@@ -1,0 +1,103 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-o-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~13",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "c80b5c85b6"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "e5a6dcbe2f",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-o-3.runbook-text-repair.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/runbooks/SCHWAB_PILOT_RUNBOOK.md",
+   "kind": "doc",
+   "commit_or_etag": "a8cd1b06d3",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Text-only runbook edit; the file is a document read by the operator and is not deployed to the host. No rollback, deploy, grant change or AWS call was run.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3",
+    "J1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- the three repaired references name 6.1, 8 and 6.1.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/rb.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "anchor 'administration command': section refs ['6.1'] want 6.1 -> OK\n  anchor 'the disclosure': section refs ['8'] want 8 -> OK\n  anchor 'NEW grant revision': section refs ['6.1'] want 6.1 -> OK\nanchored references correct 3 of 3\nRESULT: PASS\nexit=0",
+   "denominator": "3 of 3 anchored references (administration command, the disclosure, NEW grant revision)",
+   "status": "PASS",
+   "expect": "anchored references correct 3 of 3.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- section 7.2's live release and rollback targets agree with the manifest's deploy history.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/rb.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "manifest history: 160 commits, 18 distinct deployed_commit values; live 6a98a0553a\n7.2 names live=yes; targets named 2, without guard 0, not in manifest history 0; NO VALID ROLLBACK sentences 0\nRESULT: PASS\nexit=0",
+   "denominator": "2 backticked rollback targets in 7.2 (fe94911257, 110d93fb73) checked against 18 distinct deployed_commit values over 160 manifest commits; 1 live commit",
+   "status": "PASS",
+   "expect": "7\\.2 names live=yes; targets named [1-9][0-9]*, without guard 0, not in manifest history 0; NO VALID ROLLBACK sentences 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 -- every \"section N\" reference resolves to a heading, and the preamble's section count equals the headings.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/rb.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "headings 17 (9 top-level); section references 17, dangling 0 []; stated count 9\ndangling section references 0; stated section count equals headings\nRESULT: PASS\nexit=0",
+   "denominator": "17 section references, 0 dangling; 9 top-level headings against stated count 9",
+   "status": "PASS",
+   "expect": "dangling section references 0; stated section count equals headings.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "J1",
+   "criterion_verbatim": "J1 -- graded at L9 by 3.0.0_SA_CVO~O on the new bytes (the re-grade of OGO2-J1): an operator can execute each section at its named moment without other context. RECORD; NO VERDICT.",
+   "method": "manual_read_with_citation",
+   "invocation": "git show a8cd1b06d3 -- infra/aws/ec2/opal-gateway/runbooks/SCHWAB_PILOT_RUNBOOK.md",
+   "output_evidence": "Runbook commit a8cd1b06d3: lines 10-12 (nine sections 0-8), 47 (section 6.1), 49 (section 8), 115 (section 6.1), 252-265 (7.2 rewritten: live 6a98a0553a, rollback target fe94911257 deployed 2026-09-27T18:43:56Z, next 110d93fb73, re-read EC2_MANIFEST.json before acting). Recorded, not graded.",
+   "denominator": "N/A -- judgment criterion, no verdict by the worker",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Judgment criterion: the oracle is 3.0.0_SA_CVO~O at L9 (re-grade of OGO2-J1); a worker PASS or FAIL is invalid.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The three checks' python bodies run against the runbook bytes at a8cd1b06d3~1 (the pre-repair text) to prove each can fail.",
+   "expected": "AC1 FAIL 0 of 3; AC2 FAIL (live not named, 1 NO VALID ROLLBACK sentence, d88cd32d0c not in manifest history); AC3 FAIL (dangling section 10, stated 10 vs 9 headings)",
+   "observed": "AC1 rc=1 'correct 0 of 3' (refs 7,10,7); AC2 rc=1 'live=no; not in manifest history 1; NO VALID ROLLBACK sentences 1'; AC3 rc=1 'dangling 1 [10]; stated count 10' vs 9 top-level",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Two same-input runs of each check (before and after the commit, same bytes) compared",
+   "observed": "Identical RESULT: PASS lines and counts on both runs of AC1, AC2, AC3",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "tests/acceptance/WALKTHROUGH_PROTOCOL.md and every runbook line outside the four references and section 7.2",
+   "reason": "The task order says touch nothing else; not in this cell."
+  }
+ ],
+ "surprises": [],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail: runbook commit a8cd1b06d3 on branch wk-NFRA_OPLGTW-13. Reads only: EC2_MANIFEST.json at HEAD and at commits 5a2fcc13fa, ac40d9374c (deployed_at of fe94911257, 110d93fb73); git cat-file guard check on fe94911257. No AWS call.",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/rb.AC{1,2,3}.sh",
+   "invocation": "each under timeout 120 from the worktree root",
+   "result": "rc 0 each, RESULT: PASS"
+  }
+ ]
+}

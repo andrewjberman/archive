@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-i-4",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "f382d1848c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-i-4.bd-exporter-least-privilege.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~8/CENSUS_MX-i-4.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Caller census: 4 LIVE readers (allocation, realized, transaction, unrealized documents), 1 DEAD registered (fees), 2 DEAD unregistered (force-*), 4 non-readers. Live grant side read from 16 policies. No infrastructure was changed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row NFRA_MCPINDEX-Z-W8-S3 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~MI) naming the 4 live readers.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "get-role-policy rc=0; statements read>=1; resources naming opal/bd/credentials: 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round3/checks/i4.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "get-role-policy rc=0; statements read 4; resources naming opal/bd/credentials: 1\nRESULT: FAIL\nexit=1\nREFUSED per order step 3: the census reads 4 live readers (see CENSUS_MX-i-4.md and row NFRA_MCPINDEX-Z-W8-S3), so the policy was not changed. The criterion cannot be met as written without breaking four scheduled documents' secret read.",
+      "denominator": "1 of 1 resources naming opal/bd/credentials still present; 4 live readers of 9 registered BD documents censused; 16 policies scanned",
+      "status": "FAIL",
+      "status_reason": "REFUSED per order step 3: the caller census reads 4 live readers of opal/bd/credentials on bd-exporter-ec2-role (allocation, realized, transaction, unrealized documents; each reads the secret daily on an ENABLED trigger). The policy was not changed; row NFRA_MCPINDEX-Z-W8-S3 names each reader. Measurement: CENSUS_MX-i-4.md."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "get-role-policy rc=0; GetSecretValue actions>=1; resources naming blackdiamond/49f/session>=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round3/checks/i4.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "get-role-policy rc=0; GetSecretValue actions 1; resources naming blackdiamond/49f/session: 1\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 AdditionalPermissions policy read live; 1 GetSecretValue action, 1 resource naming blackdiamond/49f/session",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No change was made, so no defect was planted. The discriminating arm is the census itself: a reader that reads the secret and then fails elsewhere is separated from a reader that never reaches the read, by reading each run's output for the fetch line and for AccessDenied.",
+      "expected": "If Failed status meant 'no secret read', the four runs would show no fetch line; if the grant were already ineffective they would show AccessDenied.",
+      "observed": "All 4 latest runs show 'Fetching credentials from Secrets Manager...', no AccessDenied, then 'Phase 1: Login' and a TimeoutError: the read succeeds daily.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run once against the live policy; the grant scan (16 policies) and the document scan (11 asked, 9 registered) each run once; comp-find and native Grep agree on the 5 fetch lines / 37 files.",
+      "observed": "AC1 FAIL exit 1 and AC2 PASS exit 0 as recorded; no state was changed between reads.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Steps 2 (policy edit, ledger, safe-apply) and its post-apply plan.",
+      "reason": "Order step 3: the census reads at least 1 live reader, so the policy is not changed and AC1 is refused with the census as its measurement."
+    },
+    {
+      "item": "The secret itself, the four documents' triggers, and any push.",
+      "reason": "Order bounds 1-3: only the one Resource element was in scope, and the secret is untouched."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W8-S3"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-i-4.bd-exporter-least-privilege.md",
+  "compiler_tools": [
+    {
+      "tool": "aws (iam, ssm, events, ec2)",
+      "invocation": "aws iam get-role-policy / get-policy-version for 16 policies; ssm get-document x11, list-commands x6, get-command-invocation x4; events list-rules; ec2 describe-instances",
+      "result": "Only AdditionalPermissions grants the secret; 4 documents read it daily on ENABLED triggers and the read succeeds."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'opal/bd/credentials' --all",
+      "result": "152 hits across 43424 files scanned; 5 secret-fetch lines in the five SSM document mirrors."
+    }
+  ]
+}
