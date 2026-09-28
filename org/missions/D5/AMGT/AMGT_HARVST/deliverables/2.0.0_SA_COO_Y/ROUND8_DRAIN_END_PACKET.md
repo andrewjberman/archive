@@ -51,6 +51,18 @@ by omission.
 recorded one face as "the" failure and sent a later reader after the wrong cause.** The order told the worker to
 report the `WinError 183` case rather than force it green, and it did, leaving the assertion untouched.
 
+> ⛔ **FALSE, AND CORRECTED BY MEASUREMENT 2026-09-28 (`HVST-x-2` AC1, re-verified by the issuer):**
+> `chatter_event` holds **12 rows across 7 securities, 4 of them Lenovo's own**, and `publishers_distinct`
+> reaches **3**. The landed universe is **191** securities, not 89, with **55** carrying a day where
+> `articles_total > 0`. **So FWD-6 was exercisable all along, and FWD-5 is now EXERCISED on Lenovo**
+> (267 of 267 dense days, no gap, strongest-first with 0 sort violations).
+>
+> **THE ERROR SHAPE, kept because it is the reusable part:** `EVENT_MIN_PUBLISHERS = 2` WAS read at the
+> bytes; *"only `sa` has landed listing rows"* was INHERITED from round 7's measurement of a different
+> population at an older vintage -- and `chatter_event` itself was **never read**. Presenting that pair with
+> the measured constant's authority is how an inherited number acquires standing it never earned.
+> **A conclusion is only as measured as its weakest premise.** Row `AMGT_HARVST-Z-W27-S1`.
+
 ⛔ **FWD-6 IS UNSATISFIABLE BY CONSTRUCTION, AND A CRITERION FOR IT WOULD HAVE PASSED VACUOUSLY.**
 `publication_gold.EVENT_MIN_PUBLISHERS = 2`, `EVENT_MIN_ARTICLES = 2`, tiers `('A','B')` -- and **only `sa` has
 landed listing rows.** With one publisher landed `publishers_distinct >= 2` is unreachable, so `chatter_event`
