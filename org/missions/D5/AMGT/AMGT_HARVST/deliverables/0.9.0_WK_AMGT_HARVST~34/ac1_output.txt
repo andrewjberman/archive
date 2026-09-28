@@ -1,0 +1,59 @@
+====================================================================================================
+AC1 -- per-site negative control (in-process pytest collection rc=0; 8 sites measured)
+
+SITE 1/8  posture crosswalk.resolve
+  BEFORE  lib/research/posture/tests/test_posture.py:63  @mock.patch("lib.research.identity.crosswalk.resolve", side_effect=_no_x1)
+  AFTER   lib/research/posture/tests/test_posture.py:65
+  BEFORE-state: patch DID take effect through the code-under-test's module (string resolved to the SAME object or a shared singleton). The no-op CANNOT be exhibited here; what is proved instead: the string-target and the code-under-test agree today, and the AFTER form binds to the module object by identity, not by re-import.
+  AFTER-state : patch takes effect = True ; patched module object IS the code-under-test's module object = True
+
+SITE 2/8  posture crosswalk.resolve
+  BEFORE  lib/research/posture/tests/test_posture.py:100  @mock.patch("lib.research.identity.crosswalk.resolve", side_effect=_no_x1)
+  AFTER   lib/research/posture/tests/test_posture.py:102
+  BEFORE-state: patch DID take effect through the code-under-test's module (string resolved to the SAME object or a shared singleton). The no-op CANNOT be exhibited here; what is proved instead: the string-target and the code-under-test agree today, and the AFTER form binds to the module object by identity, not by re-import.
+  AFTER-state : patch takes effect = True ; patched module object IS the code-under-test's module object = True
+
+SITE 3/8  posture crosswalk.resolve
+  BEFORE  lib/research/posture/tests/test_posture.py:142  @mock.patch("lib.research.identity.crosswalk.resolve", side_effect=_no_x1)
+  AFTER   lib/research/posture/tests/test_posture.py:144
+  BEFORE-state: patch DID take effect through the code-under-test's module (string resolved to the SAME object or a shared singleton). The no-op CANNOT be exhibited here; what is proved instead: the string-target and the code-under-test agree today, and the AFTER form binds to the module object by identity, not by re-import.
+  AFTER-state : patch takes effect = True ; patched module object IS the code-under-test's module object = True
+
+SITE 4/8  posture engine.peers
+  BEFORE  lib/research/posture/tests/test_posture.py:188  with mock.patch("lib.research.peers.engine.peers", side_effect=fake_peers):
+  AFTER   lib/research/posture/tests/test_posture.py:190
+  BEFORE-state: patch DID take effect through the code-under-test's module (string resolved to the SAME object or a shared singleton). The no-op CANNOT be exhibited here; what is proved instead: the string-target and the code-under-test agree today, and the AFTER form binds to the module object by identity, not by re-import.
+  AFTER-state : patch takes effect = True ; patched module object IS the code-under-test's module object = True
+
+SITE 5/8  scoped_amgt watchlist.store.star
+  BEFORE  lib/research/api/tests/test_scoped_amgt.py:278  monkeypatch.setattr("lib.research.watchlist.store.star", fake_star)
+  AFTER   lib/research/api/tests/test_scoped_amgt.py:279
+  BEFORE-state: patch DID take effect through the code-under-test's module (string resolved to the SAME object or a shared singleton). The no-op CANNOT be exhibited here; what is proved instead: the string-target and the code-under-test agree today, and the AFTER form binds to the module object by identity, not by re-import.
+  AFTER-state : patch takes effect = True ; patched module object IS the code-under-test's module object = True
+
+SITE 6/8  retrieval_provenance harvest.store._default_client
+  BEFORE  lib/opal_data_harvest/test_retrieval_provenance.py:646  monkeypatch.setattr("lib.research.harvest.store._default_client", lambda: _StubS3Client())
+  AFTER   lib/opal_data_harvest/test_retrieval_provenance.py:648
+  BEFORE-state: patch DID take effect through the code-under-test's module (string resolved to the SAME object or a shared singleton). The no-op CANNOT be exhibited here; what is proved instead: the string-target and the code-under-test agree today, and the AFTER form binds to the module object by identity, not by re-import.
+  AFTER-state : patch takes effect = True ; patched module object IS the code-under-test's module object = True
+
+SITE 7/8  verification REGISTRY (patch.dict)
+  BEFORE  lib/opal_data_harvest/test_verification.py:18  with patch.dict("lib.opal_data_harvest.verification.REGISTRY",
+  AFTER   lib/opal_data_harvest/test_verification.py:19
+  BEFORE-state: patch did NOT take effect through the code-under-test's module -- THE NO-OP, DEMONSTRATED.
+  AFTER-state : patch takes effect = True ; patched module object IS the code-under-test's module object = True
+
+SITE 8/8  worker transport.time.time
+  BEFORE  lib/opal_data_harvest/test_worker.py:51  with patch("lib.opal_data_harvest.transport.time.time", return_value=100):
+  AFTER   lib/opal_data_harvest/test_worker.py:52
+  BEFORE-state: patch DID take effect through the code-under-test's module (string resolved to the SAME object or a shared singleton). The no-op CANNOT be exhibited here; what is proved instead: the string-target and the code-under-test agree today, and the AFTER form binds to the module object by identity, not by re-import.
+  NOTE: test_worker.py:51 works ONLY by the stdlib-singleton coincidence (see FACTS): the two transport module objects are DIFFERENT, `time` is one process-wide object. The before-state has no failing form to exhibit; the control below shows the same split DOES no-op on a non-singleton name.
+  AFTER-state : patch takes effect = True ; patched module object IS the code-under-test's module object = True
+
+FACTS
+  verification: code under test lives in 'opal_data_harvest.verification'; the string target imports 'lib.opal_data_harvest.verification'; REGISTRY dicts are the same object -> False
+  worker: code under test lives in 'opal_data_harvest.transport'; string target imports 'lib.opal_data_harvest.transport'; the two module objects are the same -> False
+  worker: the stdlib singleton -- lib_transport.time is code-under-test transport.time -> True (this is why BEFORE 'works')
+  worker CONTROL, same split, a NON-singleton name: patch('lib.opal_data_harvest.transport.retry_seconds') seen by the code under test's module -> False (the coincidence does not extend past `time`)
+
+AC1 SUMMARY: 8 of 8 sites reported; AFTER proved on 8 of 8; BEFORE no-op demonstrated on 1 of 8

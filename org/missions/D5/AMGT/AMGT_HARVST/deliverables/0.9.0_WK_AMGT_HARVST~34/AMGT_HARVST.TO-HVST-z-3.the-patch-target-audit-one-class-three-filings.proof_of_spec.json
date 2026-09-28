@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-z-3.the-patch-target-audit-one-class-three-filings",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-z-3.the-patch-target-audit-one-class-three-filings.md",
+    "group": "OTHER",
+    "vintage_commit": "2c3e657865186e7e32f9ccc4e49329fff9202903"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "300be1dfc9456188ec2b3695b8e782bc65c8bd55",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-z-3.the-patch-target-audit-one-class-three-filings.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~34",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~34, L7 subagent of 2.0.0_SA_COO~H, own worktree wk-hvst-r11b-34 on branch wk-AMGT_HARVST-34, cut at 2c3e657865. THE BAR: branch wk-AMGT_HARVST-34, org/ and .tools/ present, TREE-OK. GROUNDING: probed which module names pytest gives the five files (posture.tests.test_posture, api.tests.test_scoped_amgt, opal_data_harvest.test_*), then read the code under test at each site. Finding: only the opal_data_harvest tests split identity; posture, scoped_amgt and the __main__ store import were never misses (row Z-W34-S1). FIX, PER SITE (chosen over the structural fix): each site re-targeted with patch.object / monkeypatch.setattr / patch.dict on the module object (or its dict) the test file itself imports, adding one import line per file (test_retrieval_provenance.py local, beside the file's existing local imports). Only patch targets changed: no assertion, fixture, name or behaviour moved; the two foreign files got the target edits plus one import each, under the CTO ruling 20260928T114032Z. WHY NOT lib/__init__.py or an import-mode change: it changes how every test in the estate imports, and it was not proved harmless across the full suite, so per-site. PROOF: AC1 runs pytest collection in-process and reads each patch through the code-under-test module; AC3 is a census with a positive control at the cut; AC2 is the literal suite. One surprise row filed.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/posture/tests/test_posture.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test-file patch-target edit only; nothing deployed, no push. 4 sites (:65,:102,:144 crosswalk.resolve; :190 engine.peers) + 2 import lines; POSN file, patch targets only, per CTO ruling 20260928T114032Z."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_scoped_amgt.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test-file patch-target edit only; nothing deployed, no push. 1 site (:279 watchlist.store.star) + 1 import line; AMGT_RESAPP file, patch target only, per CTO ruling 20260928T114032Z."
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_retrieval_provenance.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test-file patch-target edit only; nothing deployed, no push. 1 site (:648 harvest.store._default_client) + 1 local import line."
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_verification.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test-file patch-target edit only; nothing deployed, no push. 1 site (:19 patch.dict on verification_module.REGISTRY) + 1 import line; the test is quarantined-skipped."
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_worker.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test-file patch-target edit only; nothing deployed, no push. 1 site (:52 patch.object(transport_module.time, 'time')) + 1 import line."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~34/scripts/ac1_per_site_negative_control.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "In-process proof script; no network, no S3, no vendor call."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~34/scripts/ac3_census_zero_remaining.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "In-process proof script; no network, no S3, no vendor call."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PER SITE, A NEGATIVE CONTROL PROVING THE PATCH NOW TAKES EFFECT: the patched name, READ THROUGH THE MODULE OBJECT THE CODE UNDER TEST USES, is the mock. Print the 8 sites as BEFORE/AFTER pairs -- before: the identity read through the code-under-test's module is NOT the mock (the no-op, demonstrated); after: it IS. Name each site by file and line. A site that cannot be shown failing BEFORE is not proved fixed -- if a site's before-state cannot be exhibited (e.g. test_worker.py:51, which works by a stdlib-singleton coincidence), say so explicitly and state what you proved instead. 8 of 8 sites reported, each with its own outcome",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~34/scripts/ac1_per_site_negative_control.py",
+      "output_evidence": "8 of 8 sites reported (rc 0). AFTER: patch takes effect through the code-under-test module object on 8 of 8 (patched module object IS the code-under-test module on 8 of 8). BEFORE no-op demonstrated on 1 of 8: test_verification.py:18 (patch.dict) -- code under test lives in opal_data_harvest.verification, the string target imports lib.opal_data_harvest.verification, the two REGISTRY dicts are not the same object (False); after the string patch.dict the code under test still read the unpatched value. BEFORE cannot be exhibited failing on 7 of 8, stated per site: posture x4 (test_posture.py:63,100,142 crosswalk.resolve; :188 engine.peers), test_scoped_amgt.py:278, test_retrieval_provenance.py:646 -- the string resolved to the SAME module object the code under test imports (both use absolute lib.* imports: membership.py:161, comparable.py:179, scoped_amgt.py:3224, __main__.py:182), so those patches always took effect; proved instead: the AFTER form binds by identity to that object. test_worker.py:51 -- lib.opal_data_harvest.transport is NOT opal_data_harvest.transport (module objects differ) but `time` is the one stdlib singleton (True), so it works by coincidence; a control on the same split with a non-singleton name (transport.retry_seconds) does NOT reach the code under test module (False); proved instead: the AFTER form patches through the test own transport_module, which IS PacedSession module. Full per-site output in deliverables/0.9.0_WK_AMGT_HARVST~34/ac1_output.txt. Determinism: two runs byte-identical.",
+      "denominator": "8 of 8 sites reported; AFTER proved 8 of 8; BEFORE no-op demonstrated 1 of 8 (7 of 8 before-states not exhibitable, each stated)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "EACH TOUCHED SUITE PASSES, with the pass count printed BEFORE and AFTER and NO test deleted or weakened. BEFORE, measured by the issuer at this cut: `78 passed, 1 skipped, 6 subtests passed`. The AFTER count must not FALL, and the collected count must not fall either -- a passed count that drops while failures stay at zero means tests were removed, and the collected total is the discriminator. If a re-targeted patch EXPOSES a real failure, report it named, file a row, and state it rather than repairing it",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/posture/tests/test_posture.py lib/research/api/tests/test_scoped_amgt.py lib/opal_data_harvest/test_retrieval_provenance.py lib/opal_data_harvest/test_verification.py lib/opal_data_harvest/test_worker.py -rA --tb=line",
+      "output_evidence": "BEFORE (this worktree, cut 2c3e657865, before any edit, same command): `78 passed, 1 skipped` (this environment prints no subtests line; the issuer figure `6 subtests passed` is the same 78). AFTER (same command, rc 0): `78 passed, 1 skipped`, 79 tests collected (`--co`: 79 tests collected) -- passed 78 -> 78, skipped 1 -> 1, collected 79 -> 79, failed 0. No test deleted, renamed or weakened: the diff touches only patch-target lines and adds import lines (see artifacts). No newly-exposed failure: no re-targeted patch changed a pass to a fail. The sole skip is test_verification.py quarantined test, the one site whose no-op was real, so its re-targeted patch.dict is proved by AC1 direct read-through, not by pytest. Output: ac2_after_output.txt.",
+      "denominator": "78 passed, 1 skipped, 0 failed of 79 collected (before: 78/1/79)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "THE CENSUS RE-RUN OVER lib/ READS ZERO dotted-string patch targets THAT MISS, with the denominator printed. Print: every `patch(\"lib.`, `patch.dict(\"lib.` and `monkeypatch.setattr(\"lib.` occurrence found under lib/ with its file and line, the total scanned denominator, and for each occurrence whether it RESOLVES to the same module object the code under test uses. Expected: 0 that miss. A bare zero FAILS -- print the occurrences and their resolution verdicts, because \"0 hits\" and \"0 that miss\" are different claims and only the second is this criterion",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~34/scripts/ac3_census_zero_remaining.py",
+      "output_evidence": "Scanned 309 .py files under lib/ (denominator). Occurrences of patch(\"lib., patch.dict(\"lib., monkeypatch.setattr(\"lib. under lib/: 0. Occurrences that MISS: 0 of 0. Not a bare zero: (a) POSITIVE CONTROL -- the same census over the five touched files as at the cut (2c3e657865) reads 8 of 8 (posture 4, scoped_amgt 1, retrieval_provenance 1, verification 1, worker 1), each printed with file:line, and the same five files now read 0; (b) the related population is printed: every other dotted-string patch/setattr target of any prefix under lib/ is 3 (boto3.client at test_crosswalk_write_validates.py:226 and :244, test_union_universe.py:241), each resolving to the single boto3 module object (0 copies under another sys.modules key), none with a lib. prefix. Output: ac3_output.txt. Determinism: two runs byte-identical.",
+      "denominator": "0 that miss of 0 occurrences, over 309 files scanned; positive control 8 of 8 at the cut",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 BEFORE arm IS the mutant: the original dotted-string form of the one real split (test_verification.py:18, patch.dict on lib.opal_data_harvest.verification.REGISTRY) applied against the code under test own module, beside the re-targeted form. AC3 positive control runs the census over the five files as at the cut.",
+      "expected": "String form: the code under test REGISTRY still reads the unpatched value (no-op). Object form: it reads the patched value. AC3 control: census over the cut text reads 8.",
+      "observed": "String form: unpatched read (no-op demonstrated). Object form: PATCHED read. AC3 control reads 8 of 8 with file:line, and 0 on the edited files.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ran ac1 and ac3 twice each and compared the output with cmp",
+      "observed": "ac1 output byte-identical across two runs; ac3 output byte-identical across two runs; AC2 pytest read 78 passed 1 skipped on every run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Structural fix (lib/__init__.py or a pytest import-mode change)",
+      "reason": "Order section 2: in scope only if proved harmless across the full suite; that proof was not run. Per-site fix chosen."
+    },
+    {
+      "item": "Behaviour exposed by the corrected patches",
+      "reason": "None was exposed: every suite result is unchanged. Nothing was repaired."
+    },
+    {
+      "item": "Disarming rows Z-W10-S3, Z-W14-S2, Z-W26-S1",
+      "reason": "Order section 5: evidence is the issuer's, the clock is 3.0.0_SA_CVO's."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W34-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate (py_compile, ds-precommit, ruff py39) via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "run at commit time; see the commit"
+    }
+  ]
+}
