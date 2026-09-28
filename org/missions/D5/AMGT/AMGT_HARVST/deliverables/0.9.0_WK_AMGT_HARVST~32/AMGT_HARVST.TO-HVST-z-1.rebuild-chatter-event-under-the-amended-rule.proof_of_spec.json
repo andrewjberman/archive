@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_HARVST.TO-HVST-z-1.rebuild-chatter-event-under-the-amended-rule",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/prd/AMGT_HARVST_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e8d13d58ed"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+  "vintage_commit": "300be1dfc9456188ec2b3695b8e782bc65c8bd55",
+  "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-z-1.rebuild-chatter-event-under-the-amended-rule.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_HARVST~32",
+ "artifacts_produced": [
+  {
+   "path_or_key": "amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet",
+   "kind": "s3_object",
+   "commit_or_etag": "58755afa077103a89063a1c916cef788",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "ONE new S3 object in s3://opal-data-harvest, put with IfNoneMatch=* by publication_gold.write_gold; head_object ETag 58755afa077103a89063a1c916cef788, ContentLength 6412 (= receipt content_length 6412), LastModified 2026-09-28 21:10:04+00:00; re-read through _latest_gold_snapshot_rows it is the newest snapshot with 8 events. The 3 prior parts all still exist (head_object on each). No delete of any kind."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~32/scripts/ac1_rebuild_and_name_the_diff.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC1 instrument; the ONE writing script of the cell (refuses before any put unless the BEFORE newest snapshot has 12 rows, so a re-run cannot add a snapshot)."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~32/scripts/ac2_served_equals_rebuildable.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC2 instrument; read-only S3 LIST/GET."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~32/scripts/ac4_are_the_served_eight_real.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC4 presentation instrument; read-only S3 LIST/GET; records no verdict."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "THE REBUILD LANDS AND THE WHOLE NAMED DIFF IS PROVED ON THE SERVED PLANE. Print, in order: (a) the BEFORE state read from S3 -- the newest chatter_event snapshot's key and its event count, expected 12; (b) the producer's own output verbatim, including write_gold's receipt (uri, key, rows, content_length) and rows == 8; (c) the AFTER state re-read from S3 through publication_gold._latest_gold_snapshot_rows, showing the NEWEST snapshot is now the one just written and carries 8 events; (d) the 4 spurious events ABSENT, each named by security_key and span; (e) the TWO event_id MOVES -- for BA and HD print the old span, the new span, the OLD event_id, the NEW event_id, that they differ, and that the new one equals publication_gold._event_id(security_key, new_first_day, new_last_day). Also print that the PRIOR snapshot still EXISTS at its own key",
+   "method": "command",
+   "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~32/scripts/ac1_rebuild_and_name_the_diff.py",
+   "output_evidence": "exit 0 (timeout 900). Full output verbatim:\n(a) BEFORE: 3 parquet parts under the prefix; newest key = s3://opal-data-harvest/amgt/harvest/gold/chatter_event/date=2026-09-24/part-20260924T134754Z.parquet\n      part: amgt/harvest/gold/chatter_event/date=2026-09-22/part-20260922T215254Z.parquet\n      part: amgt/harvest/gold/chatter_event/date=2026-09-23/part-20260923T021336Z.parquet\n      part: amgt/harvest/gold/chatter_event/date=2026-09-24/part-20260924T134754Z.parquet\n(a) BEFORE newest snapshot event count = 12 (expected 12)\n      992_HK_Equity    2026-02-12..2026-02-12 id=1b5df12b12348f3ca49da894bde0bbd686cad8ca6af960616036b75de30b4e2c\n      992_HK_Equity    2026-05-22..2026-05-22 id=3169b045cbd11ba23749dfad4627a54fc8d01f297c89a8a05a116e56b3495a2c\n      992_HK_Equity    2026-06-01..2026-06-01 id=ded2a62fe09ba700277f522bbe90e2e7d909619c8eb40b71ad1083d2a115fd43\n      992_HK_Equity    2026-08-13..2026-08-13 id=e6ee43d88cf1a91d868d2b0d346a76a73929934654db63ca5c91501ec5db2d95\n      BA_US_Equity     2026-08-26..2026-08-26 id=e0896a56faa0f1d77ce7fbb026d02c8e74815834c24fafcf805ee11d202b1cfb\n      BA_US_Equity     2026-09-07..2026-09-08 id=cb05fc3f69c8316b7a58a069dd3d1338947e1d3e2d0fb956be8a61e7d0ccac03\n      COST_US_Equity   2026-09-02..2026-09-02 id=7e51b03cfcb225b242423bfabe3a019802440c585648c388937618a81fcf95b8\n      COST_US_Equity   2026-09-14..2026-09-14 id=e15ab8e93350cde8466264afff0c0aedf667333a545402b103ac19ce41009804\n      DELL_US_Equity   2026-06-01..2026-06-01 id=438a3fdcd1897280ab885b0a9f4c81c51d9c7511beec94b57432fa9c336a1022\n      HD_US_Equity     2026-08-17..2026-08-20 id=81874d0515b2af1ad8853704a83ba74f33000daba41fcadcc3719593d9d8b83e\n      MSFT_US_Equity   2026-06-01..2026-06-01 id=d7ad3159aaf999fbc1b2d4ebcb962ed3125c46b521be8b2daee7d1483541412f\n      NVDA_US_Equity   2026-06-01..2026-06-01 id=f6b88c34c3c1aea35d5e2a6ffd1b6eefd80367d731a7fa5e410182a3ff9ebd6c\n(b) producer: publication_gold.main(['build-event', '--securities-json', 'C:\\\\Users\\\\Opal Bloomberg\\\\Desktop\\\\wk-hvst-r11b-32\\\\org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~4/securities.json', '--as-of', '2026-09-28'])\n(b) write_gold receipt: {\"bucket\": \"opal-data-harvest\", \"content_length\": 6412, \"key\": \"amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet\", \"rows\": 8, \"uri\": \"s3://opal-data-harvest/amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet\"}\n{\"events\": 8, \"events_per_security\": {\"992_HK_Equity\": 3, \"BA_US_Equity\": 2, \"COST_US_Equity\": 1, \"HAL_US_Equity\": 0, \"HD_US_Equity\": 1, \"NVDA_US_Equity\": 1, \"VLO_US_Equity\": 0}, \"key\": \"amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet\", \"securities\": 6}\n(b) producer returned rc=0; write_gold calls = 1\nPASS: exactly ONE put (one write_gold call) \nPASS: receipt rows == 8 rows=8 content_length=6412\n(c) AFTER: 4 parquet parts; newest key = amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet\nPASS: newest snapshot IS the one just written newest=amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet receipt=amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet\nPASS: exactly one part added 3 -> 4\nPASS: newest snapshot (via _latest_gold_snapshot_rows) carries 8 events n=8\n      992_HK_Equity    2026-02-12..2026-02-12 id=1b5df12b12348f3ca49da894bde0bbd686cad8ca6af960616036b75de30b4e2c\n      992_HK_Equity    2026-05-22..2026-05-22 id=3169b045cbd11ba23749dfad4627a54fc8d01f297c89a8a05a116e56b3495a2c\n      992_HK_Equity    2026-08-13..2026-08-13 id=e6ee43d88cf1a91d868d2b0d346a76a73929934654db63ca5c91501ec5db2d95\n      BA_US_Equity     2026-08-26..2026-08-26 id=e0896a56faa0f1d77ce7fbb026d02c8e74815834c24fafcf805ee11d202b1cfb\n      BA_US_Equity     2026-09-08..2026-09-08 id=852a1466eecda93133dfd953a3017e133169e8282e85735dce02eeeb8d6ed1ac\n      COST_US_Equity   2026-09-14..2026-09-14 id=e15ab8e93350cde8466264afff0c0aedf667333a545402b103ac19ce41009804\n      HD_US_Equity     2026-08-18..2026-08-18 id=a91db4a21307cb5810cf2568ecf70bc35ffbe3245f52ea0377588b6e145d0c58\n      NVDA_US_Equity   2026-06-01..2026-06-01 id=f6b88c34c3c1aea35d5e2a6ffd1b6eefd80367d731a7fa5e410182a3ff9ebd6c\n(d) old events whose event_id is absent from the served AFTER table: 6 = 4 spurious + 2 narrowed\n(d) the SPURIOUS events, ABSENT after the rebuild:\n      ABSENT security_key=992_HK_Equity span=2026-06-01..2026-06-01 event_id=ded2a62fe09ba700277f522bbe90e2e7d909619c8eb40b71ad1083d2a115fd43 (present in AFTER: False)\n      ABSENT security_key=COST_US_Equity span=2026-09-02..2026-09-02 event_id=7e51b03cfcb225b242423bfabe3a019802440c585648c388937618a81fcf95b8 (present in AFTER: False)\n      ABSENT security_key=DELL_US_Equity span=2026-06-01..2026-06-01 event_id=438a3fdcd1897280ab885b0a9f4c81c51d9c7511beec94b57432fa9c336a1022 (present in AFTER: False)\n      ABSENT security_key=MSFT_US_Equity span=2026-06-01..2026-06-01 event_id=d7ad3159aaf999fbc1b2d4ebcb962ed3125c46b521be8b2daee7d1483541412f (present in AFTER: False)\nPASS: exactly 4 spurious events absent n=4\nPASS: the 4 spurious securities are {992_HK, COST, DELL, MSFT} ['992_HK_Equity', 'COST_US_Equity', 'DELL_US_Equity', 'MSFT_US_Equity']\n(e) the TWO event_id MOVES (a narrowed span is a NEW ROW WITH A NEW ID):\nPASS: exactly two moves, BA and HD ['BA_US_Equity', 'HD_US_Equity']\nPASS: BA_US_Equity has exactly one narrowed successor \n      BA_US_Equity: old span 2026-09-07..2026-09-08 -> new span 2026-09-08..2026-09-08\n        OLD event_id = cb05fc3f69c8316b7a58a069dd3d1338947e1d3e2d0fb956be8a61e7d0ccac03\n        NEW event_id = 852a1466eecda93133dfd953a3017e133169e8282e85735dce02eeeb8d6ed1ac\nPASS: BA_US_Equity old != new event_id \nPASS: BA_US_Equity new event_id == publication_gold._event_id(security_key, new_first_day, new_last_day) recomputed=852a1466eecda93133dfd953a3017e133169e8282e85735dce02eeeb8d6ed1ac\nPASS: BA_US_Equity new span == 2026-09-08..2026-09-08 \nPASS: HD_US_Equity has exactly one narrowed successor \n      HD_US_Equity: old span 2026-08-17..2026-08-20 -> new span 2026-08-18..2026-08-18\n        OLD event_id = 81874d0515b2af1ad8853704a83ba74f33000daba41fcadcc3719593d9d8b83e\n        NEW event_id = a91db4a21307cb5810cf2568ecf70bc35ffbe3245f52ea0377588b6e145d0c58\nPASS: HD_US_Equity old != new event_id \nPASS: HD_US_Equity new event_id == publication_gold._event_id(security_key, new_first_day, new_last_day) recomputed=a91db4a21307cb5810cf2568ecf70bc35ffbe3245f52ea0377588b6e145d0c58\nPASS: HD_US_Equity new span == 2026-08-18..2026-08-18 \nPRIOR snapshot still EXISTS at its own key: s3://opal-data-harvest/amgt/harvest/gold/chatter_event/date=2026-09-24/part-20260924T134754Z.parquet ContentLength=7026 LastModified=2026-09-24 13:48:10+00:00\nPASS: prior snapshot exists at its own key (signed radius = one ADDED object) \nPASS: ALL 3 prior parts still exist \nRESULT: PASS (0 failure(s))",
+   "denominator": "BEFORE 12 events (3 parts); receipt rows 8 of expected 8; AFTER 8 events, 4 parts (3 -> 4, exactly one added); 4 of 4 spurious absent (992_HK 2026-06-01, COST 2026-09-02, DELL 2026-06-01, MSFT 2026-06-01); 2 of 2 id moves (BA, HD) each recomputed via _event_id; 3 of 3 prior parts still exist; 0 failing checks",
+   "status": "PASS",
+   "expect": "RESULT: PASS \\(0 failure\\(s\\)\\)"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C-HV-GOLD-REBUILDABLE HOLDS ON THE SERVED PLANE, not just in memory. Build the event rows IN MEMORY from the same newest article_security_mention snapshot, and compare them ROW BY ROW against what the SERVED newest chatter_event snapshot now carries -- equal sets, equal event_ids, equal per-row field values, with the denominator printed (8 of 8). Print any difference in full.",
+   "method": "command",
+   "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~32/scripts/ac2_served_equals_rebuildable.py",
+   "output_evidence": "exit 0 (timeout 900). Full output verbatim:\nSERVED newest chatter_event snapshot: s3://opal-data-harvest/amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet (4 parts listed)\ninput: 263 mention rows (newest article_security_mention snapshot); in-memory build = 8 events; served = 8 events\n  992_HK_Equity    2026-02-12..2026-02-12  row EQUAL  (13 fields)\n  992_HK_Equity    2026-05-22..2026-05-22  row EQUAL  (13 fields)\n  BA_US_Equity     2026-09-08..2026-09-08  row EQUAL  (13 fields)\n  HD_US_Equity     2026-08-18..2026-08-18  row EQUAL  (13 fields)\n  BA_US_Equity     2026-08-26..2026-08-26  row EQUAL  (13 fields)\n  COST_US_Equity   2026-09-14..2026-09-14  row EQUAL  (13 fields)\n  992_HK_Equity    2026-08-13..2026-08-13  row EQUAL  (13 fields)\n  NVDA_US_Equity   2026-06-01..2026-06-01  row EQUAL  (13 fields)\nROWS EQUAL: 8 of 8 (fields compared: 104)\nDIFFERENCES (0):\nRESULT: PASS",
+   "denominator": "8 of 8 rows equal (104 field comparisons, 13 fields x 8 rows); 0 differences; 263 mention rows in; in-memory 8 events vs served 8 events",
+   "status": "PASS",
+   "expect": "ROWS EQUAL: 8 of 8.*DIFFERENCES \\(0\\).*RESULT: PASS"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "JUDGMENT, PRESENTED AND NOT GRADED -- ARE THE 8 EVENTS THE SERVED TABLE NOW CARRIES THE REAL COVERAGE BURSTS? Read them from S3, not from the builder. For each print security, span, lead_headline, articles_total, publishers_distinct, tier_a/tier_b, and the headlines of every article in the span. Present the text; record NO verdict of your own",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~32/scripts/ac4_are_the_served_eight_real.py",
+   "output_evidence": "exit 0. Output verbatim (read from the SERVED newest snapshot, not the builder):\nstatus: UNVERIFIABLE-BY-INSTRUMENT   status_reason: judgment; oracle is 3.0.0_SA_CVO at L9\nSERVED newest chatter_event snapshot: s3://opal-data-harvest/amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet\nevents served: 8\n\n====================================================================================================\nEVENT 1: security=992_HK_Equity  span=2026-02-12..2026-02-12 (1 day(s))\n  articles_total=2  publishers_distinct=2  tier_a=2  tier_b=0\n  lead_headline: Lenovo Posts Earnings Beat on AI-Driven Demand\n  articles in the span (2):\n    [A] 2026-02-12 08:57 | wsj | Lenovo Posts Earnings Beat on AI-Driven Demand\n    [A] 2026-02-12 16:28 | sa | Lenovo hits highest PC market share during Q3; CEO says memory crunch will persist\n====================================================================================================\nEVENT 2: security=992_HK_Equity  span=2026-05-22..2026-05-22 (1 day(s))\n  articles_total=3  publishers_distinct=2  tier_a=2  tier_b=1\n  lead_headline: Lenovo surge on Q4 revenue beat driven by 84% AI growth; declares final dividend\n  articles in the span (3):\n    [A] 2026-05-22 04:31 | sa | Lenovo surge on Q4 revenue beat driven by 84% AI growth; declares final dividend\n    [A] 2026-05-22 07:26 | wsj | Lenovo Targets $100 Billion Annual Revenue Within Two Years After Stellar Quarter\n    [B] 2026-05-22 00:44 | wsj | European Indexes Gain at Open as Tech Stocks Jump\n====================================================================================================\nEVENT 3: security=992_HK_Equity  span=2026-08-13..2026-08-13 (1 day(s))\n  articles_total=2  publishers_distinct=2  tier_a=2  tier_b=0\n  lead_headline: Lenovo Posts Record Revenue, Expects to Hit $100 Billion Goal This Year\n  articles in the span (2):\n    [A] 2026-08-13 04:55 | wsj | Lenovo Posts Record Revenue, Expects to Hit $100 Billion Goal This Year\n    [A] 2026-08-13 14:19 | sa | Lenovo Group jumps on strong Q1 revenue, AI growth\n====================================================================================================\nEVENT 4: security=BA_US_Equity  span=2026-08-26..2026-08-26 (1 day(s))\n  articles_total=2  publishers_distinct=2  tier_a=2  tier_b=0\n  lead_headline: FAA Orders Inspections of Some Boeing Dreamliners for Gaps\n  articles in the span (2):\n    [A] 2026-08-26 14:58 | bbg | FAA Orders Inspections of Some Boeing Dreamliners for Gaps\n    [A] 2026-08-26 18:00 | sa | Boeing\\u2019s Wisk breaks ground on California vertiport for air-taxi tests\n====================================================================================================\nEVENT 5: security=BA_US_Equity  span=2026-09-08..2026-09-08 (1 day(s))\n  articles_total=4  publishers_distinct=3  tier_a=3  tier_b=1\n  lead_headline: Everything to Know About the Boeing Jet That Overshot a Miami Runway\n  articles in the span (4):\n    [A] 2026-09-08 14:06 | barrons | Everything to Know About the Boeing Jet That Overshot a Miami Runway\n    [A] 2026-09-08 15:00 | bbg | Boeing Delivers 51 Jets in August, Lowest in Four Months\n    [A] 2026-09-08 15:22 | sa | Boeing\\u2019s August jet deliveries slip as Dreamliner handovers decline\n    [B] 2026-09-08 15:28 | sa | SA analyst upgrades/downgrades: DELL, BA, KO, HSY\n====================================================================================================\nEVENT 6: security=COST_US_Equity  span=2026-09-14..2026-09-14 (1 day(s))\n  articles_total=2  publishers_distinct=2  tier_a=2  tier_b=0\n  lead_headline: Costco hikes motor oil prices and limits purchases\n  articles in the span (2):\n    [A] 2026-09-14 18:25 | sa | Costco hikes motor oil prices and limits purchases\n    [A] 2026-09-14 18:30 | barrons | Get in Line. Costco Is Rationing Motor Oil.\n====================================================================================================\nEVENT 7: security=HD_US_Equity  span=2026-08-18..2026-08-18 (1 day(s))\n  articles_total=2  publishers_distinct=2  tier_a=2  tier_b=0\n  lead_headline: Home Depot Results Beat Estimates, Overcoming Housing Slump\n  articles in the span (2):\n    [A] 2026-08-18 10:03 | bbg | Home Depot Results Beat Estimates, Overcoming Housing Slump\n    [A] 2026-08-18 10:11 | wsj | Home Depot Posts Higher Sales, Backs Outlook\n====================================================================================================\nEVENT 8: security=NVDA_US_Equity  span=2026-06-01..2026-06-01 (1 day(s))\n  articles_total=3  publishers_distinct=2  tier_a=3  tier_b=0\n  lead_headline: Nvidia Introduces First PCs Designed for AI Agents\n  articles in the span (3):\n    [A] 2026-06-01 04:44 | wsj | Nvidia Introduces First PCs Designed for AI Agents\n    [A] 2026-06-01 09:43 | sa | Nvidia targets the PC market; Which stocks stand to gain?\n    [A] 2026-06-01 10:33 | sa | Nvidia's PC push lifts PC maker, Arm; pressures Qualcomm, Intel, AMD\n====================================================================================================\nNO VERDICT RECORDED by this script. Per event, whether the lead names what the burst was about is 3.0.0_SA_CVO's call at L9.",
+   "denominator": "8 served events presented; 22 article headlines listed; no per-event verdict recorded",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Judgment criterion presented and not graded; the oracle is 3.0.0_SA_CVO at L9, never self-graded by this worker."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "N/A: the task order names no mutant control; the cell runs an existing producer and changes no code.",
+   "expected": "N/A",
+   "observed": "N/A -- no code changed (order section 0: no code path in the grant)",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC2 rebuilds the event rows in memory from the same newest mention snapshot and silver headlines the producer read, and compares them field by field to the SERVED rows (a second build over the same input vs the put bytes)",
+   "observed": "8 of 8 rows equal, 104 of 104 field values equal, 0 differences",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "chatter_daily rebuild",
+   "reason": "Not in the signed radius (order section 3.2); not touched."
+  },
+  {
+   "item": "Any S3 delete, noncurrent-version or delete-marker removal",
+   "reason": "Standing absolute clause s.14a; none performed, none needed."
+  },
+  {
+   "item": "Grading FWD-6 and the AC4 verdicts",
+   "reason": "3.0.0_SA_CVO at L9 and 1.0.0_SA_CTO at L10."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~32/scripts/ac1_rebuild_and_name_the_diff.py",
+ "compiler_tools": [
+  {
+   "tool": "publication_gold.main build-event (via ac1)",
+   "invocation": "publication_gold.main(['build-event','--securities-json','.../0.9.0_WK_AMGT_HARVST~4/securities.json','--as-of','2026-09-28'])",
+   "result": "events 8; key amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet; write_gold receipt rows 8, content_length 6412; one put, no delete"
+  }
+ ]
+}
