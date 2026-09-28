@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-78",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5d44d0fa6281d69def8454a181adfb2916f794d7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "9847df3322bb7b8774f9f275a66d5b0acb7f89b9",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-78.receipt-refusal-named.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~41",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/export/submit.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "c34692a260164103a0b185af930b67c8d82a7acd",
+      "artifact_covered_by": ["IVE78-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit c34692a2 on branch wk-DSGN_IRPTV1-41-portal (LOCAL). New isExportReceiptTerminal(receipt) (wraps the existing EXPORT_RECEIPT_TERMINAL_STATES set), stillBuildingReason(attempts) (the attempt-bound-spent wording), and describeExportReceiptFailure(error) (duck-types `publicReasonCode` off the caught value -- IrRequestError's refusal code, e.g. NOT_READY, or EnvelopeMismatch's ENVELOPE_* code -- falling back to the error's own message; no class import, so the file's own no-React/no-client-import rule holds). pollExportReceipt itself is unedited: it still resolves (never throws) on attempt-bound exhaustion, and still rejects only when a read itself rejects.",
+      "introduces": ["describeExportReceiptFailure", "isExportReceiptTerminal", "stillBuildingReason"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/export/ExportButton.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "c34692a260164103a0b185af930b67c8d82a7acd",
+      "artifact_covered_by": ["IVE78-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit c34692a2. New `receiptRefusal` state, cleared alongside `refusal` at the top of every handleSubmit. The queued-poll branch now counts reads and attaches `.then((receipt) => { if (!isExportReceiptTerminal(receipt)) setReceiptRefusal(stillBuildingReason(reads)) })` and `.catch((error) => { setReceiptRefusal(describeExportReceiptFailure(error)); setFlow(...) })` in place of the prior bare `.catch(() => setFlow(...))`. Rendered in a new paragraph reusing the existing `data-slot=\"export-refusal\"` element under a new `data-gate=\"refused-at-receipt\"` value, beside the pre-existing `refused-at-submit`/`closed` gates. No change to pollExportReceipt's call site's request shape, no route added, envelope.ts/ReceiptPanel.tsx/ExportModal.tsx not edited.",
+      "introduces": ["receiptRefusal state", "data-gate=\"refused-at-receipt\""]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/contracts/wire/responses.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "c34692a260164103a0b185af930b67c8d82a7acd",
+      "artifact_covered_by": ["IVE78-AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit c34692a2. Regenerated via __tests__/fe-s-13/gen-wire.ts's generate() (never hand-edited) against the already-ratified schema docs/contracts/investor-reporting/v1/responses/export-receipt.response.schema.json (R11, CVO @ab453f59ed, wording @25f7581ded, both present in this worktree's ajb_workspace HEAD ecfef1fcc5 -- confirmed `data` absent from that schema's `required` array). ExportReceiptResponseWire.data widens from `readonly data: ExportReceiptWire` to `readonly data?: ExportReceiptWire`; the file's `Source sha256` comment updates to match. gen-wire.ts and the schema are read-only; nothing else in this file changed.",
+      "introduces": ["ExportReceiptResponseWire.data (now optional)"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-78.receipt-refusal-named.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "c34692a260164103a0b185af930b67c8d82a7acd",
+      "artifact_covered_by": ["IVE78-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit c34692a2 (new file)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE78-AC1",
+      "criterion_verbatim": "the built behaviour, with its control. Against a recording fake api: (a) a submit answered QUEUED (synthetic exr_ id), then a receipt read answered with the window-19 body above (data-less, UNAVAILABLE, NOT_READY): the panel shows the export-refusal element naming NOT_READY, the flow is not left submitting, and NO further receipt read is issued (no poll-on-UNAVAILABLE); (b) a receipt read that throws a non-refusal error shows a named reason in the same element; (c) a fake that stays RUNNING past a small maxAttempts shows a named \"still building\" reason; (d) control: QUEUED -> RUNNING -> READY shows the download link and NO export-refusal element, and QUEUED -> FAILED shows the FAILED receipt as today. Print VERDICT: RECEIPT-REFUSAL-NAMED-OK only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-41/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-78.receipt-refusal-named.test.tsx 2>&1 | tail -15",
+      "output_evidence": "(a) window-19 UNAVAILABLE/NOT_READY read -> poll rejected: true; reads issued: 1; named reason: 'NOT_READY'\n  (b) network failure -> poll rejected: true; reads issued: 1; named reason: 'investor-reporting export-receipt failed'\n  (c) still-RUNNING poll: reads=3, resolved jobState=running, terminal=false, named reason='Export receipt: still building after 3 reads.'\n  (d-i) READY control: reads=3, terminal=true, download link=/api/scoped/investor-reporting/export/exr_e78aa11bb22cc33dd44ee55f/download?selected_tenant=reg-e78\n  (d-ii) FAILED control: reads=2, terminal=true, envelope.state=FAILED\n  ExportButton.tsx renders data-gate=\"refused-at-receipt\" under data-slot=\"export-refusal\": true\n  ExportButton.tsx clears receiptRefusal on a fresh submit: true\n  ExportButton.tsx names the still-building exhaustion via .then: true\n  ExportButton.tsx names a rejected read via .catch: true\nVERDICT: RECEIPT-REFUSAL-NAMED-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating 4 named arms plus a 2-part control and a 4-part source-inspection: (a) the literal window-19 body (HTTP 200, ok:false, no data, status.state UNAVAILABLE, public_reason_code NOT_READY), read through the real LiveClient+parseIrEnvelope, rejects pollExportReceipt on its FIRST attempt (log.length===1, no onReceipt call), and describeExportReceiptFailure names it 'NOT_READY' bare; (b) a transport/network failure through the same real client path rejects with a non-fallback named message; (c) a fake staying RUNNING for exactly maxAttempts=3 reads resolves (does not throw) with a non-terminal receipt, and stillBuildingReason(3) names 'still building after 3 reads'; (d-i) QUEUED->RUNNING->READY is terminal with a tenant-carrying download link; (d-ii) QUEUED->FAILED is terminal and envelopeFromReceipt(...).state==='FAILED'; plus 4 source-inspected regex checks on ExportButton.tsx confirming the data-gate=\"refused-at-receipt\" render, the fresh-submit clear, and both the .then/.catch wiring to the two new named-reason paths.",
+      "status": "PASS",
+      "expect": "VERDICT: RECEIPT-REFUSAL-NAMED-OK"
+    },
+    {
+      "criterion_id": "IVE78-AC2",
+      "criterion_verbatim": "the wire copy matches R11: the pinned regeneration test passes (byte-identical regeneration, data optional, content pin 17 of 17). It FAILS at the base (portal DEV) because responses.ts predates R11.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-41/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-26.wire-regen.test.ts 2>&1 | tail -8",
+      "output_evidence": "content-pins.test.ts rc=0\nCONSUMED OPERATIONS OFFERED: 17 of 17\nVERDICT: WIRE-REGEN-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating 3 arms: ARM 1 (idempotency) -- generate() against the committed responses.ts (post-commit c34692a2) reproduces it byte-identical (0 of 24 files drifted, EOL-normalized compare); ARM 2 -- the regenerated ExportReceiptResponseWire block matches /readonly data\\?: ExportReceiptWire/ (optional); ARM 3 -- fe-s-13/content-pins.test.ts subprocess rc=0, CONSUMED OPERATIONS OFFERED 17 of 17. Measured BEFORE this cell's commit (base state): 0 pass / 1 fail, drifted=['responses'] -- confirms the criterion's own 'FAILS at the base' clause.",
+      "status": "PASS",
+      "expect": "1 pass[\\s\\S]*0 fail"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants, one per criterion's own load-bearing mechanism. (1) IVE78-AC1: submit.ts's describeExportReceiptFailure body replaced with an unconditional `return 'export-receipt: refused with no named reason'` (backup taken first via a scratch copy, restored the same way -- never git checkout --/reset --hard). (2) IVE78-AC2: contracts/wire/responses.ts's `readonly data?: ExportReceiptWire` reverted to `readonly data: ExportReceiptWire` (scratch-copy backup/restore, same discipline).",
+      "expected": "(1) IVE78-AC1 fails: arms (a) and (b) no longer get their named reason (both collapse to the generic fallback string). (2) IVE78-AC2 fails: ARM 1's idempotency check reports 'responses' drifted (the manually-reverted bytes disagree with a fresh regeneration).",
+      "observed": "(1) 0 pass / 1 fail: \"arm (a): expected the named reason 'NOT_READY', got 'export-receipt: refused with no named reason'\" and \"arm (b): expected a named (non-fallback) reason, got 'export-receipt: refused with no named reason'\" -- exactly the two arms the mutant strips. Restored from the scratch backup; re-ran clean (VERDICT: RECEIPT-REFUSAL-NAMED-OK, 1 pass / 0 fail). (2) 0 pass / 1 fail: \"gen-wire.ts regeneration is not byte-identical to the committed files: responses\" -- exactly ARM 1's own idempotency check. Restored from the scratch backup; re-ran clean (VERDICT: WIRE-REGEN-OK, 1 pass / 0 fail).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE78-AC1's exact invocation 3x (pre-mutant, post-restore, against the final committed HEAD c34692a2) and IVE78-AC2's exact invocation 3x (pre-mutant, post-restore, against the final committed HEAD c34692a2).",
+      "observed": "IVE78-AC1: identical VERDICT: RECEIPT-REFUSAL-NAMED-OK every run, 1 pass / 0 fail, 1 expect() call each time. IVE78-AC2: identical VERDICT: WIRE-REGEN-OK every run, 1 pass / 0 fail, 1 expect() call each time (ARM 3's subprocess consistently reported CONSUMED OPERATIONS OFFERED: 17 of 17).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal/src/pages/InvestorReporting/export/ReceiptPanel.tsx",
+      "reason": "Not edited: its existing, unedited envelopeFromReceipt/downloadRouteFor/publicReasonCodeFor already render queued/running/ready/failed/expired from any bare ExportReceipt, and this cell's own refusal element lives in ExportButton.tsx beside the pre-existing gate-closed/refused-at-submit paragraphs -- no change to ReceiptPanel's rendering rule was needed."
+    },
+    {
+      "item": "portal/src/pages/InvestorReporting/export/ExportModal.tsx",
+      "reason": "Not edited: it already renders whatever children ExportButton passes as the modal's content (the mechanism the pre-existing refused-at-submit paragraph already used); no new prop or slot was needed for the new refused-at-receipt paragraph."
+    },
+    {
+      "item": "portal/src/pages/InvestorReporting/contracts/envelope.ts",
+      "reason": "Not edited per the cell's own instruction. The window-19 UNAVAILABLE/NOT_READY body is already correctly refused by the existing parser (boundaryRefusal via `ok: false`) -- the fix is entirely in how the CALLER (ExportButton.tsx, via submit.ts's new helpers) names that refusal, never in loosening what the parser accepts as pending."
+    },
+    {
+      "item": "portal/src/pages/InvestorReporting/contracts/wire/{AnalysisReport,AnalysisRequest,AnalysisSubmissionRequest,AnalysisUploadRequest,AnalysisUploadResult,BoundaryRefusal,DirectoryContext,DirectoryEntry,DirectoryPage,ExportBundle,ExportReceipt,HoldingsSnapshot,NarrativePacket,OwnedAnalysisRequest,OwnedAnalysisRequestHistory,PerformanceReport,PublicStatusEnvelope,RenderPackage,RequestComposition,ResolvedScope,SelectedAccounts,SelectionRequest,StatusEnvelope,index}.ts",
+      "reason": "IVE78-AC2's own invocation runs gen-wire.ts's generate(), an all-or-nothing writer over the whole wire/ directory; on this worktree's CRLF checkout that touched all 24 files on disk, but a per-file content diff (git diff --ignore-space-at-eol -w) showed 0 changed content-lines on these 23 -- EOL-only, the same pre-existing artifact this pinned test's own docstring names (row DSGN_IRPTV1-W34-S). The <paths> grant names only responses.ts among wire/*.ts, so these 23 were left uncommitted rather than staged past the grant. Filed as row DSGN_IRPTV1-W41-S2."
+    }
+  ],
+  "surprises": ["DSGN_IRPTV1-W41-S2"],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~41/receipt-refusal-named.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-78.receipt-refusal-named.test.tsx",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: RECEIPT-REFUSAL-NAMED-OK (run 3x across the mutant/restore/post-commit cycle, identical)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-26.wire-regen.test.ts",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: WIRE-REGEN-OK (run 3x across the mutant/restore/post-commit cycle, identical); measured 0 pass / 1 fail at the base state before this cell's regeneration"
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (tsc -b --noEmit, full portal)",
+      "result": "0 errors, both before committing (post-fix, pre-commit) and after (post-commit c34692a2)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/fe-s-31/submit.test.ts src/pages/InvestorReporting/__tests__/fe-s-75/parse-control.test.ts src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-26.submit-data-optional.test.ts src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-64.submit-tenant.test.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-67.queued-export-poll.test.tsx src/pages/InvestorReporting/__tests__/fe-s-9 src/pages/InvestorReporting/__tests__/fe-s-16/mounted-states.test.ts src/pages/InvestorReporting/__tests__/fe-s-35/no-identity.test.ts",
+      "result": "38 pass / 0 fail, 145 expect() calls across 14 files (glob picked up the fe-s-9/fe-s-90 sibling suite too) -- no regression in the two directly-touched pinned tests (iv-e-64, iv-e-67) or any sibling"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D13/DSGN/DSGN_IRPTV1/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (1 new row of 107 total checked); surprise-corpus pass: 0 new / 0 resolved against the 4-item legacy baseline"
+    }
+  ]
+}
