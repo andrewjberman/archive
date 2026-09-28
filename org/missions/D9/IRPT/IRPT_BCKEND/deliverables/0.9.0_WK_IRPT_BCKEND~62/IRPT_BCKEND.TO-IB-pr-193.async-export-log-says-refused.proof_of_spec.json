@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-193",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "33ae74760bb23c5a4c9b088617bdddeb72fec48d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "63e6ff6438bdaa3fc4f408916c11791acbce4bf1",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-193.async-export-log-says-refused.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~62",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/entry.py",
+      "kind": "script",
+      "commit_or_etag": "2f007b00f796d0f61e1164de4821746cea1931cc",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Not deployed by this order (WORLD-class Lambda source; the order's BOUNDS explicitly exclude deploy/AWS calls). Blob hash is the git blob of the worktree file at commit time; introduces the `_async.AsyncSubmitRefused` catch arm and the literal `\"REFUSED\"` stage token in `run_async_submit`, absent at HEAD~ (git show HEAD:<path> before this edit carried only the single `except Exception` arm printing FAILED).",
+      "introduces": ["AsyncSubmitRefused", "\"stage\": \"REFUSED\""],
+      "artifact_covered_by": ["P19-3-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/tests/test_submit_async.py",
+      "kind": "test",
+      "commit_or_etag": "afd38d2fd9fd88650a1677040320fa399d49cfb8",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "git hash-object matches the worktree blob; py_compile clean; adds one test, `test_a_refused_replay_logs_stage_refused_never_failed`, absent before this edit.",
+      "introduces": ["test_a_refused_replay_logs_stage_refused_never_failed"],
+      "artifact_covered_by": ["P19-3-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~62/IB-pr-193.result.md",
+      "kind": "doc",
+      "commit_or_etag": "c4206785746867736e8e5f41b6fe772b3435a494",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object c4206785746867736e8e5f41b6fe772b3435a494 -- the session log for this order.",
+      "artifact_covered_by": ["P19-3-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ba47d07cda7d48e0fc99ed8dfe44cd2c03eb0fe2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object ba47d07cda7d48e0fc99ed8dfe44cd2c03eb0fe2 -- 1 new row appended (IRPT_BCKEND-W62-S1) inside the file's existing sequence of fenced json objects, following the file's own prevailing style; surprise-row-gate.py run against the file, 0 flagged as malformed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P19-3-AC1",
+      "criterion_verbatim": "the built behaviour with its control: AsyncSubmitRefused logs ['REFUSED'] and re-raises; the ExportBuildFailed control still logs ['FAILED'] and re-raises. Base: FAIL (['FAILED'] for the refusal), control PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r19/p19_3_ac1_async_log.py\" .",
+      "output_evidence": "Before the fix: 'FAIL AsyncSubmitRefused: stages [\\'FAILED\\'], re-raised True' / 'PASS ExportBuildFailed: stages [\\'FAILED\\'], re-raised True' / 'P19-3-AC1 FAIL' (rc=1) -- matches the task order's stated base case exactly. After the fix: 'PASS AsyncSubmitRefused: stages [\\'REFUSED\\'], re-raised True' / 'PASS ExportBuildFailed: stages [\\'FAILED\\'], re-raised True' / 'P19-3-AC1 PASS' (rc=0).",
+      "denominator": "2 of 2 arms (AsyncSubmitRefused, ExportBuildFailed) PASS",
+      "status": "PASS",
+      "expect": "P19-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own arm B is the control: an `ExportBuildFailed` raised from `submit_async.run` (a different, non-refusal exception) must still log `stage: FAILED` and re-raise, unchanged by this edit.",
+      "expected": "stage FAILED, re-raised True, for ExportBuildFailed both before and after the fix.",
+      "observed": "'PASS ExportBuildFailed: stages [\\'FAILED\\'], re-raised True' in both the before-fix and after-fix runs of the checker.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The checker (p19_3_ac1_async_log.py) and the new pytest test were each run twice at the final bytes.",
+      "observed": "Both runs of the checker reproduced 'P19-3-AC1 PASS' with identical stage lists; both runs of `pytest tests/test_submit_async.py -v` reproduced 13 passed, 1 pre-existing unrelated failure, with identical test names.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "submit_async.py, the receipt route, and any stage constant it defines",
+      "reason": "BOUNDS: 'Do not change submit_async.py, the receipt route, or any stage constant it defines.' The literal string \"REFUSED\" is used in entry.py rather than a new submit_async constant, per the same instruction."
+    },
+    {
+      "item": "test_the_marked_event_builds_and_the_handle_reaches_the_receipt (pre-existing failure in the same test file)",
+      "reason": "Unrelated to this cell's diff -- reproduced identically against the unmodified HEAD entry.py; outside this order's <paths> and outside run_async_submit. Rowed at IRPT_BCKEND-W62-S1 rather than fixed."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W62-S1: infra/aws/lambda/investor-reporting/export/tests/test_submit_async.py::test_the_marked_event_builds_and_the_handle_reaches_the_receipt fails pre-existing and unrelated to this cell (AttributeError: module 'handler' has no attribute 'finalize_export' at entry.py:185), reproduced against the unmodified HEAD entry.py; left as found (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~P)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~62/IB-pr-193.result.md",
+  "compiler_tools": [
+    {
+      "tool": "p19_3_ac1_async_log.py (P19-3-AC1, before and after the fix)",
+      "invocation": "timeout 120 python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r19/p19_3_ac1_async_log.py\" .",
+      "result": "Before: rc=1, P19-3-AC1 FAIL (AsyncSubmitRefused logged FAILED). After: rc=0, P19-3-AC1 PASS (AsyncSubmitRefused logs REFUSED, control ExportBuildFailed still logs FAILED)."
+    },
+    {
+      "tool": "pytest tests/test_submit_async.py",
+      "invocation": "timeout 120 python -m pytest tests/test_submit_async.py -v (from infra/aws/lambda/investor-reporting/export)",
+      "result": "13 passed (12 pre-existing + the 1 new test added by this order), 1 pre-existing failure unrelated to this cell (rowed at IRPT_BCKEND-W62-S1), reproduced identically against the unmodified HEAD entry.py."
+    },
+    {
+      "tool": "git show HEAD:<path> / git hash-object (before/after isolation, no working-tree stash)",
+      "invocation": "git show HEAD:infra/aws/lambda/investor-reporting/export/entry.py to isolate this order's own diff from the pre-existing failure; git hash-object over every artifact listed above",
+      "result": "Confirmed this order's diff is exactly the one new except-arm in run_async_submit; confirmed the pre-existing failure reproduces identically with that diff backed out, then restored."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "timeout 120 python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: all rows carry their step-7/step-10 fields; corpus baseline unchanged (4 known pre-existing failures, 0 new)."
+    }
+  ]
+}
