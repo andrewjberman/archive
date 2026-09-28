@@ -157,12 +157,28 @@ at a time; that is where the 24 shrinks fastest.
   commits were examined.
 - **No `git-filter-repo` install without Andrew's word** -- it is egress off Opal infrastructure.
 
-⛔⛔ **NEVER DELETE THE WORKTREES `C:/tmp/oa-1` AND `C:/tmp/oa-3`.** Reported by `1.0.0_SA_CTO~O` at 17:55Z: the
-nested `opal_ai` commits behind `wk-NFRA_OPALAI-1` and `wk-NFRA_OPALAI-3` **exist ONLY in those two worktrees** --
-they are in no other clone, no branch on origin, and no mirror. Both branches are HOLD behind Andrew's
-G-ACCT / G-AUTH / G-PUSH cutover, so they will still be sitting there when someone tidies up after the reboot.
-**A worktree sweep that treats them as disposable destroys the only copy.** This is the single most damaging
-mistake available in the whole drain.
+⚠ **`C:/tmp/oa-1` AND `C:/tmp/oa-3` -- THE "ONLY COPY" WARNING IS WITHDRAWN. MEASURED, NOT ASSUMED.**
+`1.0.0_SA_CTO~O` reported at 17:55Z that the nested `opal_ai` commits behind `wk-NFRA_OPALAI-1` and
+`wk-NFRA_OPALAI-3` *"exist ONLY in C:/tmp/oa-1 and C:/tmp/oa-3; never delete those worktrees"*, and an earlier
+revision of this document carried that as its most severe rule. **I checked it against the opal_ai remote and it
+does not hold:**
+
+| worktree | nested branch | HEAD | unique commits | contained in a published branch |
+|---|---|---|---|---|
+| `C:/tmp/oa-1` | `wk-NFRA_OPALAI-1-opal_ai` | `2e48f7b` | **0** | **yes** -- ancestor of `fd8ab8a57f` (DEV and PROD) |
+| `C:/tmp/oa-3` | `wk-NFRA_OPALAI-3-opal_ai` | `803f699` | **0** | **yes** -- ancestor of `fd8ab8a57f` (DEV and PROD) |
+
+**THE TRAP THAT PRODUCED THE FALSE ALARM, and it points the other way too:** `git rev-list --count --all --not
+--remotes` reads **0** in both, which looks like confirmation that everything is pushed -- but it trusts LOCAL
+remote-tracking refs, which go stale. In these repos `refs/remotes/origin/wk-NFRA_OPALAI-*-opal_ai` exists
+locally while **the branch does not exist on the remote at all** (`git ls-remote` returns nothing for it; the
+remote has exactly two heads, DEV and PROD). So the tracking-ref check can say "all pushed" about a branch the
+remote has never heard of. **The sound check is `ls-remote` plus an ancestry test against the hashes it
+returns** -- which is what the table above is.
+
+**WHAT IS ACTUALLY LOCAL-ONLY** is the ordinary thing: the PARENT branches `wk-NFRA_OPALAI-1` (7 commits) and
+`wk-NFRA_OPALAI-3` (4), exactly like the other 22. They are HOLD on Andrew's cutover gates, not because they are
+irreplaceable. **Treat those two worktrees as ordinary members of the 24.**
 
 ## 8. RESUMPTION CHECKLIST, POST-REBOOT
 
