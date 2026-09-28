@@ -46,11 +46,27 @@ operator user (`Opal Bloomberg`, elevated). The source of these steps is the CTO
    - `[Environment]::SetEnvironmentVariable('OPAL_RUNTIME_CONFIG','C:\opal_runtime\runtime.config.json','User')`.
    - Confirm with `claude --version` and `claude mcp list` (one server, `opal-gateway-bbg`).
 
+## G-AUTH -- only after steps 1-4 pass (Andrew-direct 2026-09-28: "use setup-token on the Analyst account, one relayed MFA is fine")
+
+5. **Claude credential for Opal_Agent, with no interactive login on that account:**
+   - run `claude setup-token`, and sign in in the browser it opens with the DEDICATED Analyst Claude account, NEVER
+     Andrew's own (runbook step 4);
+   - it prints a long-lived token. In the Opal_Agent session from step 4, set it as that account's user variable:
+     `[Environment]::SetEnvironmentVariable('CLAUDE_CODE_OAUTH_TOKEN','<token>','User')`.
+   - The token is a secret: never print it in a report, a log, a commit or a message.
+6. **Gateway sign-in (the ONE relayed MFA):**
+   - as the operator, start the session with the launcher:
+     `powershell -ExecutionPolicy Bypass -File C:\opal_runtime\opal_ai\opal\runtime\launcher.ps1 -Config C:\opal_runtime\runtime.config.json`;
+   - it must print `GATE: PASS` before `claude.exe` starts as Opal_Agent;
+   - when `opal-gateway-bbg` asks for a Microsoft sign-in, sign in as **Opal Bloomberg** and ask Andrew to relay the one
+     MFA approval;
+   - then confirm the Analyst's `whoami` = Opal Bloomberg.
+   If the Teams watch asks for a second Microsoft sign-in, STOP and report it rather than requesting a second MFA.
+
 ## Do NOT
 
-- Do not sign in. That is G-AUTH (runbook steps 4-5: the Claude sign-in and the gateway's Microsoft sign-in). It waits
-  on Andrew's decision about the service-account path, which `2.0.0_SA_COO~O` is taking to him separately.
-- Do not run `launcher.ps1`, add Opal_Agent to any group, or touch the workspace repo, AWS or the gateway.
+- Do not run steps 5-6 unless steps 1-4 passed with the exact outputs above.
+- Do not add Opal_Agent to any group, or touch the workspace repo, AWS or the gateway configuration.
 
 ## Report (one message to `2.0.0_SA_COO~O`, file inbox `org/mcp/inbox/2.0.0_SA_COO/~O/`)
 
