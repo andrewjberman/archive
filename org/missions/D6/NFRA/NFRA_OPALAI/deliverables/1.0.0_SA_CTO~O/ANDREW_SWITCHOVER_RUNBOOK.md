@@ -4,6 +4,12 @@
 record @bda25438c8). **Unblocks:** NFRA_OPALAI FWD-1 (the Analyst answers a colleague in Teams from its own account)
 and NFRA_MCPORTAL FWD-1 (you change a colleague's access from the dashboard).
 
+**RE-CONFIRMED after the reboot (`2.0.0_SA_COO~O`, 2026-09-28 ~20:1xZ): ALL FOUR MET**, each measured that session
+(`org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/SWITCHOVER_PRECONDITIONS_RECONFIRM_20260928.md`
+@c0030ea9db). Two deltas from the text below: the gateway now serves `fe94911257` (OG-e-2), which contains
+`df724ef284`, `1f7128201a` and `c5f8099440`; and `C:\opal_runtime\opal_ai` already exists as an EMPTY directory, which
+step 0's clone accepts.
+
 **Precondition status (`2.0.0_SA_COO~O`, 2026-09-26 ~09:5xZ): ALL FOUR MET.**
 - (a) MET. `opal_ai` DEV and PROD are both at `fd8ab8a57f` on origin. `0.0.0_AB_MSTR~Z` pushed them (msg
   20260925T235909Z) and verified by `ls-remote`.
