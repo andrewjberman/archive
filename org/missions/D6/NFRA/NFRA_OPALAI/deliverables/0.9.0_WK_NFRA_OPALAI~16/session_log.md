@@ -10,3 +10,5 @@ Worktree `C:/tmp/oa-16`, branch `wk-NFRA_OPALAI-16`.
 4. AC1 PASS, AC3 PASS. AC2 FAIL as written: e10.AC2.sh matches `tests/...` and pytest prints `tests\...` on this
    Windows device; the tests themselves passed (2 passed, 3 runs). Filed BLOCKING row Z-W16-S4. Order left open.
 5. Mutant: guard removed -> both new tests fail; restored byte-for-byte.
+6. Issuer answered row Z-W16-S4 (matcher amended, 3ebf12c48f). Re-ran AC1-AC3: all PASS (AC2 named passed=1). Proof
+   re-validated rc=0; `<status>` flipped to complete.
