@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-mr-1",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "33ae74760bb23c5a4c9b088617bdddeb72fec48d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R19_M.md",
+    "vintage_commit": "a891bb2e49c6febdd13e77b271dc54a6abed687c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m19-1.r1-readbacks-on-the-0928-cot-run.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~41",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R19_R1_READBACK_20260928.json",
+      "kind": "doc",
+      "commit_or_etag": "ae8802f1853282cddce947f4b5e04a5f333a3ad3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, git blob ae8802f1853282cddce947f4b5e04a5f333a3ad3, committed in this cell's own commit. Per-leg verdict/expected/measured/served_objects (uri+VersionId+LastModified)/run_evidence/surprise_row for the three HELD ledgers, read directly from live S3 (opal-data-cot, opal-data-bd) and the COT gold run log, never from the ledger proofs or the half's own predictions."
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/COT_SERVED_COMPOSITION_POSTRUN_20260928.json",
+      "kind": "doc",
+      "commit_or_etag": "9da99ce653305737e7ffd61d9b3bc8f75612352b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, git blob 9da99ce653305737e7ffd61d9b3bc8f75612352b, committed in this cell's own commit. Output of the TO-named cot_served_composition_check.py --out run against live opal-data-cot: 227 documents read (225 relationship compositions + firm), data_as_of spread {2026-09-25: 223, 2026-08-25: 2, 2026-08-28: 2}, 7 relationships over 100% pct_sum, z09305653 watch composition -- read-only, no S3 write."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "3b3cebe25a69cdff2dc3eeb8f45756e7a3c0f03e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 3b3cebe25a69cdff2dc3eeb8f45756e7a3c0f03e (rows IRPT_BCKEND-W41-S1, -S2, one per FAILed leg, and -S3, the proof-of-spec instance filename mismatch found and fixed same-turn, appended; S3's disarm_owner corrected from the worker's own serial to its issuer 2.0.0_SA_COO~M per surprise-row-gate R-18). All 143 fenced JSON blocks re-validated to parse (python json.loads over every fenced block, 143 of 143, 0 bad) after the append; .tools/surprise-row-gate.py run clean (corpus baseline unchanged, 4 known pre-existing failures, 0 new)."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260925T2031Z_cot-other-admission-m-20260925_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "4b77a80be18338f4645152cf8a604eb96c160c63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 4b77a80be18338f4645152cf8a604eb96c160c63 -- .tools/deploy_ledger.py close-leg --leg-id R1 (proof cited below) then close, written by the tool itself: 'Status: CLOSED -- nothing stranded -- closed 20260928T194110Z'. The same close deleted org/critical_paths/.open_deploys/cot-other-admission-m-20260925.json (the sentinel; git status confirms ' D' staged-for-deletion at commit time) -- its absence is read directly by IBM19-1-AC2's own invocation (os.path.exists), not asserted as a separate artifact row here."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBM19-1-AC1",
+      "criterion_verbatim": "each R1 is graded on served objects of the 09-28 run, with uri + VersionId per object",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R19_CHECKS/r19_m1_r1_verdicts.py",
+      "output_evidence": "R1-GRADED bd-securities-cot-new-p1-m-20260926=FAIL cot-cash-admission-m-20260925=FAIL cot-other-admission-m-20260925=PASS",
+      "denominator": "3 of 3 slugs graded, each with >=2 served_objects carrying uri (s3://) + version_id",
+      "status": "PASS",
+      "expect": "R1-GRADED"
+    },
+    {
+      "criterion_id": "IBM19-1-AC2",
+      "criterion_verbatim": "each ledger's state agrees with its grade (PASS closed, FAIL held with a surprise row)",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R19_CHECKS/r19_m1_ledger_agrees.py",
+      "output_evidence": "AGREES cot-other-admission-m-20260925=PASS cot-cash-admission-m-20260925=FAIL bd-securities-cot-new-p1-m-20260926=FAIL",
+      "denominator": "3 of 3 slugs: 1 PASS (sentinel absent, entry CLOSED), 2 FAIL (sentinel present, entry still HELD-SOVEREIGN-GATED, R1 leg unproven, surprise_row present in and resolvable to the channel)",
+      "status": "PASS",
+      "expect": "AGREES"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A -- this cell is a READ/GRADE task over live S3 state and existing gold-run/IAM evidence (BOUNDS forbid any S3/DynamoDB write, gold re-run, or IAM change); the acceptance criteria (IBM19-1-AC1/AC2) are self-consistency checkers over R19_R1_READBACK_20260928.json and the ledger sentinels, with no mutatable production logic this cell authored.",
+      "expected": "N/A",
+      "observed": "N/A -- no code path exists for this cell to mutate; the two checker scripts (r19_m1_r1_verdicts.py, r19_m1_ledger_agrees.py) are read-only graders supplied by the task order, outside this cell's <paths> write grant",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "both acceptance invocations run twice each this session against the same committed R19_R1_READBACK_20260928.json and the post-close ledger state",
+      "observed": "AC1: both runs printed the identical line 'R1-GRADED bd-securities-cot-new-p1-m-20260926=FAIL cot-cash-admission-m-20260925=FAIL cot-other-admission-m-20260925=PASS', rc=0 both times. AC2: both runs printed the identical line 'AGREES cot-other-admission-m-20260925=PASS cot-cash-admission-m-20260925=FAIL bd-securities-cot-new-p1-m-20260926=FAIL', rc=0 both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the ETFClassifier / bd-securities DynamoDB access grant (S173's remedy)",
+      "reason": "BOUNDS: 'Never fix the grant, re-run gold, or write any served object: this cell READS and GRADES.' The grant, an IAM widening, is explicitly named as not this cell's lane in S173's own notes (owner 1.0.0_SA_CTO)."
+    },
+    {
+      "item": "reconciling the bd-securities-cot-new-p1 half's BD reader definition (the frozen 2026-09-23 partition) against C_06's actual incremental/watermark behavior",
+      "reason": "Newly surfaced this session (IRPT_BCKEND-W41-S2); a code or process change to C_06 or to the half's own method is outside this cell's <paths> grant and BOUNDS ('no gold run'); routed to 1.0.0_SA_CTO."
+    },
+    {
+      "item": "grading cot-cash-admission-m-20260925's and bd-securities-cot-new-p1-m-20260926's R1 legs as PASS despite the measured FAIL",
+      "reason": "BOUNDS refusal clause: 'do not weaken the test to pass.' Both ledgers are left HELD-SOVEREIGN-GATED, R1 unproven, per the TO's own FAIL branch instruction."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W41-S1: cot-cash-admission-m-20260925's R1 FAILs on served bytes -- z09308463's 0.37315 cash-equivalent slice and z09308511's 100% FCASH holding both classify asset_class='fixed_income', not 'cash', anywhere in the 09-28 served compositions; the same S173 empty-map fallback (name-pattern Layer 3 hard-codes CASH/SWEEP/MONEY MARKET to fixed_income) that the TO's KNOWN HAZARD section named as a risk for items 1 and 3 also defeats item 2, which the TO's own hazard note did not list.",
+    "IRPT_BCKEND-W41-S2: bd-securities-cot-new-p1-m-20260926's R1 FAILs on served bytes for TWO distinct causes -- the COT half by S173 (NEOS/CSHI still equity), and the BD half by a newly-measured cause outside S173's scope: bd-exporter-ec2-role HAS live dynamodb:Scan/GetItem on bd-securities (simulate-principal-policy: allowed), yet gold/views/mix_daily_summary.json's 2026-09-23 partition in opal-data-bd is byte-identical before (2026-09-25T05:12:45Z) and after (2026-09-27T05:16:54Z) the write, because C_06's incremental watermark never reprocesses an already-computed historical date -- the half's own named reader can structurally never show the move.",
+    "IRPT_BCKEND-W41-S3: this order's own <proof_of_spec> section cites an instance filename ('IRPT_BCKEND.TO-IB-mr-1.proof_of_spec.json', built off its internal <to_id> token) that does not match the order file's own basename ('IRPT_BCKEND.TO-IB-m19-1.r1-readbacks-on-the-0928-cot-run.md') -- the same class already logged 3x this round (IRPT_BCKEND-W21-S1). The pipeline gate's complete-flip search globs on the order-file basename, not the to_id; the instance below was renamed to the resolving name before commit, disarmed same-turn."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~41/IRPT_BCKEND.TO-IB-m19-1.r1-readbacks-on-the-0928-cot-run.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/cot_served_composition_check.py, TO-named)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/cot_served_composition_check.py --out org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/COT_SERVED_COMPOSITION_POSTRUN_20260928.json",
+      "result": "rc=0. 225 relationship compositions + firm_composition.json read (227 total); over_100pct=7; data_as_of spread {2026-09-25: 223, 2026-08-25: 2, 2026-08-28: 2}"
+    },
+    {
+      "tool": "python (boto3, ad-hoc reads via scratchpad scripts -- get_object/head_object/list_object_versions on opal-data-cot and opal-data-bd, and the COT gold-run log)",
+      "invocation": "boto3.client('s3').get_object/head_object/list_object_versions against platinum/firm/mix_summary.json, gold/views/{mix_daily_summary,firm_composition}.json, gold/entities/clients/{z09308463,z09326138,z09308511,z09304677,z09305627}_composition.json (opal-data-cot); gold/views/mix_daily_summary.json (opal-data-bd); logs/cot-exporter/gold-run/cot-gold-run-20260928-113330.log",
+      "result": "All objects read successfully with VersionId + LastModified captured (recorded in R19_R1_READBACK_20260928.json served_objects); the 09-28 gold-run log (160,687 bytes) confirms C_06's incremental skip ('No new partitions -- artifacts are current') and the ETFClassifier AccessDeniedException fallback (line 1246)"
+    },
+    {
+      "tool": ".tools/aws iam simulate-principal-policy (read-only)",
+      "invocation": "aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::313476888478:role/bd-exporter-ec2-role --action-names dynamodb:Scan dynamodb:GetItem --resource-arns arn:aws:dynamodb:us-east-1:313476888478:table/bd-securities",
+      "result": "both actions 'allowed' -- confirms BD's gold host role (bd-gold-layer-runner EC2 instance, profile bd-exporter-profile, per aws ec2 describe-instances + aws iam get-instance-profile) has live table access, unlike COT's cot-exporter-ec2-role (S173)"
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (TO-named, PASS branch)",
+      "invocation": "python .tools/deploy_ledger.py close-leg --slug cot-other-admission-m-20260925 --leg-id R1 --proof \"...\" && python .tools/deploy_ledger.py close --slug cot-other-admission-m-20260925",
+      "result": "OK: leg R1 closed. Remaining open: NONE / OK: CLOSED deploy ledger 'cot-other-admission-m-20260925' -- all 2 legs proven; sentinel removed"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "[surprise-corpus] OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved). [surprise-row-gate] OK: 1 file(s), all new rows carry their step-7/step-10 fields."
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-191",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "A",
+    "vintage_commit": "33ae74760b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "63e6ff6438",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-191.engine-never-serves-an-impossible-return.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~61",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/f49_engine.py",
+      "kind": "script",
+      "commit_or_etag": "760089d35b078ff7b6ce826a4206bebd70bccd06",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 760089d35b078ff7b6ce826a4206bebd70bccd06, committed 57a58117fb on wk-IRPT_BCKEND-61. Adds class EngineReturnImplausible(EnginePerformanceRefused) beside WindowNotRuled, and raises it from calculate() right after the window's live (r_net-notna, in-window) rows are selected and before the running-product loop or any report construction, when any linked row carries r_net <= -1.0. parity_period_returns.py and the producer c02_twr_engine.py are untouched (ruling 102411 routes that fix separately).",
+      "artifact_covered_by": ["P19-1-AC1", "P19-1-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/entry.py",
+      "kind": "script",
+      "commit_or_etag": "6f7cdfc1de849d396b27df915bfe3ea1cb6ba280",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 6f7cdfc1de849d396b27df915bfe3ea1cb6ba280, committed 57a58117fb. build_entry's reasons table gains \"EngineReturnImplausible\": \"DEPENDENCY_UNAVAILABLE\" immediately before the existing \"EnginePerformanceRefused\": \"OBJECT_NOT_COVERED\" line, with a one-line comment naming the InflectionPerformanceRefused precedent; that existing line is otherwise unchanged (verified by P19-1-AC3 arm B).",
+      "artifact_covered_by": ["P19-1-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/tests/test_f49_engine.py",
+      "kind": "test",
+      "commit_or_etag": "b4a271a28634a9181d659d0498c2ebc286f74a4b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob b4a271a28634a9181d659d0498c2ebc286f74a4b, committed 57a58117fb. Adds test_an_implausible_engine_day_refuses_before_any_report_is_built, reusing the file's own FakeS3/_scope/_source fixtures: a NEW-01-shaped account (one OK day, an OK day with r_net -1.0/emv 0.0/cf_net 0.0, a zero-base OK day, a re-funded OK day) raises f49_engine.EngineReturnImplausible (isinstance-checked against EnginePerformanceRefused too); the sibling account (RAW) on the SAME partitions is the control and still computes a finite value > -1.0. Full suite run: `python -m pytest tests/test_f49_engine.py -q` -> 10 passed, 2 warnings (pre-existing pandas FutureWarning, unrelated) in 1.86s."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P19-1-AC1",
+      "criterion_verbatim": "the built behaviour, with its difference control: arm A, the NEW-01 shape refuses as EngineReturnImplausible; arm B, the control account still computes. Base (CLOUD before this cell): FAIL on arm A, PASS on arm B.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r19/p19_1_ac1_implausible_fixture.py\" .",
+      "output_evidence": "rc=0. 'PASS A: the NEW-01 shape refuses as EngineReturnImplausible' / 'PASS B: the control account computes 0.007967' / 'P19-1-AC1 PASS'.",
+      "denominator": "2 of 2 arms PASS (A: refusal by class; B: control computes finite > -1.0)",
+      "status": "PASS",
+      "status_reason": "Non-judgment criterion (<invocation>/<expect>, no judgment=\"true\"): rc=0 and the printed 'P19-1-AC1 PASS' line matches the order's <expect>.",
+      "expect": "P19-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "P19-1-AC2",
+      "criterion_verbatim": "the seam probe against the REAL engine table, read-only S3 (about 20 s): arm A, live YTD for the NEW-01 account refuses as EngineReturnImplausible; arm B, live control account computes. Base: arm A FAIL (served -1.0), arm B PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r19/p19_1_ac2_live_seam.py\" .",
+      "output_evidence": "rc=0. 'PASS A: YTD 2026-01-01..2026-09-25 refuses as EngineReturnImplausible' / 'PASS B: control YTD 2026-01-01..2026-09-25 computes 0.069071' / 'P19-1-AC2 PASS'. Read-only against the live canonical/twr_daily partitions (185 of 559 listed partitions read; ~186 S3 GETs).",
+      "denominator": "2 of 2 arms PASS against the live table (A: NEW-01 account refuses; B: control account computes)",
+      "status": "PASS",
+      "status_reason": "Non-judgment criterion: rc=0 and the printed 'P19-1-AC2 PASS' line matches the order's <expect>.",
+      "expect": "P19-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "P19-1-AC3",
+      "criterion_verbatim": "the boundary names the refusal DEPENDENCY_UNAVAILABLE. Without the line, the MRO walk would answer OBJECT_NOT_COVERED (\"this account is not covered\"), which is false. Base: FAIL on arm A.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r19/p19_1_ac3_boundary_code.py\" .",
+      "output_evidence": "rc=0. 'PASS A: EngineReturnImplausible -> DEPENDENCY_UNAVAILABLE' / 'PASS B: EnginePerformanceRefused -> OBJECT_NOT_COVERED unchanged' / 'P19-1-AC3 PASS'.",
+      "denominator": "2 of 2 arms PASS (A: new line present; B: existing EnginePerformanceRefused line unchanged)",
+      "status": "PASS",
+      "status_reason": "Non-judgment criterion: rc=0 and the printed 'P19-1-AC3 PASS' line matches the order's <expect>.",
+      "expect": "P19-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not applicable to this cell's proof under the run bound; base-state contrast is the difference control the order itself names ('Base (CLOUD before this cell): FAIL on arm A, PASS on arm B' etc.) -- the WORKER FACE's own before/after clause for all three criteria, exercised by the check scripts' arm A/B design rather than a separate git-diff mutant.",
+      "expected": "Before this cell's edits, all three check scripts' arm A prints FAIL (f49_engine.EngineReturnImplausible undefined / the NEW-01 shape served a value / no DEPENDENCY_UNAVAILABLE line for it), arm B still PASS.",
+      "observed": "EXECUTED (not merely read) at the base commit: a detached-HEAD linked worktree at 0a80f8165c (before this cell touched the two source files) was checked out to .scratch/base-check, and both check scripts run against it. `python p19_1_ac1_implausible_fixture.py .scratch/base-check` -> 'FAIL A: f49_engine.EngineReturnImplausible (subclass of EnginePerformanceRefused) is not defined', 'PASS B: the control account computes 0.007967', 'P19-1-AC1 FAIL', rc=1. `python p19_1_ac3_boundary_code.py .scratch/base-check` -> 'FAIL A: no EngineReturnImplausible -> DEPENDENCY_UNAVAILABLE line in the reasons table', 'PASS B: EnginePerformanceRefused -> OBJECT_NOT_COVERED unchanged', 'P19-1-AC3 FAIL', rc=1. Both match the order's own stated base exactly ('FAIL on arm A', arm B PASS). The worktree was then removed (`git worktree remove --force --force .scratch/base-check`; the now-untracked leftover directory under .scratch/ was deleted, never staged). After this cell's commit (57a58117fb), all three scripts PASS both arms as shown in the acceptance rows above -- the executed before/after contrast.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "P19-1-AC1 and P19-1-AC3 run twice each at the post-commit state (once before writing this instance, once while re-collecting output_evidence); the full pytest suite (tests/test_f49_engine.py) run once.",
+      "observed": "Identical PASS/PASS/rc=0 outcome both AC1 runs and both AC3 runs; the control account's computed value (0.007967) identical across both AC1 runs. pytest: 10 passed, 2 warnings (pre-existing pandas FutureWarning on empty-frame concat, unrelated to this change) in 1.86s.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "parity_period_returns.py and data/assets/scripts/gold/runners_49f/c02_twr_engine.py",
+      "reason": "BOUNDS: the task order names these explicitly out of scope -- the producer-side fix is routed separately by 1.0.0_SA_CTO under ruling 102411. This cell's guard sits entirely in f49_engine.calculate, downstream of the producer table."
+    },
+    {
+      "item": "any deploy or AWS write",
+      "reason": "BOUNDS clause: 'No deploy, no AWS write.' P19-1-AC2 reads S3 read-only via the package's own EngineSource/calculate; no object was written, no Lambda updated, no Terraform applied. The served move of the adapter is the COO's later act under both never-widen halves (risk class WORLD, path floor)."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W61-S1: this order's own <proof_of_spec> block names the instance path 'IRPT_BCKEND.TO-IB-pr-191.proof_of_spec.json' (short form), but .tools/to-pipeline-gate.py's check_complete_flip only accepts a filename built from the TO file's FULL stem plus '.proof_of_spec.json' -- this instance was saved/renamed to the full-stem name 'IRPT_BCKEND.TO-IB-pr-191.engine-never-serves-an-impossible-return.proof_of_spec.json' (content unchanged, VALID rc=0 under either name) so the complete flip's own gate would admit it."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~61/IRPT_BCKEND.TO-IB-pr-191.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (p19_1_ac1_implausible_fixture.py, the AC1 invocation)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r19/p19_1_ac1_implausible_fixture.py\" .",
+      "result": "rc=0, P19-1-AC1 PASS, both arms PASS"
+    },
+    {
+      "tool": "python + boto3 (p19_1_ac2_live_seam.py, the AC2 invocation, read-only S3)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r19/p19_1_ac2_live_seam.py\" .",
+      "result": "rc=0, P19-1-AC2 PASS, both arms PASS against the live canonical/twr_daily table"
+    },
+    {
+      "tool": "python (p19_1_ac3_boundary_code.py, the AC3 invocation)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r19/p19_1_ac3_boundary_code.py\" .",
+      "result": "rc=0, P19-1-AC3 PASS, both arms PASS"
+    },
+    {
+      "tool": "python -m pytest (tests/test_f49_engine.py, corroborating suite)",
+      "invocation": "cd infra/aws/lambda/investor-reporting/performance && python -m pytest tests/test_f49_engine.py -q",
+      "result": "10 passed, 2 warnings (pre-existing, unrelated) in 1.86s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/performance/f49_engine.py infra/aws/lambda/investor-reporting/performance/entry.py infra/aws/lambda/investor-reporting/performance/tests/test_f49_engine.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~61 <0.9.0_WK_IRPT_BCKEND~61@opal.agent>\" -F .scratch/commit-msg-ib-pr-191.txt -- infra/aws/lambda/investor-reporting/performance/f49_engine.py infra/aws/lambda/investor-reporting/performance/entry.py infra/aws/lambda/investor-reporting/performance/tests/test_f49_engine.py",
+      "result": "committed 57a58117fb on wk-IRPT_BCKEND-61, msg-verify MATCH len=1086"
+    }
+  ]
+}
