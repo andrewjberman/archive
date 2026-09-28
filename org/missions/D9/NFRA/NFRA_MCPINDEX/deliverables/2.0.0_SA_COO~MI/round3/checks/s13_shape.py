@@ -39,6 +39,9 @@ def _is_literal(rhs):
 
 def count_line(line):
     n = 0
+    # A quoted code excerpt (json/markdown) escapes its quotes: read backslash-quote as the quote itself.
+    bs = chr(92)
+    line = line.replace(bs + '"', '"').replace(bs + "'", "'")
     # 1. shell defaults inside ${...}; then blank every expansion so its text cannot match a later form.
     for m in EXPANSION.finditer(line):
         d = DEFAULT_BODY.match(m.group(1))
@@ -69,6 +72,8 @@ def self_test():
         ("BD_PASSWORD=", 0),
         ("echo $BD_PASSWORD", 0),
         ("if (!process.env.BD_PASSWORD) throw new Error('BD_PASSWORD: required')", 0),
+        (chr(92).join(['"code": "BD_PASSWORD=', '"${BD_PASSWORD:-<from Secrets Manager>}', '""']), 0),
+        (chr(92).join(['"code": "BD_PASSWORD=', '"hunter2', '""']), 1),
     ]
     bad = [i for i, (c, e) in enumerate(cases) if count_line(c) != e]
     print("self-test: %d of %d cases as expected%s" % (len(cases) - len(bad), len(cases),
