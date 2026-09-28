@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-uu-3",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-uu-3.the-base-case-on-the-adjusted-basis.md",
+    "group": "C",
+    "vintage_commit": "24c535c23df6d7e593c03e6ecb51d04279bf98d3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "24c535c23df6d7e593c03e6ecb51d04279bf98d3",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-uu-3.the-base-case-on-the-adjusted-basis.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~166",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/case_rule.py",
+      "kind": "script",
+      "commit_or_etag": "b56fef3032",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module holding the ONE Base-case rule (stdlib only). Under lib/research/api, a seed package of the scoped-AMGT Lambda build: build-and-upload-scoped-amgt.sh --build-only shows lib/research/api/case_rule.py in the zip (205 entries, VERIFY missing [] at module and function scope). Nothing uploaded or deployed; the served change reaches the Lambda at uu-4.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "b56fef3032",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_model_cases computes the Base case from the stored block's own figures by case_rule.compute_cases. Not deployed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "b56fef3032",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_compute_cases delegates to case_rule.compute_cases; constants re-exported; _cases_report_figures now builds PX_LAST and IS_COMP_EPS_ADJUSTED year figures and the BEST_EPS basis. Not run against S3.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "b56fef3032",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_model_case_line prints a SERVED value with %.2f. Not deployed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "8fa7abde",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "commit_or_etag is the PORTAL-repo commit 8fa7abde (branch wk-AMGT_RESAPP-166-portal, LOCAL). modelCaseDetail prints a SERVED value with toFixed(2). No server, no deploy.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_model_cases.py",
+      "kind": "test",
+      "commit_or_etag": "b56fef3032",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Updated to the adjusted rule; adds minor-unit and no-consensus arms.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/print/tests/test_model_cases_markdown.py",
+      "kind": "test",
+      "commit_or_etag": "b56fef3032",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Updated to the two-decimal print.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_model_cases_guard.py",
+      "kind": "test",
+      "commit_or_etag": "b56fef3032",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Helpers engineer adjusted P/E years; adds three arms pinning the adjusted rule (fiscal_year join, non-positive EPS skipped, open years excluded, basis copied, no GAAP fallback).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_band_basis.py",
+      "kind": "test",
+      "commit_or_etag": "b56fef3032",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Helpers engineer adjusted P/E years.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE -- the issuer's AC1 was already fed a green arm at the cut and reads 0 of 3 at base (measured by the issuer before this cell); this worker authored tests, not a mutant.",
+      "expected": "N/A",
+      "observed": "Before the change AC1 read 0 of 3 on my first run after the rule landed only because check (5) (two-decimal print) was still unmet: 3 of 3 rule checks passed and 3 of 3 print checks failed; after the print sites moved it read 3 of 3.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1, AC2, AC3 each run twice (once before, once after the commit) over committed fixtures; pure offline python plus node render, no network.",
+      "observed": "Identical output both runs: AC1 3 of 3, AC2 2 of 2, AC3 70 passed. Wider run lib/research/api + lib/research/print + integrations/bloomberg/research/tests: 406 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, Bloomberg call, deploy, server, install, push or vendor call",
+      "reason": "TO BOUNDS 1. build-and-upload-scoped-amgt.sh --build-only <temp> was run as the TO permits (uploads nothing); it pip-downloads vendored wheels into its own scratch dir as its design."
+    },
+    {
+      "item": "The pdf path (build_pack), posture path and every other served key",
+      "reason": "TO BOUNDS 2 -- byte-unchanged; only the case construction, its inputs' basis and the two print sites moved."
+    }
+  ],
+  "surprises": [],
+  "session_log": "N/A -- no session-log path in this worker's paths. Worktree C:/tmp/wk-amgt-46-166 on wk-AMGT_RESAPP-166; portal branch wk-AMGT_RESAPP-166-portal.",
+  "compiler_tools": [
+    {
+      "tool": "infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only <scratch>/out.zip",
+      "result": "rc=0, BUILD-ONLY not uploaded; zip lists lib/research/api/case_rule.py; VERIFY 50 of 50 required modules packaged, missing []; ISOLATED 3 of 3 arms OK."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round46/checks/uu-3.AC1.py; echo \"exit=$?\"  expect: ADJUSTED BASE CASE, BASIS CARRIED, VALUE PRINTED: 3 of 3 names -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round46/checks/uu-3.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "AMD_US_Equity: pe 55.62641509433962 over 9 years; base 415.64057358490567; line 'Base case: SERVED -- 415.64 USD (adjusted consensus EPS (FY1) x adjusted trailin'\nGOOGL_US_Equity: pe 27.007861986193596 over 10 years; base 511.6099296044653; line 'Base case: SERVED -- 511.61 USD (adjusted consensus EPS (FY1) x adjusted trailin'\nRKT_LN_Equity: pe 17.626154077394652 over 10 years; base 5941.776539489737; line 'Base case: SERVED -- 5941.78 GBp (adjusted consensus EPS (FY1) x adjusted traili'\nADJUSTED BASE CASE, BASIS CARRIED, VALUE PRINTED: 3 of 3 names\nexit=0",
+      "denominator": "3 of 3 pinned stored blocks (AMD USD, GOOGL raw-float, RKT GBp minor-unit) pass checks (1)-(5)",
+      "expect": "ADJUSTED BASE CASE, BASIS CARRIED, VALUE PRINTED: 3 of 3 names[\\s\\S]*exit=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round46/checks/uu-3.AC2.py; echo \"exit=$?\"  expect: PAGE AND EXPORT PRINT THE SAME CASES: 2 of 2 names (each: harness rc=0; CASES page=3 rich=3 same=3 missing=0 extra=0) -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round46/checks/uu-3.AC2.py; echo \"exit=$?\"",
+      "output_evidence": "GOOGL_US_Equity: harness rc=0; CASES page=3 rich=3 same=3 missing=0 extra=0; export 'Base case: SERVED -- 511.61 USD (adjusted consensus EPS (FY1) x adjusted trailing-median P'\nRKT_LN_Equity: harness rc=0; CASES page=3 rich=3 same=3 missing=0 extra=0; export 'Base case: SERVED -- 5941.78 GBp (adjusted consensus EPS (FY1) x adjusted trailing-median '\nPAGE AND EXPORT PRINT THE SAME CASES: 2 of 2 names\nexit=0",
+      "denominator": "2 of 2 pinned served captures read CASES page=3 rich=3 same=3 missing=0 extra=0 with harness rc=0",
+      "expect": "PAGE AND EXPORT PRINT THE SAME CASES: 2 of 2 names[\\s\\S]*exit=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round46/checks/uu-3.AC3.sh; echo \"exit=$?\"  expect: all passed (no failed, no error) -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round46/checks/uu-3.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "......................................................................   [100%]\n70 passed in 8.45s\nexit=0",
+      "denominator": "70 passed, 0 failed, 0 errors over test_model_cases.py, lib/research/print/tests, test_model_cases_guard.py, test_band_basis.py",
+      "expect": "\\d+ passed[\\s\\S]*exit=0",
+      "status": "PASS"
+    }
+  ]
+}
