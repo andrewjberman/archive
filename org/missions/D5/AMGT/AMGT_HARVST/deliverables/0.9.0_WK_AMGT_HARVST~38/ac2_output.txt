@@ -1,0 +1,30 @@
+lib/__init__.py exists: False ; pytest.ini pythonpath line: 'pythonpath = data/black_diamond/scripts .'
+module identity: opal_data_harvest.verification is lib.opal_data_harvest.verification -> False
+REGISTRY identity: same dict object -> False (id 2412985398208 vs 2412985554432)
+contracts.json barrons automatic_verification_enabled = True (the unpatched value the guard sees)
+guard  (decides pass): lib/opal_data_harvest/verification.py:69
+mkdir  (creates unused/): lib/opal_data_harvest/verification.py:72
+bundle (KeyError):      lib/opal_data_harvest/verification.py:79
+--- ARM A: body at HEAD (patch on the imported module object), one temp cwd, no reset between runs
+ARM A: N=30  pass=30 fail=0  sequence(P=pass,K=KeyError,E=FileExistsError)=PPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+    signature x30: PASS
+    unused/ present in the TEMP cwd after the runs: False
+--- ARM B1: pre-58135da029 body, dotted-string target, module = opal_data_harvest.verification (pytest import mode), NO reset between runs
+ARM B1: N=30  pass=0 fail=30  sequence(P=pass,K=KeyError,E=FileExistsError)=KEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+    signature x29: FAIL FileExistsError: [WinError 183] Cannot create a file when that file already exists: 'unused'
+    signature x1: FAIL KeyError: 'bundle'
+    unused/ present in the TEMP cwd after the runs: True
+--- ARM B2: same, but unused/ removed before every run (the first-run signature, repeated)
+ARM B2: N=30  pass=0 fail=30  sequence(P=pass,K=KeyError,E=FileExistsError)=KKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+    signature x30: FAIL KeyError: 'bundle'
+    unused/ present in the TEMP cwd after the runs: True
+--- ARM C: pre-58135da029 body, dotted-string target, module = lib.opal_data_harvest.verification (unittest -m lib.... import mode: one copy), NO reset
+ARM C: N=30  pass=30 fail=0  sequence(P=pass,K=KeyError,E=FileExistsError)=PPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+    signature x30: PASS
+    unused/ present in the TEMP cwd after the runs: False
+repo-root unused/ in THIS worktree: False
+main-tree repo-root unused/: exists=True is_dir=True entries=0 mtime(local)=2026-09-21T17:42:11
+VERDICT: ARM A (HEAD) 30/30 pass -> the flake does NOT reproduce at HEAD.
+VERDICT: ARM B (dotted string under pytest import mode) 0 of 30 pass; first run KeyError 'bundle' (unused/ made at verification.py mkdir), every later run FileExistsError -> the alternation is REPRODUCED: reproduced=True
+ROOT CAUSE: the dotted-string patch target imports a SECOND module copy (lib.opal_data_harvest.verification) whose REGISTRY is patched, while repair() under test lives in opal_data_harvest.verification and reads its OWN unpatched REGISTRY (barrons enabled=True) at lib/opal_data_harvest/verification.py:69; the guard passes, lib/opal_data_harvest/verification.py:72 creates unused/ in the cwd, lib/opal_data_harvest/verification.py:79 raises KeyError('bundle'); the next run finds unused/ and lib/opal_data_harvest/verification.py:72 raises FileExistsError.
+unused/ produced by this path: True (ARM B1 temp cwd True, ARM C temp cwd False, ARM A temp cwd False)

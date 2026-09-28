@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-e-10",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "b17a43ca9a",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-e-10.retire-legacy-login.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-e-10.retire-legacy-login.md",
+    "group": "OTHER",
+    "vintage_commit": "b17a43ca9a"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~16",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "8ed37b3266",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "gateway code; nothing is deployed this round (order bound 1); release rides E9 or round 2's L10",
+      "introduces": [
+        "_login_allowed_identities"
+      ],
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_login_retire.py",
+      "kind": "test",
+      "commit_or_etag": "8ed37b3266",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline test file, not a deploy-scope artifact",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~16/E10_LOGIN_CENSUS.md",
+      "kind": "doc",
+      "commit_or_etag": "8ed37b3266",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "census document",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "login_uses, window, source, dependents named; branch consistent=yes (REMOVE iff dependents=0) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e10.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "login_uses=0 window=1 source=1 dependents=1 branch=NARROW consistent=yes\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 census keys present at HEAD (LOGIN_USES, WINDOW, SOURCE, DEPENDENTS) plus BRANCH consistent with DEPENDENTS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the test named for the census's branch passed>=1; failed/errored=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e10.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "branch=NARROW named=test_login_narrowed passed=1 failed/errored=0; summary: 2 passed, 1 warning in 3.60s\nRESULT: PASS\nexit=0",
+      "denominator": "named test passed 1 of >=1 required; pytest: 2 passed of 2 (test_login_narrowed, test_login_fails_closed_when_empty), 0 failed. Re-run after the issuer's matcher amendment 3ebf12c48f (accepts tests\\ or tests/; row NFRA_OPALAI-Z-W16-S4)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "sprint routes asserted=4; email-deny suite 0 failed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e10.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "sprint routes asserted=4; email-deny suite: 11 passed, 1 warning in 1.31s\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 /sprint routes in the denial table; 11 passed of 11, 0 failed (test_email_deny.py unedited)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Replaced the guard line in login() with `if False:` (temporary, restored byte-for-byte from a backup copy; git status clean after), ran tests/test_login_retire.py.",
+      "expected": "both new tests fail while the guard is absent, pass once restored",
+      "observed": "mutant: 2 failed (test_login_narrowed AssertionError status 307 for a non-listed identity; test_login_fails_closed_when_empty). Restored: 13 passed with test_email_deny.py",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "tests/test_login_retire.py run three further times in the same worktree with no input varied",
+      "observed": "2 passed each time",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPALAI-Z-W16-S1",
+    "NFRA_OPALAI-Z-W16-S2",
+    "NFRA_OPALAI-Z-W16-S3",
+    "NFRA_OPALAI-Z-W16-S4"
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~16/session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (test run)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_login_retire.py tests/test_email_deny.py -q",
+      "result": "13 passed, 1 warning"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate + surprise-row-gate + to-pipeline-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPALAI~16 <0.9.0_WK_NFRA_OPALAI~16@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit 8ed37b3266 on wk-NFRA_OPALAI-16; surprise-row-gate OK for 3 new rows; msg-verify MATCH"
+    }
+  ]
+}
