@@ -375,3 +375,94 @@ shutdown-before-exit ordering are no longer single-observation properties.
 2. **Then step 2 re-run, and only then the halves.** The `asset_id`-set diff the halves are meant to
    weigh still does not exist, for the third time of saying so.
 3. Rollback unchanged: prior document version **3**, Active, hash `490af524...d442129`.
+
+---
+
+# STEP 2 COMPLETE -- DELTA=0, after I regressed the served dim and rolled it back
+
+**The answer the never-widen halves were waiting for: `asset_id` set sha256 IDENTICAL, 0 added,
+0 removed, DELTA ZERO.** It took five attempts and one of them broke the served artifact.
+
+## The run that counts -- `ssm:0626f927-ae88-4e31-a962-f710e4087efc`, Success
+
+```
+as-of (last completed trading day): 09/25/2026
+OK: bearer minted; session expires_in=7199 s
+export rows (pre-dedup): 12132 ; dedup to one row per asset_id: 12132
+OUTPUT_KEY=s3://opal-data-bd/blackdiamond/49financial/bronze/assets_dim_rest/2026-09-28/...
+union bronze key: blackdiamond/49financial/bronze/assets_dim_rest/2026-09-28/...
+  current dim 12,141 rows / REST bronze 12,132 rows
+  ONLY in pull (added): 0
+Output: 12,141 rows  ->  WROTE s3://opal-data-bd/silver/bd_assets_dim.parquet
+```
+
+| oracle, same instrument both sides | pre-act | final |
+|---|---|---|
+| `asset_id` unique | 12,141 | **12,141** |
+| `asset_id` set sha256 | `b38a8b0a…4cb9616a` | **identical** |
+| added / removed | -- | **0 / 0** |
+| columns | 22 | 22 |
+| bytes / etag | 967,128 / `a218b3dd…` | 977,308 / `a33f5eef…` |
+
+**The bytes moved and the set did not** -- `built_at` is restamped every build. So this is NEVER-1's
+*verified DELTA=0 needs no hold*, and the halves are weighing a producer swap that provably changes
+no key.
+
+## What I broke, and for how long
+
+**`ssm:e76074b5` wrote the dim at 10,937 rows at 12:04:24Z -- 1,204 `asset_id`s dropped from a SERVED
+artifact.** Restored 12:08:43Z. **Exposure 4m19s.** Row `Z-S46`.
+
+The cause is mine, not the module's. `build_bd_assets_dim.py` has two modes (`:334-353`): bare, it
+rebuilds from `SOURCE_KEY silver/bd_assets.parquet`, which **its own comment at `:245-246` calls
+frozen since 2026-04-14** and whose docstring states 10,937 unique ids -- exactly what landed. With
+`--union-bronze KEY` it reads the *current* dim and unions the bronze latest-wins. The served 12,141
+existed only because MX-s-6 had done that union.
+
+**MX-s-10 step 1 says it in terms: "then `build_bd_assets_dim.py`, *with its union* (latest-wins;
+both counts printed)."** I ported the document without carrying those four words.
+
+Rollback was to bytes taken *before* the act, verified as the exact prior object (967,128 bytes and
+md5 `a218b3dd…`) **before** upload rather than after, then re-read by the same oracle -- etag equal,
+set sha256 equal, DELTA 0 against pre-act.
+
+**Why it was caught in four minutes, and why it nearly wasn't.** Only because the order required a
+BEFORE oracle, so the prior bytes were already on disk when the drop was measured. Nothing in the
+producer surfaced it: SSM read **Success**, and the builder's own printed acceptance said
+`AC1 row count >= 10,000: PASS (10,937)`. **A floor cannot see a decrease from a known prior.** The
+honest-exit work from MX-s-4 is also blind to this class by construction -- a run that does the wrong
+thing *correctly* exits 0.
+
+## The document now refuses that path
+
+It captures the pull's own printed `OUTPUT_KEY` and passes it as `--union-bronze`; if no `OUTPUT_KEY`
+was printed it sets `MERGE_RC=92` and says so, rather than falling back to the frozen source. The key
+is never constructed by hand.
+
+Also fixed this round: `--base-template-id 486228`. Without it the module takes its `else` branch
+(`:382-392`) and builds a template carrying `"dateRangeType": "AsOfDate"`, which BD rejects with a 400
+(`ssm:3b3df28d`). 486228 is the envelope MX-s-9's successful pull used -- its egress ledger line 58 --
+not a guess. **MX-s-9's scheduling spec (s.5) omitted it**, so the first scheduled-shape run exercised
+that dead branch for the first time.
+
+## Vendor calls by this cell, ledgered
+
+| attempt | outcome | vendor calls |
+|---|---|---|
+| 1 `c8c60492` | rc=91, as-of TypeError | **0** |
+| 2 `103d29fd` | rc=1, AccessDenied at the secret | **0** |
+| 3 `3b3df28d` | rc=1, BD 400 on `dateRangeType` | bearer mint + catalogue read |
+| 4 `e76074b5` | Success, **regressed the dim** | full pull |
+| 5 `0626f927` | Success, DELTA=0 | full pull |
+
+No vendor-side template was created on any attempt (`--allow-template-create` never passed). The
+instance self-stopped every time; SSM reported Failed on every failure and Success only on 4 and 5.
+
+## State
+
+`Z-S44` (IAM) and `Z-S45` (naming) are both **satisfied in the world** -- the grant is applied
+(0/1/0, post-apply 0-diff) and the run authenticates. Their disarms are `2.0.0_SA_COO~O`'s.
+`Z-S46` is filed INERT: the world is restored and the document can no longer take the frozen path.
+
+PHASE B still needs both never-widen halves and the issuer's GO. Rollback for PHASE B is unchanged:
+prior document version **3**, Active, hash `490af524…d442129`.
