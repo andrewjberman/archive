@@ -16,6 +16,7 @@ read; nothing below has been executed.
 | Device pulls (`origin/CLOUD` into local) that conflicted | 2 of 23 | same replay |
 | Worktrees on site Z | 68: 31 on branches ALREADY MERGED, 32 unmerged, 5 detached; 55 under `C:/tmp` | `git worktree list --porcelain` + `merge-base --is-ancestor` |
 | Linked worktrees holding uncommitted files | 55 of 67 (83 files) | `git -C <wt> status --porcelain` |
+| Disk held under `C:/tmp` (55 of the 68 worktrees live there) | 70 GB | `du -sh /c/tmp` |
 | Surprise-channel file changes that DELETE lines (not pure append) | 129 of 1,802 (7%) | `git log --numstat` on channel paths |
 
 **Reading:** the merge problem is not topology, cadence, or code collisions. It is ONE file class: every worker
