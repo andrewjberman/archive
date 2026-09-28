@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-e-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "20b2b561f5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "b17a43ca9a",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-e-1.asker-scoping-repair.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~10",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/asker_scope.py",
+      "kind": "script",
+      "commit_or_etag": "2254910889",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds resolve_asker_class (Opal tenant via context.tenant_authorized -> (opal-internal, ''), else None), resolve_asker_message (sender + createdDateTime), max_age_seconds (ASKER_MESSAGE_MAX_AGE_SECONDS, default 900), message_is_recent, the in-process reply-binding store (record/check/clear_reply_bindings, keyed (email, client_id)), and read_chat_members (follows nextLink). handle_asker_query refuses asker_message_stale, asker_tenant_denied, asker_chat_unreadable, asker_group_member_denied; the catalog verdict is gate(asker) AND gate(caller); portal_channels are the intersection over the asker and each group member; a SERVE records the binding. Not deployed: OA-r-1."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+      "kind": "script",
+      "commit_or_etag": "2254910889",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "send_chat_message and send_channel_message call _reply_unbound before _run: while a binding is live for (calling email, OAuth client_id) a target other than the served chat (a channel is never it) returns asker_reply_unbound, audited through audit.log_call, with no Graph POST. No live binding: unchanged. Not deployed: OA-r-1."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_asker_binding.py",
+      "kind": "test",
+      "commit_or_etag": "2254910889",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New: the four named arms plus twelve more (16 tests), fakes only."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_asker_scope.py",
+      "kind": "test",
+      "commit_or_etag": "2254910889",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Asker tenant is the configured TENANT_ID, the fake message carries a recent createdDateTime and the chat answers oneOnOne, and the $select assertion reads 'from,createdDateTime'. 4 of 4 pass."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "named arms passed 4 of 4; failed/errored tests 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "named arms passed 0 of 4; failed/errored tests 0; summary: 20 passed in 1.19s\nnot passed: test_old_message_from_wider_person_refused test_reply_to_other_chat_refused test_group_chat_unprofiled_member_refused test_same_chat_recent_message_served\nRESULT: FAIL\nexit=1\n-- The same run's pytest -rA lines: PASSED tests\\test_asker_binding.py::test_old_message_from_wider_person_refused / ::test_reply_to_other_chat_refused / ::test_group_chat_unprofiled_member_refused / ::test_same_chat_recent_message_served; 20 passed, 0 failed (16 in test_asker_binding.py, 4 in test_asker_scope.py).",
+      "denominator": "REFUSED as written: the script's matcher '^PASSED tests/test_asker_binding.py::<name>' cannot match pytest 9.1.1's backslash rendering on this device (rootdir is the workspace root, pytest.ini there), so it reads 0 of 4 whatever the tests do. Substance measured: 4 of 4 named tests PASSED in the -rA output, 20 of 20 tests passed. The same command with --rootdir=. prints the forward slash; that flag is not in the script's invocation, so it was not used to meet the criterion. Row NFRA_OPALAI-Z-W10-S1.",
+      "status": "FAIL",
+      "status_reason": "The check's matcher greps 'PASSED tests/test_asker_binding.py::<name>' but pytest 9.1.1 prints 'tests\test_asker_binding.py' on this device, so the script reads 0 of 4. The 4 named tests did pass. Refused as written; not repaired. Row NFRA_OPALAI-Z-W10-S1."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "host TENANT_ID read=yes (ssm status Success); active profiles=N>0 resolved opal-internal=N; foreign tenant -> None -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "host TENANT_ID read=yes (ssm status Success)\nactive profiles=1 resolved opal-internal=1; foreign tenant -> None\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 active principal_profile resolved opal-internal against the live host's TENANT_ID; foreign tenant -> None. Run at HEAD 2254910889.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "moto from C:/tmp/moto-target: 5.2.3; passed>=10; failed=[test_ogz1_ac05 test_ogz1_ac08]; new failures=[] -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "moto from C:/tmp/moto-target: 5.2.3; guard suite: 2 failed, 10 passed, 1 warning in 20.45s; passed=10; failed=[test_ogz1_ac05 test_ogz1_ac08]; new failures=[]\nRESULT: PASS\nexit=0",
+      "denominator": "12 tests in tests/test_data_entitlement_guard.py: 10 passed, 2 failed, the same 2 as the cut (Z-S36); 0 new failures. The baseline run before any change read the same line.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "tests/test_asker_binding.py was run against the base (HEAD before this change) app/asker_scope.py and app/tools.py, swapped in with git show and restored from a saved copy.",
+      "expected": "The base has no tenant gate, window, binding or group scope, so the new tests cannot pass.",
+      "observed": "16 errors, 0 passed (every test's fixture calls asker_scope.clear_reply_bindings, absent at the base). This shows the tests need the new code; it is a weaker control than a per-arm mutant, and no per-arm mutant was run. Files restored, 20 passed after.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_asker_binding.py + test_asker_scope.py run three times (before the commit, at the commit, at the proof run).",
+      "observed": "20 passed each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "tests/test_portal_grant.py",
+      "reason": "Outside this order's paths; two of its tests (test_asker_portal_scope_admits_granted_channel, test_asker_portal_scope_refuses_other_channel) now fail because their fake message carries tenant 22222222-... and no createdDateTime. 26 of 28 passed in the neighbour run with test_tool_classification_composition, test_identity_scope and test_teams_reader_fallback. Row NFRA_OPALAI-Z-W10-S2."
+    },
+    {
+      "item": "whole-suite run of infra/aws/ec2/opal-gateway/tests",
+      "reason": "Started under a 400 s bound and was killed by the harness at the shell limit (rc 143); UNREAD, not PASS."
+    },
+    {
+      "item": "chat-members read against live Graph (bound 3)",
+      "reason": "Not run: no vendor call is in scope. The members read is exercised by fakes only; whether the concierge's delegated token holds ChatMember.Read is UNREAD."
+    },
+    {
+      "item": "deploy, push, vendor call",
+      "reason": "Deploy is OA-r-1. This seat never pushes."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPALAI-Z-W10-S1",
+    "NFRA_OPALAI-Z-W10-S2"
+  ],
+  "session_log": "2026-09-28 UTC. Worktree C:/tmp/oa-10, branch wk-NFRA_OPALAI-10, based on b17a43ca9a; TREE-OK. (1) Read the three checks, e1_seam.py, asker_scope.py, tools.py send tools, context.py, catalog_gate, query_v0._principal. (2) Baseline AC3: 10 passed, 2 failed (ac05, ac08). (3) Built (a)-(c) in asker_scope.py and the binding guard in tools.py; updated test_asker_scope.py; wrote test_asker_binding.py. (4) commit-gate caught one unused variable; fixed; committed 2254910889. (5) AC1: matcher reads 0 of 4 because of the backslash node ids; refused, row Z-W10-S1. (6) Neighbour run found 2 red tests in test_portal_grant.py; row Z-W10-S2. (7) AC2 and AC3 PASS. The order stays open on AC1. PUSH STATE: LOCAL, never pushed.",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": "via safe-commit on 4 files",
+      "result": "clean after one unused-variable fix"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "tests/test_asker_binding.py tests/test_asker_scope.py -rA -q",
+      "result": "20 passed"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3",
+      "result": "see the worker report; only the exit code is the verdict."
+    }
+  ]
+}
