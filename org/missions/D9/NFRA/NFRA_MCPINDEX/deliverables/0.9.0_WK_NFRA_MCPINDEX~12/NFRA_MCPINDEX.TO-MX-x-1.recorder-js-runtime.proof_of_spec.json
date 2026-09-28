@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-x-1",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cc6bf5d0cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "cc6bf5d0cc",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-x-1.recorder-js-runtime.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~12",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/record-terraform-deploy.sh",
+      "kind": "script",
+      "commit_or_etag": "139a478be4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CI recorder script; order bounds forbid running a deploy with it. bash -n rc=0.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "user-home literal paths in infra/aws/lambda/ci/record-terraform-deploy.sh: 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round3/checks/x1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "user-home literal paths in infra/aws/lambda/ci/record-terraform-deploy.sh: 0 -- RESULT: PASS -- exit=0",
+      "denominator": "1 file scanned; 0 of 2 prior literal hits remain (HEAD~1 carried 2)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "CHANGELOG writer invocations>=1; started by $JSON_TOOL=0; extracted JS lines>0; node --check rc=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round3/checks/x1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "CHANGELOG writer invocations=1; started by $JSON_TOOL=0; extracted JS lines=208; node --check rc=0 -- RESULT: PASS -- exit=0",
+      "denominator": "1 of 1 writer invocations runs under JS_RUNTIME; 208 JS lines parsed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Ran both checks against the pre-fix file (AC1) and against the fixed file with the JS_RUNTIME call reverted to JSON_TOOL (AC2).",
+      "expected": "Both checks FAIL on the mutant.",
+      "observed": "AC1 on HEAD~1 bytes: 2 literal paths, RESULT: FAIL. AC2 on reverted call: started by $JSON_TOOL=1, RESULT: FAIL.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both checks are read-only greps plus node --check.",
+      "observed": "Both checks ran twice (drive and mutant control), same verdicts; bash -n rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Runtime execution of the recorder",
+      "reason": "Order bound 1: no deploy is run with it."
+    }
+  ],
+  "surprises": [],
+  "session_log": "none",
+  "compiler_tools": [
+    {
+      "tool": "bash -n",
+      "invocation": "bash -n infra/aws/lambda/ci/record-terraform-deploy.sh",
+      "result": "rc=0"
+    }
+  ]
+}
