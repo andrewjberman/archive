@@ -9,6 +9,8 @@ and NFRA_MCPORTAL FWD-1 (you change a colleague's access from the dashboard).
 @c0030ea9db). Two deltas from the text below: the gateway now serves `fe94911257` (OG-e-2), which contains
 `df724ef284`, `1f7128201a` and `c5f8099440`; and `C:\opal_runtime\opal_ai` already exists as an EMPTY directory, which
 step 0's clone accepts.
+**UPDATE ~20:2xZ (`2.0.0_SA_COO~AI`, @73e5968e67):** step 0 is now DONE -- a full clone at PROD `fd8ab8a57f` -- and
+Part C's grant is ACTIVE. Start at Part A step 1.
 
 **Precondition status (`2.0.0_SA_COO~O`, 2026-09-26 ~09:5xZ): ALL FOUR MET.**
 - (a) MET. `opal_ai` DEV and PROD are both at `fd8ab8a57f` on origin. `0.0.0_AB_MSTR~Z` pushed them (msg
