@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-d-3",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "f382d1848c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-d-3.discover-dataset-ranking.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~10",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/opal_discover/integration.py",
+      "kind": "script",
+      "commit_or_etag": "85e1158e6e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TO bound 1: nothing is deployed; offline code change on the worker branch wk-nfra_mcpindex-3-10 (LOCAL).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_opal_discover.py",
+      "kind": "test",
+      "commit_or_etag": "85e1158e6e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four synthetic-catalog ranking tests; run by AC3 (8 passed). Against the pre-fix integration.py, 2 of the 4 fail (control).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "plain run rc=0 ROUTING k of 27 with k>=21 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round3/checks/d3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "plain run rc=0 ROUTING 23 of 27\nRESULT: PASS\nexit=0",
+      "denominator": "23 of 27 harness questions route to the expected tool (floor 21); misses Q09, Q13, Q22, Q25 of 27",
+      "status": "PASS",
+      "expect": "rc=0 ROUTING (2[1-9]|[3-9]\\d) of 27.*RESULT: PASS.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "harness rc=0; dataset asks routed first k of 3 with k>=2 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round3/checks/d3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "harness rc=0; dataset asks routed first 2 of 3: Q05:HIT Q07:HIT Q22:MISS \nRESULT: PASS\nexit=0",
+      "denominator": "2 of 3 dataset-expected questions (Q05, Q07, Q22) route to their dataset first; Q22 MISS",
+      "status": "PASS",
+      "expect": "rc=0; dataset asks routed first ([2-9]) of 3.*RESULT: PASS.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pytest rc=0; passed>=1; failed/error 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round3/checks/d3.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; passed 8; failed/error 0\nRESULT: PASS\nexit=0",
+      "denominator": "8 passed, 0 failed/error of 8 tests in tests/test_opal_discover.py (4 pre-existing + 4 new MX-d-3 ranking tests)",
+      "status": "PASS",
+      "expect": "pytest rc=0; passed [1-9]\\d*; failed/error 0.*RESULT: PASS.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pre-fix integration.py (git show HEAD:...) was put back and the suite re-run, to show the new tests can fail.",
+      "expected": "the ranking tests that depend on ordering fail on the unranked code",
+      "observed": "2 failed (test_rank_more_of_the_asks_words_first, test_rank_servable_before_unservable), 6 passed; the tie and stopword tests pass by design on catalog order. The fixed file was restored and AC3 re-run to 8 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "Ranking is a stable sort on (servable, -overlap); no clock, network or randomness.",
+      "method": "the harness was run twice (once inside AC1, once inside AC2) and the outputs compared",
+      "observed": "both runs printed MISSES Q09, Q13, Q22, Q25 and ROUTING 23 of 27",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Q22 (an index ask matching no keyword) still routes NOT_CATALOGUED",
+      "reason": "No catalog text or keyword links an S&P ask to mkt.01; the repairs are a catalog keyword (bound 1 forbids editing the catalog) or a hand-written index-name vocabulary (special-casing words). Row NFRA_MCPINDEX-Z-W10-S1."
+    },
+    {
+      "item": "Q09, Q13, Q25 (asks expecting NOT_CATALOGUED that still route to a dataset)",
+      "reason": "A precision defect (weak channel-keyword-only matches), not a ranking one; reordering cannot cure it. Row NFRA_MCPINDEX-Z-W10-S1."
+    },
+    {
+      "item": "Editing the task order's <status>",
+      "reason": "The order's own line 73 says do not edit it and it is not in <paths>; the issuer flips it."
+    },
+    {
+      "item": "git push, deploy, AWS, vendor",
+      "reason": "TO bound 3."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W10-S1: ranking fixes 2 of the 3 dataset misses (Q05, Q07); Q22 and the 3 false positives are not ranking defects. OBSERVATION/INERT, disarm_owner 2.0.0_SA_COO~MI, UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-d-3.discover-dataset-ranking.md",
+  "compiler_tools": [
+    {
+      "tool": "run_routing.py",
+      "invocation": "python infra/aws/ec2/opal-gateway/tests/routing/run_routing.py",
+      "result": "before: MISSES Q05 Q07 Q09 Q13 Q22 Q25, 21 of 27; after: MISSES Q09 Q13 Q22 Q25, 23 of 27"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_opal_discover.py -q -rA",
+      "result": "8 passed, 0 failed"
+    }
+  ]
+}

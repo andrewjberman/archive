@@ -23,7 +23,9 @@ rd=$(arm mcp__opal-gateway-bbg__read_chat_messages)
 em=$(arm mcp__opal-gateway-bbg__send_email)
 TT="$T/opal/agent/hooks/test_concierge_gate.sh"
 names=$(grep -c 'opal_data_refresh_upload' "$TT" 2>/dev/null); names=${names:-0}
-summ=$(timeout 60 bash "$TT" 2>&1 | tr -d '\r' | grep -m1 '^RESULT:')
+# AMENDED (row NFRA_OPALAI-Z-W11-S2): the fence test takes ~89 s on this device; 60 s cut it off. 105 s stays inside
+# the worker harness's 120 s bound (the three arms above take a few seconds).
+summ=$(timeout 105 bash "$TT" 2>&1 | tr -d '\r' | grep -m1 '^RESULT:')
 failed=$(printf '%s' "$summ" | sed -n 's/.* \([0-9][0-9]*\) failed.*/\1/p')
 rm -rf "$T"
 echo "opal_ai $REF: upload=$up read_chat_messages=$rd send_email=$em; fence test names upload=$names; fence test '${summ:-no summary}'"
