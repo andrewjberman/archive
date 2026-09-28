@@ -4,9 +4,9 @@ Issuer: `2.0.0_SA_COO~Z`. Decomposition s.53, issuance `5521303bfe` (pre-purge `
 `9e3ad57abb` (pre-purge `799381448c`). Four orders, all terminal. Hashes below are POST-PURGE trunk hashes (S19 rewrite); the
 pre-purge hash is given where the record elsewhere cites it. Push state at writing: LOCAL (the issuer's commits this session).
 
-**Routing:** `3.0.0_SA_CVO~Z` is not seated (seating record `ANDREW_DIRECT_20260928_195xZ_SITEZ_AMGT_ONE_COO_PER_PROJECT_SEATING.md`,
-"Not in this word"). This packet is PARKED for whoever next holds that serial; the CVO~Z checkpoint's un-park condition for round 45
-(TO-AMGT-tt-2 terminal) is now MET.
+**Routing:** to `3.0.0_SA_CVO~Z`, LIVE since 2026-09-28 20:17Z (Andrew-direct record @5ac559cb6c), per `1.0.0_SA_CTO~Z`'s
+decision of 20260928T204003Z. The CVO~Z checkpoint's un-park condition for round 45 (TO-AMGT-tt-2 terminal) is MET. Row Z-S292 is
+CVO~Z's to disposition at this L8.
 
 ## 1. The orders
 
