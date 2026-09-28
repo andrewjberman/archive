@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-74",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5d44d0fa62"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "f7d386c79f",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-74.analysis-history-words.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~39",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "6320af18f2ab3990c2ecf03af99182a082178bdd",
+      "artifact_covered_by": ["IVE74-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 6320af18 on branch wk-DSGN_IRPTV1-39-portal (LOCAL). New `REASON_CODE_WORDS` one-entry map (`ANALYSIS_REQUIRES_ATTENTION` -> 'needs attention'), applied in `ownedRowStatusWords` so that ONE code named by the CTO ruling (S25/FWD-11) never appears verbatim, while every other named refusal (DATE_BASIS, FIRM_BINDING, SOURCE_UNAVAILABLE) keeps reading raw -- iv-e-62's own committed SOURCE_UNAVAILABLE assertion (out of this cell's <paths>) is unchanged. New per-row `data-slot=\"owned-request-client\"` span reading `useHeaderSelection()`'s `header?.row?.displayName` (UIR-12), with a named placeholder ('Client not identified') absent a header selection -- never blank. `<ProspectJobStatus>` now mounted with `selectedTenant={selectedTenant}` (S28), the same selected tenant the row's own status read (`readRowStatus`) already carries (IV-e-66)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/analysis/ProspectJobStatus.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "6320af18f2ab3990c2ecf03af99182a082178bdd",
+      "artifact_covered_by": ["IVE74-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 6320af18. `JobReader.getJobStatus` and `readIssuedStatus` gain an additive, optional `selectedTenant` second parameter (S28, ~Y 102268); `ProspectJobStatus` itself gains an optional `selectedTenant` prop, threaded into `readIssuedStatus` and into the read effect's dependency array. Structurally backward compatible: `tests/prospect.test.tsx`'s existing 1-ary `getJobStatus` stub still satisfies `hasJobReader`/`readIssuedStatus` unedited (TS admits a shorter-parameter-list function against an optional trailing parameter) -- confirmed by re-running that file unedited, still 0 fail."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-74.history-words.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "6320af18f2ab3990c2ecf03af99182a082178bdd",
+      "artifact_covered_by": ["IVE74-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 6320af18 (new file). ARM(a): the real `ownedRowStatusWords` and the real `OwnedRequestHistory` markup (seeded via `initialRowStatus`) both read a READY row 'Ready'. ARM(b): an `ANALYSIS_REQUIRES_ATTENTION` row never carries that literal substring anywhere in its own text or in the whole rendered markup, and reads its reason in words ('needs attention'); CONTROL proves a DIFFERENT named code (DATE_BASIS) still reads raw, matching iv-e-62's own committed precedent. ARM(c): every row names the accepted client's `displayName` when a `HeaderSelectionContext` is provided (the fixture's own 'Coastal Ridge Trust'), and a named placeholder, never blank, when it is not. ARM(d): the real `readRowStatus` and the real `readIssuedStatus` (both imported, unmodified call sites) carry the SAME `selected_tenant` on a direct call, plus a source-inspected regex confirms `OwnedRequestHistory.tsx` itself mounts `<ProspectJobStatus ... selectedTenant={selectedTenant}>` (the same no-DOM-test-environment instrument `iv-e-78`/`iv-e-67`/`iv-e-64` already use, since `renderToStaticMarkup` runs no effect and the opened-request branch is gated on click-set `selected` state); CONTROL confirms a refused/unsupported status read still says so in words ('Status is unavailable in this view.')."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE74-AC1",
+      "criterion_verbatim": "the built behaviour: (a) a READY row reads READY; (b) an ATTENTION row reads its reason in words and never ANALYSIS_REQUIRES_ATTENTION; (c) each row names the client; (d) opening a request issues its status read carrying the same selected tenant as the row read (S28); control: a refused status read says so in words. Print VERDICT: ANALYSIS-HISTORY-WORDS-OK only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-39/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-74.history-words.test.tsx 2>&1 | tail -20",
+      "output_evidence": "ARM(a) READY row words: 'Ready'\nARM(b) ATTENTION row words: 'Unavailable \u2014 needs attention'\nARM(b) CONTROL -- a different named refusal (DATE_BASIS): 'Uncertain \u2014 DATE_BASIS'\nARM(a)/(b) rendered rows: [{\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"text\":\"Ready\"},{\"id\":\"REQ-f0a82259ac9749c79084fd6b\",\"text\":\"Unavailable \u2014 needs attention\"}]\nARM(c) client rows (with header selection): [{\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"text\":\"Coastal Ridge Trust\"},{\"id\":\"REQ-f0a82259ac9749c79084fd6b\",\"text\":\"Coastal Ridge Trust\"}] expected displayName='Coastal Ridge Trust'\nARM(c) CONTROL (no header selection): [{\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"text\":\"Client not identified\"},{\"id\":\"REQ-f0a82259ac9749c79084fd6b\",\"text\":\"Client not identified\"}]\nARM(d) row read: [{\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"selectedTenant\":\"fir_internal00000000000000\"}] opened read: [{\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"selectedTenant\":\"fir_internal00000000000000\"}]\nARM(d) WIRING: OwnedRequestHistory.tsx mounts ProspectJobStatus with selectedTenant={selectedTenant}: true\nARM(d) CONTROL -- a status-less api names the refusal: true\nVERDICT: ANALYSIS-HISTORY-WORDS-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating 4 named arm groups (a/b/c/d, each with its own control), each pushing a named failure string into one `failures` array asserted empty; every arm's own console.log line is reproduced verbatim above so a reader can see which sub-check produced each printed value.",
+      "status": "PASS",
+      "expect": "VERDICT: ANALYSIS-HISTORY-WORDS-OK"
+    },
+    {
+      "criterion_id": "IVE74-AC2",
+      "criterion_verbatim": "judgment: the rows above read on the running page (round-9 walk), graded by 3.0.0_SA_CVO at L9. Record it as UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming the CVO; never PASS or FAIL.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- this order's grant does not include a live portal DEV walk; the CVO's own post-drain walk is the instrument this criterion names.",
+      "output_evidence": "This worker's own mechanical proof (IVE74-AC1, VERDICT: ANALYSIS-HISTORY-WORDS-OK) is offered as the mechanical proxy for what the live walk would confirm: a READY row reads Ready, an ATTENTION/refused row reads its reason in words (never the literal ANALYSIS_REQUIRES_ATTENTION), every row names the client, and opening a request no longer refuses on a missing tenant.",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: the task order marks this criterion judgment-graded by 3.0.0_SA_CVO on the issuer's live portal DEV walk after the drain. A worker-assigned PASS/FAIL is refused by the checker; the CVO's live walk is the oracle.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "OwnedRequestHistory.tsx's exported `ownedRowStatusWords` -- forced to always `return 'MUTATED'` regardless of the row's kind or status, via a scripted in-place edit (python3 string replacement); re-ran IVE74-AC1's exact invocation, then restored the file byte-for-byte from a pre-mutation backup (diff -q confirmed IDENTICAL, and `git status` on the file showed only this cell's own real, already-committed diff -- no residue) and confirmed the restored test re-passes.",
+      "expected": "IVE74-AC1 fails: the READY row, the ATTENTION row and the DATE_BASIS control row all read 'MUTATED' instead of their own state words, so VERDICT prints ANALYSIS-HISTORY-WORDS-FAIL naming those arms.",
+      "observed": "0 pass, 1 fail. ARM(a)/(b)/(b) CONTROL all read \"MUTATED\"; VERDICT: ANALYSIS-HISTORY-WORDS-FAIL ARM(a): expected the bare word 'Ready', got 'MUTATED'; ARM(b): expected the reason in words ('needs attention'), got 'MUTATED'; ARM(b) CONTROL: expected DATE_BASIS to keep reading raw (matching iv-e-62's own SOURCE_UNAVAILABLE precedent), got 'MUTATED'; ARM(a) MARKUP: expected the rendered READY row 'Ready', got {\"text\":\"MUTATED\"}. File restored from the pre-mutation copy (diff -q IDENTICAL); re-ran IVE74-AC1 twice post-restore, both VERDICT: ANALYSIS-HISTORY-WORDS-OK.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE74-AC1's exact invocation twice in a row post-restore, then a third time post-commit.",
+      "observed": "Identical VERDICT: ANALYSIS-HISTORY-WORDS-OK all three runs; 1 pass / 0 fail, 1 expect() call each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "UIC-23's own 'variant and date' clause, and the admin 'all requests' label",
+      "reason": "The task order's own Build text narrows this cell to 'the client name and the state in words'; IVE74-AC1's four explicit clauses (a)-(d) name neither variant, date, nor an admin-all-requests mode. Filed as surprise row DSGN_IRPTV1-W39-S2 (ARMED, disarm owner 1.0.0_SA_CTO) since the served wire also carries no per-row client field for a future multi-client admin view."
+    }
+  ],
+  "surprises": ["DSGN_IRPTV1-W39-S2"],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~39/DSGN_IRPTV1.TO-IV-e-74.analysis-history-words.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-74.history-words.test.tsx",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: ANALYSIS-HISTORY-WORDS-OK (run three times total, identical; also run once against the ownedRowStatusWords mutant, correctly FAILED with the named ARM(a)/(b)/(b) CONTROL failures)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-66.owned-item-tenant.test.tsx src/pages/InvestorReporting/tabs/analysis/tests/prospect.test.tsx",
+      "result": "11 pass / 0 fail across 2 files -- the two named grant files this cell could have re-golded, both unmoved (11 pre-existing tests, including prospect.test.tsx's own 1-ary getJobStatus stub call, still pass unedited against the widened, additive-optional selectedTenant signature)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-62.request-history.test.tsx",
+      "result": "1 pass / 0 fail (out-of-grant, read-only verification) -- iv-e-62's own committed 'Failed \u2014 SOURCE_UNAVAILABLE' assertion is unchanged by this cell's REASON_CODE_WORDS one-entry map"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/",
+      "result": "889-890 pass / 27 skip / 5-6 fail across 257 files (full InvestorReporting suite, run twice pre- and post-commit). Every failure across both runs is pre-existing and unrelated to this cell's 3 edited/added files: fixtures.test.ts's smoke-map census, source-bounds.test.ts, fe-s-25/absent-vs-null.test.ts's F25-AC2/AC3 (contracts/adapt.ts's ?? null), and fe-s-90/suite-complete-check.test.ts's CONTROL 4 (a subprocess-timing race already characterized corpus-wide by rows DSGN_IRPTV1-W29-S9/S10 -- confirmed by the run-to-run count difference, 5 vs 6 fails, on an otherwise-identical tree). `git diff --stat` on both runs showed only 24 EOL-only (CRLF<->LF) touches to contracts/wire/*.ts, left uncommitted (the same pre-existing gen-wire.ts side effect row DSGN_IRPTV1-W41-S2 already documents), plus this cell's own 3 already-committed files."
+    },
+    {
+      "tool": "tsc",
+      "invocation": "bun run typecheck (tsc -b --noEmit)",
+      "result": "0 errors"
+    },
+    {
+      "tool": "eslint",
+      "invocation": "node_modules/.bin/eslint.exe src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx src/pages/InvestorReporting/tabs/analysis/ProspectJobStatus.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-74.history-words.test.tsx",
+      "result": "0 errors, 7 warnings, all pre-existing-pattern (react-refresh/only-export-components for files exporting more than one component/function) -- the new test file itself carries 0 warnings"
+    }
+  ]
+}
