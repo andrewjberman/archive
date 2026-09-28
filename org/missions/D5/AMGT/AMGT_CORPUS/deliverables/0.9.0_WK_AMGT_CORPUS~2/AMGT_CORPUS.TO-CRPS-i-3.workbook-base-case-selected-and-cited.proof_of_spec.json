@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-i-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-i-3.workbook-base-case-selected-and-cited.md",
+    "group": "OTHER",
+    "vintage_commit": "4051cbb215f9038da42d7555764a3deb1d7707db"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "4051cbb215f9038da42d7555764a3deb1d7707db",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-i-3.workbook-base-case-selected-and-cited.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/case_evidence.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Round-6 producer edited IN PLACE per section 1 RULED: (1) `_fix_dimensions` resets and force-recalculates each read_only sheet's max_row/max_column before any neighbour scan (openpyxl's own reset_dimensions()/calculate_dimension(force=True)), fixing the stale-stored-dimension hypothesis; measured over the live corpus (scratch instrumentation) 47 of 366 sheets had a stale dimension corrected, but base_labels stayed 200 and right_recovered stayed 4 (round 6's own baseline) before/after -- 0 net recovery. (2) `_right_window_has_uncached_formula` reopens the same bytes `data_only=False` for exactly the still-empty label cells and checks the 6-column right window for a formula string; measured 0 of 196 still-empty cells hold one. Both counts are printed in CASE_EVIDENCE_ROUND7.md. (3) `workbook.selections` (at most one per workbook): `BASE_WORD_PATTERN = re.compile(r'\\bbase\\b', re.I)` (whole word only -- verified it does NOT match 'database'/'baseline'/'based' by construction of \\b); `_select_right`/`_select_below` implement 'first number right in row (<=6 cols) else first number below in column, skip an integer 1900-2100 as a year, skip a negative' (`_is_valid_selection_number`/`_is_year`); `SELECTION_RULE` is printed verbatim on every selection; each selection carries security_key/workbook_key/sheet/cell/label_cell/label/value/direction/rule/served_base/px_last/status/cause/workbook_to_served (value/served_base, or null when served_base is None/0), and `other_candidates` lists every other whole-word-'base' label match found in the same workbook, chosen by first-in-sheet-order/row/column among candidates that RESOLVE to a value. `below` is unchanged in algorithm (still `_numbers_below`, cap 3, no skip logic) -- only its dimension bound is now correct as a side effect. No S3 write, no vendor/gateway call, no Base/Upside/Downside figure computed -- every selection value is a number already present in the team's own cell.",
+      "introduces": [
+        "_fix_dimensions",
+        "_is_year",
+        "_is_valid_selection_number",
+        "_select_right",
+        "_select_below",
+        "_right_window_has_uncached_formula",
+        "BASE_WORD_PATTERN",
+        "SELECTION_RULE"
+      ],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/CASE_EVIDENCE_ROUND7.json",
+      "kind": "s3_object",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Producer output over the live corpus at commit time (sha256 4ee6e8a934e6..., identical across two independent re-runs, matching AC2's own determinism run). workbook.dimension_fix_cause_counts: base_labels 200, right_recovered_by_dimension_fix 4, right_still_empty 196, still_empty_uncached_formula 0. workbook.rows unchanged in shape from round 6 (669 entries), `right` now genuinely reflects the corrected dimension. workbook.selections: 61 entries over 53 distinct security_key (of 79 xlsx-bearing extracts across the corpus), 0 missing a sheet/cell coordinate, ALL 61 via direction 'below' (0 via 'right' -- the corpus's dominant one-pager template puts the Base-case number diagonally below-and-left of a spanning section title, not in the title's own row or column). Of the 42 selections with served_base not None/0, workbook_to_served ranges -0.0057 to 57.17; 0 of 42 fall in [0.5, 2.0]; 2 of 42 (CPA_US_Equity 0.207, UBER_US_Equity 0.490) fall in the broader [0.2, 5.0]. Filed as AMGT_CORPUS-Z-W2-S11 (BLOCKING, ARMED) -- this is evidence FOR the CVO's AC4 judgment, not a defect in this cell's mechanism (which implements section 1's rule exactly as written).",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/CASE_EVIDENCE_ROUND7.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds, ahead of round 6's own sections (bins, near_floor/near_ceiling, per-venue workbook tables, refused-keys section, all unchanged): (1) the round-7 measurement section naming both printed cause counts plus the qualitative third-cause finding (2D header layout) with two named worked examples and a pointer to AMGT_CORPUS-Z-W2-S11; (2) a 'Round-7 selections' section, one table per venue (LN 9 names, US 16 names, ASIA 7 names among the 53 selected names -- the same LN 9 / US 16 / ASIA 7 as round 6's own workbook-bearing key counts: every workbook-bearing key in these three venues resolves at least one selection), each row citing security_key/workbook_key/sheet/label_cell/label/cell/value/direction/served_base/px_last/status/cause/workbook_to_served, plus the SELECTION_RULE printed verbatim once at the section head.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i3_AC1.sh -- expect i3 OK census_rows (\\d+) keys_with_block \\1 base_labels \\d+ right_nonempty [1-9]\\d* names_with_selection [1-9]\\d* selections_without_coord 0\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i3_AC1.sh",
+      "output_evidence": "i3 OK census_rows 97 keys_with_block 97 base_labels 200 right_nonempty 4 names_with_selection 53 selections_without_coord 0",
+      "denominator": "1 of 1 real, live-S3 shape check (timeout 120, single run, no retry needed): the issuer's own independent count of served-Model-block keys (97) equals my census row count (97); 200 Base-labelled cells (unchanged from round 6, same population), 4 now carry a right-hand neighbour, 53 distinct names carry a selection, 0 of 61 selections are missing a sheet/cell coordinate.",
+      "expect": "i3 OK census_rows (\\d+) keys_with_block \\1 base_labels \\d+ right_nonempty [1-9]\\d* names_with_selection [1-9]\\d* selections_without_coord 0\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i3_AC2.sh -- expect i3 determinism identical sha [0-9a-f]{12}",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i3_AC2.sh",
+      "output_evidence": "i3 determinism identical sha 4ee6e8a934e6",
+      "denominator": "1 of 1 real invocation of the issuer's --determinism mode (runs case_evidence.py TWICE, `--out-json` only, into two fresh temp files, sha256's each): both runs against the live corpus produced byte-identical JSON (sha 4ee6e8a934e6), matching the sha256 of the separately-committed CASE_EVIDENCE_ROUND7.json exactly -- sorted keys/rows/selections and no timestamp field hold across independent runs.",
+      "expect": "i3 determinism identical sha [0-9a-f]{12}",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i3_AC3.sh -- expect i3 floor LN [1-9]\\d* US [1-9]\\d* ASIA [1-9]\\d*",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i3_AC3.sh",
+      "output_evidence": "i3 floor LN 9 US 16 ASIA 7",
+      "denominator": "1 of 1 real check over the live corpus: the selections cover 9 London, 16 US and 7 Asian-venue keys (R-1 floor satisfied, every venue present, the same per-venue key counts as round 6's own workbook-bearing keys since every one of them resolved at least one selection).",
+      "expect": "i3 floor LN [1-9]\\d* US [1-9]\\d* ASIA [1-9]\\d*",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/i3/verify_fix.py (not committed): live-corpus instrumentation of `_fix_dimensions` alone, run BEFORE the selection logic existed, isolating the dimension-fix hypothesis from the formula hypothesis and from the layout finding.",
+      "expected": "If the round-6 write-up's dimension hypothesis were the dominant cause, fixing it should recover most of the 196 empty `right` cases.",
+      "observed": "47 of 366 sheets across the 79 xlsx extracts had a genuinely stale stored dimension (before != after reset_dimensions()+calculate_dimension(force=True)), confirming the fix is mechanically live -- but right_recovered_by_dimension_fix stayed exactly 4 (round 6's own baseline), 0 net-new. Reopening the still-empty cells `data_only=False` found 0 formula strings in the right window. Direct inspection of two real workbooks (8306_JP_Equity K43, 2317_TT_Equity F45/F53) shows the true layout: 'Base Case' as a section title spanning columns, values several rows below in a FLANKING column -- neither hypothesis fires because the label genuinely has no numeric neighbour in its own row or column at all. Both named-cause hypotheses are FALSIFIED (0 net effect each); the true cause is a third, unnamed one (2D header layout). Filed as AMGT_CORPUS-Z-W2-S11. Separately, BASE_WORD_PATTERN = re.compile(r'\\bbase\\b', re.I) was checked against the three excluded forms named in section 1: re.search against 'database' -> None; 'baseline' -> None; 'based on FY26E' -> None; 'Base Case' -> match at 0-4 (Python's own \\b semantics: a word-char/word-char pair carries no boundary).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "case_evidence.py run 3 times against the same live S3 state (standalone twice, then via i3_AC2.sh's own paired subprocess run), each a fresh process, no shared cache.",
+      "observed": "sha256 of the JSON body identical across all runs (4ee6e8a934e6...).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4 (the CVO's judgment: does each selected cell read as the team's own Base-case number for that name, and does the served Base case read as plausible beside it?) -- not graded by this worker.",
+      "reason": "judgment=true in the task order's <proof_of_spec>; graded at L9 by the CVO on this cell's evidence (including AMGT_CORPUS-Z-W2-S11), not self-gradable by the worker."
+    },
+    {
+      "item": "No Base/Upside/Downside figure computed, chosen or proposed anywhere in case_evidence.py -- a `workbook.selections` entry is a number the team already typed, at a coordinate, picked by a fixed positional rule (never derived, never adjusted for plausibility).",
+      "reason": "section 4 BOUNDS."
+    },
+    {
+      "item": "No S3 write, no vendor/gateway call (every read is boto3 GetObject/ListObjectsV2 against s3://opal-data-harvest; openpyxl opens an in-memory BytesIO of an already-fetched object, never a network call of its own; the data_only=False re-open reuses the SAME already-fetched bytes).",
+      "reason": "section 4 BOUNDS."
+    },
+    {
+      "item": "No producer outside this order's own path (case_evidence.py) edited; CASE_EVIDENCE_ROUND6.json/.md left exactly as round 6 committed them (this producer only ever writes the two paths given on argv, and no invocation in this cell's build or checks names the ROUND6 filenames).",
+      "reason": "section 4 BOUNDS / section 1 'the ROUND6 files stay as they are'."
+    }
+  ],
+  "surprises": ["AMGT_CORPUS-Z-W2-S11"],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "i3_check.py --shape (AC1, via i3_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i3_AC1.sh",
+      "result": "rc 0; i3 OK census_rows 97 keys_with_block 97 base_labels 200 right_nonempty 4 names_with_selection 53 selections_without_coord 0"
+    },
+    {
+      "tool": "i3_check.py --determinism (AC2, via i3_AC2.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i3_AC2.sh",
+      "result": "rc 0; i3 determinism identical sha 4ee6e8a934e6"
+    },
+    {
+      "tool": "i3_check.py --floor (AC3, via i3_AC3.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i3_AC3.sh",
+      "result": "rc 0; i3 floor LN 9 US 16 ASIA 7"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/case_evidence.py",
+      "result": "rc 0; OK: pre-commit gate clean for 1 of 1 file(s)"
+    },
+    {
+      "tool": "non-ASCII byte-delta check (CLAUDE.md rule 4) + LF check",
+      "invocation": "python -c \"b=open(p,'rb').read(); print(len(b)-len(b.decode('utf-8')), b'\\r\\n' in b)\" over case_evidence.py, CASE_EVIDENCE_ROUND7.json, CASE_EVIDENCE_ROUND7.md",
+      "result": "0 non-ASCII bytes and no CRLF in all three"
+    },
+    {
+      "tool": "safe-commit.sh (artifacts commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~2 <0.9.0_WK_AMGT_CORPUS~2@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/case_evidence.py org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/CASE_EVIDENCE_ROUND7.json org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/CASE_EVIDENCE_ROUND7.md org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "PENDING -- run immediately after this instance is written"
+    },
+    {
+      "tool": "proof-of-spec-check.py (close-out gate)",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/AMGT_CORPUS.TO-CRPS-i-3.workbook-base-case-selected-and-cited.proof_of_spec.json AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-i-3.workbook-base-case-selected-and-cited.md",
+      "result": "PENDING -- run immediately after this instance is written"
+    },
+    {
+      "tool": "safe-commit.sh (final commit: instance + order status flip)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~2 <0.9.0_WK_AMGT_CORPUS~2@opal.agent>\" -F <msgfile> -- <instance path> <order path>",
+      "result": "PENDING -- run immediately after this instance is written"
+    }
+  ]
+}

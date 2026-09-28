@@ -1,0 +1,52 @@
+diff --git a/infra/aws/terraform/bd-pipeline/iam.tf b/infra/aws/terraform/bd-pipeline/iam.tf
+index f7ce334afa..1e2b59287c 100644
+--- a/infra/aws/terraform/bd-pipeline/iam.tf
++++ b/infra/aws/terraform/bd-pipeline/iam.tf
+@@ -1209,3 +1209,47 @@ resource "aws_iam_role_policy" "bd_exporter_advi_49f_publisher_put" {
+     ]
+   })
+ }
++
++# NFRA_MCPINDEX MX-s-10 amendment A4, on row NFRA_MCPINDEX-Z-S44.
++#
++# The asset-dim producer was ported off the Playwright portal login (dead since BD added MFA
++# ~2026-06-23) to a REST pull that mints a bearer from the EXISTING 49F session secret that
++# bd-49f-auto-login maintains. This role was provisioned for the PORTAL era: its only other
++# secretsmanager grant is opal/bd/credentials -- the username+password that port removes -- so the
++# first ad-hoc run of the ported document died at pull_bd_asset_dim_rest.py:172 load_bd_cookie with
++# AccessDeniedException on GetSecretValue (ssm:103d29fd-1960-4944-ba60-17b797c603f9, 2026-09-28
++# 10:07:47Z). The order's preflight had asserted this grant already existed; measured, it did not,
++# on either the Terraform or the live plane.
++#
++# Form copied from ReadSessionForCheck (bd-49f-session-chain.tf:171-176): GetSecretValue ONLY, on the
++# 49F session secret ONLY. Two deliberate improvements on a literal copy, both because the naming
++# gate refused the literal and was right to: the resource is the DERIVED
++# aws_secretsmanager_secret.bd_49f["session"].arn -- this module's own idiom for this very secret
++# (bd-49f-interim.tf:95, :223, :407) -- so no ARN, account id or firm token is hand-kept here; and
++# the policy name is the one the naming gate itself proposed. Deriving also tightens the grant from
++# the "-*" prefix pattern to the one secret.
++#
++# On that name: two earlier attempts were REFUSED and both refusals were correct. "read-49f-..."
++# used "read", which is in no vocabulary (the admitted functions are ingress, netassets, publisher,
++# session). "bd-49f-..." hand-kept "bd", which is an ALIAS of the system "blackdiamond" -- the gate
++# named the conformant form outright, and this is it: system blackdiamond, scope 49financial
++# rendering 49f, function session. No token here is hand-kept against the registry.
++#
++# READ-ONLY and 49F-ONLY. The secret, the bucket and the role are all the 49F plane, so the firm
++# line holds (NFRA_DTAFLP, Andrew sovereign 2026-06-10) and the cross-firm Deny above is untouched.
++# This grant moves no served output, so it carries no never-widen half; the halves weigh the dim
++# diff that MX-s-10 step 2 produces.
++resource "aws_iam_role_policy" "bd_exporter_49f_session_read" {
++  name = "blackdiamond-49f-session-secret-policy"
++  role = aws_iam_role.bd_exporter.id
++
++  policy = jsonencode({
++    Version = "2012-10-17"
++    Statement = [{
++      Sid      = "ReadSessionForAssetDimRestPull"
++      Effect   = "Allow"
++      Action   = ["secretsmanager:GetSecretValue"]
++      Resource = [aws_secretsmanager_secret.bd_49f["session"].arn]
++    }]
++  })
++}

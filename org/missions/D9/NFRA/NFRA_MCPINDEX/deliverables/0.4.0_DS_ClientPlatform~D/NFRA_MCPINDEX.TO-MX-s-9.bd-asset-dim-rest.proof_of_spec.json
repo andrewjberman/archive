@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-9",
+  "phase": "BUILD-GENERAL",
+  "firm": "49F",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "0c557f19da",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-9.bd-asset-dim-rest.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~D",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/bronze/pull_bd_asset_dim_rest.py",
+      "kind": "script",
+      "commit_or_etag": "867e5d2cca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "deploy_evidence": "The bd-tree bronze module. Two modes: `discover` (the ONE ledgered discovery read) and `pull` (the qt4 selection, run, poll, export, dedup and bronze write). No schedule was built -- the spec for one is section 5 of the result doc, per the order. Deterministic and re-runnable, which is the MECHANISM half of the vendor-egress grant (R-21 @b390c36444): the pull lives in a script, never in an agent turn."
+    },
+    {
+      "path_or_key": "s3://opal-data-bd/blackdiamond/49financial/bronze/assets_dim_rest/2026-09-28/assets_dim_rest.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "LastModified 2026-09-28T05:24:16Z (issuance 2026-09-28T04:25:12Z)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deploy_evidence": "12,132 rows, one per asset_id (unique True, 0 nulls), 15 columns, as-of 09/25/2026. DEPLOYED-VERIFIED because AC2 read it back from S3 with its own downloader and head-object, not from the local build buffer: LastModified 2026-09-28T05:24:16Z is after the issuance at 2026-09-28T04:25:12Z, and the uniqueness bar was evaluated on the served bytes."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/EGRESS_LEDGER_MX-s-9.md",
+      "kind": "doc",
+      "commit_or_etag": "867e5d2cca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deploy_evidence": "Three ledgered vendor operations with the authority record printed and verified at its pin, the super-class outcome as a dim id, and the declared overrun of the order's two-call bound."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/bd-asset-dim-rest.result.md",
+      "kind": "doc",
+      "commit_or_etag": "867e5d2cca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deploy_evidence": "OUTPUT_KEY as the first data line (AC2 parses it), the row count, the super-class outcome, the step-1.1 allocation answer, the scheduling spec, the union coverage note with both counts, and the departures."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/discovery_MX-s-9.json",
+      "kind": "doc",
+      "commit_or_etag": "867e5d2cca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deploy_evidence": "The machine record of the discovery read: roster of 19 templates, the qt4 catalog's 8 levels / 201 dimensions, the super-class hit with its scan denominator, and a present/ABSENT verdict per required dim id."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "bd bronze asset modules>=1; modules importing cot=0; data/cot files changed since issue=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s9.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "bd bronze asset modules=1; modules importing cot=0; data/cot files changed since issue=0 -- RESULT: PASS -- exit=0",
+      "denominator": "git ls-files 'data/black_diamond/scripts/bronze/*asset*.py' = 1 module; the cot-import probe ran over that 1 module; git diff 0c557f19da..HEAD -- data/cot/ = 0 files.",
+      "status": "PASS",
+      "status_reason": "The firm line holds. The module imports nothing from cot's tree: its auth is inlined from data/black_diamond/API/AUTHENTICATION.md rather than cross-imported, which is what the design ruling required. Its firm allowlist is built from this scope's OWN registry row, so a foreign firm's bucket or secret is unreachable even if the environment names one."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "LastModified after issue=yes; rows>=1 asset_id unique=True -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s9.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "key under opal-data-bd; LastModified after issue=yes; rows=12132 asset_id column=asset_id unique=True -- RESULT: PASS -- exit=0",
+      "denominator": "12,132 rows read back from the SERVED object by the check's own s3 cp, not from the build buffer. Pull-side denominators: 12,132 export rows pre-dedup, 148 qt4 dimensions scanned for the super-class, 201 dimensions in the qt4 catalog.",
+      "status": "PASS",
+      "status_reason": "The dedup removed 0 rows and that is a property of the query, not a skipped step: with dimensions selected and no facts, BD returns the distinct dimension tuple set, so the result is already asset-grain. The dedup is retained because that is vendor behaviour rather than a contract, and any future selection carrying a measure would re-expand to lot grain."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "ledgered calls>=2; super-class outcome lines>=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s9.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "ledgered calls=3; super-class outcome lines=2 -- RESULT: PASS -- exit=0",
+      "denominator": "3 timestamped ledger rows; 2 lines naming the super-class outcome as a dim id.",
+      "status": "PASS",
+      "status_reason": "PASSES AT 3, NOT 2, AND THE THIRD IS THE DISCLOSURE: the order's bound 2 allows at most two BD calls and this seat made three. The first pull attempt fired run 541481 server-side and was not parsed (BD returns the run either wrapped in \"template\" or at the top level; only the wrapped shape was handled), so no export was taken. On a first run this criterion read calls=2 because that row's timestamp carried an 'x' placeholder the check's regex cannot match -- i.e. the check PASSED while being blind to the very call being disclosed. The timestamp was made machine-parseable and the row now carries the claim `inferred` on its time, since the seat did not record the failed attempt's clock."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control. The controls that carried weight were falsification controls on the reads and on a refactor.",
+      "expected": "none named by the spec",
+      "observed": "Three ran. (1) REFACTOR CONTROL: after moving scope, vendor, firm short-code, secret and bucket from literals to registry reads, the derived values were asserted equal to the four the live pull actually used -- so the naming fix is provably behaviour-preserving rather than assumed to be. (2) DROP CONTROL: before removing the duplicate raw 'Asset SuperClass' column from the served object, the two columns were asserted identical value-for-value; the drop was conditional on that assertion. (3) RENAME CONTROL: the value distribution was asserted unchanged across the asset_super_class_bd -> asset_super_class rename.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The pull is one live vendor read of changing production state, so it is not re-runnable to an identical byte image by construction. The checks are.",
+      "observed": "All three AC scripts returned the same verdict on repeat within the session. AC3 was run twice deliberately and changed 2 -> 3 only because the ledger's disclosure was made machine-visible, not because the world moved.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The schedule for this pull",
+      "reason": "The order says the scheduling spec is reported, NOT built ('putting the pull on a schedule is NOT this order's'). The spec is section 5 of the result doc, including the trading-day-frontier freshness basis the entry must declare to avoid a Monday false alarm."
+    },
+    {
+      "item": "The silver dim rebuild (the union with the frozen 2026-04-14 dim)",
+      "reason": "That is MX-s-6 step 2, explicitly not this order. This cell writes bronze and stops. The counts step 2 needs are measured and reported: union 12,141; 1,204 pull-only; 9 frozen-only."
+    },
+    {
+      "item": "Any vendor-side template CREATE",
+      "reason": "A write to vendor state, permitted by the ruling only if no persisted template can carry the columns. Not needed: the pull reused persisted qt4 template 486228's envelope with the selection swapped into the inline run body. --allow-template-create exists for the fallback and was not passed."
+    },
+    {
+      "item": "Any alarm, monitor, notification or freshness checker over the frozen dim",
+      "reason": "Standing moratorium. The module exiting loud on a stale session is a producer reporting its own result, not an alarm."
+    },
+    {
+      "item": "A repair to the naming gate's context rule",
+      "reason": "Out of lane -- the gate and infra/logic/registry/ are not in this order's <paths>. Recorded as row NFRA_MCPINDEX-Z-S33 with the gate owner named, and worked around in-lane by shipping the vendor's own column name."
+    },
+    {
+      "item": "Any push",
+      "reason": "Order bound 4: 'Standing: no push.' The commit is LOCAL; push state is stated in the report from a git ls-remote read."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-S33: the naming gate's context rule refuses any NEW file carrying an EXISTING schema column whose name ends in a firm-token segment, and its printed remedy (lookup()) is not expressible for a column name; the S3Key rule's 'already at HEAD, mints nothing' grandfather has no equivalent in the context rule. Worked around in-lane; not blocking for this cell."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~D/logs/2026-09-28/ds_d_mx_s_9_bd_asset_dim_rest_0450-0600Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which / comp-find",
+      "invocation": "comp-find 'rest api pull for those tables' -- 'org'; comp-find --name 'build_bd_assets_dim.py'; comp-find --name 'naming-gate*'",
+      "result": "6 hits across 59,203 files located the Andrew quote and showed the task order's pin for it is the WRONG record (the quote belongs to the ~20:1xZ refinement, not @785fc4d71f). Denominators printed on every run; one call was correctly refused by the rail for piping a census into tail, and re-run clean."
+    },
+    {
+      "tool": "comp-freshness",
+      "invocation": "comp-freshness artifact s3://opal-data-bd/silver/allocations/",
+      "result": "PASS at 29.2h, which is the step-1.1 allocation answer's served-artifact half. Noted in the result that the entry carries no freshness_basis: trading-day-frontier and so evaluates on flat wall-clock hours -- the exact shape that false-alarms on a Monday, which today is."
+    },
+    {
+      "tool": "comp-schedule / comp-iam / comp-adversary",
+      "invocation": "(not run)",
+      "result": "All three DECLARED-NOT-APPLICABLE by the order's own preflight block, and the declarations hold as executed: no schedule was created, no role or policy changed, and the design was ruled by the CTO on Andrew's word. Recorded as declared-not-run rather than omitted."
+    },
+    {
+      "tool": "comp-pipescript",
+      "invocation": "(not run)",
+      "result": "COVERAGE GAP, measured previously on this same tree (MX-s-1/MX-s-2): the BD asset-dim scripts resolve in no indexed pipeline, so the DS role minimum has no coverage here. Recorded as a gap, never as a skipped check."
+    },
+    {
+      "tool": "naming-gate.py",
+      "invocation": "python .tools/naming-gate.py --diff <diff of the new module>",
+      "result": "Run directly BEFORE re-attempting the commit rather than discovering the verdict through safe-commit again: REFUSE 16 -> REFUSE 2 -> WARN 1. The residual is a RAISE-EXISTING the gate itself grades 'mints nothing'."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": ".tools/safe-commit.sh --author '0.4.0_DS_ClientPlatform~D <...>' -F <msgfile> -- <paths>",
+      "result": "First attempt REFUSED by the naming gate, leaving two paths STAGED in the shared tree; the partial index was cleared before anything else. The landed verdict was read from git log and git ls-files, never from a positional slice of the gate's output."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "Run on this instance; result recorded in the report."
+    }
+  ]
+}

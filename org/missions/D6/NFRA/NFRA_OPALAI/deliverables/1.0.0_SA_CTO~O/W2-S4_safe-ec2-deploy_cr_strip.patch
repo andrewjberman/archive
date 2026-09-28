@@ -1,0 +1,15 @@
+diff --git a/infra/aws/ec2/safe-ec2-deploy.sh b/infra/aws/ec2/safe-ec2-deploy.sh
+index 0ee421ad1d..91c924652c 100755
+--- a/infra/aws/ec2/safe-ec2-deploy.sh
++++ b/infra/aws/ec2/safe-ec2-deploy.sh
+@@ -208,7 +208,9 @@ jq ".services[\"$SERVICE_NAME\"].deployed_commit = \"$CURRENT_COMMIT\" |
+     .services[\"$SERVICE_NAME\"].deployed_at     = \"$TIMESTAMP\" |
+     .services[\"$SERVICE_NAME\"].deployed_by     = \"$AGENT\" |
+     ._last_updated = \"$TIMESTAMP\"" \
+-    "$MANIFEST" > "$TEMP"
++    "$MANIFEST" | tr -d '\r' > "$TEMP"
++# tr -d '\r' (as at SOURCE_PATH above): jq.exe writes CRLF here, and an unstripped temp turned every
++# manifest line CRLF, so the naming gate at Step 3 refused 89 graded lines (NFRA_OPALAI-Z-W2-S4).
+ mv "$TEMP" "$MANIFEST"
+ 
+ print_success "Manifest updated"

@@ -24,10 +24,27 @@ sign-off (CTO half + a second, non-acting half)" (record `ANDREW_DIRECT_20260926
 ## Both branches, read from the producer's rule
 - **Today's table (no record carries `portal_channels`):** every existing grant takes the unchanged v1.1 path, so
   **DELTA = 0** on every served answer at GO. The release adds a capability and moves no one.
-- **After a portal-only record is written:** only that person's asker answers change, narrowed to the granted
-  channels. That write is OA-g-3 (Alyssa Keith, portal figures), Andrew's call 2
+- **After a portal-only record is written:** ~~only that person's asker answers change, narrowed to the granted
+  channels.~~ **SUPERSEDED 2026-09-27 ~12:5xZ by this seat: this branch was INCOMPLETE.** Writing ANY profile record makes
+  that principal `restricted` (`data_entitlement.py:28-33` at `110d93fb73`: "a principal with ANY profile record ... is
+  restricted"). A restricted principal is denied every MCP tool not in its grant and every direct REST route (`:41-44`,
+  `decide()` `:364-376`), and a portal-only grant admits no tool. So the write ALSO removes that person's OWN native
+  gateway tools, not only narrowing their asker answers. Measured for the one such record (Alyssa Keith, OA-g-3): 6,895
+  audit records over 2026-09-25..27 hold 92 of hers, ALL `ms_site_children` on the 02Z site-ingest path, which still reads
+  `ok` after the grant; 0 MCP tool calls in the 72 h. So nothing observed broke, but the lockout is latent and was
+  never signed. It is carried to Andrew (entitlements are his class). That write is OA-g-3 (Alyssa Keith, portal figures), Andrew's call 2
   (`ANDREW_DIRECT_20260926_022xZ_CTO_O_OPEN_CALLS_1_TO_6_ANSWERED.md`). It is a separate act with its own order.
   This half does not sign it.
+
+## Writers of the named property (NEVER-1: count them), added 2026-09-26 ~18:4xZ
+**N = 1.** The only site that puts `portal_channels` into a STORED record is the operator admin command,
+`ops/schwab_entitlement_admin.py:274-275` (it writes the field only when the scope carries it). That command
+refuses the field unless the contract declares `portal_grant`, and refuses channels the catalog does not hold
+(`:192-199`). `app/admin_grants.py:105-107` builds the `get_grant` read-back response, so it is not a writer.
+Every other hit in `infra/aws/ec2/opal-gateway` is parse, enforcement or tests. Counted by `3.0.0_SA_CVO~Z`
+(file msg 20260926T183500Z, 53 hits); the two cited ranges were re-read here at HEAD.
+**So "no record carries `portal_channels` today" is a bounded property, not a moment:** it can change only when
+someone deliberately runs that command, which is OA-g-3's act, not this one.
 
 ## Rollback, per key
 - Code: redeploy the base artifact `opal-gateway-c5f8099440.tar.gz` through the same release script (the 90-second

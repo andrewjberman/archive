@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-x-2.exercise-the-timeline-on-real-landed-gold",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~8/SPEC_SECTION_timeline.md",
+    "group": "W",
+    "vintage_commit": "7d92646ac4f55e438ca62f3cbe11ac05c542d7ec"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "8aebd98d5601df71451fbdbc1b0817149cee2c6d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-x-2.exercise-the-timeline-on-real-landed-gold.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/_gold_reader.py",
+      "kind": "script",
+      "commit_or_etag": "856ff2a62fcb477a4d1b010383bad87b256460e4",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "no deploy scope: read-only loader helpers, exercised in-process against landed S3 gold/silver; task order bounds forbid any S3 write/delete/build. commit-gate.sh (py_compile + ds-precommit + ruff py39) run clean, see compiler_tools",
+      "artifact_covered_by": ["AC1", "AC2", "AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac1_which_arm_is_exercisable.py",
+      "kind": "script",
+      "commit_or_etag": "856ff2a62fcb477a4d1b010383bad87b256460e4",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "check script, no deploy scope",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac2_fwd5_day_dissection.py",
+      "kind": "script",
+      "commit_or_etag": "856ff2a62fcb477a4d1b010383bad87b256460e4",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "check script, no deploy scope",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac4_are_these_real_bursts.py",
+      "kind": "script",
+      "commit_or_etag": "856ff2a62fcb477a4d1b010383bad87b256460e4",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "check script, no deploy scope; JUDGMENT criterion, presents only, records no verdict",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9ddef91448a192d139bb0b210df4818e23f3fddc",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "surprise-channel row AMGT_HARVST-Z-W27-S1 appended, no deploy scope",
+      "introduces": ["AMGT_HARVST-Z-W27-S1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "WHICH ARM IS EXERCISABLE, NAMED BEFORE EITHER IS EXERCISED, with denominators. Print: the number of securities carrying ANY chatter_daily row, out of the universe's 89; the number carrying at least one day with articles_total greater than 0, and THE SECURITY KEYS THEMSELVES for those (this is the \"1 of 89\" round 7 never named); the number of chatter_event rows that exist AT ALL, per security, out of the same denominator; and publishers_distinct's maximum observed value against EVENT_MIN_PUBLISHERS. Then state plainly, in one line each: FWD-5 arm EXERCISABLE or UNEXERCISABLE-and-why, FWD-6 arm EXERCISABLE or UNEXERCISABLE-and-why. A zero anywhere is reported WITH ITS CAUSE -- a bare zero reads as \"no problem exists\" and fails this criterion",
+      "method": "live_read",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac1_which_arm_is_exercisable.py",
+      "output_evidence": "DENOMINATOR -- distinct securities carrying ANY chatter_daily row (the LANDED universe, measured live, not assumed): 191 | SECURITIES with >=1 day carrying articles_total>0: 55 of 191 | THE SECURITY KEYS THEMSELVES: ['992_HK_Equity', 'AAPL_US_Equity', ... 53 more ...] | chatter_event ROWS THAT EXIST AT ALL: 12 total, spread over 7 of 191 securities | PER-SECURITY chatter_event row counts: {'992_HK_Equity': 4, 'BA_US_Equity': 2, 'COST_US_Equity': 2, 'DELL_US_Equity': 1, 'HD_US_Equity': 1, 'MSFT_US_Equity': 1, 'NVDA_US_Equity': 1} | publishers_distinct MAXIMUM observed on any chatter_daily row: 3 (EVENT_MIN_PUBLISHERS=2) | FWD-5 arm: EXERCISABLE -- 55 securities carry a day with articles_total>0; 992_HK_Equity is among them. | FWD-6 arm: EXERCISABLE -- 12 chatter_event rows exist across 7 securities; 992_HK_Equity is among them. NOTE (finding, filed as surprise row AMGT_HARVST-Z-W27-S1): the universe is 191, not the task order's cited 89, and chatter_event is NOT structurally zero as the task order's premise stated -- gold has been rebuilt since round 7/8's measurement.",
+      "denominator": "191 of 191 distinct securities carrying any landed chatter_daily row censused; 55 of 191 carry articles_total>0; 12 of 12 landed chatter_event rows censused across 7 of 191 securities; rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "FWD-5 EXERCISED ON LANDED GOLD, or UNEXERCISABLE with AC1's cause restated. If exercisable: name the security used and WHY that one (from AC1's read, not from the spec's assumption); print the dense day span (first day, last day, count of days returned) and prove there is no gap -- days returned equals days in range; pick a day with articles_total greater than 0, print that day's served article list IN ORDER, and prove the order is strongest-first by printing the (signal_tier, mention_count, published_utc) triple per row and showing the sort holds pairwise. Each row must show headline, publisher, tier, mention_in_title and mention_in_lead PRESENT-EVEN-WHEN-FALSE, and time. If the chosen security is NOT 992_HK_Equity, say so explicitly and file a row -- the spec's acceptance security differing from the only exercisable one is a finding, not a detail",
+      "method": "live_read",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac2_fwd5_day_dissection.py",
+      "output_evidence": "CHOSEN SECURITY: 992_HK_Equity (Lenovo, the spec's own acceptance security, section 8) -- confirmed exercisable by the AC1 read, not assumed. | floor_date: 2026-01-01 | series length (days returned): 267 | first day: 2026-01-01, last day: 2026-09-24 | PROOF OF NO GAP: days_in_range=267 ; days returned=267 ; equal=True | days in series with articles_total>0: 21 of 267 | PICKED DAY (highest articles_total among the 21 nonzero days): 2026-05-22 (articles_total=3, data_status=DENIED) | articles served for this day: 3 | [0] tier=A mention_count=6 published_utc=2026-05-22T07:26:00+00:00 headline='Lenovo Targets $100 Billion Annual Revenue Within Two Years After Stellar Quarter' publisher='wsj' mention_in_title=True mention_in_lead=True | [1] tier=A mention_count=4 published_utc=2026-05-22T04:31:44+00:00 headline='Lenovo surge on Q4 revenue beat driven by 84% AI growth; declares final dividend' publisher='sa' mention_in_title=True mention_in_lead=True | [2] tier=B mention_count=3 published_utc=2026-05-22T00:44:00+00:00 headline='European Indexes Gain at Open as Tech Stocks Jump' publisher='wsj' mention_in_title=False mention_in_lead=True | STRONGEST-FIRST PROOF -- pairwise sort key checked across 2 adjacent pairs: 0 violation(s), sort holds pairwise. | missing-field count across headline/publisher/tier/mention_in_title/mention_in_lead/time = 0",
+      "denominator": "1 of 1 exercisable security exercised (992_HK_Equity, confirmed by AC1's live read, matching the spec's own section-8 acceptance security -- no divergence to file); 267 of 267 days in range served with no gap; 21 of 267 days nonzero; 3 of 3 articles on the picked day sorted with 0 of 2 pairwise violations; rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "JUDGMENT, PRESENTED AND NOT GRADED -- status UNVERIFIABLE-BY-INSTRUMENT with status_reason naming 3.0.0_SA_CVO at L9 as the oracle. ARE THE EVENTS SHOWN THE REAL COVERAGE BURSTS? For every chatter_event row that exists (if none exist, say so with AC1's cause and present the DAY-level question instead: do the highest mention_score days correspond to days a reader would call a burst?), print the span, its lead_headline, its articles_total and publishers_distinct, and BESIDE IT the headlines of the articles in that span. Then state, per span, whether the lead_headline plausibly names what the burst was about, and where it does not, say what the span actually looks like. Present the counts and the text; record NO verdict of your own",
+      "method": "live_read",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac4_are_these_real_bursts.py",
+      "output_evidence": "STATUS: UNVERIFIABLE-BY-INSTRUMENT | status_reason: this criterion is JUDGMENT; the oracle is 3.0.0_SA_CVO at L9; this script presents counts and text only and records no verdict. | chatter_event ROWS PRESENTED: 12 total, e.g. EVENT security=992_HK_Equity span=[2026-02-12..2026-02-12] articles_total=2 tier_a=2 tier_b=0 publishers_distinct=2 lead_headline='Lenovo Posts Earnings Beat on AI-Driven Demand' ARTICLES: tier=A publisher=wsj 'Lenovo Posts Earnings Beat on AI-Driven Demand'; tier=A publisher=sa 'Lenovo hits highest PC market share during Q3; CEO says memory crunch will persist' OBSERVATION: shares word(s) ['lenovo'] -- plausibly same topic. ... and EVENT security=MSFT_US_Equity span=[2026-06-01..2026-06-01] lead_headline='Nvidia Introduces First PCs Designed for AI Agents' ARTICLES: two Nvidia-PC-market articles, OBSERVATION: shares word(s) ['nvidia'] -- the lead is about Nvidia's own product launch, not an MSFT-specific item, presented for the oracle to weigh. All 12 rows printed with full span/lead/articles_total/publishers_distinct/article-headline detail; no PASS/FAIL recorded.",
+      "denominator": "12 of 12 landed chatter_event rows presented (7 of 191 securities carrying any); day-level fallback not needed since events exist; rc=0",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (task order section 5 / bounds section 4.4): 3.0.0_SA_CVO is the oracle at L9. This worker presents the span/lead/article/headline data and a plain-English word-overlap observation for the oracle to weigh; PASS/FAIL is refused by the checker and not recorded here.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Injected a one-day offset into _gold_reader.make_day_article_loader's (security_key, day) bucketing (day = day + timedelta(days=1)) -- a real, targeted break of the exact day-join AC2's article-list proof depends on -- then re-ran AC2 before reverting the file to its pre-mutation bytes verbatim.",
+      "expected": "AC2's picked day (2026-05-22, articles_total=3) serves 0 articles instead of 3, because every mention row is now bucketed one day later than its true published day; every other printed value (series length, no-gap proof) is unaffected since those come from chatter_daily directly, not from this join.",
+      "observed": "articles served for this day: 0 (down from 3); the SERVED ARTICLE LIST section printed empty and the pairwise-sort check ran across 0 pairs. File reverted; `diff` against the pre-mutation copy showed zero bytes different, and a post-revert re-run of AC2 again served 3 articles for 2026-05-22 (see determinism.observed).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac2_fwd5_day_dissection.py run twice in succession on the identical, reverted file, output compared byte-for-byte.",
+      "observed": "run 1 and run 2 stdout are byte-identical (diff produced no output): same chosen security, same 267-day series, same picked day 2026-05-22 with the same 3 articles in the same order.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC3 (there is no AC3 in this cell)",
+      "reason": "task order section 5 / bounds section 4.1: THREE criteria named -- AC1, AC2, AC4 -- two mechanical plus one judgment. No fourth criterion exists to exclude from."
+    },
+    {
+      "item": "Any change to lib/research/harvest/timeline_api.py or lib/research/harvest/publication_gold.py",
+      "reason": "task order bounds section 4.2 and the ISSUER NOTE (section 0/1): this cell exercises those modules, it does not modify them; neither file is in this worker's <paths>. No defect in either was found that would have required a change."
+    },
+    {
+      "item": "Gold write / gold rebuild for chatter_daily, chatter_event or article_security_mention",
+      "reason": "task order clause 0.2/0.3 (NO S3 WRITE/DELETE, NO GOLD BUILD): this cell reads the newest already-landed snapshot of each table exactly as it is."
+    },
+    {
+      "item": ".tsx render build (chart, day/event dissection panel)",
+      "reason": "out of scope for HVST-x-2 entirely -- this cell exercises the SERVER-SIDE timeline_api against real gold; the client render is a separate, later cell (per HVST-w-3's own declared_exclusions)."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W27-S1: HVST-x-2's premise (chatter_event holds ZERO rows for every security, universe is 89) is stale -- landed gold now carries 191 securities and 12 chatter_event rows across 7 of them (including 4 for Lenovo), so both FWD-5 and FWD-6 are exercisable, not just one."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/AMGT_HARVST.TO-HVST-x-2.exercise-the-timeline-on-real-landed-gold.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/_gold_reader.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac1_which_arm_is_exercisable.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac2_fwd5_day_dissection.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac4_are_these_real_bursts.py",
+      "result": "clean, rc=0 (run inside commit-gate.sh)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/_gold_reader.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac1_which_arm_is_exercisable.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac2_fwd5_day_dissection.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~27/scripts/ac4_are_these_real_bursts.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~27 <0.9.0_WK_AMGT_HARVST~27@opal.agent>\" -F <msgfile> -- <scripts>",
+      "result": "committed 856ff2a62fcb477a4d1b010383bad87b256460e4 (scripts) and 9ddef91448a192d139bb0b210df4818e23f3fddc (surprise row), both LOCAL on wk-hvst-x2-r9"
+    }
+  ]
+}

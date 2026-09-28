@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-6",
+  "phase": "BUILD-GENERAL",
+  "firm": "49F",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "0c557f19da",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-6.bd-assets-compaction.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~D",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/silver/build_bd_assets_dim.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deploy_evidence": "New --union-bronze KEY mode: unions the MX-s-9 REST bronze into the current dim, latest-wins, blending ONLY the added rows so already-served rows keep their derived values byte-for-byte. Placed in THIS file by 1.0.0_SA_CTO~O's ruling on row Z-S33 (row Z-S36 @22d6e8f182, relayed by 2.0.0_SA_COO~O) rather than in a new module, because the gate grades a string NEW only against the file's own pre-image. Gate on the edit: WARN 2, not REFUSE -- the ruling's prediction, tested on the diff before committing."
+    },
+    {
+      "path_or_key": "s3://opal-data-bd/silver/bd_assets_dim.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "LastModified 2026-09-28T06:22:06Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deploy_evidence": "12,141 rows / 22 columns / asset_id unique, READ BACK from S3 rather than reported from the build buffer. 10,928 refreshed, 1,204 added, 9 kept. txn_count NULL for exactly 1,204 -- the added set and nothing else -- carrying the claim absent. Rollback is one call: versioning measured Enabled, pre-write VersionId 4dfwFfuZ4qRbbGRbIl.90qVyw6N0bENG (LastModified 2026-04-14T20:44:16Z)."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/bd-assets-compaction.step2.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deploy_evidence": "Both counts, the 805-of-805 coverage with its 141-partition denominator, the per-column delta on already-served rows including the 42 cusip changes, the rollback VersionId, and the route correction."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "silver/bd_assets_dim.parquet after issue=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s4.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "silver/bd_assets_dim.parquet LastModified=2026-09-28T06:22:06+00:00 after issue=yes -- RESULT: PASS -- exit=0",
+      "denominator": "141 transaction partitions dated >= 2026-04-14 scanned for the coverage set; 3,959 distinct asset_id across them; the gap set is 805, of which 805 are now in the dim and 0 remain absent. Union denominators: 10,937 frozen dim + 12,132 pull -> 12,141 written.",
+      "status": "PASS",
+      "status_reason": "PASSES ON SUBSTANCE, NOT ONLY ON FRESHNESS, and that distinction is the whole reason this cell exists. MX-s-2 measured that merely running the builder would move LastModified and resolve 0 of 791 -- satisfying this criterion's freshness limb while fixing nothing. Here the same limb passes AND the gap closes: 805 of 805, 0 still absent. The gap set is 805 today rather than the 791 the order's text carries, because two further trading days of transactions landed since MX-s-2 measured it; the number is reported as measured now rather than carried forward from the order. AC1 left this order under amendment A2: silver/bd_assets.parquet is transaction grain and is unreachable from an asset-grain bronze (row Z-S34)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control.",
+      "expected": "none named by the spec",
+      "observed": "Two controls carried the weight. (1) IDEMPOTENCE AND PORT-EQUIVALENCE: after the write, the builder's --union-bronze dry run against the already-written dim returned 0 added and delta 0 on all ten refreshable columns at the same 12,141 total -- so the code moved into the builder is behaviour-equivalent to the module that actually performed the write, and a re-run is a no-op. (2) THE GATE PREDICTION WAS TESTED, NOT ASSUMED: the CTO's ruling predicted the builder edit would WARN rather than REFUSE; run directly on the diff, it graded WARN 2.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The union is a pure function of two S3 objects; the blend depends on a live DynamoDB scan of bd-securities, so it is deterministic only per classifier state.",
+      "observed": "The dry run and the write agreed on every count (10,928 / 1,204 / 9 / 12,141). The post-write dry run returned delta 0 across all ten refreshable columns, which is the stability check.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "silver/bd_assets.parquet",
+      "reason": "Untouched by ruling. It is 3,449,107 rows of TRANSACTION grain; the REST bronze is asset grain. Amendment A1 named it as the target, row Z-S34 measured the mismatch and stopped before writing, and amendment A2 removed it -- AC1 left the order."
+    },
+    {
+      "item": "The gold holdings_lots rewrite",
+      "reason": "MX-s-2's, under its own never-widen sign-off, both halves still UNSIGNED. This rebuild is the precondition that sign-off was waiting on -- SIGNOFF_REQUEST_bd_cusip.md recommended not signing until the bridge is current. It is now current, which makes that request answerable on its own terms, by its signers and not here."
+    },
+    {
+      "item": "Any schedule, alarm, monitor or freshness checker",
+      "reason": "Standing moratorium, and the order builds none. The builder's own schedule stays a later ask, as the order's preflight says."
+    },
+    {
+      "item": "Re-doing MX-s-6 step 1",
+      "reason": "Already complete at a2d25dd90b (2026-09-26) by a PREDECESSOR session of this same lane, not by this session. Verified rather than re-done: test_convert_assets_compaction.py passes 7/7 at HEAD and comp-pipescript deployed --pipeline bd-silver reads MATCH, byte-identical."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-S34: MX-s-6 step 2 as amended (A1) named silver/bd_assets.parquet -- 3,449,107 transaction rows over 31 columns -- as the target for a 12,132-row asset-grain bronze. Writing it would have destroyed the transaction set and stranded the very builder the same step then asks to run. Stopped before writing; closed by the issuer as Z-S35 with amendment A2 (dim-only).",
+    "NFRA_MCPINDEX-Z-S33: the naming gate's context rule refuses a NEW file carrying an existing firm-token column, with no in-lane remedy. Disarmed by 1.0.0_SA_CTO~O as row Z-S36: edit the existing builder in place, which WARNs. Route followed and the prediction tested."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~D/logs/2026-09-28/ds_d_mx_s_9_bd_asset_dim_rest_0450-0600Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "comp-pipescript deployed convert_assets_to_silver.py --pipeline bd-silver",
+      "result": "MATCH, byte-identical -- step 1's deploy verified rather than assumed. A first call without --pipeline was REFUSED rather than defaulting to bd-gold and returning a clean zero for a script living in another tree; the refusal is correct behaviour and is recorded rather than worked around."
+    },
+    {
+      "tool": "naming-gate.py",
+      "invocation": "python .tools/naming-gate.py --diff <builder diff>",
+      "result": "WARN 2 graded on the EXISTING builder, confirming the CTO's routing ruling BEFORE committing rather than discovering it through a refusal."
+    },
+    {
+      "tool": "comp-freshness / comp-find",
+      "invocation": "exercised under MX-s-9 in the same session",
+      "result": "Recorded in the MX-s-9 instance. This cell's reads were direct S3 plus parquet metadata, and one rail-checked raw listing to enumerate the 141 transaction partitions behind the coverage denominator."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "Run on this instance; result recorded in the report."
+    }
+  ]
+}

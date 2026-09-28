@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-y-1.publishers-counted-over-tier-A-only",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/prd/AMGT_HARVST_PRD.md",
+    "group": "C",
+    "vintage_commit": "5e05cb1d3c72f97169b8091f57568afa22acc36d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "399e41b5cd0d8d753e33774ceea3fff2274b0b58",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-y-1.publishers-counted-over-tier-A-only.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~28",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/publication_gold.py",
+      "kind": "script",
+      "commit_or_etag": "664f792d0e7f245f156dd7aa521af0866c14948a",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "no deploy scope -- event_rows is a PURE function, no I/O, no clock; exercised in-process. commit-gate.sh (py_compile + ds-precommit + ruff py39) run clean, see compiler_tools",
+      "introduces": [
+        "for r in rows if r.get(\"signal_tier\") == \"A\"}) >= min_publishers"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_publication_gold_event.py",
+      "kind": "test",
+      "commit_or_etag": "664f792d0e7f245f156dd7aa521af0866c14948a",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "test file, no deploy scope; commit-gate.sh run clean, see compiler_tools",
+      "introduces": [
+        "test_one_tier_a_one_tier_b_two_publishers_no_longer_qualifies"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/ac2_expected_diff.py",
+      "kind": "script",
+      "commit_or_etag": "664f792d0e7f245f156dd7aa521af0866c14948a",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "check script, no deploy scope; reads landed S3 gold read-only, no write/delete",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/ac4_are_the_eight_real.py",
+      "kind": "script",
+      "commit_or_etag": "664f792d0e7f245f156dd7aa521af0866c14948a",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "check script, no deploy scope; JUDGMENT criterion, presents only, records no verdict",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/_gold_reader.py",
+      "kind": "script",
+      "commit_or_etag": "664f792d0e7f245f156dd7aa521af0866c14948a",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "read-only loader helpers (copied from 0.9.0_WK_AMGT_HARVST~27's HVST-x-2 deliverable, unchanged), no deploy scope",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE AMENDED RULE IS PINNED BY TESTS THAT FAIL ON THE OLD BEHAVIOUR. New cases, named in the -rA output: (a) 2 tier-A rows from 2 publishers on one day still yields 1 event; (b) 1 tier-A + 1 tier-B from 2 publishers yields ZERO events, where today it yields 1 -- this is the negative control and the criterion FAILS if it passes against HEAD's unamended function; (c) purity, two identical calls returning equal row lists. Print the whole-suite count before and after so a new red test elsewhere is not hidden by the -k filter",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/harvest/tests/ -rA --tb=line -k event",
+      "output_evidence": "-k event: collected 146 items / 129 deselected / 17 selected -- 17 passed, 0 failed, 0 skipped. Named new cases in -rA: PASSED test_two_tier_a_publishers_two_articles_is_an_event (discriminator (a): 2 tier-A rows, 2 publishers -> 1 event, tier_a=2 tier_b=0 publishers_distinct=2); PASSED test_one_tier_a_one_tier_b_two_publishers_no_longer_qualifies (discriminator (b), the negative control: 1 tier-A + 1 tier-B, 2 publishers -> events == [] ; MUTANT CONTROL below proves this assertion FAILS against the unamended qualifying-day predicate); PASSED test_rebuild_identical (discriminator (c), purity: two gold.event_rows(list(rows)) calls on identical input return equal row lists, len==2). All 10 other pre-existing test_publication_gold_event.py cases updated to keep their ORIGINAL intent (merge/gap, publisher-column-vs-prefix, lead tie-break, article list, rebuild) provable under the amended tier-A-only publisher population, and pass. WHOLE-SUITE COUNT, no -k filter, run in this worktree at HEAD (post-amendment): collected 146 items, 146 passed, 0 failed. WHOLE-SUITE COUNT at the pre-amendment commit (4bf000096200b04f5f7dc1bf0e50864dc62085b1), measured in an ephemeral detached worktree so the shared tree was never touched: collected 145 items, 145 passed, 0 failed -- the +1 item is the negative-control test this cell adds; no new red test elsewhere in either whole-suite run.",
+      "denominator": "17 of 17 -k event selected tests passed; 146 of 146 whole-suite tests passed post-amendment; 145 of 145 whole-suite tests passed pre-amendment (ephemeral worktree @4bf0000962); rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "THE WHOLE NAMED DIFF, IN MEMORY OVER THE LANDED MENTION ROWS, with no gold write. Print: the BEFORE event count (expected 12) and the AFTER count (expected 8) from the same input; the 4 spurious events ABSENT, each named by security_key and span; and the TWO event_id MOVES proved by printing, for BA and HD, the old span, the new span, the OLD event_id and the NEW event_id and showing they differ and that the new one equals publication_gold._event_id(security_key, new_first_day, new_last_day). A run that reports 8 events without naming both id moves FAILS this criterion. Also print C-HV-GOLD-REBUILDABLE: two builds over the same input produce identical row lists",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/ac2_expected_diff.py",
+      "output_evidence": "INPUT: 263 landed article_security_mention rows (newest snapshot, no gold write) | BEFORE (unamended rule, publisher population = tier A-or-B): 12 events | AFTER (amended rule, publisher population = tier A ONLY): 8 events | SPURIOUS EVENTS ABSENT AFTER THE AMENDMENT (4, expected 4): security=992_HK_Equity span=[2026-06-01..2026-06-01]; security=COST_US_Equity span=[2026-09-02..2026-09-02]; security=DELL_US_Equity span=[2026-06-01..2026-06-01]; security=MSFT_US_Equity span=[2026-06-01..2026-06-01] | EVENT_ID MOVES (2, expected 2): security=BA_US_Equity OLD span=[2026-09-07..2026-09-08] OLD event_id=cb05fc3f69c8316b7a58a069dd3d1338947e1d3e2d0fb956be8a61e7d0ccac03 ; NEW span=[2026-09-08..2026-09-08] NEW event_id=852a1466eecda93133dfd953a3017e133169e8282e85735dce02eeeb8d6ed1ac ; OLD != NEW: True ; NEW == publication_gold._event_id(security_key, new_first_day, new_last_day): True | security=HD_US_Equity OLD span=[2026-08-17..2026-08-20] OLD event_id=81874d0515b2af1ad8853704a83ba74f33000daba41fcadcc3719593d9d8b83e ; NEW span=[2026-08-18..2026-08-18] NEW event_id=a91db4a21307cb5810cf2568ecf70bc35ffbe3245f52ea0377588b6e145d0c58 ; OLD != NEW: True ; NEW == publication_gold._event_id(...): True | C-HV-GOLD-REBUILDABLE: two builds over the same input identical: True (8 rows each) | AC2 SUMMARY: MATCHES THE NAMED DIFF | determinism: two independent runs of this script, stdout diffed byte-for-byte -- BYTE-IDENTICAL",
+      "denominator": "263 of 263 landed mention rows used as input; 12 of 12 before-events accounted for (8 survive + 4 spurious absent + 2 that moved to new ids); 4 of 4 expected spurious events named; 2 of 2 expected id moves proved with both old and new ids and the recomputation equality; rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "JUDGMENT, PRESENTED AND NOT GRADED -- status UNVERIFIABLE-BY-INSTRUMENT with status_reason naming 3.0.0_SA_CVO at L9 as the oracle. ARE THE SURVIVING 8 EVENTS THE REAL COVERAGE BURSTS? For each of the 8 print the security, the span, lead_headline, articles_total, publishers_distinct, tier_a/tier_b, and BESIDE IT the headlines of every article in the span. Then state per event whether the lead_headline names what the burst was about, and where it does not, say what the span actually looks like. Andrew's own test is the standard: an event about a DIFFERENT company's product is not this security's burst. Present the text; record NO verdict of your own",
+      "method": "live_read",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/ac4_are_the_eight_real.py",
+      "output_evidence": "STATUS: UNVERIFIABLE-BY-INSTRUMENT | status_reason: JUDGMENT criterion; oracle is 3.0.0_SA_CVO at L9; script presents counts and text only, records no verdict. | chatter_event rows PRESENTED (computed in-memory under the amended rule, no gold write): 8 total. Full presentation per event, e.g.: EVENT security=992_HK_Equity span=[2026-02-12..2026-02-12] articles_total=2 tier_a=2 tier_b=0 publishers_distinct=2 lead_headline='Lenovo Posts Earnings Beat on AI-Driven Demand' ARTICLES: tier=A publisher=wsj 'Lenovo Posts Earnings Beat on AI-Driven Demand'; tier=A publisher=sa 'Lenovo hits highest PC market share during Q3...' OBSERVATION: shares word(s) ['lenovo'] -- plausibly same topic. All 8 events printed with full span/lead/articles_total/publishers_distinct/tier_a/tier_b/article-headline detail: 992_HK_Equity x3 (2026-02-12, 05-22, 08-13, all Lenovo earnings/revenue stories, leads name Lenovo/revenue directly), BA_US_Equity x2 (08-26 FAA inspection + Wisk vertiport, both Boeing; 09-08 Miami runway overrun + August deliveries, lead names 'Boeing Jet' directly, the one tier-B co-mention is an SA analyst-ratings roundup that also covers BA), COST_US_Equity 09-14 (motor oil rationing, both articles Costco-specific), HD_US_Equity 08-18 (earnings beat, both articles Home Depot-specific), NVDA_US_Equity 06-01 (Nvidia's own PC launch, all 3 articles Nvidia-specific). Per-event observation printed for all 8: every lead headline shares content word(s) with at least one other article in its own span (e.g. 'lenovo', 'boeing'/'jet', 'costco'/'motor'/'oil', 'depot'/'home', 'nvidia') -- none of the 4 co-mention spillovers the round-9 L9 flagged (992_HK/DELL/MSFT Nvidia-PC copy-events, COST 09-02 DOJ-beef-probe event) survive in this set.",
+      "denominator": "8 of 8 surviving events presented with full span/lead/counts/article-headline detail and a per-event observation; rc=0",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (task order proof_of_spec AC4, judgment=\"true\"); the oracle is 3.0.0_SA_CVO at L9. This worker presents the span/lead/article/headline data and a plain-English word-overlap observation for the oracle to weigh; PASS/FAIL is refused by the checker and not recorded here.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Reverted event_rows's amended qualifying-day predicate to the pre-amendment publisher population (removed the 'r.get(\"signal_tier\") == \"A\"' filter, restoring the A-or-B population), leaving every other clause untouched, then re-ran AC1's new negative-control test and the AC2 script before restoring the file to its pre-mutation bytes verbatim.",
+      "expected": "AC1's test_one_tier_a_one_tier_b_two_publishers_no_longer_qualifies fails (asserts events==[], the mutated function again returns 1 event); AC2's own internal check fails (BEFORE==AFTER==12, not 12->8, 0 of the 4 expected spurious events absent).",
+      "observed": "pytest run of the single negative-control test: 1 failed -- AssertionError: assert [{'event_id': ...BA_US_Equity...}] == [] (the mutated function returned 1 event where the test demands zero). AC2 script run under the mutant: BEFORE 12 events, AFTER 12 events, 'SPURIOUS EVENTS ABSENT AFTER THE AMENDMENT (0, expected 4)', 'AC2 SUMMARY: DOES NOT MATCH THE NAMED DIFF', rc=1. File then restored from a pre-mutation copy; `diff` against that copy showed zero bytes different, and a post-revert re-run of the full test_publication_gold_event.py suite (12 passed) and the AC2 script (rc=0, MATCHES THE NAMED DIFF) both reproduced their pre-mutation results exactly.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/ac2_expected_diff.py run twice in succession on the identical, reverted file, stdout compared byte-for-byte with diff.",
+      "observed": "run 1 and run 2 stdout are byte-identical (diff produced no output): same 263-row input, same BEFORE=12/AFTER=8, same 4 spurious spans, same BA/HD old and new event_ids, same C-HV-GOLD-REBUILDABLE=True.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC3 (there is no AC3 in this cell)",
+      "reason": "task order section 4 / bounds section 3.1: THREE criteria named -- AC1, AC2, AC4 -- two mechanical plus one judgment. No fourth criterion exists to exclude from."
+    },
+    {
+      "item": "Any gold write / S3 write / S3 delete / rebuild of chatter_event, article_security_mention or chatter_daily",
+      "reason": "task order bounds section 3.3 (event_rows STAYS PURE) and AC1/AC2/AC4's own text (no gold write needed): both scripts read the newest already-landed article_security_mention snapshot exactly as it is and compute events in memory."
+    },
+    {
+      "item": "Any change to EVENT_MIN_ARTICLES, EVENT_MAX_GAP_DAYS or _EVENT_QUALIFYING_TIERS",
+      "reason": "task order bounds section 3.2: only the publisher count's population moves. Verified: neither constant's definition line was touched (single-clause diff, see artifacts_produced introduces field)."
+    },
+    {
+      "item": "Vendor call, network egress off Opal's own S3, or lib/opal_data_harvest's run command",
+      "reason": "task order section 0 clause 1 (hard constraint): none invoked; every read in this cell goes through lib.research.harvest.store against s3://opal-data-harvest, Opal-owned."
+    },
+    {
+      "item": "build_event / timeline_api.py / any served-reader change",
+      "reason": "out of scope for HVST-y-1 -- section 5 names y-2 (FWD-4/timeline page) and y-3 (timeline page build) as the cells that touch those; NEVER-1 is checked and does not fire per the task order's issuer notes (decomp s.22.2)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/AMGT_HARVST.TO-HVST-y-1.publishers-counted-over-tier-A-only.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/harvest/publication_gold.py lib/research/harvest/tests/test_publication_gold_event.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/ac2_expected_diff.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/ac4_are_the_eight_real.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/_gold_reader.py",
+      "result": "clean, rc=0 (run inside commit-gate.sh)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/harvest/publication_gold.py lib/research/harvest/tests/test_publication_gold_event.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/ac2_expected_diff.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/ac4_are_the_eight_real.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~28/scripts/_gold_reader.py",
+      "result": "OK: pre-commit gate clean for 5 of 5 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~28 <0.9.0_WK_AMGT_HARVST~28@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "committed 664f792d0e7f245f156dd7aa521af0866c14948a LOCAL on wk-hvst-y1-r10"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-y-2.re-derive-the-strength-grade-from-stored-text",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-y-2.re-derive-the-strength-grade-from-stored-text.md",
+    "group": "OTHER",
+    "vintage_commit": "4bf000096200b04f5f7dc1bf0e50864dc62085b1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "399e41b5cd0d8d753e33774ceea3fff2274b0b58",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-y-2.re-derive-the-strength-grade-from-stored-text.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~29",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~29/scripts/_common.py",
+      "kind": "script",
+      "commit_or_etag": "e08eeccb33b0e751dd8450a5b701e11ed90670e1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ-ONLY helper: load_context() (live S3 reads of the newest article_security_mention gold snapshot, every source's latest silver article rows, and a live universe_securities.build() alias table) + rederive_row/rederive_all, which call publication_gold._security_mentions and publication_gold.assign_tier on the STORED silver text -- never on the gold row's own stored mention_in_title/mention_in_lead/mention_count fields. No S3 write, no S3 delete, no vendor call anywhere in the module.",
+      "introduces": ["load_context", "rederive_row", "rederive_all"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~29/scripts/ac1_rederive_tier.py",
+      "kind": "script",
+      "commit_or_etag": "e08eeccb33b0e751dd8450a5b701e11ed90670e1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC1's literal invocation. Prints the newest-snapshot denominator, the silver-text-available count, the AGREE/DISAGREE split over measurable rows, every disagreeing row (article_key, stored tier, derived tier, four text-derived inputs), the UNMEASURABLE bucket split by reason (never folded into a match or a mismatch), and which of the four inputs were recomputed from text (all four).",
+      "introduces": ["main"],
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~29/scripts/ac2_distribution_and_totality.py",
+      "kind": "script",
+      "commit_or_etag": "e08eeccb33b0e751dd8450a5b701e11ed90670e1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC2's literal invocation. Prints the stored vs re-derived A/B/C/D tier distribution with denominator, a degeneracy flag for each, and all 16 rows of the (mention_in_title, mention_in_lead, mention_count>=2, share>=share_b) truth table with the tier each maps to, each combination run twice to show determinism, and a totality verdict.",
+      "introduces": ["main"],
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~29/scripts/ac3_score_consistency.py",
+      "kind": "script",
+      "commit_or_etag": "e08eeccb33b0e751dd8450a5b701e11ed90670e1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC3's literal invocation. Row grain: compares every mention row's stored signal_weight to WEIGHTS[stored signal_tier]. Day grain: compares every chatter_daily row's stored mention_score to the tier-weighted sum of that (security, day)'s own mention rows, denominator = chatter_daily rows checked, with one worked example (arithmetic shown) and every disagreeing pair named.",
+      "introduces": ["main"],
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE STORED TIER IS MATCHED AGAINST A RE-DERIVATION FROM THE STORED TEXT, with a printed denominator. Print: the number of gold article_security_mention rows examined out of the total in the newest snapshot; how many had their silver article text AVAILABLE (a row whose text cannot be read is UNMEASURABLE and is counted separately, never as a match or a mismatch); then AGREE / DISAGREE counts over the measurable rows, and EVERY disagreeing row named with its article_key, its stored signal_tier, the re-derived tier, and the four inputs that produced the re-derivation. A bare match rate with no disagreement list FAILS this criterion. State plainly which of the four inputs you recomputed from text and which you could not",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~29/scripts/ac1_rederive_tier.py",
+      "output_evidence": "{\"gold_rows_total_in_newest_snapshot\": 263, \"gold_rows_examined\": 263, \"silver_text_available_count\": 263, \"measurable_rows_count\": 263, \"unmeasurable_rows_count\": 0, \"unmeasurable_text_count\": 0, \"unmeasurable_security_alias_count\": 0, \"agree_count\": 263, \"disagree_count\": 0, \"disagreeing_rows\": [], \"inputs_recomputed_from_text\": [\"mention_in_title\", \"mention_in_lead\", \"mention_count\", \"share\"], \"inputs_not_recomputable\": [], \"universe_alias_source\": {\"source\": \"pool:universe/v1/2026-09-16.json\", \"as_of\": \"2026-09-16\"}} -- run twice back to back (see controls.determinism), byte-identical both times.",
+      "denominator": "263 of 263 gold article_security_mention rows in the newest snapshot examined; 263 of 263 had silver text available (0 UNMEASURABLE); 263 of 263 measurable rows AGREE, 0 DISAGREE",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AGREEMENT IS SEPARATED FROM A DEGENERATE DISTRIBUTION -- a 100% match on a corpus that is 100% one tier proves nothing. Print the tier distribution of the STORED grades and of the RE-DERIVED grades side by side (counts per A/B/C/D with the denominator), so a collapse to a single tier is visible. Then prove assign_tier's TOTALITY as its docstring claims: enumerate the (mention_in_title, mention_in_lead, mention_count>=2, share>=share_b) truth-table -- 16 combinations -- and show each maps to EXACTLY ONE tier with no combination unmapped and none mapping twice. Print all 16 rows",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~29/scripts/ac2_distribution_and_totality.py",
+      "output_evidence": "{\"measurable_rows_denominator\": 263, \"stored_tier_distribution\": {\"A\": 66, \"B\": 64, \"C\": 45, \"D\": 88}, \"derived_tier_distribution\": {\"A\": 66, \"B\": 64, \"C\": 45, \"D\": 88}, \"is_degenerate_single_tier_stored\": false, \"is_degenerate_single_tier_derived\": false, \"truth_table_row_count\": 16, \"distinct_tiers_seen_in_truth_table\": [\"A\", \"B\", \"C\", \"D\"], \"every_combination_mapped_to_exactly_one_tier\": true, \"unmapped_combination_count\": 0}. Full 16-row truth table printed (title=lead=count>=2=share>=share_b=True -> A weight 1.0; title=True,lead=False,count>=2=False,share>=share_b=False -> B weight 0.6; title=False,lead=False,count>=2=True,share>=share_b=False -> C weight 0.3; title=False,lead=False,count>=2=False,share>=share_b=False -> D weight 0.1; every one of the 16 rows deterministic_on_replay=true and tier_is_defined=true).",
+      "denominator": "measurable-rows denominator 263 of 263 for the distribution; 16 of 16 truth-table combinations printed and mapped to exactly one tier, 0 unmapped",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "THE STORED WEIGHT AND SCORE AGREE WITH THE STORED TIER. For every measurable row, show the weight assign_tier returns for the stored tier equals the weight the row carries (or state that the row carries no weight column, which is itself the finding); and at the DAY grain show that chatter_daily's mention_score equals the tier-weighted sum of its own day's rows, with the denominator of (security, day) pairs checked and every disagreeing pair named. If mention_score is not reproducible from the stored rows, say so with the arithmetic shown for one failing day -- that is FWD-4's answer either way, and a criterion that only reports \"consistent\" without showing one worked example FAILS",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~29/scripts/ac3_score_consistency.py",
+      "output_evidence": "{\"row_grain\": {\"mention_rows_total\": 263, \"rows_checked\": 263, \"rows_missing_signal_weight_column\": 0, \"weight_matches_assign_tier_for_stored_tier\": true, \"mismatch_count\": 0}, \"day_grain\": {\"security_day_pairs_checked\": 50997, \"chatter_daily_rows_total\": 50997, \"mention_score_reproducible\": true, \"mismatch_count\": 0, \"one_worked_example\": {\"security_key\": \"992_HK_Equity\", \"day\": \"2026-01-13\", \"stored_mention_score\": 0.1, \"expected_mention_score\": 0.1, \"contributing_rows\": [{\"article_key\": \"sa:4538824\", \"signal_tier\": \"D\", \"signal_weight\": 0.1}], \"arithmetic\": \"0.1000 = 0.1000\"}}}",
+      "denominator": "263 of 263 mention rows checked at row grain (0 missing signal_weight, 0 mismatches); 50997 of 50997 chatter_daily (security, day) pairs checked at day grain, 0 disagreeing pairs",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "One gold row's stored signal_tier was overwritten in memory (article_key barrons:WP-BAR-0001908718, real stored tier A planted as B, article/security text and aliases unchanged) and passed through _common.rederive_row to confirm the AGREE/DISAGREE comparator actually fires on a real mismatch rather than always reporting AGREE.",
+      "expected": "status DISAGREE, with derived_tier recomputed from the unchanged text (A) differing from the planted stored tier (B)",
+      "observed": "article_key barrons:WP-BAR-0001908718 real_tier A planted_tier B derived A status DISAGREE",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ac1_rederive_tier.py run twice back to back (two separate live S3 read passes) and diffed byte-for-byte",
+      "observed": "diff of the two full JSON outputs: no differences (0 lines)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reproducing the exact alias derivation used at the ORIGINAL build time of the current article_security_mention snapshot (build_mention's own call, whenever it last ran)",
+      "reason": "universe_securities.build() was read LIVE at measurement time (pool:universe/v1/2026-09-16.json, the newest available pool snapshot); if the pool universe changed between the gold snapshot's own build and this measurement, the alias set used here could diverge from the one production actually used. All 55 security_keys the newest gold snapshot carries resolved against this live universe read (0 missing), and 0 DISAGREE resulted, so no divergence was observed, but the two reads are not provably the identical pin -- named here rather than silently assumed identical."
+    },
+    {
+      "item": "Re-checking the trailing_7d_sum / trailing_30d_sum / baseline_30d_sum / cumulative_ytd fields of chatter_daily",
+      "reason": "out of scope for HVST-y-2 (FWD-4 is the strength grade and its weight/score; the rolling-window fields are FWD-5's/FWD-7's ordering inputs, not the grade itself named in section 1 of the task order)"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~29/AMGT_HARVST.TO-HVST-y-2.re-derive-the-strength-grade-from-stored-text.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (repo venv, ac1/ac2/ac3 CLI scripts, live S3 reads only)",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~29/scripts/ac1_rederive_tier.py | ac2_distribution_and_totality.py | ac3_score_consistency.py (each run standalone, no pipe)",
+      "result": "AC1 rc=0, AC2 rc=0, AC3 rc=0, all under the 900s bound; commit-gate.sh clean on all four .py files"
+    }
+  ]
+}

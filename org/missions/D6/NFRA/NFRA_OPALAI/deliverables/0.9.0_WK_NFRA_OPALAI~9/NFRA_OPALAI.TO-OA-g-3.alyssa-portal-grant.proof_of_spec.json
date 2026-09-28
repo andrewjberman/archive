@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-g-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "20b2b561f5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "18f9409711",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-g-3.alyssa-portal-grant.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~9/EGRESS_LEDGER.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One read-only Microsoft Graph lookup, GET /v1.0/users filtered on displayName eq 'Alyssa Keith', at 2026-09-27T00:42:52Z via az rest under the operator's existing sign-in to tenant 6810043e-****; rc=0; exactly 1 match. The file holds no identifier."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "portal_only_active=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/g3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "items=159 policy=10 active_profiles=1 portal_only_active=1 operations=[['query']]\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 active principal_profile is portal-only, over 10 POLICY records out of 159 items in gateway-access-state-table. Run once from the workspace root after the act; the script bounds its scan with timeout 150.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "portal_only_active=1 operations=[['query']] -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/g3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "items=159 policy=10 active_profiles=1 portal_only_active=1 operations=[['query']]\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 portal-only active grant carries operations exactly ['query'], over 10 POLICY records out of 159 items. Run once from the workspace root after the act.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. As a discriminating pre-state, g3.AC1.sh was run before the act.",
+      "expected": "Before the act, the scan reads portal_only_active=0 and RESULT: FAIL, so the criterion can fail.",
+      "observed": "Before the act: items=156 policy=7 active_profiles=0 portal_only_active=0 operations=[], RESULT: FAIL, exit=1. After: portal_only_active=1, RESULT: PASS.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Each AC was run once, as the order names. AC1 and AC2 read the same scan.",
+      "observed": "AC1 and AC2 printed identical scan lines (items=159 policy=10 active_profiles=1 portal_only_active=1 operations=[['query']]).",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPALAI-Z-W9-S5: the face selects channels 'whose verdict is not deny', but verdict_class is carried only by artifact rows, never by a channel. The worker granted the 10 channels that hold at least one indexed row whose verdict_class is not deny, and left out the 5 channels that have no rows. OBSERVATION, INERT, UNDER_INVESTIGATION."
+  ],
+  "session_log": "2026-09-27 UTC. Worktree C:/tmp/oa-9 (wk-NFRA_OPALAI-9, TREE-OK). CLOUD was merged by safe-merge at a60f285f94 (rc=0).\n(1) The operator role's trust admits account principals other than opal-gateway-role. sts assume-role into opal-gateway-access-admin returned rc=0; the credentials were held in a temp file outside the repo and deleted after the act.\n(2) 00:42:52Z: one read-only Graph lookup (see EGRESS_LEDGER.md) found exactly 1 match.\n(3) The candidate was built in a temp file outside the repo: tid from the order, oid and mail from the lookup, masters/datasets [] and accounts/columns {}, operations ['query'], dates rolling_complete_window, and 10 portal_channels (W9-S5).\n(4) Pre-act g3.AC1.sh: portal_only_active=0, FAIL.\n(5) The act ran with rc=0: ACTIVATED profile_revision=1 grant_revision=1. The scope diff was captured masked.\n(6) The temp lookup, candidate, credential and output files were deleted; 0 remained.\n(7) AC1 and AC2 ran from the workspace root: both read RESULT: PASS, exit=0.\nTHE LIVE WRITE, not a repo artifact (PROOF_OF_SPEC kind has no DynamoDB value, so it is recorded here): dynamodb://gateway-access-state-table POLICY#<masked principal> (principal_profile rev 1, data_entitlement grant rev 1, operator_audit append). Act at 2026-09-27T00:48:46Z (UTC read after rc): python infra/aws/ec2/opal-gateway/ops/schwab_entitlement_admin.py activate --candidate <temp file outside the repo, deleted after the act> --approver andrew@opalinvest.com --source-authorization org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260926_022xZ_CTO_O_OPEN_CALLS_1_TO_6_ANSWERED.md --summary 'Alyssa Keith: portal figures only (OA-g-3)', run from /c/tmp/oa-9 (wk-NFRA_OPALAI-9 @a60f285f94, CLOUD merged) under assumed-role/opal-gateway-access-admin/wk-nfra-opalai-9-oa-g-3; the command's own sts:GetCallerIdentity check passed; rc=0; 'ACTIVATED profile_revision=1 grant_revision=1'. Scope diff (masked; it carries no identifier): masters +[] -[]; datasets +[] -[]; accounts {}; columns {}; operations +['query'] -[]; dates old_mode None -> new_mode rolling_complete_window; portal_channels +['benchmarks_and_models','capital_markets','correlations_factors','macro_rates','market_regime_trending','mdpf_model_portfolios','peers','positioning_holdings','sentiment_news_mood','valuation'] -[]. Principal tid 6810043e-****, oid ********-****, email masked. Scan before the act (g3.AC1.sh): items=156 policy=7 active_profiles=0 portal_only_active=0. After: items=159 policy=10 active_profiles=1 portal_only_active=1, so exactly 3 POLICY items were added (profile, grant and audit in one operator_transact) and no other POLICY record changed.\nPUSH STATE: LOCAL, never pushed.",
+  "compiler_tools": [
+    {
+      "tool": "az rest (Microsoft Graph)",
+      "invocation": "GET /v1.0/users?$filter=displayName eq 'Alyssa Keith'",
+      "result": "rc=0; 1 match"
+    },
+    {
+      "tool": "infra/aws/ec2/opal-gateway/ops/schwab_entitlement_admin.py activate",
+      "invocation": "as in deploy_evidence, under assumed-role/opal-gateway-access-admin",
+      "result": "rc=0; ACTIVATED profile_revision=1 grant_revision=1"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see the worker report; only the exit code is the verdict."
+    }
+  ]
+}

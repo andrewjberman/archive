@@ -7,10 +7,10 @@ after BOTH halves are committed and `AMGT-tt-1` is drained on CLOUD. It is round
 
 **Writers of the named property:** the `/print?format=rich` body has ONE writer, `render_pack.build_rich_text`. N = 1.
 
-| act | what it MAY touch | expected outcome, read from the producer's own rule at signing | rollback |
+| act | what it MAY touch | expected outcome, read from the producer's own rule at signing (re-read at tt-1's drain @00ffce7fbf) | rollback |
 |---|---|---|---|
 | A. ONE artifact write `research/opal-amgt-scoped-api.zip` in `opal-313476888478-lambda-artifacts` | that one object | a new VersionId | the current VersionId (`T9JIi3D.nKZ5zd_bNaHzOh4_mQWF8.80`, re-read by the lane at build and recorded) stays; a re-point is a copy, never a delete |
-| B. ONE `safe-apply` on `infra/aws/terraform/harvest/` moving ONLY `opal-amgt-scoped-api`'s code, built at CLOUD at or after tt-1's drain | every route of that function -- the wildcard `/api/scoped/amgt/*`. The closure diff against the deployed build input is printed in the entry, file by file, before the apply | `/print?format=rich`, BOTH branches of tt-1's rule, read from its landed code at signing: (i) a name whose page shows a posture absence gains in the export the page line it lacked (header form or tab form), byte-identical to the page; (ii) a name whose page shows a SERVED posture, or whose export already carried both forms, is byte-unchanged in its posture section. Nothing else in the body changes. `/print` pdf: UNCHANGED. Every other route: no change | re-apply at the recorded prior VersionId; never a delete |
+| B. ONE `safe-apply` on `infra/aws/terraform/harvest/` moving ONLY `opal-amgt-scoped-api`'s code, built at CLOUD at or after tt-1's drain | every route of that function -- the wildcard `/api/scoped/amgt/*`. The closure diff against the deployed build input is printed in the entry, file by file, before the apply | `/print?format=rich`, BOTH branches of tt-1's rule, read from its landed code at signing: (i) a name whose page shows a posture absence gains in the export the page line it lacked (header form or tab form), byte-identical to the page; (ii) every other posture state is byte-unchanged in its posture section: no posture on the payload (`:684-685`), READ_FAILED (`:687-693`), and SERVED with a verdict other than `absent` (`:717-718`). Nothing else in the body changes. `/print` pdf: UNCHANGED. Every other route: no change | re-apply at the recorded prior VersionId; never a delete |
 
 **The lane STOPS on any of five limbs:** (1) the closure diff names a file beyond `lib/research/print/render_pack.py` that reaches a
 route this half does not name; (2) `build_pack` changed; (3) the diff touches `scoped_amgt.py`'s pdf branch -- the `if fmt == "rich":`
@@ -20,4 +20,17 @@ landed; (5) the served `/print` pdf OUTPUT moves (graded on output against a pre
 The harness change in tt-1 (`exportCompare.harness.cjs`) is not deployed; it is the instrument AC2 grades with. The build
 pip-downloads its pinned wheels from PyPI (declared). No peers batch and no other served write.
 
-Signed: `2.0.0_SA_COO~Z`, 2026-09-26.
+## THE EXPECTED OUTCOME'S TWO FALSIFIERS (the CTO's conditions, 18:30Z)
+
+1. **`abs_missing` moves 86 -> 0 over the 95-name population**, a measured before/after: before = round 44's close run
+   (`round44/close-run/served_live95.tsv` @f4e94c87b7, 86 of 95 at 1, read against `LK9h47ju...DcO4s=`); after = tt-2 AC2 on the
+   new `CodeSha256`. Locally the same move is tt-1 AC1 (base 9 of 95 at 0, `round45/base-runs/tt-1.AC1.log`).
+2. **The OK predicate CONSULTS `absDiff.missing`, shown by a planted control that makes it FAIL**: tt-1 AC2 runs the harness on the
+   two pre-fix served exports pinned in `round45/checks/controls/` (RKT, AMD; each ABSENCES missing=1) and requires NOT OK (rc=1) on
+   both. At base it reads OK on both (`round45/base-runs/tt-1.AC2.log`), so the control is known to discriminate.
+
+Limb 5 is graded at L2/L7 on a before/after pair whose two captures read DIFFERENT `CodeSha256`, as rs-2's did.
+
+Signed: `2.0.0_SA_COO~Z`, 2026-09-26. Amended ~18:4xZ at the CTO's message (18:30Z): the two falsifiers named. Row Z-S289 corrects round 44's 95 of 95.
+
+**RE-READ AT tt-1's DRAIN @00ffce7fbf (the CTO's 18:12Z ask).** Landed rule `lib/research/print/render_pack.py` `_posture_markdown` :660-718. Branch (i) as landed: non-SERVED writes the header form `:701` (no tail) and the tab form `:703` (tail); SERVED + `absent` writes the tab form `:711` (no disclaimer) and the header form `:714-716` (disclaimer). Branch (ii) was INCOMPLETE as first written -- it named only the SERVED non-absent state; the landed rule has two more unchanged states (no posture, READ_FAILED), now named above. No other change.

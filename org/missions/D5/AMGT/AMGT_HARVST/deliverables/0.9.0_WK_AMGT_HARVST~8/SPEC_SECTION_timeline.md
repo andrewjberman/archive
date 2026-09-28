@@ -18,8 +18,14 @@ page belongs to `AMGT_RESAPP`. The page shell (`AMGT_RESAPP_FRONTEND_FRAMEWORK_2
 section 1, and the synthesis's amended shell) is: a persistent top panel, then three tabs
 (Thesis, Peers, Coverage), with Print/Drafting as an upper-right action.
 
-**The timeline lives at the top of the Coverage tab**, above the existing article list (S4, the
-Coverage Reader). This is a placement, not a new tab: dissecting a day or an event on the
+**The timeline mounts in the PAGE HEADER, directly above the company feed's article list.**
+*(AMENDED 2026-09-28 per `ledger/CTO_RULING_TIMELINE_PLACEMENT_20260928.md` @`277b0795ac`. The
+SUPERSEDED text read: "The timeline lives at the top of the Coverage tab, above the existing article
+list (S4, the Coverage Reader)." **`AMGT_RESAPP` RETIRED the Coverage tab into the header feed and
+deleted it** -- the built page carries five tabs and no `CoverageTab.tsx` -- and that feed is the surface
+that now holds Coverage's content (`AMGT_RESAPP_PRD.md:843`, on Andrew's header word at `:1891`). So the
+timeline follows the content it was placed beside. Row `AMGT_HARVST-Z-S33`.)*
+This is a placement, not a new tab: dissecting a day or an event on the
 timeline drives the SAME article list S4 already renders below it -- a click sets a filter on
 that list rather than opening a second list elsewhere on the page. This mirrors the framework's
 own instruction that a surface without an explicit home is placed by the design-spec worker
@@ -247,7 +253,9 @@ render.
 On the validation security, Lenovo (`992_HK_Equity`), once `HVST-h-5`/`HVST-h-6`/`HVST-h-10`
 have run and this spec is approved and built:
 
-**FWD-5:** an analyst opens Lenovo's security page, reaches the Coverage tab, sees the day-by-day
+**FWD-5:** an analyst opens Lenovo's security page, sees in the PAGE HEADER above the company feed
+*(AMENDED 2026-09-28, same ruling @`277b0795ac`; SUPERSEDED: "reaches the Coverage tab". FWD-5's own
+ENDPOINT text is NOT amended and never named a tab -- only this spec's walk changes.)* the day-by-day
 line dense from 2026-01-01 with `mention_score` plotted by default, picks a day that carries
 `articles_total > 0`, and the day opens to its article list ordered strongest first (tier A
 before B before C before D, `mention_count` descending within a tier) -- each row showing

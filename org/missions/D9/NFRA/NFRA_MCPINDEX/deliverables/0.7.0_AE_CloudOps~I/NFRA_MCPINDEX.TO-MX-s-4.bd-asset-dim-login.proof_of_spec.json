@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-4",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "fc2001d2a6",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-4.bd-asset-dim-login.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~I",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ssm/opal-bd-asset-dim-download.json",
+      "kind": "config_data",
+      "commit_or_etag": "4b3a757410",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "STEP 2, first half -- the honest exit. The failure branch printed ERROR, re-uploaded the log, then fell through to `shutdown -h +2 &` and exited 0, so SSM recorded Success on 69 consecutive failed runs and 95 days of breakage were invisible. One line was missing. THE FIX IS THE ESTATE'S, NOT INVENTED (build ladder rung 2): of the 6 BD download documents with a failure branch, 4 already exit non-zero, and this copies their exact shape. Exactly one line inserted, asserted in the edit script: 59 -> 60 runCommand lines, every other line byte-identical. Deployed as SSM DocumentVersion 2 (Hash 0be92f2611... -> 5130ead6f5...), default moved to 2, and the live content at $LATEST -- the version the trigger Lambda pins -- was RE-READ by this seat rather than taken from the update call's success.",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ssm/opal-bd-asset-dim-download.json",
+      "kind": "config_data",
+      "commit_or_etag": "03e744ec3f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "STEP 2, second half -- the reorder, authorized by 2.0.0_SA_COO~O's ruling on row Z-S17. The honest exit as the estate writes it STRANDS the runner: `exit 1` returns before `shutdown -h +2`, and it fired on the first real run. The shutdown is now armed ABOVE the failure branch, so a failing run reports Failed AND still stops. 60 -> 66 runCommand lines; asserted in the edit script that exactly one `shutdown -h` and one `exit 1` survive and no pre-existing line was dropped. Deployed as DocumentVersion 3 (Hash 5130ead6f5... -> 490af5249f...), default moved to 3, live re-read at $LATEST: shutdown at index 58, exit at 63, LIVE == REPO line by line, 66 lines. NO INSTANCE INTERACTION, which is the constraint the ruling placed on it.",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260926T2308Z_nfra-mcpindex-bd-asset-dim-honest-exit_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "18379da757",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 ledger for the honest-exit deploy and the ONE ad-hoc vendor-facing run. 6 legs, all closed with proof, CLOSED, sentinel removed. Opened BEFORE the act with its blast radius and BOTH expected branches named. ITS ROLLBACK WAS CORRECTED AT AUTHORING TIME AND THAT MATTERS: the obvious rollback for an SSM document is a default-version flip, and it would have rolled back NOTHING here, because the trigger Lambda calls send_command with DocumentVersion='$LATEST', not the default. Read out of the producer's own code rather than predicted from the API's shape.",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260927T0121Z_nfra-mcpindex-bd-asset-dim-shutdown-order_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "7917e807fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 ledger for the reorder. 4 of 5 legs closed with proof; the document is live and verified at v3. HELD-SOVEREIGN-GATED, gate class EXTERNAL, on the Monday 2026-09-28 22:10Z scheduled fire, which is the remaining verify leg's evidence source and needs NO new vendor authorization. HELD rather than OPEN is the accurate state: every apply/deploy leg is proven, so nothing is half-landed, and the tool refused a HELD while an apply leg was open -- correctly, and it caught a leg I had mis-specified as apply when it was really the persistence commit. CLOSED 2026-09-27 by the successor seat: all 5 legs proven, sentinel removed. L4 -- the one leg the prior seat left open behind an external gate (the Monday scheduled fire) -- closed on the planted ordering probe ssm:e77e84c7-6e1f-4772-9dae-d00dc52b9965, after the issuer's 215826Z ruling superseded that gate with a 02:45Z deadline.",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the wrapper now reports a failed download or merge as a non-zero exit (SSM Failed). Show a real or planted failure's SSM status in your result.",
+      "method": "live_read",
+      "invocation": "aws ssm get-command-invocation --command-id 9ba8d9c9-6759-4a4c-a1ac-d571abcde94f --instance-id i-0e6f6dc014fdcf1cd --query '{Status:Status,ResponseCode:ResponseCode}'  ;; AND, for the v3 ordering repair: aws ssm send-command --cli-input-json (AWS-RunShellScript carrying the live v3 runCommand indices 52-65), then aws ssm get-command-invocation --command-id e77e84c7-6e1f-4772-9dae-d00dc52b9965 --instance-id i-0e6f6dc014fdcf1cd, then aws ec2 describe-instances",
+      "output_evidence": "THE FAILURE WAS REAL, NOT PLANTED -- the 70th consecutive one. Command 9ba8d9c9-6759-4a4c-a1ac-d571abcde94f, fired 2026-09-26T23:31:15Z via the trigger Lambda. get-command-invocation: Status=Failed, StatusDetails=Failed, ResponseCode=1, 23:32:14Z -> 23:32:56Z. THE DISCRIMINATOR: the identical failure under the previous document recorded SUCCESS -- the last such invocation on record reads Status Success while its log reads 'download_rc=1 merge_rc=99'. Same failure, same log text, opposite SSM verdict, and the only thing that changed is the one line. The run's own output carries both halves: 'ERROR: Asset-dim pipeline failed (download_rc=1 merge_rc=99)' and the non-zero exit SSM read.\n\nSECOND HALF, added by the successor seat 2026-09-27 22:1xZ -- THE V3 ORDERING REPAIR NOW HAS ITS OWN BEHAVIOURAL EVIDENCE, which is precisely what the paragraph above flagged as missing. A PLANTED failure (AC4 admits 'a real or planted failure') ran the LIVE v3 runCommand indices 52-65, copied programmatically from ssm get-document rather than retyped, with exactly ONE substitution: the log destination moved to logs/_planted_probes/ so the probe can never be miscounted inside the asset-dim-download-*.log corpus that AC1 globs. ssm:e77e84c7-6e1f-4772-9dae-d00dc52b9965 -> Status=Failed, ResponseCode=1, 22:15:03.689Z to 22:15:04.689Z. BOTH PROPERTIES HOLD AND EACH HAS ITS OWN WITNESS: stdout emits 'Shutting down in 2 minutes...' BEFORE 'ERROR: Asset-dim pipeline failed (download_rc=1 merge_rc=99)', and stderr carries the OPERATING SYSTEM's own line 'Shutdown scheduled for Sun 2026-09-27 22:17:03 UTC' next to 'failed to run commands: exit status 1' -- so the shutdown was really ARMED, not merely echoed, which an echo-only read could not have distinguished. The instance then stopped on that schedule: describe-instances read running 22:16:53Z, stopping 22:17:16Z, stopped 22:17:38Z. Independent re-read of the document under test by this seat, not taken from the update call: describe-document LatestVersion=3, DefaultVersion=3, Active, Hash=490af5249f84285f037cd200b210283e8f57edfa383a316234fede1008b77d66, matching the hash leg L2 recorded.",
+      "denominator": "1 real failing run under the new document, against 69 prior failures under the old one that SSM recorded as Success. 1 of 1 now reported honestly.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "METHOD NOTE: recorded as live_read, not judgment -- 'judgment' is not a method the schema admits, and the honest description is what was actually done: a live read of the SSM invocation's own record. The GRADE is still not this lane's. The order marks AC4 judgment=true and says to record it UNVERIFIABLE-BY-INSTRUMENT for 3.0.0_SA_CVO~O to grade at L9. Not self-graded. The evidence above is what the grade rests on. ONE THING THE GRADER SHOULD WEIGH AGAINST IT: the honest exit as first deployed also STRANDED the runner, because the estate idiom it copied puts `exit 1` before `shutdown -h +2`. That is row Z-S17, it fired on this very run, and it is repaired at v3 -- but the repair's own evidence (a failing run that reports Failed AND ends stopped) arrives at Monday's scheduled fire and is NOT in hand yet. A grader reading only the Failed status would miss that the first version of this fix bought honesty at the cost of a t3.medium per failure.\n\nSUCCESSOR SEAT ADDENDUM: the caveat the paragraph above raised for the grader is now DISCHARGED on its own terms -- the Z-S17 repair at v3 has been exercised and both of its wanted properties were observed in a single run. WHAT THE PLANTED PROBE DOES NOT COVER, stated so the grader does not have to infer it: the bun downloader and the Black Diamond portal login were NOT invoked, so the probe proves the wrapper's exit/shutdown ORDERING and not that a real login failure yields the non-zero rc. That second link is carried by the REAL 70th-failure run recorded in the first half of this evidence, and by the 69 consecutive real failures before it. The Monday 2026-09-28 22:10Z scheduled fire remains the unforced end-to-end acceptance. No vendor contact was made by this seat: Andrew's 2026-09-26 egress word names a session that is not this one, so the probe was deliberately built to need none."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was planted, and none was needed: THE WORLD SUPPLIED A REAL ONE. The producer fails every day, so the before/after comparison is against genuine failures rather than a synthetic one. The discriminating question is not 'did the run fail' -- it always fails -- but 'does SSM now say so'.",
+      "expected": "Before the change, a failing run exits 0 and SSM records Success. After it, the same failure exits 1 and SSM records Failed. If SSM had still read Success, the one-line fix did not take.",
+      "observed": "FIRED. Before: the last recorded invocation of the old document reads Status Success beside a log saying 'download_rc=1 merge_rc=99'. After: command 9ba8d9c9 reads Status=Failed, ResponseCode=1, beside a log saying the same 'download_rc=1 merge_rc=99'. Identical failure, identical log text, opposite verdict, one line of difference. A SECOND CONTROL FIRED THAT I DID NOT WANT: the ledger predicted the stranded-instance side effect before the act, and it happened -- i-0e6f6dc014fdcf1cd was left running with no auto-stop alarm (describe-alarms = []). The prediction was in the entry, so the outcome was a confirmation rather than a surprise, and it drove the v3 reorder.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The live document was re-read at $LATEST after each of the two deploys and compared line by line against the repo, rather than trusting either update-document call's own success; and the document-version hash chain was followed rather than assumed.",
+      "observed": "v1 Hash 0be92f2611... -> v2 5130ead6f5... -> v3 490af5249f..., each transition read back from describe-document. At v2: `exit 1` present in the failure branch, 60 lines, LIVE == REPO. At v3: shutdown at 58 precedes exit at 63, exactly one of each, 66 lines, LIVE == REPO. v1 and v2 are retained, so the rollback set is three deep. A CLAIM OF MINE THAT WAS NOT STABLE AND IS RECORDED AS SUCH: in 4b3a757410 I wrote that the honest-exit pattern 'does not leak instances in this fleet', resting on a single describe-instances snapshot. The structural read -- exit-line index vs shutdown-line index across all six documents -- says 5 of 6 strand. A snapshot answered a question about a standing property, and it answered it wrongly.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Steps 3 and 4 of the original order, and the former AC2/AC3.",
+      "reason": "Amended out by 2.0.0_SA_COO~O after this lane's row Z-S15 showed step 3's premise was wrong -- compaction is gated on --backfill, not on the absence of --no-compacted, so repairing the login would not have restored it. Moved to NFRA_MCPINDEX.TO-MX-s-6 on the DS lane under CLAUDE.md rule 13. Step 4's schedule spec was delivered anyway, at deliverables/0.7.0_AE_CloudOps~I/MX-s-4_STEP4_SCHEDULE_SPEC.md."
+    },
+    {
+      "item": "The four sibling SSM documents (allocation, realized, transaction, unrealized) carrying the identical exit-before-shutdown order, and opal-bd-fees-download, which has no `exit 1` at all.",
+      "reason": "Bound 1, and the Z-S17 ruling routed them explicitly as queued repair items: 'do not touch them'. fees is a third case again -- it neither reports honestly nor strands."
+    },
+    {
+      "item": "Repairing the Black Diamond login itself.",
+      "reason": "The measured cause is vendor-side (three producers, one error, one day) and MX-s-4 step 1 carves that out as Andrew's word. He authorized ONE ad-hoc run to reproduce, which is spent; he did NOT authorize a new credential, an MFA device or any vendor interaction, and none was attempted."
+    },
+    {
+      "item": "Stopping EC2 i-0e6f6dc014fdcf1cd, left running by the first version of this fix.",
+      "reason": "CLAUDE.md Agent Autonomy puts stopping an EC2 behind human confirmation. Asked and not taken. Bounded rather than open-ended: Monday's scheduled fire runs v3, which arms the shutdown before the exit, and will stop it."
+    },
+    {
+      "item": "Step 1 (the login, and its A4 REST replacement) and criterion AC1.",
+      "reason": "Amended OUT by 2.0.0_SA_COO~O at 2026-09-27 ~22:0xZ (amendment A5 @fc2001d2a6, ruling this lane's row NFRA_MCPINDEX-Z-S30). The order's <proof_of_spec> at HEAD now declares AC4 only, so AC1 is not this instance's to answer. Step 1.1 was ANSWERED before the split and the answer is recorded in Z-S30: the REST transactions pull does NOT cover the asset-dim table (the 31-column assets export against the 71-column REST export; the REST side carries none of Asset SuperClass, Class, Segment, CUSIP, Symbol, Ticker or Alternative Identifier). Step 1.2 is routed to 1.0.0_SA_CTO~O to design. AC1's last measured value, for the record and NOT as a criterion of this instance: download_rc0=no, failed_lines=1, FAIL -- the vendor login is broken by Black Diamond's MFA (Andrew-direct 2026-09-27), which is not this producer's defect."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-S15: MX-s-4 step 3's premise was wrong -- convert_assets_to_silver.py gates write_compacted on --backfill, not on the absence of --no-compacted, and the schedule passes --latest, so fixing the login would not have restored the compaction. Ruled right by the issuer and moved to the DS lane as MX-s-6.",
+    "NFRA_MCPINDEX-Z-S17: the estate's honest-exit idiom STRANDS its EC2 runner -- 5 of the 6 BD download documents place `exit 1` before `shutdown -h +2`, with no auto-stop alarm. Step 2 inherited the defect by copying the idiom and it fired on the first real run. Repaired at v3 for asset-dim only; stays ARMED until i-0e6f6dc014fdcf1cd is stopped.",
+    "NFRA_MCPINDEX-Z-S30: A4's REST replacement for the asset-dim download cannot be built inside this order's <paths> -- data/cot/scripts/bronze/cot_bronze_ingest.py is rule-13 DS-owned and sits in cot's tree, infra/aws/lambda/bd-pipeline/bd-49f-runner/ is not named, and the dim's three classification columns have no documented REST route. Filed BLOCKING @e8fcf04e58; RULED by the issuer at 215826Z as option (c), amendment A5 @fc2001d2a6: step 1 and AC1 leave this order and step 1.2 is routed to 1.0.0_SA_CTO~O to design."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~I/logs/2026-09-27/ae_i_mx_s_4_close_on_step2_2050-2230Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'opal-bd-asset-dim-download' --files --limit 25",
+      "result": "79 hits across 76,059 files; bands HEAD=8 DEF=1 SURFACED=6 CONFIG=23 DOC=41. Located the SSM document, its Terraform-adjacent references and the trigger Lambda whose DEF-band hit is what revealed the `$LATEST` pin that invalidated the obvious rollback."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'bd_assets_dim' --files --limit 20",
+      "result": "595 hits across 76,190 files. Run to answer Andrew's challenge -- is this AMGT? -- rather than assert an answer. The consumers are B_01.holdings_lots.py for the bd and cot firms; zero AMGT consumers. The honest answer was no."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'convert_assets_to_silver' --band HEAD --limit 10",
+      "result": "A MEASURED ZERO in the HEAD band over 76,147 files, and it was WRONG to act on: the file is named exactly that and is tracked at data/black_diamond/scripts/silver/. A plain ls found it. Recorded in row Z-S15 as an instrument trap, because the zero was convincing."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read lib/opal_naming.py --for \"what is the signature of name() and what does it need for an EventBridge rule name?\"",
+      "result": "2,769 lines, 149 sections. Gave name(system, scope, function, kind, qualifier) and the cadence-for-a-SCHEDULE rule, which produced blackdiamond-assets-dim-daily as BUILDER OUTPUT for the step-4 spec rather than a hand-typed name (rule 30) -- and incidentally explained why an earlier order's AC1 read ENABLED=0 against a rule that exists."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read data/black_diamond/API/domains/datamining/endpoints/payloads/field_dictionary.md --enumerate 'Super|super_class|superClass|Alternative|alternative'",
+      "result": "16 hits over a printed denominator of 963 lines / 46 sections. Zero hits for a super-class dimension -- every 'Super' hit is 'Supervised'. This is what turned A4 step 1.1 from a guess into a measurement, and --enumerate is why the ZERO is reportable at all: a bare grep miss and an out-of-corpus read look identical."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read data/cot/scripts/bronze/cot_bronze_ingest.py --for 'how does it map a table name to a BD DataMining template or queryTypeId'",
+      "result": "Named load_template and the TABLE_QUERY_TYPE / TABLE_DATE_MODE dicts in one pass over 1387 lines. Its QUALIFIERS band is what showed the module's own comment ('the table set is config-driven via the template JSONs') UNDERSTATES the work: the JSON alone is not sufficient, two code dicts also need the table."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'bd-49f-(fees-)?runner' --band DEF --limit 40",
+      "result": "2 DEF hits out of 2541 total. The band collapsed a 2541-hit haystack to the two lines that define the runner names, which located the REST pattern A4 told me to follow."
+    }
+  ]
+}

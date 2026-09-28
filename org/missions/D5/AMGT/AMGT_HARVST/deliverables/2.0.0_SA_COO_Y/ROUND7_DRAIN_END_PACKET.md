@@ -6,9 +6,13 @@ ORDER; any issuer act in neither is invisible here."* The CTO adopted that as a 
 made the packet enrichment item 4. **This is that artifact: the record of ISSUER acts, which is the class the
 L8 compile structurally cannot see.**
 
-⛔ **STATUS: OPEN. `HVST-v-2` is still executing.** Every section below is final; section 6 is a stub until
-`v-2` drains. **A packet published as complete while a cell runs would assert a terminal state that does not
-exist** -- the same defect this round was cut to clean up.
+⛔ **STATUS: STILL OPEN, AND FOR A DIFFERENT REASON THAN BEFORE.** Both cells' WORK is complete and drained
+(`3dba19e7cb`, `1a808524ba`) and section 6 is now filled with measured results. What keeps this packet open
+is that **`HVST-v-2` reads `<status>pending</status>` at HEAD** and cannot be flipped: its instance is
+INVALID on one annotated field, only the worker's serial may edit that file, and the worker cannot be
+resumed (row `Z-S29`). **A packet that called itself complete over an order the record still shows as
+pending would assert a terminal state that does not exist** -- the same defect this round was cut to clean
+up, which is why it stays open rather than being tidied.
 
 ---
 
@@ -96,12 +100,44 @@ not by a list of publishers, which is what would have rotted.
   the same parquet writer. **An open exposure on a second table, declared by the worker rather than silently
   widened.**
 
-## 6. `HVST-v-2` -- STUB, THE CELL IS EXECUTING
+## 6. `HVST-v-2` -- COMPLETE AND DRAINED (`1a808524ba`). THE WORK SUCCEEDED; THE INSTANCE IS INVALID
 
-To be completed at the drain: AC1's held-row delta, AC2's capture against the measured ceiling of 25, AC3's
-`DENIED -> PARTIAL` movement, the ledger row, and AC4's evidence for the CVO. **AC4 is the round's ONLY
-judgment criterion and it exists because round 6's L9 was VACUOUS** -- 0 of 8 graded against a control reading
-1, so every mechanical column could read green over a result nobody assessed for sense.
+- **AC1 PASS** -- the 20 HELD rows reached silver, **+20 (0 -> 20)**, uploader rc 0, `written_rows 20`,
+  `remaining_pending 0`, **no vendor call**. `v-1`'s fix exercised on the same sa bytes that raised at 02:1xZ.
+- **AC2 PASS** -- ONE capture. **4 vendor requests, all HTTP 200, `auth_refreshes: 0`**, no browser, clause 4
+  never reached. sa listing_hit **20 -> 40**, bronze `news_listing` +1, silver article parts +2. Ledger row
+  landed in the same commit. Attempted **8 of 89**, skipped-for-missing-symbol **0 of 8**, queried **1 of 8**,
+  **cooldown-suppressed 7 of 8** -- job 1's `Timeout` cooled the publisher and cost the other seven.
+- **AC3 PASS** (pure, `GOLD WRITE PERFORMED: none`, two runs byte-identical) -- population A, the **6**
+  securities `build_daily` is invoked with: **0 of 6** sa spans, **0 of 1614** rows moved. Population B, the
+  89-name universe: **1 of 89** spans (2026-07-15 to 2026-09-26), **74 of 23941** DENIED -> PARTIAL,
+  `publishers_covered 1 of 5`, `COMPLETE` **0 times** in any moved row.
+- **AC4 RECORDED, NOT GRADED** -- 40 of 40 sa rows censused; population A files **0 of 40**, population B
+  **20 of 40**; the queried symbol corroborated by the row's own content links in **36 of 40**. The CVO
+  grades it at L9. It is the round's ONLY judgment criterion, and it exists because round 6's L9 was VACUOUS
+  at 0 of 8 against a control reading 1.
+
+⛔ **THE INSTANCE IS INVALID (rc=1) AND THE ORDER STILL READS `pending` AT HEAD.** Two
+`invocation-alignment` violations, neither of them the work: AC1's recorded `invocation` field is 342
+characters where the command is 132, the remainder being the worker's own annotation, and the limb compares
+the whole string; AC2 diverges on **one space**, because the limb builds `(\S+)` per placeholder and this
+device's workspace path contains one. **I fixed AC2** (literal path, `<placeholders>NONE</placeholders>`)
+and **AC3** (reverted a re-path I should not have made). AC1 needs one annotation moved to a field the limb
+does not compare -- **authorized under five conditions (`7d5f8279a8`) and NOT YET DONE, because
+`PROOF_OF_SPEC.schema.json` sets `additionalProperties: false` and permits no note field.** Row `Z-S29`.
+
+⚠ **AND THE CVO's ROUND-7 COMPILE IS PARKED ON EXACTLY THAT FLIP.** `3.0.0_SA_CVO~Z` wound down and its
+checkpoint parks three L8/L9s, one of them *AMGT_HARVST 7 on TO-HVST-v-2 reaching a terminal `<status>`*.
+So the one unlanded field gates the round's compile, and whoever next holds that serial inherits it.
+
+⭐ **WHAT CHANGED AFTER THE DRAIN, and it is why AC3's zero is no longer the end of the story:** `Z-W22-S3`
+was the finding that the rows landed and the grade did not move -- `_listing_hit_security_match` matched a
+security's ALIASES against a query written as a VENDOR SYMBOL, so `'Lenovo'` could never match `'LNVGY'`.
+**That join is now fixed (`4cc54df506`)**, in the reader AND in the securities builder, because the
+securities file carried `sa_symbol` on 0 of 191 rows and a listing row carries no `security_key` at all.
+**The measured ceiling is 21 of 191 securities, and it is the JOIN KEY that caps it, not the symbol count:**
+only 32 of 89 research folders carry a `bloomberg_ticker`, the sole key on both planes. Re-running AC3 over
+the fixed reader is round 8's, not a retro-edit of this instance's recorded outputs.
 
 ## 7. WHAT IS CARDED AT ANDREW OUT OF THIS ROUND
 
@@ -117,3 +153,31 @@ judgment criterion and it exists because round 6's L9 was VACUOUS** -- 0 of 8 gr
    **proven-valid** sa session. ⚠ **This corrects a claim this seat made to the CTO** -- that the identity gap
    was "untouched by" the word. It is not; it is the thing the word most plausibly moves.
 4. **The 5 best-effort identities**, parked by his own instruction.
+
+## 8. WHAT HAPPENED TO THOSE FOUR CARDS AFTER THE DRAIN -- RULED 2026-09-27, three of four MOVED
+
+Appended rather than rewritten, because section 7 is what was true AT THE DRAIN and this is what is true now.
+**Three of the four cards are no longer at Andrew.** A carded item left standing after its ruling reads as
+open work, which is the same stale-record debt this packet's section 6 complains about elsewhere.
+
+| card | state now | what moved it |
+|---|---|---|
+| 1. bbg verification | **ACTED ON; one MEASUREMENT already banked, the capture outcome still RUNNING at this commit** | His "Yes" to a paced retry. See below -- the banked finding is not the one I expected, and the retry's own verdict is not in yet |
+| 2. serp | **STILL PARKED, unchanged** | Andrew-direct: *"I do want this SERP channel but we will get to it after resolving the holes in the existing channels"* -- so it is sequenced, not carded at him |
+| 3. the authenticated symbol pass | **CLOSED, and NOT by the route this card predicted** | It stalled itself at 56 of 89. Andrew then read all 33 remaining SA pages by hand; `sa_symbol` is **89 of 89** on the producer's own read, wired @d2be2d3b13 |
+| 4. the 5 best-effort identities | **RULED DONE AND READY with a per-identity grade** | Andrew-direct Call 4; grade table recorded in `org/tier1_exec/2.0.0_SA_COO/deliverables/AMGT_HARVST/ADR_RESOLUTION_OF_RESIDUAL.md` |
+
+**CARD 3 IS THE ONE WORTH READING TWICE, because this packet predicted the wrong mechanism.** Section 7 said
+the egress word "is the thing the word most plausibly moves." The word did NOT move it: the endpoint kept
+refusing, the driver stopped itself on its own two-strikes rule at 56 resolved, and the gap closed because a
+HUMAN read 33 vendor pages. **The authorization was never the binding constraint on that axis** -- and I had
+named it as the constraint in the same breath as correcting a different claim about it.
+
+**CARD 1's ACTUAL FINDING, and it inverts the premise of the retry.** bbg's `search/query` serves 200 sixty
+times against seven 403s (67 events) and recovers in as little as 70 seconds, so a retry looked obviously
+right. But a `request_rejected` makes the producer write a **900-second PUBLISHER COOLDOWN**
+(`worker.py:310`) into `progress.sqlite3`, and **that cooldown outlives the process that set it.** My first
+paced run used a 300s gap: attempt 2 fired inside the cooldown, returned `cooldown` on every job in under
+one second, loaded no session and made **no request at all**. A retry inside the cooldown is not a retry --
+it is a no-op that reads exactly like a second vendor refusal. **I paced against the VENDOR's recovery
+window when the binding constraint was OUR OWN, and ours is a number sitting in a local table.**

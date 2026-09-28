@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-11",
+  "phase": "BUILD-GENERAL",
+  "firm": "49F",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "864ea3b7ef",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-11.asset-dim-build-time-pin.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~D",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/bronze/_asset_dim_rest_pin.py",
+      "kind": "script",
+      "commit_or_etag": "19dcfa26d4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "deploy_evidence": "A GENERATED view, 2,020 bytes, carrying scope, scope_short, vendor, routed bucket, tier, table, key_prefix and object. Rendered by `python lib/opal_naming.py generate --target <pin>`; the MARK declares `over scopes.json` and nothing else. Published at code/bronze/_asset_dim_rest_pin.py, ETag equal to the local HEAD md5."
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/bronze/pull_bd_asset_dim_rest.py",
+      "kind": "script",
+      "commit_or_etag": "19dcfa26d4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ],
+      "deploy_evidence": "Imports the pin BY LOCATION beside itself and no longer imports opal_naming; new module-level bronze_key(partition); write_bronze uses it. `sys` dropped as it became unused. Published at code/bronze/pull_bd_asset_dim_rest.py, ETag equal to the local HEAD md5."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/opal_naming_pin_target.patch",
+      "kind": "doc",
+      "commit_or_etag": "19dcfa26d4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deploy_evidence": "The three lib/opal_naming.py entries (VIEWS row, TARGET_REGISTRY_KEYS row, BLOCKS renderer), handed over rather than committed: lib/ is owned-paths lane BASE_EXEC. 1.0.0_SA_CTO~O landed it @6ca6c1777a. THE PATCH IS NOW ONE LINE BEHIND HEAD and the commit is the record -- see the acceptance note on the change that seat made."
+    },
+    {
+      "path_or_key": "s3://opal-data-bd/code/lib/silver_ids.py",
+      "kind": "s3_object",
+      "commit_or_etag": "ETag == local HEAD md5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deploy_evidence": "Firm-neutral code, published by this seat. Verified by reading the ETag back from S3, never from the upload's return code."
+    },
+    {
+      "path_or_key": "s3://opal-data-bd/code/lib/trading_calendar.py",
+      "kind": "s3_object",
+      "commit_or_etag": "ETag == local HEAD md5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deploy_evidence": "Firm-neutral code, published by this seat. The asset-dim document resolves its as-of date with lib.trading_calendar."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "mark present=yes body identical on regeneration=yes (generate rc=0) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s11.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "mark present=yes body identical on regeneration=yes (generate rc=0) -- RESULT: PASS -- exit=0",
+      "denominator": "One generated target; the mark declares one registry file (scopes.json) and the regeneration compares 2,020 bytes.",
+      "status": "PASS",
+      "status_reason": "Re-run AFTER 1.0.0_SA_CTO~O's landing, not only against my own renderer. That seat made ONE change to my patch: the naming gate (DEC-6 ENFORCE) refused `_long_scope(reg, \"49financial\")` as a hand-kept carrier, because the context rule admits a firm token only inside key(), address(), name() or lookup() arguments -- and _long_scope is none of those. It now reads lookup(\"49financial\", reg). I re-rendered from THEIR committed renderer and the pin is byte-identical to the file I had already committed, so the change moved no output. TARGET_REGISTRY_KEYS declares (\"scopes\",) alone: tiers.json is deliberately undeclared because this pipeline's bronze sits in the ROUTED bucket alias rather than the tier home, so a tiers move must leave these bytes unchanged (r6-undeclared-inert)."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "published pull+pin fetched=yes lib-free import=yes target equal=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s11.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "published pull+pin fetched=yes lib-free import=yes target equal=yes -- RESULT: PASS -- exit=0",
+      "denominator": "2 published objects fetched; 1 lib-free import; the target compared on bucket and key.",
+      "status": "PASS",
+      "status_reason": "THE TARGET NOT MOVING IS THE WHOLE RISK OF THIS CELL, so the oracle was captured from the pre-pin module BEFORE any edit and compared after: bucket opal-data-bd and key blackdiamond/49financial/bronze/assets_dim_rest/<partition>/assets_dim_rest.parquet, equal on three partitions including a future date. I also ran the ruling's own negative control independently of the check: with `lib` blocked on the meta-path the module still imports and resolves both values, while `import lib.opal_naming` raises ModuleNotFoundError -- so the dependency is GONE rather than merely unused."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "published byte-identical to HEAD: 4 of 4 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s11.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "published byte-identical to HEAD: 4 of 4 -- RESULT: PASS -- exit=0",
+      "denominator": "4 of 4 keys; measured per key by ETag against the local HEAD md5 before and after publishing.",
+      "status": "PASS",
+      "status_reason": "STATED RATHER THAN ABSORBED: of the four keys, I published only TWO. The pre-publish census read code/bronze/pull_bd_asset_dim_rest.py and code/bronze/_asset_dim_rest_pin.py as already MATCH -- the pin object was created 2026-09-28T09:15:49Z (s3api UTC; `s3 ls` renders LOCAL time on this host and would have read 05:15:49), about two minutes after my commit 19dcfa26d4 and before any publish of mine. 1.0.0_SA_CTO~O is the plausible actor, having said it regenerated the pin, but I did NOT measure who wrote those two objects and do not claim it. What I did measure is that both are byte-identical to HEAD, which is what this criterion grades. The two I published are the code/lib/ pair, verified by reading the ETag back from S3 rather than from the upload's return code."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control; the ruling names a negative control and this cell ran it plus two more.",
+      "expected": "the ruling's control: the module runs with lib/opal_naming.py absent",
+      "observed": "Three ran. (1) NEGATIVE: with `lib` blocked on sys.meta_path the module imports and resolves bucket and key, while `import lib.opal_naming` raises ModuleNotFoundError. (2) TARGET-EQUALITY: the oracle was captured from the pre-pin module BEFORE editing and matched after, on three partitions including a future one -- a control that only exists if it is taken first. (3) RENDERER-INDEPENDENCE: after the CTO changed one line of my patch, I re-rendered from THEIR committed renderer and got a byte-identical pin, so their edit is provably output-neutral rather than assumed so.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The pin is a pure function of scopes.json; the publish is an S3 write verified by read-back.",
+      "observed": "Regeneration byte-identical at 2,020 bytes across three separate renders (mine, mine post-landing, and the CTO's). All three AC scripts returned the same verdict on repeat.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "lib/opal_naming.py",
+      "reason": "Lane BASE_EXEC. Edited in this tree ONLY to render, handed over as opal_naming_pin_target.patch, and landed by 1.0.0_SA_CTO~O @6ca6c1777a. Not committed by this seat, and GIT_COMMIT_AUTHOR_OVERRIDE was not taken."
+    },
+    {
+      "item": "The asset-dim SSM document",
+      "reason": "Explicitly MX-s-10's, per bound 3. Not touched."
+    },
+    {
+      "item": "Any vendor call",
+      "reason": "EGRESS CLASS declared none by the order's own preflight, and none was made: this cell is a naming and publish change only."
+    },
+    {
+      "item": "Any registry, NAMING_SCHEMA or opal_naming in a bucket",
+      "reason": "Bound 2, and the point of the cell. The four published keys are two bronze scripts and two firm-neutral lib modules; nothing from infra/logic/registry/, org/standards/ or lib/opal_naming.py was published."
+    },
+    {
+      "item": "A schedule",
+      "reason": "comp-schedule DECLARED-NOT-APPLICABLE by the order's preflight; MX-s-10 owns the one schedule."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~D/logs/2026-09-28/ds_d_mx_s_11_build_time_pin_0850-0940Z.md",
+  "compiler_tools": [
+    {
+      "tool": "naming-gate.py (via safe-commit)",
+      "invocation": "the pin + module commit",
+      "result": "PASS 0 graded -- the generated block is accepted and the module now carries no hand-kept name. The gate also did the real work on the lib/ side: it refused `_long_scope(reg, \"49financial\")` in my renderer, which is why the landed version reads lookup(). My patch was wrong on that line and the gate caught it."
+    },
+    {
+      "tool": "opal_naming generate",
+      "invocation": "python lib/opal_naming.py generate --out <dir> --target data/black_diamond/scripts/bronze/_asset_dim_rest_pin.py",
+      "result": "Renders to a staging dir at the repo-relative path; the file is then installed. Run three times (mine, mine post-landing, CTO's renderer) -- byte-identical every time."
+    },
+    {
+      "tool": "comp-pipescript / comp-freshness / comp-schedule / comp-iam / comp-adversary",
+      "invocation": "(not run)",
+      "result": "comp-schedule, comp-iam and comp-adversary are DECLARED-NOT-APPLICABLE by the order's own preflight and the declarations held as executed. comp-pipescript's deployment corpus covers data/*/scripts/* and does not model code/lib/, so the four-key verify was done by ETag against the local HEAD md5, before and after, with the denominator printed. Recorded as a coverage boundary, not a skipped check."
+    },
+    {
+      "tool": "safe-deploy.sh",
+      "invocation": "(not used for the lib pair)",
+      "result": "Its mapping covers data/<firm>/scripts/{gold,silver,bronze}/*.py only, so it has no target for lib/silver_ids.py or lib/trading_calendar.py. Those were published by cp plus an ETag read-back, which is the discipline safe-deploy encodes. The two bronze keys were already MATCH before I reached them."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "Run on this instance; result recorded in the report."
+    }
+  ]
+}

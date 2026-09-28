@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-w-3.timeline-api-and-the-honest-states",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~8/SPEC_SECTION_timeline.md",
+    "group": "W",
+    "vintage_commit": "7d92646ac4f55e438ca62f3cbe11ac05c542d7ec"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "275811ed995a15110588bfad340559b67a9d3942",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-w-3.timeline-api-and-the-honest-states.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~24",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/timeline_api.py",
+      "kind": "script",
+      "commit_or_etag": "22f9eb2bfd308681f65e12092945548ca9c1389e",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "no deploy scope: this cell is API code exercised in-process only (task order clause 0.1 -- no vendor call, no network, no S3); commit-gate.sh (py_compile + ruff py39) run clean pre-commit, see compiler_tools",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_timeline_api.py",
+      "kind": "test",
+      "commit_or_etag": "22f9eb2bfd308681f65e12092945548ca9c1389e",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "test file, no deploy scope",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~24/scripts/ac1_route_shapes.py",
+      "kind": "script",
+      "commit_or_etag": "22f9eb2bfd308681f65e12092945548ca9c1389e",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "check script, no deploy scope",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~24/scripts/ac2_failure_never_reads_as_data.py",
+      "kind": "script",
+      "commit_or_etag": "22f9eb2bfd308681f65e12092945548ca9c1389e",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "check script, no deploy scope",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ALL THREE ROUTES SERVE EXACTLY THE SPEC'S FIELD LISTS, over CONSTRUCTED chatter_daily/chatter_event rows. Print per route: the field names served, and the SET DIFFERENCE against the spec's enumerated list in BOTH directions -- missing fields AND extra fields, each with its count, so a superset is as visible as a subset. Print the dense-day denominator (days requested vs days returned, equal, no gap) and prove breakout_ratio and z_score appear on the series arm but are ABSENT from every constructed stored row -- print the stored row's keys to show it. The events arm carries NO relative figure: print its field set and show the intersection with {breakout_ratio, z_score} is EMPTY. The event route keys off publication_gold._event_id -- print the id it resolves and the same function's output for those arguments and show they are equal",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~24/scripts/ac1_route_shapes.py",
+      "output_evidence": "dense-day denominator: requested=10 returned=10 equal=True | series[0] MISSING: 0 -- [] | series[0] EXTRA: 0 -- [] | stored chatter_daily row keys: [...20 keys, no breakout_ratio/z_score...] | 'breakout_ratio' in stored row: False | 'z_score' in stored row: False | day 10 (baseline_days=3) breakout_ratio=5.0 z_score=24.494897427831788 | day 1 (no baseline yet) breakout_ratio=None z_score=None | events[0] MISSING: 0 -- [] | events[0] EXTRA: 0 -- [] | events arm intersection with {breakout_ratio, z_score}: [] (must be empty) | day.articles[0] MISSING: 0 -- [] EXTRA: 0 -- [] | event.articles[0] MISSING: 0 -- [] EXTRA: 0 -- [] | event route resolved event_id: c5cfee52b6abf634e62aa4644c5ae708e1e9b4db533df8c202a2addabe9e15af | publication_gold._event_id(...): c5cfee52b6abf634e62aa4644c5ae708e1e9b4db533df8c202a2addabe9e15af | equal: True | PASS: all three routes serve exactly the spec's field lists; breakout_ratio/z_score are served-only; events carry no relative figure; the event route keys off the existing publication_gold._event_id.",
+      "denominator": "3 of 3 routes checked; 0 of 13 spec fields missing across series+events+day-articles+event-articles combined; 0 extra fields on any of the 4 field lists; rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "A FAILED CALL IS UNREACHABLE TO THE EMPTY-ARRAY ENCODING, proved by exercising each of the three routes under THREE injected failures (a raised exception inside the route, a timeout, and a malformed/unparseable upstream body) and printing, for each of the nine cases: the returned body, that it carries error: true with a NON-EMPTY stable error_code, and that it carries NO series/events/articles key at all. Then the CONTRAST that makes it a real test -- a SUCCESSFUL call over an empty range, printing its empty array and error absent. A pass requires the two shapes to be DISTINGUISHABLE BY A CONSUMER with no knowledge of the request: print the exact predicate a caller uses to tell them apart. 9 of 9 failure cases and the honest-empty control all present",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~24/scripts/ac2_failure_never_reads_as_data.py",
+      "output_evidence": "9 of 9 failure cases: [timeline/raised-exception]..[timeline/event/malformed-upstream-body] each printed body {'error': True, 'error_code': '<non-empty token>', 'message': ...}, error is True: True, error_code non-empty: True, carries data key: False for all 9 | [honest-empty range] body: {'security_key':..,'floor_date':..,'series': [], 'events': []} error present: False series==[]:True events==[]:True | [honest-empty day] body: {..'articles': []} error present: False articles==[]:True | predicate def is_error_body(body): return body.get('error') is True | predicate(failure body) = True | predicate(honest-empty body) = False | PASS: 9 of 9 failure cases present...",
+      "denominator": "9 of 9 injected-failure cases present (3 routes x 3 failure classes); 2 of 2 honest-empty controls (range + day) present with error absent; rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the cell's own contract tests pass and are NAMED (-rA, never -q, because -q does not print a passing test's nodeid -- row Z-W21-S1). The suite must include a test that quiet-COMPLETE, PARTIAL and DENIED are served with three DISTINGUISHABLE encodings: print the three served values side by side and the predicate separating them. Also print the WHOLE-SUITE count before and after so this cell's additions are visible against the round-8 baseline HVST-w-1 establishes, and so a new red test elsewhere is not hidden by a -k filter",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m pytest lib/research/harvest/tests/ -rA -k timeline 2>&amp;1 | tail -40",
+      "output_evidence": "collected 145 items / 131 deselected / 14 selected | all 14 lib/research/harvest/tests/test_timeline_api.py tests PASSED, each named by nodeid (test_series_is_dense_and_carries_the_spec_fields, test_breakout_ratio_and_z_score_absent_from_the_stored_row_and_present_on_serve, test_events_arm_carries_no_relative_figure, test_floor_date_clamps_a_request_reaching_before_it, test_complete_partial_denied_are_three_distinguishable_encodings [captured stdout: quiet-COMPLETE='COMPLETE' PARTIAL='PARTIAL' DENIED='DENIED'], test_a_quiet_complete_day_is_not_a_partial_or_denied_day_by_height_alone, test_day_dissection_order_is_tier_then_mention_count_desc_then_published_utc_asc, test_mention_in_title_and_mention_in_lead_are_always_present_unmarked_when_false, test_a_complete_day_with_zero_articles_is_honest_empty_not_an_error, test_a_day_with_no_chatter_daily_row_is_day_not_found_not_a_blank_chart, test_event_dissection_reuses_the_day_dissection_order_and_the_existing_event_id, test_no_qualifying_event_for_first_day_is_event_not_found, test_every_route_wraps_every_failure_class_into_the_one_error_envelope, test_a_failure_never_merges_into_series_events_or_articles_and_never_degrades_to_empty) | '14 passed, 131 deselected in 0.24s' | WHOLE-SUITE (no -k filter, python -m pytest lib/research/harvest/tests/ -rA): BEFORE this cell's file existed the suite held 131 tests (145 - 14 = 131, confirmed by the -k timeline run's own '131 deselected' count); AFTER adding test_timeline_api.py: '145 passed in 1.60s', 0 failed -- no red test elsewhere, not hidden by the -k filter",
+      "denominator": "14 of 14 named tests passed (this cell's additions); 145 of 145 whole-suite tests passed (131 pre-existing baseline + 14 new); rc=0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutated lib/research/harvest/timeline_api.py's _dissection_sort_key to drop the (tier, -mention_count) sort keys, keeping only published_utc -- a real, targeted break of the exact strongest-first order AC1/AC3 assert on, then re-ran the AC3 suite before reverting the file to its pre-mutation bytes verbatim.",
+      "expected": "test_day_dissection_order_is_tier_then_mention_count_desc_then_published_utc_asc fails (assertion on ordered article_key list mismatches); every other test in the file is unaffected by this one function's change.",
+      "observed": "1 failed, 13 passed: FAILED lib/research/harvest/tests/test_timeline_api.py::test_day_dissection_order_is_tier_then_mention_count_desc_then_published_utc_asc -- AssertionError: assert ['sa:4', 'sa:2', 'sa:3', 'sa:1'] == ['sa:2', 'sa:1', 'sa:3', 'sa:4']. File reverted; post-revert re-run returned '14 passed' again (see determinism.observed).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest lib/research/harvest/tests/ -rA -k timeline run twice in succession on the identical, reverted file, output compared byte-for-byte except the wall-clock duration token.",
+      "observed": "run 1: '14 passed, 131 deselected in 0.29s'; run 2: '14 passed, 131 deselected in 0.27s' -- identical pass/fail/deselected counts and identical named-test results both runs, only the timing token differs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "FWD-6 (event dissection acceptance on Lenovo's own landed chatter_event rows)",
+      "reason": "task order section 6 / ISSUER NOTE: EVENT_MIN_PUBLISHERS=2 and only publisher 'sa' has landed rows today, so chatter_event holds zero rows for every security -- a criterion graded on it would pass vacuously. Deliberately not a criterion of this cell; see the task order's record face."
+    },
+    {
+      "item": ".tsx render build (the client-side chart, dissection panel, hatch/marker visuals)",
+      "reason": "task order clause 4.1 (BOUNDS): NO .tsx in this cell -- the render half is a separate, later cell. This cell builds only the API and its contract tests."
+    },
+    {
+      "item": "chatter_daily/chatter_event gold write, and the silver-to-mention-row headline join wiring for production",
+      "reason": "task order clause 0.2: no gold write in this cell. The three route functions take loader callables the CALLER supplies (production wiring, e.g. an S3 read + silver headline join, is out of this cell's scope and out of its NO-S3 bound); AC1/AC2/AC3 exercise the routes over constructed rows and injected-failure loaders only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~24/HVST-w-3.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/harvest/timeline_api.py",
+      "result": "clean, rc=0"
+    },
+    {
+      "tool": "ruff (py39)",
+      "invocation": "python -m ruff check --target-version py39 lib/research/harvest/timeline_api.py lib/research/harvest/tests/test_timeline_api.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~24/scripts/ac1_route_shapes.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~24/scripts/ac2_failure_never_reads_as_data.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/harvest/timeline_api.py lib/research/harvest/tests/test_timeline_api.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~24/scripts/ac1_route_shapes.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~24/scripts/ac2_failure_never_reads_as_data.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+    }
+  ]
+}
