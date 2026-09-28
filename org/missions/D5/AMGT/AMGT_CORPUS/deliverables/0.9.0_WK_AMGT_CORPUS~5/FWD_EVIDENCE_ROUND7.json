@@ -1,0 +1,164 @@
+{
+  "prd": "org/missions/D5/AMGT/AMGT_CORPUS/prd/AMGT_CORPUS_PRD.md@9e326e11c1e05d310de5308371192bf3aa118000",
+  "run_at": "2026-09-28T22:08:25Z",
+  "outcomes": [
+    {
+      "id": "FWD-1",
+      "fence_quote": "EXERCISED -- for every file the library's own folder list resolves to, the stored object is re-opened and matches the file on the synced drive byte for byte, and the count of objects equals the count of files scanned, both printed",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.ingest --verify (read-only byte-for-byte compare of every stored bronze object against the synced library file); python -m lib.research.corpus.library --census for the library-side count",
+      "output_excerpt": "ingest --verify: objects 356 files 356 match 356 mismatch 0 (elapsed_s 19.875). library --census: folders 95 files 356 (.docx 73, .html 1, .pdf 186, .png 17, .xlsx 79), placeholders 0 of 356.",
+      "state": "met",
+      "notes": "Objects count (356) equals files scanned (356), both printed, 0 mismatches. Round 5 read 354 of 354; the library grew by 2 files (AIA Group folder) and the store followed. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-2",
+      "fence_quote": "EXERCISED -- a query by security key returns that name's reports in period order; and the run prints, as a denominator, how many files resolved, how many did not, and the reason for each that did not",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.typed --census; python .scratch/i5/run.py lib.research.corpus.typed --reports-for-first-multi; python .scratch/i5/run.py lib.research.corpus.extract --duplicates; a read-only probe (.scratch/i5/p_typed.py) over store.silver_latest() for period_absent_reason",
+      "output_excerpt": "typed --census: silver_rows 355 of 356 bronze; k5 period carried 311 of 355 by filename 269 header 34 content 8 absent 44. probe: period_absent 44, reasons {'no filename, header or content period token matched': 44}, absent_without_reason 0, security_key_missing 0, securities 94. --reports-for-first-multi: security_key 8306_JP_Equity reports 2 dated 2 (2026-03-27, 2026-03-30) period_order_ok True. extract --duplicates: objects 356 report_ids 355 duplicates 1 (duplicate-content ff0e11955cb266f4 Copa Holdings - 2025 Investor Day Presentation (1).pdf / Copa Holdings - 2025 Investor Day Presentation.pdf).",
+      "state": "met",
+      "notes": "Every file is accounted: 311 placed on a period, 44 named unplaced each with the same printed reason, and the 1 bronze object without its own silver row is the named Copa duplicate (356 - 355). Security placement: 0 of 355 silver rows lack a security_key. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-3",
+      "fence_quote": "EXERCISED -- the folder list is read fresh from the library (never a transcribed list), each folder is resolved through the identity layer to a security key, and the output carries three counts that sum to the folder count: resolved, unresolved-with-reason, and ambiguous-with-candidates",
+      "instrument": "lib.research.corpus.backlog.coverage(library.library_root()) called as a library (fresh scan of the library, no S3 write; script .scratch/i5/p_cov.py), via python .scratch/i5/run.py wrapper",
+      "output_excerpt": "folders_read 95; resolved 95 unresolved 0 ambiguous 0 sum 95; crosswalk_loaded_from s3://opal-data-harvest/crosswalk/v1/2026-09-25.json; records_with_reason_when_unresolved 0 (none exist); dup_security_keys {} (95 distinct keys).",
+      "state": "met",
+      "notes": "Three counts (resolved 95, unresolved-with-reason 0, ambiguous-with-candidates 0) sum to the fresh folder count 95. The folder list is read fresh (library.list_folders), never transcribed. PRD ADDENDUM on FWD-19 applied: the folder count is a reading (95), not the 93 of the original text. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-4",
+      "fence_quote": "EXERCISED -- for one backlog name the universe carries UNRESOLVED, a single act produces the induction request: it PRINTS what the induction WILL add before anything is added, REFUSES a name whose identity is ambiguous, and is driven end to end with a REFUSING TRANSPORT and the poison POSITIVE-CONTROLLED, so the run COULD NOT have reached the network rather than merely having not",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.induction_request module run() called as a library with DELIVERABLES_DIR redirected to .scratch/i5/ind_out (the CLI --pick writes to worker ~2's deliverables path, outside this grant); plus a read of the committed org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/induction_request.json",
+      "output_excerpt": "fresh run: backlog_folders 95; resolved_absent 0 of 95; unresolved_in_universe 0 of 95; population UNRESOLVED; picked NONE population is empty; vendor_calls 0; s3_writes 0; registrations_json_changed False; poison_positive_control raised 4 of 4; rc 0. committed request (as_of 2026-09-23, population then 60 unresolved of 93): picked folder America Movil AXMB MM, bloomberg AMXB MM, security_key AMXB_MM_Equity, pool s3://opal-data-harvest/crosswalk/v1/2026-09-23.json.",
+      "state": "unmeasurable",
+      "reason": "The fence's subject, 'one backlog name the universe carries UNRESOLVED', no longer exists: the fresh population is 0 of 95 unresolved and 0 of 95 resolved-absent (all 95 were inducted by the scripted producer, FWD-19), so the act can only print 'picked NONE'. No instrument can exercise it on a real name now; what remains is the transport half (refusing transport, poison positive-controlled 4 of 4, 0 vendor calls, 0 S3 writes) and the committed 2026-09-23 exercise on AMXB MM.",
+      "notes": "Round 5 graded this met on the committed 2026-09-23 exercise while the population was 60. The population emptied by design when the backlog was inducted; the WILL-ADD/REFUSES-ambiguous limbs cannot be re-observed without a synthetic name, which would not be the served state. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-5",
+      "fence_quote": "EXERCISED -- for one covered name, the continuation artifact is produced and every field in it resolves to a passage in a named report; a field the reports do not state is ABSENT, never inferred and never defaulted",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.continuation --show-first-covered; python .scratch/i5/run.py lib.research.corpus.continuation --verify-citations",
+      "output_excerpt": "show-first-covered: security_key AZN_LN_Equity; fund_of_record IDVZ report_key .../AZN Q2 2026 Earnings Update.docx locator 2; last_stated_position {\"fund\": \"IDVZ\", \"size_pct\": \"1.75\", \"text\": \"MAINTAIN 1.75% POSITION IN IDVZ\"} report_key .../AZN Q2 2026 Earnings Update.docx locator 2; thesis_pillars Size + Growth / Execution record / Strong pipeline / EM growth driver / Rare disease is high-margin, each with report_key .../ASTRAZENECA Research Pack 2026 06 17_v1.pdf locator 1. verify-citations: citations_checked 14257 resolved 14257 unresolved 0.",
+      "state": "met",
+      "notes": "Every field printed resolves to a named report and locator; the citation census over the whole store resolves 14257 of 14257 (denominator printed). No printed field is inferred or defaulted. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-6",
+      "fence_quote": "EXERCISED -- the template for one business type is produced from the corpus and prints the denominator it was measured over (how many of that type's reports, of how many total) and the per-term counts behind each KPI it lists",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.sector_template --show-first-graded",
+      "output_excerpt": "business_type consumer-cyclicals+consumer-services reports 4 of 355; kpi FCF count 4 of 4; kpi dividend count 3 of 4; kpi net debt count 3 of 4; kpi EBITDA count 2 of 4; kpi GMV count 2 of 4; kpi consensus count 2 of 4; kpi production count 2 of 4; kpi guidance count 1 of 4; kpis_total 8 sections_total 78.",
+      "state": "met",
+      "notes": "Denominator printed (4 of 355 reports) and a per-term count behind each of the 8 KPIs listed. Sample is the first graded type only (the CLI's own scope). All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-7",
+      "fence_quote": "EXERCISED -- the typecast artifact lists the shared mnemonic core, the extended ratio set and the Opal Case Assumptions block, each with the count of workbooks carrying it out of the workbooks read",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.typecast --read-latest; plus a read-only probe (.scratch/i5/p_tc.py) of the stored gold object's extended_ratio_set records",
+      "output_excerpt": "workbooks_read 158; with_mnemonics 120; core: 96 members, each printed 'core <MNEMONIC> n of 120' (e.g. PX_LAST 120 of 120, ARD_GOODWLL 108 of 120); extended 6 members with counts BEST_FREE_CASH_FLOW 46, CF_DECR_CAP_STOCK 56, CF_INCR_CAP_STOCK 56, NET_INC 46, P_PRICE_HIGH 46, P_PRICE_LOW 46 (probe; the CLI prints only the member count); opal_case_assumptions 120 of 158. read_latest returned the object whose inputs equal current_inputs() (158 inputs).",
+      "state": "met",
+      "notes": "Core and Opal Case Assumptions print their counts directly; the extended set's per-member counts are on the stored object and were read by the probe (the CLI summary prints only 'extended 6 members'). All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-8",
+      "fence_quote": "EXERCISED -- one call by security key returns the prior reports, the continuation artifact, the sector template and the typecast, each with a content hash; a second call after a new report lands returns a changed hash for exactly the artifact that changed and unchanged hashes for the rest",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.substrate --first-covered (one call); python .scratch/i5/run.py lib.research.corpus.substrate --difference-arm (the second-call comparator after a report lands)",
+      "output_excerpt": "--first-covered: security_key AZN_LN_Equity; prior_reports (12) 90d2a65b31f97928..., continuation f9d92be70dea8ada..., sector_template 1e3cd279504c1e91..., fund_form 0455da2da7d6490f..., typecast d9d828e341cb75c7..., each 'current True'; members 5 present 5 absent 0; call_count 1. --difference-arm: prior_reports changed True, continuation changed True, sector_template changed False, fund_form changed False, typecast changed False; changed_set ['continuation','prior_reports'] == expected_changed_set; difference_ok True.",
+      "state": "met",
+      "notes": "One call returns all five artifacts with hashes; the difference arm changes exactly the two artifacts a new report should move and leaves three unchanged. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-9",
+      "fence_quote": "EXERCISED -- a deliberate negative control runs the ingestion against a read-only copy of the library and completes; and a census of the project's own code prints zero write, move, delete or open-for-write calls against any path under the library root, with the denominator of files scanned",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.readonly_proof --code-census; python .scratch/i5/run.py lib.research.corpus.readonly_proof --negative-control (its ACL-denied copy is written to system temp, outside the repo and the library)",
+      "output_excerpt": "code-census (rc 1): files_scanned 46; write_like_calls 50; library_write_calls 0; positive_control flagged 1; positive_control_test_file flagged 1; test_sites 32 tmp_fixture_sites 32 test_unknown_sites 0; tristate library 0 unresolved 5 clear 45; unresolved_site induction_run.py:462 os.makedirs, induction_run.py:464 open, induction_run.py:688 os.makedirs, induction_run.py:690 open, key_glob_census.py:199 plant_path.write_text (origins ['unknown']). negative-control (rc 0): source_files 356; icacls_deny_mask (DE,DC,WD,AD,WEA,WA); read_probe OK; write_denied_probe PermissionError; overwrite_denied_probe PermissionError; ingest_rc 0 stored 356 put_performed 0 existed 356 read_failed 0; transport actual_s3_puts 0.",
+      "state": "unmet",
+      "notes": "Negative-control arm holds (completes against a read-only copy, 0 puts). Census arm: the printed library-reaching count is 0 of 50 write-like calls over 46 files (round 5 read 4), but the census's own tristate leaves 5 sites unresolved (origin unknown) and its verdict exits 1; I applied the instrument's own verdict rather than reading the zero alone, so the state is unmet. The 5 sites take a caller-supplied path (a deliverables/plant path), not a library path by default; that is a reading, not something the census proves. Both runs left disposable copies in system temp (positive-control files; an ACL-restored 308.6 MB copy at %TEMP%\\amgt_corpus_ro_copy_20260928T214344600833Z) for operator cleanup. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-10",
+      "fence_quote": "EXERCISED -- IMB_LN_Equity renders the pack's pillars as bold lead plus paragraph, each openable to the report and the passage it came from, and each marked as the team's rather than generated",
+      "instrument": "read_dossier() (lib.research.corpus.dossier, S3 read) for IMB_LN_Equity and AMD_US_Equity, script .scratch/i5/p_dos.py; census over all 95 latest dossiers (.scratch/i5/p_pop.py)",
+      "output_excerpt": "IMB_LN_Equity as_of=2026-09-28.8ca85f6a69be8a44: thesis_pillars n 6, each {pillar, text, terms, citation{report_key .../Imperial Brands Research Pack 2026 07 17_v1.docx, locator 11, passage, extract_key}}; first pillar 'Cash-return machine'. AMD_US_Equity: thesis_pillars {\"absent\": \"no class A report for this security\", \"value\": null}. All 95 latest dossiers: 46 names carry a pillar list (159 pillars, all with report_key + passage + extract_key), 49 of 95 read ABSENT with a reason.",
+      "state": "unmeasurable",
+      "reason": "The clause is a page render (bold lead plus paragraph, each openable, marked as the team's) on AMGT_RESAPP's Thesis tab. This cone holds no rendering surface and lib/research/api/scoped_amgt.py has no dossier reader; nothing in this project's data answers a typography, DOM or label clause.",
+      "notes": "Applied the PRD's ADDENDUM and CORRECTION under FWD-10: the substrate half this project owns (pillars as lead + paragraph + citation, ABSENT with a reason for a name with none, IMB positive arm and AMD negative arm) is measured as above and reads met; the render half holds the outcome open and is not measurable here. The dossier carries no explicit 'team's' marker field on a pillar; the artifact is the team's own report text by construction. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-11",
+      "fence_quote": "EXERCISED -- the passage renders labelled as the team's, BESIDE the filing roster, with the roster unchanged; and a name whose pack carries none reads ABSENT with its reason",
+      "instrument": "read_dossier() for IMB_LN_Equity and AMD_US_Equity (.scratch/i5/p_dos.py); census over all 95 latest dossiers",
+      "output_excerpt": "IMB_LN_Equity fields.management: value 'MANAGEMENT Lukas Paravicini, CEO since 1 October 2025, ...' citation {locator 107, report_id a1caf1eec85230eb, report_key .../Imperial Brands Research Pack 2026 07 17_v1.docx, passage}. AMD_US_Equity fields.management: {\"absent\": \"no MANAGEMENT section in class A missing or class B missing\", \"value\": null}. All 95: management present and cited 47 of 95, ABSENT with a reason 48 of 95.",
+      "state": "unmeasurable",
+      "reason": "The clause is a page-placement render (the passage BESIDE the filing roster, roster unchanged) on Exec Management; the PRD ADDENDUM itself records that AMGT_RESAPP's endpoint has no outcome for it. No data in this project answers placement or roster-unchanged.",
+      "notes": "Substrate half (cited passage, ABSENT with a reason) measured: 47 cited + 48 absent-with-reason = 95 of 95. Applied the FWD-11 ADDENDUM (the render half stays open here). All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-12",
+      "fence_quote": "EXERCISED -- rows come from the typecast and the template for that business type; every row carries a figure or reads ABSENT with a reason; the team's Upside/Base/Downside cases render as the team's, cited, in the slot that is ABSENT today",
+      "instrument": "read_dossier() for all 95 folders' securities (.scratch/i5/p_pop.py) then a census of fields.model_rows and fields.cases (inline python over .scratch/i5/dossiers.json); dossier --model-rows-probe not needed",
+      "output_excerpt": "model_rows: 95 of 95 dossiers carry a row list; 9567 rows; sources typecast 9120 + sector_template 447; with a figure 3942; ABSENT with a reason 5625; neither 0; rows still carrying the retired constant 'Bloomberg figure pull not authorized (R-16 V3)' 0 (IMB: 96 rows, 40 with a figure, each absent row names its own mnemonic, e.g. 'mnemonic ARD_GOODWLL not carried by the Model block'). cases: 34 names serve at least one of upside/base/downside (102 case slots), each with citation {report_key, locator 0, passage, report_id}; the other slots read ABSENT with a reason (e.g. 'no BASE CASE section in class A ...'). IMB_LN_Equity: all three cases ABSENT with reason.",
+      "state": "met",
+      "notes": "LITERAL READING of the clause, met on all three limbs. FINDING the reader should weigh (filed as AMGT_CORPUS-Z-W5-S3): all 102 of 102 served case values are the section heading itself ('Upside Case', 'Base Case', 'Downside Case'), cited to a passage that is the same heading text; no case body is carried. The slot is populated and cited, but nothing the team wrote under the heading is readable, so the fence's ACCEPT ('the team's own cases are readable') is not shown by this measurement. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-13",
+      "fence_quote": "EXERCISED -- a census over the dossier's fields prints zero fields that are neither cited nor reason-bearing, with the denominator of fields scanned; and a negative control shows a deliberately uncitable field rendering ABSENT rather than blank or inferred",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.dossier --census (read-only)",
+      "output_excerpt": "dossiers 468 fields_scanned 11700 cited 4940 absent_with_reason 6760 neither 0; negative_control absent_with_reason 1.",
+      "state": "met",
+      "notes": "Census covers every stored dossier object (468 objects over 95 securities, all history included), zero fields neither cited nor reason-bearing, denominator 11700 printed; the deliberately uncitable negative-control field renders ABSENT (absent_with_reason 1). All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-14",
+      "fence_quote": "EXERCISED -- for a named folder the read returns a dossier or a reason; and the three counts (resolved / ambiguous / empty-or-workbook-only) SUM TO THE FOLDER COUNT every time",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.backlog --coverage-dry-run; python .scratch/i5/run.py lib.research.corpus.backlog --folder \"AMD Advanced Micro Devices\" / \"Imperial Brands IMB LN\" / \"Air Liquide AI FP\"",
+      "output_excerpt": "--coverage-dry-run: folders_read 95 dossier_served 83 served_as_empty_shell 12 resolved_no_prose 0 unresolved_with_reason 0 sum 95; fence14 resolved 83 ambiguous 0 empty-or-workbook-only 12 sum 95 outside-fence 0 folders_read 95; written NONE put_performed False (dry-run). --folder 'Imperial Brands IMB LN': disposition dossier-served, dossier_uri s3://opal-data-harvest/amgt/harvest/gold/research-dossier/security_key=IMB_LN_Equity/as_of=2026-09-28.8ca85f6a69be8a44.json. --folder 'AMD Advanced Micro Devices': disposition served-as-empty-shell, dossier_uri .../AMD_US_Equity/as_of=2026-09-28.61638f6878b2e9d3.json, reason workbook-only. --folder 'Air Liquide AI FP': disposition served-as-empty-shell, reason empty.",
+      "state": "met",
+      "notes": "The census now prints the fence's own three names (resolved / ambiguous / empty-or-workbook-only) and they sum to the folder count, 83 + 0 + 12 = 95; round 5's four-name-only gap is closed. A named folder returns a dossier URI or a printed reason in all 3 lookups run. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-15",
+      "fence_quote": "EXERCISED -- both render cited on the header posture line and the Posture tab, and the machine verdict is byte-unchanged by their presence",
+      "instrument": "read_dossier() for IMB_LN_Equity and census over all 95 latest dossiers (.scratch/i5/p_dos.py, inline census)",
+      "output_excerpt": "IMB_LN_Equity fund_of_record {value IDVZ, citation report_key .../Imperial Brands Research Pack 2026 07 17_v1.docx locator 2, passage 'RECOMMENDATION: Potential ADD in IDVZ (currently ~2.5%)'}; last_stated_position value {fund IDVZ, size_pct ~2.5, text 'Potential ADD in IDVZ (currently ~...'} same citation. All 95: fund_of_record present and cited 40 of 95, ABSENT with reason 55; last_stated_position present and cited 47 of 95, ABSENT with reason 48.",
+      "state": "unmeasurable",
+      "reason": "The clause is a page render ('both render cited on the header posture line and the Posture tab') plus a claim that the machine verdict is byte-unchanged; the machine verdict and both render surfaces belong to AMGT_RESAPP and no object in this project's stored data carries either.",
+      "notes": "Substrate half (served, cited fund of record and last stated position, 0 fields uncited) measured as above. Applied the FWD-15 ADDENDUM and CORRECTION: the render half holds the outcome open. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-16",
+      "fence_quote": "EXERCISED -- a PDF-only name renders pillars, management and cases from the PDF pack; and the docx path is KEPT AS THE CONTROL and still recovers what it recovered before",
+      "instrument": "read_dossier() for ADBE_US_Equity (PDF-only) and IMB_LN_Equity (docx control), plus a census joining library.census() extensions per folder to the latest dossiers (.scratch/i5/p_pdf.py)",
+      "output_excerpt": "folder classes over 95: has-docx & dossier-served 53; PDF-only (no docx) & dossier-served 30; no docx or pdf & served-as-empty-shell 12. PDF-only 30: thesis_pillars present 24, management present 24, at least one case present 24 (the other 6: GOOGL_US_Equity, BA_US_Equity, LLY_US_Equity, QXO_US_Equity, SLB_US_Equity, UNH_US_Equity read ABSENT with reasons per the census). ADBE_US_Equity (only extension .pdf): pillars, management and 3 cases all present, cited to .../ADBE research pack 7_13_2026.pdf. docx control IMB_LN_Equity: 6 pillars with citation locator 11, management present (locator 107), cases ABSENT with reason (no case section in the pack).",
+      "state": "met",
+      "notes": "A PDF-only name (ADBE) renders pillars, management and cases from the PDF pack, and the docx path still recovers pillars and management on IMB. 24 of 30 PDF-only served names carry pillars. The same heading-only case-value caveat as FWD-12 applies to the case values here (row AMGT_CORPUS-Z-W5-S3). All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-17",
+      "fence_quote": "EXERCISED -- a new report lands, a new report_id16 appears BESIDE the old, the dossier's inputs_sha16 changes, the page serves the newer pillars, and the prior as_of object still reads; and a rebuild with UNCHANGED inputs writes NOTHING and says so",
+      "instrument": "passive S3 listing and read of every object under gold research-dossier/ (paginated list_objects_v2, then gold_get on each; scripts .scratch/i5/p_hist.py, p_hist2.py, p_hist3.py); NO --write run",
+      "output_excerpt": "objects 468 over 95 securities (objects per security: 2x1, 3x13, 4x23, 5x24, 6x23, 7x11); unreadable 0; as_of dates 2026-09-24 146, 09-25 185, 09-26 42, 09-28 95. IMB_LN_Equity: 6 objects (as_of 09-24 x3, 09-25 x2, 09-28 x1), every prior object still reads; newest inputs (5) differ from the prior object's (they name extract 20260926T205753Z and a new security_key sha), content e06ff546cf1e vs 88c6fb0b8d. 37 extra objects share an earlier object's inputs exactly with identical fields (e.g. ADBE_US_Equity as_of=2026-09-25.81d29e4e52a7bd15.json and as_of=2026-09-26.81d29e4e52a7bd15.json); the last 09-28 rewrite wrote 1 object per partition.",
+      "state": "unmeasurable",
+      "reason": "The fence is exercised by an act: a new report lands, the dossier rebuilds, then an unchanged-inputs rebuild must write nothing and say so. Both need dossier --write / --write --security-key (S3 puts) and a report landing, which this worker's read-only bound forbids; no read-only instrument produces the 'unchanged ... wrote 0' line.",
+      "notes": "Passive facts only: append-only history with all 468 objects readable, and a new inputs hash beside the old for IMB. The 37 same-inputs extra objects (a re-write across a date change with identical fields) are already the subject of the channel row at INVESTIGATION_v1.md line 1481 (2317_TT_Equity worked case) and are cited here, not re-filed. Round 5 also read this fence unmeasurable. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-18",
+      "fence_quote": "EXERCISED -- a pillar's terms are readable on the page and the feed filters to them for at least one name",
+      "instrument": "python .scratch/i5/run.py lib.research.corpus.continuation --show-terms --security-key IMB_LN_Equity; census of thesis_pillars[].terms over all 95 latest dossiers (.scratch/i5/p_pop.py inline)",
+      "output_excerpt": "--show-terms IMB_LN_Equity: pillars 6 with_terms 6 kpi_rows 25 with_terms 25; e.g. 'pillar Clean balance sheet for a Tobacco company terms Clean balance sheet for a Tobacco company|net debt|EBITDA'. Dossier census: 46 names carry pillars, 159 of 159 pillars carry a non-empty terms list, kpi_set entries carry terms with citations and a count (IMB: EBITDA count with citation locator 1).",
+      "state": "unmeasurable",
+      "reason": "The clause is on the page and the feed: 'a pillar's terms are readable on the page and the feed filters to them'. The page render and the header feed / Chatter axis filter are AMGT_RESAPP and AMGT_HARVST surfaces, absent from this cone and from this project's stored data; nothing here can drive a feed filter.",
+      "notes": "The terms half moved since round 5 (which read no terms field on a pillar): every pillar now carries terms, 159 of 159. Only the page-and-feed clause remains, and it cannot be measured here. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    },
+    {
+      "id": "FWD-19",
+      "fence_quote": "EXERCISED -- a census prints, for all 93, dossier-served / resolved-but-no-prose / unresolved-with-reason, and THE THREE SUM TO 93; the 60 today-unresolved folders are inducted by a SCRIPTED producer and re-ingested; and the 11 that can never carry prose (10 workbook-only, 1 empty) are NAMED with their reason rather than dropped from the denominator",
+      "instrument": "lib.research.corpus.backlog.coverage() (fresh folder read, .scratch/i5/p_cov.py) and python .scratch/i5/run.py lib.research.corpus.backlog --coverage-dry-run; python .scratch/i5/run.py lib.research.corpus.ingest --verify",
+      "output_excerpt": "coverage: folders_read 95; dispositions dossier-served 83, served-as-empty-shell 12 (= resolved-but-no-prose 12), unresolved-with-reason 0; 83 + 12 + 0 = 95; resolved 95 unresolved 0 ambiguous 0. never_prose_named 12: workbook-only x11 (AMD Advanced Micro Devices, Costco COST, Haliburton HAL, Home Depot HD, Hon Hai 2317 TT, National Grid NG LN, Quanta Services PWR, RWE AG RWE GY, SSE plc SSE LN, Valero Energy VLO, Zurich Insurance ZURN SW) and empty x1 (Air Liquide AI FP). crosswalk_loaded_from s3://opal-data-harvest/crosswalk/v1/2026-09-25.json. ingest --verify objects 356 files 356 match 356.",
+      "state": "met",
+      "notes": "Applied the PRD ADDENDUM on FWD-19: 'all 93' is the fresh folder read, 95 today, and the three-value partition sums to it. The 60 previously-unresolved folders now read 0 unresolved (the scripted producer induction_run.py fired 2026-09-24/25; logs under deliverables/2.0.0_SA_COO~X/evidence/induction_fire*) and their files are stored (356 of 356 match). The never-prose class reads 12 (11 workbook-only, 1 empty), each named with its reason, against the fence's 11 (10 + 1): the class is a reading. All corpus instruments were run through .scratch/i5/run.py, a 4-line wrapper that sets lib.opal_naming.REGISTRY_DIR to a scratch copy of infra/logic/registry (git show HEAD:...) because the sparse cone omits infra/; see row AMGT_CORPUS-Z-W5-S2."
+    }
+  ]
+}
