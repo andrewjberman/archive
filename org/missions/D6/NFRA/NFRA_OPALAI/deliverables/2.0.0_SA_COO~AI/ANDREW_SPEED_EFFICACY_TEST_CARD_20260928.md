@@ -6,7 +6,8 @@ live gateway, not recalled.
 
 ## 1. What is live for you right now
 
-The gateway serves commit `fe94911257`. The live integration switch is `ENABLED_INTEGRATIONS=ycharts opal_portal
+The gateway serves commit `6a98a0553a` (OG-s-1; CORRECTED from `fe94911257`, an ancestor with identical app files, on
+`1.0.0_SA_CTO~O` msg 26242 and `2.0.0_SA_COO~O`'s measurement @e992df46c4). The live integration switch is `ENABLED_INTEGRATIONS=ycharts opal_portal
 globgrph`, read over SSM from `/opt/opal-gateway/.env`, the service's only environment file.
 
 | Group | Live now | Tools |
