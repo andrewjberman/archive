@@ -1,0 +1,20 @@
+SQLITE articles ft: 15 rows, 14 distinct article_id
+SQLITE table DDL: CREATE TABLE articles(publisher TEXT,security_key TEXT,article_id TEXT,body_sha256 TEXT,path TEXT, PRIMARY KEY(publisher,security_key,article_id))
+SQLITE rows for 79c86a189372f457e82c5969: 2
+  sqlite row: publisher=ft security_key=COST article_id=79c86a189372f457e82c5969 body_sha256=da945122c7b02935480ff5646ab6359553c1283dd5a5597fe1cfb729ffe4d12f
+  sqlite row: publisher=ft security_key=HD article_id=79c86a189372f457e82c5969 body_sha256=da945122c7b02935480ff5646ab6359553c1283dd5a5597fe1cfb729ffe4d12f
+  distinct body_sha256 across those rows: 1
+SILVER ft article: 14 parquet parts, 14 rows scanned (denominator), 14 distinct article_key overall
+SILVER rows carrying 79c86a189372f457e82c5969: 1; distinct article_keys: 1 ['ft:79c86a189372f457e82c5969']
+  silver part=ft/harvest/silver/article/date=2026-09-15/part-20260915T034059Z.parquet fetched_at=2026-09-15 03:40:59.423200+00:00 discovered_for=['COST', 'HD'] title='Walmart shares tumble as sales growth slows to six-year low'
+GOLD article_security_mention: 3 snapshot parts, newest=amgt/harvest/gold/article_security_mention/date=2026-09-24/part-20260924T105025Z.parquet, 263 rows (denominator)
+GOLD rows for ['ft:79c86a189372f457e82c5969']: 2
+  gold row: article_key=ft:79c86a189372f457e82c5969 security_key=COST_US_Equity tier=D mention_count=1 published_utc=2026-08-20 20:52:26.087000+00:00
+  gold row: article_key=ft:79c86a189372f457e82c5969 security_key=HD_US_Equity tier=D mention_count=1 published_utc=2026-08-20 20:52:26.087000+00:00
+  (article_key, security_key) pairs: 2, distinct pairs: 2
+  articles_total contribution: security_key=COST_US_Equity day=2026-08-20 -> 1 (set of article_keys ['ft:79c86a189372f457e82c5969'])
+  articles_total contribution: security_key=HD_US_Equity day=2026-08-20 -> 1 (set of article_keys ['ft:79c86a189372f457e82c5969'])
+GOLD ft rows: 21, distinct (article_key,security_key): 21, distinct article_key: 14
+CHATTER_DAILY newest=amgt/harvest/gold/chatter_daily/date=2026-09-24/part-20260924T105051Z.parquet (50997 rows): security_key=COST_US_Equity day=2026-08-20 articles_total=[1]
+CHATTER_DAILY newest=amgt/harvest/gold/chatter_daily/date=2026-09-24/part-20260924T105051Z.parquet (50997 rows): security_key=HD_US_Equity day=2026-08-20 articles_total=[5]
+gold double-counts: NO  (silver article_keys for the article=1, silver rows=1, gold rows=2, distinct gold pairs=2, max articles_total contribution per (security,day)=1)
