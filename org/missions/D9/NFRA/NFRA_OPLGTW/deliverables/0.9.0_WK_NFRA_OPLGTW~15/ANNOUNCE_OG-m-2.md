@@ -50,3 +50,15 @@ or the `opal-assets` root. Re-run at PHASE B.
 - **Tests:** dr.AC1.sh `named tests passed 6 of 6; failed/error lines 0 -- RESULT: PASS`.
 - **Targeted plan (`-lock=false`):** `Plan: 0 to add, 2 to change, 0 to destroy.` Changed: `aws_iam_role_policy.advi_49f_gold_dispatch` and `module.advi_49f_gold_dispatch.aws_lambda_function.this` (env `CHAIN_LOG_BUCKET`, `CHAIN_LOG_PREFIX` added). `aws_ssm_document` is not listed: unchanged (guard met).
 - `og-m-2_code_and_iam.patch` and the `.py.txt` copy are refreshed to the current worktree state.
+
+---
+## UPDATE after A3 (SPLIT) and the CTO pin addendum -- this order is OG-m-2a; PHASE A COMPLETE, COMMITTED
+
+**Code commit `c064389bab` (LOCAL, wk-NFRA_OPLGTW-15).** Naming gate on the diff: `NAMING-GATE: WARN 1 graded` (only the existing `advi.49f.silver-accelerator` hand-kept-carrier WARN); no refusal, no override.
+- **Diff (2 tracked + 1 new):** `lambda_function.py` +44 (marker gate, `_marker_closure_status`, s3 client, `_trigger_identity` rider stays); `advi_49f_floor.tf` +9 (one statement `ReadTheAcceleratorMarker`: `s3:GetObject` + `s3:GetObjectVersion` on `arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*`, no ListBucket); new test file, 3 tests.
+- **Reverted:** every classifier and chain-log change (no chain-log grant, literal, local or `CHAIN_LOG_*` env var); the stdout `_classify` is byte-for-byte the deployed shape.
+- **Tests:** `test_incomplete_marker_does_not_dispatch`, `test_qualified_marker_dispatches_once`, `test_floor_event_reads_no_marker`. dr.AC1.sh: `named tests passed 3 of 3; failed/error lines 0 -- RESULT: PASS`.
+- **Targeted plan (`-lock=false`):** `Plan: 0 to add, 1 to change, 0 to destroy.` Only `aws_iam_role_policy.advi_49f_gold_dispatch` is listed. The function's code change appears only after the new artifact version exists (the module reads the artifact's latest S3 version); no env var, no `aws_ssm_document` change.
+- **Live re-read (now):** `CodeSha256` `fEMCZ4usqXuIC1GhklcClwOn/O6vR+uV+xgbk+oj8lk=` (2026-08-19T17:32:12.440Z); artifact latest VersionId `MLLnDY4WlZCx94GuUkxXyQWlYXR2c5kY`. Unchanged.
+
+**2b frozen candidate:** `og-m-2b_candidate_frozen.patch`, sha256 `600a4b6da9e75c65472dfdf10532cd85218f291c2b0b14b79d232275ca5ffbfe` (11,683 bytes), byte-identical to `og-m-2_code_and_iam.patch` committed at 8340c65376 (same sha256) and to the CTO pin prefix `600a4b6da9e7...` (the CTO's file itself is not present in this worktree to compare in full). Not to be edited. `og-m-2b_input_test_full_6.py.txt` is the six-test file for 2b.
