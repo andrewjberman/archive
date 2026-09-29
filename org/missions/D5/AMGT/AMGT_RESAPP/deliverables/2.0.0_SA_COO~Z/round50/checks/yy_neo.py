@@ -69,6 +69,18 @@ def main():
             continue
         if a.plane == "plan":
             judge(key, plan, bad)
+            # AMENDMENT 1 (row Z-W177-S2): the object yy-5 writes into the served M-1 store must validate against that store's
+            # own schema -- enrich.validate over lib/research/management/management.schema.json.
+            from lib.research.management import enrich
+            try:
+                result = enrich.validate(plan)  # returns (valid: bool, errors: list)
+                problems = [] if (isinstance(result, tuple) and result[0]) else (result[1] if isinstance(result, tuple) else result)
+            except Exception as exc:  # noqa: BLE001 -- a raise is a refusal
+                problems = ["%s: %s" % (type(exc).__name__, str(exc)[:160])]
+            if problems:
+                bad.append("%s: planned object fails management.schema.json: %s" % (key, str(problems)[:200]))
+            else:
+                print("  %s validates against management.schema.json" % key)
             continue
         from lib.research.api import scoped_amgt as sa
         saved = sa.read_pool_object
