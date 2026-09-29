@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.2",
-  "description": "BD Allocation silver merge - convert the allocation bronze files landed by the live 49F REST session chain to silver parquet, then trigger bd-price-update. The Playwright portal download this document used to run is removed: BD added MFA and it failed every run since 2026-06-23.",
+  "description": "BD Allocation silver merge - convert the allocation bronze files landed by the live 49F REST session chain to silver parquet. The Playwright portal download this document used to run is removed: BD added MFA and it failed every run since 2026-06-23.",
   "parameters": {},
   "mainSteps": [
     {
@@ -41,21 +41,14 @@
           "echo \"Shutting down in 2 minutes...\" | tee -a $LOG",
           "shutdown -h +2 &",
           "",
-          "# Only invoke bd-price-update if the merge succeeded",
+          "# Exit non-zero if the merge failed so SSM and CloudWatch reflect the failure",
           "if [ $MERGE_RC -ne 0 ]; then",
-          "  echo \"ERROR: Pipeline failed (merge_rc=$MERGE_RC) - skipping bd-price-update\" | tee -a $LOG",
+          "  echo \"ERROR: Pipeline failed (merge_rc=$MERGE_RC)\" | tee -a $LOG",
           "  aws s3 cp $LOG s3://opal-data-bd/logs/allocation-download-$TODAY.log || true",
           "  exit 1",
           "fi",
           "",
-          "# Trigger price update Lambda (next step in pipeline chain)",
-          "echo \"Invoking bd-price-update Lambda...\" | tee -a $LOG",
-          "aws lambda invoke \\",
-          "  --function-name bd-price-update \\",
-          "  --invocation-type Event \\",
-          "  --region us-east-1 \\",
-          "  /tmp/lambda-invoke-response.json 2>&1 | tee -a $LOG && echo \"OK: bd-price-update triggered\" | tee -a $LOG || echo \"WARNING: Failed to trigger bd-price-update\" | tee -a $LOG",
-          "",
+          "echo \"NOTE: bd-price-update is NOT invoked by this document (MX-s-14 carve-out; it has been unreachable since 2026-06-22).\" | tee -a $LOG",
           "echo \"Done.\" | tee -a $LOG"
         ]
       }
