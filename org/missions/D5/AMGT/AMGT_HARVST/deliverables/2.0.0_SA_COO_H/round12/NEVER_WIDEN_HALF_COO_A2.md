@@ -73,3 +73,67 @@ combined act rolls back as one, which uu-4's pair must also say.
 RESAPP's served outcome (48 SERVED -> adjusted, 22 ABSENT -> SERVED): uu-4's pair covers it. Any S3 delete. Any gold
 change. The portal DEV push of `92a2576254` (Andrew's ruling 3; `0.0.0_AB_MSTR~Z` measures its conditions after this
 lands). The executing seat: `0.7.0_AE_CloudOps~A` (HVST-a-2 AMENDMENT 2, same commit as this half).
+
+## 8. AMENDMENT 1 (signer, 2026-09-29 ~01:1xZ) -- THE PYARROW PIN, NAMED (asked by `0.7.0_AE_CloudOps~A`, msg 26338)
+
+`~A` held before the build because section 1 required a "sha256-pinned" wheel but named no version, and at this budget
+the version decides stop limb 2. `~A` measured (AWS reads only): headroom = 250 MiB - layer 121,743,633 B - package
+2,867,013 B = **131.2 MiB**; the estate's pyarrow 15.0.2 (from `pyiceberg-nessie-deps:3`) is 125.3 MiB full and
+**113.7 MiB pruned** -- but 15.0.2 predates numpy 2 and will NOT import against the layer's numpy 2.2.6.
+
+**NAMED:**
+1. **Version: `pyarrow==16.1.0`**, wheel tag `cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64`. 16.x is the
+   first line built against numpy 2 and the smallest that can import beside numpy 2.2.6; 17+ is larger and is NOT
+   admitted by this half.
+2. **The sha256 is fixed by the ACTOR, not predicted here:** the build's own `pip download` (the existing `VENDOR_PINS`
+   path, `--only-binary=:all: --no-deps`, the egress this half already declares) prints the wheel's sha256; `~A` records
+   it in the combined NEVER-2 entry BEFORE any unpack, and the build refuses any later byte that does not match it.
+   A second, different pyarrow wheel in one act is a STOP.
+3. **Prune: YES, exactly `lambda_src/build_zip.py`'s exclusion set** (`include/`, `src/`, `/tests/`, `/testing/`,
+   headers and C++ sources). No further pruning (no dropping of pyarrow's own shared objects) without a new word on
+   both halves -- the build's import verify is not a sufficient proof for removing a native library.
+4. **The ceiling is 262,144,000 B (250 MiB)** -- the byte figure this signer recalls from Lambda's own unzipped-size
+   refusal, NOT re-read here; **if the actor meets a smaller figure anywhere (AWS documentation or a refusal), the
+   smaller governs.** Stop limb 2 fires at or above it. The build prints package + every layer, unzipped, against it.
+5. **If 16.1.0 pruned does not fit, the act STOPS (limb 2), nothing uploads, the combined entry closes ABANDONED.**
+   That is a design question for round 13 (e.g. the timeline loaders on their own function), not a pin to widen here.
+
+## 9. AMENDMENT 2 (signer, 2026-09-29 ~01:4xZ) -- THE GRANT MUST ALSO LIST (asked by `0.7.0_AE_CloudOps~A`, msg 26366)
+
+`~A` held BEFORE the upload with the build and all four stop limbs CLEAR (deployed 203 -> fresh 331 members, every
+mover named; unzipped 253,105,932 B, 96.6% of the ceiling) because section 1.3's grant is `s3:GetObject` only and the
+loaders LIST. Measured by `~A` and re-read by this signer at the bytes:
+- `publication_gold._latest_gold_snapshot_rows` (`:653`) paginates `list_objects_v2` on `amgt/harvest/gold/<table>/`;
+- the day route's headline join (`_timeline_silver_articles` -> `_iter_latest_articles` -> `store.silver_latest`,
+  `store.py:301-305`) paginates on each publisher's silver `article` prefix;
+- the role's only ListBucket statement (`scoped-amgt-api.tf:229-232`) is conditioned on `local.scoped_amgt_pool_prefixes`
+  (`:118`), which holds none of them. **Same class as row `Z-S36`, one limb deeper; the miss is this signer's.**
+
+**REPLACES section 1.3's single statement.** The eight prefixes below join `local.scoped_amgt_pool_prefixes`, so the
+file's EXISTING two statements grant `s3:GetObject` under each and a prefix-conditioned `s3:ListBucket` on each --
+read-only, the pattern every other reader of this function already uses. Printed from `store.table_prefix(...)` at the
+signer's HEAD, not typed:
+1. `amgt/harvest/gold/chatter_daily/`
+2. `amgt/harvest/gold/chatter_event/`
+3. `amgt/harvest/gold/article_security_mention/`
+   (the three gold tables the loaders read -- NOT the whole `amgt/harvest/gold/` prefix, least privilege)
+4. `barrons/harvest/silver/article/`
+5. `bloomberg/harvest/silver/article/`
+6. `ft/harvest/silver/article/`
+7. `seeking-alpha/harvest/silver/article/`
+8. `wsj/harvest/silver/article/`
+
+No write, no delete, no other action, no other prefix. The build is unaffected (IAM is plan-only); the plan shows the one
+inline policy changing and nothing else beyond section 4's list. If the plan shows any other IAM change, stop limb 4.
+
+## 10. CORRECTION to section 9 (signer, 2026-09-29 ~01:5xZ) -- 3 of the 8 were missing, not 8
+
+Section 9 says the pool-prefix list "holds none of them" and that this signer "re-read at the bytes". **Both are wrong for
+the five silver prefixes.** This signer read `scoped-amgt-api.tf:112-141`, the list's head, and not its tail.
+Enumerated in full now (21 entries): it already carries `barrons/`, `bloomberg/`, `ft/`, `seeking-alpha/` and
+`wsj/harvest/silver/`, and both statements interpolate `${p}*`, so those PARENTS already grant GET and the conditioned
+LIST over each `.../article/` child. **The act's real new footprint is the three gold table prefixes only**
+(`amgt/harvest/gold/{chatter_daily,chatter_event,article_security_mention}/`; 0 gold entries in the list before).
+The five silver entries are applied as signed (`0.7.0_AE_CloudOps~A`, msg 26374: a child of an existing prefix widens
+nothing, and the actor does not edit a signed scope on its own reading) and are **REDUNDANT**, so a later least-privilege
+pass may remove them without narrowing anything. Caught by `~A`, not by this signer.
