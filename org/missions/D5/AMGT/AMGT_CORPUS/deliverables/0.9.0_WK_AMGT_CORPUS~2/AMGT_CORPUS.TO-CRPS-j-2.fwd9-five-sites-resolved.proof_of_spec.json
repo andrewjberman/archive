@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-j-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-j-2.fwd9-five-sites-resolved.md",
+    "group": "OTHER",
+    "vintage_commit": "43912573fb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "43912573fb",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-j-2.fwd9-five-sites-resolved.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/induction_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run()/write_readback() drop the deliverables_dir parameter and write under the module constant DELIVERABLES_DIR; the two open() targets are spelled through datetime.date.fromisoformat(as_of).strftime(...) which the census classifies SAFE. CLI default location unchanged; as_of is validated YYYY-MM-DD at the CLI.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/key_glob_census.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run_plant uses tempfile.mkdtemp and removes it with shutil.rmtree(tmp) in a finally; both classify SAFE. Adds one write-like call (rmtree): write_like_calls 50 -> 51.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_induction_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "autouse fixture redirects induction_run.DELIVERABLES_DIR to tmp_path; every deliverables_dir= kwarg removed.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j2_AC1.sh -- expect j2 tristate_unresolved 0 library 0 rc 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j2_AC1.sh",
+      "output_evidence": "j2 tristate_unresolved 0 library 0 rc 0",
+      "denominator": "1 of 1 run; census files_scanned 46 before and after; write_like_calls 50 -> 51; tristate library 0 unresolved 5 clear 45 -> library 0 unresolved 0 clear 51",
+      "expect": "j2 tristate_unresolved 0 library 0 rc 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j2_AC2.sh -- expect (?m)^plant_flagged 1$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j2_AC2.sh",
+      "output_evidence": "plant_flagged 1",
+      "denominator": "1 of 1 run",
+      "expect": "(?m)^plant_flagged 1$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j2_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j2_AC3.sh",
+      "output_evidence": "152 passed in 1.08s",
+      "denominator": "1 of 1 run; 4 test modules, 152 of 152 passed",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 run twice",
+      "observed": "identical",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "AC2 planted key-derived glob module still flags after the plant moved to mkdtemp",
+      "expected": "plant_flagged 1",
+      "observed": "plant_flagged 1",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "readonly_proof.py untouched; negative-control not run",
+      "reason": "section 3/4 bounds"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "readonly_proof --code-census (via j2_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j2_AC1.sh",
+      "result": "rc 0; j2 tristate_unresolved 0 library 0 rc 0"
+    }
+  ]
+}
