@@ -1,0 +1,520 @@
+diff --git a/infra/aws/ec2/opal-gateway/app/data_entitlement.py b/infra/aws/ec2/opal-gateway/app/data_entitlement.py
+index a44ff20ed1..023a178841 100644
+--- a/infra/aws/ec2/opal-gateway/app/data_entitlement.py
++++ b/infra/aws/ec2/opal-gateway/app/data_entitlement.py
+@@ -112,6 +112,7 @@ INTEGRATION_TOOLS = frozenset({
+ # gates, and a restricted (Schwab-grant) principal is denied them exactly as it is every other non-Schwab tool.
+ INDEX_TOOLS = frozenset({
+     "mdpf_get_aum_metrics", "mdpf_get_account_distribution", "mdpf_get_aggregate_aua",   # portal_index
++    "mdpf_get_model_benchmarks", "etfs_get_positioning",      # portal_index, NFRA_MCPINDEX MX-t-9 / MX-t-10 (row Z-W15-S2)
+     "opal_discover", "opal_describe",                         # opal_discover
+ })
+ CLASS_LEGACY = "legacy"
+diff --git a/infra/aws/ec2/opal-gateway/app/integrations/portal_index/integration.py b/infra/aws/ec2/opal-gateway/app/integrations/portal_index/integration.py
+index 5aafcca97b..f7782803ff 100644
+--- a/infra/aws/ec2/opal-gateway/app/integrations/portal_index/integration.py
++++ b/infra/aws/ec2/opal-gateway/app/integrations/portal_index/integration.py
+@@ -27,6 +27,8 @@ or an object whose as-of is not the date asked for, answers "no data for that da
+ THE CAVEAT (MX-t-9): a tool whose ToolRow declares a `caveat` returns it on EVERY answer, a no-data answer included,
+ beside `benchmark_basis` naming the bases a quoted figure must state. The model-benchmark table is MODEL-DESIGN returns,
+ never a client's realized return, so its answer carries that and nothing else is asked of the caller to remember.
++A tool that declares `row_caveats` (MX-t-10, the ETF positioning table) returns, on every answer, the `caveat` its own
++catalog row states (`serve_verdict_with_caveats`), read at call time and never held here.
+ 
+ DORMANT (integrations standard s.6): nothing here runs unless `portal_index` is in ENABLED_INTEGRATIONS; the
+ catalog and the S3 client are loaded on the first call, never at import.
+@@ -65,6 +67,7 @@ class ToolRow:
+     member_arg: str = ""    # the argument naming the member of the row's family; must equal the row's family axis
+     caveat: str = ""        # a caveat every answer of this tool carries (MX-t-9); empty = none declared
+     basis: str = ""         # the benchmark basis a quoted figure must name; carried with the caveat
++    row_caveats: bool = False   # every answer carries the tool's own catalog row's serve_verdict_with_caveats (MX-t-10)
+ 
+     def args(self) -> tuple:
+         return (self.member_arg,) if self.member_arg else ()
+@@ -84,12 +87,13 @@ ROWS = {
+                                       member_arg="scope"),
+     "mdpf_get_model_benchmarks": ToolRow("getModelPortfolioBenchmarks", "portal_mdpf_model_benchmarks",
+                                          caveat=MODEL_DESIGN_CAVEAT, basis=BENCHMARK_BASIS),
++    "etfs_get_positioning": ToolRow("getEtfPositioningData", "portal_etfs_positioning", row_caveats=True),
+ }
+ TOOLS = tuple(ROWS)
+ 
+ SPEC = IntegrationSpec(
+     id="portal_index",
+-    display_name="Portal precomputed objects (mdpf, model benchmarks)",
++    display_name="Portal precomputed objects (mdpf, model benchmarks, etf positioning)",
+     description="Read-only purpose-built tools over the portal's own precomputed objects: each tool reads ONE "
+                 "whole object whose key is its own catalog row's, through catalog_gate, and answers with the "
+                 "object's own as-of date.",
+@@ -212,11 +216,14 @@ def answer(tool: str, getter: Callable[[str, str], Optional[bytes]], principal:
+            loaded: Optional[dict] = None, **args) -> dict:
+     """One tool's answer: resolve the key from the catalog through the gate, read the whole object, return it with
+     the object's own as-of date. A tool that declares a caveat returns it on every answer (MX-t-9)."""
++    loaded = loaded if loaded is not None else runtime_catalog()
+     out = _answer(tool, getter, principal, as_of, loaded, **args)
+     spec = ROWS[tool]
+     if spec.caveat:
+         out["caveat"] = spec.caveat
+         out["benchmark_basis"] = spec.basis
++    if spec.row_caveats:
++        out["caveat"] = str(_row_for(loaded, spec.accessor).get("serve_verdict_with_caveats") or "").strip()
+     return out
+ 
+ 
+@@ -313,4 +320,12 @@ class PortalIndexIntegration(Integration):
+             object's own as-of date. Optional as_of (YYYY-MM-DD) must match it."""
+             return run("mdpf_get_model_benchmarks", {}, as_of)
+ 
++        @mcp.tool()
++        def etfs_get_positioning(as_of: str = "") -> dict:
++            """The Opal ETF positioning table (the four Opal ETFs: AUM, allocation, characteristics, sector and
++            geography mix and holdings, one object with each fund's own as-of date), from the catalog row of
++            getEtfPositioningData. Opal-internal. The answer carries the row's own caveats: never sum or blend funds.
++            Answers with the object's own as-of date. Optional as_of (YYYY-MM-DD) must match it."""
++            return run("etfs_get_positioning", {}, as_of)
++
+         return list(TOOLS)
+diff --git a/infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml b/infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml
+index 9d08a26f17..cff2d3a6f8 100644
+--- a/infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml
++++ b/infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml
+@@ -1,6 +1,6 @@
+-# DATA_CATALOG v0.3 -- THE RUNTIME CATALOG AT ITS ONE HOME (CTO~Z ruling 2448/2449, 2026-08-20)
++# DATA_CATALOG v0.4 -- THE RUNTIME CATALOG AT ITS ONE HOME (CTO~Z ruling 2448/2449, 2026-08-20)
+ #
+-# BUILT BY: workflows/atom_decomposition/emit_catalog_v02.py at git HEAD 120ff9b27f
++# BUILT BY: workflows/atom_decomposition/emit_catalog_v02.py at git HEAD a6c17f4bcf
+ # EXECUTES: OPAL_ANALYST_PRD.md sec.9.6 + sec.10.1 (W5 supersede @9c7b59f9df) as amended by
+ #           OPAL_ANALYST.W5-V03 (the three Rule-24 axis reshapes WITH catalog_gate, one
+ #           versioned change; 0.5.0_AE_OpalETL~Z, 2026-08-20).
+@@ -30,10 +30,16 @@
+ # never from a bucket name (sec.10.8.1). Consumers enforce; this file declares.
+ #
+ # WIDENING IS ANDREW-ONLY, unchanged. Version bumps carry his verbatim.
++#
++# v0.4 (NFRA_MCPINDEX MX-t-10) WIDENS THE CATALOG TO platinum/etfs, on Andrew's word. Andrew-direct 2026-09-29 ~04:5xZ,
++# verbatim: "self-drive says adjudicate all open calls. Go with your recs." His recommendations, adopted: platinum/etfs
++# YES (read-only, already portal-served, per-firm visibility unchanged); platinum/advi NOT YET (held until the W4b
++# certification window closes). Record: org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260928_212xZ_O_FABRIC_OPEN_CALLS_ANSWERED.md
++# addendum, @dc75ddbe32. One object is rowed (channel etfs_positioning); nothing else under the prefix is.
+ 
+-version: 0.3
+-built_at_git_head: 120ff9b27f
+-supersedes: v0.2 (ported 2026-08-20 by 0.7.0_AE_CloudOps, W6-PORT C1; certified @bf0a2c30f9 + CVO~Z @9b859ca898) -- EXTENDS, never a second registry
++version: 0.4
++built_at_git_head: a6c17f4bcf
++supersedes: v0.3 (widening to platinum/etfs, @dc75ddbe32); v0.2 (ported 2026-08-20 by 0.7.0_AE_CloudOps, W6-PORT C1; certified @bf0a2c30f9 + CVO~Z @9b859ca898) -- EXTENDS, never a second registry
+ bucket: opal-data-portal-v2
+ access_tool: tools/portal_lookup.py   # NEVER raw `aws s3` to answer a user
+ semantics_provenance:   # sec.9.3 / L-7 -- machine-readable carrier; per-row field repeats it with the certified run
+@@ -384,6 +390,39 @@ channels:
+         consumer_set: |-
+           1 accessor (getFactorTiltsTimeSeries), consumed by the TimeSeries tab   # L-2/L-6 grain caveats travel in the cell text; the mechanized list is accessors: above
+ 
++  etfs_positioning:
++    widening: 'APPROVED CHANNEL ADD -- Andrew-direct 2026-09-29 ~04:5xZ @dc75ddbe32, verbatim: self-drive says adjudicate all open calls. Go with your recs. (his recommendation adopted: platinum/etfs YES, read-only, already portal-served, per-firm visibility unchanged; platinum/advi NOT YET)'
++    serves: "Opal's four ETFs (DIVZ, IDVZ, PFDE, PFOE): per-fund AUM, allocation, characteristics, sector and geography mix and holdings -- the ETF positioning mode of the /positioning page"
++    keywords: [ETF, ETFs, ETF holdings, ETF positioning, ETF allocation, ETF AUM, fund holdings, fund AUM, DIVZ, IDVZ, PFDE, PFOE, Polen ETF, Pathfinder ETF, our ETFs, opal etfs]
++    example_asks:
++      - 'what does the Polen Dividend Income ETF hold?'
++      - "what is PFDE's AUM and allocation as of the latest date?"
++    tool: tools/portal_lookup.py
++    artifacts:
++      - key: 'platinum/etfs/positioning_data.json'
++        entity: etfs.01.positioning-data   # AUTHORED row (no certified rectangle); sources cited in semantics_provenance
++        firm: opal-internal
++        pages: [/positioning]
++        verdict_class: serve-with-caveat
++        verdict_state: ruled
++        allowlist: ALLOWLISTED
++        vintage_field: 'data_as_of'
++        vintage_grain: date
++        accessors: ['getEtfPositioningData (@/api/portal-proxy)']
++        census_ref: 'NONE -- uncensused (L-14)'
++        semantics_provenance: "WORKER-AUTHORED (0.9.0_WK_NFRA_MCPINDEX~15, MX-t-10), NOT a CVO-certified rectangle: read from a live get-object of the object (top-level generated_at, data_as_of, data_date, data_as_of_spread, note, portfolios) and from the producer's and the portal's own source (data/etfs/scripts/gold/etf_positioning_publisher.py, portal/src/api/portal-proxy.ts EtfPositioningBook). Served surface widened on Andrew's word @dc75ddbe32."
++        disambiguation: 'SAME BASENAME positioning_data.json, DIFFERENT ARTIFACT: json/positioning/positioning_data.json (Models mode: the five model portfolios, pos.01) -- L-1: THIS row answers the four ETFs; never answer an ETF question from the Models-mode object, nor a model-portfolio question from this one'   # L-1 mutual, both rows name the other
++        serve_verdict_with_caveats: |-
++          SERVE-WITH-CAVEAT -- widened on Andrew's word (@dc75ddbe32), read-only, already portal-served. Opal-internal: the object carries all four funds under one key with NO firm or scope segment, so a firm principal is never served it. NEVER sum or blend funds: AUM, allocation and holdings are per fund, each its own legal entity. Each fund carries its OWN data_as_of; quote the fund's date, not only the top-level one. holdings_status is load-bearing: 'book_only' means holdings are intentionally not carried, and 'full' with an empty holdings list is a producer defect, never a fund with no holdings; do not infer either from the list length. An unavailable metric is null, never zero.
++        business_meaning: |-
++          The Opal ETF positioning table: for each of the four Opal ETFs (DIVZ, IDVZ, PFDE, PFOE) the fund's AUM, asset-class allocation (cash, fixed income, equity, hedge), active versus passive, characteristics (yield, cost, duration, beta), sector and geography mix, and the ETF holdings with weights and returns. It is the artifact behind the ETF holdings and fund AUM view of the Positioning page.
++        vintage_semantics: |-
++          THE vintage is top-level `data_as_of` (live 2026-09-25, generated_at 2026-09-28T13:01:28Z); `data_date` repeats it and `data_as_of_spread` lists the distinct per-fund dates. Each fund also carries its own `data_as_of` and `as_of_basis`. The producer's own docstring names one artifact for all four books; the write cadence is not restated here.
++        producer: |-
++          data/etfs/scripts/gold/etf_positioning_publisher.py (ETFS_POSITIONING, one artifact carrying all four books)
++        consumer_set: |-
++          portal: getEtfPositioningData -> Positioning.tsx (ETF mode) and EtfModal.tsx
++
+   macro_rates:
+     example_asks:
+     - where's the 10-year today?
+@@ -954,6 +993,7 @@ channels:
+         accessors: ['getPositioningData (@/api/portal-proxy)']
+         census_ref: {file: org/tier0_utility/0.0.3_BG_BBGTerminal/refs/census/ARTIFACT_CENSUS_POD2.yaml, page: /attribution, key: 'json/positioning/positioning_data.json'}
+         semantics_provenance: 'CVO-DELEGATED (Andrew-direct 2026-08-11 ~1020Z; PRD sec.9.3 / L-7) by 3.0.0_SA_CVO~Z; certified run portal-page-attribution/20260811T1834Z; merged definition co-signed @9b859ca898; substrate: rectangle'
++        disambiguation: 'SAME BASENAME positioning_data.json, DIFFERENT ARTIFACT: platinum/etfs/positioning_data.json (the four Opal ETFs, etfs.01) -- L-1: THIS row answers Models-mode positioning (the model portfolios); NEVER answer an ETF question from it'   # L-1 mutual, both rows name the other
+         serve_verdict_with_caveats: |-
+           SERVE-WITH-CAVEAT. (1) BOOK-LEVEL positioning, never a client's holdings - the most damaging misread available on this page; (2) gzip-encoded on the wire, so a failed retrieval is a READER defect, not a stale artifact (K7); (3) it supplies /attribution's page-level as-of, so anything quoted from this page's headline date is quoted from this artifact. PLANE C: approved posture, no widening.
+         business_meaning: |-
+@@ -1316,6 +1356,29 @@ portal_datasets:
+   # one row per workflows/atom_decomposition/catalog_entries/portal_<entity>.yaml source file.
+   # These are PRECOMPUTED objects the portal serves. Every row carries the 8 C1 fields plus `read_tool` and
+   # `accessor`; the object's key is resolved by that portal_index tool through that accessor's channels: row.
++  - entity: portal_etfs_positioning
++    business_meaning: 'The Opal ETF positioning table: for each of the four Opal ETFs (DIVZ, IDVZ, PFDE, PFOE) the
++      fund''s AUM, asset-class allocation, active versus passive, characteristics (yield, cost, duration, beta), sector
++      and geography mix, and the ETF holdings with weights and returns, as one object with each fund''s own as-of
++      date.'
++    example_questions:
++    - What does the Polen Dividend Income ETF hold, and as of what date?
++    - What is PFDE's AUM and asset-class allocation?
++    grain: date
++    freshness_field: FIELD:data_as_of
++    firm_scope_rule: opal-internal-only
++    never_sum_rules:
++    - 'never sum or blend funds: AUM, allocation and holdings are per fund, each fund its own legal entity, and the
++      object carries no total'
++    - 'never read a fund''s date from the top-level as-of alone: each fund carries its own data_as_of'
++    - never treat holdings_status book_only as a fund with no holdings, nor a full status with an empty holdings list
++      as anything but a producer defect
++    producer: data/etfs/scripts/gold/etf_positioning_publisher.py, one artifact carrying all four books (read whole
++      by portal_index)
++    tools:
++    - etfs_get_positioning
++    read_tool: etfs_get_positioning
++    accessor: getEtfPositioningData
+   - entity: portal_mdpf_account_distribution
+     business_meaning: 'The distribution of account (allocation) sizes for one scope: histogram, percentiles and summary
+       statistics, per model and in total.'
+diff --git a/infra/aws/ec2/opal-gateway/tests/test_portal_index.py b/infra/aws/ec2/opal-gateway/tests/test_portal_index.py
+index 6dbc4d538d..bd4d11b993 100644
+--- a/infra/aws/ec2/opal-gateway/tests/test_portal_index.py
++++ b/infra/aws/ec2/opal-gateway/tests/test_portal_index.py
+@@ -43,7 +43,9 @@ INTERNAL = (catalog_gate.OPAL_INTERNAL, "")
+ 
+ PINNED = ("mdpf_get_aum_metrics", "mdpf_get_account_distribution", "mdpf_get_aggregate_aua")
+ BENCH = "mdpf_get_model_benchmarks"        # MX-t-9
+-ALL_TOOLS = PINNED + (BENCH,)
++ETFS = "etfs_get_positioning"             # MX-t-10
++ALL_TOOLS = PINNED + (BENCH, ETFS)
++ETFS_KEY = "platinum/etfs/positioning_data.json"   # pinned test-side, never read from the module
+ BENCH_KEY = "json/benchmarks/model_portfolio_benchmarks.json"   # pinned test-side, never read from the module
+ AS_OF = "2026-09-24"
+ 
+@@ -151,9 +153,21 @@ def fixture_for(tool, key, as_of=AS_OF):
+                                        "Since Inception": _bench_cell(5.5, 5.25, 5.0)}}],
+                "model_names": {"UST": "Ultra-Short Term", "ST": "Short Term"},
+                "source": "fixture", "model_source_note": "fixture"}
++    elif tool == ETFS:
++        obj = {"generated_at": "2026-09-28T13:01:28Z", "data_date": as_of, "data_as_of_spread": [as_of], "note": "",
++               "portfolios": {code: _etf_book(code, name, as_of, n, aum) for code, name, n, aum in (
++                   ("DIVZ", "Fixture Dividend ETF", 2, 300.0), ("IDVZ", "Fixture International ETF", 2, 200.0),
++                   ("PFDE", "Fixture Disciplined ETF", 2, 170.0), ("PFOE", "Fixture Focused ETF", 0, 90.0))}}
+     return _set(obj, pi.as_of_field(tool, LOADED), as_of)
+ 
+ 
++def _etf_book(code, name, as_of, n, aum):
++    return {"code": code, "name": name, "data_as_of": as_of, "as_of_basis": "row-sourced", "prior_date": "2026-09-23",
++            "holdings_status": "full" if n else "book_only", "num_holdings": n, "aum": aum,
++            "allocation": {"cash": 0, "fixed_income": 1.0, "equity": 99.0, "hedge": 0.0},
++            "holdings": [{"ticker": "T%d" % i, "name": "Holding %d" % i, "weight": 0.5} for i in range(n)]}
++
++
+ def _bench_cell(model, index, etf):
+     return {"model": model, "model_source": "yang_design", "index_benchmark": index, "etf_benchmark": etf,
+             "index_spread": round(model - index, 2), "etf_spread": round(model - etf, 2), "model_volatility": 0.75,
+@@ -246,11 +260,12 @@ def test_portal_tools_register_dormant_with_class(capsys):
+     assert sorted(enabled_mcp.names) == sorted(ALL_TOOLS)
+     assert "composed_path_refused" not in enabled["portal_index"]
+     assert all(c is dop.OpClass.SAFE for c in dop_classes.values())
+-    # MX-t-9 (row NFRA_MCPINDEX-Z-W15-S2): data_entitlement.py is outside this cell's paths, so the fourth tool is
+-    # NOT yet named in its INDEX_TOOLS; the three mdpf tools are graded as before, the fourth is measured above.
+-    unresolved = sorted(t for t, c in de_classes.items() if c is None and t != BENCH)
+-    assert unresolved == [],("data_entitlement.classify returns None for %d of %d tools: %r"
+-                              % (len(unresolved), len(PINNED), unresolved))
++    # Strict again (row NFRA_MCPINDEX-Z-W15-S2, disarmed by MX-t-10 amendment A2): every one of the tools is named in
++    # data_entitlement, and the two new ones classify exactly as the original three do.
++    unresolved = sorted(t for t, c in de_classes.items() if c is None)
++    assert unresolved == [], ("data_entitlement.classify returns None for %d of %d tools: %r"
++                              % (len(unresolved), len(ALL_TOOLS), unresolved))
++    assert {de_classes[t] for t in ALL_TOOLS} == {de_classes[PINNED[0]]} == {"legacy"}, de_classes
+ 
+ 
+ def _catalog_entities():
+@@ -630,3 +645,106 @@ def test_model_benchmarks_catalog_row_names_its_reader(capsys):
+     assert row["key"] == BENCH_KEY and row["verdict_class"] == "serve-with-caveat"
+     _say(capsys, "MX-t-9 catalog entry %s: read_tool=%s accessor=%s; the one runtime row is %s (%s)"
+          % (spec.catalog_ref, entry["read_tool"], entry["accessor"], row["entity"], row["verdict_class"]))
++
++
++# --- MX-t-10: the ETF positioning table (a whole object, one key, all four funds) -----------------------------------
++
++def test_etf_positioning_reads_its_exact_key_only(capsys):
++    """The tool reads ONE object, the key its own catalog row yields through catalog_gate, in one call. An argument it
++    does not declare, a firm principal (the row is Opal-internal: the key carries no scope segment) and an
++    unresolvable principal are refused before any S3 call."""
++    store = Store({ETFS_KEY: _bytes(fixture_for(ETFS, ETFS_KEY))})
++    out = ask(ETFS, store)
++    assert out["status"] == "ok" and out["key"] == ETFS_KEY and out["bucket"] == "opal-data-portal-v2"
++    assert store.calls == [("opal-data-portal-v2", ETFS_KEY)]
++    assert pi.ROWS[ETFS].args() == ()
++    lines = ["MX-t-10 %s read %r in %d S3 call" % (ETFS, ETFS_KEY, len(store.calls))]
++    refused = 0
++    for kw, principal in (({"fund": "DIVZ"}, INTERNAL), ({"key": ETFS_KEY}, INTERNAL),
++                          ({"key": "platinum/etfs/_manifests/2026-09-25/x.json"}, INTERNAL),
++                          ({}, ("firm", "49financial")), ({}, ("firm", "inflection")), ({}, ("", ""))):
++        store = Store({ETFS_KEY: _bytes(fixture_for(ETFS, ETFS_KEY))})
++        with pytest.raises(pi.PrefixRefused) as exc:
++            ask(ETFS, store, principal=principal, **kw)
++        assert store.calls == []
++        refused += 1
++        lines.append("MX-t-10 refused %r as %r: %s" % (kw, principal, exc.value))
++    # the prefix's other keys stay off-catalog to the gate: only the one object is rowed
++    for key in ("platinum/etfs/_manifests/2026-09-25/9ded4d559535.json", "platinum/etfs/other.json"):
++        assert not catalog_gate.gate(LOADED, key, *INTERNAL)
++    lines.append("MX-t-10 refusals with zero S3 calls: %d of %d; the manifests and any other key under the prefix: off-catalog"
++                 % (refused, 6))
++    _say(capsys, *lines)
++
++
++def test_etf_positioning_answer_carries_the_rows_own_caveats(capsys):
++    """Every answer (ok, absent, empty, as-of mismatch) carries the caveat the tool's own catalog row states, read at
++    call time; the no-data answers carry no figure."""
++    row_caveat = pi._row_for(LOADED, pi.ROWS[ETFS].accessor)["serve_verdict_with_caveats"].strip()
++    assert "NEVER sum or blend funds" in row_caveat and "holdings_status" in row_caveat
++    served = _bytes(fixture_for(ETFS, ETFS_KEY))
++    cases = {"ok": (Store({ETFS_KEY: served}), ""), "ok-with-matching-as-of": (Store({ETFS_KEY: served}), AS_OF),
++             "absent": (Store({}), ""), "empty-bytes": (Store({ETFS_KEY: b""}), ""),
++             "empty-object": (Store({ETFS_KEY: b"{}"}), ""),
++             "as-of-mismatch": (Store({ETFS_KEY: served}), _shift(AS_OF, -1))}
++    lines = []
++    for label, (store, as_of) in cases.items():
++        out = ask(ETFS, store, as_of=as_of)
++        assert out["caveat"] == row_caveat, (label, out)
++        if label.startswith("ok"):
++            assert out["status"] == "ok"
++        else:
++            assert out["status"] == "no_data" and "data" not in out and _numbers(out) == []
++        lines.append("MX-t-10 %-24s status=%-8s row caveat carried" % (label, out["status"]))
++    # a catalog whose row states a different caveat is followed at call time (nothing is held in the module)
++    planted = copy.deepcopy(LOADED)
++    for row in planted["rows_by_key"].values():
++        if row["key"] == ETFS_KEY:
++            row["serve_verdict_with_caveats"] = "PLANTED CAVEAT"
++    assert ask(ETFS, Store({ETFS_KEY: served}), loaded=planted)["caveat"] == "PLANTED CAVEAT"
++    _say(capsys, *lines)
++
++
++def test_etf_positioning_parity_with_served_object(capsys):
++    """The tool's headline figure and as-of equal the served object's own; the same object one day later reports the
++    mismatch and carries no figure."""
++    served = fixture_for(ETFS, ETFS_KEY)
++    field = pi.as_of_field(ETFS, LOADED)
++    assert field == "data_as_of"
++    out = ask(ETFS, Store({ETFS_KEY: _bytes(served)}), as_of=served[field])
++    assert out["status"] == "ok" and out["as_of"] == served[field] and out["data"] == served
++    assert out["data"]["portfolios"]["PFDE"]["aum"] == served["portfolios"]["PFDE"]["aum"]
++    shifted = fixture_for(ETFS, ETFS_KEY, as_of=_shift(AS_OF, 1))
++    moved = ask(ETFS, Store({ETFS_KEY: _bytes(shifted)}), as_of=served[field])
++    assert moved["status"] == "no_data" and moved["mismatch"] is True and "data" not in moved
++    _say(capsys, "MX-t-10 parity: PFDE aum tool=%r served=%r as_of tool=%s served=%s | shifted +1d -> %s"
++         % (out["data"]["portfolios"]["PFDE"]["aum"], served["portfolios"]["PFDE"]["aum"], out["as_of"], served[field],
++            moved["message"]))
++
++
++def test_etf_positioning_catalog_row_and_entitlement(capsys):
++    """The tool's catalog entry names its reader; the one runtime row is Opal-internal, serve-with-caveat and
++    allowlisted; both new tools classify in data_entitlement like the original three."""
++    entry = _catalog_entities()[pi.ROWS[ETFS].catalog_ref]
++    spec = pi.ROWS[ETFS]
++    assert entry["read_tool"] == ETFS and entry["accessor"] == spec.accessor and entry["tools"] == [ETFS]
++    assert entry["freshness_field"] == "FIELD:data_as_of" and "s3_key" not in entry and "key" not in entry
++    row = pi._row_for(LOADED, spec.accessor)
++    assert row["key"] == ETFS_KEY and row["firm"] == "opal-internal" and row["allowlist"] == "ALLOWLISTED"
++    assert row["verdict_class"] == "serve-with-caveat" and row["verdict_state"] == "ruled"
++    assert LOADED["catalog"]["version"] == 0.4
++    classes = {t: de.classify(t) for t in (BENCH, ETFS)}
++    assert classes == {BENCH: "legacy", ETFS: "legacy"} and de.classify("mdpf_get_aum_metrics") == "legacy"
++    _say(capsys, "MX-t-10 catalog entry %s: read_tool=%s accessor=%s; runtime row %s (%s, firm %s); data_entitlement %r"
++         % (spec.catalog_ref, entry["read_tool"], entry["accessor"], row["entity"], row["verdict_class"], row["firm"],
++            classes))
++
++
++def test_etf_ask_routes_to_the_etf_row_first(capsys):
++    """opal_discover ranks the platinum/etfs row first for an ETF ask, and names etfs_get_positioning as its tool."""
++    from app.integrations.opal_discover import integration as od
++    ans = od.discover("ETF holdings and fund flows", catalog_gate.OPAL_INTERNAL, head=lambda _b, _k: "2026-09-28T13:01:32Z")
++    first = ans["matches"][0]
++    _say(capsys, "MX-t-10 discover first=%s next_tool=%s" % (first["dataset"], first["next_tool"]))
++    assert ans["catalogued"] is True and first["dataset"] == ETFS_KEY
++    assert first["next_tool"]["name"] == ETFS
+diff --git a/workflows/atom_decomposition/emit_catalog_v02.py b/workflows/atom_decomposition/emit_catalog_v02.py
+index f68c2816b1..8a1a476837 100644
+--- a/workflows/atom_decomposition/emit_catalog_v02.py
++++ b/workflows/atom_decomposition/emit_catalog_v02.py
+@@ -46,7 +46,46 @@ REPORT_DIR = os.path.join(HERE, "catalog_v02")   # validation_report.json only
+ # Allowlist coverage (BUCKET_ALLOWLIST.yaml v0.2 read 2026-08-19): prefixes allowed on
+ # opal-data-portal-v2. A row whose key sits outside these emits BLOCKED-BY-ALLOWLIST --
+ # an honest denial, never a silent widening (widening is Andrew-only).
+-ALLOWED_PREFIXES = ("platinum/mdpf/", "json/", "market-metrics.json.gz")
++#
++# WIDENED 2026-09-29 (NFRA_MCPINDEX MX-t-10, amendment A1): "platinum/etfs/" joins the list on Andrew's recorded word,
++# relayed by 1.0.0_SA_CTO~O and recorded @dc75ddbe32 (platinum/etfs YES; platinum/advi NOT YET, so platinum/advi/ is
++# deliberately NOT added). Only the one served object below is given a row; the prefix's _manifests stay unrowed and
++# therefore off-catalog to the gate.
++ALLOWED_PREFIXES = ("platinum/mdpf/", "platinum/etfs/", "json/", "market-metrics.json.gz")
++
++# The ETF positioning channel and its one row (MX-t-10). Unlike the EMISSION_MAP rows, this surface has NO certified
++# rectangle to lift from (the ETF page is not a program unit of the W5 certification), so its row is AUTHORED here, every
++# field cited to a live read of the object or to the producer's and the portal's own source, and the row says so in its
++# `semantics_provenance`. The capital_markets channel is the precedent for an authored channel block.
++AUTHORED_CHANNELS = {
++    "etfs_positioning": dict(
++        widening="APPROVED CHANNEL ADD -- Andrew-direct 2026-09-29 ~04:5xZ @dc75ddbe32, verbatim: self-drive says adjudicate all open calls. Go with your recs. (his recommendation adopted: platinum/etfs YES, read-only, already portal-served, per-firm visibility unchanged; platinum/advi NOT YET)",
++        serves="Opal's four ETFs (DIVZ, IDVZ, PFDE, PFOE): per-fund AUM, allocation, characteristics, sector and geography mix and holdings -- the ETF positioning mode of the /positioning page",
++        keywords=["ETF", "ETFs", "ETF holdings", "ETF positioning", "ETF allocation", "ETF AUM", "fund holdings", "fund AUM",
++                  "DIVZ", "IDVZ", "PFDE", "PFOE", "Polen ETF", "Pathfinder ETF", "our ETFs", "opal etfs"],
++        example_asks=["what does the Polen Dividend Income ETF hold?", "what is PFDE's AUM and allocation as of the latest date?"]),
++}
++AUTHORED_ARTIFACTS = {
++    "etfs_positioning": [dict(
++        key="platinum/etfs/positioning_data.json",
++        entity="etfs.01.positioning-data",
++        firm="opal-internal",
++        pages=["/positioning"],
++        verdict_class="serve-with-caveat",
++        verdict_state="ruled",
++        vintage_field="data_as_of",
++        vintage_grain="date",
++        accessors=["getEtfPositioningData (@/api/portal-proxy)"],
++        census_ref="NONE -- uncensused (L-14)",
++        semantics_provenance="WORKER-AUTHORED (0.9.0_WK_NFRA_MCPINDEX~15, MX-t-10), NOT a CVO-certified rectangle: read from a live get-object of the object (top-level generated_at, data_as_of, data_date, data_as_of_spread, note, portfolios) and from the producer's and the portal's own source (data/etfs/scripts/gold/etf_positioning_publisher.py, portal/src/api/portal-proxy.ts EtfPositioningBook). Served surface widened on Andrew's word @dc75ddbe32.",
++        disambiguation="SAME BASENAME positioning_data.json, DIFFERENT ARTIFACT: json/positioning/positioning_data.json (Models mode: the five model portfolios, pos.01) -- L-1: THIS row answers the four ETFs; never answer an ETF question from the Models-mode object, nor a model-portfolio question from this one",
++        serve_verdict_with_caveats="SERVE-WITH-CAVEAT -- widened on Andrew's word (@dc75ddbe32), read-only, already portal-served. Opal-internal: the object carries all four funds under one key with NO firm or scope segment, so a firm principal is never served it. NEVER sum or blend funds: AUM, allocation and holdings are per fund, each its own legal entity. Each fund carries its OWN data_as_of; quote the fund's date, not only the top-level one. holdings_status is load-bearing: 'book_only' means holdings are intentionally not carried, and 'full' with an empty holdings list is a producer defect, never a fund with no holdings; do not infer either from the list length. An unavailable metric is null, never zero.",
++        business_meaning="The Opal ETF positioning table: for each of the four Opal ETFs (DIVZ, IDVZ, PFDE, PFOE) the fund's AUM, asset-class allocation (cash, fixed income, equity, hedge), active versus passive, characteristics (yield, cost, duration, beta), sector and geography mix, and the ETF holdings with weights and returns. It is the artifact behind the ETF holdings and fund AUM view of the Positioning page.",
++        vintage_semantics="THE vintage is top-level `data_as_of` (live 2026-09-25, generated_at 2026-09-28T13:01:28Z); `data_date` repeats it and `data_as_of_spread` lists the distinct per-fund dates. Each fund also carries its own `data_as_of` and `as_of_basis`. The producer's own docstring names one artifact for all four books; the write cadence is not restated here.",
++        producer="data/etfs/scripts/gold/etf_positioning_publisher.py (ETFS_POSITIONING, one artifact carrying all four books)",
++        consumer_set="portal: getEtfPositioningData -> Positioning.tsx (ETF mode) and EtfModal.tsx",
++    )],
++}
+ 
+ # EMISSION_MAP: entity_id -> row spec. `key` is the exact S3 key (or template for a
+ # family, with `family` = (axis, declared_member_count)). `firm` per PRD 10.8.1: from the
+@@ -321,6 +360,7 @@ def load_catalog_entries():
+ # ---- condition 3 (L-1): mutual disambiguation on the shared-basename pair -- BOTH rows name the other.
+ DISAMBIGUATION = {
+     "mp.01.aum-metrics": "SAME BASENAME aum-metrics.json, DIFFERENT ARTIFACT: json/portfolios/aum-metrics.json (legacy, last written 2026-07-23, vintage field `period`) -- L-1: THIS platinum row answers Model-Portfolios AUM; never the legacy one",
++    "pos.01.positioning-data": "SAME BASENAME positioning_data.json, DIFFERENT ARTIFACT: platinum/etfs/positioning_data.json (the four Opal ETFs, etfs.01) -- L-1: THIS row answers Models-mode positioning (the model portfolios); NEVER answer an ETF question from it",
+     "pos.03.portfolios-aum-metrics": "SAME BASENAME aum-metrics.json, DIFFERENT ARTIFACT: platinum/mdpf/{scope}/aum-metrics.json (THE Model-Portfolios AUM source) -- L-1: NEVER answer a Model-Portfolios AUM question from this legacy artifact",
+ }
+ 
+@@ -491,7 +531,7 @@ def main():
+ 
+     os.makedirs(OUT_DIR, exist_ok=True)
+     w = io.StringIO()
+-    w.write("""# DATA_CATALOG v0.3 -- THE RUNTIME CATALOG AT ITS ONE HOME (CTO~Z ruling 2448/2449, 2026-08-20)
++    w.write("""# DATA_CATALOG v0.4 -- THE RUNTIME CATALOG AT ITS ONE HOME (CTO~Z ruling 2448/2449, 2026-08-20)
+ #
+ # BUILT BY: workflows/atom_decomposition/emit_catalog_v02.py at git HEAD %s
+ # EXECUTES: OPAL_ANALYST_PRD.md sec.9.6 + sec.10.1 (W5 supersede @9c7b59f9df) as amended by
+@@ -523,10 +563,16 @@ def main():
+ # never from a bucket name (sec.10.8.1). Consumers enforce; this file declares.
+ #
+ # WIDENING IS ANDREW-ONLY, unchanged. Version bumps carry his verbatim.
++#
++# v0.4 (NFRA_MCPINDEX MX-t-10) WIDENS THE CATALOG TO platinum/etfs, on Andrew's word. Andrew-direct 2026-09-29 ~04:5xZ,
++# verbatim: "self-drive says adjudicate all open calls. Go with your recs." His recommendations, adopted: platinum/etfs
++# YES (read-only, already portal-served, per-firm visibility unchanged); platinum/advi NOT YET (held until the W4b
++# certification window closes). Record: org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260928_212xZ_O_FABRIC_OPEN_CALLS_ANSWERED.md
++# addendum, @dc75ddbe32. One object is rowed (channel etfs_positioning); nothing else under the prefix is.
+ 
+-version: 0.3
++version: 0.4
+ built_at_git_head: %s
+-supersedes: v0.2 (ported 2026-08-20 by 0.7.0_AE_CloudOps, W6-PORT C1; certified @bf0a2c30f9 + CVO~Z @9b859ca898) -- EXTENDS, never a second registry
++supersedes: v0.3 (widening to platinum/etfs, @dc75ddbe32); v0.2 (ported 2026-08-20 by 0.7.0_AE_CloudOps, W6-PORT C1; certified @bf0a2c30f9 + CVO~Z @9b859ca898) -- EXTENDS, never a second registry
+ bucket: opal-data-portal-v2
+ access_tool: tools/portal_lookup.py   # NEVER raw `aws s3` to answer a user
+ semantics_provenance:   # sec.9.3 / L-7 -- machine-readable carrier; per-row field repeats it with the certified run
+@@ -562,7 +608,7 @@ semantics_provenance:   # sec.9.3 / L-7 -- machine-readable carrier; per-row fie
+     by_ch = {}
+     for eid, spec in EMISSION_MAP.items():
+         by_ch.setdefault(spec["ch"], []).append(eid)
+-    all_channels = sorted(set(by_ch) | set(v01_channels))
++    all_channels = sorted(set(by_ch) | set(v01_channels) | set(AUTHORED_CHANNELS))
+ 
+     def emit_v01_fragment(ch):
+         """Re-emit the v0.1 channel's own fields (sanitized to ASCII), indented under the channel."""
+@@ -593,6 +639,46 @@ semantics_provenance:   # sec.9.3 / L-7 -- machine-readable carrier; per-row fie
+             w.write("    example_asks:\n")
+             w.write("      - 'what are our long-term return assumptions for equities?'\n")
+             w.write("      - 'what is the house view on rates?'\n")
++        elif ch in AUTHORED_CHANNELS:
++            # MX-t-10: an authored channel block, then its authored rows (no certified rectangle behind them).
++            blk = AUTHORED_CHANNELS[ch]
++            w.write("    widening: %r\n" % blk["widening"])
++            w.write("    serves: %r\n" % blk["serves"])
++            w.write("    keywords: [%s]\n" % ", ".join(str(k) for k in blk["keywords"]))
++            w.write("    example_asks:\n")
++            for ask in blk["example_asks"]:
++                w.write("      - %r\n" % ask)
++            w.write("    tool: tools/portal_lookup.py\n")
++            w.write("    artifacts:\n")
++            for row in AUTHORED_ARTIFACTS[ch]:
++                if not str(row["key"]).startswith(ALLOWED_PREFIXES):
++                    axis_violations.append("%s: authored key outside ALLOWED_PREFIXES" % row["entity"])
++                if row["firm"] not in KNOWN_FIRM_VALUES or row["verdict_class"] not in VERDICT_CLASSES or row["verdict_state"] not in VERDICT_STATES:
++                    axis_violations.append("%s: authored row outside the v0.3 axis value sets" % row["entity"])
++                firm_census[row["firm"]] = firm_census.get(row["firm"], 0) + 1
++                vstate_census[row["verdict_state"]] = vstate_census.get(row["verdict_state"], 0) + 1
++                acc, acc_unres = accessors_for([row["consumer_set"]], acc_idx)
++                if not acc or acc_unres:
++                    axis_violations.append("%s: authored accessor(s) not exported under portal/src/api: %s" % (row["entity"], acc_unres))
++                w.write("      - key: %r\n" % row["key"])
++                w.write("        entity: %s   # AUTHORED row (no certified rectangle); sources cited in semantics_provenance\n" % row["entity"])
++                w.write("        firm: %s\n" % row["firm"])
++                w.write("        pages: [%s]\n" % ", ".join(row["pages"]))
++                w.write("        verdict_class: %s\n" % row["verdict_class"])
++                w.write("        verdict_state: %s\n" % row["verdict_state"])
++                w.write("        allowlist: ALLOWLISTED\n")
++                w.write("        vintage_field: %r\n" % row["vintage_field"])
++                w.write("        vintage_grain: %s\n" % row["vintage_grain"])
++                w.write("        accessors: [%s]\n" % ", ".join("'%s'" % a for a in row["accessors"]))
++                w.write("        census_ref: %r\n" % row["census_ref"])
++                w.write("        semantics_provenance: %r\n" % row["semantics_provenance"])
++                w.write("        disambiguation: %r   # L-1 mutual, both rows name the other\n" % row["disambiguation"])
++                w.write("        serve_verdict_with_caveats: %s\n" % yml(row["serve_verdict_with_caveats"], 10))
++                w.write("        business_meaning: %s\n" % yml(row["business_meaning"], 10))
++                w.write("        vintage_semantics: %s\n" % yml(row["vintage_semantics"], 10))
++                w.write("        producer: %s\n" % yml(row["producer"], 10))
++                w.write("        consumer_set: %s\n" % yml(row["consumer_set"], 10))
++            continue
+         else:
+             emit_v01_fragment(ch)
+         if ch not in by_ch:
+diff --git a/workflows/atom_decomposition/catalog_entries/portal_etfs_positioning.yaml b/workflows/atom_decomposition/catalog_entries/portal_etfs_positioning.yaml
+new file mode 100644
+index 0000000000..e1dcb6a9e2
+--- /dev/null
++++ b/workflows/atom_decomposition/catalog_entries/portal_etfs_positioning.yaml
+@@ -0,0 +1,21 @@
++# MX-t-10 catalog entry (C1 schema): portal_index tool etfs_get_positioning
++business_meaning: 'The Opal ETF positioning table: for each of the four Opal ETFs (DIVZ, IDVZ, PFDE, PFOE) the fund''s AUM,
++  asset-class allocation, active versus passive, characteristics (yield, cost, duration, beta), sector and geography mix,
++  and the ETF holdings with weights and returns, as one object with each fund''s own as-of date.'
++example_questions:
++- What does the Polen Dividend Income ETF hold, and as of what date?
++- What is PFDE's AUM and asset-class allocation?
++grain: date
++freshness_field: FIELD:data_as_of
++firm_scope_rule: opal-internal-only
++never_sum_rules:
++- 'never sum or blend funds: AUM, allocation and holdings are per fund, each fund its own legal entity, and the object
++  carries no total'
++- 'never read a fund''s date from the top-level as-of alone: each fund carries its own data_as_of'
++- 'never treat holdings_status book_only as a fund with no holdings, nor a full status with an empty holdings list as
++  anything but a producer defect'
++producer: data/etfs/scripts/gold/etf_positioning_publisher.py, one artifact carrying all four books (read whole by portal_index)
++tools:
++- etfs_get_positioning
++read_tool: etfs_get_positioning
++accessor: getEtfPositioningData
