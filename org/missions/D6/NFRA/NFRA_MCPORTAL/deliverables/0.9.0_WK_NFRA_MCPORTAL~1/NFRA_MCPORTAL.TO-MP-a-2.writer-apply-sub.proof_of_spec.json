@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-a-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "820dd79e36309810a703568cba198d0bdfd76fc0",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-a-2.writer-apply-sub.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-a-2.writer-apply-sub.md",
+    "group": "OTHER",
+    "vintage_commit": "3f3c616fe8db3d30faa4a7995c3dfa8597ca5567"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/critical_paths/change_management/20260929T0412Z_nfra-mcportal-r3-writer-apply_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "0cff25a236",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Ledger CLOSED, 4 of 4 legs proven; safe-apply targeted: Apply complete! Resources: 7 added, 0 changed, 0 destroyed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "0cff25a236",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Grant writer _note names MCPORTAL_OWNER_KEY_CLAIM and MCPORTAL_OWNER_KEY, says the writer refuses a header past its own exp, says APPLIED after the apply leg closed.",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "entry files at HEAD>=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR printed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round3/checks/a2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "entry files at HEAD=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 14 of 14 sentinel(s) scanned\nRESULT: PASS\nexit=0",
+      "denominator": "14 of 14 sentinels scanned",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "no header -> REFUSED NO-OWNER-HEADER; table items with reason NO-OWNER-HEADER>=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round3/checks/a2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "function mcportal-grant-writer-lambda: no header -> REFUSED NO-OWNER-HEADER; table mcportal-grant-changes-table items with reason NO-OWNER-HEADER=1\nRESULT: PASS\nexit=0",
+      "denominator": "1 item (need >=1)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "ssm status=Success; line=yes values_in_line=no want_claim=sub have_claim=sub value_ok=yes verdict=OK -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round3/checks/a2.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "ssm status=Success; line=yes values_in_line=no want_claim=sub have_claim=sub value_ok=yes verdict=OK\nRESULT: PASS\nexit=0",
+      "denominator": "1 line read",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "MCPORTAL_OWNER_OID=0 and MCPORTAL_OWNER_KEY_CLAIM>=1 and MCPORTAL_OWNER_KEY>=1 at HEAD -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round3/checks/a2.AC4.sh; echo \"exit=$?\"",
+      "output_evidence": "infra/aws/lambda/ci/lambda-source-map.json at HEAD: bytes=305070 MCPORTAL_OWNER_OID=0 MCPORTAL_OWNER_KEY_CLAIM=1 MCPORTAL_OWNER_KEY=1\nRESULT: PASS\nexit=0",
+      "denominator": "1 file at HEAD",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Working-tree mutant, never committed: in _append_record, cl.put_item(...) was replaced with cl.update_item(...), and AC2 was run. The file was restored by the reverse byte replacement; afterwards git diff showed only the pre-existing portal gitlink.",
+      "expected": "AC2 FAILs: the trapped UpdateItem is recorded, the record reads FAILED, and both record tests fail.",
+      "observed": "pytest rc=1; named tests passed 0 of 2; failed/error lines 3 / RESULT: FAIL exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 were each run twice at 9a370f2644 with no arguments varied. The first run was the verbatim invocation; the second came after the mutant was restored.",
+      "observed": "Both runs of each criterion printed the identical deciding line: AC1 4 of 4, AC2 2 of 2, and AC3 yes/yes/yes.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform plan/apply and supplying var.mcportal_owner_key_claim / var.mcportal_owner_key",
+      "reason": "The face says written, NOT applied; MP-a-1 applies and supplies both variables."
+    },
+    {
+      "item": "updating the stale _note in infra/aws/lambda/ci/lambda-source-map.json",
+      "reason": "It is outside this order's <paths> (row NFRA_MCPORTAL-Z-W1-S5)."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W1-S6"
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~1/session_log.MP-b-2.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests -p no:cacheprovider -q (from the function directory)",
+      "result": "10 passed"
+    },
+    {
+      "tool": "b1.AC2.sh (MP-b-1 in-package refusal)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/b1.AC2.sh",
+      "result": "build rc=0; in-package lambda_handler (Lambda depth) with no owner header -> verdict=REFUSED NO-OWNER-HEADER / RESULT: PASS exit=0 (before and after the commit)"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt -check -diff infra/aws/terraform/opal-gateway/mcportal_grant_writer.tf",
+      "result": "rc=0"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg_b2.txt -- <4 paths>",
+      "result": "committed 9a370f2644; naming gate PASS 3 graded; surprise-row-gate OK 1 new row"
+    }
+  ]
+}
