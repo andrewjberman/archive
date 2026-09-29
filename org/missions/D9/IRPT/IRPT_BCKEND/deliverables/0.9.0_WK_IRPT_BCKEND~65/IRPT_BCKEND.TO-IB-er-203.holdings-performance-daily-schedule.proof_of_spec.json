@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-er-203",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "5847d14dd6",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-er-203.holdings-performance-daily-schedule.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md ADDENDUM v0.19 ruling 9, on 1.0.0_SA_CTO ruling 102520 (\"plus the daily schedule ... under its own ledger\")",
+    "group": "OTHER",
+    "vintage_commit": "5847d14dd6"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~65",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/holdings-performance/handler.py",
+      "kind": "script",
+      "commit_or_etag": "11631d1ebf",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws lambda get-function -> irpt-holdings-performance-lambda State=Active LastUpdateStatus=Successful Handler=handler.lambda_handler; a real invoke of the deployed function {date:2026-09-25} returned rc=0 and its log shows the handler's own resolution path running end to end.",
+      "artifact_covered_by": ["E2-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/holdings-performance/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "9de9f358e1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "two safe-apply runs, rc=0: first 'Resources: 7 added, 0 changed, 0 destroyed' (all-create, new root); second (role rename fix) 'Resources: 2 added, 1 changed, 2 destroyed', both destroyed resources created by the FIRST apply of this same deploy, nothing else served. Post-apply plan: 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/holdings-performance/locals.tf",
+      "kind": "terraform",
+      "commit_or_etag": "11631d1ebf",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the read/write ARN locals resolved at plan/apply time to the exact strings the ledger's real invoke exercised: read arn:aws:s3:::opal-data-assets/schwab/08335338/silver/{dim_position,dim_balance}/*; write arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/{holdings_performance_daily,holdings_performance_manifest}/*."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/holdings-performance/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "9de9f358e1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws iam get-role irpt-49f-holdings-performance-role -> exists; the deployed role's inline policy (data.aws_iam_policy_document.irpt_holdings_performance) grants exactly ListBucket (prefix-conditioned), GetObject (declared silver only), PutObject (the two gold prefixes only), and the own-log-stream statement -- no delete, no ListBucket beyond the declared prefixes. A first cut without the firm-scoped role name (irpt-holdings-performance-role) was DENIED at the write by opal-data-49financial's own bucket policy DenyForeignFirmPrincipals; row IRPT_BCKEND-W65-S1 records the discovery and the fix, and the SECOND real invoke against the renamed role landed the write (see acceptance row evidence)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/holdings-performance/schedule.tf",
+      "kind": "schedule",
+      "commit_or_etag": "11631d1ebf",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws scheduler get-schedule --name irpt-holdings-performance-daily --group-name default: State=ENABLED, ScheduleExpression=cron(30 7 ? * MON-FRI *), ScheduleExpressionTimezone=America/New_York, Target.Arn=arn:aws:lambda:us-east-1:313476888478:function:irpt-holdings-performance-lambda -- this IS the E2-AC3 criterion's own read."
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-holdings-performance-lambda.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "a1ZUOSw5lg5CH2Fe6Dq7UsZSpbiXQtwFRNp084Cerms=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "build-and-upload.sh head-object write VERIFIED: size=112985 == local zip size, content-sha256 metadata == computed sha256, both matching the value terraform's data.aws_s3_object.artifact read at apply time (source_code_hash on the served function)."
+    },
+    {
+      "path_or_key": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/date=2026-09-25/data.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "98b81e55c6989cbc7cae6008dfa9a34b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head-object ContentLength=297155; landed by the deployed function's own invoke, not written by this worker directly.",
+      "artifact_covered_by": ["E2-AC3"]
+    },
+    {
+      "path_or_key": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_manifest/date=2026-09-25/manifest.json",
+      "kind": "s3_object",
+      "commit_or_etag": "e7815982a90b2cb8c81813f3b5f6c07d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "get-object read back: rows=7540, status_census OK=6650/NO-PRIOR-HOLDINGS=881/NON-POSITIVE-BASE=6/ALL-HOLDINGS-EXCLUDED=3, landed=true, matching the invoke's own return {date:2026-09-25, rc:0, ok:true}.",
+      "artifact_covered_by": ["E2-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "819546aabc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the new irpt-holdings-performance-lambda entry (14 staged_from members, each pinned + sha256-verified at build time) plus last_deployed_commit/last_deployed_at/recorded_by written by record-terraform-deploy.sh, scoped with --function to touch only this one entry."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260929T0229Z_irpt-holdings-performance-daily-w65-20260929_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "9de9f358e1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the one deploy ledger for this cell, opened before the first AWS write (the artifact upload) and CLOSED with all 4 legs proven (A1 artifact upload, A2 apply+readback, V1 real invoke+manifest readback, V2 0-diff re-plan). Sentinel org/critical_paths/.open_deploys/irpt-holdings-performance-daily-w65-20260929.json removed on close."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E2-AC3",
+      "criterion_verbatim": "E2-AC3 -- the schedule irpt-holdings-performance-daily exists, ENABLED, on a cron expression, with a target. Base: FAIL (ResourceNotFoundException).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r2e/e2_ac3_daily_schedule.py\"",
+      "output_evidence": "irpt-holdings-performance-daily | state ENABLED | cron(30 7 ? * MON-FRI *) America/New_York | target arn:aws:lambda:us-east-1:313476888478:function:irpt-holdings-performance-lambda\nE2-AC3 PASS",
+      "denominator": "1 of 1 named schedule; boolean check (state==ENABLED and expression startswith 'cron(' and target present) -- all 3 sub-conditions true",
+      "status": "PASS",
+      "expect": "E2-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the task order names no mutant for this cell: E2-AC3 is a live AWS read of a Terraform-created resource's own state (state/expression/target), not a computation with an assertable wrong answer to inject. The base-state read IS the negative control the order itself names: before this cell's apply, the same script read 'not readable: ResourceNotFoundException' / 'E2-AC3 FAIL' (rc=1) -- re-confirmed at the start of this order's own session, before the first write.",
+      "expected": "N/A -- no mutant is constructible for a resource-existence/state read; the base-state FAIL is the standing negative control",
+      "observed": "base-state run (pre-apply, this session): 'irpt-holdings-performance-daily | not readable: ResourceNotFoundException' / 'E2-AC3 FAIL' rc=1. Post-apply run: 'E2-AC3 PASS' rc=0. The check discriminates.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two consecutive runs of the acceptance script against the same live AWS state, output captured and diffed",
+      "observed": "0 differing lines across the two runs; both printed 'irpt-holdings-performance-daily | state ENABLED | cron(30 7 ? * MON-FRI *) America/New_York | target arn:aws:lambda:us-east-1:313476888478:function:irpt-holdings-performance-lambda' then 'E2-AC3 PASS', rc=0 both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-W65-S1: OBSERVATION, DISMISSED_WITH_REASON -- opal-data-49financial's own bucket policy (DenyForeignFirmPrincipals) denies s3:* to any principal whose role name does not carry the firm's -49f- token (or sit in a named exemption list), which neither this cell's build note nor the ~M precedent it names mentions. Discovered by the ledger's own required real invoke (an IAM Allow cannot override a resource-policy explicit Deny); fixed same-turn via opal_name's existing scope argument (builder-derived, never typed), re-applied, re-invoked, re-plan clean."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "e2_ac3_daily_schedule.py -- the E2-AC3 acceptance check",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r2e/e2_ac3_daily_schedule.py\"",
+      "result": "base (pre-apply): 'not readable: ResourceNotFoundException' / E2-AC3 FAIL rc=1. Post-apply: ENABLED / cron(30 7 ? * MON-FRI *) America/New_York / target set / E2-AC3 PASS rc=0."
+    },
+    {
+      "tool": "terraform plan/apply -- infra/aws/terraform/investor-reporting/holdings-performance",
+      "invocation": "terraform init; terraform plan -out=tfplan.bin; .tools/safe-apply.sh apply tfplan.bin (HALT_ACK=1, routine); terraform plan (0-diff)",
+      "result": "first apply: 7 added/0 changed/0 destroyed (new root, all-create). Second apply (role-name fix): 2 added/1 changed/2 destroyed, all on this same deploy's own not-yet-served resources. Final re-plan: 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "tool": "aws lambda invoke -- the ledger's own required real invoke",
+      "invocation": "aws lambda invoke --function-name irpt-holdings-performance-lambda --payload file://invoke-payload.json (event {\"date\": \"2026-09-25\"}, the latest trading day with fully-landed silver at invoke time) --log-type Tail",
+      "result": "first invoke (pre-fix role): errorType AccessDenied on PutObject, explicit deny in a resource-based policy. Second invoke (post-fix role): {\"date\": \"2026-09-25\", \"rc\": 0, \"ok\": true}; log EMIT: 1 day(s) landed, 7540 row(s)."
+    },
+    {
+      "tool": "aws s3api head-object / get-object -- readback of the landed artifacts",
+      "invocation": "aws s3api head-object --bucket opal-data-49financial --key irpt/49financial/gold/holdings_performance_daily/date=2026-09-25/data.parquet; aws s3api get-object ... holdings_performance_manifest/date=2026-09-25/manifest.json",
+      "result": "ContentLength=297155 on the daily object; manifest read back rows=7540, status_census matching the invoke log, landed=true."
+    },
+    {
+      "tool": "aws s3api get-bucket-policy -- the surprise's own instrument",
+      "invocation": "aws s3api get-bucket-policy --bucket opal-data-49financial --query Policy --output text",
+      "result": "Sid DenyForeignFirmPrincipals: Deny s3:* on the whole bucket unless aws:PrincipalArn matches role/*-49f-* or a named exemption -- the mechanism that failed the first invoke and that the role rename satisfies."
+    },
+    {
+      "tool": "python .tools/deploy_ledger.py open/close-leg/close",
+      "invocation": "python .tools/deploy_ledger.py open --slug irpt-holdings-performance-daily-w65-20260929 ... ; close-leg A1/A2/V1/V2 ; close",
+      "result": "OPENED before the first AWS write; all 4 legs closed with their own proof strings; CLOSED -- all 4 legs proven; sentinel removed."
+    }
+  ]
+}
