@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-p-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-p-3.fwd17-scratch-drive.md",
+    "group": "OTHER",
+    "vintage_commit": "4fa7cba244"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "4fa7cba244",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-p-3.fwd17-scratch-drive.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/tests/test_fwd17_scratch_drive.py",
+      "kind": "test",
+      "commit_or_etag": "2720feab20",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline test, one StubS3Client, real library/backlog/ingest/extract/typed.record/continuation/dossier stage functions over a tmp_path library with ONE covered folder; a newer class-A report added; write_one driven a third time with nothing changed. Report ids 83106c43cdb542e6 (old) and e92c5ac1c32e7d32 (new); dossier inputs_sha16 b32069caa535ec15 (old, as_of 2026-09-01) and b87e2fac03260430 (new, as_of 2026-09-02).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "checks/round14/p3_AC1.sh -- the driven exercise's line",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round14/p3_AC1.sh",
+      "output_evidence": "fwd17 new_report_id16_beside_old True inputs_sha16_changed True newer_pillars_served True prior_as_of_reads True unchanged_rebuild_wrote 0\n1 passed in 1.02s",
+      "denominator": "1 of 1 drive test passed; 5 of 5 fence limbs on the printed line",
+      "expect": "(?m)^fwd17 new_report_id16_beside_old True inputs_sha16_changed True newer_pillars_served True prior_as_of_reads True unchanged_rebuild_wrote 0$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "checks/round14/p3_AC2.sh -- the whole corpus suite with the new test in it",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round14/p3_AC2.sh",
+      "output_evidence": ".............                                                            [100%]\n445 passed in 3.87s",
+      "denominator": "445 of 445 corpus tests passed, rc 0",
+      "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "checks/round14/p3_AC3.sh -- nothing outside the grant",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round14/p3_AC3.sh",
+      "output_evidence": "paths_outside_grant 0",
+      "denominator": "0 of the branch's changed paths fall outside the grant",
+      "expect": "(?m)^paths_outside_grant 0$",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W3-S8"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "controls": {
+    "mutant": {
+      "description": ".scratch/p3/test_mut.py is a copy of the test with dossier._inputs_sha16 patched to a constant, so a new report cannot move the inputs hash",
+      "expected": "the test fails",
+      "observed": "1 failed (AssertionError at the inputs_sha16_changed assertion)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three more times after the first pass",
+      "observed": "1 passed each time, same printed line",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "typed._run_write CLI limb, sector_template, fund_form, typecast, the page render",
+      "reason": "typed._run_write needs head_object LastModified StubS3Client lacks (typed.record + silver_append driven instead, row Z-W3-S8); the other three have no input in the scratch reports; the page render belongs to AMGT_RESAPP / DSGN_AMGTV1 per the order"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q lib/research/corpus/tests",
+      "result": "445 passed"
+    }
+  ]
+}
