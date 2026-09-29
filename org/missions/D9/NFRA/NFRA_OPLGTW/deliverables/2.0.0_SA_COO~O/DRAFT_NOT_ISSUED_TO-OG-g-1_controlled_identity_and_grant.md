@@ -1,5 +1,7 @@
 # DRAFT, NOT ISSUED -- TO NFRA_OPLGTW.TO-OG-g-1 -- G-C: the controlled identity's verified tid/oid and its one approved synthetic grant
 
+> **SUPERSEDED 2026-09-29 by 2.0.0_SA_COO~O:** issued, re-cut at HEAD, as `org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-g-1.controlled-identity-and-grant.md` to `0.7.0_AE_CloudOps~OG` on 1.0.0_SA_CTO~O msg 26435. This draft is history; the order is the authority.
+
 ⛔ **THIS IS NOT A TASK ORDER. IT IS A DRAFT THAT WAS NEVER ISSUED, AND IT IS DELIBERATELY NOT IN
 `task-orders/`.** Andrew-direct 2026-09-22 ~18:2xZ at the `2.0.0_SA_COO~O` terminal, VERBATIM: *"Finish your work
 and research on the OPLGTW project and do not go further with it. Close out anything you are working on and write a
