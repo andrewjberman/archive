@@ -1,0 +1,115 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-m-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~13",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "c80b5c85b6"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "e5a6dcbe2f",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-m-1.marker-storm-read.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~13/MARKER_STORM_READ.md",
+   "kind": "doc",
+   "commit_or_etag": "8ec9b4c183",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A read record; nothing is deployed. Read-only AWS calls: s3api list-object-versions and get-object, logs filter-log-events, ssm get-command-invocation, lambda get-function, s3api list-objects-v2 and get-object on the chain logs.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~13/MARKER_STORM_READ.json",
+   "kind": "config_data",
+   "commit_or_etag": "8ec9b4c183",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The machine record the three checks read; not deployed.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- the recorded PUTs per date equal a fresh recount of versions in the window, key by key.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/ms.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "window 2026-09-15T23:45:00+00:00..2026-09-28T23:45:00+00:00; versions listed 195; keys in window fresh 9, recorded 9; keys differing 0\nRESULT: PASS\nexit=0",
+   "denominator": "9 of 9 in-window keys equal; 195 versions listed over 19 keys; 91 versions in window",
+   "status": "PASS",
+   "expect": "keys differing 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- the dispatch tally partitions a fresh recount of dispatcher invocations, by source and by outcome (the script prints the four numbers and decides equality itself).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/ms.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "fresh recount 104; recorded invocations 104; by_source sum 104; by_outcome sum 104\nRESULT: PASS\nexit=0",
+   "denominator": "104 of 104 invocations partitioned by source (91 + 13 + 0) and by outcome (48 + 33 + 15 + 0 + 8)",
+   "status": "PASS",
+   "expect": "RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 -- every code file naming the marker prefix is in the writer census with a role, and every writer's deployed bytes are measured.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/ms.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "code files naming the prefix 7; in census 7; writers 4; missing 0; no role 0; writers unmeasured 0\nRESULT: PASS\nexit=0",
+   "denominator": "7 of 7 code files naming the prefix in the census; 4 of 4 writers measured (all match the deployed Lambda package)",
+   "status": "PASS",
+   "expect": "missing 0; no role 0; writers unmeasured 0.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Each check's own python body run against a mutated copy of MARKER_STORM_READ.json (one key's count +1; one outcome count -1; one writer marked unmeasured and one census entry removed) and against the unmutated copy, with the same live inputs.",
+   "expected": "unmutated PASS rc 0 for AC1-AC3; mutant FAIL rc 1 for AC1-AC3",
+   "observed": "AC1 unmutated rc=0, mutant rc=1 (keys differing 1); AC2 unmutated rc=0, mutant rc=1 (by_outcome sum 103 vs 104); AC3 unmutated rc=0, mutant rc=1 (in census 6 of 7, writers unmeasured 1)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Each check ran twice on the same record: the recount inside the worker (fresh list-object-versions and filter-log-events against the window) and the post-commit run",
+   "observed": "Identical counts both times: 91 versions / 9 keys, 104 invocations, 7 files / 4 writers",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Chain-log terminal lines for the 33 ABORT, 48 REFUSED and 8 running-past-budget dispatches, and a host-side read of /tmp/advi_49f_code",
+   "reason": "The order pairs only up to 5 UNKNOWN dispatches with their chain logs; a host read is outside a read of AWS control-plane records."
+  },
+  {
+   "item": "Any fix or proposal",
+   "reason": "The order says propose no fix; the remedy is a later cell."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W13-S1",
+  "NFRA_OPLGTW-Z-W13-S2"
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail: commit 8ec9b4c183 on wk-NFRA_OPLGTW-13, rows Z-W13-S1 and Z-W13-S2. Raw reads were held in the untracked .scratch/m1 of the worktree (marker bodies were never copied there beyond the four permitted fields; bodies were deleted after parsing).",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/ms.AC{1,2,3}.sh",
+   "invocation": "each under timeout 120 from the worktree root after the commit",
+   "result": "rc 0 each, RESULT: PASS"
+  },
+  {
+   "tool": ".tools/aws",
+   "invocation": "read-only calls only (see artifacts_produced)",
+   "result": "rc 0 on every call; caller arn:aws:iam::313476888478:user/Andrew_Berman"
+  }
+ ]
+}
