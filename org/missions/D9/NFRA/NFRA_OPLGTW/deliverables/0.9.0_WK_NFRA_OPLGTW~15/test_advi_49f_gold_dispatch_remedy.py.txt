@@ -1,0 +1,143 @@
+"""OG-m-2 (E11 remedy): the 49F gold dispatcher grades the chain log's terminal line and
+gates the S3 accelerator on a qualified marker. Stdlib unittest.mock only; no network."""
+import importlib.util
+import io
+import json
+import os
+import unittest
+from contextlib import redirect_stdout
+from pathlib import Path
+from unittest import mock
+
+os.environ.setdefault("HOST_INSTANCE_ID", "i-0000000000000test")
+os.environ.setdefault("SSM_DOCUMENT_NAME", "advi-49f-chain-dispatch")
+
+_SRC = (Path(__file__).resolve().parent.parent / "advi-49f-gold-dispatch" / "lambda_function.py")
+_spec = importlib.util.spec_from_file_location("advi_49f_gold_dispatch_under_test", _SRC)
+mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(mod)
+
+START = "2026-09-28T12:45:42.498Z"
+LOG_KEY = "gold/advi/_logs/chain_20260928T124542Z.log"
+MARKER_KEY = "schwab/08335338/meta/complete/date%3D2026-09-25.json"
+MARKER_KEY_DECODED = "schwab/08335338/meta/complete/date=2026-09-25.json"
+
+
+class _Body:
+    def __init__(self, data):
+        self._d = data if isinstance(data, bytes) else data.encode("utf-8")
+
+    def read(self):
+        return self._d
+
+
+def _s3_event(version="v1"):
+    return {"Records": [{"eventSource": "aws:s3", "s3": {
+        "bucket": {"name": "opal-data-assets"},
+        "object": {"key": MARKER_KEY, "versionId": version}}}]}
+
+
+class DispatcherRemedyTests(unittest.TestCase):
+    def setUp(self):
+        self.ec2 = mock.MagicMock()
+        self.ec2.describe_instances.return_value = {
+            "Reservations": [{"Instances": [{"State": {"Name": "running"}}]}]}
+        self.ssm = mock.MagicMock()
+        self.ssm.exceptions.InvocationDoesNotExist = type("InvocationDoesNotExist", (Exception,), {})
+        self.ssm.describe_instance_information.return_value = {
+            "InstanceInformationList": [{"PingStatus": "Online"}]}
+        self.ssm.send_command.return_value = {"Command": {"CommandId": "cmd-1"}}
+        self.s3 = mock.MagicMock()
+        self.s3_calls = []
+        patches = [
+            mock.patch.object(mod, "ec2", self.ec2),
+            mock.patch.object(mod, "ssm", self.ssm),
+            mock.patch.object(mod, "s3", self.s3),
+            mock.patch.object(mod.time, "sleep", lambda s: None),
+        ]
+        for p in patches:
+            p.start()
+            self.addCleanup(p.stop)
+
+    def _invocation(self, stdout):
+        self.ssm.get_command_invocation.return_value = {
+            "Status": "Success", "ResponseCode": 0,
+            "ExecutionStartDateTime": START, "StandardOutputContent": stdout}
+
+    def _s3_objects(self, objects):
+        """objects: {(bucket, key): text}; any other key raises like a missing key."""
+        def get_object(**kw):
+            self.s3_calls.append(kw)
+            k = (kw["Bucket"], kw["Key"])
+            if k not in objects:
+                raise RuntimeError("AccessDenied (no ListBucket, absent key)")
+            return {"Body": _Body(objects[k])}
+        self.s3.get_object.side_effect = get_object
+
+    def _run(self, event):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            result = mod.lambda_handler(event, None)
+        return result, buf.getvalue()
+
+    def test_chain_log_ok_classifies_ok_once(self):
+        self._invocation("x" * 24000)  # cut stdout: no CHAIN line at all
+        self._s3_objects({("opal-data-49financial", LOG_KEY):
+                          "stage a\nCHAIN ABORT stage=old rc=9\nmore\nCHAIN OK rc=0\n"})
+        result, _ = self._run({"source": "advi.49f.scheduled-floor"})
+        self.assertEqual(result["signature"], "OK")
+        self.assertEqual(self.ssm.send_command.call_count, 1)
+
+    def test_chain_log_abort_classifies_abort(self):
+        self._invocation("CHAIN OK rc=0\n")  # stdout lies; the log decides
+        self._s3_objects({("opal-data-49financial", LOG_KEY):
+                          "stage a\nCHAIN ABORT stage=x rc=1\n"})
+        result, _ = self._run({"source": "advi.49f.scheduled-floor"})
+        self.assertEqual(result["signature"], "ABORT")
+        self.assertEqual(self.ssm.send_command.call_count, 1)
+
+    def test_missing_chain_log_is_unknown_and_says_so(self):
+        self._invocation("CHAIN OK rc=0\n")
+        self._s3_objects({})
+        result, out = self._run({"source": "advi.49f.scheduled-floor"})
+        self.assertTrue(result["signature"].startswith("UNKNOWN(chain_log=absent"))
+        self.assertIn("chain_log=absent", out)
+        tried = [c["Key"] for c in self.s3_calls]
+        self.assertEqual(tried, [
+            "gold/advi/_logs/chain_20260928T124542Z.log",
+            "gold/advi/_logs/chain_20260928T124541Z.log",
+            "gold/advi/_logs/chain_20260928T124543Z.log"])
+        self.assertEqual(self.ssm.send_command.call_count, 1)
+
+    def test_incomplete_marker_does_not_dispatch(self):
+        self._s3_objects({("opal-data-assets", MARKER_KEY_DECODED):
+                          json.dumps({"closure": {"status": "incomplete"}})})
+        result, out = self._run(_s3_event("v7"))
+        self.assertEqual(self.ssm.send_command.call_count, 0)
+        self.assertEqual(self.ec2.start_instances.call_count, 0)
+        self.assertIn("SKIP: accelerator marker key=", out)
+        self.assertIn("closure.status=incomplete", out)
+        self.assertIs(result["dispatched"], False)
+        self.assertEqual(self.s3_calls[0]["VersionId"], "v7")
+
+    def test_qualified_marker_dispatches_once(self):
+        self._invocation("")
+        self._s3_objects({
+            ("opal-data-assets", MARKER_KEY_DECODED): json.dumps({"closure": {"status": "qualified"}}),
+            ("opal-data-49financial", LOG_KEY): "CHAIN OK rc=0\n"})
+        result, _ = self._run(_s3_event("v10"))
+        self.assertEqual(self.ssm.send_command.call_count, 1)
+        self.assertIs(result["dispatched"], True)
+        self.assertEqual(result["source"], "advi.49f.silver-accelerator")
+
+    def test_floor_event_reads_no_marker(self):
+        self._invocation("")
+        self._s3_objects({("opal-data-49financial", LOG_KEY): "CHAIN OK rc=0\n"})
+        result, _ = self._run({"source": "advi.49f.scheduled-floor"})
+        marker_reads = [c for c in self.s3_calls if c["Bucket"] == "opal-data-assets"]
+        self.assertEqual(marker_reads, [])
+        self.assertEqual(self.ssm.send_command.call_count, 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

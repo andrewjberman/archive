@@ -1,0 +1,205 @@
+diff --git a/infra/aws/lambda/opal-assets/advi-49f-gold-dispatch/lambda_function.py b/infra/aws/lambda/opal-assets/advi-49f-gold-dispatch/lambda_function.py
+index 2266526a9c..f3ff37967a 100644
+--- a/infra/aws/lambda/opal-assets/advi-49f-gold-dispatch/lambda_function.py
++++ b/infra/aws/lambda/opal-assets/advi-49f-gold-dispatch/lambda_function.py
+@@ -13,9 +13,15 @@ CONTRACT FACTS (P2D-4, do not re-derive):
+     the dispatcher takes the ENSURE-RUNNING duty and passes StartedByDispatcher to
+     the document so the command self-halts ONLY a box this dispatcher started.
+   - the chain is fired via its OWN SSM document, never the legacy chain's stage list.
+-  - failure signatures (stdout first line): CHAIN OK rc=0 / CHAIN REFUSED rc=3
+-    (live mutex -- a REAL event, surfaced ERROR-loud, never retried into) /
+-    CHAIN ABORT stage=<name> rc=<n>.
++  - failure signatures (the chain log's LAST `CHAIN ` line): CHAIN OK rc=0 /
++    CHAIN REFUSED rc=3 (live mutex -- a REAL event, surfaced ERROR-loud, never
++    retried into) / CHAIN ABORT stage=<name> rc=<n>.
++  - OG-m-2 (E11 remedy, CTO msg 26305 option a): SSM StandardOutputContent is cut at
++    24,000 characters, so a long chain's terminal line never reaches it. The
++    classifier grades the uploaded chain log (s3://opal-data-49financial/gold/advi/
++    _logs/chain_<TS>.log, TS = the invocation's ExecutionStartDateTime) instead.
++    The S3 accelerator dispatches only when the exact marker version that fired it
++    reads closure.status == "qualified".
+ 
+ DISPATCH-PLANE failures (cannot start/reach the host, cannot send the command)
+ RAISE -- the schedule's retry policy + DLQ are the delivery surface. CHAIN-plane
+@@ -36,6 +42,8 @@ from __future__ import annotations
+ import json
+ import os
+ import time
++import urllib.parse
++from datetime import datetime, timedelta
+ 
+ import boto3
+ 
+@@ -53,8 +61,15 @@ ALLOWED_DOCUMENTS = [
+ POLL_BUDGET_S = int(os.environ.get("POLL_BUDGET_S", "300"))
+ SSM_EXEC_TIMEOUT_S = os.environ.get("SSM_EXEC_TIMEOUT_S", "3600")
+ 
++# OG-m-2: where a dispatch finds its own chain log (SSM document advi-49f-chain-dispatch
++# uploads /tmp/advi_49f_chain_${TS}.log here before it exits).
++CHAIN_LOG_BUCKET = "opal-data-49financial"
++CHAIN_LOG_PREFIX = "gold/advi/_logs/chain_"
++ACCELERATOR_SOURCE = "advi.49f.silver-accelerator"
++
+ ec2 = boto3.client("ec2", region_name=REGION)
+ ssm = boto3.client("ssm", region_name=REGION)
++s3 = boto3.client("s3", region_name=REGION)
+ 
+ 
+ def _instance_state() -> str:
+@@ -87,18 +102,82 @@ def _wait_ssm_online(timeout_s: int = 240) -> None:
+     raise TimeoutError(f"host {HOST_INSTANCE_ID} SSM not Online within {timeout_s}s")
+ 
+ 
+-def _classify(stdout: str) -> str:
+-    """First-line signature per the P2D-4 table. UNKNOWN is a real value -- an
+-    output matching no declared signature is reported as such, never guessed."""
+-    first = (stdout or "").strip().splitlines()[0] if (stdout or "").strip() else ""
+-    for line in (stdout or "").splitlines():
+-        if line.startswith("CHAIN OK"):
+-            return "OK"
+-        if line.startswith("CHAIN REFUSED"):
+-            return "REFUSED"
+-        if line.startswith("CHAIN ABORT"):
+-            return "ABORT"
+-    return f"UNKNOWN(first_line={first[:120]!r})"
++def _classify_log(text: str) -> str | None:
++    """Signature from the LAST line of the chain log that starts with `CHAIN `.
++    None when the log carries no such line."""
++    last = None
++    for line in (text or "").splitlines():
++        if line.startswith("CHAIN "):
++            last = line
++    if last is None:
++        return None
++    if last.startswith("CHAIN OK"):
++        return "OK"
++    if last.startswith("CHAIN REFUSED"):
++        return "REFUSED"
++    if last.startswith("CHAIN ABORT"):
++        return "ABORT"
++    return None
++
++
++def _chain_log_keys(inv) -> list:
++    """Candidate log keys: TS, TS-1 s, TS+1 s (host-clock skew), TS from the
++    invocation's ExecutionStartDateTime (UTC, %Y%m%dT%H%M%SZ)."""
++    start = inv.get("ExecutionStartDateTime")
++    if not start:
++        return []
++    if isinstance(start, datetime):
++        base = start.replace(tzinfo=None, microsecond=0)
++    else:
++        base = datetime.strptime(str(start)[:19], "%Y-%m-%dT%H:%M:%S")
++    return [
++        CHAIN_LOG_PREFIX + (base + timedelta(seconds=d)).strftime("%Y%m%dT%H%M%SZ") + ".log"
++        for d in (0, -1, 1)
++    ]
++
++
++def _classify(inv) -> str:
++    """Grade the chain log's terminal `CHAIN ` line (never SSM stdout, which is cut
++    at 24,000 chars). UNKNOWN is a real value and SAYS WHY: chain_log=absent when no
++    candidate key exists (without ListBucket an absent key reads AccessDenied, so
++    every read error counts as absent), chain_log=no terminal line when the log
++    has no `CHAIN ` line. Never guessed."""
++    keys = _chain_log_keys(inv)
++    if not keys:
++        return "UNKNOWN(chain_log=absent, key=None)"
++    for key in keys:
++        try:
++            body = s3.get_object(Bucket=CHAIN_LOG_BUCKET, Key=key)["Body"].read()
++        except Exception as exc:  # NoSuchKey / AccessDenied / 404 -> absent
++            print(f"chain log key={key} not readable: {type(exc).__name__}")
++            continue
++        text = body.decode("utf-8", "replace") if isinstance(body, bytes) else str(body)
++        sig = _classify_log(text)
++        if sig is None:
++            return f"UNKNOWN(chain_log=no terminal line, key={key})"
++        return sig
++    return f"UNKNOWN(chain_log=absent, key={keys[0]})"
++
++
++def _marker_closure_status(record) -> tuple:
++    """(status_or_error, key, version) of the EXACT marker version that fired the
++    S3 event (never the latest). Anything unreadable returns an error string."""
++    s3rec = (record or {}).get("s3", {})
++    bucket = s3rec.get("bucket", {}).get("name")
++    raw_key = s3rec.get("object", {}).get("key")
++    version = s3rec.get("object", {}).get("versionId")
++    if not bucket or not raw_key:
++        return "error:event carries no bucket/key", raw_key, version
++    if not version:
++        return "error:event carries no versionId", raw_key, version
++    key = urllib.parse.unquote_plus(raw_key)
++    try:
++        body = s3.get_object(Bucket=bucket, Key=key, VersionId=version)["Body"].read()
++        doc = json.loads(body.decode("utf-8") if isinstance(body, bytes) else body)
++        status = doc["closure"]["status"]
++    except Exception as exc:  # absent key, read error, unparseable body
++        return f"error:{type(exc).__name__}", key, version
++    return str(status), key, version
+ 
+ 
+ def _trigger_identity(event):
+@@ -144,6 +223,23 @@ def lambda_handler(event, context):
+             f"REFUSED: document {document!r} not in ALLOWED_DOCUMENTS {ALLOWED_DOCUMENTS}"
+         )
+ 
++    if source == ACCELERATOR_SOURCE:
++        # Qualified-marker gate (S3 path only), BEFORE any EC2 or SSM call: only a
++        # qualified closure dispatches; the floor remains the production trigger.
++        status, key, version = _marker_closure_status((event.get("Records") or [{}])[0])
++        if status != "qualified":
++            reason = (f"accelerator marker key={key} version={version} "
++                      f"closure.status={status}")
++            print(f"SKIP: {reason} -- not dispatching (only a qualified closure "
++                  "dispatches; the floor remains the production trigger)")
++            return {
++                "statusCode": 200,
++                "dispatched": False,
++                "skip_reason": reason,
++                "source": source,
++                "marker_key": marker_key,
++            }
++
+     state = _instance_state()
+     started_by_dispatcher = False
+     if state != "running":
+@@ -200,7 +296,9 @@ def lambda_handler(event, context):
+               "chain log + SSM invocation rc are the run's record " + json.dumps(result))
+         return result
+ 
+-    signature = _classify(inv.get("StandardOutputContent", ""))
++    signature = _classify(inv)
++    print(f"stdout context: len={len(inv.get('StandardOutputContent', '') or '')} "
++          "(not the grading input)")
+     result["ssm_rc"] = inv.get("ResponseCode")
+     result["signature"] = signature
+     if signature == "OK":
+diff --git a/infra/aws/terraform/opal-assets/advi_49f_floor.tf b/infra/aws/terraform/opal-assets/advi_49f_floor.tf
+index bea310619a..23454d99e8 100644
+--- a/infra/aws/terraform/opal-assets/advi_49f_floor.tf
++++ b/infra/aws/terraform/opal-assets/advi_49f_floor.tf
+@@ -152,6 +152,22 @@ resource "aws_iam_role_policy" "advi_49f_gold_dispatch" {
+         Action   = ["ssm:GetCommandInvocation"]
+         Resource = ["*"] # GetCommandInvocation does not support resource scoping
+       },
++      {
++        # OG-m-2 (E11 remedy, CTO msg 26305 option a): the dispatcher grades the chain log's terminal
++        # line. One key prefix, GetObject only, no ListBucket (an absent key reads AccessDenied).
++        Sid      = "ReadTheChainLog"
++        Effect   = "Allow"
++        Action   = ["s3:GetObject"]
++        Resource = ["arn:aws:s3:::opal-data-49financial/gold/advi/_logs/chain_*"]
++      },
++      {
++        # OG-m-2: the S3 accelerator path reads the exact marker version that fired, to dispatch
++        # only on a qualified closure. One key prefix, GetObject only, no ListBucket.
++        Sid      = "ReadTheAcceleratorMarker"
++        Effect   = "Allow"
++        Action   = ["s3:GetObject"]
++        Resource = ["arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*"]
++      },
+       {
+         Sid      = "Logs"
+         Effect   = "Allow"
