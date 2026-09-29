@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-m22-221",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "c0c0ae560637503969312f5c285070d2475bcb98"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R22_M.md",
+    "vintage_commit": "c54f6361f27f4b7d17944da6cff3c2f478e231ad",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m22-221.ad10-directory-per-account-masks.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~75",
+  "artifacts_produced": [
+    {
+      "path_or_key": "docs/contracts/investor-reporting/v1/DirectoryEntry.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "27d9a8f700889f2e234c267faf02d37f6d23d9a4",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "git hash-object (worktree blob, uncommitted). The ADDITIVE, OPTIONAL account_masks property, declared because additionalProperties is false at the top level.",
+      "introduces": ["account_masks"],
+      "artifact_covered_by": ["IBM22-221-AC1", "IBM22-221-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/directory_runner.py",
+      "kind": "script",
+      "commit_or_etag": "36cc82cf3ff658a57cbc8b6c496ff11caece6e39",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "git hash-object (worktree blob, uncommitted). _entry() now builds account_masks from EVERY account row (deduped like ids.account_ids), added as a new key on the returned entry dict; masked_discriminator (head row) is unchanged.",
+      "introduces": ["account_masks"],
+      "artifact_covered_by": ["IBM22-221-AC1", "IBM22-221-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_directory_account_masks.py",
+      "kind": "test",
+      "commit_or_etag": "701337c73de1686fcd2e303c9638c84b15042e28",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "git hash-object (worktree blob, uncommitted). New file, 9 tests.",
+      "artifact_covered_by": ["IBM22-221-AC1"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R22_AD10_ACCOUNT_MASKS_SUMMARY_20260929.json",
+      "kind": "config_data",
+      "commit_or_etag": "c0730c45fa259c46e38cc046a7abc99c16802628",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object (worktree blob, uncommitted -- committed together with the instance per protocol). Built from real local (no-upload) runs of directory_runner.py --firms all --dry-run --local-out against live S3 sources, at each firm's own latest complete business date.",
+      "artifact_covered_by": ["IBM22-221-AC2"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_DIRECTORY_AD10_20260929.md",
+      "kind": "doc",
+      "commit_or_etag": "5a983b5eb1c45f00ce03d0a124d2eca0274fd161",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object (worktree blob, uncommitted -- committed together with the instance per protocol). Nothing under this half is uploaded, deployed or served; it is the sign-off request only.",
+      "artifact_covered_by": ["IBM22-221-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~75/IB-mr-221.result.md",
+      "kind": "doc",
+      "commit_or_etag": "ebdae6b6c57cc1ab409d921be1925196f7ef65ce",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object (worktree blob, uncommitted). The session log for this order.",
+      "artifact_covered_by": ["IBM22-221-AC1", "IBM22-221-AC2", "IBM22-221-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c5b19143cf56a4b42c723808dc0c4098e7fac4e7",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "git hash-object (worktree blob, staged). One new row appended, IRPT_BCKEND-W75-S1; passes .tools/surprise-row-gate.py (1 new row(s) of 468 total checked, OK: all new rows carry their step-7/step-10 fields)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBM22-221-AC1",
+      "criterion_verbatim": "the built behaviour: one mask per account, in order, schema-valid.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_directory_account_masks.py -q -p no:cacheprovider",
+      "output_evidence": "9 passed in 1.61s",
+      "denominator": "9 of 9 tests in the file",
+      "status": "PASS",
+      "expect": "^\\d+ passed in [\\d.]+s$"
+    },
+    {
+      "criterion_id": "IBM22-221-AC2",
+      "criterion_verbatim": "real local builds at all three firms give every account its own mask and show distinct tails where an entry has several accounts.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R22_CHECKS/r22_ad10_masks.py",
+      "output_evidence": "AD10-MASKED 49financial=7598 inflection=884 cottonwood=953",
+      "denominator": "3 of 3 firms (49financial, inflection, cottonwood), all real S3 reads no upload",
+      "status": "PASS",
+      "expect": "^AD10-MASKED 49financial=\\d+ inflection=\\d+ cottonwood=\\d+$"
+    },
+    {
+      "criterion_id": "IBM22-221-AC3",
+      "criterion_verbatim": "the half, with its all-readers census and release order, is written for the issuer to sign and send.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_DIRECTORY_AD10_20260929.md",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_DIRECTORY_AD10_20260929.md",
+      "denominator": "N/A -- single named file, boolean readiness check",
+      "status": "PASS",
+      "expect": "HALF-READY NEVER_WIDEN_HALF_REQUEST_DIRECTORY_AD10_20260929.md"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Worktree-only, reverted before commit, never landed: the account_masks loop's row-level masked_discriminator(row.get('account_number'), row.get('account_type')) call changed to head.get(...), reproducing the ORIGINAL defect (every account in a multi-account entry reads the head row's mask instead of its own).",
+      "expected": "test_multi_account_entry_masks_are_distinct_and_carry_each_accounts_own_tail fails (both masks collapse to the head's), the other 8 tests stay green.",
+      "observed": "FAILED as expected: assert '****9079 / IRA' == '****3302 / JOINT' (AssertionError), 1 failed, 8 passed. Reverted; diff against the pre-mutation copy showed zero difference; the suite re-ran 9 passed after revert.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The 9-test file run three times at final bytes (post-revert).",
+      "observed": "9 passed in 1.65s, then 9 passed in 1.33s, then 9 passed in 1.61s -- identical pass/fail shape every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Updating infra/aws/lambda/investor-reporting/_contracts/DirectoryEntry.schema.json (the deployed Lambda's packaged copy)",
+      "reason": "BOUNDS: explicitly named as NOT this order's to edit (2.0.0_SA_COO~P's shared packaging). Named as release-order step 1 in the never-widen half instead. Filed as row IRPT_BCKEND-W75-S1: this leaves directory_runner.py's own pre-flight validation (and the pre-existing test_inf_entries_validate_against_the_contract) red until that step lands."
+    },
+    {
+      "item": "Editing the portal reader (BrowseDrawer.tsx, ClientSearch.tsx, IdentityCard.tsx, AccountsTable.tsx, AccountDetail.tsx, directory-browse.ts, wire types) to read account_masks",
+      "reason": "Named by the task order as the reader 2.0.0_SA_COO~D will point at account_masks, and outside this order's <paths> grant; censused in the never-widen half's readers table instead."
+    },
+    {
+      "item": "Uploading/deploying any built directory revision",
+      "reason": "BOUNDS: LOCAL build + record only. No upload, no mint, no served write."
+    }
+  ],
+  "surprises": ["IRPT_BCKEND-W75-S1: Building AD-10's additive account_masks onto every DirectoryEntry makes the pre-existing test_inf_entries_validate_against_the_contract go red and would make directory_runner.py's own main() report a schema ERROR on every entry, because both validate against the DEPLOYED Lambda contract copy (out of this order's lane to edit), which is additionalProperties:false and has not gained the field."],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~75/IB-mr-221.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest test_directory_account_masks.py",
+      "invocation": "timeout 120 python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_directory_account_masks.py -q -p no:cacheprovider",
+      "result": "rc=0, 9 passed"
+    },
+    {
+      "tool": "r22_ad10_masks.py (AC2 checker)",
+      "invocation": "timeout 60 python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R22_CHECKS/r22_ad10_masks.py",
+      "result": "rc=0, AD10-MASKED 49financial=7598 inflection=884 cottonwood=953"
+    },
+    {
+      "tool": "r20_half_ready.py (AC3 checker)",
+      "invocation": "timeout 60 python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_DIRECTORY_AD10_20260929.md",
+      "result": "rc=0, HALF-READY NEVER_WIDEN_HALF_REQUEST_DIRECTORY_AD10_20260929.md"
+    },
+    {
+      "tool": "directory_runner.py real local build (no upload), all three firms",
+      "invocation": "timeout 150 python data/assets/scripts/gold/investor_reporting/directory_runner.py --firms all --dry-run --local-out .scratch/r22_local_out",
+      "result": "rc nonzero (schema errors against the un-updated Lambda contract copy, expected and documented, row IRPT_BCKEND-W75-S1); real S3 reads succeeded, entries built and landed locally: 49F entries=4642 as_of=2026-09-28, INF entries=298 as_of=2026-09-29, COT entries=263 as_of=2026-09-25"
+    },
+    {
+      "tool": "full pre-existing directory_runner test suite (regression check)",
+      "invocation": "timeout 120 python -m pytest data/assets/scripts/gold/investor_reporting/tests -q -p no:cacheprovider",
+      "result": "rc=1, 1 failed, 311 passed -- the ONE failure is test_inf_entries_validate_against_the_contract, the documented out-of-lane Lambda-contract-copy conflict (row IRPT_BCKEND-W75-S1); no other test moved"
+    },
+    {
+      "tool": "ruff (unused-import / syntax-error rules)",
+      "invocation": "python -m ruff check --select=E9,F data/assets/scripts/gold/investor_reporting/directory_runner.py data/assets/scripts/gold/investor_reporting/tests/test_directory_account_masks.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "ds-precommit-check.py",
+      "invocation": "python .tools/ds-precommit-check.py data/assets/scripts/gold/investor_reporting/directory_runner.py data/assets/scripts/gold/investor_reporting/tests/test_directory_account_masks.py",
+      "result": "no output -- clean"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "1 new row(s) of 468 total checked (467 pre-existing, NOT re-graded); OK: all new rows carry their step-7/step-10 fields"
+    },
+    {
+      "tool": "git hash-object (worktree blob isolation)",
+      "invocation": "git hash-object docs/contracts/investor-reporting/v1/DirectoryEntry.schema.json data/assets/scripts/gold/investor_reporting/directory_runner.py data/assets/scripts/gold/investor_reporting/tests/test_directory_account_masks.py org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R22_AD10_ACCOUNT_MASKS_SUMMARY_20260929.json org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_DIRECTORY_AD10_20260929.md",
+      "result": "27d9a8f700889f2e234c267faf02d37f6d23d9a4, 36cc82cf3ff658a57cbc8b6c496ff11caece6e39, 701337c73de1686fcd2e303c9638c84b15042e28, c0730c45fa259c46e38cc046a7abc99c16802628, 5a983b5eb1c45f00ce03d0a124d2eca0274fd161 -- confirmed the exact blobs referenced above"
+    }
+  ]
+}
