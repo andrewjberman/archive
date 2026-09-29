@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-s-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-s-1.model-block-census.md",
+    "group": "OTHER",
+    "vintage_commit": "1d58fd0c2ed9670e1540e3d2a18bbd494c59eb8b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "1d58fd0c2ed9670e1540e3d2a18bbd494c59eb8b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-s-1.model-block-census.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/MODEL_BLOCK_CENSUS_ROUND17.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 96 rows over the live library; present 95, absent 1 (6501_JP_Equity); producer block with 4 invoked_by, population_source, admits_new_registrations false, 6 evidence items. Read-only: one paginated S3 list of opal-data-harvest derived/model_block/ (618 objects), no vendor call, no S3 write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/MODEL_BLOCK_CENSUS_ROUND17.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: counts, the absent name, the producer chain, and the one exercising act for Hitachi (not run).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round17/s1_AC1.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round17/s1_AC1.sh",
+      "output_evidence": "s1 census names 96 present 95 absent 1 rows_valid 96 hitachi absent",
+      "denominator": "96 of 96 library folders census-rowed and valid; 95 present, 1 absent (6501_JP_Equity).",
+      "expect": "(?m)^s1 census names 96 present \\d+ absent \\d+ rows_valid 96 hitachi absent$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round17/s1_AC2.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round17/s1_AC2.sh",
+      "output_evidence": "s1 producer writer integrations/bloomberg/research/model_block_pull.py invoked_by_n 4 population_source_named True admits_new_registrations False evidence_n 6",
+      "denominator": "4 callers/triggers found; 207 scheduled tasks read, 5 matched the filter, 0 run the producer.",
+      "expect": "(?m)^s1 producer writer integrations/bloomberg/research/model_block_pull\\.py invoked_by_n \\d+ population_source_named True admits_new_registrations (True|False) evidence_n [1-9]\\d*$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round17/s1_AC3.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round17/s1_AC3.sh",
+      "output_evidence": "paths_outside_grant 0",
+      "denominator": "0 of the paths changed since merge-base with CLOUD lie outside the grant.",
+      "expect": "(?m)^paths_outside_grant 0$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of the census file (.scratch/s1/mut) with the Hitachi row flipped to present while its latest_stamp stays null, and producer.evidence emptied; the issuer's s1_census.py run against it, nothing committed.",
+      "expected": "rows_valid drops to 95 and hitachi reads present, evidence_n reads 0, so neither expect regex matches.",
+      "observed": "s1 census names 96 present 95 absent 0 rows_valid 95 hitachi present ; s1 producer ... evidence_n 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 read the committed census file only; run once by the check and the result is a pure function of the file.",
+      "observed": "AC1 and AC2 lines identical on two runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No pull or derive run for Hitachi, no vendor call, no S3 write, no Task Scheduler change",
+      "reason": "Order section 4; the pull is a vendor call and a served write, the issuer's act under a never-widen pair."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "s1_AC1.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round17/s1_AC1.sh",
+      "result": "rc 0; census line 96/95/1/96/absent"
+    },
+    {
+      "tool": "s1_AC2.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round17/s1_AC2.sh",
+      "result": "rc 0; producer line invoked_by_n 4, admits False, evidence_n 6"
+    },
+    {
+      "tool": "s1_AC3.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round17/s1_AC3.sh",
+      "result": "rc 0; paths_outside_grant 0"
+    }
+  ]
+}
