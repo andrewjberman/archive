@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-r-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "e5a6dcbe2f",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-r-3.onhost-capacity-recut.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c80b5c85b6"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/acceptance/onhost_bench.py",
+      "kind": "script",
+      "commit_or_etag": "877833be87",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Harness on wk-NFRA_OPLGTW-11 (LOCAL). The committed bytes (md5 fbe79f8473f706438a0931a338374f02) are the copy that ran on the host; the host scratch was removed. Nothing deployed.",
+      "artifact_covered_by": [
+        "OGR3-AC1",
+        "OGR3-AC2",
+        "OGR3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/acceptance/test_onhost_bench_grader.py",
+      "kind": "test",
+      "commit_or_etag": "1efe069571",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test on wk-NFRA_OPLGTW-11 (LOCAL).",
+      "artifact_covered_by": [
+        "OGR3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~11/CAPACITY.json",
+      "kind": "doc",
+      "commit_or_etag": "877833be87",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The measurement record assembled from the host run (SSM e32bd390-4b24-4e5f-9e4d-49824f691a05), the ALB read and CloudWatch.",
+      "artifact_covered_by": [
+        "OGR3-AC2",
+        "OGR3-AC3",
+        "OGR3-AC4",
+        "OGR3-AC5",
+        "OGR3-AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~11/probes/og_r3.py",
+      "kind": "script",
+      "commit_or_etag": "877833be87",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only probe; no AWS call.",
+      "artifact_covered_by": [
+        "OGR3-AC2",
+        "OGR3-AC3",
+        "OGR3-AC4",
+        "OGR3-AC5",
+        "OGR3-AC6"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGR3-AC1",
+      "criterion_verbatim": "OGR3-AC1 (test_ogr3_ac01) -- onhost_bench._cap_respected grades {ok: False, code: LIMIT_EXCEEDED, peak_child_rss_bytes: 282021888} False and {ok: False, code: LIMIT_EXCEEDED, peak_child_rss_bytes: 200000000} True, and the test prints the census of cap_respected consumers with its denominator.",
+      "method": "test_suite",
+      "invocation": "timeout 110 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/acceptance/test_onhost_bench_grader.py::test_ogr3_ac01 -q -s -p no:cacheprovider --color=no",
+      "output_evidence": "grade: LIMIT_EXCEEDED at 282,021,888 (the round-1 shape)    -> cap_respected=False (expected False)\ngrade: LIMIT_EXCEEDED at 200,000,000                        -> cap_respected=True (expected True)\ngrade: ok=True at cap + 1                                   -> cap_respected=False (expected False)\ngrade: ok=True at exactly the cap                           -> cap_respected=True (expected True)\ngrade: BUSY, child never started (peak 0)                   -> cap_respected=True (expected True)\ngrade: refusal whose RSS was never measured (None)          -> cap_respected=False (expected False)\ncensus onhost_bench.py: definition at line 206; call sites of _cap_respected( at lines [572] (1); reads of the ['cap_respected']/['all_cap_respected'] verdict at lines [581, 653, 658, 666] (4); denominator: 708 lines scanned\ncensus og_r3.py: 1 line(s) mention cap_respected at lines [57]; denominator: 192 lines scanned\n.\ninfra\\aws\\ec2\\opal-gateway\\tests\\test_principal_cutover.py:37\n1 passed, 1 warning in 0.08s\nrc=0",
+      "denominator": "1 of 1 selected test; 6 graded job shapes; census of onhost_bench.py (705 lines) and og_r3.py",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGR3-AC2",
+      "criterion_verbatim": "OGR3-AC2 -- every benchmarked job on the host, whatever its outcome, peaks at or below 268,435,456 bytes of child RSS: the maximal query, the concurrent queries, and both export sizes. Each peak is printed.",
+      "method": "command",
+      "invocation": "timeout 110 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~11/probes/og_r3.py AC2",
+      "output_evidence": "vintage: host run 2026-09-29T06:47:12Z .. 2026-09-29T06:47:34Z (host wall clock); served release 4248b70b39\njob_memory_cap_bytes: 268435456\ndenominator: 6 benchmarked job(s) graded (1 maximal query + 2 concurrent queries + 3 export run(s))\n  maximal                                                    ok=False code=LIMIT_EXCEEDED peak_child_rss_bytes=286691328 respected=False (recorded flag agrees: True)\n  concurrent[bench-principal-og-r-3-A]                       ok=True code=None peak_child_rss_bytes=205750272 respected=True (recorded flag agrees: True)\n  concurrent[bench-principal-og-r-3-B]                       ok=True code=None peak_child_rss_bytes=205463552 respected=True (recorded flag agrees: True)\n  export:full (250000 rows x 11 columns)                     ok=False code=LIMIT_EXCEEDED peak_child_rss_bytes=272683008 respected=False (recorded flag agrees: True)\n  export:tenth (25000 rows x 11 columns)                     ok=True code=None peak_child_rss_bytes=171974656 respected=True (recorded flag agrees: True)\n  export:probe5 (125000 rows x 11 columns)                   ok=True code=None peak_child_rss_bytes=225271808 respected=True (recorded flag agrees: True)\nmax_peak_child_rss_bytes: 286691328 over the cap by 18255872 bytes\nVERDICT: FAIL-OGR3-AC2 maximal peaked at 286691328 bytes > cap 268435456; export:full (250000 rows x 11 columns) peaked at 272683008 bytes > cap 268435456\nrc=1",
+      "denominator": "6 of 6 benchmarked jobs graded (maximal, 2 concurrent, export full, export tenth, export probe 125,000 rows); 2 of 6 over the cap",
+      "status": "FAIL",
+      "expect": "(?m)^VERDICT: PASS-OGR3-AC2(?![0-9])",
+      "status_reason": "Measured, not a probe defect: on the host at the served release 4248b70b39 the maximal query peaked at 286,691,328 bytes (cap 268,435,456; over by 18,255,872) and the 250,000-row x 11-column export was killed at 272,683,008 bytes (over by 4,247,552). A second full run read 286,830,592 and 275,021,824. R-OG-24's bar is 'never exceeds'; the repaired grader reads the peak on the refusal paths and records them over the cap. Row NFRA_OPLGTW-Z-W11-S10. INSUFFICIENT is a recorded result."
+    },
+    {
+      "criterion_id": "OGR3-AC3",
+      "criterion_verbatim": "OGR3-AC3 -- on the host, a 250,000-row export through export.generate_csv writes its CSV within 30 seconds, and its export and job files are gone afterwards.",
+      "method": "command",
+      "invocation": "timeout 110 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~11/probes/og_r3.py AC3",
+      "output_evidence": "vintage: host run 2026-09-29T06:47:12Z .. 2026-09-29T06:47:34Z ; export via export.generate_csv (SchwabService.export_query), served release 4248b70b39\ndataset: dim_position columns: 11 (the widest exportable set by contract column count; dim_position is the widest exportable dataset by contract column count (11; dim_balance 9, dim_asset 9); dim_asset's three free-text description columns are NOT measured )\ndenominator: 1 contract-scale export (250000 rows) + 1 one-tenth export (25000 rows), same width; export_deadline_seconds=30.0; csv cap 52428800 bytes\n  full   rows=250000 columns=11 ok=False code=LIMIT_EXCEEDED reason=memory elapsed_seconds=1.407 csv_bytes=None peak_child_rss_bytes=272683008 export_dir_entries_after=[] engine_job_dirs_leaked=[] files_gone=True\n  tenth  rows=25000 columns=11 ok=True code=None reason=None elapsed_seconds=2.921 csv_bytes=3748900 peak_child_rss_bytes=171974656 export_dir_entries_after=[] engine_job_dirs_leaked=[] files_gone=True\npeak ratio full/tenth: 1.5856 (the full run was cut off at the cap when it failed, so its true peak is higher)\n  probe  rows=125000 columns=11 ok=True elapsed_seconds=8.074 csv_bytes=18743499 peak_child_rss_bytes=225271808 files_gone=True\nlargest_successful_probe (supporting, never substituted for the contract-scale run): {'columns': 11, 'csv_bytes': 18743499, 'elapsed_seconds': 8.074, 'peak_child_rss_bytes': 225271808, 'rows': 125000}\nVERDICT: FAIL-OGR3-AC3 the 250000-row x 11-column export through export.generate_csv did not complete: ok=False code=LIMIT_EXCEEDED reason=memory peak_child_rss_bytes=272683008 vs cap 268435456; files_gone=True; measured evidence is in verdict.for_prd_revision_if_insufficient\nrc=1",
+      "denominator": "1 contract-scale export (250,000 rows x 11 columns) + 1 one-tenth export; 0 of 1 contract-scale exports completed",
+      "status": "FAIL",
+      "expect": "(?m)^VERDICT: PASS-OGR3-AC3(?![0-9])",
+      "status_reason": "Measured, not a probe defect: the 250,000-row export of the widest exportable set (dim_position, 11 columns) through export.generate_csv is refused LIMIT_EXCEEDED/memory after 1.407 s at a child peak of 272,683,008 bytes; its files are gone (files_gone true). 25,000 rows x 11 columns completes (csv 3,748,900 bytes, 2.921 s, peak 171,974,656) and 125,000 rows x 11 completes (csv 18,743,499 bytes, 8.074 s, peak 225,271,808). Row NFRA_OPLGTW-Z-W11-S10; the measurement is the input to a PRD revision."
+    },
+    {
+      "criterion_id": "OGR3-AC4",
+      "criterion_verbatim": "OGR3-AC4 -- over the baseline window 2026-09-11T00:00Z..2026-09-18T00:00Z, HTTPCode_Target_5XX_Count is zero with RequestCount non-zero in every one of the seven day-buckets (both series printed), and that window's TargetResponseTime p95 regresses no more than 20 percent against OGP1-AC11's 0.5535024102704742 s. The probe ALSO prints the post-release window 2026-09-21T00:00Z..2026-09-28T00:00Z's per-day 5XX count, request count and p95 (Q5); AC4 FAILS if that second window is not printed with its request counts.",
+      "method": "command",
+      "invocation": "timeout 110 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~11/probes/og_r3.py AC4",
+      "output_evidence": "instrument: CloudWatch GetMetricStatistics, namespace AWS/ApplicationELB, period 86400 per day bucket (plus one 7-day period for the window p95); metrics HTTPCode_Target_5XX_Count Sum, RequestCount Sum, TargetResponseTime SampleCount + p95\ndimensions: {'LoadBalancer': 'app/opal-gateway/89166a68f337e5a4', 'TargetGroup': 'targetgroup/opal-gateway-tg/00997fc81f087cb8'}\nbefore reference: {'p95_seconds': 0.5535024102704742, 'sample_count': 43745.0, 'source': 'OG-p-1 BASELINE.json OGP1-AC11', 'window': '2026-09-02T19:15Z..2026-09-16T19:15Z'}\ndenominator: baseline 7 day-buckets, 19473 requests; post-release 7 day-buckets, 11966 requests\nBASELINE window: 2026-09-11T00:00:00Z .. 2026-09-18T00:00:00Z (7 day-buckets), http_5xx_sum_total=0.0 request_count_total=19473.0 window_sample_count=19473.0 window_p95_seconds=0.49602561606493784\n    2026-09-11  HTTPCode_Target_5XX_Count=0.0  RequestCount=3323.0  sample_count=3323.0  p95_seconds=0.5285776633072475\n    2026-09-12  HTTPCode_Target_5XX_Count=0.0  RequestCount=1123.0  sample_count=1123.0  p95_seconds=0.5026495794214049\n    2026-09-13  HTTPCode_Target_5XX_Count=0.0  RequestCount=1142.0  sample_count=1142.0  p95_seconds=0.42271042633675493\n    2026-09-14  HTTPCode_Target_5XX_Count=0.0  RequestCount=4309.0  sample_count=4309.0  p95_seconds=0.5412361028679381\n    2026-09-15  HTTPCode_Target_5XX_Count=0.0  RequestCount=2778.0  sample_count=2778.0  p95_seconds=0.019872075633487807\n    2026-09-16  HTTPCode_Target_5XX_Count=0.0  RequestCount=5017.0  sample_count=5017.0  p95_seconds=0.3442392520943288\n    2026-09-17  HTTPCode_Target_5XX_Count=0.0  RequestCount=1781.0  sample_count=1781.0  p95_seconds=0.4604801065085579\nPOST-RELEASE (Q5) window: 2026-09-21T00:00:00Z .. 2026-09-28T00:00:00Z (7 day-buckets), http_5xx_sum_total=0.0 request_count_total=11966.0 window_sample_count=11824.0 window_p95_seconds=0.595009555391637\n    2026-09-21  HTTPCode_Target_5XX_Count=0.0  RequestCount=1385.0  sample_count=1385.0  p95_seconds=0.5548524230938721\n    2026-09-22  HTTPCode_Target_5XX_Count=0.0  RequestCount=1285.0  sample_count=1285.0  p95_seconds=0.6745895150942955\n    2026-09-23  HTTPCode_Target_5XX_Count=0.0  RequestCount=1676.0  sample_count=1675.0  p95_seconds=0.6025324902287066\n    2026-09-24  HTTPCode_Target_5XX_Count=0.0  RequestCount=3469.0  sample_count=3469.0  p95_seconds=0.5977986852624244\n    2026-09-25  HTTPCode_Target_5XX_Count=0.0  RequestCount=1517.0  sample_count=1398.0  p95_seconds=0.576847115000602\n    2026-09-26  HTTPCode_Target_5XX_Count=0.0  RequestCount=1314.0  sample_count=1309.0  p95_seconds=0.45890023547564845\n    2026-09-27  HTTPCode_Target_5XX_Count=0.0  RequestCount=1320.0  sample_count=1303.0  p95_seconds=0.4707505366984673\nbaseline p95 regression vs OGP1-AC11 0.5535024102704742 s: -0.10384199443223704 (cap 0.2)\npost-release p95 regression vs the same reference (printed, supporting): 0.07498999887079076\nnamed-incident rule: a named incident disqualifies any window that contains it; nothing is excised from inside a window (R-OG-23B)\nVERDICT: PASS-OGR3-AC4\nrc=0",
+      "denominator": "baseline 7 day-buckets / 19,473 requests / 0 failures; post-release 7 day-buckets / 11,966 requests / 0 failures",
+      "status": "PASS",
+      "expect": "(?m)^VERDICT: PASS-OGR3-AC4(?![0-9])"
+    },
+    {
+      "criterion_id": "OGR3-AC5",
+      "criterion_verbatim": "OGR3-AC5 -- the ALB idle_timeout, read immediately before the benchmark with its ARN and UTC time, exceeds the 30-second preparation deadline.",
+      "method": "command",
+      "invocation": "timeout 110 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~11/probes/og_r3.py AC5",
+      "output_evidence": "instrument: elbv2 describe-load-balancer-attributes idle_timeout.timeout_seconds\nload_balancer_arn: arn:aws:elasticloadbalancing:us-east-1:313476888478:loadbalancer/app/opal-gateway/89166a68f337e5a4 read_utc: 2026-09-29T06:46:20Z (taken immediately before the benchmark run at 2026-09-29T06:47:12Z )\ndenominator: 1 ALB attribute read\nidle_timeout_seconds: 60 query_export_prep_deadline_seconds: 30.0\nVERDICT: PASS-OGR3-AC5\nrc=0",
+      "denominator": "1 ALB attribute read",
+      "status": "PASS",
+      "expect": "(?m)^VERDICT: PASS-OGR3-AC5(?![0-9])"
+    },
+    {
+      "criterion_id": "OGR3-AC6",
+      "criterion_verbatim": "OGR3-AC6 -- CAPACITY.json carries a capacity verdict, SUFFICIENT or INSUFFICIENT. An INSUFFICIENT verdict carries its measurements in a for_prd_revision_if_insufficient block.",
+      "method": "command",
+      "invocation": "timeout 110 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~11/probes/og_r3.py AC6",
+      "output_evidence": "vintage: host run 2026-09-29T06:47:12Z .. 2026-09-29T06:47:34Z ; assembled 2026-09-29T06:52:25Z\ndenominator: 1 capacity verdict\nverdict: INSUFFICIENT\nchecks: {'deadline_respected_every_query': True, 'export_at_contract_scale_ok_clean_and_on_time': False, 'host_structurally_admits_global_cap_jobs': True, 'memory_cap_never_exceeded_by_any_job': False}\nadmission reserve (formula): 375753728 bytes = ceil(193228800 x 1.25) + 134217728; inputs existing_gateway_peak_rss_bytes=193228800 (measured VmHWM now 101580800), required for 2 jobs 912624640\nadmission reserve (priced against the measured child peak): 412265472 bytes; inputs max_measured_peak_child_rss_bytes=286691328, overshoot_over_cap_bytes=18255872; required for 2 jobs 949136384; gap vs formula 36511744 bytes; host_memory_bytes=1936322560\nfor_prd_revision_if_insufficient: {\"admission\": {\"formula\": {\"admission_reserve_bytes\": 375753728, \"inputs\": {\"existing_gateway_peak_rss_bytes\": 193228800, \"floor_note\": \"measured peak RSS unavailable or below OG-p-1's documented floor (193228800 bytes); the engine's own EngineLimits floor is used for admission so this benchmark never UNDER-reserves\", \"global_jobs\": 2, \"job_memory_cap_bytes\": 268435456, \"measured_current_peak_rss_bytes\": 101580800, \"measured_current_peak_rss_error\": null, \"multiplier\": 1.25, \"os_reserve_bytes\": 134217728}, \"required_bytes_for_1_job\": 644189184, \"required_bytes_for_2_jobs\": 912624640}, \"from_measured_child_peak\": {\"admission_reserve_bytes\": 412265472, \"inputs\": {\"existing_gateway_peak_rss_bytes\": 193228800, \"global_jobs\": 2, \"job_memory_cap_bytes\": 268435456, \"max_measured_peak_child_rss_bytes\": 286691328, \"overshoot_over_cap_bytes\": 18255872}, \"required_bytes_for_2_jobs\": 949136384}, \"gap_bytes_for_2_jobs\": 36511744, \"gateway_peak_rss_bytes_after_run\": 101580800, \"host_can_admit_1_job\": true, \"host_can_admit_2_jobs_global_cap\": true, \"host_memory_bytes\": 1936322560}, \"export_at_contract_scale\": {\"code\": \"LIMIT_EXCEEDED\", \"columns\": 11, \"csv_bytes\": null, \"elapsed_seconds\": 1.407, \"ok\": false, \"peak_child_rss_bytes\": 272683008, \"reason\": \"memory\", \"target_csv_max_bytes\": 52428800, \"target_rows\": 250000}, \"export_tenth\": {\"columns\": 11, \"ok\": true, \"peak_child_rss_bytes\": 171974656, \"target_rows\": 25000}, \"job_memory_cap_bytes\": 268435456, \"jobs_over_cap\": [{\"cap_respected\": false, \"code\": \"LIMIT_EXCEEDED\", \"job\": \"maximal\", \"ok\": false, \"peak_child_rss_bytes\": 286691328}, {\"cap_respected\": false, \"code\": \"LIMIT_EXCEEDED\", \"job\": \"export:full (250000 rows x 11 columns)\", \"ok\": false, \"peak_child_rss_bytes\": 272683008}], \"largest_successful_export_probe\": {\"columns\": 11, \"\nVERDICT: PASS-OGR3-AC6\nrc=0",
+      "denominator": "1 capacity verdict (INSUFFICIENT) with its for_prd_revision_if_insufficient block",
+      "status": "PASS",
+      "expect": "(?m)^VERDICT: PASS-OGR3-AC6(?![0-9])"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three mutants against a copy of CAPACITY.json (OGR3_CAPACITY_PATH test-only override, never set by the graded invocations): A every job at or under the cap and the full export succeeded; B the maximal job's cap_respected flag forced True while its peak stays 286,691,328 (the round-1 defect); C a baseline day-bucket given 2 5XX.",
+      "expected": "A: AC2 and AC3 flip to PASS. B: AC2 still FAILS and names '[flag disagrees]'. C: AC4 FAILS.",
+      "observed": "A: PASS-OGR3-AC2 and PASS-OGR3-AC3. B: FAIL-OGR3-AC2 'maximal [flag disagrees] peaked at 286691328 bytes > cap 268435456'. C: FAIL-OGR3-AC4 'a baseline day-bucket carries HTTPCode_Target_5XX_Count > 0'. All fired as expected; the unmutated baseline re-run alongside still reads FAIL/FAIL/PASS.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "og_r3.py AC2..AC6 run twice on the same CAPACITY.json and diffed; the host benchmark itself was run twice.",
+      "observed": "Probe output byte-identical in both runs for all five. Host runs 1 and 2: maximal 286,691,328 / 286,830,592 (LIMIT_EXCEEDED both); export full 272,683,008 / 275,021,824 (LIMIT_EXCEEDED both); tenth 171,974,656 / 170,377,216 (ok both); probe 125,000 rows 225,271,808 / 225,247,232 (ok both); verdict INSUFFICIENT both. The peaks vary by under 1 percent; every outcome and every grade is the same.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "dim_asset export width",
+      "reason": "The widest set was chosen by contract column count (dim_position 11; dim_balance and dim_asset 9), as amendment A1 states; dim_asset's three free-text columns were not exported."
+    },
+    {
+      "item": "Any deploy, service restart, configuration change or state-store write",
+      "reason": "Out of scope; the service stayed active and unrestarted since 05:22:10Z and no RUNTIME#bench-og-r3-* key was needed (in-memory doubles)."
+    },
+    {
+      "item": "Changing admission code or any contract number",
+      "reason": "Not this cell's act (R-4); the admission gap is filed as row S11."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W11-S10: on the host the 250,000-row x 11-column export is refused LIMIT_EXCEEDED/memory at 272,683,008 B and the maximal query peaks at 286,691,328 B; capacity INSUFFICIENT at full width (OBSERVATION / ARMED, disarm_owner 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-Z-W11-S11: admission arithmetic priced against the cap misses the measured overshoot: gap 36,511,744 bytes for two jobs (OBSERVATION / ARMED, disarm_owner 2.0.0_SA_COO~O)."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~11/onhost-capacity-recut.result.md",
+  "compiler_tools": [
+    {
+      "tool": "onhost_bench.py --scale full",
+      "invocation": "SSM e32bd390-4b24-4e5f-9e4d-49824f691a05 on i-07dccb1615503ac99: sudo -u ec2-user /opt/opal-gateway/.venv/bin/python onhost_bench.py --scale full --contract contract.json --out CAPACITY_host.json",
+      "result": "RC=0, 22.3 s, verdict INSUFFICIENT"
+    },
+    {
+      "tool": "probes/assemble_capacity.py",
+      "invocation": "python assemble_capacity.py onhost_run_full.json <alb_dir> CAPACITY.json",
+      "result": "CloudWatch windows: baseline 19,473 requests / 0 5XX; post-release 11,966 requests / 0 5XX"
+    }
+  ]
+}
