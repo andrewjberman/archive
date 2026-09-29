@@ -20,6 +20,12 @@ LABEL = "Opal's historical-multiple reference"
 SCALARS = ("management", "fund_of_record", "last_stated_position")
 
 
+def _pillars(fields):
+    """AMENDMENT 1 (row Z-W177-S1): only a LIST is pillars; an absent object {absent, value} counts 0, never len(dict)."""
+    value = fields.get("thesis_pillars")
+    return value if isinstance(value, list) else []
+
+
 def thesis(plane, cl, key):
     path = "%s/security/%s/thesis" % (cl.ROUTE_PREFIX, key)
     if plane == "served":
@@ -56,10 +62,15 @@ def main():
         got = obj.get("dossier_fields")
         if not isinstance(got, dict):
             bad.append("%s: /thesis carries no dossier_fields" % key)
-            held_p += len(fields.get("thesis_pillars") or [])
+            held_p += len(_pillars(fields))
             continue
-        want_p = fields.get("thesis_pillars") or []
+        want_p = _pillars(fields)
         got_p = got.get("thesis_pillars") or []
+        if not want_p and isinstance(fields.get("thesis_pillars"), dict):
+            # AMENDMENT 1: the dossier's pillars field is itself ABSENT -> served as [] plus thesis_pillars_absent (ruled at the drain)
+            absent = got.get("thesis_pillars_absent") or {}
+            if got_p or absent.get("status") != "ABSENT" or not absent.get("reason"):
+                bad.append("%s: absent pillars field should serve [] + thesis_pillars_absent ABSENT (%r)" % (key, absent))
         held_p += len(want_p)
         served_p += len(got_p)
         if len(got_p) != len(want_p):
