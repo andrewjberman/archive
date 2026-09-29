@@ -18,28 +18,28 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
       "kind": "script",
-      "commit_or_etag": "625c8520f30e0b032e9165b77a84111f1af16d66",
+      "commit_or_etag": "b8e7433ff5d341bcd227f578687f83e0b7e7a779",
       "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "Not deployed by this order (BOUNDS: served code moves only through 2.0.0_SA_COO~P's st4 rebuild). Blob hash is the git blob of the worktree file at commit time; `RESOLVE_MAX_RECEIVES` and the GAVE_UP branch are absent at HEAD (git show HEAD:<path> | grep -c RESOLVE_MAX_RECEIVES / GAVE_UP both return 0).",
-      "introduces": ["RESOLVE_MAX_RECEIVES", "state=GAVE_UP code=RESOLVE_RETRY_EXHAUSTED", "AttributeNames=[\"ApproximateReceiveCount\"]"],
+      "deploy_evidence": "Not deployed by this order (BOUNDS: served code moves only through 2.0.0_SA_COO~P's st4 rebuild). Blob hash is the git blob of the worktree file at commit time (git hash-object). AMENDMENT 1: step 3 replaced -- the GAVE_UP print/branch is removed; a RETRY at ApproximateReceiveCount >= RESOLVE_MAX_RECEIVES now calls _end_exhausted_resolve (new helper) which conditionally flips the NORMALIZATION row RESOLVING -> NEEDS_CORRECTION (reason RESOLVE_RETRY_EXHAUSTED) via upload_resolution.NormalizationStates.replace, then prints 'state=ATTENTION code=RESOLVE_RETRY_EXHAUSTED' and deletes the message.",
+      "introduces": ["RESOLVE_MAX_RECEIVES", "_end_exhausted_resolve", "state=ATTENTION code=RESOLVE_RETRY_EXHAUSTED", "AttributeNames=[\"ApproximateReceiveCount\"]"],
       "artifact_covered_by": ["Y22-1-AC1", "Y22-1-AC2", "Y22-1-AC3"]
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~73/IB-yr-221.result.md",
       "kind": "doc",
-      "commit_or_etag": "324bda052ffd948e3df5ad8c46af6fa45db5a53a",
+      "commit_or_etag": "3c43c4c61efcaaec16f82f35864c1393e6775d22",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "git hash-object 324bda052ffd948e3df5ad8c46af6fa45db5a53a -- the session log for this order.",
+      "deploy_evidence": "git hash-object 3c43c4c61efcaaec16f82f35864c1393e6775d22 -- the amended session log for this order.",
       "artifact_covered_by": ["Y22-1-AC1", "Y22-1-AC2", "Y22-1-AC3"]
     }
   ],
   "acceptance": [
     {
       "criterion_id": "Y22-1-AC1",
-      "criterion_verbatim": "at receive count RESOLVE_MAX_RECEIVES a RETRY deletes the message, prints the GAVE_UP line, and the row reads RESOLVING. Base: RESOLVE_MAX_RECEIVES absent.",
+      "criterion_verbatim": "(amended) at receive count RESOLVE_MAX_RECEIVES a RETRY deletes the message, prints state=ATTENTION code=RESOLVE_RETRY_EXHAUSTED, and the row reads NEEDS_CORRECTION with reason and one finding RESOLVE_RETRY_EXHAUSTED. Base @c125c68396: FAIL (prints GAVE_UP, row RESOLVING).",
       "method": "test_suite",
-      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R22_CHECKS/test_r22_y1_resolve_bounded.py::test_gives_up_by_name_before_the_dlq",
-      "output_evidence": "1 passed in 3.11s",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R22_CHECKS/test_r22_y1_resolve_bounded.py::test_fourth_retry_ends_attention_by_name",
+      "output_evidence": "1 passed in 1.49s",
       "denominator": "1 of 1 selected test",
       "status": "PASS",
       "expect": "1 passed"
@@ -49,7 +49,7 @@
       "criterion_verbatim": "poll_once asks SQS for ApproximateReceiveCount on every receive. Base: no AttributeNames.",
       "method": "test_suite",
       "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R22_CHECKS/test_r22_y1_resolve_bounded.py::test_asks_sqs_for_the_receive_count",
-      "output_evidence": "1 passed in 1.92s",
+      "output_evidence": "1 passed in 1.47s",
       "denominator": "1 of 1 selected test",
       "status": "PASS",
       "expect": "1 passed"
@@ -59,7 +59,7 @@
       "criterion_verbatim": "the difference control: at receive count 1 a RETRY is kept with the 60 s re-offer, and the row reads RESOLVING. Passes at the base and must still pass.",
       "method": "test_suite",
       "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R22_CHECKS/test_r22_y1_resolve_bounded.py::test_early_retry_is_kept_and_reoffered",
-      "output_evidence": "1 passed in 1.14s",
+      "output_evidence": "1 passed in 1.44s",
       "denominator": "1 of 1 selected test",
       "status": "PASS",
       "expect": "1 passed"
@@ -67,55 +67,55 @@
   ],
   "controls": {
     "mutant": {
-      "description": "Changed the bound comparison from `receives >= RESOLVE_MAX_RECEIVES` to `receives > RESOLVE_MAX_RECEIVES` (worktree-only, never committed) so the boundary case (receive count exactly equal to the limit) is no longer given up.",
-      "expected": "test_gives_up_by_name_before_the_dlq fails because at receives==limit the message is kept and re-offered instead of deleted with the GAVE_UP line.",
-      "observed": "FAILED: AssertionError: assert [] == ['rh-1'] (queue.deleted empty instead of ['rh-1']). Reverted to `>=` before any commit; all three criteria re-ran green.",
+      "description": "Two mutants (worktree-only, never committed). (1) Boundary: `receives >= RESOLVE_MAX_RECEIVES` changed to `receives > RESOLVE_MAX_RECEIVES`. (2) Row write: `_end_exhausted_resolve`'s `NormalizationStates(...).replace(...)` call made unreachable with an early `return`, leaving the print/delete branch intact.",
+      "expected": "(1) test_fourth_retry_ends_attention_by_name fails because at receives==limit the message is kept and re-offered instead of ended. (2) The same test fails on the row-state assertion because the row never leaves RESOLVING.",
+      "observed": "(1) FAILED: assert [] == ['rh-1'] (queue.deleted empty instead of ['rh-1']). (2) FAILED: assert 'RESOLVING' == 'NEEDS_CORRECTION' (row state assertion). Both reverted to the correct bytes before any commit; all three criteria re-ran green afterward.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "The full check file (all 3 tests) was run twice at the final bytes; the existing suite (test_resident_worker.py + test_resolve_upload.py, collected together) was also run to confirm no regression.",
-      "observed": "org/tier1_exec/.../test_r22_y1_resolve_bounded.py reproduced '3 passed' identically on both runs (1.61s, 1.76s); the existing suite reproduced '46 passed, 8 skipped in 51.16s' with no failures.",
+      "observed": "org/tier1_exec/.../test_r22_y1_resolve_bounded.py reproduced '3 passed in 1.35s' identically on both runs; the existing suite reproduced '46 passed, 8 skipped in 45.51s' with no failures.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
       "item": "Optional test addition to tests/test_resolve_upload.py (build step 5)",
-      "reason": "Marked optional by the task order (\"you may add tests\"); the read-only R22_CHECKS harness (test_r22_y1_resolve_bounded.py, subclassing test_resolve_upload.py's own Queue/case/assembly fixtures as CountedQueue) already exercises all three required arms (gives-up-at-the-bound, asks-for-the-receive-count, early-retry-kept), so no addition was made and existing tests were left unchanged per the order's own instruction."
+      "reason": "Marked optional by the task order (\"you may add tests\"); the read-only R22_CHECKS harness (test_r22_y1_resolve_bounded.py, subclassing test_resolve_upload.py's own Queue/case/assembly fixtures as CountedQueue) already exercises all three amended arms (fourth-retry-ends-attention-by-name, asks-for-the-receive-count, early-retry control), so no addition was made and existing tests were left unchanged per the order's own instruction."
     }
   ],
   "surprises": [],
   "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~73/IB-yr-221.result.md",
   "compiler_tools": [
     {
-      "tool": "pytest R22_CHECKS::test_gives_up_by_name_before_the_dlq",
-      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R22_CHECKS/test_r22_y1_resolve_bounded.py::test_gives_up_by_name_before_the_dlq",
-      "result": "rc=0, 1 passed in 3.11s"
+      "tool": "pytest R22_CHECKS::test_fourth_retry_ends_attention_by_name",
+      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R22_CHECKS/test_r22_y1_resolve_bounded.py::test_fourth_retry_ends_attention_by_name",
+      "result": "rc=0, 1 passed in 1.49s"
     },
     {
       "tool": "pytest R22_CHECKS::test_asks_sqs_for_the_receive_count",
       "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R22_CHECKS/test_r22_y1_resolve_bounded.py::test_asks_sqs_for_the_receive_count",
-      "result": "rc=0, 1 passed in 1.92s"
+      "result": "rc=0, 1 passed in 1.47s"
     },
     {
       "tool": "pytest R22_CHECKS::test_early_retry_is_kept_and_reoffered",
       "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R22_CHECKS/test_r22_y1_resolve_bounded.py::test_early_retry_is_kept_and_reoffered",
-      "result": "rc=0, 1 passed in 1.14s"
+      "result": "rc=0, 1 passed in 1.44s"
     },
     {
       "tool": "pytest full check file, twice (determinism)",
       "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R22_CHECKS/test_r22_y1_resolve_bounded.py",
-      "result": "rc=0 both runs, 3 passed in 1.61s then 3 passed in 1.76s"
+      "result": "rc=0 both runs, 3 passed in 1.35s each"
     },
     {
       "tool": "pytest existing suite regression (collected together for sys.path order)",
       "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resolve_upload.py",
-      "result": "rc=0, 46 passed, 8 skipped in 51.16s -- no pre-existing test broken by the new gate"
+      "result": "rc=0, 46 passed, 8 skipped in 45.51s -- no pre-existing test broken by the amended gate"
     },
     {
       "tool": "git hash-object (worktree blob isolation, no working-tree stash)",
       "invocation": "git hash-object infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~73/IB-yr-221.result.md",
-      "result": "625c8520f30e0b032e9165b77a84111f1af16d66 and 324bda052ffd948e3df5ad8c46af6fa45db5a53a -- confirmed the exact blobs referenced above; git diff --stat confirmed the change is scoped to resident_worker.py only."
+      "result": "b8e7433ff5d341bcd227f578687f83e0b7e7a779 and 3c43c4c61efcaaec16f82f35864c1393e6775d22 -- confirmed the exact blobs referenced above; git diff --stat confirmed the change is scoped to resident_worker.py only."
     }
   ]
 }
