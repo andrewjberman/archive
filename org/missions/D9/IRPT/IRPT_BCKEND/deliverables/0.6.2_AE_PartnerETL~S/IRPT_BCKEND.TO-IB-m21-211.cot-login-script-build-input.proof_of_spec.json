@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-m21-211",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m21-211.cot-login-script-build-input.md",
+    "group": "OTHER",
+    "vintage_commit": "a88041549b33c0679511dad00884236253f5eb92"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R21_M.md",
+    "vintage_commit": "c3a90445864cd627361d33412aba769f1ea5d35b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m21-211.cot-login-script-build-input.md"
+  },
+  "assignee": "0.6.2_AE_PartnerETL~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/bd-cot-auto-login/bd_49f_auto_login.js.running-capture.txt",
+      "kind": "config_data",
+      "commit_or_etag": "fc609ed209",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the RUNNING bytes of /opt/bd-cot-auto-login/bd_49f_auto_login.js on i-0643a5bee8a8feabf, byte for byte: md5 28dd27a054b826cc3a87f6b4498d3b5a, 35049 B. Carried off the box inside SSM command ea2016dd-1284-4a9e-9322-5497c80dd905 (AWS-RunShellScript, Status Success, ResponseCode 0) as a gzip+base64 stream, reconstructed locally and md5-re-verified; the read output was not truncated (its ---END--- marker is present). Independently equal, byte for byte, to the S3 deploy-source object s3://opal-313476888478-lambda-artifacts/ec2/bd-cot-auto-login/bd_49f_auto_login.js (ContentLength 35049, single-part ETag = the same md5). Amendment 2 (CTO ruling on row S198): the suffix is *.running-capture.txt because the naming limb grades .py .js .mjs .ts .tf .json .yaml .yml only, so the running script lands as non-graded EVIDENCE and NOT as a .js build input. NOT deployed: nothing was written to the box or to S3 by this order.",
+      "artifact_covered_by": [
+        "IBM21-211-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/IRPT_BCKEND_R21_S166_RUNNING_VS_REPO_20260929.json",
+      "kind": "doc",
+      "commit_or_etag": "fc609ed209",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the order read-back JSON: command_id ea2016dd-1284-4a9e-9322-5497c80dd905, running_md5 28dd27a054b826cc3a87f6b4498d3b5a, running_bytes 35049, repo_md5 the same. r21_s166_capture.py reads command_id out of this file and re-queries the SSM invocation live, so the file is EXERCISED by AC1 rather than merely present. It also records the S3 deploy-source finding the order asked for in the report, and an amendment_2 field naming why the committed path is the capture.",
+      "artifact_covered_by": [
+        "IBM21-211-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".gitattributes",
+      "kind": "config_data",
+      "commit_or_etag": "bda0189898",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two lines: infra/aws/ec2/bd-cot-auto-login/*.js -text (amendment 1 @f69b8509e7) and infra/aws/ec2/bd-cot-auto-login/*.running-capture.txt -text (amendment 2 @a88041549b). core.autocrlf=true is set on this device and no rule covered infra/aws/ec2/**/*.js, so a checkout would rewrite a verbatim capture to CRLF while IBM21-211-AC1 md5s the WORKING file, and a correct build would FAIL at the drain. git check-attr text on the capture now reads unset, so the attribute is in force; before the line it read unspecified and git warned that LF would be replaced by CRLF. -text rather than eol=lf because git must not translate a verbatim capture in either direction. LANE OVERRIDE, STATED IN ITS OWN COMMIT MESSAGE: this path is lane BASE_EXEC and owned-paths-check BLOCKED it at 2026-09-29T07:48:45Z; the write is authorized by the order paths block, which the issuer widened in amendment 1 and re-stated in amendment 2, and it was committed ALONE under the CLAUDE.md Rule 14a audited escape so the override covered no other path.",
+      "artifact_covered_by": [
+        "IBM21-211-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBM21-211-AC1",
+      "criterion_verbatim": "the repo carries the running bytes, and an SSM read shows the box still runs them.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_CHECKS/r21_s166_capture.py",
+      "output_evidence": "RUNNING-CAPTURE 28dd27a054b8 (rc=0), run from the worktree root against the committed bytes.",
+      "denominator": "4 of 4 conjuncts in the checker pass: the capture file exists; its md5 is 28dd27a054b826cc3a87f6b4498d3b5a AND its length is exactly 35049 B; the read-back JSON exists; and the SSM invocation it names on i-0643a5bee8a8feabf returns Status Success with that same md5 inside StandardOutputContent",
+      "expect": "RUNNING-CAPTURE",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two arms. (1) The order's own recorded base: at 2026-09-29 04:3xZ, before this session, the pre-amendment check read NO-BUILD-INPUT (the repo .js absent) and amendment 2 re-based it as NO-CAPTURE (the capture file absent), both FAIL as expected. (2) A PLANTED one-byte mutant this session: a single space appended to the committed capture, the checker re-run, then the verified bytes restored. The planted arm is the load-bearing one, because an absent-file arm only proves the checker can see a missing path, not that it can see WRONG BYTES at the right path.",
+      "expected": "the planted mutant must be refused for the BYTES, not for the path: NO-CAPTURE naming a different md5 and 35050 B, rc=1; and the restored file must return to PASS, proving the refusal was the mutation and not a broken run.",
+      "observed": "MUTANT: NO-CAPTURE: repo md5 0659b4331ba8f538f0f2f17731d78324 / 35050 B, want 28dd27a054b826cc3a87f6b4498d3b5a / 35049 B, rc=1. RESTORED: RUNNING-CAPTURE 28dd27a054b8, rc=0. The same planted arm was also run against the PRE-amendment checker (r21_s166_build_input.py) earlier in the session with the same result, so the control fired against both checkers, not only the one that graded the flip.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "r21_s166_capture.py run twice against the committed bytes (once before the mutant arm, once after the restore); the pre-amendment r21_s166_build_input.py was likewise run twice earlier. Each run re-queries the live SSM invocation rather than a cached value.",
+      "observed": "RUNNING-CAPTURE 28dd27a054b8 rc=0 both times; the earlier checker gave BUILD-INPUT 28dd27a054b8 rc=0 both times. The SSM invocation is a fixed historical record, so the live re-query is stable by construction.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "committing infra/aws/ec2/bd-cot-auto-login/bd_49f_auto_login.js (the deployable .js)",
+      "reason": "amendment 2, on the CTO ruling of row S198: the naming limb refuses the byte-exact .js and the CTO ruled no gate widening, so this order lands the running script as non-graded evidence only. The uncommitted .js was deleted from this worktree as the amendment instructs. The deployable script is TO-IB-m21-212's port."
+    },
+    {
+      "item": "any write to the box, to S3, or to the wrapper/env file",
+      "reason": "the order BOUNDS: read-only on the box and in S3, one SSM read command, no upload, no box write, no service restart. The box was STARTED to reach SSM because it is a stopped-when-idle batch runner (ec2-auto-shutdown-enforcer stopped it on 2026-09-28) and it returns to stopped by that same standing enforcer; no vendor sign-in was made and the login document was not run."
+    },
+    {
+      "item": "porting the 49F canonical retry, its classifyByDom fallback, or its F2 persist-binding",
+      "reason": "all three belong to TO-IB-m21-212's cell, not this one. This order is the capture, with no behaviour change."
+    },
+    {
+      "item": "widening, editing or disabling the naming limb, and editing the captured bytes to pass it",
+      "reason": "editing the bytes would break this order's own byte-for-byte criterion, and patching a gate to admit this seat's own commit is not this seat's act. Routed as row S198 instead, and ruled by the CTO."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-S198: BLOCKING, INERT, UNDER_INVESTIGATION -- the naming limb in ENFORCE mode refused the byte-exact .js 15 times, every refusal a hand-kept firm carrier that the committed 49F sibling already carries verbatim at HEAD; the gate gives RAISE literals a carried-at-HEAD escape citing CLAUDE.md Rule 30 and gives the hand-kept-carrier branch none. RULED by the CTO (msg 102634) with no gate widening, which is what amendment 2 re-shaped this order around.",
+    "IRPT_BCKEND-S199: OBSERVATION, ARMED, UNDER_INVESTIGATION -- the cot running bytes call smPut(sessionId, ...) unguarded at line 438, so a Secrets Manager failure leaves rc at 0 and the run reports success with a stale secret; the 49F canonical binds a failed persist to rc=1 (lines 582-593, F2, 2026-07-02) and the cot copy never received that hunk. Found while reading both scripts whole for TO-IB-m21-212 Part 1. RULED into TO-IB-m21-212's cell by the issuer (amendment 3 @b986145750), not into this one."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.6.2_AE_PartnerETL~S/IRPT_BCKEND.TO-IB-m21-211.cot-login-script-build-input.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "SSM (read-only) -- the running-bytes read",
+      "invocation": "aws ssm send-command --cli-input-json file://<one md5sum + wc -c + gzip|base64 read of /opt/bd-cot-auto-login/bd_49f_auto_login.js>, then aws ssm get-command-invocation",
+      "result": "CommandId ea2016dd-1284-4a9e-9322-5497c80dd905, Status Success, ResponseCode 0, stderr empty: md5 28dd27a054b826cc3a87f6b4498d3b5a, 35049 B; 17784 base64 chars with the ---END--- marker present, so not truncated"
+    },
+    {
+      "tool": "aws s3api head-object -- the deploy-source second read the order asked about",
+      "invocation": "aws s3api head-object --bucket opal-313476888478-lambda-artifacts --key ec2/bd-cot-auto-login/bd_49f_auto_login.js",
+      "result": "ContentLength 35049, ETag 28dd27a054b826cc3a87f6b4498d3b5a (single-part, no -N suffix, so the ETag IS the md5), SSE AES256, LastModified 2026-06-26T15:18:51Z; downloaded and compared byte for byte to the box bytes: identical. The source DOES carry the .js, so the order contingency clause does not apply."
+    },
+    {
+      "tool": "r21_s166_capture.py -- the amended acceptance checker, plus its planted mutant",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_CHECKS/r21_s166_capture.py",
+      "result": "RUNNING-CAPTURE 28dd27a054b8 rc=0; with one byte appended, NO-CAPTURE naming md5 0659b433 / 35050 B rc=1; restored, PASS again"
+    },
+    {
+      "tool": "git check-attr -- proving the -text attribute is in force, not merely written",
+      "invocation": "git check-attr text -- infra/aws/ec2/bd-cot-auto-login/bd_49f_auto_login.js.running-capture.txt",
+      "result": "text: unset (before the .gitattributes line it read text: unspecified and git warned that LF would be replaced by CRLF the next time git touched the file)"
+    },
+    {
+      "tool": "safe-commit.sh -- three gated commits, and the two refusals that re-shaped the order",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.6.2_AE_PartnerETL~S <0.6.2_AE_PartnerETL~S@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "REFUSED twice on the .js: BLOCKED -- the naming limb refused (LGIC_ENFORCE DEC-6, ENFORCE mode), NAMING-GATE REFUSE 15 graded, which became row S198. After amendment 2: NAMING-GATE PASS 0 graded on the capture. Landed bda0189898 (.gitattributes, under the stated Rule 14a lane override, one path) and fc609ed209 (capture + read-back JSON, in lane). Rows S198 and S199 landed on CLOUD as 036fa7193b and cb1c14472a."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py -- both rows, graded at commit time on the staged index",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md, and again inside each safe-commit run",
+      "result": "OK, 1 new row graded per commit, corpus baseline unchanged (4 known legacy failures, 0 new) both times"
+    },
+    {
+      "tool": "comp-find / comp-read -- locating the deploy source and reading the gate's own escape paths",
+      "invocation": "comp-find 'bd-cot-auto-login' --limit 40; comp-read .tools/safe-commit.sh --for '<the naming limb and its bypasses>'; comp-read .tools/naming-gate.py --for '<per-path exemption or legacy escape>'",
+      "result": "comp-find printed DENOMINATOR 575 hits across 205712 files scanned and surfaced the canonical S3 deploy path; comp-read located the naming limb ENFORCE window and its single LEGACY-READ consumption point, which is what established that no escape was available to this seat"
+    }
+  ]
+}
