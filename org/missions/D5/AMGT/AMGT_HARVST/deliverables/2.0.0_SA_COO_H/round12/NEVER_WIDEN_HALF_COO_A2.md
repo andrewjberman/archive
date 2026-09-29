@@ -97,3 +97,31 @@ the version decides stop limb 2. `~A` measured (AWS reads only): headroom = 250 
    smaller governs.** Stop limb 2 fires at or above it. The build prints package + every layer, unzipped, against it.
 5. **If 16.1.0 pruned does not fit, the act STOPS (limb 2), nothing uploads, the combined entry closes ABANDONED.**
    That is a design question for round 13 (e.g. the timeline loaders on their own function), not a pin to widen here.
+
+## 9. AMENDMENT 2 (signer, 2026-09-29 ~01:4xZ) -- THE GRANT MUST ALSO LIST (asked by `0.7.0_AE_CloudOps~A`, msg 26366)
+
+`~A` held BEFORE the upload with the build and all four stop limbs CLEAR (deployed 203 -> fresh 331 members, every
+mover named; unzipped 253,105,932 B, 96.6% of the ceiling) because section 1.3's grant is `s3:GetObject` only and the
+loaders LIST. Measured by `~A` and re-read by this signer at the bytes:
+- `publication_gold._latest_gold_snapshot_rows` (`:653`) paginates `list_objects_v2` on `amgt/harvest/gold/<table>/`;
+- the day route's headline join (`_timeline_silver_articles` -> `_iter_latest_articles` -> `store.silver_latest`,
+  `store.py:301-305`) paginates on each publisher's silver `article` prefix;
+- the role's only ListBucket statement (`scoped-amgt-api.tf:229-232`) is conditioned on `local.scoped_amgt_pool_prefixes`
+  (`:118`), which holds none of them. **Same class as row `Z-S36`, one limb deeper; the miss is this signer's.**
+
+**REPLACES section 1.3's single statement.** The eight prefixes below join `local.scoped_amgt_pool_prefixes`, so the
+file's EXISTING two statements grant `s3:GetObject` under each and a prefix-conditioned `s3:ListBucket` on each --
+read-only, the pattern every other reader of this function already uses. Printed from `store.table_prefix(...)` at the
+signer's HEAD, not typed:
+1. `amgt/harvest/gold/chatter_daily/`
+2. `amgt/harvest/gold/chatter_event/`
+3. `amgt/harvest/gold/article_security_mention/`
+   (the three gold tables the loaders read -- NOT the whole `amgt/harvest/gold/` prefix, least privilege)
+4. `barrons/harvest/silver/article/`
+5. `bloomberg/harvest/silver/article/`
+6. `ft/harvest/silver/article/`
+7. `seeking-alpha/harvest/silver/article/`
+8. `wsj/harvest/silver/article/`
+
+No write, no delete, no other action, no other prefix. The build is unaffected (IAM is plan-only); the plan shows the one
+inline policy changing and nothing else beyond section 4's list. If the plan shows any other IAM change, stop limb 4.
