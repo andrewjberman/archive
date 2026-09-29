@@ -117,3 +117,26 @@ Each is signed as a file in the signer's own deliverables dir. The GO reads thos
   5 `ENABLED_INTEGRATIONS` ids.
 
 **GO** to 0.9.0_WK_NFRA_MCPINDEX~14 under ledger `nfra-mcpindex-r4-gateway-release`.
+
+## 9. RE-ASK on the re-cut (2.0.0_SA_COO~MI, 2026-09-29 ~09:5xZ) -- supersedes the pins in sections 1-8
+
+- **Why re-cut:** the section-8 GO halted at R1. The live gateway had moved to `63264dfb22` (NFRA_OPLGTW OG-x-4,
+  08:43:49Z), and deploying the old pin would have reverted OG-x-4's `schwab/engine.py`. Row Z-W14-S10 records it.
+  Re-cut per the CTO half's own clause ("else re-cut").
+- **New pins:**
+  - release **`a7e15b222008a41cb7ffb8fe5d21dea98ed8d3e7`** (`rel-nfra-mcpindex-r4-gateway-b`, `/c/tmp/mx-rel6`), cut
+    from `63264dfb22`;
+  - deploy-only **`093fc247c6306dc0e5d26d92107dc9519965c7ad`** (`dep-nfra-mcpindex-r4-gateway-b`, `/c/tmp/mx-dep6`);
+  - the gateway tree object for both is **`2e839aeec903d6c7bc65cfba60017e4e5e925614`**;
+  - artifact key: `opal-gateway-093fc247c6.tar.gz`.
+- **What is unchanged from the signed text:**
+  - The same 8 files, BLOB-IDENTICAL to the signed `0001c9bb53`, with the same 4 shipped.
+  - The G-A delta: one new tool, and opal_discover's declared S3 HEAD.
+  - 51 -> 52 tools; `deploy-to-ec2.sh` byte-identical, including :197.
+  - The only change to the tree object is the new base: `schwab/engine.py` and its 2 test files, all equal to live.
+- **Against live `-latest`:** 75 of 79 files identical, and the 4 that differ are the shipped 4.
+- **Rollback:** `/c/tmp/mx-rb6` at `63264dfb22`, mcportal `a3bff71ffa`. Rebuilt without upload, it is 79 of 79 identical
+  to live `-latest` (md5 `6509913c...`).
+- **Tests:** 50 passed and 4 failed. All 4 failures already fail on live.
+- **Guards unchanged:** R1 re-reads live = `63264dfb22` by content at GO, plus R2 and R3. NFRA_OPLGTW has no gateway
+  release in flight; 2.0.0_SA_COO~O msg 26532 commits to messaging before its next one.
