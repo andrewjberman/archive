@@ -1,0 +1,109 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-m20-201",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+  "group": "M",
+  "vintage_commit": "82e1700237"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R20_M.md",
+  "vintage_commit": "8994d3754b",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m20-201.r4-enable-the-holdings-schedule.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~43",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/investor-reporting/directory/schedule.tf",
+   "kind": "terraform",
+   "commit_or_etag": "f5ef18a449",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "aws_scheduler_schedule.irpt_holdings_snapshot flipped state = \"DISABLED\" -> \"ENABLED\" under HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/directory apply against a saved plan (.scratch_plan.tfplan, 0 add / 1 change / 0 destroy, that one address only). Apply complete: 0 added, 1 changed, 0 destroyed. Post-apply boto3 scheduler.get_schedule(Name='irpt-holdings-snapshot'): State=ENABLED, ScheduleExpression='cron(15 10 ? * MON-FRI *)', ScheduleExpressionTimezone='America/New_York', TargetArn=arn:aws:lambda:us-east-1:313476888478:function:irpt-holdings-refresh-lambda, Input={\"kind\":\"irpt_holdings_refresh\",\"note\":\"R4: ENABLED under signed halves (COO 8d601db072, CTO f541e1cbf0, CRO 283d590379)\"} -- no \"qa\" key. Re-plan after apply: 'No changes. Your infrastructure matches the configuration.'"
+  },
+  {
+   "path_or_key": "org/critical_paths/.open_deploys/irpt-holdings-schedule-enable-m-20260929.json",
+   "kind": "config_data",
+   "commit_or_etag": "87e6479212",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ledger sentinel opened before the apply (3 legs: A1 activation, V1 verify, V2 verify). A1 and V1 closed with this cell's own apply and read-back proof (python .tools/deploy_ledger.py close-leg). V2 (the first scheduled fire, cell IB-mr-204) stays OPEN for that cell's own worker, per the task order's instruction."
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260929T0112Z_irpt-holdings-schedule-enable-m-20260929_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "87e6479212",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the ledger's human-readable mirror, opened and committed in the same commit as the sentinel per deploy_ledger.py's own instruction."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IBM20-201-AC1",
+   "criterion_verbatim": "IBM20-201-AC1 -- the schedule reads ENABLED on AWS, targets the dispatch with no qa, and ledger legs A1/V1 carry proof.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_m201_schedule_enabled.py",
+   "output_evidence": "Baseline (pre-flip, this session, rc=1): 'NOT-ENABLED: State DISABLED'. After the safe-apply and the ledger leg closes (rc=0): 'ENABLED cron(15 10 ? * MON-FRI *) America/New_York' -- matching <expect> ('ENABLED followed by the schedule expression and its timezone').",
+   "denominator": "1 of 1 mechanical check: State==ENABLED, target Arn ends :function:irpt-holdings-refresh-lambda, no \"qa\" key in the target Input, ledger sentinel present with A1 and V1 both carrying non-empty proof. All four conditions the script tests read MET.",
+   "status": "PASS",
+   "status_reason": "PASS-by-output. The script's own gate (State, target+no-qa, ledger sentinel presence, A1/V1 proof non-empty) all cleared; verbatim ENABLED line printed with the schedule expression and timezone as <expect> requires.",
+   "expect": "ENABLED followed by the schedule expression and its timezone"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "not run -- the check script is the task order's own named instrument (r20_m201_schedule_enabled.py) reading live AWS state and a committed ledger file directly; there is no separate harness of this worker's own authorship to mutate. The pre-flip/post-flip before/after (NOT-ENABLED -> ENABLED) is the discriminating read: the same invocation returns the opposite verdict depending on the live schedule State, which is the property under test.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the AC1 check was run twice: once before the apply (baseline dry-run at session start) and once after the apply + ledger leg closes",
+   "observed": "before: 'NOT-ENABLED: State DISABLED' rc=1. after: 'ENABLED cron(15 10 ? * MON-FRI *) America/New_York' rc=0. The state transition is the exercised change; a third run immediately after the second (terraform re-plan, a separate instrument) also read 'No changes', confirming the ENABLED state is stable, not a one-shot artifact.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "cell IB-mr-204 (the first scheduled fire read-back per firm)",
+   "reason": "explicitly out of this cell's scope per the task order: 'that read-back is cell IB-mr-204, not yours.' Ledger leg V2 is left OPEN for it; this worker made no manual invoke of the dispatch and did not start or stop the runner."
+  },
+  {
+   "item": "IB-mr-202 (L0 category shape) and IB-mr-203 (UIC-14 vendor keys)",
+   "reason": "other cells of round-20 workstream ~M, not named in this worker's <owned_cells> (IB-mr-201 only)."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~43/IRPT_BCKEND.TO-IB-m20-201.r4-enable-the-holdings-schedule.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "terraform plan (pre-apply, saved)",
+   "invocation": "timeout 180 terraform -chdir=infra/aws/terraform/investor-reporting/directory plan -lock=false -out=.scratch_plan.tfplan",
+   "result": "Plan: 0 to add, 1 to change, 0 to destroy -- aws_scheduler_schedule.irpt_holdings_snapshot only (state DISABLED->ENABLED, description and target.input.note text updates). No other resource address in the diff."
+  },
+  {
+   "tool": "safe-apply.sh (the gated apply)",
+   "invocation": "HALT_ACK=1 timeout 180 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/directory apply -input=false -auto-approve \".scratch_plan.tfplan\"",
+   "result": "naming-plan-gate WARN (29 graded, pre-existing out-of-pattern names on unrelated resources, not this cell's address); comp-tagauthz gate PASSED (0 candidate resources overwrite an access-granting tag); tombstone-gate CLEAN. Apply complete! Resources: 0 added, 1 changed, 0 destroyed."
+  },
+  {
+   "tool": "boto3 scheduler.get_schedule (live read-back)",
+   "invocation": "python -c \"import boto3; print(boto3.client('scheduler', region_name='us-east-1').get_schedule(Name='irpt-holdings-snapshot'))\"",
+   "result": "State=ENABLED, ScheduleExpression='cron(15 10 ? * MON-FRI *)', ScheduleExpressionTimezone='America/New_York', TargetArn ends ':function:irpt-holdings-refresh-lambda', Input has no \"qa\" key."
+  },
+  {
+   "tool": "terraform plan (post-apply, 0-diff)",
+   "invocation": "timeout 180 terraform -chdir=infra/aws/terraform/investor-reporting/directory plan -lock=false",
+   "result": "'No changes. Your infrastructure matches the configuration.'"
+  },
+  {
+   "tool": "deploy_ledger.py close-leg (A1, V1)",
+   "invocation": "python .tools/deploy_ledger.py close-leg --slug irpt-holdings-schedule-enable-m-20260929 --leg-id A1 --proof ...; python .tools/deploy_ledger.py close-leg --slug irpt-holdings-schedule-enable-m-20260929 --leg-id V1 --proof ...",
+   "result": "OK: leg A1 closed. Remaining open: ['V1', 'V2']. OK: leg V1 closed. Remaining open: ['V2']."
+  },
+  {
+   "tool": "r20_m201_schedule_enabled.py -- the task order's own AC1 check",
+   "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_m201_schedule_enabled.py",
+   "result": "pre-flip rc=1 'NOT-ENABLED: State DISABLED'; post-flip rc=0 'ENABLED cron(15 10 ? * MON-FRI *) America/New_York'."
+  }
+ ]
+}
