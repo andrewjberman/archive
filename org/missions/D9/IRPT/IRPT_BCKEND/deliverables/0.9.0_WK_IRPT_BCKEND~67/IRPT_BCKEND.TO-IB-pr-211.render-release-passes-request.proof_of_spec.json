@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-211",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "613bfc6ecfa1ec016f15c93a3729b586ee47a960"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "4a6402ad8c7a46d43f1080aed28f830843070287",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-211.render-release-passes-request.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~67",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/entry.py",
+      "kind": "script",
+      "commit_or_etag": "911b8dbc7248752746b308ab2aaed71c77b28df3",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Not deployed by this order (WORLD-class Lambda source; BOUNDS exclude deploy/AWS calls -- the served move is the issuer's). Blob hash f960fe70c330e488753f4aad4a873a8812abf037 at commit 911b8dbc72; introduces the fourth positional argument `request` on the `_resolve_selected(scope, current_ctx, reference)` call inside `_authorize_release`, absent at HEAD~1 (that line called `_resolve_selected` with 3 args before this edit).",
+      "introduces": ["_resolve_selected(scope, current_ctx, reference, request)"],
+      "artifact_covered_by": ["P21-1-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/tests/test_render_selection.py",
+      "kind": "test",
+      "commit_or_etag": "911b8dbc7248752746b308ab2aaed71c77b28df3",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Blob hash 91e45510ce91572a8818a551c7f7b3eae401318d at commit 911b8dbc72; adds `test_the_release_recheck_passes_the_request_for_a_render_delegate`, absent before this edit (git show HEAD~1:<path> carries no such test).",
+      "introduces": ["test_the_release_recheck_passes_the_request_for_a_render_delegate"],
+      "artifact_covered_by": ["P21-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~67/IB-pr-211.result.md",
+      "kind": "doc",
+      "commit_or_etag": "b98b1cc379019fbd8689168e5f7de3ea796e98e6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object b98b1cc379019fbd8689168e5f7de3ea796e98e6 -- the session log for this order, committed alongside the proof instance and the status flip."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P21-1-AC1",
+      "criterion_verbatim": "arm A: `_authorize_release` hands its own request to `_resolve_selected`; arm B (control): a changed selection still refuses. Base: FAIL (arm A false, arm B true).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r21/p21_1_ac1_release_passes_request.py\" .",
+      "output_evidence": "Before the fix: 'arm A: request handed to _resolve_selected: False' / 'arm B: a changed selection still refuses: True' / 'P21-1-AC1 FAIL' (rc=1) -- matches the task order's stated base case exactly. After the fix: 'arm A: request handed to _resolve_selected: True' / 'arm B: a changed selection still refuses: True' / 'P21-1-AC1 PASS' (rc=0).",
+      "denominator": "2 of 2 arms (A, B) PASS",
+      "status": "PASS",
+      "expect": "P21-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own arm B is the control: a `_resolve_selected` return whose `selected_account_ids` differs from the retained `selected` must still raise `PerformanceAccessRefused(\"computed selection no longer matches\")`, unchanged by this edit. Also exercised by the pre-existing pytest suite's `test_a_changed_selection_binding_is_refused` and `test_arm2_a_request_naming_another_set_is_refused`.",
+      "expected": "arm B True (still refuses) both before and after the fix; the two pre-existing 'refused' pytest tests still pass.",
+      "observed": "'arm B: a changed selection still refuses: True' in both the before-fix and after-fix runs of the checker; `test_a_changed_selection_binding_is_refused` and `test_arm2_a_request_naming_another_set_is_refused` both PASS in the post-fix pytest run.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The checker (p21_1_ac1_release_passes_request.py) and the full pytest file pair were each run twice at the final bytes.",
+      "observed": "Both runs of the checker reproduced 'P21-1-AC1 PASS' identically; both runs of `pytest test_render_selection.py test_render_principal.py -v` reproduced 13 passed, 0 failed, with identical test names.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the human path (resolve_selection call inside _resolve_selected) and the \"computed selection no longer matches\" refusal",
+      "reason": "BOUNDS: 'Nothing else changes: the human path and the computed-selection-no-longer-matches refusal stay as they are.' Only the RENDER_DELEGATE branch's request plumbing was touched; both are covered unchanged by arm B and the pre-existing pytest suite."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~67/IB-pr-211.result.md",
+  "compiler_tools": [
+    {
+      "tool": "p21_1_ac1_release_passes_request.py (P21-1-AC1, before and after the fix)",
+      "invocation": "timeout 120 python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r21/p21_1_ac1_release_passes_request.py\" .",
+      "result": "Before: rc=1, P21-1-AC1 FAIL (arm A False). After: rc=0, P21-1-AC1 PASS (arm A True, arm B True)."
+    },
+    {
+      "tool": "pytest test_render_selection.py test_render_principal.py",
+      "invocation": "timeout 120 python -m pytest test_render_selection.py test_render_principal.py -v (from infra/aws/lambda/investor-reporting/performance/tests)",
+      "result": "13 passed, 0 failed -- the new test plus all 12 pre-existing tests in both files."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "timeout 120 bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/performance/entry.py infra/aws/lambda/investor-reporting/performance/tests/test_render_selection.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s) (py_compile + ds-precommit + ruff py39)."
+    },
+    {
+      "tool": "git hash-object / git show HEAD~1:<path>",
+      "invocation": "git hash-object infra/aws/lambda/investor-reporting/performance/entry.py infra/aws/lambda/investor-reporting/performance/tests/test_render_selection.py; git show HEAD~1:<path> for both",
+      "result": "Confirmed the committed blobs match the worktree state and that both introduced tokens are absent at the parent commit."
+    }
+  ]
+}
