@@ -8,6 +8,63 @@ unchanged. AWS contact was read-only and all of it is Opal's own: `s3api list-ob
 artifact keys, `head-object` on the future key (404), and ONE SSM `AWS-RunShellScript` read of file hashes on the host.
 MX-t-10 is not drained (issuer ruling under A1): no ETF file is in the release, and its uncommitted patch was not touched.
 
+## RE-CUT ON 63264dfb22 (issuer ruling, Option 1) -- READ THIS FIRST; it supersedes every pin below
+
+PHASE B's Step 0 (R1) read the host by content and found it NOT at 4248b70b39: NFRA_OPLGTW OG-x-4 deployed
+**63264dfb22** at 2026-09-29T08:43:49Z (4248b70b39 plus schwab/engine.py and 2 test files). The host's 79 files equal the
+current `-latest` artifact (LastModified 08:43:27Z, 407136 bytes, md5 6509913cec5963c8caf197c28e82e851) 79 of 79 and the
+4248b70b39 artifact 78 of 79. I halted, did nothing else, and re-cut. Row Z-W14-S10. Nothing is deployed.
+
+| field | value |
+|---|---|
+| base = LIVE deployed commit | 63264dfb22cf6e6b6acdab30d7086736686e1be9 (NFRA_OPLGTW OG-x-4, deployed 2026-09-29T08:43:49Z) |
+| release branch (NEW) | rel-nfra-mcpindex-r4-gateway-b, worktree /c/tmp/mx-rel6, never merged, never pushed |
+| release commit | a7e15b222008a41cb7ffb8fe5d21dea98ed8d3e7 |
+| deploy-only branch (NEW) | dep-nfra-mcpindex-r4-gateway-b, worktree /c/tmp/mx-dep6, on CLOUD 49a9c7b158, never merged, never pushed |
+| deploy-only commit | 093fc247c6306dc0e5d26d92107dc9519965c7ad |
+| gateway tree object, release = deploy-only | **2e839aeec903d6c7bc65cfba60017e4e5e925614** |
+| rollback tree | /c/tmp/mx-rb6, detached at 63264dfb22, mcportal a3bff71ffa built |
+| mcportal | a3bff71ffa3f5c73aa0fb7ea1e7386434e233054 in all three trees, 0 status lines each (unchanged from the live deploy) |
+| artifact key at GO | s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-093fc247c6.tar.gz (head-object: 404 now), plus `-latest` |
+
+The earlier branches and commits (rel-nfra-mcpindex-r4-gateway 510bf69089 / 0001c9bb53, dep-nfra-mcpindex-r4-gateway
+b9e5c64437 / ca48cd5482, trees /c/tmp/mx-rel5, mx-dep5, mx-rb5) are SUPERSEDED and untouched.
+
+- **Re-cut:** a NEW branch from 63264dfb22; the gateway files only of 2984d17cc3, d2c9bb448f, 51dfc8879d, 4278c7174f,
+  5a450314de, 33d2dd2fbf, a9092e0081, applied in that order (`git apply --3way`). The same two conflicts as before
+  (DATA_CATALOG.yaml build stamps, later stamp 120ff9b27f kept; test_entitlement_admin.py, the same one-pin one-count change
+  by hand). Release commit a7e15b2220 (override use 5). The deploy-only tree is CLOUD with the gateway directory replaced by
+  the release's, commit 093fc247c6 (override use 6). Rel- and dep- branches only, as confirmed.
+- **Census: the same 8 files** (`git diff --stat 63264dfb22 a7e15b2220 -- infra/aws/ec2/opal-gateway`: 551 insertions, 49
+  deletions): data_entitlement.py, opal_discover/integration.py, portal_index/integration.py, app/refs/DATA_CATALOG.yaml,
+  tests/routing/run_routing.py, tests/test_entitlement_admin.py, tests/test_opal_discover.py, tests/test_portal_index.py.
+  All 8 are blob-identical to the first release's (0001c9bb53). Nothing outside the gateway directory differs.
+  `schwab/engine.py` in the release equals 63264dfb22's (blob ba392cf29e) and equals the live artifact's byte for byte.
+- **Tree object equality:** `git rev-parse 093fc247c6:infra/aws/ec2/opal-gateway` = `a7e15b2220:infra/aws/ec2/opal-gateway` =
+  2e839aeec903d6c7bc65cfba60017e4e5e925614; `git diff --stat` between them is empty. The order at the dep tree's HEAD is
+  `<issued_to>` this serial, `<status>pending`.
+- **Rollback proof, by content:** /c/tmp/mx-rb6 (detached 63264dfb22, mcportal a3bff71ffa cloned and built). A build-only
+  mirror of deploy-to-ec2.sh:78-91 (no upload line) gave a 407108-byte artifact; against the LIVE `-latest` artifact:
+  **79 of 79 files byte-identical** (67 of 67 .py), 0 only-live, 0 only-rebuilt.
+  Re-deploy command: `cd /c/tmp/mx-rb6 && HALT_ACK=1 AGENT_NAME=<deployer serial> bash infra/aws/ec2/safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh`
+  (HALT_ACK=1 only when the halt gate reads 0 STOP); the rollback tree has no order at HEAD, so a worker is refused there and
+  the issuer or the deployer identity runs it. It restores the `opal-gateway-63264dfb22` key, `-latest`, the 5-id `.env`
+  value, and the tool count 51.
+- **Artifact equality:** artifacts rebuilt (no upload) from the dep tree and the release tree: **79 of 79 byte-identical** (67 of 67 .py).
+- **Artifact delta against LIVE:** 75 of 79 identical; ONLY the same 4 shipped files differ: app/data_entitlement.py,
+  app/integrations/opal_discover/integration.py, app/integrations/portal_index/integration.py, app/refs/DATA_CATALOG.yaml.
+  The other 75 (including schwab/engine.py) are equal to live. tests/ is not shipped.
+- **`deploy-to-ec2.sh`:** byte-identical (cmp) in the release, deploy-only and rollback trees; line 197 keeps
+  `ENABLED_INTEGRATIONS=ycharts opal_portal globgrph opal_discover portal_index` (5 ids).
+- **Tests in the release tree** (test_entitlement_admin, test_data_entitlement_guard, test_tool_classification_composition,
+  test_opal_discover, test_portal_index): 50 passed, 4 failed, the same 4 that fail on the live tree (test_ogz2_ac06,
+  test_ogz1_ac05, test_ogz1_ac08, test_portal_tools_catalog_refs_resolve); test_ogz2_ac08 passes.
+- **Host, re-read at the re-cut:** 79 of 79 files equal the `-latest` artifact (still 63264dfb22's).
+- **G-A delta:** unchanged (one new tool mdpf_get_model_benchmarks, 51 -> 52, and opal_discover's declared S3 HEAD).
+- **Signed hashes:** G-A, the CTO half and the CVO half were signed on rel 0001c9bb53 / tree d2debddbd3. The tree object
+  changed (d2debddbd3 -> 2e839aeec9) only by the base's schwab/engine.py and its 2 test files; the 8 MX-r-5 files are
+  blob-identical. Whether the signatures carry to the new hash is the issuer's and the signers' to say before the GO.
+
 ## A2 UPDATE (2.0.0_SA_COO~MI amendment A2, rulings on Z-W14-S5, S6, S8) -- READ THIS FIRST
 
 Superseded by A2: the pin below is now **release 0001c9bb53, deploy-only ca48cd5482, gateway tree object
@@ -197,3 +254,4 @@ opal_discover/integration.py, portal_index/integration.py, DATA_CATALOG.yaml); N
 | NFRA_MCPINDEX-Z-W14-S7 | OBSERVATION / INERT | the live commit is 4248b70b39, not 0bce8d322a / 3371f18803 |
 | NFRA_MCPINDEX-Z-W14-S8 | OBSERVATION / INERT | two audited overrides (rel and dep commits) on the MX-r-4 precedent |
 | NFRA_MCPINDEX-Z-W14-S9 | OBSERVATION / INERT | A2 step 6 says the census is still 7 files; with test_entitlement_admin.py it is 8 in git, 4 shipped (unchanged) |
+| NFRA_MCPINDEX-Z-W14-S10 | OBSERVATION / INERT (disarm 2.0.0_SA_COO~MI) | another seat released 63264dfb22 on the host between PHASE A and the GO; R1 caught it; the release was re-cut |
