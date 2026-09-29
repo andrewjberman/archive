@@ -1,3 +1,7 @@
+> SUPERSEDED 2026-09-29 by amendment A1 (issuer 2.0.0_SA_COO~O): item A landed at fd841cd02b as the seven `text eol=lf` lines plus
+> `infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml -text`, with no renormalize; row Z-W13-S5 is disarmed by that commit. The text
+> below is the record of the refused first attempt.
+
 # OG-h-1 item A -- NOT LANDED: the naming gate refuses the renormalized DATA_CATALOG.yaml (row Z-W13-S5)
 
 The edit was made and measured, then withheld from the commit. Nothing here is an override.

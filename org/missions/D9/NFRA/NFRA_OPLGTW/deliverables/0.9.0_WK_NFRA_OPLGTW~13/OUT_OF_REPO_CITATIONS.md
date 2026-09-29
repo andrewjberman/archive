@@ -2,9 +2,9 @@
 
 Written by 0.9.0_WK_NFRA_OPLGTW~13 on site Z. Census: `git grep -nE` for a `C:/tmp/nfra-oplgtw-` path (either slash) over
 `org/missions/D9/NFRA/NFRA_OPLGTW/` at this worktree's HEAD, excluding this register, the OG-h-1 order file and
-`deliverables/2.0.0_SA_COO~O/`. **35 citing lines in 11 files** (10 files at drafting; 11 now, because the row text of the
+`deliverables/2.0.0_SA_COO~O/`. **36 citing lines in 12 files** (10 files at drafting; 12 now, because this cell's own proof instance quotes the AC3 criterion, and the row text of the
 channel and the later orders cite the paths too). Transient worktree paths `C:/tmp/wk-*` and `C:/tmp/og-*` are excluded by
-design: **63 citing lines in 18 files excluded**, counted with the same exclusions. No completed order, result or proof was edited.
+design: **64 citing lines in 19 files excluded** (63 in 18 before this cell's own result file, which names the patterns), counted with the same exclusions. No completed order, result or proof was edited.
 
 States: `ABSENT-ON-SITE-Z` = `test -e` on this device reports the path absent and no durable copy of the same content was
 found; this device cannot read the laptop's `C:\tmp`, so it says nothing about the laptop. `DURABLE <location>` = the same content
@@ -47,6 +47,7 @@ is in the repo or a named durable store, with the match method in the notes belo
 | org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-v-4.controlled-walkthrough-grading.md:22 | `C:/tmp/nfra-oplgtw-sealed/expected/SALT.txt` | ABSENT-ON-SITE-Z |
 | org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-v-4.controlled-walkthrough-grading.md:142 | `C:/tmp/nfra-oplgtw-sealed` | ABSENT-ON-SITE-Z |
 | org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-v-6.sealed-question-set-v2.md:115 | `C:/tmp/nfra-oplgtw-sealed/actual/` | ABSENT-ON-SITE-Z |
+| org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~13/NFRA_OPLGTW.TO-OG-h-1.batch-hygiene.proof_of_spec.json:122 | `C:/tmp/nfra-oplgtw-` (the prefix quoted in the AC3 criterion text; no path is named) | ABSENT-ON-SITE-Z |
 
 ## Notes on the states
 

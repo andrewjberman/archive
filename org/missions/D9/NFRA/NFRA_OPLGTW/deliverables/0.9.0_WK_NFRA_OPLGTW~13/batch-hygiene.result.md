@@ -2,17 +2,17 @@
 
 Per item: the row it answers and what a reader should now see.
 
-## A -- eol rules (row W2-S8) -- NOT LANDED, BLOCKING (row Z-W13-S5)
-The edit was made (a 10-line block scoped to `infra/aws/ec2/opal-gateway/**` for the seven extensions; 41 tracked files, all read `eol: lf`;
-`DATA_CATALOG.yaml`, the one `i/crlf` file of the 41, renormalized with `git add --renormalize`). `safe-commit.sh` then refused the commit at the
-naming limb: 16 findings on DATA_CATALOG.yaml (S3 key patterns owned by the live remediation MDPF_CANON, which a whole-file line-ending rewrite makes
-read as added). Landing `.gitattributes` without the renormalization would leave DATA_CATALOG.yaml as a phantom ` M` in every worktree, so both edits
-were held back. `ITEM_A_BLOCKED.md` holds the exact block, the measurement and the decision the issuer owes. Reader sees: `hy.AC1` FAIL, stored CRLF 1.
-DATA_CATALOG.yaml's shipped bytes stay CRLF until it lands; when it does they change to LF at the next Gateway release.
+## A -- eol rules (row W2-S8), landed under amendment A1 @fd841cd02b
+`.gitattributes` gains one block: `infra/aws/ec2/opal-gateway/**/*.<ext> text eol=lf` for the seven extensions `service txt yaml json md html jsonl`
+(gateway tree only, a two-line comment naming W2-S8), then the one exception line `infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml -text`.
+Nothing was renormalized. Domain: 41 tracked gateway files; 40 read `eol: lf`, none of them stored CRLF; the exception reads `text: unset`.
+`git status --short` shows no change to DATA_CATALOG.yaml. Its shipped bytes do NOT change: it stays stored CRLF, as it has always shipped, until
+MDPF_CANON's remediation renormalizes it. The first attempt (rule plus renormalize) was refused by the naming limb (row Z-W13-S5); that row's
+hazard is disarmed by this commit. Reader sees: `hy.AC1` PASS -- 40 outside the exception at eol=lf, exception -text=yes, 0 stored CRLF outside it.
 
 ## B -- out-of-repo citations (row S43)
-`OUT_OF_REPO_CITATIONS.md`: 35 citing lines in 11 files, one register row per line; 34 `ABSENT-ON-SITE-Z`, 1 `DURABLE` (the inherited
-`QUALIFIED_VERSIONS.json`, matched by its three VersionIds). 63 lines in 18 files citing transient `C:/tmp/wk-*` and `C:/tmp/og-*` paths were
+`OUT_OF_REPO_CITATIONS.md`: 36 citing lines in 12 files, one register row per line; 35 `ABSENT-ON-SITE-Z`, 1 `DURABLE` (the inherited
+`QUALIFIED_VERSIONS.json`, matched by its three VersionIds). 64 lines in 19 files citing transient `C:/tmp/wk-*` and `C:/tmp/og-*` paths were
 excluded. The notes under the table say why the SSM reseal parameters are not counted as the same content as the lost salt and answers, and
 why the OG-c-2 source map is not durable (its sha256 matches none of the 1305 committed versions of the repo map). No completed order, result or proof was touched.
 
