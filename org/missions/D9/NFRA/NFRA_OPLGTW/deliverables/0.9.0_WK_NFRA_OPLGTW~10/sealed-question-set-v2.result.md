@@ -43,7 +43,7 @@ The units question the order describes (quantity against value for one (cusip, l
 `dim_position`, which COLLIDES on every measured snapshot, so the C3 rule makes RQ2-1's expected answer a refusal. Value
 units (sign, scale) are exercised with real values on `dim_balance` in RQ2-2 (BlackDiamond holds a negative
 `mkt_value_short`; SmartX holds none). Row `Z-W10-S1`. Protocol edits: section 4 paragraph and table, A7 step 2 (:107)
-and the seal and date at :111, nothing else (stale references elsewhere in the file are row `Z-W10-S3`).
+and the seal and date at :111, nothing else (the stale references elsewhere in the file were row `Z-W10-S3`; see section 9).
 
 ## 4. Seal (steps 4 and 5)
 
@@ -86,7 +86,7 @@ masters: RQ2-6.
 ## 7. Rows filed
 
 `NFRA_OPLGTW-Z-W10-S1` (units question on a colliding grain), `-S2` (collision structure and candidate supersets),
-`-S3` (stale OG-v-3 and `C:/tmp` references left in the protocol, ARMED), `-S4` (marker enumeration by version listing,
+`-S3` (stale OG-v-3, OG-v-4 and `C:/tmp` references left in the protocol, ARMED; disarmed by amendment A1, section 9), `-S4` (marker enumeration by version listing,
 marker VersionId churn). Disarm owner `2.0.0_SA_COO~O`.
 
 ## 8. Declared exclusions
@@ -94,3 +94,12 @@ marker VersionId churn). Disarm owner `2.0.0_SA_COO~O`.
 No Gateway call, sign-in or vendor API; no AWS write other than SSM PutParameter under `/opal/nfra_oplgtw/ogv6/`; no
 read of the Gateway's engine; the grain of the code and the contract not changed; no live exercise of FWD-2 (that is
 `OG-v-7`).
+
+## 9. Amendment A1 (row `Z-W10-S3` disarmed)
+
+The issuer reopened the order (commit `518cf9a3d0`) to correct five protocol lines and nothing else in
+`WALKTHROUGH_PROTOCOL.md`: `:38` and `:242` the answer path is now `%LOCALAPPDATA%/opal/og-salt/actual_v2/`; `:39` and
+`:111` the grader is now `OG-v-7`; `:208` the sealer is now `OG-v-6`. The seal, the SSM copy and
+`SEALED_EXPECTED_V2.json` did not move. `OGV6-AC1`, `AC2` and `AC3` were re-run as written and all three print
+`VERDICT: PASS-OGV6-AC<n>` (AC3: 0 values in 12 files). The commit that lands this correction disarms row
+`NFRA_OPLGTW-Z-W10-S3`.
