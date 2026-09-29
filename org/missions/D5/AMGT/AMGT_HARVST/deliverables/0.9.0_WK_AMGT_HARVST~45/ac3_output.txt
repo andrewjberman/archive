@@ -1,0 +1,36 @@
+== HVST-g-1 AC3: rebuildable + whole-brand file + determinism ==  (git HEAD 4d86812a13; the rule code is the working tree's)
+
+-- (1) securities.universe.json vs a fresh universe_securities.build() --
+universe read: pool:universe/v1/2026-09-16.json  as_of=2026-09-16  names_read=250  securities: file=191 fresh=191
+file == fresh build (whole list equality, every field of every security): True
+summary: ticker_aliases_added=182 of 191; refused by reason={'no_ticker': 0, 'too_short': 4, 'no_letter': 3, 'refusal_list': 2}; whole_brand admitted=7 refused=1 already=0 not_in_universe=[]
+  whole-brand entry REFUSED in code: {"brand": "UBS", "reason": "limb_a_other_security_brand:#name240", "security_key": "UBS_US_Equity"}
+  whole-brand entry admitted: {"brand": "ASML", "security_key": "ASML_NA_Equity"}
+  whole-brand entry admitted: {"brand": "ASML", "security_key": "ASML_US_Equity"}
+  whole-brand entry admitted: {"brand": "Dell", "security_key": "DELL_US_Equity"}
+  whole-brand entry admitted: {"brand": "Micron", "security_key": "MU_US_Equity"}
+  whole-brand entry admitted: {"brand": "Spotify", "security_key": "SPOT_US_Equity"}
+  whole-brand entry admitted: {"brand": "TJX", "security_key": "TJX_US_Equity"}
+  whole-brand entry admitted: {"brand": "Uber", "security_key": "UBER_US_Equity"}
+ticker forms refused, named: [{"form": "2317", "reason": "no_letter", "security_key": "2317_TT_Equity"}, {"form": "9433", "reason": "no_letter", "security_key": "9433_JP_Equity"}, {"form": "992", "reason": "no_letter", "security_key": "992_HK_Equity"}, {"form": "C", "reason": "too_short", "security_key": "C_US_Equity"}, {"form": "F", "reason": "too_short", "security_key": "F_US_Equity"}, {"form": "RTX", "reason": "refusal_list", "security_key": "RTX_US_Equity"}, {"form": "ST", "reason": "refusal_list", "security_key": "ST_SP_Equity"}, {"form": "T", "reason": "too_short", "security_key": "T_US_Equity"}, {"form": "V", "reason": "too_short", "security_key": "V_US_Equity"}]
+
+-- (2) whole_brand_aliases.json: every entry carries its census citation --
+  whole_brands           entries=8 without census=0  ['Dell', 'TJX', 'UBS', 'ASML', 'ASML', 'Micron', 'Uber', 'Spotify']
+  ticker_refusals        entries=2 without census=0  ['RTX', 'ST']
+  parent_brand_refusals  entries=1 without census=0  ['Walmart']
+entries with a census citation: 11 of 11
+  DELL_US_Equity   Dell     cites ac1_output.txt + ADJUDICATION_v25: True
+  TJX_US_Equity    TJX      cites ac1_output.txt + ADJUDICATION_v25: True
+  UBS_US_Equity    UBS      cites ac1_output.txt + ADJUDICATION_v25: True
+  ASML_US_Equity   ASML     cites ac1_output.txt + ADJUDICATION_v25: True
+  ASML_NA_Equity   ASML     cites ac1_output.txt + ADJUDICATION_v25: True
+  MU_US_Equity     Micron   cites ac1_output.txt + ADJUDICATION_v25: True
+  UBER_US_Equity   Uber     cites ac1_output.txt + ADJUDICATION_v25: True
+  SPOT_US_Equity   Spotify  cites ac1_output.txt + ADJUDICATION_v25: True
+
+-- (3) two in-memory builds from the same inputs, equal row by row --
+inputs: silver articles=120 listing_hit rows=60 securities=191 as_of=2026-09-29
+  article_security_mention   build1=304 rows build2=304 rows  rows unequal=0  ->  EQUAL row by row
+  chatter_daily              build1=51952 rows build2=51952 rows  rows unequal=0  ->  EQUAL row by row
+  chatter_event              build1=8 rows build2=8 rows  rows unequal=0  ->  EQUAL row by row
+AC3 RESULT: PASS
