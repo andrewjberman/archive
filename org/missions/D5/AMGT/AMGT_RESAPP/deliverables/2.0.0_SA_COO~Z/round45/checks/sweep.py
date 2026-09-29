@@ -13,9 +13,21 @@ Per folder of the research library (universe.json snapshot, --live library, or -
            -> rich_facts: the same four sets, in the same keys
   compare  compare_facts(page, rich) -> verdict + a reason naming EVERY class that differs and no other
 The exportCompare.harness.cjs (another project's) is NOT called: it matched absence lines by their words.
-Writes a TSV with rp-1's header (plus the CASES counts) to --out and prints the verdict counts and ONE grade line
-`FWD-30 GRADE: equal E of I identified names; unidentified U of F folders; keyed on: data-attributes`. Reads AWS (lambda invoke,
-crosswalk); writes nothing to it. Exit 0 only when E == I.
+Writes a TSV with rp-1's header (plus the CASES counts and the value counts) to --out and prints the verdict counts and ONE grade line
+`FWD-30 GRADE: equal E of I identified names; values equal V of I; unidentified U of F folders; keyed on: data-attributes`. Reads AWS
+(lambda invoke, crosswalk); writes nothing to it. Exit 0 only when E == V == I.
+VALUES (round 50, AMGT-yy-1, CTO round-49 ruling 1): the attribute picks WHICH fact; the grader then compares the fact's VALUE on both
+sides -- the fact's identity alone read a wrong number as equal. A "VALUES" map rides beside the four sets (fact -> the value texts):
+  page    FISCAL   the numeric text of the data-model-cell td that the year header keys
+          HEADER   the value text of the SERVED data-card-figure li (its last span: "USD 1.03T", "2.5%", "1.53")
+  export  the leading number of the "Rendered" column of the same "## Header" / "## Fiscal year Y" row, with its unit word
+  compare  a number is read as sign + digits (a thousands comma, a currency code, a % sign or a unit word is not a difference); a
+          K/M/B/T on the page is a scale and the export's own unit word (MILLIONS) is the scale it is read at; the two agree when
+          they differ by no more than half of the page's last displayed digit (-0.6 == -0.60; 1.03T == 1029487735736.46). A value that
+          differs, or that one side does not carry, is a FIGURES difference (reason "FIGURES(values) differ" when the identities match).
+  VALUE-UNCHECKED (the page carries the fact's identity as an attribute but not its value; listed, never guessed): OFFICER rows'
+          other cells, a served CASE's value (only its formula is an attribute), plus rows Z-W173-S1..S4 (identity line, absence reasons,
+          driver chart).
 KEYS (page attribute -> rich line), one row per class:
   FIGURES   ("HEADER", m)          data-card-figure-mnemonic (data-card-figure-state=SERVED)   -> "## Header" table row m
             ("FISCAL", m, year)    data-model-row=m x data-model-cell, year = the sheet's column header -> "## Fiscal year Y" row m
@@ -44,6 +56,7 @@ import json
 import re
 import subprocess
 import sys
+from decimal import Decimal, InvalidOperation
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -52,7 +65,7 @@ UNIVERSE = ROOT / "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_R
 CAPTURE_LIB = ROOT / "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/capture_lib.py"
 PAGE_RENDER = Path(__file__).resolve().parent / "page_render.cjs"
 CLASSES = (("FIGURES", "fig"), ("CITES", "cit"), ("ABSENCES", "abs"), ("CASES", "cas"))
-COUNTS = [s + "_" + c for _, s in CLASSES for c in ("page", "rich", "same", "missing", "extra")]
+COUNTS = [s + "_" + c for _, s in CLASSES for c in ("page", "rich", "same", "missing", "extra")] + ["val_compared", "val_differ", "val_unchecked", "val_unscaled"]
 HEADER = ["folder", "security_key"] + COUNTS + ["verdict", "reason"]
 
 
@@ -131,7 +144,13 @@ class _PageReader(HTMLParser):
 
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.f = {"FIGURES": set(), "CITES": set(), "ABSENCES": set(), "CASES": set()}
+        self.f = {"FIGURES": set(), "CITES": set(), "ABSENCES": set(), "CASES": set(), "VALUES": {}}
+        self.cell = None         # td index of the data-model-cell being read, and its text so far
+        self.cell_text = ""
+        self.cell_depth = 0      # elements open inside that td: a badge's words (PROVISIONAL) are not the cell's number
+        self.row_values = {}     # td index -> the cell's numeric text
+        self.card = None         # the SERVED header card (its mnemonic) being read
+        self.card_spans = []
         self.in_sheet = self.in_thead = self.in_th = False
         self.years = []
         self.row = None          # the data-model-row mnemonic being walked
@@ -152,18 +171,24 @@ class _PageReader(HTMLParser):
             self.years.append("")
         elif self.in_sheet and tag == "tr" and "data-model-row" in a:
             self.row, self.td, self.row_cells, self.row_refused, self.row_refusals = a["data-model-row"], -1, [], False, []
+            self.row_values = {}
         elif self.row is not None and tag == "td":
             self.td += 1
             if a.get("data-model-refused") in ("", "true"):  # a boolean marker: any other value is not that marker
                 self.row_refused = True
             elif "data-model-cell" in a:
                 self.row_cells.append(self.td)
+                self.cell, self.cell_text, self.cell_depth = self.td, "", 0
         if "data-model-line-refusal" in a and self.row is not None:
             self.row_refusals.append(a["data-model-line-refusal"].strip())
         if tag == "tr" and "data-exec-officer" in a:
             f["FIGURES"].add(("OFFICER", a["data-exec-officer"]))
         if a.get("data-card-figure-state") == "SERVED" and a.get("data-card-figure-mnemonic"):
             f["FIGURES"].add(("HEADER", a["data-card-figure-mnemonic"]))
+            if tag == "li":
+                self.card, self.card_spans = a["data-card-figure-mnemonic"], []
+        elif self.card is not None and tag == "span":
+            self.card_spans.append("")
         if a.get("data-thesis-passage"):
             f["CITES"].add(("THESIS", a["data-thesis-passage"]))
         if a.get("data-posture-cite"):
@@ -192,12 +217,28 @@ class _PageReader(HTMLParser):
             status = a["data-model-case-status"]
             detail = a.get("data-model-case-formula", "") if status == "SERVED" else a.get("data-model-case-reason", "").strip()
             f["CASES"].add(("CASE", a["data-model-case"], status, detail))
+        if self.cell is not None and tag != "td":
+            self.cell_depth += 1
 
     def handle_data(self, data):
         if self.in_th:
             self.years[-1] += data.strip()
+        if self.cell is not None and self.cell_depth == 0:
+            self.cell_text += data
+        if self.card is not None and self.card_spans:
+            self.card_spans[-1] += data
 
     def handle_endtag(self, tag):
+        if tag == "td" and self.cell is not None:
+            self.row_values[self.cell] = self.cell_text.strip()
+            self.cell = None
+        elif self.cell is not None:
+            self.cell_depth -= 1
+        elif tag == "li" and self.card is not None:
+            texts = [t.strip() for t in self.card_spans if t.strip()]
+            if texts:
+                self.f["VALUES"].setdefault(("HEADER", self.card), []).append((texts[-1], ""))
+            self.card, self.card_spans = None, []
         if tag == "th":
             self.in_th = False
         elif tag == "thead":
@@ -212,6 +253,8 @@ class _PageReader(HTMLParser):
                 for i in self.row_cells:
                     if 1 <= i <= len(self.years) - 1:
                         self.f["FIGURES"].add(("FISCAL", self.row, self.years[i]))
+                        if i in self.row_values:
+                            self.f["VALUES"].setdefault(("FISCAL", self.row, self.years[i]), []).append((self.row_values[i], ""))
             self.row = None
 
 
@@ -236,13 +279,16 @@ def _bundle(fixture):
 def rich_facts(rich_text, fixture=None):
     """The same four sets from the rich export's own lines. `fixture` (the captured served payload, a path or its dict) is read only
     for what the rich text cannot say: which case a labelled case line ("Historical-multiple reference") is."""
-    f = {"FIGURES": set(), "CITES": set(), "ABSENCES": set(), "CASES": set()}
-    cases = ((_bundle(fixture).get("thesis") or {}).get("model_cases") or {})
+    f = {"FIGURES": set(), "CITES": set(), "ABSENCES": set(), "CASES": set(), "VALUES": {}}
+    thesis = _bundle(fixture).get("thesis") or {}
     label_name = {}
-    for nm in ("upside", "base", "downside"):
-        c = cases.get(nm)
-        if isinstance(c, dict) and c.get("label"):
-            label_name[c["label"]] = nm.capitalize()
+    # the case labels are the SERVED payload's own (model.cases.<name>.label, or the same block as model_cases): never a literal,
+    # so a served relabel of the base case moves nothing in this grade
+    for cases in ((thesis.get("model") or {}).get("cases"), thesis.get("model_cases")):
+        for nm in ("upside", "base", "downside"):
+            c = cases.get(nm) if isinstance(cases, dict) else None
+            if isinstance(c, dict) and c.get("label"):
+                label_name.setdefault(c["label"], nm.capitalize())
     section = None
     for raw in rich_text.split("\n"):
         line = raw.strip()
@@ -265,11 +311,12 @@ def rich_facts(rich_text, fixture=None):
         if section == "Header" or (section or "").startswith("Fiscal year "):
             m = re.match(r"^\|\s*(\S+)\s*\|\s*(.+?)\s*\|$", line)
             if m and MID_DOT in m.group(2) and "[REFUSED:" not in m.group(2):
-                if section == "Header":
-                    if m.group(1) not in IDENTITY_LINE:
-                        f["FIGURES"].add(("HEADER", m.group(1)))
-                else:
-                    f["FIGURES"].add(("FISCAL", m.group(1), section.split(" ", 2)[2]))
+                key = ("HEADER", m.group(1)) if section == "Header" else ("FISCAL", m.group(1), section.split(" ", 2)[2])
+                if section != "Header" or m.group(1) not in IDENTITY_LINE:
+                    f["FIGURES"].add(key)
+                    rendered = m.group(2).rsplit("|", 1)[-1].strip()   # the table's last column: "<value> <UNIT> (...) . <mnemonic> (...) . as of ..."
+                    vm = re.match(r"^(\S+)\s+([A-Z][A-Z /%%]*?)(?=\s*(?:\(|%s|$))" % MID_DOT, rendered)
+                    f["VALUES"][key] = [(vm.group(1), vm.group(2)) if vm else (rendered.split()[0], rendered.split(MID_DOT)[0].strip()[len(rendered.split()[0]):].strip())]
             continue
         if section == "Management/Board":
             m = re.match(r"^Exec Management: ABSENT \((.+)\)\.$", line)
@@ -324,16 +371,91 @@ def rich_facts(rich_text, fixture=None):
     return f
 
 
+VALUE_CHECKED = ("HEADER", "FISCAL")   # the facts whose value the page carries as attribute-keyed text; OFFICER / CASE values are not
+UNIT_SCALE = {"THOUSANDS": Decimal(10) ** 3, "MILLIONS": Decimal(10) ** 6, "BILLIONS": Decimal(10) ** 9, "TRILLIONS": Decimal(10) ** 12}
+SUFFIX_SCALE = {"K": Decimal(10) ** 3, "M": Decimal(10) ** 6, "B": Decimal(10) ** 9, "T": Decimal(10) ** 12}
+_NUM = re.compile(r"^\s*(?:[A-Za-z]{3}\s+)?(\()?\s*([+-]|\u2212)?\s*(\d[\d,]*(?:\.\d+)?|\.\d+)(?:[eE]([+-]?\d+))?\s*\)?\s*([KMBT])?(?![A-Za-z])")
+
+
+def read_number(text):
+    """(signed Decimal, displayed decimals, suffix scale or None) of a value text, or None when it does not start with a number.
+    A currency code, a thousands comma, a % sign and a trailing unit word are not part of the number."""
+    m = _NUM.match(text or "")
+    if not m:
+        return None
+    paren, sign, digits, exp, suffix = m.groups()
+    digits = digits.replace(",", "")
+    try:
+        val = Decimal(digits + ("e" + exp if exp else ""))
+    except InvalidOperation:
+        return None
+    if sign in ("-", "\u2212") or paren:
+        val = -val
+    decimals = len(digits.split(".")[1].rstrip("0")) if "." in digits and not exp else 0
+    return val, decimals, SUFFIX_SCALE.get(suffix)
+
+
+def values_agree(page_text, export_token, export_unit):
+    """True when the page's value text and the export's value state the same figure: read as numbers, at the page's displayed
+    precision (half of its last digit), the page's K/M/B/T against the export's own unit word; else the two texts equal."""
+    p, r = read_number(page_text), read_number(export_token)
+    if p is None or r is None:
+        return (page_text or "").strip() == (export_token or "").strip()
+    pv, pd, ps = p
+    rv = r[0]
+    half = Decimal("0.5") * Decimal(10) ** (-pd)
+    unit = (export_unit or "").strip()
+    if ps is not None:
+        pv, half = pv * ps, half * ps
+        if unit.startswith("UNRESOLVED"):
+            # the export REFUSES to name the unit ("does not discriminate absolute vs millions"): the digits are compared at every
+            # power-of-1000 scale and the scale is left unchecked (counted, row Z-W176-S1), never guessed
+            return any(abs(pv - rv * Decimal(10) ** k) <= half * Decimal("1.0000001") for k in (0, 3, 6, 9, 12))
+        rv = rv * UNIT_SCALE.get(unit, Decimal(1))
+    return abs(pv - rv) <= half * Decimal("1.0000001")
+
+
+def value_diffs(page, rich):
+    """(compared, differ, unchecked, diffs{class: [facts]}, lines, unscaled): the VALUE grade over the facts whose identity both sides
+    state; `unscaled` counts the compared facts whose export unit is UNRESOLVED (digits compared, scale not)."""
+    pv, rv = page.get("VALUES") or {}, rich.get("VALUES") or {}
+    compared, differ, unchecked, diffs, lines, unscaled = 0, 0, 0, {"FIGURES": [], "CASES": []}, [], 0
+    for label in ("FIGURES", "CASES"):
+        for fact in sorted((set(page.get(label) or ()) & set(rich.get(label) or ())), key=str):
+            if fact[0] not in VALUE_CHECKED:
+                unchecked += 1
+                continue
+            compared += 1
+            ptexts, rvals = pv.get(fact), rv.get(fact)
+            if not ptexts or not rvals:
+                differ += 1
+                diffs[label].append(fact)
+                lines.append("%s value not carried: page=%s export=%s" % (fact, ptexts, rvals))
+                continue
+            if rvals[0][1].startswith("UNRESOLVED") and read_number(ptexts[0][0]) and read_number(ptexts[0][0])[2]:
+                unscaled += 1
+            if not all(values_agree(t, rvals[0][0], rvals[0][1]) for t, _ in ptexts):
+                differ += 1
+                diffs[label].append(fact)
+                lines.append("%s value differs: page=%s export=%s" % (fact, [t for t, _ in ptexts], "%s %s" % rvals[0]))
+    return compared, differ, unchecked, diffs, lines, unscaled
+
+
 def compare_facts(page, rich):
     """One comparison that names what differs: the verdict, a reason naming EVERY class that differs and no other ("" when OK), and
-    per-class counts (page / rich / same / missing / extra) under the TSV's column names."""
+    per-class counts (page / rich / same / missing / extra) under the TSV's column names, plus the value counts (compared / differ /
+    unchecked). A class whose identities match but whose values do not is named "CLASS(values)"."""
     row, bad = {}, []
+    compared, differ, unchecked, diffs, lines, unscaled = value_diffs(page, rich)
     for label, s in CLASSES:
         p, r = set(page.get(label) or ()), set(rich.get(label) or ())
         row.update({s + "_page": len(p), s + "_rich": len(r), s + "_same": len(p & r), s + "_missing": len(p - r),
                     s + "_extra": len(r - p)})
         if p != r:
             bad.append(label)
+        elif diffs.get(label):
+            bad.append(label + "(values)")
+    row.update(val_compared=compared, val_differ=differ, val_unchecked=unchecked, val_unscaled=unscaled, _value_lines=lines)
     row["verdict"] = "NOT_OK" if bad else "OK"
     row["reason"] = ("%s differ" % "+".join(bad)) if bad else ""
     return row
@@ -347,6 +469,7 @@ def compare(fixture_path, rich_path):
     rich = rich_facts(Path(rich_path).read_text(encoding="utf-8"), fixture_path)
     row = compare_facts(page, rich)
     row["_diff"] = {lab: (sorted(map(str, page[lab] - rich[lab])), sorted(map(str, rich[lab] - page[lab]))) for lab, _ in CLASSES}
+    row["_diff"]["VALUES"] = (row.pop("_value_lines"), [])
     return row, None
 
 
@@ -423,7 +546,7 @@ def main():
         if a.diff and row.get("_diff") and row["verdict"] == "NOT_OK":
             for lab, (only_page, only_rich) in row["_diff"].items():
                 for x in only_page:
-                    print("    %s page-only: %s" % (lab, x[:200]))
+                    print("    %s %s: %s" % (lab, "value" if lab == "VALUES" else "page-only", x[:200]))
                 for x in only_rich:
                     print("    %s rich-only: %s" % (lab, x[:200]))
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
@@ -441,9 +564,15 @@ def main():
     if unidentified:
         print("unidentified folders (%d of %d): %s" % (len(unidentified), len(folders), "; ".join(unidentified)))
     equal, identified = n["OK"], len(rows)
-    print("FWD-30 GRADE: equal %d of %d identified names; unidentified %d of %d folders; keyed on: data-attributes" % (
-        equal, identified, len(unidentified), len(folders)))
-    ok = identified > 0 and equal == identified
+    # values equal: a compared name whose value read found something to compare (a vacuous comparison is not an equal one) and no difference
+    val_equal = sum(1 for r in compared if int(r["val_compared"]) > 0 and int(r["val_differ"]) == 0)
+    print("value facts over %d compared names: compared=%d differ=%d; value-unchecked (identity only, the page carries no value attribute)=%d; "
+          "digits compared, scale unchecked (export unit UNRESOLVED)=%d" % (
+        len(compared), sum(int(r["val_compared"]) for r in compared), sum(int(r["val_differ"]) for r in compared),
+        sum(int(r["val_unchecked"]) for r in compared), sum(int(r["val_unscaled"]) for r in compared)))
+    print("FWD-30 GRADE: equal %d of %d identified names; values equal %d of %d; unidentified %d of %d folders; keyed on: data-attributes" % (
+        equal, identified, val_equal, identified, len(unidentified), len(folders)))
+    ok = identified > 0 and equal == identified and val_equal == identified
     if a.require_cases:
         ok = ok and len(compared) == identified and cas[0] > 0 and cas[3] == 0 and cas[4] == 0
     return 0 if ok else 1
