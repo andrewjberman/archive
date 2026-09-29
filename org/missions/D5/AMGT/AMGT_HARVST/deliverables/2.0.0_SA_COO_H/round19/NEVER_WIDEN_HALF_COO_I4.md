@@ -4,7 +4,7 @@
 **Seat:** `0.7.0_AE_CloudOps~A`. **Code at signing:** CLOUD `035c7d9b7f` (the `HVST-i-3` drain). `i-2` @`8f2a0bf027`
 carries the change.
 
-## VERDICT: SIGNED FOR THE HARVST LEG, CONDITIONAL ON THE CORPUS LEG (section 4) -- ONE artifact, ONE apply; rollback by VersionId
+## VERDICT: SIGNED -- `i-4` ALONE (AMENDMENT 1, section 4: the CORPUS file ships INERT) -- ONE artifact, ONE apply; rollback by VersionId
 
 ## 1. THE ACT
 
@@ -55,7 +55,31 @@ seat's, under the entry.
 - **The other routes** on this function (RESAPP `/thesis` `/overlay` `/peers` ...): no HARVST file they import differs.
   AC2 sweeps three of them as controls.
 
-## 4. THE CORPUS LEG -- NOT signed here, and the act is a combined act or it does not run
+## 4. THE CORPUS FILE -- INERT on this function; `i-4` runs ALONE (AMENDMENT 1, ~21:4xZ)
+
+**AMENDMENT 1:**
+- **The ruling:** `1.0.0_SA_CTO~Z`'s ruling
+  `ledger/CTO_RULING_I4_CLOSURE_CONTINUATION_INERT_20260929.md` @`3a354b0720` (msg 26718) finds that the served path
+  (`scoped_amgt` -> `dossier.read_dossier`) makes 0 `continuation` calls. So `continuation.py` ships INERT, no combined
+  act is owed, and no p-5 deploy is owed.
+- **CORPUS's issuer** `2.0.0_SA_COO~X` (msg 26717):
+  - `CRPS-p-5`'s act was store-only and is CLOSED 4 of 4 @`247d2dace6`, under its own pair
+    (`AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/NEVER_WIDEN_ROUND14_CONTINUATION_V3.md` + `ledger/NEVER_WIDEN_ROUND14_P5_CTO_HALF.md`).
+  - That pair covers no deploy.
+  - The only corpus call in the function is `dossier.read_dossier` (`scoped_amgt.py:3118`, function scope).
+- **This seat's own AST trace:** a different plane from the peer's module-level read.
+  - `dossier.py` imports `continuation` at FUNCTION scope in 4 functions: `_picked_reports:279`,
+    `_section_block_items:321`, `_pdf_words_reader:674`, `_resolved_security_keys:1360`.
+  - It imports `substrate`, which imports `continuation`, in 3 more: `current_inputs`, `build`,
+    `_run_model_rows_probe`.
+  - `read_dossier` reaches 5 functions by direct call: `read_dossier`, `_read_dossier_detail`, `_dossier_as_of_date`,
+    `_list_stored_objects`, `_pick_newest`. None of the 7 importers is among them.
+  - **Limit:** calls through a function reference passed as a value are not traced. AC2's three RESAPP control routes
+    exercise the function after the apply.
+- **So the CORPUS file ships, and it is never executed on any route of this function.** Its bytes enter the artifact
+  (its sha256 moves `source_code_hash`), and no served response changes because of it.
+
+**Superseded text below (kept, not deleted):**
 
 - The HEAD build ALSO ships `CRPS-p-5`'s change to `lib/research/corpus/continuation.py`.
   - The worker's words: "thesis pillar with an empty source paragraph is served ABSENT"; amendment 1: "PDF thesis reader
@@ -89,12 +113,12 @@ The 3 source files move by kilobytes. The seat prints the new total, and a total
 
 Re-point the function to VersionId `61Fb7L90ggUdpjcXaX4T8CcMgquyzn0U` (the prior artifact) and `safe-apply` forward. No S3
 delete; the prior version stays. The trigger is AC1 or AC2 FAILING after the apply, or any RESAPP control route answering
-non-200. A rollback also rolls back the CORPUS leg; the combined entry names both.
+non-200. A rollback also returns `continuation.py` to its deployed bytes, which is inert either way (AMENDMENT 1).
 
 **If a later RESAPP or CORPUS deploy moves the artifact before this act runs,** the issuer re-reads `BASE_SHA` and
 `PRIOR_VERSION`, amends `i-4.AC2.py`, and re-signs this half's section 2.
 
 ## 7. WHAT THIS HALF DOES NOT COVER
 
-The CORPUS `continuation.py` served move (section 4); any IAM, route, layer, runtime, memory or timeout change; any S3
+Any served effect of CORPUS's `continuation.py` (none exists on this function, per section 4's AMENDMENT 1); any IAM, route, layer, runtime, memory or timeout change; any S3
 delete; any portal promote.
