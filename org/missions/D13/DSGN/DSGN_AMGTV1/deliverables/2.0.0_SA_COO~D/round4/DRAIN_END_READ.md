@@ -16,8 +16,12 @@ msg 26646); the post-crash disposition is `org/tier1_exec/2.0.0_SA_COO~D/drive_l
 | AV-w-5 Posture evidence in words | ~17 | a538d0b7 -> fc05ab8b | 572c243ec1 | posture 3 of 3 (3 of 3); W5 bound 2 of 2 |
 | AV-w-6 the history view with ten names | ~14 | 92d1b243 -> 0ea20627 | fb018e26b1 (4, with w-2) | history 5 of 5 series 12 (5 of 5); W6 bound 4 of 4 |
 
-- **Portal:** DEV (site-Z local, unpushed) went a93071b8 -> 09bd04b1. `tsc` read 0 errors after each of the five portal
-  merges. Every check above is green again on the union (`ROUND4_CLOSE_WALK.md`).
+- **Portal:** DEV (site-Z local, unpushed) went a93071b8 -> 09bd04b1. Every check above is green again on the union
+  (`ROUND4_CLOSE_WALK.md`).
+- **CORRECTED (~21:0xZ, superseding the typecheck line that stood here):** the per-merge "tsc 0 errors" readings came from
+  `tsc -p . --noEmit`, which lists 0 files (the root tsconfig is `"files": []`), so they checked nothing. The real
+  typecheck, `tsc -b --noEmit` on DEV 09bd04b1, reads rc=0 and 0 errors. It covers 1480 app files, 34 of them in
+  SecurityAnalysis, and caught a planted error. Round 5's drains use `tsc -b`.
 - **Crash handling:** AV-w-1's first worker died in the crash; its edits were salvaged verbatim @e051ec096d and the resumed
   worker re-proved every criterion. Slots ~14 and ~17 had never got a checkout (the disk was full) and were recreated from
   their branches.

@@ -25,8 +25,15 @@ POSTURE EVIDENCE IN WORDS: 3 of 3 arms
 HISTORY VIEW: 5 of 5 arms (series 12)
 W2 BOUND 2 of 2 | W3 BOUND 2 of 2 | W4 BOUND 4 of 4 | W5 BOUND 2 of 2 | W6 BOUND 4 of 4
 FWD-30 HARNESS READS THE REDESIGNED PAGE: YES          (AMGT_RESAPP vv-5.AC1)
-tsc -p . --noEmit: 0 errors                            (after each of the five portal merges)
+tsc -b --noEmit: 0 errors, rc=0                        (CORRECTED, see below)
 ```
+
+**CORRECTION (issuer, 2026-09-29 ~21:0xZ, found by the round-5 draft):** the typecheck first reported here was
+`tsc -p . --noEmit`, which checks NOTHING. The root `portal/tsconfig.json` is `"files": []` with project references, and
+`tsc -p . --listFilesOnly` lists 0 files, so the five "0 errors" readings were vacuous. The portal's own typecheck is
+`bun run typecheck` = `tsc -b --noEmit`. Re-run on DEV 09bd04b1: rc=0, 0 errors. `tsconfig.app.json` covers 1480 src files,
+34 of them in SecurityAnalysis. A planted `const x: number = "x"` in SecurityAnalysis was caught (1 error; file removed,
+tree clean). The round-4 union is type-clean; only the earlier readings were empty.
 
 ## The non-prose census (census.cjs, the CVO's instrument; not a verdict)
 
