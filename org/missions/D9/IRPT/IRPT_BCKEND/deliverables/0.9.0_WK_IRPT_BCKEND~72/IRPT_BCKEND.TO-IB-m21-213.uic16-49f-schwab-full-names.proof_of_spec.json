@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-m21-213",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R21_M.md",
+    "vintage_commit": "c3a9044586",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m21-213.uic16-49f-schwab-full-names.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m21-213.uic16-49f-schwab-full-names.md AS AMENDED (amendment 1), citing org/tier1_exec/1.0.0_SA_CTO/deliverables/SIGNOFF_REFUSED_HOLDINGS_UIC16_49F_20260929.md @05b9abe572",
+    "group": "M",
+    "vintage_commit": "3349fda945"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~72",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/schwab_account_codes.py",
+      "kind": "script",
+      "commit_or_etag": "0b7d3c77a1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "adds registration_name(code, table=None), reading the table's acct_regis section ONLY (never acct_type, never a fall-through) -- amendment 1's remedy for the CTO's refusal @05b9abe572. full_name() (both sections) is retained, unused by production call sites, still covered by its own tests. LOCAL only, no upload.",
+      "introduces": ["def registration_name"],
+      "artifact_covered_by": ["IBM21-213-AC1", "IBM21-213-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/holdings_49f.py",
+      "kind": "script",
+      "commit_or_etag": "0b7d3c77a1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_49f_actual's account_masks step now reads dim_balance's acct_regis column through schwab_account_codes.registration_name() (was: acct_type through full_name()). Verified by a real read of the live 2026-09-25 dim_balance partition (7,548 accounts) and by build_49f_actual(s3, '2026-09-25') running end to end with 152,137 nodes, 9 refused (unrelated to this cell).",
+      "introduces": ["sac.registration_name", "balance[\"acct_regis\"]"],
+      "artifact_covered_by": ["IBM21-213-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/directory_runner.py",
+      "kind": "script",
+      "commit_or_etag": "0b7d3c77a1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_49f's acct_row now calls schwab_account_codes.registration_name() on r.get('acct_regis') (was: full_name() on acct_type); masked_discriminator itself is unchanged (pinned by its own existing tests with raw codes). Full investor_reporting suite: 303 passed.",
+      "introduces": ["_sac.registration_name(_s(r.get(\"acct_regis\")))"],
+      "artifact_covered_by": ["IBM21-213-AC1"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_schwab_codes.py",
+      "kind": "test",
+      "commit_or_etag": "0b7d3c77a1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 pure unit tests (5 original + 2 new): test_registration_name_uses_acct_regis_never_acct_type (RH resolves via acct_regis; IRA and S1, product-only codes, do NOT fall through) and test_registration_name_ri401_and_blank_print_as_unrecognised. python -m pytest ... -q -p no:cacheprovider -> '7 passed'.",
+      "introduces": ["def test_registration_name_uses_acct_regis_never_acct_type"],
+      "artifact_covered_by": ["IBM21-213-AC1"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_UIC16_49F_SUMMARY_20260929.json",
+      "kind": "doc",
+      "commit_or_etag": "fa6b257502",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rewritten with \"field\": \"acct_regis\" from a real local 49F build (no upload): read the live schwab/08335338/silver/dim_balance date=2026-09-25 partition via boto3 and applied schwab_account_codes.registration_name() to every account's acct_regis exactly as the production call sites now do -- accounts=7548, labelled_full_name=7545, unrecognised {'RI401': 1, '': 2}, matching the CTO's stated expectation exactly; cross-checked against the same-code-path account_masks generator run directly against the live dim_balance frame.",
+      "artifact_covered_by": ["IBM21-213-AC2"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md",
+      "kind": "doc",
+      "commit_or_etag": "fa6b257502",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "updated in place per amendment 1: an AMENDMENT 1 note, \"## The act\" and its counts rewritten to the registration type (product-code examples struck), and the local candidate diff replaced with the current acct_regis/registration_name diff. The readers census, rollback per key and release order are unchanged from the original half; \"## COO half\" and \"## CTO half\" (written against the refused bytes) are left as-is, per the amendment's instruction.",
+      "artifact_covered_by": ["IBM21-213-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBM21-213-AC1",
+      "criterion_verbatim": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_schwab_codes.py -q -p no:cacheprovider -- a summary line with N passed and no failed or error. IBM21-213-AC1 -- the built behaviour, including unrecognised codes and the loader's refusal.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_schwab_codes.py -q -p no:cacheprovider",
+      "output_evidence": "....... [100%]\n7 passed in 0.13s",
+      "denominator": "7 of 7 tests passed",
+      "status": "PASS",
+      "expect": "^\\d+ passed in [\\d.]+s$"
+    },
+    {
+      "criterion_id": "IBM21-213-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_CHECKS/r21_uic16_49f_regis.py -- SCHWAB-REGIS-NAMED followed by the labelled and total account counts. IBM21-213-AC2 -- a real local 49F build names every account's registration type the table covers, guesses none.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_CHECKS/r21_uic16_49f_regis.py",
+      "output_evidence": "SCHWAB-REGIS-NAMED 7545/7548 (unrecognised {'RI401': 1, '': 2})",
+      "denominator": "7545 labelled + 1 (RI401) + 2 (blank) unrecognised = 7548 accounts (real 2026-09-25 dim_balance partition)",
+      "status": "PASS",
+      "expect": "^SCHWAB-REGIS-NAMED \\d+/\\d+"
+    },
+    {
+      "criterion_id": "IBM21-213-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py <half path> -- HALF-READY <name>. IBM21-213-AC3 -- the half, with its all-readers census, is written for the issuer to sign and send.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md",
+      "denominator": "N/A -- boolean check (no {{slot}} left AND all 4 required markers present)",
+      "status": "PASS",
+      "expect": "^HALF-READY"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "schwab_account_codes.registration_name() mutated to fall through to acct_type as well (the pre-amendment, refused behaviour) -- an assertable wrong answer against a computation, not a resource-state read.",
+      "expected": "test_schwab_codes.py fails on the registration-only test (IRA, a product-only code, would resolve instead of staying unrecognised)",
+      "observed": "with registration_name() mutated to search both _SECTIONS: pytest reported '1 failed, 6 passed' -- test_registration_name_uses_acct_regis_never_acct_type FAILED with \"assert 'INDIVIDUAL RETIREMENT' == 'unrecognised (IRA)'\". Mutant reverted immediately after capture; re-run returned to '7 passed'.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two consecutive runs each of the AC1 pytest command, the AC2 check script and the AC3 check script, output captured and compared",
+      "observed": "AC1: '7 passed' both runs (0.18s, 0.13s -- timing differs, verdict does not). AC2: 'SCHWAB-REGIS-NAMED 7545/7548 (unrecognised {\\'RI401\\': 1, \\'\\': 2})' identical both runs. AC3: 'HALF-READY NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md' identical both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest -- AC1",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_schwab_codes.py -q -p no:cacheprovider",
+      "result": "7 passed in 0.13s"
+    },
+    {
+      "tool": "r21_uic16_49f_regis.py -- AC2",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_CHECKS/r21_uic16_49f_regis.py",
+      "result": "SCHWAB-REGIS-NAMED 7545/7548 (unrecognised {'RI401': 1, '': 2}) rc=0"
+    },
+    {
+      "tool": "r20_half_ready.py -- AC3",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md",
+      "result": "HALF-READY NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md rc=0"
+    },
+    {
+      "tool": "full investor_reporting regression suite (no criterion depends on it; run to confirm no breakage)",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests -q -p no:cacheprovider",
+      "result": "303 passed in 32.85s"
+    },
+    {
+      "tool": "live AWS read -- real 49F dim_balance read + production account_masks generator re-run against it (boto3, read-only, no upload)",
+      "invocation": "boto3 get_object opal-data-assets schwab/08335338/silver/dim_balance/date=2026-09-25/data.parquet; holdings_49f.load_49f_sources(s3,'2026-09-25') then the account_masks generator with schwab_account_codes.registration_name() over acct_regis",
+      "result": "accounts=7548, labelled=7545, unrecognised={'RI401': 1, '': 2}; sample RH label '0010047532 / Roth Contributory IRA', sample blank label '0068966566 / unrecognised ()'"
+    },
+    {
+      "tool": "live AWS read -- full build_49f_actual end-to-end cross-check",
+      "invocation": "h49f.build_49f_actual(s3, '2026-09-25') against live opal-data-assets",
+      "result": "FULL BUILD OK, nodes: 152137, refused: 9 (unrelated to this cell)"
+    },
+    {
+      "tool": "commit-gate.sh -- all edited files",
+      "invocation": "bash .tools/commit-gate.sh data/assets/scripts/gold/investor_reporting/schwab_account_codes.py data/assets/scripts/gold/investor_reporting/holdings_49f.py data/assets/scripts/gold/investor_reporting/directory_runner.py data/assets/scripts/gold/investor_reporting/tests/test_schwab_codes.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+    },
+    {
+      "tool": "py_compile -- schwab_account_codes.py",
+      "invocation": "python -m py_compile data/assets/scripts/gold/investor_reporting/schwab_account_codes.py",
+      "result": "COMPILE-OK (rc=0, no output)"
+    }
+  ]
+}
