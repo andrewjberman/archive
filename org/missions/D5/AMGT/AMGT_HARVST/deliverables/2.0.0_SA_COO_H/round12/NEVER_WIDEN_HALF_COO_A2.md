@@ -73,3 +73,27 @@ combined act rolls back as one, which uu-4's pair must also say.
 RESAPP's served outcome (48 SERVED -> adjusted, 22 ABSENT -> SERVED): uu-4's pair covers it. Any S3 delete. Any gold
 change. The portal DEV push of `92a2576254` (Andrew's ruling 3; `0.0.0_AB_MSTR~Z` measures its conditions after this
 lands). The executing seat: `0.7.0_AE_CloudOps~A` (HVST-a-2 AMENDMENT 2, same commit as this half).
+
+## 8. AMENDMENT 1 (signer, 2026-09-29 ~01:1xZ) -- THE PYARROW PIN, NAMED (asked by `0.7.0_AE_CloudOps~A`, msg 26338)
+
+`~A` held before the build because section 1 required a "sha256-pinned" wheel but named no version, and at this budget
+the version decides stop limb 2. `~A` measured (AWS reads only): headroom = 250 MiB - layer 121,743,633 B - package
+2,867,013 B = **131.2 MiB**; the estate's pyarrow 15.0.2 (from `pyiceberg-nessie-deps:3`) is 125.3 MiB full and
+**113.7 MiB pruned** -- but 15.0.2 predates numpy 2 and will NOT import against the layer's numpy 2.2.6.
+
+**NAMED:**
+1. **Version: `pyarrow==16.1.0`**, wheel tag `cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64`. 16.x is the
+   first line built against numpy 2 and the smallest that can import beside numpy 2.2.6; 17+ is larger and is NOT
+   admitted by this half.
+2. **The sha256 is fixed by the ACTOR, not predicted here:** the build's own `pip download` (the existing `VENDOR_PINS`
+   path, `--only-binary=:all: --no-deps`, the egress this half already declares) prints the wheel's sha256; `~A` records
+   it in the combined NEVER-2 entry BEFORE any unpack, and the build refuses any later byte that does not match it.
+   A second, different pyarrow wheel in one act is a STOP.
+3. **Prune: YES, exactly `lambda_src/build_zip.py`'s exclusion set** (`include/`, `src/`, `/tests/`, `/testing/`,
+   headers and C++ sources). No further pruning (no dropping of pyarrow's own shared objects) without a new word on
+   both halves -- the build's import verify is not a sufficient proof for removing a native library.
+4. **The ceiling is 262,144,000 B (250 MiB)** -- the byte figure this signer recalls from Lambda's own unzipped-size
+   refusal, NOT re-read here; **if the actor meets a smaller figure anywhere (AWS documentation or a refusal), the
+   smaller governs.** Stop limb 2 fires at or above it. The build prints package + every layer, unzipped, against it.
+5. **If 16.1.0 pruned does not fit, the act STOPS (limb 2), nothing uploads, the combined entry closes ABANDONED.**
+   That is a design question for round 13 (e.g. the timeline loaders on their own function), not a pin to widen here.
