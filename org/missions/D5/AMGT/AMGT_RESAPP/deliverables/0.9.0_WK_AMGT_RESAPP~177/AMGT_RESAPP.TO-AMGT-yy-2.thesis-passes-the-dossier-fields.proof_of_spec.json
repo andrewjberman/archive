@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "411236c2b75d3199a70eab17d57da38e1df75a5a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "411236c2b75d3199a70eab17d57da38e1df75a5a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-yy-2.thesis-passes-the-dossier-fields.md"
+  },
+  "to_id": "AMGT_RESAPP.TO-AMGT-yy-2",
+  "assignee": "0.9.0_WK_AMGT_RESAPP~177",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "f0cce70bfa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "adapter code only; no deploy, no server, no new AWS action (the one read_dossier call is the existing s3:GetObject). Exercised by AC1 and AC2.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_dossier_fields.py",
+      "kind": "test",
+      "commit_or_etag": "f0cce70bfa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 stubbed-dossier arms: pillars verbatim with terms, scalar SERVED and ABSENT, READ_FAILED distinct from ABSENT, unresolved key, one read per request, pre-existing keys unchanged, absent pillars field.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "plane local: pillars 15 of 15 over 4 names (the dossier's count, whatever it reads), no BAD line, /THESIS PASSES THE DOSSIER'S FIELDS: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round50/checks/yy_thesis.py --plane local --what fields; echo \"exit=$?\"",
+      "output_evidence": "  BAD AMD_US_Equity: pillars 0 of 2\nplane local: pillars 13 of 15 over 4 names\n/THESIS PASSES THE DOSSIER'S FIELDS: NO\nexit=1\n(the same checker with only want_p made list-only, a copy in .scratch not committed: 'plane local: pillars 13 of 13 over 4 names', '/THESIS PASSES THE DOSSIER'S FIELDS: YES', exit=0. Cause: the dossier holds AMD_US's pillars as the absent object {absent, value: None}, which the checker counts as 2. See row AMGT_RESAPP-Z-W177-S1.)",
+      "denominator": "served 13 of the checker's 15 over 4 names; the dossier's real pillars are 13 (AZN_LN 5, IMB_LN 6, ADBE_US 2, AMD_US 0 -- its pillars field is ABSENT). The 15 counts AMD's 2-key absent object.",
+      "status": "FAIL",
+      "expect": "pillars 15 of 15 over 4 names.*?/THESIS PASSES THE DOSSIER'S FIELDS: YES.*?exit=0",
+      "status_reason": "The checker cannot read 15 of 15: it counts AMD_US's ABSENT pillars object ({absent, value: None}) as 2 pillars, so its own held count is 15 against a real 13. Serving that object as thesis_pillars would crash it at line 68. The built payload is right by the corrected copy (13 of 13, YES, exit=0). BLOCKING row AMGT_RESAPP-Z-W177-S1; the issuer amends AC1's checker/expectation."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest reports N passed and 0 failed (plus your new tests) -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round48/checks/api-suite.sh; echo \"exit=$?\"",
+      "output_evidence": "338 passed in 54.21s\nexit=0",
+      "denominator": "338 passed, 0 failed (337 before the last added test; 9 new tests in test_dossier_fields.py)",
+      "status": "PASS",
+      "expect": "[0-9]+ passed.*?exit=0"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "api-suite.sh run twice (337 then 338 passed as a test was added between runs)",
+      "observed": "0 failed on both",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "In a python -c session (no file edit), wrapped scoped_amgt._dossier_fields to return thesis_pillars [] and ran test_dossier_fields.py.",
+      "expected": "the pillars-verbatim test and the one-read test fail.",
+      "observed": "2 failed, 7 passed: test_pillars_pass_verbatim_in_order_with_terms, test_the_dossier_is_read_once_per_thesis_request.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "AMGT_RESAPP-Z-W177-S1"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~177/AMGT_RESAPP.TO-AMGT-yy-2.thesis-passes-the-dossier-fields.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=$(pwd) python -m pytest lib/research/api/tests/test_dossier_fields.py -q",
+      "result": "9 passed, 0 failed"
+    }
+  ]
+}
