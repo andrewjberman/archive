@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-d-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3d06751450"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "bb6e0a29c3",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-d-4.discover-route-to-tool.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/opal_discover/integration.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "R-13: next_tool resolves the purpose-built MCP tool from the catalog's portal_datasets (accessor -> read_tool) with the family axis = the principal's member (global for opal-internal); query_v0 only for a row with none, labelled an HTTP route. R-14: freshness.served_written_at from one injectable HEAD per servable row (measured, or absent + error_class). Nothing deployed; release is MX-r-5.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_opal_discover.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 new tests on a synthetic catalog with an injected HEAD (12 passed of 12 in the file); the one existing next_tool equality was updated to the new labelled shape.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "match mp.01.aum-metrics next_tool=mdpf_get_aum_metrics args={\"scope\": \"global\"} -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round4/checks/d4.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)match mp\\.01\\.aum-metrics next_tool=mdpf_get_aum_metrics args=\\{\"scope\": \"global\"\\}.*RESULT: PASS.*exit=0",
+      "output_evidence": "match mp.01.aum-metrics next_tool=mdpf_get_aum_metrics args={\"scope\": \"global\"}\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 mp.01 match named the purpose-built tool",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "servable rows carrying served_written_at (measured, or absent with error_class): N of N, N>=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round4/checks/d4.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)servable rows carrying served_written_at \\(measured, or absent with error_class\\): 9 of 9.*RESULT: PASS.*exit=0",
+      "output_evidence": "servable rows carrying served_written_at (measured, or absent with error_class): 9 of 9\nRESULT: PASS\nexit=0",
+      "denominator": "9 of 9 servable rows over 3 asks carried served_written_at",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "plain run rc=0 ROUTING k of 27 with k>=23 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round4/checks/d4.AC3.sh; echo \"exit=$?\"",
+      "expect": "(?s)plain run rc=0 ROUTING (2[3-7]) of 27.*RESULT: PASS.*exit=0",
+      "output_evidence": "plain run rc=0 ROUTING 23 of 27\nRESULT: PASS\nexit=0",
+      "denominator": "23 of 27 harness questions route (floor 23)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before-state of AC1 and AC2: the same in-process call on the unmodified module (measured before the first edit).",
+      "expected": "next_tool name query_v0 with args {key: platinum/mdpf/{scope}/aum-metrics.json} for mp.01, and no served_written_at field",
+      "observed": "mp.01.aum-metrics True {'name': 'query_v0', 'call': 'POST /query/v0', 'args': {'key': 'platinum/mdpf/{scope}/aum-metrics.json'}}; freshness carried only field, grain and latest_value",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 was run twice against live S3 in the same session (before and after the test file was extended).",
+      "observed": "9 of 9 both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy of the gateway, and any edit of the catalog, the harness or its question set",
+      "reason": "Order bounds 1 and 2; the release is MX-r-5."
+    },
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The order says 'Do not edit this task order' and the file is outside <paths>; the issuer flips it."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W14-S1",
+    "NFRA_MCPINDEX-Z-W14-S2"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest tests/test_opal_discover.py",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_opal_discover.py -q -p no:cacheprovider",
+      "result": "12 passed"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3",
+      "result": "see the worker report"
+    }
+  ]
+}

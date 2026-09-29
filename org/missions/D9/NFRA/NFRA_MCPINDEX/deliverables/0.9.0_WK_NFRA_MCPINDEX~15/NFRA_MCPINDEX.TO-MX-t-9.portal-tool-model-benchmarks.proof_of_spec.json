@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-t-9",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3d06751450"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "bb6e0a29c3",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-t-9.portal-tool-model-benchmarks.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~15",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/portal_index/integration.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New ROWS entry mdpf_get_model_benchmarks (ToolRow with a caveat and a basis), one @mcp.tool registration, and answer() wrapping the existing answer so a tool that declares a caveat returns it on every answer. Local; nothing deployed (the release is MX-r-5).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/catalog_entries/portal_mdpf_model_benchmarks.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One C1 entry with read_tool and accessor, no key literal; emitted by the emitter, never hand edited.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Re-emitted by workflows/atom_decomposition/emit_catalog_v02.py: 4 portal_datasets rows (was 3), built_at_git_head line moved to 120ff9b27f; nothing else changed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_portal_index.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 new tests (exact key, caveat on every answer, parity with the served object, catalog row names its reader); the registry and catalog-ref tests now grade the four tools.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~15/EQUALITY_MX-t-9.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Headline figure and as-of on both sides (tool and the object read by VersionId Pxy6ATX1Eah8up3d9.iauhexhaxPMkxX): 4.21 / 4.13 / 3.99 at 2026-09-25 on both; whole object equal.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "placed and naming their reader N of N with N>=4",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round4/checks/t9.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)placed and naming their reader 4 of 4.*minimum rows required: 4.*RESULT: PASS.*exit=0",
+      "output_evidence": "portal_index ROWS entries read: 4\nportal rows: 4 total; under silver_datasets 0; under portal_datasets 4\nplaced and naming their reader 4 of 4\nminimum rows required: 4\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 portal_* rows placed under portal_datasets with read_tool + accessor equal to portal_index ROWS; 4 ROWS entries",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest rc=0; passed>7; failed/error 0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round4/checks/t9.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; passed (?:[89]|[1-9][0-9]+); failed/error 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; passed 11; failed/error 0\nRESULT: PASS\nexit=0",
+      "denominator": "11 passed of 11 in tests/test_portal_index.py (baseline 7 + 4 new)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control on AC1: the first draft registered the new ROWS entry by item assignment after the dict literal, which the check's own reader does not parse as a ToolRow entry.",
+      "expected": "placed and naming their reader 3 of 4, rc=1 (the check is able to fail)",
+      "observed": "portal_index ROWS entries read: 3 / portal_mdpf_model_benchmarks: no portal_index ROWS entry / placed and naming their reader 3 of 4 / RESULT: FAIL / exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 (pytest of the whole file) ran twice at the same source after the ROWS entry moved into the dict literal: once inside the check and once directly.",
+      "observed": "11 passed in both runs; the emitter re-run with no source change produced the same catalog (2 vintage lines only, measured before the new entry).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The order's own instruction is 'Do not edit this task order' and the file is outside <paths>; the issuer flips it."
+    },
+    {
+      "item": "app/data_entitlement.py INDEX_TOOLS",
+      "reason": "Outside <paths>; the fourth tool is unclassified there (row NFRA_MCPINDEX-Z-W15-S2, ARMED, disarm owner 2.0.0_SA_COO~MI)."
+    },
+    {
+      "item": "Deploy, push, any write to S3",
+      "reason": "Order bounds 1 and 3; the S3 reads were get-object/head-object and the in-process tool's one GetObject."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W15-S1: the worktree's portal/ is an empty gitlink dir so the emitter refused; portal/src/api read from the pinned gitlink c3dd9ca96a, untracked. OBSERVATION, INERT.",
+    "NFRA_MCPINDEX-Z-W15-S2: data_entitlement.classify returns None for the new tool (INDEX_TOOLS is outside the paths), so it is denied to every principal once enabled. OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~MI."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "emit_catalog_v02.py",
+      "invocation": "python workflows/atom_decomposition/emit_catalog_v02.py",
+      "result": "rc=0; WROTE DATA_CATALOG.yaml (1427 lines); 4 emitted (0 silver_datasets, 4 portal_datasets), 0 refused of 4 source files"
+    },
+    {
+      "tool": "unittest test_catalog_silver_entries",
+      "invocation": "python -m unittest workflows.atom_decomposition.tests.test_catalog_silver_entries",
+      "result": "Ran 18 tests OK"
+    },
+    {
+      "tool": "aws s3api get-object --version-id (read-only)",
+      "invocation": ".tools/aws s3api get-object --bucket opal-data-portal-v2 --key <mp.05 key> --version-id Pxy6ATX1Eah8up3d9.iauhexhaxPMkxX",
+      "result": "rc=0; 19225 bytes; equal to the tool's answer (EQUALITY_MX-t-9.md)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see the worker report"
+    }
+  ]
+}
