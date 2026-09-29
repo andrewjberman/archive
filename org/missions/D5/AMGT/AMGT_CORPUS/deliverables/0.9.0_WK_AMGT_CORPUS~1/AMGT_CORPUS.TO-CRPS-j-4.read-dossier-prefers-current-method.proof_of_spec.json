@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-j-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-j-4.read-dossier-prefers-current-method.md",
+    "group": "OTHER",
+    "vintage_commit": "43912573fb2bceaaf3167e433cd9de8bed2660a9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "43912573fb2bceaaf3167e433cd9de8bed2660a9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-j-4.read-dossier-prefers-current-method.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/dossier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read_dossier now reads each stored object's method_version (each object fetched once, one listing) and picks among current-METHOD_VERSION objects only when any exist, else over all (unchanged rule, _pick_newest); new read-only --pick-census CLI mode in the mutually exclusive group. METHOD_VERSION untouched. No S3 write run.",
+      "introduces": [
+        "_pick_newest",
+        "_read_dossier_detail",
+        "_pick_census_one",
+        "_run_pick_census"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier_reader_method.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 offline tests over a LastModified-carrying stub: old-method written after current same date -> current; current on older date than old -> current; two current -> later write; none current -> pre-existing pick; single fetch per object + LookupError; census stale count on a planted stale case (0 honest, 1 planted); census writes nothing. Existing test_dossier.py, test_dossier_newest.py, test_dossier_model_rows.py run unmodified: 31 passed with the new file.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j4_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j4_AC1.sh",
+      "output_evidence": ".......                                                                  [100%]\n7 passed in 0.71s",
+      "denominator": "7 of 7 tests passed, 0 failed; rc 0",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j4_AC2.sh -- expect dossier_pick names ([1-9]\\d*) current_method_available \\d+ stale_pick 0\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j4_AC2.sh",
+      "output_evidence": "dossier_pick names 95 current_method_available 95 stale_pick 0",
+      "denominator": "95 names censused (read-only S3 list/get against the live research-dossier table), 95 with a current-method object, 0 stale picks; rc 0",
+      "expect": "dossier_pick names ([1-9]\\d*) current_method_available \\d+ stale_pick 0\\b",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A for this task order -- no mutant control was named; the planted-stale census case in AC1's test file is the negative arm of the stale count.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and the three existing dossier test files run once each after the build; AC2 run once against live S3 (read-only).",
+      "observed": "AC1 7 passed; existing + new 31 passed; AC2 stale_pick 0 of 95.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Changing METHOD_VERSION",
+      "reason": "Order bound: that is CRPS-j-1. AC2 reads 95 current because every stored object is /1 = current until the bump."
+    },
+    {
+      "item": "Any S3 write (dossier --write)",
+      "reason": "Order bound: NO S3 write; the census and reader are list/get only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=. python -m pytest lib/research/corpus/tests/test_dossier_reader_method.py lib/research/corpus/tests/test_dossier.py lib/research/corpus/tests/test_dossier_newest.py lib/research/corpus/tests/test_dossier_model_rows.py -q",
+      "result": "31 passed in 5.80s"
+    }
+  ]
+}
