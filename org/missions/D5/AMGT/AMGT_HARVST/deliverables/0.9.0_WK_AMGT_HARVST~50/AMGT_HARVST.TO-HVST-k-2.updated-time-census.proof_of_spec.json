@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-k-2.updated-time-census",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-k-2.updated-time-census.md",
+    "group": "OTHER",
+    "vintage_commit": "95e703064d0be647cfa8d4c0e2f9ea3a8be79c3a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "95e703064d0be647cfa8d4c0e2f9ea3a8be79c3a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-k-2.updated-time-census.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~50",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~50, L7 subagent of 2.0.0_SA_COO~H, worktree wk-hvst-r21-50 on branch wk-AMGT_HARVST-50 cut from 95e703064d, TREE-OK. A census over the 120 silver article rows as landed (store.silver_latest per source) and the 120 bronze objects their bronze_key names. S3 LIST/GET only: no put, no delete, no vendor call, no deploy, no lib/ edit. One row filed: Z-W50-S1.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~50/scripts/k2_ac1_updated_time_census.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census script; S3 LIST/GET only.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~50/k2_ac1_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim output of the literal AC1 invocation, rc 0.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "A CENSUS OVER THE SILVER ARTICLES AS LANDED TODAY (120 at the cut, denominator printed and per publisher): (a) every time-bearing field in the silver rows, per publisher, with PRESENT and DIFFERS-FROM-published_utc counts, each over that publisher's article count; (b) the same for the bronze objects the silver rows point to, with the number of bronze objects read and the number that could not be read, each named; (c) HD_US_Equity's served-event lead, by article key and headline, with every time value found for it; (d) a one-line summary per publisher: UPDATED-TIME AVAILABLE on k of n articles, or NONE. PASS only if (a)-(d) all print with their denominators.",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~50/scripts/k2_ac1_updated_time_census.py",
+      "expect": "denominator 120 silver articles, 120 bronze read, 0 unreadable",
+      "output_evidence": "rc 0 (run as: timeout 900 <the invocation>). Full output: deliverables/0.9.0_WK_AMGT_HARVST~50/k2_ac1_output.txt. Deciding lines: 'SILVER ARTICLES AS LANDED ... 120 total; per publisher: barrons=15, bbg=19, ft=14, sa=46, wsj=26'; (a) printed per publisher with PRESENT n of N, DISTINCT-VALUES and DIFFERS-FROM-published_utc; (b) '120 of 120 read; 0 could not be read' / 'UNREADABLE: none'; (c) HD newest-snapshot lead bbg:TJX9W8T96OSJ00 and the barrons lead barrons:WP-BAR-0001875805 (led HD in 3 earlier parts), each with every silver and bronze time value; (d) 'barrons: NONE (0 of 15 ...)', 'bbg: NONE (0 of 19 ...)', 'ft: NONE (0 of 14 ...)', 'sa: UPDATED-TIME AVAILABLE on 5 of 46 articles', 'wsj: UPDATED-TIME AVAILABLE on 11 of 26 articles'; final line 'SECTIONS PRINTED (a)(b)(c)(d): YES; denominator 120 silver articles, 120 bronze read, 0 unreadable'. No ruling on the lead is recorded.",
+      "denominator": "(a) 120 of 120 silver articles censused (15+19+14+46+26); (b) 120 of 120 bronze objects read, 0 unreadable; (c) 1 HD event in the newest snapshot and 1 barrons-led HD article across 8 of 8 chatter_event parts; (d) 5 of 5 publishers summarised",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Adversary arm of the order: a census that reports a field's presence as an updated time. The script counts PRESENT and DISTINCT-VALUES and DIFFERS-FROM-published_utc separately for every field, so presence without a distinct value shows as DIFFERS 0 (e.g. wsj meta[dateModified] present 11 of 26, differs 7 of 11; sa lastModified present 5 of 46, differs 1 of 5).",
+      "expected": "a field present but equal to published_utc prints DIFFERS 0",
+      "observed": "published, published_utc print DIFFERS 0 of N on every publisher; wsj dateModified prints 7 of 11; sa lastModified 1 of 5",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "exploratory read and the recorded run read the same silver and bronze",
+      "observed": "120 silver rows, 120 bronze objects, the same per-publisher fields in both runs (a first run mis-classed wsj meta[...] names as OTHER-TIME; fixed the class parser and re-ran, counts unchanged)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any lib/ change, S3 write or delete, vendor call, deploy",
+      "reason": "Standing clause 1."
+    },
+    {
+      "item": "A ruling on which article leads HD's event",
+      "reason": "Section 3: the CTO rules it. The census prints both leads' time values."
+    },
+    {
+      "item": "Times inside list members (wsj furtherReadingContent x27)",
+      "reason": "They belong to other stories on the page, not to the article; counted under NOT COUNTED, never as the article's field."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W50-S1: the newest served chatter_event part leads HD with bbg:TJX9W8T96OSJ00 (2026-08-18 only); the barrons lead is in the three parts up to 20260924T134754Z"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "run at commit time; see the commit"
+    }
+  ]
+}
