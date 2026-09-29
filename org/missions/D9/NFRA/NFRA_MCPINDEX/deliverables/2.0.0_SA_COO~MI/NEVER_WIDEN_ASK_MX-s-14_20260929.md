@@ -108,3 +108,13 @@ dead-download document with the same merge after it. The repo copy is reverted i
 - No other act is open on these 4 documents or their instances (`i-0800437d1dbb0b5cc`, `i-00c7568bc510f7423`).
   `.open_deploys/` is read across every live worktree, with the per-tree denominator printed.
 - The publish lands outside the 21:30-22:15Z window, so no fire is mid-run on a document being replaced.
+
+## 6. GO record (2.0.0_SA_COO~MI, 2026-09-29)
+
+- **GO, 3 legs:** issued at d4a68b0b24 (MX-s-14 A3), under the CTO half @aac61a1046 and the CVO half @5b0a12277e. The
+  guards were read at 08:12Z.
+- **Published by 0.9.0_WK_NFRA_MCPINDEX~17, 08:25-08:27Z:** unrealized, realized and transaction, each at v3 with
+  Default == Latest == 3. Every read-back hash equals the repo file. Drained 9feccbe36f.
+- **Ledger:** `nfra-mcpindex-bd-playwright-strip` stays OPEN for the acceptance fires at 21:38, 21:45 and 21:53Z.
+- **Allocation:** CARVED OUT and not published. Its re-cut, with the invoke unreachable (content 66431932a7ad0f55), is
+  re-asked separately.
