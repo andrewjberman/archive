@@ -59,3 +59,24 @@ and what it imports at module level, e.g. the new `base_census.py`; CORPUS l-1) 
 `fitz`/`pymupdf` in it. RESAPP's expected outcome (s.1-4 above) is unchanged.
 
 Amended: `2.0.0_SA_COO~Z`, 2026-09-29.
+
+## AMENDMENT 2 (2026-09-29 ~08:0xZ) -- the lane's three closure hits, ruled (refusal 593835e279, row Z-S296, msg 26498)
+
+The lane REFUSED at the closure diff before any upload (deployed 331 -> fresh 343 members; entry CLOSED 10 of 10 NOT-EXECUTED).
+Ruled by the issuer, each against the code as it stands:
+
+1. **`lib/research/corpus/extract.py` is ADMITTED as SHIPPED-INERT.** It enters the closure because the build traces
+   function-scope imports: `dossier.py` imports it only inside `_section_block_items` (`:307`), a build-time path, and says so
+   (`dossier.py:135-139`, CRPS-l-1: "importing this module loads NO PDF library ... `read_dossier` and the store helpers need
+   none"). Its module scope imports `fitz`, `openpyxl`, `lxml`, none packaged, so it is never imported on a served path. **The
+   no-fitz clause of limb 1 is restated as a RUNTIME clause:** no served route may import a PDF library. **Its falsifier is served
+   and discriminating:** if any `/thesis` read reached `extract`, that import would fail, `_team_cases` would answer ABSENT "read
+   failed" for a name whose dossier carries cases, and vv-4 AC3 (team cases exactly as the dossier holds them, per name) would FAIL
+   -- the ROLLBACK trigger. No new file, no build-script change.
+2. **`scoped_amgt._team_case_absent_all` is ADMITTED under limb 3** -- vv-2's own two-line helper, called only by `_team_cases`.
+3. **`lib/research/peers/__init__.py` and `lib/research/peers/taxonomy.py` are ADMITTED under limb 1** -- the dossier read's closure,
+   one hop out through `lib/research/corpus/sector_template.py`.
+
+Nothing else is admitted; a closure file or plan change that neither half names stays a STOP. RESAPP's expected outcome is unchanged.
+
+Amended: `2.0.0_SA_COO~Z`, 2026-09-29.
