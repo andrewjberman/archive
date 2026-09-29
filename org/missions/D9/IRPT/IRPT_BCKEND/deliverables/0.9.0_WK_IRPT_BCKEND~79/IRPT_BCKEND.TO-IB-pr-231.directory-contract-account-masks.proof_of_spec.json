@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-231",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "c0c0ae560637503969312f5c285070d2475bcb98"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "3677dc2b47a3b0c0267229ad45fd5b07828cebac",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-231.directory-contract-account-masks.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~79",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/DirectoryEntry.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "27d9a8f700889f2e234c267faf02d37f6d23d9a4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object over the worktree file returns 27d9a8f700889f2e234c267faf02d37f6d23d9a4, byte-equal to the docs contract blob ~M committed @4ecbaca410; written via `git show 27d9a8f700889f2e234c267faf02d37f6d23d9a4 > <path>` per the task order, no other bytes touched. The order's own BOUNDS state no deploy/AWS write and no served Lambda stages this copy (the docs copy at pinned commits is what serves), so DEPLOYED-VERIFIED does not apply.",
+      "introduces": ["account_masks"],
+      "artifact_covered_by": ["P23-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~79/IB-pr-231.result.md",
+      "kind": "doc",
+      "commit_or_etag": "a399e29030b41c7d7571ba522e3177bbb67d3272",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object a399e29030b41c7d7571ba522e3177bbb67d3272 -- the session log for this order.",
+      "artifact_covered_by": ["P23-1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P23-1-AC1",
+      "criterion_verbatim": "the file's git blob is 27d9a8f7, it defines `account_masks`, and every property of the HEAD copy is kept. Base: FAIL (`account_masks defined: False`).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r23/p23_1_ac1_directory_contract_masks.py\" .",
+      "output_evidence": "worktree blob 27d9a8f700, want 27d9a8f700: True\naccount_masks defined: True | every HEAD property kept: True\nP23-1-AC1 PASS",
+      "denominator": "3 of 3 sub-checks (blob match, account_masks defined, HEAD properties kept) PASS",
+      "status": "PASS",
+      "expect": "P23-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's two independently-gradable sub-checks (account_masks defined; every HEAD property kept) are the discriminator: the task order records the base case at the unmodified HEAD copy as FAIL with `account_masks defined: False`, which this run's fix flips to True without disturbing the property-superset check.",
+      "expected": "Base (unmodified worktree copy, before this order's write): account_masks defined False, checker FAIL. After the write: both sub-checks True, checker PASS.",
+      "observed": "Task order states the base as FAIL (`account_masks defined: False`); after this order's single write, the checker printed `account_masks defined: True | every HEAD property kept: True` and `P23-1-AC1 PASS`.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The checker was run twice at the final bytes with no change in between.",
+      "observed": "Both runs printed identical output: 'worktree blob 27d9a8f700, want 27d9a8f700: True', 'account_masks defined: True | every HEAD property kept: True', 'P23-1-AC1 PASS', rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~79/IB-pr-231.result.md",
+  "compiler_tools": [
+    {
+      "tool": "p23_1_ac1_directory_contract_masks.py (P23-1-AC1)",
+      "invocation": "timeout 120 python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r23/p23_1_ac1_directory_contract_masks.py\" .",
+      "result": "rc=0, P23-1-AC1 PASS; run twice with identical output."
+    },
+    {
+      "tool": "git show / git hash-object",
+      "invocation": "git show 27d9a8f700889f2e234c267faf02d37f6d23d9a4 > infra/aws/lambda/investor-reporting/_contracts/DirectoryEntry.schema.json; git hash-object <path>",
+      "result": "Wrote the docs blob verbatim; git hash-object confirmed the worktree file is byte-equal (27d9a8f700889f2e234c267faf02d37f6d23d9a4)."
+    }
+  ]
+}
