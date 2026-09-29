@@ -1,0 +1,202 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-m20-203",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m20-203.holdings-source-vendor-keys.md",
+    "group": "OTHER",
+    "vintage_commit": "724f50597774872837554884de3e21a01880d52e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R20_M.md",
+    "vintage_commit": "724f50597774872837554884de3e21a01880d52e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m20-203.holdings-source-vendor-keys.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~44",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+      "kind": "script",
+      "commit_or_etag": "1206612f63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "adds registry_vendor_keys()/source_vendor_keys() (infra/logic/registry/systems.json VENDOR-class rows matched word-bounded/case-insensitive against each builder's own manifest['source'] text; refuses an unrecognized source), wires 'source_vendor_keys' into build_snapshot()'s returned document; AMENDMENT 1 R1 adds root['assigned_strategy'] on a COT ACCOUNT node in cot_actual_security_tree when membership assigns a strategy. Not deployed (production package re-mint is the never-widen act this half requests, not taken here).",
+      "introduces": ["def registry_vendor_keys", "def source_vendor_keys", "SYSTEMS_REGISTRY_PATH", "root[\"assigned_strategy\"]"],
+      "artifact_covered_by": ["IBM20-203-AC1", "IBM20-203-AC2", "IBM20-203-AC4"]
+    },
+    {
+      "path_or_key": "docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "1206612f63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two additive optional properties: top-level 'source_vendor_keys' (array of registry vendor keys) and node-level 'assigned_strategy' (COT ACCOUNT nodes only, {model_id:{namespace,value}, name}). Both OPTIONAL per the v1 immutability rule. This repo copy is the one this runner validates against (CTO ruling 1, one carrier); the DEPLOYED lambda-tree copy is out of this worker's <paths> and named as a re-mint precondition in the never-widen half.",
+      "artifact_covered_by": ["IBM20-203-AC1", "IBM20-203-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_vendor_keys.py",
+      "kind": "test",
+      "commit_or_etag": "1206612f63",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_vendor_keys.py -q -p no:cacheprovider -> '9 passed' rc=0, run standalone under `timeout 120`. Asserts the field present/non-empty/registry-drawn on real 49F/INF build_snapshot() output (reusing test_holdings_49f._sources/test_holdings_inf._sources fixtures) and on a stub firm, and that an unrecognized source is REFUSED (both the pure function and build_snapshot's own wiring).",
+      "artifact_covered_by": ["IBM20-203-AC1"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdings_membership.py",
+      "kind": "test",
+      "commit_or_etag": "1206612f63",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AMENDMENT 1 R1: test_tree_with_membership_keeps_totals_and_positions_and_adds_one_measured_leaf extended -- z091 (assigned m-lt) carries assigned_strategy = {model_id:{namespace:COT_REBALANCER_MODEL,value:m-lt}, name:'Opal Long Term'}; z092 (no membership) and the unmeshed 'plain' tree carry no such key. Part of the AC4 7-passed run below.",
+      "artifact_covered_by": ["IBM20-203-AC4"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdings_rearm_trigger.py",
+      "kind": "test",
+      "commit_or_etag": "1206612f63",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AMENDMENT 1 R2: re-targeted from the typed BUNDLE='investor_reporting' (the directory bundle, never run by the enabled schedule) to target_bundle_names() = every safe_deploy_core.STANDALONE_BUNDLES entry carrying the runner as a member (irpt_holdings_49f/_inf/_cot today, found by membership, never typed); served_bundle_members() reads a manifest-stamped bundle's member list from its in-tar SHA256SUMS (get_object), not S3 metadata (which manifest mode does not populate with source-repo-paths). Live: 'REARM-TRIGGER LIVE: schedule irpt-holdings-snapshot = ENABLED; 3 target bundle(s) [...]; served {...41,41,41 members...}; runner opens 12; missing {} -> PASS' (rc=0, 3 passed). Part of the AC4 7-passed run below.",
+      "artifact_covered_by": ["IBM20-203-AC4"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_UIC14_VENDOR_KEYS_SUMMARY_20260929.json",
+      "kind": "doc",
+      "commit_or_etag": "1206612f63",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "written from a real local build (holdings_snapshot.py --qa --firms all --local-out .scratch/r20_m203/out, qa=True, upload=False, no publish) against live S3 at business_date=2026-09-25: 49financial=[schwab,smartx] (152280 nodes, 7548 accounts, schema_valid=true), inflection=[eclipse,orion] (32405 nodes, 878 accounts, schema_valid=true), cottonwood=[blackdiamond] (17637 nodes, 938 accounts, schema_valid=true; 464 of 938 ACCOUNT nodes carry assigned_strategy, matching IB-mr-202's own measured 464->0 MODEL_WRAPPER removal). python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_m203_vendor_keys.py -> 'VENDOR-KEYED 49financial=schwab+smartx inflection=eclipse+orion cottonwood=blackdiamond' rc=0.",
+      "artifact_covered_by": ["IBM20-203-AC2"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_HOLDINGS_VENDOR_KEYS_20260929.md",
+      "kind": "doc",
+      "commit_or_etag": "1206612f63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "written with ## The act / ## Blast radius / Rollback per key filled from the real local-build numbers and a read-only census (no portal consumer of either new field exists yet; the lambda-tree contract copy and UIC-14's portal-side registry-vendor-view are named as preconditions, both outside this cell's <paths>). NOT SENT, CTO half owed -- this worker does not re-mint/upload/publish/merge. python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py <this path> -> 'HALF-READY NEVER_WIDEN_HALF_REQUEST_HOLDINGS_VENDOR_KEYS_20260929.md' rc=0.",
+      "artifact_covered_by": ["IBM20-203-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1206612f63",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "appended row IRPT_BCKEND-W44-S2 (OBSERVATION, INERT, UNDER_INVESTIGATION) recording AMENDMENT 1 R2's retarget of the S71 guard (old target: investor_reporting bundle, live FAIL; new target: the three irpt_holdings_* bundles, live PASS) -- the old/new targets AMENDMENT 1 asked to be recorded in row W44-S1's resolution, filed as a new row per the channel's append-only rule rather than an edit to S1. Does not adjudicate or disarm S1 itself (adjudicates/GRADUATED are the CVO's L9 fields, refused on a worker's row by .tools/surprise-row-gate.py A-1)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBM20-203-AC1",
+      "criterion_verbatim": "the built behaviour, including the refusal of an unknown source.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_vendor_keys.py -q -p no:cacheprovider",
+      "output_evidence": "9 passed in 27.90s (rc=0, run under `timeout 120`).",
+      "denominator": "9 of 9 test functions passed: registry file named+readable; per-firm derivation matches each firm's real manifest source text (3 parametrized cases); an unrecognized/None/empty source is REFUSED at both the pure function and build_snapshot's wiring; a recognized source lands non-empty and registry-drawn on a stub AND on real 49F/INF build_snapshot() output",
+      "expect": "\\d+ passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBM20-203-AC2",
+      "criterion_verbatim": "every firm's real local candidate carries registry vendor keys.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_m203_vendor_keys.py",
+      "output_evidence": "VENDOR-KEYED 49financial=schwab+smartx inflection=eclipse+orion cottonwood=blackdiamond (rc=0, run under `timeout 120`).",
+      "denominator": "3 of 3 firms VENDOR-KEYED: each carries >=1 vendor key, every key a subset of the 22 registry_vendor_keys named in the summary, and a stated output_field",
+      "expect": "VENDOR-KEYED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBM20-203-AC3",
+      "criterion_verbatim": "the half request is written for the issuer to sign and send.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_HOLDINGS_VENDOR_KEYS_20260929.md",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_HOLDINGS_VENDOR_KEYS_20260929.md (rc=0, run under `timeout 120`).",
+      "denominator": "0 of 4 required sections/markers missing (## The act, ## Blast radius, Rollback per key, candidate), 0 unfilled {{slot}} placeholders",
+      "expect": "HALF-READY",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBM20-203-AC4",
+      "criterion_verbatim": "the batched repairs R1 and R2 (a fourth criterion: the round's repairs ride this one cell, per the spine's 'repairs batched into ONE cell').",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_rearm_trigger.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_membership.py -q -p no:cacheprovider",
+      "output_evidence": "7 passed in 56.22s (rc=0, run under `timeout 120`).",
+      "denominator": "7 of 7 test functions passed, 0 failed/error/skipped: 3 rearm-trigger tests (probe, live retarget PASS, mutant) + 4 membership tests including the extended assigned_strategy assertion",
+      "expect": "\\d+ passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The dry-run baseline recorded in the task order itself is the negative arm: at 2026-09-29 ~01:0xZ (before this session's code/artifacts existed) AC1 read 'no tests ran' (test_vendor_keys.py absent), AC2 read NOT-KEYED (summary absent), AC3 read NOT-READY (half absent). AC4 at the amendment's own base commit 724f505977 read '1 failed / 6 passed' (the rearm-trigger guard still pointed at the wrong bundle, live FAIL; the membership test not yet extended). This session's own artifacts are what flip each check, not a constant.",
+      "expected": "AC1: no tests -> N passed once test_vendor_keys.py exists and source_vendor_keys() is real. AC2: NOT-KEYED -> VENDOR-KEYED only once every firm's real candidate carries >=1 registry-drawn key. AC3: NOT-READY -> HALF-READY only once the half carries all 4 required markers. AC4: 1 failed/6 passed -> 7 passed only once R1 (assigned_strategy field + test) and R2 (retargeted guard) both land.",
+      "observed": "AC1: '9 passed'. AC2: 'VENDOR-KEYED 49financial=schwab+smartx inflection=eclipse+orion cottonwood=blackdiamond' -- reading THIS session's real build; a run of source_vendor_keys() against an unrecognized source string raises ValueError rather than returning any keys (test_an_unrecognized_source_is_refused_not_labelled), proving the checker's field would have read empty/absent and NOT-KEYED had the derivation returned a guess instead of refusing. AC3: 'HALF-READY ...' only after the half's four sections were filled. AC4: a direct live re-check of the OLD target (find_bundle('investor_reporting'), read-only, no code change) shows it still serves the same 10-member bundle missing the same 7 opened files that would fail under ENABLED -- confirming the retarget in code, not a weakened assertion or a since-fixed bundle, is what flips AC4's verdict from '1 failed/6 passed' to '7 passed'; the real local build independently shows 464 of 938 cottonwood ACCOUNT nodes carrying assigned_strategy (matching IB-mr-202's own measured 464 MODEL_WRAPPER removal), confirming the field is genuinely written by the code and the membership test's assertion is not a tautology.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each of AC1/AC2/AC3/AC4's invocations run twice this session (once mid-session while iterating, once as the final recorded run at the committed HEAD 1206612f63), both under `timeout 120`",
+      "observed": "AC1: '9 passed' both times. AC2: 'VENDOR-KEYED 49financial=schwab+smartx inflection=eclipse+orion cottonwood=blackdiamond' both times, reading the same committed summary JSON. AC3: 'HALF-READY ...' both times after the half was filled. AC4: '7 passed' both times (14.06s/56.22s wall time varies with live AWS reads; verdict does not).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "re-minting, uploading, publishing or merging the new document shape into the served Holdings packages",
+      "reason": "the order's own Step 5/BOUNDS: 'Do NOT re-mint, upload, publish or merge ... that act waits for the half's signatures.' The never-widen half is written and NOT SENT; the CTO half is owed."
+    },
+    {
+      "item": "adding the two new schema members to the DEPLOYED lambda-tree contract copy (infra/aws/lambda/investor-reporting/_contracts/)",
+      "reason": "outside this worker's <paths> and explicitly 'not this runner's to move' per holdings_snapshot.py's own docstring; named as a re-mint precondition in the never-widen half's Blast radius section instead."
+    },
+    {
+      "item": "building the registry-generated vendor view in lib/opal_naming.py that UIC-14's portal half (the client-words render, parked at .runtmp/parked/iv-e-87.source-client-words.test.ts) needs to un-park",
+      "reason": "lib/opal_naming.py and portal/ are outside this cell's <paths>; org/missions/D13/DSGN/DSGN_IRPTV1/STATUS.md names the un-park condition as TWO parts and this cell builds only the producer half (this worker serves the snapshot's source vendor keys locally; the registry vendor view is a separate, uncited precondition)."
+    },
+    {
+      "item": "disarming or adjudicating row IRPT_BCKEND-W44-S1 (the ARMED live rearm-trigger finding)",
+      "reason": "S1's named disarm_owner is 2.0.0_SA_COO~M, not this worker; this worker records the old/new targets and the live PASS as a NEW row (W44-S2, append-only) per AMENDMENT 1's own instruction, and does not itself flip S1's disposition (adjudicates/GRADUATED are the CVO's L9 fields, refused on a worker's row)."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W44-S2: UNDER_INVESTIGATION, OBSERVATION, INERT -- AMENDMENT 1 R2's resolution of row W44-S1: the S71 guard was watching the wrong bundle (the investor_reporting directory bundle, never run by the enabled schedule's dispatch); re-pointed at the three irpt_holdings_{49f,inf,cot} standalone bundles the dispatch actually fetches, all three now PASS live. Filed as a new row (never an edit to S1) per the channel's append-only rule; does not itself disarm or adjudicate S1."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~44/IRPT_BCKEND.TO-IB-m20-203.holdings-source-vendor-keys.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest -- test_vendor_keys.py (AC1)",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_vendor_keys.py -q -p no:cacheprovider",
+      "result": "9 passed in 27.90s"
+    },
+    {
+      "tool": "pytest -- test_holdings_rearm_trigger.py + test_holdings_membership.py (AC4, the batched R1/R2 repairs)",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_rearm_trigger.py data/assets/scripts/gold/investor_reporting/tests/test_holdings_membership.py -q -p no:cacheprovider",
+      "result": "7 passed in 56.22s (dry-run baseline at 724f505977 was 1 failed / 6 passed)"
+    },
+    {
+      "tool": "boto3 s3 (read-only) via holdings_snapshot.py CLI -- the real local build, all three firms",
+      "invocation": "python data/assets/scripts/gold/investor_reporting/holdings_snapshot.py --qa --firms all --local-out .scratch/r20_m203/out",
+      "result": "OK: 49financial business_date=2026-09-25 nodes=152280 accounts=7548 reconcile=True(1826940340.65/1826940340.65) valid=True; OK: inflection nodes=32405 accounts=878 reconcile=True(208110999.41/208110999.41) valid=True; OK: cottonwood nodes=17637 accounts=938 reconcile=True(553689995.59/553689995.59) valid=True"
+    },
+    {
+      "tool": "ad-hoc read of the local platinum JSON per firm -- confirming source_vendor_keys/assigned_strategy landed on the real documents",
+      "invocation": "python -c \"import glob,json; [print(f, json.load(open(f))['source_vendor_keys']) for f in glob.glob('.scratch/r20_m203/out/**/platinum/**/*.json', recursive=True)]\"",
+      "result": "49financial=['schwab','smartx']; inflection=['eclipse','orion']; cottonwood=['blackdiamond'] (x2, both COT candidates); a direct read of one COT candidate's ACCOUNT nodes shows 464 of 938 carrying assigned_strategy"
+    },
+    {
+      "tool": "r20_m203_vendor_keys.py / r20_half_ready.py -- the two mechanical acceptance checkers",
+      "invocation": "python org/.../R20_CHECKS/r20_m203_vendor_keys.py; python org/.../R20_CHECKS/r20_half_ready.py <half path> (each under `timeout 120`)",
+      "result": "VENDOR-KEYED 49financial=schwab+smartx inflection=eclipse+orion cottonwood=blackdiamond (rc=0); HALF-READY NEVER_WIDEN_HALF_REQUEST_HOLDINGS_VENDOR_KEYS_20260929.md (rc=0)"
+    },
+    {
+      "tool": "ruff / py_compile -- commit-gate's own lint+compile limb, run ahead of commit",
+      "invocation": ".tools/commit-gate.sh on all 4 edited/added .py files",
+      "result": "one finding (unused `gzip` import in test_holdings_rearm_trigger.py) found and removed; re-run: 'OK: pre-commit gate clean for 4 of 4 file(s)'"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py -- the new investigation row's schema/gate check",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md (pre-commit; the commit-time run grades the staged index)",
+      "result": "corpus baseline unchanged (4 known pre-existing carried-row findings, 0 new); safe-commit.sh's own staged-index run passed as part of the commit below"
+    },
+    {
+      "tool": "safe-commit.sh -- the gated commit of all deliverables",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~44 <0.9.0_WK_IRPT_BCKEND~44@opal.agent>\" -F <msgfile> -- <8 files: 2 producers/tests already counted, 1 schema, 1 new test, 2 new docs, 1 surprise-channel doc>",
+      "result": "commit 1206612f63b47cf423a4bb678907071854ee4d7e on branch wk-IRPT_BCKEND-44 (LOCAL, not pushed); git status --porcelain shows only the pre-existing 'M portal' submodule pointer (untouched by this worker, present before this session started) and the untracked .scratch/ scratch dir"
+    }
+  ]
+}
