@@ -1,8 +1,8 @@
 diff --git a/infra/aws/lambda/opal-assets/advi-49f-gold-dispatch/lambda_function.py b/infra/aws/lambda/opal-assets/advi-49f-gold-dispatch/lambda_function.py
-index 2266526a9c..f3ff37967a 100644
+index 2266526a9c..5cc0b81988 100644
 --- a/infra/aws/lambda/opal-assets/advi-49f-gold-dispatch/lambda_function.py
 +++ b/infra/aws/lambda/opal-assets/advi-49f-gold-dispatch/lambda_function.py
-@@ -13,9 +13,15 @@ CONTRACT FACTS (P2D-4, do not re-derive):
+@@ -13,9 +13,16 @@ CONTRACT FACTS (P2D-4, do not re-derive):
      the dispatcher takes the ENSURE-RUNNING duty and passes StartedByDispatcher to
      the document so the command self-halts ONLY a box this dispatcher started.
    - the chain is fired via its OWN SSM document, never the legacy chain's stage list.
@@ -14,14 +14,15 @@ index 2266526a9c..f3ff37967a 100644
 +    retried into) / CHAIN ABORT stage=<name> rc=<n>.
 +  - OG-m-2 (E11 remedy, CTO msg 26305 option a): SSM StandardOutputContent is cut at
 +    24,000 characters, so a long chain's terminal line never reaches it. The
-+    classifier grades the uploaded chain log (s3://opal-data-49financial/gold/advi/
-+    _logs/chain_<TS>.log, TS = the invocation's ExecutionStartDateTime) instead.
++    classifier grades the uploaded chain log (bucket CHAIN_LOG_BUCKET, key
++    CHAIN_LOG_PREFIX + <TS> + ".log", both from Terraform; TS = the invocation's
++    ExecutionStartDateTime) instead.
 +    The S3 accelerator dispatches only when the exact marker version that fired it
 +    reads closure.status == "qualified".
  
  DISPATCH-PLANE failures (cannot start/reach the host, cannot send the command)
  RAISE -- the schedule's retry policy + DLQ are the delivery surface. CHAIN-plane
-@@ -36,6 +42,8 @@ from __future__ import annotations
+@@ -36,6 +43,8 @@ from __future__ import annotations
  import json
  import os
  import time
@@ -30,14 +31,14 @@ index 2266526a9c..f3ff37967a 100644
  
  import boto3
  
-@@ -53,8 +61,15 @@ ALLOWED_DOCUMENTS = [
+@@ -53,8 +62,15 @@ ALLOWED_DOCUMENTS = [
  POLL_BUDGET_S = int(os.environ.get("POLL_BUDGET_S", "300"))
  SSM_EXEC_TIMEOUT_S = os.environ.get("SSM_EXEC_TIMEOUT_S", "3600")
  
-+# OG-m-2: where a dispatch finds its own chain log (SSM document advi-49f-chain-dispatch
-+# uploads /tmp/advi_49f_chain_${TS}.log here before it exits).
-+CHAIN_LOG_BUCKET = "opal-data-49financial"
-+CHAIN_LOG_PREFIX = "gold/advi/_logs/chain_"
++# OG-m-2 (A2): where a dispatch finds its own chain log. Both come from Terraform (the same
++# local the SSM document uploads to); unset -> the classifier reads UNKNOWN(chain_log=unconfigured).
++CHAIN_LOG_BUCKET = os.environ.get("CHAIN_LOG_BUCKET", "")
++CHAIN_LOG_PREFIX = os.environ.get("CHAIN_LOG_PREFIX", "")
 +ACCELERATOR_SOURCE = "advi.49f.silver-accelerator"
 +
  ec2 = boto3.client("ec2", region_name=REGION)
@@ -46,7 +47,7 @@ index 2266526a9c..f3ff37967a 100644
  
  
  def _instance_state() -> str:
-@@ -87,18 +102,82 @@ def _wait_ssm_online(timeout_s: int = 240) -> None:
+@@ -87,18 +103,84 @@ def _wait_ssm_online(timeout_s: int = 240) -> None:
      raise TimeoutError(f"host {HOST_INSTANCE_ID} SSM not Online within {timeout_s}s")
  
  
@@ -84,7 +85,7 @@ index 2266526a9c..f3ff37967a 100644
 +    """Candidate log keys: TS, TS-1 s, TS+1 s (host-clock skew), TS from the
 +    invocation's ExecutionStartDateTime (UTC, %Y%m%dT%H%M%SZ)."""
 +    start = inv.get("ExecutionStartDateTime")
-+    if not start:
++    if not start or not CHAIN_LOG_PREFIX:
 +        return []
 +    if isinstance(start, datetime):
 +        base = start.replace(tzinfo=None, microsecond=0)
@@ -102,6 +103,8 @@ index 2266526a9c..f3ff37967a 100644
 +    candidate key exists (without ListBucket an absent key reads AccessDenied, so
 +    every read error counts as absent), chain_log=no terminal line when the log
 +    has no `CHAIN ` line. Never guessed."""
++    if not CHAIN_LOG_BUCKET or not CHAIN_LOG_PREFIX:
++        return "UNKNOWN(chain_log=unconfigured)"
 +    keys = _chain_log_keys(inv)
 +    if not keys:
 +        return "UNKNOWN(chain_log=absent, key=None)"
@@ -141,7 +144,7 @@ index 2266526a9c..f3ff37967a 100644
  
  
  def _trigger_identity(event):
-@@ -144,6 +223,23 @@ def lambda_handler(event, context):
+@@ -144,6 +226,23 @@ def lambda_handler(event, context):
              f"REFUSED: document {document!r} not in ALLOWED_DOCUMENTS {ALLOWED_DOCUMENTS}"
          )
  
@@ -165,7 +168,7 @@ index 2266526a9c..f3ff37967a 100644
      state = _instance_state()
      started_by_dispatcher = False
      if state != "running":
-@@ -200,7 +296,9 @@ def lambda_handler(event, context):
+@@ -200,7 +299,9 @@ def lambda_handler(event, context):
                "chain log + SSM invocation rc are the run's record " + json.dumps(result))
          return result
  
@@ -177,10 +180,20 @@ index 2266526a9c..f3ff37967a 100644
      result["signature"] = signature
      if signature == "OK":
 diff --git a/infra/aws/terraform/opal-assets/advi_49f_floor.tf b/infra/aws/terraform/opal-assets/advi_49f_floor.tf
-index bea310619a..23454d99e8 100644
+index bea310619a..f94747e476 100644
 --- a/infra/aws/terraform/opal-assets/advi_49f_floor.tf
 +++ b/infra/aws/terraform/opal-assets/advi_49f_floor.tf
-@@ -152,6 +152,22 @@ resource "aws_iam_role_policy" "advi_49f_gold_dispatch" {
+@@ -51,6 +51,9 @@ locals {
+   advi_49f_dispatch_name = "advi-49f-gold-dispatch"
+   advi_49f_host_id       = "i-01003b035d2988dfb" # bd-gold-layer-runner (P2D-4 host ruling)
+   advi_49f_bucket        = "opal-data-49financial"
++  # The chain log's key prefix: ONE carrier for the SSM document's upload target, the dispatcher's read
++  # grant and the dispatcher's CHAIN_LOG_PREFIX env var (OG-m-2 A2). The suffix is the run's TS.
++  advi_49f_chain_log_prefix = "gold/advi/_logs/chain_"
+ }
+ 
+ # --- the dedicated DLQ (draft row 4) ----------------------------------------
+@@ -152,6 +155,23 @@ resource "aws_iam_role_policy" "advi_49f_gold_dispatch" {
          Action   = ["ssm:GetCommandInvocation"]
          Resource = ["*"] # GetCommandInvocation does not support resource scoping
        },
@@ -190,16 +203,36 @@ index bea310619a..23454d99e8 100644
 +        Sid      = "ReadTheChainLog"
 +        Effect   = "Allow"
 +        Action   = ["s3:GetObject"]
-+        Resource = ["arn:aws:s3:::opal-data-49financial/gold/advi/_logs/chain_*"]
++        Resource = ["arn:aws:s3:::${local.advi_49f_bucket}/${local.advi_49f_chain_log_prefix}*"]
 +      },
 +      {
 +        # OG-m-2: the S3 accelerator path reads the exact marker version that fired, to dispatch
-+        # only on a qualified closure. One key prefix, GetObject only, no ListBucket.
++        # only on a qualified closure. One key prefix, no ListBucket. GetObjectVersion because a read
++        # that names a versionId needs it (AMENDMENT A1, row Z-W15-S1).
 +        Sid      = "ReadTheAcceleratorMarker"
 +        Effect   = "Allow"
-+        Action   = ["s3:GetObject"]
++        Action   = ["s3:GetObject", "s3:GetObjectVersion"]
 +        Resource = ["arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*"]
 +      },
        {
          Sid      = "Logs"
          Effect   = "Allow"
+@@ -183,6 +203,9 @@ module "advi_49f_gold_dispatch" {
+     # ALLOWED_DOCUMENTS defaults to SSM_DOCUMENT_NAME in code; the P4 publisher
+     # document is appended here (TF-only change) when its stage is contracted.
+     POLL_BUDGET_S = "300"
++    # OG-m-2 A2: where the dispatcher finds its own chain log (same local as the SSM upload target).
++    CHAIN_LOG_BUCKET = local.advi_49f_bucket
++    CHAIN_LOG_PREFIX = local.advi_49f_chain_log_prefix
+   }
+   system_tag = "OpalAssets"
+ }
+@@ -287,7 +310,7 @@ resource "aws_ssm_document" "advi_49f_chain_dispatch" {
+           "  python3 chain_49f_entrypoint.py --date {{ Date }} --upload $${DH_ARG} 2>&1 | tee $${LOG}",
+           "  rc=$${PIPESTATUS[0]}",
+           "fi",
+-          "aws s3 cp $${LOG} s3://${local.advi_49f_bucket}/gold/advi/_logs/chain_$${SUFFIX}.log || echo 'WARN: chain log upload failed'",
++          "aws s3 cp $${LOG} s3://${local.advi_49f_bucket}/${local.advi_49f_chain_log_prefix}$${SUFFIX}.log || echo 'WARN: chain log upload failed'",
+           "if [ \"{{ StartedByDispatcher }}\" = \"true\" ]; then echo 'self-halt: dispatcher-started box, shutdown in 2 minutes'; sudo shutdown -h +2; fi",
+           "exit $${rc}",
+         ]

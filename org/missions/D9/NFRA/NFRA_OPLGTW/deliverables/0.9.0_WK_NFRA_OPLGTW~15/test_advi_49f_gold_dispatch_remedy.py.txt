@@ -11,6 +11,8 @@ from unittest import mock
 
 os.environ.setdefault("HOST_INSTANCE_ID", "i-0000000000000test")
 os.environ.setdefault("SSM_DOCUMENT_NAME", "advi-49f-chain-dispatch")
+os.environ["CHAIN_LOG_BUCKET"] = "test-chain-log-bucket"
+os.environ["CHAIN_LOG_PREFIX"] = "logs/chain_"
 
 _SRC = (Path(__file__).resolve().parent.parent / "advi-49f-gold-dispatch" / "lambda_function.py")
 _spec = importlib.util.spec_from_file_location("advi_49f_gold_dispatch_under_test", _SRC)
@@ -18,7 +20,7 @@ mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(mod)
 
 START = "2026-09-28T12:45:42.498Z"
-LOG_KEY = "gold/advi/_logs/chain_20260928T124542Z.log"
+LOG_KEY = "logs/chain_20260928T124542Z.log"
 MARKER_KEY = "schwab/08335338/meta/complete/date%3D2026-09-25.json"
 MARKER_KEY_DECODED = "schwab/08335338/meta/complete/date=2026-09-25.json"
 
@@ -82,7 +84,7 @@ class DispatcherRemedyTests(unittest.TestCase):
 
     def test_chain_log_ok_classifies_ok_once(self):
         self._invocation("x" * 24000)  # cut stdout: no CHAIN line at all
-        self._s3_objects({("opal-data-49financial", LOG_KEY):
+        self._s3_objects({("test-chain-log-bucket", LOG_KEY):
                           "stage a\nCHAIN ABORT stage=old rc=9\nmore\nCHAIN OK rc=0\n"})
         result, _ = self._run({"source": "advi.49f.scheduled-floor"})
         self.assertEqual(result["signature"], "OK")
@@ -90,7 +92,7 @@ class DispatcherRemedyTests(unittest.TestCase):
 
     def test_chain_log_abort_classifies_abort(self):
         self._invocation("CHAIN OK rc=0\n")  # stdout lies; the log decides
-        self._s3_objects({("opal-data-49financial", LOG_KEY):
+        self._s3_objects({("test-chain-log-bucket", LOG_KEY):
                           "stage a\nCHAIN ABORT stage=x rc=1\n"})
         result, _ = self._run({"source": "advi.49f.scheduled-floor"})
         self.assertEqual(result["signature"], "ABORT")
@@ -104,9 +106,9 @@ class DispatcherRemedyTests(unittest.TestCase):
         self.assertIn("chain_log=absent", out)
         tried = [c["Key"] for c in self.s3_calls]
         self.assertEqual(tried, [
-            "gold/advi/_logs/chain_20260928T124542Z.log",
-            "gold/advi/_logs/chain_20260928T124541Z.log",
-            "gold/advi/_logs/chain_20260928T124543Z.log"])
+            "logs/chain_20260928T124542Z.log",
+            "logs/chain_20260928T124541Z.log",
+            "logs/chain_20260928T124543Z.log"])
         self.assertEqual(self.ssm.send_command.call_count, 1)
 
     def test_incomplete_marker_does_not_dispatch(self):
@@ -124,7 +126,7 @@ class DispatcherRemedyTests(unittest.TestCase):
         self._invocation("")
         self._s3_objects({
             ("opal-data-assets", MARKER_KEY_DECODED): json.dumps({"closure": {"status": "qualified"}}),
-            ("opal-data-49financial", LOG_KEY): "CHAIN OK rc=0\n"})
+            ("test-chain-log-bucket", LOG_KEY): "CHAIN OK rc=0\n"})
         result, _ = self._run(_s3_event("v10"))
         self.assertEqual(self.ssm.send_command.call_count, 1)
         self.assertIs(result["dispatched"], True)
@@ -132,7 +134,7 @@ class DispatcherRemedyTests(unittest.TestCase):
 
     def test_floor_event_reads_no_marker(self):
         self._invocation("")
-        self._s3_objects({("opal-data-49financial", LOG_KEY): "CHAIN OK rc=0\n"})
+        self._s3_objects({("test-chain-log-bucket", LOG_KEY): "CHAIN OK rc=0\n"})
         result, _ = self._run({"source": "advi.49f.scheduled-floor"})
         marker_reads = [c for c in self.s3_calls if c["Bucket"] == "opal-data-assets"]
         self.assertEqual(marker_reads, [])

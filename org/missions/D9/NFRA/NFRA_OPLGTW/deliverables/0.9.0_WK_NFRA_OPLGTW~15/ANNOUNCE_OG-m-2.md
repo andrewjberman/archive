@@ -38,3 +38,15 @@ or the `opal-assets` root. Re-run at PHASE B.
 - The gate runs for the event source `advi.49f.silver-accelerator` (a superset of "returns a marker key": an S3 event with no key also skips), after the document allowlist check and before any EC2/SSM call. The event key is `unquote_plus`-decoded before the read (S3 event keys are URL-encoded: `date%3D...`).
 - A missing `versionId` in the event skips (fail closed).
 - SSM stdout is printed only as a length line.
+
+---
+## UPDATE after rulings A1 (@45a2a598a4, branch B) and A2 (@e534f3d938)
+
+**State: still BUILT AND TESTED, NOT COMMITTED.** Route (iii) reached; row `NFRA_OPLGTW-Z-W15-S3` (BLOCKING, INERT) carries the exact refusal.
+- **A1 applied:** marker ARN `s3:GetObject` + `s3:GetObjectVersion`; chain-log ARN `s3:GetObject` alone; no ListBucket.
+- **A2 route (i) failed:** `address('advi','49financial','gold','_logs','chain_')` gives `.../advi/49financial/gold/_logs/chain_`, not the existing `gold/advi/_logs/chain_`.
+- **A2 route (ii) built:** `local.advi_49f_chain_log_prefix` read by the SSM upload target, the IAM ARN and a new env var `CHAIN_LOG_PREFIX` (plus `CHAIN_LOG_BUCKET`); no Python literal of either; unset env reads `UNKNOWN(chain_log=unconfigured)`. Tests set the env.
+- **Route (iii):** `naming-gate.py --enforce` REFUSES `advi_49f_floor.tf:56 gold/advi/_logs/chain_` ("EXISTING and OUT-OF-PATTERN as S3Key in a surface remediations.json assigns to the live remediation ADVI_FIRMBKTS: REFUSE unless the diff removes it"), although the diff removes the same literal from the SSM cp line. Only other output: WARN on `advi.49f.silver-accelerator`.
+- **Tests:** dr.AC1.sh `named tests passed 6 of 6; failed/error lines 0 -- RESULT: PASS`.
+- **Targeted plan (`-lock=false`):** `Plan: 0 to add, 2 to change, 0 to destroy.` Changed: `aws_iam_role_policy.advi_49f_gold_dispatch` and `module.advi_49f_gold_dispatch.aws_lambda_function.this` (env `CHAIN_LOG_BUCKET`, `CHAIN_LOG_PREFIX` added). `aws_ssm_document` is not listed: unchanged (guard met).
+- `og-m-2_code_and_iam.patch` and the `.py.txt` copy are refreshed to the current worktree state.
