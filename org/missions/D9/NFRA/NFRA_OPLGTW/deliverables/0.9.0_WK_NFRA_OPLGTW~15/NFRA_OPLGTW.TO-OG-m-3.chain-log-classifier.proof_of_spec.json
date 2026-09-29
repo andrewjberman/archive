@@ -1,0 +1,144 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-m-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~15",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "c80b5c85b6"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "bd0e06fe4c",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-m-3.chain-log-classifier.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/opal-assets/advi-49f-gold-dispatch/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "4e14699746",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Frozen 2b candidate (sha256 600a4b6da9e7...) re-applied unmodified. Built by build-and-upload.sh (artifact sha256 TjIWGFWkbUswLkA+mUac9NS+LRZ1q7o6lR1iQLb0kI4=, write VERIFIED) and applied through .tools/safe-apply.sh -auto-approve, targeted: 'Apply complete! Resources: 0 added, 2 changed, 0 destroyed.' Live CodeSha256 TjIWGFWk... (was KqlIoAJs...); zip member lambda_function.py = HEAD bytes (dc.AC2.sh).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/opal-assets/tests/test_advi_49f_gold_dispatch_remedy.py",
+   "kind": "test",
+   "commit_or_etag": "4e14699746",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The six-test file (og-m-2b_input_test_full_6.py.txt) copied unmodified; dc.AC1.sh: 6 of 6 passed.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/opal-assets/advi_49f_floor.tf",
+   "kind": "terraform",
+   "commit_or_etag": "4e14699746",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Local advi_49f_chain_log_prefix (3 references), ReadTheChainLog statement, env CHAIN_LOG_BUCKET/CHAIN_LOG_PREFIX, SSM cp line reading the local. Applied in the same targeted apply. Live read-back: policy = 2a's statements plus exactly ReadTheChainLog (s3:GetObject on arn:aws:s3:::opal-data-49financial/gold/advi/_logs/chain_*, no ListBucket); function env = HOST_INSTANCE_ID, SSM_DOCUMENT_NAME, POLL_BUDGET_S plus the two new; dc.AC2.sh s3 read grants exact 2 of 2 (extra 0), env = locals yes. Targeted re-plan including aws_ssm_document.advi_49f_chain_dispatch: 'No changes.'",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+   "kind": "config_data",
+   "commit_or_etag": "dcb7bd2cf7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The build script rewrote the dispatcher's artifact_sha256 (KqlIoAJs... -> TjIWGFWk...); committed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260929T0303Z_nfra-oplgtw-chain-log-classifier_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "49a14e989b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Opened with its sentinel and committed @6d4bafd684 BEFORE the upload; both legs closed with proofs; CLOSED, sentinel removed, committed @49a14e989b. dc.AC3.sh: sentinel at HEAD=no, listed OPEN/HELD=0.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- both classifier branches locally (a CHAIN OK log reads OK and dispatches once; an ABORT log reads ABORT; an absent log reads UNKNOWN and says so) and the 2a gate still holding (incomplete no dispatch, qualified once, floor reads no marker).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/dc.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 6 of 6; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "6 of 6 named tests passed",
+   "status": "PASS",
+   "expect": "named tests passed 6 of 6; failed/error lines 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- the served Lambda is the built artifact of the committed source, moved off 2a's build; the role's s3 read grant is exactly the two prefixes with their action sets; the function env equals the Terraform locals.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/dc.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "live=TjIWGFWkbUswLkA+mUac9NS+LRZ1q7o6lR1iQLb0kI4= artifact=TjIWGFWkbUswLkA+mUac9NS+LRZ1q7o6lR1iQLb0kI4= local prefix=gold/advi/_logs/chain_ env prefix=gold/advi/_logs/chain_ env bucket=opal-data-49financial (rc 0/0/0/0/0/0)\nlive sha = artifact sha: yes; moved off previous: yes; zip member = HEAD bytes: yes; s3 read grants exact 2 of 2 (extra 0); env = locals: yes\nRESULT: PASS\nexit=0",
+   "denominator": "2 of 2 s3 statements; 4 of 4 comparisons yes",
+   "status": "PASS",
+   "expect": "live sha = artifact sha: yes; moved off previous: yes; zip member = HEAD bytes: yes; s3 read grants exact 2 of 2 .extra 0.; env = locals: yes.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 -- NEVER-2: the entry is committed at HEAD, the sentinel is gone, and the OPEN/HELD scan does not list the slug.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/dc.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "entry files at HEAD=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 13 of 13 sentinel(s) scanned\nRESULT: PASS\nexit=0",
+   "denominator": "13 of 13 sentinels scanned; 0 listed for the slug",
+   "status": "PASS",
+   "expect": "sentinel at HEAD=no; listed OPEN/HELD=0.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "In a scratch copy of lambda_function.py, _classify_log's `if line.startswith(\"CHAIN \"): last = line` mutated to take the FIRST CHAIN line; the same test file run against it and against the unmutated file.",
+   "expected": "unmutated 6 passed; mutant fails test_chain_log_ok_classifies_ok_once",
+   "observed": "unmutated 6 passed (twice); mutant 1 failed, 5 passed: test_chain_log_ok_classifies_ok_once FAILED",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The 6-test file run twice on the unchanged source, and dc.AC1.sh run in PHASE A and after the close",
+   "observed": "6 passed, 6 passed; dc.AC1 6 of 6 each time",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The first real chain graded by the new classifier (the next 12:45Z floor or a qualified marker's dispatch)",
+   "reason": "The order assigns it to the issuer's close run, not to this worker."
+  },
+  {
+   "item": "A live read of a real chain log by the deployed function",
+   "reason": "No criterion names one and PHASE B changes no chain; the tests stub s3."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W15-S1",
+  "NFRA_OPLGTW-Z-W15-S2",
+  "NFRA_OPLGTW-Z-W15-S3",
+  "NFRA_OPLGTW-Z-W15-S4"
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail on wk-NFRA_OPLGTW-15: 4e14699746 (code), b49b2a3900 (ANNOUNCE), 6d4bafd684 (ledger open), dcb7bd2cf7 (source map), 49a14e989b (ledger close). No new row in this order; rows Z-W15-S1..S4 are the earlier ones the frozen candidate and the amendments resolved.",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/dc.AC{1,2,3}.sh",
+   "invocation": "each under timeout 115 from the worktree root after the ledger close commit",
+   "result": "rc 0 each, RESULT: PASS"
+  },
+  {
+   "tool": ".tools/safe-apply.sh",
+   "invocation": "HALT_ACK=1 apply -auto-approve -target=module.advi_49f_gold_dispatch -target=aws_iam_role_policy.advi_49f_gold_dispatch",
+   "result": "Apply complete! Resources: 0 added, 2 changed, 0 destroyed."
+  }
+ ]
+}
