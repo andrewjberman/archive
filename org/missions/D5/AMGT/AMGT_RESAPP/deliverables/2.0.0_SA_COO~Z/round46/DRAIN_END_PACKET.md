@@ -28,8 +28,9 @@ object and the channel is append-only; its disposition is yours.**
 The widening (22 ABSENT -> SERVED: 19 names had no PE_RATIO rows, 3 left the band on GAAP and enter it on adjusted) was named in both
 halves before the act. **The page (the ONE real run, `round46/close-run/`):** AMD's Model tab on 5174 reads "Base case: SERVED --
 415.64057358490567 USD (adjusted consensus EPS (FY1) x adjusted trailing-median P/E (PX_LAST / IS_COMP_EPS_ADJUSTED))" beside Price
-USD 630.63 -- the served value crosses to the page. **BOUND:** 5174 is the CTO's walk build @e3f77e40, which lacks portal DEV 8fa7abde,
-so it prints the raw float; the two-decimal page rule is proven only by the harness at DEV (uu-3 AC2, uu-4 AC2).
+USD 630.63 -- the served value crosses to the page. **CORRECTED IN PLACE ~04:0xZ:** the first render was on the CTO's walk build
+@e3f77e40 (it lacked DEV 8fa7abde and printed the raw float); after the CTO merged DEV (af19fedd), the re-run reads "415.64 USD",
+two decimals, the export's own line (`close-run/real-run-AMD_US_Equity-after-walk-ff/`).
 
 ## 3. Judgment criterion (L9; never self-graded)
 
@@ -53,7 +54,7 @@ definition, a label, not a measurement. Ratio to px_last 0.5124 .. 2.9835, media
 
 ## 5. Carried to the CTO's round-46 analysis
 
-1. **The walk build on 5174 lacks round 46's page change** (e3f77e40 vs DEV 8fa7abde) while Andrew walks it.
+1. **The walk build on 5174** now carries round 46's page change (CTO, af19fedd, 03:56Z).
 2. **uu-1's 7 unmet** (FWD-2, 7, 11, 12, 14, 20, 31) and **15 unmeasurable** (10 need a human act with no readable record; 5 need a
    browser capture) -- the grades are the analysis's.
 3. **The other harnesses' `@/` break** (Z-W167-S1) -- one repair cell across `shell`/`posture`/`tabs` harnesses.

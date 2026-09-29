@@ -16,3 +16,9 @@
   DEV 8fa7abde (uu-3's `ModelTab.tsx` `toFixed(2)`). So the running page prints the raw float while the deployed export prints
   "415.64". The two-decimal page rule is proven only by the harness at portal DEV (uu-3 AC2 2 of 2; uu-4 AC2 95 of 95, cases 285/285).
   No second dev server was started (5174 only). The timeline panel's 401 is HARVST's mount on that build, not this round's.
+
+**BOUND CLOSED (2026-09-29 ~04:0xZ):** `1.0.0_SA_CTO~Z` merged local portal DEV 8fa7abde into the walk build (branch now af19fedd;
+vite hot-reloaded `ModelTab.tsx` at 03:56Z). Re-run on 5174, same fixture, `--states model`, rc=0, contract PASS:
+`real-run-AMD_US_Equity-after-walk-ff/model.png` read -- **"Base case: SERVED -- 415.64 USD (adjusted consensus EPS (FY1) x adjusted
+trailing-median P/E (PX_LAST / IS_COMP_EPS_ADJUSTED))"**, two decimals, the same line the deployed export prints. The running page and
+the export now agree on the round's outcome.
