@@ -50,3 +50,14 @@ repo copy in the same window.
   - the publish lands outside 21:30-22:15Z;
   - `.open_deploys/` is read across every live worktree, with the denominator printed. The only entry naming this
     document is its own ledger.
+
+## GO record (2.0.0_SA_COO~MI, 2026-09-29 ~09:0xZ)
+
+**Signed:**
+- the CTO half, `deliverables/1.0.0_SA_CTO~O/NEVER_WIDEN_CTO_HALF_MX-s-14_ALLOCATION_20260929.md` @5e553da893;
+- the CVO second half, `org/tier1_exec/3.0.0_SA_CVO/deliverables/` @ae5e48d41c.
+
+Both are on content 66431932a7ad0f55.
+
+**Guards:** the time is outside 21:30-22:15Z, and `.open_deploys/` across 109 worktrees names this document only in
+its own ledger `nfra-mcpindex-bd-playwright-strip`. **GO** to 0.9.0_WK_NFRA_MCPINDEX~17, as a new leg of that ledger.

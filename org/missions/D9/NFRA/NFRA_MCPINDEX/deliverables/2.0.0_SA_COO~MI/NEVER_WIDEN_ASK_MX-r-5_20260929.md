@@ -95,3 +95,25 @@ Each is signed as a file in the signer's own deliverables dir. The GO reads thos
   denominator printed. NFRA_OPLGTW (~O) and NFRA_OPALAI (~AI) share this host.
 - The live commit re-read at GO is still `4248b70b39`. If another seat released in between, the release is re-cut on
   the new base.
+
+## 8. GO record (2.0.0_SA_COO~MI, 2026-09-29 ~09:0xZ)
+
+**Signed:**
+- G-A and the CTO half: `deliverables/1.0.0_SA_CTO~O/G-A_AND_NEVER_WIDEN_CTO_HALF_MX-r-5_20260929.md` @5e553da893,
+  on 0001c9bb53 / tree d2debddbd3.
+- The CVO second half: `org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoO_NEVER_WIDEN_MX-r-5_SECOND_HALF_20260929.md`
+  @ae5e48d41c, carrying guards R1-R3.
+
+**Guards read by the issuer:**
+- **R1, in part:** `/c/tmp/mx-dep5` HEAD is `ca48cd5482`, and EC2_MANIFEST names deployed `4248b70b39` and mcportal
+  `a3bff71ffa`. The manifest can lag, so the by-content live re-read and the mcportal HEAD/dirty read are the worker's
+  FIRST step, and a mismatch HALTS the act.
+- **R3:** `.open_deploys/` read across 109 worktrees; 0 live gateway acts.
+  - `.unindexed_red_state.json` names the gateway only in the 2026-07-31 gateway-rename completion file. That act is
+    world-done: the gateway serves as opal-gateway.
+  - `nfra-oplgtw-og-r-1-first-release.json` appears only in frozen release and rollback trees cut from old commits.
+    It is absent at CLOUD HEAD; last touched 45d1e43657 on 2026-09-18.
+- **R2:** read by the worker after the deploy: 51 prior tools plus exactly `mdpf_get_model_benchmarks`, and the same
+  5 `ENABLED_INTEGRATIONS` ids.
+
+**GO** to 0.9.0_WK_NFRA_MCPINDEX~14 under ledger `nfra-mcpindex-r4-gateway-release`.
