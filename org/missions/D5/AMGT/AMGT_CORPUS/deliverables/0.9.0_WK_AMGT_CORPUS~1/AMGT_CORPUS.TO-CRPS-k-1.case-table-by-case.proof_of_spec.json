@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-k-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-k-1.case-table-by-case.md",
+    "group": "OTHER",
+    "vintage_commit": "2da2daa9b798550604d74a9762013333516fe16e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "2da2daa9b798550604d74a9762013333516fe16e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-k-1.case-table-by-case.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/dossier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_read_case_table reads the scenario table (three consecutive case leads, 3k year headers, rows of label + 3k values; a lone currency-symbol line is the preceding value's unit); _case_table_field serves case i the values [ik,(i+1)k) of every row as {value:{metric:{year:string}}, unit, citation at the table page}; a wrong-count row makes all three cases absent with the reason; a non-table heading keeps round 8. --case-census prints unit and ordering per name and the extended final line. METHOD_VERSION unchanged (/2). No S3 write of any kind was run.",
+      "introduces": [
+        "_read_case_table",
+        "_case_table_field",
+        "_case_ordering",
+        "_price_number",
+        "_unit_escape"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier_case_table.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 offline tests: k=5 table with own columns and page locator, k=3 table, U+00A3 unit, wrong value count -> all three absent with reason, date/page footer ends the table, non-table heading keeps round 8, census ordering held/violated/na with the exact summary, na without a Price row.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier_case_body.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE test edited: test_case_census_prints_per_name_states_and_the_exact_summary pinned the census's old per-name line and old final line; it now expects the unit and ordering columns and the extended final line. No test pinned the table-dump behaviour.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended: AMGT_CORPUS-Z-W1-S11 (lone symbol lines and date/page footer read as the table's own) and AMGT_CORPUS-Z-W1-S12 (6 of 34 tables unreadable, EPS row 14 values).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round9/k1_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round9/k1_AC1.sh",
+      "output_evidence": "........                                                             [100%]\n8 passed in 3.42s",
+      "denominator": "8 of 8 tests passed, 0 failed; rc 0",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round9/k1_AC2.sh -- expect case_census names ([1-9]\\d*) slots \\d+ body [1-9]\\d* heading_only 0 absent \\d+ sum \\d+ ordering_held \\d+ ordering_violated \\d+ ordering_na \\d+ unit_carried \\d+",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round9/k1_AC2.sh",
+      "output_evidence": "case_census names 95 slots 285 body 84 heading_only 0 absent 201 sum 285 ordering_held 28 ordering_violated 0 ordering_na 67 unit_carried 10",
+      "denominator": "95 of 95 resolved names censused over the stored extractions (read-only S3), 285 slots = 84 body + 0 heading_only + 201 absent; 34 names carry a table, 28 read (84 slots), 6 unreadable (18 absent slots, row Z-W1-S12); rc 0",
+      "expect": "case_census names ([1-9]\\d*) slots \\d+ body [1-9]\\d* heading_only 0 absent \\d+ sum \\d+ ordering_held \\d+ ordering_violated \\d+ ordering_na \\d+ unit_carried \\d+",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "JUDGMENT: does each served case read as that case, in the team's numbers, with its unit? (graded by 3.0.0_SA_CVO~Z at L9 on the served rewrite, on names from more than one currency; never by the worker)",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion, no invocation; the sample is read at the values cited in output_evidence",
+      "judgment": true,
+      "output_evidence": "ADBE_US_Equity upside EPS 2026E 24.16 ... 2030E 39.33, Price 416..629, unit null; base EPS 24.37..38.60, Price 233..347; downside EPS 23.06..27.78, Price 143..167 (locator page 0). AZN_LN_Equity upside EPS 9.08 10.24 11.54 13.06 14.75, Price 227.08..368.63, unit U+00A3; base EPS 7.76..12.16, Price 131.91..206.65, unit U+00A3; downside EPS 3.77..4.56, Price 45.24..54.72, unit U+00A3. Units across the 10 names that carry one: U+00A3 (AZN), U+20AC (ML), $ (8). Recorded with NO verdict.",
+      "denominator": "N/A -- judgment",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (judgment=true, no invocation): the substitute oracle is 3.0.0_SA_CVO~Z at L9, who reads the served cases against the team's reports. This row records the sample and carries no PASS/FAIL verdict."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A for this task order -- no mutant control was named.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC2 census run three times against live S3 reads during the build.",
+      "observed": "body 84 heading_only 0 absent 201 ordering_held 28 unit_carried 10 on every run after the footer stop landed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write (dossier --write)",
+      "reason": "Order bound: the served rewrite is the issuer's act after the drain."
+    },
+    {
+      "item": "Recovering the missing Base-group EPS value in 6 names",
+      "reason": "The value is absent from the extraction text layer; a different cell (row Z-W1-S12)."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W1-S11",
+    "AMGT_CORPUS-Z-W1-S12"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=. python -m pytest lib/research/corpus/tests/ -q",
+      "result": "392 passed in 3.99s"
+    }
+  ]
+}
