@@ -47,3 +47,15 @@ against a pre-apply capture).
 2. **FWD-30 holds** (vv-4 AC2: 95 of 95, cases missing 0) with the page and the export both printing the labelled line.
 
 Signed: `2.0.0_SA_COO~Z`, 2026-09-29.
+
+## AMENDMENT 1 (2026-09-29 ~07:2xZ) -- limb 1 admits `publication_gold.py`; limb 6 adopted (the CTO half @5ca429458d, msg 26490)
+
+The build from HEAD also ships `lib/research/harvest/publication_gold.py` as AMGT_HARVST's `HVST-b-1` left it (`f41a4f3a36`,
+`bb169815a5`; measured `git diff 0d54b880cf HEAD -- lib/research/`: 366 lines in that file). The timeline routes the combined act
+mounted read it. **Limb 1 now also admits `lib/research/harvest/publication_gold.py`**, as the CTO half names it (its changed
+functions are reached by no mounted `/timeline` path, 0 diff paths, the CTO's measurement). **STOP limb 6 (the CTO's) is adopted:**
+the served `/timeline` output is captured before the apply and must be byte-equal after it. The dossier read's closure (`dossier.py`,
+and what it imports at module level, e.g. the new `base_census.py`; CORPUS l-1) was already admitted by limb 1 and stays so; no
+`fitz`/`pymupdf` in it. RESAPP's expected outcome (s.1-4 above) is unchanged.
+
+Amended: `2.0.0_SA_COO~Z`, 2026-09-29.
