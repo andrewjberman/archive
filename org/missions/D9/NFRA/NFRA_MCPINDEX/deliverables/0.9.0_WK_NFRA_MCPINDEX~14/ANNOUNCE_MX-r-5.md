@@ -8,21 +8,67 @@ unchanged. AWS contact was read-only and all of it is Opal's own: `s3api list-ob
 artifact keys, `head-object` on the future key (404), and ONE SSM `AWS-RunShellScript` read of file hashes on the host.
 MX-t-10 is not drained (issuer ruling under A1): no ETF file is in the release, and its uncommitted patch was not touched.
 
-## THE RELEASE PIN (for the CTO's G-A arch-gate)
+## A2 UPDATE (2.0.0_SA_COO~MI amendment A2, rulings on Z-W14-S5, S6, S8) -- READ THIS FIRST
+
+Superseded by A2: the pin below is now **release 0001c9bb53, deploy-only ca48cd5482, gateway tree object
+d2debddbd3e3977b0ed1ef0db00a4afd457be394**. Everything else in this file that names 510bf69089, b9e5c64437 or tree
+3b35460af3 describes the FIRST pin; the base, the five carried commits, the rollback and the live-commit finding are unchanged.
+
+- **PHASE A carrier recommitted** on the wk branch as 192df0755b: this file byte for byte from ed61b070e4, and rows
+  Z-W14-S5..S8 appended to the end of CLOUD's channel (132 -> 136 rows; content-equal to the ed61b070e4 rows, `id` placed first).
+- **Z-W14-S5 fixed, 33d2dd2fbf** (text and declaration only): opal_discover's module docstring, SPEC description and SPEC
+  comment now state: no S3 object body is read; ONE S3 HEAD per servable row (`served_written_at`), under the gateway
+  role's existing `json/*` and `platinum/*` grant; nothing leaves Opal's own AWS. `SPEC.hosts` is now
+  `opal-data-portal-v2.s3.amazonaws.com` (was the never-resolving `no-egress.invalid`); base.py treats `hosts` as
+  documentation and a non-empty check, so behaviour is unchanged. **The declaration now matches the behaviour.**
+- **Z-W14-S6 fixed, a9092e0081:** `tests/test_entitlement_admin.py::test_ogz2_ac08` pins portal_index to 4 tools and the
+  registered count to 52. It passes.
+- **Z-W14-S8 CONFIRMED** for the rel- and dep- branches: two more uses of the audited override, both named: release commit
+  0001c9bb53 (use 3) and deploy-only commit ca48cd5482 (use 4). The first two were 510bf69089 and b9e5c64437.
+- **Release commit 0001c9bb53** = 510bf69089 + the gateway diff of 33d2dd2fbf and a9092e0081, applied with `git apply --3way`.
+  test_entitlement_admin.py conflicted (the release base has an older text of the two lines than CLOUD) and the same
+  one-pin, one-count change was made by hand on the release's text.
+- **Deploy-only commit ca48cd5482** = b9e5c64437 + the gateway diff of 0001c9bb53 (31 files vs CLOUD 0c18ee586f, all under
+  infra/aws/ec2/opal-gateway).
+
+**Re-proof (A2 step 6):**
+- Gateway tree object, dep vs release: `git rev-parse ca48cd5482:infra/aws/ec2/opal-gateway` =
+  `0001c9bb53:infra/aws/ec2/opal-gateway` = **d2debddbd3e3977b0ed1ef0db00a4afd457be394**; `git diff --stat` between them is empty.
+- Artifacts rebuilt (no upload) from the dep tree and the release tree: **79 of 79 byte-identical** (67 of 67 .py).
+- Release vs the LIVE artifact: 75 of 79 identical, the same 4 shipped files differ (data_entitlement.py,
+  opal_discover/integration.py, portal_index/integration.py, DATA_CATALOG.yaml). The SHIPPED delta did not grow.
+- **Census: the git census is now 8 files, not 7** (`git diff --stat 4248b70b39 0001c9bb53 -- infra/aws/ec2/opal-gateway`,
+  551 insertions, 49 deletions): the earlier 7 plus `tests/test_entitlement_admin.py` (+3 -2), which A2 step 3 puts on
+  the branches. `tests/` is not in the artifact, so the artifact still differs from live in exactly 4 files. Row Z-W14-S9.
+- `deploy-to-ec2.sh` is byte-identical to the live tree's (cmp); line 197 still carries the 5-id
+  `ENABLED_INTEGRATIONS=ycharts opal_portal globgrph opal_discover portal_index`.
+- Tests in the release tree: test_entitlement_admin, test_data_entitlement_guard, test_tool_classification_composition,
+  test_opal_discover, test_portal_index: **50 passed, 4 failed**. The 4 are the ones already failing on the LIVE tree
+  (test_ogz2_ac06, test_ogz1_ac05, test_ogz1_ac08, and test_portal_tools_catalog_refs_resolve, whose source-file glob
+  finds 3 catalog_entries yaml files while the catalog names 4 tools; the fourth yaml is outside the gateway tree and is
+  not carried). **test_ogz2_ac08 now passes**, so the release adds no failing test. On the wk branch (CLOUD): test_ogz2_ac08,
+  test_opal_discover, test_portal_index 27 passed.
+- Artifact key at GO: `opal-gateway-ca48cd5482.tar.gz` (head-object: 404 now).
+
+**G-A delta, restated:** item 1 (one new tool, 51 -> 52) is unchanged. Item 2 below (opal_discover's S3 HEAD) is now
+DECLARED: the SPEC, its description and `hosts` state the one HEAD per servable row. Row Z-W14-S5's mismatch is closed
+by 33d2dd2fbf; the disposition is the issuer's.
+
+## THE RELEASE PIN (for the CTO's G-A arch-gate) -- FIRST PIN; see the A2 UPDATE above for the current one
 
 | field | value |
 |---|---|
 | release branch | rel-nfra-mcpindex-r4-gateway (never merged, never pushed) |
-| release commit | 510bf690896d8f70410901fc6cc7f4fe5fe40f4c |
+| release commit (A2 pin) | 0001c9bb538ac24deb5dc5996b0006a9aba274c7 (first pin 510bf690896d8f70410901fc6cc7f4fe5fe40f4c, SUPERSEDED) |
 | release worktree | /c/tmp/mx-rel5 |
 | base = LIVE deployed commit | 4248b70b3911129588b96b32a4f74072151a8750 (NFRA_OPLGTW OG-x-3's release, deployed 2026-09-29T05:22:18Z) |
-| gateway tree object, release | 3b35460af3af112af72688a634fce760f4ef0dce |
-| deploy-only branch / commit | dep-nfra-mcpindex-r4-gateway (never merged, never pushed) / b9e5c64437019123a08b0fe6d8e5a644c39ebb46, on CLOUD 0c18ee586f |
+| gateway tree object, release = deploy-only | d2debddbd3e3977b0ed1ef0db00a4afd457be394 (first pin 3b35460af3, superseded) |
+| deploy-only branch / commit | dep-nfra-mcpindex-r4-gateway (never merged, never pushed) / ca48cd548220a085581c5322c908c308772c0d95, on CLOUD 0c18ee586f (first deploy-only commit b9e5c64437019123a08b0fe6d8e5a644c39ebb46, SUPERSEDED) |
 | deploy-only worktree | /c/tmp/mx-dep5 |
 | rollback tree | /c/tmp/mx-rb5, detached at 4248b70b39 |
 | mcportal (dashboard bundle) | a3bff71ffa3f5c73aa0fb7ea1e7386434e233054, nested clone in all three trees, 0 status lines each, unchanged from the live deploy |
-| artifact key at GO | s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-b9e5c64437.tar.gz (head-object: 404 now), plus `-latest` |
-| worker branch (this file, rows) | wk-nfra_mcpindex-4-14 |
+| artifact key at GO | s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-ca48cd5482.tar.gz (head-object: 404 now), plus `-latest` |
+| worker branch (this file, rows, the A2 edits 33d2dd2fbf and a9092e0081) | wk-nfra_mcpindex-4-14 |
 
 
 ## Step 1: the live deployed commit, read BY CONTENT
@@ -113,10 +159,10 @@ Against the live gateway (4248b70b39) the release changes the shipped surface as
 - Entitlement: `data_entitlement.py` INDEX_TOOLS names it (5a450314de), so it is tier-classified on enable.
 
 **2. `opal_discover` now performs one S3 HEAD per servable row it returns** (MX-d-4, R-14, `served_written_at`).
-Its SPEC still declares `hosts=("no-egress.invalid",)` and its description says it reads no S3 object. Measured on the
+AS FIRST CUT its SPEC declared `hosts=("no-egress.invalid",)` and its description said it reads no S3 object (corrected by A2, see above). Measured on the
 release catalog with the opal-internal principal: 24 servable rows, every HEAD key under `json/` (21) or `platinum/` (3),
-inside the role's granted scope; a failed HEAD reads `absent` with an error class. **The declaration and the behaviour
-disagree.** Row Z-W14-S5, ARMED, disarm owner 2.0.0_SA_COO~MI, for the CTO to weigh at G-A before the GO.
+inside the role's granted scope; a failed HEAD reads `absent` with an error class. **At the first cut the declaration and the
+behaviour disagreed (row Z-W14-S5, ARMED); A2's 33d2dd2fbf makes the declaration state the HEAD, so they now agree.**
 
 **3. Behavior changes with no new surface:** `next_tool` names the purpose-built tool (R-13); a weak one-word channel
 match answers NOT_CATALOGUED (MX-d-5); S&P vocabulary on the market_regime_trending channel (mkt.01's channel, no new row).
@@ -146,7 +192,8 @@ opal_discover/integration.py, portal_index/integration.py, DATA_CATALOG.yaml); N
 
 | id | class / hazard | what |
 |---|---|---|
-| NFRA_MCPINDEX-Z-W14-S5 | OBSERVATION / ARMED (disarm 2.0.0_SA_COO~MI) | opal_discover's egress declaration is stale against its S3 HEAD |
+| NFRA_MCPINDEX-Z-W14-S5 | OBSERVATION / ARMED (disarm 2.0.0_SA_COO~MI) | opal_discover's egress declaration was stale against its S3 HEAD; corrected in 33d2dd2fbf (A2) |
 | NFRA_MCPINDEX-Z-W14-S6 | OBSERVATION / INERT | test_ogz2_ac08 needs the fourth tool in its pin (51 -> 52), on CLOUD and the release |
 | NFRA_MCPINDEX-Z-W14-S7 | OBSERVATION / INERT | the live commit is 4248b70b39, not 0bce8d322a / 3371f18803 |
 | NFRA_MCPINDEX-Z-W14-S8 | OBSERVATION / INERT | two audited overrides (rel and dep commits) on the MX-r-4 precedent |
+| NFRA_MCPINDEX-Z-W14-S9 | OBSERVATION / INERT | A2 step 6 says the census is still 7 files; with test_entitlement_admin.py it is 8 in git, 4 shipped (unchanged) |
