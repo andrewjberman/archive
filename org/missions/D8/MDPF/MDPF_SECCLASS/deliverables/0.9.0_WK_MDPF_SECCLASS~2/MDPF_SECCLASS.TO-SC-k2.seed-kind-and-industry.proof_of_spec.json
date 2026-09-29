@@ -1,0 +1,219 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-k2",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP.md",
+    "vintage_commit": "c1e9b60e63",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-k2.seed-kind-and-industry.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classification.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source-only edit to the canonical seed source: adds IB-mr-251's PHYS row byte-identical to commit 40b86ffab3 (amendment 1), a new ETF_INSTRUMENT_KIND dict (fund/single_security over the seed-script's own all_tickers union, CASH_USD excluded/absent), and a new ETF_INDUSTRY dict (WMT only, GICS name resolved offline via etf_classifications_dynamodb.resolve() and recorded as a literal to avoid a live cross-module import into a module with copy-fragile deploy targets -- row MDPF_SECCLASS-W2-S1). No seed run against the table; no deploy.",
+      "introduces": [
+        "ETF_INSTRUMENT_KIND",
+        "ETF_INDUSTRY",
+        "get_instrument_kind",
+        "get_industry",
+        "'PHYS': 'commodities'"
+      ],
+      "artifact_covered_by": [
+        "SC1-k2-AC1",
+        "SC1-k2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-classifications.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "SEED_FIELDS/module_values extended with instrument_kind and industry (same placeholder-vs-real merge rule as every other field, no special-casing needed); merge_item now sets classified_by = 'seed' unconditionally, alongside last_updated/updated_by. Run only with --dry-run against the live table for this cell's census; no write performed.",
+      "introduces": [
+        "\"instrument_kind\", \"industry\"",
+        "item[\"classified_by\"] = \"seed\""
+      ],
+      "artifact_covered_by": [
+        "SC1-k2-AC1",
+        "SC1-k2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_row() now derives instrument_kind per ticker (single_security for a stock, fund for the two money-market funds SALXX/FXFXX, absent for the CASH residual line -- row MDPF_SECCLASS-W2-S2), and never sets classified_by. Writes switched from table.batch_writer() to per-item put_row_if_unclassified(), a conditional PutItem (attribute_not_exists(classified_by)) that raises RowProtected and skips a row the seed path or FWD-7 already owns (1.0.0_SA_CTO RULING 103050, amendment 2). Run only with --dry-run against the live table; no write performed.",
+      "introduces": [
+        "def build_row",
+        "def instrument_kind_for",
+        "class RowProtected",
+        "def put_row_if_unclassified"
+      ],
+      "artifact_covered_by": [
+        "SC1-k2-AC1",
+        "SC1-k2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "19 tests: every module instrument_kind is a contract value; GLD/PHYS/VXX read fund and the PHYS row matches 251's commit byte-for-byte; a constituent row reads single_security, the two money-market funds read fund, the CASH residual carries no instrument_kind; a row with no known industry (GLD) carries no industry attribute while WMT carries the one known value; the constituents seeder never sets classified_by and refuses (RowProtected) to overwrite a row that already carries one, regardless of its value; none of the three edited files reference bd-securities/bd_securities/etf_classifier. python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py -q -p no:cacheprovider: 19 passed in 0.26s.",
+      "introduces": [
+        "def test_wmt_carries_the_one_known_industry",
+        "def test_constituents_seeder_refuses_to_overwrite_a_classified_row"
+      ],
+      "artifact_covered_by": [
+        "SC1-k2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_SEED_FIELDS_CENSUS_20260929.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built by running both seeders' own merge_item()/build_row() logic against a live read of etf-classifications (344 rows, one PRE-READ scan) and the live served constituents artifact (167 tickers) -- read-only, no put_item/batch_writer call anywhere in the build. seed_rows=302 (137 module tickers minus CASH_USD, plus 167 constituent tickers minus the CASH residual line), live_rows=344, class_changes=[] (zero asset_class regressions), other_diffs=88 (name/management_style/sector/sub_asset_class differences excluding the two new fields, per r1_seed_fields.py's own 'differences other than the new fields named per ticker'); only 2 of those 88 are a real live value changing (BNDX.sub_asset_class, a pre-existing drift predating this cell per git blame eeec3e9d62; CASH.name, guarded by --force-names and not part of this act) -- the other 86 are net-new tickers with no live row yet.",
+      "artifact_covered_by": [
+        "SC1-k2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_SEED_FIELDS_20260929.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Never-widen half for the future signed seed run: names the act (both seeders, no --accept-module-truth needed), the blast radius against both live Positioning readers (registry_field()/classification.get(key) by explicit key, new fields inert) and the future IR Holdings producer (IB-mr-251, held, byte-identical PHYS row), every listed class change (zero) and real value change (BNDX, CASH), and a rollback per key (UpdateItem REMOVE for the two new fields plus classified_by, SET for BNDX's PRE-READ value, DeleteItem for a net-new row).",
+      "artifact_covered_by": [
+        "SC1-k2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three new rows appended (append-only, schema-valid, parsed as 4 total fenced JSON blocks including the pre-existing seat row MDPF_SECCLASS-S1 this cell's report disarms): MDPF_SECCLASS-W2-S1 (etf_classification.py copy-fragility vs. a live resolve() import), MDPF_SECCLASS-W2-S2 (3 of 167 constituent tickers are not single-security stocks), MDPF_SECCLASS-W2-S3 (the census's full-domain kinds map vs. this act's actual 10-of-167 constituent write plan)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC1-k2-AC1",
+      "criterion_verbatim": "`SC1-k2-AC1` -- both fields on the seed rows, contract values only, absent never defaulted, no bd-securities read.",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py .................. [100%]\n19 passed in 0.26s",
+      "denominator": "19 of 19 tests passed (0 failed, 0 errors, 0 skipped).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC1-k2-AC2",
+      "criterion_verbatim": "`SC1-k2-AC2` -- every seed row's kind, GLD/PHYS/VXX as fund, and the seed-vs-live diff listed.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_seed_fields.py",
+      "expect": "SEED-FIELDS",
+      "output_evidence": "SEED-FIELDS 302/344 diffs=88 class_changes=0",
+      "denominator": "302 of 302 kinds entries hold a contract value (fund/single_security); 3 of 3 (GLD, PHYS, VXX) read fund; 0 of 0 class_changes lack ticker/before/after; 344 live_rows read via one fully-paginated scan.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC1-k2-AC3",
+      "criterion_verbatim": "`SC1-k2-AC3` -- the half for the seed run, for the issuer to sign and send.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_SEED_FIELDS_20260929.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_SEED_FIELDS_20260929.md",
+      "denominator": "0 of 0 unresolved {{slot}} placeholders; 4 of 4 required strings present (## The act, ## Blast radius, Rollback per key, candidate).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Removed 'WMT' from etf_classification.py's _SINGLE_SECURITY_TICKERS set (commented out), so ec.ETF_INSTRUMENT_KIND['WMT'] silently became 'fund' instead of 'single_security'.",
+      "expected": "test_wmt_carries_the_one_known_industry fails on its instrument_kind assertion (item.get('instrument_kind') == 'single_security')",
+      "observed": "FAILED test_wmt_carries_the_one_known_industry - AssertionError: assert 'fund' == 'single_security' (1 failed, 18 passed). Reverted immediately; re-run: 19 passed in 0.38s.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py -q -p no:cacheprovider invoked twice back to back; outputs diffed.",
+      "observed": "diff of the two runs is empty apart from pytest's own per-run timing line ('19 passed in 0.34s' vs '19 passed in 0.44s') -- byte-identical otherwise; same 19 node ids in the same order both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running either seeder against the live table without --dry-run (an actual write).",
+      "reason": "Forbidden by the order's BOUNDS: LOCAL build + record, seeders run with --dry-run only, no table write, no deploy. The never-widen half is the artifact that hands the real run to the issuer to sign."
+    },
+    {
+      "item": "GICS industry for the ~166 non-WMT tickers this cell's two universes cover.",
+      "reason": "Absent means absent (order step 1): GICS industry is filled 'where GICS knows it', and this cell's only known Bloomberg GICS input is WMT's. The served constituents artifact carries no GICS industry-group field for its other 166 tickers (measured: 0 hits for 'industry_group' anywhere under infra/aws/lambda/v2_portal) -- row MDPF_SECCLASS-W2-S3 and the census's other_diffs both surface this as absence, not as a defect to paper over."
+    },
+    {
+      "item": "Backfilling instrument_kind onto the 157 already-existing constituent rows that a default (non --force-names) run of seed-etf-constituents.py would not touch.",
+      "reason": "Out of this cell's step-2 mandate (which describes what a row THIS seeder writes carries, not a rewrite of its pre-existing preserve-by-default behavior); surfaced as row MDPF_SECCLASS-W2-S3 rather than silently expanded into a wider seeder rewrite."
+    },
+    {
+      "item": "Folding seed-etf-constituents.py into the sanctioned seed path (a third classified_by writer, or classified_by=seed on its own rows).",
+      "reason": "RULING 103050 (amendment 2) is explicit: a fold is the CTO's round-2 addendum, not this order's. This cell reports the writer question (see REPORT) and makes the write conditional, nothing further."
+    },
+    {
+      "item": "Wiring etf_classifications_dynamodb.resolve() as a live runtime import inside etf_classification.py.",
+      "reason": "Row MDPF_SECCLASS-W2-S1: etf_classification.py has at least 2 other physical deploy copies with no etf_classifications_dynamodb.py peer; a live import would ImportError those Lambdas on next sync. The one known industry value is pre-resolved and cited instead."
+    },
+    {
+      "item": "Deploy, push, merge or rebase.",
+      "reason": "Forbidden by the order. The commit is LOCAL on branch wk-MDPF_SECCLASS-2; the COO drains it."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W2-S1: etf_classification.py is physically copied into at least 2 other lambda directories with no etf_classifications_dynamodb.py peer, so the industry field is a pre-resolved literal, not a live resolve() import.",
+    "MDPF_SECCLASS-W2-S2: 3 of the 167 tickers in seed-etf-constituents.py's universe are not single-security stocks (2 money-market funds, 1 cash-residual line) -- classified fund/absent accordingly, not blanket single_security.",
+    "MDPF_SECCLASS-W2-S3: the census's kinds map (302 entries) is the full seed-source domain; the actual act this cell's half describes only writes instrument_kind to 10 of the 167 constituent tickers (the net-new ones) under a default, non --force-names run."
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_SEED_FIELDS_20260929.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py -q -p no:cacheprovider",
+      "result": "19 passed in 0.26s"
+    },
+    {
+      "tool": "r1_seed_fields.py (SC1-k2-AC2 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_seed_fields.py",
+      "result": "SEED-FIELDS 302/344 diffs=88 class_changes=0, rc=0"
+    },
+    {
+      "tool": "r20_half_ready.py (SC1-k2-AC3 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_SEED_FIELDS_20260929.md",
+      "result": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_SEED_FIELDS_20260929.md, rc=0"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/v2_portal/_shared/etf_classification.py infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-classifications.py infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~2 <0.9.0_WK_MDPF_SECCLASS~2@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-MDPF_SECCLASS-2"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC1-k2-AC1,SC1-k2-AC2,SC1-k2-AC3",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}
