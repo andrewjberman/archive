@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-213",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "613bfc6ecfa1ec016f15c93a3729b586ee47a960"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "4a6402ad8c7a46d43f1080aed28f830843070287",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-213.edge-role-public-keys-only.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~69",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "749554633784bda9b02205eaafe2d44b2f701c25",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Not applied (BOUNDS: plan only). blob=86611612ed0c1c42d0d6b5289b5349e92cddc579 (git show 749554633784bda9b02205eaafe2d44b2f701c25:infra/aws/terraform/portal-auth/iam.tf | git hash-object --stdin). aws_iam_role_policy.lambda_edge_secrets_logs's GetSecretValue Resource narrowed from the bare wildcard 'secret:opal/auth/*' to the two-element list ['secret:opal/auth/jwt-public-key-*', 'secret:opal/auth/irpt-render-jwt-public-key-*']; every other statement unchanged in substance (terraform fmt reformatted indentation on an unrelated pre-existing comment block, whitespace only).",
+      "introduces": ["opal/auth/jwt-public-key-*", "opal/auth/irpt-render-jwt-public-key-*"],
+      "artifact_covered_by": ["P21-3-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~69/IB-pr-213.result.md",
+      "kind": "doc",
+      "commit_or_etag": "4d9cfd9aa5a97af0f4f3f926de3545d8383ecad0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "session log for this order, committed at 4d9cfd9aa5a97af0f4f3f926de3545d8383ecad0",
+      "artifact_covered_by": ["P21-3-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d592be3c5c77a9a6f188cf1cab14e3e918c9dc14",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_BCKEND-W69-S1 and IRPT_BCKEND-W69-S2 appended; gate-validated (.tools/surprise-row-gate.py: '2 new row(s) of 461 total checked', OK) before this commit landed at d592be3c5c."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P21-3-AC1",
+      "criterion_verbatim": "the GetSecretValue statement names exactly the secrets the edge code reads, all public keys, none a bare wildcard. Base: FAIL (opal/auth/*). Positive control, run at the cut: a copy narrowed to the two names PASSES.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r21/p21_3_ac1_edge_policy_source.py\" .",
+      "output_evidence": "edge reads ['irpt-render-jwt-public-key', 'jwt-public-key'] | GetSecretValue resources 2 ['arn:aws:secretsmanager:us-east-1:${local.account_id}:secret:opal/auth/jwt-public-key-*', 'arn:aws:secretsmanager:us-east-1:${local.account_id}:secret:opal/auth/irpt-render-jwt-public-key-*']\nP21-3-AC1 PASS",
+      "denominator": "1 of 1 statement (aws_iam_role_policy.lambda_edge_secrets_logs's GetSecretValue Resource) against 2 of 2 edge-read secret ids",
+      "status": "PASS",
+      "expect": "P21-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base (pre-edit) statement is the negative control: run against the unmodified wildcard 'secret:opal/auth/*', the same checker script reports FAIL (bare wildcard, names neither edge-read id explicitly).",
+      "expected": "Base FAIL, narrowed-copy PASS.",
+      "observed": "Base (git show 749554633784bda9b02205eaafe2d44b2f701c25~1:infra/aws/terraform/portal-auth/iam.tf, the pre-edit blob) carries Resource = \"arn:aws:secretsmanager:us-east-1:${local.account_id}:secret:opal/auth/*\", which the checker's regex `:secret:opal/auth/([A-Za-z0-9_-]+?)(-\\*|-\\?{6})$` does not match (the bare '*' is not a name followed by '-*'), so `bad` is non-empty and the base fails; the narrowed copy at 749554633784bda9b02205eaafe2d44b2f701c25 matches both entries exactly and passes, as shown in the acceptance row above.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran the AC script twice at the committed bytes (749554633784bda9b02205eaafe2d44b2f701c25), once immediately after `terraform fmt` and once after the surprise-channel commit (no further edit to iam.tf between runs).",
+      "observed": "Identical output both times: 'edge reads [...] | GetSecretValue resources 2 [...]' then 'P21-3-AC1 PASS'.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform apply",
+      "reason": "Per BOUNDS: 'Do NOT apply... it is the issuer's served act, under both never-widen halves, with a live before/after of the human-token path.' The live AWS grant is unchanged by this instance; deployed_state on the terraform artifact is STAGED-AWAITING-GATE, not DEPLOYED-VERIFIED."
+    }
+  ],
+  "surprises": ["IRPT_BCKEND-W69-S1", "IRPT_BCKEND-W69-S2"],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~69/IB-pr-213.result.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt infra/aws/terraform/portal-auth/iam.tf",
+      "result": "infra\\aws\\terraform\\portal-auth\\iam.tf (file reformatted, rc=0)"
+    },
+    {
+      "tool": "terraform init (system PATH binary, .tools/terraform.exe absent in this worktree -- row S1)",
+      "invocation": "terraform init -input=false -lock=false -no-color",
+      "result": "rc=0 (backend/provider setup only, no resource write)"
+    },
+    {
+      "tool": "terraform plan, targeted",
+      "invocation": "terraform plan -lock=false -target=aws_iam_role_policy.lambda_edge_secrets_logs -no-color",
+      "result": "rc=0, 'Plan: 0 to add, 1 to change, 0 to destroy.' -- aws_iam_role_policy.lambda_edge_secrets_logs updated in-place, no other resource"
+    },
+    {
+      "tool": "terraform plan, un-targeted (corroboration of the targeted result, not a build step)",
+      "invocation": "terraform plan -lock=false -no-color",
+      "result": "rc=0, 'Plan: 0 to add, 2 to change, 0 to destroy.' -- the named resource plus pre-existing unrelated drift on aws_wafv2_web_acl.opal_cloudfront_protection (row S2)"
+    },
+    {
+      "tool": "git hash-object / git show (committed-blob isolation)",
+      "invocation": "git show 749554633784bda9b02205eaafe2d44b2f701c25:infra/aws/terraform/portal-auth/iam.tf | git hash-object --stdin",
+      "result": "86611612ed0c1c42d0d6b5289b5349e92cddc579, matches the committed blob"
+    }
+  ]
+}
