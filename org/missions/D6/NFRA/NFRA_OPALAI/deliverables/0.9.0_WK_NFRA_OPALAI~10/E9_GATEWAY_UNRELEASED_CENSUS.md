@@ -173,9 +173,9 @@ Per class: released-elsewhere 31, unreleased 18, superseded 2 (total 51 = DENOMI
 
 ### The unreleased commits a move from BASE would carry (18)
 
-Commits touching `app/` code (would change the served behaviour when released): `0906bf01e5` (NFRA_OPLGTW OG-u-2), `0c3d545002` (NFRA_OPLGTW OG-x-2), `c4d2274c6d` (NFRA_OPLGTW OG-u-1), `b5a585cf2f` (NFRA_OPLGTW OG-t-1), `8ed37b3266` (NFRA_OPALAI OA-e-10), `bc0cde67f0` (NFRA_MCPINDEX MX-t-8), `84a725073b` (NFRA_MCPINDEX MX-t-8), `98ad7e253f` (NFRA_MCPORTAL MP-t-1), `cc22fdfb9d` (NFRA_OPALAI OA-t-5), `6abf60e5d5` (MDPF_TAXSMA TX-g-1).
+Commits with an `app/` file not yet on the host (would change the served behaviour when released): `0906bf01e5` (NFRA_OPLGTW OG-u-2), `0c3d545002` (NFRA_OPLGTW OG-x-2), `c4d2274c6d` (NFRA_OPLGTW OG-u-1), `b5a585cf2f` (NFRA_OPLGTW OG-t-1), `8ed37b3266` (NFRA_OPALAI OA-e-10), `98ad7e253f` (NFRA_MCPORTAL MP-t-1), `6abf60e5d5` (MDPF_TAXSMA TX-g-1).
 
-Test, runbook or benchmark only (no served effect): `82824d829f` (NFRA_OPLGTW OG-h-1), `2df96ab2b2` (NFRA_OPLGTW OG-v-6), `344cca64a1` (NFRA_OPLGTW OG-t-1), `d292b6c0b9` (NFRA_OPLGTW OG-v-6), `a8cd1b06d3` (NFRA_OPLGTW OG-o-3), `31b9d1975e` (NFRA_MCPORTAL MP-f-1), `9e4074c33a` (NFRA_OPLGTW OG-r-2), `8dce9aeb0b` (MDPF_TAXSMA TX-g-1).
+Commits whose not-on-host files are tests, runbooks or benchmarks only (no served effect): `82824d829f` (NFRA_OPLGTW OG-h-1), `2df96ab2b2` (NFRA_OPLGTW OG-v-6), `344cca64a1` (NFRA_OPLGTW OG-t-1), `d292b6c0b9` (NFRA_OPLGTW OG-v-6), `a8cd1b06d3` (NFRA_OPLGTW OG-o-3), `31b9d1975e` (NFRA_MCPORTAL MP-f-1), `bc0cde67f0` (NFRA_MCPINDEX MX-t-8), `84a725073b` (NFRA_MCPINDEX MX-t-8), `cc22fdfb9d` (NFRA_OPALAI OA-t-5), `9e4074c33a` (NFRA_OPLGTW OG-r-2), `8dce9aeb0b` (MDPF_TAXSMA TX-g-1).
 
 ### Two commits outside the DENOMINATOR
 
