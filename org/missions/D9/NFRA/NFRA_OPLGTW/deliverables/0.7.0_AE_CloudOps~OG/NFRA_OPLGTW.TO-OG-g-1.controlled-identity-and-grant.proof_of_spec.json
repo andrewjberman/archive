@@ -11,7 +11,7 @@
  },
  "decomp_ref": {
   "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
-  "vintage_commit": "1621a80b0c",
+  "vintage_commit": "b274848977",
   "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-g-1.controlled-identity-and-grant.md"
  },
  "artifacts_produced": [
@@ -56,6 +56,18 @@
     "GCG1-AC4",
     "GCG1-AC5",
     "GCG1-AC6"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~OG/probes/og_g1_accounts.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AMENDMENT A3's instrument: S3 GetObject by pinned VersionId on the 5 objects SEALED_EXPECTED_V2.json records, pyarrow decode, DISTINCT account_id per master. Counts only -- no identifier, balance or holding is printed, written or committed; the bytes land in a temp directory outside the repository and are removed in a finally. Run 2026-09-29: 5 of 5 objects read; 08242234 -> 7460, 08335338 -> 7548. Passed .tools/commit-gate.sh.",
+   "artifact_covered_by": [
+    "GCG1-AC5",
+    "GCG1-AC6",
+    "GCG1-J1"
    ]
   },
   {
@@ -105,13 +117,13 @@
   },
   {
    "criterion_id": "GCG1-AC3",
-   "criterion_verbatim": "GCG1-AC3 -- the grant candidate PASSES the committed operator command's own validation (`schwab_entitlement_admin.py prepare`), and the evidence file carries that command's printed scope diff verbatim. The probe re-runs the validation against the recorded candidate rather than trusting the transcript.",
+   "criterion_verbatim": "GCG1-AC3, as replaced by AMENDMENT A2 (ruling 1.0.0_SA_CTO~O @8bf2bf37c6): the probe imports `infra/aws/ec2/opal-gateway/ops/schwab_entitlement_admin.py` and calls `validate_candidate(raw, contract)` on the off-repo candidate (the one `activate` validates first) -- no write. The evidence file carries the scope diff with every account identifier REDACTED, plus the SHA-256 of the UNREDACTED diff; the probe recomputes the unredacted diff from the candidate and compares the SHA-256. AC6 is unchanged.",
    "method": "command",
    "invocation": "timeout 110 python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~OG/probes/og_g1.py AC3",
-   "output_evidence": "validator: ops/schwab_entitlement_admin.py validate_candidate (the function `activate` itself calls)\nnote: the CLI exposes activate|revoke|deny-backfill -- there is NO `prepare` subcommand; see row NFRA_OPLGTW-Z-S9\nscope half: PARSES -- masters=2 datasets=3 dates=fixed_dates(2) columns=15 operations=4\naccounts dimension substituted for this parse in 2 of 2 master(s): the committed scope redacts it under AC6 (see row NFRA_OPLGTW-Z-S10)\nfull candidate: REJECTED -- CandidateRejected('empty or unknown identity: not an Entra GUID')\nVERDICT: FAIL-GCG1-AC3 no controlled identity to validate (tid/oid absent); the scope half parses\nRC=1",
-   "denominator": "scope half: masters 2, datasets 3, dates fixed_dates(2), columns 15, operations 4 -- parses under the command's own de.parse_scope; accounts dimension substituted in 2 of 2 masters because the committed scope redacts it under AC6. Full candidate refused at make_principal.",
+   "output_evidence": "validator: ops/schwab_entitlement_admin.py validate_candidate (the function `activate` runs first)\nnote: the CLI exposes activate|revoke|deny-backfill -- there is NO `prepare` subcommand (row NFRA_OPLGTW-Z-S9)\noff-repo candidate (A2: the ids never enter the repo): C:\\Users\\Opal Bloomberg\\AppData\\Local\\opal\\og-salt\\og_g1_candidate.json\n  state: ABSENT\n  denominator: 1 off-repo candidate required, 0 present\nVERDICT: FAIL-GCG1-AC3 the off-repo candidate does not exist -- it is keyed by the controlled identity's tid/oid, which does not exist yet (see AC1); nothing to validate\nRC=1",
+   "denominator": "1 off-repo candidate required at %LOCALAPPDATA%/opal/og-salt/og_g1_candidate.json, 0 present. The arm is fully implemented against A2's mechanism -- import, validate_candidate, recompute the unredacted diff, compare its SHA-256, then scan the committed evidence for any account identifier of the candidate -- and grades the moment the identity exists.",
    "status": "FAIL",
-   "status_reason": "REFUSED WITH ITS MEASUREMENT, on two independent causes. (1) No tid/oid exists, so validate_candidate refuses at make_principal. (2) Row NFRA_OPLGTW-Z-S10: the committed candidate must redact the accounts dimension under AC6, so what validates is not what a run would activate -- AC3-verbatim and AC6-no-raw-account-id cannot both hold for a Schwab grant, because parse_scope requires non-empty per-master account lists (_strings, data_entitlement.py:204-206). Separately, row NFRA_OPLGTW-Z-S9: the CLI has no `prepare` subcommand; the probe calls the committed module's own validator, which is the same code activate runs.",
+   "status_reason": "REFUSED WITH ITS MEASUREMENT, now on ONE cause where the first pass had two. Amendment A2 retired both original defects: row NFRA_OPLGTW-Z-S9 (the CLI has no `prepare` subcommand -- A2 names validate_candidate via import) and row NFRA_OPLGTW-Z-S10 (AC3-verbatim vs AC6-no-raw-account-id -- ruled AC6 wins, redacted diff plus the SHA-256 of the unredacted one). Z-S10 is confirmed on the code, not inferred: app/account_ref.py:3 states that the data_entitlement grant's scope.accounts holds raw Schwab ids. What remains is that the off-repo candidate is keyed by a tid/oid that does not exist, so there is nothing to validate and no diff to hash.",
    "expect": "(?m)^VERDICT: PASS-GCG1-AC3(?![0-9])"
   },
   {
@@ -164,11 +176,11 @@
    "status": "FIRED-AS-EXPECTED",
    "description": "Three readers had to be able to go either way, and all three were shown to. (1) AC4's strong-read instrument, run as a POSITIVE CONTROL against the one principal that does exist in the live table -- the arm AC4 itself cannot reach because no controlled principal key is constructible. (2) AC6's scanner, which produced a real FAIL and a PASS only after the cause was removed. (3) AC2's AWS shim path, which failed loudly rather than passing silently.",
    "expected": "(1) the reader returns a present record for an existing principal, proving AC4's FAIL is a true absence rather than a blind reader; (2) AC6 FAILs while a forbidden-shaped value is present and PASSes once it is gone; (3) a broken instrument is reported as a FAIL naming its cause.",
-   "observed": "(1) 'rc=0 / items read: 3 / principal_profile found: 1 -> status=active' against POLICY#6810043e-d171-4adc-9975-068b35e179da#ad037ea5-fee8-412e-9da9-15c6cf2a4fbc -- the instrument CAN see a present record. (2) AC6 first run: 'FAIL-GCG1-AC6 1 file(s) carry a forbidden value: og_g1.py: raw account identifier candidate 00000000; raw account identifier candidate 000000000000' -- the probe's own all-zero GUID sentinel, a false positive; after blanking GUIDs before the digit scan, 'PASS-GCG1-AC6, 4 files scanned, 0 with a finding'. (3) AC2 returned 'FAIL ... deployed-roster read could not be issued (rc=255): shim invocation failed: OSError(8, '%1 is not a valid Win32 application')' against the bash .tools/aws shim, and read the live rosters once the .cmd forwarder was resolved -- a FAIL with its cause, never a silent pass. AC1 also went both ways: it read 'instrument <<ABSENT>>' until a backtick-excluding capture class was widened, since an instrument name carries backticks of its own."
+   "observed": "(1) 'rc=0 / items read: 3 / principal_profile found: 1 -> status=active' against an EXISTING principal -- the instrument CAN see a present record, so AC4's FAIL is a true absence. (2) AC6 fired for real TWICE and passed only after each cause was removed: first on the probe's own all-zero GUID sentinel (GUIDs are now blanked before the digit scan), then on a git commit hash cited in the record -- a digit-only lookaround treats the 9-digit tail of a hash beginning with a hex letter as an account number, so the boundary was widened to word-class. A negative control confirms the widened pattern STILL matches a standalone 10-digit token and a quoted one, and no longer matches a commit-ish. (3) AC2 returned rc=255 OSError('%1 is not a valid Win32 application') against the bash .tools/aws shim before the .cmd forwarder was resolved -- a FAIL with its cause, never a silent pass. (4) AMENDMENT A3's account count went both ways too: the first run RAISED ArrowInvalid('No match for FieldRef.Name(account_ref)') rather than counting the wrong column, which is how the contract-name / physical-column split (account_ref is a keyed HMAC over account_id, app/integrations/schwab/datasets.json:12) was found instead of silently miscounted."
   },
   "determinism": {
    "method": "All six arms run twice end to end in the same worktree, each under timeout 110, the two transcripts compared byte for byte with diff. The runs include the live SSM roster read on i-07dccb1615503ac99, the live DynamoDB reads and the seal read at HEAD, so this exercises the networked arms and not only the file-local ones.",
-   "observed": "IDENTICAL byte-for-byte across both runs: FAIL-AC1, FAIL-AC2, FAIL-AC3, FAIL-AC4, PASS-AC5, PASS-AC6 with the same measurements and denominators in the same order. The probe prints no timestamp and no command id, which is what makes the comparison meaningful rather than trivially unequal.",
+   "observed": "IDENTICAL byte-for-byte across both runs in this worktree: FAIL-AC1, FAIL-AC2, FAIL-AC3, FAIL-AC4, PASS-AC5, PASS-AC6 with the same measurements and denominators in the same order. The A3 account count was also re-run and returned the same figures (7460 / 7548). The probe prints no timestamp and no command id, which is what makes the comparison meaningful.",
    "status": "STABLE"
   }
  },
@@ -195,12 +207,13 @@
   }
  ],
  "surprises": [
-  "NFRA_OPLGTW-Z-S9: GCG1-AC3 names the invocation `schwab_entitlement_admin.py prepare`, but the CLI admits only activate, revoke and deny-backfill -- `prepare` is an internal function, and it is what prints the scope diff on the activate path (OBSERVATION, INERT; the probe calls the committed module's own validator).",
-  "NFRA_OPLGTW-Z-S10: GCG1-AC3 (scope diff verbatim) and GCG1-AC6 (no raw account identifier in any committed artifact) cannot both hold, because parse_scope requires non-empty per-master account lists (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~O; blocks GCG1-AC3 from passing as written even once the identity exists).",
-  "NFRA_OPLGTW-Z-S11: a fixed_dates grant bounds the latest qualified date it can report, so once a closure marker later than 2026-09-25 lands, A7 step 4's 'newest marker at ask time' half stops holding for a reason that is the date mode rather than the system under test (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~O; GCG1-AC5 is unaffected).",
-  "NFRA_OPLGTW-Z-S12: the order mandates row ids of the form NFRA_OPLGTW-Z-OG-S<k>, which BOTH gates reject -- surprise-row-gate.py:104 and proof-of-spec-check.py:1127 are anchored patterns admitting only Z-, W<n>- or C- before S<k>, and 0 of the channel's 191 rows carry a -OG- segment. Filed under the order's literal ids the commit would have been refused and these findings would have read as unfiled, so they carry the admitted seat-row shape Z-S9..S12 (OBSERVATION, INERT)."
+  "NFRA_OPLGTW-Z-S9: GCG1-AC3 named `schwab_entitlement_admin.py prepare`, but the CLI admits only activate, revoke and deny-backfill -- prepare is an internal function and is what prints the scope diff on the activate path (OBSERVATION, INERT). DISPOSITIONED by 2.0.0_SA_COO~O row NFRA_OPLGTW-Z-S13: folded into amendment A2, which names validate_candidate() via import.",
+  "NFRA_OPLGTW-Z-S10: GCG1-AC3 (scope diff verbatim) and GCG1-AC6 (no raw account identifier in any committed artifact) could not both hold, because parse_scope requires non-empty per-master account lists. Confirmed on the code at app/account_ref.py:3. DISPOSITIONED by row NFRA_OPLGTW-Z-S13: ruled by 1.0.0_SA_CTO~O @8bf2bf37c6 -- AC6 wins, redacted diff plus the SHA-256 of the unredacted diff, folded as A2.",
+  "NFRA_OPLGTW-Z-S11: a fixed_dates grant bounds the latest qualified date it can report, so a marker later than 2026-09-25 would break A7 step 4's expectation for a reason that is the date mode, not the system under test. DISPOSITIONED by row NFRA_OPLGTW-Z-S13: OG-v-7's OGV7-AC6 amended to the grant's dates @ce520eb13e -- one of the two routes the row named.",
+  "NFRA_OPLGTW-Z-S12: the order mandated row ids of shape NFRA_OPLGTW-Z-OG-S<k>, which both gates reject (surprise-row-gate.py:104, proof-of-spec-check.py:1127). DISPOSITIONED by row NFRA_OPLGTW-Z-S13: A2 names the admitted NFRA_OPLGTW-Z-S<k> shape.",
+  "NFRA_OPLGTW-Z-S14: measured under A3, the sealed account set is EVERY account in both masters (7460 and 7548), so the grant cannot be the bounded subset of accounts the order asks for -- and the seal FORCES that, because RQ2-2..RQ2-6 are aggregates whose hashes break under any account subset. The cost is that the account dimension yields no refusal discriminator; every refusal OG-v-7 grades comes from the column or date dimension (OBSERVATION, INERT; new this pass)."
  ],
- "session_log": "This seat is a SESSION seat, not an L7 worker subagent; the trail is this instance, the evidence file, the result file, the three -Z-OG-S rows and branch ae-og-g1b (sparse worktree at C:/tmp/ae-og-g1b, cut from CLOUD @1621a80b0c). No write of any kind was made to AWS or Entra. Read-only calls this run: sts get-caller-identity; dynamodb scan of POLICY# (10 items, ScannedCount 213, no LastEvaluatedKey) and one --consistent-read query; ec2 describe-instances; two ssm send-command roster reads on i-07dccb1615503ac99 extracting only the roster keys and never the secret-bearing lines of /opt/opal-gateway/.env; s3api list-objects-v2 on the two meta/complete/ prefixes (19 markers each). Entra: az account list, az ad user list, az ad user show -- the one authoritative tenant read the order's declared egress class admits. No vendor API. No secret value entered any committed file.",
+ "session_log": "This seat is a SESSION seat, not an L7 worker subagent; the trail is this instance, the evidence file, the result file, the three -Z-OG-S rows and branch ae-og-g1c (sparse worktree at C:/tmp/ae-og-g1c, cut from CLOUD @b274848977). No write of any kind was made to AWS or Entra. Read-only calls this run: sts get-caller-identity; dynamodb scan of POLICY# (10 items, ScannedCount 213, no LastEvaluatedKey) and one --consistent-read query; ec2 describe-instances; two ssm send-command roster reads on i-07dccb1615503ac99 extracting only the roster keys and never the secret-bearing lines of /opt/opal-gateway/.env; s3api list-objects-v2 on the two meta/complete/ prefixes (19 markers each); and under AMENDMENT A3, s3api get-object by the PINNED VersionId on the 5 objects SEALED_EXPECTED_V2.json records -- no other key, no list, no latest version -- decoded with pyarrow to DISTINCT account_id counts per master, the bytes written to a temp directory outside the repository and removed in a finally. Entra: az account list, az ad user list, az ad user show -- the one authoritative tenant read the order's declared egress class admits. No vendor API. No secret value entered any committed file.",
  "compiler_tools": [
   {
    "tool": "comp-read",
