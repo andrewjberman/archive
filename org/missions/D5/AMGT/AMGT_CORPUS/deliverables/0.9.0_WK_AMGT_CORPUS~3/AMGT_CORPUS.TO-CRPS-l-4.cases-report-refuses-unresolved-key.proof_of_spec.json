@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-l-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-l-4.cases-report-refuses-unresolved-key.md",
+    "group": "OTHER",
+    "vintage_commit": "cc1700dfbe"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "cc1700dfbe",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-l-4.cases-report-refuses-unresolved-key.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "80060666e7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "cases-report pre-checks every security (latest stamp + figure reconstruction, read-only) and refuses the whole invocation, rc 2, before computing when any has no stamp or an empty figure set.",
+      "introduces": [
+        "_cases_report_unresolved"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_cases_report_refuses_unresolved.py",
+      "kind": "test",
+      "commit_or_etag": "80060666e7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 offline tests: underscore refused, resolvable unchanged, mixed refused whole.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "checks/round10/l4_AC1.sh -- see the order's criterion AC1",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round10/l4_AC1.sh",
+      "output_evidence": "...\n3 passed in 4.47s",
+      "denominator": "3 of 3 tests passed; full research suite 118 of 118",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "checks/round10/l4_AC2.sh -- see the order's criterion AC2",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round10/l4_AC2.sh",
+      "output_evidence": "REFUSE: AMD_US_Equity resolves to no landed raw stamp under bloomberg/harvest/bronze/refdata/security_key=AMD_US_Equity/ (pass the Bloomberg form, e.g. \"AMD US Equity\")\nl4 planted_underscore rc 2",
+      "denominator": "1 of 1 planted underscore key refused, rc 2",
+      "expect": "(?ms)REFUSE.*^l4 planted_underscore rc [1-9]\\d*$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "checks/round10/l4_AC3.sh -- see the order's criterion AC3",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round10/l4_AC3.sh",
+      "output_evidence": "cases AMD_US_Equity base SERVED ratio 0.659087854343919 cause none reason None band_basis low 0.33 uncalibrated high 3.0 measured\ncases_report served 1 refused 0",
+      "denominator": "1 of 1 Bloomberg-form key served",
+      "expect": "(?m)^cases AMD_US_Equity base SERVED ",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W3-S7"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "controls": {
+    "mutant": {
+      "description": ".scratch/l4/mut.py replaces _cases_report_unresolved with a no-op and reruns the new tests",
+      "expected": "underscore and mixed tests fail",
+      "observed": "2 failed, 1 passed (test_underscore_refused, test_mixed_refused_whole fail)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times",
+      "observed": "3 passed each time",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "derive, pull, stamp-census, case_rule.py",
+      "reason": "ruled item 3: unchanged"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "pytest integrations/bloomberg/research/tests",
+      "result": "118 passed"
+    }
+  ]
+}
