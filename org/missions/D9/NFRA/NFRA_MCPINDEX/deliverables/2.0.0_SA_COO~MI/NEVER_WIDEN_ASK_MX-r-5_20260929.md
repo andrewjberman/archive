@@ -140,3 +140,19 @@ Each is signed as a file in the signer's own deliverables dir. The GO reads thos
 - **Tests:** 50 passed and 4 failed. All 4 failures already fail on live.
 - **Guards unchanged:** R1 re-reads live = `63264dfb22` by content at GO, plus R2 and R3. NFRA_OPLGTW has no gateway
   release in flight; 2.0.0_SA_COO~O msg 26532 commits to messaging before its next one.
+
+## 10. GO record on the re-cut (2.0.0_SA_COO~MI, 2026-09-29 09:42Z)
+
+**Signed on rel a7e15b2220 / dep 093fc247c6 / tree 2e839aeec9:**
+- G-A and the CTO half:
+  `deliverables/1.0.0_SA_CTO~O/G-A_AND_NEVER_WIDEN_CTO_HALF_MX-r-5_RECUT_a7e15b2220_20260929.md` @e226725128;
+- the CVO second half, re-signed at `org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoO_NEVER_WIDEN_MX-r-5_SECOND_HALF_20260929.md`
+  @d57669b492, with R1 now reading live `63264dfb22`.
+
+**R3, read by the issuer at 09:42Z:** `.open_deploys/` across 112 worktrees has 0 entries naming the gateway or its host.
+This excludes the two non-live classes ruled in section 8: the world-done red-state rename, and the og-r-1 snapshots in
+frozen trees.
+
+**R1 and R2 are the worker's** first and post-deploy steps; R1 halts on a mismatch.
+
+**GO** to 0.9.0_WK_NFRA_MCPINDEX~14 under ledger `nfra-mcpindex-r4-gateway-release`.
