@@ -52,6 +52,14 @@ prefix and the same firm. It is the grant the stated behaviour (a qualified mark
 is SIGNED for the ask plus that one action, and the rollback key is the same policy revert. Branch (A) would ship a
 gate that can never pass, which is a defect, not a safe narrowing.
 
+## Amendment ~01:3xZ -- split: OG-m-2a ships, OG-m-2b is held (row Z-W15-S3)
+
+`.tools/naming-gate.py` refuses the chain-log prefix `gold/advi/_logs/chain_` (LGIC_ENFORCE DEC-6), because it lies on
+ADVI_FIRMBKTS's live-remediation surface. No waiver is typed. **OG-m-2a** is the qualified-marker gate, plus
+`s3:GetObject` and `s3:GetObjectVersion` on the marker ARN only, with no chain-log literal, local or env var. It is a
+strict SUBSET of the write set signed above, and this half covers it. **OG-m-2b** (the chain-log classifier) is HELD
+until ADVI_FIRMBKTS's owner (laptop `1.0.0_SA_CTO`) names the admitted form, relayed via `0.0.0_AB_MSTR~Z`.
+
 ## GO guards
 
 - The second half (`3.0.0_SA_CVO~O`) is signed as a file.
