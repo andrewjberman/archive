@@ -1,0 +1,100 @@
+AC2 offline. HARVEST_REFUSE_NETWORK=1; main runtime root=C:\Users\Opal Bloomberg\Desktop\ajb_workspace\.runtime\opal-data-harvest
+
+[1] STORED bbg events: 196 of 412 events.jsonl rows; http=79; search/query=21
+    search/query 2026-09-15 HTTP 200 x9
+    search/query 2026-09-15 HTTP 403 x3
+    search/query 2026-09-23 HTTP 403 x1
+    search/query 2026-09-26 HTTP 403 x2
+    search/query 2026-09-27 HTTP 403 x6
+    search/query totals: 200=9 403=12 of 21; 403 body bytes distinct=[535]
+    every 200 falls in 2026-09-15T03:44:24.204729+00:00 .. 2026-09-15T04:47:32.463510+00:00 (63 min); since the last 200: 9 search/query calls, 0 x 200 (+ the live AC1 call: HTTP 403)
+    other path /article/api/story/id HTTP 200 x45
+    other path /article/api/story/id HTTP 403 x1
+    other path /user-info HTTP 200 x12
+    article API (www.bloomberg.com): 46 calls, non-200=1 [('2026-09-15T04:07:04', 403, 535)]
+    /user-info (login.bloomberg.com): 12 of 12 HTTP 200 stored; live AC1 call HTTP 200 -> 13 of 13
+
+[2] search/query per security key (key = job_finished that followed the call)
+    BA: [('09-15T03:31', 403), ('09-15T03:44', 200), ('09-15T03:55', 200), ('09-15T04:06', 200), ('09-15T04:40', 403), ('09-15T04:41', 200), ('09-15T04:44', 200)]
+    COST: [('09-15T03:47', 403), ('09-15T04:00', 200), ('09-15T04:45', 200)]
+    HD: [('09-15T04:46', 200), ('09-15T04:47', 200)]
+    992_HK_Equity: [('09-23T00:27', 403)]
+    security-81a74ed057551e58: [('09-26T20:32', 403)]
+    security-a37b3e6572f2baa4: [('09-26T22:26', 403)]
+    security-7a01d2c1a1b7c0c8: [('09-27T21:40', 403)]
+    security-d6b0aa3159a41277: [('09-27T21:56', 403)]
+    security-0e8ccb781856d3b0: [('09-27T22:13', 403)]
+    security-f82a11cc8e156d62: [('09-27T22:29', 403)]
+    security-57ca236c85391f0d: [('09-27T22:45', 403)]
+    security-a25abbc791077a07: [('09-27T23:02', 403)]
+    post-09-15: 9 calls over 9 DISTINCT securities, all 403=True; securities seen with BOTH 200 and 403: ['BA', 'COST']; live query 'Lenovo' -> 403
+
+[3] gaps between consecutive search/query calls: post-09-15 min=16.4 min over 8 gaps; first post-09-15 gap 7.8 d; live call was 24.7 h after the last stored 403
+    09-15 window: 16 gaps < 1h among 200/403 interleaved calls
+
+[4] session age at call (captured_at read from the stored DPAPI envelopes; nothing else printed)
+    09-15 session (bbg-search-contract/session-after.dpapi) captured_at=2026-09-15T03:42:10.196858+00:00, cookies=173
+    live vault (secrets/bbg.dpapi) captured_at=2026-09-26T22:07:12.387813+00:00, cookies=155, http_updated_at=2026-09-27T23:02:38.694924+00:00
+    parked session used by AC1: captured_at=2026-09-11T05:13:28.386718Z age at call 426.52 h, cookies=63
+    09-15T03:31:31 HTTP 403 session_age_h=-0.18
+    09-15T03:44:24 HTTP 200 session_age_h=0.04
+    09-15T03:47:44 HTTP 403 session_age_h=0.09
+    09-15T03:55:14 HTTP 200 session_age_h=0.22
+    09-15T04:00:07 HTTP 200 session_age_h=0.3
+    09-15T04:06:05 HTTP 200 session_age_h=0.4
+    09-15T04:40:10 HTTP 403 session_age_h=0.97
+    09-15T04:41:22 HTTP 200 session_age_h=0.99
+    09-15T04:44:22 HTTP 200 session_age_h=1.04
+    09-15T04:45:36 HTTP 200 session_age_h=1.06
+    09-15T04:46:33 HTTP 200 session_age_h=1.07
+    09-15T04:47:32 HTTP 200 session_age_h=1.09
+    09-23T00:27:26 HTTP 403 session_age_h=None
+    09-26T20:32:01 HTTP 403 session_age_h=None
+    09-26T22:26:44 HTTP 403 session_age_h=0.33
+    09-27T21:40:12 HTTP 403 session_age_h=23.55
+    09-27T21:56:39 HTTP 403 session_age_h=23.82
+    09-27T22:13:08 HTTP 403 session_age_h=24.1
+    09-27T22:29:31 HTTP 403 session_age_h=24.37
+    09-27T22:45:59 HTTP 403 session_age_h=24.65
+    09-27T23:02:21 HTTP 403 session_age_h=24.92
+    200 session ages: 0.04..1.09 h (n=9); 403s on a session YOUNGER than the oldest 200: 3 of 9 with a known age -> [('09-15T03:47:44', 403, 0.09), ('09-15T04:40:10', 403, 0.97), ('09-26T22:26:44', 403, 0.33)]
+    live AC1: 403 on a session 426.52 h old (parked); its _px3 expiry:
+      _px3 .bloomberg.com expires 2026-09-11T05:17:35.602865+00:00 (= 4.1 min after capture)
+      _px2 .bloomberg.com expires 2026-09-11T05:17:35.608463+00:00 (= 4.1 min after capture)
+    live vault _px3 present=True expires=[-1] (name/expiry only)
+
+[5] stored 403 evidence
+    producer 403 bodies: events.jsonl carries BYTE COUNTS only; 12 of 12 search/query 403s + 1 of 1 article 403s are exactly 535 B; live AC1 403 = 535 B -> 14 of 14 non-200 www.bloomberg.com responses are 535 B. No stored producer body exists, so byte-identity of structure with the live body is NOT MEASURABLE beyond length.
+    live 403 body: PX JSON keys=['altBlockScript', 'appId', 'blockScript', 'customLogo', 'firstPartyEnabled', 'hostUrl', 'jsClientSrc', 'uuid', 'vid'] appId=PX8FCGYgk4 hostUrl=/8FCGYgk4/xhr markers=['px-cloud', 'captcha', 'blockScript', 'appId', 'jsClientSrc'] content-type=application/json server=Varnish
+    stored browser-context 403 HTML pages: 4 files, distinct sha256=3, bytes=[13928], PX appId=['PX8FCGYgk4']
+    live PX appId == stored 09-15 page appId: True
+    real headed Chrome probe (bbg-search-contract/requests.json, files 2026-09-14 23:30 local = 09-15 04:30Z):
+      login.bloomberg.com/nemo-next/api/search/saved HTTP 200 request header names=15 (sec-ch-ua=True, x-enable-sst=False)
+      www.bloomberg.com/nemo-next/api/search/query HTTP 403 request header names=21 (sec-ch-ua=True, x-enable-sst=True)
+      www.bloomberg.com/nemo-next/api/search/lookup HTTP 403 request header names=20 (sec-ch-ua=True, x-enable-sst=False)
+    curl_cffi search/query calls on either side of that browser 403 (04:00-04:47Z): [('04:00:07', 200), ('04:06:05', 200), ('04:40:10', 403), ('04:41:22', 200), ('04:44:22', 200), ('04:45:36', 200), ('04:46:33', 200), ('04:47:32', 200)]
+
+[6] press-and-hold history: 17 verification dirs; verification_succeeded events=1 ['2026-09-15T04:41:22']; reauth_started(bbg)=1 ['2026-09-15T03:31:31']
+    independent_pass values (dirs with a proof file): Counter({'False': 9, 'no-proof-file': 8})
+    holds since 09-15: 9; passes among them: 0; fresh browser-captured vault session at 2026-09-26T22:07:12.387813+00:00 then first 403 ['09-26T22:26:44']
+
+[7] HYPOTHESES
+  * H1 session age / staleness: RULED OUT (as the discriminator)
+      403s on sessions YOUNGER than the oldest 200: 3 of 9 known-age 403s (e.g. [('09-15T03:47:44', 403, 0.09), ('09-15T04:40:10', 403, 0.97)]); the 200s and 403s of 09-15 interleave on ONE session (403 at 5 min age between 200s); live 403 on a 426.52 h parked session too. A fresh browser capture (vault 2026-09-26T22:07:12.387813+00:00) was refused 19 min later. Age does not separate the outcomes in either direction.
+  * H2 search/query-specific wall (vs the www.bloomberg.com host): RULED OUT for 09-15; NOT DISCRIMINATED for now
+      the SAME 535-byte refusal hit the article API on www.bloomberg.com on 09-15 (1 of 46 article calls, ['04:07:04']), so the wall is not confined to search/query. After 09-15 NO www.bloomberg.com path other than search/query has been called (producer jobs stop at the search refusal), so host-wide vs search-only is unobserved NOW. login.bloomberg.com /user-info answered 200 on 13 of 13 incl. the live call made seconds before the live 403 on the same session -- a different host is not walled, which is host- or PX-scope-consistent.
+  * H3 query-specific (a particular security or query text): RULED OUT
+      since 09-15: 9 calls over 9 distinct securities, 0 of 9 returned 200, plus live 'Lenovo' -> 403; and securities seen with both outcomes on 09-15: ['BA', 'COST'].
+  * H4 client header / TLS-fingerprint class (curl_cffi chrome impersonation vs a real browser): RULED OUT (n=1 browser sample)
+      a real headed Chrome with the full browser header set (21 request header names incl. sec-ch-ua, x-enable-sst) was also refused on search/query (and /search/lookup) at ~04:30Z 09-15 while curl_cffi returned 200 at 04:06Z and 04:41-04:47Z: [('04:00:07', 200), ('04:06:05', 200), ('04:40:10', 403), ('04:41:22', 200), ('04:44:22', 200), ('04:45:36', 200), ('04:46:33', 200), ('04:47:32', 200)]. The identical transport succeeds and fails on the same session, and a real browser fails. CAVEAT: one browser observation, on the 09-15 session.
+  * H5 burst / rate sensitivity (a retry after a window clears it): RULED OUT for the current regime
+      post-09-15 calls: min gap 16.4 min (the 900 s cooldown), first gap 7.8 d, live call 24.7 h after the last -- 9 + 1 of 10 still 403. On 09-15 the 403 -> next-200 recoveries took ['12.9 min', '7.5 min', '1.2 min'] -- all inside the window in which 200s still existed.
+  * H6 vendor-side regime change after 09-15 ~04:47Z (PX policy, source-IP or account risk score): SUPPORTED (survives every discriminating observation)
+      9 of 9 200s fall in one 63-min window and 0 of 10 calls since (incl. live) are 200, across 10 securities and 2 sessions (vault x9, parked x1); the only real-browser refusal on file is from 09-15, inside the 200 window. NOT DISCRIMINATED among policy change vs source-IP reputation vs account risk: all three predict this data.
+  * H7 a PX trust token from a fresh sign-in or a passed hold is what unlocks 200: PARTLY: 'fresh sign-in is sufficient' RULED OUT; 'a passed hold is necessary' NOT DISCRIMINATED
+      09-15: reauth ['03:31:31'] -> 200 within 13 min; verification_succeeded ['04:41:22'] -> 200 the same second. But the vault session was browser-captured 2026-09-26T22:07:12.387813+00:00 and its first search/query 19 min later was 403, and 9 holds since 09-15 have 0 passes. The state 'hold passed, still 403' has never been observed after 09-15, so necessity cannot be tested from stored evidence. The pixel trace does not discriminate (order section 1).
+
+[8] VERDICT
+  What the run discriminated: the refusal is NOT explained by session age (H1), query text (H3), header/TLS client class (H4) or burst rate (H5); the 403 body is a PerimeterX block JSON (appId PX8FCGYgk4, same tenant as the 09-15 pages) served at the Fastly/Varnish edge of www.bloomberg.com; it is not search-specific on 09-15 (H2, article API refused with the same 535 B). The surviving explanation (H6/H7) is a vendor-side PX risk decision made on something the stored evidence cannot vary (source IP, account, or a trust token only a passed hold mints).
+  VERDICT: a bbg capture is NOT PLANNABLE from this evidence -- the run could not separate H6 (regime/IP/account) from H7 (trust token). SINGLE FURTHER OBSERVATION that would discriminate host-wide vs search-only (H2): ONE GET of a www.bloomberg.com article-API route (/article/api/story/id/<a story id already held from 09-15>) on the same session -- 200 means the wall is search-scoped and a search-free capture path (known ids) is plannable; 403 means host-wide and bbg is closed until a passed hold or a different source is available. That call needs its own vendor word (this order's word was ONE /user-info + ONE search/query call).
+  hypothesis verdicts: [('H1', 'RULED'), ('H2', 'RULED'), ('H3', 'RULED'), ('H4', 'RULED'), ('H5', 'RULED'), ('H6', 'SUPPORTED'), ('H7', 'PARTLY:')]

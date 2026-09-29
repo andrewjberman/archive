@@ -24,7 +24,8 @@ print(n)
 EOF
 )
 perr=$(timeout 40 powershell -NoProfile -Command "\$e=\$null; [void][System.Management.Automation.Language.Parser]::ParseFile('$WT\\v.ps1',[ref]\$null,[ref]\$e); \$e.Count" 2>&1 | tr -d '\r' | tail -1)
-others=$(git -C opal_ai diff --name-only "$OA_NESTED_PIN" "$REF" 2>/dev/null | grep -v -x -F "$F" | grep -c .)
+# AMENDED (amendment 2): the two arm files beside the script are part of the cell.
+others=$(git -C opal_ai diff --name-only "$OA_NESTED_PIN" "$REF" 2>/dev/null | grep -v -x -F -e "$F" -e "opal/runtime/provision/boundary-arm-probe.ps1" -e "opal/runtime/provision/boundary-arm-control.ps1" | grep -c .)
 rm -rf "$T"
 echo "opal_ai $REF: Invoke-Command/ComputerName=$ic; Start-Process with -Credential -Wait -WorkingDirectory=$sp; parse errors=${perr:-none}; other files changed vs $OA_NESTED_PIN=$others"
 if [ "$ic" = 0 ] && [ "${sp:-0}" -ge 2 ] && [ "$perr" = 0 ] && [ "$others" = 0 ]; then echo "RESULT: PASS"; exit 0; fi
