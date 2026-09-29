@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-243",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "3f33315632",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-243.bronze-runner-on-instance-cause.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-243.bronze-runner-on-instance-cause.md",
+    "group": "OTHER",
+    "vintage_commit": "3f33315632"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~86",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~86/ON_INSTANCE_DIAGNOSIS.json",
+      "kind": "doc",
+      "commit_or_etag": "68f56659e1f0f1b77f9d702501367a203e45e09f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only diagnosis order (risk=WORLD, no write of any kind): the artifact is a record, nothing is deployed; AWS was read only (S3 get/head/list, CloudWatch filter-log-events, EC2 describe, SSM list-command-invocations).",
+      "artifact_covered_by": [
+        "P24-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P24-3-AC1",
+      "criterion_verbatim": "the record's deployed_vs_repo sha256 is re-confirmed against S3 (an instrument control); the cause citations exist in the worktree, or needs_instance_read names a journal command; and the record has at least 3 evidence items.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r24/p24_3_ac1_on_instance_cause.py\" .",
+      "output_evidence": "instrument control: s3 code/bronze-runner/inf-bronze-fetch.sh sha256 91136b0921d5 recorded 91136b0921d5 -> True\ncause cites: [('infra/aws/ec2/inf-bronze-runner/inf-bronze-fetch.sh', '105'), ('data/inf/scripts/gold/orion-gold-dispatch.sh', '293'), ('data/inf/scripts/gold/orion-gold-dispatch.sh', '348'), ('data/inf/scripts/silver/_orion_api_silver_lib.py', '284')] exist: True\nneeds_instance_read named with journal command: False\ndeployed_vs_repo rows: 15 | evidence >= 3: True\nP24-3-AC1 PASS",
+      "denominator": "15 of 15 deployed_vs_repo rows carry an S3 sha256 or an explicit ABSENT verdict (13 MATCH, 1 DIFFERS on an unpulled stale mirror, 1 ABSENT_IN_S3 = the cause); 1 of 1 instrument-control S3 object re-read and equal; 8 of 8 evidence items name an S3 key, log group or file:line (>=3 required); every cause file:line exists in the worktree",
+      "status": "PASS",
+      "expect": "P24-3-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Run the same check against a worktree root that has no diagnosis record (an empty scratch root): the base state named by the order (record absent).",
+      "expected": "diagnosis record absent ... P24-3-AC1 FAIL, rc=1",
+      "observed": "diagnosis record absent: ...\\.scratch\\empty\\org\\missions\\D9\\IRPT\\IRPT_BCKEND\\deliverables\\0.9.0_WK_IRPT_BCKEND~86\\ON_INSTANCE_DIAGNOSIS.json ; P24-3-AC1 FAIL ; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The check re-reads S3 and the worktree only; the recorded sha256 of the instrument-control object equals the freshly computed one on the first run (91136b0921d5) and the object's LastModified (2026-07-24T15:25:10Z) predates the run, so a second run reads identical bytes.",
+      "observed": "Same object, same sha256, same PASS on the run recorded here and on the earlier run during authoring (both printed P24-3-AC1 PASS rc=0).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-W86-S1",
+    "IRPT_BCKEND-W86-S2"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~86/ON_INSTANCE_DIAGNOSIS.json",
+  "compiler_tools": [
+    {
+      "tool": "python-json",
+      "invocation": "python -c \"import json;json.load(open('org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~86/ON_INSTANCE_DIAGNOSIS.json'))\"",
+      "result": "parses, rc=0 (written by json.dump)"
+    }
+  ]
+}
