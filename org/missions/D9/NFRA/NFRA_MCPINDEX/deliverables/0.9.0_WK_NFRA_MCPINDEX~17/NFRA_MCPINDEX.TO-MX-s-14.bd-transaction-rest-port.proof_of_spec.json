@@ -19,33 +19,44 @@
       "path_or_key": "data/black_diamond/scripts/bronze/pull_bd_transaction_rest.py",
       "kind": "script",
       "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "Not published: comp-pipescript deployed --firm bd lists no pull_bd_transaction_rest.py. Publishing to code/bronze/ is the DS lane's safe-deploy (row NFRA_MCPINDEX-Z-W17-S2). Exercised offline only, against synthetic workbooks; 0 vendor calls.",
-      "artifact_covered_by": ["AC1"]
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "REMOVED by this commit (git rm): superseded by amendment A1 (no new REST module; the live bd-49f-session-daily chain already lands TRANSACTIONS_DAILY_*). Added at 16d142659d, never published, never run against the vendor.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "infra/aws/ssm/opal-bd-transaction-download.json",
       "kind": "config_data",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Edited in the repo only (PHASE A). The served document is unchanged: DefaultVersion 1, LatestVersion 2 at the s14.AC1 read. Offline: JSON parses; rest-pull refs 2, Playwright refs 0, BD_PASSWORD refs 0.",
-      "artifact_covered_by": ["AC1"]
+      "deploy_evidence": "Edited in the repo only (PHASE A). The served document is unchanged: DefaultVersion 1, LatestVersion 2. Offline: BD_PASSWORD 0, download-daily-transaction.ts 0, secretsmanager 0, merge-daily-incremental 2. Merge block: 7 of 8 lines identical to served v2, the 8th a comment (mojibake dash to ASCII hyphen). Test: ssm send-command cdb144c8-b4de-4ef1-b5d8-4c36509ca6fc, Success rc 0, merge only, 0 vendor calls; it wrote silver/transactions/2026-09-29.parquet (0 rows).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~17/ANNOUNCE_MX-s-14.md",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "PHASE A announcement for the never-widen halves: steps 1-2 built, steps 3-4 blocked on the DS publish.",
-      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+      "deploy_evidence": "PHASE A announcement (as amended A1): the four never-widen items (only write, merge byte diff, baseline, rollback) and the superseded module.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
     },
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Rows NFRA_MCPINDEX-Z-W17-S1 (BLOCKING, INERT), -S2 (BLOCKING, INERT), -S3 (OBSERVATION, INERT).",
-      "artifact_covered_by": ["AC1", "AC3"]
+      "deploy_evidence": "Rows NFRA_MCPINDEX-Z-W17-S1/-S2 (BLOCKING, INERT, now lapsed), -S3 (OBSERVATION, INERT), -S4 (OBSERVATION, INERT: the lapse record).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
     }
   ],
   "acceptance": [
@@ -54,10 +65,10 @@
       "criterion_verbatim": "DefaultVersion==LatestVersion; at $LATEST rest-pull refs>=1 playwright refs=0 BD_PASSWORD refs=0 -- RESULT: PASS -- exit=0",
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round4/checks/s14.AC1.sh; echo \"exit=$?\"",
-      "output_evidence": "document opal-bd-transaction-download: DefaultVersion=1 LatestVersion=2; at $LATEST: rest-pull refs=0 playwright refs=1 BD_PASSWORD refs=2\nRESULT: FAIL\nexit=1",
-      "denominator": "1 of 1 served documents read at $LATEST; rest-pull refs 0 (need >=1), playwright refs 1 (need 0), BD_PASSWORD refs 2 (need 0)",
+      "output_evidence": "document opal-bd-transaction-download: DefaultVersion=1 LatestVersion=2; at $LATEST: playwright refs=1 BD_PASSWORD refs=2 merge refs=2\nRESULT: FAIL\nexit=1\n(output of the amended s14.AC1.sh read from CLOUD @a56cbfd460; the copy in this worktree is the pre-amendment version, whose rest-pull test no longer applies.)",
+      "denominator": "1 of 1 served documents read at $LATEST; playwright refs 1 (need 0), BD_PASSWORD refs 2 (need 0), merge refs 2 (need >=1)",
       "status": "FAIL",
-      "status_reason": "PHASE A ONLY, by instruction: the document is edited in the repo (rest-pull refs 2, playwright 0, BD_PASSWORD 0 offline) but is not published; publishing and setting DEFAULT is PHASE B on the issuer's GO, which also waits on the DS-lane publish of the module (row NFRA_MCPINDEX-Z-W17-S2)."
+      "status_reason": "PHASE A ONLY, by instruction: the edited document (offline: playwright 0, BD_PASSWORD 0, merge 2) is not published; publishing and setting DEFAULT == LATEST is PHASE B on the issuer's GO."
     },
     {
       "criterion_id": "AC2",
@@ -67,14 +78,14 @@
       "output_evidence": "rule state=ENABLED schedule=cron(53 21 ? * MON-FRI *) targets=1 targets bd-transactions-trigger=yes\nRESULT: PASS\nexit=0",
       "denominator": "1 of 1 rules read; 1 target, 1 matching bd-transactions-trigger",
       "status": "PASS",
-      "status_reason": "Read at PHASE A as a regression guard: no rule was touched by this worker. It reads ENABLED because MX-i-5's PHASE B had not yet disabled the rule at this read; it will read DISABLED between MX-i-5's disable and this order's PHASE B re-enable, so this PASS is a PHASE A moment, not the final grade."
+      "status_reason": "Regression guard: no rule was touched by this worker, and under amendment A1 the rule stays ENABLED (MX-i-5 will not disable a live document)."
     },
     {
       "criterion_id": "AC3",
       "criterion_verbatim": "successful runs at/after slot>=1; run <id>: OUTPUT_KEY lines>=1 -- RESULT: PASS -- exit=0",
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round4/checks/s14.AC3.sh; echo \"exit=$?\"",
-      "output_evidence": "no PHASE B GO commit yet -- RESULT: FAIL\nexit=1",
+      "output_evidence": "no PHASE B GO commit yet -- RESULT: FAIL\nexit=1\n(amended s14.AC3.sh from CLOUD; same read as the pre-amendment copy)",
       "denominator": "0 of 1 scheduled acceptance fires available (PHASE B not run)",
       "status": "FAIL",
       "status_reason": "PHASE A ONLY, by instruction: AC3 is the next scheduled 21:53Z weekday fire after PHASE B's publish and re-enable; it cannot read before them."
@@ -82,9 +93,9 @@
   ],
   "controls": {
     "mutant": {
-      "description": "Offline, on the module's pure functions with synthetic workbooks: a roster holding the template name twice, and a workbook with 0 data rows.",
-      "expected": "The duplicate name resolves to no template (refused); the 0-row workbook reports rows=0 so main() refuses to write it.",
-      "observed": "find_template returned None with 2 matches for the duplicate roster; inspect_workbook returned rows=0 for the empty workbook; a single-name roster returned the template with 1 match.",
+      "description": "Offline, on the edited document's command list against the served $LATEST (version 2): the count of Playwright, portal-credential and merge references, and a line diff of the 8-line merge block.",
+      "expected": "Playwright 0, BD_PASSWORD 0, merge >=1 in the edit; the served version reads Playwright 1, BD_PASSWORD 2; the merge block differs only in a comment.",
+      "observed": "Edit: BD_PASSWORD 0, download-daily-transaction.ts 0, secretsmanager 0, merge-daily-incremental 2. Served v2: playwright 1, BD_PASSWORD 2 (AC1 FAIL as recorded). Merge block diff: 1 comment line, 7 executable lines identical.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -95,34 +106,31 @@
   },
   "declared_exclusions": [
     {
-      "item": "Step 3 (the ad-hoc test run on the instance) and step 1's discovery read.",
-      "reason": "The commands stage a module that is not published; publishing is the DS lane's safe-deploy (row NFRA_MCPINDEX-Z-W17-S2). No vendor call was made."
+      "item": "Step 1 (a new REST module), its pin, its publish, and step 1's discovery read.",
+      "reason": "Dropped by amendment A1: the live bd-49f-session-daily chain already lands TRANSACTIONS_DAILY_*; a second writer would be a shadow pipeline. The built module was removed from the branch."
     },
     {
-      "item": "`_transaction_rest_pin.py`.",
-      "reason": "A generated pin needs a target in lib/opal_naming.py, outside this cell's paths (row NFRA_MCPINDEX-Z-W17-S1); the module reads the published asset-dim pin instead."
-    },
-    {
-      "item": "PHASE B (ledger, publish, DEFAULT, rule re-enable, the 21:53Z acceptance).",
-      "reason": "Order and issuer instruction: PHASE A only; PHASE B runs on the issuer's GO."
+      "item": "PHASE B (ledger, publish, DEFAULT == LATEST, the scheduled 21:53Z acceptance).",
+      "reason": "Order and issuer instruction: PHASE A only; PHASE B runs on the issuer's GO. Nothing is published; the rule stays ENABLED."
     }
   ],
   "surprises": [
     "NFRA_MCPINDEX-Z-W17-S1",
     "NFRA_MCPINDEX-Z-W17-S2",
-    "NFRA_MCPINDEX-Z-W17-S3"
+    "NFRA_MCPINDEX-Z-W17-S3",
+    "NFRA_MCPINDEX-Z-W17-S4"
   ],
   "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-14.bd-transaction-rest-port.md",
   "compiler_tools": [
     {
-      "tool": "aws (s3, ssm, events)",
-      "invocation": "aws s3 ls s3://opal-data-bd/forwardfill_v2/transactions/; the s14 checks: ssm describe-document/get-document, events describe-rule/list-targets-by-rule",
-      "result": "Bronze prefix: 98 TRANSACTIONS_DAILY_*, 97 TXN_DAILY_* (last 2026-06-18), 1 _complete/; served document still Playwright; rule ENABLED with 1 target."
+      "tool": "aws (ssm, ec2, s3, events)",
+      "invocation": "ec2 start-instances i-0e6f6dc014fdcf1cd; ssm send-command AWS-RunShellScript with the edited command list; get-command-invocation; ssm get-document versions 1 and 2; s3 head/get of silver/transactions partitions and logs; the s14 checks (describe-document, get-document, describe-rule, list-targets-by-rule)",
+      "result": "Test command cdb144c8-b4de-4ef1-b5d8-4c36509ca6fc Success rc 0: 1 new file, silver/transactions/2026-09-29.parquet written with 0 rows, Total partitions 195; instance stopped after; served document still Default 1 / Latest 2."
     },
     {
-      "tool": "comp-pipescript",
-      "invocation": "comp-pipescript deployed --firm bd",
-      "result": "_asset_dim_rest_pin.py MATCH; pull_bd_transaction_rest.py not listed (unpublished)."
+      "tool": "pyarrow / boto3",
+      "invocation": "num_rows from parquet metadata of silver/transactions/2026-09-22..29",
+      "result": "52,776 / 5,268 / 25,098 / 5,268 / 25,098 / 7,637 / 0 (09-28) / 0 (09-29)."
     }
   ]
 }

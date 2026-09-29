@@ -1,76 +1,90 @@
-# ANNOUNCE -- MX-s-14 PHASE A, the BD transaction leg ported to the REST pull (steps 1-2 built, steps 3-4 blocked on a DS-lane publish)
+# ANNOUNCE -- MX-s-14 PHASE A (as amended A1): strip the dead Playwright step from `opal-bd-transaction-download`, keep the merge
 
-Worker: 0.9.0_WK_NFRA_MCPINDEX~17 (issuer 2.0.0_SA_COO~MI). Order:
+Worker: 0.9.0_WK_NFRA_MCPINDEX~17 (issuer 2.0.0_SA_COO~MI). Order (amended A1, CLOUD @a56cbfd460):
 org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-14.bd-transaction-rest-port.md
 
-STATE: PHASE A stopped at the publish. Nothing was deployed, no ledger was opened, no SSM document version was
-created, no rule was touched, nothing was uploaded to S3, and NO VENDOR CALL was made (count 0).
-AWS contact was read-only: `s3 ls` of the transaction bronze prefix, `comp-pipescript deployed --firm bd`, and the
-three `s14.AC*.sh` reads (ssm describe/get-document, events describe-rule/list-targets).
+STATE: PHASE A only. The document is edited in the repo and NOT published; the rule stays ENABLED; DefaultVersion 1,
+LatestVersion 2, unchanged at the last read. One ad-hoc run of the edited command list was made as the test
+(merge only, ZERO vendor calls).
 
-## STEP 1 -- the REST pull (built, not yet run)
+## SUPERSEDED: the new REST module
 
-`data/black_diamond/scripts/bronze/pull_bd_transaction_rest.py`, on the MX-s-9 pattern (`pull_bd_asset_dim_rest.py`):
+The first cut of this order built `pull_bd_transaction_rest.py` (commit 16d142659d). Amendment A1 drops it: a live
+`bd-49f-session-daily` REST chain already lands `TRANSACTIONS_DAILY_*`, and a second writer of `TXN_DAILY_*` would be a
+shadow pipeline (row Z-W17-S3). The module is REMOVED from this branch by a `git rm` commit, so the drain carries no
+unused writer. It was never published and never ran against the vendor. Rows Z-W17-S1 and Z-W17-S2 lapse with it
+(row Z-W17-S4 records that).
 
-| property | value |
+## (1) The SSM document is the only write
+
+| what | state |
 | --- | --- |
-| session | bearer minted from `blackdiamond/49f/session`; read-only; 49F only; refuses before any network call if secret or bucket is not 49F's |
-| template | the persisted `Transactions_OpalCapital_Daily` (the name `download-daily-transaction.ts` ran), found in the roster by exact name; 0 or 2+ matches refuses |
-| vendor writes | none: GET template, inline run, status poll, export |
-| bronze key | `forwardfill_v2/transactions/TXN_DAILY_<data date>.xlsx`, the export workbook unchanged, the key the Playwright leg wrote and `merge-daily-incremental.py` reads |
-| data date | the export's Timestamps-sheet `Start Date`, as `extract-as-of-date.ts` read it |
-| first landing wins | an existing object at the key is kept (`SKIP-EXISTS`), as the Playwright leg did |
-| output | `OUTPUT_KEY=s3://<bucket>/<key>`, then `ROWS= COLS= DATE_MIN= DATE_MAX= RUN_ID= GUID= VENDOR_CALLS=` |
-| honest exit | non-zero on: no bearer, template not found once, failed or timed-out run, truncated export, 0 data rows, columns != 71 |
-| test flag | `--stage` lands the object under `staging/mx-s-14/transactions/` so a test moves nothing the merge reads |
+| `infra/aws/ssm/opal-bd-transaction-download.json` | the only file changed; not yet published |
+| removed from it | the `opal/bd/credentials` fetch, `BD_USERNAME`/`BD_PASSWORD`, the `aws s3 sync` of `scripts/src`, the chown, the `bun run ...download-daily-transaction.ts` step and its `DOWNLOAD_RC` |
+| kept | the merge step, the log upload, `shutdown -h +2 &` armed BEFORE the failure branch (the served version exits first and strands the instance), the honest exit on `MERGE_RC` |
+| offline counts on the edited commands | `BD_PASSWORD` 0, `download-daily-transaction.ts` 0, `secretsmanager` 0, `merge-daily-incremental` 2 |
+| not touched | the Terraform rule, the Lambda trigger, `download-daily-transaction.ts` (retired later, if at all), `merge-daily-incremental.py`, IAM, any bronze object, the vendor |
 
-Two departures from the order, both stated in the module and filed as rows:
-- `_transaction_rest_pin.py` was NOT written. A generated pin needs a `lib/opal_naming.py` target; `lib/` is not in
-  this cell's paths. The module reads scope/vendor/bucket from the already-published generated `_asset_dim_rest_pin.py`
-  (comp-pipescript: MATCH) and carries the two legacy literals (prefix, `TXN_DAILY_`). Row Z-W17-S1.
-- An export with 0 data rows is refused rather than written (the vendor's empty workbook is well formed, about 4.4 KB;
-  the bronze prefix holds two such stubs for 2026-09-28/29 under the other producer's name). Row Z-W17-S3 has the
-  census.
+The test run DID write served silver: the merge wrote the one partition below. That is what the scheduled 21:53Z run
+does with the same command; it is a write of the merge, not of this order's edit.
 
-The discovery read of the export template was NOT performed (it needs the instance; see step 3). `discover` mode
-prints the roster count, the name-match count, and the template's id, queryTypeId, dateRangeType and window: one
-roster GET plus one template GET, two counted calls.
+## (2) The merge step is byte-unchanged
 
-## STEP 2 -- the document (edited, not published)
+The merge step is the 8 lines from `# Run transaction silver conversion` to `echo "Merge exit code: $MERGE_RC"`.
+Diff of that block, served `$LATEST` (version 2, read live) against the edited document:
 
-`infra/aws/ssm/opal-bd-transaction-download.json`, on the shape of `opal-bd-asset-dim-download.json`:
-- Playwright step, `BD_USERNAME`/`BD_PASSWORD` and the `opal/bd/credentials` read: REMOVED (0 refs each in the JSON).
-- stages exactly two objects into `$RUNROOT/data/black_diamond/scripts/bronze/`: `code/bronze/pull_bd_transaction_rest.py`
-  and `code/bronze/_asset_dim_rest_pin.py`; the module needs no `lib/` closure (no `opal_naming`, no trading calendar).
-- runs the pull as ec2-user, captures `PULL_RC`, then the SAME merge step as before (`scripts/merge-daily-incremental.py`,
-  captured `MERGE_RC`); the merge runs whatever the pull did, as it did when the download failed.
-- log upload, then `shutdown -h +2 &` ARMED BEFORE the `exit 1` branch (the old document exited first and stranded the
-  instance on every failure), then the honest exit on either RC.
-- offline: JSON parses; the run commands carry `pull_bd_transaction_rest` 2 times, `download-daily-transaction.ts` 0,
-  `BD_PASSWORD` 0.
+```
+1c1
+< # Run transaction silver conversion <mojibake dash> capture exit code
+> # Run transaction silver conversion - capture exit code
+```
 
-## STEP 3 -- the test run: BLOCKED (row Z-W17-S2)
+The other 7 lines (`echo`, the `aws s3 cp` of `scripts/merge-daily-incremental.py`, `set +e`, `python3 merge-daily-incremental.py`,
+`MERGE_RC=${PIPESTATUS[0]}`, `set -e`, `echo "Merge exit code"`) are identical. The one difference is a COMMENT: the served
+version carries a double-encoded em dash, and the edited one an ASCII hyphen (the only non-ASCII in the file). Nothing
+that executes moved. Same block, repo `120ff9b27f` against edited: the same single comment line.
 
-The edited commands stage a module that is not published. Publishing `code/bronze/pull_bd_transaction_rest.py` is the
-DS lane's safe-deploy. Unblock: one publish of that one object from this branch's bytes; then re-issue step 3 as
-`ssm send-command` with the edited commands (with `--stage`, then optionally once without). Expected budget: about 6
-counted vendor calls per pull (token, roster, template, run, status poll(s), export).
+## (3) Baseline for the next scheduled merge
 
-Not measured, so not claimed: the template's `dateRangeType` and stored window; whether the export carries 71 columns;
-whether the instance role may write `staging/mx-s-14/`; whether the discovered template id is unique in the roster.
+Prior scheduled run, 2026-09-28 21:54Z (log `logs/transaction-download-2026-09-28.log`): the Playwright step failed at
+the login (`Download exit code: 1`), then the merge ran: `Previously processed: 193 files`, `Found 1 new files`,
+`TRANSACTIONS_DAILY_2026-09-28.xlsx -> silver/transactions/2026-09-28.parquet (0 rows)`, `Rows added: 0`,
+`Total partitions: 194`, `Merge exit code: 0`. Partition `2026-09-28.parquet`: 0 rows, 34,882 bytes.
 
-## STEP 4 -- what the issuer asks
+Rows in the previous six partitions (parquet metadata, read live): 09-22 52,776; 09-23 5,268; 09-24 25,098;
+09-25 5,268; 09-26 25,098; 09-27 7,637.
 
-Offline checks run on the module (synthetic 71-column workbooks, no vendor): the key is byte-equal to the Playwright
-form; a duplicate roster name is refused; the run body normalises ISO dates and adds the five required nulls; the data
-date is read from `Start Date`; a 0-row workbook is detected.
+The step-3 TEST run (2026-09-29T06:36:52Z, command `cdb144c8-b4de-4ef1-b5d8-4c36509ca6fc`, Status Success, rc 0):
+- merge input: `Previously processed: 194 files`, `Found 1 new files`: `TRANSACTIONS_DAILY_2026-09-29.xlsx` (4,355 bytes,
+  the vendor's empty workbook, landed by the REST chain at 00:02Z);
+- it wrote `silver/transactions/2026-09-29.parquet`: 0 rows, 35,269 bytes, LastModified 2026-09-29T06:37:01Z;
+- `Rows added: 0`, `Total partitions: 195`, `Merge exit code: 0`; the log was uploaded, shutdown armed, the instance is `stopped`;
+- vendor calls: 0.
 
-Criteria at this cut (run from the worktree, live reads): AC1 FAIL (served document version 2 of 2 still Playwright;
-DefaultVersion 1, LatestVersion 2), AC2 PASS (rule ENABLED, 1 target), AC3 FAIL (no PHASE B GO). AC1 and AC3 need
-PHASE B by construction. NOTE for the never-widen halves: AC2 reads ENABLED because MX-i-5 had not yet disabled the
-rule at this read; MX-i-5's PHASE B disables it and this order's PHASE B re-enables it.
+So the next scheduled merge is compared with: partitions 195; last partition 2026-09-29 at 0 rows; and any
+`TRANSACTIONS_DAILY_*` the REST chain lands after 00:02Z tomorrow is what it should pick up as new. That the
+merge skips an unchanged object under the manifest is expected from the merge's own ETag rule; I did not measure it.
 
-Rows: NFRA_MCPINDEX-Z-W17-S1 (BLOCKING, INERT: pin target), -S2 (BLOCKING, INERT: DS publish), -S3 (OBSERVATION,
-INERT: `TRANSACTIONS_DAILY_*` names beside `TXN_DAILY_*`). Disarm owner `2.0.0_SA_COO~MI` on the two BLOCKING rows.
+Two things the test showed, stated and not resolved:
+- Both new bronze files for 2026-09-28 and 2026-09-29 are empty workbooks, so this merge run has nothing to convert;
+  the acceptance fire proves the document's exit and the merge, not a non-empty partition. The last non-empty
+  partition is 2026-09-27 (7,637 rows).
+- The enrichment line changed from `[enrich] bd_assets_dim unavailable; skipping cusip join` (2026-09-28) to
+  `[enrich] cusip: 0/0 non-null (0.00%)` (2026-09-29): the dim join is no longer skipped on this path (0 rows, so 0/0).
+  That bears on row Z-W11-S2; the join's result on non-empty data is unmeasured.
 
-DO NOT publish the document or re-enable the rule until the step-3 run reads a row count and a date range.
+## (4) Rollback to the prior document version
+
+`opal-bd-transaction-download` today: DefaultVersion 1 (2026-02-19), LatestVersion 2 (2026-02-23, what the trigger
+runs). Both carry the Playwright download. Versions are immutable, so the prior content is always readable:
+`aws ssm get-document --name opal-bd-transaction-download --document-version 2`.
+
+PHASE B publishes version 3 and sets DEFAULT to it. Because the trigger runs `$LATEST` (row Z-S48), rolling back
+means re-publishing version 2's content as the next version (`update-document`, then `update-document-default-version`
+to it) so that DefaultVersion == LatestVersion again; moving DEFAULT back to 2 alone changes nothing the trigger runs.
+The rollback restores a document that fails at the login (21 of 21), whose merge step still runs.
+
+## Criteria at this cut (amended checks read from CLOUD)
+
+AC1 FAIL (served `$LATEST`: playwright refs 1, BD_PASSWORD refs 2, merge refs 2; Default 1, Latest 2), AC2 PASS (rule
+ENABLED, 1 target), AC3 FAIL (no PHASE B GO). AC1 and AC3 need PHASE B by construction.
