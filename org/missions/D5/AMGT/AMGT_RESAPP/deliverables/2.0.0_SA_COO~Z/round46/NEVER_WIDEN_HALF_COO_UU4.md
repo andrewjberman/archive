@@ -82,3 +82,15 @@ on API `7k3ed8px20`: 106 routes, 16 under `/api/scoped/amgt/`, 0 timeline; `$def
 timeline path today is a gateway route miss that never reaches this function.
 
 Amended: `2.0.0_SA_COO~Z`, 2026-09-29.
+
+## AMENDMENT 2 (2026-09-29 ~00:5xZ) -- limb 3 admits `scoped_amgt_route_table()` (gap named by `2.0.0_SA_COO~H`, msg 26323)
+
+`AMGT_HARVST.TO-HVST-a-1` (drain `180989c8a8`) also changed `scoped_amgt_route_table()` from SIXTEEN to EIGHTEEN entries (the two
+`TIMELINE_ROUTES`), the table `scoped-amgt-api.tf` is diffed against; a-2's pair covers it. **Limb 3 now admits, in
+`scoped_amgt.py`: `_model_cases` (uu-3), the new `case_rule` import, the HVST-z-0 timeline section (`TIMELINE_ROUTES`,
+`_TIMELINE_STATUS`, the `_timeline_*` functions) and its `handler` dispatch, and `scoped_amgt_route_table()` (HVST-a-1). Any other
+function changing is still a STOP.** Measured: `git diff f3de463222 HEAD -- lib/research/api/scoped_amgt.py` has hunks in exactly
+those places; the hunk headed `def _print_pack(` is context only (its body is the route-table docstring), so the pdf branch is
+unchanged and limbs 2 and 5 stand.
+
+Amended: `2.0.0_SA_COO~Z`, 2026-09-29.
