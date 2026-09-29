@@ -4,7 +4,8 @@ the runners directory absent from the harness path; CTO 102736: the served rule,
 Usage: python adapter_cold_census.py <built zip> [<end date>]
 Same harness as adapter_cold_periods.py: a fresh interpreter whose import path is ONLY the extracted zip, the service
 composed by `installed.build_runtime` over the real S3 client. For speed, and without changing any answer:
-- the composed HoldingsGoldSource is wrapped so each partition object is read ONCE and handed back per account;
+- the composed HoldingsGoldSource is wrapped so each partition object is read ONCE and handed back per account,
+  and its partition listing is taken once and reused;
 - `ids.opaque_account` (a pure hash) is memoized.
 `holdings_gold.calculate` itself runs unchanged for every account with a row on the end date, for YTD, QTD, 1Y and
 Since inception, and each exception is classified by the built Entry's own reasons table.
@@ -59,17 +60,31 @@ ids.opaque_account = functools.lru_cache(maxsize=None)(ids.opaque_account)
 src = svc.holdings_source
 _read = src._read
 cache = {}
+COLUMNS = ["account_id", "business_date", "daily_return", "account_value", "excluded_count", "excluded_weight", "status"]
 def cached_read(day, account_key):
+    # One compact copy per partition: the columns calculate() reads, sorted by account, sliced on demand.
     if day not in cache:
         receipt, frame = _read(day, None)
-        cache[day] = (receipt, frame, {k: g for k, g in frame.groupby(frame["account_id"].astype(str))})
-    receipt, frame, groups = cache[day]
+        frame = frame[[c for c in COLUMNS if c in frame.columns]].copy()
+        frame["account_id"] = frame["account_id"].astype(str)
+        frame = frame.sort_values("account_id", kind="stable").reset_index(drop=True)
+        ids_ = frame["account_id"].to_numpy()
+        bounds, start = {}, 0
+        for i in range(1, len(ids_) + 1):
+            if i == len(ids_) or ids_[i] != ids_[start]:
+                bounds[ids_[start]] = (start, i)
+                start = i
+        cache[day] = (receipt, frame, bounds)
+    receipt, frame, bounds = cache[day]
     if account_key is None:
         return receipt, frame
-    return receipt, groups.get(account_key, frame.iloc[0:0])
+    a, b = bounds.get(account_key, (0, 0))
+    return receipt, frame.iloc[a:b]
 src._read = cached_read
 src.max_workers = 1
 days = src.partition_dates()
+_days = list(days)
+src.partition_dates = lambda: list(_days)  # one S3 listing, reused: the adapter lists once per answer
 end = %(end)r or days[-1]
 t0 = time.perf_counter()
 for day in days:
