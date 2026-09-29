@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_AMGTV1.TO-AV-t-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_AMGTV1/prd/DSGN_AMGTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "abfad1355c314c42fbf31b70b5241a21dd82fda0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_AMGTV1/decompositions/DSGN_AMGTV1_DECOMP.md",
+    "vintage_commit": "abfad1355c",
+    "to_ref": "org/missions/D13/DSGN/DSGN_AMGTV1/task-orders/DSGN_AMGTV1.TO-AV-t-4.the-tabs-harness-stubs-the-dialog.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_AMGTV1~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs",
+      "kind": "test",
+      "commit_or_etag": "30f69ad04e8f9a168d0016a060943a4ff2d29f49",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit on branch wk-DSGN_AMGTV1-3-portal (LOCAL); no deploy grant in this order."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: on the merged round, the tabs harness reads 20 of 20 again and the three sibling harnesses stay green at their floors.",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; node \"org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/2.0.0_SA_COO~D/round1/checks/bound.cjs\" TABS tabs.harness.cjs:20 errorEmpty.harness.cjs:12 drafting.harness.cjs:8 thesisLadder.harness.cjs:10; echo \"exit=$?\"",
+      "output_evidence": "HARNESS RED tabs.harness.cjs :: rc=1 (floor 20)\nHARNESS GREEN errorEmpty.harness.cjs :: CHECKS-OK 12 of 12 (floor 12)\nHARNESS GREEN drafting.harness.cjs :: CHECKS-OK 8 of 8 (floor 8)\nHARNESS GREEN thesisLadder.harness.cjs :: CHECKS-OK 10 of 10 (floor 10)\nTABS BOUND: 3 of 4 harnesses green\nexit=1\n(tabs.harness.cjs run directly: 'CHECK thesis_sentences_and_one_chart false (expected true)', 'CHECKS-WRONG-WAY thesis_sentences_and_one_chart'; the other 19 checks true; per name sentences 38, markers 0)",
+      "denominator": "3 of 4 harnesses green; tabs.harness.cjs 19 of 20 checks true",
+      "status": "FAIL",
+      "expect": "TABS BOUND: 4 of 4 harnesses green",
+      "status_reason": "The added HeroGraphic stub fixes the load (MODULE_NOT_FOUND gone). The one remaining red check, thesis_sentences_and_one_chart, counts data-drafted-sentence markers on the Thesis tab render; AV-t-3 moved every sentence into card windows, so it reads 0 of 38. Reaching 20 of 20 needs that check re-anchored, which the order forbids. Filed as DSGN_AMGTV1-Z-W3-S2 (BLOCKING). Row W3-S1 is not dispositioned."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "tabs.harness.cjs before the stub, on the merged page (issuer preflight and this worker's W3-S1 evidence).",
+      "expected": "rc=1, MODULE_NOT_FOUND on the HeroGraphic import, before any check runs.",
+      "observed": "As expected before the edit; after it the harness loads and prints 19 of 20 checks true.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran tabs.harness.cjs directly and through bound.cjs.",
+      "observed": "Same single failing check both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "re-anchoring thesis_sentences_and_one_chart",
+      "reason": "The order says no check is re-anchored; the check is inside the harness file the order grants, but the issuer decides that widening. Filed as DSGN_AMGTV1-Z-W3-S2."
+    }
+  ],
+  "surprises": [
+    "DSGN_AMGTV1-Z-W3-S2"
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_AMGTV1/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "node",
+      "invocation": "node bound.cjs TABS tabs.harness.cjs:20 errorEmpty.harness.cjs:12 drafting.harness.cjs:8 thesisLadder.harness.cjs:10",
+      "result": "3 of 4 harnesses green; tabs.harness.cjs RED (19 of 20 checks true)"
+    }
+  ]
+}
