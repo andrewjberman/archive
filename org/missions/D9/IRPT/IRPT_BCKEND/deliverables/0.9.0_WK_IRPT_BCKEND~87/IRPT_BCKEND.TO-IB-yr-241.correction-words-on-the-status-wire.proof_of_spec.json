@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-241",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "e0520d4760"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R24_Y.md",
+    "vintage_commit": "e0520d4760",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-241.correction-words-on-the-status-wire.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~87",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/status.py",
+      "kind": "script",
+      "commit_or_etag": "57ebb7ac6c",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "committed on branch wk-IRPT_BCKEND-87 only; served code moves through 2.0.0_SA_COO~P's rebuild",
+      "artifact_covered_by": [
+        "Y24-1-AC1",
+        "Y24-1-AC2",
+        "Y24-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/tests/test_status.py",
+      "kind": "test",
+      "commit_or_etag": "57ebb7ac6c",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "test file, not deployed",
+      "artifact_covered_by": [
+        "Y24-1-AC1",
+        "Y24-1-AC2",
+        "Y24-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y24-1-AC1",
+      "criterion_verbatim": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R24_CHECKS/test_r24_y1_correction_words.py::test_offers_correct_with_words -> expect: 1 passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R24_CHECKS/test_r24_y1_correction_words.py::test_offers_correct_with_words",
+      "output_evidence": "Run under timeout 120. rc=0. Output: 1 passed. Base dry-run at CLOUD e0520d4760 (issuer) was FAIL.",
+      "denominator": "1 of 1 selected test",
+      "status": "PASS",
+      "expect": "1 passed"
+    },
+    {
+      "criterion_id": "Y24-1-AC2",
+      "criterion_verbatim": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R24_CHECKS/test_r24_y1_correction_words.py::test_retry_exhausted_words_do_not_blame_the_file -> expect: 1 passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R24_CHECKS/test_r24_y1_correction_words.py::test_retry_exhausted_words_do_not_blame_the_file",
+      "output_evidence": "Run under timeout 120. rc=0. Output: 1 passed. Base dry-run at CLOUD e0520d4760 (issuer) was FAIL.",
+      "denominator": "1 of 1 selected test",
+      "status": "PASS",
+      "expect": "1 passed"
+    },
+    {
+      "criterion_id": "Y24-1-AC3",
+      "criterion_verbatim": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R24_CHECKS/test_r24_y1_correction_words.py::test_contract_unchanged -> expect: 1 passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R24_CHECKS/test_r24_y1_correction_words.py::test_contract_unchanged",
+      "output_evidence": "Run under timeout 120. rc=0. Output: 1 passed. Base dry-run at CLOUD e0520d4760 (issuer) was PASS.",
+      "denominator": "1 of 1 selected test",
+      "status": "PASS",
+      "expect": "1 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a copy-restored status.py, replaced the CORRECTION_WORDS lookup with None (words = None), then ran the whole R24 check file.",
+      "expected": "AC1 and AC2 fail, AC3 (contract control) still passes",
+      "observed": "2 failed, 1 passed: AC1 and AC2 FAILED, AC3 passed. status.py restored byte-identical (cmp), git status clean.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "whole R24 check file run twice after the commit",
+      "observed": "3 passed both runs; ops/tests/test_status.py + test_owned_status.py 45 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy of ops/status.py",
+      "reason": "BOUNDS: no AWS call/deploy; served code moves only via 2.0.0_SA_COO~P rebuild"
+    }
+  ],
+  "surprises": [],
+  "session_log": "none",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider <R24 check>",
+      "result": "3 passed"
+    }
+  ]
+}
