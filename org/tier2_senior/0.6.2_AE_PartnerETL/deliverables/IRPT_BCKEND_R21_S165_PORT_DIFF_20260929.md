@@ -293,6 +293,29 @@ to, never a silent wrong-cookie login -- but it does mean **Part 2 must deploy b
 must restore both.** The box's env file is already a different md5 from the repo's (`9b55e03c` vs the repo
 copy), so Part 2's S3 upload of the cot tree is what reconciles them.
 
+### 5a. A line-ending hazard this change turned load-bearing -- MEASURED, and fixed
+
+Making the `.js` depend on `secret-ids.env` exposed something that would have broken Part 2 outright:
+
+```
+working copy of infra/aws/ec2/bd-cot-auto-login/secret-ids.env : 2560 B, CR=35, LF=35
+the same file's blob at CLOUD                                  : 2525 B, CR=0,  LF=35
+BD_FIRM_ID on disk -> b'BD_FIRM_ID=cot<CR>'      in the blob -> b'BD_FIRM_ID=cot'
+```
+
+No `.gitattributes` rule covered `*.env`, so the blob is LF and **every checkout on an autocrlf=true device
+materializes CRLF.** Part 2's leg A1 uploads the WORKING copy, and the box's wrapper SOURCES that file with
+bash on Linux -- so every value would have carried a trailing carriage return. `BD_FIRM_ID=cot<CR>` makes
+every derived secret-id a name that does not exist (exit 2); `BD_IDENTITY_COOKIE=.bd.identity<CR>` would make
+the identity cookie never match, so the login would burn all three retry attempts and report exhausted. The
+hazard predates this change for `BD_FIRM_ID`; the change widens it to the two new required values.
+
+Fixed in this order's granted `.gitattributes`: `infra/aws/ec2/bd-cot-auto-login/*.env text eol=lf`
+(`@626033ace0`, with a bare-CR repair to its own comment at `@2a4c589512`). `git check-attr` now reads
+`text: set, eol: lf`, and the working copy was normalized so it is byte-identical to the blob (2,525 B, 0 CR).
+**Not done, named instead:** the sibling 49F and inf env files under `infra/aws/ec2/` are uncovered by the
+same rule and are outside this order's grant.
+
 ## 6. What was deliberately NOT ported
 
 The capture and the 49F canonical at HEAD differ in **12 hunks** (456 vs 605 lines, unified diff at n=0); two
@@ -354,9 +377,11 @@ replacement landed on a near-miss.
    V1 (SSM read of the running md5 and `secret-ids.env`) / V2 (the next scheduled
    `opal-cot-bd-session-fetch` Success, cron 07:30 America/New_York). NOT opened -- no leg can start before
    the GO.
-3. **Both** files in the same deploy, per section 5, and the rollback restores both: re-deploy the captured
+3. **Both** files in the same deploy, per sections 5 and 5a, and the rollback restores both: re-deploy the captured
    bytes from `bd_49f_auto_login.js.running-capture.txt` and the prior env file under the same ledger. The
    cheaper partial rollback, with the port left in place, is `BD_MAX_LOGIN_ATTEMPTS=1`.
-4. V1 is what disarms row `IRPT_BCKEND-S199` (running md5 = the committed port).
+4. Before leg A1, confirm the uploaded `secret-ids.env` has **0 CR bytes** (section 5a). The attribute
+   makes that true on a fresh checkout; measure it anyway, because the upload reads the working copy.
+5. V1 is what disarms row `IRPT_BCKEND-S199` (running md5 = the committed port).
 
 **DIFF READY.**

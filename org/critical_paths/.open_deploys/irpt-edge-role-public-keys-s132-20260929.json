@@ -1,0 +1,40 @@
+{
+  "slug": "irpt-edge-role-public-keys-s132-20260929",
+  "title": "S132: the Lambda@Edge role (lambda-edge-execution-role, lambda-edge-secrets-logs) reads only the two public keys -- targeted apply in portal-auth (IB-pr-213 @e408bbe9df); WAF drift in the same root left untouched (W69-S2)",
+  "author": "2.0.0_SA_COO~P",
+  "status": "OPEN",
+  "opened_at": "2026-09-29T08:22:09.693501+00:00",
+  "window_hours": 6.0,
+  "entry_path": "org/critical_paths/change_management/20260929T0822Z_irpt-edge-role-public-keys-s132-20260929_deploy_completion.md",
+  "legs": [
+    {
+      "id": "P1",
+      "kind": "verify",
+      "target": "targeted plan",
+      "proof_required": "-target=aws_iam_role_policy.lambda_edge_secrets_logs: 0/1/0, Resource opal/auth/* -> the two public-key ARNs",
+      "proof": "Main tree, .tools/terraform.exe (the W69-S1 substitute not used here), 08:2xZ: plan -target=aws_iam_role_policy.lambda_edge_secrets_logs -lock=false: Plan 0/1/0, Resource arn:...:secret:opal/auth/* -> [opal/auth/jwt-public-key-*, opal/auth/irpt-render-jwt-public-key-*], nothing else. The untargeted root also carries pre-existing WAF drift (aws_wafv2_web_acl.opal_cloudfront_protection, row W69-S2), deliberately NOT in this act.",
+      "closed_at": "20260929T082301Z"
+    },
+    {
+      "id": "D1",
+      "kind": "activation",
+      "target": "targeted safe-apply",
+      "proof_required": "halves at HEAD; simulator BEFORE; safe-apply -target; readback policy; simulator AFTER; edge logs 0 AccessDenied; re-plan targeted 0",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "A1",
+      "kind": "verify",
+      "target": "the human-token path",
+      "proof_required": "a real signed-in portal request through CloudFront after apply answers as before (no 5xx/deny from the edge)",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20260929T082209Z OPENED by 2.0.0_SA_COO~P with 3 leg(s)",
+    "20260929T082301Z LEG P1 closed: Main tree, .tools/terraform.exe (the W69-S1 substitute not used here), 08:2xZ: plan -target=aws_iam_role_policy.lambda_e"
+  ],
+  "last_red_at": null
+}
