@@ -140,3 +140,11 @@ removed and one log line says it is not invoked. Offline: `lambda invoke` 0, `aw
 (that log line), BD_PASSWORD 0, download-daily 0, secretsmanager 0, merge-daily-incremental 2; the merge block is 7 of 8
 lines identical to served v4 (the 8th the comment dash). Content sha256 first-16 `66431932a7ad0f55`, committed at a1a912c90a.
 This supersedes the allocation hash 559048c8290150fc above and the row Z-W17-S5 hazard for the re-asked leg.
+
+## ALLOCATION LEG RECORD (GO ec43dd0e33; halves SIGNED on content 66431932a7ad0f55: CTO @5e553da893, CVO @ae5e48d41c)
+
+Published 2026-09-29T09:15Z, outside 21:30-22:15Z, after ledger legs L7-L9 were committed (138ed30f0a). `opal-bd-allocation-download`:
+version before Default 3 / Latest 4, after v5, Default 5 / Latest 5. `get-document` `$LATEST` content sha256 first-16
+`66431932a7ad0f55` equals the repo file byte for byte; `lambda invoke` 0, `BD_PASSWORD` 0. The other 3 documents were not touched
+(3/3 each). Rollback: re-publish the v4 content (sha256 first-16 `3c17e61812af49f7`) as the next version and set DEFAULT to
+it. L9 (the 22:00Z acceptance fire) stays OPEN.
