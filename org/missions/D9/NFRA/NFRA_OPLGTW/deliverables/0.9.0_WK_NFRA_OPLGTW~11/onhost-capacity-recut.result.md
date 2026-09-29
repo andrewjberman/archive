@@ -15,9 +15,9 @@ Verdict in CAPACITY.json: **INSUFFICIENT**. A measured result, not a failure to 
 3. AC4 windows are read by `probes/assemble_capacity.py` (CloudWatch, both ruled windows).
 
 ## `cap_respected` consumer census (printed by `test_ogr3_ac01`, denominator = lines scanned)
-`onhost_bench.py` (705 lines): the definition at :206; ONE call site of `_cap_respected(` (:569, the single function that
-grades every job); reads of the `cap_respected` / `all_cap_respected` verdict at :578, :650, :655, :663 (4). Round 1 read it
-at 6 places. `og_r3.py`: re-derives the grade from each recorded peak and only compares the recorded flag with it (a
+`onhost_bench.py` (708 lines, as committed): the definition at :206; ONE call site of `_cap_respected(` (:572, the single function
+that grades every job); reads of the `cap_respected` / `all_cap_respected` verdict at :581, :653, :658, :666 (4). Round 1 read it
+at 6 places. `og_r3.py` (192 lines): one line mentions `cap_respected` (:57); it re-derives the grade from each recorded peak and only compares the recorded flag with it (a
 disagreement is itself a failure); mutant B (flag forced True on the maximal job) is caught: `[flag disagrees]`.
 
 ## Peaks (host, 11 columns = dim_position, the widest exportable set by contract column count)
