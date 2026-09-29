@@ -125,3 +125,15 @@ signer's HEAD, not typed:
 
 No write, no delete, no other action, no other prefix. The build is unaffected (IAM is plan-only); the plan shows the one
 inline policy changing and nothing else beyond section 4's list. If the plan shows any other IAM change, stop limb 4.
+
+## 10. CORRECTION to section 9 (signer, 2026-09-29 ~01:5xZ) -- 3 of the 8 were missing, not 8
+
+Section 9 says the pool-prefix list "holds none of them" and that this signer "re-read at the bytes". **Both are wrong for
+the five silver prefixes.** This signer read `scoped-amgt-api.tf:112-141`, the list's head, and not its tail.
+Enumerated in full now (21 entries): it already carries `barrons/`, `bloomberg/`, `ft/`, `seeking-alpha/` and
+`wsj/harvest/silver/`, and both statements interpolate `${p}*`, so those PARENTS already grant GET and the conditioned
+LIST over each `.../article/` child. **The act's real new footprint is the three gold table prefixes only**
+(`amgt/harvest/gold/{chatter_daily,chatter_event,article_security_mention}/`; 0 gold entries in the list before).
+The five silver entries are applied as signed (`0.7.0_AE_CloudOps~A`, msg 26374: a child of an existing prefix widens
+nothing, and the actor does not edit a signed scope on its own reading) and are **REDUNDANT**, so a later least-privilege
+pass may remove them without narrowing anything. Caught by `~A`, not by this signer.
