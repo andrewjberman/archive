@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-x-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "e5a6dcbe2f",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-x-2.streaming-export.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c80b5c85b6"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/engine.py",
+      "kind": "script",
+      "commit_or_etag": "0c3d545002",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Export child counts, refuses over row_cap before any fetch, streams batches to a file. Branch wk-NFRA_OPLGTW-11 only (LOCAL); the order says nothing deploys, OG-x-3 ships it.",
+      "artifact_covered_by": [
+        "OGX2-AC1",
+        "OGX2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py",
+      "kind": "script",
+      "commit_or_etag": "0c3d545002",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "export_query returns an ExportRows iterator over the export file. Branch wk-NFRA_OPLGTW-11 only (LOCAL); the order says nothing deploys, OG-x-3 ships it.",
+      "artifact_covered_by": [
+        "OGX2-AC1",
+        "OGX2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/export.py",
+      "kind": "script",
+      "commit_or_etag": "0c3d545002",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "write_csv takes an iterator; generate_csv counts and closes. Branch wk-NFRA_OPLGTW-11 only (LOCAL); the order says nothing deploys, OG-x-3 ships it.",
+      "artifact_covered_by": [
+        "OGX2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/envelope.py",
+      "kind": "script",
+      "commit_or_etag": "0c3d545002",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "measure() counts a row once. Branch wk-NFRA_OPLGTW-11 only (LOCAL); the order says nothing deploys, OG-x-3 ships it.",
+      "artifact_covered_by": [
+        "OGX2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_export_stream.py",
+      "kind": "test",
+      "commit_or_etag": "0c3d545002",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module: test_ogx2_ac01, test_ogx2_ac02. Branch wk-NFRA_OPLGTW-11 only (LOCAL); the order says nothing deploys, OG-x-3 ships it.",
+      "artifact_covered_by": [
+        "OGX2-AC1",
+        "OGX2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_query.py",
+      "kind": "test",
+      "commit_or_etag": "0c3d545002",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Engine double gains a real run_export; test_ogq2_ac16 counts a row once; new test_ogx2_ac03. Branch wk-NFRA_OPLGTW-11 only (LOCAL); the order says nothing deploys, OG-x-3 ships it.",
+      "artifact_covered_by": [
+        "OGX2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGX2-AC1",
+      "criterion_verbatim": "OGX2-AC1 (test_ogx2_ac01) -- through the REAL engine (a spawned child, no run_export alias) and generate_csv, a 100,000-row export's peak memory (the child's peak RSS as JobResult.peak_child_rss_bytes reports it, plus the parent's tracemalloc peak during generate_csv) is at most 1.2 times a 10,000-row export's; both CSVs are written with the right row count; the test prints both sizes and all four numbers.",
+      "method": "test_suite",
+      "invocation": "timeout 110 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export_stream.py::test_ogx2_ac01 -q -s -p no:cacheprovider --color=no",
+      "output_evidence": "OGX2-AC1: 10,000-row export: csv 450019 bytes, 10000 rows; child peak RSS 157175808 bytes (149.9 MiB); parent tracemalloc peak 582092 bytes (0.6 MiB)\nOGX2-AC1: 100,000-row export: csv 4500019 bytes, 100000 rows; child peak RSS 184332288 bytes (175.8 MiB); parent tracemalloc peak 549651 bytes (0.5 MiB)\nOGX2-AC1: ratios 100k/10k -- child 1.173, parent 0.944 (limit 1.2); csv size ratio 10.00\n1 passed in 44.94s\nrc=0",
+      "denominator": "1 of 1 selected test (test_ogx2_ac01, one of 2 in the module); 2 export sizes x 2 runs each (higher peak kept), 1 warm-up run excluded",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX2-AC2",
+      "criterion_verbatim": "OGX2-AC2 (test_ogx2_ac02) -- with a contract overlay setting limits.export_rows to 1,000 and a request matching 5,000 rows, the real-engine export is refused LIMIT_EXCEEDED / export_rows_limit with zero result rows fetched (a count the child reports and the test prints), and no file remains in the export directory.",
+      "method": "test_suite",
+      "invocation": "timeout 110 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export_stream.py::test_ogx2_ac02 -q -s -p no:cacheprovider --color=no",
+      "output_evidence": "OGX2-AC2: cap 1000, request matched 5000 rows -> LIMIT_EXCEEDED / export_rows_limit; child reported fetched_rows=0 (matched_rows=5000); files left in the export directory: []; child peak RSS 154054656 bytes\n1 passed in 5.56s\nrc=0",
+      "denominator": "1 of 1 selected test (test_ogx2_ac02); 1 request, matched_rows 5000, fetched_rows 0, 0 files left",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX2-AC3",
+      "criterion_verbatim": "OGX2-AC3 (test_ogx2_ac03) -- a schwab_query page with page_size 500 over 700 matched short rows (bytes and codepoints well inside their caps) returns 500 rows, truncated true with a cursor, and envelope.measure() reports 500 rows.",
+      "method": "test_suite",
+      "invocation": "timeout 110 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_query.py::test_ogx2_ac03 -q -s -p no:cacheprovider --color=no",
+      "output_evidence": "OGX2-AC3: page_size 500 over 700 matched -> returned 500, truncated True, cursor True; text block rows 500; measure() rows 500, codepoints 17904, utf-8 bytes 17904\n1 passed in 3.68s\nrc=0",
+      "denominator": "1 of 1 selected test (test_ogx2_ac03); 700 matched rows, 500 returned",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "OGX2-AC3 with the pre-OG-x-2 summing envelope.measure patched back in (.scratch/mutant_ac03.py, not committed).",
+      "expected": "The page is cut to 250 rows and test_ogx2_ac03 fails at its returned_count == 500 assertion.",
+      "observed": "With the old rule: 'OGX2-AC3: page_size 500 over 700 matched -> returned 250, truncated True, cursor True; text block rows 250; measure() rows 500' and AssertionError at tests/test_schwab_query.py:855 (returned_count == 500). With the new rule the same test passes with returned 500.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each criterion run twice on the same tree; test_ogx2_ac01 a further five times before the final change set.",
+      "observed": "AC2 and AC3: identical printed lines (matched 5000, fetched_rows 0, files []; returned 500, measure rows 500) on both runs. AC1: passed every run from the 2-column shape onward (child ratios 1.134, 1.140, 1.134, 1.176, 1.150, 1.173; parent 0.89 to 0.96); the child ratio varies by about 0.04 run to run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "download_routes.py edits",
+      "reason": "Read only: it unpacks generate_csv's unchanged 4-tuple, so no change was needed."
+    },
+    {
+      "item": "tests/acceptance/onhost_bench.py",
+      "reason": "Not in the order's <paths>; it still calls the old run_export signature. Row NFRA_OPLGTW-Z-W11-S2."
+    },
+    {
+      "item": "A 250,000-row wide-projection export inside the job memory cap",
+      "reason": "Not an acceptance value of this cell; measured over the cap in the child (row NFRA_OPLGTW-Z-W11-S1) and left for OG-x-3's on-host proof."
+    },
+    {
+      "item": "Any deploy, AWS call or Schwab object",
+      "reason": "Build only; synthetic data (order section 2)."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W11-S1: a 250,000-row export of wide rows still peaks the child above the 256 MiB job cap on the test host (source table and DuckDB's sorted result stay resident); AC1's child ratio is met on a 2-column export and not a 4-column one. ARMED, disarm_owner 2.0.0_SA_COO~O.",
+    "NFRA_OPLGTW-Z-W11-S2: tests/acceptance/onhost_bench.py calls run_export with the old signature and reads job.value['csv']; its export leg raises TypeError after this cell merges. ARMED, disarm_owner 2.0.0_SA_COO~O.",
+    "NFRA_OPLGTW-Z-W11-S3: test_ogq1_ac04 failed once in a combined-module run on site Z (pid_alive after a deadline kill) and passes alone; INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~11/streaming-export.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (python 3.11.9, .venv-og, pyarrow 18.1.0, duckdb 1.2.2)",
+      "invocation": "timeout 110 .venv-og/Scripts/python -m pytest <node> -q -s -p no:cacheprovider --color=no",
+      "result": "3 of 3 criteria: rc=0, '1 passed'"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <the 9 changed .py files>",
+      "result": "rc=0 for all (ruff, py_compile, ds-precommit)"
+    }
+  ]
+}
