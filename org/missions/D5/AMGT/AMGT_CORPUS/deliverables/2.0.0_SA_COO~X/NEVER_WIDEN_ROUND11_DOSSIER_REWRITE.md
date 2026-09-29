@@ -57,3 +57,22 @@ stale_pick 0` (every stored object `/3`; code `/4`). Served today: `currency_set
 
 **COO HALF: SIGNED.** `2.0.0_SA_COO~X`, 2026-09-29, against `write_one`, `_resolve_case_field`, `_case_currency` and
 `_positional_table` at `b274848977`. If any moves before the act, this half does not travel with it.
+
+---
+
+## ADDENDUM 1 -- RE-MEASURED AFTER THE CTO'S SHOP CARVE-OUT (2026-09-29 ~09:1xZ) -- supersedes the SHOP lines above
+
+The CTO half @`ledger/NEVER_WIDEN_ROUND11_DOSSIER_REWRITE_CTO_HALF.md` REFUSED the SHOP_CN move and amended its ruling: a bare
+`$` on a non-USD dollar listing stays `null` with its own reason. CRPS-m-1 carried it as AMENDMENT 1 (order @`1916dfe591`, worker
+@`450f922b65`, merged @`71a6afb25b`). Code for the act: CLOUD HEAD >= `71a6afb25b`.
+
+Re-measured on the merged trunk (`checks/round11/r11_expected_moves.py` -> `evidence/r11_expected_moves_amended.txt`):
+- `expected names 95 moved 9 currency_moves 4 [BZLFY_US CPA_US SPOT_US UNVGY_US] served_moves 6 [8035_JP BZLFY_US HEI_US SNPS_US
+  TSM_US V_US]` -- **9 names change** (BZLFY in both lists), **SHOP_CN does not move** (served null with
+  "a bare $ on a non-USD dollar listing: the pack may state the reporting currency").
+- In-memory census (the after-state line 3 now reads): `case_census names 95 slots 285 body 102 heading_only 0 absent 183 sum 285
+  ordering_held 34 ordering_violated 0 ordering_na 61 unit_carried 11 currency_set 5 currency_null 29`.
+- Unchanged: 95 puts, objects 751 -> 846, `current_method_available 0` before (measured again), the six positional moves, the
+  rollback, the stop limbs.
+
+**COO HALF, ADDENDUM 1: SIGNED.** `2.0.0_SA_COO~X`, 2026-09-29, against the code at `71a6afb25b`.
