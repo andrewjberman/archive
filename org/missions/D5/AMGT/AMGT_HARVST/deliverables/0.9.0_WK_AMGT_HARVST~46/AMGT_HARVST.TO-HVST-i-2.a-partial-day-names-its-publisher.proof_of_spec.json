@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-i-2.a-partial-day-names-its-publisher",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-i-2.a-partial-day-names-its-publisher.md",
+    "group": "OTHER",
+    "vintage_commit": "11b353048314ade5f84660c264dbad31659c0640"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "11b353048314ade5f84660c264dbad31659c0640",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-i-2.a-partial-day-names-its-publisher.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~46",
+  "session_log": "Ran on 2026-09-29 in worktree wk-hvst-r19-46. Added the chatter_daily column publishers_covered_codes (appended last), made both timeline routes carry publishers_covered and publishers_covered_codes with a null tolerance for an older part, updated SERIES_STORED_FIELDS, added 4 tests, ran both invocations literally under timeout 900. S3 GET/LIST only; no put, no vendor call, no deploy.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/publication_gold.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "GOLD_DAILY_SCHEMA gains publishers_covered_codes list<string> as the LAST column; daily_rows writes list(covered) in ENABLED_PUBLISHERS order. No existing column changed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/timeline_api.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "SERIES_STORED_FIELDS gains publishers_covered, publishers_covered_codes; _serve_series_entry and get_timeline_day carry both; _codes_of serves None for a row without the column.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_publication_gold_daily.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1 new test: codes equal the covering publishers in ENABLED order with len == publishers_covered (PARTIAL names its two, DENIED none, COMPLETE all), and the schema round-trips.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_timeline_api.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 new tests: series entry carries both, timeline_day body carries both, a row without the column serves null and does not raise. 198 -> 202 collected, none dropped.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~46/scripts/i2_ac2_codes_in_memory.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC2 invocation script; in-memory; S3 GET/LIST only; reuses i1_common read-only.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~46/i2_ac1_base_before.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Base -rA output before any edit: 198 passed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~46/i2_ac1_after.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim AC1 -rA output after the edit: 202 passed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~46/i2_ac2_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim AC2 output, rc 0: AC2 RESULT: PASS.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the harvest suite passes with new tests NAMED in the -rA output for each of: a daily row carries publishers_covered_codes equal to the covering publishers in ENABLED_PUBLISHERS order with len == publishers_covered; the /timeline series entry carries publishers_covered and publishers_covered_codes; the timeline_day body carries both; a daily row WITHOUT the column serves publishers_covered_codes null and does not raise; pass count BEFORE and AFTER printed (base 198), collected count not falling",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest/tests/ -rA --tb=line",
+      "expect": "202 passed",
+      "output_evidence": "rc 0. Last line '202 passed in 14.34s'. Before (this worktree, no edit): '198 passed in 5.75s'. Named in -rA: test_daily_row_carries_publishers_covered_codes_in_enabled_order, test_series_entry_carries_publishers_covered_and_codes, test_timeline_day_body_carries_publishers_covered_and_codes, test_a_daily_row_without_the_codes_column_serves_null_and_does_not_raise.",
+      "denominator": "202 of 202 collected tests passed (base 198 of 198); 4 new, 0 dropped",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "THE REBUILD, IN MEMORY, OVER TODAY'S INPUTS with i-1's securities file, set beside the SERVED newest chatter_daily part: (a) every PRE-EXISTING column equal on every row, denominator printed, any difference attributed DRIFT with 0 non-DRIFT; (b) the new column: row counts per data_status class, PARTIAL >= 1 code, DENIED 0, len(codes) == publishers_covered on every row, every security with a PARTIAL day listed with day count and codes; (c) the /timeline and timeline_day bodies over these in-memory rows for ASML_NA_Equity and FDX_US_Equity",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~46/scripts/i2_ac2_codes_in_memory.py",
+      "expect": "AC2 RESULT: PASS",
+      "output_evidence": "rc 0. Served newest part date=2026-09-29/part-20260929T192649Z.parquet, 51952 rows, lacks the column. (a) 21 pre-existing columns over 51952 rows: 0 rows differ served vs rebuild (DRIFT=0, NON-DRIFT=0); new code vs base code 7668249a78 over the same inputs: 0 of 51952 rows differ. (b) DENIED 51803, PARTIAL 149, COMPLETE 0; violations all 0 (len, order, PARTIAL-empty, DENIED-nonempty); PARTIAL securities: 992_HK_Equity 1 day {wsj}, ASML_NA_Equity 74 days {sa}, ASML_US_Equity 74 days {sa}; in-memory parquet round trip equal. (c) ASML_NA_Equity PARTIAL 2026-07-15 publishers_covered 1 codes ['sa'] on series entry and day body, DENIED 2026-01-01 codes []; FDX_US_Equity all 272 days DENIED (no PARTIAL), DENIED 2026-01-01 codes [] on both. Last line: 'AC2 RESULT: PASS'.",
+      "denominator": "51952 served rows vs 51952 rebuilt; 21 pre-existing columns; 191 securities; 120 silver articles, 60 listing_hit rows",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not run as a separate mutant; the null-tolerance test omits the column from the row, which is the older-part arm.",
+      "expected": "publishers_covered_codes null, no raise",
+      "observed": "test_a_daily_row_without_the_codes_column_serves_null_and_does_not_raise PASSED",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 builds the daily table with the new code and with the BASE code (git show 7668249a78) over the same inputs and compares the 21 pre-existing columns row by row",
+      "observed": "0 of 51952 rows differ",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write or delete, vendor call, gold write, deploy",
+      "reason": "Standing clause 1 and section 4 of the order."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "run at commit time; see the commit"
+    }
+  ]
+}
