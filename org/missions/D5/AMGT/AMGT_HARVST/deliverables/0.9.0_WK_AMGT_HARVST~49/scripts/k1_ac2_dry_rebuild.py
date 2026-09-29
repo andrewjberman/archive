@@ -133,6 +133,9 @@ def main():
     j2_text = open(os.path.join(J2_DIR, "j2_ac1_output.txt"), encoding="utf-8").read()
     c_ok = True
     c_detail = {}
+    # AMENDMENT 1: AMZN's span is 09-06..09-07 (its 09-08 barrons member is a guarded roundup and does not extend it);
+    # its member set and lead are j-2's. 992_HK equals j-2's candidate in span, member set and lead.
+    amz_span = (datetime.date(2026, 9, 6), datetime.date(2026, 9, 7))
     for sec in ("992_HK_Equity", "AMZN_US_Equity"):
         changed_served = [s for s in served if s["security_key"] == sec and j2_status[s["event_id"]][0] == "CHANGED"]
         for s in changed_served:
@@ -145,8 +148,15 @@ def main():
                 if sec == "AMZN_US_Equity":
                     json_ok = [{"span": [str(c["first_day"]), str(c["last_day"])], "articles": c["articles_total"]}] == j2_json["amzn_candidate"]
                 mine = [e for e in new if e["security_key"] == sec and set(e["article_keys"]) & set(c["article_keys"])]
-                same = len(mine) == 1 and (mine[0]["first_day"], mine[0]["last_day"]) == (c["first_day"], c["last_day"]) \
+                exp_span = amz_span if sec == "AMZN_US_Equity" else (c["first_day"], c["last_day"])
+                same = len(mine) == 1 and (mine[0]["first_day"], mine[0]["last_day"]) == exp_span \
                     and set(mine[0]["article_keys"]) == set(c["article_keys"]) and mine[0]["lead_article_key"] == c["lead_article_key"]
+                if sec == "AMZN_US_Equity":
+                    late = [k for k in c["article_keys"] if pg._day_of(row_of[(k, sec)]["published_utc"]) > amz_span[1]]
+                    late_ok = bool(late) and bool(mine) and all(row_of[(k, sec)].get("is_roundup") and k in mine[0]["article_keys"] for k in late)
+                    print("      AMENDMENT 1: j-2 members after %s: %s -> each is_roundup True AND a member of the new-rule event: %s" % (
+                        amz_span[1], [(k[:32], guard_word(row_of[(k, sec)])) for k in late], late_ok))
+                    same = same and late_ok
                 c_ok &= same and text_ok and json_ok
                 c_detail[sec] = {"j2_candidate": {"first_day": str(c["first_day"]), "last_day": str(c["last_day"]), "articles": c["articles_total"],
                                                   "lead": c["lead_article_key"]},
