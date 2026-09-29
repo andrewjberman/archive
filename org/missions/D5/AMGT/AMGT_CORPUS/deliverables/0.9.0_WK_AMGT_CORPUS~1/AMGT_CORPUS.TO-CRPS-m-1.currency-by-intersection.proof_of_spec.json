@@ -5,11 +5,11 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-m-1.currency-by-intersection.md",
     "group": "OTHER",
-    "vintage_commit": "e0887a72cdda8efa0c5f2729ef2bd8eb15f76085"
+    "vintage_commit": "1916dfe5916499464b3c121f1731e78cbf580b67"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
-    "vintage_commit": "e0887a72cdda8efa0c5f2729ef2bd8eb15f76085",
+    "vintage_commit": "1916dfe5916499464b3c121f1731e78cbf580b67",
     "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-m-1.currency-by-intersection.md"
   },
   "assignee": "0.9.0_WK_AMGT_CORPUS~1",
@@ -17,20 +17,21 @@
     {
       "path_or_key": "lib/research/corpus/dossier.py",
       "kind": "script",
-      "commit_or_etag": "e0887a72cd",
+      "commit_or_etag": "1916dfe5916499464b3c121f1731e78cbf580b67",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "_case_currency now returns the single element of (the symbol's _SYMBOL_ISO set) intersected with {listing currency}, else null. Basis when set: symbol's ISO set and the listing agree on exactly one code. Null bases: not stated in the pack / listing currency not on the block / symbol's currency differs from the listing. The old ambiguous basis is still produced by exactly one path: a symbol with no _SYMBOL_ISO entry (unreachable through extraction, which only reads _CURRENCY_SYMBOLS; reachable by direct call). Mapping unchanged, ASCII escapes; METHOD_VERSION unchanged; no S3 write run.",
+      "deploy_evidence": "_case_currency returns the single element of (the symbol's _SYMBOL_ISO set) intersected with {listing currency}, else null; basis when set: symbol's ISO set and the listing agree on exactly one code; null bases: not stated in the pack / listing currency not on the block / symbol's currency differs from the listing. AMENDMENT 1 (rule 6): a bare $ on a dollar-currency listing other than USD (_DOLLAR_ISO minus USD: AUD CAD NZD HKD SGD TWD and the other $-currencies) is null with basis 'a bare $ on a non-USD dollar listing: the pack may state the reporting currency'; a bare $ on USD still gives USD; every other symbol keeps the intersection rule. The old ambiguous basis is still produced by exactly one path: a symbol with no _SYMBOL_ISO entry. Nothing converts; METHOD_VERSION not touched by this order (/4 from CRPS-m-2); no S3 write run.",
       "artifact_covered_by": [
         "AC1",
-        "AC2"
+        "AC2",
+        "AC3"
       ]
     },
     {
       "path_or_key": "lib/research/corpus/tests/test_dossier_case_currency_intersection.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "1916dfe5916499464b3c121f1731e78cbf580b67",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "New, 8 offline tests: $+USD USD; $+CAD CAD; $+EUR null differs; pound+GBp null differs; euro+EUR EUR; no symbol null not stated; no listing null; listing never supplies a code the symbol does not admit.",
+      "deploy_evidence": "11 offline tests: $+USD USD; $+CAD null with the bare-dollar basis; $+AUD null; $+NZD/HKD/SGD/TWD null; pound+GBP and yen+JPY keep the intersection rule; $+EUR null differs; pound+GBp null differs; euro+EUR EUR; no symbol null not stated; no listing null; listing never supplies a code the symbol does not admit.",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -38,9 +39,9 @@
     {
       "path_or_key": "lib/research/corpus/tests/test_dossier_case_unit.py",
       "kind": "test",
-      "commit_or_etag": "e0887a72cd",
+      "commit_or_etag": "1916dfe5916499464b3c121f1731e78cbf580b67",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Edited only where it pinned the old outcome: test_euro_on_a_euro_listing_is_eur (basis wording); test_dollar_on_a_usd_listing_is_null_and_ambiguous -> ..._is_usd_by_intersection; test_dollar_on_a_euro_or_cad_listing_is_null_and_ambiguous -> test_dollar_on_a_euro_listing_is_null_and_differs; test_yen_sign_is_ambiguous_even_on_a_jpy_listing -> test_yen_sign_on_a_jpy_listing_is_jpy_by_intersection; new test_symbol_with_no_iso_entry_is_null_and_ambiguous; census final line currency_set 1 currency_null 2 -> currency_set 2 currency_null 1.",
+      "deploy_evidence": "Unchanged by the amendment (its round-1 edits stand: dollar-on-USD -> USD, dollar-on-EUR null differs, yen on JPY -> JPY, no-ISO-entry symbol ambiguous, census currency_set 2 currency_null 1 on USD/EUR listings).",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -48,12 +49,13 @@
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-m-1.currency-by-intersection.md",
       "kind": "doc",
-      "commit_or_etag": "e0887a72cd",
+      "commit_or_etag": "1916dfe5916499464b3c121f1731e78cbf580b67",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "status flipped pending -> complete.",
       "artifact_covered_by": [
         "AC1",
-        "AC2"
+        "AC2",
+        "AC3"
       ]
     }
   ],
@@ -61,21 +63,31 @@
     {
       "criterion_id": "AC1",
       "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round11/m1_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
-      "method": "test_suite",
+      "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round11/m1_AC1.sh",
-      "output_evidence": "8 passed in 0.18s",
-      "denominator": "8 of 8 tests passed, 0 failed; rc 0 (whole lib/research/corpus/tests: 426 passed)",
+      "output_evidence": "11 passed in 0.16s",
+      "denominator": "11 of 11 tests passed, 0 failed; rc 0 (whole lib/research/corpus/tests: 441 passed)",
       "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
       "status": "PASS"
     },
     {
       "criterion_id": "AC2",
-      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round11/m1_AC2.sh -- expect (?m)^m1 names 95 currency_set \\d+ .*CPA_US_Equity=USD.*ML_FP_Equity=EUR.*SPOT_US_Equity=USD.*UNVGY_US_Equity=USD",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round11/m1_AC2.sh -- expect (?m)^m1 names 95 currency_set 4 CPA_US_Equity=USD ML_FP_Equity=EUR SPOT_US_Equity=USD UNVGY_US_Equity=USD$",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round11/m1_AC2.sh",
-      "output_evidence": "m1 names 95 currency_set 5 CPA_US_Equity=USD ML_FP_Equity=EUR SHOP_CN_Equity=CAD SPOT_US_Equity=USD UNVGY_US_Equity=USD",
-      "denominator": "95 of 95 resolved names probed (read-only S3); 5 carry a currency; rc 0",
-      "expect": "(?m)^m1 names 95 currency_set \\d+ .*CPA_US_Equity=USD.*ML_FP_Equity=EUR.*SPOT_US_Equity=USD.*UNVGY_US_Equity=USD",
+      "output_evidence": "m1 names 95 currency_set 4 CPA_US_Equity=USD ML_FP_Equity=EUR SPOT_US_Equity=USD UNVGY_US_Equity=USD",
+      "denominator": "95 of 95 resolved names probed (read-only S3); 4 carry a currency, SHOP_CN not among them; rc 0",
+      "expect": "(?m)^m1 names 95 currency_set 4 CPA_US_Equity=USD ML_FP_Equity=EUR SPOT_US_Equity=USD UNVGY_US_Equity=USD$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round11/m1_AC3.sh -- expect (?ms)^m1 SHOP_CN_Equity listing CAD currency None basis a bare \\$ on a non-USD dollar listing.*^m1 CPA_US_Equity listing USD currency USD ",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round11/m1_AC3.sh",
+      "output_evidence": "m1 SHOP_CN_Equity listing CAD currency None basis a bare $ on a non-USD dollar listing: the pack may state the reporting currency\nm1 CPA_US_Equity listing USD currency USD basis symbol's ISO set and the listing agree on exactly one code",
+      "denominator": "2 of 2 names probed (SHOP_CN arm, CPA_US control); rc 0",
+      "expect": "(?ms)^m1 SHOP_CN_Equity listing CAD currency None basis a bare \\$ on a non-USD dollar listing.*^m1 CPA_US_Equity listing USD currency USD ",
       "status": "PASS"
     }
   ],
@@ -87,8 +99,8 @@
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "AC2 probe reads live stored extractions and blocks.",
-      "observed": "currency_set 5: CPA, ML, SHOP, SPOT, UNVGY.",
+      "method": "AC2 and AC3 probes read live stored extractions and blocks (read-only).",
+      "observed": "currency_set 4: CPA, ML, SPOT, UNVGY; SHOP_CN null.",
       "status": "STABLE"
     }
   },
@@ -99,7 +111,7 @@
     },
     {
       "item": "METHOD_VERSION change",
-      "reason": "Order bound: CRPS-m-2 bumps it."
+      "reason": "Order bound: CRPS-m-2 bumped it to /4; the amendment adds no second bump."
     }
   ],
   "surprises": [],
@@ -108,7 +120,7 @@
     {
       "tool": "pytest",
       "invocation": "PYTHONPATH=. python -m pytest lib/research/corpus/tests -q",
-      "result": "426 passed"
+      "result": "441 passed"
     }
   ]
 }
