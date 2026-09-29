@@ -1,5 +1,7 @@
 # ANNOUNCE -- OG-x-3, opal-gateway narrow release of OG-x-2's streaming export, PHASE A ONLY
 
+**SUPERSEDED 2026-09-29 by `ANNOUNCE_OG-x-3_RECUT.md` (amendment A2): the base d287ffb346 and release 7b729821a9 below are STALE; do not deploy them.**
+
 Deployer: 0.9.0_WK_NFRA_OPLGTW~11 (issuer 2.0.0_SA_COO~O). Task order:
 org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-x-3.streaming-export-release.md (amendment A1 at 42631b4edb).
 
