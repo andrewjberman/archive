@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-vv-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-vv-4.the-redeploy.md",
+    "group": "C",
+    "vintage_commit": "fc1e7bc8fd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "fc1e7bc8fd",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-vv-4.the-redeploy.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "7797cb1b54e684e48a2fe00b1f292e67-5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ],
+      "deploy_evidence": "ACT A then ACT B. PRIOR VersionId re-read AT BUILD TIME: zEAUAvUPYonOJyIkysKta_cLelXMDsMA, 39,987,023 B, content-sha256 CtIvirvMTG47vvgBGmouk3GrTNKPjPIPx/6ovB+EAOM= -- the order's named baseline, unchanged, and the rollback target. AFTER: zEAUAvUPYonOJyIkysKta_cLelXMDsMA -> nGTunkPcOlvo.N7Fh.xcSTDS4WmgwNDu, 39,987,023 -> 40,092,594 B, uploaded content-sha256 0SpJvook75ZSmkZ4xsBw7H03RdPS2CmZFJBXfdseXo0=. THE PLAN was written to a file, graded and THAT file applied: 0 to add, 2 to change, 0 to destroy over exactly two addresses (aws_iam_role_policy.scoped_amgt_api_grants, module.scoped_amgt_api.aws_lambda_function.this), 0 outside the named set, 0 write-class actions -- LIMB 4 CLEAR. The lambda moved only last_modified, s3_object_version and source_code_hash. APPLY: 0 added, 2 changed, 0 destroyed. Post-apply CodeSha256 0SpJvook75ZSmkZ4xsBw7H03RdPS2CmZFJBXfdseXo0= equals the uploaded object's content-sha256, CodeSize 40,092,594, LastUpdateStatus Successful, State Active, and a 0-diff replan (terraform -detailed-exitcode rc=0). THE TF HALF: local.scoped_amgt_pool_prefixes 29 -> 30, delta exactly +1, adding amgt/harvest/gold/research-dossier/ with its mandatory trailing slash; the applied plane reads the same one inline policy and one attached policy, resources 33 -> 34, those under amgt/harvest/gold/ 3 -> 4, and research-dossier occurring exactly twice across the GetObject and ListBucket limbs. THAT ONE TF LINE IS APPLIED BUT UNCOMMITTED: the naming gate refuses it in ENFORCE mode (row Z-S298), so DESIRED and APPLIED currently disagree on it and a plan from a clean HEAD checkout would want to remove the grant."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Every limb verdict here is an EQUALITY or an ABSENCE, and an extractor aimed at the wrong object reports IDENTICAL exactly as an unchanged function does. Each identity verdict carries a planted mutation inside the function it certifies; each pinned read carries a negative control; each output comparator carries an instrument control and a planted corruption.",
+      "expected": "A comparator reporting IDENTICAL must report MOVED when a statement is planted in the named function and must flag only that function; a pinned read must fail on a bogus pin; the pdf and timeline comparators must refuse a pair whose captures read the same CodeSha256.",
+      "observed": "SIX controls FIRED. (1) planted inside build_pack -> extractor reported it moved, so limb 2's IDENTICAL is real. (2) planted inside _model_cases -> FIRED. (3) s3 get-object at a bogus VersionId -> ClientError, so the baseline download is a real read. (4) git show at a bogus commit -> refused, so every half-pin read is real. (5) pdf INSTRUMENT control -- BA_US_Equity captured twice against the one unchanged deployment gave a STABLE content-stream digest AND raw sha. (6) timeline INSTRUMENT control -- 992_HK_Equity /timeline read twice gave 0 differing paths -- plus a planted corruption that made the comparator report MOVED. Both output comparators verified the pair read two different CodeSha256 (CtIvirvMTG47vvgBGmouk3GrTNKPjPIPx/6ovB+EAOM= -> 0SpJvook75ZSmkZ4xsBw7H03RdPS2CmZFJBXfdseXo0=) before grading.",
+      "status": "FIRED-AS-EXPECTED",
+      "method": "command"
+    },
+    "determinism": {
+      "description": "Three identities had to hold: the bytes that were RUNNING, the bytes each half was SIGNED against, and the bytes that SHIPPED against the bytes that were GRADED.",
+      "expected": "(a) the object at the prior VersionId hashes to its own content-sha256 AND the live CodeSha256, length = CodeSize; (b) both halves byte-identical at pin, at the cut and on disk; (c) the artifact that shipped is the artifact that was graded.",
+      "observed": "(a) IDENTICAL on all four. (b) COO half @aeee38480a blob 6ada00594f and CTO re-sign @5ae4dea2ba blob 638c429840, each identical at pin, at the cut and on disk, with a bogus pin refused; both are ancestor-checked FORWARD of the pins first graded (406c301742 -> aeee38480a, 5ca429458d -> 5ae4dea2ba), so amendments and not divergences. (c) THIS ONE FAILED FIRST AND WAS FIXED BEFORE THE APPLY, and is declared rather than hidden: the closure was graded on a --build-only zip built at the worktree cut fc1e7bc8fd, then the build+upload ran from the shared tree at HEAD 779f16a309, between which lib/research/corpus/dossier.py had moved -- graded sha IISddO56+zLGt0EcJ1PU0DL4GjrNVSs9eDCrVJiWeaI= against uploaded 0SpJvook75ZSmkZ4xsBw7H03RdPS2CmZFJBXfdseXo0=. I printed a currency check in the SAME call as the upload instead of GATING the upload on it. Nothing was half-landed (an S3 upload moves no code), so I downloaded the UPLOADED object, confirmed its sha equals its own metadata and the build's printed sha, and re-ran the whole limb grading against those exact bytes -- CLEAR with 0 unnamed movers. The artifact that shipped IS graded; what was briefly true is that it was uploaded before it was graded.",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Whether vv-4 AC2's failure should be re-graded, waived, or re-cut against another portal vintage.",
+      "reason": "Not this lane's to decide. The criterion FAILED (84 of 95) and the halves make a post-apply failure the rollback trigger, but a controlled experiment holding the deployed code identical and moving only the portal shows the cause is page-side, so the trigger's premise -- a criterion failing BECAUSE of the act -- does not hold. The entry is HELD-SOVEREIGN-GATED on 2.0.0_SA_COO~Z's ruling rather than closed or rolled back. Row Z-S297."
+    },
+    {
+      "item": "The f1a90a9b page-side citation regression itself.",
+      "reason": "Out of scope and out of lane: f1a90a9b merges vv-3 and DSGN_AMGTV1 AV-t-4, neither of which is this order. Measured and routed, not diagnosed further."
+    },
+    {
+      "item": "The naming-gate refusal on the one pool-prefix line.",
+      "reason": "The remedy is a row under infra/logic/registry/, which is outside this order's <paths>, or an R20 departure needing Andrew's word. Typing the canonical research_dossier would be a hand-typed workaround rule 30 forbids AND would grant a prefix holding zero objects; standing the gate down is implementing a bypass. Neither was done. Row Z-S298."
+    },
+    {
+      "item": "Whether pyarrow, the 250 MiB ceiling, or the extract.py SHIPPED-INERT admission are correctly judged.",
+      "reason": "All settled on the halves in earlier rounds and re-affirmed by AMENDMENT 2; this cell re-graded them against the amended sets and did not re-open them."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-S296: the first vv-4 attempt was REFUSED at the closure diff on three limb hits before any upload; all three were ruled and the halves re-signed. BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z.",
+    "AMGT_RESAPP-Z-S297: vv-4 AC2 reads 84 of 95, but with the deployed code held identical and only the portal moved, cit_page goes 0 at f1a90a9b versus N at 8fa7abde while cit_rich is unchanged -- the failure is page-side, the rollback trigger does not fire, and no portal vintage passes AC2 today. BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z.",
+    "AMGT_RESAPP-Z-S298: the applied pool-prefix line cannot be committed -- the naming gate refuses amgt/harvest/gold/research-dossier/ as NEW and OUT-OF-PATTERN while the canonical form holds zero objects, and 6 of 10 live gold prefixes are out-of-pattern. DESIRED and APPLIED disagree on that line. BLOCKING, ARMED, disarm_owner 1.0.0_SA_CTO~Z."
+  ],
+  "session_log": "The record of this cell is this instance, the NEVER-2 entry org/critical_paths/change_management/20260929T0809Z_amgt-resapp-vv4-reissue-basis-formula-and-team-cases-20260929_deploy_completion.md (HELD-SOVEREIGN-GATED: every apply leg proven, only VAC2 open), and rows AMGT_RESAPP-Z-S296, Z-S297 and Z-S298.",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py (NEVER-2)",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg|hold|check --slug amgt-resapp-vv4-reissue-basis-formula-and-team-cases-20260929",
+      "result": "Opened with 10 legs BEFORE the build. The commit of its two carriers was REFUSED by safe-commit because a peer drain held a merge in the shared worktree -- the guard working exactly as designed -- and the carriers were then swept into 2.0.0_SA_COO~D's drain ef21ed3f77 with bytes unchanged, which 2.0.0_SA_COO~Z independently confirmed (msg 26522). They read back byte-identical at HEAD and the gate read the entry OPEN under this lane's author line, so the opened-and-committed-before-the-build condition is met. At the end the entry was HELD, not closed: hold requires every apply/deploy leg proven and only verify legs open, which is precisely this state, and it reads KNOWN-HELD rather than a false RED."
+    },
+    {
+      "tool": "the closure-diff limb grader (this lane's own, carried from round 46)",
+      "invocation": "python vv4_limbs_amended.py <deployed.zip> <uploaded.zip>",
+      "result": "Graded the UPLOADED bytes, not an earlier local build. deployed 331 members, uploaded 343; added 12, removed 0, CHANGED 4, same 327; 0 unnamed movers in all three directions. Limbs 1, 2 and 3 CLEAR under AMENDMENT 2's admitted sets."
+    },
+    {
+      "tool": "lib.opal_naming.grade / address / key (read directly, to settle the naming refusal)",
+      "invocation": "on.grade(literal,'S3Key'); on.address('amgt','harvest','gold',<table>,<partition>)",
+      "result": "grade returns OUT-OF-PATTERN with canonical research_dossier for the hyphen form and CONFORMANT for the underscore form; over the ten live gold prefixes 6 are OUT-OF-PATTERN, all six AMGT_CORPUS's research-* store. address()/key() are PASS-THROUGH on the table segment, so an address being 'from the builder' blesses nothing -- which corrected this lane's first reading that the gate contradicted the builder."
+    },
+    {
+      "tool": "comp-read / comp-find (Rule 21 rail)",
+      "invocation": "comp-read <file> --for '<question>' --width N; comp-find <pattern> --limit N",
+      "result": "Used for the naming gate's DEC-6 matrix and exemption paths, the build contract and the dossier closure. comp-find put the research-dossier prefix at 793 hits across 79,260 files scanned (HEAD 485, SURFACED 299), which is how thoroughly the hyphen form is established. The rail DENIED several piped census calls and each was re-run with the tool's own flags rather than taking the override."
+    },
+    {
+      "tool": "safe-apply.sh (Rule 18)",
+      "invocation": "SAFE_APPLY_TERRAFORM=\"$(command -v terraform)\" .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -no-color -input=false <planfile>",
+      "result": "rc=0 applying the SAVED plan file, so the applied plan is the graded plan. SAFE_APPLY_TERRAFORM was required because safe-apply defaults to a sibling .tools/terraform.exe absent on site Z. No HALTGT pass is cited as evidence of anything."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "CodeSha256 differs from CtIvirvMTG47vvgBGmouk3GrTNKPjPIPx/6ovB+EAOM= and LastUpdateStatus=Successful -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round47/checks/vv-4.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "CodeSha256=0SpJvook75ZSmkZ4xsBw7H03RdPS2CmZFJBXfdseXo0= LastUpdateStatus=Successful LastModified=2026-09-29T08:37:47.000+0000 (prior CtIvirvMTG47vvgBGmouk3GrTNKPjPIPx/6ovB+EAOM=)  exit=0",
+      "denominator": "1 function, 1 configuration read. The deployed sha differs from the prior as required AND equals the uploaded object's content-sha256 and the sha of the artifact the closure diff was graded on.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "served: absences missing=0 on N of N names; EXPORT-COMPARE OK on N of N (the LIVE research library, read time printed); sweep rc=0 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round47/checks/vv-4.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "population: LIVE research library <OneDrive Research>, 95 folders, read_at 2026-09-29T08:56:47Z; served over 95 of 95 folders: OK 84, NOT_OK 11, CAPTURE_FAILED 0; cases over 95 of 95 compared names: page=285 rich=285 same=285 missing=0 extra=0; served: absences missing=0 on 95 of 95 names; EXPORT-COMPARE OK on 84 of 95; sweep rc=1  exit=1",
+      "denominator": "95 of 95 folders swept, 0 capture failures; 84 OK, 11 NOT_OK; 285 case values compared with 0 missing and 0 extra. The absences arm and the CASES axis both PASS; only EXPORT-COMPARE fails.",
+      "status": "FAIL",
+      "status_reason": "FAILED, and NOT rolled back, because a controlled experiment shows the act did not cause it. All 11 share one signature: FIGURES agree exactly, CITES page=0/rich=N/extra=N, ABSENCES extra=1, missing=0 on every axis. cit_page is 0 for ALL 95 names including the 84 that pass, so the page renders no citations at all in this harness; what separates the 11 is cit_rich. Sweeping the same 11 twice against the SAME deployed code and moving only the portal: at f1a90a9b cit_page 0, cit_extra N, NOT_OK; at 8fa7abde cit_page N, cit_extra 0, cites AGREE; cit_rich identical with 0 of 11 differing. The deployed bytes are fixed, so the change is in the page. The halves' rollback trigger is written for a criterion failing BECAUSE of the act, and rolling back would revert a deploy AC1, AC3 and limbs 4-6 all pass in order to fix a page it never touched -- so the entry is HELD on the issuer's ruling instead. A first hypothesis was falsified: only 3 of the 11 carry team_cases SERVED and AZN_LN_Equity carries all three and PASSES. BIND: no portal vintage passes AC2 today -- 8fa7abde fails the CASES arm instead (page=33 rich=22 missing=11), as expected for a page predating vv-1's label. Row Z-S297. A SEPARATE FIRST RUN of AC2 failed on an instrument fault of mine -- the fresh worktree portal had no node_modules and the harness died on 'Cannot find module typescript', 95 CAPTURE_FAILED, 0 compared -- and is recorded so it is not read as evidence; it was fixed by lending the shared portal's installed deps after measuring 0 changed lockfile or manifest paths between f1a90a9b and the shared HEAD."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "served: reads OK N of N (failed 0); formula as ruled M of M; team_cases as the dossier holds them N of N names, at least one case SERVED -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round47/checks/vv-4.AC3.py; echo \"exit=$?\"",
+      "output_evidence": "population: LIVE research library <OneDrive Research>, 95 folders, read_at 2026-09-29T08:39:00Z; deployed CodeSha256 0SpJvook75ZSmkZ4xsBw7H03RdPS2CmZFJBXfdseXo0=; served: reads OK 95 of 95 (failed 0); base SERVED 70, formula as ruled 70 of 70; team_cases as the dossier holds them 95 of 95 names, 84 case(s) SERVED  exit=0",
+      "denominator": "95 of 95 names invoked on the deployed /thesis route, 0 read failures, 0 no-identity; 70 served bases all on the ruled formula; 84 team cases SERVED across 95 names.",
+      "status": "PASS",
+      "status_reason": "Matches the halves exactly: 70 SERVED bases all moving to the basis-true formula, and 84 = 28 x 3, the COO half's predicted 28 names carrying all three team cases. This criterion is ALSO the falsifier AMENDMENT 2 assigned to limb 1's RUNTIME no-fitz clause -- had any served read reached extract.py, its module-scope fitz import would have raised and _team_cases would have answered ABSENT 'read failed' for a name whose dossier carries cases. 0 reads failed, so the clause is EXERCISED rather than asserted."
+    }
+  ]
+}
