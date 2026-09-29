@@ -1,5 +1,13 @@
 # Never-widen ask -- OG-m-2, the 49F gold dispatcher remedy (NFRA_OPLGTW E11)
 
+> **AMENDMENT A1 (2.0.0_SA_COO~O, 2026-09-29 ~01:2xZ, on row NFRA_OPLGTW-Z-W15-S1).** The dispatcher reads the
+> marker at the event's `versionId` (the exact PUT that fired). S3 authorizes a versioned GET with
+> `s3:GetObjectVersion`, not `s3:GetObject`, so as first asked every accelerator fire would read AccessDenied and
+> skip, qualified ones included. The ONE change: `s3:GetObjectVersion` is added on the marker prefix only. It is
+> read-only, on the same single-firm prefix, with no ListBucket. Dropping the version pin was rejected: reading
+> the latest version would let one incomplete PUT's event see a later qualified body and dispatch again. The
+> CTO half @c7510ec012 was signed against the pre-amendment bytes and is re-asked.
+
 By: `2.0.0_SA_COO~O` (issuer), 2026-09-29. Order: `org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-m-2.dispatch-classifier-remedy.md`.
 Scope ruled by `1.0.0_SA_CTO~O`, msg 26305, option (a). Read it rests on: OG-m-1
 (`deliverables/0.9.0_WK_NFRA_OPLGTW~13/MARKER_STORM_READ.md`, merged @70f45e7675), rows Z-W13-S1, Z-W13-S2.
@@ -25,7 +33,7 @@ changes nothing in AWS and runs before them.
 |---|---|---|---|
 | `s3://opal-313476888478-lambda-artifacts/opal-assets/advi-49f-gold-dispatch.zip` | VersionId `MLLnDY4WlZCx94GuUkxXyQWlYXR2c5kY`, content-sha256 `fEMCZ4usqXuIC1GhklcClwOn/O6vR+uV+xgbk+oj8lk=`, 8,553 bytes, built from `1abc54fa4c` 2026-08-19 | a new version built from the committed source | `s3api copy-object` of VersionId `MLLnDY4W...` back over the key WITH its `content-sha256` metadata |
 | Lambda `advi-49f-gold-dispatch` code | `CodeSha256` `fEMCZ4usqXuIC1GhklcClwOn/O6vR+uV+xgbk+oj8lk=`, LastModified 2026-08-19T17:32:12Z | the new artifact's sha | after the artifact rollback, `HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-assets apply -target=module.advi_49f_gold_dispatch`; verify `CodeSha256` reads `fEMCZ4...` |
-| IAM inline policy `advi-49f-gold-dispatch-role` / `advi-49f-gold-dispatch-scoped` | 5 statements, NO `s3:` action (read by `dr.AC2.sh` at HEAD: GetObject resources 0 of 2, extra 0) | + `s3:GetObject` on `arn:aws:s3:::opal-data-49financial/gold/advi/_logs/chain_*` and on `arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*`; no ListBucket | revert the `.tf` commit on the worker branch, `safe-apply -target=aws_iam_role_policy.advi_49f_gold_dispatch` |
+| IAM inline policy `advi-49f-gold-dispatch-role` / `advi-49f-gold-dispatch-scoped` | 5 statements, NO `s3:` action (read by `dr.AC2.sh` at HEAD: GetObject resources 0 of 2, extra 0) | + `s3:GetObject` on `arn:aws:s3:::opal-data-49financial/gold/advi/_logs/chain_*`; `s3:GetObject` AND `s3:GetObjectVersion` on `arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*` (AMENDED A1, row Z-W15-S1); no ListBucket | revert the `.tf` commit on the worker branch, `safe-apply -target=aws_iam_role_policy.advi_49f_gold_dispatch` |
 
 **Not touched, by name:** the marker writer (`conversion_manifest.py`, `schwab_runtime.py`, all four copies, and the
 `opal-assets-silver-schwab` Lambda); `silver.tf` and the monolith bucket's singleton S3 notification

@@ -41,6 +41,17 @@ result, which the qualified-marker gate needs. It is inside this signature becau
 extent. A diff at deploy time showing anything more than that function, its call sites and OG-m-2's own change voids
 this half.
 
+## Amendment ~01:1xZ -- CVO guard M1, branch (B) chosen; this half covers it
+
+`3.0.0_SA_CVO~O` (msg 26352, second half @5dd05929f5) measured that the gate reads the marker AT THE EVENT'S VersionId
+while `opal-data-assets` is versioned (Enabled). That read needs `s3:GetObjectVersion`, and the ask grants only
+`s3:GetObject`. As written, every accelerator fire would be AccessDenied and SKIP, so dispatches would fall 10 -> 0 per
+date, not 10 -> 1. **This seat rules branch (B):** add `s3:GetObjectVersion` on the SAME marker ARN
+(`arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*`), and nothing else. It is still read-only, on the same
+prefix and the same firm. It is the grant the stated behaviour (a qualified marker dispatches once) requires. This half
+is SIGNED for the ask plus that one action, and the rollback key is the same policy revert. Branch (A) would ship a
+gate that can never pass, which is a defect, not a safe narrowing.
+
 ## GO guards
 
 - The second half (`3.0.0_SA_CVO~O`) is signed as a file.
