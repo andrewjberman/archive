@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-231",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R23_Y.md",
+    "vintage_commit": "aa5ffed795",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-231.name-the-eviction-and-the-job-attention.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-231.name-the-eviction-and-the-job-attention.md",
+    "group": "D",
+    "vintage_commit": "aa5ffed795"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~83",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "7fc1a123f0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Served code moves only through 2.0.0_SA_COO~P's resident rebuild; no deploy, AWS call or push by this worker.",
+      "introduces": [
+        "named_line"
+      ],
+      "artifact_covered_by": [
+        "Y23-1-AC1",
+        "Y23-1-AC2",
+        "Y23-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y23-1-AC1",
+      "criterion_verbatim": "On an eviction, stdout carries a line naming the matched verdict and the job id.",
+      "method": "command",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R23_CHECKS/test_r23_y1_eviction_named.py::test_names_the_matched_verdict",
+      "output_evidence": "1 passed in 2.32s",
+      "denominator": "1 of 1 test(s) selected passed, rc=0",
+      "status": "PASS",
+      "expect": "1 passed"
+    },
+    {
+      "criterion_id": "Y23-1-AC2",
+      "criterion_verbatim": "A job that ends ATTENTION prints its job_detail code.",
+      "method": "command",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R23_CHECKS/test_r23_y1_eviction_named.py::test_names_the_job_attention",
+      "output_evidence": "1 passed in 1.35s",
+      "denominator": "1 of 1 test(s) selected passed, rc=0",
+      "status": "PASS",
+      "expect": "1 passed"
+    },
+    {
+      "criterion_id": "Y23-1-AC3",
+      "criterion_verbatim": "Control: one eviction still reaches READY; two still end ATTENTION SESSION_REFRESH_ALREADY_USED.",
+      "method": "command",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R23_CHECKS/test_r23_y1_eviction_named.py::test_no_behaviour_change",
+      "output_evidence": "2 passed in 2.44s",
+      "denominator": "2 of 2 test(s) selected passed, rc=0",
+      "status": "PASS",
+      "expect": "2 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "At the base (CLOUD aa5ffed795) AC1 and AC2 fail with no IRPT_RESIDENT_* line, while AC3 passes.",
+      "expected": "AC1 FAIL, AC2 FAIL, AC3 PASS",
+      "observed": "Issuer's base dry-run recorded exactly that; after the change AC1 and AC2 pass and AC3 still passes 2 of 2.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The three criteria were run twice (once in full-file run, once individually) against the same tree.",
+      "observed": "Identical pass counts both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-W83-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py",
+      "result": "40 passed, 8 skipped, rc=0"
+    }
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~83/name-the-eviction-and-the-job-attention.session_log.txt"
+}
