@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-221",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md ADDENDUM v0.19 rulings 6, 10, 11, 12 (line 523: \"Thread first ... then Inflection, then Cottonwood\"; line 525: \"No shadow path ... nothing runs alongside\")",
+    "group": "A",
+    "vintage_commit": "1c7136213d09047456014d1a84aa7b1836be2b3b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "1c7136213d09047456014d1a84aa7b1836be2b3b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-221.adapter-reads-the-inflection-gold.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~74",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/holdings_gold.py",
+      "kind": "script",
+      "commit_or_etag": "d823581045afdef22316e7d636f5d4b15779e548",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob d823581045afdef22316e7d636f5d4b15779e548 (worktree wk-IRPT_BCKEND-74, committed below). calculate() no longer refuses everything but 49F: firm = scope['verified_request_firm_id']; canonical_firm = _canonical_firm_for(firm) (new helper, tenants.route_for + a reverse of tenants._LEGACY_SHORT_ID back to the registry's canonical firm id, refusing an unrouted firm as HoldingsGoldRefused). bind_report_currency(tenants._CANONICAL_49F) -> bind_report_currency(canonical_firm). map_account gained a required firm parameter and is now this module's OWN implementation of f49_engine.map_account's rule (ids.opaque_account(firm, raw) matched against source.account_keys(day)) instead of delegating to f49_engine.map_account, which hardcodes 49 Financial and cannot serve a second firm.",
+      "artifact_covered_by": [
+        "P22-1-AC1",
+        "P22-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/retained.py",
+      "kind": "script",
+      "commit_or_etag": "d688170ea1886bf451ff742680b13d6beef44515",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob d688170ea1886bf451ff742680b13d6beef44515 (worktree wk-IRPT_BCKEND-74). RetainedPerformance.__init__ gains holdings_sources (dict, canonical firm id -> HoldingsGoldSource); holdings_source= (round-20 spelling) stays accepted as a plain attribute, and the new _holdings_source_for(firm_id) method reconciles the two (49F's plain attribute takes precedence when set, so an existing caller mutating service.holdings_source = ... after construction still lands on the same read _compute uses). The composed-firm gate (_compute) now requires holdings_firm (owner firm_id resolved through _holdings_source_for) for BOTH engine_firm (49F) and inf_firm (Inflection) -- no fallback to f49_engine or orion_selected for either. accepted_key['basis'], the fresh-path implausible-series guard (IB-pr-214) and the reopen-side implausible-series guard are all keyed on holdings_firm instead of engine_firm alone, so Inflection gets the same pre-switch-pointer isolation and the same fresh-path guard 49F already had. _provider/orion_selected/_inf_mapping_loader stay importable (row IRPT_BCKEND-W74-S1) but the fresh-path else-branch (vendor path) is reached only when NOT holdings_firm, which for Inflection now only happens when its registry address fails to resolve.",
+      "artifact_covered_by": [
+        "P22-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/installed.py",
+      "kind": "script",
+      "commit_or_etag": "d7e8235f4fd37e3e68f883bd2dda584d2bd38f9f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob d7e8235f4fd37e3e68f883bd2dda584d2bd38f9f (worktree wk-IRPT_BCKEND-74). _holdings_source(s3) (49F only) split into _holdings_source_for(s3, canonical_firm) (one firm's port, address resolved via opal_naming.address('irpt', canonical_firm, ...), None on a ValueError) and _holdings_sources(s3) (both tenants._CANONICAL_49F and tenants._CANONICAL_INF, each resolved independently -- a registry refusal for one never blocks the other, mirroring the pre-existing 49F-alone resilience rule). Iterates over the canonical firm ids themselves (the registry's own firm token) rather than a hand-typed '49financial'/'inflection' string -- the naming gate's LGIC_ENFORCE limb refused the hand-typed 'inflection' literal on the first attempt (NAMING REFUSE, NEW hand-kept carrier); fixed by reading the token from tenants._CANONICAL_INF instead. build_runtime now passes holdings_sources=_holdings_sources(s3) instead of holdings_source=_holdings_source(s3); _inf_mapping_loader(...) is still built and passed as inf_mapping_loader= for backward compatibility (unused on the served path once Inflection's holdings source composes, per retained.py's change above) so the out-of-grant structural test tests/test_inf_packaging.py keeps passing unedited.",
+      "artifact_covered_by": [
+        "P22-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py",
+      "kind": "test",
+      "commit_or_etag": "b980c10332d5ffbb2a2e19aad54d40b0741d7fb7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob b980c10332d5ffbb2a2e19aad54d40b0741d7fb7 (worktree wk-IRPT_BCKEND-74). test_another_firm_never_reads_the_holdings_gold (asserted zero S3 reads for a wrong-firm scope, a guarantee the firm-generalized calculate() no longer makes -- it now attempts the account mapping before refusing) replaced with test_an_account_minted_under_a_different_firm_never_matches_this_gold (same two firms, COT/INF, proves the refusal via the account-mapping namespace mismatch instead). test_the_account_mapping_reuses_the_engine_lanes_own_rule replaced with test_the_account_mapping_reuses_the_engine_lanes_rule_parameterized_on_firm (map_account's new required firm argument, plus a same-raw-key-different-firm-namespace negative case). Added test_an_unrouted_firm_refuses_by_name and test_inflection_answers_from_its_own_gold_with_its_own_currency_binding (Inflection's own scope/gold/currency attestation, mirroring the 49F YTD test's shape). `python -m pytest tests/test_holdings_gold.py -q` -> 14 passed.",
+      "artifact_covered_by": [
+        "P22-1-AC1",
+        "P22-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/tests/test_retained_performance.py",
+      "kind": "test",
+      "commit_or_etag": "b200781245a182c0c3741c4dca60a94614065918",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob b200781245a182c0c3741c4dca60a94614065918 (worktree wk-IRPT_BCKEND-74). test_inflection_is_computed_on_orion_retained_and_reopened_without_a_second_call (asserted lineage.provider == 'ORION' for Inflection, the behaviour ruling 12 retires) replaced with test_inflection_is_computed_from_the_holdings_gold_retained_and_reopened_without_a_second_read (mirrors the existing 49F holdings test: Inflection's own in-memory gold, load_mapping/transport_factory/inf_mapping_loader all poisoned to prove none is reached, provider == OPAL_HOLDINGS, no second S3 read on reopen). test_inflection_without_its_mapping_port_stays_uncomposed renamed test_inflection_without_its_holdings_source_stays_uncomposed (same assertion, ProviderPathNotComposed, now the correct reason under the new gate). `python -m pytest tests/test_retained_performance.py -q` -> 20 passed; full package `python -m pytest tests/ -q` -> 228 passed, 2 warnings (pre-existing pandas FutureWarning, unrelated).",
+      "artifact_covered_by": [
+        "P22-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P22-1-AC1",
+      "criterion_verbatim": "in-memory gold: an INF YTD answers the chain as OPAL_HOLDINGS (arm A); 49F unchanged (arm B, control); an uncovered INF account refuses (arm C, control). Base: FAIL (arm A refused \"49 Financial holdings calculation only\").",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r22/p22_1_ac1_inf_gold_fixture.py\" .",
+      "output_evidence": "rc=0. 'arm A (INF YTD): value 0.009980779700 want 0.009980779700 provider OPAL_HOLDINGS -> True' / 'arm B (49F unchanged): True' / 'arm C: refused HoldingsGoldRefused' / 'P22-1-AC1 PASS'.",
+      "denominator": "3 of 3 arms PASS (A, B, C)",
+      "status": "PASS",
+      "expect": "P22-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "P22-1-AC2",
+      "criterion_verbatim": "the seam probe against the REAL INF gold, read-only: account 998's YTD equals the independent chain of its 180 OK days (0.057245053463) within 1e-12. Base: FAIL (refused).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r22/p22_1_ac2_inf_gold_live.py\" .",
+      "output_evidence": "rc=0. 'gold OK days 180 | independent chain 0.057245053463 | holdings_gold 0.057245053463 | provider OPAL_HOLDINGS' / 'P22-1-AC2 PASS'.",
+      "denominator": "1 of 1 arm PASS (180 OK days matched within 1e-12)",
+      "status": "PASS",
+      "expect": "P22-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "P22-2-AC1",
+      "criterion_verbatim": "the RETAINED reader, through RetainedPerformance(holdings_sources={INF: ...}): a pre-switch pointer planted at the old key is never consulted, and the answer is OPAL_HOLDINGS at the chain; asking again reopens it with no second gold read. Base: FAIL (holdings_sources does not exist).",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r22/p22_2_ac1_inf_retained_switch.py\" .",
+      "output_evidence": "rc=0. pytest '.' / '1 passed in 2.86s' / 'P22-2-AC1 PASS'. Arm A: a pointer at the pre-switch key (no basis field, ref pointing to a nonexistent report) is never matched (index.get misses on the new basis-keyed pointer_key); the service computes fresh from Inflection's holdings gold and answers OPAL_HOLDINGS at the chained value. Arm B: asking again reopens the same answer, with gold_s3.gets unchanged (no second read).",
+      "denominator": "1 of 1 pytest case PASS (both arms A and B inside it)",
+      "status": "PASS",
+      "expect": "P22-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted on the ONE mechanism this cell's task order is about: holdings_gold.calculate's firm generalization. Line 201 (`canonical_firm = _canonical_firm_for(firm)`) was temporarily replaced with `canonical_firm = tenants._CANONICAL_49F  # MUTANT: hardcode 49F, undoing the firm-generalization`, reproducing the pre-cell behaviour where every firm's currency binding and account mapping is forced onto 49 Financial's namespace, and P22-1-AC1 was re-run.",
+      "expected": "Arm A (Inflection YTD) fails: an account minted under Inflection's canonical firm id never matches the 998-raw-key lookup performed under 49 Financial's opaque_account namespace, so map_account finds zero or duplicate matches and refuses. Arms B and C (both already 49F/negative-account shaped) are unaffected.",
+      "observed": "EXECUTED. With the mutant in place: 'arm A (INF YTD): HoldingsGoldRefused: holdings account mapping missing or duplicate' / 'arm B (49F unchanged): True' / 'arm C: refused HoldingsGoldRefused' / 'P22-1-AC1 FAIL' -- exactly the predicted single-arm failure. Restored (`canonical_firm = _canonical_firm_for(firm)`) and re-run: 'arm A (INF YTD): value 0.009980779700 want 0.009980779700 provider OPAL_HOLDINGS -> True' / 'P22-1-AC1 PASS'. `git hash-object infra/aws/lambda/investor-reporting/performance/holdings_gold.py` after restore matches the committed blob (d823581045afdef22316e7d636f5d4b15779e548) exactly, and `git status --porcelain` shows only the real (non-mutant) diff -- the worktree carries no mutant residue.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "P22-1-AC1, P22-1-AC2 and P22-2-AC1 each run twice at the committed state (once during development, once while collecting this instance's output_evidence, after the mutant was restored). The full package suite (tests/) run three times across the session (before the mutant, at the mutant, after restoring it).",
+      "observed": "Identical PASS/rc=0 outcome and identical deciding values on both runs of each of the three criteria: P22-1-AC1's arm A value (0.009980779700), P22-1-AC2's independent chain (0.057245053463, 180 OK days), P22-2-AC1's pytest '1 passed'. Full suite: 228 passed, 2 warnings (pre-existing pandas FutureWarning, unrelated) on both the pre-mutant and post-restore runs; the mutant run itself only exercised P22-1-AC1 (not the full suite) and was restored before any further full-suite run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "PerformanceReport.schema.json (infra/aws/lambda/investor-reporting/_contracts/ and docs/contracts/investor-reporting/v1/)",
+      "reason": "Not in this order's <paths> grant. The lineage.provider enum admits OPAL_HOLDINGS already (CTO RULING 102544, landed at 78eeb223f8 ahead of this cell per row IRPT_BCKEND-W64-S1's resolution) -- normalize.validate_report passes on a real OPAL_HOLDINGS report for Inflection exactly as it does for 49 Financial; no further schema change was needed or made by this cell."
+    },
+    {
+      "item": "any deploy or AWS write",
+      "reason": "BOUNDS clause: 'No deploy, no AWS write.' P22-1-AC2 reads the real Inflection gold read-only via HoldingsGoldSource/calculate (boto3 GetObject/ListObjectsV2 only); no object was written, no Lambda updated, no Terraform applied. The served move (code deploy + the adapter role's IAM read on the Inflection gold + the Inflection bucket's firm fence) is the issuer's, under both never-widen halves, per the order's own BOUNDS text."
+    },
+    {
+      "item": "tests/test_inf_packaging.py, tests/test_orion_account_mapping.py, tests/test_orion_selected.py, tests/test_authorization.py (Orion/packaging structural tests)",
+      "reason": "Not in this order's <paths> grant. These out-of-grant tests require retained._provider(tenants._CANONICAL_INF).__name__ == 'orion_selected' and installed._inf_mapping_loader to remain importable and working; both were left intact and unreached from the served path once Inflection's holdings source composes (row IRPT_BCKEND-W74-S1). Full suite confirms all four still pass unedited (228 passed overall)."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W74-S1: the cell text says ruling 12 retires the Orion read for Inflection 'in the same act; nothing runs alongside', but the out-of-grant test tests/test_inf_packaging.py requires retained._provider(tenants._CANONICAL_INF).__name__ == 'orion_selected' and installed._inf_mapping_loader to keep working -- resolved by keeping those functions intact but unreachable from the served path (retained._compute) once Inflection's holdings source composes; 'nothing runs alongside' is satisfied at the SERVED level, not by deleting the structural scaffolding. See the row for full grounding."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~74/IRPT_BCKEND.TO-IB-pr-221.adapter-reads-the-inflection-gold.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (p22_1_ac1_inf_gold_fixture.py, the AC1 invocation)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r22/p22_1_ac1_inf_gold_fixture.py\" .",
+      "result": "rc=0, P22-1-AC1 PASS (3 of 3 arms PASS)"
+    },
+    {
+      "tool": "python + boto3 (p22_1_ac2_inf_gold_live.py, the AC2 invocation, read-only live S3, 180 OK days over 180 partitions)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r22/p22_1_ac2_inf_gold_live.py\" .",
+      "result": "rc=0, P22-1-AC2 PASS against the live Inflection gold; value 0.057245053463 matches the independent chain oracle within 1e-12"
+    },
+    {
+      "tool": "python -m pytest (p22_2_ac1_inf_retained_switch.py, the AC3 invocation)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r22/p22_2_ac1_inf_retained_switch.py\" .",
+      "result": "rc=0, P22-2-AC1 PASS (1 passed in 2.86s)"
+    },
+    {
+      "tool": "python -m pytest (tests/test_holdings_gold.py, corroborating suite)",
+      "invocation": "cd infra/aws/lambda/investor-reporting/performance && python -m pytest tests/test_holdings_gold.py -q",
+      "result": "14 passed"
+    },
+    {
+      "tool": "python -m pytest (tests/test_retained_performance.py, corroborating suite incl. the two switch tests)",
+      "invocation": "cd infra/aws/lambda/investor-reporting/performance && python -m pytest tests/test_retained_performance.py -q",
+      "result": "20 passed"
+    },
+    {
+      "tool": "python -m pytest (full performance package suite)",
+      "invocation": "cd infra/aws/lambda/investor-reporting/performance && python -m pytest tests/ -q",
+      "result": "228 passed, 2 warnings (pre-existing pandas FutureWarning, unrelated)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/performance/holdings_gold.py infra/aws/lambda/investor-reporting/performance/installed.py infra/aws/lambda/investor-reporting/performance/retained.py infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py infra/aws/lambda/investor-reporting/performance/tests/test_retained_performance.py",
+      "result": "OK: pre-commit gate clean for 5 of 5 file(s)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (1 new row of 465 total checked)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (naming-gate limb, first attempt)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~74 <0.9.0_WK_IRPT_BCKEND~74@opal.agent>\" -F .scratch/commit-msg-ib-pr-221.txt -- <the 8 paths below>",
+      "result": "BLOCKED first attempt: naming-gate REFUSE on installed.py:66 -- a hand-typed 'inflection' string literal (NEW hand-kept carrier, LGIC rule 30). Fixed by iterating _holdings_sources over tenants._CANONICAL_49F/_CANONICAL_INF (the registry's own firm token) instead of a second hand-typed spelling; re-run below is the actual commit."
+    }
+  ]
+}
