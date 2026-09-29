@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-201",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "A",
+    "vintage_commit": "82e1700237440a14d6341013e3cb62c574db50d1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "8340a8fef2ba4754c882a6faf22de5e43d897596",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-201.adapter-reads-the-holdings-gold.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~64",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/holdings_gold.py",
+      "kind": "script",
+      "commit_or_etag": "2f7ed6b2e8ea16a8dc1909718b6dbb49b148beb7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 2f7ed6b2e8ea16a8dc1909718b6dbb49b148beb7, committed 42e8fc647df26f5ae693bda085364ec50732327d on wk-IRPT_BCKEND-64. New module: PROVIDER=OPAL_HOLDINGS, HoldingsGoldRefused/HoldingsWindowNotRuled, HoldingsGoldSource (read-only port over holdings_performance_daily, receipted per object), map_account() delegating to f49_engine.map_account and re-raising as HoldingsGoldRefused, calculate() with f49_engine.calculate's own return contract (normalize.build_performance_report; account_detail; daily_cumulative_series; dates.actual_start/actual_end) over YTD/QTD/1Y (reused via f49_engine.ruled_period_for) plus Since Inception (start == 1970-01-01, ruling 6).",
+      "artifact_covered_by": [
+        "P20-1-AC1",
+        "P20-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/retained.py",
+      "kind": "script",
+      "commit_or_etag": "222dcfbac1bbe0343974ec801e4d71f584b92d97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 222dcfbac1bbe0343974ec801e4d71f584b92d97, committed 42e8fc647df26f5ae693bda085364ec50732327d. RetainedPerformance(holdings_source=None) replaces engine_source; composition check reads self.holdings_source; the fresh path for engine_firm calls holdings_gold.calculate instead of f49_engine.calculate. accepted_key carries a basis=holdings_gold.PROVIDER field for 49F only, so a pre-switch OPAL_ENGINE pointer (minted without that field) is never found or reopened -- the fresh path always computes and publishes at the new key, and a holdings-basis pointer reopens as today with no second gold read.",
+      "artifact_covered_by": [
+        "P20-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/installed.py",
+      "kind": "script",
+      "commit_or_etag": "0b05083f62d57ac767d7947d0dc35b719c1a4b34",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 0b05083f62d57ac767d7947d0dc35b719c1a4b34, committed 42e8fc647df26f5ae693bda085364ec50732327d. _engine_source replaced by _holdings_source(s3): bucket and prefix derived from opal_naming.address('irpt', '49financial', 'gold', 'holdings_performance_daily', 'date=1970-01-01'), never typed; an address ValueError returns None (49F stays uncomposed and answers UNSUPPORTED_OPERATION by name) rather than killing cold start for COT/INF, mirroring the existing INF-mapping-port resilience pattern.",
+      "artifact_covered_by": [
+        "P20-1-AC2",
+        "P20-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/entry.py",
+      "kind": "script",
+      "commit_or_etag": "88b4cc1b9675757a14a191f9e6de51e4eb6ae262",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 88b4cc1b9675757a14a191f9e6de51e4eb6ae262, committed 42e8fc647df26f5ae693bda085364ec50732327d. build_entry's reasons table gains \"HoldingsWindowNotRuled\": \"UNSUPPORTED_OPERATION\" and \"HoldingsGoldRefused\": \"OBJECT_NOT_COVERED\" (subclass named first for the MRO walk), immediately after the existing EnginePerformanceRefused lines, which are otherwise unchanged.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py",
+      "kind": "test",
+      "commit_or_etag": "3710e0dc70d6eb216b1a393573d40dc322196265",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 3710e0dc70d6eb216b1a393573d40dc322196265, committed 42e8fc647df26f5ae693bda085364ec50732327d (new file). 12 tests mirroring test_f49_engine.py's shape for the holdings basis: source/prefix, unknown-account and unruled-window refusals, cross-firm isolation, account-mapping reuse, YTD chain (with a PRICE_MISSING row skipped, never zeroed), Since Inception, no-OK-row refusal, and the phase-log line. Two tests xfail on the documented world defect (row IRPT_BCKEND-W64-S1) rather than passing or erroring silently. `python -m pytest tests/test_holdings_gold.py -q` -> 10 passed, 2 xfailed."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/tests/test_retained_performance.py",
+      "kind": "test",
+      "commit_or_etag": "938156f00452b62df38f38b0129b2002cc4d9b22",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 938156f00452b62df38f38b0129b2002cc4d9b22, committed 42e8fc647df26f5ae693bda085364ec50732327d. Two engine-era tests (test_49f_is_computed_from_the_engine_retained_and_reopened_without_a_second_read, test_reopen_refuses_a_pre_guard_implausible_engine_report) replaced with test_49f_is_computed_from_the_holdings_gold_retained_and_reopened_without_a_second_read and test_a_pre_switch_engine_report_is_never_reopened_the_holdings_gold_answer_takes_over, both stubbing normalize.validate_report (documented world defect, row IRPT_BCKEND-W64-S1) to prove the retained-layer switch/no-reopen/no-second-read mechanism independent of that unrelated gap. `python -m pytest tests/test_retained_performance.py -q` -> 19 passed. MUTANT EXECUTED (see controls.mutant): with the new basis-key line suppressed, test_a_pre_switch_engine_report_is_never_reopened_the_holdings_gold_answer_takes_over fails with 'AssertionError: assert 'OPAL_ENGINE' == 'OPAL_HOLDINGS'' (the switched service wrongly reopens the pre-switch engine report); restored, it passes again.",
+      "artifact_covered_by": [
+        "P20-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P20-1-AC1",
+      "criterion_verbatim": "on in-memory gold: YTD = the chain, provider OPAL_HOLDINGS, actual_start the first in-window day; Since inception starts at the first landed day; an uncovered account and a 3-year window refuse by name. Base: FAIL (holdings_gold absent).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_1_ac1_gold_fixture.py\" .",
+      "output_evidence": "rc=0. '{\"bytes\": 23105, \"event\": \"irpt_holdings_phases\", ...}' / 'PASS A: YTD 0.009980779700 (want 0.009980779700) provider OPAL_HOLDINGS start 2026-01-02' / 'PASS B: SI actual_start 2025-12-31' / 'PASS C1 unknown account: refused as HoldingsGoldRefused' / 'PASS C2 3-year window: refused as HoldingsWindowNotRuled' / 'P20-1-AC1 PASS'. All four arms now pass: the OPAL_HOLDINGS enum fix (78eeb223f8, CTO RULING 102544, brought into this worktree read-only per the issuer's continuation ruling and NEVER committed here) removed the jsonschema.ValidationError that was the sole cause of the prior FAIL; the arithmetic, window rules and refusal-by-name were already correct.",
+      "denominator": "4 of 4 arms PASS (A, B, C1, C2)",
+      "status": "PASS",
+      "expect": "P20-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "P20-1-AC2",
+      "criterion_verbatim": "the seam probe against the REAL gold, read-only: the thread account's YTD through holdings_gold.calculate equals the independent chain of its 184 landed days (0.058285199226) within 1e-12. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_1_ac2_gold_live.py\" .",
+      "output_evidence": "rc=0, live gold (184 landed partitions, thread account 0010498003): 'gold days 184 | independent chain 0.058285199226 | holdings_gold 0.058285199226 | provider OPAL_HOLDINGS' / 'P20-1-AC2 PASS'. holdings_gold.calculate's YTD value now matches the independent 184-day chain oracle within 1e-12, unblocked by the same enum fix (78eeb223f8) that unblocked AC1 -- this is the exact figure this order's earlier manual, uncommitted observation already found (0.058285199226329354), now reached through the real, unmodified acceptance path.",
+      "denominator": "1 of 1 arm PASS",
+      "status": "PASS",
+      "expect": "P20-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "P20-2-AC1",
+      "criterion_verbatim": "the check retains a 49F report through the PRE-switch retained.py (git ae8da14d12, engine port), then asks your RetainedPerformance(holdings_source=...) for the same window. Arm A: the answer is OPAL_HOLDINGS at the gold chain, and the engine report is not reopened. Arm B: asking again reopens it unchanged, with no second gold read. Base: FAIL (holdings_gold absent; the pre-switch half runs clean).",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_2_ac1_retained_recompute.py\" .",
+      "output_evidence": "rc=0. pytest '.' / '1 passed in 2.33s' / 'P20-2-AC1 PASS'. Arm A: the switched service answers OPAL_HOLDINGS at the gold chain via retained.py's fresh path and never reopens the pre-switch OPAL_ENGINE report (accepted_key basis switch, unchanged from the prior build). Arm B: asking again reopens the holdings answer unchanged, with no second gold read. Unblocked by the same enum fix (78eeb223f8).",
+      "denominator": "1 of 1 pytest case PASS (both arms A and B inside it)",
+      "status": "PASS",
+      "expect": "P20-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two arms. (1) The order's own before/after clause: Base (CLOUD, holdings_gold absent) fails all three criteria on IMPORT/absence (RECORD FACE comp-adversary preflight, this TO file: 'P20-1-AC1 FAIL (holdings_gold absent); P20-1-AC2 FAIL ...; P20-2-AC1 FAIL at the holdings_gold import only'). After this cell's commit, all three fail for a DIFFERENT, single, later-stage cause (jsonschema.ValidationError on the closed provider enum) -- never on import, mapping, arithmetic or window logic. (2) A planted mutant on the ONE mechanism this cell's own code makes true (the never-reopens-a-pre-switch-engine-report guard): the `accepted_key[\"basis\"] = holdings_gold.PROVIDER` line in retained.py was temporarily replaced with a no-op, and test_retained_performance.py::test_a_pre_switch_engine_report_is_never_reopened_the_holdings_gold_answer_takes_over was re-run.",
+      "expected": "Arm 1: Base fails on absence; After fails on the enum only. Arm 2: with the basis-key line suppressed, the switched service wrongly reopens the pre-switch OPAL_ENGINE pointer instead of computing fresh from the holdings gold.",
+      "observed": "Arm 1 confirmed: Base state is the TO file's own preflight line (absence); After state is 'FAIL: holdings_gold could not answer (ValidationError); ...' for P20-1-AC2 and the identical ValidationError text for P20-1-AC1/P20-2-AC1 above -- a different failure mode, never absence. Arm 2 EXECUTED: with the basis-key line suppressed (`pass  # MUTANT: basis key suppressed`), `python -m pytest tests/test_retained_performance.py -k pre_switch_engine_report -q` -> 1 failed: 'AssertionError: assert 'OPAL_ENGINE' == 'OPAL_HOLDINGS'' at test_retained_performance.py:291, captured stdout showing path=reopen (it reopened the OLD engine pointer). The file was restored via `git checkout -- infra/aws/lambda/investor-reporting/performance/retained.py` (back to committed blob 222dcfbac1bbe0343974ec801e4d71f584b92d97) and the same test re-run: 1 passed. Worktree confirmed clean of the mutant (git status --short) before this instance was written.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "P20-1-AC1, P20-1-AC2 and P20-2-AC1 each run twice at the committed state (once before writing this instance, once while collecting output_evidence); the full package suite (tests/) run three times across the session. Re-run at the disarmed state (CTO RULING 102544 landed, 78eeb223f8 brought into this worktree read-only): each of the three criteria run once more, plus the full performance/tests suite.",
+      "observed": "Identical FAIL/rc=1 outcome and identical ValidationError text on both runs of each of the three criteria; P20-1-AC2's independent chain value (0.058285199226) identical both runs. Full suite: 222 passed, 2 xfailed, both runs (before the mutant and after restoring from it). At the disarmed state: all three criteria PASS on this run (identical to a repeat run moments later); full suite python -m pytest -q performance/tests -> 224 passed, 2 warnings (same pre-existing pandas FutureWarning), both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "PerformanceReport.schema.json (infra/aws/lambda/investor-reporting/_contracts/ and docs/contracts/investor-reporting/v1/)",
+      "reason": "Not in this order's <paths> grant, and by its own docstring GENERATED from the PRD CONTRACTS table -- a hand edit would be 'a fabrication ... refused by the IB-s-18 battery'. Adding OPAL_HOLDINGS to the lineage.provider enum is an L4 PRD/CONTRACTS-table act reserved to 1.0.0_SA_CTO (CLAUDE.md rule 27). See surprise row IRPT_BCKEND-W64-S1. RESOLVED: 1.0.0_SA_CTO ruled (RULING 102544) and 2.0.0_SA_COO~P landed the additive fix on CLOUD at 78eeb223f8. Per the issuer's continuation instruction the three fixed files (docs/contracts/investor-reporting/v1/PerformanceReport.schema.json, infra/aws/lambda/investor-reporting/_contracts/PerformanceReport.schema.json, infra/aws/lambda/investor-reporting/performance/tests/test_primary_policy.py) were brought into THIS worktree read-only for the re-run (git checkout 78eeb223f8 -- <3 files>; git reset -q -- <3 files>) and remain unstaged, never committed from this worktree -- still outside this order's <paths> grant, and the issuer's drain merges CLOUD, which already carries the committed fix."
+    },
+    {
+      "item": "any deploy or AWS write",
+      "reason": "BOUNDS clause: 'No deploy, no AWS write.' P20-1-AC2 and the manual observation read S3 read-only via the package's own HoldingsGoldSource/calculate; no object was written, no Lambda updated, no Terraform applied."
+    },
+    {
+      "item": "infra/aws/lambda/investor-reporting/performance/entry.py",
+      "reason": "None of this order's three acceptance criteria route through entry.py's build_entry reasons table -- P20-1-AC1 and P20-2-AC1 both call holdings_gold.calculate / RetainedPerformance directly and catch HoldingsGoldRefused / HoldingsWindowNotRuled in the check's own except clause (p20_1_ac1_gold_fixture.py :78-88; retained.py's fresh path in p20_2_ac1_retained_recompute.py), never through the Lambda handler's entry point. Confirmed: infra/aws/lambda/investor-reporting/performance/tests/test_entry_selection.py (the pre-existing entry.py test file) carries no reference to HoldingsWindowNotRuled or HoldingsGoldRefused. The reasons-table addition itself is a two-line, mechanical, same-pattern change (mirrors the existing EnginePerformanceRefused lines immediately above it) and was covered incidentally in the prior instance's acceptance output_evidence only by an unrelated substring match ('no reopen entry against the pre-switch pointer') -- an accidental pass of the artifact-coverage heuristic, not a real exercise of entry.py. Declared explicitly here rather than re-wording output_evidence to restore the incidental match, which would misrepresent coverage that does not exist. No criterion is weakened to compensate: entry.py's two new lines are visually verifiable directly (git show 42e8fc647d -- .../entry.py) and are outside this order's acceptance battery."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W64-S1: PerformanceReport.schema.json's lineage.provider enum ([SMARTX, BLACK_DIAMOND, ORION, OPAL_ENGINE, UNKNOWN], GENERATED from the PRD CONTRACTS table @62301f71e0, a pin predating ADDENDUM v0.19) did not admit OPAL_HOLDINGS; normalize.validate_report therefore raised jsonschema.ValidationError on every real holdings report and all three of this order's acceptance criteria FAILED on exactly this cause. RESOLVED: 1.0.0_SA_CTO's RULING 102544 landed the additive enum fix (both schema copies) at commit 78eeb223f8; brought into this worktree read-only for the re-run (never committed here), all three criteria now PASS. See row IRPT_BCKEND-W64-S2 (this worktree) for the disarm evidence; formal disposition (GRADUATED via `adjudicates`) is 3.0.0_SA_CVO's L9 act."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~64/IRPT_BCKEND.TO-IB-pr-201.adapter-reads-the-holdings-gold.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (p20_1_ac1_gold_fixture.py, the AC1 invocation)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_1_ac1_gold_fixture.py\" .",
+      "result": "rc=0, P20-1-AC1 PASS (4 of 4 arms PASS), unblocked by 78eeb223f8"
+    },
+    {
+      "tool": "python + boto3 (p20_1_ac2_gold_live.py, the AC2 invocation, read-only live S3, 184 partitions)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_1_ac2_gold_live.py\" .",
+      "result": "rc=0, P20-1-AC2 PASS against the live gold; value 0.058285199226 matches the independent chain oracle within 1e-12, unblocked by 78eeb223f8"
+    },
+    {
+      "tool": "python -m pytest (p20_2_ac1_retained_recompute.py, the AC2-1 invocation)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_2_ac1_retained_recompute.py\" .",
+      "result": "rc=0, P20-2-AC1 PASS (1 passed in 2.33s), unblocked by 78eeb223f8"
+    },
+    {
+      "tool": "python -m pytest (tests/test_holdings_gold.py, new corroborating suite)",
+      "invocation": "cd infra/aws/lambda/investor-reporting/performance && python -m pytest tests/test_holdings_gold.py -q",
+      "result": "10 passed, 2 xfailed (world defect IRPT_BCKEND-W64-S1)"
+    },
+    {
+      "tool": "python -m pytest (tests/test_retained_performance.py, corroborating suite incl. the two switch tests)",
+      "invocation": "cd infra/aws/lambda/investor-reporting/performance && python -m pytest tests/test_retained_performance.py -q",
+      "result": "19 passed"
+    },
+    {
+      "tool": "python -m pytest (full performance package suite)",
+      "invocation": "cd infra/aws/lambda/investor-reporting/performance && python -m pytest tests/ -q",
+      "result": "222 passed, 2 xfailed, 2 warnings (pre-existing pandas FutureWarning, unrelated)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/performance/holdings_gold.py infra/aws/lambda/investor-reporting/performance/retained.py infra/aws/lambda/investor-reporting/performance/installed.py infra/aws/lambda/investor-reporting/performance/entry.py infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py infra/aws/lambda/investor-reporting/performance/tests/test_retained_performance.py",
+      "result": "OK: pre-commit gate clean for 6 of 6 file(s)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (1 new row of 450 total checked)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~64 <0.9.0_WK_IRPT_BCKEND~64@opal.agent>\" -F .scratch/commit-msg-ib-pr-201.txt -- infra/aws/lambda/investor-reporting/performance/holdings_gold.py infra/aws/lambda/investor-reporting/performance/retained.py infra/aws/lambda/investor-reporting/performance/installed.py infra/aws/lambda/investor-reporting/performance/entry.py infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py infra/aws/lambda/investor-reporting/performance/tests/test_retained_performance.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "committed 42e8fc647df26f5ae693bda085364ec50732327d on wk-IRPT_BCKEND-64, msg-verify MATCH len=2632"
+    },
+    {
+      "tool": "python -m pytest (full performance package suite, re-run at the disarmed state)",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q performance/tests",
+      "result": "224 passed, 2 warnings (pre-existing pandas FutureWarning, unrelated) -- rc=0"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py (resolution row IRPT_BCKEND-W64-S2)",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (1 new row of 451 total checked)"
+    }
+  ]
+}
