@@ -84,8 +84,31 @@ independently of the identity**, so it needs disposition even after the identity
 |---|---|---|
 | `comp-read` | on the decomposition, then on `ops/schwab_entitlement_admin.py` | located `G-C` in s.6 (774-790) and the command's subcommand surface; its QUALIFIERS limb surfaced the "never imported by app/tools.py" and identity-refusal clauses |
 | `comp-find` | `--corpus all` on the roster and walker tokens | usable from the main worktree; **timed out at 60 s against the sparse worktree** (`git ls-files` on the sparse index), so repo-corpus censuses were run from the main tree and single-module reads used `sed`/`grep` under `# rail-checked:` markers |
-| `.tools/commit-gate.sh` | on `probes/og_g1.py` | rc 0, "All checks passed!", "no unguarded strict-utf8 log reads", clean for 1 of 1 file. Needed `org/modules/graph` added to the sparse cone first (`comp_constants_cli` import) |
-| `.tools/surprise-row-gate.py` | in the worktree before staging | "no surprise-channel rows in this commit (denominator: 0 dispatched path(s))" -- an **empty read, not a pass**; the gate validates staged rows, so the real check is the commit hook |
+| `.tools/commit-gate.sh` | on `probes/og_g1.py` | rc 0, "All checks passed!", "no unguarded strict-utf8 log reads", clean for 1 of 1 file |
+| `.tools/surprise-row-gate.py` | in the worktree before staging, then as the commit hook | standalone: "no surprise-channel rows in this commit (denominator: 0 dispatched path(s))" -- an **empty read, not a pass**, because it validates STAGED rows. At the hook, after the cone was widened: "4 new row(s) of 192 total checked (188 pre-existing, NOT re-graded)", "OK: all new rows carry their step-7/step-10 fields" |
+| `.tools/safe-commit.sh` | the commit | rc 0 at `0126a2360c` after four gate refusals, **every one of them a sparse-cone gap rather than a defect in this work** -- see below |
+
+### A SPARSE-CONE WORKTREE FAILS FOUR GATES, AND EACH READS AS A DEFECT IN YOUR WORK
+
+Recorded here because the record and git history are where this belongs, and because three of the four
+refusals name a remedy that would have damaged something if followed literally.
+
+| gate | refusal text | the path it actually wanted |
+|---|---|---|
+| `commit-gate.sh` | `ModuleNotFoundError: No module named 'comp_constants_cli'` | `org/modules/graph` |
+| naming limb (LGIC_ENFORCE DEC-6) | `registry.file: unreadable: FileNotFoundError ... infra/logic/registry/systems.json` | `infra/logic` |
+| `surprise-row-gate.py` | `standing corpus pass could not run (FileNotFoundError ...)` -- fail-closed **twice, naming a different missing file each time** | `org/surprise_channel` (its schemas), then **all of `org/missions`**, because it reads every project's channel |
+| `missions-tree-check` | **29** `[INDEX-MISSING] no org/projects/<CODE>.json`, for every project in the repo including ones never touched | `org/projects` |
+
+Two traps worth naming. The 29 `INDEX-MISSING` lines carry the remedy `derive --write`, which would have
+**written 29 index files** to fix what was one absent directory. And the row gate offers an audited
+override (`# surprise-row-override: <reason>`) exactly where a sparse cone trips it -- taking it would
+have committed four rows **UNGRADED**, the opposite of what a row is for. Both were declined; the cone was
+widened and the gates then passed on their own terms.
+
+Working cone for a commit touching a project tree plus a surprise channel: `org/missions org/projects
+org/surprise_channel org/modules/graph org/standards org/critical_paths org/mcp infra/logic .tools lib`
+plus the code under test.
 | `comp-schedule` / `comp-iam` / `comp-adversary` | -- | DECLARED-NOT-APPLICABLE by the order's own preflight; no AWS operation, policy, principal or role is added or changed here |
 
 ## AWS and tenant calls this run
