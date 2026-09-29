@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-e-11",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "c8df03c408",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-e-11.nested-worktree-fail-closed.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-e-11.nested-worktree-fail-closed.md",
+    "group": "OTHER",
+    "vintage_commit": "c8df03c408"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~17",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/git-hooks/owned-paths-check.sh",
+      "kind": "script",
+      "commit_or_etag": "d5aa5338eb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "workspace hook, read live from the parent by the installed wrapper; exercised by e11.AC1/AC3 (RESULT: PASS)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": ".tools/git-hooks/install-owned-paths.sh",
+      "kind": "script",
+      "commit_or_etag": "d5aa5338eb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "installer WRAPPER text carries the same resolution; the fixture installs it and arm1 exercises it (e11.AC1 PASS). Not installed into the real opal_ai (bound 2); see row Z-W17-S1",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_nested_worktree_failclosed.sh",
+      "kind": "script",
+      "commit_or_etag": "d5aa5338eb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "regression test; e11.AC2 runs it: RESULT: 9 passed, 0 failed",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "arm1 outside-worktree out-of-lane: refused; arm2 main-nested out-of-lane: refused; arm3 main-nested in-lane: landed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e11.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "arm1 outside-worktree out-of-lane: refused rc=1; arm2 main-nested out-of-lane: refused rc=1; arm3 main-nested in-lane: landed (fixture /tmp/tmp.xBoQEOHfqR)\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 arms matched (2 refused, 1 landed)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "test at HEAD=present; rc=0; failing lines=0; summary names 0 failed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e11.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "test at HEAD=present; rc=0; failing lines=0; summary: RESULT: 9 passed, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "9 of 9 test lines ok, 0 failed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "parent out-of-lane: refused; parent in-lane: landed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e11.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "parent out-of-lane: refused rc=1; parent in-lane: landed (fixture /tmp/tmp.OH6eV2SRXb)\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 parent arms matched",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Ran the committed regression test in a scratch tree carrying the PRE-CHANGE bytes of owned-paths-check.sh and install-owned-paths.sh (git show HEAD~1 versions), same fixture.",
+      "expected": "arm1 (outside worktree) and arm6 (unresolvable superproject) fail; arms 2-5 pass",
+      "observed": "RESULT: 5 passed, 4 failed -- arm1 'wanted refused, got landed', arm6 'wanted refused, got landed'; arms 1b,2,3,4,5 ok",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "e11.AC1/AC2/AC3 each run once against committed HEAD; the test creates a fresh mktemp fixture per run",
+      "observed": "All three PASS on the run; AC2's test ran 9 of 9 ok twice (once direct, once via the check)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPALAI-Z-W17-S1"
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~17/session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "bash -n (syntax check)",
+      "invocation": "bash -n .tools/git-hooks/owned-paths-check.sh && bash -n .tools/git-hooks/install-owned-paths.sh",
+      "result": "SYNTAX-OK for both; the commit-gate also syntax-checked all 3 files ('pre-commit gate clean for 3 of 3 file(s)')"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPALAI~17 <0.9.0_WK_NFRA_OPALAI~17@opal.agent>\" -F .scratch/msg1.txt -- <3 paths>",
+      "result": "commit d5aa5338eb on wk-NFRA_OPALAI-17; msg-verify MATCH len=386"
+    }
+  ]
+}

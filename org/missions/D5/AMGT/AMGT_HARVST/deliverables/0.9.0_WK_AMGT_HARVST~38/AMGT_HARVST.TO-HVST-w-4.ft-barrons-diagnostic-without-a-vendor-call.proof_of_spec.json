@@ -1,0 +1,85 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_HARVST.TO-HVST-w-4.ft-barrons-diagnostic-without-a-vendor-call",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-w-4.ft-barrons-diagnostic-without-a-vendor-call.md",
+  "group": "OTHER",
+  "vintage_commit": "a51c02d159ee5b2049891993f01c06ca1c0225f3"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+  "vintage_commit": "a51c02d159ee5b2049891993f01c06ca1c0225f3",
+  "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-w-4.ft-barrons-diagnostic-without-a-vendor-call.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_HARVST~38",
+ "session_log": "Worker 0.9.0_WK_AMGT_HARVST~38, L7 subagent of 2.0.0_SA_COO~H, worktree wk-hvst-r12-38 on branch wk-AMGT_HARVST-38, cut at a51c02d159. THE BAR: TREE-OK. AC1: followed ft article 79c86a189372f457e82c5969 from the sqlite rows (2, COST and HD, one body sha256) to ft silver (14 rows scanned, ONE row, ONE article_key ft:79c86a...) to the newest article_security_mention gold snapshot (2 rows, one per security, 2 distinct pairs) and to each security's articles_total set (1 each): gold double-counts NO. AC2: ran the skipped test body 30 times at HEAD (30/30 pass, no unused/), and the pre-58135da029 dotted-string body 30 times under pytest's import identity (first run KeyError 'bundle', 29 FileExistsError, unused/ created in the temp cwd): root cause is a second module copy patched while repair() reads its own unpatched REGISTRY at verification.py:69, then mkdir at :72. No vendor call, no S3 write, no test un-skipped, no lib change.",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~38/scripts/ac1_ft_duplicate_reaches_gold.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Read-only diagnostic; HARVEST_REFUSE_NETWORK=1; S3 list/get only; no write."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~38/scripts/ac2_barrons_flake_root_cause.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Read-only diagnostic; HARVEST_REFUSE_NETWORK=1; S3 list/get only; no write."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "FOLLOW THE DUPLICATE TO THE TABLE GOLD READS: print the sqlite rows for ft article_id 79c86a189372f457e82c5969 (read-only), then how many ft SILVER article rows and distinct article_keys carry that article (read from S3, denominator = ft silver rows scanned), then every newest article_security_mention gold row for it (article_key, security_key) and the articles_total contribution per security. Verdict line: \"gold double-counts: YES/NO\" with the counts that decide it. If silver holds the article under TWO article_keys, that is the finding and is filed as a row",
+   "method": "command",
+   "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~38/scripts/ac1_ft_duplicate_reaches_gold.py",
+   "output_evidence": "rc 0. SQLITE articles ft: 15 rows, 14 distinct article_id\nSQLITE table DDL: CREATE TABLE articles(publisher TEXT,security_key TEXT,article_id TEXT,body_sha256 TEXT,path TEXT, PRIMARY KEY(publisher,security_key,article_id))\nSQLITE rows for 79c86a189372f457e82c5969: 2\n  sqlite row: publisher=ft security_key=COST article_id=79c86a189372f457e82c5969 body_sha256=da945122c7b02935480ff5646ab6359553c1283dd5a5597fe1cfb729ffe4d12f\n  sqlite row: publisher=ft security_key=HD article_id=79c86a189372f457e82c5969 body_sha256=da945122c7b02935480ff5646ab6359553c1283dd5a5597fe1cfb729ffe4d12f\n  distinct body_sha256 across those rows: 1\nSILVER ft article: 14 parquet parts, 14 rows scanned (denominator), 14 distinct article_key overall\nSILVER rows carrying 79c86a189372f457e82c5969: 1; distinct article_keys: 1 ['ft:79c86a189372f457e82c5969']\n  silver part=ft/harvest/silver/article/date=2026-09-15/part-20260915T034059Z.parquet fetched_at=2026-09-15 03:40:59.423200+00:00 discovered_for=['COST', 'HD'] title='Walmart shares tumble as sales growth slows to six-year low'\nGOLD article_security_mention: 3 snapshot parts, newest=amgt/harvest/gold/article_security_mention/date=2026-09-24/part-20260924T105025Z.parquet, 263 rows (denominator)\nGOLD rows for ['ft:79c86a189372f457e82c5969']: 2\n  gold row: article_key=ft:79c86a189372f457e82c5969 security_key=COST_US_Equity tier=D mention_count=1 published_utc=2026-08-20 20:52:26.087000+00:00\n  gold row: article_key=ft:79c86a189372f457e82c5969 security_key=HD_US_Equity tier=D mention_count=1 published_utc=2026-08-20 20:52:26.087000+00:00\n  (article_key, security_key) pairs: 2, distinct pairs: 2\n  articles_total contribution: security_key=COST_US_Equity day=2026-08-20 -> 1 (set of article_keys ['ft:79c86a189372f457e82c5969'])\n  articles_total contribution: security_key=HD_US_Equity day=2026-08-20 -> 1 (set of article_keys ['ft:79c86a189372f457e82c5969'])\nGOLD ft rows: 21, distinct (article_key,security_key): 21, distinct article_key: 14\nCHATTER_DAILY newest=amgt/harvest/gold/chatter_daily/date=2026-09-24/part-20260924T105051Z.parquet (50997 rows): security_key=COST_US_Equity day=2026-08-20 articles_total=[1]\nCHATTER_DAILY newest=amgt/harvest/gold/chatter_daily/date=2026-09-24/part-20260924T105051Z.parquet (50997 rows): security_key=HD_US_Equity day=2026-08-20 articles_total=[5]\ngold double-counts: NO  (silver article_keys for the article=1, silver rows=1, gold rows=2, distinct gold pairs=2, max articles_total contribution per (security,day)=1)",
+   "denominator": "ft silver 14 rows scanned (14 parts, 14 distinct article_key); gold newest snapshot 263 rows scanned, 2 for the article; sqlite ft 15 rows / 14 article_id, 2 for the article",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "THE QUARANTINED BARRONS TEST'S ROOT CAUSE, reproduced OFFLINE (HARVEST_REFUSE_NETWORK=1): run the skipped test's body in-process N times (N printed, at least 20), print the pass/fail split and the failure signature distribution, and name the file:line that decides the outcome; state whether the repo-root unused/ directory is produced by this path (reproduce it in a temp cwd, never in the repo). If it cannot be reproduced in N runs, say so with N, and name what differs from the environment in which it flaked",
+   "method": "command",
+   "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~38/scripts/ac2_barrons_flake_root_cause.py",
+   "output_evidence": "rc 0. lib/__init__.py exists: False ; pytest.ini pythonpath line: 'pythonpath = data/black_diamond/scripts .'\nmodule identity: opal_data_harvest.verification is lib.opal_data_harvest.verification -> False\nREGISTRY identity: same dict object -> False (id 1825532964160 vs 1825533104256)\ncontracts.json barrons automatic_verification_enabled = True (the unpatched value the guard sees)\nguard  (decides pass): lib/opal_data_harvest/verification.py:69\nmkdir  (creates unused/): lib/opal_data_harvest/verification.py:72\nbundle (KeyError):      lib/opal_data_harvest/verification.py:79\n--- ARM A: body at HEAD (patch on the imported module object), one temp cwd, no reset between runs\nARM A: N=30  pass=30 fail=0  sequence(P=pass,K=KeyError,E=FileExistsError)=PPPPPPPPPPPPPPPPPPPPPPPPPPPPPP\n    signature x30: PASS\n    unused/ present in the TEMP cwd after the runs: False\n--- ARM B1: pre-58135da029 body, dotted-string target, module = opal_data_harvest.verification (pytest import mode), NO reset between runs\nARM B1: N=30  pass=0 fail=30  sequence(P=pass,K=KeyError,E=FileExistsError)=KEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n    signature x29: FAIL FileExistsError: [WinError 183] Cannot create a file when that file already exists: 'unused'\n    signature x1: FAIL KeyError: 'bundle'\n    unused/ present in the TEMP cwd after the runs: True\n--- ARM B2: same, but unused/ removed before every run (the first-run signature, repeated)\nARM B2: N=30  pass=0 fail=30  sequence(P=pass,K=KeyError,E=FileExistsError)=KKKKKKKKKKKKKKKKKKKKKKKKKKKKKK\n    signature x30: FAIL KeyError: 'bundle'\n    unused/ present in the TEMP cwd after the runs: True\n--- ARM C: pre-58135da029 body, dotted-string target, module = lib.opal_data_harvest.verification (unittest -m lib.... import mode: one copy), NO reset\nARM C: N=30  pass=30 fail=0  sequence(P=pass,K=KeyError,E=FileExistsError)=PPPPPPPPPPPPPPPPPPPPPPPPPPPPPP\n    signature x30: PASS\n    unused/ present in the TEMP cwd after the runs: False\nrepo-root unused/ in THIS worktree: False\nmain-tree repo-root unused/: exists=True is_dir=True entries=0 mtime(local)=2026-09-21T17:42:11\nVERDICT: ARM A (HEAD) 30/30 pass -> the flake does NOT reproduce at HEAD.\nVERDICT: ARM B (dotted string under pytest import mode) 0 of 30 pass; first run KeyError 'bundle' (unused/ made at verification.py mkdir), every later run FileExistsError -> the alternation is REPRODUCED: reproduced=True\nROOT CAUSE: the dotted-string patch target imports a SECOND module copy (lib.opal_data_harvest.verification) whose REGISTRY is patched, while repair() under test lives in opal_data_harvest.verification and reads its OWN unpatched REGISTRY (barrons enabled=True) at lib/opal_data_harvest/verification.py:69; the guard passes, lib/opal_data_harvest/verification.py:72 creates unused/ in the cwd, lib/opal_data_harvest/verification.py:79 raises KeyError('bundle'); the next run finds unused/ and lib/opal_data_harvest/verification.py:72 raises FileExistsError.\nunused/ produced by this path: True (ARM B1 temp cwd True, ARM C temp cwd False, ARM A temp cwd False)",
+   "denominator": "N=30 per arm: ARM A 30 of 30 pass; ARM B1 0 of 30 pass (1 KeyError, 29 FileExistsError); ARM B2 0 of 30 pass (30 KeyError); ARM C 30 of 30 pass",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC2 ARM B is the negative arm: the pre-58135da029 dotted-string body under pytest import identity, beside ARM A (the body at HEAD) and ARM C (dotted string, one module copy).",
+   "expected": "ARM B fails with KeyError then FileExistsError and creates unused/ in the temp cwd; ARM A and ARM C pass and create nothing.",
+   "observed": "ARM B1 KEEEE... (1 KeyError, 29 FileExistsError), unused/ present in temp cwd; ARM B2 30 KeyError; ARM A 30 of 30 pass, ARM C 30 of 30 pass, no unused/.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "ac2 run twice (once to print, once to save output); both runs read the same arm tallies",
+   "observed": "identical tallies both runs; the two REGISTRY object ids differ per run by construction",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A live ft or barrons run under Andrew's ruling 2 permission",
+   "reason": "The order's standing clause 1: the measurement at the cut shows neither question needs a vendor byte; none was made (HARVEST_REFUSE_NETWORK=1 on both scripts)."
+  },
+  {
+   "item": "Un-skipping or editing test_disabled_barrons_contract_defers_before_opening_a_browser; removing the empty repo-root unused/ in the main tree",
+   "reason": "Order section 3: no test un-skipped, no write outside deliverables and channel. The dotted-string cause is already removed at HEAD by 58135da029 (row Z-W34-S1); the skip decorator's removal is the issuer's cut."
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "commit gate (py_compile, ds-precommit, ruff py39) via .tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+   "result": "run at commit time; see the commit"
+  }
+ ]
+}
