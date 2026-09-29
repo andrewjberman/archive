@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-m21-213",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R21_M.md",
+    "vintage_commit": "c3a9044586",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m21-213.uic16-49f-schwab-full-names.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m21-213.uic16-49f-schwab-full-names.md, citing CTO 102567/102582 and CTO round-19 analysis (@d797a87872) section 6 item 2",
+    "group": "M",
+    "vintage_commit": "c3a9044586"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~66",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/schwab_account_codes.json",
+      "kind": "config_data",
+      "commit_or_etag": "b47987ae49",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "byte-for-byte copy of org/tier1_exec/1.0.0_SA_CTO/deliverables/SCHWAB_ACCOUNT_CODES_BRIDGEFT_READ_20260929.json -- md5 1950f864bb1cabf61aab5abc15864485 on both files (confirmed by md5sum); never read from that deliverables path or the source URL at run time (BOUNDS). LOCAL only -- no upload.",
+      "artifact_covered_by": ["IBM21-213-AC1", "IBM21-213-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/schwab_account_codes.py",
+      "kind": "script",
+      "commit_or_etag": "b47987ae49",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the lookup module (full_name/load_table); LOCAL only, no deploy scope of its own -- it ships inside the existing holdings/directory build surfaces, added to _IRPT_HOLDINGS_CLOSURE below.",
+      "artifact_covered_by": ["IBM21-213-AC1", "IBM21-213-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/holdings_49f.py",
+      "kind": "script",
+      "commit_or_etag": "b47987ae49",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_49f_actual's account_masks step now calls schwab_account_codes.full_name() on each acct_type before account_mask; verified by a real read of the live 2026-09-25 dim_balance partition (7,548 accounts, no upload) and by the full build_49f_actual(s3, '2026-09-25', tax_membership_path=None) running end to end with 0 refusals.",
+      "artifact_covered_by": ["IBM21-213-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/directory_runner.py",
+      "kind": "script",
+      "commit_or_etag": "b47987ae49",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_49f's acct_row now calls schwab_account_codes.full_name() on r.get('acct_type') before it reaches masked_discriminator; masked_discriminator itself is unchanged (pinned by its own existing tests with raw codes, all 301 tests in the suite still pass).",
+      "artifact_covered_by": ["IBM21-213-AC1"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_schwab_codes.py",
+      "kind": "test",
+      "commit_or_etag": "b47987ae49",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 pure unit tests; python -m pytest ... -q -p no:cacheprovider -> '5 passed'.",
+      "artifact_covered_by": ["IBM21-213-AC1"]
+    },
+    {
+      "path_or_key": ".tools/safe_deploy_core.py",
+      "kind": "config_data",
+      "commit_or_etag": "b47987ae49",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_IRPT_HOLDINGS_CLOSURE re-traced (sys.modules + open() audit hook against `import holdings_49f` then `schwab_account_codes.full_name(...)`): adds schwab_account_codes.py and schwab_account_codes.json, drops none -- 31 modules + 12 data files (43 total), matching the amendment-1 precedent's method exactly."
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_UIC16_49F_SUMMARY_20260929.json",
+      "kind": "doc",
+      "commit_or_etag": "ba50bab270",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "real local 49F build (no upload): read the live schwab/08335338/silver/dim_balance date=2026-09-25 partition via boto3 and applied schwab_account_codes.full_name() to every account's acct_type exactly as the production call site now does; cross-checked against a full end-to-end build_49f_actual run against the same live data (same account_masks values, 0 refusals).",
+      "artifact_covered_by": ["IBM21-213-AC2"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md",
+      "kind": "doc",
+      "commit_or_etag": "5c9e6b73a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the never-widen half, with the act, blast radius (local candidate diff), an 8-row every-reader census (comp-find over masked_discriminator/maskedDiscriminator/display.label/display?.label, corpus=all) and rollback per key; not itself a served write or sign-off.",
+      "artifact_covered_by": ["IBM21-213-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBM21-213-AC1",
+      "criterion_verbatim": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_schwab_codes.py -q -p no:cacheprovider -- a summary line with N passed and no failed or error. IBM21-213-AC1 -- the built behaviour, including unrecognised codes and the loader's refusal.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_schwab_codes.py -q -p no:cacheprovider",
+      "output_evidence": "..... [100%]\n5 passed in 0.14s",
+      "denominator": "5 of 5 tests passed",
+      "status": "PASS",
+      "expect": "^\\d+ passed in [\\d.]+s$"
+    },
+    {
+      "criterion_id": "IBM21-213-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_CHECKS/r21_uic16_49f.py -- SCHWAB-NAMED followed by the labelled and total account counts. IBM21-213-AC2 -- a real local 49F build names every account the table covers, guesses none.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_CHECKS/r21_uic16_49f.py",
+      "output_evidence": "SCHWAB-NAMED 7546/7548 (unrecognised {'': 2})",
+      "denominator": "7546 labelled + 2 unrecognised (blank acct_type) = 7548 accounts (real 2026-09-25 dim_balance partition); 9 of 9 non-blank acct_type codes in use are named by the table",
+      "status": "PASS",
+      "expect": "^SCHWAB-NAMED \\d+/\\d+"
+    },
+    {
+      "criterion_id": "IBM21-213-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py <half path> -- HALF-READY <name>. IBM21-213-AC3 -- the half, with its all-readers census, is written for the issuer to sign and send.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md",
+      "denominator": "N/A -- boolean check (no {{slot}} left AND all 4 required markers present)",
+      "status": "PASS",
+      "expect": "^HALF-READY"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "schwab_account_codes.full_name() mutated to return the bare code unwrapped/unlooked-up (the pre-fix behaviour) -- an assertable wrong answer against a computation, not a resource-state read.",
+      "expected": "test_schwab_codes.py fails on the known-code, unrecognised-wrapping and acct_regis tests; r21_uic16_49f.py fails when the summary's own 'guessed' field is flipped to 1",
+      "observed": "with full_name() mutated: pytest reported '3 failed, 2 passed' (test_a_known_acct_type_code_maps_to_its_full_name, test_ri401_and_blank_print_as_unrecognised_never_guessed_never_the_bare_code, test_a_registration_code_is_also_named_from_the_same_table all FAILED with e.g. \"assert 'IRA' == 'INDIVIDUAL RETIREMENT'\"). Separately, with R21_UIC16_49F_SUMMARY_20260929.json's guessed field set to 1: r21_uic16_49f.py printed 'NOT-NAMED: guessed labels 1 (must be 0)' rc=1. Both mutants reverted immediately after capture; post-revert re-runs returned to '5 passed' and 'SCHWAB-NAMED 7546/7548 (unrecognised {\\'\\': 2})' respectively.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two consecutive runs each of the AC1 pytest command, the AC2 check script and the AC3 check script, output captured and compared",
+      "observed": "AC1: '5 passed' both runs (0.23s, 0.13s -- timing differs, verdict does not). AC2: 'SCHWAB-NAMED 7546/7548 (unrecognised {\\'\\': 2})' identical both runs. AC3: 'HALF-READY NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md' identical both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest -- AC1",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_schwab_codes.py -q -p no:cacheprovider",
+      "result": "5 passed in 0.14s"
+    },
+    {
+      "tool": "r21_uic16_49f.py -- AC2",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_CHECKS/r21_uic16_49f.py",
+      "result": "SCHWAB-NAMED 7546/7548 (unrecognised {'': 2}) rc=0"
+    },
+    {
+      "tool": "r20_half_ready.py -- AC3",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md",
+      "result": "HALF-READY NEVER_WIDEN_HALF_REQUEST_HOLDINGS_UIC16_49F_20260929.md rc=0"
+    },
+    {
+      "tool": "full investor_reporting regression suite (no criterion depends on it; run to confirm no breakage)",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests -q -p no:cacheprovider",
+      "result": "301 passed in 33.05s"
+    },
+    {
+      "tool": "live AWS read -- real 49F build against opal-data-assets/schwab/08335338/silver/dim_balance date=2026-09-25 (boto3, read-only, no upload)",
+      "invocation": "python .scratch/real_49f_build.py (h49f.build_49f_actual(s3, '2026-09-25', tax_membership_path=None)); python .scratch/real_49f_summary.py",
+      "result": "full build: 'FULL BUILD OK, nodes: <n>', 0 refused_accounts. Summary script: accounts=7548, labelled_full_name=7546, unrecognised={'': 2}; sample IRA label '****0692 / INDIVIDUAL RETIREMENT', sample blank label '****6566 / unrecognised'."
+    },
+    {
+      "tool": "closure re-trace -- sys.modules + open() audit hook (amendment-1 method)",
+      "invocation": "python .scratch/trace_closure.py",
+      "result": "NEW MODULE FILES beyond the existing closure: schwab_account_codes.py. OPENED AFTER CALL: schwab_account_codes.json."
+    },
+    {
+      "tool": "commit-gate.sh -- all edited/new files",
+      "invocation": "bash .tools/commit-gate.sh data/assets/scripts/gold/investor_reporting/schwab_account_codes.py data/assets/scripts/gold/investor_reporting/holdings_49f.py data/assets/scripts/gold/investor_reporting/directory_runner.py data/assets/scripts/gold/investor_reporting/tests/test_schwab_codes.py .tools/safe_deploy_core.py",
+      "result": "OK: pre-commit gate clean for 5 of 5 file(s)"
+    }
+  ]
+}
