@@ -1,0 +1,1 @@
+yy-4: BASE_LABEL -> "Opal's historical-multiple reference" at case_rule.py:76. Consumers: scoped_amgt.py:3081,:3095 (read the constant); render_pack.py types no label. 4 tests updated. AC1 YES; AC2 329 passed; print tests 15 passed. Commit 389e606df5.
