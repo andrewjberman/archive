@@ -1,0 +1,136 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_CORPUS.TO-CRPS-j-3",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-j-3.derive-stamp-carries-rule-inputs.md",
+  "group": "OTHER",
+  "vintage_commit": "43912573fb2bceaaf3167e433cd9de8bed2660a9"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+  "vintage_commit": "43912573fb2bceaaf3167e433cd9de8bed2660a9",
+  "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-j-3.derive-stamp-carries-rule-inputs.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Adds stage `stamp-census` (read-only; exempt from the 3-key vendor cap) and `_select_stamp_carrying_inputs`, now used by stage_derive (raw_stamp None) and cmd_cases_report in place of _latest_stamp: newest qualifying stamp that carries the case_rule inputs (compute_cases not refusing for missing EPS/history; a cause-bearing refusal counts as carrying), else the newest exactly as today. case_rule.py untouched.",
+   "introduces": [
+    "stamp-census",
+    "_stamp_carries_inputs",
+    "_select_stamp_carrying_inputs",
+    "cmd_stamp_census"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "integrations/bloomberg/research/tests/test_stamp_inputs_selection.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "8 offline tests: newest carries -> newest (no older read); newest lacks history or EPS -> older; none carries -> newest and reason unchanged; currency refusal counts as carrying; no qualifying stamp still raises NoRawStampError; census partition sums to keys read; stamp-census is a main stage exempt from the cap.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "one row appended: AMGT_CORPUS-Z-W3-S6 (no landed stamp of the six keys carries IS_COMP_EPS_ADJUSTED, so selection moves nothing).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-j-3.derive-stamp-carries-rule-inputs.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "<status> flipped pending -> complete after AC1, AC2, AC3 each printed their expected line.",
+   "artifact_covered_by": []
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the built behaviour (test_stamp_inputs_selection.py offline fixtures)",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j3_AC1.sh",
+   "output_evidence": "8 passed in 0.43s",
+   "denominator": "8 of 8 tests in test_stamp_inputs_selection.py passed; the whole research tests dir also 115 passed, 0 failed, existing tests unmodified.",
+   "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the seam probe on the six keys' real landed raw (the partition, whatever its values)",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j3_AC2.sh",
+   "output_evidence": "stamp 6861_JP_Equity newest 20260919T152125Z newest_carries no carrying none\nstamp BZLFY_US_Equity newest 20260925T042603Z newest_carries no carrying none\nstamp CAT_US_Equity newest 20260919T152117Z newest_carries no carrying none\nstamp CSL_AU_Equity newest 20260919T152121Z newest_carries no carrying none\nstamp PBR_US_Equity newest 20260925T042954Z newest_carries no carrying none\nstamp TSM_US_Equity newest 20260925T043112Z newest_carries no carrying none\nstamp_census keys 6 newest_carries 0 older_carries 0 none_carries 6 sum 6",
+   "denominator": "6 of 6 keys read; partition 0+0+6 = 6. Per-stamp diagnostic over 18 stamps: none carries an IS_COMP_EPS_ADJUSTED figure (row AMGT_CORPUS-Z-W3-S6).",
+   "expect": "stamp_census keys 6 newest_carries \\d+ older_carries \\d+ none_carries \\d+ sum 6\\b",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "the bound over all 97 keys against the issuer's base log: no key served at the base is unserved, no served ratio moves",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round8/j3_AC3.sh",
+   "output_evidence": "newly_served 0 \nj3 keys_read 97 of 97 unserved_vs_base 0 of 69 ratio_moved_vs_base 0",
+   "denominator": "97 of 97 keys read; 0 of 69 base-served keys unserved; 0 of 69 ratios moved; newly_served 0.",
+   "expect": "j3 keys_read 97 of 97 unserved_vs_base 0 of \\d+ ratio_moved_vs_base 0\\b",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": ".scratch/j3/mutant.py (not committed): monkeypatches _stamp_carries_inputs to always True, i.e. selection collapses to today's _latest_stamp, then runs the AC1 test file.",
+   "expected": "the three tests that need an older stamp (older-selected on history, older-selected on EPS, census partition) FAIL; the five newest-wins/unchanged tests pass.",
+   "observed": "3 failed, 5 passed: test_newest_lacks_older_carries_selects_the_older, test_newest_lacks_eps_older_carries_selects_the_older, test_census_partition_sums_to_keys_read.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 run twice (pytest, offline); AC2 and AC3 are read-only S3 reads over landed raw.",
+   "observed": "AC1 8 passed both runs; AC2 and AC3 printed the same lines this session (AC3 also matches the issuer's dry-run at the base: 0 of 69 / 0).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No re-derive and no served-block write",
+   "reason": "Order bound: NEVER run pull or derive; only cases-report and stamp-census were run. The selection is wired into derive but derive was not executed."
+  }
+ ],
+ "surprises": [
+  "AMGT_CORPUS-Z-W3-S6"
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "pytest whole research tests dir",
+   "invocation": "PYTHONPATH=. python -m pytest integrations/bloomberg/research/tests -q",
+   "result": "115 passed"
+  },
+  {
+   "tool": "ruff check --target-version py39",
+   "invocation": "ruff check --target-version py39 integrations/bloomberg/research/tests/test_stamp_inputs_selection.py",
+   "result": "All checks passed!"
+  },
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile model_block_pull.py test_stamp_inputs_selection.py",
+   "result": "rc 0"
+  }
+ ]
+}
