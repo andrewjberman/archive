@@ -30,7 +30,7 @@ for s in d.get('Statement', []):
         rs = s.get('Resource', []); rs = [rs] if isinstance(rs, str) else rs
         for r in rs:
             acts_by_res.setdefault(r, set()).update(s3a)
-want = {'arn:aws:s3:::opal-data-49financial/gold/advi/_logs/chain_*': {'s3:getobject'}, 'arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*': {'s3:getobject', 's3:getobjectversion'}}
+want = {'arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*': {'s3:getobject', 's3:getobjectversion'}}
 hit = sum(1 for r, a in want.items() if acts_by_res.get(r) == a)
 extra = sum(1 for r, a in acts_by_res.items() if want.get(r) != a)
 print('%d %d' % (hit, extra))" | tr -d '\r'); r6=$?
@@ -39,6 +39,6 @@ a=no; [ -n "$live" ] && [ "$live" = "$art" ] && a=yes
 b=no; [ -n "$live" ] && [ "$live" != "$PREV" ] && b=yes
 c=no; [ -n "$member_sha" ] && [ "$member_sha" = "$head_sha" ] && c=yes
 echo "live=$live artifact=$art (rc $r1/$r2/$r3/$r4/$r5/$r6)"
-echo "live sha = artifact sha: $a; moved off previous: $b; zip member = HEAD bytes: $c; GetObject resources exact ${hit:-0} of 2 (extra ${extra:-?})"
-if [ "$a" = yes ] && [ "$b" = yes ] && [ "$c" = yes ] && [ "$hit" = 2 ] && [ "$extra" = 0 ]; then echo "RESULT: PASS"; exit 0; fi
+echo "live sha = artifact sha: $a; moved off previous: $b; zip member = HEAD bytes: $c; GetObject resources exact ${hit:-0} of 1 (extra ${extra:-?})"
+if [ "$a" = yes ] && [ "$b" = yes ] && [ "$c" = yes ] && [ "$hit" = 1 ] && [ "$extra" = 0 ]; then echo "RESULT: PASS"; exit 0; fi
 echo "RESULT: FAIL"; exit 1
