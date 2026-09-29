@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-m24-241",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R24_M.md",
+    "vintage_commit": "78b1b7458f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m24-241.directory-bundle-schwab-members.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m24-241.directory-bundle-schwab-members.md",
+    "group": "D",
+    "vintage_commit": "78b1b7458f"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~82",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/safe_deploy_core.py",
+      "kind": "script",
+      "commit_or_etag": "e40685bd00505bb2a20fb50aef27d9410fd746a3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL-only order (risk=LOCAL): no upload, no --mint-bundle, no push -- the bundle ships at 0.0.0_AB_MSTR's push after the drain, per BOUNDS.",
+      "introduces": [
+        "schwab-account-codes-sha256",
+        "schwab-account-codes-json-sha256"
+      ],
+      "artifact_covered_by": [
+        "IBM24-241-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBM24-241-AC1",
+      "criterion_verbatim": "a locally built bundle carries every module directory_runner.py imports at load, and `import directory_runner` succeeds from the extracted tree alone.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R24_CHECKS/r24_directory_bundle_imports.py",
+      "output_evidence": "BUNDLE-IMPORTS 12 members",
+      "denominator": "12 of 12 bundle members extracted; 1 of 1 import of directory_runner from the extracted tree succeeded",
+      "status": "PASS",
+      "expect": "BUNDLE-IMPORTS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before the fix, the same check script run against the base commit (78b1b7458f, members dict lacking schwab_account_codes.py/.json) failed as the task order's dry-run recorded.",
+      "expected": "NOT-IMPORTABLE: module-level sibling imports not in the bundle: ['schwab_account_codes']",
+      "observed": "Task order's own dry-run at base 2026-09-29 18:1xZ recorded exactly this line; re-verified by inspection of .tools/safe_deploy_core.py@78b1b7458f (schwab_account_codes.py/.json absent from the investor_reporting members dict) -- the check's failure mode against the unfixed state is the named one.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of r24_directory_bundle_imports.py against the fixed worktree.",
+      "observed": "Both runs printed BUNDLE-IMPORTS 12 members with rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~82/directory-bundle-schwab-members.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests -q -p no:cacheprovider",
+      "result": "314 passed in 68.94s (0:01:08), rc=0"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile .tools/safe_deploy_core.py",
+      "result": "rc=0"
+    }
+  ]
+}
