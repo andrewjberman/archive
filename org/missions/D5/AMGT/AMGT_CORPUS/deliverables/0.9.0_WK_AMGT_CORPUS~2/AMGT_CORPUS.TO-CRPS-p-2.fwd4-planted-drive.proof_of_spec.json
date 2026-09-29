@@ -1,0 +1,103 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_CORPUS.TO-CRPS-p-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-p-2.fwd4-planted-drive.md",
+  "group": "OTHER",
+  "vintage_commit": "4fa7cba244c900ca28f0ea6b004527b690dd7352"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+  "vintage_commit": "4fa7cba244c900ca28f0ea6b004527b690dd7352",
+  "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-p-2.fwd4-planted-drive.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/corpus/tests/test_induction_planted_drive.py",
+   "kind": "test",
+   "commit_or_etag": "e4806b2b99",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "committed LOCAL on branch wk-crps14-2 at e4806b2b99; one test, test_fwd4_planted_drive, drives induction_request.run(root=<scratch>, stdout=<buffer>) over two planted UNRESOLVED folders; induction_request.py untouched.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-p-2.fwd4-planted-drive.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "<status> flipped pending -> complete after AC1, AC2 and AC3 each printed their expected line and proof-of-spec-check exited 0.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the driven exercise's line",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round14/p2_AC1.sh",
+   "output_evidence": "fwd4 will_add_before_add True ambiguous_refused True vendor_calls 0 s3_writes 0 poison_positive 4 of 4\n1 passed in 0.95s",
+   "denominator": "2 of 2 planted folders classified (1 EVIDENCED and printed as WILL ADD, 1 AMBIGUOUS and refused); 4 of 4 poison sites raised on the run's positive control and 4 of 4 re-proven refusing after the run with the module's own POISON message.",
+   "expect": "(?m)^fwd4 will_add_before_add True ambiguous_refused True vendor_calls 0 s3_writes 0 poison_positive 4 of 4$",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the drive and the existing induction tests pass",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round14/p2_AC2.sh",
+   "output_evidence": "7 passed in 0.64s",
+   "denominator": "7 of 7 tests passed (1 in test_induction_planted_drive.py, 6 in test_induction_request.py), 0 failed.",
+   "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "the bound: nothing outside your grant",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round14/p2_AC3.sh",
+   "output_evidence": "paths_outside_grant 0",
+   "denominator": "0 of N changed paths (merge-base HEAD CLOUD to HEAD) fall outside the granted path patterns.",
+   "expect": "(?m)^paths_outside_grant 0$",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The drive's own negative arm: the ambiguous folder (two different Ticker lines) must NOT be picked, and the poison must be the run's own (module message, not the conftest message); a run that mis-picked folder B, wrote the ledger or crosswalk, or failed to install its poison would fail the asserts.",
+   "expected": "assertions on the pick, on byte-identical scratch ledger/crosswalk/library trees, and on the module-specific POISON markers fail if the act misbehaves.",
+   "observed": "the test passes against the unmodified induction_request.py; no mutant of induction_request.py was run (order: do not edit it).",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC1 run twice (once via the check script, once directly with pytest -s); AC2 run once; AC3 run after the commit.",
+   "observed": "the same fwd4 line and 1 passed on both AC1 runs.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Any vendor call, S3 write, write to the live library, crosswalk or registrations write",
+   "reason": "Order bound. The drive reads a scratch library under tmp_path, the identity layer's env overrides point the crosswalk, harvester config and registrations ledger at tmp_path files, and DELIVERABLES_DIR is redirected to tmp_path."
+  },
+  {
+   "item": "Editing lib/research/corpus/induction_request.py",
+   "reason": "Order: do not edit it; no limb it could not show was found, so no refusal row was needed."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "pytest over the planted drive and the existing induction tests",
+   "invocation": "PYTHONPATH=. python -m pytest -q --color=no -s lib/research/corpus/tests/test_induction_planted_drive.py lib/research/corpus/tests/test_induction_request.py",
+   "result": "fwd4 will_add_before_add True ambiguous_refused True vendor_calls 0 s3_writes 0 poison_positive 4 of 4; 7 passed"
+  }
+ ]
+}
