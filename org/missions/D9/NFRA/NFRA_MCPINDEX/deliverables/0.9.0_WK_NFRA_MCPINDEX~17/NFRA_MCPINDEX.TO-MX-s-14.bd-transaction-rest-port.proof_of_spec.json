@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-14",
+  "phase": "BUILD-GENERAL",
+  "firm": "49F",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3d06751450"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "bb6e0a29c3",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-14.bd-transaction-rest-port.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~17",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/bronze/pull_bd_transaction_rest.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Not published: comp-pipescript deployed --firm bd lists no pull_bd_transaction_rest.py. Publishing to code/bronze/ is the DS lane's safe-deploy (row NFRA_MCPINDEX-Z-W17-S2). Exercised offline only, against synthetic workbooks; 0 vendor calls.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ssm/opal-bd-transaction-download.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Edited in the repo only (PHASE A). The served document is unchanged: DefaultVersion 1, LatestVersion 2 at the s14.AC1 read. Offline: JSON parses; rest-pull refs 2, Playwright refs 0, BD_PASSWORD refs 0.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~17/ANNOUNCE_MX-s-14.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "PHASE A announcement for the never-widen halves: steps 1-2 built, steps 3-4 blocked on the DS publish.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows NFRA_MCPINDEX-Z-W17-S1 (BLOCKING, INERT), -S2 (BLOCKING, INERT), -S3 (OBSERVATION, INERT).",
+      "artifact_covered_by": ["AC1", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "DefaultVersion==LatestVersion; at $LATEST rest-pull refs>=1 playwright refs=0 BD_PASSWORD refs=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round4/checks/s14.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "document opal-bd-transaction-download: DefaultVersion=1 LatestVersion=2; at $LATEST: rest-pull refs=0 playwright refs=1 BD_PASSWORD refs=2\nRESULT: FAIL\nexit=1",
+      "denominator": "1 of 1 served documents read at $LATEST; rest-pull refs 0 (need >=1), playwright refs 1 (need 0), BD_PASSWORD refs 2 (need 0)",
+      "status": "FAIL",
+      "status_reason": "PHASE A ONLY, by instruction: the document is edited in the repo (rest-pull refs 2, playwright 0, BD_PASSWORD 0 offline) but is not published; publishing and setting DEFAULT is PHASE B on the issuer's GO, which also waits on the DS-lane publish of the module (row NFRA_MCPINDEX-Z-W17-S2)."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "rule state=ENABLED schedule=cron(53 21 ? * MON-FRI *) targets=1 targets bd-transactions-trigger=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round4/checks/s14.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "rule state=ENABLED schedule=cron(53 21 ? * MON-FRI *) targets=1 targets bd-transactions-trigger=yes\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 rules read; 1 target, 1 matching bd-transactions-trigger",
+      "status": "PASS",
+      "status_reason": "Read at PHASE A as a regression guard: no rule was touched by this worker. It reads ENABLED because MX-i-5's PHASE B had not yet disabled the rule at this read; it will read DISABLED between MX-i-5's disable and this order's PHASE B re-enable, so this PASS is a PHASE A moment, not the final grade."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "successful runs at/after slot>=1; run <id>: OUTPUT_KEY lines>=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round4/checks/s14.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "no PHASE B GO commit yet -- RESULT: FAIL\nexit=1",
+      "denominator": "0 of 1 scheduled acceptance fires available (PHASE B not run)",
+      "status": "FAIL",
+      "status_reason": "PHASE A ONLY, by instruction: AC3 is the next scheduled 21:53Z weekday fire after PHASE B's publish and re-enable; it cannot read before them."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Offline, on the module's pure functions with synthetic workbooks: a roster holding the template name twice, and a workbook with 0 data rows.",
+      "expected": "The duplicate name resolves to no template (refused); the 0-row workbook reports rows=0 so main() refuses to write it.",
+      "observed": "find_template returned None with 2 matches for the duplicate roster; inspect_workbook returned rows=0 for the empty workbook; a single-name roster returned the template with 1 match.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The three s14 checks each run once against live AWS reads; the module tests ran once in the worktree.",
+      "observed": "AC1 FAIL exit 1, AC2 PASS exit 0, AC3 FAIL exit 1; no state was changed between reads.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Step 3 (the ad-hoc test run on the instance) and step 1's discovery read.",
+      "reason": "The commands stage a module that is not published; publishing is the DS lane's safe-deploy (row NFRA_MCPINDEX-Z-W17-S2). No vendor call was made."
+    },
+    {
+      "item": "`_transaction_rest_pin.py`.",
+      "reason": "A generated pin needs a target in lib/opal_naming.py, outside this cell's paths (row NFRA_MCPINDEX-Z-W17-S1); the module reads the published asset-dim pin instead."
+    },
+    {
+      "item": "PHASE B (ledger, publish, DEFAULT, rule re-enable, the 21:53Z acceptance).",
+      "reason": "Order and issuer instruction: PHASE A only; PHASE B runs on the issuer's GO."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W17-S1",
+    "NFRA_MCPINDEX-Z-W17-S2",
+    "NFRA_MCPINDEX-Z-W17-S3"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-14.bd-transaction-rest-port.md",
+  "compiler_tools": [
+    {
+      "tool": "aws (s3, ssm, events)",
+      "invocation": "aws s3 ls s3://opal-data-bd/forwardfill_v2/transactions/; the s14 checks: ssm describe-document/get-document, events describe-rule/list-targets-by-rule",
+      "result": "Bronze prefix: 98 TRANSACTIONS_DAILY_*, 97 TXN_DAILY_* (last 2026-06-18), 1 _complete/; served document still Playwright; rule ENABLED with 1 target."
+    },
+    {
+      "tool": "comp-pipescript",
+      "invocation": "comp-pipescript deployed --firm bd",
+      "result": "_asset_dim_rest_pin.py MATCH; pull_bd_transaction_rest.py not listed (unpublished)."
+    }
+  ]
+}
