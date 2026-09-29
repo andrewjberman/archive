@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-r-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-r-1.schedule-induction-run.md",
+    "group": "OTHER",
+    "vintage_commit": "89289bfbb598c6af9239ff4d7ab7455c246c1bd3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "89289bfbb598c6af9239ff4d7ab7455c246c1bd3",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-r-1.schedule-induction-run.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/induction_scheduled.py",
+      "kind": "script",
+      "commit_or_etag": "b0b24f9ae288d300c45db75998cbf7168a422d97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: python -m lib.research.corpus.induction_scheduled --mode fire|dry-run; as_of = today UTC, calls induction_run.main, appends stdout to a log under a derived per-user dir, one closing line; never sets OPAL_INDUCTION_FIRE. No registration, no fire, no S3 write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/schedule_induction.ps1",
+      "kind": "script",
+      "commit_or_etag": "b0b24f9ae288d300c45db75998cbf7168a422d97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: -Plan/-Register/-Unregister/-Status with -Commit; the worker ran -Plan and -Status only (Status read: task NOT REGISTERED); nothing registered, no pinned checkout created.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_induction_schedule.py",
+      "kind": "test",
+      "commit_or_etag": "b0b24f9ae288d300c45db75998cbf7168a422d97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW offline test: induction_scheduled.main dry-run over a scratch library with 2 planted folders under tmp_path.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round16/r1_AC1.sh",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round16/r1_AC1.sh",
+      "output_evidence": "r1 scheduled_path planted_evidenced_requested 1 ambiguous_refused 1 bloomberg_calls 0 as_of_is_today True\n1 passed in 0.58s",
+      "denominator": "1 of 1 tests passed; 2 planted folders: 1 in the batch request, 1 refused ambiguous, 0 Bloomberg calls.",
+      "expect": "(?m)^r1 scheduled_path planted_evidenced_requested 1 ambiguous_refused 1 bloomberg_calls 0 as_of_is_today True$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round16/r1_AC2.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round16/r1_AC2.sh",
+      "output_evidence": "r1 plan task_is_builder_name True commit_pinned True workdir_is_shared_tree False registered_now 0",
+      "denominator": "1 of 1 -Plan runs at HEAD; 4 of 4 fields as expected; rc 0.",
+      "expect": "(?m)^r1 plan task_is_builder_name True commit_pinned True workdir_is_shared_tree False registered_now 0$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round16/r1_AC3.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round16/r1_AC3.sh",
+      "output_evidence": "paths_outside_grant 0",
+      "denominator": "0 of the paths changed since merge-base with CLOUD lie outside the grant.",
+      "expect": "(?m)^paths_outside_grant 0$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of the test with folder (a) renamed to end in ZQPY NA (folder token disagrees with the report ZQPX); run and deleted, nothing committed.",
+      "expected": "the run makes no batch call (effective state DISAGREEMENT) and the test fails at the batch assertion, so the AC1 line cannot print.",
+      "observed": "1 failed: assert (None is not None) on document[batch][argv]; no r1 line printed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice (direct pytest, then the literal check); AC2 -Plan run twice (direct, then the literal check).",
+      "observed": "AC1 identical both runs; AC2 -Plan output identical apart from the derived trigger date.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No -Register, no Register-ScheduledTask, no git worktree add, no --fire, no vendor call, no S3 write",
+      "reason": "Order section 4; the registration and first fire are the issuer's drain act under a never-widen pair."
+    },
+    {
+      "item": "Known limit: a folder whose only identity evidence is its own name (e.g. Hitachi 6501 JP) is NO_EVIDENCE and is not registered by the schedule",
+      "reason": "The order carries it to the CTO as an issuer row; induction_run.py, induction_request.py and add_security.py unchanged."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest test_induction_schedule.py (AC1, via r1_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round16/r1_AC1.sh",
+      "result": "rc 0; 1 passed"
+    },
+    {
+      "tool": "schedule_induction.ps1 -Plan (AC2, via r1_AC2.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round16/r1_AC2.sh",
+      "result": "rc 0; plan fields as expected"
+    },
+    {
+      "tool": "git diff scope check (AC3, via r1_AC3.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round16/r1_AC3.sh",
+      "result": "rc 0; paths_outside_grant 0"
+    }
+  ]
+}
