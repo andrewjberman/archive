@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-211",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "96b4b1d01b1609e38ce6e733f25220ae4de268ca"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R21_Y.md",
+    "vintage_commit": "96b4b1d01b1609e38ce6e733f25220ae4de268ca",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-211.resolve-retry-logged-and-reoffered-soon.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~71",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "1473764053b4b22a94e963bd29a87e5be653a5e4",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Not deployed by this order (BOUNDS: served code moves only through 2.0.0_SA_COO~P's next resident build). Blob hash is the git blob of the worktree file at commit time; RESOLVE_RETRY_VISIBILITY_S is absent at HEAD~ (git show HEAD:<path> | grep -c RESOLVE_RETRY_VISIBILITY_S == 0) and present in this blob.",
+      "introduces": ["RESOLVE_RETRY_VISIBILITY_S = 60", "IRPT_RESIDENT_RESOLVE state=%s code=%s"],
+      "artifact_covered_by": ["Y21-1-AC1", "Y21-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~71/IB-yr-211.result.md",
+      "kind": "doc",
+      "commit_or_etag": "0f149b9bec7e7c54a8b9b8a81e2e7e21817b92af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object 0f149b9bec7e7c54a8b9b8a81e2e7e21817b92af -- the session log for this order.",
+      "artifact_covered_by": ["Y21-1-AC1", "Y21-1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y21-1-AC1",
+      "criterion_verbatim": "a provider outage keeps the message, the last visibility change is RESOLVE_RETRY_VISIBILITY_S (<= 120), and an IRPT_RESIDENT_RESOLVE state=RETRY code= line prints. Base: the constant is absent.",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R20_CHECKS/test_r20_y2_resolve_retry.py::test_retry_is_logged_and_reoffered_soon",
+      "output_evidence": "1 passed in 2.00s",
+      "denominator": "1 of 1 selected test",
+      "status": "PASS",
+      "expect": "1 passed"
+    },
+    {
+      "criterion_id": "Y21-1-AC2",
+      "criterion_verbatim": "a successful resolve still deletes its message (the suite's own success test, re-run) and prints IRPT_RESIDENT_RESOLVE state=READY. Base: the line is missing.",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R20_CHECKS/test_r20_y2_resolve_retry.py::test_ready_still_deletes_and_is_logged",
+      "output_evidence": "1 passed in 1.64s",
+      "denominator": "1 of 1 selected test",
+      "status": "PASS",
+      "expect": "1 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Temporarily replaced the `if result[\"state\"] == \"RETRY\": sqs.change_message_visibility(...)` block in poll_once with a no-op `pass`, disabling the short re-offer visibility change, and reran AC1.",
+      "expected": "AC1 fails on the assertion that the queue's last visibility change equals RESOLVE_RETRY_VISIBILITY_S.",
+      "observed": "test_retry_is_logged_and_reoffered_soon FAILED: 'assert ([900] and 900 == 60)' -- the only recorded visibility call stayed the heartbeat's 900s. Restored the exact original bytes afterward (git hash-object reproduced 1473764053b4b22a94e963bd29a87e5be653a5e4, matching the pre-mutant/delivered blob).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full R20_CHECKS/test_r20_y2_resolve_retry.py file (both tests) was run twice in succession at the final restored bytes.",
+      "observed": "Both runs: '2 passed' (1.86s and 1.57s) -- identical pass/fail outcome and identical selected-test count across runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Optional test addition to test_resolve_upload.py (build step 4)",
+      "reason": "Marked optional by the task order (\"you may add tests\"); the read-only R20_CHECKS harness (test_r20_y2_resolve_retry.py, reusing test_resolve_upload.py's own Queue/case/assembly fixtures) already exercises both built behaviours end to end, so no addition was made and existing tests were left unchanged per the order's own instruction not to change them."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~71/IB-yr-211.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R20_CHECKS/test_r20_y2_resolve_retry.py (post-edit, both criteria)",
+      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R20_CHECKS/test_r20_y2_resolve_retry.py",
+      "result": "rc=0, 2 passed"
+    },
+    {
+      "tool": "pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/ (whole-directory regression, post-edit, post-restore)",
+      "invocation": "timeout 150 python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/",
+      "result": "rc=0, 290 passed, 30 skipped, 32 subtests passed in 95.05s -- identical shape to the pre-edit baseline, no regression"
+    },
+    {
+      "tool": "git hash-object (worktree blob isolation, no working-tree stash)",
+      "invocation": "git hash-object infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~71/IB-yr-211.result.md",
+      "result": "1473764053b4b22a94e963bd29a87e5be653a5e4 / 0f149b9bec7e7c54a8b9b8a81e2e7e21817b92af; git diff --stat confirmed resident_worker.py +11/-1 lines, no other tree files touched by the build steps"
+    }
+  ]
+}
