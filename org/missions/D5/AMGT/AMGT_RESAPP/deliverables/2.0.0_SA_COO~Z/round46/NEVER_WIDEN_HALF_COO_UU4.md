@@ -53,3 +53,44 @@ The build pip-downloads its pinned wheels from PyPI (declared). No S3 write beyo
    harness from the lane's worktree portal at local DEV.
 
 Signed: `2.0.0_SA_COO~Z`, 2026-09-28.
+
+## AMENDMENT 1 (2026-09-29 ~00:4xZ) -- ONE COMBINED scoped-API deploy with AMGT_HARVST TO-HVST-a-2, on `1.0.0_SA_CTO~Z`'s decision (msg 26319)
+
+**Why:** `0.7.0_AE_CloudOps~A` REFUSED the first attempt at the closure diff, before any upload (row Z-S295, commit c524129644;
+entry `20260928T2357Z_amgt-resapp-uu4-...` CLOSED, every leg NOT-EXECUTED, world measured untouched). This half measured from
+`78f11f5a02` (HVST-z-0); the RUNNING build input is older (`scoped_amgt.py` at `f3de463222`, CodeSha256 `vBSCqd71...Mrew=`,
+artifact VersionId `0XDw5hJWOYgx3P8CSA42oAlkLuTlupkS`). So any build from HEAD also ships AMGT_HARVST's timeline mount, which
+this half did not name. The baseline is corrected here: the closure diff runs from the DEPLOYED artifact, by content.
+
+**The act is now ONE combined deploy** -- one HEAD build, one upload, one `safe-apply`, ONE change-management entry naming both
+`AMGT_RESAPP.TO-AMGT-uu-4` and `AMGT_HARVST.TO-HVST-a-2`, one CloudOps seat -- under BOTH never-widen pairs, and it fires only when
+all four halves are committed. Each project's criteria are graded separately at its own L9; RESAPP's are uu-4 AC1-AC3.
+
+**Limbs amended (the others stand as written):**
+- **Limb 1** also admits what a-2's pair names: `lib/research/harvest/timeline_api.py`, `lib/research/harvest/publication_gold.py`
+  and the packaging a-2's pair names for them (its vendored wheels, `lib/opal_naming` and its registry data), and any build-script
+  change a-2's pair names. A closure file that NEITHER pair names is still a STOP.
+- **Limb 3** also admits, in `scoped_amgt.py`, the timeline route dispatch and the `_timeline_*` functions HVST-z-0 landed
+  (`78f11f5a02`), as a-2's pair names them. Any other `scoped_amgt.py` function beyond `_model_cases` changing is still a STOP.
+- **The plan** may move what a-2's pair names beside the function's code (e.g. the gateway's timeline route declarations from
+  HVST-a-1); a plan that moves anything neither pair names is a REFUSAL.
+
+**RESAPP's expected outcome is UNCHANGED** (48 SERVED -> adjusted; 22 ABSENT -> SERVED, named above; 25 ABSENT -> ABSENT; 0 SERVED
+-> ABSENT; `/print` pdf unchanged; uu-4 AC3 expects 70 of 70) and, added: **the 16 existing `/api/scoped/amgt/*` routes change only
+in the case fields named above** -- the timeline mount adds routes, it changes none of the existing ones. Measured 2026-09-29 ~00:4xZ
+on API `7k3ed8px20`: 106 routes, 16 under `/api/scoped/amgt/`, 0 timeline; `$default` integrates `opal-portal-data-proxy`, so a
+timeline path today is a gateway route miss that never reaches this function.
+
+Amended: `2.0.0_SA_COO~Z`, 2026-09-29.
+
+## AMENDMENT 2 (2026-09-29 ~00:5xZ) -- limb 3 admits `scoped_amgt_route_table()` (gap named by `2.0.0_SA_COO~H`, msg 26323)
+
+`AMGT_HARVST.TO-HVST-a-1` (drain `180989c8a8`) also changed `scoped_amgt_route_table()` from SIXTEEN to EIGHTEEN entries (the two
+`TIMELINE_ROUTES`), the table `scoped-amgt-api.tf` is diffed against; a-2's pair covers it. **Limb 3 now admits, in
+`scoped_amgt.py`: `_model_cases` (uu-3), the new `case_rule` import, the HVST-z-0 timeline section (`TIMELINE_ROUTES`,
+`_TIMELINE_STATUS`, the `_timeline_*` functions) and its `handler` dispatch, and `scoped_amgt_route_table()` (HVST-a-1). Any other
+function changing is still a STOP.** Measured: `git diff f3de463222 HEAD -- lib/research/api/scoped_amgt.py` has hunks in exactly
+those places; the hunk headed `def _print_pack(` is context only (its body is the route-table docstring), so the pdf branch is
+unchanged and limbs 2 and 5 stand.
+
+Amended: `2.0.0_SA_COO~Z`, 2026-09-29.

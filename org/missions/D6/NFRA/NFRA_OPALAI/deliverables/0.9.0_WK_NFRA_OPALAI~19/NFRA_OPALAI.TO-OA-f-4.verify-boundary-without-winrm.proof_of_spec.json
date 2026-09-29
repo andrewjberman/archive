@@ -17,7 +17,7 @@
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "Invoke-Command/ComputerName=0; Start-Process with -Credential -Wait -WorkingDirectory>=2; parse errors=0; other files changed vs fd8ab8a57f=0 -- RESULT: PASS -- exit=0",
+      "criterion_verbatim": "Invoke-Command/ComputerName=0; Start-Process with -Credential -Wait -WorkingDirectory>=2; parse errors=0; other files changed vs fd8ab8a57f (outside the script and its two arm files)=0 -- RESULT: PASS -- exit=0",
       "method": "command",
       "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/f4.AC1.sh; echo \"exit=$?\"",
       "output_evidence": "opal_ai HEAD: Invoke-Command/ComputerName=0; Start-Process with -Credential -Wait -WorkingDirectory=2; parse errors=0; other files changed vs fd8ab8a57f=0\nRESULT: PASS\nexit=0",
@@ -29,17 +29,17 @@
       "criterion_verbatim": "rc=3 line='BOUNDARY: ERROR probe=... control=...' -- RESULT: PASS -- exit=0",
       "method": "command",
       "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/f4.AC2.sh; echo \"exit=$?\"",
-      "output_evidence": "opal_ai HEAD: rc=3 line='BOUNDARY: ERROR probe=ERROR:This command cannot be run due to the error: The parameter is incorrect. control=ERROR:This command cannot be run due to the error: The parameter is incorrect.'\nRESULT: PASS\nexit=0",
+      "output_evidence": "opal_ai HEAD: rc=3 line='BOUNDARY: ERROR probe=ERROR:This command cannot be run due to the error: The user name or password is incorrect. control=ERROR:This command cannot be run due to the error: The user name or password is incorrect.'\nRESULT: PASS\nexit=0",
       "denominator": "1 of 1 run: rc=3 and line starts BOUNDARY: ERROR",
       "status": "PASS"
     },
     {
       "criterion_id": "AC3",
-      "criterion_verbatim": "-EncodedCommand refs>=1 -Command refs=0; rc=1 line='BOUNDARY: BREACH probe=ALLOWED control=OK'; verdict files>=2 -- RESULT: PASS -- exit=0",
+      "criterion_verbatim": "arm files=2; -EncodedCommand refs=0 -Command refs=0 -File refs>=2; rc=1 line='BOUNDARY: BREACH probe=ALLOWED control=OK'; verdict files>=2; ARGLEN: probe<1024 control<1024 -- RESULT: PASS -- exit=0",
       "method": "command",
       "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/f4.AC3.sh; echo \"exit=$?\"",
-      "output_evidence": "opal_ai HEAD: -EncodedCommand refs=2 -Command refs=0; rc=1 line='BOUNDARY: BREACH probe=ALLOWED control=OK'; verdict files=2\nRESULT: PASS\nexit=0",
-      "denominator": "5 of 5 conditions (enc>=1, cmd=0, rc=1, line, verdict files=2)",
+      "output_evidence": "opal_ai HEAD: arm files=2; -EncodedCommand refs=0 -Command refs=0 -File refs=2; rc=1 line='BOUNDARY: BREACH probe=ALLOWED control=OK'; verdict files=2; ARGLEN: probe=288 control=215\nRESULT: PASS\nexit=0",
+      "denominator": "all conditions of AC3 (arm files=2, enc=0, cmd=0, -File>=2, rc=1, line, verdict files=2, ARGLEN both <1024)",
       "status": "PASS"
     }
   ],
@@ -54,12 +54,32 @@
     {
       "path_or_key": "opal_ai/opal/runtime/provision/verify-boundary.ps1",
       "kind": "script",
-      "commit_or_etag": "56c6228",
+      "commit_or_etag": "3a751c6",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "nested opal_ai commit 56c622843163 (on top of 6b13ff8) on wk-NFRA_OPALAI-19-opal_ai; not deploy-scope; exercised by AC1-AC3",
+      "deploy_evidence": "nested opal_ai commit 3a751c6ea916 (on top of 56c6228) on wk-NFRA_OPALAI-19-opal_ai; also adds boundary-arm-probe.ps1 and boundary-arm-control.ps1; not deploy-scope; exercised by AC1-AC3",
       "artifact_covered_by": [
         "AC1",
         "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "opal_ai/opal/runtime/provision/boundary-arm-probe.ps1",
+      "kind": "script",
+      "commit_or_etag": "3a751c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nested opal_ai commit 3a751c6ea916; not deploy-scope; run by AC3",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "opal_ai/opal/runtime/provision/boundary-arm-control.ps1",
+      "kind": "script",
+      "commit_or_etag": "3a751c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nested opal_ai commit 3a751c6ea916; not deploy-scope; run by AC3",
+      "artifact_covered_by": [
         "AC3"
       ]
     }

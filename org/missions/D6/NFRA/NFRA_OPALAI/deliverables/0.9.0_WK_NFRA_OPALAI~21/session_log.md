@@ -1,0 +1,1 @@
+OA-f-6: provision-account.ps1 gains Set-ExplicitAcl (inheritance off, explicit ACEs on runtime root, config, checkout_dir, state_dir; -Plan prints 4 INHERITANCE-OFF ACL lines); verify-boundary.ps1 runs four arms (new boundary-arm-checkout.ps1, boundary-arm-config.ps1). Nested commit d78e021. f6.AC1 and f6.AC2 PASS. No real ACL changed, no elevation, no rows.
