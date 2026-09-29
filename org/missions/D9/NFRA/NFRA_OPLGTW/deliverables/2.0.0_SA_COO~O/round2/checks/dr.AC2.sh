@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # OPLGTW OG-m-2 AC2: the SERVED dispatcher is the built artifact of the committed source, it moved off the 2026-08-19 build
-# (CodeSha256 fEMCZ4..., built_from_commit 1abc54fa4c), and the role's s3:GetObject grant is exactly the two prefixes.
+# (CodeSha256 fEMCZ4..., built_from_commit 1abc54fa4c), and the role's s3 read grant is exactly GetObject on the chain logs and GetObject+GetObjectVersion on the marker (A1).
 # Read-only: lambda get-function, s3api head-object, iam get-role-policy, one GET of the presigned code URL.
 . "$(dirname "$0")/_root.sh"
 AWS=".tools/aws"
@@ -22,16 +22,18 @@ raw = sys.stdin.read().strip()
 d = json.loads(raw)
 if isinstance(d, str):
     d = json.loads(urllib.parse.unquote(d))
-got = set()
+acts_by_res = {}
 for s in d.get('Statement', []):
     acts = s.get('Action', []); acts = [acts] if isinstance(acts, str) else acts
-    if any(a.lower().startswith('s3:') for a in acts):
+    s3a = [a.lower() for a in acts if a.lower().startswith('s3:')]
+    if s3a:
         rs = s.get('Resource', []); rs = [rs] if isinstance(rs, str) else rs
-        if [a.lower() for a in acts] != ['s3:getobject']:
-            got.add('NON-GETOBJECT:' + ','.join(acts))
-        got.update(rs)
-want = {'arn:aws:s3:::opal-data-49financial/gold/advi/_logs/chain_*', 'arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*'}
-print('%d %d' % (len(got & want), len(got - want)))" | tr -d '\r'); r6=$?
+        for r in rs:
+            acts_by_res.setdefault(r, set()).update(s3a)
+want = {'arn:aws:s3:::opal-data-49financial/gold/advi/_logs/chain_*': {'s3:getobject'}, 'arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*': {'s3:getobject', 's3:getobjectversion'}}
+hit = sum(1 for r, a in want.items() if acts_by_res.get(r) == a)
+extra = sum(1 for r, a in acts_by_res.items() if want.get(r) != a)
+print('%d %d' % (hit, extra))" | tr -d '\r'); r6=$?
 hit=$(printf '%s' "$res" | cut -d' ' -f1); extra=$(printf '%s' "$res" | cut -d' ' -f2)
 a=no; [ -n "$live" ] && [ "$live" = "$art" ] && a=yes
 b=no; [ -n "$live" ] && [ "$live" != "$PREV" ] && b=yes
