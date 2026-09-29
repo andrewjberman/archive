@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-n-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-n-1.dossier-to-canonical-address.md",
+    "group": "OTHER",
+    "vintage_commit": "02a16d3382"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "02a16d3382",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-n-1.dossier-to-canonical-address.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/dossier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TABLE and ARTIFACT now research_dossier; every store access already went through gold.table_prefix(TABLE); all 5 hyphen literals replaced; no legacy fallback in read_dossier.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier_canonical_address.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 offline-stub tests: prefix equals builder prefix; write_one puts only under amgt/harvest/gold/research_dossier/; read_dossier raises LookupError on a legacy-prefix object and reads the new prefix.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_backlog.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 hyphen literals replaced with research_dossier in stub URIs and messages.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round12/n1_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round12/n1_AC1.sh",
+      "output_evidence": "...\n3 passed in 0.16s",
+      "denominator": "3 of 3 tests passed; full corpus suite 444 passed",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round12/n1_AC2.sh -- expect n1 table research_dossier prefix amgt/harvest/gold/research_dossier/ equals_builder True hyphen_literal 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round12/n1_AC2.sh",
+      "output_evidence": "n1 table research_dossier prefix amgt/harvest/gold/research_dossier/ equals_builder True hyphen_literal 0",
+      "denominator": "1 of 1 store prefix equals builder; 0 hyphen literals in dossier.py",
+      "expect": "n1 table research_dossier prefix amgt/harvest/gold/research_dossier/ equals_builder True hyphen_literal 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round12/n1_AC3.sh -- expect l1 dossier_import pdf_libs_loaded none read_dossier_callable True",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round12/n1_AC3.sh",
+      "output_evidence": "l1 dossier_import pdf_libs_loaded none read_dossier_callable True",
+      "denominator": "1 of 1 import checks",
+      "expect": "l1 dossier_import pdf_libs_loaded none read_dossier_callable True",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1-AC3 scripts run once each after the full suite",
+      "observed": "rc 0 each",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "gold.table_prefix called with the legacy hyphen table name (the pre-fix TABLE) instead of dossier.TABLE.",
+      "expected": "prefix differs from the builder's research_dossier prefix, so AC2's equals_builder would read False.",
+      "observed": "mutant prefix amgt/harvest/gold/research-dossier/ != amgt/harvest/gold/research_dossier/ -- CONTROL FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write or dossier --write; METHOD_VERSION change; other lib/ carriers",
+      "reason": "Bounds; a lib-wide search for the hyphen literal found only dossier.py and test_backlog.py (10 hits, 351 files), both in paths."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest full corpus suite",
+      "invocation": "python -m pytest lib/research/corpus/tests -q",
+      "result": "rc 0; 444 passed"
+    }
+  ]
+}
