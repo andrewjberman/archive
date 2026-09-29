@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-xx-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "411236c2b75d3199a70eab17d57da38e1df75a5a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "411236c2b75d3199a70eab17d57da38e1df75a5a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-xx-3.officers-from-the-proxy.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~175",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/management/proxy_officers.py",
+      "kind": "script",
+      "commit_or_etag": "3bbbd2746f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY, read-only: officers_from_proxy and census read the persisted filing objects (S3 read) and EDGAR through fetch.py's latest_filing/http_get/html_to_text; nothing served, persisted or written. Exercised by AC1 and AC2.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_proxy_officers.py",
+      "kind": "test",
+      "commit_or_etag": "3bbbd2746f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 no-network arms with a stubbed fetch over fixtures reduced from the real INTU proxy and 10-K Item 10: SERVED parse, no officer section, title-only refused, no proxy filing, fragment under 3, census counts.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "status SERVED, form DEF 14A, an accession, officers N (N >= 3), malformed 0, OFFICERS FROM THE PROXY ON THE WALKED NAME: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round49/checks/xx-3.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "status SERVED, form DEF 14A, accession 000089687825000057, officers 5, malformed 0\n  Sasan K. Goodarzi -- President and Chief Executive Officer\n  Sandeep S. Aujla -- Executive Vice President and Chief Financial Officer\n  Alex Balazs -- Executive Vice President and Chief Technology Officer\n  Mark Notarainni -- Executive Vice President and General Manager, Consumer Group\n  Marianna Tessel -- Executive Vice President and General Manager, Small Business Group\nOFFICERS FROM THE PROXY ON THE WALKED NAME: YES\nexit=0",
+      "denominator": "1 walked name (INTU_US_Equity); 5 officers, 0 malformed of 5; the proxy's own heading is 'Named Executive Officers' (source.section_heading)",
+      "status": "PASS",
+      "expect": "status SERVED, form DEF 14A.*?officers [3-9].*?malformed 0.*?OFFICERS FROM THE PROXY ON THE WALKED NAME: YES.*?exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "census: identified I; officer section points elsewhere P; gain officers from the proxy G of P (0 < G <= P <= I), THE CENSUS PRINTS ITS DENOMINATORS: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round49/checks/xx-3.AC2.py; echo \"exit=$?\"",
+      "output_evidence": "census: identified 96; officer section points elsewhere 2; gain officers from the proxy 2 of 2\n  HAL_US_Equity SERVED officers=5 \n  INTU_US_Equity SERVED officers=5 \nTHE CENSUS PRINTS ITS DENOMINATORS: YES\nexit=0",
+      "denominator": "I=96 identified library names; P=2 whose persisted officer section points elsewhere (HAL, INTU); G=2 of 2 SERVED, 0 pointer names without a reason. The other 94 are not pointer names (roster RESOLVED, or unresolved with no pointer sentence).",
+      "status": "PASS",
+      "expect": "census: identified 96; officer section points elsewhere [1-9]\\d*; gain officers from the proxy [1-9]\\d* of [1-9]\\d*.*?THE CENSUS PRINTS ITS DENOMINATORS: YES.*?exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a python -c session (no file edit), replaced proxy_officers._plausible with the identity function and ran the suite.",
+      "expected": "the served-parse test and the census test fail, since a revenue caption ('Global Business Solutions Group -- Group up 16%') would be read as a sixth officer.",
+      "observed": "MUTANT failures 2 errors 0: test_served_parse_from_the_proxy_section, test_census_counts_pointer_names_and_gains.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m unittest lib.research.management.tests.test_proxy_officers run twice in succession",
+      "observed": "Ran 6 tests, OK; Ran 6 tests, OK",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "AMGT_RESAPP-Z-W175-S1"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~175/AMGT_RESAPP.TO-AMGT-xx-3.officers-from-the-proxy.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m unittest",
+      "invocation": "PYTHONPATH=$(pwd) python -m unittest lib.research.management.tests.test_proxy_officers",
+      "result": "6 passed, 0 failed"
+    }
+  ]
+}
