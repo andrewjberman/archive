@@ -175,14 +175,63 @@ No `forbidden_field_classes` member (`raw_account_id`, `account_title`, `tax_ide
 dates), `describe` (the `dim_asset` journey and RQ2-1/RQ2-2's *"what unit or scale does the dataset description
 give"*). `download_original` and `write` are contract-disabled and are never requested.
 
-### accounts -- REDACTED, and this is a spec conflict, not a choice
-`parse_scope` requires `scope.accounts` to name every granted master's accounts, and `_strings`
-(`data_entitlement.py:204-206`) **refuses an empty list**. So a runnable Schwab grant structurally contains raw
-account identifiers -- while `GCG1-AC6` forbids a raw account identifier in **any** artifact this order commits,
-and `GCG1-AC3` requires this file to carry the operator command's printed scope diff **verbatim** (the diff prints
-the accounts dimension). **AC3-verbatim and AC6-no-raw-account-id cannot both hold.** Filed as row
-`NFRA_OPLGTW-Z-S10`; it needs the issuer's or the CTO's disposition, not a workaround here. The committed scope
-carries `<<REDACTED-AC6-OPERATOR-SUBSTITUTES>>` per master.
+### accounts -- RULED, then MEASURED under amendment A3
+
+Row `NFRA_OPLGTW-Z-S10` reported that `parse_scope` requires `scope.accounts` to name every granted master's
+accounts and `_strings` (`data_entitlement.py:204-206`) **refuses an empty list**, so a runnable Schwab grant
+structurally contains raw account identifiers -- colliding with `GCG1-AC6`. That finding is **confirmed on the
+code**, not merely inferred: `app/account_ref.py:3` states it outright -- *"Accounts are raw Schwab ids INSIDE
+the Gateway only: the data_entitlement grant's `scope.accounts` and the source rows."* The `account_ref` a
+principal sees is a keyed HMAC over the raw id and never appears in a grant.
+
+`1.0.0_SA_CTO~O` ruled it @`8bf2bf37c6` (msg 26461) and the issuer carried it as **A2**: **AC6 wins** -- the
+scope diff is committed with every account identifier redacted, plus the SHA-256 of the unredacted diff; the
+candidate names its accounts only off-repo. The grant's accounts are **exactly the set
+`SEALED_EXPECTED_V2.json` was computed over, per master; record the COUNT, never an identifier.**
+
+**A3's measurement** (the read it granted: `GetObject` by pinned VersionId on those 5 objects only, decoded with
+pyarrow, counts only). Instrument: `probes/og_g1_accounts.py`.
+
+| master | dataset | business date | rows | distinct accounts in object | VersionId |
+|---|---|---|---|---|---|
+| `08242234` | `dim_balance` | 2026-09-25 | 7460 | 7460 | `5PRG5E6r7Y0ouiB7XOK1Ab7bQGCCEyNd` |
+| `08242234` | `dim_balance` | 2026-09-24 | 7452 | 7452 | `UKusT2qymyztVSohx_i3JvHcJRedvdtK` |
+| `08335338` | `dim_balance` | 2026-09-25 | 7548 | 7548 | `l902TpDGeJ.P.AF0Ru8kiW87B6EpUXTq` |
+| `08335338` | `dim_position` | 2026-09-25 | 106835 | 6347 | `MTChLz7Qh4xR9ySWrFxSBRxRktUmLwa3` |
+| `08335338` | `dim_balance` | 2026-09-24 | 7540 | 7540 | `ccnYjRNxXDSlvEuZLv.TlRR8NA5PkQQq` |
+
+Keys are `schwab/<master>/silver/<dataset>/date=<date>/data.parquet`. **Denominator: 5 of 5 pinned objects read.**
+
+**THE GRANT'S ACCOUNT COUNT, per master:** `08242234` -> **7460**; `08335338` -> **7548**.
+
+Feasibility, measured rather than assumed: every id is exactly 10 characters, so `scope.accounts` serialises to
+about **195,102 bytes -- 47.6% of DynamoDB's 400 KB item limit**. The ruled grant is writable in one item.
+
+> ⛔ **THIS IS EVERY ACCOUNT IN BOTH MASTERS, AND THAT IS CORRECT -- BUT IT CONTRADICTS THIS ORDER'S OWN
+> "bounded subset" CLAUSE.** The order says *"The accounts and columns stay a bounded subset"* because a grant
+> wide enough to answer everything destroys the refusal evidence. The **columns** are a bounded subset (15 of 29).
+> The **accounts cannot be**: RQ2-2 .. RQ2-6 are aggregates over the objects -- sums of `mkt_value_long`,
+> `net_mv_positions`, `cash_balance_settled_only`, and *"how many accounts hold a negative value"* -- so any
+> account subset changes the answer and breaks the hash match against `OG-v-6`'s seal. The seal FORCES an
+> all-accounts grant. Ruling (1) is therefore not just permissible, it is the only value that lets the sealed
+> answers verify. **The cost, stated plainly: the account dimension yields NO refusal discriminator.** Every
+> refusal `OG-v-7` grades must come from the column or date dimension -- which is what the pair below does.
+> Filed as row `NFRA_OPLGTW-Z-S13`.
+
+### The AC3 artifacts under amendment A2 -- the off-repo candidate and the diff hash
+
+- **offrepo_candidate:** `%LOCALAPPDATA%/opal/og-salt/og_g1_candidate.json`
+- **unredacted_diff_sha256:** `<<ABSENT -- the candidate is keyed by the controlled identity's tid/oid, which does not exist; see section 1>>`
+
+The candidate lives outside the repository, on the same route `WALKTHROUGH_PROTOCOL.md` section 2 already uses
+for real-data answers (`%LOCALAPPDATA%/opal/og-salt/`). It is the only place the 15,008 account identifiers
+appear; nothing about them enters git but their **count**. Retention: it is deleted once `G-C` closes and the
+grant is active, since from then on the authoritative copy is the `data_entitlement` record itself.
+
+Both fields are ABSENT for one reason, not two: without a `tid`/`oid` there is no candidate to validate and
+therefore no diff to hash. The probe's AC3 arm is fully implemented against A2's mechanism and will grade the
+moment the identity exists -- it calls `validate_candidate`, recomputes the unredacted diff, compares this
+SHA-256, and separately scans this committed file for any account identifier of the candidate.
 
 ### The discriminator pair (`GCG1-J1`)
 

@@ -2,7 +2,7 @@
   "_comment_1": "NFRA_OPLGTW TO-OG-g-1: the DERIVED grant scope for the controlled identity of gate G-C.",
   "_comment_2": "NOT a runnable candidate. Two dimensions are deliberately absent, each for a stated reason:",
   "_comment_3": "  tid/oid -- ABSENT because no controlled identity exists in the tenant (see the evidence file, AC1). A placeholder GUID is refused by AC1 by design, so none is written.",
-  "_comment_4": "  scope.accounts -- REDACTED because app/data_entitlement.py:_strings refuses an empty list, so a real grant must name raw account identifiers per master, and GCG1-AC6 forbids a raw account identifier in any artifact this order commits. The operator substitutes the real ids at activation from a source outside the repository.",
+  "_comment_4": "  scope.accounts -- the COUNT only, per amendments A2/A3 (ruling 1.0.0_SA_CTO~O @8bf2bf37c6): the grant's accounts are EXACTLY the set SEALED_EXPECTED_V2.json was computed over, per master; record the COUNT, never an identifier. The candidate names its ids only off-repo. Measured by probes/og_g1_accounts.py over the 5 pinned objects: 08242234 -> 7460, 08335338 -> 7548. This is EVERY account in both masters and that is forced by the seal -- RQ2-2..RQ2-6 are aggregates, so any subset breaks the hash match. Cost: the account dimension yields no refusal discriminator (row NFRA_OPLGTW-Z-S13).",
   "_comment_5": "Every other dimension is final and is what GCG1-AC5 grades against SEALED_EXPECTED_V2.json at HEAD.",
   "derivation_sources": {
     "seal": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~10/SEALED_EXPECTED_V2.json",
@@ -13,8 +13,16 @@
     "masters": ["08242234", "08335338"],
     "datasets": ["dim_asset", "dim_balance", "dim_position"],
     "accounts": {
-      "08242234": ["<<REDACTED-AC6-OPERATOR-SUBSTITUTES>>"],
-      "08335338": ["<<REDACTED-AC6-OPERATOR-SUBSTITUTES>>"]
+      "_rule": "A2/A3: exactly the set SEALED_EXPECTED_V2.json was computed over, per master. COUNTS here; the ids live only in the off-repo candidate.",
+      "08242234": {"count": 7460, "ids": "<<OFF-REPO-A2>>"},
+      "08335338": {"count": 7548, "ids": "<<OFF-REPO-A2>>"}
+    },
+    "_accounts_provenance": {
+      "instrument": "probes/og_g1_accounts.py -- S3 GetObject by pinned VersionId on the 5 seal objects, pyarrow decode, DISTINCT account_id per master",
+      "source_column": "account_id (the PHYSICAL column; the contract's catalog name account_ref is the Gateway's keyed HMAC over it and exists only in responses -- app/integrations/schwab/datasets.json:12)",
+      "objects_read": 5,
+      "serialised_size_bytes": 195102,
+      "dynamodb_item_limit_pct": 47.6
     },
     "dates": {
       "mode": "fixed_dates",

@@ -117,3 +117,26 @@ AC1-AC3 grade the transaction document as written; the amended checks read from 
 playwright refs 1, BD_PASSWORD refs 2, merge refs 2; Default 1, Latest 2), AC2 PASS (rule ENABLED, 1 target), AC3 FAIL (no
 PHASE B GO). AC1 and AC3 need PHASE B by construction. The same predicates on the other 3 documents are per-document
 rows in the proof, and are graded at L9.
+
+## PHASE B RECORD (amendment A3, GO by 2.0.0_SA_COO~MI; halves SIGNED for 3 legs, allocation carved out)
+
+Published 2026-09-29T08:25-08:27Z, outside 21:30-22:15Z, with the NEVER-2 ledger `nfra-mcpindex-bd-playwright-strip` open first
+(commit 8cd7d48a4c). Per leg, `update-document --document-version '$LATEST'` from the repo file, then
+`update-document-default-version`, then a `get-document` read-back:
+
+| leg | document | version before (Default/Latest) | version after | read-back content sha256 first-16 == repo file | Default/Latest after |
+| --- | --- | --- | --- | --- | --- |
+| L2 | opal-bd-unrealized-download | 2/2 | 3 | b33bb4201627f2d8, bytes equal | 3/3 |
+| L3 | opal-bd-realized-download | 2/2 | 3 | 570538ea79ddfe59, bytes equal | 3/3 |
+| L4 | opal-bd-transaction-download | 1/2 | 3 | af59a64d5ca315b0, bytes equal | 3/3 |
+
+`s14.AC1` reads PASS (Default 3, Latest 3; playwright refs 0, BD_PASSWORD refs 0, merge refs 2), `s14.AC2` PASS (rule ENABLED).
+Rollback per leg is section (4) above: re-publish v2 (content hashes e2bbc0febde98668 unrealized, cd2bf147c44653f7 realized,
+18f27fcdf008975b transaction) as the next version and set DEFAULT to it. The ledger stays OPEN: L5 is tonight's 21:38, 21:45
+and 21:53Z scheduled fires; L6 is the git leg.
+
+ALLOCATION (re-cut per the CTO ruling in A3, NOT published; served stays Default 3, Latest 4): the `bd-price-update` invoke block is
+removed and one log line says it is not invoked. Offline: `lambda invoke` 0, `aws lambda` 0, `bd-price-update` appears once
+(that log line), BD_PASSWORD 0, download-daily 0, secretsmanager 0, merge-daily-incremental 2; the merge block is 7 of 8
+lines identical to served v4 (the 8th the comment dash). Content sha256 first-16 `66431932a7ad0f55`, committed at a1a912c90a.
+This supersedes the allocation hash 559048c8290150fc above and the row Z-W17-S5 hazard for the re-asked leg.
