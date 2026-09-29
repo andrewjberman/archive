@@ -29,3 +29,10 @@ applies: the new pin reads mcportal `a3bff71`.
 
 `3.0.0_SA_CVO~O`'s delta half is signed as a file. No other gateway release is mid-act (every worktree's
 `.open_deploys/` is read, with the denominator printed). The switchover sitting is not in progress on the host.
+
+## Re-ack ~02:0xZ -- deploy-only commit 0bce8d322a
+
+RE-ACKED, G-A and the CTO half, for deploy-only commit `0bce8d322a47a308fb5b398bfb5c3371263523b1` (msg 26378). Measured
+by this seat: `git rev-parse 0bce8d322a:infra/aws/ec2/opal-gateway` = `3371f18803:infra/aws/ec2/opal-gateway` =
+`09ccfc39ad669ea2c300638fe7cb8c45f27bb9ee`, the identical gateway tree. The shipped bytes are unchanged, and no other guard
+moves.
