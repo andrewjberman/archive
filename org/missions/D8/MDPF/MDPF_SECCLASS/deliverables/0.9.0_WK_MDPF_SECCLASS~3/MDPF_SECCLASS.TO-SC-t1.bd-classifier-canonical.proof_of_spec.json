@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-t1",
+  "phase": "BUILD-GENERAL",
+  "firm": "MDPF",
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~3",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-t1.bd-classifier-canonical.md",
+    "group": "OTHER",
+    "vintage_commit": "c1e9b60e63bf535d3c9bc148c0e612f824b51684"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP.md",
+    "vintage_commit": "c1e9b60e63bf535d3c9bc148c0e612f824b51684",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-t1.bd-classifier-canonical.md"
+  },
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~3/bd-classifier-canonical.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/lib/etf_classifier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build + record only (BOUNDS: 'no upload, no deploy'); not synced to the bd-gold-layer-runner EC2 instance by this order."
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/test_etf_classifier_canonical.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test module, no deploy surface. 11/11 passed locally."
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_BD_RESOLUTION_CENSUS_20260929.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census artifact (LOCAL read of live S3/DynamoDB, no write to either); the task order's SC1-t1-AC2 deliverable."
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~3/bd-classifier-canonical.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Result document; no deploy surface."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC1-t1-AC1",
+      "criterion_verbatim": "classes from the canonical table with no fold and no guess, and no bd-securities access.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_etf_classifier_canonical.py -q -p no:cacheprovider",
+      "output_evidence": "11 passed in 0.22s",
+      "denominator": "11 of 11 test cases passed",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC1-t1-AC2",
+      "criterion_verbatim": "the BD holdings before and after on real data: every move listed, zero bd-securities reads, zero guesses, and the readers named.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_resolution_census.py",
+      "output_evidence": "NOT-CENSUSED: PHYS lands {'asset_class': '', 'sub_asset': ''}, placed ('commodities', 'Metals')",
+      "denominator": "1 of 1 check script run to completion; 3880 of 3992 open holdings moved and listed; 1 of 3 sentinel tickers (PHYS) fails the check's PLACED expectation",
+      "expect": "BD-CENSUS",
+      "status": "FAIL",
+      "status_reason": "The canonical etf-classifications table (344 rows, live scan 2026-09-29) does not carry a PHYS row -- confirmed by direct get-item (no Item) and a full ticker-projection scan; GLD and VXX are present and land correctly (commodities/Metals, structured/Hedge). The census JSON is honest and complete (PHYS after={'',''}, a genuine miss per SC-t-1's own no-guess spec), but the check's PLACED assumption that PHYS already resolves is false against live world state. Not weakened to pass; filed as MDPF_SECCLASS-W3-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~M) per the refusal clause."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: neither criterion names a mutant. The stub-client test suite's own negative controls stand in: test_unknown_ticker_is_unknown_not_equity and test_unknown_ticker_by_name_pattern_is_not_guessed assert the OLD layer-3/layer-4 guess paths (alpha ticker -> equity; FI/alt/cash keyword match) no longer fire, which is the mutation the old code would have produced.",
+      "expected": "N/A",
+      "observed": "N/A-SPEC-NAMES-NONE",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "python -m pytest data/black_diamond/scripts/gold/tests/test_etf_classifier_canonical.py -q -p no:cacheprovider executed twice; python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_resolution_census.py executed twice against the committed census JSON.",
+      "observed": "Both pytest runs: '11 passed'. Both check-script runs: identical 'NOT-CENSUSED: PHYS lands {...}, placed (...)' line, byte-identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Fixing the PHYS gap in etf-classifications (seeding the row).",
+      "reason": "Out of this order's BOUNDS (LOCAL build + record: no write, no upload, no deploy; the library reads only). Filed as MDPF_SECCLASS-W3-S1, disarm owner 2.0.0_SA_COO~M."
+    },
+    {
+      "item": "Updating data/black_diamond/scripts/silver/build_bd_assets_dim.py, gold/C_06, D_03, D_04, E_25 to use the new library's contract.",
+      "reason": "BOUNDS: 'Readers are read-only here... move in the next orders of your queue (SC-t-2, SC-t-3).' Their private _ticker_map/_name_map read (build_bd_assets_dim.py:156) is filed as MDPF_SECCLASS-W3-S2."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W3-S1: SC1-t1-AC2's check (PLACED) and SC-k-1's check (PINNED) both assume GLD, PHYS and VXX already carry canonical etf-classifications rows; PHYS does not (live scan, 2026-09-29), so AC2 fails on real data as written.",
+    "MDPF_SECCLASS-W3-S2: removing layers 2-4 drops the private _ticker_map/_name_map attributes build_bd_assets_dim.py:156 reads directly for a diagnostic print, so that reader raises AttributeError on its next real run (no production impact today -- LOCAL build only, no deploy)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_etf_classifier_canonical.py -q -p no:cacheprovider",
+      "result": "11 passed in 0.22s."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/black_diamond/scripts/gold/lib/etf_classifier.py data/black_diamond/scripts/gold/tests/test_etf_classifier_canonical.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)."
+    },
+    {
+      "tool": "python (census generator, .scratch only, not committed)",
+      "invocation": "python .scratch/gen_census.py",
+      "result": "Classified 3992 distinct open (ticker, asset_name) BD holdings from s3://opal-data-bd/gold/holdings_lots/2026-09-25.parquet with the BEFORE (CLOUD @c1e9b60e63, bd-securities + all 4 layers) and AFTER (this commit's etf-classifications-only) classifiers; wrote R1_BD_RESOLUTION_CENSUS_20260929.json. holdings=3992 moved=3880 unclassified=3699."
+    },
+    {
+      "tool": "aws dynamodb (live read)",
+      "invocation": "aws dynamodb get-item --table-name etf-classifications --key '{\"ticker\":{\"S\":\"PHYS\"}}' --region us-east-1; aws dynamodb scan --table-name etf-classifications --filter-expression 'contains(ticker, :p)' ...",
+      "result": "No Item for PHYS; full ticker-projection scan of all 344 rows confirms PHYS absent, GLD and VXX present. bd-securities get-item PHYS: Item present, asset_class=alternatives, sub_asset_class=Gold, classified_by=gpt-4o-mini."
+    },
+    {
+      "tool": "r1_bd_resolution_census.py (check script)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_resolution_census.py",
+      "result": "NOT-CENSUSED: PHYS lands {'asset_class': '', 'sub_asset': ''}, placed ('commodities', 'Metals'); rc=1. Recorded verbatim as SC1-t1-AC2 FAIL, not weakened."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields. (2 new rows of 3 total checked, 1 pre-existing not re-graded)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC1-t1-AC1,SC1-t1-AC2",
+      "result": "run before any complete-flip decision; result recorded in the worker report. Status is NOT flipped to complete because SC1-t1-AC2 does not PASS-by-output."
+    }
+  ]
+}
