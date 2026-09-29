@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-j-1.event-route-serves-stored-ids",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-j-1.event-route-serves-stored-ids.md",
+    "group": "OTHER",
+    "vintage_commit": "58fbe48402"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "58fbe48402",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-j-1.event-route-serves-stored-ids.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~47",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/timeline_api.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "get_timeline_event(security_key, event_id, event_loader, article_loader) returns the chatter_event row whose stored event_id equals the argument; body event_id is the matched row's stored value; unknown id -> TIMELINE_EVENT_NOT_FOUND; routes 1 and 2 untouched. Route comment path updated to .../timeline/event/{event_id}. LOCAL: unwired in scoped_amgt.py, unmounted at the gateway, nothing deployed (issuer HOLD, CTO msg 26760).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_timeline_api.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The event-route tests re-keyed to stored ids; four new named tests plus the re-keyed dissection-order test replace the two first_day-keyed ones. Harvest suite 202 -> 205 collected.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~47/scripts/j1_ac2_stored_ids_on_served_rows.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only: S3 GET/LIST via publication_gold._latest_gold_snapshot_rows on chatter_event and article_security_mention; old code loaded with git show 86ee31f531:lib/research/harvest/timeline_api.py. No PUT.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~47/j1_ac2_result.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Per-event stored id, old recomputed id, row match and article-set equality for the 8 events.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "both suites pass with new tests NAMED in the -rA output: the route returns the row whose stored event_id equals the argument; two planted events sharing ONE first_day are EACH served by their own id; the body's event_id equals the stored value, not publication_gold._event_id of the row; an unknown id returns TIMELINE_EVENT_NOT_FOUND; the unwired-route test passes unchanged; pass count BEFORE and AFTER printed and collected count not falling",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/harvest/tests/ lib/research/api/tests/test_timeline_routes.py -rA --tb=line",
+      "output_evidence": "rc=0; final line '221 passed in 3.74s'. PASSED lines in -rA: test_route_returns_the_row_whose_stored_event_id_equals_the_argument | test_two_events_sharing_one_first_day_are_each_served_by_their_own_id | test_body_event_id_is_the_stored_value_not_publication_gold_event_id_of_the_row | test_an_unknown_event_id_is_event_not_found | test_timeline_route_post_and_event_route_are_not_wired. BEFORE (base 58fbe48402, timeline_api.py at HEAD): lib/research/harvest/tests/ 202 passed + lib/research/api/tests/test_timeline_routes.py 16 passed = 218. AFTER: 205 collected in harvest + 16 in the api file = 221 passed, 0 failed. Full -rA output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~47/j1_ac1_output.txt",
+      "denominator": "5 of 5 named tests PASSED; 221 of 221 collected passed (before 218 -> after 221, collected count did not fall)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "OVER THE SERVED NEWEST chatter_event PART (8 events at the cut): (a) stored event_id beside the old recomputed id, count that differ; (b) NEW get_timeline_event called with each stored id returns that very row with its articles, 8 of 8; (c) old first_day-keyed and new id-keyed calls return the same article set per event. PASS only if (b) is 8 of 8 and (c) holds",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~47/scripts/j1_ac2_stored_ids_on_served_rows.py",
+      "output_evidence": "rc=0. newest chatter_event part rows: 8 ; article_security_mention rows: 304 | 992_HK_Equity 2026-02-12..2026-02-12 stored=c6406ab65afa.. recomputed=1b5df12b1234.. differ=True new_row=True articles new/old=2/2 same=True | 992_HK_Equity 2026-05-22..2026-05-22 stored=df65e860ac9b.. recomputed=3169b045cbd1.. differ=True new_row=True articles new/old=2/2 same=True | 992_HK_Equity 2026-08-13..2026-08-13 stored=a95c2232e1a8.. recomputed=e6ee43d88cf1.. differ=True new_row=True articles new/old=2/2 same=True | AMZN_US_Equity 2026-09-07..2026-09-07 stored=c9e34b38e4ba.. recomputed=239045ce76fd.. differ=True new_row=True articles new/old=3/3 same=True | BA_US_Equity 2026-09-08..2026-09-08 stored=88d9df907e03.. recomputed=852a1466eecd.. differ=True new_row=True articles new/old=2/2 same=True | COST_US_Equity 2026-09-14..2026-09-14 stored=f51394fda7e3.. recomputed=e15ab8e93350.. differ=True new_row=True articles new/old=2/2 same=True | HD_US_Equity 2026-08-18..2026-08-18 stored=a4be84824eec.. recomputed=a91db4a21307.. differ=True new_row=True articles new/old=2/2 same=True | NVDA_US_Equity 2026-06-01..2026-06-01 stored=39c0b3d69453.. recomputed=f6b88c34c3c1.. differ=True new_row=True articles new/old=3/3 same=True | (a) stored != old recomputed: 8 of 8 | (b) new id-keyed call returns that very row with articles: 8 of 8 | (c) old first_day-keyed and new id-keyed article sets equal: 8 of 8 | RESULT: PASS",
+      "denominator": "(a) 8 of 8 events differ; (b) 8 of 8; (c) 8 of 8 same article set. Denominator = 8 rows in the newest chatter_event part read via publication_gold._latest_gold_snapshot_rows; 304 article_security_mention rows in the newest mention part. Articles are the mention rows whose article_key is in the event's article_keys (no silver headline join; headline = mention title).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The five named/re-keyed event-route tests in lib/research/harvest/tests/test_timeline_api.py run against the OLD timeline_api.py (git show HEAD:lib/research/harvest/timeline_api.py, first_day-keyed, recomputed id), then restored.",
+      "expected": "The event-route tests fail on the old function.",
+      "observed": "5 failed, 15 passed in test_timeline_api.py against the old function; all 20 pass on the new. CONTROL FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times and AC2 run twice this session against the same tree",
+      "observed": "221 passed every run; AC2 8 of 8 / 8 of 8 / 8 of 8 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "lib/research/api/scoped_amgt.py wiring, gateway mount, deploy, publication_gold id scheme, gold write, portal, vendor call",
+      "reason": "Section 3 of the worker face excludes each; git diff touches only timeline_api.py, test_timeline_api.py, the deliverables folder and the channel. The stale route comment at scoped_amgt.py:4101 is outside <paths> and is row AMGT_HARVST-Z-W47-S1."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W47-S1"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/harvest/tests/ lib/research/api/tests/test_timeline_routes.py -rA --tb=line",
+      "result": "rc 0; 221 passed"
+    },
+    {
+      "tool": "j1_ac2_stored_ids_on_served_rows.py (AC2, read-only S3)",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~47/scripts/j1_ac2_stored_ids_on_served_rows.py",
+      "result": "rc 0; a 8/8, b 8/8, c 8/8; RESULT: PASS"
+    }
+  ]
+}
