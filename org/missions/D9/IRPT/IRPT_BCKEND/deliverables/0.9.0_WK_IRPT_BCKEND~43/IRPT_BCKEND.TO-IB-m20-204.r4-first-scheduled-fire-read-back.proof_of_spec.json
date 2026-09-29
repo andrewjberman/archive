@@ -1,0 +1,106 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-m20-204",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+  "group": "M",
+  "vintage_commit": "c0c0ae560637503969312f5c285070d2475bcb98"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R20_M.md",
+  "vintage_commit": "8994d3754bf253abae7441fdb61e40029e8ddcff",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m20-204.r4-first-scheduled-fire-read-back.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~43",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_R4_FIRST_FIRE_20260929.json",
+   "kind": "config_data",
+   "commit_or_etag": "fe5e1dc2424a5821fc5a372aa54184464cc5712e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only reporting artifact: the per-firm read-back of the first scheduled Holdings fire (SSM command id/status/rc/as_of/revision, served manifest VersionId before/after, reconcile line), built entirely from live AWS reads (boto3 ssm.get_command_invocation, s3.list_object_versions); no AWS state was written by this worker."
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260929T0112Z_irpt-holdings-schedule-enable-m-20260929_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "fe5e1dc2424a5821fc5a372aa54184464cc5712e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the ledger's human-readable mirror; leg V2 row updated to CLOSED with the same proof text and the entry's Status flipped to CLOSED by deploy_ledger.py close (via close-leg --leg-id V2 then close). deploy_ledger.py close ALSO removes org/critical_paths/.open_deploys/irpt-holdings-schedule-enable-m-20260929.json (the OPEN sentinel), which is why that path is a delete in this commit rather than a produced artifact -- deploy_ledger.py's own CLOSE mechanism, not an edit by this worker."
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "fe5e1dc2424a5821fc5a372aa54184464cc5712e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one row appended, IRPT_BCKEND-W43-S1 (OBSERVATION/INERT): cottonwood's scheduled-fire SSM StandardOutputContent hit the 24000-byte inline cap before the difference_control/reconciliation-narrative block, so that text could not be read back verbatim for that one firm (reconcile_ok/before/after were still readable and equal)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IBM20-204-AC1",
+   "criterion_verbatim": "IBM20-204-AC1 -- the first scheduled fire is read back per firm, served VersionIds move exactly where the fire succeeded, and the enable ledger is CLOSED.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_m204_first_fire.py",
+   "output_evidence": "Before the read-back JSON and ledger close existed (baseline, this session, rc=1): 'NOT-READ: enable ledger not CLOSED' (fired after the firms/comment/VersionId-movement checks all passed, once R20_R4_FIRST_FIRE_20260929.json was written but before the ledger close). After `deploy_ledger.py close-leg --leg-id V2` + `deploy_ledger.py close` (rc=0): 'READ-BACK 49financial=Success inflection=Success cottonwood=Success' -- matching <expect> ('READ-BACK followed by 49financial, inflection and cottonwood each with its SSM status').",
+   "denominator": "1 of 1 mechanical check: 3 of 3 firms present with SSM commands matching the exact scheduled non-qa comment ('irpt holdings refresh <firm> 2026-09-29'); for each, Status==Success and served_version_before != served_version_after (moved), both VersionIds non-empty, and a non-empty revision; exactly 1 enable-ledger .md entry found and it contains '**Status:** CLOSED'. All conditions the script tests read MET for all 3 firms.",
+   "status": "PASS",
+   "status_reason": "PASS-by-output. The script's own gate (per-firm comment match, Status/VersionId-movement coherence, revision presence on Success, single CLOSED ledger entry) all cleared; verbatim READ-BACK line printed with all three firms and their SSM status as <expect> requires.",
+   "expect": "READ-BACK followed by 49financial, inflection and cottonwood each with its SSM status"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "not run -- the check script is the task order's own named instrument (r20_m204_first_fire.py) reading live AWS state (SSM) and a committed JSON + ledger .md file directly; there is no separate harness of this worker's own authorship to mutate. The before/after run (ledger-not-CLOSED -> CLOSED) is the discriminating read: the identical invocation flips verdict purely on the live/committed ledger state, which is the property under test.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC1 was run twice: once after the read-back JSON was written but before the ledger leg V2 close/ledger close, and once after both.",
+   "observed": "before: 'NOT-READ: enable ledger not CLOSED' rc=1. after: 'READ-BACK 49financial=Success inflection=Success cottonwood=Success' rc=0. A third, immediate re-run of the post-close invocation returned the identical line and rc=0, confirming the PASS state is stable, not a one-shot artifact of ordering.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "invoking the scheduled dispatch, changing the schedule, or minting/moving any served package or manifest",
+   "reason": "explicitly out of bounds ('Read-only on AWS except the ledger files: no dispatch invoke, no schedule change, no package mint, no served write, no runner start/stop'). This worker only read SSM command/invocation state and S3 object-version metadata; the schedule had already fired on its own at 14:15Z before this worker was spawned."
+  },
+  {
+   "item": "the full cottonwood difference_control.reading narrative text",
+   "reason": "SSM get_command_invocation StandardOutputContent for cottonwood's command hit the 24000-byte inline cap before that block; no StandardOutputUrl/CloudWatchOutputConfig was set on the command to retrieve the untruncated copy. Filed as row IRPT_BCKEND-W43-S1 (OBSERVATION/INERT) rather than fabricated or silently omitted; reconcile_ok/before/after (both 541745917.1, unchanged) remained readable and are what the acceptance check and ledger proof actually rely on."
+  }
+ ],
+ "surprises": [
+  "IRPT_BCKEND-W43-S1: cottonwood's scheduled-fire SSM command output (06569db1-aeee-471e-a54e-91fe612838be) hit the 24000-byte StandardOutputContent cap before reaching the difference_control/reconciliation-narrative block; the block's exact text could not be read back for that firm (reconcile_ok/before/after were still readable and equal, so the halves' reconciliation condition is still measured)."
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~43/IRPT_BCKEND.TO-IB-m20-204.r4-first-scheduled-fire-read-back.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "boto3 ssm.list_commands (paginated, InstanceId scoped)",
+   "invocation": "python -c \"import boto3; ssm=boto3.client('ssm', region_name='us-east-1'); [print(c['CommandId'], c.get('Comment'), c['Status'], c['RequestedDateTime']) for p in ssm.get_paginator('list_commands').paginate(InstanceId='i-02448edb624a7a7cf') for c in p['Commands'] if c['RequestedDateTime'].strftime('%Y-%m-%d')=='2026-09-29']\"",
+   "result": "3 non-qa scheduled commands found, each comment 'irpt holdings refresh <firm> 2026-09-29', all Status Success, requested 2026-09-29T14:15:23.807Z (49financial), 14:15:25.339Z (cottonwood), 14:15:26.718Z (inflection) -- matching the issuer's stated command ids exactly."
+  },
+  {
+   "tool": "boto3 ssm.get_command_invocation (per firm)",
+   "invocation": "ssm.get_command_invocation(CommandId=<id>, InstanceId='i-02448edb624a7a7cf')",
+   "result": "all 3: Status=Success, ResponseCode=0. business_date (published)=2026-09-28 for all 3 firms (custody-lagged T-1 from the 2026-09-29 source_cutoff/dispatch date), reconcile_ok=true and reconcile_before==reconcile_after for all 3 (1803717947.15 / 541745917.1 / 206846622.0). 49financial and inflection stdout stayed under the 24000-byte cap and carried the full difference_control.reading text; cottonwood's stdout hit the cap (length==24000) before that block (row IRPT_BCKEND-W43-S1)."
+  },
+  {
+   "tool": "boto3 s3.list_object_versions (per firm bucket, current manifest.json key)",
+   "invocation": "s3.list_object_versions(Bucket='opal-data-<firm>', Prefix='irpt/<firm>/platinum/holdings/current/manifest.json')",
+   "result": "all 3 firms: latest (IsLatest=True) VersionId's LastModified falls AFTER its command's 14:15:2xZ start (14:20:35Z / 14:18:21Z / 14:18:18Z) and the immediately-prior version's LastModified falls before it (all 2026-09-24T23:1xZ) -- served VersionId moved for every Success firm, none unchanged."
+  },
+  {
+   "tool": "deploy_ledger.py close-leg (V2) then close",
+   "invocation": "python .tools/deploy_ledger.py close-leg --slug irpt-holdings-schedule-enable-m-20260929 --leg-id V2 --proof ...; python .tools/deploy_ledger.py close --slug irpt-holdings-schedule-enable-m-20260929",
+   "result": "OK: leg V2 closed. Remaining open: NONE. OK: CLOSED deploy ledger 'irpt-holdings-schedule-enable-m-20260929' -- all 3 legs proven; sentinel removed."
+  },
+  {
+   "tool": "r20_m204_first_fire.py -- the task order's own AC1 check",
+   "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_m204_first_fire.py",
+   "result": "pre-close rc=1 'NOT-READ: enable ledger not CLOSED'; post-close rc=0 'READ-BACK 49financial=Success inflection=Success cottonwood=Success'."
+  }
+ ]
+}
