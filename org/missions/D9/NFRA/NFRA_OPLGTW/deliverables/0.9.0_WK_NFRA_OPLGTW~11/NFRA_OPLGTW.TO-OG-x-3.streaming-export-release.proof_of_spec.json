@@ -41,7 +41,7 @@
       "kind": "config_data",
       "commit_or_etag": "1f15da8f48",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Manifest record on wk-NFRA_OPLGTW-11 (LOCAL): deployed_commit 4248b70b39..., previous_deployed_commit f791522306..., hand-recorded on an LF copy (3152461491, corrected by 1f15da8f48).",
+      "deploy_evidence": "Manifest record on wk-NFRA_OPLGTW-11 (LOCAL): deployed_commit 4248b70b39..., previous_deployed_commit f791522306... (ruled correct by the issuer), hand-recorded on an LF copy (3152461491, corrected by 1f15da8f48).",
       "artifact_covered_by": [
         "AC2"
       ]
@@ -65,9 +65,8 @@
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/xr.AC1.sh; echo \"exit=$?\"",
       "output_evidence": "entry files at HEAD=2; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 13 of 13 sentinel(s) scanned\nRESULT: PASS\nexit=0",
       "denominator": "1 slug; 13 of 13 sentinels scanned by deploy_ledger.py list",
-      "status": "UNVERIFIABLE-BY-INSTRUMENT",
-      "expect": "sentinel at HEAD=no; listed OPEN/HELD=0 -- RESULT: PASS -- exit=0",
-      "status_reason": "The script's own verdict is RESULT: PASS with exit=0 (evidence above), but the criterion's <expect> 'sentinel at HEAD=no; listed OPEN/HELD=0 -- RESULT: PASS -- exit=0' is a literal pattern that no verbatim output of the script can match: the script prints its lines separated by newlines and puts other fields between the two fragments (for AC1 '; SCAN DENOMINATOR: ...' follows 'listed OPEN/HELD=0'), while the pattern joins fragments with ' -- '. The pattern cannot decide this row, so the substitute oracle is the script's RESULT line, read by the CVO at L9 or replaced by an amended <expect>. Row NFRA_OPLGTW-Z-W11-S9."
+      "status": "PASS",
+      "expect": "(?s)sentinel at HEAD=no; listed OPEN/HELD=0.*RESULT: PASS.*exit=0"
     },
     {
       "criterion_id": "AC2",
@@ -76,20 +75,18 @@
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/xr.AC2.sh; echo \"exit=$?\"",
       "output_evidence": "deployed_commit=4248b70b3911129588b96b32a4f74072151a8750 previous=f791522306ded5a95e72839d119dd99e96db5513 descends=yes; gateway files shipped 9, outside OG-x-2's set 0; streaming export carried 1\nRESULT: PASS\nexit=0",
       "denominator": "1 manifest record; 9 gateway files shipped, 0 outside OG-x-2's set",
-      "status": "UNVERIFIABLE-BY-INSTRUMENT",
-      "expect": "descends=yes -- RESULT: PASS -- exit=0",
-      "status_reason": "The script's own verdict is RESULT: PASS with exit=0 (evidence above), but the criterion's <expect> 'descends=yes -- RESULT: PASS -- exit=0' is a literal pattern that no verbatim output of the script can match: the script prints its lines separated by newlines and puts other fields between the two fragments (for AC1 '; SCAN DENOMINATOR: ...' follows 'listed OPEN/HELD=0'), while the pattern joins fragments with ' -- '. The pattern cannot decide this row, so the substitute oracle is the script's RESULT line, read by the CVO at L9 or replaced by an amended <expect>. Row NFRA_OPLGTW-Z-W11-S9."
+      "status": "PASS",
+      "expect": "(?s)descends=yes.*RESULT: PASS.*exit=0"
     },
     {
       "criterion_id": "AC3",
       "criterion_verbatim": "AC3 -- the served host over SSM: /health 200, the streaming export shipped, the four Schwab engine files equal the deployed commit's bytes, and ENABLED_INTEGRATIONS unchanged (Schwab stays dark).",
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/xr.AC3.sh; echo \"exit=$?\"",
-      "output_evidence": "ssm command=bb8aef48-d382-4b12-bd4e-3e2d55f6d791 status=Success; /health=200; streaming export on host 0; schwab files equal deployed_commit 4 of 4; ENABLED_INTEGRATIONS unchanged=no\nRESULT: FAIL\nexit=1",
-      "denominator": "1 SSM command on 1 instance; 4 of 4 schwab files, 1 health read, 1 test-module read, 1 .env line",
-      "status": "FAIL",
-      "expect": "/health=200; streaming export on host 1; schwab files equal deployed_commit 4 of 4; ENABLED_INTEGRATIONS unchanged=yes -- RESULT: PASS -- exit=0",
-      "status_reason": "Two premises of the check are false at the served host, measured: (1) 'streaming export on host' tests for /opt/opal-gateway/tests/test_schwab_export_stream.py, but the gateway artifact carries only app/, deploy/, requirements.txt, identity_tool_allowlist.txt and dashboard/ (deploy-to-ec2.sh's tar, tests excluded) and did so for every prior release, so the file is absent by construction (stream=0); the streaming export itself is on the host: engine.py/integration.py/export.py/envelope.py md5 = 4248b70b39's bytes, 4 of 4, and the 76-file manifest 76 of 76. (2) It expects ENABLED_INTEGRATIONS=ycharts opal_portal globgrph, the value before MX-r-4; the host's value is ycharts opal_portal globgrph opal_discover portal_index, unchanged by this act (same before and after), no schwab. Row NFRA_OPLGTW-Z-W11-S8. The order stays open; the issuer amends the check or rules it."
+      "output_evidence": "ssm command=5f17cf01-4b7a-4756-9bcd-14979af43d84 status=Success; /health=200; streaming export on host 1; schwab files equal deployed_commit 4 of 4; ENABLED_INTEGRATIONS unchanged=yes\nRESULT: PASS\nexit=0",
+      "denominator": "1 SSM command (5f17cf01-4b7a-4756-9bcd-14979af43d84) on 1 instance; 4 of 4 schwab files, 1 health read, 1 engine.py marker read, 1 .env line",
+      "status": "PASS",
+      "expect": "(?s)/health=200; streaming export on host 1; schwab files equal deployed_commit 4 of 4; ENABLED_INTEGRATIONS unchanged=yes.*RESULT: PASS.*exit=0"
     }
   ],
   "controls": {
@@ -100,8 +97,8 @@
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "Each xr.AC*.sh run twice on the same HEAD (xr_run1 before the manifest's previous_deployed_commit correction, xr_run2 after).",
-      "observed": "AC1 PASS both; AC3 FAIL both with the same two measurements (stream=0, enabled mismatch; health 200; 4 of 4). AC2 FAILED in run 1 (descends=no, previous 7c7ebe14d3 is a never-merged deploy-only commit) and PASSED in run 2 after the previous_deployed_commit correction to f791522306; the change is deliberate, not instability.",
+      "method": "Each xr.AC*.sh run at HEAD 1f15da8f48 (run 2, before amendment A3) and again at HEAD 8c000d12ad as amended (run 3), same deployed host.",
+      "observed": "AC1 and AC2: identical printed lines and RESULT: PASS in both runs; AC3: run 2 FAIL under the old check (stream=0, enabled=no), run 3 PASS under the amended check (stream=1, unchanged=yes) with the same host readings (/health 200, 4 of 4 files equal 4248b70b39). The only change is the criterion (A3), not the host; AC2's first run at 3152461491 read descends=no before the previous_deployed_commit correction, ruled correct by the issuer.",
       "status": "STABLE"
     }
   },
@@ -124,8 +121,8 @@
     "NFRA_OPLGTW-Z-W11-S5: the live artifact key named the deploy-only tree (ruled INERT).",
     "NFRA_OPLGTW-Z-W11-S6: the MX-r-4 ledger stopped PHASE B once and forced a re-cut (BLOCKING, resolved by the queue clearing and amendment A2).",
     "NFRA_OPLGTW-Z-W11-S7: the MP-a-2 open sentinel stopped PHASE B once (BLOCKING, resolved: ledger closed 05:01:33Z, GO given).",
-    "NFRA_OPLGTW-Z-W11-S9: the <expect> patterns of AC1 and AC2 join fragments with ' -- ' and cannot match the scripts' verbatim multi-line output; both scripts print RESULT: PASS (OBSERVATION / INERT).",
-    "NFRA_OPLGTW-Z-W11-S8: xr.AC3 cannot pass as written: the artifact never carries tests/, and the ENABLED_INTEGRATIONS literal is the pre-MX-r-4 value (OBSERVATION / INERT)."
+    "NFRA_OPLGTW-Z-W11-S9: the <expect> patterns of AC1 and AC2 joined fragments with ' -- ' and could not match the scripts' output (OBSERVATION / INERT). DISARMED by the issuer's amendment A3 @8c000d12ad (regex expects); AC1 and AC2 now PASS.",
+    "NFRA_OPLGTW-Z-W11-S8: xr.AC3 could not pass as written (tests/ never ships; pre-MX-r-4 ENABLED_INTEGRATIONS literal) (OBSERVATION / INERT). DISARMED by the issuer's amendment A3 @8c000d12ad (greps the shipped engine.py for read_export_batches; the 5-id value); AC3 now PASS."
   ],
   "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~11/streaming-export-release.result.md",
   "compiler_tools": [
@@ -137,7 +134,7 @@
     {
       "tool": "xr.AC1.sh, xr.AC2.sh, xr.AC3.sh",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/xr.AC<n>.sh; echo exit=$?",
-      "result": "AC1 exit 0 PASS; AC2 exit 0 PASS; AC3 exit 1 FAIL (premises, row S8)"
+      "result": "AC1 exit 0 PASS; AC2 exit 0 PASS; AC3 exit 0 PASS (amended check, A3 @8c000d12ad)"
     }
   ]
 }

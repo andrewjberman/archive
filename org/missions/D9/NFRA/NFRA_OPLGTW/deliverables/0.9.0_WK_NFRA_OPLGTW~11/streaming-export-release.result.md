@@ -24,18 +24,14 @@ as the tree that was served. The issuer's GO named 7c7ebe14d3; this is a deliber
 The wrapper's own manifest edit sat unstaged as a whole-file CRLF rewrite in /c/tmp/og-x3-rel2 and was not used.
 Ledger `nfra-oplgtw-stream-export-release`: opened `7ca65d7885` before the act, closed `71c9c85205`, 4 of 4 legs proven.
 
-## Criteria (run from the worktree root at HEAD 1f15da8f48)
-Proof instance: VALID (rc=0). AC1 and AC2 are recorded UNVERIFIABLE-BY-INSTRUMENT, not PASS: their scripts print `RESULT: PASS` and
-exit 0, but the order's `<expect>` patterns join fragments with ` -- ` and cannot match the verbatim output, so the checker refuses a PASS
-row (row S9). AC3 is FAIL. No criterion was edited and no output re-flowed to fit a pattern.
-- AC1 PASS: `entry files at HEAD=2; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 13 of 13 sentinel(s) scanned` (2 entries:
-  the ABANDONED 0140Z one and this one).
-- AC2 PASS (after the previous_deployed_commit correction; FAIL before it, `descends=no`): `descends=yes; gateway files shipped 9,
-  outside OG-x-2's set 0; streaming export carried 1`.
-- AC3 FAIL, exit=1: `/health=200; streaming export on host 0; schwab files equal deployed_commit 4 of 4; ENABLED_INTEGRATIONS
-  unchanged=no`. The check tests for `tests/test_schwab_export_stream.py` on the host (no artifact ships tests/) and for the
-  pre-MX-r-4 3-id ENABLED_INTEGRATIONS literal. The deploy itself is verified by content (above). Row `NFRA_OPLGTW-Z-W11-S8`.
-  The order's `<status>` is NOT flipped.
+## Criteria (re-run as written at HEAD 8c000d12ad, after the issuer's amendment A3)
+Proof instance VALID (rc=0), all three PASS by output; the order is flipped `complete`.
+- AC1 PASS: `entry files at HEAD=2; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 13 of 13 sentinel(s) scanned` / `RESULT: PASS` / `exit=0`.
+- AC2 PASS: `deployed_commit=4248b70b39... previous=f791522306... descends=yes; gateway files shipped 9, outside OG-x-2's set 0; streaming export carried 1` / `RESULT: PASS` / `exit=0`.
+- AC3 PASS: `ssm command=5f17cf01-4b7a-4756-9bcd-14979af43d84 status=Success; /health=200; streaming export on host 1; schwab files equal deployed_commit 4 of 4; ENABLED_INTEGRATIONS unchanged=yes` / `RESULT: PASS` / `exit=0`.
+Earlier runs (HEAD 1f15da8f48, before A3): AC1 and AC2 printed RESULT: PASS but their `<expect>` could not match (S9); AC3 FAIL on two stale
+premises (S8). Both rows are DISARMED by amendment A3 @8c000d12ad (the issuer's ruling; the criteria were the defect). The manifest's
+`previous_deployed_commit` = `f791522306` is ruled correct.
 
 ## Rows this order filed
 S4 (stale og-r-1 sentinel copies, ruled STALE), S5 (artifact key of the deploy-only tree, ruled INERT), S6 (MX-r-4 ledger,
