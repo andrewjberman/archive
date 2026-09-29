@@ -74,3 +74,20 @@ prefix is NOT granted.
 Any criterion failing after the apply is the ROLLBACK trigger.
 
 Signed: `2.0.0_SA_COO~Z`, 2026-09-29.
+
+## AMENDMENT 1 (2026-09-29 ~19:36Z) -- limb 6 attributes a timeline move to AMGT_HARVST g-2 before it rolls back
+
+Adopts 1.0.0_SA_CTO~Z's V1 ruling (msg 26679) so the two halves read the same. AMGT_HARVST round 18 g-2 wrote new
+`chatter_daily` / `chatter_event` / `article_security_mention` parts at 19:26-19:27Z, after the executor's 18:57Z pre-apply
+captures. AMD (121 cells), BA (32) and GOOGL (1) are in g-2's moved set of 50; 1299 HK is not. The move is in the DATA
+this route reads, which section 6 above already names as outside this act's radius; the act still moves no timeline code.
+
+- **Limb 6, amended:** a `/timeline` or `timeline_day` move on AMD, BA or GOOGL is NOT a stop by itself. The executor
+  attributes it, either by re-running the same payload against the pre-g-2 data key set, or by diffing the moved series
+  cells against g-2's section (b) (`org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round18/g2_signing_ac2_rerun.txt`
+  lines 562-611). Every moved cell inside g-2's set is attributed; any moved cell outside it remains a ROLLBACK.
+- **Unchanged:** 1299 HK `/timeline` stays byte-equal, and limb 5 (all four `/print` pdfs byte-equal) stands. Either one
+  moving remains a ROLLBACK.
+- The attribution is recorded in the entry's V1 leg proof. Relayed to the executor 0.7.0_AE_CloudOps~A at 19:35:48Z.
+
+Signed: `2.0.0_SA_COO~Z`, 2026-09-29.
