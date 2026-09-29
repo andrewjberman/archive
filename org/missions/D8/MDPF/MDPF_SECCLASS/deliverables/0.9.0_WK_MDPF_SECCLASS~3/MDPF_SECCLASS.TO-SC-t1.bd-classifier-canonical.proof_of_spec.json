@@ -19,28 +19,28 @@
     {
       "path_or_key": "data/black_diamond/scripts/gold/lib/etf_classifier.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "206b90e359",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "LOCAL build + record only (BOUNDS: 'no upload, no deploy'); not synced to the bd-gold-layer-runner EC2 instance by this order."
     },
     {
       "path_or_key": "data/black_diamond/scripts/gold/tests/test_etf_classifier_canonical.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "206b90e359",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Test module, no deploy surface. 11/11 passed locally."
     },
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_BD_RESOLUTION_CENSUS_20260929.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "206b90e359",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Census artifact (LOCAL read of live S3/DynamoDB, no write to either); the task order's SC1-t1-AC2 deliverable."
     },
     {
       "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~3/bd-classifier-canonical.result.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "206b90e359",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Result document; no deploy surface."
     }
@@ -61,11 +61,11 @@
       "criterion_verbatim": "the BD holdings before and after on real data: every move listed, zero bd-securities reads, zero guesses, and the readers named.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_resolution_census.py",
-      "output_evidence": "NOT-CENSUSED: PHYS lands {'asset_class': '', 'sub_asset': ''}, placed ('commodities', 'Metals')",
-      "denominator": "1 of 1 check script run to completion; 3880 of 3992 open holdings moved and listed; 1 of 3 sentinel tickers (PHYS) fails the check's PLACED expectation",
+      "output_evidence": "BD-CENSUS holdings=3992 moved=3880 unclassified=3699",
+      "denominator": "1 of 1 check script run to completion; 3880 of 3992 open holdings moved and listed; 3 of 3 sentinel tickers (GLD, PHYS, VXX) satisfy the amended check (GLD/VXX PLACED, PHYS SEED_PENDING-unclassified)",
       "expect": "BD-CENSUS",
-      "status": "FAIL",
-      "status_reason": "The canonical etf-classifications table (344 rows, live scan 2026-09-29) does not carry a PHYS row -- confirmed by direct get-item (no Item) and a full ticker-projection scan; GLD and VXX are present and land correctly (commodities/Metals, structured/Hedge). The census JSON is honest and complete (PHYS after={'',''}, a genuine miss per SC-t-1's own no-guess spec), but the check's PLACED assumption that PHYS already resolves is false against live world state. Not weakened to pass; filed as MDPF_SECCLASS-W3-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~M) per the refusal clause."
+      "status": "PASS",
+      "status_reason": "Re-run against the issuer's amendment 1 (commit e31e302afc, check fix 4ce2d4a8af): amendment 1 accepts PHYS as unclassified (seed-pending, since etf-classifications carries no PHYS row until SC-k-2's seed write) rather than requiring it PLACED; GLD and VXX still land placed. Ruling: the defect was the issuer's check, not this worker's build (row MDPF_SECCLASS-W3-S1, disposition per the ruling commit). No change made to etf_classifier.py or the census artifact; only the check changed."
     }
   ],
   "controls": {
@@ -117,9 +117,9 @@
       "result": "No Item for PHYS; full ticker-projection scan of all 344 rows confirms PHYS absent, GLD and VXX present. bd-securities get-item PHYS: Item present, asset_class=alternatives, sub_asset_class=Gold, classified_by=gpt-4o-mini."
     },
     {
-      "tool": "r1_bd_resolution_census.py (check script)",
+      "tool": "r1_bd_resolution_census.py (check script, amendment 1 @e31e302afc, re-run by WK~3 after merging CLOUD @40cc35dc6a)",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_resolution_census.py",
-      "result": "NOT-CENSUSED: PHYS lands {'asset_class': '', 'sub_asset': ''}, placed ('commodities', 'Metals'); rc=1. Recorded verbatim as SC1-t1-AC2 FAIL, not weakened."
+      "result": "BD-CENSUS holdings=3992 moved=3880 unclassified=3699; rc=0. Recorded as SC1-t1-AC2 PASS per the issuer's ruling (row MDPF_SECCLASS-W3-S1)."
     },
     {
       "tool": "surprise-row-gate.py",
@@ -129,7 +129,7 @@
     {
       "tool": "proof-of-spec-check.py",
       "invocation": "python .tools/proof-of-spec-check.py <this instance> SC1-t1-AC1,SC1-t1-AC2",
-      "result": "run before any complete-flip decision; result recorded in the worker report. Status is NOT flipped to complete because SC1-t1-AC2 does not PASS-by-output."
+      "result": "run before the complete-flip; result recorded in the worker report. Both criteria PASS-by-output after the issuer's amendment 1 ruling on row MDPF_SECCLASS-W3-S1, so status IS flipped to complete."
     }
   ]
 }
