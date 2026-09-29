@@ -10,7 +10,9 @@ Run from the worktree root. Each criterion finishes inside 110 s.
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -26,6 +28,9 @@ _CONTRACT = _REPO / "org/standards/NFRA_OPLGTW_CONTRACT.json"
 _GATEWAY = _REPO / "infra/aws/ec2/opal-gateway"
 _INSTANCE = "i-07dccb1615503ac99"
 _TABLE = "gateway-access-state-table"
+# A2: the candidate's account ids live ONLY here, outside the repository, alongside the route
+# WALKTHROUGH_PROTOCOL.md section 2 already uses for real-data answers.
+_OFFREPO = Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "opal" / "og-salt" / "og_g1_candidate.json"
 
 _GUID = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 _PLACEHOLDER = re.compile(r"<|>|REDACT|PLACEHOLDER|TODO|TBD|FIXME|XXXX|ABSENT|NONE|N/A", re.I)
@@ -81,6 +86,15 @@ def _identity_from_evidence():
     instrument = field("instrument")
     quoted = "```" in text and re.search(r"INSTRUMENT OUTPUT, VERBATIM", text) is not None
     return tid, oid, instrument, quoted
+
+
+def _evidence_field(label):
+    """One `- **<label>:** <value>` line from the evidence file, or None."""
+    if not _EVIDENCE.exists():
+        return None
+    m = re.search(r"^\s*-\s*\*\*%s:\*\*[ 	]*(.+?)[ 	]*$" % re.escape(label),
+                  _EVIDENCE.read_text(encoding="utf-8"), re.M)
+    return (m.group(1).strip().strip("`").strip() or None) if m else None
 
 
 # --- AC1: the identity is recorded, as canonical GUIDs, with its instrument and that instrument's output
@@ -184,55 +198,61 @@ def ac2():
     return _out("AC2", True)
 
 
-# --- AC3: the candidate passes the committed operator command's own validation
+# --- AC3: the OFF-REPO candidate passes the operator command's own validation, and the committed
+#     redacted diff is provably the same diff as the unredacted one (AMENDMENT A2, ruling @8bf2bf37c6)
 def ac3():
+    """A2 replaced AC3's original form. The CLI has no `prepare` subcommand (row NFRA_OPLGTW-Z-S9), so the
+    probe imports the module and calls `validate_candidate` -- the function `activate` itself runs first.
+    AC6 wins over a verbatim diff (row NFRA_OPLGTW-Z-S10): the evidence file carries the diff with every
+    account identifier REDACTED plus the SHA-256 of the UNREDACTED diff, and this probe recomputes the
+    unredacted diff from the off-repo candidate and compares that SHA-256. No write of any kind."""
     if not _CANDIDATE.exists():
         return _out("AC3", False, "no grant candidate recorded at %s" % _CANDIDATE.relative_to(_REPO))
-    raw = json.loads(_CANDIDATE.read_text(encoding="utf-8"))
-    scope = raw.get("scope")
-    tid, oid, _i, _q = _identity_from_evidence()
+    print("validator: ops/schwab_entitlement_admin.py validate_candidate (the function `activate` runs first)")
+    print("note: the CLI exposes activate|revoke|deny-backfill -- there is NO `prepare` subcommand (row NFRA_OPLGTW-Z-S9)")
+    print("off-repo candidate (A2: the ids never enter the repo): %s" % _OFFREPO)
+    if not _OFFREPO.exists():
+        print("  state: ABSENT")
+        print("  denominator: 1 off-repo candidate required, 0 present")
+        return _out("AC3", False, "the off-repo candidate does not exist -- it is keyed by the controlled "
+                                  "identity's tid/oid, which does not exist yet (see AC1); nothing to validate")
+    recorded_sha = _evidence_field("unredacted_diff_sha256")
+    if not recorded_sha or _PLACEHOLDER.search(recorded_sha):
+        return _out("AC3", False, "the evidence file records no unredacted_diff_sha256 to compare against")
     sys.path.insert(0, str(_GATEWAY))
     try:
-        from app import data_entitlement as de
         from ops import schwab_entitlement_admin as adm
     except Exception as exc:  # noqa: BLE001
         return _out("AC3", False, "the operator command is not importable: %r" % (exc,))
     contract = json.loads(_CONTRACT.read_text(encoding="utf-8"))
-    print("validator: ops/schwab_entitlement_admin.py validate_candidate (the function `activate` itself calls)")
-    print("note: the CLI exposes activate|revoke|deny-backfill -- there is NO `prepare` subcommand; see row NFRA_OPLGTW-Z-S9")
-    # the scope half, measurable without an identity
-    accounts = scope.get("accounts", {})
-    redacted = [m for m, v in accounts.items() if any(_PLACEHOLDER.search(a) for a in v)]
-    probe_scope = dict(scope)
-    if redacted:
-        probe_scope["accounts"] = {m: (["PROBEACCT1"] if m in redacted else v) for m, v in accounts.items()}
-    scope_ok, scope_err = True, ""
+    cand = json.loads(_OFFREPO.read_text(encoding="utf-8"))
     try:
-        parsed = de.parse_scope(probe_scope)
-        cols = sum(len(v) for v in parsed.columns.values())
-        print("scope half: PARSES -- masters=%d datasets=%d dates=%s(%d) columns=%d operations=%d"
-              % (len(parsed.masters), len(parsed.datasets), parsed.date_mode, len(parsed.dates), cols,
-                 len(parsed.operations)))
+        _principal, scope = adm.validate_candidate(cand, contract)
     except Exception as exc:  # noqa: BLE001
-        scope_ok, scope_err = False, "%r" % (exc,)
-        print("scope half: REJECTED -- %s" % scope_err)
-    if redacted:
-        print("accounts dimension substituted for this parse in %d of %d master(s): the committed scope "
-              "redacts it under AC6 (see row NFRA_OPLGTW-Z-S10)" % (len(redacted), len(accounts)))
-    full = dict(probe_scope)
-    cand = {"tid": tid, "oid": oid, "email": None, "scope": full}
-    try:
-        adm.validate_candidate(cand, contract)
-        print("full candidate (identity + scope): ACCEPTED")
-        if redacted:
-            return _out("AC3", False, "the scope validates but the committed candidate redacts the accounts "
-                                      "dimension under AC6, so what was validated is not what a run would activate")
-        return _out("AC3", True)
-    except Exception as exc:  # noqa: BLE001
-        print("full candidate: REJECTED -- %r" % (exc,))
-        why = "scope rejected (%s)" % scope_err if not scope_ok else \
-              "no controlled identity to validate (tid/oid absent); the scope half parses"
-        return _out("AC3", False, why)
+        print("  validate_candidate: REJECTED -- %r" % (exc,))
+        return _out("AC3", False, "the off-repo candidate is refused by the command's own validation")
+    counts = {m: len(v) for m, v in sorted(scope.accounts.items())}
+    print("  validate_candidate: ACCEPTED -- masters=%d datasets=%d dates=%s(%d) operations=%d"
+          % (len(scope.masters), len(scope.datasets), scope.date_mode, len(scope.dates), len(scope.operations)))
+    print("  account COUNT per master (never an identifier): %s" % counts)
+    # the UNREDACTED diff, recomputed here and never printed
+    diff = adm.scope_diff(None, scope)
+    unredacted = adm.format_diff(diff)
+    got = hashlib.sha256(unredacted.encode("utf-8")).hexdigest()
+    print("  unredacted diff: %d bytes, sha256 recomputed (the text itself is never printed)" % len(unredacted))
+    print("  recorded sha256: %s" % recorded_sha)
+    print("  recomputed      : %s" % got)
+    if got.lower() != recorded_sha.strip().lower():
+        return _out("AC3", False, "the recomputed unredacted-diff sha256 does not match the one recorded -- "
+                                  "the committed redacted diff is not a redaction of THIS candidate")
+    # and the committed diff must actually be redacted
+    ev = _EVIDENCE.read_text(encoding="utf-8")
+    leaked = [m for m, ids in scope.accounts.items() for i in list(ids)[:200] if i in ev]
+    print("  committed evidence scanned for any account identifier of the candidate: %d leak(s)" % len(leaked))
+    if leaked:
+        return _out("AC3", False, "%d account identifier(s) from the candidate appear in the committed "
+                                  "evidence file" % len(leaked))
+    return _out("AC3", True)
 
 
 # --- AC4: the grant is ACTIVE in the live table, by a STRONG read of POLICY#<tid>#<oid>
@@ -383,7 +403,11 @@ def ac6():
         # GUIDs are blanked first: a tid/oid is recordable by this order, and its all-digit hex groups
         # would otherwise read as account numbers (the zero GUID sentinel is the exemplar).
         scan = re.sub(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}", "<guid>", text)
-        for m in re.finditer(r"(?<!\d)\d{8,}(?!\d)", scan):
+        # The boundary is WORD-class, not digit-class. A digit run glued to a hex letter is part of a
+        # commit-ish (a hash beginning with a hex letter carries a 9-digit tail), not an account number; a real
+        # account identifier stands alone as its own token. A digit-only lookaround misses that and
+        # fires on every commit hash the record cites -- measured on this file.
+        for m in re.finditer(r"(?<![0-9A-Za-z])\d{8,}(?![0-9A-Za-z])", scan):
             tok = m.group(0)
             if tok in masters_ok:
                 continue

@@ -1,14 +1,46 @@
 # TO-OG-g-1 result -- G-C evidence: the controlled identity and its synthetic grant
 
 **Order:** `NFRA_OPLGTW.TO-OG-g-1` | **Cell:** `OG-g-1` | **Assignee:** `0.7.0_AE_CloudOps~OG`
-**Branch:** `ae-og-g1` cut from `CLOUD` @`6d1a12f475` | **Terminal state:** **REFUSED-BLOCKED** (not `complete`)
-**Date:** 2026-09-29
+**Branch:** `ae-og-g1c` cut from `CLOUD` @`b274848977` | **Terminal state:** **REFUSED-BLOCKED** (not `complete`)
+**Order vintage:** amendments **A2** @`8bf2bf37c6` (CTO ruling, msg 26461) and **A3** @`b907d17f1c` (msg 26507), both in force
+**Date:** 2026-09-29 (first pass `0126a2360c`/`a55ef96d85`, drained; this pass carries A2 + A3)
 
 ## Outcome in one line
 
-The grant half is derived, bounded, validated and recorded; **the identity half is blocked on a
-tenant-administrator act that this order forbids me to improvise**, so `G-C`'s evidence is incomplete by
-construction and `<status>` stays `pending`. No live write was made, so no deploy-ledger entry was opened.
+The grant half is derived, bounded, validated and **now fully quantified under A3**; **the identity half is
+blocked on a tenant-administrator act that this order forbids me to improvise**, so `G-C`'s evidence is
+incomplete by construction and `<status>` stays `pending`. No live write was made, so no deploy-ledger entry was
+opened. **All four failing criteria now trace to ONE cause** -- the absent identity -- where the first pass had
+three independent causes; amendments A2 and A3 retired the other two.
+
+## Under amendments A2 and A3
+
+**A3 granted the read I asked for** (msg 26505 -> 26507) and it was taken exactly as bounded: `GetObject` by the
+pinned VersionId on the 5 objects `SEALED_EXPECTED_V2.json` records, nothing else, decoded with pyarrow, counts
+only. Instrument `probes/og_g1_accounts.py`; 5 of 5 objects read.
+
+**The grant's account COUNT, per master: `08242234` -> 7460; `08335338` -> 7548.**
+
+Three things that measurement settled, none of which was knowable before it:
+
+1. **The count is not in the seal.** `SEALED_EXPECTED_V2.json` carries zero account-level fields -- it pins 5
+   objects. That is what made A3 necessary, and flagging it before the amendment was cut saved a round-trip.
+2. **The physical column is `account_id`, not the contract's `account_ref`.** The parquet has no `account_ref`:
+   it is the Gateway's keyed HMAC over the raw id and exists only in responses
+   (`app/integrations/schwab/datasets.json:12`; `app/account_ref.py:3-8`). The first run failed loudly on the
+   missing column rather than counting the wrong one. The HMAC is injective per master, so the COUNT is the same
+   under either name.
+3. **The sealed set is EVERY account in both masters, and the seal forces that.** 15,008 in all. The order asks
+   for accounts to "stay a bounded subset"; they cannot, because RQ2-2 .. RQ2-6 are aggregates whose hashes break
+   under any subset. Ruling (1) is the only value under which the sealed answers verify. The cost is that the
+   account dimension yields **no** refusal discriminator -- every refusal `OG-v-7` grades must come from the
+   column or date dimension, which is what the recorded pair does. Filed as row `NFRA_OPLGTW-Z-S14`.
+
+Feasibility, measured rather than assumed: ids are uniformly 10 characters, so `scope.accounts` serialises to
+about **195,102 bytes -- 47.6% of DynamoDB's 400 KB item limit**. The ruled grant fits in one item.
+
+`app/account_ref.py:3` also **confirms row `Z-S10` on the code** rather than by inference: *"Accounts are raw
+Schwab ids INSIDE the Gateway only: the data_entitlement grant's `scope.accounts` and the source rows."*
 
 ## Criterion verdicts
 
@@ -16,7 +48,7 @@ construction and `<status>` stays `pending`. No live write was made, so no deplo
 |---|---|---|
 | `GCG1-AC1` | **FAIL** | 4 of 4 identity fields located in the evidence file; `controlled_oid` and `controlled_upn` are explicit ABSENT markers, not values. `controlled_tid` = `6810043e-d171-4adc-9975-068b35e179da`, canonical GUID, verified. The probe refused the ABSENT marker as a placeholder, which is the behaviour the criterion asks for |
 | `GCG1-AC2` | **FAIL** | deployed rosters read live off `i-07dccb1615503ac99` with the positive control returning: 3 entries across 2 present rosters (`MASTER_ADMIN_EMAILS` 1, `WRITE_CAPABLE_EMAILS` 2), `MASTER_ADMIN_PRINCIPALS` and `WRITE_CAPABLE_PRINCIPALS` both ABSENT. The comparison cannot be made against an absent identity -- an absent identity is not a non-privileged one |
-| `GCG1-AC3` | **FAIL** | the scope half PARSES under the command's own `de.parse_scope`: masters 2, datasets 3, dates `fixed_dates`(2), columns 15, operations 4. The full candidate is refused at `make_principal` (`CandidateRejected('empty or unknown identity: not an Entra GUID')`) because there is no identity. Two further defects in the criterion itself: rows `NFRA_OPLGTW-Z-S9` and `-S10` |
+| `GCG1-AC3` | **FAIL** | re-implemented against **A2**'s mechanism: import `ops/schwab_entitlement_admin.py`, call `validate_candidate` on the OFF-REPO candidate, recompute the unredacted scope diff and compare its SHA-256 against the one recorded, then scan the committed evidence for any account identifier of that candidate. The off-repo candidate is ABSENT (denominator: 1 required, 0 present) because it is keyed by the `tid`/`oid` that does not exist. **One cause now, not two** -- A2 retired the `prepare` defect and the AC3/AC6 conflict |
 | `GCG1-AC4` | **FAIL** | `POLICY#<tid>#<oid>` is not constructible, and this order performed no live write. The strong-read instrument was proven able to see a present record by a positive control against the one existing principal (3 items, `principal_profile` `status active`), so this FAIL is a true absence and not a blind reader |
 | `GCG1-AC5` | **PASS** | 7 of 7 sealed questions inside the grant, read from `SEALED_EXPECTED_V2.json` at HEAD (masters, dataset and business dates each checked per question); A7 step 4 no-date asks 2 of 2; A7 step 3 `download_filtered` 1 of 1 |
 | `GCG1-AC6` | **PASS** | 4 files scanned, 0 with a finding |
@@ -77,6 +109,20 @@ independently of the identity**, so it needs disposition even after the identity
   only `Z-`, `W<n>-` or `C-` before `S<k>`. Filed with the order's literal ids, the commit would have been refused and
   the findings would have read as unfiled. These rows use the admitted seat-row shape `NFRA_OPLGTW-Z-S9..S12`,
   continuing the existing `Z-S1..Z-S8` series; 0 of the channel's 191 rows carry a `-OG-` segment.
+
+**All four are now DISPOSITIONED** by `2.0.0_SA_COO~O`'s row `NFRA_OPLGTW-Z-S13` (2026-09-29T06:20Z,
+`DISMISSED_WITH_REASON`, "Disarmed by amendment, as disarm_owner"): `-S9` and `-S12` folded into A2; `-S10`
+ruled by `1.0.0_SA_CTO~O` @`8bf2bf37c6` with AC6 winning; `-S11` fixed by amending **`OG-v-7`'s `OGV7-AC6` to
+the grant's dates** @`ce520eb13e` -- one of the two routes the row named. Nothing from the first pass is left open.
+
+- **`-S14`** OBSERVATION / INERT (new this pass) -- measured under A3: the sealed account set is **every** account
+  in both masters (7460 + 7548 = 15,008), so the grant cannot be the "bounded subset" of accounts the order asks
+  for -- and the seal **forces** that, because RQ2-2 .. RQ2-6 are aggregates whose hashes break under any account
+  subset. Ruling (1) is therefore the only value that lets the sealed answers verify. The cost, stated so
+  `OG-v-7`'s grader does not hunt for something that cannot exist: **the account dimension yields no refusal
+  discriminator**; every refusal must come from the column or date dimension. Checked that no A-row depends on an
+  account-scoped refusal (A6 step 4 is a column refusal; A6 step 3 is about not revealing other principals; A10 is
+  about download links).
 
 ## Compiler tools
 
