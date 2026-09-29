@@ -47,8 +47,11 @@
 
 ## 4. Round-6 inputs (the enrichment list is yours) -- seen on the walk, outside round 5's rectangle
 
-1. **INTU's served `/timeline` answered HTTP 500.** The band held a loading skeleton, not a designed error state (shot
-   054). The endpoint's owner has a served defect, and the page's error branch is unproven.
+1. **CORRECTED (~22:4xZ, superseding the item that stood here):** INTU's served `/timeline` answered HTTP 500 on the walk.
+   The claim that "the band held a loading skeleton, not a designed error state" was WRONG. Shot 054 caught the panel
+   mid-load. Shot 059, on the same name, shows the estate's designed error state: "The timeline could not be loaded. This
+   means the call itself failed ...", with "Try again". The real page defect is its visible machine cause line: "Cause: API
+   request failed: 500 Internal Server Error -". Round 6's u-1 is recast onto that line (issuance @08cc081332).
 2. **SAP GY's served research-team Base case reads "unit $ as written in the team's pack"** for a EUR-quoted name. It is
    printed as served; the research team's pack decides whether that unit is right.
 3. **History view, name picked:** the muted lines' point dots stay full-strength, so unpicked series still read as

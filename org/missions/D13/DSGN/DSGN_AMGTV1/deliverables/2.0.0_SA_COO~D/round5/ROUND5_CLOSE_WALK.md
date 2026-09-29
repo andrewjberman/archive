@@ -72,9 +72,11 @@ prose and not a cite line.
 
 ## Seen on the walk, not in round 5's rectangle (inputs for the round-5 analysis)
 
-1. **INTU's mention timeline answered HTTP 500**, served `/timeline`, on the INTU steps. The band showed a loading skeleton
-   in place of the timeline (shot 054) rather than a designed error state. Two questions follow: the endpoint's owner (a
-   served-API defect), and whether the page's error branch renders.
+1. **CORRECTED (~22:4xZ):** INTU's mention timeline answered HTTP 500, served `/timeline`, on the INTU steps. Shot 054
+   caught the panel MID-LOAD, not failing. Shot 059 shows the designed error state rendering ("The timeline could not be
+   loaded ... Try again"). The residual defect is the visible machine cause "Cause: API request failed: 500 Internal Server
+   Error -". The first reading here, a loading skeleton in place of an error state, came from one mid-load screenshot and
+   was wrong.
 2. **SAP GY's research-team Base case reads "unit $ as written in the team's pack"** for a EUR-quoted name (shot 096), with
    figures 144.28-237.58. They are printed as served; whether the pack's unit is right is the research team's question.
 3. **In the history view with a name picked, the muted lines' point dots stay full-strength white** (shot 007), so the
