@@ -6,7 +6,7 @@ PRD ADDENDUM v0.19 rulings 2-4 (Andrew-direct call 3): the day-t return of an ac
 where v_i is the holding's end-of-day market value (a cusip's lots summed), r_i = price(t) / price(t-1) - 1 on a
 positive price both days, cash is the declared cash balance with a zero return, and a holding without a positive price
 on both days is EXCLUDED (the account row carries excluded_count). No inflow/outflow term.
-Sources: the declaration data/assets/scripts/gold/irpt_holdings_performance/sources.json (49financial entry: bucket,
+Sources: the declaration data/assets/scripts/gold/irpt_holdings_performance/sources.json (the entry whose positions_prefix is the 49F Schwab master: bucket,
 positions prefix, balance prefix, cash columns); the gold at lib/opal_naming address("irpt", "49financial", "gold",
 "holdings_performance_daily", "date=<day>") with columns account_id, business_date, daily_return, account_value,
 excluded_count, excluded_weight.
@@ -49,7 +49,15 @@ if not DECL.is_file():
     print("FAIL: no source declaration at %s" % DECL.relative_to(ROOT))
     ok = False
 else:
-    src = json.loads(DECL.read_text(encoding="utf-8"))["49financial"]
+    # The 49F entry is found by its declared SOURCE (PRD v0.19 ruling 1: schwab/08335338/silver/dim_position), never
+    # by a typed firm key -- the naming gate refuses a bare firm token in an authored JSON (row S191); the producer
+    # derives the firm from the registry.
+    entries = [v for k, v in json.loads(DECL.read_text(encoding="utf-8")).items()
+               if isinstance(v, dict) and not k.startswith("_")
+               and v.get("positions_prefix") == "schwab/08335338/silver/dim_position/"]
+    if len(entries) != 1:
+        raise SystemExit("FAIL: %d declaration entries name the 49F Schwab positions source (want exactly 1)" % len(entries))
+    src = entries[0]
     prev = str(trading_calendar.prev_trading_day(pd.Timestamp(DAY).date()))
     pos = {d: parquet(src["bucket"], "%sdate=%s/" % (src["positions_prefix"], d)) for d in (prev, DAY)}
     bal = parquet(src["bucket"], "%sdate=%s/" % (src["balance_prefix"], prev))
