@@ -1,0 +1,201 @@
+# FWD_EVIDENCE_ROUND13 -- AMGT_CORPUS nineteen-outcome evidence pass
+
+PRD org/missions/D5/AMGT/AMGT_CORPUS/prd/AMGT_CORPUS_PRD.md@9e326e11c1e0. Run at HEAD 46d28c6c4c, 2026-09-29T12:50:00Z. Worker 0.9.0_WK_AMGT_CORPUS~1, order CRPS-o-1. State is the worker's measurement of the clause as written, not a grade.
+
+met 10 (FWD-1, FWD-2, FWD-3, FWD-5, FWD-6, FWD-7, FWD-8, FWD-13, FWD-14, FWD-19); unmet 6 (FWD-10, FWD-11, FWD-12, FWD-15, FWD-16, FWD-18); unmeasurable 3 (FWD-4, FWD-9, FWD-17).
+
+| id | state | denominator | owner |
+|---|---|---|---|
+| FWD-1 | met | 356 files scanned in the library, 356 stored bronze objects, 356 matched byte for byte, 0 mismatch (printed) | - |
+| FWD-2 | met | 356 files: 355 typed silver rows (311 placed on a period, 44 unplaced each with the printed reason) + 1 named content duplicate (Copa); 94 securities, 66 with two or more dated reports | - |
+| FWD-3 | met | 95 folders read fresh from the library (resolved 95, unresolved-with-reason 0, ambiguous-with-candidates 0) | - |
+| FWD-4 | unmeasurable | 0 of 95 backlog folders are UNRESOLVED in the universe (and 0 of 95 resolved-absent): the fence's population is empty | AMGT_CORPUS |
+| FWD-5 | met | 14257 citations checked across the continuation store, 14257 resolved, 0 unresolved | - |
+| FWD-6 | met | 4 of 355 typed reports for the one business type printed; a per-term count behind each of the 8 KPIs | - |
+| FWD-7 | met | 158 workbooks read, 120 carrying mnemonics; core counted out of 120, Opal Case Assumptions 120 of 158 | - |
+| FWD-8 | met | 5 artifacts returned by one call (5 present, 0 absent), each with a content hash; difference arm: 2 changed of 5, equal to the expected set | - |
+| FWD-9 | unmeasurable | 56 files scanned, 51 write-like calls, 0 reach the library, 0 unresolved (census arm); negative-control arm 0 runs | AMGT_CORPUS |
+| FWD-10 | unmet | 95 dossiers (46 with pillars, 159 pillars; 49 ABSENT with a reason); portal files consuming pillars: 0 | AMGT_RESAPP |
+| FWD-11 | unmet | 95 dossiers: management cited 47, ABSENT with a reason 48; portal Exec Management files consuming it: 0 | AMGT_RESAPP |
+| FWD-12 | unmet | 95 dossiers, 285 case slots (102 served with a body and citation, 183 ABSENT with a reason, 0 heading-only); 9567 model rows (3942 figure, 5625 ABSENT with a reason, 0 neither) | AMGT_RESAPP |
+| FWD-13 | met | 95 dossiers, 2375 fields scanned (1046 cited, 1329 ABSENT with a reason, 0 neither); negative control 1 of 1 planted uncitable field rendered ABSENT | - |
+| FWD-14 | met | 95 folders: resolved 83 + ambiguous 0 + empty-or-workbook-only 12 = 95; 4 named-folder lookups, 4 answered (dossier URI or a printed reason) | - |
+| FWD-15 | unmet | 95 dossiers: fund of record cited 40 / ABSENT 55; last stated position cited 47 / ABSENT 48; portal posture-line files consuming either: 0 | AMGT_RESAPP |
+| FWD-16 | unmet | 30 PDF-only folders (24 with the full fold, 6 ABSENT with a reason); 53 docx folders (22 / 23 / 10 pillars / management / cases); 12 with neither | AMGT_RESAPP |
+| FWD-17 | unmeasurable | 95 names rebuilt against unchanged inputs: 95 wrote 0 and said so, 0 put attempts; canonical store 95 objects (one per security), legacy store 846 objects | AMGT_CORPUS |
+| FWD-18 | unmet | 159 pillars (159 with terms); 2350 KPI entries over 94 dossiers (2350 with terms); page and feed consumers of terms: 0 | AMGT_RESAPP |
+| FWD-19 | met | 95 folders read fresh: 83 + 12 + 0 = 95; 12 never-prose folders named with a reason; 356 of 356 files stored and matched | - |
+
+## FWD-1 -- met
+
+- fence: EXERCISED -- for every file the library's own folder list resolves to, the stored object is re-opened and matches the file on the synced drive byte for byte, and the count of objects equals the count of files scanned, both printed
+- instrument: python -m lib.research.corpus.ingest --verify ; python -m lib.research.corpus.library --census
+- output: ingest --verify: objects 356 files 356 match 356 mismatch 0. library --census: folders 95 files 356 (.docx 73, .html 1, .pdf 186, .png 17, .xlsx 79), placeholders 0 of 356.
+- denominator: 356 files scanned in the library, 356 stored bronze objects, 356 matched byte for byte, 0 mismatch (printed)
+- notes: Object count equals file count, both printed. Round 7 read 356 of 356 too; HEAD holds the same 95 folders and 356 files.
+
+## FWD-2 -- met
+
+- fence: EXERCISED -- a query by security key returns that name's reports in period order; and the run prints, as a denominator, how many files resolved, how many did not, and the reason for each that did not
+- instrument: python -m lib.research.corpus.typed --census ; python -m lib.research.corpus.typed --reports-for-first-multi ; python -m lib.research.corpus.extract --duplicates ; PYTHONPATH=. python .scratch/o1/p_typed.py (read-only probe over store.silver_latest() and typed.reports_for() for every security; scratch, uncommitted)
+- output: typed --census: silver_rows 355 of 356 bronze; k5 period carried 311 of 355 by filename 269 header 34 content 8 absent 44. probe: period_absent 44, reasons {'no filename, header or content period token matched': 44}, absent_without_reason 0, security_key_missing 0, securities 94; backlog files 356 = resolved_files 356 + unresolved_files 0. reports_for over 94 securities: multi_dated 66, period_order_not_ok []. --reports-for-first-multi: security_key 8306_JP_Equity reports 2 dated 2, period_order_ok True. extract --duplicates: objects 356 report_ids 355 duplicates 1 (Copa Holdings - 2025 Investor Day Presentation (1).pdf / Copa Holdings - 2025 Investor Day Presentation.pdf).
+- denominator: 356 files: 355 typed silver rows (311 placed on a period, 44 unplaced each with the printed reason) + 1 named content duplicate (Copa); 94 securities, 66 with two or more dated reports
+- notes: The per-file reason for an unplaced period lives on each silver row (probe); the unresolved-file limb prints 0 folders (0 files) today. The --write run's own 'backlog files ... unresolved_files' line was reproduced by the probe from the fresh coverage read, not by a --write run (bound).
+
+## FWD-3 -- met
+
+- fence: EXERCISED -- the folder list is read fresh from the library (never a transcribed list), each folder is resolved through the identity layer to a security key, and the output carries three counts that sum to the folder count: resolved, unresolved-with-reason, and ambiguous-with-candidates
+- instrument: PYTHONPATH=. python .scratch/o1/p_cov.py (lib.research.corpus.backlog.coverage(library.library_root()) called as a library: fresh folder read, no S3 write) ; python -m lib.research.corpus.backlog --read-latest
+- output: coverage(): folders_read 95 resolved 95 unresolved 0 ambiguous 0 (95 + 0 + 0 = 95); crosswalk_loaded_from s3://opal-data-harvest/crosswalk/v1/2026-09-25.json; records 95. --read-latest: 'folders_read 95 = resolved 95 + unresolved 0 + ambiguous 0' 'sum_check OK'.
+- denominator: 95 folders read fresh from the library (resolved 95, unresolved-with-reason 0, ambiguous-with-candidates 0)
+- notes: Applied the FWD-19 ADDENDUM: the folder count is a reading (95 today), not the 93 of the original text. The unresolved and ambiguous limbs are populated by zero, a value not a gap.
+
+## FWD-4 -- unmeasurable
+
+- fence: EXERCISED -- for one backlog name the universe carries UNRESOLVED, a single act produces the induction request: it PRINTS what the induction WILL add before anything is added, REFUSES a name whose identity is ambiguous, and is driven end to end with a REFUSING TRANSPORT and the poison POSITIVE-CONTROLLED, so the run COULD NOT have reached the network rather than merely having not
+- instrument: PYTHONPATH=. python .scratch/o1/p_ind.py (lib.research.corpus.induction_request.run() called as a library with DELIVERABLES_DIR redirected to .scratch/o1/ind_out; the CLI --pick writes under the repo deliverables path)
+- output: backlog_folders 95; resolved_absent 0 of 95; unresolved_in_universe 0 of 95; population UNRESOLVED; picked NONE population is empty; vendor_calls 0; s3_writes 0; registrations_json_changed False; poison_positive_control raised 4 of 4; rc 0.
+- denominator: 0 of 95 backlog folders are UNRESOLVED in the universe (and 0 of 95 resolved-absent): the fence's population is empty
+- reason: The clause's subject, one backlog name the universe carries UNRESOLVED, no longer exists: all 95 folders resolve (the scripted producer inducted the 60), so the act can only print 'picked NONE'. The WILL-ADD and REFUSES-ambiguous limbs cannot be observed on a served name; the transport limb (refusing transport, poison positive-controlled 4 of 4, 0 vendor calls, 0 S3 writes) is measured.
+- exercising_act: A seat drives induction_request.run(root=<scratch library root>) against a SCRATCH copy of the library holding two planted folders: one whose name resolves to nothing in the crosswalk (the unresolved arm, one parseable Ticker: line in its report) and one whose reports carry two different Ticker: values (the ambiguous arm). It runs under the existing refusing transport with the 4-site poison positive control. Read: the WILL-ADD block printed before anything is added, the ambiguous folder REFUSED, vendor_calls 0, s3_writes 0, registrations_json_changed False. No store or crosswalk write; the library itself is untouched.
+- owner: AMGT_CORPUS
+- notes: Round 5 graded this on the committed 2026-09-23 exercise (population then 60 of 93); the population emptied by design. No grade carried from either.
+
+## FWD-5 -- met
+
+- fence: EXERCISED -- for one covered name, the continuation artifact is produced and every field in it resolves to a passage in a named report; a field the reports do not state is ABSENT, never inferred and never defaulted
+- instrument: python -m lib.research.corpus.continuation --show-first-covered ; python -m lib.research.corpus.continuation --verify-citations
+- output: show-first-covered: security_key AZN_LN_Equity; fund_of_record IDVZ report_key .../AZN Q2 2026 Earnings Update.docx locator 2; last_stated_position {"fund": "IDVZ", "size_pct": "1.75", "text": "MAINTAIN 1.75% POSITION IN IDVZ"} same report locator 2; thesis_pillars Size + Growth / Execution record / Strong pipeline / EM growth driver / Rare disease is high-margin, each with report_key .../ASTRAZENECA Research Pack 2026 06 17_v1.pdf locator 1. verify-citations: citations_checked 14257 resolved 14257 unresolved 0.
+- denominator: 14257 citations checked across the continuation store, 14257 resolved, 0 unresolved
+- notes: Every printed field names a report and a locator; a field the reports do not state is ABSENT (the dossier and continuation carry absent-with-reason values).
+
+## FWD-6 -- met
+
+- fence: EXERCISED -- the template for one business type is produced from the corpus and prints the denominator it was measured over (how many of that type's reports, of how many total) and the per-term counts behind each KPI it lists
+- instrument: python -m lib.research.corpus.sector_template --show-first-graded
+- output: business_type consumer-cyclicals+consumer-services reports 4 of 355; kpi FCF count 4 of 4; kpi dividend count 3 of 4; kpi net debt count 3 of 4; kpi EBITDA count 2 of 4; kpi GMV count 2 of 4; kpi consensus count 2 of 4; kpi production count 2 of 4; kpi guidance count 1 of 4; kpis_total 8 sections_total 78.
+- denominator: 4 of 355 typed reports for the one business type printed; a per-term count behind each of the 8 KPIs
+- notes: The CLI prints the first graded type only, which is what the clause asks (one business type).
+
+## FWD-7 -- met
+
+- fence: EXERCISED -- the typecast artifact lists the shared mnemonic core, the extended ratio set and the Opal Case Assumptions block, each with the count of workbooks carrying it out of the workbooks read
+- instrument: python -m lib.research.corpus.typecast --read-latest ; PYTHONPATH=. python .scratch/o1/p_tc.py (read-only probe of the stored extended_ratio_set counts)
+- output: workbooks_read 158; with_mnemonics 120; core: 96 members each printed 'core <MNEMONIC> n of 120' (first: ARD_GOODWLL 108 of 120); extended 6 members with counts BEST_FREE_CASH_FLOW 46, CF_DECR_CAP_STOCK 56, CF_INCR_CAP_STOCK 56, NET_INC 46, P_PRICE_HIGH 46, P_PRICE_LOW 46 (probe; the CLI prints only 'extended 6 members'); opal_case_assumptions 120 of 158; factset mapped 8 unmapped 33.
+- denominator: 158 workbooks read, 120 carrying mnemonics; core counted out of 120, Opal Case Assumptions 120 of 158
+- notes: Extended-set per-member counts come from the probe over the stored gold object; the CLI's own line carries the member count only.
+
+## FWD-8 -- met
+
+- fence: EXERCISED -- one call by security key returns the prior reports, the continuation artifact, the sector template and the typecast, each with a content hash; a second call after a new report lands returns a changed hash for exactly the artifact that changed and unchanged hashes for the rest
+- instrument: python -m lib.research.corpus.substrate --first-covered ; python -m lib.research.corpus.substrate --difference-arm
+- output: --first-covered: security_key AZN_LN_Equity; prior_reports 12 90d2a65b31f979... ; continuation f9d92be70dea8ada... ; sector_template 1e3cd279504c1e91... ; fund_form 0455da2da7d6490... ; typecast d9d828e341cb75c7... each 'current True'; members 5 present 5 absent 0; call_count 1. --difference-arm: prior_reports changed True, continuation changed True, sector_template changed False, fund_form changed False, typecast changed False; changed_set ['continuation', 'prior_reports'] expected_changed_set ['continuation', 'prior_reports']; difference_ok True.
+- denominator: 5 artifacts returned by one call (5 present, 0 absent), each with a content hash; difference arm: 2 changed of 5, equal to the expected set
+- notes: The second call after a new report lands is the module's own difference arm (a planted new report against the comparator), not a live landing.
+
+## FWD-9 -- unmeasurable
+
+- fence: EXERCISED -- a deliberate negative control runs the ingestion against a read-only copy of the library and completes; and a census of the project's own code prints zero write, move, delete or open-for-write calls against any path under the library root, with the denominator of files scanned
+- instrument: python -m lib.research.corpus.readonly_proof --code-census (the --negative-control arm was NOT run: it writes a 308 MB ACL-restricted copy to system temp, outside the read-only bound)
+- output: code-census (rc 0): files_scanned 56; write_like_calls 51; library_write_calls 0; positive_control flagged 1; positive_control_test_file flagged 1; test_sites 32 tmp_fixture_sites 32 test_unknown_sites 0; tristate library 0 unresolved 0 clear 51 write_like_calls 51. negative-control: not run under the bound.
+- denominator: 56 files scanned, 51 write-like calls, 0 reach the library, 0 unresolved (census arm); negative-control arm 0 runs
+- reason: The clause is a conjunction. The census arm reads clear (0 of 51 write-like calls reach the library, 0 unresolved, positive control flagged). The negative-control arm, which runs the ingestion against a read-only copy of the library, has one instrument, --negative-control, and it writes a temp copy of the library; the order bounds this cell to read-only instruments, so the arm is unmeasured here, not failed.
+- exercising_act: A seat runs python -m lib.research.corpus.readonly_proof --negative-control (ACL-denied copy of the library in system temp, ingest --write against it expecting stored 356, put_performed 0, existed 356, write and overwrite probes PermissionError), then removes the temp copy; paired with the census arm already read clear.
+- owner: AMGT_CORPUS
+- notes: --code-census itself left two positive-control files in system temp (amgt_corpus_census_*), reported by the tool as left_for_operator_cleanup; see row AMGT_CORPUS-Z-W1-S15. The five unresolved sites round 7 read (induction_run, key_glob_census) now resolve as outside-library: unresolved 0.
+
+## FWD-10 -- unmet
+
+- fence: EXERCISED -- IMB_LN_Equity renders the pack's pillars as bold lead plus paragraph, each openable to the report and the passage it came from, and each marked as the team's rather than generated
+- instrument: PYTHONPATH=. python .scratch/o1/p_dump.py then p_an.py (read_dossier() for all 95 securities, census of fields.thesis_pillars; scratch, uncommitted) ; portal read: git -C portal grep at DEV a93071b833 ; git grep at HEAD over lib/ and infra/
+- output: Dossier plane: 95 dossiers read from amgt/harvest/gold/research_dossier/ (95 objects, method amgt-corpus-dossier/4). thesis_pillars: 46 names carry a list, 49 read ABSENT with a reason; 159 pillars, each a lead phrase (pillar) + citation {report_key, locator, passage, extract_key} + terms, and a paragraph (text) in 158 of 159 (ML_FP_Equity's one pillar has text ''). IMB_LN_Equity: 6 pillars, first 'Cash-return machine', citation locator 11 in the Research Pack 2026 07 17 docx. AMD_US_Equity: {absent: 'no class A report for this security', value: null}. No per-pillar 'team' flag field: the artifact is research_dossier. Served-plane measurement: git grep at HEAD over lib/ and infra/ finds ONE reader of the dossier, lib/research/api/scoped_amgt.py _team_cases (cases only); no reader of fields.thesis_pillars, management, fund_of_record, last_stated_position, model_rows or terms. Portal at local DEV a93071b833 (origin/DEV 50eb1d563b carries 0 team_cases hits; positive control 'thesis' 98 files): only model.team_cases is consumed (ThesisCards.tsx, ModelTab.tsx); 0 files reference thesis_pillars, fund_of_record, last_stated, team_pillars or typecast rows.
+- denominator: 95 dossiers (46 with pillars, 159 pillars; 49 ABSENT with a reason); portal files consuming pillars: 0
+- exercising_act: A seat adds a served reader over dossier.read_dossier that carries fields.thesis_pillars (lead, text, citation, terms) with a team-authored marker on the /thesis payload beside _team_cases, redeploys the served API, then reads IMB_LN_Equity through the served route (pillars 6, each with report_key, locator, passage) and AMD_US_Equity (ABSENT with its reason); the DSGN_AMGTV1 page walk on IMB_LN_Equity then reads bold lead + paragraph and the opened passage from the DOM.
+- owner: AMGT_RESAPP
+- notes: The substrate half this project owns (PRD ADDENDUM, FWD-10) reads MET: IMB positive arm, AMD negative arm, 159 of 159 pillars with lead, citation and terms (158 of 159 with paragraph text; row AMGT_CORPUS-Z-W1-S16). The clause as written is the render (bold lead plus paragraph, openable, marked the team's); nothing serves the pillars to a page and no page renders them, so the whole fence is not met (CORRECTION under FWD-10: graded on the whole fence). Applied the FWD-10 ADDENDUM and CORRECTION.
+
+## FWD-11 -- unmet
+
+- fence: EXERCISED -- the passage renders labelled as the team's, BESIDE the filing roster, with the roster unchanged; and a name whose pack carries none reads ABSENT with its reason
+- instrument: PYTHONPATH=. python .scratch/o1/p_an.py (census of fields.management over the 95 read_dossier() documents) ; portal and served-reader reads as FWD-10
+- output: fields.management over 95 dossiers: cited 47, ABSENT with a reason 48 (47 + 48 = 95). IMB_LN_Equity: value 'MANAGEMENT Lukas Paravicini, CEO since 1 October 2025, ...' citation locator 107 in the Research Pack 2026 07 17 docx. AMD_US_Equity: {absent: 'no MANAGEMENT section in class A missing or class B missing', value: null}. Served-plane measurement: git grep at HEAD over lib/ and infra/ finds ONE reader of the dossier, lib/research/api/scoped_amgt.py _team_cases (cases only); no reader of fields.thesis_pillars, management, fund_of_record, last_stated_position, model_rows or terms. Portal at local DEV a93071b833 (origin/DEV 50eb1d563b carries 0 team_cases hits; positive control 'thesis' 98 files): only model.team_cases is consumed (ThesisCards.tsx, ModelTab.tsx); 0 files reference thesis_pillars, fund_of_record, last_stated, team_pillars or typecast rows.
+- denominator: 95 dossiers: management cited 47, ABSENT with a reason 48; portal Exec Management files consuming it: 0
+- exercising_act: A seat appends the missing AMGT_RESAPP outcome (the team's passage beside the roster, roster unchanged), adds a served reader carrying fields.management with its citation to the payload read_management builds, redeploys, then reads IMB_LN_Equity and AMD_US_Equity through the served route with the roster list byte-compared with and without the passage; the DSGN_AMGTV1 page walk reads the labelled passage beside the roster.
+- owner: AMGT_RESAPP
+- notes: Substrate half MET (PRD ADDENDUM under FWD-11: served and cited for IMB, AMD ABSENT with a reason). The clause is the passage beside the filing roster with the roster unchanged on Exec Management; no served reader or page carries it. The ADDENDUM records that AMGT_RESAPP's endpoint has no outcome for it yet, so the act below needs that outcome appended first.
+
+## FWD-12 -- unmet
+
+- fence: EXERCISED -- rows come from the typecast and the template for that business type; every row carries a figure or reads ABSENT with a reason; the team's Upside/Base/Downside cases render as the team's, cited, in the slot that is ABSENT today
+- instrument: python -m lib.research.corpus.dossier --case-census ; python -m lib.research.corpus.dossier --case-positional-census ; python -m lib.research.corpus.dossier --pick-census ; python -m lib.research.corpus.dossier --model-rows-probe --key IMB_LN_Equity ; PYTHONPATH=. python .scratch/o1/p_served.py (scoped_amgt._team_cases called as a library) ; p_an.py model_rows census
+- output: case_census: names 95 slots 285 body 102 heading_only 0 absent 183 sum 285 ordering_held 34 ordering_violated 0 ordering_na 61 unit_carried 11 currency_set 5 currency_null 29. positional census: names 6 placed 6 ambiguous 0 no_positions 0 sum 6. pick-census: dossier_pick names 95 current_method_available 95 stale_pick 0. model_rows over 95 dossiers: rows 9567 (typecast 9120 + sector_template 447), figure 3942, ABSENT with a reason 5625, neither 0; IMB model-rows-probe: model_rows 96 with_value 40 absent 56 constant_reasons 0. Served reader as library: scoped_amgt._team_cases AZN_LN_Equity base/upside/downside SERVED (cited tables with the unit as written); IMB_LN_Equity and AMD_US_Equity all three ABSENT with the dossier's own reason. Portal DEV a93071b833: ModelTab.tsx renders model.team_cases.base; no reader in lib/ or infra/ carries model_rows and no portal file reads typecast rows.
+- denominator: 95 dossiers, 285 case slots (102 served with a body and citation, 183 ABSENT with a reason, 0 heading-only); 9567 model rows (3942 figure, 5625 ABSENT with a reason, 0 neither)
+- exercising_act: A seat redeploys the served API so scoped_amgt reads amgt/harvest/gold/research_dossier/ (the canonical 95), extends the /thesis payload with the typecast and sector-template model_rows from the dossier (figure or ABSENT with a reason per row), then reads AZN_LN_Equity, IMB_LN_Equity and AMD_US_Equity through the deployed route (team_cases served with unit and citation for AZN, ABSENT with reason for IMB and AMD, rows carried) and a DSGN_AMGTV1 page walk reads all three cases and the row list on the Model tab.
+- owner: AMGT_RESAPP
+- notes: Round 7 read the case values as heading-only (102 of 102); at HEAD 0 of 102 are heading-only, every served slot carries the team's table with its citation, and the positional read placed 6 of 6. The dossier plane is met on every limb. The clause is the Model tab: the served reader carries the team's cases (library call) but not the typecast/template rows, and the page renders the Base case only (ModelTab.tsx). Per the order the deployed Lambda reads the legacy prefix amgt/harvest/gold/research-dossier/ (846 objects; methods /1 to /4 in the first 400 read) until its own redeploy; this cell did not call the Lambda, so the deployed state is not measured.
+
+## FWD-13 -- met
+
+- fence: EXERCISED -- a census over the dossier's fields prints zero fields that are neither cited nor reason-bearing, with the denominator of fields scanned; and a negative control shows a deliberately uncitable field rendering ABSENT rather than blank or inferred
+- instrument: python -m lib.research.corpus.dossier --census
+- output: dossiers 95 fields_scanned 2375 cited 1046 absent_with_reason 1329 neither 0; negative_control absent_with_reason 1.
+- denominator: 95 dossiers, 2375 fields scanned (1046 cited, 1329 ABSENT with a reason, 0 neither); negative control 1 of 1 planted uncitable field rendered ABSENT
+- notes: Round 7's census read 468 objects and 11700 fields because the store then held every as_of object; the canonical prefix holds one current object per security, so the census reads 95 and 2375 (25 fields each).
+
+## FWD-14 -- met
+
+- fence: EXERCISED -- for a named folder the read returns a dossier or a reason; and the three counts (resolved / ambiguous / empty-or-workbook-only) SUM TO THE FOLDER COUNT every time
+- instrument: python -m lib.research.corpus.backlog --coverage-dry-run ; python -m lib.research.corpus.backlog --folder "Imperial Brands IMB LN" / "AMD Advanced Micro Devices" / "Air Liquide AI FP" / "Adobe ADBE US"
+- output: coverage-dry-run: folders_read 95 dossier_served 83 served_as_empty_shell 12 resolved_no_prose 0 unresolved_with_reason 0 sum 95; fence14 resolved 83 ambiguous 0 empty-or-workbook-only 12 sum 95 outside-fence 0 folders_read 95; written NONE put_performed False (dry-run). --folder Imperial Brands IMB LN: disposition dossier-served, dossier_uri s3://opal-data-harvest/amgt/harvest/gold/research_dossier/security_key=IMB_LN_Equity/as_of=2026-09-29.4870a729a761d5b1.json. AMD: served-as-empty-shell, reason workbook-only. Air Liquide AI FP: served-as-empty-shell, reason empty. Adobe ADBE US: dossier-served (research_dossier/.../ADBE_US_Equity/...).
+- denominator: 95 folders: resolved 83 + ambiguous 0 + empty-or-workbook-only 12 = 95; 4 named-folder lookups, 4 answered (dossier URI or a printed reason)
+- notes: The lookups now return URIs under the canonical research_dossier prefix.
+
+## FWD-15 -- unmet
+
+- fence: EXERCISED -- both render cited on the header posture line and the Posture tab, and the machine verdict is byte-unchanged by their presence
+- instrument: PYTHONPATH=. python .scratch/o1/p_an.py (fields.fund_of_record and last_stated_position over 95 read_dossier() documents) ; scoped_amgt.read_posture read at HEAD ; portal and served-reader reads as FWD-10
+- output: fund_of_record over 95: cited 40, ABSENT with a reason 55. last_stated_position over 95: cited 47, ABSENT with a reason 48. IMB_LN_Equity fund_of_record IDVZ citation locator 2 'RECOMMENDATION: Potential ADD in IDVZ (currently ~2.5%)'; last_stated_position {fund IDVZ, size_pct ~2.5} same citation. scoped_amgt.read_posture builds from the posture object (document.get('verdict')) and reads no dossier field. Served-plane measurement: git grep at HEAD over lib/ and infra/ finds ONE reader of the dossier, lib/research/api/scoped_amgt.py _team_cases (cases only); no reader of fields.thesis_pillars, management, fund_of_record, last_stated_position, model_rows or terms. Portal at local DEV a93071b833 (origin/DEV 50eb1d563b carries 0 team_cases hits; positive control 'thesis' 98 files): only model.team_cases is consumed (ThesisCards.tsx, ModelTab.tsx); 0 files reference thesis_pillars, fund_of_record, last_stated, team_pillars or typecast rows.
+- denominator: 95 dossiers: fund of record cited 40 / ABSENT 55; last stated position cited 47 / ABSENT 48; portal posture-line files consuming either: 0
+- exercising_act: A seat adds the fund of record and last stated position, each with citation, to the payload read_posture serves beside the unchanged verdict object, redeploys, then reads IMB_LN_Equity twice through the served route (dossier fields carried vs the field stripped) and byte-compares the verdict object; the DSGN_AMGTV1 page walk reads both cited on the header posture line and the Posture tab.
+- owner: AMGT_RESAPP
+- notes: Substrate half MET for IMB (PRD ADDENDUM and CORRECTION under FWD-15): both fields cited. The clause is the render on the header posture line and the Posture tab with the machine verdict byte-unchanged; no served reader carries either field, so neither render nor the byte comparison can be read, and the whole fence is not met.
+
+## FWD-16 -- unmet
+
+- fence: EXERCISED -- a PDF-only name renders pillars, management and cases from the PDF pack; and the docx path is KEPT AS THE CONTROL and still recovers what it recovered before
+- instrument: PYTHONPATH=. python .scratch/o1/p_an.py (library.census() extensions per folder joined to the 95 read_dossier() documents; ADBE_US_Equity PDF-only, IMB_LN_Equity docx control) ; portal and served-reader reads as FWD-10
+- output: Folder classes over 95: has docx 53, PDF-only (no docx) 30, neither docx nor pdf 12. PDF-only 30: thesis_pillars present 24, management cited 24, at least one case served 24; the other 6 (GOOGL_US_Equity, BA_US_Equity, LLY_US_Equity, QXO_US_Equity, SLB_US_Equity, UNH_US_Equity) read ABSENT with reasons ('no class A report for this security', 'no MANAGEMENT section in class A ...', 'no BASE CASE section in class A ...'). ADBE_US_Equity: pillars 2, management cited, upside/base/downside served, cited to the ADBE research pack 7_13_2026.pdf. docx control (53 names): pillars 22, management 23, cases 10; with the PDF group 24+22 = 46 pillar names, 24+23 = 47 management, 24+10 = 34 case names, equal to round 7's 46 / 47 / 34. Served-plane measurement: git grep at HEAD over lib/ and infra/ finds ONE reader of the dossier, lib/research/api/scoped_amgt.py _team_cases (cases only); no reader of fields.thesis_pillars, management, fund_of_record, last_stated_position, model_rows or terms. Portal at local DEV a93071b833 (origin/DEV 50eb1d563b carries 0 team_cases hits; positive control 'thesis' 98 files): only model.team_cases is consumed (ThesisCards.tsx, ModelTab.tsx); 0 files reference thesis_pillars, fund_of_record, last_stated, team_pillars or typecast rows.
+- denominator: 30 PDF-only folders (24 with the full fold, 6 ABSENT with a reason); 53 docx folders (22 / 23 / 10 pillars / management / cases); 12 with neither
+- exercising_act: Rides the FWD-10, FWD-11 and FWD-12 served-reader act: after the served reader carries pillars, management and cases, a seat reads ADBE_US_Equity (PDF-only) and IMB_LN_Equity (docx control) through the deployed route, expects pillars 2 / management / 3 cases for ADBE and 6 pillars for IMB, and a DSGN_AMGTV1 page walk on ADBE_US_Equity reads them from the DOM.
+- owner: AMGT_RESAPP
+- notes: Reader half MET on the dossier plane: a PDF-only name (ADBE) carries pillars, management and cases from the PDF pack and the docx path recovers what it did before (46 / 47 / 34). The clause says the PDF-only name renders them; no page renders pillars or management (FWD-10, FWD-11) and only the Base case renders, so it is graded on the render plane the same way as FWD-10. The 6 names that read ABSENT state their reason, which is the fence's other branch.
+
+## FWD-17 -- unmeasurable
+
+- fence: EXERCISED -- a new report lands, a new report_id16 appears BESIDE the old, the dossier's inputs_sha16 changes, the page serves the newer pillars, and the prior as_of object still reads; and a rebuild with UNCHANGED inputs writes NOTHING and says so
+- instrument: PYTHONPATH=. python .scratch/o1/p_noop.py (dossier.write_one() for all 95 resolved names through a client whose put_object/delete/copy raise, positive-controlled) ; PYTHONPATH=. python .scratch/o1/p_legacy.py (S3 listing of both prefixes) ; NO --write run
+- output: p_noop: positive_control put_object refused 1 of 1; names 95 {'noop': 95} refused_puts 0; IMB_LN_Equity 'unchanged inputs_sha16 4d99e10c7c291740 wrote 0'; AZN_LN_Equity 'unchanged inputs_sha16 c15a62be691bbabc wrote 0'. p_legacy: legacy research-dossier/ 846 objects over 95 securities (newest 2026-09-29 09:36:58Z; method_versions in the first 400 read: /1 225, /2 87, /3 44, /4 44); canonical research_dossier/ 95 objects over 95 securities (2026-09-29 10:48:46Z to 11:09:15Z).
+- denominator: 95 names rebuilt against unchanged inputs: 95 wrote 0 and said so, 0 put attempts; canonical store 95 objects (one per security), legacy store 846 objects
+- reason: The unchanged-inputs arm is measured (95 of 95 write nothing and print 'unchanged ... wrote 0', 0 refused puts against a positive-controlled refusing client). The other arm needs a new report to land, a rebuild to write a second object with a changed inputs_sha16 beside the old, the page to serve the newer pillars and the prior as_of object to read; that is a landing plus S3 puts, outside the read-only bound, and no read-only instrument produces it. In the canonical prefix there is no prior as_of object beside the newest (1 per security); the prior objects live in the legacy prefix.
+- exercising_act: A seat drives the changed arm on a SCRATCH library root (the real library is read-only): copy one covered folder, add one new report file to the copy, point the library root at it, run ingest, extract, typed, continuation and then dossier --write --security-key <that name>; read that a new report_id16 appears beside the old, the inputs_sha16 in the new object name differs, read_dossier returns the newer pillars and the prior as_of object still reads; then run dossier --write --security-key <that name> again and read 'unchanged ... wrote 0'.
+- owner: AMGT_CORPUS
+- notes: The no-op arm was exercised through a refusing client, so it could not have written; it is not the fence's changed arm. Round 7 read this fence unmeasurable as well; the 37 same-inputs duplicate objects it recorded sit in the legacy prefix.
+
+## FWD-18 -- unmet
+
+- fence: EXERCISED -- a pillar's terms are readable on the page and the feed filters to them for at least one name
+- instrument: python -m lib.research.corpus.continuation --show-terms --security-key IMB_LN_Equity ; PYTHONPATH=. python .scratch/o1/p_an.py (census of thesis_pillars[].terms and kpi_set terms over 95 dossiers) ; portal read as FWD-10 (feed-terms filter grep)
+- output: --show-terms IMB_LN_Equity: pillars 6 with_terms 6 kpi_rows 25 with_terms 25; e.g. 'pillar Clean balance sheet for a Tobacco company terms Clean balance sheet for a Tobacco company|net debt|EBITDA'. Dossier census: 159 of 159 pillars carry a non-empty terms list; kpi_set: 2350 entries with terms over 94 dossiers (1 dossier, AI_FP_Equity, carries kpi_set ABSENT), 971 with count > 0 and all 971 with citations. Portal DEV a93071b833: 0 files reference pillar terms or a terms-filtered feed on the Security Analysis page (a fixture JSON contains the word 'terms' once).
+- denominator: 159 pillars (159 with terms); 2350 KPI entries over 94 dossiers (2350 with terms); page and feed consumers of terms: 0
+- exercising_act: A seat adds the pillar and KPI terms to the served payload (with the pillars, FWD-10) and a terms parameter to the feed read the header feed and Chatter axis call, redeploys, then reads the IMB_LN_Equity feed with and without a pillar's terms through the served route (the filtered feed a subset of the unfiltered); the DSGN_AMGTV1 page walk reads the terms on a pillar and the filtered feed from the DOM.
+- owner: AMGT_RESAPP
+- notes: The terms half is MET and moved since round 5 (every pillar carries terms). The clause is that a pillar's terms are readable on the page and the feed filters to them; no served reader carries terms and no page or feed filter consumes them.
+
+## FWD-19 -- met
+
+- fence: EXERCISED -- a census prints, for all 93, dossier-served / resolved-but-no-prose / unresolved-with-reason, and THE THREE SUM TO 93; the 60 today-unresolved folders are inducted by a SCRIPTED producer and re-ingested; and the 11 that can never carry prose (10 workbook-only, 1 empty) are NAMED with their reason rather than dropped from the denominator
+- instrument: python -m lib.research.corpus.backlog --coverage-dry-run ; PYTHONPATH=. python .scratch/o1/p_cov.py (fresh folder read) ; python -m lib.research.corpus.ingest --verify
+- output: coverage-dry-run fence line: dossier-served 83 resolved-but-no-prose 12 unresolved-with-reason 0 sum 95 folders_read 95; resolved 95 unresolved 0 ambiguous 0; never_prose_named 12: workbook-only x11 (AMD Advanced Micro Devices, Costco COST, Haliburton HAL, Home Depot HD, Hon Hai 2317 TT, National Grid NG LN, Quanta Services PWR, RWE AG RWE GY, SSE plc SSE LN, Valero Energy VLO, Zurich Insurance ZURN SW) and empty x1 (Air Liquide AI FP). crosswalk_loaded_from s3://opal-data-harvest/crosswalk/v1/2026-09-25.json. ingest --verify: objects 356 files 356 match 356 mismatch 0.
+- denominator: 95 folders read fresh: 83 + 12 + 0 = 95; 12 never-prose folders named with a reason; 356 of 356 files stored and matched
+- notes: Applied the PRD ADDENDUM under FWD-19: 'all 93' is the fresh folder read (95), the 60 previously unresolved read 0 unresolved (all inducted by the scripted producer and re-ingested: 356 of 356 match), and the never-prose class reads 12 (11 workbook-only, 1 empty) against the fence's 11.
+
