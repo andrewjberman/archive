@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-242",
+  "firm": "INF",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "5be1e5e847",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-242.launch-monitor-empty-reason.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md section 23, cell IB-pr-242 (row S216; WK~81 diagnosis TO-IB-pr-241)",
+    "group": "OTHER",
+    "vintage_commit": "5be1e5e847"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~85",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/inf-pipeline/inf-ec2-launch-monitor/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "38d5705f50",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order bounds: no deploy, no AWS write; the served move is the issuer's, under both halves.",
+      "artifact_covered_by": ["P24-2-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/inf-pipeline/inf-ec2-launch-monitor/tests/test_lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "38d5705f50",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unit test beside the Lambda, fake EC2/SNS/Lambda clients; 5 tests OK (python -m unittest discover). Not part of the Lambda package.",
+      "artifact_covered_by": ["P24-2-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P24-2-AC1",
+      "criterion_verbatim": "P24-2-AC1 -- with fake EC2, SNS and Lambda clients, four arms: an empty reason 5 s after launch is handed to retry; an empty reason 2 h after launch is NOT suppressed as normal; \"User initiated\" 2 h after launch is suppressed; Server.InternalError is handed to retry.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r24/p24_2_ac1_monitor_empty_reason.py\" .",
+      "output_evidence": "A empty reason, 5 s            -> body handed-to-retry-elapsed-time-defense retry invocations 1\nB empty reason, 2 h            -> body no-op-unknown-reason             retry invocations 0\nC 'User initiated', 2 h        -> body suppressed-normal-shutdown       retry invocations 0\nD Server.InternalError, 5 s    -> body handed-to-retry-explicit         retry invocations 1\nP24-2-AC1 PASS",
+      "denominator": "4 of 4 arms as expected; rc=0",
+      "status": "PASS",
+      "expect": "P24-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the pre-change lambda_function.py (commit 38d5705f50~1, with '' in NORMAL_PATTERNS) copied to .scratch/base and graded by the same check, as the order names (Base: FAIL).",
+      "expected": "P24-2-AC1 FAIL, both empty-reason arms suppressed",
+      "observed": "arm A body suppressed-normal-shutdown retry 0; arm B body suppressed-normal-shutdown retry 0; last line P24-2-AC1 FAIL rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two further consecutive runs of the check against the changed tree",
+      "observed": "both last lines P24-2-AC1 PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p24_2_ac1_monitor_empty_reason.py -- the P24-2-AC1 acceptance check",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r24/p24_2_ac1_monitor_empty_reason.py\" .",
+      "result": "base tree: P24-2-AC1 FAIL rc=1. Changed tree: P24-2-AC1 PASS rc=0."
+    }
+  ]
+}
