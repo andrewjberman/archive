@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ww-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "4a7792b19f1b08f84d5a0c36e3adad13e9c3d2bd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "4a7792b19f1b08f84d5a0c36e3adad13e9c3d2bd",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ww-3.the-tables-writer-gains-the-research-library.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~172",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY, hand-run script, no deploy and NO TABLE WRITE by the worker. Adds --universe {positioning (default), amgt-library}; load_library reads list_folders -> harvester_key -> resolve_identity -> read_model_block; library_row writes ticker/asset_class equity/sub_asset_class GICS_SECTOR_NAME/management_style unknown/last_updated/updated_by, sector unset, name = NAME_CORRECTIONS.get(bare) else withheld; per-row put_item with ConditionExpression attribute_not_exists(ticker), None and empty values dropped; --force-names refused (rc 2). Exercised by AC1 (dry-run 59/0/36), AC2 (36 held rows unchanged), AC3 (8 passed).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/tests/test_seed_etf_constituents.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 arms with a stubbed table and stubbed readers, script loaded by path: row shape and withheld name, bare ticker, dry-run plan and no write, condition on the put with empty values dropped, --force-names refusal, SKIP branch (5 skip reasons), positioning plan unchanged, repo root derived. Exercised by AC3.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PLAN equals the live absent/held split (59 create / 0 update / 36 preserve-existing at the cut); THE TABLE'S WRITER PLANS EXACTLY THE LIBRARY'S MISSING ROWS: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round48/checks/ww-3.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "library 95, held now 36, absent now 59\nplanned creates 59 (named 0, name withheld 59)\nTHE TABLE'S WRITER PLANS EXACTLY THE LIBRARY'S MISSING ROWS: YES\nexit=0. The writer's own line, from a direct dry-run: PLAN: 59 create / 0 update / 36 preserve-existing; 0 SKIP lines.",
+      "denominator": "95 library names, 36 held, 59 absent; 59 of 59 planned creates match the live absent set, 0 extra, 0 missing",
+      "status": "PASS",
+      "expect": "THE TABLE'S WRITER PLANS EXACTLY THE LIBRARY'S MISSING ROWS: YES.*?exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "held rows compared: 36, changed: 0; THE 36 HELD ROWS ARE UNCHANGED: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round48/checks/ww-3.AC2.py; echo \"exit=$?\"",
+      "output_evidence": "held rows compared: 36, changed: 0\nTHE 36 HELD ROWS ARE UNCHANGED: YES\nexit=0",
+      "denominator": "36 of 36 held rows byte-identical to the fixture; the worker wrote nothing (dry-run only)",
+      "status": "PASS",
+      "expect": "held rows compared: 36, changed: 0.*?THE 36 HELD ROWS ARE UNCHANGED: YES.*?exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pytest reports N passed and 0 failed, N at least 6 -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest -q -p no:cacheprovider infra/aws/lambda/v2_portal/yang_pipeline/tests; echo \"exit=$?\"",
+      "output_evidence": "8 passed in 0.25s\nexit=0",
+      "denominator": "8 of 8 tests passed, 0 failed (bound: at least 6)",
+      "status": "PASS",
+      "expect": "8 passed.*?exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Removed ConditionExpression from the amgt-library put_item in a working copy, ran the suite, restored the file from a scratch copy.",
+      "expected": "test_put_carries_the_condition_and_drops_empty_values fails, since a held row could then be overwritten.",
+      "observed": "1 failed, 7 passed: test_put_carries_the_condition_and_drops_empty_values - KeyError: 'ConditionExpression'. Restored file re-ran 8 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/v2_portal/yang_pipeline/tests run twice in succession (in-process stubs, no network).",
+      "observed": "run1: 8 passed; run2: 8 passed; identical apart from wall-clock timing.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~172/AMGT_RESAPP.TO-AMGT-ww-3.the-tables-writer-gains-the-research-library.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "PYTHONPATH=$(pwd) python -m pytest -q -p no:cacheprovider infra/aws/lambda/v2_portal/yang_pipeline/tests",
+      "result": "8 passed, 0 failed"
+    }
+  ]
+}
