@@ -1,0 +1,66 @@
+HEADER (added by the worker, 0.9.0_WK_AMGT_HARVST~42; row AMGT_HARVST-Z-W42-S1): this is the stdout of the ONE run of
+  python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~42/scripts/ac1_rebuild_two_tables.py
+started 2026-09-29 ~11:21Z. The run was piped through `head -60`, so the harness kept the first 60 lines below; the script's
+steps after (d) -- step (e) and the S3 KEYS WRITTEN list -- were not captured. They are re-read from S3 by the read-only
+scripts/ac1_post_act_verify.py into e2_ac1_post_act_verify_output.txt. The lines below are the captured text verbatim; only
+the long "securities_with_rows" list inside build-mention's stdout is kept whole, nothing is edited.
+==========================================================================================================================
+== (a) BEFORE, from S3 (as-of for both producers = today UTC = 2026-09-29; the halves allow 2026-09-29 or 2026-09-30) ==
+article_security_mention   parts=4 newest=date=2026-09-29/part-20260929T092419Z.parquet ETag=4a5e91d38405f09d3052343f69a68151 rows=275   as at the cut: (4, 'date=2026-09-29/part-20260929T092419Z.parquet', '4a5e91d38405f09d3052343f69a68151', 275) -> SAME
+chatter_daily              parts=5 newest=date=2026-09-29/part-20260929T092435Z.parquet ETag=561a3bd6513eccacd68dab502a5a3a93 rows=51952   as at the cut: (5, 'date=2026-09-29/part-20260929T092435Z.parquet', '561a3bd6513eccacd68dab502a5a3a93', 51952) -> SAME
+chatter_event              parts=7 newest=date=2026-09-29/part-20260929T092439Z.parquet ETag=c146a325c98963f965b8b1bd69ca3393 rows=8   as at the cut: (7, 'date=2026-09-29/part-20260929T092439Z.parquet', 'c146a325c98963f965b8b1bd69ca3393', 8) -> SAME
+inputs: securities=191 silver articles=120 listing hits=60
+PRE-PUT prediction (in memory, same functions the producers call) against the pair: mention outside=0 daily outside=0
+
+== (b) THE PRODUCERS, once each, mention then daily ==
+$ python -m lib.research.harvest.publication_gold build-mention --securities-json <0.9.0_WK_AMGT_HARVST~41/securities.universe.json> --as-of 2026-09-29
+rc=0
+stdout: {"articles_read": 120, "key": "amgt/harvest/gold/article_security_mention/date=2026-09-29/part-20260929T112204Z.parquet", "pairs": 275, "securities_with_rows": ["992_HK_Equity", "AAPL_US_Equity", "ABBV_US_Equity", "ABT_US_Equity", "AMD_US_Equity", "AMZN_US_Equity", "ANET_US_Equity", "AVGO_US_Equity", "BABA_US_Equity", "BAC_US_Equity", "BA_US_Equity", "BBY_US_Equity", "COST_US_Equity", "DAL_US_Equity", "DELL_US_Equity", "FDX_US_Equity", "GOOGL_US_Equity", "GOOG_US_Equity", "GS_US_Equity", "HD_US_Equity", "HSY_US_Equity", "HWM_US_Equity", "INTC_US_Equity", "INTU_US_Equity", "JNJ_US_Equity", "KO_US_Equity", "KPN_NA_Equity", "LITE_US_Equity", "LMT_US_Equity", "LUV_US_Equity", "META_US_Equity", "MRVL_US_Equity", "MSFT_US_Equity", "MU_US_Equity", "NFLX_US_Equity", "NOVN_SW_Equity", "NVDA_US_Equity", "ORANY_US_Equity", "QCOM_US_Equity", "RHHBY_US_Equity", "ROG_SW_Equity", "ROST_US_Equity", "SNDK_US_Equity", "STT_US_Equity", "STX_US_Equity", "TKOMY_US_Equity", "TSLA_US_Equity", "TSM_US_Equity", "UAL_US_Equity", "UBER_US_Equity", "ULVR_LN_Equity", "UL_US_Equity", "UPS_US_Equity", "V_US_Equity", "WDAY_US_Equity", "WDC_US_Equity"], "tier_counts": {"A": 72, "B": 63, "C": 39, "D": 101}}
+WRITTEN amgt/harvest/gold/article_security_mention/date=2026-09-29/part-20260929T112204Z.parquet ETag=b8118b05d3160c7c31b4955c22732afe ContentLength=36117 (HEAD read-back)
+$ python -m lib.research.harvest.publication_gold build-daily --securities-json <0.9.0_WK_AMGT_HARVST~41/securities.universe.json> --as-of 2026-09-29
+rc=0
+stdout: {"days": 272, "key": "amgt/harvest/gold/chatter_daily/date=2026-09-29/part-20260929T112222Z.parquet", "rows": 51952, "rows_per_security": 272, "securities": 191}
+
+== (c) AFTER, re-read through publication_gold._latest_gold_snapshot_rows ==
+article_security_mention   parts before=4 after=5  new parts=1 ['date=2026-09-29/part-20260929T112204Z.parquet ETag=b8118b05d3160c7c31b4955c22732afe size=36117']  newest=date=2026-09-29/part-20260929T112204Z.parquet ETag=b8118b05d3160c7c31b4955c22732afe rows=275
+chatter_daily              parts before=5 after=6  new parts=1 ['date=2026-09-29/part-20260929T112222Z.parquet ETag=06025a62eb771b336f33fe097d50c61c size=30153']  newest=date=2026-09-29/part-20260929T112222Z.parquet ETag=06025a62eb771b336f33fe097d50c61c rows=51952
+chatter_event              parts before=7 after=7  new parts=0 []  newest=date=2026-09-29/part-20260929T092439Z.parquet ETag=c146a325c98963f965b8b1bd69ca3393 rows=8
+newest mention and daily = the parts just written: True ; newest event part unchanged (key, ETag, size): True
+
+== (d) MOVED ROWS against the pair ==
+-- article_security_mention (COO half s.4.1) --
+rows before=275 after=275  duplicate keys before/after=False/False
+rows ADDED=0 REMOVED=0 (pair: 0 and 0)
+  moved AMZN_US_Equity | barrons:WP-BAR-0001882188 | match_forms: ['Amazon', 'Amazon.com'] -> ['Amazon.com']; mention_count: 2 -> 1; signal_tier: 'C' -> 'D'; signal_weight: 0.3 -> 0.1 | Atlanta Falcons Agree to Sell 10% Stake: Report
+  moved AMZN_US_Equity | barrons:WP-BAR-0001904706 | mention_count: 4 -> 3 | Everything to Know About the Boeing Jet That Overshot a Miami Runway
+  moved DAL_US_Equity | bbg:TITX6KR24U8700 | match_forms: ['Delta Air Lines', 'Delta Air Lines Inc'] -> ['Delta Air Lines Inc']; mention_count: 2 -> 1; signal_tier: 'C' -> 'D'; signal_weight: 0.3 -> 0.1 | As Boeing Recovers, Engine Makers Inflict Some Pain
+  moved AMZN_US_Equity | bbg:TKNDM8T96OSI00 | match_forms: ['Amazon', 'Amazon.com', 'Amazon.com Inc'] -> ['Amazon', 'Amazon.com Inc']; mention_count: 8 -> 6 | YouTube Inks Amazon Partnership to Boost Online Shopping Bet
+  moved GOOGL_US_Equity | bbg:TKNDM8T96OSI00 | match_forms: ['Alphabet', 'Alphabet Inc'] -> ['Alphabet Inc']; mention_count: 2 -> 1; signal_tier: 'C' -> 'D'; signal_weight: 0.3 -> 0.1 | YouTube Inks Amazon Partnership to Boost Online Shopping Bet
+  moved GOOG_US_Equity | bbg:TKNDM8T96OSI00 | match_forms: ['Alphabet', 'Alphabet Inc'] -> ['Alphabet Inc']; mention_count: 2 -> 1; signal_tier: 'C' -> 'D'; signal_weight: 0.3 -> 0.1 | YouTube Inks Amazon Partnership to Boost Online Shopping Bet
+  moved AMZN_US_Equity | bbg:TKQWO4KK3NYB00 | match_forms: ['Amazon', 'Amazon.com', 'Amazon.com Inc'] -> ['Amazon', 'Amazon.com Inc']; mention_count: 5 -> 3 | Amazon, Walmart Looped Into DOJ Beef-Price Antitrust Probe
+  moved AMZN_US_Equity | bbg:TKYJAAVTTCZL00 | match_forms: ['Amazon', 'Amazon.com', 'Amazon.com Inc'] -> ['Amazon', 'Amazon.com Inc']; mention_count: 10 -> 8 | Amazon Cargo Plane Overshoots Runway in Miami, Killing Five
+  moved FDX_US_Equity | bbg:TKYJAAVTTCZL00 | match_forms: ['FedEx', 'FedEx Corp'] -> ['FedEx Corp']; mention_count: 2 -> 1; signal_tier: 'C' -> 'D'; signal_weight: 0.3 -> 0.1 | Amazon Cargo Plane Overshoots Runway in Miami, Killing Five
+  moved UPS_US_Equity | bbg:TKYJAAVTTCZL00 | match_forms: ['United Parcel Service', 'United Parcel Service Inc'] -> ['United Parcel Service Inc']; mention_count: 2 -> 1; signal_tier: 'C' -> 'D'; signal_weight: 0.3 -> 0.1 | Amazon Cargo Plane Overshoots Runway in Miami, Killing Five
+  moved AMZN_US_Equity | bbg:TL0J5YKJH6V500 | match_forms: ['Amazon', 'Amazon.com', 'Amazon.com Inc'] -> ['Amazon', 'Amazon.com Inc']; mention_count: 5 -> 3 | NTSB Says Amazon Cargo Jet Hit Van, Car After Runway Overrun
+  moved AMZN_US_Equity | bbg:TL4E5FKJH6V400 | match_forms: ['Amazon', 'Amazon.com', 'Amazon.com Inc'] -> ['Amazon', 'Amazon.com Inc']; mention_count: 7 -> 5 | Amazon Jet Tried to Abort Landing Before Fatal Crash, NTSB Says
+  moved UPS_US_Equity | bbg:TL4E5FKJH6V400 | match_forms: ['United Parcel Service', 'United Parcel Service Inc'] -> ['United Parcel Service Inc']; mention_count: 2 -> 1; signal_tier: 'C' -> 'D'; signal_weight: 0.3 -> 0.1 | Amazon Jet Tried to Abort Landing Before Fatal Crash, NTSB Says
+  moved AMZN_US_Equity | sa:4638889 | match_forms: ['Amazon', 'Amazon.com'] -> ['Amazon.com']; mention_count: 2 -> 1; signal_tier: 'C' -> 'D'; signal_weight: 0.3 -> 0.1 | Most and least shorted consumer discretionary stocks with more than $2B market c
+moved rows=14 (pair: 14) over 6 securities (pair: 6)
+  AMZN_US_Equity   mention_count moved=8 match_forms moved=7 tier moved=2  (pair (8, 7, 2)) OK
+  DAL_US_Equity    mention_count moved=1 match_forms moved=1 tier moved=1  (pair (1, 1, 1)) OK
+  FDX_US_Equity    mention_count moved=1 match_forms moved=1 tier moved=1  (pair (1, 1, 1)) OK
+  GOOGL_US_Equity  mention_count moved=1 match_forms moved=1 tier moved=1  (pair (1, 1, 1)) OK
+  GOOG_US_Equity   mention_count moved=1 match_forms moved=1 tier moved=1  (pair (1, 1, 1)) OK
+  UPS_US_Equity    mention_count moved=2 match_forms moved=2 tier moved=2  (pair (2, 2, 2)) OK
+-- chatter_daily (COO half s.4.2) --
+cells before=51952 after=51952  duplicate keys=False/False  before last day=2026-09-29 as-of=2026-09-29
+extension cells=0 (pair: 0 = 191 x 0 extension days at as-of 2026-09-29)
+moved cells=212 (pair: 212)  columns moved (cell counts): {'baseline_30d_sum': 142, 'cumulative_ytd': 212, 'mention_count_total': 13, 'mention_score': 8, 'tier_c': 8, 'tier_d': 8, 'trailing_30d_sum': 177, 'trailing_7d_sum': 53}
+  AMZN_US_Equity   moved cells=41 (pair 41)  direct: mention_count_total cells=7 tier cells=2 (pair (7, 2)) OK
+  DAL_US_Equity    moved cells=65 (pair 65)  direct: mention_count_total cells=1 tier cells=1 (pair (1, 1)) OK
+  FDX_US_Equity    moved cells=24 (pair 24)  direct: mention_count_total cells=1 tier cells=1 (pair (1, 1)) OK
+  GOOGL_US_Equity  moved cells=29 (pair 29)  direct: mention_count_total cells=1 tier cells=1 (pair (1, 1)) OK
+  GOOG_US_Equity   moved cells=29 (pair 29)  direct: mention_count_total cells=1 tier cells=1 (pair (1, 1)) OK
+  UPS_US_Equity    moved cells=24 (pair 24)  direct: mention_count_total cells=2 tier cells=2 (pair (2, 2)) OK
+-- chatter_event: not written; newest part unchanged: True --
+OUTSIDE THE PAIR rows/counts: 0
