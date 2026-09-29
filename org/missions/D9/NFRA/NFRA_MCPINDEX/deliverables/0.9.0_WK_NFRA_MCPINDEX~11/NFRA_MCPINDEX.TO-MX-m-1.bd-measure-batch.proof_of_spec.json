@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-m-1",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "M",
+    "vintage_commit": "3d06751450"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "cc6bf5d0cc",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-m-1.bd-measure-batch.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~11/MEASURE_BATCH_ROUND3.md",
+      "kind": "doc",
+      "commit_or_etag": "0c3e43431d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The four recorded measures (a)-(d), each with its DENOMINATOR and FINDING line. A repo document; nothing is deployed."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~11/m1_a_classify.py",
+      "kind": "test",
+      "commit_or_etag": "0c3e43431d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only analysis of local copies of SSM and S3 log reads (m1_a_fetch.sh, m1_a_pins.py, m1_a_fees_objects.py, m1_b_measure.py and m1_c_measure.py are its siblings). Not deployed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "sections complete 4 of 4 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round3/checks/m1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "record org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~11/MEASURE_BATCH_ROUND3.md: sections complete 4 of 4 -- RESULT: PASS -- exit=0",
+      "denominator": "4 of 4 sections (a)-(d), each carrying a DENOMINATOR: line and a FINDING: line",
+      "status": "PASS",
+      "expect": "sections complete 4 of 4 -- RESULT: PASS -- exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "graded at L9 by 3.0.0_SA_CVO~O: does each of (a)-(d) answer its question on the right population, with its denominator and its instrument named, and is a zero's cause named?",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~11/MEASURE_BATCH_ROUND3.md sections (a)-(d): the FINDING and DENOMINATOR lines of each",
+      "output_evidence": "(a) SSM Success while the log records failure = 21 of 105 runs across the five daily documents, all 21 on opal-bd-fees-download; allocation, realized, transaction, unrealized honest (0 of 84); 49f-session-fetch 0 of 2, failure branch untested; Z-S47's 69 of 121 reproduces at the log-object grain. (b) 0 of 0 silver rows written after the dim version carry a cusip differing from the predecessor's; the only object written after it is a 0-row partition and the EC2 merge logged 'bd_assets_dim unavailable; skipping cusip join' in 10 of 10 runs that processed a file. (c) 2,800 of 22,344 null-cusip rows (12.53%) at the 2026-09-25 partition are cash by asset_name == 'CASH' (B_01.holdings_lots.py:2371); 15,329 (68.60%) by the broader name-pattern upper bound (:579); on R-11's own version 2,664 of 22,172 (12.02%). (d) one live consumer, B_03.account_gains, in the scheduled gold chain (inferred from writer mtimes); C_05 reads them only on a fallback arm; no Lambda or served page in the searched population; the portal submodule is not in the worktree.",
+      "denominator": "(a) 24 SSM documents, 7 opal-bd-, 129 SSM runs, 127 logs by VersionId, 121 fees log objects; (b) silver/transactions 2,405 object versions, 1 written after the dim version; (c) 1,270,177 rows / 22,344 null at 2026-09-25, 1,264,679 / 22,172 at R-11's version; (d) 43,870 files scanned, 5 BD-plane code files, objects 658 / 1,402 / 2,459",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion: graded at L9 by 3.0.0_SA_CVO~O, who is the oracle. The worker records the output and gives no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control for a read-only measurement cell (preflight: comp-adversary DECLARED-NOT-APPLICABLE).",
+      "expected": "none",
+      "observed": "None run: the spec names none.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: each arm reads live objects that change (the dim moved at 22:11Z, gold partitions are rewritten nightly); each S3 object was read by VersionId so its bytes are fixed, and the classify, dim and cash scripts print the same counts on re-run against the local copies.",
+      "observed": "m1_a_classify.py, m1_b_measure.py, m1_c_measure.py and m1_a_fees_objects.py were each re-run after the ruff reformat and printed the same counts.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "opal-cot-bd-session-fetch and every file under data/cot/",
+      "reason": "Firm line: cot is a separate firm. The document name contains 'bd' and was excluded from the BD enumeration; the cot copies of B_02, B_03, C_05 and s3_layout were listed by name and not opened."
+    },
+    {
+      "item": "SSM status of the 48 fees failure days older than SSM's 30-day retention",
+      "reason": "Not measured; INFERRED Success from the unchanged v1 document. The fees SSM-run grain is 21 of 21, the log-object grain is 69 of 121."
+    },
+    {
+      "item": "Silver transaction rows written BEFORE the dim rewrite that carry the predecessor's cusip on the 42 asset_ids",
+      "reason": "Outside the cell (about 596 MB of live-key objects) and not measured."
+    },
+    {
+      "item": "Whether boto3 is absent on the BD EC2 host, and the trigger of the 05:0xZ gold run",
+      "reason": "No command was run on the instance and the trigger was not identified; both are INFERRED, in rows Z-W11-S2 and in the (d) record."
+    },
+    {
+      "item": "The task order's own status flip",
+      "reason": "The order face says not to edit the order and its file is outside this worker's <paths>; no flip was made."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W11-S1: a bare aws ssm get-document returns the default version, not the $LATEST that runs execute; allocation and transaction differ in logic.",
+    "NFRA_MCPINDEX-Z-W11-S2: the daily BD transaction merge skips the bd_assets_dim join on the EC2 run path in 10 of 10 runs that processed a file.",
+    "NFRA_MCPINDEX-Z-W11-S3: the portal submodule is an empty directory in this worktree, so the served-page arm of (d) excludes portal source."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~11/MEASURE_BATCH_ROUND3.md",
+  "compiler_tools": [
+    {
+      "tool": "m1_a_fetch.sh + m1_a_pins.py + m1_a_classify.py (the (a) instrument)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~11/m1_a_fetch.sh; python .../m1_a_pins.py; python .../m1_a_classify.py",
+      "result": "rc=0; the per-document table is recorded in MEASURE_BATCH_ROUND3.md section (a)"
+    },
+    {
+      "tool": "issuer check m1.AC1.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round3/checks/m1.AC1.sh",
+      "result": "RESULT: PASS exit=0, run after commit 0c3e43431d"
+    }
+  ]
+}

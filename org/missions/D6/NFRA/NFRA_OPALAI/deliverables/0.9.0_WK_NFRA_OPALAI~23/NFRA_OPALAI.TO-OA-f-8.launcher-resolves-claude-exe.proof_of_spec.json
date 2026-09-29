@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-f-8",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "20b2b561f5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "7abd580177",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-f-8.launcher-resolves-claude-exe.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~23",
+  "artifacts_produced": [
+    {
+      "path_or_key": "opal_ai/opal/runtime/resolve-claude.ps1",
+      "kind": "script",
+      "commit_or_etag": "648e8c5",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Nested opal_ai commit 648e8c5 on branch wk-NFRA_OPALAI-23-opal_ai; LOCAL, not pushed, not deployed; live run is G-ACCT step 6."
+    },
+    {
+      "path_or_key": "opal_ai/opal/runtime/launcher.ps1",
+      "kind": "script",
+      "commit_or_etag": "648e8c5",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Nested opal_ai commit 648e8c5 on branch wk-NFRA_OPALAI-23-opal_ai; LOCAL, not pushed, not deployed; live run is G-ACCT step 6."
+    },
+    {
+      "path_or_key": "opal_ai/opal/runtime/provision/runtime.config.example.json",
+      "kind": "config_data",
+      "commit_or_etag": "648e8c5",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Nested opal_ai commit 648e8c5 on branch wk-NFRA_OPALAI-23-opal_ai; LOCAL, not pushed, not deployed; live run is G-ACCT step 6."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "arm1='CLAUDE_EXE: ...fake-claude.exe' rc=0; arm2='LAUNCHER: REFUSE CLAUDE-NOT-FOUND ...' rc=5; arm3='LAUNCHER: REFUSE CLAUDE-NOT-FOUND ...' -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/f8.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "opal_ai HEAD: arm1='CLAUDE_EXE: ...\fake-claude.exe' rc=0; arm2='LAUNCHER: REFUSE CLAUDE-NOT-FOUND -- set claude_exe in the runtime config to the Claude Code install for the runtime account' rc=5; arm3='LAUNCHER: REFUSE CLAUDE-NOT-FOUND -- ...'\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 arms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "launcher calls resolve-claude>=1; bare 'claude.exe' in Start-Process=0; example names claude_exe>=1; parse-clean scripts=2 of 2; other files changed vs dcececf53c=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/f8.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "opal_ai HEAD: launcher calls resolve-claude=1; bare 'claude.exe' in Start-Process=0; example names claude_exe=1; parse-clean scripts=2 of 2; other files changed vs dcececf53c=0\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 scripts parsed; 3 files changed vs base",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "Each check run once after the nested commit.",
+      "observed": "One run each.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "AC1 arms 2 and 3 are the negative arms (missing path, absent key, PATH without claude).",
+      "expected": "Refusal line, rc 5.",
+      "observed": "Both refused as expected.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "launcher run, push, install, vendor call",
+      "reason": "Bound 2 and 3: the live run is G-ACCT step 6, not this seat's."
+    }
+  ],
+  "surprises": [],
+  "session_log": "Worktree C:/tmp/oa-23. Wrote resolve-claude.ps1, edited launcher.ps1 and example config, committed nested 648e8c5, ran AC1 and AC2 both PASS. PUSH STATE: LOCAL.",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2",
+      "result": "see worker report"
+    }
+  ]
+}
