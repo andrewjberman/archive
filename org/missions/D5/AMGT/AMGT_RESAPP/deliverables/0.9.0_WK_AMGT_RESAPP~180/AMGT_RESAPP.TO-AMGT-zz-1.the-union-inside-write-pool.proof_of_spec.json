@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "77712167dc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "77712167dc",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-zz-1.the-union-inside-write-pool.md"
+  },
+  "to_id": "AMGT_RESAPP.TO-AMGT-zz-1",
+  "assignee": "0.9.0_WK_AMGT_RESAPP~180",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "fde642f9f6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "write_pool union + _carry_served + retire=(); fake client only, no S3 write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_write_pool_union.py",
+      "kind": "test",
+      "commit_or_etag": "48df429e2c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 arms, all validating against the repo schema (no temp-schema workaround).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/crosswalk.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "48df429e2c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1: denominators admits optional integers carried and retired_from_served (min 0); nothing else moves.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "both writers print \"planted kept: True\" with served+planted records dropped 0; EVERY CROSSWALK WRITER KEEPS A SERVED RECORD: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round51/checks/zz_choke.py; echo \"exit=$?\"",
+      "output_evidence": "OK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-29.json ... records=237 MEASURED=237 UNRESOLVED=0 registered=49 pool_puts=1\nserved crosswalk/v1/2026-09-29.json: 237 records + planted ZZPLANTED_US_Equity (the pinned-side append)\n  A add_security._mint_pool        planted kept: True; served+planted records dropped: 0\n  B crosswalk build + write_pool   planted kept: True; served+planted records dropped: 0\nEVERY CROSSWALK WRITER KEEPS A SERVED RECORD: YES\nexit=0",
+      "denominator": "2 of 2 writers keep the planted record on the repo schema",
+      "status": "PASS",
+      "expect": "EVERY CROSSWALK WRITER KEEPS A SERVED RECORD: YES.*?exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "digest in == digest out; THE CROSSWALK NEVER DROPS A SERVED RECORD (roundtrip): YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round50/checks/yy_crosswalk.py --arm roundtrip; echo \"exit=$?\"",
+      "output_evidence": "served: 237 records, as_of 2026-09-29\n(c) records in 237 out 237; digest in 68a788347ec2 out 68a788347ec2\nTHE CROSSWALK NEVER DROPS A SERVED RECORD (roundtrip): YES\nexit=0",
+      "denominator": "237 of 237 records",
+      "status": "PASS",
+      "expect": "THE CROSSWALK NEVER DROPS A SERVED RECORD \\(roundtrip\\): YES.*?exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "N passed and 0 failed, N > 135 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest lib/research/identity/tests -q; echo \"exit=$?\"",
+      "output_evidence": "141 passed, 2 subtests passed in 6.02s\nexit=0",
+      "denominator": "141 passed, 0 failed (135 at the cut + 6 new)",
+      "status": "PASS",
+      "expect": "[0-9]+ passed.*?exit=0"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 run on the repo schema",
+      "observed": "YES exit=0",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the plant ZZPLANTED_US_Equity is its own difference control: kept only when the union runs",
+      "expected": "dropped before the change, kept after",
+      "observed": "kept on both writers on the repo schema; refused on the repo schema before the schema edit (row Z-W180-S1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "AMGT_RESAPP-Z-W180-S1",
+    "AMGT_RESAPP-Z-W180-S2"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~180/AMGT_RESAPP.TO-AMGT-zz-1.the-union-inside-write-pool.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=$(pwd) python -m pytest lib/research/identity/tests -q",
+      "result": "141 passed, 2 subtests passed, 0 failed"
+    }
+  ]
+}
