@@ -19,7 +19,7 @@ The blast radius, per key. BEFORE was measured 2026-09-30 ~21:1xZ, every page, c
 | # | key | before | after | rollback |
 |---|---|---|---|---|
 | 1 | `s3://opal-data-etfs/bloomberg/etfs/bronze/holdings/` | 0 | 944 imported captures (503 IDVZ-group + 441 PFOE-group), each raw + `.sidecar.json`, `capture_origin census:*`; then one daily batch per trading day | a delete is a HUMAN word |
-| 2 | `.../bloomberg/etfs/silver/holdings/` | 0 | typed silver per report date | same |
+| 2 | `.../bloomberg/etfs/silver/holdings/` | 0 | typed silver per report date for RIVALS only; IDVZ and PFOE rows = **0** (CTO ruling (b), msg 27404; e.g. the 45 IDVZ rows of 2026-09-29 land in bronze bytes, never in silver) | same |
 | 3 | `.../rivalfunds/etfs/gold/{peer_group_map,holdings_coverage,corporate_actions,flow_reconciliation}/` | 0 each | G0 map_version 1; G2; G3 (import of `dividends.json`, 4780 records + 43 status rows, then daily); G6 | same |
 | 4 | `.../rivalfunds/etfs/gold/{canonical_shape,trade_schedule}/` and `.../platinum/page/` | 325 / 324 / 6 objects | NEW revision objects only. The existing BASG objects are never overwritten (never-overwrite, revision ids) | same |
 | 5 | `.../rivalfunds/etfs/state/{fetch_bloomberg,build_bloomberg_silver,pull_enrichment,build_peer_group_map,build_coverage,build_flow_reconciliation}/` | 0 each | batch-complete markers | same |
