@@ -1,6 +1,6 @@
-# ANNOUNCE -- MX-r-6 PHASE A, the Schwab enable release: MX-s-15, MX-q-3, the contract change, `schwab` in ENABLED_INTEGRATIONS
+# ANNOUNCE -- MX-r-6 PHASE A (A3 delta applied), the Schwab enable release: MX-s-15, MX-q-3, the contract change, `schwab` in ENABLED_INTEGRATIONS, and the Schwab service's host inputs
 
-Deployer: 0.9.0_WK_NFRA_MCPINDEX~19 (issuer 2.0.0_SA_COO~MI). Order (amended A1, A2):
+Deployer: 0.9.0_WK_NFRA_MCPINDEX~19 (issuer 2.0.0_SA_COO~MI). Order (amended A1, A2, A3):
 org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-r-6.schwab-enable-release.md
 
 STATE: PHASE A only. Nothing was deployed, no ledger is open, nothing was uploaded to S3, no `terraform apply`, no grant, identity
@@ -9,7 +9,74 @@ or sign-in was created or changed. AWS contact was read-only and Opal's own: `s3
 `lambda get-function-configuration` (the two grant-writer owner variables, needed only to let `terraform plan` evaluate), `head-object`
 on the future key (404), and `terraform plan -lock=false` (S3 state read). MX-t-10 does NOT ride (not drained).
 
-## READ FIRST -- two BLOCKING rows the issuer must rule before any GO
+## A3 DELTA (2.0.0_SA_COO~MI, row Z-S66) -- what changed since the first ANNOUNCE; the NEW PIN is here
+
+**New pins.** Release **9def06ff2f** (child of ac77acf9e8, branch rel-nfra-mcpindex-r5-schwab-enable, /c/tmp/mx-rel7). Deploy-only **0d3e953c76** (child of abee4587f7, branch
+dep-nfra-mcpindex-r5-schwab-enable, /c/tmp/mx-dep7, on CLOUD 0440cd4e4d). Both are audited GIT_COMMIT_AUTHOR_OVERRIDE uses (rel-/dep- branches, Z-W14-S8 precedent; uses 3 and 4);
+they are CHILDREN of the first cut, nothing rewritten. Gateway tree object, release = deploy-only: **c8e4449bcf57e3357371dbf9bb41c3b6b1cb45ad**
+(`git rev-parse 0d3e953c76:infra/aws/ec2/opal-gateway` = `9def06ff2f:infra/aws/ec2/opal-gateway`; `git diff --stat 9def06ff2f 0d3e953c76 -- infra/aws/ec2/opal-gateway` is empty).
+The deploy-only commit differs from CLOUD 0440cd4e4d in 46 files, **0 outside infra/aws/ec2/opal-gateway**. Artifact key at GO:
+s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-0d3e953c76.tar.gz (head-object: 404 now). mcportal a3bff71ffa unchanged. The pins ac77acf9e8 / abee4587f7
+below are SUPERSEDED by these. Halt gate: the MX-r-6 order at the deploy-only HEAD is still `<status>pending</status>`, issued to ~19.
+
+**Z-W19-S7 (host inputs), how each ships -- no secret VALUE in the repo, the artifact or `.env`:**
+
+| input | key (named by the code) | how it ships |
+|---|---|---|
+| contract file | `NFRA_OPLGTW_CONTRACT_PATH` (catalog.py:85, `load_contract`) | the file ships IN THE ARTIFACT as `deploy/NFRA_OPLGTW_CONTRACT.json` (a byte copy of the release tree's org/standards contract; `deploy` is already a tar root, so the build and tar roots need no change); `.env` = `${REMOTE_DIR}/deploy/NFRA_OPLGTW_CONTRACT.json`, i.e. /opt/opal-gateway/deploy/NFRA_OPLGTW_CONTRACT.json |
+| reader role ARN | `SCHWAB_READER_ROLE_ARN` (aws_roles.py:78) | `.env` = arn:aws:iam::313476888478:role/gateway-schwab-read-role (read-only `iam get-role`; its role name must equal the contract's reader_role, which `role_config` checks) |
+| catalog role ARN | `SCHWAB_CATALOG_ROLE_ARN` (aws_roles.py:78) | `.env` = arn:aws:iam::313476888478:role/gateway-schwab-catalog-read-role |
+| ExternalId source | **`SCHWAB_EXTERNAL_IDS_SECRET_ID` (NEW key, row Z-W19-S12)** | `.env` = opal/mcp/opal-gateway-schwab-reader-external-ids (the secret's NAME). The code's own keys `SCHWAB_READER_EXTERNAL_ID` / `SCHWAB_CATALOG_EXTERNAL_ID` take a VALUE, which A3 bars from `.env`, so the release adds `aws_roles.environ_with_external_ids`: an unset value is read, once at service construction, from that secret's JSON fields `data_read` / `catalog_read` (the Gateway role's resource policy grants exactly that read); an env value still wins; `os.environ` is never written; no error text carries a value |
+| account_ref secret id | `SCHWAB_ACCOUNT_REF_SECRET_ID` (account_ref.py:56) | `.env` = opal/mcp/opal-gateway-schwab-account-ref-key (the secret's NAME; the key stays in Secrets Manager) |
+
+**Env keys added (names only): 5** -- NFRA_OPLGTW_CONTRACT_PATH, SCHWAB_READER_ROLE_ARN, SCHWAB_CATALOG_ROLE_ARN, SCHWAB_EXTERNAL_IDS_SECRET_ID, SCHWAB_ACCOUNT_REF_SECRET_ID; plus `schwab`
+in ENABLED_INTEGRATIONS (line 197). The host `.env` goes from 27 keys (measured in PHASE A) to **32**. The printf still takes exactly its 9 runtime `%s` values. No `SCHWAB_*_EXTERNAL_ID` key is
+written. `git diff --stat 093fc247c6 9def06ff2f -- infra/aws/ec2/opal-gateway/deploy-to-ec2.sh` = 6 insertions, 1 deletion (5 comment lines, the printf line).
+
+**CENSUS DELTA.** `git diff --stat 093fc247c6 9def06ff2f -- infra/aws/ec2/opal-gateway`: **21 files, 997 insertions, 43 deletions** (was 17 files, 505 insertions, 41 deletions): +4 files =
+`app/integrations/schwab/aws_roles.py` (+40), `app/integrations/schwab/integration.py` (+1 -1), `deploy/NFRA_OPLGTW_CONTRACT.json` (NEW, 336 lines), `tests/test_schwab_host_inputs.py` (NEW, 7 tests);
+deploy-to-ec2.sh grows from 1 to 6 insertions. Shipped files: **10** (the earlier 7 plus aws_roles.py, integration.py, the contract copy); not shipped: deploy-to-ec2.sh and 10 tests. Outside the gateway dir the release
+still differs from 093fc247c6 in exactly the same 2 files (schwab_reader_iam.tf, NFRA_OPLGTW_CONTRACT.json). The artifact is **80 files** (was 79): +1, `deploy/NFRA_OPLGTW_CONTRACT.json`.
+
+**Rebuilt artifacts (build-only mirror of deploy-to-ec2.sh:74-98, NO upload; mcportal rebuilt in each tree):**
+- release tree vs deploy-only tree: **80 of 80 byte-identical** (67 of 67 .py), 0 only-release, 0 only-deploy-only (mx-rel7-art3.tar.gz 417593 bytes, mx-dep7-art3.tar.gz 417564 bytes).
+- deploy-only artifact vs the LIVE `-latest` (79 files): **70 of 79 identical** (59 of 67 .py); 9 differ (app/data_entitlement.py, app/destructive_ops.py, app/integrations/opal_discover/integration.py,
+  app/integrations/portal_index/integration.py, app/integrations/schwab/aws_roles.py, app/integrations/schwab/datasets.json, app/integrations/schwab/integration.py, app/integrations/schwab/query.py,
+  app/schwab_audit.py); 1 only-in-new (the contract copy); 0 only-live. The dashboard bundle is unchanged.
+
+**THE IN-PROCESS PROOF (read-only; probes/inprocess_schwab_host_inputs_MX-r-6_A3.txt and .py).** The DEPLOY-ONLY artifact (mx-dep7-art3) is extracted to a host-like directory
+(C:/tmp/hs-dep7b/opal-gateway); the process environment is the operator's own AWS read credentials plus ONLY the five static keys the release's `.env` printf writes (the deploy-only tree's script is parsed, `${REMOTE_DIR}` mapped
+to the extraction dir). No secret value is printed. The first Schwab call's construction and the two tools; one seam is disclosed: OG-z-1's admission guard needs a live principal, so `_admit` is replaced by a no-op.
+```
+=== without (negative control: no SCHWAB_*/NFRA_OPLGTW_* in the environment)
+BUILD: RAISED ContractUnavailable no contract path: set NFRA_OPLGTW_CONTRACT_PATH to org/standards/NFRA_OPLGTW_CONTRACT.json
+TOOL schwab_get_access isError=True {'code': 'UNAVAILABLE', 'reason': 'schwab_integration_unavailable'}
+TOOL schwab_list_files isError=True {'code': 'UNAVAILABLE', 'reason': 'schwab_integration_unavailable'}
+=== with (the release's .env shape)
+MODE with ENV KEYS SET: ['NFRA_OPLGTW_CONTRACT_PATH', 'SCHWAB_ACCOUNT_REF_SECRET_ID', 'SCHWAB_CATALOG_ROLE_ARN', 'SCHWAB_EXTERNAL_IDS_SECRET_ID', 'SCHWAB_READER_ROLE_ARN']
+CONTRACT PATH EXISTS: True
+BUILD: OK SchwabService
+TOOL schwab_get_access isError=True {'code': 'ENTITLEMENT_DENIED', 'reason': 'principal_required'}
+TOOL schwab_list_files isError=True {'code': 'ENTITLEMENT_DENIED', 'reason': 'principal_required'}
+```
+With the keys, `build_default_service()` (the one place `ContractUnavailable` and `RoleConfigError` were raised) returns a `SchwabService`, and both tools reach the service's own entitlement check (no principal in this process) instead of
+`UNAVAILABLE`. The ExternalIds were read from their secret by the operator's credentials into process memory; `BUILD: OK` includes `role_configs` (both ARNs match the contract's role names, both ExternalIds well-formed and different).
+What this does NOT prove: an sts:AssumeRole (the reader roles trust the Gateway role only) or a served Schwab answer; those are PHASE B and r6.J1.
+
+**Tests in the release tree after the delta** (from infra/aws/ec2/opal-gateway): the six-file set **55 passed, 3 failed** (the PHASE A set was 54 passed, 4 failed; test_portal_tools_catalog_refs_resolve passed this run and its earlier failure
+is unexplained and not caused by this delta, row Z-W19-S13; the 3 still failing also fail on the live tree); the five Schwab files plus test_account_ref.py and the new test file **76 passed**; tests/acceptance/test_local_acceptance.py
+**14 passed**. The release adds no failing test.
+
+**Targeted plan: UNCHANGED.** No Terraform file moved in this delta (schwab_reader_iam.tf is byte-identical to ac77acf9e8's). /c/tmp/mx-r6-schwab-read-targeted.tfplan, sha256 ca611803f37c560aad820b54ae277903145eaff43e46af1a934a247fb2ca7ffa:
+**0 to add, 1 to change, 0 to destroy**, 8 added `dim_transaction` elements. It is not re-run here; per A3 it is re-planned, targeted, at the GO and applied only if it is the same one change, through `safe-apply`.
+
+**Tool count (re-measured on the deploy-only artifact, probes/tools_depA3_6ids_MX-r-6.json):** integration tools 21 at 6 ids (16 at the same 5 ids, which include MX-q-3's `gateway_query_catalog`; the LIVE host's 5 ids give 15), total **37 native + 21 = 58**
+against the live 52: **+6, 0 removed**, unchanged by this delta (the host-input change adds and removes no tool): `schwab_get_access`, `schwab_list_files`, `schwab_describe_dataset`, `schwab_query`, `schwab_prepare_download`, `gateway_query_catalog`.
+
+**Rows for this delta:** Z-W19-S12 (OBSERVATION / INERT, disarm 2.0.0_SA_COO~MI): the code names no ExternalId-source key, so one was added with a small resolver; Z-W19-S13 (OBSERVATION / INERT): the contract ships as a copy in the gateway's deploy/ root, cut from the
+release tree's contract (older than CLOUD's), and one unexplained test flip. S7 is addressed by the above (ruled by Z-S66); S8 is addressed by the targeted plan. Nothing is deployed, applied or pushed; no grant is created or changed.
+
+## FIRST ANNOUNCE (superseded where the A3 delta above differs) -- two BLOCKING rows, ruled by Z-S66
 
 | row | what |
 |---|---|
@@ -136,7 +203,7 @@ business_date, trade_date, settlmnt_date, tr_cd, sb_cd, transaction_category, tr
 net_amount); `additive_fields.dim_transaction` = [] (nothing summable, as datasets.json). `contract_version` unchanged. Existing grants name the three dims
 explicitly and stay as they are (ruling B2).
 
-**How the served gateway gets the contract (the A1 question), answered:** it does not read it from the artifact. `build_default_service()` (first Schwab call) calls
+**How the served gateway gets the contract (the A1 question), answered -- AS BUILT AT THE FIRST CUT; SUPERSEDED by the A3 delta above, where the contract now ships in the artifact at deploy/NFRA_OPLGTW_CONTRACT.json and `.env` names its path:** it does not read it from the artifact. `build_default_service()` (first Schwab call) calls
 `catalog.load_contract()`: the `NFRA_OPLGTW_CONTRACT_PATH` environment value, else the repository layout (`Path(catalog.py).parents[7]/org/standards/...`, which is
 `None` on the host: its path has 6 parents). The artifact's tar roots are app, deploy, requirements.txt, identity_tool_allowlist.txt and dashboard, so the
 contract file is in no shipped file, the host has no copy, and `.env` names no path. **As built, the release does not ship the contract and the enable cannot
@@ -171,3 +238,5 @@ the order is written.
 | NFRA_MCPINDEX-Z-W19-S9 | OBSERVATION / INERT | the grant-writer Lambda bundles a contract copy without `dim_transaction` |
 | NFRA_MCPINDEX-Z-W19-S10 | OBSERVATION / INERT | two audited overrides on rel-/dep-; two non-gateway files in the release commit; the line-197 edit is also on the worker branch |
 | NFRA_MCPINDEX-Z-W19-S11 | OBSERVATION / INERT | the deploy-only tree drops 42 files of other projects' unreleased gateway work |
+| NFRA_MCPINDEX-Z-W19-S12 | OBSERVATION / INERT (disarm 2.0.0_SA_COO~MI) | A3: the code names no ExternalId-source key; `SCHWAB_EXTERNAL_IDS_SECRET_ID` and a small resolver added |
+| NFRA_MCPINDEX-Z-W19-S13 | OBSERVATION / INERT | A3: the contract ships as a copy in deploy/ from the release tree's (older) contract; one unexplained test flip |
