@@ -135,4 +135,4 @@ def dry_append(cl=None):
     cap = _p1.CapturingClient(cl or client())
     rows = [row for _key, row in rebuilt_rows(cap)]
     receipt = store.silver_append(SOURCE, TABLE, rows, RECORD_KEY, store.stamp(_dt.datetime.now(_dt.timezone.utc)), client=cap)
-    return receipt, sorted(cap.puts)
+    return receipt, {k: len(v["body"]) for k, v in cap.puts.items()}

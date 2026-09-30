@@ -50,6 +50,11 @@ def main():
         raw = cl.get_object(Bucket=store.HARVEST_BUCKET, Key=k)["Body"].read()
         for r in pq.read_table(io.BytesIO(raw)).to_pylist():
             written.append((r.get("article_key"), r.get("record_hash")))
+    dry = (before.get("dry_append") or {}).get("bytes")
+    sizes = sorted(parts_after[k][1] for k in new_parts)
+    print("put byte count: written %s, act-start serializing dry run %s" % (sizes, dry))
+    if dry is None or sizes != sorted(dry):
+        failures.append("STOP condition (CTO re-sign): written bytes %s != dry-run bytes %s" % (sizes, dry))
     want = sorted((t[1], t[3]) for t in expected)
     got = sorted(written)
     print("rows in new parts: %d; expected write: %d (%s)" % (len(got), len(want),

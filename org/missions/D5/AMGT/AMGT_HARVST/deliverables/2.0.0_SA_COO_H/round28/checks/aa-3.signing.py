@@ -38,8 +38,8 @@ def main():
     print("served record keys AFTER, if applied: %d" % (len(m["latest_record_hash"]) + kinds.get("NEW", 0)))
     try:
         receipt, puts = c.dry_append()
-        print("SERIALIZE (the real silver_append, put-captured): %d put(s), written_rows %s" % (len(puts), receipt.get("written_rows")))
-        m["dry_append"] = {"puts": len(puts), "written_rows": receipt.get("written_rows")}
+        print("SERIALIZE (the real silver_append, put-captured): %d put(s), written_rows %s, bytes %s" % (len(puts), receipt.get("written_rows"), sorted(puts.values())))
+        m["dry_append"] = {"puts": len(puts), "written_rows": receipt.get("written_rows"), "bytes": sorted(puts.values())}
     except Exception as exc:  # noqa: BLE001 -- the act would raise the same
         print("SERIALIZE FAILED: %s: %s" % (type(exc).__name__, str(exc)[:200]))
         m["dry_append"] = {"error": type(exc).__name__}
