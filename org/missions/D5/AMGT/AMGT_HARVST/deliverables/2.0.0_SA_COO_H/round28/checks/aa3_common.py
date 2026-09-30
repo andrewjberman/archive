@@ -122,3 +122,17 @@ def dump(path, obj):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(obj, fh, indent=1, sort_keys=True, default=str)
+
+
+def dry_append(cl=None):
+    """HVST-aa-3 AMENDMENT 2: run the REAL `store.silver_append` over the rebuild against a put-capturing pass-through
+    client, so the signing measurement SERIALIZES (attempt 1's dry run mirrored the filter only and missed a parquet
+    empty-struct failure). Returns (receipt, captured put keys); raises exactly as the act would."""
+    import datetime as _dt
+    here = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(here)), "round26", "checks"))
+    import p1_common as _p1
+    cap = _p1.CapturingClient(cl or client())
+    rows = [row for _key, row in rebuilt_rows(cap)]
+    receipt = store.silver_append(SOURCE, TABLE, rows, RECORD_KEY, store.stamp(_dt.datetime.now(_dt.timezone.utc)), client=cap)
+    return receipt, sorted(cap.puts)

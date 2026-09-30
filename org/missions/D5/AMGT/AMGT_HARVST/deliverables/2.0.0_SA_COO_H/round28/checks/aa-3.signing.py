@@ -36,6 +36,13 @@ def main():
     for t in m["expected_write"]:
         print("  %-5s %s | %s | %s" % (t[0], t[1], t[4], t[2]))
     print("served record keys AFTER, if applied: %d" % (len(m["latest_record_hash"]) + kinds.get("NEW", 0)))
+    try:
+        receipt, puts = c.dry_append()
+        print("SERIALIZE (the real silver_append, put-captured): %d put(s), written_rows %s" % (len(puts), receipt.get("written_rows")))
+        m["dry_append"] = {"puts": len(puts), "written_rows": receipt.get("written_rows")}
+    except Exception as exc:  # noqa: BLE001 -- the act would raise the same
+        print("SERIALIZE FAILED: %s: %s" % (type(exc).__name__, str(exc)[:200]))
+        m["dry_append"] = {"error": type(exc).__name__}
     if "--signing" in sys.argv:
         c.dump(c.SIGNING, m)
         print("wrote " + c.SIGNING)
