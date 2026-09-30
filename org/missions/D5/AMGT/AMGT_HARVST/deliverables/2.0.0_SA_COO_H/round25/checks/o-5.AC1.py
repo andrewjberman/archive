@@ -1,7 +1,6 @@
 """HVST-o-5 AC1 (issuer check, read-only): the first run stayed inside the pair.
 
-PASS requires: no object that existed at act start moved or vanished (all five publishers); no new sa object (the sa
-leg waits on the renewal); the first run's run record exists, names 992_HK_Equity on exactly barrons, bbg, ft and wsj,
+PASS requires: no object that existed at act start moved or vanished (all five publishers); no new sa or barrons object; the first run's run record exists, names 992_HK_Equity on exactly bbg, ft and wsj (AMENDMENT 1),
 and its fetched keys are each backed by a new bronze object. Printed as measurement, not graded: new objects per
 tier/table, each job's status, and each publisher's listing reach from 2026-01-01 through the run date. Writes the
 after-run-1 snapshot the AC2 check compares against.
@@ -33,8 +32,8 @@ def main():
         if moved or removed:
             failures.append("%s: %d pre-existing object(s) moved, %d removed (first: %s)"
                             % (publisher, len(moved), len(removed), (moved + removed)[0]))
-        if publisher in c.CONTROL and new:
-            failures.append("%s: %d new object(s) -- the sa leg must not run" % (publisher, len(new)))
+        if publisher in c.NO_NEW and new:
+            failures.append("%s: %d new object(s) -- this root must gain no object (sa waits on the renewal; barrons is Branch B)" % (publisher, len(new)))
 
     ids = c.load(os.path.join(c.WK, "o5_run_ids.json"))
     runs = ids.get("runs") or []
@@ -49,7 +48,7 @@ def main():
             print("  job %-8s %-14s status=%s fetched=%s skipped_as_held=%s"
                   % (j.get("publisher"), j.get("security_key"), j.get("status"), j.get("keys_fetched"), j.get("keys_skipped_as_held")))
         pairs = sorted((j.get("publisher"), j.get("security_key")) for j in jobs)
-        want = sorted((p, c.SECURITY_KEY) for p in c.LIVE)
+        want = sorted((p, c.SECURITY_KEY) for p in c.JOB_PUBLISHERS)
         if pairs != want:
             failures.append("run 1 jobs %s != %s" % (pairs, want))
         new_bronze = [k for p in c.LIVE for k in d[p][2] if c.table_of(k).startswith("bronze/")]

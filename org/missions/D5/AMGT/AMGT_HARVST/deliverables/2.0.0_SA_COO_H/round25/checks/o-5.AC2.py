@@ -40,8 +40,8 @@ def main():
         article_new = [k for k in new if "article" in c.table_of(k)]
         if article_new:
             failures.append("%s: %d new article object(s) on the repeat (first: %s)" % (publisher, len(article_new), article_new[0]))
-        if publisher in c.CONTROL and new:
-            failures.append("%s: %d new object(s) -- the sa leg must not run" % (publisher, len(new)))
+        if publisher in c.NO_NEW and new:
+            failures.append("%s: %d new object(s) -- this root must gain no object (sa waits on the renewal; barrons is Branch B)" % (publisher, len(new)))
 
     print("AC2 RESULT: %s (%d failure(s))" % ("PASS" if not failures else "FAIL", len(failures)))
     for f in failures:
