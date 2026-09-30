@@ -33,7 +33,9 @@ def run(v):
     for k, want in expected.items():
         v.check(exposed.get(k) == want, f"homes.all_addresses()['{k}'] == {want} (got {exposed.get(k)})")
     for stage in ("fetch-holdings", "build-silver", "build-canonical-shape", "build-trade-schedule", "publish-page"):
-        want = c.address("rivalfunds", "etfs", "state", stage, "date=2026-09-29")
+        # the state-tier TABLE is the stage name in snake case (row ETFS_RIVALS-Z-W3-S5: the naming gate refuses a
+        # hyphenated S3Key table); the stage NAME stays hyphenated
+        want = c.address("rivalfunds", "etfs", "state", stage.replace("-", "_"), "date=2026-09-29")
         got = homes.marker_prefix(stage, "2026-09-29")
         v.check(got == want, f"homes.marker_prefix('{stage}') == {want} (got {got})")
     names = homes.all_names()
