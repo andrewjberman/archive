@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-271",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-271.seam-parser-resolves-opal-refs.md",
+    "group": "OTHER",
+    "vintage_commit": "a00a7fda7d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R27_Y.md",
+    "vintage_commit": "a00a7fda7d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-271.seam-parser-resolves-opal-refs.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~90",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/tests/test_seam_paired.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "opal:// and ../ refs resolved at 4 sites (validator registry, declared-route ref check, _document_of, new helpers); zero-count unprojected_grant supplied where a contract requires it; no test node added or removed (59 collected before and after)",
+      "artifact_covered_by": [
+        "Y27-1-AC1",
+        "Y27-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "docs/contracts/investor-reporting/v1/ComparisonCatalogue.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the missing published contract: byte-for-byte the _contracts/ source plus one added x-contract-version v1 key; added, no existing published file modified",
+      "artifact_covered_by": [
+        "Y27-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/fixtures/ComparisonCatalogue.valid.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "wrapped fixture; validates with 0 errors against the published schema",
+      "artifact_covered_by": [
+        "Y27-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/fixtures/ComparisonCatalogue.invalid.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "wrapped fixture; 3 errors (additional property, empty label, name_source enum)",
+      "artifact_covered_by": [
+        "Y27-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_unguarded_census.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "cell IB-yr-272: the three literals 17 -> 18, still literals, dated in comments naming IB-yr-272 and row IRPT_BCKEND-W89-S2; result 6 failed / 2 passed as predicted",
+      "artifact_covered_by": [
+        "Y27-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y27-1-AC1",
+      "criterion_verbatim": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider _contracts/tests/test_seam_paired.py -> expect 0 failed (report the passed count and the collected total)",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider _contracts/tests/test_seam_paired.py",
+      "output_evidence": "24 failed, 35 passed in 0.41s (rc=1); 59 collected. Base in this worktree was 34 failed, 25 passed (59 collected). The parsing cause is gone (10 nodes moved to green, [comparison-catalogue] among them) but 24 stay red for six other causes A-F, enumerated in row IRPT_BCKEND-W90-S1.",
+      "denominator": "35 of 59 tests passed (24 failed)",
+      "expect": "^0 failed",
+      "status": "FAIL",
+      "status_reason": "REFUSED, not weakened: the remaining 24 are 13 consumer-portal fixture drift nodes, 6 control nodes lacking fixture pairs for five documents (files outside <paths>), and 5 nodes whose stale pins or oneOf/status-envelope shapes need a decision (row IRPT_BCKEND-W90-S1). The order stays open."
+    },
+    {
+      "criterion_id": "Y27-1-AC2",
+      "criterion_verbatim": "cd infra/aws/lambda/investor-reporting && python - <<'PY'\nimport io, json, subprocess\nP = \"_contracts/fixtures/AnalysisRequest.valid.json\"\norig = io.open(P, encoding=\"utf-8\").read()\nd = json.loads(orig)\nd[\"instance\"][\"stage\"] = 12345      # stage is an 8-value string enum; 12345 violates it outright\nio.open(P, \"w\", encoding=\"utf-8\", newline=\"\\n\").write(json.dumps(d, indent=2) + \"\\n\")\nr = subprocess.run([\"python\", \"-m\", \"pytest\", \"-q\", \"-p\", \"no:cacheprovider\",\n                    \"_contracts/tests/test_seam_paired.py::test_control_a_known_good_document_conforms_and_a_known_bad_one_does_not[analysis-requests]\"],\n                   capture_output=True, text=True)\nio.open(P, \"w\", encoding=\"utf-8\", newline=\"\\n\").write(orig)   # ALWAYS revert\nprint(r.stdout[-700:])\nPY -> expect 1 failed, and the message names the ENUM violation on `stage` (12345) -- NOT \"no valid fixture\"",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python - &lt;&lt;'PY'\nimport io, json, subprocess\nP = \"_contracts/fixtures/AnalysisRequest.valid.json\"\norig = io.open(P, encoding=\"utf-8\").read()\nd = json.loads(orig)\nd[\"instance\"][\"stage\"] = 12345      # stage is an 8-value string enum; 12345 violates it outright\nio.open(P, \"w\", encoding=\"utf-8\", newline=\"\\n\").write(json.dumps(d, indent=2) + \"\\n\")\nr = subprocess.run([\"python\", \"-m\", \"pytest\", \"-q\", \"-p\", \"no:cacheprovider\",\n                    \"_contracts/tests/test_seam_paired.py::test_control_a_known_good_document_conforms_and_a_known_bad_one_does_not[analysis-requests]\"],\n                   capture_output=True, text=True)\nio.open(P, \"w\", encoding=\"utf-8\", newline=\"\\n\").write(orig)   # ALWAYS revert\nprint(r.stdout[-700:])\nPY",
+      "output_evidence": "1 failed. AssertionError: POSITIVE CONTROL FAILED for analysis-requests: 12345 is not one of ['RECEIVED', 'PARSED', 'NEEDS_CORRECTION', 'READY', 'SUBMITTING', 'GENERATED', 'RELEASED', 'FAILED'] -- the ENUM violation on stage (12345), not 'no valid fixture'. (1 failed in 0.38s; script body identical to the criterion's, run from .scratch/ac2.py; fixture reverted, git diff empty.)",
+      "denominator": "1 of 1 node run",
+      "expect": "1 failed.*12345 is not one of",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y27-1-AC3",
+      "criterion_verbatim": "git diff --diff-filter=M --name-only HEAD -- docs/contracts/investor-reporting/v1/ -> expect no output (no EXISTING published schema modified; added files are permitted and do not appear)",
+      "method": "diff",
+      "invocation": "git diff --diff-filter=M --name-only HEAD -- docs/contracts/investor-reporting/v1/",
+      "output_evidence": "no output (empty), rc=0. The one file added under v1/, ComparisonCatalogue.schema.json, is untracked and does not appear.",
+      "denominator": "0 of 24 published top-level schemas modified",
+      "expect": "no output",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's own falsifier (AC2): the control node must still be able to fail, for the right reason, after the parser fix.",
+      "expected": "1 failed naming the stage enum",
+      "observed": "1 failed: 12345 is not one of [... 8 stage values]",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- each criterion is one pytest file or node on fixed inputs",
+      "observed": "AC1 run three times with the same result (24 failed, 35 passed)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Y27-1-AC1 pass",
+      "reason": "Six causes outside the parser (portal fixture drift, five missing fixture pairs, a stale 11-schema pin, data-not-required, oneOf, PublicStatusEnvelope fixture); refusal clause invoked, row IRPT_BCKEND-W90-S1."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W90-S1 -- the seam suite's red is not one cause: 24 of 59 nodes still red after the parser fix, six independent causes, AC1 unmeetable inside the grant",
+    "IRPT_BCKEND-W90-S2 -- AC2 passes on output but the analysis-requests control is red for a second reason with the mutation removed"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider _authz/tests/test_unguarded_census.py",
+      "result": "6 failed, 2 passed (target met; the 6 are rows IRPT_BCKEND-S220/S221, not this order's)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest --collect-only -q -p no:cacheprovider _contracts/tests/test_seam_paired.py",
+      "result": "59 tests collected (the order's dry-run said 58; the extra is the [comparison-catalogue] node from IB-yr-261, present at base)"
+    }
+  ]
+}
