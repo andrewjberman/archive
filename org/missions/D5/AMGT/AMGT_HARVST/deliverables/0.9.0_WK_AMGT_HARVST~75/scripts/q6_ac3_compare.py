@@ -28,8 +28,8 @@ def main():
     gained = sorted(after - base)
     print("BASE  (%s, lib/opal_data_harvest identical to worktree HEAD 0cfb3406bf): %s" % (BASE_COMMIT, base_summary))
     print("AFTER (this branch)                                       : %s" % after_summary)
-    print("BASE  passed=%d failed=%d" % (len(base), len(base_failed)))
-    print("AFTER passed=%d failed=%d" % (len(after), len(after_failed)))
+    print("BASE  passed=%d; failed=%d" % (len(base), len(base_failed)))
+    print("AFTER passed=%d; failed=%d" % (len(after), len(after_failed)))
     print("passed at base and not passing after: %d of %d %s" % (len(lost), len(base), lost))
     new_files = {g.split("::")[0] for g in gained}
     print("newly passing after: %d, all in %s" % (len(gained), sorted(new_files)))
