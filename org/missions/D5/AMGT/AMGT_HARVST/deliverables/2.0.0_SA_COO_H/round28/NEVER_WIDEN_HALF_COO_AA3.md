@@ -62,3 +62,27 @@ The NEW rows are not in the mention snapshot until a mention rebuild, so no page
 ## 3. ROLLBACK
 
 Forward only. A delete is a human word; the ruling keeps the 11 rows.
+
+---
+
+## RE-SIGNED FOR PHASE B (2026-09-30 ~11:2xZ), on the merged phase-A code @`379a4cab73`
+
+**Attempt 1 wrote nothing** (@`b2517c9c4b`). `silver_append` raised at parquet serialization: the rows carried empty structs.
+This half's original dry run mirrored the filter only, and never serialized.
+
+**Phase A** (@`379a4cab73`) prunes empty dicts to None in bbg rows only (`silver_from_bronze._prune_empty_dicts`). The suite runs
+677 passed.
+
+**Re-measured with the SERIALIZING dry run** (`aa-3.signing.py --signing`, which runs the REAL `silver_append` against a
+put-capturing client):
+- **1 put, `written_rows` 11.**
+- The expected write is unchanged: 11 NEW, in 1 part (2026-09-30).
+- Keys go from 30 to 41.
+- BEFORE is unchanged: 30 parts, 30 bronze objects, 30 served keys, 11 of them empty.
+
+**Everything else in this half stands:**
+- the 11 hash-keyed rows are kept and proven inert;
+- the STOP if an empty row is reachable from a served list;
+- forward-only rollback.
+
+The act runs from code at or after `379a4cab73`.
