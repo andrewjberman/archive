@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-b-1.bloomberg-channel-collector-silver-leg",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "808f1eb30293ae4ea52082701067857393a653f6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "787905d1a3",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-b-1.bloomberg-channel-collector-silver-leg.md"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/collector_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "695e59f854",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW. Stage fetch-bloomberg: import (real census captures -> bronze, raw bytes unchanged, sidecar, idempotent on sha256, marker when whole), daily/backfill via the Excel BQL method behind an injectable fetch (never called live in this cell), CLI exit 0/1/2/3. Not deployed; the vehicle leg is gated off.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/silver_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "695e59f854",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW. Stage build-bloomberg-silver: every row and column typed, fund_ticker added, per-fund partition by claimed report date, latest capture wins, idempotent on batch_id.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/collector_issuer.py",
+      "kind": "script",
+      "commit_or_etag": "695e59f854",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDIT (3 lines): bronze stem basg-<requested_date>-<ts>-<sha12> (rules row W1-S2).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/pipeline/scheduled_daily_pull.cmd",
+      "kind": "script",
+      "commit_or_etag": "695e59f854",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ADD-ONLY (122 lines, 0 removed): :rivalfunds_bbg_leg right after :prune, gated by RIVALFUNDS_BBG_LEG=1 (absent = skip line, no rc), RC_RIVBBG 80-83 and RC_RIVENR 84-87, enrichment_bloomberg.py only if the file exists; CRLF and ASCII kept. The leg text was exercised through a stub harness (gate off, collector rc 0/1/2/3/9, enrichment rc 0/1/2/3/7, PY_AWS unset): every mapping as designed, RC untouched. The file is NOT deployed beyond the working tree and the leg never runs without the gate.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_b1_bloomberg_channel.py",
+      "kind": "test",
+      "commit_or_etag": "695e59f854",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 16 pytest tests incl. the planted malformed captures, the real captures through import and silver, daily with a fake fetch. Full rivalfunds suite: 99 passed.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "two real captures import into bronze + sidecars with the requested date in the key; marker; rerun no-op; issuer key fixed",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/b-1.AC1.py",
+      "output_evidence": "OK: import status OK; OK: 2 raw + 2 sidecars under <sink>/opal-data-etfs/bloomberg/etfs/bronze/holdings (got 2 + 2); OK: one raw key carries requested date 2026-09-28 (chk-import-2026-09-28-20260930T151342Z-67fcf351eed4.json); OK: 2026-09-28 sidecar row_count per fund == capture's; OK: capture_origin census:2026-09-28.json@2026-09-30T11:13:42.273136-04:00; OK: fetch-bloomberg marker written; OK: rerun lands nothing new (2 -> 2); OK: issuer bronze key carries requested date 2026-09-28 (basg-2026-09-28-20260929T204617Z-2a559d4deb4e.txt); AC1 RESULT: PASS 0 failures (rc=0)",
+      "denominator": "13 of 13 checks OK, 0 failures (rc=0)",
+      "status": "PASS",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "Bloomberg silver holds every row of every fund; columns kept; idempotent",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/b-1.AC2.py",
+      "output_evidence": "OK: silver objects for report date 2026-09-29: 6; OK: funds ['BIDD','CGIC','IDVZ','INEQ','SCHY','TXUE'] == capture's; OK: rows per fund {'BIDD': 49, 'CGIC': 205, 'IDVZ': 45, 'INEQ': 104, 'SCHY': 134, 'TXUE': 51} == capture; OK: every capture column kept (11 of 11); OK: second replay adds no rows (588 -> 588); AC2 RESULT: PASS 0 failures (rc=0)",
+      "denominator": "6 of 6 checks OK, 0 failures (rc=0)",
+      "status": "PASS",
+      "expect": "AC2 RESULT: PASS 0 failures",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the vehicle leg is added gated OFF with no existing line changed",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/b-1.AC3.py",
+      "output_evidence": "OK: all 394 base lines survive in order (0 missing/edited); OK: :rivalfunds_bbg_leg placed after :prune (22375, 24511); OK: the leg skips unless RIVALFUNDS_BBG_LEG==1; OK: exit codes 80-87 documented in the leg; OK: own rc variables RC_RIVBBG and RC_RIVENR; OK: the leg never assigns RC, RC_ETF or RC_CONS ([]); OK: enrichment is invoked only if its file exists; AC3 RESULT: PASS 0 failures (rc=0)",
+      "denominator": "14 of 14 checks OK, 0 failures (rc=0)",
+      "status": "PASS",
+      "expect": "AC3 RESULT: PASS 0 failures",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no planted mutant; its tests plant malformed captures.",
+      "expected": "a non-capture lands nothing and fails the batch with no marker; a well-formed unusable capture lands with a non-OK status and never reaches silver",
+      "observed": "test_malformed_capture_lands_nothing_and_fails_the_batch and test_unusable_but_well_formed_capture_lands_with_status_and_never_reaches_silver pass; bad sha256, unparseable value and absent captures also pass (16 of 16 in test_b1_bloomberg_channel.py)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Ran b-1.AC1, AC2 and AC3 twice each (check run plus the recorded run)",
+      "observed": "each printed PASS 0 failures both times, rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live Excel BQL fetch (collector_bloomberg.excel_fetch)",
+      "reason": "NO live Bloomberg call in this cell (R-21, order section 0); only its unreachable guard is tested (pywin32 absent -> BloombergUnreachable). The leg stays gated off until RIV-d-3."
+    },
+    {
+      "item": "pywin32 in the vehicle's PY_AWS interpreter",
+      "reason": "Measured, not a criterion: Python 3.11.9 at the PY_AWS path imports win32com.client, pythoncom, win32process, boto3, pyarrow and pandas."
+    },
+    {
+      "item": "the task order's <status> flip",
+      "reason": "Outside this worker's <paths> and left to the issuer by the order."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W2-S2",
+    "ETFS_RIVALS-Z-W2-S3",
+    "ETFS_RIVALS-Z-W2-S4",
+    "ETFS_RIVALS-Z-W2-S5"
+  ],
+  "session_log": "No separate log file; worker 0.9.0_WK_ETFS_RIVALS~2 on branch wk-ETFS_RIVALS-r2-2, code commit 695e59f854. Four rows filed: ETFS_RIVALS-Z-W2-S2 (80-83 also the price leg's codes), -S3 (PY_AWS unset on the rc-50 path), -S4 (silver_issuer capture-id ordering vs the new issuer key, ARMED), -S5 (per-row report dates vs the silver partition).",
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 <the five .py files>",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/etfs/scripts/rivalfunds/tests -q",
+      "result": "99 passed"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <7 paths>",
+      "result": "committed 695e59f854"
+    }
+  ]
+}
