@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ad-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ad-3.one-verified-upload.md",
+    "group": "C",
+    "vintage_commit": "9473d06426fa0b6111870a0f6cfa87be007155f1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "9473d06426fa0b6111870a0f6cfa87be007155f1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ad-3.one-verified-upload.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~194",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/harvest/upload_verified.sh",
+      "kind": "script",
+      "commit_or_etag": "f31a81acc6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deploy_evidence": "Shell code only; no upload run, no AWS call."
+    }
+  ],
+  "surprises": [],
+  "session_log": "0.9.0_WK_AMGT_RESAPP~194 on wk-AMGT_RESAPP-194; no surprise rows.",
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "UPLOAD KEEPS A LEADING-SLASH SHA AND REFUSES A MANGLED READ-BACK: YES -- and exit=0",
+      "method": "command",
+      "denominator": "4 scripts, 2 harness arms",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round54/checks/ad_3_readback.sh; echo \"exit=$?\"",
+      "output_evidence": "honest arm: exit 0, metadata received /HmoIi0wOY/LTypS/T5cJ8Qi3AMmxyVYxed57iiAwHw=; plant arm exit 3; 4 of 4 scripts source upload_verified.sh with 0 other --metadata lines; verdict YES; exit=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "syntax OK for all five files, no syntax BAD -- and exit=0",
+      "method": "command",
+      "denominator": "5 of 5 files",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; for f in infra/aws/terraform/harvest/upload_verified.sh infra/aws/terraform/harvest/build-and-upload*.sh; do bash -n \"$f\" &amp;&amp; echo \"syntax OK $f\" || echo \"syntax BAD $f\"; done; echo \"exit=$?\"",
+      "output_evidence": "syntax OK x5, 0 syntax BAD, exit=0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1's plant arm returns a mangled read-back; the helper must exit non-zero.",
+      "expected": "plant arm exit non-zero",
+      "observed": "plant arm exit 3",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: stub-driven harness, no AWS, deterministic plant zip",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "bash -n",
+      "invocation": "bash -n on the five files",
+      "result": "5 of 5 syntax OK"
+    }
+  ]
+}

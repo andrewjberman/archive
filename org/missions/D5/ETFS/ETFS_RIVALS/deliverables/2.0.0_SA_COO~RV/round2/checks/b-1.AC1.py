@@ -1,7 +1,8 @@
 """RIV-b-1 AC1 -- two real IDVZ-group Excel BQL captures import into Bloomberg bronze in a local sink: one raw object
 (<batch>-<requested_date>-<ts>-<sha12>.json) + its <stem>.sidecar.json per capture at the builder address, the key carrying the requested date, the sidecar's per-fund row counts equal
 to the capture's, provenance capture_origin census:*, the fetch-bloomberg marker written; a rerun lands nothing new. The
-issuer collector's key carries the requested date too (row W1-S2)."""
+issuer collector's key carries the requested date too (row W1-S2), and silver_issuer orders captures by capture time across
+both key formats (row W2-S4)."""
 import json
 import pathlib
 import sys
@@ -43,6 +44,14 @@ def run(v):
     out = c.land(isink, c.archive_files(1))
     req = c.archive_meta(c.archive_files(1)[0])["requested_date"]
     v.check(req in out[0].get("bronze_uri", ""), f"issuer bronze key carries requested date {req}: {out[0].get('bronze_uri')}")
+
+    from rivalfunds import silver_issuer
+    old_early = "s3://b/k/basg-20260929T120000Z-aaaaaaaaaaaa.txt"
+    new_late = "s3://b/k/basg-2026-09-28-20260930T120000Z-bbbbbbbbbbbb.txt"
+    new_early = "s3://b/k/basg-2026-09-28-20260928T120000Z-cccccccccccc.txt"
+    ids = {k: silver_issuer._capture_id(k) for k in (old_early, new_late, new_early)}
+    v.check(ids[new_late] > ids[old_early] > ids[new_early],
+            f"capture ids order by capture time across key formats (row W2-S4): {ids}")
 
 
 failures = c.guarded("AC1", run)
