@@ -12,6 +12,8 @@ c=$(printf '%s\n' "$out" | sed -n 1p); p=$(printf '%s\n' "$out" | sed -n 2p)
 desc=no; [ "$p" != NONE ] && git merge-base --is-ancestor "$p" "$c" 2>/dev/null && desc=yes
 OG_T2_AUTHORS="${OG_T2_AUTHORS:-0.9.0_WK_NFRA_OPLGTW~12}"   # the build slot: OG-t-1, OG-u-1, OG-u-2
 allowed=$(for a in $OG_T2_AUTHORS; do git log --format=%H --author="$a <" HEAD -- "$GW"; done | while read h; do git show --name-only --format= "$h" -- "$GW"; done | sort -u)
+# A2 (row Z-W12-S5): the order itself ships deploy-to-ec2.sh (step 6, release branch only), so it is allowed.
+allowed=$(printf '%s\n%s\n' "$allowed" "$GW/deploy-to-ec2.sh" | grep . | sort -u)
 shipped=$( [ "$p" != NONE ] && git diff --name-only "$p" "$c" -- "$GW" 2>/dev/null | sort -u)
 nship=$(printf '%s\n' "$shipped" | grep -c .)
 foreign=$(comm -23 <(printf '%s\n' "$shipped" | grep .) <(printf '%s\n' "$allowed" | grep .)); nf=$(printf '%s\n' "$foreign" | grep -c .)

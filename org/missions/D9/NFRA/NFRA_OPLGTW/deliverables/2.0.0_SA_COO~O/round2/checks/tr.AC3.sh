@@ -17,7 +17,10 @@ st=""; for i in 1 2 3 4 5 6; do st=$(timeout 8 "$AWS" ssm get-command-invocation
 o=$(timeout 10 "$AWS" ssm get-command-invocation --command-id "$cid" --instance-id $I --query StandardOutputContent --output text 2>/dev/null | tr -d '\r')
 rm -rf "$T"
 h=$(printf '%s\n' "$o" | sed -n 's/^health=//p'); ro=$(printf '%s\n' "$o" | sed -n 's/^roster=//p'); ap=$(printf '%s\n' "$o" | sed -n 's/^authpath=//p'); en=$(printf '%s\n' "$o" | sed -n 's/^enabled=//p')
-same=no; [ "$en" = 'ENABLED_INTEGRATIONS=ycharts opal_portal globgrph' ] && same=yes
+# A2 (row Z-W12-S4): 'unchanged' means the live value before the release, six ids at 42c52ed4d9; override with
+# OG_T2_ENABLED_BEFORE when the worker's step-8 BEFORE read differs.
+EXP="${OG_T2_ENABLED_BEFORE:-ycharts opal_portal globgrph opal_discover portal_index schwab}"
+same=no; [ "$en" = "ENABLED_INTEGRATIONS=$EXP" ] && same=yes
 echo "ssm command=${cid:-NONE} status=${st:-NONE}; /health=$h; email roster reads on host ${ro:-NONE}; callback in AUTH_PATHS ${ap:-NONE}; ENABLED_INTEGRATIONS unchanged=$same"
 if [ "$h" = 200 ] && [ "$ro" = 0 ] && [ "${ap:-0}" -ge 1 ] && [ "$same" = yes ]; then echo "RESULT: PASS"; exit 0; fi
 echo "RESULT: FAIL"; exit 1
