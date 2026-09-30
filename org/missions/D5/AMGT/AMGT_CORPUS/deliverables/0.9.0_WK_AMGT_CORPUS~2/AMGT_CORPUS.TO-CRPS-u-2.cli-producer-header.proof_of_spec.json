@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-u-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-u-2.cli-producer-header.md",
+    "group": "OTHER",
+    "vintage_commit": "49d41f0c2b8ff72df14cadb1f18139c172a46e16"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "49d41f0c2b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-u-2.cli-producer-header.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/build_unit_map.py",
+      "kind": "script",
+      "commit_or_etag": "933855d47482a6887100555c1a05f84b6fb7fcb2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "prepare_header(s3, security, sec_key, header, raw_stamp) returns a copy of the header with every _mbp._BULK_TEXT_HEADER_FIELDS member joined by _mbp._bulk_text_value and the bestdata 1FY row's _mbp.FORECAST_FIELDS merged (a ClientError on the bestdata read is a no-op); main() applies it to every resolved name before dry-run and real write; the real write uses open(newline=LF). No S3 write, no vendor call, field_map.json untouched.",
+      "introduces": [
+        "prepare_header"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_build_unit_map_cli_header.py",
+      "kind": "test",
+      "commit_or_etag": "933855d47482a6887100555c1a05f84b6fb7fcb2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 tests with a stub S3 (no network): joins a CIE_DES_BULK row-dict list; merges a bestdata 1FY value (empty/None skipped); leaves the input header unchanged; missing bestdata object is a no-op; bestdata without the security's row is a no-op.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u2_AC1.sh -- expect u2 replay rc 0 shared_changed 0 shared_removed 0 type_changed 0 hitachi_reproduced 214 of 214 non6501_added 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u2_AC1.sh",
+      "output_evidence": "u2 replay rc 0 shared_changed 0 shared_removed 0 type_changed 0 hitachi_reproduced 214 of 214 non6501_added 0",
+      "denominator": "214 of 214 committed Hitachi additions reproduced through the CLI at HEAD 933855d474 (was 209 of 214 before); 0 shared changes, 0 removals, 0 type changes, 0 non-6501 additions",
+      "expect": "(?m)^u2 replay rc 0 shared_changed 0 shared_removed 0 type_changed 0 hitachi_reproduced 214 of 214 non6501_added 0$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u2_AC2.sh -- expect (?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u2_AC2.sh",
+      "output_evidence": "14 passed in 1.90s",
+      "denominator": "14 of 14 tests passed across the new cli_header test (5) and the builder's exceptions and classification_split suites (9), 0 failed",
+      "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 and AC2 each run once after the final commit; the replay reads S3 raw only against a temp copy of the pre-Hitachi map.",
+      "observed": "AC1 214 of 214 and AC2 14 passed on the runs recorded above.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The prior build_unit_map.py (HEAD~1, no prepare_header: the CLI passes the raw header as landed) run through the same u2_AC1.sh replay, then the new file restored byte-for-byte.",
+      "expected": "MUTANT reproduces fewer than 214 of 214 (the TO measured 209).",
+      "observed": "u2 replay rc 0 shared_changed 0 shared_removed 0 type_changed 0 hitachi_reproduced 209 of 214 non6501_added 0 -- CONTROL FIRED-AS-EXPECTED; git status on the file clean after restore.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Editing model_block_pull.py",
+      "reason": "Owned by another cell of round 19; the producer hookup is a one-line replacement the issuer adds at the merge (named in the worker report)."
+    },
+    {
+      "item": "Writing field_map.json or any S3 object",
+      "reason": "BOUNDS: the replay works on a temp copy; no S3 write, no vendor call."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "u2_AC1.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u2_AC1.sh",
+      "result": "rc 0; 214 of 214"
+    },
+    {
+      "tool": "u2_AC2.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u2_AC2.sh",
+      "result": "rc 0; 14 passed"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -- build_unit_map.py test_build_unit_map_cli_header.py",
+      "result": "commit 933855d474; commit-gate and naming-gate PASS"
+    }
+  ]
+}
