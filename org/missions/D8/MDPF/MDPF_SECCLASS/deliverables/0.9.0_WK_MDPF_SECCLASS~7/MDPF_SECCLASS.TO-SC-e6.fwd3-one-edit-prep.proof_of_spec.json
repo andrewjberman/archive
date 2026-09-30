@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e6",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R2.md",
+    "vintage_commit": "5d3432a201bbe44adcea42c6bb8d852faecb9cd5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e6.fwd3-one-edit-prep.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classification.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Added ticker VNQI (Vanguard Global ex-U.S. Real Estate ETF) to ETF_CLASSIFICATIONS ('alternatives'), ETF_MANAGEMENT_STYLE ('passive'), ETF_SUB_ASSET_CLASS ('International Real Estate'), ETF_SECTOR_MAPPING ('Real Estate') and ETF_NAME_OVERRIDES ('Vanguard Global ex-U.S. Real Estate ETF'), the way GLD sits (all five dicts). instrument_kind resolves to 'fund' automatically via the existing ETF_INSTRUMENT_KIND set-comprehension (VNQI is not in _SINGLE_SECURITY_TICKERS). Evidence VNQI was wrong as a live scheduled row: live get_item(Key={'ticker':'VNQI'}) read {'asset_class':'equity','sub_asset_class':'International','classified_by':'scheduled'}, direct-matched from the retiring per-firm fork's own values with no fold (etf_classification_scheduled.py classify_asset_class()); the table's own precedent row VNQ (live get_item: {'asset_class':'alternatives','sub_asset_class':'Real Estate','classified_by':'seed'}) shows the canonical vocabulary's established treatment for this fund family. Full module pytest suite: 28 passed (infra/aws/lambda/v2_portal/_shared/tests/, including test_no_bd_securities_reference and the seed-fields suite -- no regression). LOCAL edit only; no seed run, no table write, no deploy.",
+      "artifact_covered_by": [
+        "SC2-e6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_FWD3_PLAN_20260930.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "table_rows_at_build 2309 (live etf-classifications, Select=COUNT full scan). ticker VNQI; fork_value {'asset_class':'equity','sub_asset_class':'International'}; current_row the live item read (classified_by='scheduled'); seed_value {'asset_class':'alternatives','sub_asset_class':'International Real Estate','instrument_kind':'fund','management_style':'passive','sector':'Real Estate','name':'Vanguard Global ex-U.S. Real Estate ETF'}; 3 surfaces named with file + line citation each (S11 49F a07_dim_asset_classification.py classify() :220-255/230/238; S13 Positioning yang-generate-positioning etf_classifications_dynamodb.py get_asset_class :86-94 / get_sub_asset_class :96-104; S16 portal HoldingsBreakdownTable.tsx :368 subAssetBg call), each read live at this build via comp-read. Census cross-check: VNQI appears in R1_BACKFILL_CENSUS_20260929.json firms[bd] and firms[49financial] rows with classified_by='scheduled', input='bd-securities', matching the live read exactly. No table write.",
+      "artifact_covered_by": [
+        "SC2-e6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_FWD3_20260930.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Never-widen half for the first real seed run that lands the VNQI correction: '## The act' (the one-ticker seed write, before/after values), '## Blast radius' (S11/S13/S16 readers, each branch, find_by_* membership move), 'Rollback per key' (UpdateItem restoring the PRE-READ scheduled values, single ticker). Andrew's 2026-09-29 ruling on bd-securities seeding new rows is read together with the seed-always-wins C-WRITER rule to cover the one case this act is (seed overwriting a scheduled row, not an existing seed/legacy row). COO and CTO halves left PENDING per this order's bound (issuer/CTO sign, not this worker).",
+      "artifact_covered_by": [
+        "SC2-e6-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC2-e6-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py fwd3 -- expect: FWD3-PLAN",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py fwd3",
+      "expect": "FWD3-PLAN",
+      "output_evidence": "FWD3-PLAN VNQI -> {'asset_class': 'alternatives', 'sub_asset_class': 'International Real Estate', 'instrument_kind': 'fund', 'management_style': 'passive', 'sector': 'Real Estate', 'name': 'Vanguard Global ex-U.S. Real Estate ETF'} on 3 surfaces",
+      "denominator": "table_rows_at_build 2309 >= 2309 minimum; 5 of 5 required keys present (ticker, fork_value, current_row, seed_value, surfaces); current_row.classified_by == 'scheduled'; fork_value != seed_value; 3 of 3 surfaces named (>= 2 required).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC2-e6-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_FWD3_20260930.md -- expect: HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_FWD3_20260930.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_FWD3_20260930.md",
+      "denominator": "0 unresolved {{slot}} placeholders; 4 of 4 required strings present (## The act, ## Blast radius, Rollback per key, candidate).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Set fork_value == seed_value in R2_FWD3_PLAN_20260930.json (asset_class 'equity' on both sides) and re-ran the checker.",
+      "expected": "r2_evidence.py fwd3 fails on 'the seed value equals the fork value -- not a correction'",
+      "observed": "NOT-MET: the seed value equals the fork value -- not a correction (rc=1). Reverted immediately; re-run: FWD3-PLAN VNQI -> ... on 3 surfaces (rc=0).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py fwd3 invoked twice back to back.",
+      "observed": "Identical output both times: FWD3-PLAN VNQI -> {...} on 3 surfaces (rc=0).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running the seed run, writing to the live table, deploying, or applying any IAM change.",
+      "reason": "Bounds: LOCAL build + record only. The seed-source edit is made; the actual write to etf-classifications lands only after the never-widen half is signed and the issuer runs the seed script."
+    },
+    {
+      "item": "Calling an outside model for classification.",
+      "reason": "Bounds forbid an outside-model call; the correction is sourced from the table's own live VNQ precedent row and the census, never a model."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_FWD3_PLAN_20260930.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest (full module suite, regression check)",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/ -q -p no:cacheprovider",
+      "result": "28 passed"
+    },
+    {
+      "tool": "r2_evidence.py fwd3 (SC2-e6-AC1 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py fwd3",
+      "result": "FWD3-PLAN VNQI -> ... on 3 surfaces, rc=0"
+    },
+    {
+      "tool": "r20_half_ready.py (SC2-e6-AC2 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_FWD3_20260930.md",
+      "result": "HALF-READY, rc=0"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/v2_portal/_shared/etf_classification.py",
+      "result": "OK: pre-commit gate clean for 1 of 1 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~7 <0.9.0_WK_MDPF_SECCLASS~7@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "PENDING-THIS-COMMIT on wk-MDPF_SECCLASS-7 (LOCAL)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC2-e6-AC1,SC2-e6-AC2",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}

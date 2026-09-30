@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-241",
+  "firm": "INF",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "ea187702668e012abd6c8d63af10490c3e5217fe",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-241.inf-raw-writer-diagnosis.md"
+  },
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-241.inf-raw-writer-diagnosis.md (cell IB-pr-241, row IRPT_BCKEND-S216)",
+    "group": "OTHER",
+    "vintage_commit": "ea187702668e012abd6c8d63af10490c3e5217fe"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~81",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~81/RAW_WRITER_DIAGNOSIS.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only diagnosis record, no deploy scope. Validated by the cell's own checker (p24_1_ac1_raw_writer_diagnosis.py) against live AWS (S3 list + describe_instances), not a copy.",
+      "artifact_covered_by": ["P24-1-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Comment-only change (DOOR 5 paragraph), no Terraform/Lambda deploy touched; this cell's grant is read-only against AWS and explicitly excludes deploy. py_compile clean; Ruling 16 (COERCED_SUFFIXES) byte-unchanged, verified by the checker's own regex extraction.",
+      "artifact_covered_by": ["P24-1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P24-1-AC1",
+      "criterion_verbatim": "the record's fields are present; its last_raw_date equals the newest raw positions date in S3; and its raw_writer exists (get_function / describe). Base: FAIL (record absent).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r24/p24_1_ac1_raw_writer_diagnosis.py\" .",
+      "output_evidence": "fields present: True\nnewest raw positions date in S3: 2026-09-27 | record says 2026-09-27 | equal: True\nraw_writer exists: True\nP24-1-AC1 PASS",
+      "denominator": "3 of 3 sub-checks (fields present, date equality against a fresh S3 list, raw_writer existence via a fresh describe_instances) all True",
+      "status": "PASS",
+      "status_reason": "The invocation's real output ends 'P24-1-AC1 PASS', matching the TO's <expect> literally; base state (record absent) was confirmed FAIL before this worker wrote the record.",
+      "expect": "P24-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "P24-1-AC2",
+      "criterion_verbatim": "the stale sentence is gone, both commits are cited, Ruling 16 is unchanged, and the file compiles. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r24/p24_1_ac2_mirror_door5_comment.py\" .",
+      "output_evidence": "stale DOOR 5 sentence present: False | cites 5fdbe38637 + 69a15bf90e: True | Ruling 16 unchanged: True | compiles: True\nP24-1-AC2 PASS",
+      "denominator": "4 of 4 sub-checks (stale sentence gone, both commits cited, Ruling 16 unchanged, compiles) all True",
+      "status": "PASS",
+      "status_reason": "The invocation's real output ends 'P24-1-AC2 PASS', matching the TO's <expect> literally; base state (stale sentence present, no citations) was confirmed FAIL before this worker's edit.",
+      "expect": "P24-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "negative controls exercised directly, each reverted and the base re-verified before the next: (a) AC1 -- deleted the RAW_WRITER_DIAGNOSIS.json record entirely; (b) AC1 -- changed last_raw_date to an off-by-one wrong date (2026-09-28) with the record otherwise intact; (c) AC2 -- re-inserted the exact stale sentence 'It is NOT ruled, NOT recommended, NOT yours' alongside the new paragraph",
+      "expected": "each mutation makes its checker refuse, never a silent pass",
+      "observed": "(a) 'diagnosis record absent: ... P24-1-AC1 FAIL' rc=1. (b) 'newest raw positions date in S3: 2026-09-27 | record says 2026-09-28 | equal: False ... P24-1-AC1 FAIL' rc=1. (c) 'stale DOOR 5 sentence present: True ... P24-1-AC2 FAIL' rc=1. All three fired as expected; file restored (git diff confirmed clean against the committed content) and both base PASS outputs re-verified before finishing.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two consecutive runs of each acceptance invocation against the same committed content (no working-tree change between runs, live-AWS reads both times)",
+      "observed": "AC1: both runs printed 'newest raw positions date in S3: 2026-09-27 | record says 2026-09-27 | equal: True' and 'P24-1-AC1 PASS', rc=0 both times. AC2: both runs printed byte-identical output ending 'P24-1-AC2 PASS', rc=0 both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "boto3 (S3 list_objects_v2, logs describe_log_streams/get_log_events/filter_log_events, lambda get_function/get_function_configuration, ec2 describe_instances/describe_instance_attribute, events list_rules/list_targets_by_rule) -- read-only AWS diagnosis instrument",
+      "invocation": "ad-hoc python scripts run from this worktree (scratch files under $HOME, never committed), e.g. filter_log_events on /aws/lambda/inf-ec2-launch-monitor and /aws/lambda/inf-ec2-retry-launch across 2026-09-27..2026-09-29, and describe_instances on i-083ad9ae297f88e9f",
+      "result": "Named the raw writer as EC2 instance i-083ad9ae297f88e9f (inf-bronze-runner), last raw jsonl.gz 2026-09-27 across positions/transactions/performance; found the inf-ec2-launch-monitor NORMAL_PATTERNS bare-'' substring-match bug that suppressed 09-29's retry hand-off, and that 09-28's successful retry-to-running still produced no raw output (orion/rate_limit_state_transactions.json and rate_limit_state_performance.json unchanged since 09-27)"
+    },
+    {
+      "tool": "MSYS/Git-Bash path-mangling workaround for CloudWatch Logs log-group names (a leading single slash is rewritten to a Windows path by the shell before Python or aws.exe ever sees it)",
+      "invocation": "double-leading-slash argv (`//aws/lambda/<name>`) then `.lstrip('/')` + re-prepend inside the python script, verified by `python -c \"print(repr(sys.argv[1]))\"` showing the single-slash form is corrupted to `C:/Program Files/Git/aws/lambda/...` while the doubled form survives literally",
+      "result": "Enabled every describe_log_streams/get_log_events/filter_log_events call in this diagnosis; filed nowhere as a surprise because it is a known, already-documented class of MSYS argv corruption (CLAUDE.md rule 22a DELIVERY/RETRIEVAL traps; Rule 16 local-bash limits), not a new one"
+    },
+    {
+      "tool": "p24_1_ac1_raw_writer_diagnosis.py / p24_1_ac2_mirror_door5_comment.py -- the cell's own acceptance checks (issuer-provided, read-only against AWS + the source file)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r24/p24_1_ac1_raw_writer_diagnosis.py\" .   and   python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r24/p24_1_ac2_mirror_door5_comment.py\" .",
+      "result": "P24-1-AC1 PASS; P24-1-AC2 PASS (both re-verified after each negative-control mutation was reverted)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh -- pre-commit gate on the edited .py file",
+      "invocation": "bash .tools/commit-gate.sh \"infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py\"",
+      "result": "All checks passed! OK: no unguarded strict-utf8 log reads. OK: pre-commit gate clean for 1 of 1 file(s)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py -- structural validation of this instance",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~81/IRPT_BCKEND.TO-IB-pr-241.inf-raw-writer-diagnosis.proof_of_spec.json P24-1-AC1,P24-1-AC2",
+      "result": "run before the flip; rc recorded in the worker report"
+    }
+  ]
+}

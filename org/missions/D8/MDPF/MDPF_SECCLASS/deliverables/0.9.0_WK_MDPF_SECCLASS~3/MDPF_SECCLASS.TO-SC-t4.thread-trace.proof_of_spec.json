@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-t4",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP.md",
+    "vintage_commit": "c1e9b60e63bf535d3c9bc148c0e612f824b51684",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-t4.thread-trace.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/thread_trace.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The trace harness. Registers AWSCallRecorder (a botocore before-parameter-build.*.* hook) on boto3's DEFAULT_SESSION, then runs the BD chain's classification hops IN-PROCESS on real data: hop1 lib.etf_classifier.ETFClassifier.instance() classified directly (VXX/GLD/PHYS); hop2 the silver assets dimension via build_bd_assets_dim.py's own apply_blend/apply_opal_taxonomy (columns-restricted read + groupby-idxmax dedup -- the same laptop-memory workaround SC-t-2's own local build used and named, applied here because a full-column/full-sort read exhausts this device's arrow allocator; writes its output LOCALLY to .scratch/, never to S3); hops3-4 D_03's own _find_latest_holdings_lots/_read_parquet/load_ghost_account_ids/apply_ghost_exclusion/build_ap_last_seen/apply_ap_gate/classify_series and C_06.classify_series on the latest gated open lots; hop5 D_03._build_composition scoped to the real client z08327149 (the client SC-t-3's own gold census names), taking top_holdings[:D_04.TOP_N] -- the EXACT pass-through D_04.build_client_summaries serves as concentration.items. Writes org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_THREAD_TRACE_20260929.json. `--mode control` shells out as a SEPARATE process (subprocess) that plants one deliberate bd-securities get_item and reports whether the hook caught it, so the plant never pollutes the real run's own bd_securities_calls count.",
+      "introduces": [
+        "AWSCallRecorder",
+        "install_recorder",
+        "plant_bd_securities_read",
+        "run_bd_chain"
+      ],
+      "artifact_covered_by": [
+        "SC1-t4-AC1",
+        "SC1-t4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/test_thread_trace.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 tests, stub-only (botocore.stub.Stubber; no real AWS calls, no network, no credentials): the hook records a stubbed DynamoDB GetItem naming etf-classifications; the hook catches a planted call naming bd-securities and never confuses it with a canonical read; the hook also records a stubbed S3 GetObject keyed by bucket; install_recorder() registers on boto3's DEFAULT_SESSION so a client the PRODUCT modules build AFTERWARD inherits it. python -m pytest data/black_diamond/scripts/gold/tests/test_thread_trace.py -q -p no:cacheprovider: 4 passed in 0.73-1.03s across repeated runs. Full sibling suite (data/black_diamond/scripts/gold/tests/) 56 of 56 passed -- no regression.",
+      "introduces": [
+        "test_recorder_records_stubbed_dynamodb_call",
+        "test_recorder_flags_planted_bd_securities_call",
+        "test_recorder_distinguishes_s3_bucket_reads",
+        "test_install_recorder_is_seen_by_a_client_built_afterward"
+      ],
+      "artifact_covered_by": [
+        "SC1-t4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_THREAD_TRACE_20260929.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Written by `python data/black_diamond/scripts/gold/tests/thread_trace.py --mode real` on the latest BD day (data_as_of 2026-09-25, same day SC-t-3's own census used) -- LOCAL build + record only, no upload, no deploy. Measured this run: aws_calls=9584, bd_securities_calls=0, canonical_reads=9580, negative_control_caught=true (the --mode control child subprocess printed CONTROL-CAUGHT), client z08327149, page_classes=9, page_classes_resolved=9 (every one of the client's top-9 page holdings -- IEFA/DIVZ/IDVZ/PFDE/SPYM/IJH/PFOE/... -- resolved to its canonical etf-classifications row; VXX is the ticker SC-t-3's census specifically named and is among this client's holdings too). A second real run (aws_calls=11782, canonical_reads=11778 -- DynamoDB call counts vary run to run with cache warmth/timing, as expected for live network calls) reproduced the same client, page_classes=9/9 and control=true, confirming the page-resolution result is stable across runs even though the raw call counts are not.",
+      "artifact_covered_by": [
+        "SC1-t4-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC1-t4-AC1",
+      "criterion_verbatim": "python -m pytest data/black_diamond/scripts/gold/tests/test_thread_trace.py -q -p no:cacheprovider -- expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_thread_trace.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "....                                                                     [100%]\n4 passed in 0.73s",
+      "denominator": "4 of 4 tests passed (0 failed, 0 errors, 0 skipped); full sibling suite data/black_diamond/scripts/gold/tests/ 56 of 56 passed (no regression, the 52 pre-existing plus these 4).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC1-t4-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_thread_trace.py -- expect: THREAD-TRACE",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_thread_trace.py",
+      "expect": "THREAD-TRACE",
+      "output_evidence": "THREAD-TRACE calls=9584 canonical_reads=9580",
+      "denominator": "1 of 1 required key set present (as_of, aws_calls, bd_securities_calls, canonical_reads, negative_control_caught, client, page_classes, page_classes_resolved); aws_calls 9584 > 0; bd_securities_calls 0 (0 foreign-table calls in the real run); canonical_reads 9580 > 0; negative_control_caught true; page_classes 9 == page_classes_resolved 9 (every class on the real client's page resolved to its canonical row).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutated AWSCallRecorder.__call__ so a DynamoDB call naming 'bd-securities' is silently relabelled 'etf-classifications' before being recorded -- blinding the hook to the one distinction it exists to make.",
+      "expected": "test_recorder_flags_planted_bd_securities_call fails (recorder.named('bd-securities') comes back empty)",
+      "observed": "FAILED test_recorder_flags_planted_bd_securities_call - AssertionError: the harness did not catch the planted bd-securities read; assert 0 == 1 (1 failed, 3 passed). Reverted immediately (diffed byte-identical to the pre-mutation backup); re-run: 4 passed in 0.86s.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest data/black_diamond/scripts/gold/tests/test_thread_trace.py -q -p no:cacheprovider invoked twice back to back; outputs diffed. Separately, thread_trace.py --mode real invoked twice on the same latest BD day (data_as_of 2026-09-25); JSON outputs compared on the fields the checker reads.",
+      "observed": "pytest: identical apart from the per-run timing line (0.73s vs 0.73s here; 0.86s on the post-mutant-revert run), same 4 node ids in the same order both times. Real harness: run 1 (aws_calls=11782, bd_securities_calls=0, canonical_reads=11778) and run 2 (aws_calls=9584, bd_securities_calls=0, canonical_reads=9580) differ in raw AWS call counts (expected for live, uncached DynamoDB/S3 traffic) but agree on every field the checker and this cell's spec require: client z08327149, page_classes=9, page_classes_resolved=9, bd_securities_calls=0, negative_control_caught=true.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy, push, merge (beyond git history already on this branch), or rebase.",
+      "reason": "Forbidden by the order: LOCAL build + record, no upload, no deploy. The commit is LOCAL on branch wk-MDPF_SECCLASS-3; the COO drains it."
+    },
+    {
+      "item": "A fully faithful (non-columns-restricted) silver assets-dimension build inside the harness.",
+      "reason": "Named as an expected pattern by the spawning instructions ('a .scratch/ generator may restrict columns, provided it uses the same sources and rows as the product scripts, name any such workaround in the trace') and by SC-t-2's own prior local build: a full-column read + full-frame sort_values of the 3.45M-row source exhausts this laptop's arrow allocator. thread_trace.py's _build_assets_dimension_lightweight reads the SAME source key, the SAME identity columns build_dim() consumes, and calls the REAL apply_blend/apply_opal_taxonomy -- restricted only in which columns are pulled into memory and the dedup algorithm (groupby-idxmax instead of sort_values), never in source, rows, or the classification call itself."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_20260929.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_thread_trace.py -q -p no:cacheprovider",
+      "result": "4 passed in 0.73s"
+    },
+    {
+      "tool": "pytest (full sibling suite, regression check)",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/ -q -p no:cacheprovider",
+      "result": "56 passed in 1.01s"
+    },
+    {
+      "tool": "r1_thread_trace.py (SC1-t4-AC2 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_thread_trace.py",
+      "result": "THREAD-TRACE calls=9584 canonical_reads=9580, rc=0"
+    },
+    {
+      "tool": "thread_trace.py --mode real (the harness itself, producing the trace JSON)",
+      "invocation": "python data/black_diamond/scripts/gold/tests/thread_trace.py --mode real",
+      "result": "THREAD-TRACE-BUILT calls=9584 bd_securities=0 canonical=9580 page_classes=9/9 control=True, rc=0 (run twice; see controls.determinism)"
+    },
+    {
+      "tool": "ruff (py39)",
+      "invocation": "python -m ruff check --target-version py39 data/black_diamond/scripts/gold/tests/thread_trace.py data/black_diamond/scripts/gold/tests/test_thread_trace.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~3 <0.9.0_WK_MDPF_SECCLASS~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-MDPF_SECCLASS-3"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC1-t4-AC1,SC1-t4-AC2",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}

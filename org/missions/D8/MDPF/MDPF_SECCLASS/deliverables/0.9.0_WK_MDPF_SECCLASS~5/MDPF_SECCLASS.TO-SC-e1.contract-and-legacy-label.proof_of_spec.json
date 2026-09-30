@@ -1,0 +1,214 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e1",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R2.md",
+    "vintage_commit": "8b7d5738afba20935c77bbf8347d888bdfa5c87c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e1.contract-and-legacy-label.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/standards/MDPF_SECCLASS_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "contract_version bumped 0.1.0 -> 0.2.0; classified_by.values becomes [seed, scheduled, constituents, legacy], each with a definition (1.0.0_SA_CTO C-WRITER ruling, analysis @151c890591 section 1), the precedence rule (seed always wins; scheduled and constituents write only where no row exists; a missing label reads as legacy), and an updated rule24_record. Amendment 1 (CTO RULING 103140, E9, landed @1302fa149e) additionally adds identifier_namespace {TICKER, CUSIP} beside instrument_kind, with definitions, an absent-reads-TICKER rule, and its own rule24_record including a token census against portal/src (row MDPF_SECCLASS-W5-S2: a same-named, wider field exists on IRPT_BCKEND's own wire contract, disjoint domain). No table read/write performed by this artifact itself.",
+      "introduces": [
+        "\"contract_version\": \"0.2.0\"",
+        "\"constituents\"",
+        "\"legacy\"",
+        "\"identifier_namespace\""
+      ],
+      "artifact_covered_by": [
+        "SC2-e1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_row() now sets classified_by = 'constituents' on every row it writes (supersedes round-1 RULING 103050 text, which the contract's own C-WRITER ruling now names as the third sanctioned writer). Its condition is unchanged: put_row_if_unclassified() still refuses (RowProtected) on attribute_not_exists(classified_by), so it never overwrites a seed, scheduled or already-labelled row. Run only with --dry-run in this build; no write performed.",
+      "introduces": [
+        "\"classified_by\": \"constituents\""
+      ],
+      "artifact_covered_by": [
+        "SC2-e1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/label-legacy-classified-by.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New script: ONE additive conditional update per unlabelled row (SET classified_by = 'legacy' WHERE attribute_not_exists(classified_by)), touching no other attribute; refuses (RowAlreadyLabelled) any row already carrying a classified_by value. CLI blocks any non-dry-run invocation (SystemExit naming the LOCAL build bound). Run --dry-run against the live table for this cell's census; no write performed. Live scan: table_rows_at_build=2309, unlabelled_rows=238.",
+      "introduces": [
+        "def label_row_if_unlabelled",
+        "def plan_unlabelled",
+        "class RowAlreadyLabelled",
+        "def scan_all"
+      ],
+      "artifact_covered_by": [
+        "SC2-e1-AC1",
+        "SC2-e1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "17 tests: the contract lists the four classified_by values with a definition each, the precedence rule names seed/legacy, and rule24_record is present; amendment 1's identifier_namespace lists TICKER/CUSIP with a definition each, 'absent reads TICKER', and its own rule24_record; the constituents seeder labels AAPL/MSFT/SALXX/CASH rows classified_by='constituents' and still refuses (RowProtected) to overwrite an already-labelled row; the label update's UpdateExpression/ConditionExpression/ExpressionAttributeValues are asserted verbatim (SET classified_by = :v only, attribute_not_exists(classified_by), no other attribute name), an already-labelled row raises RowAlreadyLabelled, and the CLI blocks a live (non --dry-run) run. python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py -q -p no:cacheprovider: 17 passed in 0.28s.",
+      "introduces": [
+        "def test_contract_classified_by_has_four_values",
+        "def test_contract_lists_identifier_namespace_with_ticker_and_cusip",
+        "def test_constituents_seeder_row_is_labelled_constituents",
+        "def test_label_update_writes_only_classified_by",
+        "def test_label_update_refuses_an_already_labelled_row"
+      ],
+      "artifact_covered_by": [
+        "SC2-e1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_LABEL_CENSUS_20260930.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built by running label-legacy-classified-by.py --dry-run against the live etf-classifications table (one fully-paginated scan, read-only, no update_item call). table_rows_at_build=2309 (>= the required 2,309 post-release-step-2 floor), unlabelled_rows=238, would_label=238, other_attributes_touched=0, overwrites=0, classified_by_values=[seed, scheduled, constituents, legacy], contract_version=0.2.0.",
+      "artifact_covered_by": [
+        "SC2-e1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_LEGACY_LABEL_20260930.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Never-widen half for the future signed legacy-label write: names the act (one additive conditional UpdateItem per unlabelled row), the measured blast radius (238 candidate rows, zero other attributes touched, zero overwrites, a repo-wide census of classified_by readers finding none that branch on 'legacy' today), and a rollback per key (REMOVE classified_by per written key, the 238-ticker list named in the census).",
+      "artifact_covered_by": [
+        "SC2-e1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three new rows appended (append-only, schema-valid): MDPF_SECCLASS-W5-S1 -- this cell's sanctioned classified_by='constituents' write breaks round-1's own test_seed_fields.py::test_constituent_seeder_never_sets_classified_by (now superseded by the round-2 C-WRITER ruling); that test file sits outside this order's <paths> write grant. MDPF_SECCLASS-W5-S2 -- amendment 1's new identifier_namespace field shares its exact name with a wider, unrelated identifier_namespace field on IRPT_BCKEND's own wire contract (portal/src); disjoint domain, no write-path collision. MDPF_SECCLASS-W5-S3 -- a mid-task claim that local CLOUD carries a cross-device 'amgt-library' union of seed-etf-constituents.py measured FALSE against this worktree (the commit exists only on origin/CLOUD, 1,245 commits ahead of local CLOUD); not built on, per BOUNDS."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC2-e1-AC1",
+      "criterion_verbatim": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py -q -p no:cacheprovider -> passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": ".................                                                        [100%]\n17 passed in 0.28s",
+      "denominator": "17 of 17 tests passed (0 failed, 0 errors, 0 skipped).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC2-e1-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py label -> LABEL-CENSUS",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py label",
+      "expect": "LABEL-CENSUS",
+      "output_evidence": "LABEL-CENSUS would_label=238",
+      "denominator": "238 of 238 unlabelled rows planned (unlabelled_rows == would_label); 0 other_attributes_touched; 0 overwrites; table_rows_at_build=2309 (>= MIN_ROWS 2309); classified_by_values sorted == [constituents, legacy, scheduled, seed]; contract_version == 0.2.0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC2-e1-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_LEGACY_LABEL_20260930.md -> HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_LEGACY_LABEL_20260930.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_LEGACY_LABEL_20260930.md",
+      "denominator": "0 of 0 unresolved {{slot}} placeholders; 4 of 4 required strings present (## The act, ## Blast radius, Rollback per key, candidate).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Changed label-legacy-classified-by.py's UpdateExpression from 'SET classified_by = :v' to also SET last_updated = :ts (a second attribute), keeping the test's assertion that only classified_by is named in the expression.",
+      "expected": "test_label_update_writes_only_classified_by fails on its 'last_updated' not in call['UpdateExpression'] assertion",
+      "observed": "FAILED test_label_update_writes_only_classified_by - AssertionError: assert 'SET classified_by = :v, last_updated = :ts' == 'SET classified_by = :v' (1 failed, 12 passed). Reverted immediately; re-run: 13 passed in 0.31s.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py -q -p no:cacheprovider invoked twice back to back; outputs diffed.",
+      "observed": "diff of the two runs is empty apart from pytest's own per-run timing line ('13 passed in 0.33s' vs '13 passed in 0.29s') -- same 13 node ids in the same order both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running label-legacy-classified-by.py against the live table without --dry-run (an actual write).",
+      "reason": "Forbidden by the order's BOUNDS: LOCAL build + record, no table write. The never-widen half is the artifact that hands the real run to the issuer to sign."
+    },
+    {
+      "item": "Deciding whether any of the 238 legacy rows is itself wrong (a bad asset_class/sub_asset_class).",
+      "reason": "Explicitly not decided at this cell, per the CTO's own ruling (analysis @151c890591 section 1: 'Not decided here: whether any of the 238 is wrong. That is FWD-2's job once they carry a label.')."
+    },
+    {
+      "item": "Fixing test_seed_fields.py's now-stale test_constituent_seeder_never_sets_classified_by assertion.",
+      "reason": "test_seed_fields.py is round-1's file and sits outside this order's <paths> write grant; surfaced as row MDPF_SECCLASS-W5-S1 instead of edited out of grant."
+    },
+    {
+      "item": "Deploy, push, merge or rebase.",
+      "reason": "Forbidden by the order. The commit is LOCAL on branch wk-MDPF_SECCLASS-5; the COO drains it."
+    },
+    {
+      "item": "Merging origin/CLOUD (or cherry-picking 8757ce95eb) to build the amgt-library --universe path's classified_by/instrument_kind handling, as a mid-task message requested.",
+      "reason": "Measured FALSE against this worktree's local CLOUD (row MDPF_SECCLASS-W5-S3): the commit is not an ancestor of local CLOUD, which is 1,245 commits behind origin/CLOUD. Reconciling that divergence is a branch-integration act outside TO-SC-e1's LOCAL-build BOUNDS and <paths> grant."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W5-S1: this cell's sanctioned classified_by='constituents' write makes round-1's test_seed_fields.py::test_constituent_seeder_never_sets_classified_by fail (it encodes the now-superseded RULING 103050 text); that test file is outside this order's <paths> write grant.",
+    "MDPF_SECCLASS-W5-S2: amendment 1's new identifier_namespace field (TICKER, CUSIP) shares its exact name with an existing, wider identifier_namespace field on IRPT_BCKEND's own wire contract (portal/src/pages/InvestorReporting/contracts/wire/AnalysisRequest.ts) -- disjoint domain, no live collision.",
+    "MDPF_SECCLASS-W5-S3: a mid-task coordinator claim that local CLOUD already carries a cross-device 'amgt-library' union of seed-etf-constituents.py measured FALSE in this worktree (git merge-base --is-ancestor: NOT-ANCESTOR; the commit exists only on origin/CLOUD, 1,245 commits ahead of local CLOUD) -- not built on, per BOUNDS (LOCAL build + record; branch integration is not this cell's act)."
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_LEGACY_LABEL_20260930.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py -q -p no:cacheprovider",
+      "result": "17 passed in 0.28s"
+    },
+    {
+      "tool": "r2_evidence.py label (SC2-e1-AC2 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py label",
+      "result": "LABEL-CENSUS would_label=238, rc=0"
+    },
+    {
+      "tool": "r20_half_ready.py (SC2-e1-AC3 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_LEGACY_LABEL_20260930.md",
+      "result": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_LEGACY_LABEL_20260930.md, rc=0"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py infra/aws/lambda/v2_portal/yang_pipeline/label-legacy-classified-by.py infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py",
+      "result": "see COMMITS in the worker report"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~5 <0.9.0_WK_MDPF_SECCLASS~5@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-MDPF_SECCLASS-5"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC2-e1-AC1,SC2-e1-AC2,SC2-e1-AC3",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}
