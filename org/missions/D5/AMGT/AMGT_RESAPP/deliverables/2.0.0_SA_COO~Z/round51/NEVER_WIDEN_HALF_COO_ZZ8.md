@@ -1,4 +1,4 @@
-# AMGT_RESAPP round 51 -- `AMGT-zz-8` never-widen half (COO), `2.0.0_SA_COO~Z`, 2026-09-30 ~05:0xZ
+# AMGT_RESAPP round 51 -- `AMGT-zz-8` never-widen half (COO), `2.0.0_SA_COO~Z`, 2026-09-30 ~04:4xZ
 
 **The act (ONE, enrichment item 8 + the rider, CTO msg 26878):** redeploy `opal-amgt-scoped-api` carrying zz-5 (lead-list `name` /
 `name_source` / `places_moved`), zz-1 (`crosswalk.write_pool`'s union, write path only), zz-4 (the restamped `_harvest_prefixes.py`) and
