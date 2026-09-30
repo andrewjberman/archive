@@ -1,6 +1,6 @@
 # NEVER-WIDEN -- COO HALF: the ETFS_RIVALS round-2 live join (`RIV-d-3`): deploy in place, G0, import both capture sets, enable the Bloomberg leg, fire
 
-**Signer:** `2.0.0_SA_COO~RV`, 2026-09-30 ~21:2xZ; re-signed ~21:3xZ for Andrew-direct "1b" (PRD v0.5) and RIV-d-3 amendment 2. **Pairs with:** `1.0.0_SA_CTO~Z`'s half (owed).
+**Signer:** `2.0.0_SA_COO~RV`, 2026-09-30 ~21:2xZ; re-signed ~21:3xZ for Andrew-direct "1b" (PRD v0.5) and RIV-d-3 amendment 2; re-signed ~23:2xZ with key 4's measured served delta (CTO refusal msg 27419). **Pairs with:** `1.0.0_SA_CTO~Z`'s half (owed).
 
 **Serves:** PRD `org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md` v0.4 (the peer groups, the Bloomberg channel,
 income-clean trades, and the page grouped by Opal fund), task order `ETFS_RIVALS.TO-RIV-d-3` with its ISSUER AMENDMENT 1.
@@ -21,7 +21,7 @@ The blast radius, per key. BEFORE was measured 2026-09-30 ~21:1xZ, every page, c
 | 1 | `s3://opal-data-etfs/bloomberg/etfs/bronze/holdings/` | 0 | 944 imported captures (503 IDVZ-group + 441 PFOE-group), each raw + `.sidecar.json`, `capture_origin census:*`; then one daily batch per trading day | a delete is a HUMAN word |
 | 2 | `.../bloomberg/etfs/silver/holdings/` | 0 | typed silver per report date for RIVALS only; IDVZ and PFOE rows = **0** (CTO ruling (b), msg 27404; e.g. the 45 IDVZ rows of 2026-09-29 land in bronze bytes, never in silver) | same |
 | 3 | `.../rivalfunds/etfs/gold/{peer_group_map,holdings_coverage,corporate_actions,flow_reconciliation}/` | 0 each | G0 map_version 1; G2; G3 (import of `dividends.json`, 4780 records + 43 status rows, then daily); G6 | same |
-| 4 | `.../rivalfunds/etfs/gold/{canonical_shape,trade_schedule}/` and `.../platinum/page/` | 325 / 324 / 6 objects | NEW revision objects only. The existing BASG objects are never overwritten (never-overwrite, revision ids) | same |
+| 4 | `.../rivalfunds/etfs/gold/{canonical_shape,trade_schedule}/` and `.../platinum/page/` | 325 / 324 / 6 objects | NEW revision objects only; existing objects never overwritten. **Served delta for BASG, MEASURED** (`round2/key4_served_delta.py` -> `key4_served_delta.json`; see the section below): G1 0 value changes, 3 columns added; G5 0 trades added or removed, every class 0 including other; 4 provenance labels move; the page changes layout only | same |
 | 5 | `.../rivalfunds/etfs/state/{fetch_bloomberg,build_bloomberg_silver,pull_enrichment,build_peer_group_map,build_coverage,build_flow_reconciliation}/` | 0 each | batch-complete markers | same |
 | 6 | the five round-1 Lambdas | round-1 code (source-map stamps @3eaa380467) | in-place `source_code_hash` update carrying the round-2 stages; no create or destroy of a function | re-apply at the prior stamped commit, same window |
 | 7 | the five stage role policies | round-1 prefixes | + PutObject on the key-3 and key-5 prefixes and the Bloomberg silver prefix, each builder-generated (`gen_policies.py`); no DeleteObject anywhere | re-apply the prior policies |
@@ -40,6 +40,23 @@ The blast radius, per key. BEFORE was measured 2026-09-30 ~21:1xZ, every page, c
 - the Positioning pull (`etf_constituents_pull.py`, `etf_daily_pull.py`) and every existing line of the vehicle (Andrew-direct);
 - `etfs-netassets-daily` and its homes; the bucket's tier-first keys; issuer bronze (650 BASG objects);
 - the gateway: NO deploy this round. `/rivalfunds` serves the new page through the routes already live.
+
+## KEY 4 -- THE SERVED DELTA FOR BASG, MEASURED (1.0.0_SA_CTO~Z's refusal, msg 27419, remedied)
+
+**Method:** a serializing dry run. `key4_served_delta.py` ran from the merged round-2 code (worktree `wk-ETFS_RIVALS-r2-1`
+@3f843b8c9e = p-2, carrying every round-2 build).
+- It mirrored the CURRENT served inputs, read-only from S3: issuer silver + bronze sidecars, 650 objects.
+- It replayed G0 -> G1 -> G5 -> the page into a LOCAL sink, with no S3 write.
+- It diffed per fund against the latest served object per report date.
+
+| surface | served | round 2 | delta |
+|---|---:|---:|---|
+| G1 `canonical_shape` rows (BASG, 325 report dates) | 11272 | 11272 | 0 fund-dates differ. Values: 56 shared columns compared on 11272 rows; ONLY `gold_version` differs (a code-version stamp). Columns ADDED: `source_used`, `is_cash_line`, `corporate_action_adjusted`; none removed |
+| G5 `trade_schedule` trades (BASG) | 837 | 837 | 0 added, 0 removed. Classes: income 0, corporate_action 0, source 0, cash_line 0, **other 0**. Values: 28 shared columns on 837 rows; ONLY `inference_version` (a code-version stamp) and `corporate_actions_applied` / `dividends_applied` differ. The last two are provenance labels naming which G3 was read (`none-available`: BASG's securities are not in the DVD_HIST_ALL pull), not trade numerics |
+| the page | round-1 one-fund page | grouped page | Layout only. BASG's trades and holdings are the same data under the PFOE group. The other funds appear as their own blocks: the IDVZ rivals with data after the import, the home funds as not updated with their reason |
+
+**Expected at the act:** the same, plus the new funds' rows under new keys (keys 1-3, 5). Any BASG value change beyond these four
+labels STOPs the act as an unexpected served delta.
 
 ## ACT-START GATES (the worker STOPS with a BLOCKING row on any)
 
