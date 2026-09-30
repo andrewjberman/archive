@@ -29,12 +29,16 @@ def main():
             record.get("run_id"), record.get("started_at"),
             [(j.get("publisher"), j.get("status")) for j in record.get("jobs") or []]))
     print("ENABLED_PUBLISHERS %s" % (list(gold.ENABLED_PUBLISHERS),))
-    declared, removed = axis.derive_declared_set(records, start_date=start, end_date=end)
+    entries, _provenance = axis.read_universe_names(as_of=as_of)
+    universe_keys = [entry.get("security_key") or entry["identity"] for entry in entries]
+    print("UNIVERSE keys=%d (the set the generation ranks)" % len(universe_keys))
+    declared, removed = axis.derive_declared_set(records, universe_keys, start_date=start, end_date=end)
     print("DECLARED SET: %s" % (list(declared),))
-    if not removed:
-        print("REMOVED: none")
-    for publisher, reason in sorted(removed.items()):
-        print("REMOVED %s: %s" % (publisher, reason))
+    for publisher in gold.ENABLED_PUBLISHERS:
+        if publisher in removed:
+            print("REASON %s: EXITS -- %s" % (publisher, removed[publisher]))
+        else:
+            print("REASON %s: IN -- concluded universe-scope job(s) cover the universe" % publisher)
     print("CHATTER_AXIS_SOURCE_IN_ENV=%r (unchanged; this script sets nothing)"
           % (os.environ.get("CHATTER_AXIS_SOURCE"),))
     summary = axis.compute_chatter_axis(
@@ -44,6 +48,22 @@ def main():
           % (summary["rows_written"], sum(1 for p in summary["products"] if p["pointer_written"])))
     print("GOLD BRANCH declared_publishers=%s removed_publishers=%s"
           % (summary["declared_publishers"], summary["removed_publishers"]))
+    # Per excluded name: the DECLARED publishers it lacks (a day with no coverage by that publisher).
+    excluded = summary["products"][0].get("excluded_names") or {}
+    print("EXCLUDED NAMES (coverage): %d of %d; declared set has %d publisher(s)"
+          % (len(excluded), len(universe_keys), len(declared)))
+    if not declared:
+        print("  no declared publisher, so no name can lack one; the generation HOLDs before eligibility is scored")
+    signatures = {}
+    for name in sorted(excluded):
+        by_day = axis.COVERAGE_DETAIL.get(name) or {}
+        lacks = tuple(pub for pub in declared if not by_day or any(pub not in codes for codes in by_day.values()))
+        signatures.setdefault((excluded[name], lacks), []).append(name)
+    if not signatures:
+        print("  no name is excluded for coverage")
+    for (reason, lacks), names in sorted(signatures.items()):
+        print("  %d name(s) %s lack declared publishers %s: %s"
+              % (len(names), reason, list(lacks), ", ".join(names[:5]) + (" ..." if len(names) > 5 else "")))
     for product in summary["products"]:
         print("AXIS %s" % product["axis"])
         print(axis.population_line(product["population"]))
