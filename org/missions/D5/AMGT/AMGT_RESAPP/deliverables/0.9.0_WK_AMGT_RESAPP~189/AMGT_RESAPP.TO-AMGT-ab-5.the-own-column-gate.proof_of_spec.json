@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ab-5",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "fb7a8bec00",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ab-5.the-own-column-gate.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "fb7a8bec00"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~189",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/analyze.py",
+      "kind": "script",
+      "commit_or_etag": "9369a3d43d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "own-column gate: _columnar_layout factored out of _columnar_verify; _apply_point_verification demotes a point whose label sits in a columnar header run and re-verifies it by column position only. No deploy in this order."
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_own_column_gate.py",
+      "kind": "test",
+      "commit_or_etag": "9369a3d43d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 arms: plant, wrong-first-column, control 3 of 3, prose unchanged."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(a) plant 2025=200 held; (b) control 3 of 3 verified in their own columns; A DRIVER POINT VERIFIES ONLY AGAINST ITS OWN COLUMN: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round52/checks/ab_5_column.py; echo \"exit=$?\"",
+      "output_evidence": "(exercises analyze._apply_point_verification in lib/research/filings/analyze.py)\n(a) plant 2025=200 (2024's column): verified {}, held ['2025']\n(b) control own columns: verified {'2023': '100', '2024': '200', '2025': '300'}, held []\nA DRIVER POINT VERIFIES ONLY AGAINST ITS OWN COLUMN: YES\nexit=0",
+      "denominator": "plant 1 of 1 held; control 3 of 3 verified in own column, 0 held",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the dry run writes nothing; re-verified points 3 (with span 3); THE DRIVER CHART IS SERVED FROM THE FILING'S VERIFIED POINTS: YES -- and exit=0 (ASML's real points stay verified)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round51/checks/zz_6_reverify.py; echo \"exit=$?\"",
+      "output_evidence": "dry run receipt: 'DRY-RUN -- nothing written; 3 points kept, 0 held'; re-verified points 3 (with span 3); chart SERVED source 'filing' points 3\nTHE DRIVER CHART IS SERVED FROM THE FILING'S VERIFIED POINTS: YES\nexit=0",
+      "denominator": "ASML_NA_Equity real points 3 of 3 kept with span, 0 held",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "N passed and 0 failed, N > 118 (118 at the cut, plus your new tests) -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest lib/research/filings/tests -q; echo \"exit=$?\"",
+      "output_evidence": "122 passed in 12.18s\nexit=0",
+      "denominator": "122 passed, 0 failed of 122 collected (118 at the cut + 4 new)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The gate reverted: the plant {2025: 200} run through HEAD~ analyze.py (git show HEAD:lib/research/filings/analyze.py before the edit) via _apply_point_verification.",
+      "expected": "the plant VERIFIES (the defect) on the base, so the plant discriminates.",
+      "observed": "BASE plant kept [('2025', '200')] held [] -- the base verifies 2024's number in the 2025 column; the patched module holds it.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ab_5_column.py run twice, output md5 compared.",
+      "observed": "21eed977649def244f15c964bb545e4a on both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No S3 write, no live reverify, no deploy.",
+      "reason": "cell BOUND; AC2 is a dry run against the stored ASML object."
+    }
+  ],
+  "surprises": [],
+  "session_log": "none: single-session worker, evidence is the commit and this instance",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg1.txt -- lib/research/filings/analyze.py lib/research/filings/tests/test_own_column_gate.py",
+      "result": "commit 9369a3d43d; msg-verify MATCH len=696"
+    }
+  ]
+}

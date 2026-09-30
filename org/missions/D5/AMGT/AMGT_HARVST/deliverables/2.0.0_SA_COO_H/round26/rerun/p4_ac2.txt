@@ -1,0 +1,57 @@
+SOCKETS: creation blocked and asserted for the duration of this script (the only child process is `git show`, a local object read)
+NOW_UTC: 2026-09-30T07:52:10.372731+00:00
+
+====================================================================================================
+BARRONS
+  recorded sequence: http /client 200 | reauth_started | reauth_succeeded | retry_after_reauth | http /client 200 | http /search 401 | http /client 200 | job_finished
+  EVIDENCE the cause rests on:
+    [ok] events.jsonl 04:08:20..04:09:22: logged-out /client (112 B) -> reauth -> /client (3214 B) -> /search 401 (774 B) -> /client -> job_finished
+    [ok] byte sizes [112, 3214, 774, 3214]: 112 = logged-out /client, 3214 = logged-in /client
+    [ok] runs/20260930T040818Z-barrons-cfedbf8fb4.json: auth_refreshes=1, verification_repairs=0
+    [ok] 0 verification_* events in the job's window
+    [ok] runs json detail is the VerificationRequired text (transport.py: a challenge marker matched in the 401 body)
+    [ok] lib/opal_data_harvest/worker.py:281: the reauth (AuthExpired branch, lib/opal_data_harvest/worker.py:441) consumed the loop's attempt 0; the challenge then arrived at attempt 1, and lib/opal_data_harvest/worker.py:431 re-raises when `attempt` is truthy: `if attempt or publisher not in {"bbg", "barrons"}:`
+    [ok] lib/opal_data_harvest/worker.py:464: the re-raised VerificationRequired lands in RequestRejected -> status request_rejected, cooldown 900 s
+    [ok] the SAME eight-event shape is on the ledger at 2026-09-23T00:32:58Z (a second logged-out -> reauth -> /search 401 -> request_rejected)
+    [ok] wsj (same Dow Jones login script, same DowJones class) took the same logged-out -> reauth path and got /search 200: the reauth itself is not the fault
+    [ok] nopecha-barrons-compatibility.json (2026-09-15): barrons' challenge host is geo.captcha-delivery.com (DataDome)
+    [ok] bbg, same day, same collector: challenge at attempt 0 -> repair_verification ran -> /search 200 (job 20260930T044003Z-bbg-c268841b7e)
+    [ok] secrets/barrons.dpapi present (os.stat only)
+  CAUSE [MEASURED from the record + code]: the fresh post-reauth session was met by a bot-challenge (401 + marker) on the FIRST /search, and the collector's own challenge-repair for barrons never ran because the reauth had already spent the retry it needs (lib/opal_data_harvest/worker.py:431).
+  NOT the cause: 'cookies expired' explains only the FIRST /client (112 B logged out, envelope 7.15 d old) -- the refusal came 23 s after a verified fresh login (/client 3214 B logged in).
+  NOT established: which of the five markers matched (bodies are not kept), and why barrons.com challenges a fresh login while wsj.com does not (publisher policy; the UA line publishers.py:263 is the only client-side difference and contracts.json:98 requires it that way).
+    [ok] progress.sqlite3 cooldown row for barrons ends 2026-09-30T04:24:22 (reason request_rejected_without_verified_auth_expiry): lapsed, so a next job is not blocked by it
+    [ok] lib/opal_data_harvest/contracts.json:80: barrons automatic verification is ENABLED (so the repair, once reached, is permitted by contract)
+  ROUTE B1 (no code change): a further barrons job. The fresh envelope (secrets/barrons.dpapi, written 04:08:41Z) is now the saved session, so the job starts at attempt 0; a /search challenge then raises VerificationRequired at attempt 0, the branch at lib/opal_data_harvest/worker.py:430 runs repair_verification (auth.py:45-52 -> verification.py repair(): Playwright Chrome, the collector's scripted slider move), saves the repaired envelope and retries -- the path bbg took at 04:40-04:41Z.
+     ACT NEEDED: a barrons collection run = a publisher request -> Andrew's per-use vendor word (standing rule), issued outside this cell; it must run on the site-Z desktop (headed Chrome; verification.py measures Windows operator input). No pair is needed for the read.
+     LIMIT: unproven for barrons in this state -- on 09-15 03:34Z a /search 401 was followed by a reauth and the retry got /search 200; on 09-23 and 09-30 the 401 came AFTER the reauth (2 of 2), so whether the saved post-reauth envelope is challenged again on the next job is not shown by the record.
+  ROUTE B2 (code, makes B1 automatic): in lib/opal_data_harvest/worker.py let a verification repair follow a reauth in the same job -- a per-job `verification_repaired` flag in place of `attempt` in the guard at lib/opal_data_harvest/worker.py:431 and one more loop turn at lib/opal_data_harvest/worker.py:281 (the AuthExpired branch at lib/opal_data_harvest/worker.py:441 keeps its own `if attempt:`). Cell: build + test_worker.py cases; act needed: none for the edit itself; its first live use falls under B1's word.
+  FLAG for the issuer (not decided here): the barrons repair is a SCRIPTED slider move (verification.py, `Slide right to secure your access`) -- the collector's own ratified path (contracts.json:80 cites BARRONS_RETRIAL_20260915_W.md), not a new bypass; whether it counts as 'challenge solving' under this order's clause is the issuer's/Andrew's call. It is named because it is the only in-path repair that exists.
+
+====================================================================================================
+FT
+  EVIDENCE:
+    [ok] events.jsonl 04:45:30: ONE request, www.ft.com /search, 403, 270955 bytes; runs json detail='HTTP 403 from www.ft.com/search'
+    [ok] no challenge marker matched (RequestRejected, not VerificationRequired: transport.py:112 not :111); no reauth, no repair
+    [ok] whole ledger, ft /search: [('09-15T03:27', 200, 199553), ('09-15T03:35', 200, 198685), ('09-15T03:39', 200, 198572), ('09-23T00:28', 403, 270973), ('09-30T04:45', 403, 270955)]
+    [ok] the two refusals are 270973 and 270955 bytes (differ by 18) against ~199 KB for the 200s: a near-static 270 KB page, not a per-user page [INFERRED]
+    [ok] secrets/ft.dpapi mtime 2026-09-15T03:26:43 is UNCHANGED across the 200s (09-15) and the 403s (09-23, 09-30): same envelope, 15.05 d old at the o-5 job; no auth/ folder for ft
+    [ok] git show 8b11d236c4 (2026-09-15): the SAME GET, q=<company>, Referer https://www.ft.com/ -- the request that returned 200
+    [ok] lib/opal_data_harvest/publishers.py:577 now: same URL, params {'q': company} in live mode, same Referer -- request line unchanged
+    [ok] ft_rest_fetch.py build_session() (headers, UA, TLS profile, cookie set) is BYTE-IDENTICAL between 58535ee9a7 (2026-09-14 22:27 local, in force for the 200s) and HEAD; the file's later commit 7aaf58f0c1 (2026-09-15 04:02Z, after the 200s) only renamed an exception class in parse_article
+    [ok] lib/opal_data_harvest/publishers.py:400 / lib/opal_data_harvest/publishers.py:410: check_auth has no ft branch ('an isolated 403 does not log in'); contracts.json:45 says 401/403 alone is not a re-auth
+    [ok] lib/opal_data_harvest/worker.py:431 and lib/opal_data_harvest/verification.py:66: ft is outside the worker's repair set and verification.repair() refuses it -- nothing in the path acts on a bare 403
+    [ok] lib/opal_data_harvest/transport.py:95 keeps the response body in memory only; lib/opal_data_harvest/worker.py:464 persists str(exc) only -- the 403 body is NOT on disk anywhere the collector wrote
+    [ok] progress.sqlite3 cooldown row for ft ends 2026-09-30T05:00:30 (reason request_rejected_without_verified_auth_expiry): lapsed
+  CAUSE: NOT DETERMINED by the record -- a STATED LIMIT. What is measured: an unchanged request from an unchanged 15-day-old envelope returned 200 on 2026-09-15 and 403 (a ~270 KB page, no challenge marker, no login redirect) on 2026-09-23 and 2026-09-30, so the change is on the publisher's side or in time. Three readings fit and the record cannot separate them: (a) the FT session cookies have aged out and FT answers a dead session with 403; (b) an edge/bot rule now refuses this client (hard-coded UA Chrome/126 at org/tier1_exec/4.0.0_SA_CRO/scripts/ft_rest_fetch.py:112 riding curl_cffi's 'chrome' TLS profile, the same mismatch publishers.py:261-262 warns of for wsj); (c) the egress address is blocked. The discriminator is the 403 body, which the collector throws away.
+  ROUTE F1 (evidence, no publisher request in the edit): a code cell that, when a 403/401 carries no marker, writes the rejection's classification (status, content-type, <title>, first 300 text chars with no cookie/header values, size, marker hits) into the run json -- a change at lib/opal_data_harvest/transport.py:95/lib/opal_data_harvest/worker.py:464 (PacedSession already holds the bytes in `captured`). ACT NEEDED: none for the edit. The NEXT ft job then answers (a)/(b)/(c); that job is a publisher request = Andrew's per-use word.
+  ROUTE F2 (only if F1 says (a) dead session): re-harvest the ft envelope through the collector's own scripted path -- SessionManager.refresh() -> lib/opal_data_harvest/auth.py:87 -> harvest_local_session.harvest('ft') -> ft_harvest_session.py. TODAY that path is reachable only through AuthExpired (worker.py:403), which an ft 403 never raises, so it needs either a hand-run of the harvester + `import-session` (__main__.py:81) or a cell that lets F1's verdict trigger it. ACT NEEDED: Andrew's word -- it is a credential login (org/tier1_exec/4.0.0_SA_CRO/scripts/ft_harvest_session.py:275) and its hCaptcha step calls a vendor solver (org/tier1_exec/4.0.0_SA_CRO/scripts/ft_harvest_session.py:132, org/tier1_exec/4.0.0_SA_CRO/scripts/ft_harvest_session.py:213); the commissioning record forbids a credential login as a generic 403 remedy (HARVEST_COMMISSIONING_20260915_W.md, 'Remaining validation').
+  ROUTE F3: if F1 says (b)/(c) (edge or address block): NO route inside R-21 -- clearing it is either challenge solving or egress change, both outside this order; the limit stands and ft stays out of the live set until Andrew rules.
+
+====================================================================================================
+SUMMARY
+  barrons: cause MEASURED (fresh-session challenge + repair barred by the attempt guard); smallest route = B1 (a run, no code) / B2 (one guard edit); act: Andrew's word for the run.
+  ft     : cause NOT determined (403 body not kept); smallest next step = F1 (keep the rejection's classification); F2/F3 depend on its answer; act: Andrew's word for any ft request, and for F2's login + solver.
+  bbg/wsj: clean in the same runs (bbg via its own repair at attempt 0; wsj via reauth). Nothing is asserted about why barrons.com and ft.com differ from wsj.com/bloomberg.com beyond the rows above.
+ASSERTIONS PASSED: 26
+NETWORK CALLS MADE: 0 (socket.socket replaced by a refusing stub and asserted at start; restored only after the last print)

@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-y-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-y-3.same-currency-anchor.md",
+    "group": "OTHER",
+    "vintage_commit": "46540fd5f6c8d4d8730aec81c9ef2b876b43a2f4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "bbf33b05b4",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-y-3.same-currency-anchor.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/unit_anchor.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "same_currency_anchor(s3, security, header): own CUR_MKT_CAP when CRNCY==EQY_FUND_CRNCY; else the same-issuer (identity.lei in newest crosswalk) line in the fund currency; else a stored FX pair object read with its date; else None with every search named. Reads only; no FX value typed.",
+      "introduces": [
+        "same_currency_anchor"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_unit_anchor.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 stub-S3 tests: own cap; planted TWD line; planted stored FX with date; nothing stored returns None naming every search.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y3_AC1.sh -- expect (?m)^y3 tsm anchor none searched [1-9]\\d* reason_set True fx_invented False control_sap anchor CUR_MKT_CAP$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y3_AC1.sh",
+      "output_evidence": "y3 tsm anchor none searched 10 reason_set True fx_invented False control_sap anchor CUR_MKT_CAP",
+      "denominator": "rc 0; 1 of 1 output line; TSM searched 10 anchors, SAP control 1 of 1 returns CUR_MKT_CAP",
+      "expect": "(?m)^y3 tsm anchor none searched [1-9]\\d* reason_set True fx_invented False control_sap anchor CUR_MKT_CAP$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y3_AC2.sh -- expect (?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y3_AC2.sh",
+      "output_evidence": "4 passed in 0.69s",
+      "denominator": "rc 0; 4 of 4 tests passed, 0 failed",
+      "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Plausible bug: accept any same-issuer crosswalk line regardless of its CRNCY. Planted: a same-lei line whose CRNCY is USD (not the fund currency TWD) beside the ADR.",
+      "expected": "FIX rejects it (anchor None); the mutant would return its 2.8e13 as a TWD cap, so FIX != MUTANT.",
+      "observed": "FIX wrong-currency line accepted: False (.scratch/y3/mut.py, not committed)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run once against live raw / stub S3; stub tests have no clock or network.",
+      "observed": "AC1 line and AC2 4 passed as recorded",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Editing build_unit_map.py",
+      "reason": "BOUNDS: another cell owns it; the issuer wires discriminate_facts at the merge."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC2)",
+      "invocation": "bash y3_AC2.sh",
+      "result": "rc 0; 4 passed"
+    }
+  ]
+}
