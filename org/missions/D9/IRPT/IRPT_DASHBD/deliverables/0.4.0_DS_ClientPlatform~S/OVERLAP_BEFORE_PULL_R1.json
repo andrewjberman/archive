@@ -1,0 +1,55 @@
+{
+  "purpose": "DB-b-3's `overlap_before_pull`, measured BEFORE any vendor call, on the already-landed reporting_performance responses only. Its amended face admits a fresh pull only when this overlap is below 5 (account, period) pairs.",
+  "measured_at": "2026-09-30T22:0xZ",
+  "measured_by": "0.4.0_DS_ClientPlatform~S",
+  "vendor_calls": 0,
+  "vendor_calls_note": "ZERO. Every figure here comes from objects already in bronze; nothing was requested from the vendor to produce this record.",
+
+  "denominators": {
+    "landed_response_objects_under_prefix": 5318,
+    "responses_whose_relationship_is_in_the_roster": 4,
+    "roster_bd_internal_ids_with_a_landed_response": 2,
+    "roster_bd_internal_ids_with_none": ["22659431", "(a roster row carrying no bd_internal_id)"],
+    "sample_accounts_with_no_oracle_at_all": ["0010783709"],
+    "sample_accounts_with_no_oracle_note": "the thread account was chosen by census over the custodian's own history, not from the roster, so it has no Black Diamond relationship and cannot be tied out. That is expected and is not a gap in the oracle."
+  },
+
+  "overlap_before_pull": 1,
+  "overlap_before_pull_raw_count": 2,
+  "overlap_before_pull_basis": "THE HONEST NUMBER IS 1, NOT 2. A naive count of usable (account, period) pairs returns 2, but both are the SAME period on the same account -- 2026-07-01..2026-08-28 for 0027265115, identical dateRange and identical timeWeightedReturns.return (0.026385) -- because the vendor's own period list repeats a range. The holdings channel's declaration records the same repetition ('calendar 2024 repeated'). Counting a vendor duplicate twice would inflate exactly the number that decides whether to spend a vendor call, so the distinct count is the one recorded and the raw count is kept beside it rather than discarded.",
+  "threshold": 5,
+  "verdict": "BELOW THRESHOLD -- a fresh performancePeriod pull is admitted by TO-DB-b-3 amendment 1, and Andrew's egress grant (record @4c4989c800) covers it.",
+
+  "per_account": [
+    {
+      "schwab_account": "0027265115",
+      "bd_internal_id": "22596361",
+      "first_data_date": "2026-03-16",
+      "response_key": "blackdiamond/49f/bronze/reporting_performance/<pull date>/reporting_performance_22596361_2026-08-28.json",
+      "periods": [
+        {"range": "2026-07-01..2026-08-28", "vendor_twr": 0.026385, "usable": true},
+        {"range": "2026-01-01..2026-08-28", "vendor_twr": -0.057099, "usable": false, "why": "starts 2026-01-01, before this account's first data on 2026-03-16"},
+        {"range": "2025-08-28..2026-08-28", "vendor_twr": -0.057099, "usable": false, "why": "starts 2025-08-28, before this account's first data"},
+        {"range": "2026-07-01..2026-08-28", "vendor_twr": 0.026385, "usable": true, "why": "DUPLICATE of the first row -- same range, same return; counted once in overlap_before_pull"}
+      ]
+    },
+    {
+      "schwab_account": "0076459710",
+      "bd_internal_id": "23221671",
+      "first_data_date": "2026-07-08",
+      "response_key": "blackdiamond/49f/bronze/reporting_performance/<pull date>/reporting_performance_23221671_2026-08-28.json",
+      "periods": [
+        {"range": "2026-07-01..2026-08-28", "vendor_twr": 0.12783, "usable": false, "why": "starts 2026-07-01, seven days before this account's first data on 2026-07-08 -- its SHORTEST offered period still predates its book"},
+        {"range": "2026-01-01..2026-08-28", "vendor_twr": 0.12783, "usable": false, "why": "predates the data"},
+        {"range": "2025-08-28..2026-08-28", "vendor_twr": 0.12783, "usable": false, "why": "predates the data"},
+        {"range": "2026-07-01..2026-08-28", "vendor_twr": 0.12783, "usable": false, "why": "duplicate, and predates the data"}
+      ]
+    }
+  ],
+
+  "why_the_overlap_is_this_thin": "Not a defect in the oracle. The five roster accounts are 2026 TaxSMA books whose first positive value runs 2026-03-16..2026-07-08, while the vendor's offered periods are calendar-year, trailing-twelve-month and year-to-date ranges anchored well before those dates. A period reaching back before an account's first day would compare a FULL vendor figure against a PARTIAL Opal one, which is the silent version of the thing the tie-out exists to make visible -- so those periods are refused rather than compared short.",
+
+  "act_not_taken_and_why": "NO PULL MADE YET, although the trigger is met and the authorisation exists. The tie-out compares against DB-b-1's gold, and that gold is not emitted: the request ranges worth asking for depend on the coverage the emit actually lands. Pulling now would spend a vendor call to ask for periods I cannot yet compare, which is need-shaped reasoning the grant was given for rather than a licence to call early. The pull belongs inside DB-b-3, after the gold exists, with this record as its `overlap_before_pull` and the call counted in `vendor_calls`.",
+
+  "recommended_request_when_the_pull_is_made": "Periods wholly inside each account's measured window: for 0027265115 from 2026-03-16, for 0035940058 from 2026-03-26, for 0084073310 from 2026-03-19, for 0091939812 from 2026-05-18, for 0076459710 from 2026-07-08 -- each to the gold's last landed day. 0084073310 and the two pending_resolution accounts additionally need a relationship id the roster does not carry a landed response for; whether that is reachable without the account cross-reference is the open part, and it is named here rather than assumed."
+}
