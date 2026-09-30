@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e5",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R2.md",
+    "vintage_commit": "5d3432a201bbe44adcea42c6bb8d852faecb9cd5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e5.advisor-positions-canonical.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/D_04.client_portal_summary.py",
+      "kind": "script",
+      "commit_or_etag": "1717e180fc692d353758da9c5bd6bfbb209ef485",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_advisor_positions's own _classify_ticker closure (:2766, the fourth classify site round-1's SC-t-3 cell surfaced as row MDPF_SECCLASS-W3-S3) is retired; positions now classify at (ticker, asset_name) grain through the shared _classify_with_canonical(ticker, name, classifier) helper (:146) -- the same one D_04's other classify site already uses. ticker_meta now carries (name, asset_class, asset_class_canonical, sub_asset_class_canonical, class_source) per ticker; each position dict in positions.json gains the three additive fields. The pre-existing cash/other name rule for the coarse `asset_class` field is unchanged (a cash rule, not a class copy, per the shared helper's own docstring). LOCAL edit only; no upload, no deploy. NOTE on `introduces`: the field-name string tokens (asset_class_canonical/sub_asset_class_canonical/class_source) and the helper name were already present in this file BEFORE this commit (used by another D_04 function this cell does not touch), so a token-presence check would be a false CONTENT-resolution -- this row is PRESENCE-ONLY by construction, not because the change is unproven; SC2-e5-AC1's test (test_no_local_classify_ticker_closure, inspect.getsource on build_advisor_positions itself, scoped to the function this cell owns) is the CONTENT proof for this artifact.",
+      "artifact_covered_by": [
+        "SC2-e5-AC1",
+        "SC2-e5-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py",
+      "kind": "test",
+      "commit_or_etag": "1717e180fc692d353758da9c5bd6bfbb209ef485",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 tests, loading D_04 by path (dotted filename) with ETFClassifier.instance() forced onto a stub carrying GLD's measured canonical row; every S3 call in build_advisor_positions (_find_latest_holdings_lots, _read_parquet, _batch_read_json, _write_batch) is monkeypatched so the run is LOCAL, no live AWS call. Asserts: no `_classify_ticker` source string remains in build_advisor_positions and `_classify_with_canonical` does; a known ticker (GLD) carries its canonical class/sub-class/class_source; an unknown ticker (UNKNOWNCO) is class_source 'unclassified' by name, asset_class 'other', never 'equity'; CASH_USD's coarse asset_class ('fixed_income', the library's own hardcoded cash rule) is unchanged; every position carries the three additive fields plus all 13 original §4.5 fields. python -m pytest data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py -q -p no:cacheprovider: 5 passed in 0.90s. Full sibling suite data/black_diamond/scripts/gold/tests/ 61 passed -- no regression (10 of which are test_composition_canonical.py's own SC-t-3 suite, unaffected).",
+      "introduces": [
+        "test_no_local_classify_ticker_closure",
+        "test_positions_carry_canonical_fields_for_known_ticker",
+        "test_unknown_position_is_unclassified_by_name_not_guessed",
+        "test_cash_line_unchanged",
+        "test_every_position_carries_all_three_additive_fields"
+      ],
+      "artifact_covered_by": [
+        "SC2-e5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_POSITIONS_CENSUS_20260930.json",
+      "kind": "config_data",
+      "commit_or_etag": "1717e180fc692d353758da9c5bd6bfbb209ef485",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built by a REAL local dry-run of D_04.build_advisor_positions (upload=False, _write_batch monkeypatched only to capture the payloads it would write, every read live) against s3://opal-data-bd/gold/timeseries/holdings_lots/2026-09-25.parquet (the latest non-backfill day; 526,013 open lots, 7,772 accounts), gold/views/account_team.parquet (7,030 rows) and 185 real advisor books, plus the live etf-classifications table (2,309 rows, scanned COUNT at build time). 182 of 185 advisors had holdings (3 skipped, no holdings, matching the function's own SKIP print); 4,160 total position rows across those 182 positions.json artifacts. class_sources: etf-classifications=4131, unclassified=29; 29 unclassified security names listed (one per unclassified position row, matching the count exactly); guessed=0 (no canonical field is ever guessed); contract_additive=true (ADVI_49EXEC.md §4.5's own validator config, gold_validate_config.yaml D_04_positions_output, checks the 13 fields are PRESENT via `key_present`/a script_check enumerating them -- never that the object carries no others; the doc's prose names no closed field list either). No upload, no deploy. Read-only against real S3 + live DynamoDB.",
+      "artifact_covered_by": [
+        "SC2-e5-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC2-e5-AC1",
+      "criterion_verbatim": "python -m pytest data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py -q -p no:cacheprovider -- expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": ".....                                                                    [100%]\n5 passed in 0.90s",
+      "denominator": "5 of 5 tests passed (0 failed, 0 errors, 0 skipped); full sibling suite data/black_diamond/scripts/gold/tests/ 61 of 61 passed (no regression).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC2-e5-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py positions -- expect: POSITIONS-CENSUS",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py positions",
+      "expect": "POSITIONS-CENSUS",
+      "output_evidence": "POSITIONS-CENSUS rows=4160 unclassified=29",
+      "denominator": "7 of 7 required keys present (rows, class_sources, guessed, unclassified, unclassified_names, contract_additive, table_rows_at_build); table_rows_at_build 2309 >= 2309 minimum; 0 foreign class_source values (only etf-classifications=4131/unclassified=29 present); guessed=0; unclassified 29 == len(unclassified_names) 29; contract_additive is True.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Reverted _classify_with_canonical's unresolved, non-cash-like branch from 'asset_class = other' to 'asset_class = equity' (folding an unknown ticker onto equity, the class of defect this cell removes) and re-ran the new suite.",
+      "expected": "test_unknown_position_is_unclassified_by_name_not_guessed fails on its 'asset_class == other' / 'asset_class != equity' assertions",
+      "observed": "FAILED test_unknown_position_is_unclassified_by_name_not_guessed - AssertionError: assert 'equity' == 'other' (1 failed, 4 passed). Reverted immediately; re-run: 5 passed in 0.94s, then full suite 61 passed (twice, identical node ids/order both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py -q -p no:cacheprovider invoked twice back to back; outputs diffed.",
+      "observed": "Identical apart from pytest's own per-run timing line ('5 passed in 0.90s' vs '5 passed in 0.94s'); same 5 node ids in the same order both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy, push, merge (beyond the round-2 CLOUD merge already carried on this worktree at checkout), or rebase.",
+      "reason": "Forbidden by the order: LOCAL build + record, no upload, no deploy. The commit is LOCAL on branch wk-MDPF_SECCLASS-7; the COO drains it."
+    },
+    {
+      "item": "Editing docs/architecture/ADVI_49EXEC.md.",
+      "reason": "The order says read it, do not edit it -- the additive-fields determination is recorded in this instance and the census's contract_additive field, not in the doc."
+    },
+    {
+      "item": "Applying any IAM change or vendor/outside-model call.",
+      "reason": "Bounds: no IAM apply, no outside-model call. Only S3 + DynamoDB reads (already-granted, read-only) were made for the real census build."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_POSITIONS_CENSUS_20260930.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py -q -p no:cacheprovider",
+      "result": "5 passed in 0.90s"
+    },
+    {
+      "tool": "pytest (full sibling suite, regression check)",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/ -q -p no:cacheprovider",
+      "result": "61 passed in 1.24s"
+    },
+    {
+      "tool": "r2_evidence.py positions (SC2-e5-AC2 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py positions",
+      "result": "POSITIONS-CENSUS rows=4160 unclassified=29, rc=0"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/black_diamond/scripts/gold/D_04.client_portal_summary.py data/black_diamond/scripts/gold/tests/test_advisor_positions_canonical.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~7 <0.9.0_WK_MDPF_SECCLASS~7@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "1717e180fc692d353758da9c5bd6bfbb209ef485 on wk-MDPF_SECCLASS-7 (LOCAL)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC2-e5-AC1,SC2-e5-AC2",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}

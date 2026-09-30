@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e9",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R3.md",
+    "vintage_commit": "75cc083fb3bee54f5a7c90040a4e44d967784337",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e9.cusip-keyed-rows.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py",
+      "kind": "script",
+      "commit_or_etag": "80eb2d6d0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Extends the existing FWD-7 planner with is_valid_cusip(), SEC_ASSET_TYPE_DIRECT_MAP, _SCHWAB_BOND_TYPE_DIRECT_MAP, classify_cusip_asset_class() and plan_cusip_rows(); adds identifier_namespace to _WRITE_FIELDS so write() actually lands it under the SAME attribute_not_exists(ticker) conditional put the ticker path already uses -- no table/schema change. Three named class sources, first hit wins, no fold: a firm's own holdings enrichment field (sec_asset_type), the Schwab security-master bond types already named for instrument_kind, and a legacy-fork (bd-securities) value (direct vocabulary match only); a firm's own rate_bearing flag is the last-resort source, used only when the caller states no security-type field exists at all. A masked CUSIP (Orion 'x' placeholders) is rejected by is_valid_cusip. LOCAL only: no upload, no deploy, no IAM apply, no outside-model call anywhere in this module.",
+      "artifact_covered_by": ["SC2-e9-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_etf_classification_cusip.py",
+      "kind": "test",
+      "commit_or_etag": "80eb2d6d0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 offline tests (no boto3/network calls): a no-ticker CUSIP plans a CUSIP:-keyed row with identifier_namespace=CUSIP; an existing key is skipped at plan level AND refused at write()'s conditional-put level (against the real ConditionExpression, not a mocked shortcut); an unevidenced CUSIP stays unresolved with a reason; a ticker never gets the CUSIP: prefix (and is not listed unresolved either -- it is simply not this function's row); a masked CUSIP is rejected as invalid by is_valid_cusip and by plan_cusip_rows; a rate-bearing-only bond resolves to fixed_income with no sub_asset_class; a fold-only legacy-fork value (alternatives/Gold where Gold is not a vocab member) stays unresolved, same fold rule as the ticker path.",
+      "artifact_covered_by": ["SC2-e9-AC1"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CUSIP_CENSUS_20260930.json",
+      "kind": "config_data",
+      "commit_or_etag": "abae0fa1b6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Written by .scratch/build_cusip_census.py (uncommitted LOCAL build scaffolding) running the REAL plan_cusip_rows() against REAL live reads, no table write: table_rows_at_build=2309 (live DynamoDB scan of the ticker key, no CUSIP: key exists yet); reader_denominator=18, each with path/how/surfaces_cusip/guard from direct code inspection (the ONE client and its two byte-identical copies, both seed-etf-*.py scripts, seed_bd_securities.py's unfiltered full-table copy into bd-securities [the one real risk], the two Positioning Lambdas, etf_positioning_publisher.py, the two 49F satellite builders, the BD gold family via its own etf_classifier.py, seed_canonical_securities.py, and this very module's own existing_tickers()/TableVocabulary.from_live_table()); would_write=349 rows across the three firms (49financial 113 of 173 held no-ticker-valid-CUSIP bonds via the security master's own rate_bearing flag -- security_type is absent live from that firm's dim_security, columns_absent_with_shape; cottonwood 236 of 339 via the custody SEC Asset Type txn enrichment field, joined live from opal-data-assets:blackdiamond/cottonwood/silver/{fact_holdings,fact_transactions}; inflection 0 of 9 valid-format candidates -- no security-type evidence reaches any of them, and 16 more are Orion-masked CUSIPs rejected as invalid by is_valid_cusip, per data/inf/scripts/gold/lib/display_label.py's own documented mask format); unresolved=241 (each with cusip/name/reason/firm); overwrites=0, guessed=0 (measured live).",
+      "artifact_covered_by": ["SC2-e9-AC2"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md",
+      "kind": "doc",
+      "commit_or_etag": "8aa241c9b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The fresh never-widen half for the first CUSIP-keyed writes: '## The act' (guard the 3 at-risk readers first, then the conditional-put write of the 349 rows), '## Blast radius' (both branches -- a row that gets written vs. one that stays unresolved -- plus the not-yet-built IRPT Holdings follow-on and confirmation that no bd-securities/legacy-fork value fired for any of the 349 rows so no existing-row write is put to Andrew for decision), 'Rollback per key' (delete_item per new CUSIP:-key, independent of every ticker-keyed row by construction, plus point-in-time recovery as the table-wide path). Status of the act: NOT YET RUN -- both signature blocks read PENDING SIGNATURE.",
+      "artifact_covered_by": ["SC2-e9-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ce069046a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One new row appended, MDPF_SECCLASS-W4-S2 (class OBSERVATION, hazard_standing INERT): the task order's own text asserts the contract is already v0.2.0 with identifier_namespace as a C-FIELD, but org/standards/MDPF_SECCLASS_CONTRACT.json at this worktree's HEAD is still v0.1.0 with no such field -- SC-e-1's amendment (a sibling worker's cell in the same round) has not landed on this branch. .tools/surprise-row-gate.py confirms: '1 new row(s) of 11 total checked (10 pre-existing, NOT re-graded); OK: 1 file(s), all new rows carry their step-7/step-10 fields.'",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC2-e9-AC1",
+      "criterion_verbatim": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_etf_classification_cusip.py -q -p no:cacheprovider -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_etf_classification_cusip.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "7 passed in 0.36s",
+      "denominator": "7 of 7 tests passed, rc=0. The full lambda test module (test_etf_classification_scheduled.py, 9 tests) also re-run clean alongside it (16 of 16 combined), confirming no regression to the existing ticker path.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC2-e9-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py cusip -- expect: CUSIP-CENSUS",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py cusip",
+      "expect": "CUSIP-CENSUS",
+      "output_evidence": "CUSIP-CENSUS readers=18 would_write=349",
+      "denominator": "1 of 1 required check passed: table_rows_at_build 2309 >= 2309 (MIN_ROWS); reader_denominator (18) == len(readers); no reader in `readers` has surfaces_cusip true with guard falsy; every row's ticker matches 'CUSIP:' + 9 chars with identifier_namespace == CUSIP; overwrites==0, guessed==0, would_write==len(rows).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC2-e9-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md -- expect: HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md",
+      "denominator": "1 of 1 required check passed: file exists, 0 {{slot}} placeholders remain, and it carries '## The act', '## Blast radius', 'Rollback per key' and the literal substring 'candidate' (the candidate reader-guard diffs named in step 1).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Changed one planned row's sub_asset_class to a value absent from the live vocab's fixed_income sub-classes ('Investment Grade', which is confirmed absent -- see the module's own SEC_ASSET_TYPE_DIRECT_MAP comment) and re-ran classify_cusip_asset_class's direct-match check against the live vocab.",
+      "expected": "_direct_match refuses (the sub_asset_class is not a vocabulary member), so classify_cusip_asset_class does not return that pair for the sec_asset_type source",
+      "observed": "Confirmed: TableVocabulary.from_live_table()'s fixed_income sub-classes are {Ultra Short Duration, Short Duration, International, Municipal, High Yield, Cash, Intermediate, Long Duration, Structured Credit, TIPS} -- 'Investment Grade' is absent, which is exactly why SEC_ASSET_TYPE_DIRECT_MAP maps 'Investment Grade Corporate Bonds' to (fixed_income, None) rather than (fixed_income, 'Investment Grade'); a hand-forced (fixed_income, 'Investment Grade') pair fails _direct_match as expected (sac not in vocab.sub_asset_classes['fixed_income']).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": ".scratch/build_cusip_census.py invoked twice back to back (independent live DynamoDB scan + independent live S3 reads at all three firms each time).",
+      "observed": "Both runs: table_rows_at_build=2309; 49financial held_no_ticker_valid_cusip=173/would_write=113/unresolved=60; cottonwood held_no_ticker_valid_cusip=339/would_write=236/unresolved=154; inflection valid_cusip_candidates=9/masked_excluded=16/would_write=0/unresolved=27 -- identical across both live runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Table write, upload, deploy, IAM apply, or any outside-model call.",
+      "reason": "Forbidden by the order: LOCAL build + record only (dry-run). The conditional-put write and the three reader guards are named in the fresh half as future acts under their own sign-off, not performed by this cell."
+    },
+    {
+      "item": "Editing org/standards/MDPF_SECCLASS_CONTRACT.json to add identifier_namespace.",
+      "reason": "Outside this order's <paths> grant (SC-e-1 is a sibling worker's cell in the same round); named as row MDPF_SECCLASS-W4-S2 rather than assumed already landed."
+    },
+    {
+      "item": "Editing any of the 18 named readers to add the guards this cell identifies.",
+      "reason": "The order's own instruction: 'Do not edit those readers; name them.' Each guard is described as a candidate diff in the never-widen half, not applied."
+    }
+  ],
+  "surprises": ["MDPF_SECCLASS-W4-S2: the task order's own text asserts the contract is already v0.2.0 with identifier_namespace as a C-FIELD, but org/standards/MDPF_SECCLASS_CONTRACT.json at this worktree's HEAD is still v0.1.0 with no such field -- SC-e-1's amendment has not landed on this branch. No effect on this cell's own build (no grant to that file; identifier_namespace is carried as plain row data)."],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md",
+  "compiler_tools": [
+    {
+      "tool": "build_cusip_census.py (uncommitted LOCAL build scaffolding, the harness itself)",
+      "invocation": "python .scratch/build_cusip_census.py",
+      "result": "49financial: held_no_ticker_valid_cusip=173 would_write=113 unresolved=60; cottonwood: held_no_ticker_valid_cusip=339 would_write=236 unresolved=154; inflection: nonstandard_held=27 masked_excluded=16 valid_cusip_candidates=9 would_write=0 unresolved=27; WROTE R2_CUSIP_CENSUS_20260930.json would_write=349 unresolved=241 readers=18"
+    },
+    {
+      "tool": "pytest (SC2-e9-AC1 instrument)",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_etf_classification_cusip.py infra/aws/lambda/v2_portal/_shared/tests/test_etf_classification_scheduled.py -q -p no:cacheprovider",
+      "result": "16 passed in 0.32s, rc=0"
+    },
+    {
+      "tool": "r2_evidence.py cusip (SC2-e9-AC2 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py cusip",
+      "result": "CUSIP-CENSUS readers=18 would_write=349, rc=0"
+    },
+    {
+      "tool": "r20_half_ready.py (SC2-e9-AC3 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md",
+      "result": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md, rc=0"
+    },
+    {
+      "tool": "surprise-row-gate.py (staged)",
+      "invocation": "git add org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md && python .tools/surprise-row-gate.py org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "1 new row(s) of 11 total checked (10 pre-existing, NOT re-graded); OK: 1 file(s), all new rows carry their step-7/step-10 fields."
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~4 <0.9.0_WK_MDPF_SECCLASS~4@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-MDPF_SECCLASS-4"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC2-e9-AC1,SC2-e9-AC2,SC2-e9-AC3",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}

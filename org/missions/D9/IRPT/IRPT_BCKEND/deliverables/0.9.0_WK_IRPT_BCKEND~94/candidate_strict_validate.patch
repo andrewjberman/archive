@@ -1,0 +1,38 @@
+diff --git a/infra/aws/lambda/investor-reporting/ycharts/generate/job.py b/infra/aws/lambda/investor-reporting/ycharts/generate/job.py
+index 3481d5d3c3..8d0a8cdea0 100644
+--- a/infra/aws/lambda/investor-reporting/ycharts/generate/job.py
++++ b/infra/aws/lambda/investor-reporting/ycharts/generate/job.py
+@@ -75,6 +75,13 @@ LAMBDA_BUDGET_SECONDS = int(os.environ.get("IRPT_GENERATE_TIMEOUT_S", "900"))
+ VENDOR_JOB_ID_TOKENS = ("vendor_job_id", "ycharts_job_id", "job_id", "task_id", "queue_id",
+                         "background_job", "vendor_task", "report_job_id")
+ 
++# The ONE ten-key shape of a vendor-request ledger record (transport.py `_record()`): shapes and
++# counts only -- no header value, no cookie, no body. The receipt carries the ledger under
++# `vendor_requests`; a record whose key set is not exactly this refuses the receipt write.
++VENDOR_LEDGER_SHAPE = frozenset(("method", "path", "status", "content_type", "bytes",
++                                 "set_cookie_count", "waf_action", "login_destination",
++                                 "final_url_path", "body_complete"))
++
+ 
+ class JobRefused(RuntimeError):
+     """The job could not proceed. Never used for a vendor-side finding."""
+@@ -484,10 +491,18 @@ class GenerationJob(object):
+         # request that re-runs rather than a receipt pointing at bytes that are not there.
+         receipt_key = _gate.destination_for(self.bound, "generations",
+                                             id=request_id, a=str(revision)) + "receipt.json"
++        # THE RECEIPT CARRIES THE VENDOR ENDPOINT LEDGER (IB-yr-291): the transport's own
++        # shape-only records, validated BEFORE the write. An off-shape record refuses the
++        # receipt, leaving a request that re-runs rather than a receipt that could hold a value.
++        ledger = list(self.tx.evidence)
++        for rec in ledger:
++            if not isinstance(rec, dict) or frozenset(rec) != VENDOR_LEDGER_SHAPE:
++                raise JobRefused("VENDOR_LEDGER_SHAPE")
+         self.blobs.put(self.bucket, receipt_key,
+                        json.dumps({"attempt": attempt, "artifact_key": key,
+                                    "template_id": template["template_id"],
+-                                   "variant": template["variant"]},
++                                   "variant": template["variant"],
++                                   "vendor_requests": ledger},
+                                   sort_keys=True).encode(),
+                        content_type="application/json")
+         self._state(job_id, "READY", {"artifact_key": key,

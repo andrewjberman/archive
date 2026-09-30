@@ -1,0 +1,46 @@
+diff --git a/infra/aws/lambda/investor-reporting/ycharts/generate/entry.py b/infra/aws/lambda/investor-reporting/ycharts/generate/entry.py
+index 8ac17ab2f6..59c6eb7ac9 100644
+--- a/infra/aws/lambda/investor-reporting/ycharts/generate/entry.py
++++ b/infra/aws/lambda/investor-reporting/ycharts/generate/entry.py
+@@ -58,9 +58,11 @@ import served as _entry          # noqa: E402
+ import enforce as _enforce       # noqa: E402
+ import loaders as _loaders       # noqa: E402
+ import ids as _ids               # noqa: E402  IB-rt-3 / IB-rte-6, the one id-space normalizer
++import comparison_catalogue as _catalogue  # noqa: E402  IB-yr-242, the sibling catalogue read
+ from submission import PUBLIC_FIELDS, SubmissionRefused, validate_public_request  # noqa: E402
+ 
+ OPERATION = "analysis-requests"
++CATALOGUE_OPERATION = "comparison-catalogue"
+ QUEUE_URL_ENV = "IRPT_GENERATION_QUEUE_URL"
+ 
+ # The fields a BROWSER may send. Everything else on an AnalysisRequest is the server's.
+@@ -145,8 +147,20 @@ def submit_analysis(request, scope, event, ctx, service=None, *, allow_prospect=
+ ROUTES = {
+     "POST /api/scoped/investor-reporting/analysis":
+         "analysis-requests",
++    # IB-yr-242 (CTO 103038, shape B): the catalogue is a SIBLING scoped GET, so ResolvedScope stays
++    # v1. It rides this entry's guard and tenant check like every other read in the family.
++    "GET /api/scoped/investor-reporting/analysis/comparisons":
++        CATALOGUE_OPERATION,
+ }
+ 
++
++def read_comparison_catalogue(request, scope, event, ctx, read_classifications=None):
++    """THE CATALOGUE READ. Named from the model catalogue and etf-classifications, else the ticker
++    verbatim (CTO 103035). A READ: it writes nothing and makes no network call. `ctx.tenant` is the
++    VERIFIED tenant the boundary bound; nothing in the request selects it."""
++    return _catalogue.build_catalogue(tenant=ctx.tenant, read_classifications=read_classifications)
++
++
+ def build_entry(service=None, load_prospect_owner=None):
+     """Install the persistent service inside the shared M boundary.
+ 
+@@ -162,7 +176,7 @@ def build_entry(service=None, load_prospect_owner=None):
+                                allow_prospect=load_prospect_owner is not None)
+     return _entry.Entry(
+         function_name="irpt-ycharts-generate",
+-        operations={OPERATION: compute},
++        operations={OPERATION: compute, CATALOGUE_OPERATION: read_comparison_catalogue},
+         deps=_loaders.deps,
+         opaque_firm_for=_loaders.opaque_firm_for,
+         routes=ROUTES,

@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_TRNSPT.TO-TR-t1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP.md",
+    "vintage_commit": "81e350ba0a",
+    "to_ref": "org/missions/D9/NFRA/NFRA_TRNSPT/task-orders/NFRA_TRNSPT.TO-TR-t1.pull-job.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/prd/NFRA_TRNSPT_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "81e350ba0a"
+  },
+  "assignee": "0.9.0_WK_NFRA_TRNSPT~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams/pull.py",
+      "kind": "script",
+      "commit_or_etag": "f868b684cf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL risk class: code/fixtures/tests only, fake S3 and fixture transport; no gateway call, no bucket write. Not deployed.",
+      "artifact_covered_by": [
+        "TR1-t1-AC1",
+        "TR1-t1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/teams/gateway_client.py",
+      "kind": "script",
+      "commit_or_etag": "f868b684cf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL risk class: code/fixtures/tests only, fake S3 and fixture transport; no gateway call, no bucket write. Not deployed.",
+      "artifact_covered_by": [
+        "TR1-t1-AC1",
+        "TR1-t1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/teams/series.json",
+      "kind": "config_data",
+      "commit_or_etag": "f868b684cf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL risk class: code/fixtures/tests only, fake S3 and fixture transport; no gateway call, no bucket write. Not deployed.",
+      "artifact_covered_by": [
+        "TR1-t1-AC1",
+        "TR1-t1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_teams_pull.py",
+      "kind": "test",
+      "commit_or_etag": "f868b684cf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL risk class: code/fixtures/tests only, fake S3 and fixture transport; no gateway call, no bucket write. Not deployed.",
+      "artifact_covered_by": [
+        "TR1-t1-AC1",
+        "TR1-t1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/fixtures/teams_pull/index.json",
+      "kind": "test",
+      "commit_or_etag": "f868b684cf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL risk class: code/fixtures/tests only, fake S3 and fixture transport; no gateway call, no bucket write. Not deployed.",
+      "artifact_covered_by": [
+        "TR1-t1-AC1",
+        "TR1-t1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TR1-t1-AC1",
+      "criterion_verbatim": "python -m pytest data/transcripts/scripts/tests/test_teams_pull.py -q -p no:cacheprovider -> passed",
+      "method": "command",
+      "invocation": "python -m pytest data/transcripts/scripts/tests/test_teams_pull.py -q -p no:cacheprovider",
+      "output_evidence": "10 passed in 0.17s\nexit=0",
+      "denominator": "10 of 10 tests passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TR1-t1-AC2",
+      "criterion_verbatim": "python data/transcripts/scripts/teams/pull.py --transport fixture --fixture data/transcripts/scripts/tests/fixtures/teams_pull --dry-run -> PULL-DRY series=4 listed=4 new=2 held=1 expired=1 refused=1",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/teams/pull.py --transport fixture --fixture data/transcripts/scripts/tests/fixtures/teams_pull --dry-run",
+      "output_evidence": "PULL-DRY series=4 listed=4 new=2 held=1 expired=1 refused=1\nexit=0\n(held case seeded by the fixture's held.json, which the fixture-mode CLI preloads into an in-memory S3)",
+      "denominator": "4 of 4 series listed; 4 rows: 2 new, 1 held, 1 expired, plus 1 series refused",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative arms in the suite: the HELD row (sidecar preloaded) is never put; the EXPIRED and REFUSED fixtures are typed and put nothing; a second apply run holds all landed rows; --dry-run leaves the fake S3 unchanged.",
+      "expected": "held skipped, expired/refused typed, rerun new=0, dry-run puts=0",
+      "observed": "test_held_row_is_skipped_never_read_never_put, test_outcomes_are_typed_per_series, test_rerun_after_apply_holds_everything_new and test_dry_run_writes_nothing_but_counts_the_same pass",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pytest and the CLI run twice each (pre-commit and post-commit).",
+      "observed": "10 passed and the same PULL-DRY line both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_TRNSPT-W1-S2: a 148-char meeting id overflows the Windows path limit as a fixture filename; FixtureTransport reads an index.json short-stem map",
+    "NFRA_TRNSPT-W1-S3: the parked gateway spec's read_meeting_transcript has no fmt argument and returns a paged dict; no metadata-VTT call is specified"
+  ],
+  "session_log": "none",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest data/transcripts/scripts/tests/test_teams_pull.py -q -p no:cacheprovider",
+      "result": "10 passed"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_TRNSPT~1 <0.9.0_WK_NFRA_TRNSPT~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "f868b684cf"
+    }
+  ]
+}

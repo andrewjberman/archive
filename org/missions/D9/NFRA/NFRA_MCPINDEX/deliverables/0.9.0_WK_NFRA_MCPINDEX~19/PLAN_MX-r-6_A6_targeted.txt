@@ -1,0 +1,109 @@
+aws_secretsmanager_secret.schwab_reader_external_ids: Refreshing state... [id=arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/mcp/opal-gateway-schwab-reader-external-ids-2BSIrt]
+aws_iam_role.gw: Refreshing state... [id=opal-gateway-role]
+aws_secretsmanager_secret_version.schwab_reader_external_ids: Refreshing state... [id=arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/mcp/opal-gateway-schwab-reader-external-ids-2BSIrt|terraform-20260916182533855000000003]
+aws_iam_role.schwab_data_read: Refreshing state... [id=gateway-schwab-read-role]
+aws_iam_role_policy.schwab_data_read_policy: Refreshing state... [id=gateway-schwab-read-role:gateway-schwab-read-role-policy]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_iam_role_policy.schwab_data_read_policy will be updated in-place
+  ~ resource "aws_iam_role_policy" "schwab_data_read_policy" {
+        id          = "gateway-schwab-read-role:gateway-schwab-read-role-policy"
+        name        = "gateway-schwab-read-role-policy"
+      ~ policy      = jsonencode(
+          ~ {
+              ~ Statement = [
+                    {
+                        Effect    = "Deny"
+                        NotAction = [
+                            "s3:GetObject",
+                            "s3:GetObjectVersion",
+                            "s3:ListBucket",
+                        ]
+                        Resource  = "*"
+                        Sid       = "DenyAllNonReadActions"
+                    },
+                  ~ {
+                      ~ NotResource = [
+                            # (2 unchanged elements hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/dim_asset/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/dim_transaction/*",
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_position/*",
+                            # (1 unchanged element hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_asset/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_transaction/*",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                    {
+                        Action      = "s3:ListBucket"
+                        Effect      = "Deny"
+                        NotResource = "arn:aws:s3:::opal-data-assets"
+                        Sid         = "DenyListingOtherBuckets"
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringNotLike = {
+                              ~ "s3:prefix" = [
+                                    # (2 unchanged elements hidden)
+                                    "schwab/08242234/silver/dim_asset/*",
+                                  + "schwab/08242234/silver/dim_transaction/*",
+                                    "schwab/08335338/silver/dim_position/*",
+                                    # (1 unchanged element hidden)
+                                    "schwab/08335338/silver/dim_asset/*",
+                                  + "schwab/08335338/silver/dim_transaction/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Resource = [
+                            # (2 unchanged elements hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/dim_asset/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/dim_transaction/*",
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_position/*",
+                            # (1 unchanged element hidden)
+                            "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_asset/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_transaction/*",
+                        ]
+                        # (3 unchanged attributes hidden)
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringLike = {
+                              ~ "s3:prefix" = [
+                                    # (2 unchanged elements hidden)
+                                    "schwab/08242234/silver/dim_asset/*",
+                                  + "schwab/08242234/silver/dim_transaction/*",
+                                    "schwab/08335338/silver/dim_position/*",
+                                    # (1 unchanged element hidden)
+                                    "schwab/08335338/silver/dim_asset/*",
+                                  + "schwab/08335338/silver/dim_transaction/*",
+                                ]
+                            }
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (2 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.

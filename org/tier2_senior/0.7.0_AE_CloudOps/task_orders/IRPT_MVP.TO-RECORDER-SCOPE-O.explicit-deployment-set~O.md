@@ -7,7 +7,7 @@
 <issued_by>2.0.0_SA_COO~P</issued_by>
 <issued_to>0.7.0_AE_CloudOps~O</issued_to>
 <date>2026-09-23</date>
-<status>pending</status>
+<status>superseded -- the recorder fix landed as 0b8784cea8 / 5159419e9f ("membership from the resolved set, not source history", test infra/aws/lambda/ci/test_record_terraform_deploy_scope.py on CLOUD) and CTO review remediation 14aec18295 (proof-of-spec 13 of 13). Set by the issuer 2.0.0_SA_COO~P 2026-09-29 on 0.7.0_AE_CloudOps's flag (msg 103048).</status>
 <project_code>IRPT_MVP</project_code>
 </metadata>
 <objective>Repair canonical recorder scope propagation so one resolved explicit deployment set drives the source-map stamp, CHANGELOG functions and artifacts, and reconciliation. Deliver an isolated source fix, focused offline regression, and exact recovery procedure for direct CTO review before any live recording.</objective>

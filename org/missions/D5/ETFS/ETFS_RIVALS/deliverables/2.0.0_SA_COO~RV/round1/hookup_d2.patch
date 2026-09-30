@@ -1,0 +1,95 @@
+diff --git a/infra/aws/ec2/opal-gateway/app/server.py b/infra/aws/ec2/opal-gateway/app/server.py
+index a2dc0c4135..30e4fa49a3 100644
+--- a/infra/aws/ec2/opal-gateway/app/server.py
++++ b/infra/aws/ec2/opal-gateway/app/server.py
+@@ -54,7 +54,7 @@ from starlette.requests import Request
+ from starlette.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
+ from starlette.routing import Mount, Route
+ 
+-from . import admin_api, audit, browser_oidc, data_entitlement, download_routes, graph, graph_read, integrations, ms_ingest, oauth_as, otp, owner_gate, query_v0 as query_v0_mod, ratelimit, sprint_view, token_broker
++from . import admin_api, audit, browser_oidc, data_entitlement, download_routes, graph, graph_read, integrations, ms_ingest, oauth_as, otp, owner_gate, query_v0 as query_v0_mod, ratelimit, rivalfunds_view, sprint_view, token_broker
+ from .blocklist import AccessDenied, enforce
+ from .config import get_config
+ from .context import Principal, set_current_email, set_current_principal
+@@ -196,7 +196,7 @@ class GuardMiddleware:
+                     raw = scope.get("raw_path")
+                     if isinstance(raw, (bytes, bytearray)):
+                         scope["raw_path"] = bytes(raw) + b"/"
+-            elif path == "/login" or sprint_view.is_sprint_path(path):
++            elif path == "/login" or sprint_view.is_sprint_path(path) or rivalfunds_view.is_rivalfunds_path(path):
+                 # /sprint* (the Daily Sprint web client, 2026-08-28) is the GUI path made real: same
+                 # ALB-OIDC-verified identity + blocklist as /login, fail-closed on a missing header.
+                 request = Request(scope, receive)
+@@ -983,6 +983,11 @@ app = Starlette(
+         Route("/sprint/", sprint_view.sprint_redirect, methods=["GET"]),
+         Route("/sprint/archive", sprint_view.sprint_archive, methods=["GET"]),
+         Route("/sprint/{day}", sprint_view.sprint_page, methods=["GET"]),
++        # ETFS_RIVALS: the day's rival-funds research page, served byte-for-byte from S3 like /sprint. app/rivalfunds_view.py.
++        Route("/rivalfunds", rivalfunds_view.rivalfunds_page, methods=["GET"]),
++        Route("/rivalfunds/", rivalfunds_view.rivalfunds_redirect, methods=["GET"]),
++        Route("/rivalfunds/archive", rivalfunds_view.rivalfunds_archive, methods=["GET"]),
++        Route("/rivalfunds/{day}", rivalfunds_view.rivalfunds_day, methods=["GET"]),
+         # MP-t-1: Andrew's dashboard admin API + static bundle, both owner-gated (app/owner_gate.py).
+         # A Mount is prefix-matched but "/api/admin" is a new, exact, non-overlapping prefix, so it
+         # cannot shadow any existing route above. "/" is an exact-path Route (Starlette Route never
+diff --git a/infra/aws/lambda/ci/lambda-source-map.json b/infra/aws/lambda/ci/lambda-source-map.json
+index 0d5922bab6..e1395194f1 100644
+--- a/infra/aws/lambda/ci/lambda-source-map.json
++++ b/infra/aws/lambda/ci/lambda-source-map.json
+@@ -5522,6 +5522,56 @@
+       "tf_resource": "aws_lambda_function.mcportal_grant_writer",
+       "iam_role": "mcportal-grant-writer-role",
+       "_note": "NFRA_MCPORTAL MP-t-2 (PRD C4): the ONLY other writer of the gateway's POLICY# grant partition besides the operator CLI (ops/schwab_entitlement_admin.py), invoked by the gateway with ONE lambda:InvokeFunction grant and no sts:AssumeRole. Verifies the ALB-signed x-amzn-oidc-data header itself (ES256 against the regional ELB key, reimplemented -- never imports app/identity.py), exact-matches Andrew's owner key from its own env: MCPORTAL_OWNER_KEY_CLAIM (oid or sub) selects the verified claim and MCPORTAL_OWNER_KEY holds its value, matched case-insensitively; refuses a header older than 120s and a header past its own exp; refuses before any store call; records one item per outcome in mcportal-grant-changes-table, with who carrying the claim name and email only. APPLIED 2026-09-29 (NFRA_MCPORTAL MP-a-2, sub branch, ledger nfra-mcportal-r3-writer-apply): the staged package (build_package.py) and the mcportal-grant-writer-deps layer are live."
++    },
++    "etfs-rivalfunds-daily-lambda": {
++      "source_dir": "infra/aws/lambda/etfs-pipeline/etfs-rivalfunds-daily-lambda",
++      "files": [
++        "lambda_function.py"
++      ],
++      "tf_file": "infra/aws/terraform/etfs-rivalfunds/lambdas.tf",
++      "tf_resource": "aws_lambda_function.stage[\"etfs-rivalfunds-daily-lambda\"]",
++      "iam_role": "etfs-rivalfunds-daily-role",
++      "_note": "ETFS_RIVALS round 1 (2.0.0_SA_COO~RV hookup, 2026-09-30): zip Lambda built by archive_file from .runtime/rivalfunds-build/<name> + the shared rivalfunds/, lib/, infra/logic/registry/ and org/standards/NAMING_SCHEMA.json; no artifact_s3_key. Not deployed until RIV-d-2, which records artifact_sha256 / last_deployed_*."
++    },
++    "etfs-rivalfunds-fetch-holdings-lambda": {
++      "source_dir": "infra/aws/lambda/etfs-pipeline/etfs-rivalfunds-fetch-holdings-lambda",
++      "files": [
++        "lambda_function.py"
++      ],
++      "tf_file": "infra/aws/terraform/etfs-rivalfunds/lambdas.tf",
++      "tf_resource": "aws_lambda_function.stage[\"etfs-rivalfunds-fetch-holdings-lambda\"]",
++      "iam_role": "etfs-rivalfunds-fetch-holdings-role",
++      "_note": "ETFS_RIVALS round 1 (2.0.0_SA_COO~RV hookup, 2026-09-30): zip Lambda built by archive_file from .runtime/rivalfunds-build/<name> + the shared rivalfunds/, lib/, infra/logic/registry/ and org/standards/NAMING_SCHEMA.json; no artifact_s3_key. Not deployed until RIV-d-2, which records artifact_sha256 / last_deployed_*."
++    },
++    "rivalfunds-build-canonical-shape-lambda": {
++      "source_dir": "infra/aws/lambda/etfs-pipeline/rivalfunds-build-canonical-shape-lambda",
++      "files": [
++        "lambda_function.py"
++      ],
++      "tf_file": "infra/aws/terraform/etfs-rivalfunds/lambdas.tf",
++      "tf_resource": "aws_lambda_function.stage[\"rivalfunds-build-canonical-shape-lambda\"]",
++      "iam_role": "rivalfunds-build-canonical-shape-role",
++      "_note": "ETFS_RIVALS round 1 (2.0.0_SA_COO~RV hookup, 2026-09-30): zip Lambda built by archive_file from .runtime/rivalfunds-build/<name> + the shared rivalfunds/, lib/, infra/logic/registry/ and org/standards/NAMING_SCHEMA.json; no artifact_s3_key. Not deployed until RIV-d-2, which records artifact_sha256 / last_deployed_*."
++    },
++    "rivalfunds-build-silver-lambda": {
++      "source_dir": "infra/aws/lambda/etfs-pipeline/rivalfunds-build-silver-lambda",
++      "files": [
++        "lambda_function.py"
++      ],
++      "tf_file": "infra/aws/terraform/etfs-rivalfunds/lambdas.tf",
++      "tf_resource": "aws_lambda_function.stage[\"rivalfunds-build-silver-lambda\"]",
++      "iam_role": "rivalfunds-build-silver-role",
++      "_note": "ETFS_RIVALS round 1 (2.0.0_SA_COO~RV hookup, 2026-09-30): zip Lambda built by archive_file from .runtime/rivalfunds-build/<name> + the shared rivalfunds/, lib/, infra/logic/registry/ and org/standards/NAMING_SCHEMA.json; no artifact_s3_key. Not deployed until RIV-d-2, which records artifact_sha256 / last_deployed_*."
++    },
++    "rivalfunds-publish-page-lambda": {
++      "source_dir": "infra/aws/lambda/etfs-pipeline/rivalfunds-publish-page-lambda",
++      "files": [
++        "lambda_function.py"
++      ],
++      "tf_file": "infra/aws/terraform/etfs-rivalfunds/lambdas.tf",
++      "tf_resource": "aws_lambda_function.stage[\"rivalfunds-publish-page-lambda\"]",
++      "iam_role": "rivalfunds-publish-page-role",
++      "_note": "ETFS_RIVALS round 1 (2.0.0_SA_COO~RV hookup, 2026-09-30): zip Lambda built by archive_file from .runtime/rivalfunds-build/<name> + the shared rivalfunds/, lib/, infra/logic/registry/ and org/standards/NAMING_SCHEMA.json; no artifact_s3_key. Not deployed until RIV-d-2, which records artifact_sha256 / last_deployed_*."
+     }
+   },
+   "_last_deploy_recorded": "2026-09-29T03:23:00Z"

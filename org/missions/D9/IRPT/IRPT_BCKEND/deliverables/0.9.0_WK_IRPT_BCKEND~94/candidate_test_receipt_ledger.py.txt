@@ -1,0 +1,59 @@
+"""IB-yr-291: the READY receipt carries the vendor endpoint ledger (shapes, never values).
+
+Offline only: importing run_offline_suite installs the network guard; no socket is opened.
+"""
+import json
+from pathlib import Path
+import sys
+import unittest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import run_offline_suite as suite  # noqa: E402
+
+jobmod = suite.jobmod
+
+
+def _receipts(blobs):
+    return [k for k in blobs.objects if k[1].endswith("receipt.json")]
+
+
+class PlantedJob(jobmod.GenerationJob):
+    """Plants an off-shape record into the transport's evidence just before the receipt write."""
+
+    def attempt_row(self, *args, **kwargs):
+        row = super(PlantedJob, self).attempt_row(*args, **kwargs)
+        self.tx.evidence.append({"method": "GET", "path": "/x", "cookie": "planted"})
+        return row
+
+
+class ReceiptLedgerTests(unittest.TestCase):
+    def test_receipt_ledger_equals_evidence_on_ten_key_shape(self):
+        name, _fp = suite.owned_name()
+        blobs = jobmod.MemoryBlobs()
+        job, _opener = suite.make_job(suite.base_script(collection_owned_name=name), blobs=blobs)
+        run = job.run(suite.JOB_ID, suite.REQUEST_ID, suite.REVISION, suite.HOLDINGS, "OVERVIEW",
+                      cover=suite.COVER)
+        self.assertTrue(run.get("ok"))
+        receipts = _receipts(blobs)
+        self.assertEqual(len(receipts), 1)
+        receipt = json.loads(blobs.objects[receipts[0]].decode("utf-8"))
+        ledger = receipt["vendor_requests"]
+        self.assertEqual(ledger, json.loads(json.dumps(job.tx.evidence)))
+        self.assertGreaterEqual(len(ledger), 4)
+        for rec in ledger:
+            self.assertEqual(frozenset(rec), jobmod.VENDOR_LEDGER_SHAPE)
+
+    def test_control_off_shape_record_refuses_receipt(self):
+        name, _fp = suite.owned_name()
+        blobs = jobmod.MemoryBlobs()
+        job, _opener = suite.make_job(suite.base_script(collection_owned_name=name),
+                                      blobs=blobs, cls=PlantedJob)
+        with self.assertRaises(jobmod.JobRefused) as ctx:
+            job.run(suite.JOB_ID, suite.REQUEST_ID, suite.REVISION, suite.HOLDINGS, "OVERVIEW",
+                    cover=suite.COVER)
+        self.assertIn("VENDOR_LEDGER_SHAPE", str(ctx.exception))
+        self.assertEqual(_receipts(blobs), [])
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e8",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R2.md",
+    "vintage_commit": "5d3432a201bbe44adcea42c6bb8d852faecb9cd5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e8.unresolved-review.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_UNRESOLVED_REVIEW_20260930.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "All 884 of the round-1 backfill census's unresolved names (bd 207, 49financial 601, inflection 76) reviewed: 527 classed (equity 327, fixed_income 91, alternatives 79, structured 19, commodities 11), each with a stated evidence source (the security's own registry name, a structural ticker-format match to the table's own live money-market ticker convention, or a fuller sibling entry held elsewhere in this same build's own census); 357 carry a stated reason instead (unmapped_name 141: no direct-match keyword, a fold would be required and is not applied; truncated_name 116: 49financial's own holdings feed truncates its display-name field, evidenced by the firm's own measured max length across its own list; bare_ticker_no_name 41: a bare ticker with no registry name/Bloomberg/Schwab field held to resolve it; multi_asset_no_single_class 33: a blended/target-date/balanced fund the table's five-value enum has no member for; cusip_only 26: a CUSIP-shaped identifier with no ticker or name held). table_rows_at_build 2309 (live etf-classifications, Select=COUNT full scan at build time). No outside model called; no table write; no seed-source edit. Every proposed_class additionally carries instrument_kind where a structural indicator (ETF/FUND/INDEX/POOL/TRUST word, a corporate-entity suffix, or a mutual-fund share-class token) resolves it, left absent (never defaulted) otherwise -- 190 single_security, 132 fund, 205 absent among the 527 classed.",
+      "artifact_covered_by": [
+        "SC2-e8-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC2-e8-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py unresolved -- expect: REVIEW-COMPLETE",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py unresolved",
+      "expect": "REVIEW-COMPLETE",
+      "output_evidence": "REVIEW-COMPLETE 884 of 884 (classed 527)",
+      "denominator": "table_rows_at_build 2309 >= 2309 minimum; denominator 884 == len(entries) 884 == the census's own bd 207 + 49financial 601 + inflection 76; 0 of 884 entries carry neither a proposed_class nor a reason (every entry has exactly one).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Removed the 'reason' field from one unclassed entry (leaving it with neither proposed_class nor reason) and re-ran the checker.",
+      "expected": "r2_evidence.py unresolved fails, naming the entry with neither a class nor a reason",
+      "observed": "NOT-MET: 1 entries carry neither a class nor a reason: ['O'] (rc=1). Reverted immediately; re-run: REVIEW-COMPLETE 884 of 884 (classed 527) (rc=0).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py unresolved invoked twice back to back.",
+      "observed": "Identical output both times: REVIEW-COMPLETE 884 of 884 (classed 527) (rc=0).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Landing any proposed class into etf_classification.py or the live table.",
+      "reason": "Bounds: LOCAL record only, no table write, no seed-source edit. The order states landing the proposed classes is a later seed-source act."
+    },
+    {
+      "item": "Calling an outside model (LLM) to classify a name.",
+      "reason": "Bounds forbid an outside-model call; every proposed class is sourced from the security's own registry name, a structural ticker-format match, or a fuller sibling entry already held in this build's own census -- never a model guess."
+    },
+    {
+      "item": "Resolving a bare ticker or CUSIP-only identifier to a class.",
+      "reason": "No registry name, Bloomberg field or Schwab field is held in this build for these 41 (bare ticker) + 26 (CUSIP) entries; classifying from the identifier string alone would be a guess, which the order forbids -- each carries a stated reason instead."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_UNRESOLVED_REVIEW_20260930.json",
+  "compiler_tools": [
+    {
+      "tool": "r2_evidence.py unresolved (SC2-e8-AC1 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py unresolved",
+      "result": "REVIEW-COMPLETE 884 of 884 (classed 527), rc=0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~7 <0.9.0_WK_MDPF_SECCLASS~7@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "PENDING-THIS-COMMIT on wk-MDPF_SECCLASS-7 (LOCAL)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC2-e8-AC1",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}

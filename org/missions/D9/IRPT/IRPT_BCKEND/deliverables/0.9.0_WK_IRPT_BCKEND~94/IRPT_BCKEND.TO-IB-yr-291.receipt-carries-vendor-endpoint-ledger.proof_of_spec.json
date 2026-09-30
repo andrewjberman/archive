@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-291",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-291.receipt-carries-vendor-endpoint-ledger.md",
+    "group": "OTHER",
+    "vintage_commit": "64a37ccbd5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R29_Y.md",
+    "vintage_commit": "64a37ccbd5",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-291.receipt-carries-vendor-endpoint-ledger.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~94",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/job.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "VENDOR_LEDGER_SHAPE frozenset of the ten keys; READY receipt carries vendor_requests = list(self.tx.evidence); any record off the shape raises JobRefused(VENDOR_LEDGER_SHAPE) before the receipt put",
+      "artifact_covered_by": [
+        "Y29-1-AC1",
+        "Y29-1-AC2",
+        "Y29-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/transport.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Amendment 1: one line removed, ReplayTransport evidence record no longer carries `location` (now the real Transport ten-key shape)",
+      "artifact_covered_by": [
+        "Y29-1-AC1",
+        "Y29-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_receipt_ledger.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "2 tests: receipt ledger read back equals tx.evidence on the ten-key shape; control plants an off-shape `cookie` record, asserts JobRefused VENDOR_LEDGER_SHAPE and no receipt object",
+      "artifact_covered_by": [
+        "Y29-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y29-1-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_291_receipt_ledger.py",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_291_receipt_ledger.py",
+      "output_evidence": "PASS: receipt vendor_requests carries every transport record on the ten-key shape (rc=0). Preceding lines: run ok: True | receipts written: 1 | transport evidence records: 7; receipt keys ['artifact_key','attempt','template_id','variant','vendor_requests']; records off-shape: 0",
+      "denominator": "7 of 7 records on the ten-key shape",
+      "expect": "^PASS: receipt vendor_requests carries every transport record on the ten-key shape",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y29-1-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_291_dup_control.py",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_291_dup_control.py",
+      "output_evidence": "PASS : duplicate re-delivery spends 0 vendor requests; first run spent 7 (rc=0). Preceding line: duplicate_outcome EXISTING_ARTIFACT_REUSED, duplicate_vendor_requests 0, first_vendor_requests 7, blob_head_calls 2",
+      "denominator": "duplicate 0, first 7",
+      "expect": "^PASS : duplicate re-delivery spends 0 vendor requests",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y29-1-AC3",
+      "criterion_verbatim": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_receipt_ledger.py",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_receipt_ledger.py",
+      "output_evidence": "2 passed in 0.24s (rc=0): ledger read back equals json(tx.evidence), 7 records each on VENDOR_LEDGER_SHAPE; control off-shape `cookie` record raises JobRefused naming VENDOR_LEDGER_SHAPE and zero receipt objects",
+      "denominator": "2 of 2 tests passed",
+      "expect": "^2 passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Off-shape record (key `cookie`) planted before the receipt write.",
+      "expected": "JobRefused VENDOR_LEDGER_SHAPE and no receipt object",
+      "observed": "test_control_off_shape_record_refuses_receipt passed against the committed job.py",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- offline replay on fixed inputs",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W94-S1 -- ReplayTransport records carried an eleventh key `location`; resolved by issuer amendment 1 (one line removed from transport.py, strict validation kept)",
+    "IRPT_BCKEND-W94-S2 -- whole-directory pytest collection of ycharts/generate/tests fails 3 on a fixtures module collision; each file alone passes"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_receipt_ledger.py",
+      "result": "2 passed"
+    },
+    {
+      "tool": "python",
+      "invocation": "python infra/aws/lambda/investor-reporting/ycharts/generate/tests/run_offline_suite.py",
+      "result": "RESULT-END, every v* flag true (regression read after the transport.py line removal)"
+    }
+  ]
+}

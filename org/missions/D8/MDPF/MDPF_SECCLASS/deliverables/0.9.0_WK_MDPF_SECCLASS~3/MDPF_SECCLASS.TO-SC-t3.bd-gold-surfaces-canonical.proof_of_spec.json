@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-t3",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP.md",
+    "vintage_commit": "c1e9b60e63bf535d3c9bc148c0e612f824b51684",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-t3.bd-gold-surfaces-canonical.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/D_03.composition_artifacts.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "classify_series() now returns a DataFrame (asset_class, asset_class_canonical, sub_asset_class_canonical, class_source) instead of a bare Series -- the coarse cash/other post-processing is unchanged (a cash rule, not a class copy); the canonical fields carry classify()/get_sub_asset_class() verbatim, '' + 'unclassified' when the table carries no row. _build_composition()'s groupby key and both top_holdings dict builders (per-class and global) now carry the three canonical fields on every holding. LOCAL edit only; no upload, no deploy.",
+      "introduces": [
+        "asset_class_canonical",
+        "sub_asset_class_canonical",
+        "class_source"
+      ],
+      "artifact_covered_by": [
+        "SC1-t3-AC1",
+        "SC1-t3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/D_04.client_portal_summary.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New shared top-level helper _classify_with_canonical(ticker, name, classifier) -- same coarse/cash rule + canonical/class_source split as D_03, reused by build_account_summaries's _classify site (:1235 pre-cell). Its holding_agg groupby key and top_items now carry the three canonical fields. build_client_summaries needs no direct edit: its concentration.items is a pass-through of D_03's top_holdings, which already carry the new fields. build_advisor_positions's separate _classify_ticker closure (:2766, a fourth site the cell's reader list did not name, serving the ADVI_49EXEC.md-frozen positions.json wire contract) is UNCHANGED -- filed as row MDPF_SECCLASS-W3-S3.",
+      "introduces": [
+        "_classify_with_canonical"
+      ],
+      "artifact_covered_by": [
+        "SC1-t3-AC1",
+        "SC1-t3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "classify_holding() and classify_series() no longer fold an unresolved, non-cash-like ticker onto 'equity' (the prior 'conservative fallback' / 'ultimate fallback for positions' guess -- row MDPF_SECCLASS-W3-S1's sibling defect); they now return 'other', matching D_03/D_04's own cash/other domain. classify_series() returns the same 4-column DataFrame shape as D_03/C_06; process_date()'s conc_grp groupby key and each holdings[] dict now carry the three canonical fields. mix{} (equity/fixed_income/alternatives dollar percentages) is unchanged in SHAPE; its VALUES can move for a relationship that held a previously-mis-guessed-equity position (named in the never-widen half's Blast radius).",
+      "introduces": [
+        "asset_class_canonical",
+        "sub_asset_class_canonical",
+        "class_source"
+      ],
+      "artifact_covered_by": [
+        "SC1-t3-AC1",
+        "SC1-t3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/test_composition_canonical.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 tests, loading D_03/D_04/C_06 by path (dotted filenames, same convention as test_d00_aua_provenance.py) with ETFClassifier.instance() forced onto a stub carrying GLD/PHYS/VXX's measured canonical rows: GLD/PHYS/VXX carry their canonical class+sub-class+class_source in D_03.classify_series, D_03._build_composition's actual holding dicts, D_04._classify_with_canonical, and C_06.classify_series; an unknown holding (UNKNOWNCO, and the 1-5-letter-alpha ZZZZ that used to trigger C_06's old ticker-shape guess) is unclassified by name (class_source 'unclassified', asset_class 'other'), never 'equity'; the CASH_USD line's coarse asset_class ('fixed_income', the library's own pre-existing hardcoded rule) is unchanged in every one of the three files. python -m pytest data/black_diamond/scripts/gold/tests/test_composition_canonical.py -q -p no:cacheprovider: 10 passed in 0.78s. Full sibling suite (data/black_diamond/scripts/gold/tests/) still 52 passed -- no regression.",
+      "introduces": [
+        "test_d03_classify_series_carries_canonical_fields",
+        "test_d03_unknown_holding_is_unclassified_by_name_not_equity",
+        "test_d03_cash_line_unchanged",
+        "test_d03_build_composition_holdings_carry_canonical_classes",
+        "test_d04_classify_with_canonical_carries_canonical_classes",
+        "test_d04_unknown_holding_is_unclassified_by_name_not_equity",
+        "test_d04_cash_line_unchanged",
+        "test_c06_classify_series_carries_canonical_classes",
+        "test_c06_unknown_holding_is_unclassified_by_name_not_equity",
+        "test_c06_cash_line_unchanged"
+      ],
+      "artifact_covered_by": [
+        "SC1-t3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_BD_GOLD_CENSUS_20260929.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built by a REAL local run of D_03's own _find_latest_holdings_lots/_read_parquet/load_ghost_account_ids/apply_ghost_exclusion/build_ap_last_seen/apply_ap_gate/classify_series/_build_composition against s3://opal-data-bd/gold/holdings_lots/2026-09-25.parquet (the latest day) plus the live etf-classifications table -- no upload. rows=524413 (open, ghost-excluded, AP-gated lots), class_sources={etf-classifications: 955934, unclassified: 92892} (D_03 + C_06 combined), unclassified=3565 distinct unclassified security names (matching len(unclassified_names) exactly, the checker's own invariant), client_page names a real relationship (z08327149, $70.4M book) holding VXX at 1.6951% weight, correctly structured/Hedge/etf-classifications. moves lists GLD/PHYS/VXX before (bd-securities/name-alias values, from SC-t-1's own measured R1_BD_RESOLUTION_CENSUS_20260929.json) and after (live etf-classifications, read back 2026-09-30). Workaround named in the census's own 'workaround' field: classify_series fed the REAL functions the 3,987 unique (ticker, asset_name) pairs 526,013 open lots collapse to (a pure function of that pair, so identical, not approximate), and firm-scope + one relationship built rather than the full ~600-relationship + per-advisor fan-out that exceeded a 240s bound on this laptop.",
+      "artifact_covered_by": [
+        "SC1-t3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_20260929.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Never-widen half for deploying SC-t-1..3 (release step 2, after SC-k-1's release step 1 backfill, CLOSED @ad921b0c47): names the act (safe-deploy.sh on the 4 changed gold/silver files, then the first production run overwriting served artifacts), every BD-held ticker whose class moves including GLD/PHYS/VXX (table, before from SC-t-1's measured resolution census, after read back live), the served readers per artifact (advisor composition, client portal summary incl. the known build_advisor_positions gap, client mix timeseries incl. the one coarse-number shift from C_06's equity-guess removal), the IAM read etf-classifications needs for principal bd-exporter-ec2-role (DESIRED, not applied), the release order, and rollback per key via S3 object versioning.",
+      "artifact_covered_by": [
+        "SC1-t3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One new row appended (append-only, schema-valid): MDPF_SECCLASS-W3-S3 (build_advisor_positions's own classify site is a fourth D_04 reader the cell's text did not name, and its positions.json still lacks the canonical fields). W3-S1 and W3-S2 (this worker's SC-t-1 rows) were already on this branch pre-merge; this commit's own merge with CLOUD (06faec58cf, union-resolved) additionally carries CLOUD's W2-S1/S2/S3 and the pre-existing seat row S1, all validated as 5 well-formed JSON blocks."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC1-t3-AC1",
+      "criterion_verbatim": "python -m pytest data/black_diamond/scripts/gold/tests/test_composition_canonical.py -q -p no:cacheprovider -- expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_composition_canonical.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "..........                                                               [100%]\n10 passed in 0.78s",
+      "denominator": "10 of 10 tests passed (0 failed, 0 errors, 0 skipped); full sibling suite data/black_diamond/scripts/gold/tests/ 52 of 52 passed (no regression).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC1-t3-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_build_census.py gold -- expect: BUILD-CENSUS",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_build_census.py gold",
+      "expect": "BUILD-CENSUS",
+      "output_evidence": "BUILD-CENSUS gold rows=524413 unclassified=3565",
+      "denominator": "1 of 1 required keys present (as_of, artifacts, rows, class_sources, unclassified, unclassified_names); 524413 of 524413 rows built + classified; 0 foreign class_source values (only etf-classifications/unclassified present); unclassified 3565 == len(unclassified_names) 3565; client_page names 1 real client with 1 classified value, class_source etf-classifications.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC1-t3-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_20260929.md -- expect: HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_20260929.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_20260929.md",
+      "denominator": "0 of 0 unresolved {{slot}} placeholders; 4 of 4 required strings present (## The act, ## Blast radius, Rollback per key, candidate).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Reverted C_06.classify_holding's no-guess fix back to 'return 'equity'  # ultimate fallback for positions' for the unresolved, non-cash-like branch.",
+      "expected": "test_c06_unknown_holding_is_unclassified_by_name_not_equity fails on its 'holding == other' / 'holding != equity' assertions",
+      "observed": "FAILED test_c06_unknown_holding_is_unclassified_by_name_not_equity - AssertionError: assert 'equity' == 'other' (1 failed, 9 passed). Reverted immediately; re-run: 10 passed in 0.78s.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest data/black_diamond/scripts/gold/tests/test_composition_canonical.py -q -p no:cacheprovider invoked twice back to back; outputs diffed.",
+      "observed": "Identical apart from pytest's own per-run timing line ('10 passed in 0.78s' vs '10 passed in 0.81s'); same 10 node ids in the same order both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy, push, merge (beyond the required CLOUD merge into this worktree), or rebase.",
+      "reason": "Forbidden by the order: LOCAL build + record, no upload, no deploy. The commit is LOCAL on branch wk-MDPF_SECCLASS-3; the COO drains it."
+    },
+    {
+      "item": "Adding the three canonical fields to build_advisor_positions's positions[] (D_04.client_portal_summary.py:2766's _classify_ticker).",
+      "reason": "The cell's own reader enumeration names three sites (D_03.classify_series, D_04._classify near :1235, C_06 generally); this fourth site serves a separately-governed FROZEN wire contract (PRD ADVI_49EXEC.md Section 4.5, explicit CTO redlines on the field list). Row MDPF_SECCLASS-W3-S3 surfaces it rather than silently widening a differently-owned contract."
+    },
+    {
+      "item": "Applying the etf-classifications IAM read policy for bd-exporter-ec2-role.",
+      "reason": "The cell's Build item 4 names it 'as desired, not applied' -- the half states the need; granting it is a separate, later act this order does not cover."
+    },
+    {
+      "item": "Rewriting C_06's MIX_ASSET_CLASSES (equity/fixed_income/alternatives-only) to also report cash/other in the mix{} dict.",
+      "reason": "Pre-existing gap, unrelated to this cell's canonical-class/class_source addition -- a coarse-bucket cash/other line was already silently absent from mix{} before this cell; fixing it would be a different, wider change than 'carry the canonical class' this order asks for."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W3-S1: SC1-t1-AC2's own check (PLACED) and SC-k-1's check (PINNED) both assumed GLD, PHYS and VXX already carried canonical etf-classifications rows; PHYS was absent when SC-t-1 ran (now resolved by CLOUD's release step 1, measured live for this cell).",
+    "MDPF_SECCLASS-W3-S2: removing layers 2-4 in SC-t-1's library dropped the private _ticker_map/_name_map attributes build_bd_assets_dim.py:156 read directly for a diagnostic print, breaking that reader until SC-t-2 fixed it (this worker's own prior cell).",
+    "MDPF_SECCLASS-W3-S3: D_04.client_portal_summary.py's build_advisor_positions carries a fourth classify site (_classify_ticker, :2766) the cell's reader list did not name; its positions.json still lacks the canonical class/sub-class/class_source fields this cell adds everywhere else in the file."
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_20260929.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_composition_canonical.py -q -p no:cacheprovider",
+      "result": "10 passed in 0.78s"
+    },
+    {
+      "tool": "r1_bd_build_census.py (SC1-t3-AC2 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_build_census.py gold",
+      "result": "BUILD-CENSUS gold rows=524413 unclassified=3565, rc=0"
+    },
+    {
+      "tool": "r20_half_ready.py (SC1-t3-AC3 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_20260929.md",
+      "result": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_20260929.md, rc=0"
+    },
+    {
+      "tool": "ruff (py39)",
+      "invocation": "python -m ruff check --target-version py39 data/black_diamond/scripts/gold/D_03.composition_artifacts.py data/black_diamond/scripts/gold/D_04.client_portal_summary.py data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py data/black_diamond/scripts/gold/tests/test_composition_canonical.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~3 <0.9.0_WK_MDPF_SECCLASS~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-MDPF_SECCLASS-3"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC1-t3-AC1,SC1-t3-AC2,SC1-t3-AC3",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}

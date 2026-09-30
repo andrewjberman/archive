@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e11",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R5.md",
+    "vintage_commit": "6d44575a7fb99d3d6790e8b2a99a3b2a9a601a11",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e11.cusip-guard-seed-bd-securities.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/classification/seed_bd_securities.py",
+      "kind": "script",
+      "commit_or_etag": "8368a9a396",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "is_cusip_row + CUSIP_KEY_PREFIX (lines 38-45), skip before put_item (lines 75-78), skipped_cusip=<n> printed; CLI and dry-run flag unchanged.",
+      "artifact_covered_by": [
+        "SC5-e11-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/classification/tests/test_seed_bd_securities_cusip_guard.py",
+      "kind": "script",
+      "commit_or_etag": "8368a9a396",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 tests, boto3.resource stubbed, no network: CUSIP row skipped and counted; ticker rows copied as today (hedge remap kept); count equals CUSIP rows offered (3 of 5); dry-run writes nothing.",
+      "artifact_covered_by": [
+        "SC5-e11-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R5_CHECKS/r5_cusip_guard_dryrun.py",
+      "kind": "script",
+      "commit_or_etag": "8368a9a396",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only Scan of live etf-classifications and bd-securities; imports the seeder's own guard; prints the two CUSIP-GUARD lines; exits 1 on a nonzero count.",
+      "artifact_covered_by": [
+        "SC5-e11-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md",
+      "kind": "doc",
+      "commit_or_etag": "8368a9a396",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Appended ## Guard (SC-e-11) section only: both dry-run lines verbatim, guard file and lines, test path, the REFUSED-unless-fresh-dry-run-prints-0 sentence.",
+      "artifact_covered_by": [
+        "SC5-e11-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC5-e11-AC1",
+      "criterion_verbatim": "python -m pytest data/black_diamond/scripts/classification/tests/test_seed_bd_securities_cusip_guard.py -q -p no:cacheprovider -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest data/black_diamond/scripts/classification/tests/test_seed_bd_securities_cusip_guard.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "4 passed in 0.43s (rc=0)",
+      "denominator": "4 of 4 tests passed, 0 failed, 0 skipped",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC5-e11-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R5_CHECKS/r5_cusip_guard_dryrun.py -- expect: CUSIP-GUARD",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R5_CHECKS/r5_cusip_guard_dryrun.py",
+      "expect": "CUSIP-GUARD",
+      "output_evidence": "CUSIP-GUARD etf_rows=2309 cusip_rows=0 bd_rows=10929 bd_delta_from_cusip=0 | CUSIP-GUARD-PLANNED planned=349 would_copy_to_bd=0 (rc=0)",
+      "denominator": "live scan: 2309 etf-classifications rows, 10929 bd-securities rows; planned 349 of 349 census rows through the guard, 0 copy; unguarded control 349",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC5-e11-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md -- expect: HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_CUSIP_ROWS_20260930.md (rc=0)",
+      "denominator": "1 of 1 half files read",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Unguarded control: count the 349 planned CUSIP: rows that would copy if the guard were absent.",
+      "expected": "349",
+      "observed": "stderr of the dry-run: control: unguarded planned copy would be 349, against would_copy_to_bd=0 with the guard.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R5_CHECKS/r5_cusip_guard_dryrun.py run twice back to back against the live tables.",
+      "observed": "Identical output both times (both CUSIP-GUARD lines and the stderr control), rc=0 each.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to etf-classifications or bd-securities, and the CUSIP_ROWS act itself.",
+      "reason": "BOUNDS: LOCAL build + record; live tables are Scan-only; the act is signed separately."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W9-S1",
+    "MDPF_SECCLASS-W9-S2"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R5_CHECKS/r5_cusip_guard_dryrun.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <each .py>",
+      "result": "pre-commit gate clean 1 of 1 for each of 3 files"
+    }
+  ]
+}
