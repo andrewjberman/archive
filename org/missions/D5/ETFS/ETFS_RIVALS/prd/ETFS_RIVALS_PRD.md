@@ -3,7 +3,7 @@
 ```json
 {
  "project": "ETFS_RIVALS",
- "directive": "D4",
+ "directive": "D5",
  "fabric": "site-z",
  "prd_version": "v0.2",
  "step": 4,
@@ -18,7 +18,7 @@
 `org/tier1_exec/4.0.0_SA_CRO~Z/deliverables/AMGT_RECONN_SOURCES_20260929/GOLD_TABLES_AND_PROMPTS.md` and the feasibility probe
 `TRADE_INFERENCE_FEASIBILITY.md` in the same folder.
 **Andrew's words:** every word this PRD rests on is verbatim in that folder's `ANDREW_DIRECT.md`.
-**Registered** @`ec6f31261c` (D4/ETFS, fabric site-z). **COO:** `2.0.0_SA_COO~RV`, seated by 0.0.0_AB_MSTR~Z (msg 26952).
+**Registered** @`ec6f31261c` (D4/ETFS), **moved to D5/ETFS** on Andrew's word (record `ANDREW_DIRECT_20260930_063xZ_ETFS_INCLUDED_IN_D5_MACROS_ETFS_RIVALS_TO_D5.md`), fabric site-z. **COO:** `2.0.0_SA_COO~RV`, seated by 0.0.0_AB_MSTR~Z (msg 26952).
 **CVO:** `3.0.0_SA_CVO~Z`. **CRO:** `4.0.0_SA_CRO~Z`.
 **The ENDPOINT is confirmed by Andrew** (2026-09-30 ~01:5x ET, *"1.) Yes approved."*, record @`77c891c869`).
 **Sign-off:** proportionate (CLAUDE.md rule 27). The CVO signs the ratified-text half; the brief half is accepted because the
