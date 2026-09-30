@@ -5,6 +5,11 @@
                  the overlay / peers / thesis bodies. `save` writes their canonical sha256 to D/bpng.json (the executor, BEFORE the act);
                  `bpng` re-reads them and PASSES when every body is byte-equal to the saved one (they must read the same data at the
                  encoded keys after the act as at the raw keys before it).
+                 AMENDMENT 2 (row Z-S318): the body reports its own read path inside the `*_read` provenance subtrees (posture_read,
+                 peer_read, scores_read, management_read), and the act moves that path BY DESIGN. `bpng` therefore rewrites the
+                 encoded name back to the raw one INSIDE `*_read` subtrees ONLY, and every other byte must still equal the pre-act
+                 capture (dossier citations stored encoded before the act are NOT rewritten). It prints the count of rewritten strings:
+                 0 would mean the path never moved.
 usage: python <this> --what code|codes|save|bpng [--dir D]   (from the repo root)"""
 import argparse
 import hashlib
@@ -21,6 +26,7 @@ PRIOR = "nKWCfQRQ3/lL6cJxgYG3dZr0tcVdOBheeMMNaoWQE+w="
 NAMES = ("BP/_LN_Equity", "NG/_LN_Equity")
 ROUTES = ("overlay", "peers", "thesis")
 VOLATILE = ("generated_at", "read_at", "served_at", "request_id")
+ENCODED = {"BP-SLASH-_LN_Equity": "BP/_LN_Equity", "NG-SLASH-_LN_Equity": "NG/_LN_Equity"}
 
 
 def strip(o):
@@ -28,6 +34,19 @@ def strip(o):
         return {k: strip(v) for k, v in o.items() if k not in VOLATILE}
     if isinstance(o, list):
         return [strip(v) for v in o]
+    return o
+
+
+def read_path_raw(o, in_read=False, n=None):
+    """AMENDMENT 2: the encoded name back to raw inside `*_read` subtrees only; n[0] counts the rewrites."""
+    if isinstance(o, dict):
+        return {k: read_path_raw(v, in_read or k.endswith("_read"), n) for k, v in o.items()}
+    if isinstance(o, list):
+        return [read_path_raw(v, in_read, n) for v in o]
+    if in_read and isinstance(o, str) and any(e in o for e in ENCODED):
+        n[0] += 1
+        for e, r in ENCODED.items():
+            o = o.replace(e, r)
     return o
 
 
@@ -53,11 +72,12 @@ def main():
         ok = bool(ser) and carrying == len(ser)
         label = "/TIMELINE SERVES PUBLISHERS_FOUND_CODES"
     else:
-        sums = {}
+        sums, rewrites = {}, [0]
         for n in NAMES:
             for r in ROUTES:
                 obj, meta = cl._invoke(lam, "%s/security/%s/%s" % (cl.ROUTE_PREFIX, urllib.parse.quote(n, safe=""), r))
-                sums["%s %s" % (n, r)] = hashlib.sha256(json.dumps(strip(obj), sort_keys=True).encode()).hexdigest() if obj else None
+                body = strip(obj) if a.what == "save" else read_path_raw(strip(obj), n=rewrites)
+                sums["%s %s" % (n, r)] = hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest() if obj else None
         path = os.path.join(a.dir, "bpng.json")
         if a.what == "save":
             os.makedirs(a.dir, exist_ok=True)
@@ -72,6 +92,7 @@ def main():
                 print("no pre-act capture at %s" % path)
                 before = {}
             moved = [k for k in sums if not before or before.get(k) != sums[k] or not sums[k]]
+            print("read-path strings rewritten encoded->raw inside *_read subtrees: %d" % rewrites[0])
             print("bodies %d; moved or empty vs the pre-act capture: %d %s" % (len(sums), len(moved), moved[:6]))
             ok = bool(before) and not moved
             label = "BP AND NG READ THE SAME DATA AT THE ENCODED KEYS"
