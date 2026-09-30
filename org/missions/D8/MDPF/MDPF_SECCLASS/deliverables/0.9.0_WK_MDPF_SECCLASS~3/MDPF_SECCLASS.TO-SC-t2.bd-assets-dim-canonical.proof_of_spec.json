@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-t2",
+  "phase": "BUILD-GENERAL",
+  "firm": "MDPF",
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~3",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-t2.bd-assets-dim-canonical.md",
+    "group": "OTHER",
+    "vintage_commit": "e31e302afc8842ddd1fd4ce6bbd3a32a1cce67da"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP.md",
+    "vintage_commit": "c1e9b60e63bf535d3c9bc148c0e612f824b51684",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-t2.bd-assets-dim-canonical.md"
+  },
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~3/bd-assets-dim-canonical.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/silver/build_bd_assets_dim.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build + record only (BOUNDS: 'no upload, no deploy'); apply_blend now computes asset_class_canonical/sub_asset_class_canonical/class_source for every asset via the library's public API, and the stale bd-securities-scan print and private _ticker_map/_name_map read are removed (amendment 1).",
+      "artifact_covered_by": ["SC1-t2-AC1", "SC1-t2-AC2"]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/silver/tests/test_assets_dim_canonical.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test module, no deploy surface. 5/5 passed locally on a stubbed library."
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_BD_SILVER_CENSUS_20260929.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census artifact from a REAL local build of the silver assets dimension (LOCAL read of live s3://opal-data-bd/silver/bd_assets.parquet and live etf-classifications; no S3 write). Local dimension artifact itself (.scratch/bd_assets_dim_local_20260929.parquet, 10,937 rows) is NOT committed -- it is the census's cited local path, per BOUNDS 'no upload, no deploy'; scratch is not a deliverable surface."
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~3/bd-assets-dim-canonical.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Result document; no deploy surface."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC1-t2-AC1",
+      "criterion_verbatim": "the canonical row decides, and an unknown is unclassified by name.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/black_diamond/scripts/silver/tests/test_assets_dim_canonical.py -q -p no:cacheprovider",
+      "output_evidence": "5 passed in 0.98s",
+      "denominator": "5 of 5 test cases passed",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC1-t2-AC2",
+      "criterion_verbatim": "a real local build where every class came from the canonical table.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_build_census.py silver",
+      "output_evidence": "BUILD-CENSUS silver rows=10937 unclassified=10641",
+      "denominator": "1 of 1 check script run to completion; 10937 of 10937 dimension rows censused; 296 of 10937 classified rows, all class_source='etf-classifications' (0 from bd-securities, a guess, or a BD super class); 10641 of 10937 unclassified, all named",
+      "expect": "BUILD-CENSUS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: neither criterion names a mutant. The stubbed-library test suite's own negative controls stand in: test_unknown_ticker_is_unclassified_by_name and test_public_api_only_no_private_map_read assert the behaviors a regression would break (falling back to a BD super class, or reading a private attribute the stub does not carry).",
+      "expected": "N/A",
+      "observed": "N/A-SPEC-NAMES-NONE",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "python -m pytest data/black_diamond/scripts/silver/tests/test_assets_dim_canonical.py -q -p no:cacheprovider executed twice; python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_build_census.py silver executed twice against the committed census JSON.",
+      "observed": "Both pytest runs: '5 passed'. Both check-script runs: identical 'BUILD-CENSUS silver rows=10937 unclassified=10641' line.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Updating D_03, D_04, C_06 to read the library directly.",
+      "reason": "BOUNDS grant is build_bd_assets_dim.py + its tests + this cell's census + the surprise channel file. SC-t-3 moves those readers (decomp write-set: 'SC-t-3: D_03, D_04, C_06')."
+    },
+    {
+      "item": "Extending ETF_TO_BD_SUPER / the legacy asset_super_class_blend coarse-only mapping to the canonical taxonomy's full value set (e.g. 'commodities', 'structured').",
+      "reason": "Out of this cell's ask, which is the new asset_class_canonical/sub_asset_class_canonical/class_source columns (every asset, via the library, never overridden by BD); the legacy blend column's own coarse-only mapping is a pre-existing, separately-scoped mechanism this order does not touch beyond removing its stale print and private-attribute read."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/black_diamond/scripts/silver/tests/test_assets_dim_canonical.py -q -p no:cacheprovider",
+      "result": "5 passed in 0.98s."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/black_diamond/scripts/silver/build_bd_assets_dim.py data/black_diamond/scripts/silver/tests/test_assets_dim_canonical.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)."
+    },
+    {
+      "tool": "python (real local census build, .scratch only, not committed)",
+      "invocation": "python .scratch/gen_silver_census.py",
+      "result": "Read s3://opal-data-bd/silver/bd_assets.parquet (3,449,107 txn rows, columns-restricted -- a full-column read hit ArrowMemoryError on this device's exhausted virtual memory, measured), deduped to 10,937 unique asset_ids (idxmax dedup -- sort_values-based dedup also hit an ArrayMemoryError on this device; same source, same rows, same identity columns as build_dim(), lighter dedup algorithm), ran the real apply_blend()/apply_opal_taxonomy() (live etf-classifications reads via ETFClassifier.instance()). 296/10,937 resolved via etf-classifications, 10,641 unclassified. Wrote the local dim parquet and R1_BD_SILVER_CENSUS_20260929.json."
+    },
+    {
+      "tool": "r1_bd_build_census.py (check script)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R1_CHECKS/r1_bd_build_census.py silver",
+      "result": "BUILD-CENSUS silver rows=10937 unclassified=10641; rc=0."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "No new rows filed for this cell -- both prior rows (W3-S1, W3-S2) already carry the issuer's ruling; SC-t-2 built exactly to amendment 1 (public API only), so no new surprise arose."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC1-t2-AC1,SC1-t2-AC2",
+      "result": "run before the complete-flip; result recorded in the worker report."
+    }
+  ]
+}
