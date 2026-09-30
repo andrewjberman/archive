@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-g-3.canonical-shape-v2-multi-source",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "787905d1a3",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-g-3.canonical-shape-v2-multi-source.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "787905d1a3"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_canonical_shape.py",
+      "kind": "script",
+      "commit_or_etag": "5a2c0a1d16",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDIT. v2: both silvers, one source per (fund, report date) by universe.policy, columns source_used / is_cash_line / corporate_action_adjusted, Bloomberg row builder. Local sink only, no served write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_g12_canonical_multi_source.py",
+      "kind": "script",
+      "commit_or_etag": "5a2c0a1d16",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 9 pytest tests (policy selection, no bloomberg_primary fallback, issuer_first fallback, cash flags, position ids, pending/home_producer skip, revision). Full rivalfunds suite: 129 passed, 2 skipped.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "5a2c0a1d16",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPEND: rows ETFS_RIVALS-Z-W1-S8, S9, S10, S11 (all OBSERVATION, INERT).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "G1 over real Bloomberg + issuer data: the right funds, one source each, cash kept and flagged, every row -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/g-3.AC1.py",
+      "output_evidence": "canonical: {'status': 'OK', 'batch_id': 'chk', 'outputs': ['s3://opal-data-etfs/rivalfunds/etfs/gold/canonical_shape/date=2026-09-25/holdings-20260930T151342Z-9aeb382f9305.parquet', 's3://opal-data-etfs/rivalfunds/etfs/gold/canonical_shape/date=2026-09-28/holdings-20260930T151342Z-5ac949810b63.parquet', 's3://\nOK:   G1 objects 3, rows 1700\nOK:   columns fund, source_used, is_cash_line present\nOK:   the five IDVZ rivals present ([] missing)\nOK:   IDVZ (home_producer_pending) NOT read\nOK:   BASG present from the issuer\nOK:   rivals source_used bloomberg {'BIDD': ['bloomberg'], 'INEQ': ['bloomberg'], 'TXUE': ['bloomberg'], 'SCHY': ['bloomberg'], 'CGIC': ['bloomberg']}\nOK:   BASG source_used issuer (['issuer'])\nOK:   one source per (fund, report date) (max 1)\nOK:   newest report 2026-09-29: G1 rows per rival {'BIDD': 49, 'CGIC': 205, 'INEQ': 104, 'SCHY': 134, 'TXUE': 51} == capture {'IDVZ': 45, 'CGIC': 205, 'SCHY': 134, 'TXUE': 51, 'BIDD': 49, 'INEQ': 104}\nOK:   cash lines kept and flagged: 48 >= 47\nAC1 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "10 of 10 checks OK (3 G1 report dates, 1700 rows; 5 Bloomberg rivals + BASG; newest report 2026-09-29)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "round 1's BASG output unchanged: g-1.AC1, p-1.AC1 and u-1.AC3 still PASS -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/g-3.AC2.py",
+      "output_evidence": "OK:   round1/g-1.AC1.py: AC1 RESULT: PASS 0 failures\nOK:   round1/p-1.AC1.py: AC1 RESULT: PASS 0 failures\nOK:   round2/u-1.AC3.py: AC3 RESULT: PASS 0 failures\nAC2 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "3 of 3 checks OK (round-1 g-1.AC1, round-1 p-1.AC1, round-2 u-1.AC3)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted by the worker: the checks plant no mutant; the unit tests plant a bloomberg_primary fund present only in the issuer silver (must not appear) and a home_producer-policy fund (must be counted unread).",
+      "expected": "TXUE absent from G1 when only the issuer carries it; IDVZ counted in home_producer_unread.",
+      "observed": "both unit tests pass.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (before and after the commit); the rivalfunds suite run three times.",
+      "observed": "same verdict lines every time; 129 passed, 2 skipped.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S8",
+    "ETFS_RIVALS-Z-W1-S9",
+    "ETFS_RIVALS-Z-W1-S10",
+    "ETFS_RIVALS-Z-W1-S11"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "5a2c0a1d16"
+    }
+  ]
+}
