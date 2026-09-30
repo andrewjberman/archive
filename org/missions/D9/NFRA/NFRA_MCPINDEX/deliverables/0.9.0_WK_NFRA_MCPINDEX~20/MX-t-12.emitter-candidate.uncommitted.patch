@@ -1,0 +1,144 @@
+diff --git a/workflows/atom_decomposition/emit_catalog_v02.py b/workflows/atom_decomposition/emit_catalog_v02.py
+index fdf1a87439..4d38a6eae6 100644
+--- a/workflows/atom_decomposition/emit_catalog_v02.py
++++ b/workflows/atom_decomposition/emit_catalog_v02.py
+@@ -46,7 +46,46 @@ REPORT_DIR = os.path.join(HERE, "catalog_v02")   # validation_report.json only
+ # Allowlist coverage (BUCKET_ALLOWLIST.yaml v0.2 read 2026-08-19): prefixes allowed on
+ # opal-data-portal-v2. A row whose key sits outside these emits BLOCKED-BY-ALLOWLIST --
+ # an honest denial, never a silent widening (widening is Andrew-only).
+-ALLOWED_PREFIXES = ("platinum/mdpf/", "json/", "market-metrics.json.gz")
++#
++# WIDENED 2026-09-30 (NFRA_MCPINDEX MX-t-12, amendment A1): "platinum/advi/49financial/" joins the list on Andrew's
++# recorded word, relayed by 1.0.0_SA_CTO~O and recorded @1eba868308 ("whatever needs to be lifted should be lifted",
++# lifting his "platinum/advi NOT YET"). The widening is the ONE firm scope 49financial (the firm is the key segment,
++# C7), never the platinum/advi/ prefix whole; only the one served object below is given a row, so the prefix's other
++# objects and its _manifests stay unrowed and therefore off-catalog to the gate.
++ALLOWED_PREFIXES = ("platinum/mdpf/", "platinum/advi/49financial/", "json/", "market-metrics.json.gz")
++
++# The advisor-intelligence channel and its one row (MX-t-12). The page unit portal-page-advisor-intelligence is in the
++# catalog's refused_units (its W4b certification window is open, so there is no certified rectangle to lift from);
++# this row is therefore AUTHORED here, every field cited to a live read of the object or to the portal's own source,
++# and the row says so in its `semantics_provenance`. The capital_markets channel is the precedent for an authored block.
++AUTHORED_CHANNELS = {
++    "advisor_intelligence": dict(
++        widening="APPROVED CHANNEL ADD -- Andrew-direct 2026-09-30 ~13:0xZ @1eba868308, verbatim: whatever needs to be lifted should be lifted (lifts his platinum/advi NOT YET; scope limit unchanged: platinum/advi/49financial/ only)",
++        serves="49financial's advisor-intelligence firm mix summary: AUA by asset class, the top-holdings concentration and the per-period mix",
++        keywords=["advisor intelligence", "49financial", "49 financial", "firm mix", "asset mix", "AUA mix", "asset class mix",
++                  "firm concentration", "top holdings", "equity fixed income alternatives", "advisor AUA"],
++        example_asks=["what is 49financial's asset-class mix?", "what are the top holdings by market value across 49financial's book?"]),
++}
++AUTHORED_ARTIFACTS = {
++    "advisor_intelligence": [dict(
++        key="platinum/advi/49financial/mix_summary.json",
++        entity="advi.01.mix-summary",
++        firm="49financial",
++        pages=["/advisor-intelligence"],
++        verdict_class="serve-with-caveat",
++        verdict_state="ruled",
++        vintage_field="data_as_of",
++        vintage_grain="date",
++        accessors=["getPlatinumFirmMixSummary (@/api/endpoints/advisor-intelligence)"],
++        census_ref="NONE -- uncensused (L-14)",
++        semantics_provenance="WORKER-AUTHORED (0.9.0_WK_NFRA_MCPINDEX~20, MX-t-12), NOT a CVO-certified rectangle (the page unit is in refused_units, W4b window open): read from a live get-object of the object (top-level generated_at, data_as_of, firm_id, mix, mix_periods, concentration, composition) and from the portal's own source (portal/src/api/endpoints/advisor-intelligence.ts getPlatinumFirmMixSummary, adviKeyRepoint.ts). Served surface widened on Andrew's word @1eba868308.",
++        serve_verdict_with_caveats="SERVE-WITH-CAVEAT -- widened on Andrew's word (@1eba868308), one firm scope only (49financial, the key segment): a 49financial principal resolves only this row, every other firm principal is refused, Opal staff see it. THIS IS THE FROZEN TWIN, NOT THE PAGE'S LIVE SOURCE: the portal reads the legacy opal-data-bd platinum/firm/ object for this leaf while the twin is held at never-widen (adviKeyRepoint.ts ADVI_REPOINT mix_summary state held), its publisher advi-49f-publisher is a DISABLED schedule, and the object has sat unchanged since 2026-08-21T15:03Z. Quote its own data_as_of and say it is the twin's vintage; never present it as today's figure nor as what the page currently shows. The mix is by market value (the asset classes sum to total_market_value only with the unclassified share); never add mix_periods rows together, each is a period-end stock. An unavailable metric is null, never zero. The object is firm-level and carries no client rows (top holdings are securities, not clients).",
++        business_meaning="The 49financial advisor-intelligence firm mix summary: the firm's total assets under advisement (AUA) and its split across equity, fixed income, alternatives and unclassified, the per-period mix (for example the quarter-to-date end date), the ten largest holdings by market value with their share and asset class, and the composition view (total market value, mix by asset class with top holdings, the other bucket and the unclassified count). It is the firm mix behind the Mix tab of the Advisor Intelligence page.",
++        vintage_semantics="THE vintage is top-level `data_as_of` (live 2026-08-20, generated_at 2026-08-21T15:03:16Z); the `composition` block repeats both and each `mix_periods` row carries its own `end_date`. The producer stamps the same date in object metadata (asof). The object has not been rewritten since 2026-08-21 (the publisher is disabled), so its as-of is the twin's and may be far behind the trading frontier.",
++        producer="advi-49f-publisher (d_publisher_port, written-by metadata; ADVI 49F gold to the portal bucket, ADVI_49PUSH)",
++        consumer_set="portal: getPlatinumFirmMixSummary -> the Advisor Intelligence Mix tab (legacy twin read held, see the caveat)",
++    )],
++}
+ 
+ # MX-d-5 (round 4, Q22 "where is the S&P at?"): index-name vocabulary for the channel whose existing row (mkt.01,
+ # the tiered all-returns snapshot) answers an index-performance ask. AUTHORED here because the v0.1 channel
+@@ -498,7 +537,7 @@ def main():
+ 
+     os.makedirs(OUT_DIR, exist_ok=True)
+     w = io.StringIO()
+-    w.write("""# DATA_CATALOG v0.3 -- THE RUNTIME CATALOG AT ITS ONE HOME (CTO~Z ruling 2448/2449, 2026-08-20)
++    w.write("""# DATA_CATALOG v0.4 -- THE RUNTIME CATALOG AT ITS ONE HOME (CTO~Z ruling 2448/2449, 2026-08-20)
+ #
+ # BUILT BY: workflows/atom_decomposition/emit_catalog_v02.py at git HEAD %s
+ # EXECUTES: OPAL_ANALYST_PRD.md sec.9.6 + sec.10.1 (W5 supersede @9c7b59f9df) as amended by
+@@ -530,10 +569,16 @@ def main():
+ # never from a bucket name (sec.10.8.1). Consumers enforce; this file declares.
+ #
+ # WIDENING IS ANDREW-ONLY, unchanged. Version bumps carry his verbatim.
++#
++# v0.4 (NFRA_MCPINDEX MX-t-12) WIDENS THE CATALOG TO platinum/advi/49financial/, on Andrew's word. Andrew-direct
++# 2026-09-30 ~13:0xZ, verbatim: "whatever needs to be lifted should be lifted" (lifting his hold "platinum/etfs YES,
++# platinum/advi NOT YET"). Record: org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260930_13xxZ_R20_ETFS_BDFEES_YES_SCHWAB_GRANT_YES_ADVI_LIFTED.md,
++# @1eba868308. Scope limit, unchanged: the one firm scope 49financial (the key segment). One object is rowed (channel
++# advisor_intelligence); nothing else under the prefix is.
+ 
+-version: 0.3
++version: 0.4
+ built_at_git_head: %s
+-supersedes: v0.2 (ported 2026-08-20 by 0.7.0_AE_CloudOps, W6-PORT C1; certified @bf0a2c30f9 + CVO~Z @9b859ca898) -- EXTENDS, never a second registry
++supersedes: v0.3 (widening to platinum/advi/49financial/, @1eba868308); v0.2 (ported 2026-08-20 by 0.7.0_AE_CloudOps, W6-PORT C1; certified @bf0a2c30f9 + CVO~Z @9b859ca898) -- EXTENDS, never a second registry
+ bucket: opal-data-portal-v2
+ access_tool: tools/portal_lookup.py   # NEVER raw `aws s3` to answer a user
+ semantics_provenance:   # sec.9.3 / L-7 -- machine-readable carrier; per-row field repeats it with the certified run
+@@ -569,7 +614,7 @@ semantics_provenance:   # sec.9.3 / L-7 -- machine-readable carrier; per-row fie
+     by_ch = {}
+     for eid, spec in EMISSION_MAP.items():
+         by_ch.setdefault(spec["ch"], []).append(eid)
+-    all_channels = sorted(set(by_ch) | set(v01_channels))
++    all_channels = sorted(set(by_ch) | set(v01_channels) | set(AUTHORED_CHANNELS))
+ 
+     def emit_v01_fragment(ch):
+         """Re-emit the v0.1 channel's own fields (sanitized to ASCII), indented under the channel."""
+@@ -604,6 +649,45 @@ semantics_provenance:   # sec.9.3 / L-7 -- machine-readable carrier; per-row fie
+             w.write("    example_asks:\n")
+             w.write("      - 'what are our long-term return assumptions for equities?'\n")
+             w.write("      - 'what is the house view on rates?'\n")
++        elif ch in AUTHORED_CHANNELS:
++            # MX-t-12: an authored channel block, then its authored rows (no certified rectangle behind them).
++            blk = AUTHORED_CHANNELS[ch]
++            w.write("    widening: %r\n" % blk["widening"])
++            w.write("    serves: %r\n" % blk["serves"])
++            w.write("    keywords: [%s]\n" % ", ".join(str(k) for k in blk["keywords"]))
++            w.write("    example_asks:\n")
++            for ask in blk["example_asks"]:
++                w.write("      - %r\n" % ask)
++            w.write("    tool: tools/portal_lookup.py\n")
++            w.write("    artifacts:\n")
++            for row in AUTHORED_ARTIFACTS[ch]:
++                if not str(row["key"]).startswith(ALLOWED_PREFIXES):
++                    axis_violations.append("%s: authored key outside ALLOWED_PREFIXES" % row["entity"])
++                if row["firm"] not in KNOWN_FIRM_VALUES or row["verdict_class"] not in VERDICT_CLASSES or row["verdict_state"] not in VERDICT_STATES:
++                    axis_violations.append("%s: authored row outside the v0.3 axis value sets" % row["entity"])
++                firm_census[row["firm"]] = firm_census.get(row["firm"], 0) + 1
++                vstate_census[row["verdict_state"]] = vstate_census.get(row["verdict_state"], 0) + 1
++                acc, acc_unres = accessors_for([row["consumer_set"]], acc_idx)
++                if not acc or acc_unres:
++                    axis_violations.append("%s: authored accessor(s) not exported under portal/src/api: %s" % (row["entity"], acc_unres))
++                w.write("      - key: %r\n" % row["key"])
++                w.write("        entity: %s   # AUTHORED row (no certified rectangle); sources cited in semantics_provenance\n" % row["entity"])
++                w.write("        firm: %s\n" % row["firm"])
++                w.write("        pages: [%s]\n" % ", ".join(row["pages"]))
++                w.write("        verdict_class: %s\n" % row["verdict_class"])
++                w.write("        verdict_state: %s\n" % row["verdict_state"])
++                w.write("        allowlist: ALLOWLISTED\n")
++                w.write("        vintage_field: %r\n" % row["vintage_field"])
++                w.write("        vintage_grain: %s\n" % row["vintage_grain"])
++                w.write("        accessors: [%s]\n" % ", ".join("'%s'" % a for a in acc))
++                w.write("        census_ref: %r\n" % row["census_ref"])
++                w.write("        semantics_provenance: %r\n" % row["semantics_provenance"])
++                w.write("        serve_verdict_with_caveats: %s\n" % yml(row["serve_verdict_with_caveats"], 10))
++                w.write("        business_meaning: %s\n" % yml(row["business_meaning"], 10))
++                w.write("        vintage_semantics: %s\n" % yml(row["vintage_semantics"], 10))
++                w.write("        producer: %s\n" % yml(row["producer"], 10))
++                w.write("        consumer_set: %s\n" % yml(row["consumer_set"], 10))
++            continue
+         else:
+             emit_v01_fragment(ch)
+         if ch not in by_ch:
+@@ -821,7 +905,7 @@ absent_semantics_units:
+ refused_units:
+   # sec.10.1(b) LOUD REFUSALS -- the lift refuses these; asks landing here get the
+   # catalog's honest denial, never a guess.
+-  - {unit: portal-page-advisor-intelligence, why: "in-flight (W4b open certification window)"}
++  - {unit: portal-page-advisor-intelligence, why: "in-flight (W4b open certification window); no W5 rectangle is lifted for it. ONE authored row (advi.01.mix-summary, platinum/advi/49financial/mix_summary.json) is served under Andrew's widening word @1eba868308, never the unit"}
+   - {unit: portal-page-ticket-center, why: "certified on rectangle.verify.json; rectangle.final.certified.json absent; 42 Plane-B/C cells unwritten"}
+   - {unit: portal-page-portfolio-management, why: "unit never started (also: never_serve -- PM working state incl. TRADE DRAFTS)"}
+   - {unit: portal-page-trade-submission, why: "unit never started (empty run dir)"}
