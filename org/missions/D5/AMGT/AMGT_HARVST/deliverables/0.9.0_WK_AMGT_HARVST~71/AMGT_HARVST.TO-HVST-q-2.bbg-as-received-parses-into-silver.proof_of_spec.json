@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-q-2.bbg-as-received-parses-into-silver",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-q-2.bbg-as-received-parses-into-silver.md",
+    "group": "OTHER",
+    "vintage_commit": "0cfb3406bf2e0883755d82ac920c3e7a356f9027"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "0cfb3406bf2e0883755d82ac920c3e7a356f9027",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-q-2.bbg-as-received-parses-into-silver.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~71",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~71, L7 subagent of 2.0.0_SA_COO~H, worktree wk-hvst-r27-71 on branch wk-AMGT_HARVST-71 cut from 0cfb3406bf, TREE-OK. Read-only S3 LIST/GET only; no PUT, no delete, no vendor call, no deploy, no silver written. CAUSE: silver_from_bronze._extract_bbg (base line 110) read payload.get('story') or {} unconditionally, but bbg's as-received response IS the story object at the top level (the 11 objects HVST-o-5 put carry headline/id/publishedAt/body at the root, no 'story' key; publishers.bloomberg reads value.get('story', value)), so the story was empty: title None, 0 text blocks, article_id None. FIX: story = (payload.get('story') or {}) if 'story' in payload else payload (now line 115); the wrapped and normalised forms and every other publisher are byte-identical (8 golden hashes taken from ff4405d3d5). One row filed: Z-W71-S1 (the parsed rows take a new article_key, so a rebuild adds 11 keys beside the 11 empty ones). MEASURED.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/silver_from_bronze.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_extract_bbg reads the top-level story object when there is no 'story' wrapper. Builder only; no silver written; the served rebuild is round 28.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_q2_bbg_as_received.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "11 offline tests: the real received body parses; two mutants restoring the base parse fail; 8 other-form byte-identity checks.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~71/scripts/q2_ac2_real_bbg_objects.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only S3 LIST/GET of the 11 served 2026-09-30 bbg bronze objects; base builder loaded from git show ff4405d3d5.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~71/q2_bbg_as_received_fixture.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Byte-for-byte copy of one real received bbg bronze object (14490 bytes), source in q2_bbg_as_received_fixture.source.txt.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a test built from one real bbg as-received body (a copied fixture) parses to a non-empty title and text. A mutant restoring the base parse FAILS it. An other-publisher fixture is byte-identical before and after.",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_q2_bbg_as_received.py -rA --tb=line",
+      "output_evidence": "rc 0. Final line: '11 passed in 0.21s'. test_received_bbg_body_parses_title_text_and_date (title 'Lenovo's Slump Shows Not All Asian Tech Stocks Are a One Way Bet', 3 text blocks, article_id OV0TQA6K50XZ01, published instant); test_mutant_restoring_the_base_parse_fails_the_received_check and test_mutant_via_the_real_extractor_fails_too (both raise AssertionError under the base parse); test_every_other_form_is_byte_identical_to_the_base x8 (sa, sa_recv, barrons, wsj, ft, normalised, bbg_wrapped, bbg_normalised; sha256 of the row equals the hash taken from the base builder ff4405d3d5). Full output: q2_ac1_output.txt",
+      "denominator": "11 tests: 1 real-body parse, 2 mutants, 8 byte-identity forms; 11 of 11 passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "read-only GET of the 11 bbg bronze objects that the 2026-09-30 silver rows name (via each row's bronze_key). Print, per object, the title and the text-block count under the base and the new builder, with the count line exactly as in the expect. A shortfall prints its object and reason.",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~71/scripts/q2_ac2_real_bbg_objects.py",
+      "output_evidence": "rc 0. Base builder: title None and 0 text blocks on all 11. New builder: 11 non-empty titles, text blocks 10,5,6,12,15,8,22,8,17,3,19, a published_utc and an article_id on each, 0 shortfalls. Final line: 'REAL BBG OBJECTS PARSED NON-EMPTY: 11 of 11'. Full output: q2_ac2_output.txt",
+      "denominator": "11 served bbg silver rows fetched 2026-09-30 (store.silver_latest('bloomberg','article')), 11 bronze objects read; 11 of 11 non-empty",
+      "status": "PASS",
+      "expect": "REAL BBG OBJECTS PARSED NON-EMPTY: 11 of 11"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the base is commit ff4405d3d5, pinned at cut. It prints the base and after pass counts, and the line 0 failed.",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/ lib/research/harvest/tests/ -rA --tb=line",
+      "output_evidence": "rc 0. After: '495 passed, 1 skipped' (0 FAILED lines; the 1 skip is the pre-existing HVST-x-1 quarantine). Base run at ff4405d3d5 tree before the edit: '484 passed, 1 skipped'. The 11 added are this cell's tests. Summary q2_ac3_summary.txt prints both counts and the line: 0 failed. Full output: q2_ac3_output.txt, q2_ac3_base_output.txt",
+      "denominator": "496 collected after (495 passed + 1 skipped), 485 at base; 0 failed of 496",
+      "status": "PASS",
+      "expect": "0 failed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Adversary arm: a parser that passes a synthetic fixture yet returns an empty row for bbg's real received bytes.",
+      "expected": "the base parse fails the received-body check and returns an empty row on all 11 real objects",
+      "observed": "two mutant tests raise AssertionError under the base parse; AC2 prints base title None / 0 blocks on 11 of 11 real objects and non-empty under the new builder.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 run twice against the same served store",
+      "observed": "the two outputs are identical modulo line endings (diff after tr -d CR), 11 of 11 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any silver write, S3 PUT, deploy, or vendor call",
+      "reason": "Standing clause 0.1; the served silver rebuild from bronze is the round-28 paired act."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W71-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~71 <0.9.0_WK_AMGT_HARVST~71@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see the worker report"
+    }
+  ]
+}
