@@ -1,0 +1,163 @@
+{
+  "task_order": "AMGT_CORPUS.TO-CRPS-t-3",
+  "worker": "0.9.0_WK_AMGT_CORPUS~3",
+  "round": 18,
+  "bucket": "opal-data-harvest",
+  "prefix": "derived/model_block/",
+  "names_exercised": [
+    "BP/_LN_Equity",
+    "NG/_LN_Equity"
+  ],
+  "writer_key_form": "raw_slash (integrations/bloomberg/research/model_block_pull.py:1319 derived_key = f'derived/{ENGINE}/{sec_key}/{derived_stamp}/model_block.json')",
+  "live_objects_per_name": {
+    "BP/_LN_Equity": 6,
+    "NG/_LN_Equity": 6,
+    "BP-SLASH-_LN_Equity": 0,
+    "NG-SLASH-_LN_Equity": 0
+  },
+  "search": {
+    "scope": [
+      "lib/",
+      "integrations/",
+      "infra/ (including infra/aws/lambda/ sources and infra/aws/terraform/)"
+    ],
+    "excluded": "portal/ submodule (out of scope per the order)",
+    "method": "git grep over tracked files at HEAD of wk-crps18-3 (based on CLOUD 48a5b4a1cf)",
+    "files_searched": 9210,
+    "files_hit_model_block_any": 81,
+    "lines_hit_model_block_any": 673,
+    "files_hit_non_test": 41,
+    "files_hit_store_prefix_token": 15,
+    "files_hit_store_prefix_token_non_test": 11,
+    "non_reader_prefix_hits": "s3.tf and scoped-amgt-api.tf (IAM grants and comments), model_block_pull.py (the WRITER: derived key built at :1319, reads only bronze), crosswalk.py (docstring/provenance text), robustness.py (a message string)",
+    "reached_by_import_only": "base_census, seed-etf-constituents and render_pack main reach the store through scoped_amgt.read_model_block or dossier._model_block_read and are rows above"
+  },
+  "denominator": 20,
+  "readers": [
+    {
+      "reader": "lib/research/api/scoped_amgt.py:1106",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "_read_model_block_pool builds base = '{0}{1}/'.format(MODEL_BLOCK_POOL_PREFIX, security_key) with MODEL_BLOCK_POOL_PREFIX='derived/model_block/' (:190), then list_objects_v2 + newest '/model_block.json'. Exercise (live, opal-data-harvest, read-only): _read_model_block_pool('BP/_LN_Equity') -> SERVED derived/model_block/BP/_LN_Equity/20260925T200039Z/model_block.json, 419 figures; ('NG/_LN_Equity') -> SERVED .../NG/_LN_Equity/20260925T200133Z/model_block.json, 367 figures. Negative control, slash-safe form: ('BP-SLASH-_LN_Equity') and ('NG-SLASH-_LN_Equity') -> ABSENT (0 objects), so the raw form is the only one that exists."
+    },
+    {
+      "reader": "lib/research/api/scoped_amgt.py:1085",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "read_model_block(security_key) delegates to _read_model_block_pool(security_key) then _apply_corrected_overlay; no key rewrite. Exercise: read_model_block('BP/_LN_Equity') -> block with 419 figures; ('NG/_LN_Equity') -> 367 figures."
+    },
+    {
+      "reader": "lib/research/api/scoped_amgt.py:2011",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "read_security_overlay: resolved_key = identity.get('security_key'); model_block = read_model_block(resolved_key). identity upstream: scoped_amgt.resolve_identity('BP/ LN') -> 'BP/_LN_Equity', ('NG/ LN') -> 'NG/_LN_Equity', ('BP/_LN_Equity') -> same; ('BP-SLASH-_LN_Equity') -> None (measured live, read-only). Exercise: read_security_overlay('BP/_LN_Equity') -> header_figures 16; ('NG/_LN_Equity') -> 16."
+    },
+    {
+      "reader": "lib/research/api/scoped_amgt.py:2180",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "read_thesis_bundle: resolved_key = identity.get('security_key'); model_block = read_model_block(resolved_key). Exercise: read_thesis_bundle('BP/_LN_Equity') -> header_figures 16, model_status SERVED; NG same. Served: handler GET /api/scoped/amgt/security/BP%2F_LN_Equity/thesis -> 200, model_status SERVED (NG likewise)."
+    },
+    {
+      "reader": "lib/research/api/scoped_amgt.py:3229",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "read_model: key = identity.get('security_key'); read_model_block(key) when no block is passed. Exercise: read_model('BP/_LN_Equity') -> model_status SERVED, 370 fiscal_year_figures; NG -> SERVED, 318."
+    },
+    {
+      "reader": "lib/research/api/scoped_amgt.py:3314",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "read_description: key = identity.get('security_key'); read_model_block(key). Exercise: read_description('BP/_LN_Equity') -> status SERVED; NG -> SERVED."
+    },
+    {
+      "reader": "lib/research/api/scoped_amgt.py:3979",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "read_model_block_versions: base = '{0}{1}/'.format(MODEL_BLOCK_POOL_PREFIX, security_key); keys via _pool_keys(base). Exercise: ('BP/_LN_Equity') -> SERVED, versions 6, objects_listed 6, latest 20260925T200039Z; ('NG/_LN_Equity') -> 6/6, latest 20260925T200133Z; ('BP-SLASH-_LN_Equity') -> ABSENT, 0. Served: handler GET .../security/BP%2F_LN_Equity/versions -> 200, denominators versions 6 (NG 6)."
+    },
+    {
+      "reader": "lib/research/api/scoped_amgt.py:4042",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "compare_model_blocks: key = '{0}{1}/{2}/model_block.json'.format(MODEL_BLOCK_POOL_PREFIX, security_key, stamp) with stamps taken from read_model_block_versions. Exercise: compare_model_blocks('BP/_LN_Equity') -> reason None, 6 versions, figures_from 419 figures_to 419 unchanged 419; NG -> 6 versions, 367/367 unchanged 367."
+    },
+    {
+      "reader": "lib/research/api/scoped_amgt.py:4480",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "_print_pack: resolved_key = identity.get('security_key'); block = read_model_block(resolved_key) (the rk-23 comment near :4467 notes render_pack.security_key() is filesystem-only and is not used for the read). Same reader as :1085, exercised OK for BP and NG; the print render itself was not run (out of scope of a read census)."
+    },
+    {
+      "reader": "lib/research/corpus/dossier.py:927",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "_model_block_read: base = '%s%s/' % (MODEL_BLOCK_POOL_PREFIX, security_key), MODEL_BLOCK_POOL_PREFIX imported from scoped_amgt; paginate list_objects_v2 with the caller's client. Exercise (boto3 client, read-only): _model_block_read('BP/_LN_Equity', c) -> SERVED derived/model_block/BP/_LN_Equity/20260925T200039Z/model_block.json, 419 figures; ('NG/_LN_Equity') -> SERVED .../NG/_LN_Equity/20260925T200133Z/..., 367 figures."
+    },
+    {
+      "reader": "lib/research/corpus/dossier.py:966",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "_model_block_stamp: base = '%s%s/' % (MODEL_BLOCK_POOL_PREFIX, security_key); object_key.startswith(base). Exercise: _model_block_stamp('BP/_LN_Equity', 'derived/model_block/BP/_LN_Equity/20260925T200039Z/model_block.json') -> '20260925T200039Z'; NG -> '20260925T200133Z'. A key parser over the raw form, not an S3 call."
+    },
+    {
+      "reader": "lib/research/corpus/base_census.py:152",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "_read_one calls dossier._model_block_read(security_key, client), key passed through unchanged. Exercise = the dossier._model_block_read row above (SERVED, 419 / 367 figures)."
+    },
+    {
+      "reader": "lib/research/peers/universe.py:312",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "model_block_pool_index lists Prefix=MODEL_BLOCK_POOL_PREFIX ('derived/model_block/', :83) and derives the key as k[len(prefix):].rsplit('/', 2)[0], i.e. the LITERAL directory name, so the raw slash survives (rsplit from the right). Exercise: index of 100 keys; 'BP/_LN_Equity' in index -> True (derived/model_block/BP/_LN_Equity/20260925T200039Z/model_block.json); 'NG/_LN_Equity' -> True (.../20260925T200133Z/...)."
+    },
+    {
+      "reader": "lib/research/peers/universe.py:331",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "read_model_block_from_pool: index.get(security_key) with the raw key from the index above, then get_object. Exercise: read_model_block_from_pool('BP/_LN_Equity') -> 419 figures; ('NG/_LN_Equity') -> 367 figures."
+    },
+    {
+      "reader": "lib/research/peers/engine.py:163",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "_load_model_block: pool_index = universe_module.model_block_pool_index(); 'if security_key in pool_index' then read_model_block_from_pool; falls back to a repo directory only when the pool lacks the key. Exercise: _load_model_block('BP/_LN_Equity', 'no-such-dir', read_pool=True) -> 419 figures; NG -> 367 (pool hit, no fallback used)."
+    },
+    {
+      "reader": "lib/research/scores/run_scores.py:106",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "_latest_model_block: base = '{0}{1}/'.format(MODEL_BLOCK_PREFIX, security_key), MODEL_BLOCK_PREFIX='derived/model_block/' (:70); single list_objects_v2 (no pagination; 6 objects per key is under 1000). Exercise: _latest_model_block(c, 'BP/_LN_Equity') -> derived/model_block/BP/_LN_Equity/20260925T200039Z/model_block.json, 419 figures; NG -> .../20260925T200133Z/..., 367 figures."
+    },
+    {
+      "reader": "lib/research/scores/run_scores.py:223",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "run(): keys = keyed_security_keys(latest crosswalk doc) then _latest_model_block(client, security_key) per key. Exercise: latest crosswalk crosswalk/v1/2026-09-29.json -> keyed_security_keys 237 keys; 'BP/_LN_Equity' in keys True, 'NG/_LN_Equity' True, keys containing 'SLASH' 0 -- so the producer's key source is the raw form the reader lists by."
+    },
+    {
+      "reader": "infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py:233",
+      "key_form": "raw_slash",
+      "reads_bp": "OK",
+      "evidence": "load_library: sk = scoped_amgt.resolve_identity(hk).get('security_key'); block = scoped_amgt.read_model_block(sk); bare_ticker(sk) = sk.split('_')[0].replace('/', '') -> 'BP'. Exercise (module loaded by importlib, real load_library, read-only): 96 library names, 0 skips, 'BP' -> {'security_key': 'BP/_LN_Equity', 'sub_asset_class': 'Energy'}, 'NG' -> {'security_key': 'NG/_LN_Equity', 'sub_asset_class': 'Utilities'}."
+    },
+    {
+      "reader": "lib/research/print/render_pack.py:1043",
+      "key_form": "other:filesystem_safe_display_form_space-to-underscore_slash-to-hyphen",
+      "reads_bp": "ABSENT",
+      "evidence": "main() CLI: block = read_model_block(security_key(args.security)) where render_pack.security_key(security) = security.replace(' ', '_').replace('/', '-') (:148; its own docstring says it is for LOCAL FILESYSTEM names only, never an S3 key). The read therefore lists derived/model_block/BP-_LN_Equity/, a form that exists nowhere. Exercise (live, read-only): security_key('BP/_LN_Equity') -> 'BP-_LN_Equity' -> read_model_block -> None; security_key('BP/ LN Equity') -> 'BP-_LN_Equity' -> None; NG likewise 'NG-_LN_Equity' -> None. The CLI prints 'BLOCKED: no landed model block for <name>' and returns 1. Contrast: every non-slash name maps identically (space to _ equals the key form), e.g. 'SAP GY Equity' -> 'SAP_GY_Equity'. Reachability: git grep of render_pack over lib/ integrations/ infra/ (tests excluded) finds no caller of main(); the served print route (scoped_amgt.py:4480) does not use it. No served surface shows this ABSENT."
+    },
+    {
+      "reader": "lib/research/posture/packs.py:64",
+      "key_form": "other:local_directory_file_model_block_KEY.json",
+      "reads_bp": "NOT_APPLICABLE",
+      "evidence": "load_model_block reads a repo/local file os.path.join(model_block_dir or MODEL_BLOCK_DIR, 'model_block_%s.json' % security_key); it never touches s3://opal-data-harvest/derived/model_block/. It is not a reader of the store, listed because it shares the model_block name; with a raw slash key the path would nest a directory, but this reader is outside the store the writer defect concerns. No S3 exercise applies."
+    }
+  ],
+  "summary": {
+    "OK": 18,
+    "ABSENT": 1,
+    "NOT_APPLICABLE": 1
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-t-3",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-t-3.model-block-reader-census.md",
+    "group": "OTHER",
+    "vintage_commit": "6fcaa52f79"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "6fcaa52f79",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-t-3.model-block-reader-census.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~3/MODEL_BLOCK_READERS_ROUND18.json",
+      "kind": "doc",
+      "commit_or_etag": "e48a5f6925",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "20 reader rows (denominator 20): 18 OK, 1 ABSENT (lib/research/print/render_pack.py:1043 main() CLI), 1 NOT_APPLICABLE (lib/research/posture/packs.py:64, a local-directory reader). Each row carries the key builder code and a live read-only exercise against s3://opal-data-harvest/derived/model_block/ for BP/_LN_Equity and NG/_LN_Equity. Search denominator: 9210 tracked files under lib/ integrations/ infra/, 81 with model_block, 15 with the store-prefix token.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~3/MODEL_BLOCK_READERS_ROUND18.md",
+      "kind": "doc",
+      "commit_or_etag": "e48a5f6925",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The reader table, the search denominator, and the ABSENT row with its served surface: none (the CLI has no caller; served routes /versions and /thesis for BP and NG return 200, SERVED, 6 versions).",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t3_AC1.sh -- expect (?m)^t3 readers [1-9]\\d* rows_valid [1-9]\\d* all_valid True key_forms \\S+ bp_absent \\d+$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t3_AC1.sh",
+      "output_evidence": "t3 readers 20 rows_valid 20 all_valid True key_forms other:filesystem_safe_display_form_space-to-underscore_slash-to-hyphen,other:local_directory_file_model_block_KEY.json,raw_slash bp_absent 1",
+      "denominator": "20 of 20 reader rows valid",
+      "expect": "(?m)^t3 readers [1-9]\\d* rows_valid [1-9]\\d* all_valid True key_forms \\S+ bp_absent \\d+$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t3_AC2.sh -- expect (?m)^paths_outside_grant 0$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t3_AC2.sh",
+      "output_evidence": "paths_outside_grant 0",
+      "denominator": "0 of the changed paths on the branch fall outside the grant",
+      "expect": "(?m)^paths_outside_grant 0$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control on the census key form: the same readers called with the slash-safe key BP-SLASH-_LN_Equity / NG-SLASH-_LN_Equity",
+      "expected": "ABSENT (the writer landed 0 objects under the slash-safe form)",
+      "observed": "_read_model_block_pool and read_model_block_versions both returned ABSENT with 0 objects for both slash-safe keys; resolve_identity('BP-SLASH-_LN_Equity') -> None",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 checker run twice on the final bytes (before and after the commit)",
+      "observed": "same printed line each time",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the served print render (scoped_amgt.py:4480 _print_pack) and Lambda invocation",
+      "reason": "a render is not a read; the print reader is the same read_model_block call exercised OK for BP and NG, and the order forbids any Lambda invocation that writes"
+    }
+  ],
+  "surprises": ["AMGT_CORPUS-Z-W3-S9: the one ABSENT reader (render_pack main CLI) has no served surface"],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python live read-only exercise",
+      "invocation": "PYTHONPATH=. python .scratch/t3/ex1.py .. ex5.py (boto3 list/get on opal-data-harvest)",
+      "result": "18 of 20 reader rows read BP and NG OK by direct call (routes /versions and /thesis also 200 SERVED); 1 ABSENT (render_pack CLI key); 1 NOT_APPLICABLE"
+    }
+  ]
+}
