@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e15",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R6.md",
+    "vintage_commit": "c7571d32b0b825f11c1812c32d9cfd2b5f5a363b",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e15.model-rows-reader-census.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~12",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R6_CHECKS/r6_model_reader_census.py",
+      "kind": "script",
+      "commit_or_etag": "481cff1589",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local census check (LOCAL build + record bound): exercises 34 readers with the table stubbed, makes no AWS call and writes only the census JSON; not deployed anywhere.",
+      "artifact_covered_by": [
+        "SC6-e15-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R6_MODEL_READER_CENSUS_20260930.json",
+      "kind": "doc",
+      "commit_or_etag": "481cff1589",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The check's record artifact: {readers[path,function,verdict,evidence], denominator, search}; byte-identical across two back-to-back runs.",
+      "artifact_covered_by": [
+        "SC6-e15-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_MODEL_ROWS_20260930.md",
+      "kind": "doc",
+      "commit_or_etag": "bf36e9c5ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A record artifact for the issuer's sign-off; the \"Reader census (SC-e-15)\" section was appended (87 lines added, 0 removed, no other section edited).",
+      "artifact_covered_by": [
+        "SC6-e15-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "bf36e9c5ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows MDPF_SECCLASS-W12-S1, W12-S2 (BLOCKING) and W12-S3 (OBSERVATION) appended; no existing row edited; surprise-row-gate OK (3 new rows of 28)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC6-e15-AC1",
+      "criterion_verbatim": "every reader of the table tolerates a model row (none crashes, refuses it or fails a strict contract).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R6_CHECKS/r6_model_reader_census.py",
+      "expect": "MODEL-READER-CENSUS readers=",
+      "output_evidence": "rc=0 under timeout 120; amended expectation (AMENDMENT 1, b587116b82) 'MODEL-READER-CENSUS readers=' is printed. Deciding line:\nMODEL-READER-CENSUS readers=34 tolerates=22 read_only=8 crashes=3 refuses=0 fails_contract=1\n(MODEL-READER-TOLERATED is not printed, by design of the census: crashes=3 fails_contract=1.)",
+      "denominator": "34 readers exercised or read: 22 TOLERATES, 8 READ-ONLY, 3 CRASHES, 0 REFUSES, 1 FAILS-CONTRACT; 0 UNCENSUSED of 60 tracked code files naming the table (21 tests, 12 declared not-readers)",
+      "status": "PASS",
+      "status_reason": "PASS against the amended expectation: the cell delivers the census (34 readers, 0 uncensused). Per amendment 1 the every-reader-tolerates bar is the MODEL_ROWS act's precondition, not this cell's: the half stays unsigned and the act is REFUSED unless a fresh census immediately before it prints MODEL-READER-TOLERATED. Census numbers are as the check prints them (crashes=3: classify_holdings in the shared client and its two Lambda copies, row W12-S2; fails_contract=1: seed-etf-classifications.py merge_item, row W12-S1); both route to round 7 as repairs. No reader, check, JSON or half was changed."
+    },
+    {
+      "criterion_id": "SC6-e15-AC2",
+      "criterion_verbatim": "the MODEL_ROWS half still reads HALF-READY with its reader census section.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_MODEL_ROWS_20260930.md",
+      "expect": "HALF-READY",
+      "output_evidence": "rc=0 under timeout 120: HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_MODEL_ROWS_20260930.md",
+      "denominator": "1 of 1 half file graded HALF-READY; the file now carries the \"## Reader census (SC-e-15)\" section (git diff: 87 insertions, 0 deletions)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The check must refuse a reader that breaks on a model row: two genuine breakers and two in-check negative controls fire on the real tree.",
+      "expected": "CRASHES on a class outside the 4-key dict; FAILS-CONTRACT on carried model attributes; the closed Holdings schema refuses a leaked classification_confidence",
+      "observed": "classify_holdings KeyError(alternatives) on the model row and on the control seed row ALTSEED; merge_item returns classified_by=seed WITH classification_confidence+low_confidence; the holdings exercise's negative control (a node carrying classification_confidence) IS refused by the same validator that accepted all 260 annotated nodes",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python r6_model_reader_census.py run twice back to back; md5 of the JSON and diff of stdout compared.",
+      "observed": "JSON md5 499d02ab047c5fb11f97f3b31a203d45 both runs; stdout diff empty (outputs-identical).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to etf-classifications, and the MODEL_ROWS act itself.",
+      "reason": "BOUNDS: LOCAL build + record; the table is stubbed, live reads only (one scan for the class census); the act is signed separately and refused unless a fresh census prints MODEL-READER-TOLERATED."
+    },
+    {
+      "item": "Changing any reader (the seed merge carry-forward, the classify_holdings dict).",
+      "reason": "Outside the order's paths; the order says record the verdict, file a row, report AC1 failed."
+    },
+    {
+      "item": "Untracked files in the shared checkout and the uninitialised portal submodule.",
+      "reason": "Outside the worktree pin; stated as row MDPF_SECCLASS-W12-S3. Portal rows are READ-ONLY at gitlink pin 3e2233de92."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W12-S1",
+    "MDPF_SECCLASS-W12-S2",
+    "MDPF_SECCLASS-W12-S3"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R6_CHECKS/r6_model_reader_census.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R6_CHECKS/r6_model_reader_census.py",
+      "result": "pre-commit gate clean 1 of 1 file(s)"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "run by safe-commit on INVESTIGATION_v1.md",
+      "result": "3 new row(s) of 28 total checked (25 pre-existing, NOT re-graded); OK"
+    }
+  ]
+}
