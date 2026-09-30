@@ -16,6 +16,13 @@ shapes through the new code on stubs.
    replayed as a one-page BACKFILL job at floor 2026-01-01 over a stub transport: hits, dated hits,
    fetched, skipped_pre_floor -- a dated hit before the floor is not fetched, an undated one still is.
 
+5. 429 REPLAY (phase B, C-HV-TRUST-TOKEN). A stubbed 429 burst is served to the real PacedSession: the
+   attempt rows (publisher, request kind, attempt, status, wait, class) and that no sign-in happened.
+
+6. TOKEN-SOURCE CENSUS (phase B). Per publisher: the Secrets secret NAMES (credentials, stored session) via
+   list/describe ONLY -- no value is read -- and the saved-session file path with existence and mtime. Run
+   by `ab1b_token_census.py` in its own process (AWS control plane; the replay process blocks sockets).
+
 Sockets are blocked and counted for the whole script. No publisher, no S3.
 """
 
@@ -23,6 +30,7 @@ import datetime as dt
 import json
 import socket
 import sqlite3
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -205,12 +213,51 @@ def step_pre_floor():
     print("base (fetch every hit) would have fetched %d; the floor gate fetches %d" % (totals["hits"], totals["fetched"]))
 
 
+def step_backoff():
+    section("5. 429 burst replayed through the real PacedSession (stub transport, sleeps captured)")
+    from types import SimpleNamespace
+    from lib.opal_data_harvest.transport import PacedSession, Throttled
+
+    class Inner:
+        def __init__(self, statuses):
+            self.statuses = list(statuses)
+
+        def get(self, url, **kwargs):
+            status = self.statuses.pop(0) if self.statuses else 200
+            return SimpleNamespace(status_code=status, content=b"{}", text="{}", url=url, headers={},
+                                   raise_for_status=lambda: None)
+
+    for label, statuses in (("short burst (2 x 429 then 200)", [429, 429]), ("burst past the bound (429 x 9)", [429] * 9)):
+        waits = []
+        session = PacedSession(Inner(statuses), "ft", lambda event: None, minimum=0, jitter=0, sleep=waits.append)
+        outcome = "ok"
+        try:
+            session.get("https://www.ft.com/search")
+        except Throttled as exc:
+            outcome = "Throttled (cooldown %ds, no sign-in, token kept)" % exc.retry_after
+        print("%s -> %s; waits=%s total=%.1fs" % (label, outcome, [round(w, 2) for w in waits], sum(waits)))
+        for row in session.attempts:
+            print("    attempt %(attempt)d status=%(status)d wait=%(wait_seconds)ss class=%(class)s (%(publisher)s, %(request_kind)s)" % row)
+
+
+def step_token_sources():
+    section("6. token-source census (names and paths only; Secrets by list/describe, no value read)")
+    done = subprocess.run([sys.executable, str(HERE / "ab1b_token_census.py"), RUNTIME.as_posix()],
+                          capture_output=True, text=True, timeout=180)
+    sys.stdout.write(done.stdout)
+    if done.returncode:
+        print("CENSUS FAILED rc=%d: %s" % (done.returncode, done.stderr.strip().splitlines()[-1:]))
+        raise SystemExit(1)
+
+
 def main():
     print("today (UTC):", dt.datetime.now(dt.timezone.utc).date().isoformat())
     row = step_seed()
     step_wsj()
     step_bbg(row)
     step_pre_floor()
+    step_backoff()
+    step_token_sources()
     # the runtime db carries exactly the one seeded row
     db = sqlite3.connect("file:%s?mode=ro" % (RUNTIME / "progress.sqlite3").as_posix(), uri=True)
     try:
