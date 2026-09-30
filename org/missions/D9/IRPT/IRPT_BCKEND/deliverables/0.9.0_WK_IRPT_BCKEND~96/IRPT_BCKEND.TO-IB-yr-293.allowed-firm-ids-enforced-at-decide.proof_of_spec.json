@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-293",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-293.allowed-firm-ids-enforced-at-decide.md",
+    "group": "OTHER",
+    "vintage_commit": "1da46fccbd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R29_Y.md",
+    "vintage_commit": "1da46fccbd",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-293.allowed-firm-ids-enforced-at-decide.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~96",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_scope/canonical_profile_reads.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "allowedFirmIds appended as last name of _USER_FIELDS (twelfth) and _USER_RETURN_FIELDS",
+      "artifact_covered_by": [
+        "Y29-3-AC2",
+        "Y29-3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_scope/tests/test_canonical_profile_reads.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "USER_FIELDS pin moved; 1 test added: verbatim S value, absent stays absent, passwordHash never returns",
+      "artifact_covered_by": [
+        "Y29-3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/current_authority.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "allowed_firm_ids(user) helper; decide() refuses ACTOR_FIRM_NOT_ALLOWED after ACTOR_SCOPE_REFUSED and before ALLOWED; evidence gains allowed_firm_ids and allowed_firm_ids_absent",
+      "artifact_covered_by": [
+        "Y29-3-AC1",
+        "Y29-3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_allowed_firms.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 tests: the five check cases plus OWN_FIRM actor where ACTOR_SCOPE_REFUSED fires first",
+      "artifact_covered_by": [
+        "Y29-3-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y29-3-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_293_allowed_firms.py -> PASS: all five allowed-firm cases hold",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_293_allowed_firms.py",
+      "output_evidence": "5 of 5 cases hold; PASS: all five allowed-firm cases hold (rc=0). Base was 2 of 5.",
+      "denominator": "5 of 5 cases",
+      "expect": "PASS: all five allowed-firm cases hold",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y29-3-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_293_projection.py -> PASS: projection carries allowedFirmIds verbatim, absent stays absent, passwordHash never returned",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_293_projection.py",
+      "output_evidence": "with attribute -> cottonwood | without -> key present: False | passwordHash returned: False; PASS: projection carries allowedFirmIds verbatim, absent stays absent, passwordHash never returned (rc=0)",
+      "denominator": "3 of 3 conditions (verbatim, absent, no passwordHash)",
+      "expect": "PASS: projection carries allowedFirmIds verbatim",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y29-3-AC3",
+      "criterion_verbatim": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_resident_worker.py _scope/tests/test_canonical_profile_reads.py ycharts/generate/tests/test_allowed_firms.py -> 0 failed and not fewer than 88 passed",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_resident_worker.py _scope/tests/test_canonical_profile_reads.py ycharts/generate/tests/test_allowed_firms.py",
+      "output_evidence": "94 passed, 8 skipped in 50.71s (rc=0): 87 existing + 1 new projection test + 6 new allowed-firm tests; 8 skipped unchanged",
+      "denominator": "94 passed of 102 collected, 0 failed, 8 skipped",
+      "expect": "^94 passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The two check scripts were run at CLOUD base by the issuer before the cut.",
+      "expected": "AC1 2 of 5; AC2 stub parameter mismatch",
+      "observed": "issuer-recorded base: AC1 2 of 5 cases hold, AC2 FAIL reader did not project allowedFirmIds; both PASS after the cut",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- offline doubles on fixed inputs",
+      "observed": "single run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W96-S1 -- allowedFirmIds of a type other than string/list/set fails closed in allowed_firm_ids()"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_resident_worker.py _scope/tests/test_canonical_profile_reads.py ycharts/generate/tests/test_allowed_firms.py",
+      "result": "94 passed, 8 skipped, 0 failed"
+    }
+  ]
+}

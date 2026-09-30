@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-292",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-292.login-capture-records-a-scrubbed-har.md",
+    "group": "OTHER",
+    "vintage_commit": "f54e17e4c6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R29_Y.md",
+    "vintage_commit": "f54e17e4c6",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-292.login-capture-records-a-scrubbed-har.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~95",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "contextOptions() exported; both newContext sites (lines 988, 1399) call it; recordHar only behind YC_RECORD_HAR=1 with YC_RECORD_HAR_PATH (throws without); ctx.close() before browser.close() on acquire non-keepContext branch (1146), withAuthenticatedPage eviction path (1464) and teardown (1472)",
+      "artifact_covered_by": [
+        "Y29-2-AC1",
+        "Y29-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-ycharts/har_scrub.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "scrub(src,dst) redacts cookie/set-cookie/authorization header values and cookies[].value to <redacted:len=N>, re-reads output bytes for residual_hits; CLI prints the census as one-line JSON; no-secret HAR is byte-identical",
+      "artifact_covered_by": [
+        "Y29-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-ycharts/tests/test_har_scrub.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 pytest tests: planted value on four paths absent from output bytes with census, length-tagged redaction, harmless headers kept, negative control byte-identical; 4 passed",
+      "artifact_covered_by": [
+        "Y29-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-ycharts/README.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "file-table row for har_scrub.py and an environment-pointers line naming YC_RECORD_HAR / YC_RECORD_HAR_PATH as opt-in, off by default",
+      "artifact_covered_by": [
+        "Y29-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y29-2-AC1",
+      "criterion_verbatim": "node check_292_context_options.js -> PASS: contextOptions -- off: no recordHar; on: path honoured, content omit; no path: refused",
+      "method": "command",
+      "invocation": "node org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_292_context_options.js",
+      "output_evidence": "PASS: contextOptions -- off: no recordHar; on: path honoured, content omit; no path: refused (rc=0)",
+      "denominator": "3 of 3 arms (off, on, on-without-path) held",
+      "expect": "^PASS: contextOptions",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y29-2-AC2",
+      "criterion_verbatim": "python check_292_har_scrub.py -> PASS: planted value absent from the scrubbed output on every path; harmless header kept; negative control byte-identical",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_292_har_scrub.py",
+      "output_evidence": "PASS: planted value absent from the scrubbed output on every path; harmless header kept; negative control byte-identical (rc=0). Preceding lines: planted value occurrences in OUTPUT: 0 | in INPUT: 5; census headers_scrubbed 3, cookies_scrubbed 1, residual_hits 0, entries 1; negative control census all 0, bytes identical True. Row W95-S1 on the cookie count.",
+      "denominator": "0 of 5 planted occurrences remain; 4 of 4 planted paths scrubbed; 1 of 1 negative control identical",
+      "expect": "^PASS: planted value absent",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y29-2-AC3",
+      "criterion_verbatim": "node check_292_suite_control.js -> PASS: offline suite all_pass with the netguard preload",
+      "method": "command",
+      "invocation": "node org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_292_suite_control.js",
+      "output_evidence": "PASS: offline suite all_pass with the netguard preload (rc=0). Preceding line: arms a_five_surfaces,b_no_otp_branch,c_bounded_eviction,d_lease_and_fencing,e_offline all true, all_pass true",
+      "denominator": "5 of 5 arms passed",
+      "expect": "^PASS: offline suite all_pass",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 and AC2 checks run against base ycharts_session.js and without har_scrub.py (issuer base run).",
+      "expected": "both FAIL at base",
+      "observed": "issuer base reading: AC1 FAIL contextOptions not exported; AC2 FAIL har_scrub not importable; after the cut both PASS",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- offline synthetic HAR and env-only option calls",
+      "observed": "single runs; no clock, network or randomness",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W95-S1 -- AC2's fixture echoes one cookie on request and response yet expects cookies_scrubbed == 1; the scrub counts a (name, value) cookie once per entry"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/ec2/investor-reporting-ycharts/tests/test_har_scrub.py -q",
+      "result": "4 passed"
+    }
+  ]
+}
