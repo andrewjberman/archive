@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-h-1.holdings-coverage",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "787905d1a3",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-h-1.holdings-coverage.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "787905d1a3"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_holdings_coverage.py",
+      "kind": "script",
+      "commit_or_etag": "1184b37260",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW. handler_entry for stage build-coverage: one row per fund x expected trading day x source seen; status new/repeat/gap/periodic; modal report date; one selected row per fund-day. Local sink only, no served write. Real run over 501 IDVZ-group census captures: 501 days, 2392 rows, 0 failures.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_g21_holdings_coverage.py",
+      "kind": "script",
+      "commit_or_etag": "1184b37260",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 18 pytest tests. Full rivalfunds suite: 147 passed, 2 skipped.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "1184b37260",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPEND: rows ETFS_RIVALS-Z-W1-S12, S13, S14 (all OBSERVATION, INERT).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a planted gap reads gap; captured days read new; every column present -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/h-1.AC1.py",
+      "output_evidence": "coverage: {'status': 'OK', 'batch_id': 'chk', 'outputs': ['s3://opal-data-etfs/rivalfunds/etfs/gold/holdings_coverage/date=2026-09-23/holdings_coverage.parquet', 's3://opal-data-etfs/rivalfunds/etfs/g\nOK:   G2 objects 5, rows 25\nOK:   column fund_id\nOK:   column expected_date\nOK:   column source\nOK:   column actual_report_date\nOK:   column status\nOK:   column row_count\nOK:   column weight_sum\nOK:   column selected\nOK:   column selection_reason\nOK:   TXUE: new on captured days ['new', 'new', 'new']\nOK:   TXUE: gap on the skipped day 2026-09-25 (gap)\nOK:   BIDD: new on captured days ['new', 'new', 'new']\nOK:   BIDD: gap on the skipped day 2026-09-25 (gap)\nOK:   CGIC: new on captured days ['new', 'new', 'new']\nOK:   CGIC: gap on the skipped day 2026-09-25 (gap)\nOK:   INEQ: new on captured days ['new', 'new', 'new']\nOK:   INEQ: gap on the skipped day 2026-09-25 (gap)\nOK:   SCHY: new on captured days ['new', 'new', 'new']\nOK:   SCHY: gap on the skipped day 2026-09-25 (gap)\nAC1 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "21 of 21 checks OK (5 G2 report-day objects, 25 rows; 5 rivals x (new on 3 captured days + gap on the skipped 2026-09-25); 9 columns)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a planted re-publication reads repeat with the older date; the modal-date rule holds -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/h-1.AC2.py",
+      "output_evidence": "OK:   TXUE on 2026-09-29: ['repeat'] (repeat, never new)\nOK:   TXUE actual_report_date ['2026-09-28'] carries the older 2026-09-28\nOK:   SCHY on 2026-09-29: ['repeat'] (repeat, never new)\nOK:   SCHY actual_report_date ['2026-09-28'] carries the older 2026-09-28\nOK:   INEQ on 2026-09-28: actual_report_date ['2026-09-28'] == modal 2026-09-28\nOK:   SCHY on 2026-09-28: actual_report_date ['2026-09-28'] == modal 2026-09-28\nAC2 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "6 of 6 checks OK (TXUE and SCHY repeat on 2026-09-29 with the older 2026-09-28; INEQ and SCHY actual_report_date == modal on 2026-09-28)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checks plant the gap and the re-publication into real captures; the unit tests also plant a lingering 0%-weight line dated 2025-12-31 in a fresh day, a corrupt bronze capture, and a weekly reporter.",
+      "expected": "fresh day stays new with the stray counted as a row; corrupt capture FAILS the stage; weekly reporter reads periodic.",
+      "observed": "18 of 18 unit tests pass.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (before and after the commit); the rivalfunds suite run twice.",
+      "observed": "same verdict lines every time; 147 passed, 2 skipped.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S12",
+    "ETFS_RIVALS-Z-W1-S13",
+    "ETFS_RIVALS-Z-W1-S14"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "1184b37260"
+    }
+  ]
+}
