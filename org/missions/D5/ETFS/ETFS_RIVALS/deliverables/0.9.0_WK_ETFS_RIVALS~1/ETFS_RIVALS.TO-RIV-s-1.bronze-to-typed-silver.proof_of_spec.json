@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-s-1.bronze-to-typed-silver",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "57af02c3ea",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-s-1.bronze-to-typed-silver.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "01e5499ae7"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/silver_issuer.py",
+      "kind": "script",
+      "commit_or_etag": "f14347431c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, checks run against a local sink over real archived bronze",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_s1_silver_issuer.py",
+      "kind": "script",
+      "commit_or_etag": "f14347431c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "27 passed (14 c-1 + 13 s-1) under python -m pytest data/etfs/scripts/rivalfunds/tests -q",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "five real days to silver: one partition per report date, every source row and column, typed, with lineage -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/s-1.AC1.py",
+      "output_evidence": "AC1 RESULT: PASS 0 failures\nexit=0 (47 OK lines, 0 FAIL lines; tail: quantity typed float, security_cusip typed string)",
+      "denominator": "47 OK of 47 check lines, 0 FAIL; 5 of 5 real archived days (2026-09-22..2026-09-28)",
+      "status": "PASS",
+      "expect": "AC1 RESULT: PASS 0 failures"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "replay twice adds nothing; a non-OK bronze object is skipped and counted -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/s-1.AC2.py",
+      "output_evidence": "OK:   first replay: 533 rows == 533 source rows (the DATE-MISMATCH object adds none)\nOK:   second replay adds no rows (533 == 533)\nOK:   no silver partition for the mismatched request date\nOK:   detail.skipped_not_ok == 1 (got 1)\nAC2 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "4 of 4 checks OK, 0 FAIL (re-run at amended check be252dc1de against silver_issuer.py @f14347431c, unchanged)",
+      "status": "PASS",
+      "expect": "AC2 RESULT: PASS 0 failures",
+      "status_reason": "Row ETFS_RIVALS-Z-W1-S3 resolved by amendment be252dc1de (issuer ruling fix (b): the DATE-MISMATCH landing is a distinct capture, captured_at=None). silver_issuer.py unchanged; AC2 now PASS."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted: the checks carry their own negative arm (AC2's non-OK object) and 13 unit tests cover latest-capture-wins, supersede, malformed capture, sha mismatch and the marker paths.",
+      "expected": "a non-OK object is skipped and counted; a malformed capture writes nothing and leaves no marker.",
+      "observed": "AC2 skipped_not_ok == 1; unit tests test_untypable_capture_fails_writes_nothing_and_no_marker 3 of 3 arms pass.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice more after amendment be252dc1de.",
+      "observed": "AC1 PASS and AC2 PASS on both runs, identical result lines.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "Left for the issuer (Andrew/COO instruction: the status flip is the issuer's)."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S3",
+    "ETFS_RIVALS-Z-W1-S1",
+    "ETFS_RIVALS-Z-W1-S2"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "accb234371"
+    }
+  ]
+}

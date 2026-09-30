@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-g-2.gold-trade-schedule",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "57af02c3ea",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-g-2.gold-trade-schedule.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "01e5499ae7"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "473e9e0a56",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, checks run against a local sink over real archived bronze through silver, canonical_shape and trade_schedule",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_g2_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "473e9e0a56",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "50 passed (37 c-1/s-1/g-1 + 13 g-2) under python -m pytest data/etfs/scripts/rivalfunds/tests -q",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "40 real days: trade_schedule equals the C-TRADE-SCHEDULE formula recomputed independently; windows never finer -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/g-2.AC1.py",
+      "output_evidence": "OK:   trade_schedule status OK (got OK)\nOK:   trade_schedule written (80 row(s), 39 part(s))\nOK:   no gold trade outside the formula (0 extra: [])\nOK:   every formula trade present, ID-CHANGE explaining at most its pair (0 missing, 0 explained by 0 ID-CHANGE row(s))\nreport dates 40; oracle trades 80; gold rows 80; ID-CHANGE 0\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "9 OK of 9 check lines, 0 FAIL; 40 of 40 real archived days, 39 pairs, 80 of 80 oracle trades matched, 0 extra",
+      "status": "PASS",
+      "expect": "AC1 RESULT: PASS 0 failures"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "flow control: a pure 3.7% inflow infers 0 trades; one +5% move on top infers exactly one add -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/g-2.AC2.py",
+      "output_evidence": "OK:   a real canonical day (35 rows)\nOK:   pure 3.7% inflow -> 0 trades (got 0)\nOK:   one position +5% on top of the flow -> exactly one 'add' (got 1: ['add'])\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 OK of 3 check lines, 0 FAIL; 1 real canonical day (35 positions)",
+      "status": "PASS",
+      "expect": "AC2 RESULT: PASS 0 failures"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted: AC2 carries the negative arm (pure inflow infers zero) and the positive arm (one +5% move infers one add); 13 unit tests cover threshold at 0.19% vs 0.21%, entry/exit fields, ID-CHANGE within and beyond 1%, unresolved keys, widened windows, latest revision, markers and zero-row days.",
+      "expected": "a pure inflow infers 0 trades; a 5% move on top infers exactly 1 add.",
+      "observed": "AC2 arms both pass; 13 of 13 g-2 tests pass.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run once at the committed code after the initial run (same code, no edits between).",
+      "observed": "PASS on every run, identical result lines (80 oracle trades = 80 gold rows).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "Left for the issuer per the spawn instruction."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "473e9e0a56"
+    }
+  ]
+}
