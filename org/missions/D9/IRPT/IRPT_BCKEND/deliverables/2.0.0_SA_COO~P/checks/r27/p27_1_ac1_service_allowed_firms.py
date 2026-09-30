@@ -16,6 +16,7 @@ ARMS (the change):
   D   service subject, row allowedFirmIds "ALL", selects inflection           -> NOT FIRM_BINDING
   E   service subject whose profile read RAISES, selects cottonwood           -> FIRM_BINDING (fail closed)
   F   service subject, row allowedFirmIds ["cottonwood","49financial"] (list), selects 49financial -> NOT FIRM_BINDING
+  G   service subject with NO profile row, selects cottonwood             -> FIRM_BINDING (amendment 1: unregistered, fail closed)
 Pass line: P27-1-AC1 PASS. Base: FAIL (Entry does not accept load_service_profile), with H1/H2 passing.
 """
 import json
@@ -123,6 +124,9 @@ arms = [
     ("D", "svc-all@opalinvest.com", "inflection", False),
     ("E", "svc-boom@opalinvest.com", "cottonwood", True),
     ("F", "svc-list@opalinvest.com", "49financial", False),
+    # Issuer amendment 1 (2026-09-30 ~21:3xZ, row W98-S2): a SERVICE subject with NO profile row is not a registered service
+    # principal, so it is refused (FWD-3 CONSTRAINT: never silently granted), not read as unrestricted.
+    ("G", "svc-ghost@opalinvest.com", "cottonwood", True),
 ]
 for name, email, sel, want_refused in arms:
     out = run(e, headers("opal-capital", "service", email), sel)
@@ -133,4 +137,4 @@ for name, email, sel, want_refused in arms:
     if not want_refused and not adm:
         fail("arm %s (%s selects %s): want admitted (deps called with %r), got %s" % (name, email, sel, sel, str(out)[:200]))
     print("  arm %s OK: %s selects %s -> %s" % (name, email, sel, "FIRM_BINDING" if refused else "admitted: deps(%r)" % sel))
-print("P27-1-AC1 PASS (2 harness controls, 6 arms)")
+print("P27-1-AC1 PASS (2 harness controls, 7 arms)")
