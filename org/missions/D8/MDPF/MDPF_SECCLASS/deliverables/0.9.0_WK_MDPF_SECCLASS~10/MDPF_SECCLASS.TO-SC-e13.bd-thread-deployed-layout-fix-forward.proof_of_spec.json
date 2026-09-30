@@ -71,9 +71,9 @@
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R6_CHECKS/r6_deployed_layout_import.py",
       "kind": "script",
-      "commit_or_etag": "a170cf4cb2",
+      "commit_or_etag": "83122ae32a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Asks safe_deploy_core.upload_plan() for the 8-file plan, reads the gold flatten rule from gold_dispatch.sh, extracts into a temp root, imports the five modules in python -I children that refuse any repo path on sys.path; silver layout parsed from infra/aws/ssm/opal-bd-asset-dim-download.json.",
+      "deploy_evidence": "Amendment 1: silver layout read from the repo document as committed; SHARED-KEYS-MATCH-TOOL; SILVER-NEGATIVE-CONTROL (document minus _shared lines) must be REFUSED; exit 1 on any silver gap. commit-gate clean 1 of 1. Nothing uploaded or run.",
       "artifact_covered_by": [
         "SC6-e13-AC2"
       ]
@@ -81,11 +81,21 @@
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R3_20260930.md",
       "kind": "doc",
-      "commit_or_etag": "51df828590",
+      "commit_or_etag": "83122ae32a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "BD_THREAD_R3 half, UNSIGNED: act, candidate files by blob id/md5, every destination key with live VersionId, six served keys with restore versions, rollback per key, preconditions P1/P2.",
+      "deploy_evidence": "BD_THREAD_R3 half, UNSIGNED: Leg 0 (silver document update: live DefaultVersion 4 before, update-document act, two-part rollback because the trigger reads $LATEST), P1 satisfied by Leg 0 per amendment 1, P2, candidate files by blob id/md5, every destination key, six served keys with restore versions, rollback per key.",
       "artifact_covered_by": [
         "SC6-e13-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ssm/opal-bd-asset-dim-download.json",
+      "kind": "config_data",
+      "commit_or_etag": "83122ae32a",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "+1 mkdir path and 3 aws s3 cp lines staging code/gold/lib/_shared/*.py into $RUNROOT/data/black_diamond/scripts/gold/lib/_shared/. Live SSM document untouched: DefaultVersion 4 (Hash 294a7036...ae95e) read only; the act is Leg 0 of the BD_THREAD_R3 half (manual update-document; trigger Lambda reads $LATEST). Committed blob sha256 d3a38c7b1a92b3d92030c241ab6502245c5a25d3b40930dcef67548943d3f407.",
+      "artifact_covered_by": [
+        "SC6-e13-AC2"
       ]
     }
   ],
@@ -96,7 +106,7 @@
       "method": "test_suite",
       "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_etf_classifier_deployed_resolution.py data/black_diamond/scripts/gold/tests/test_etf_classifier_canonical.py -q -p no:cacheprovider",
       "expect": "passed",
-      "output_evidence": "18 passed in 13.54s (rc=0)",
+      "output_evidence": "18 passed in 6.98s (rc=0), re-run after amendment 1",
       "denominator": "18 of 18 tests passed, 0 failed, 0 skipped (7 in test_etf_classifier_deployed_resolution.py incl. 2 parametrised, 11 in test_etf_classifier_canonical.py); the existing thread tests also pass: test_thread_trace.py + silver/tests 34 of 34",
       "status": "PASS"
     },
@@ -106,8 +116,8 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R6_CHECKS/r6_deployed_layout_import.py",
       "expect": "DEPLOYED-LAYOUT-IMPORT modules=5 of 5",
-      "output_evidence": "GOLD-LAYOUT measured from data/black_diamond/scripts/gold/gold_dispatch.sh: sync s3://<bd bucket>/code/gold/ -> /tmp/gold_layer_scripts/ (flat, recursive, no infra/ tree)\nUPLOAD-PLAN files=8 (safe_deploy_core.upload_plan of the five gold thread files)\n  data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py -> s3://opal-data-bd/code/gold/C_06.client_mix_timeseries.py\n  data/black_diamond/scripts/gold/D_03.composition_artifacts.py -> s3://opal-data-bd/code/gold/D_03.composition_artifacts.py\n  data/black_diamond/scripts/gold/D_04.client_portal_summary.py -> s3://opal-data-bd/code/gold/D_04.client_portal_summary.py\n  data/black_diamond/scripts/gold/E_18.detect_new_securities.py -> s3://opal-data-bd/code/gold/E_18.detect_new_securities.py\n  data/black_diamond/scripts/gold/lib/etf_classifier.py -> s3://opal-data-bd/code/gold/lib/etf_classifier.py\n  infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py -> s3://opal-data-bd/code/gold/lib/_shared/etf_classifications_dynamodb.py\n  infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py -> s3://opal-data-bd/code/gold/lib/_shared/etf_classification_scheduled.py\n  infra/aws/lambda/v2_portal/_shared/etf_classification.py -> s3://opal-data-bd/code/gold/lib/_shared/etf_classification.py\nEXTRACT root=<temp>/gold_layer_scripts uploaded_by_act=8 base_already_on_s3=85\nOK C_06.client_mix_timeseries client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_y8e6d783\\gold_layer_scripts\\lib\\_shared\\etf_classifications_dynamodb.py (sys.path entries=9, inside repo=0)\nOK D_03.composition_artifacts client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_y8e6d783\\gold_layer_scripts\\lib\\_shared\\etf_classifications_dynamodb.py (sys.path entries=9, inside repo=0)\nOK D_04.client_portal_summary client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_y8e6d783\\gold_layer_scripts\\lib\\_shared\\etf_classifications_dynamodb.py (sys.path entries=9, inside repo=0)\nOK E_18.detect_new_securities client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_y8e6d783\\gold_layer_scripts\\lib\\_shared\\etf_classifications_dynamodb.py (sys.path entries=9, inside repo=0)\n   E_18 scheduled module=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_y8e6d783\\gold_layer_scripts\\lib\\_shared\\etf_classification_scheduled.py\nOK lib.etf_classifier client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_y8e6d783\\gold_layer_scripts\\lib\\_shared\\etf_classifications_dynamodb.py (sys.path entries=9, inside repo=0)\nBASE-DEPS loaded from the rest of code/gold/ (on S3 already, not uploaded by this act): lib/__init__.py, lib/config.py, lib/display_label.py, lib/exclusions.py, lib/floored_percentiles.py, lib/mix_views.py, lib/s3_layout.py\nDEPLOYED-LAYOUT-IMPORT modules=5 of 5 files=8\nSILVER-LAYOUT measured from infra/aws/ssm/opal-bd-asset-dim-download.json: a repo-shaped RUNROOT holding silver/build_bd_assets_dim.py, gold/lib/{etf_classifier,__init__}.py (two cp lines) and lib/{silver_ids,trading_calendar}.py; the script runs as `cd $RUNROOT && python3 data/black_diamond/scripts/silver/build_bd_assets_dim.py`; gold/ is reached through the builder's own ../gold sys.path insert\nSILVER-LAYOUT-AS-STAGED-TODAY files_staged=7 (document keys with no repo source, not staged: 0)\n  code/bronze/pull_bd_asset_dim_rest.py -> data/black_diamond/scripts/bronze/pull_bd_asset_dim_rest.py\n  code/bronze/_asset_dim_rest_pin.py -> data/black_diamond/scripts/bronze/_asset_dim_rest_pin.py\n  code/silver/build_bd_assets_dim.py -> data/black_diamond/scripts/silver/build_bd_assets_dim.py\n  code/gold/lib/etf_classifier.py -> data/black_diamond/scripts/gold/lib/etf_classifier.py\n  code/gold/lib/__init__.py -> data/black_diamond/scripts/gold/lib/__init__.py\n  code/lib/silver_ids.py -> lib/silver_ids.py\n  code/lib/trading_calendar.py -> lib/trading_calendar.py\nSILVER-LAYOUT-AS-STAGED-TODAY REFUSED build_bd_assets_dim import=OK client=UNRESOLVED ImportError: BLOCKED: the shared ETFClassifier client (etf_classifications_dynamodb.py) is not in this file's own _shared/ directory nor on the repo path; searched ['C:\\\\Users\\\\AndrewBerman\\\\AppData\\\\Local\\\\Temp\\\\r6_layout_y8e6d783\\\\silver_as_staged_today\\\\data\\\\black_diamond\\\\scripts\\\\gold\\\\lib\\\\_shared']. The \nSILVER-LAYOUT-WITH-SHIPPED-ARTIFACTS files_staged=10 (document keys with no repo source, not staged: 0)\n  code/bronze/pull_bd_asset_dim_rest.py -> data/black_diamond/scripts/bronze/pull_bd_asset_dim_rest.py\n  code/bronze/_asset_dim_rest_pin.py -> data/black_diamond/scripts/bronze/_asset_dim_rest_pin.py\n  code/silver/build_bd_assets_dim.py -> data/black_diamond/scripts/silver/build_bd_assets_dim.py\n  code/gold/lib/etf_classifier.py -> data/black_diamond/scripts/gold/lib/etf_classifier.py\n  code/gold/lib/__init__.py -> data/black_diamond/scripts/gold/lib/__init__.py\n  code/lib/silver_ids.py -> lib/silver_ids.py\n  code/lib/trading_calendar.py -> lib/trading_calendar.py\n  code/gold/lib/_shared/etf_classifications_dynamodb.py -> data/black_diamond/scripts/gold/lib/_shared/ (ADDED; not in the document today)\n  code/gold/lib/_shared/etf_classification_scheduled.py -> data/black_diamond/scripts/gold/lib/_shared/ (ADDED; not in the document today)\n  code/gold/lib/_shared/etf_classification.py -> data/black_diamond/scripts/gold/lib/_shared/ (ADDED; not in the document today)\nSILVER-LAYOUT-WITH-SHIPPED-ARTIFACTS OK build_bd_assets_dim import=OK client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_y8e6d783\\silver_with_shipped_artifacts\\data\\black_diamond\\scripts\\gold\\lib\\_shared\\etf_classifications_dynamodb.py\n(rc=0)",
-      "denominator": "5 of 5 gold modules imported from the extract (plan 8 files: 5 thread + 3 shipped; base 85 files of the rest of code/gold/, of which 7 were loaded: lib/__init__, config, display_label, exclusions, floored_percentiles, mix_views, s3_layout -- each read live with head-object on s3://opal-data-bd/code/gold/lib/ and its ETag equals the repo md5, 7 of 7); sys.path entries 9, inside repo 0, in each child. Silver: 1 builder, refused as staged today (client unresolved, row W10-S1), OK with the shipped artifacts added",
+      "output_evidence": "GOLD-LAYOUT measured from data/black_diamond/scripts/gold/gold_dispatch.sh: sync s3://<bd bucket>/code/gold/ -> /tmp/gold_layer_scripts/ (flat, recursive, no infra/ tree)\nUPLOAD-PLAN files=8 (safe_deploy_core.upload_plan of the five gold thread files)\n  data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py -> s3://opal-data-bd/code/gold/C_06.client_mix_timeseries.py\n  data/black_diamond/scripts/gold/D_03.composition_artifacts.py -> s3://opal-data-bd/code/gold/D_03.composition_artifacts.py\n  data/black_diamond/scripts/gold/D_04.client_portal_summary.py -> s3://opal-data-bd/code/gold/D_04.client_portal_summary.py\n  data/black_diamond/scripts/gold/E_18.detect_new_securities.py -> s3://opal-data-bd/code/gold/E_18.detect_new_securities.py\n  data/black_diamond/scripts/gold/lib/etf_classifier.py -> s3://opal-data-bd/code/gold/lib/etf_classifier.py\n  infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py -> s3://opal-data-bd/code/gold/lib/_shared/etf_classifications_dynamodb.py\n  infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py -> s3://opal-data-bd/code/gold/lib/_shared/etf_classification_scheduled.py\n  infra/aws/lambda/v2_portal/_shared/etf_classification.py -> s3://opal-data-bd/code/gold/lib/_shared/etf_classification.py\nEXTRACT root=<temp>/gold_layer_scripts uploaded_by_act=8 base_already_on_s3=85\nOK C_06.client_mix_timeseries client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_h5o_1akh\\gold_layer_scripts\\lib\\_shared\\etf_classifications_dynamodb.py (sys.path entries=9, inside repo=0)\nOK D_03.composition_artifacts client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_h5o_1akh\\gold_layer_scripts\\lib\\_shared\\etf_classifications_dynamodb.py (sys.path entries=9, inside repo=0)\nOK D_04.client_portal_summary client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_h5o_1akh\\gold_layer_scripts\\lib\\_shared\\etf_classifications_dynamodb.py (sys.path entries=9, inside repo=0)\nOK E_18.detect_new_securities client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_h5o_1akh\\gold_layer_scripts\\lib\\_shared\\etf_classifications_dynamodb.py (sys.path entries=9, inside repo=0)\n   E_18 scheduled module=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_h5o_1akh\\gold_layer_scripts\\lib\\_shared\\etf_classification_scheduled.py\nOK lib.etf_classifier client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_h5o_1akh\\gold_layer_scripts\\lib\\_shared\\etf_classifications_dynamodb.py (sys.path entries=9, inside repo=0)\nBASE-DEPS loaded from the rest of code/gold/ (on S3 already, not uploaded by this act): lib/__init__.py, lib/config.py, lib/display_label.py, lib/exclusions.py, lib/floored_percentiles.py, lib/mix_views.py, lib/s3_layout.py\nDEPLOYED-LAYOUT-IMPORT modules=5 of 5 files=8\nSILVER-LAYOUT measured from infra/aws/ssm/opal-bd-asset-dim-download.json: a repo-shaped RUNROOT holding silver/build_bd_assets_dim.py, gold/lib/{etf_classifier,__init__}.py and gold/lib/_shared/*.py (the shipped modules) and lib/{silver_ids,trading_calendar}.py; the script runs as `cd $RUNROOT && python3 data/black_diamond/scripts/silver/build_bd_assets_dim.py`; gold/ is reached through the builder's own ../gold sys.path insert\nSILVER-LAYOUT-AS-STAGED-TODAY files_staged=10 (document keys with no repo source, not staged: 0)\n  code/bronze/pull_bd_asset_dim_rest.py -> data/black_diamond/scripts/bronze/pull_bd_asset_dim_rest.py\n  code/bronze/_asset_dim_rest_pin.py -> data/black_diamond/scripts/bronze/_asset_dim_rest_pin.py\n  code/silver/build_bd_assets_dim.py -> data/black_diamond/scripts/silver/build_bd_assets_dim.py\n  code/gold/lib/etf_classifier.py -> data/black_diamond/scripts/gold/lib/etf_classifier.py\n  code/gold/lib/__init__.py -> data/black_diamond/scripts/gold/lib/__init__.py\n  code/gold/lib/_shared/etf_classifications_dynamodb.py -> data/black_diamond/scripts/gold/lib/_shared/etf_classifications_dynamodb.py\n  code/gold/lib/_shared/etf_classification_scheduled.py -> data/black_diamond/scripts/gold/lib/_shared/etf_classification_scheduled.py\n  code/gold/lib/_shared/etf_classification.py -> data/black_diamond/scripts/gold/lib/_shared/etf_classification.py\n  code/lib/silver_ids.py -> lib/silver_ids.py\n  code/lib/trading_calendar.py -> lib/trading_calendar.py\nSILVER-LAYOUT-AS-STAGED-TODAY SHARED-KEYS-MATCH-TOOL document names 3 _shared keys, safe_deploy_core.shipped_artifacts_for names 3, sets equal\nSILVER-LAYOUT-AS-STAGED-TODAY OK build_bd_assets_dim import=OK client=C:\\Users\\AndrewBerman\\AppData\\Local\\Temp\\r6_layout_h5o_1akh\\silver_as_staged_today\\data\\black_diamond\\scripts\\gold\\lib\\_shared\\etf_classifications_dynamodb.py\nSILVER-NEGATIVE-CONTROL files_staged=7 (the document minus its 3 _shared copy lines)\nSILVER-NEGATIVE-CONTROL REFUSED-AS-EXPECTED build_bd_assets_dim ImportError: BLOCKED: the shared ETFClassifier client (etf_classifications_dynamodb.py) is not in this file's own _shared/ directory nor on the repo path; searc\n(rc=0)",
+      "denominator": "5 of 5 gold modules imported from the extract (plan 8 files: 5 thread + 3 shipped; sys.path entries 9, inside repo 0, in each child). Silver (amendment 1): 1 builder imported OK from the layout staged by the repo document as committed (10 files staged, 0 keys without a repo source; 3 of 3 _shared keys equal safe_deploy_core.shipped_artifacts_for); negative control (document minus its 3 _shared lines, 7 files staged): 1 of 1 REFUSED-AS-EXPECTED. Exit 0 requires all three; run against the pre-amendment document the same check exits 1 (SHARED-KEYS-MISMATCH, REFUSED)",
       "status": "PASS"
     },
     {
@@ -116,21 +126,21 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R3_20260930.md",
       "expect": "HALF-READY",
-      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R3_20260930.md (rc=0)",
-      "denominator": "1 of 1 half file read; 0 unfilled slots, 0 of 4 required markers missing",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R3_20260930.md (rc=0), re-run after adding Leg 0",
+      "denominator": "1 of 1 half file read; 0 unfilled slots, 0 of 4 required markers missing; Leg 0 and P1-satisfied text added",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Negative control on the deployed-layout check: safe_deploy_core.shipped_artifacts_for patched to return nothing (the tool ships no shared bytes) and the gold section re-run; and the AST guard run against the pre-fix lines (git show HEAD files: parents[5] at lib line 19, parents[4] at E_18 line 54).",
-      "expected": "0 of 5 modules import, each with the BLOCKED refusal; the AST guard finds 1 module-level parents subscript in each old file",
-      "observed": "DEPLOYED-LAYOUT-IMPORT-FAILED modules=0 of 5 files=5, each FAIL line 'ImportError: BLOCKED: the shared ETFClassifier client (etf_classifications_dynamodb.py) is not in this file's own _shared/ directory'; old lib/etf_classifier.py [19], old E_18 [54]; Path('/tmp/gold_layer_scripts/lib/etf_classifier.py').parents[5] -> IndexError: 5",
+      "description": "Negative control on the deployed-layout check: safe_deploy_core.shipped_artifacts_for patched to return nothing (the tool ships no shared bytes) and the gold section re-run; and the AST guard run against the pre-fix lines (git show HEAD files: parents[5] at lib line 19, parents[4] at E_18 line 54). SILVER LEG (amendment 1): Negative control on the silver leg of the deployed-layout check (amendment 1): (a) the document with its _shared copy lines removed, staged and imported; (b) the check run against the pre-amendment document (git show c3d41dc9dd:infra/aws/ssm/opal-bd-asset-dim-download.json).",
+      "expected": "0 of 5 modules import, each with the BLOCKED refusal; the AST guard finds 1 module-level parents subscript in each old file; silver: (a) the builder import is REFUSED with the BLOCKED message; (b) SHARED-KEYS-MISMATCH, as-staged REFUSED, exit 1",
+      "observed": "DEPLOYED-LAYOUT-IMPORT-FAILED modules=0 of 5 files=5, each FAIL line 'ImportError: BLOCKED: the shared ETFClassifier client (etf_classifications_dynamodb.py) is not in this file's own _shared/ directory'; old lib/etf_classifier.py [19], old E_18 [54]; Path('/tmp/gold_layer_scripts/lib/etf_classifier.py').parents[5] -> IndexError: 5; silver: (a) SILVER-NEGATIVE-CONTROL REFUSED-AS-EXPECTED build_bd_assets_dim ImportError: BLOCKED: the shared ETFClassifier client ...; (b) SHARED-KEYS-MISMATCH document=[] tool=[3 keys], SILVER-LAYOUT-AS-STAGED-TODAY REFUSED, SILVER-LAYOUT-CHECK-FAILED, rc=1",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R6_CHECKS/r6_deployed_layout_import.py run twice after its last functional change (once while building, once for this proof), same commit tree",
-      "observed": "Identical result lines both times (5 of 5, files=8, silver as-staged REFUSED, silver with-shipped OK), rc=0; only the temp directory name differs",
+      "observed": "Identical result lines across runs after the last functional change (5 of 5, files=8, silver as-staged OK, negative control REFUSED-AS-EXPECTED), rc=0; only the temp directory name differs",
       "status": "STABLE"
     }
   },
@@ -140,8 +150,8 @@
       "reason": "BOUNDS: LOCAL build + record; S3 was read only (head-object, list-object-versions, cp from S3 to .scratch); the act is signed separately."
     },
     {
-      "item": "infra/aws/ssm/opal-bd-asset-dim-download.json (the silver runner's bootstrap document).",
-      "reason": "Outside the order's paths; the gap is row MDPF_SECCLASS-W10-S1 and the half's precondition P1."
+      "item": "The live SSM document opal-bd-asset-dim-download (no update-document, no default-version change).",
+      "reason": "BOUNDS: LOCAL build + record; the repo file is edited (amendment 1) and read-only AWS calls were made (describe-document, list-document-versions, get-document, events describe-rule); the live update is Leg 0 of the signed-later half."
     },
     {
       "item": "build_bd_assets_dim.py was not edited.",
@@ -151,14 +161,16 @@
   "surprises": [
     "MDPF_SECCLASS-W10-S1",
     "MDPF_SECCLASS-W10-S2",
-    "MDPF_SECCLASS-W10-S3"
+    "MDPF_SECCLASS-W10-S3",
+    "MDPF_SECCLASS-W10-S4",
+    "MDPF_SECCLASS-W10-S5"
   ],
   "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R6_CHECKS/r6_deployed_layout_import.py",
   "compiler_tools": [
     {
       "tool": "commit-gate.sh",
       "invocation": "bash .tools/commit-gate.sh <each .py>",
-      "result": "pre-commit gate clean for .tools/safe_deploy_core.py (1 of 1), etf_classifier.py + E_18 + the test file (3 of 3), the check (1 of 1)"
+      "result": "pre-commit gate clean for .tools/safe_deploy_core.py (1 of 1), etf_classifier.py + E_18 + the test file (3 of 3), the check (1 of 1); amendment 1: the check (1 of 1) clean again"
     }
   ]
 }
