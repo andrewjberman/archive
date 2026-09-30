@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-ab-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ab-5.bpng-denomination.md",
+    "group": "OTHER",
+    "vintage_commit": "7ecc812be5a37f4c0d142bcf7f800be1e74973ff"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "7ecc812be5a37f4c0d142bcf7f800be1e74973ff",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ab-5.bpng-denomination.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "69e89e83dc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two entries in _DENOMINATION_UNRESOLVED keyed by the Bloomberg-form security 'BP/ LN Equity' (CUR_MKT_CAP -> GBP, NET_DEBT -> SIDE) and a ground comment for BP and NG; no other entry and no function changed. No derive, no S3 write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_figure_currency_round26.py",
+      "kind": "test",
+      "commit_or_etag": "69e89e83dc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 offline tests: BP CURR_ENTP_VAL reads USD; BP CUR_MKT_CAP and NET_DEBT return None with an UNMEASURED: basis; NG's three header figures read GBP (reporting); a BP statement figure keeps the reporting rule; no-security call unchanged; the reader matches all 6 census figures.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~5/DENOMINATION_CENSUS_ROUND26.json",
+      "kind": "config_data",
+      "commit_or_etag": "69e89e83dc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census by measurement: 6 figures on 2 securities (encoded keys). BP: CUR_MKT_CAP UNRESOLVED (GBP), NET_DEBT UNRESOLVED (sides not separated), CURR_ENTP_VAL reporting USD. NG: CUR_MKT_CAP, NET_DEBT, CURR_ENTP_VAL all reporting GBP. Read from S3 only, no write.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~5/DENOMINATION_CENSUS_ROUND26.md",
+      "kind": "doc",
+      "commit_or_etag": "69e89e83dc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Human-readable counts, method and per-figure class table beside the JSON.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round26/ab5_AC1.sh -- expect (?m)^ab5 population 6 securities 2 census_covered 6 classes_valid True reader_matches 6 unmeasured_labelled 0$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round26/ab5_AC1.sh",
+      "output_evidence": "ab5 population 6 securities 2 census_covered 6 classes_valid True reader_matches 6 unmeasured_labelled 0",
+      "denominator": "census covers 6 of 6 figures on 2 securities; reader matches 6 of 6; 0 UNRESOLVED figures labelled (census classes: 0 quote, 4 reporting, 2 UNRESOLVED)",
+      "expect": "(?m)^ab5 population 6 securities 2 census_covered 6 classes_valid True reader_matches 6 unmeasured_labelled 0$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round26/ab5_AC2.sh -- expect (?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round26/ab5_AC2.sh",
+      "output_evidence": "20 passed in 1.71s",
+      "denominator": "20 of 20 tests passed, 0 failed (7 in test_figure_currency_round26.py + 8 in test_figure_currency_round25.py + 5 in test_currency_labels.py)",
+      "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control on the reader: the dry-run the issuer recorded at base CLOUD ae1c849af1, before any census or table entry existed.",
+      "expected": "census_covered 0 classes_valid False reader_matches 0",
+      "observed": "ab5 population 6 securities 2 census_covered 0 classes_valid False reader_matches 0 unmeasured_labelled 0 (issuer dry-run, ISSUER NOTES of the order; not re-run here)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ab5_AC1.sh and ab5_AC2.sh each run twice, before and after the commit, on the same committed bytes (git show 69e89e83dc:<path> byte counts equal the working tree for model_block_pull.py and the census JSON).",
+      "observed": "AC1 line identical on both runs; AC2 20 passed on both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Table entries for NG/ LN Equity",
+      "reason": "All three NG figures are reporting GBP, which the mnemonic-level reporting rule already prints, as for the other GBp/GBP names; no table holds a reporting class, so the ground is a code comment only."
+    },
+    {
+      "item": "Deciding BP CUR_MKT_CAP (value in GBP) and BP NET_DEBT (sides not separated)",
+      "reason": "GBP is stated by neither label (GBp, USD) and the identity residuals 1.9% and 9.9% are both within the 12% tolerance; those 2 figures are UNRESOLVED and print no currency, never a guess."
+    },
+    {
+      "item": "Any external FX rate",
+      "reason": "Order: never invent an FX rate. The only conversion factor used is the BP block-implied f=1.3452 from PX_TO_BOOK_RATIO x BOOK_VAL_PER_SH / PX_LAST and PE_RATIO x IS_EPS / PX_LAST (FY2025), stated in the measurement; NG needs none."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W5-S7: _figure_currency's UNMEASURED basis suffix is a literal naming the round-25 census, so BP's held figures cite the wrong census; outside this order's grant, filed not fixed."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC2)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round26/ab5_AC2.sh",
+      "result": "20 passed in 1.71s"
+    },
+    {
+      "tool": "census builder (worker scratch, not committed)",
+      "invocation": "python -u .scratch/ab5/build.py over a read-only S3 dump of the newest model block per encoded key",
+      "result": "6 figures on 2 securities; classes quote 0, reporting 4, UNRESOLVED 2"
+    }
+  ]
+}
