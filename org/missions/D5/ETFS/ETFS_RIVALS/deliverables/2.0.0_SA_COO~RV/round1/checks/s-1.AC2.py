@@ -16,7 +16,9 @@ def run(v):
     sink = c.tmpdir("rv_s1b_")
     c.land(sink, files)
     meta = c.archive_meta(files[-1])
-    land_bronze(raw=files[-1].read_bytes(), requested_date="2099-01-02", source_url=meta["url"], sink=f"local:{sink}", captured_at=meta["at"])
+    # A DISTINCT capture (captured_at=None -> now): reusing meta["at"] made this land on the OK object's own key
+    # (row ETFS_RIVALS-Z-W1-S2's same-second collision, carried to the round analysis) -- row ETFS_RIVALS-Z-W1-S3.
+    land_bronze(raw=files[-1].read_bytes(), requested_date="2099-01-02", source_url=meta["url"], sink=f"local:{sink}", captured_at=None)
     ev = {"mode": "replay", "batch_id": "chk", "sink": f"local:{sink}", "date": meta["requested_date"]}
     r1 = silver_issuer.handler_entry(dict(ev))
     silver_root = c.local_path(sink, c.address("issuer-site", "etfs", "silver", "holdings", "date=")).parent
