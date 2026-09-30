@@ -1,7 +1,7 @@
 """RIV-b-1 AC3 -- the vehicle leg is added gated OFF, without editing any existing line: the vehicle file at 2e38c030f4
 (its last change before this round) is a line-for-line subsequence of the new file; the new leg is labelled
-:rivalfunds_bbg_leg, sits after :prune, skips unless RIVALFUNDS_BBG_LEG is 1, owns RC_RIVBBG with codes 80-83 and RC_RIVENR
-with 84-87, and never assigns %RC%, %RC_ETF% or %RC_CONS%."""
+:rivalfunds_bbg_leg, sits after :prune, skips unless RIVALFUNDS_BBG_LEG is 1, owns RC_RIVBBG with codes 90-93 and RC_RIVENR
+with 94-97 (80-83 are the price leg's, row W2-S2), and never assigns %RC%, %RC_ETF% or %RC_CONS%."""
 import pathlib
 import re
 import subprocess
@@ -27,10 +27,12 @@ def run(v):
     leg = txt[i_leg:] if i_leg > 0 else ""
     v.check(re.search(r'if\s+(/i\s+)?not\s+"%RIVALFUNDS_BBG_LEG%"\s*==\s*"1"\s+goto', leg, re.I) is not None,
             "the leg skips unless RIVALFUNDS_BBG_LEG==1")
-    for code in ("80", "81", "82", "83", "84", "85", "86", "87"):
+    for code in ("90", "91", "92", "93", "94", "95", "96", "97"):
         v.check(re.search(rf"\b{code}\b", leg) is not None, f"exit code {code} documented in the leg")
     v.check("RC_RIVBBG" in leg and "RC_RIVENR" in leg, "own rc variables RC_RIVBBG and RC_RIVENR")
-    bad = re.findall(r"set\s+\"?(RC|RC_ETF|RC_CONS)=", leg, re.I)
+    v.check(re.search(r"RC_RIVBBG=8\d|RC_RIVENR=8\d|8[0-7]\s*=\s*(landed|Bloomberg|partial|nothing)", leg, re.I) is None,
+            "no 80-87 code is assigned or documented for the rivalfunds leg (they are the price leg's)")
+    bad = re.findall(r"set\s+\"?(RC|RC_ETF|RC_CONS|RC_PRICE)=", leg, re.I)
     v.check(not bad, f"the leg never assigns RC, RC_ETF or RC_CONS ({bad})")
     v.check(bool(re.search(r"enrichment_bloomberg\.py", leg)) and bool(re.search(r"if\s+not\s+exist", leg, re.I)),
             "enrichment is invoked only if its file exists")

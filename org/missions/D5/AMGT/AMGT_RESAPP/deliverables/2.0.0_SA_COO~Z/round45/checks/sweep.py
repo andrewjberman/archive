@@ -393,7 +393,7 @@ UNIT_SCALE = {"THOUSANDS": Decimal(10) ** 3, "MILLIONS": Decimal(10) ** 6, "BILL
 SUFFIX_SCALE = {"K": Decimal(10) ** 3, "M": Decimal(10) ** 6, "B": Decimal(10) ** 9, "T": Decimal(10) ** 12}
 _NUM = re.compile(r"^\s*(?:[A-Za-z]{3}\s+)?(\()?\s*([+-]|\u2212)?\s*(\d[\d,]*(?:\.\d+)?|\.\d+)(?:[eE]([+-]?\d+))?\s*\)?\s*([KMBT])?(?![A-Za-z])")
 
-_UNRES_PAGE = re.compile(r"^\s*unit not resolved\s*(?:--|—|–)\s*raw figure\s+(\S+)\s*$")
+_UNRES_PAGE = re.compile(r"^\s*unit not resolved\s*(?:--|\u2014|\u2013)\s*raw figure\s+(\S+)\s*$")
 
 
 def read_number(text):
