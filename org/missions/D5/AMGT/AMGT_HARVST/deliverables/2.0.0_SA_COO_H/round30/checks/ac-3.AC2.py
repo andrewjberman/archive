@@ -25,7 +25,18 @@ def serve(sec, day=None):
     return resp.get("statusCode"), (json.loads(body) if isinstance(body, str) else (body or {}))
 
 
+def install_dry_run():
+    """The CTO half's added condition: the route reads the CAPTURED dry-run chatter_daily rows through its own seam
+    (`_timeline_snapshot_rows`); every other table is read as served."""
+    _summary, _key, rows, _n = c.dry_build()
+    real = scoped_amgt._timeline_snapshot_rows
+    scoped_amgt._timeline_snapshot_rows = lambda table: rows if table == "chatter_daily" else real(table)
+    print("DRY-RUN: the route serves the captured chatter_daily part (%d rows)" % len(rows))
+
+
 def main():
+    if "--dry-run" in sys.argv:
+        install_dry_run()
     failures = []
     expected = sorted(c.expected_rows())
     series_cache = {}

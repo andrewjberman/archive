@@ -20,7 +20,29 @@ import pyarrow.parquet as pq  # noqa: E402
 from lib.research.harvest import store  # noqa: E402
 
 
+def dry_run():
+    """The CTO half's added condition (the positive arm): grade the CAPTURED dry-run part, before the act."""
+    failures = []
+    s = c.load(c.SIGNING)
+    _summary, _key, rows, nbytes = c.dry_build()
+    dig = c.digest(c.canon(rows))
+    d = c.field_diffs(rows, c.served())
+    in_day, rolling_later, other = c.classify(d["moved"])
+    print("DRY-RUN part: %d rows, %d bytes (signed %d), digest %s (signed %s); moves %d (signed %d), OTHER %d"
+          % (len(rows), nbytes, s["bytes"], dig[:16], s["digest"][:16], len(d["moved"]), len(s["moved"]), len(other)))
+    if nbytes != s["bytes"] or dig != s["digest"]:
+        failures.append("the captured part differs from signing")
+    if d["moved"] != s["moved"] or other:
+        failures.append("the captured moves differ from the signed list or leave the expected rows")
+    print("AC1 RESULT: %s (%d failure(s))" % ("PASS" if not failures else "FAIL", len(failures)))
+    for f in failures:
+        print("  FAIL: " + f)
+    return 0 if not failures else 1
+
+
 def main():
+    if "--dry-run" in sys.argv:
+        return dry_run()
     failures = []
     before = c.load(os.path.join(c.WK, "ac3_before.json"))
     after = c.list_parts()
