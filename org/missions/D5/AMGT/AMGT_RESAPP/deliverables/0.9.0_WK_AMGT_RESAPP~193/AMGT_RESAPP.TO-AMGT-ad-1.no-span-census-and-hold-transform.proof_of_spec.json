@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ad-1.no-span-census-and-hold-transform",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5d3052d8d730a926a4a28c711d2d6a30e973dbd4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "24a11743a15917cede10ba6fe245eca92e69052c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ad-1.no-span-census-and-hold-transform.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~193",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/drafting_build.py",
+      "kind": "script",
+      "commit_or_etag": "8b71efd6fcbad38ac64dfe2b56fb89d3329b9c7e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: hold_unspanned(document) (pure) + unspanned_sentences + --hold-unspanned CLI (--population, --dry-run, --pre-act-dir, --only-keys, --census-out). Live mode never run; no S3 write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_hold_unspanned.py",
+      "kind": "test",
+      "commit_or_etag": "8b71efd6fcbad38ac64dfe2b56fb89d3329b9c7e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 12 tests (no-span moves, span stays, blank-string span counts as none, input not mutated, served validator accepts, CLI dry-run/census/refusal/live-through-one-writer).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~193/D1_UNSPANNED_CENSUS.json",
+      "kind": "config_data",
+      "commit_or_etag": "8b71efd6fcbad38ac64dfe2b56fb89d3329b9c7e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census over crosswalk/v1/2026-09-29.json (MEASURED 237): 12 stored D-1 documents, 179 sentences, produced by --hold-unspanned --dry-run --census-out.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the population, stored D-1 documents 12, the per-name counts; THE CENSUS EQUALS AN INDEPENDENT RECOUNT: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round54/checks/ad_1_census.py; echo \"exit=$?\"",
+      "output_evidence": "population crosswalk/v1/2026-09-29.json: MEASURED 237; stored D-1 documents 12; names with a non-verbatim served sentence 12; total 179\n  ASML_NA_Equity 8\n  BABA_US_Equity 2\n  BA_US_Equity 21\n  COST_US_Equity 24\n  HAL_US_Equity 7\n  HD_US_Equity 16\n  INTU_US_Equity 14\n  KMB_US_Equity 21\n  NU_US_Equity 19\n  PBR_US_Equity 13\n  SAP_GY_Equity 8\n  VLO_US_Equity 26\nTHE CENSUS EQUALS AN INDEPENDENT RECOUNT: YES\nexit=0",
+      "denominator": "12 of 12 stored D-1 documents carry unspanned sentences; 179 sentences total; census names == recount names (12 of 12)",
+      "status": "PASS",
+      "expect": "stored D-1 documents 12.*CENSUS EQUALS AN INDEPENDENT RECOUNT: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "12 documents, no BAD line, the plant kept served: True; HOLD_UNSPANNED MOVES EXACTLY THE NON-VERBATIM SENTENCES: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round54/checks/ad_1_hold.py; echo \"exit=$?\"",
+      "output_evidence": "drafting/v1/ASML_NA_Equity.json: moved 8\ndrafting/v1/BABA_US_Equity.json: moved 2\ndrafting/v1/BA_US_Equity.json: moved 21\ndrafting/v1/COST_US_Equity.json: moved 24\ndrafting/v1/HAL_US_Equity.json: moved 7\ndrafting/v1/HD_US_Equity.json: moved 16\ndrafting/v1/INTU_US_Equity.json: moved 14\ndrafting/v1/KMB_US_Equity.json: moved 21\ndrafting/v1/NU_US_Equity.json: moved 19\ndrafting/v1/PBR_US_Equity.json: moved 13\ndrafting/v1/SAP_GY_Equity.json: moved 8\ndrafting/v1/VLO_US_Equity.json: moved 26\nplant (one ASML sentence given a span) kept served: True\ndocuments 12; sentences moved 179\nHOLD_UNSPANNED MOVES EXACTLY THE NON-VERBATIM SENTENCES: YES\nexit=0",
+      "denominator": "12 of 12 stored documents graded, 179 sentences moved, 0 BAD lines; plant 1 of 1 kept served",
+      "status": "PASS",
+      "expect": "kept served: True.*documents 12.*NON-VERBATIM SENTENCES: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "N passed and 0 failed, N > 134 (plus your new tests) -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest lib/research/filings/tests -q; echo \"exit=$?\"",
+      "output_evidence": "146 passed in 13.10s\nexit=0",
+      "denominator": "146 passed, 0 failed of 146 collected; N=146 > 134 (12 new tests in test_hold_unspanned.py)",
+      "status": "PASS",
+      "expect": "\\d+ passed.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted discriminator: replace drafting_build.hold_unspanned with the identity function and run ad_1_hold.py.",
+      "expected": "AC2 prints NO and returns 1 (179 non-verbatim sentences left served).",
+      "observed": "With hold_unspanned=lambda d: d: 'HOLD_UNSPANNED MOVES EXACTLY THE NON-VERBATIM SENTENCES: NO', rc 1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ad_1_census.py and ad_1_hold.py run against the same S3 state; counts equal the --dry-run census (179)",
+      "observed": "census 179 == recount 179; hold moved 179",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live --hold-unspanned and any S3 write",
+      "reason": "Out of BOUNDS by the order; dry-run only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~193/none (no separate session log; evidence is in this instance and the commit)",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~193 <0.9.0_WK_AMGT_RESAPP~193@opal.agent>\" -F .scratch/msg1.txt -- <paths>",
+      "result": "commit 8b71efd6fcbad38ac64dfe2b56fb89d3329b9c7e"
+    }
+  ]
+}
