@@ -56,16 +56,26 @@
         "AC2",
         "AC3"
       ]
+    },
+    {
+      "path_or_key": "lib/research/management/management.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "schema widened: officer.source enum gains 'proxy'; top-level officer_set (enum [named_executive_officers]), officer_set_label, source_form, source_url, retrieved_at (strings), document_sha256 (64 hex); additionalProperties stays false. No write.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
     }
   ],
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "INTU_US_Equity and HAL_US_Equity each officers >= 3, set 'named_executive_officers', source 'DEF 14A' + an accession; THE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS (plan): YES -- and exit=0",
+      "criterion_verbatim": "INTU_US_Equity and HAL_US_Equity each officers >= 3, set 'named_executive_officers', source 'DEF 14A' + an accession, each \"validates against management.schema.json\"; THE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS (plan): YES -- and exit=0",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round50/checks/yy_neo.py --plane plan; echo \"exit=$?\"",
-      "output_evidence": "  INTU_US_Equity officers 5, set 'named_executive_officers', source 'DEF 14A' '000089687825000057'\n  HAL_US_Equity officers 5, set 'named_executive_officers', source 'DEF 14A' '000004501226000033'\nTHE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS (plan): YES\nexit=0",
-      "denominator": "2 of 2 names (INTU_US_Equity 5 officers, HAL_US_Equity 5 officers); planned keys management/v1/INTU_US_Equity/2026-09-29.json and management/v1/HAL_US_Equity/2026-09-29.json",
+      "output_evidence": "  INTU_US_Equity officers 5, set 'named_executive_officers', source 'DEF 14A' '000089687825000057'\n  INTU_US_Equity validates against management.schema.json\n  HAL_US_Equity officers 5, set 'named_executive_officers', source 'DEF 14A' '000004501226000033'\n  HAL_US_Equity validates against management.schema.json\nTHE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS (plan): YES\nexit=0 (run with the amended checker read from CLOUD 9d412c9e42 into .scratch/, because the worktree does not fast-forward; row Z-W177-S4)",
+      "denominator": "2 of 2 names (INTU_US_Equity 5 officers, HAL_US_Equity 5 officers), each validating against management.schema.json",
       "status": "PASS",
       "expect": "THE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS \\(plan\\): YES.*?exit=0"
     },
@@ -84,7 +94,7 @@
       "criterion_verbatim": "pytest reports N passed and 0 failed -- and exit=0",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round48/checks/api-suite.sh; echo \"exit=$?\"",
-      "output_evidence": "340 passed in 41.80s\nexit=0 (an earlier run read 1 failed, 339 passed: test_resolved_block_gains_only_roster_source pinned the block against a pre-change copy and did not name the three new null keys; its exclusion list now does -- row AMGT_RESAPP-Z-W177-S3)",
+      "output_evidence": "340 passed in 31.87s\nexit=0",
       "denominator": "340 passed, 0 failed",
       "status": "PASS",
       "expect": "[0-9]+ passed.*?exit=0"
@@ -106,14 +116,16 @@
   "declared_exclusions": [],
   "surprises": [
     "AMGT_RESAPP-Z-W177-S2",
-    "AMGT_RESAPP-Z-W177-S3"
+    "AMGT_RESAPP-Z-W177-S3",
+    "AMGT_RESAPP-Z-W177-S4",
+    "AMGT_RESAPP-Z-W177-S5"
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~177/AMGT_RESAPP.TO-AMGT-yy-3.proxy-officers-served-as-neos.proof_of_spec.json",
   "compiler_tools": [
     {
       "tool": "pytest",
-      "invocation": "PYTHONPATH=$(pwd) python -m pytest lib/research/management/tests/test_proxy_officers_persist.py lib/research/management/tests/test_proxy_officers.py lib/research/api/tests/test_management_officer_set.py -q",
-      "result": "15 passed, 0 failed"
+      "invocation": "PYTHONPATH=$(pwd) python -m pytest lib/research/management/tests -q",
+      "result": "117 passed, 0 failed (4 new ProxyObjectSchemaTests)"
     }
   ]
 }
