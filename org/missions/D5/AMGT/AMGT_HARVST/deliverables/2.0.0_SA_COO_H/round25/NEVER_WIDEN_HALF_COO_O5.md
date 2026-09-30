@@ -111,3 +111,49 @@ The plan (zero-network) is printed first. There is no sa call, no schedule chang
 **Checks amended with it:** `o5_common.py` `JOB_PUBLISHERS = (bbg, ft, wsj)`, `NO_NEW = (sa, barrons)`. AC1 requires
 exactly those three jobs; AC1 and AC2 fail on any new sa or barrons object. Everything else in the verdict, the branches and
 the rollback stands.
+
+---
+
+## AMENDMENT 2 (2026-09-30 ~05:1xZ) -- RE-SIGNED: the S3 writer is `upload-harvest`, run ONCE; ft joins the no-write roots; AC2 grades "re-fetches nothing held"
+
+**What attempt 2 measured (`2747a7d0fb`; worker `~65`, rows `Z-W65-S3` BLOCKING and `-S4`).**
+
+| run | bbg | ft | wsj | fetched / skipped as held |
+|---|---|---|---|---|
+| Run 1, `20260930T044003Z-run-b75f9299` | `new_articles` 11 | `request_rejected` (Branch B) | `new_articles` 11 | 22 / 5 |
+| Run 2, `20260930T045332Z-run-75d4c464` | 2 | `cooldown` | 0 | 2 / 26 |
+
+- **Nothing reached S3.** On 5 of 5 roots: 0 moved, 0 removed, 0 new.
+- **This half's section 2 was wrong (the issuer's second cut-time miss).** The `--harvest-grammar` collection path QUEUES to
+  the local outbox (`progress.sqlite3`). The S3 writer is `upload-harvest` (`uploads.HarvestUploader`), which section 2
+  listed as "not run".
+- **Queued now, measured ~05:1xZ, all from these two runs:**
+  - `harvest_raw_outbox`: 22 pending (bbg 11, wsj 11), plus 16 `uploaded` from earlier cells, which are untouched;
+  - `harvest_listing_outbox`: 10 pending (bbg 4, wsj 6; Lenovo listing pages fetched 04:41-04:55Z), plus 4 `uploaded`;
+  - the legacy `upload_outbox` (285 pending) is NOT read by `upload-harvest`.
+
+**The added act (act 3), ONCE, after both collection runs, from the same pinned worktree code:**
+
+`python -m lib.opal_data_harvest upload-harvest --max-objects 40 --retrieval-mode backfill --runtime-root "C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.runtime/opal-data-harvest"`
+
+**Per queued row:**
+- Articles: ONE bronze object through `harvest_grammar.put_article_bronze` (never-overwrite, `as_received`), then a silver
+  `article` row built from those same bytes by `silver_from_bronze.article_rows` and written by `silver_append` (one part
+  per fetch date).
+- Listings: a bronze listing object plus its silver `listing_hit` rows.
+
+**Expected outcome:**
+- New objects ONLY under the bbg and wsj harvest roots: at most 32 bronze objects (22 articles, 10 listing pages), plus
+  silver parts for the 2026-09-30 fetch date.
+- Every pending bbg/wsj outbox row reads `uploaded`.
+- Branch B for the upload is a put failure: the row stays pending with its error code, nothing is overwritten, and it is
+  reported, not retried.
+
+**The no-write roots are now sa, barrons and ft** (ft was `request_rejected`). **AC2 (CTO condition 5's
+"`counts.fetched == 0`") is re-grounded on FWD-3's own words, "fetches no article we already hold":** PASS when every
+run-2 fetched key is NEW to the listing or was fetched but NEVER STORED by run 1. Measured: `bbg:OURYDJ6TTDSG01` is NEW;
+`bbg:NM5NLQ6K50XZ01` was fetched and never stored; 26 were skipped as held. **AC2 reads PASS on the recorded runs.** A
+listing surfacing a new item between runs is the source changing, not a re-fetch.
+
+**Recorded, not ruled here:** the wsj run record keys articles by URL and the outbox keys them by UUID, so the collector's
+two ledgers cannot be joined by key for wsj (row). Why `NM5NLQ6K50XZ01` was never stored is unmeasured.
