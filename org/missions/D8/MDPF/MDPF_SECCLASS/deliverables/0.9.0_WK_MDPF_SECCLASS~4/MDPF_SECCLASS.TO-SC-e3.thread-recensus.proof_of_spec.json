@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e3",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R2.md",
+    "vintage_commit": "5d3432a201bbe44adcea42c6bb8d852faecb9cd5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e3.thread-recensus.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_THREAD_CENSUS_20260930.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Written by .scratch/gen_thread_census.py (uncommitted, LOCAL build scaffolding). LIVE reads only, no upload, no table write: (1) a full DynamoDB scan of etf-classifications (table_rows_at_build=2309, cross-checked identical against a separate Select=COUNT scan); (2) the SAME production filter functions D_03.composition_artifacts.py uses (lib.exclusions.load_ghost_account_ids/apply_ghost_exclusion/build_ap_last_seen/apply_ap_gate, imported unmodified) on the latest real BD day (gold/holdings_lots/2026-09-25.parquet, 1,270,326 lots -> 524,413 open+ghost-excluded+AP-gated, byte-identical to round 1's own count on the same file); (3) the REAL production ETFClassifier class (lib/etf_classifier.py), backed by its documented client= injection seam with a stub whose get_classification(ticker) is a LOCAL dict lookup into the live full-table scan from (1) -- the real classify()/get_sub_asset_class() code path, against real live table contents, without thousands of serial GetItem round trips; (4) the CURRENTLY SERVED silver/bd_assets_dim.parquet (12,146 rows, VersionId gY8SA9ruIsLh90CuCCf42I5TBl.wceEq) and gold/views/firm_composition.json (VersionId 8JNm8uFxWdOVMeoZ2rj5OVRI2yJvj1IY) read live for the served 'before' state per TO step 1's 'served composition ... assets dimension' instruction. Measured: resolution rows=2220 unclassified=203 moved=429; silver rows=12146 unclassified=9980 moved=2165; gold rows=524413 unclassified=1822 moved=2017; bd_securities_reads=0 across all three stages; guessed=0 across all three stages. GLD/PHYS/VXX present as moves in every stage (commodities/Metals, commodities/Metals, structured/Hedge respectively); largest move by weight overall IEFA $203,112,369.65, largest of the three named VXX $21,459,506.36. Workaround named per TO step 1: gold stage classifies the 3,939 unique (ticker, asset_name) pairs the 524,413 filtered lots reduce to (a pure function of the pair, so identical to the full row-wise result, not an approximation) -- same source, filter and columns as the product script.",
+      "artifact_covered_by": ["SC2-e3-AC1"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R2_20260930.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The fresh never-widen half the TO requires: states at its top that it SUPERSEDES NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_20260929.md (left unedited, verified byte-unchanged by this worker), carries '## The act' (deploy + IAM grant + run + the COO's one live-run closing act), '## Blast radius' (every served key and reader, GLD/PHYS/VXX table plus the full enumerated moves in the census file, the candidate Terraform dynamodb:GetItem statement for bd-exporter-ec2-role named from a fresh read of infra/aws/terraform/bd-pipeline/iam.tf confirming NO DynamoDB statement exists on that role today), and 'Rollback per key' (code rollback + per-S3-key version rollback with the VersionIds this build measured + IAM rollback via terraform destroy -target). Status of the act: NOT YET RUN -- both signature blocks read PENDING SIGNATURE.",
+      "artifact_covered_by": ["SC2-e3-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One new row appended, MDPF_SECCLASS-W4-S1 (class OBSERVATION, hazard_standing INERT): round 1's resolution-stage generator was never committed (correctly, per the uncommitted-.scratch/ rule), so this cell's re-census used its own real, filter-faithful holdings population (2,220 distinct tickers) rather than R1's unrecoverable one (3,992) -- named so the row-count difference is not misread as a regression. .tools/surprise-row-gate.py confirms: '1 new row(s) of 10 total checked ... OK: 1 file(s), all new rows carry their step-7/step-10 fields.'",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC2-e3-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py thread -- expect: THREAD-CENSUS",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py thread",
+      "expect": "THREAD-CENSUS",
+      "output_evidence": "THREAD-CENSUS gold rows=524413 unclassified=1822",
+      "denominator": "1 of 1 required check passed: table_rows_at_build 2309 >= 2309 (MIN_ROWS); all three stages (resolution, silver, gold) carry rows/unclassified/unclassified_names/moved/moves/guessed with unclassified==len(names) and moved==len(moves) for each; guessed==0 for each; bd_securities_reads falsy.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC2-e3-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R2_20260930.md -- expect: HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R2_20260930.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R2_20260930.md",
+      "denominator": "1 of 1 required check passed: file exists, 0 {{slot}} placeholders remain, and it carries '## The act', '## Blast radius', 'Rollback per key' and the literal substring 'candidate' (the candidate Terraform statement in step 2).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Set R2_THREAD_CENSUS_20260930.json's gold.guessed to 1 (a non-zero guess count, which the new library never produces) and re-ran the AC1 checker.",
+      "expected": "r2_evidence.py thread refuses (guessed must be falsy for every stage)",
+      "observed": "NOT-MET: gold counts disagree or guessed (mutant rc=1). Reverted from a pre-mutation backup (.scratch/backup_census.json); diff against the restored file showed zero bytes changed; re-run: THREAD-CENSUS gold rows=524413 unclassified=1822 (rc=0).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": ".scratch/gen_thread_census.py invoked twice back to back (independent live DynamoDB scans and independent live S3/holdings reads each time); the two R2_THREAD_CENSUS_20260930.json outputs compared on every field the checker and this cell's spec require.",
+      "observed": "Both runs: table_rows_at_build=2309; resolution rows=2220/unclassified=203/moved=429; silver rows=12146/unclassified=9980/moved=2165; gold rows=524413/unclassified=1822/moved=2017 -- identical across both live runs (checked programmatically, all True).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy, upload, table write, or IAM apply.",
+      "reason": "Forbidden by the order: LOCAL build + record only. The deploy, the run and the IAM grant are named in the fresh half as future acts under their own sign-off, not performed by this cell."
+    },
+    {
+      "item": "A byte-for-byte reproduction of round 1's resolution-stage (library) holdings population.",
+      "reason": "Round 1's generator for that stage was never committed (correctly -- .scratch/ is uncommitted build scaffolding per CLAUDE.md rule 16b), so its exact construction is unrecoverable. This cell used its own real, filter-faithful population (the same ghost+AP-gate+open filters D_03.composition_artifacts.py applies) and named the substitution as row MDPF_SECCLASS-W4-S1 rather than silently reusing R1's row count."
+    }
+  ],
+  "surprises": ["MDPF_SECCLASS-W4-S1: round 1's resolution-stage generator was never committed, so round 2's re-census used its own real, filter-faithful holdings population (2,220 tickers) rather than R1's unrecoverable one (3,992) -- named so the row-count difference across the two census files is not read as an unexplained regression."],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R2_20260930.md",
+  "compiler_tools": [
+    {
+      "tool": "gen_thread_census.py (uncommitted LOCAL build scaffolding, the harness itself)",
+      "invocation": "python .scratch/gen_thread_census.py",
+      "result": "resolution rows=2220 unclassified=203 classified=2017; silver rows=12146 unclassified=9980 classified=2166; gold rows=524413 unclassified(pairs)=1822 classified(pairs)=2117; table_rows_at_build=2309 (run twice; see controls.determinism)"
+    },
+    {
+      "tool": "r2_evidence.py thread (SC2-e3-AC1 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py thread",
+      "result": "THREAD-CENSUS gold rows=524413 unclassified=1822, rc=0"
+    },
+    {
+      "tool": "r20_half_ready.py (SC2-e3-AC2 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R2_20260930.md",
+      "result": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_BD_THREAD_R2_20260930.md, rc=0"
+    },
+    {
+      "tool": "surprise-row-gate.py (staged)",
+      "invocation": "git add org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md && python .tools/surprise-row-gate.py org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "1 new row(s) of 10 total checked (9 pre-existing, NOT re-graded); OK: 1 file(s), all new rows carry their step-7/step-10 fields."
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~4 <0.9.0_WK_MDPF_SECCLASS~4@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-MDPF_SECCLASS-4"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC2-e3-AC1,SC2-e3-AC2",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}
