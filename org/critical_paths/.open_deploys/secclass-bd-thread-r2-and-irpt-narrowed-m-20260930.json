@@ -1,0 +1,89 @@
+{
+  "slug": "secclass-bd-thread-r2-and-irpt-narrowed-m-20260930",
+  "title": "ONE WINDOW: IRPT_BCKEND IB-mr-291 narrowed Holdings release (IAM CanonicalClassifierLookup + re-mint 3 bundles + QA + served publication) with MDPF_SECCLASS BD_THREAD_R2 (5 BD files deployed + chain run + FWD-1 page read) -- halves COO 6d44575a7f / CTO b4cd4a46ba; packet ONE_WINDOW_PACKET_BD_THREAD_R2_AND_IB_MR_291_20260930.md",
+  "author": "2.0.0_SA_COO~M",
+  "status": "OPEN",
+  "opened_at": "2026-09-30T15:07:35.925267+00:00",
+  "window_hours": 24.0,
+  "entry_path": "org/critical_paths/change_management/20260930T1507Z_secclass-bd-thread-r2-and-irpt-narrowed-m-20260930_deploy_completion.md",
+  "legs": [
+    {
+      "id": "H1",
+      "kind": "verify",
+      "target": "terraform plan investor-reporting/directory from CLOUD",
+      "proof_required": "in-place policy updates for the Holdings principals only; 0 add 0 destroy; changed resources named",
+      "proof": "terraform plan investor-reporting/directory from CLOUD (HEAD past 9fef6a7e9c, init -reconfigure) 15:1xZ: Plan 0 to add, 3 to change, 0 to destroy -- aws_iam_role_policy.irpt_holdings[49financial], [cottonwood], [inflection] updated in-place (the CanonicalClassifierLookup statement); nothing else",
+      "closed_at": "20260930T151315Z"
+    },
+    {
+      "id": "H2",
+      "kind": "activation",
+      "target": "safe-apply investor-reporting/directory",
+      "proof_required": "apply rc 0; re-plan 0-diff; per-firm get-role-policy names Sid CanonicalClassifierLookup",
+      "proof": "HALT_ACK=1 safe-apply 15:13:15Z investor-reporting/directory: aws_iam_role_policy.irpt_holdings[49financial|inflection|cottonwood] Modifications complete; Apply complete 0 added 3 changed 0 destroyed; re-plan -detailed-exitcode 0. Read-back get-role-policy irpt-49f/inf/cot-holdings-role x irpt-<f>-holdings-policy: Sid CanonicalClassifierLookup, Actions Query+GetItem, Resources table/etf-classifications + index/asset-class-index + index/sub-asset-class-index, at all three",
+      "closed_at": "20260930T152621Z"
+    },
+    {
+      "id": "H3",
+      "kind": "s3-prefix",
+      "target": "safe-deploy --mint-bundle irpt_holdings_49f/inf/cot from CLOUD 9fef6a7e9c+",
+      "proof_required": "BUNDLE MINTED x3 + head-object members-sha256 + member-count; closure carries bd_securities_fallback.py + etf_classifications_dynamodb.py",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "H4",
+      "kind": "verify",
+      "target": "QA fire irpt-holdings-refresh-lambda {qa:true}",
+      "proof_required": "3 of 3 Success; holdings_qa per firm: PHYS/GLD commodities/Metals, VXX structured/Hedge, to_unclassified 0; served manifests VersionId unchanged",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "H5",
+      "kind": "verify",
+      "target": "served Holdings publication",
+      "proof_required": "served manifest advances per firm; PHYS reads commodities/Metals on the IR Holdings page",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "B1",
+      "kind": "s3-prefix",
+      "target": "safe-deploy 5 BD files to opal-data-bd code/{gold,silver}",
+      "proof_required": "DEPLOYED + VERIFY OK per file, bytes = CLOUD HEAD",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "B2",
+      "kind": "verify",
+      "target": "live IAM read bd-exporter-ec2-role",
+      "proof_required": "bd-securities-access attached with GetItem on etf-classifications; no new inline policy added",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "B3",
+      "kind": "activation",
+      "target": "BD chain run (ordinary gold-layer trigger; ad-hoc QA fire the exercise, scheduled fire the acceptance)",
+      "proof_required": "build_bd_assets_dim, C_06 --upload, D_03 --upload, D_04; served firm_composition.json + platinum/clients/z08327149/summary.json advance; prior VersionIds recorded",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "B4",
+      "kind": "verify",
+      "target": "COO's one live FWD-1 run to the page",
+      "proof_required": "z08327149: VXX structured/Hedge, GLD/PHYS commodities/Metals on the real page; bd_securities_reads 0",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20260930T150735Z OPENED by 2.0.0_SA_COO~M with 9 leg(s)",
+    "20260930T151315Z LEG H1 closed: terraform plan investor-reporting/directory from CLOUD (HEAD past 9fef6a7e9c, init -reconfigure) 15:1xZ: Plan 0 to add, ",
+    "20260930T152621Z LEG H2 closed: HALT_ACK=1 safe-apply 15:13:15Z investor-reporting/directory: aws_iam_role_policy.irpt_holdings[49financial|inflection|c"
+  ],
+  "last_red_at": null
+}
