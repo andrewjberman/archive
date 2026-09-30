@@ -6,8 +6,9 @@ The population: the newest served model block of every key EXCEPT the slash-bear
 is true, and on it every `scope: header` figure labelled with basis 'reporting (EQY_FUND_CRNCY)'.
 
   -> 'aa1 population P securities S census_covered C classes_valid V reader_matches M tsm_mkt_cap X control_reporting Y
-      unmeasured_labelled U'
+      unmeasured_labelled U callers N unwired W'
 """
+import ast
 import importlib.util
 import json
 import os
@@ -18,7 +19,9 @@ import boto3
 TOP = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
 RES = os.path.join(TOP, "integrations", "bloomberg", "research")
 CENSUS = os.path.join(TOP, "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/DENOMINATION_CENSUS_ROUND25.json")
-EXCLUDED = {"BP/_LN_Equity", "NG/_LN_Equity"}
+# AMENDMENT 1 (row Z-W1-S21): RESAPP round-53 ac-3 copies the slash keys to their encoded form; an identity is EXCLUDED in
+# either form (raw `BP/_LN_Equity` or encoded `BP-SLASH-_LN_Equity`).
+EXCLUDED = {"BP/_LN_Equity", "NG/_LN_Equity", "BP-SLASH-_LN_Equity", "NG-SLASH-_LN_Equity"}
 B = "opal-data-harvest"
 CLASSES = {"quote", "reporting", "UNRESOLVED"}
 
@@ -72,8 +75,14 @@ for k, r in by_key.items():
     want = {"quote": quote, "reporting": reporting, "UNRESOLVED": None}.get(r.get("class"), "?")
     matches += int(got == want)
     unmeasured_labelled += int(r.get("class") == "UNRESOLVED" and got is not None)
+# AMENDMENT 1 (row Z-W1-S22): the rule reaches the served block only if the derive's own call sites pass the security. Every
+# call of `_figure_currency` in model_block_pull.py is read by AST; a call without a `security` keyword is UNWIRED.
+tree = ast.parse(open(os.path.join(RES, "model_block_pull.py"), encoding="utf-8").read())
+calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call)
+         and getattr(n.func, "id", getattr(n.func, "attr", None)) == "_figure_currency"]
+unwired = sum(1 for n in calls if not any(k.arg == "security" for k in n.keywords))
 tsm = reader("CUR_MKT_CAP", "USD", "TWD", "TSM US Equity")
 control = reader("SALES_REV_TURN", "USD", "TWD", "TSM US Equity")
 print("aa1 population %d securities %d census_covered %d classes_valid %s reader_matches %d tsm_mkt_cap %s control_reporting %s "
-      "unmeasured_labelled %d" % (len(population), len({k for k, _ in population}), covered, valid, matches, tsm, control,
-                                  unmeasured_labelled))
+      "unmeasured_labelled %d callers %d unwired %d" % (len(population), len({k for k, _ in population}), covered, valid, matches, tsm, control,
+                                  unmeasured_labelled, len(calls), unwired))
