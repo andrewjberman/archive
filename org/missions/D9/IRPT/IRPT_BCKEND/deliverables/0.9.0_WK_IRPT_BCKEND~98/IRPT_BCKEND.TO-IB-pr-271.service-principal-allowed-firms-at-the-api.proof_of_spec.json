@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-271",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-271.service-principal-allowed-firms-at-the-api.md",
+    "group": "OTHER",
+    "vintage_commit": "22b99e32fd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "22b99e32fd",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-271.service-principal-allowed-firms-at-the-api.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~98",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Entry gains load_service_profile; _service_allowed_firms; handle step 2 refuses a SERVICE subject's selected firm outside allowedFirmIds with FIRM_BINDING",
+      "artifact_covered_by": [
+        "P27-1-AC1",
+        "P27-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "canonical_profile_reads.py and maintained_sources.py (ids.py already present) added to files + staged_from in the 5 served.py bundles that lacked them",
+      "artifact_covered_by": [
+        "P27-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_service_allowed_firms.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 tests: allowed, foreign, absent, ALL, unreadable row, list/comma forms, non-service internal subject",
+      "artifact_covered_by": [
+        "P27-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P27-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r27/p27_1_ac1_service_allowed_firms.py\" . -> P27-1-AC1 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r27/p27_1_ac1_service_allowed_firms.py\" .",
+      "output_evidence": "harness controls H1 and H2 hold; arms A-F OK; P27-1-AC1 PASS (2 harness controls, 6 arms) (rc=0)",
+      "denominator": "2 controls + 6 of 6 arms",
+      "expect": "P27-1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "P27-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r27/p27_1_ac2_deployed_layout.py\" . -> P27-1-AC2 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r27/p27_1_ac2_deployed_layout.py\" .",
+      "output_evidence": "7 bundles each 'imports OK' (directory-search 22/22, export-render 61/61, holdings 35/35, narrative 27/27, performance-adapter 70/70, status 45/45, ycharts-generate 111/111 files materialized); P27-1-AC2 PASS (7 of 7 bundles import the branch in their own layout) (rc=0)",
+      "denominator": "7 of 7 bundles",
+      "expect": "P27-1-AC2 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The issuer measured both checks at the base before the cut (AC1 FAIL: Entry does not accept load_service_profile; AC2 FAIL: no service-profile reader).",
+      "expected": "base FAIL, patched PASS",
+      "observed": "not re-run at base by the worker; both PASS after the change",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline doubles on fixed inputs",
+      "observed": "single run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W98-S1 -- test_unguarded_census.py fails 6 tests at base, independent of this cell",
+    "IRPT_BCKEND-W98-S2 -- served.py staged_from pins stale after the edit; missing profile row treated as unrestricted"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q _authz/tests/test_service_allowed_firms.py",
+      "result": "7 passed"
+    }
+  ]
+}
