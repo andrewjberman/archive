@@ -393,6 +393,8 @@ UNIT_SCALE = {"THOUSANDS": Decimal(10) ** 3, "MILLIONS": Decimal(10) ** 6, "BILL
 SUFFIX_SCALE = {"K": Decimal(10) ** 3, "M": Decimal(10) ** 6, "B": Decimal(10) ** 9, "T": Decimal(10) ** 12}
 _NUM = re.compile(r"^\s*(?:[A-Za-z]{3}\s+)?(\()?\s*([+-]|\u2212)?\s*(\d[\d,]*(?:\.\d+)?|\.\d+)(?:[eE]([+-]?\d+))?\s*\)?\s*([KMBT])?(?![A-Za-z])")
 
+_UNRES_PAGE = re.compile(r"^\s*unit not resolved\s*(?:--|—|–)\s*raw figure\s+(\S+)\s*$")
+
 
 def read_number(text):
     """(signed Decimal, displayed decimals, suffix scale or None) of a value text, or None when it does not start with a number.
@@ -415,6 +417,12 @@ def read_number(text):
 def values_agree(page_text, export_token, export_unit):
     """True when the page's value text and the export's value state the same figure: read as numbers, at the page's displayed
     precision (half of its last digit), the page's K/M/B/T against the export's own unit word; else the two texts equal."""
+    um = _UNRES_PAGE.match(page_text or "")
+    if um:
+        # the page's unresolved-unit form: read the raw figure; equal ONLY against an export whose unit is also UNRESOLVED
+        if not (export_unit or "").strip().startswith("UNRESOLVED"):
+            return False
+        page_text = um.group(1)
     p, r = read_number(page_text), read_number(export_token)
     if p is None or r is None:
         return (page_text or "").strip() == (export_token or "").strip()

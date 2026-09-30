@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-e-1.bloomberg-enrichment-corporate-actions",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "787905d1a3",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-e-1.bloomberg-enrichment-corporate-actions.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cbf0cfd6b0"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "14118f0a7e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 2 code cell; no served write and no Bloomberg call, checks run against a local sink over the real dividends.json",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_e1_enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "14118f0a7e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 passed under python -m pytest data/etfs/scripts/rivalfunds/tests/test_e1_enrichment_bloomberg.py -q",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the real DVD_HIST_ALL pull imports into G3 with nothing dropped and the share-changing counts exact -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/e-1.AC1.py",
+      "output_evidence": "file: 738 securities, 4780 dividend records, raw types {... 22 raw types}\nr: {'status': 'OK', 'batch_id': 'chk-e1', ... 'rows': 4823 ...}\nOK:   G3 objects written: 1\nOK:   one G3 row per dividend record (4780 == 4780)\nOK:   Stock Split -> split: 60 == file 60\nOK:   Stock Dividend -> stock_div: 18 == file 18\nOK:   Spinoff -> spinoff: 12 == file 12\nOK:   Bonus -> bonus: 6 == file 6\nOK:   Rights Issue -> rights: 3 == file 3\nOK:   mapping total: 4780 typed rows of 4780\nOK:   column security_id ... column claim (9 column checks)\nAC1 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "18 OK of 18 check lines, 0 FAIL; 4780 of 4780 dividend records in 738 securities imported (plus 43 NOT_APPLICABLE_TO_REF_DATA status rows, 4823 rows in all); share-changing split 60, stock_div 18, spinoff 12, bonus 6, rights 3 all equal the file",
+      "status": "PASS",
+      "expect": "AC1 RESULT: PASS 0 failures"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "plan mode builds the scripted request without calling Bloomberg, covering every non-cash security once -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/e-1.AC2.py",
+      "output_evidence": "plan: {'status': 'OK', ... 'plan': {'fields': ['DVD_HIST_ALL'], 'start': '20240930', 'end': '20260930', ...}}\nOK:   no Bloomberg call in plan mode (0 made)\nOK:   fields ['DVD_HIST_ALL']\nOK:   batches cover every non-cash security exactly once (444 vs 444; 29 cash lines dropped)\nOK:   history window 20240930..20260930\nAC2 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "4 OK of 4 check lines, 0 FAIL; 444 of 444 non-cash securities of the newest IDVZ capture in exactly one of 9 batches, 29 Curncy lines dropped, 0 Bloomberg calls",
+      "status": "PASS",
+      "expect": "AC2 RESULT: PASS 0 failures"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted: unit tests carry the negative arms (an unmapped raw type is carried, a failing client batch writes no marker, plan never calls the client).",
+      "expected": "mapping total over the file's 22 raw types; a failed daily batch leaves no marker; plan mode makes 0 client calls.",
+      "observed": "test_mapping_table, test_daily_failure_writes_no_marker and test_plan_mode_calls_nothing_drops_cash_and_covers_once pass (8 passed).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "pytest run twice over the real file; the import revision is the file sha256 prefix, so a rerun is the same object.",
+      "observed": "test_import_full_file_counts_and_rerun_is_a_noop: second batch, same input, written_new 0, one object.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "Left for the issuer per the spawn instruction."
+    },
+    {
+      "item": "The daily mode's live Bloomberg pull",
+      "reason": "Exercised only by RIV-d-3; here it runs against an injected stub. No live Bloomberg call was made."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W3-S6",
+    "ETFS_RIVALS-Z-W3-S7",
+    "ETFS_RIVALS-Z-W3-S8"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~3 <0.9.0_WK_ETFS_RIVALS~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "14118f0a7e"
+    }
+  ]
+}
