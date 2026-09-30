@@ -5,7 +5,7 @@
  "project": "ETFS_RIVALS",
  "directive": "D4",
  "fabric": "site-z",
- "prd_version": "v0.1",
+ "prd_version": "v0.2",
  "step": 4,
  "brief_ref": "docs/briefs/etf-holdings-research-20260929.md@77c891c869",
  "endpoint_outcomes": ["FWD-1", "FWD-2", "FWD-3", "FWD-4", "FWD-5", "FWD-6", "FWD-7", "FWD-8", "FWD-9"],
@@ -172,12 +172,6 @@ Every other gold table is `address('rivalfunds','etfs','gold','<table>', ...)`. 
 - `rivalfunds-build-canonical-shape-lambda`, from `name('rivalfunds', None, 'build-canonical-shape', 'lambda')`.
 - `rivalfunds-publish-page-lambda`, from `name('rivalfunds', None, 'publish-page', 'lambda')`.
 
-**⚠ A correction to the brief, measured by this seat:**
-- The brief lists `rivalfunds-etfs-build-canonical-shape-lambda` and `rivalfunds-etfs-publish-page-lambda`.
-- `grade()` passes both as CONFORMANT, but **`name()` cannot produce them.** It refuses scope `etfs` in that slot ("a PRODUCT
-  scope; this slot takes FIRM/GLOBAL/MASTER").
-- The builder is the authority, so this PRD uses its output.
-- The grader-builder disagreement is an LGIC finding, filed to its owner, not this project's to fix.
 - Further stage resources are named by `name()` when a cell names them.
 
 **C-SOURCE-POLICY (brief S1; Andrew items 9 and 7).**
@@ -201,6 +195,16 @@ Every other gold table is `address('rivalfunds','etfs','gold','<table>', ...)`. 
 - Gold `canonical_shape` is the one Opal-defined master shape coalescing every silver shape, with every disclosed position.
   **Cash, derivatives and unidentified positions stay visible.** A raw field the master shape has no column for yet is kept.
 - An undated payload stays in bronze with a status. It never acquires a guessed report date.
+- **`canonical_shape` carries, per position, Opal's classification and the GICS hierarchy as SEPARATE fields**, per the
+  supporting spec `GOLD_TABLES_AND_PROMPTS.md:88-97`:
+  - Opal's classification: `asset_class` and `sub_asset_class`;
+  - the GICS hierarchy: sector, industry group, industry and sub-industry;
+  - each field with its source and as-of date.
+
+  Andrew's L1 point 3: *"a denormalized base table with all info that we'd want. Every holding, every sub asset class and GICS
+  industry tag in fields, anything we can get, put it all in there."* **A GICS sector never stands in for a sub-asset class**
+  (the spec's own `:97` warning, and the grain defect DSGN_AMGTV1 rounds 8-9 fixed). A value that cannot be resolved is
+  carried with a status, never guessed.
 
 **C-TRADE-SCHEDULE (the foundation; brief rev 3 O5, S6; feasibility probe).** For each fund and each pair of consecutive
 GENUINELY dated reports, over securities matched by RESOLVED identity (`lib/research/identity/`) with corporate actions applied:
@@ -316,6 +320,17 @@ the `/sprint` precedent files.
 
 ## PROVENANCE AND AMENDMENT HISTORY
 
+- v0.2 (2026-09-30, `1.0.0_SA_CTO~Z`), on `3.0.0_SA_CVO~Z`'s ratified-text REFUSE @`2506e39cee`:
+  - C-SHAPES gains the classification bullet (Opal asset/sub-asset class and the GICS hierarchy as separate fields,
+    Andrew's L1 point 3);
+  - the brief-name correction note moves here out of CONTRACTS.
+  - No ENDPOINT change.
+- **The brief-name correction (moved from C-NAMES):**
+  - The brief listed `rivalfunds-etfs-build-canonical-shape-lambda` and `rivalfunds-etfs-publish-page-lambda`.
+  - `grade()` passes both as CONFORMANT, but `name()` cannot produce them: it refuses scope `etfs` in that slot ("a PRODUCT
+    scope; this slot takes FIRM/GLOBAL/MASTER").
+  - C-NAMES uses the builder's output, and the grader-builder disagreement is an LGIC finding for its owner.
+  - The CRO restaged the brief's names to `name()` output @`9d550730e2`.
 - v0.1 (2026-09-30, `1.0.0_SA_CTO~Z`):
   - the ENDPOINT landed verbatim from @`33c1d096a3`, approved by Andrew ("1.) Yes approved.");
   - the CONTRACTS come from brief rev 3 Parts II-V, supporting spec S1-S9, the feasibility probe, and Andrew's rulings
