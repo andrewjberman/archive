@@ -9,6 +9,7 @@ import collections
 import concurrent.futures
 import datetime
 import json
+import os
 import sys
 
 import boto3
@@ -18,6 +19,9 @@ from lib.research.corpus import dossier
 KEYS = ("1299_HK_Equity 939_HK_Equity 992_HK_Equity AZN_LN_Equity BABA_US_Equity BA_US_Equity BZLFY_US_Equity HSBA_LN_Equity "
         "ICT_PM_Equity JD_US_Equity NOVN_SW_Equity PBR_US_Equity RIO_LN_Equity SHOP_CN_Equity SPOT_US_Equity TSM_US_Equity "
         "TTE_FP_Equity UBSG_SW_Equity ULVR_LN_Equity UNVGY_US_Equity ZURN_SW_Equity").split()  # the 22 minus 6861_JP (no dossier)
+# CRPS-aa-4: D25_KEYS (comma list of IDENTITY keys, e.g. BP/_LN_Equity) replaces the list.
+if os.environ.get("D25_KEYS"):
+    KEYS = os.environ["D25_KEYS"].split(",")
 B = "opal-data-harvest"
 P = "amgt/harvest/gold/research_dossier/"
 
@@ -26,7 +30,8 @@ def listing(s3):
     objs = collections.defaultdict(list)
     for pg in s3.get_paginator("list_objects_v2").paginate(Bucket=B, Prefix=P):
         for o in pg.get("Contents", []):
-            objs[o["Key"][len(P):].split("/")[0].split("=", 1)[1]].append(o)
+            # the gold partition is slash-safe; decode it to the identity the KEYS carry
+            objs[o["Key"][len(P):].split("/")[0].split("=", 1)[1].replace("-SLASH-", "/")].append(o)
     return objs
 
 
