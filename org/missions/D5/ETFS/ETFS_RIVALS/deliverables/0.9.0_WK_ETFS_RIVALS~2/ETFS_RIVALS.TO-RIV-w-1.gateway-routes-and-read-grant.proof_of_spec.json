@@ -62,9 +62,10 @@
       "kind": "terraform",
       "commit_or_etag": "d70267f372714dadfa91bc8c96228af745ba22ed",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "NEW: aws_iam_role_policy.gw_rivalfunds_read on aws_iam_role.gw with policy = file() of the policy JSON. No plan, no apply.",
+      "deploy_evidence": "NEW: aws_iam_role_policy.gw_rivalfunds_read on aws_iam_role.gw with policy = file() of the policy JSON. No plan, no apply. AMENDMENT 1: name = module.gw_rivalfunds_read_policy_name.name (modules/opal_name, system gateway, function rivalfunds-read, kind policy). Plan-only; not applied.",
       "artifact_covered_by": [
-        "AC3"
+        "AC3",
+        "AC4"
       ]
     },
     {
@@ -111,6 +112,17 @@
       "status": "PASS",
       "expect": "AC3 RESULT: PASS 0 failures",
       "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the gate's line for aws_iam_role_policy.gw_rivalfunds_read reads CONFORMANT, with name gateway-rivalfunds-read-policy, and NO line for that resource reads REFUSE",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/opal-gateway plan -lock=false -input=false -var mcportal_owner_key_claim=oid -var mcportal_owner_key=plan-only-dummy -out=<deliv>/w1a.tfplan; terraform show -json > <deliv>/w1a.plan.json; python .tools/naming-apply-gate.py --enforce --plan-json <deliv>/w1a.plan.json",
+      "output_evidence": "NAMING CONFORMANT aws_iam_role_policy.gw_rivalfunds_read gateway-rivalfunds-read-policy -> gateway-rivalfunds-read-policy (ADDITION: CONFORMANT as IAM_POLICY); summary NAMING-PLAN: WARN 59 graded; gate rc=0; REFUSE lines: 0 (w1a.gate.txt)",
+      "denominator": "1 of 1 resource lines for gw_rivalfunds_read CONFORMANT; 59 resource names graded, 0 REFUSE",
+      "status": "PASS",
+      "expect": "NAMING CONFORMANT aws_iam_role_policy.gw_rivalfunds_read gateway-rivalfunds-read-policy",
+      "judgment": false
     }
   ],
   "controls": {
@@ -139,7 +151,7 @@
   "surprises": [
     "ETFS_RIVALS-Z-W2-S1"
   ],
-  "session_log": "No separate log file; worker 0.9.0_WK_ETFS_RIVALS~2 (re-spawn), code commit d70267f372714dadfa91bc8c96228af745ba22ed. No rows filed. One row filed: ETFS_RIVALS-Z-W2-S1 (status flip outside <paths>).",
+  "session_log": "No separate log file; worker 0.9.0_WK_ETFS_RIVALS~2 (re-spawn), code commit d70267f372714dadfa91bc8c96228af745ba22ed. No rows filed. One row filed: ETFS_RIVALS-Z-W2-S1 (status flip outside <paths>). Amendment 1 (reopen): worker 0.9.0_WK_ETFS_RIVALS~2 on branch wk-ETFS_RIVALS-2b; AC4 added; AC1-AC3 re-run PASS.",
   "compiler_tools": [
     {
       "tool": "ruff",
