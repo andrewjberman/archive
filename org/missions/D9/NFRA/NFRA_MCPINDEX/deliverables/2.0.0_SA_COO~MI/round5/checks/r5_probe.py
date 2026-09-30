@@ -3,7 +3,7 @@
 usage (from the WORKSPACE root):
   python r5_probe.py s15            dim_transaction is declared on all 6 surfaces beside the three dim_* tables
   python r5_probe.py q3route        (run with cwd = the gateway dir) discover's mac.01 match names an MCP tool, not the route
-  python r5_probe.py t13            a black_diamond integration is registered and a catalog row names one of its tools
+  python r5_probe.py t13            a blackdiamond integration is registered and a catalog row names one of its tools
 Prints one line per surface and a denominator; exit 0 only when every surface holds.
 """
 import json
@@ -68,8 +68,8 @@ def q3route():
 def t13():
     import yaml
     reg = _read(GW / "app/integrations/registry.py")
-    registered = bool(re.search(r"[\"']black_diamond[\"']", reg))
-    root = GW / "app/integrations/black_diamond"
+    registered = bool(re.search(r"[\"']blackdiamond[\"']", reg))
+    root = GW / "app/integrations/blackdiamond"
     defs = set()
     if root.is_dir():
         for p in root.rglob("*.py"):
@@ -87,9 +87,9 @@ def t13():
             for v in o:
                 walk(v)
     walk(cat)
-    bd_rows = [r for r in rows if str(r.get("read_tool")) in defs and str(r.get("read_tool")).startswith("bd_")]
-    print("registry names black_diamond=%s; functions under %s: %d; catalog rows with read_tool: %d; "
-          "of them naming a bd_* black_diamond function: %d" % (registered, root.as_posix(), len(defs), len(rows), len(bd_rows)))
+    bd_rows = [r for r in rows if str(r.get("read_tool")) in defs and str(r.get("read_tool")).startswith("blackdiamond_")]
+    print("registry names blackdiamond=%s; functions under %s: %d; catalog rows with read_tool: %d; "
+          "of them naming a blackdiamond_* blackdiamond function: %d" % (registered, root.as_posix(), len(defs), len(rows), len(bd_rows)))
     return 0 if (registered and bd_rows) else 1
 
 

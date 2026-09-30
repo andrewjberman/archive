@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # MX-r-7 AC2 (the SERVED host after the Black Diamond release): on i-07dccb1615503ac99 /health answers 200; the
-# black_diamond and schwab integration dirs are shipped; the host .env ENABLED_INTEGRATIONS names black_diamond and
+# blackdiamond and schwab integration dirs are shipped; the host .env ENABLED_INTEGRATIONS names blackdiamond and
 # the 6 ids MX-r-6 left enabled.
 . "$(dirname "$0")/_root.sh"
 AWS="$(pwd)/.tools/aws"; I=i-07dccb1615503ac99
@@ -8,7 +8,7 @@ T="${TMPDIR:-/tmp}/mx_r5_ac2_$$"; mkdir -p "$T"
 python - "$T/params.json" <<'EOF'
 import json, sys
 cmd = ('echo "health=$(curl -s -o /dev/null -w %{http_code} http://127.0.0.1:8080/health)"; '
-       'for d in black_diamond schwab; do test -d /opt/opal-gateway/app/integrations/$d && echo "shipped=$d"; done; '
+       'for d in blackdiamond schwab; do test -d /opt/opal-gateway/app/integrations/$d && echo "shipped=$d"; done; '
        'echo "enabled=$(grep -E \'^ENABLED_INTEGRATIONS=\' /opt/opal-gateway/.env | head -1)"')
 json.dump({"commands": [cmd]}, open(sys.argv[1], "w", encoding="utf-8"))
 EOF
@@ -17,7 +17,7 @@ st=""; for i in 1 2 3 4 5 6 7 8 9 10; do st=$(timeout 20 "$AWS" ssm get-command-
 o=$(timeout 20 "$AWS" ssm get-command-invocation --command-id "$cid" --instance-id $I --query StandardOutputContent --output text 2>/dev/null | tr -d '\r')
 rm -rf "$T"
 h=$(printf '%s\n' "$o" | sed -n 's/^health=//p'); sh=$(printf '%s\n' "$o" | grep -c '^shipped='); en=$(printf '%s\n' "$o" | sed -n 's/^enabled=//p')
-need=0; for id in black_diamond schwab ycharts opal_portal globgrph opal_discover portal_index; do printf '%s' "$en" | grep -qE "(=|[ ,])$id([ ,]|$)" && need=$((need+1)); done
+need=0; for id in blackdiamond schwab ycharts opal_portal globgrph opal_discover portal_index; do printf '%s' "$en" | grep -qE "(=|[ ,])$id([ ,]|$)" && need=$((need+1)); done
 echo "ssm command=${cid:-NONE} status=${st:-NONE}; /health=$h; shipped $sh of 2; ENABLED_INTEGRATIONS line='${en}'; ids enabled $need of 7"
 if [ "$h" = 200 ] && [ "$sh" = 2 ] && [ "$need" = 7 ]; then echo "RESULT: PASS"; exit 0; fi
 echo "RESULT: FAIL"; exit 1
