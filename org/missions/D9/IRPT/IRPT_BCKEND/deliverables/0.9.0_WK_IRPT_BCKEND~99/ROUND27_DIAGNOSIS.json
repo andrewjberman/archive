@@ -1,0 +1,319 @@
+{
+ "nna": {
+  "answer": "Branch A. The three rows are one transfer among related accounts that Orion has since reclassified as INTERNAL. All three accounts (866 IRA Rollover, 769 Transfer on Death, 1096 Roth) belong to one owner, Carol O Holden, household_id 63 and clientId 63. The 09-25 raw (from which the served partition was built) carried the legs as Merge Out to Other Account and Client Distribution on 866 (-10,000 each) and Merge In from Other Account on 769 and Client Contribution on 1096 (+10,000 each), all NNA types in orion_cashflow_taxonomy.yaml. Orion re-typed the same transaction ids (5885260, 5885261, 5885298, 5885276) to Internal Account Journal Out (171) / In (172) between the 09-25 and 09-26 raw pulls; the taxonomy buckets both as Internal, so INF_C_01 now emits no NNA row for them and the coverage guard (nna_coverage_guard.py:385) refuses to drop served NNA silently. Signed net 0.00 and gross 40,000 match: 866 20,000 out; 769 and 1096 10,000 in each. Served NNA partition gold/canonical/canonical_nna_2026-09-24.parquet was last written 2026-09-25T12:39:26Z from the silver/raw of 2026-09-25 (the first raw carrying these transactions; createdDate 2026-09-25 04:11; the 2026-09-24 silver has zero rows for the three accounts on 2026-09-24). Re-running INF_C_01.classify_nna on the 09-25 silver for the three accounts reproduces the served rows exactly (769 +10000 in; 866 20000 out, 2 out events; 1096 +10000 in). Note: silver/api_dims/accounts_v2 carries household_id but no client_id column; client_id 63 is read from the clientId column of the silver/raw transactions. Nothing was written to lib/nna_coverage_excusals.json and the guard was not touched. Side observation: the last good full run chain_full_20260927_113304 did not rewrite this partition (LastModified stays 2026-09-25T12:39:26Z), so the guard first fired on the 09-30 run.",
+  "branch": "A",
+  "same_household_or_client": true,
+  "accounts": {
+   "866": {
+    "household_id": 63,
+    "client_id": 63,
+    "account_name": "Carol O Holden (IRA Rollover)",
+    "before": {
+     "raw": "bronze/transactions/2026-09-25.jsonl.gz (silver/transactions/2026-09-25.parquet)",
+     "transactions": [
+      {
+       "id": 5885260,
+       "amount": -10000.0,
+       "type": "Merge Out to Other Account",
+       "transTypeId": 42,
+       "inf_c_01_class": "NNA outflow"
+      },
+      {
+       "id": 5885261,
+       "amount": -10000.0,
+       "type": "Client Distribution",
+       "transTypeId": 51,
+       "inf_c_01_class": "NNA outflow"
+      }
+     ],
+     "note": "id 5885262 Federal Tax Withheld -1111.11 (113) and the Buy/Sell Exchange, Dividend and Income Reinvested rows are not NNA in either read",
+     "result": "daily_outflow 20000.00, n_outflow_events 2, net_nna -20000.00 (the served row)"
+    },
+    "after": {
+     "raw": "bronze/transactions/2026-09-30.jsonl.gz (silver/transactions/2026-09-30.parquet); identical from the 2026-09-26 raw onward",
+     "transactions": [
+      {
+       "id": 5885260,
+       "amount": -10000.0,
+       "type": "Internal Account Journal Out",
+       "transTypeId": 171,
+       "inf_c_01_class": "INTERNAL (excluded from NNA)"
+      },
+      {
+       "id": 5885261,
+       "amount": -10000.0,
+       "type": "Internal Account Journal Out",
+       "transTypeId": 171,
+       "inf_c_01_class": "INTERNAL (excluded from NNA)"
+      }
+     ],
+     "result": "no NNA row for 2026-09-24 (classify_nna returns no 09-24 partition rows for the three accounts)"
+    }
+   },
+   "769": {
+    "household_id": 63,
+    "client_id": 63,
+    "account_name": "Carol O Holden (Transfer on Death)",
+    "before": {
+     "raw": "bronze/transactions/2026-09-25.jsonl.gz",
+     "transactions": [
+      {
+       "id": 5885298,
+       "amount": 10000.0,
+       "type": "Merge In from Other Account",
+       "transTypeId": 39,
+       "inf_c_01_class": "NNA inflow"
+      }
+     ],
+     "result": "daily_inflow 10000.00, n_inflow_events 1, net_nna +10000.00 (the served row)"
+    },
+    "after": {
+     "raw": "bronze/transactions/2026-09-30.jsonl.gz; identical from the 2026-09-26 raw onward",
+     "transactions": [
+      {
+       "id": 5885298,
+       "amount": 10000.0,
+       "type": "Internal Account Journal In",
+       "transTypeId": 172,
+       "inf_c_01_class": "INTERNAL (excluded from NNA)"
+      }
+     ],
+     "result": "no NNA row for 2026-09-24"
+    }
+   },
+   "1096": {
+    "household_id": 63,
+    "client_id": 63,
+    "account_name": "Carol O Holden (Roth)",
+    "before": {
+     "raw": "bronze/transactions/2026-09-25.jsonl.gz",
+     "transactions": [
+      {
+       "id": 5885276,
+       "amount": 10000.0,
+       "type": "Client Contribution",
+       "transTypeId": 8,
+       "inf_c_01_class": "NNA inflow"
+      }
+     ],
+     "result": "daily_inflow 10000.00, n_inflow_events 1, net_nna +10000.00 (the served row)"
+    },
+    "after": {
+     "raw": "bronze/transactions/2026-09-30.jsonl.gz; identical from the 2026-09-26 raw onward",
+     "transactions": [
+      {
+       "id": 5885276,
+       "amount": 10000.0,
+       "type": "Internal Account Journal In",
+       "transTypeId": 172,
+       "inf_c_01_class": "INTERNAL (excluded from NNA)"
+      }
+     ],
+     "result": "no NNA row for 2026-09-24"
+    }
+   }
+  },
+  "evidence": [
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/gold/canonical/canonical_nna_2026-09-24.parquet"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/silver/transactions/2026-09-25.parquet"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/silver/transactions/2026-09-30.parquet"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/bronze/transactions/2026-09-25.jsonl.gz"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/bronze/transactions/2026-09-26.jsonl.gz"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/bronze/transactions/2026-09-27.jsonl.gz"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/bronze/transactions/2026-09-30.jsonl.gz"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/silver/api_dims/accounts_v2/snapshot_date=2026-09-30/data.parquet"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/diagnostic/chain_logs/chain_full_20260930_145328.log"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/scripts/gold/INF_C_01.canonical_nna.py:585"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/scripts/gold/INF_C_01.canonical_nna.py:918"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/scripts/gold/lib/nna_coverage_guard.py:385"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml:62"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml:85"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml:102"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml:116"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml:176"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml:183"
+   }
+  ]
+ },
+ "mirror": {
+  "answer": "Neither opal-assets-ingest-mirror nor opal-assets-silver-orion failed on positions; both did what they are built to do, and the stall is upstream of them. The raw positions files for 09-28 and 09-29 never existed in opal-data-inf (only coerced .parquet, which the mirror refuses by ruling 16), which alone explains the silence for those two dates. It does not explain 09-30: that raw landed at 15:18:55Z, after the mirror's daily INF fire at 13:05Z, and the mirror is polling-only (next fire 2026-10-01 13:05Z), so 09-30 is also not yet mirrored for a second, independent reason; the silver-orion sweep at 16:00Z correctly found nothing missing in the monolith bronze. Separately, the mirror's eclipse row raises ALIEN SURPLUS on every INF invocation (after the orion row has copied), which fails each run but does not block positions. Proposed repair, not performed, is in the repair field.",
+  "component": "Neither Lambda failed on positions. The stall is UPSTREAM of both: the INF raw positions producer wrote no bronze/positions/2026-09-28.jsonl.gz or 2026-09-29.jsonl.gz (opal-data-inf holds only the coerced .parquet for those dates), and 2026-09-30.jsonl.gz landed at 15:18:55Z, after the opal-assets-ingest-mirror daily INF fire (cron(5 13 * * ? *), 13:05Z) and before its next fire (2026-10-01 13:05Z). A separate co-located defect: the mirror's eclipse/inflection row raises MirrorRaise on every INF invocation (12 of 12 from 09-27 to 09-30).",
+  "cause": "(1) 09-28 and 09-29: the mirror enumerated the source and skipped the .parquet siblings as COERCED (ruling 16, lambda_function.py _is_raw; coerced_skipped_ruling16 rising 4791 -> 4793 -> 4795 -> 4797 across the 09-27..09-30 fires) because no .jsonl.gz positions object exists, so there was nothing to copy and nothing for silver-orion to convert. (2) 09-30: the 13:05Z invocation (log stream 2026/09/30/[$LATEST]2dddeb92..., DENOMINATOR orion/inflection enumerated 9739 written 1, which is assets 2026-09-30 only) ran about 2h13m before the positions raw existed; there is no trigger between a raw landing in opal-data-inf and the next daily poll (polling design, lambda_function.py docstring), so the object is not yet mirrored. The opal-assets-silver-orion S3 trigger (orion/inflection/bronze/ *.jsonl.gz) fires only on a monolith write, and its 16:00Z sweep (cron(0 16 * * ? *), log 09-30T16:00:46Z) reports set_identity missing=0 against what is in the monolith bronze (expected 4940, matched 4940), so it had nothing to convert. silver-orion logs only START/END/REPORT because lambda_entry prints nothing on the happy path; its evidence is the manifests meta/conversions/20260930T160043Z-bcc6c8dc.json (sweep) and 20260930T130528Z-f6adc5e8.json (event, converted 1: assets/2026-09-30). Conclusion on the W97-S4 question: the missing 09-28/09-29 raw alone explains the silence for those two dates; it does NOT explain 09-30, whose raw exists but was not yet mirrored for the timing reason above, so 09-30 also stalled, for a second independent reason. Side findings, not causes of the silence: the mirror eclipse row raises ALIEN SURPLUS on eclipse/inflection/bronze/eclipse_membership_map/date=2026-09-24/{manifest.json,membership_map.json} (written 2026-09-25T15:40:03Z, not a mirrored key) on every INF invocation, after the orion row is already processed, so it fails the invocation and triggers two async retries (13:05, 13:06, 13:08Z) but does not block the orion copy; and the silver sweep verdict is FAIL every day on one alien key orion/inflection/silver/fact_assets/date=2026-08-06/data.parquet (landed 4941 vs expected 4940), which does not stop conversion.",
+  "repair": "Proposed, NOT performed. (a) To land 09-30 now: invoke opal-assets-ingest-mirror once with {\"firm\":\"inf\"} (idempotent size-skip); the orion row copies bronze/positions/2026-09-30.jsonl.gz and the existing S3 notification triggers opal-assets-silver-orion, which writes silver/fact_positions/date=2026-09-30; otherwise it self-heals at the 2026-10-01 13:05Z fire. The eclipse ALIEN raise comes after the orion row, so it does not block. (b) 09-28 and 09-29 need the raw produced: re-run data/inf/manual_api/pull_inflection_positions_daily.py --start 2026-09-28 --end 2026-09-29 --upload-bronze (the endpoint takes the date in the path, see the asof section; an Orion call, so it needs its own authorization), and find why the scheduled producer wrote only .parquet on those dates; until then those dates are honest holes by ruling 16. (c) Mirror hygiene: classify eclipse_membership_map/ as a known non-mirror class in _assert_landed_membership (lambda_function.py:221-268) or move the two keys to their owner's prefix, so the INF invocation stops raising daily; this needs a CTO ruling because the mirror map is born with three rows and never grows. (d) To close the lag structurally, re-time the mirror after the raw positions producer or add a second INF fire; a schedule change, out of this cell.",
+  "evidence": [
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/bronze/positions/2026-09-27.jsonl.gz"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/bronze/positions/2026-09-28.parquet"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/bronze/positions/2026-09-29.parquet"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/bronze/positions/2026-09-30.jsonl.gz"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-inf/bronze/positions/2026-09-30.parquet"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-assets/orion/inflection/bronze/positions/2026-09-27.jsonl.gz"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-assets/orion/inflection/silver/fact_positions/date=2026-09-27/data.parquet"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-assets/orion/inflection/meta/conversions/20260930T160043Z-bcc6c8dc.json"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-assets/orion/inflection/meta/conversions/20260930T130528Z-f6adc5e8.json"
+   },
+   {
+    "kind": "s3",
+    "ref": "s3://opal-data-assets/eclipse/inflection/bronze/eclipse_membership_map/date=2026-09-24/manifest.json"
+   },
+   {
+    "kind": "log",
+    "ref": "CloudWatch /aws/lambda/opal-assets-ingest-mirror stream 2026/09/30/[$LATEST]2dddeb9286294c2ea462517fe7b8ba88 (13:05:14Z-13:08:44Z): DENOMINATOR orion/inflection written 1; [ERROR] MirrorRaise: ALIEN SURPLUS on eclipse/inflection"
+   },
+   {
+    "kind": "log",
+    "ref": "CloudWatch /aws/lambda/opal-assets-ingest-mirror 13:05Z fires 2026-09-27..2026-09-30: coerced_skipped_ruling16 4791, 4793, 4795, 4797"
+   },
+   {
+    "kind": "log",
+    "ref": "CloudWatch /aws/lambda/opal-assets-silver-orion stream 2026/09/30/[$LATEST]d78f9ed56754422dbac2b03a3ca261e1 (16:00:40Z-16:00:46Z sweep; START/END/REPORT only)"
+   },
+   {
+    "kind": "doc",
+    "ref": "EventBridge rule opal-assets-ingest-mirror-inf-daily cron(5 13 * * ? *) input {\"firm\":\"inf\"}; rule opal-assets-silver-orion-sweep-daily cron(0 16 * * ? *) input {\"mode\":\"sweep\"}; S3 notification silver-orion on opal-data-assets prefix orion/inflection/bronze/ suffix .jsonl.gz (read via aws events describe-rule and s3api get-bucket-notification-configuration)"
+   },
+   {
+    "kind": "file",
+    "ref": "infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:221"
+   },
+   {
+    "kind": "file",
+    "ref": "infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:268"
+   },
+   {
+    "kind": "file",
+    "ref": "infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:453"
+   },
+   {
+    "kind": "file",
+    "ref": "infra/aws/lambda/opal-assets/opal-assets-silver-orion/lambda_function.py:19"
+   },
+   {
+    "kind": "file",
+    "ref": "infra/aws/lambda/opal-assets/opal-assets-silver-orion/mirror_conversion.py:788"
+   },
+   {
+    "kind": "file",
+    "ref": "infra/aws/lambda/opal-assets/opal-assets-silver-orion/mirror_conversion.py:883"
+   }
+  ]
+ },
+ "asof": {
+  "answer": "YES, from the repo's documentation of the endpoint. The positions feed is GET /api/v1/Portfolio/Clients/{clientId}/Assets/{MM-DD-YYYY}?$top=50000&includeCostBasis=false: the date is a path segment, so an as-of date is accepted per call. The pull script takes --date, --backfill-days and --start/--end and formats each date with strftime('%m-%d-%Y') (pull_inflection_positions_daily.py:376, route at :71). The probe docstring records that DIAGFIX.009-NEW Phase 1 (commit 91da4d6a1) confirmed the endpoint supports arbitrary historical dates with real per-date currentValue, and probe_positions_mv_daily.py:382-426 is the historical-date probe (verdict HISTORICAL_DATES_SUPPORTED when every queried date returns 200 with rows). The portfolio DOMAIN.md calls it a snapshot endpoint returning the asset list as of {date}. Caveat from data/_contracts/vendor_asof_registry.yaml:112-122: asOfDate in the payload echoes the request, but the value vintage is the prior settled trading day (run-date-echo-of-prior-settled, label_offset -1 trading day). pull_inflection_positions.py is a different surface (Reporting scope by entityIds, no as-of path date). Not established: no document proves a call for 2026-09-28 or 09-29 would return data, only that arbitrary historical dates were supported when probed in April 2026. I made no Orion call.",
+  "accepts_as_of": "YES",
+  "doc_ref": "data/inf/manual_api/pull_inflection_positions_daily.py (docstring :1-30, :71, :376); data/inf/manual_api/probe_inflec_positions_mv.py (docstring :1-12); data/inf/manual_api/probe_positions_mv_daily.py (:382-426); data/inf/manual_api/pull_inflection_positions.py (read); data/inf/API/domains/portfolio/DOMAIN.md:33,55-62; docs/architecture/INFLEC_API_ENDPOINTS_CATALOG.md:345-368; data/_contracts/vendor_asof_registry.yaml:112-122",
+  "calls_made": 0,
+  "evidence": [
+   {
+    "kind": "file",
+    "ref": "data/inf/manual_api/pull_inflection_positions_daily.py:71"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/manual_api/pull_inflection_positions_daily.py:376"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/manual_api/probe_inflec_positions_mv.py:5"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/manual_api/probe_positions_mv_daily.py:382"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/manual_api/pull_inflection_positions.py:1"
+   },
+   {
+    "kind": "file",
+    "ref": "data/inf/API/domains/portfolio/DOMAIN.md:33"
+   },
+   {
+    "kind": "file",
+    "ref": "docs/architecture/INFLEC_API_ENDPOINTS_CATALOG.md:347"
+   },
+   {
+    "kind": "file",
+    "ref": "data/_contracts/vendor_asof_registry.yaml:112"
+   }
+  ]
+ }
+}
