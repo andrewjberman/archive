@@ -1,0 +1,66 @@
+SERVED-RANK PRODUCER: Lambda amgt-resapp-chatter-axis  LastModified=2026-09-24T05:09:00.000+0000  CodeSha256=Xdwp7IrPaNho7y0Nz1L4TsihsueqDG+QDuvRsA+acYM=
+CHATTER_AXIS_SOURCE = 'legacy'   (raw env: {"CHATTER_AXIS_SOURCE": "legacy"})
+ROUTE READ BY THE PAGE: GET /api/scoped/amgt/lead-panel/rankings/{movement}/{subject}
+  handler branch  lib/research/api/scoped_amgt.py:4322  (rest[:2] == ['lead-panel','rankings'])
+  function        lib/research/api/scoped_amgt.py:644  read_rankings(movement, subject, as_of_date, limit) -> pointer + generation rows
+  producer        lib/research/metrics/chatter_axis.py:587  compute_chatter_axis(count_fn=SOURCE_COUNT_FNS[source])
+  source map      lib/research/metrics/chatter_axis.py:423  SOURCE_COUNT_FNS = {legacy: default_daily_article_counts, gold: gold_daily_mention_scores}
+  env selection   infra/aws/terraform/harvest/lambda_src/lambda_function.py:102  select_source() reads CHATTER_AXIS_SOURCE (unset/empty -> legacy)
+INPUT THE SERVED RANK IS COMPUTED FROM (by CHATTER_AXIS_SOURCE=legacy): RAW ARTICLE COUNTS per day (pool publication links; default_daily_article_counts)
+
+SERVED TRENDING x CHATTER: http=200 axis=TRENDING_CHATTER ranking_status=SERVED state=COMPLETE as_of_date=2026-09-29 requested_as_of=2026-09-30 dated=True generation_id=20260929T100015Z-d09ee37a8f3b row_count=2 movement_measure=ABSOLUTE_COUNT_ON_AS_OF_DAY
+   rank 1   BA US            BA_US_Equity     score=0 raw_chatter_count(as-of day)=0 window_total_count=1 movement_raw_score=0
+   rank 2   HD US            HD_US_Equity     score=0 raw_chatter_count(as-of day)=0 window_total_count=1 movement_raw_score=0
+
+SERVED BREAKOUT x CHATTER: http=200 axis=BREAKOUT_CHATTER ranking_status=ABSENT state=None as_of_date=2026-09-30 requested_as_of=2026-09-30 dated=False generation_id=None row_count=0 movement_measure=PCT_JUMP_VS_TRAILING_BASELINE
+   (no rows served: no generation pointer at BREAKOUT_CHATTER#2026-09-30 / _CURRENT: no committed ranking exists for this date -- this is not an empty membership)
+
+NEWEST SERVED chatter_daily PART: s3://opal-data-harvest/amgt/harvest/gold/chatter_daily/date=2026-09-29/part-20260929T212132Z.parquet  (8 part(s) under the prefix); 51952 rows, 191 securities, days 2026-01-01..2026-09-29
+WINDOW: 2026-08-31 .. 2026-09-29 (30 days, the served generation's as_of_date 2026-09-29 minus 29 days)
+UNIVERSE (securities in chatter_daily): 191; companies with any window signal: 36; with an as-of-day score > 0: 0
+
+SIDE BY SIDE -- TRENDING x CHATTER, page as served vs recomputed from the graded chatter_daily part
+  rank | SERVED (security_key score)  | RECOMPUTED graded, as-of-day mention_score     | RECOMPUTED graded, 30-day window mention_score
+  1    | BA_US_Equity 0               | 992_HK_Equity 0.00                             | BA_US_Equity 12.50 (raw named 129)            
+  2    | HD_US_Equity 0               | AAPL_US_Equity 0.00                            | AMZN_US_Equity 8.40 (raw named 49)            
+  3    | -                            | ABBV_US_Equity 0.00                            | COST_US_Equity 6.70 (raw named 52)            
+  4    | -                            | ABT_US_Equity 0.00                             | DELL_US_Equity 2.30 (raw named 20)            
+  5    | -                            | AMZN_US_Equity 0.00                            | 992_HK_Equity 1.60 (raw named 9)              
+  6    | -                            | ANET_US_Equity 0.00                            | HSY_US_Equity 1.00 (raw named 8)              
+  7    | -                            | AVGO_US_Equity 0.00                            | KO_US_Equity 1.00 (raw named 7)               
+  8    | -                            | BAC_US_Equity 0.00                             | NVDA_US_Equity 0.90 (raw named 9)             
+  9    | -                            | BA_US_Equity 0.00                              | HD_US_Equity 0.70 (raw named 7)               
+  10   | -                            | COST_US_Equity 0.00                            | LMT_US_Equity 0.70 (raw named 9)              
+  11   | -                            | DAL_US_Equity 0.00                             | UBS_US_Equity 0.70 (raw named 2)              
+  12   | -                            | DELL_US_Equity 0.00                            | BAC_US_Equity 0.60 (raw named 6)              
+  13   | -                            | FDX_US_Equity 0.00                             | KPN_NA_Equity 0.60 (raw named 1)              
+  14   | -                            | GOOGL_US_Equity 0.00                           | UPS_US_Equity 0.50 (raw named 4)              
+  15   | -                            | GOOG_US_Equity 0.00                            | AAPL_US_Equity 0.40 (raw named 5)             
+
+RANK CORRELATION (Spearman, own implementation)
+  served TRENDING rank vs recomputed graded as-of-day rank : NOT MEASURABLE HERE (n=2 companies in common; fewer than 3, or one side has no spread)
+  served TRENDING rank vs recomputed graded 30-day-window rank: NOT MEASURABLE HERE (n=2 companies in common; fewer than 3, or one side has no spread)
+  raw-count window measure vs graded window measure (all companies with signal, values not ranks): 0.8302 (n=36)
+  served set vs recomputed windows: served 2 companies ['BA_US_Equity', 'HD_US_Equity']; recomputed graded window set 36 companies; overlap 2
+  companies with graded window signal that the served list does not carry: 34 of 36
+
+PASSING-MENTION TEST (raw-count window rank better than graded window rank by >= 5 places), competition ranks,
+over the 36 companies with a raw window count > 0 (36 with a graded window score > 0):
+  security_key       raw_rank graded_rank places raw_named articles graded_score tiers(A/B/C/D)
+  ANET_US_Equity           14          20      6         4        1         0.30 0/0/1/0
+  AVGO_US_Equity           14          20      6         4        1         0.30 0/0/1/0
+  SNDK_US_Equity           14          20      6         4        1         0.30 0/0/1/0
+  STX_US_Equity            14          20      6         4        1         0.30 0/0/1/0
+  WDC_US_Equity            14          20      6         4        1         0.30 0/0/1/0
+  FDX_US_Equity            24          31      7         2        2         0.20 0/0/0/2
+  => 6 company(ies) listed
+  as-of-day version (2026-09-29): 0 company(ies) with a raw as-of-day count > 0, 0 with a graded as-of-day score > 0; listed: []
+  (the as-of day holds no mention in the graded table, so the as-of-day comparison is empty, not a pass)
+  top-10 by raw named count : ['BA_US_Equity', 'COST_US_Equity', 'AMZN_US_Equity', 'DELL_US_Equity', '992_HK_Equity', 'LMT_US_Equity', 'NVDA_US_Equity', 'HSY_US_Equity', 'HD_US_Equity', 'KO_US_Equity']
+  top-10 by graded score    : ['BA_US_Equity', 'AMZN_US_Equity', 'COST_US_Equity', 'DELL_US_Equity', '992_HK_Equity', 'HSY_US_Equity', 'KO_US_Equity', 'NVDA_US_Equity', 'HD_US_Equity', 'LMT_US_Equity']
+  in the raw top-10 but not the graded top-10: []
+  in the graded top-10 but not the raw top-10: []
+
+CONSISTENCY: chatter_daily window mention_score vs the same sum recomputed from the newest pair table part (part-20260929T192610Z.parquet): agree for 191 of 191 securities
+
+wrote m2_ac2_result.json
