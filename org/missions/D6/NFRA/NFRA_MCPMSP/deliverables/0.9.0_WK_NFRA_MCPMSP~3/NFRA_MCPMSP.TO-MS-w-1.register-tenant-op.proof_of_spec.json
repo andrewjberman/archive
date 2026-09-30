@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPMSP.TO-MS-w-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/decompositions/NFRA_MCPMSP_DECOMP.md",
+    "vintage_commit": "c5dc123f42d7df724c8ebe5886a9b6727b386812",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPMSP/task-orders/NFRA_MCPMSP.TO-MS-w-1.register-tenant-op.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/task-orders/NFRA_MCPMSP.TO-MS-w-1.register-tenant-op.md",
+    "group": "OTHER",
+    "vintage_commit": "c5dc123f42d7df724c8ebe5886a9b6727b386812"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPMSP~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "4edff8d6cc3d8ce5d0b0badb0c4f3c29561dce27",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "register_tenant op: refuses BAD-FIRM, FIRM-NOT-LIVE (LIVE_FIRMS env, absent=none live), BAD-TID before any store call; writes tenant_firm at pk POLICY#TENANT#<tid> sk tenant_firm (fields tid, firm, registered_at, registered_by) with condition attribute_not_exists(pk); same firm is idempotent WRITTEN; another firm is TENANT-OTHER-FIRM. One changes-table item per outcome. Not deployed (MS-a-2).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests/test_register_tenant.py",
+      "kind": "test",
+      "commit_or_etag": "4edff8d6cc3d8ce5d0b0badb0c4f3c29561dce27",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, 4 named tests (7 cases with parametrize); fake store, fake changes client, test ES256 key; no network, no AWS.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest: N passed; test_register_tenant_writes_tenant_firm=1 test_register_tenant_refused_firm_not_live=1 test_register_tenant_refused_other_firm_row=1 test_register_tenant_records_each_outcome=1 (each >=1, 0 failed) -- RESULT: PASS -- exit=0 [AMENDED: + test_register_tenant_writes_through_operator_transact=1]",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/w1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest: ============================== 8 passed in 0.51s ==============================; test_register_tenant_writes_tenant_firm=1 test_register_tenant_refused_firm_not_live=4 test_register_tenant_refused_other_firm_row=1 test_register_tenant_records_each_outcome=1 test_register_tenant_writes_through_operator_transact=1\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 named tests passed (8 cases); 0 failed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "existing writer tests: >=12 passed, 0 failed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/w1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "existing writer tests (tests/test_grant_writer.py tests/test_owner_key_and_record.py ): 12 passed in 0.76s\nRESULT: PASS\nexit=0",
+      "denominator": "12 passed, 0 failed across 2 existing test files",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "none run: thread round; the refusal tests assert store.calls == [] as the negative arm.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run before and after the commit.",
+      "observed": "Identical deciding lines: 7 passed; 12 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a run against the real AccessState",
+      "reason": "access_state.py is read-only here; it refuses tenant_firm today (row NFRA_MCPMSP-Z-W3-S1)."
+    },
+    {
+      "item": "deploy",
+      "reason": "MS-a-2 makes the op live."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPMSP-Z-W3-S1"
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/0.9.0_WK_NFRA_MCPMSP~3/session_log.MS-w-1.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg1.txt -- <3 paths>",
+      "result": "committed 4edff8d6cc; first attempt refused by the naming gate on two firm literals, fixed"
+    }
+  ]
+}
