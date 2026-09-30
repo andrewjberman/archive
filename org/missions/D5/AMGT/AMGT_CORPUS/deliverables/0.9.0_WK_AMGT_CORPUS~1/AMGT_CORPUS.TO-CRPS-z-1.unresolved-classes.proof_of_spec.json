@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-z-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-z-1.unresolved-classes.md",
+    "group": "OTHER",
+    "vintage_commit": "2a251bfeb43e0ddcb29868da7537e97d2e1d8844"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "2a251bfeb43e0ddcb29868da7537e97d2e1d8844",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-z-1.unresolved-classes.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/build_unit_map.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Six families, each with its ground in a code comment: F1 zero dividend per share (IS_DIV_PER_SHR, EQY_DPS, BEST_DPS) and F2 zero BEST_DIV_YLD take the FIELD_BASIS unit via unit_from_basis_zero; F3 BEST_BPS joins PER_SHARE_PX_BANDS (same-currency PX_LAST read); F4 BS_TOTAL_LIABILITIES and F5 BS_CASH_NEAR_CASH_ITEM join the CUR_MKT_CAP cross-field reads; F6 build_entries now calls the round-21 discriminator for a cross-field mnemonic whose magnitude did not discriminate. field_map.json, model_block_pull.py, unit_anchor.py untouched; no S3 write; no derive.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_build_unit_map_families_round24.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file, 12 offline tests: one per family (F1..F6, F4/F5 sharing a band-gap test), and unclosable classes stay UNRESOLVED (currency differs, magnitude alone with no anchor, reporting currency unstated, tiny capex).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/UNRESOLVED_CLASSES_ROUND24.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The class table: denominator_keys 98, 2 slash keys EXCLUDED (Z-S64), before_total 602, 17 classes summing to 602, each with disposition and reason, remaining_after 49. The .md beside it is the same table rendered.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round24/z1_AC1.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round24/z1_AC1.sh",
+      "output_evidence": "z1 keys 98 excluded 2 measured_before 602 table_total 602 classes 17 dispositions_complete True projected_after 49 table_remaining 49 consistent True",
+      "denominator": "98 slash-free keys read (2 EXCLUDED under Z-S64); 602 UNRESOLVED figures measured by the checker, 602 in the table; the checker's independent rebuild of a temp copy of the committed map over the crosswalk projects 49 remaining, the table says 49. rc 0, about 70 s.",
+      "expect": "(?m)^z1 keys 98 excluded 2 measured_before 602 table_total 602 classes [1-9]\\d* dispositions_complete True projected_after \\d+ table_remaining \\d+ consistent True$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round24/z1_AC2.sh",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round24/z1_AC2.sh",
+      "output_evidence": "38 passed in 0.44s",
+      "denominator": "38 of 38 tests passed across the five build_unit_map suites (12 in test_build_unit_map_families_round24.py), 0 failed; the whole research tests directory also reads 182 passed. rc 0.",
+      "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "The projection (rebuild of a temp copy of the committed map, every figure through _resolved_unit) run three times: the worker's own script twice (before and after the zero rule moved out of classify_unit) and z1_AC1.sh once.",
+      "observed": "49 remaining each time; AC2 38 passed.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The builder as at HEAD (git show HEAD:integrations/bloomberg/research/build_unit_map.py) run through the same projection.",
+      "expected": "602 remaining: the change, not the population, closes the 553.",
+      "observed": "remaining 602 of 602 with the HEAD builder; 49 of 602 with this builder.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "BP/_LN_Equity and NG/_LN_Equity",
+      "reason": "EXCLUDED under row Z-S64 (slash-bearing keys, design fork with 4.0.0_SA_CRO~Z); named in the table, never silently absent."
+    },
+    {
+      "item": "field_map.json commit and any re-derive",
+      "reason": "A later issuer act under a pair (order section 1 item 5); the 553 closures are a projection on a temp copy, the served blocks move only after that act."
+    },
+    {
+      "item": "49 figures that stay UNRESOLVED",
+      "reason": "Reported, not demanded (AC1): 6861 JP (EQY_FUND_CRNCY unstated: BOOK_VAL_PER_SH 11, REVENUE_PER_SH 11, BEST_EPS 3, CURR_ENTP_VAL 1), 939 HK BS_TOTAL_LIABILITIES 10 (HKD vs CNY, no anchor stored), TSM CURR_ENTP_VAL 1 (USD vs TWD, no anchor stored), BBSE3 BZ CAPITAL_EXPEND 10 (tiny, no plausible band), BA BEST_PE_RATIO 2 (1FY absent)."
+    }
+  ],
+  "surprises": ["AMGT_CORPUS-Z-W1-S19", "AMGT_CORPUS-Z-W1-S20"],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "z1_check.py live read-only census and projection (AC1, via z1_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round24/z1_AC1.sh",
+      "result": "rc 0; consistent True"
+    },
+    {
+      "tool": "pytest over the five build_unit_map suites (AC2, via z1_AC2.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round24/z1_AC2.sh",
+      "result": "rc 0; 38 passed"
+    }
+  ]
+}
