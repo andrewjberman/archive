@@ -49,6 +49,19 @@ for must in ("date", "value", "total_return_daily", "return_basis", "day_quality
 from lib import opal_naming as on  # noqa: E402
 import boto3  # noqa: E402
 
+# Issuer amendment 1 (2026-09-30, PRD v0.3 ruling 16, CTO 103361): the platinum served files carry reporting-policy rows.
+try:
+    on.load_registry()
+except Exception as exc:  # noqa: BLE001
+    fail("lib.opal_naming refuses the registry: %s" % str(exc)[:200])
+_pol = json.loads((root / "infra/logic/registry/reporting_policies.json").read_text(encoding="utf-8"))
+_plat = [fam for p in _pol.get("policies", []) if "49financial" in (p.get("firms") or [])
+         for fam in (p.get("families") or {}).values()
+         if isinstance(fam, dict) and fam.get("tier") == "platinum" and fam.get("table") == "reporting"]
+if not _plat:
+    fail("reporting_policies.json carries no platinum/reporting family for 49financial (ruling 16)")
+print("  policy: %d platinum/reporting family(ies) for 49financial, extensions %s" % (len(_plat), sorted({f.get("extension") for f in _plat})))
+
 s3 = boto3.client("s3", region_name="us-east-1")
 
 

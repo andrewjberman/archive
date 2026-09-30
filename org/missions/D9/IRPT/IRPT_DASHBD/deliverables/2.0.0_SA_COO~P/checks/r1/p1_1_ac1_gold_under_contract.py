@@ -6,11 +6,11 @@ Reads, at the worktree root:
                                                                    schema_hash = sha256 over "name:type" sorted, joined by "\n")
   org/standards/IRPT_DASHBD_DIM_RETURN_METHOD_CONTRACT.json       (columns incl. tolerance, large_flow_share, plausibility_band,
                                                                    flow_convention, income_basis, fee_basis, day_count)
-  infra/logic/registry/reporting_policies.json                    (must name account_return_daily AND dim_return_method, and
-                                                                   lib.opal_naming must still load and validate it)
+  lib.opal_naming must load and validate the registry. (Issuer amendment 2, 2026-09-30: the gold policy-file half is removed --
+  PRD v0.3 ruling 16, CTO 103361: gold tables need no reporting-policy row.)
 Then, on S3 through lib.opal_naming.address() (never a typed key):
   gold account_return_daily: the FIRST, the LAST and three evenly spaced date partitions among those present must each carry
-      the thread account 0027265115, every contract column with the contract's arrow type name, and a schema hash equal to the
+      the thread account (THREAD_ACCOUNT.json), every contract column with the contract's arrow type name, and a schema hash equal to the
       contract's; the partition count must be >= 250 (the sample's history is 2024-07-09 .. the frontier);
   gold dim_return_method/method_version=1: one row with every method-contract column non-null.
 Pass line: DB-1-AC1 PASS. Base (at the cut): FAIL -- no contract file exists.
@@ -72,10 +72,6 @@ have_method = {c["name"] for c in drm["columns"]}
 if not need_method <= have_method:
     fail("dim_return_method contract lacks columns %s" % sorted(need_method - have_method))
 
-pol = (root / "infra/logic/registry/reporting_policies.json").read_text(encoding="utf-8")
-for t in ("account_return_daily", "dim_return_method"):
-    if t not in pol:
-        fail("reporting_policies.json does not name %s" % t)
 try:
     from lib import opal_naming as on
     on.load_registry()
