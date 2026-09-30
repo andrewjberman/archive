@@ -1,0 +1,79 @@
+DEPLOYED: amgt-resapp-chatter-axis CHATTER_AXIS_SOURCE='legacy' (unchanged by this cell)  LastModified=2026-09-24T05:09:00.000+0000
+SERVED TRENDING (route default date): http=200 axis=TRENDING_CHATTER ranking_status=SERVED state=COMPLETE as_of_date=2026-09-29 requested_as_of=2026-09-30 dated=True generation_id=20260929T100015Z-d09ee37a8f3b row_count=2 coverage_vintage=pool:universe/v1/2026-09-16.json#as_of=2026-09-16
+   rank 1   BA US      key=BA_US_Equity     score=0 raw_chatter_count(as-of day)=0 window_total_count=1 movement_raw_score=0
+   rank 2   HD US      key=HD_US_Equity     score=0 raw_chatter_count(as-of day)=0 window_total_count=1 movement_raw_score=0
+SERVED BREAKOUT (pinned as_of=2026-09-29): http=200 axis=BREAKOUT_CHATTER ranking_status=EMPTY state=EMPTY as_of_date=2026-09-29 requested_as_of=2026-09-29 dated=False generation_id=20260929T100015Z-25147d66b259 row_count=0 coverage_vintage=pool:universe/v1/2026-09-16.json#as_of=2026-09-16
+   (no rows served; ranking_reason: the pointer at BREAKOUT_CHATTER#2026-09-29 / _CURRENT commits EMPTY generation 20260929T100015Z-25147d66b259: a successful ranking with no members -- empty_reason: NO_SIGNAL_IN_WINDOW 189 of 191)
+
+SAME WINDOW AND AS-OF FOR ALL THREE RUNS: as_of=2026-09-29 window=2026-08-31..2026-09-29 (30 days); universe=pool:universe/v1/2026-09-16.json; covered names=191 (names_read=250); write_fn=None (nothing written)
+
+PRODUCT STATES (rows_ranked / state / reason):
+  LEGACY        TRENDING_CHATTER  rows=2  state=COMPLETE reason_code=None candidates=2 excluded={"NO_SIGNAL_IN_WINDOW": 189}  
+  LEGACY        BREAKOUT_CHATTER  rows=0  state=EMPTY   reason_code=None candidates=0 excluded={"BELOW_MIN_ABSOLUTE_JUMP": 2, "NO_SIGNAL_IN_WINDOW": 189}  
+  GOLD-AS-RUN   TRENDING_CHATTER  rows=0  state=FAILED  reason_code=INCOMPLETE_GOLD_INPUT candidates=0 excluded={"INCOMPLETE_GOLD_INPUT": 36, "NO_SIGNAL_IN_WINDOW": 155}  HOLD: incomplete gold input; RESOLVED 0 of 191 security windows (30 days each); prior generation and its original vintage retained
+  GOLD-AS-RUN   BREAKOUT_CHATTER  rows=0  state=FAILED  reason_code=INCOMPLETE_GOLD_INPUT candidates=0 excluded={"INCOMPLETE_GOLD_INPUT": 36, "NO_SIGNAL_IN_WINDOW": 155}  HOLD: incomplete gold input; RESOLVED 0 of 191 security windows (30 days each); prior generation and its original vintage retained
+  GOLD-NO-HOLD  TRENDING_CHATTER  rows=10 state=COMPLETE reason_code=None candidates=36 excluded={"NO_SIGNAL_IN_WINDOW": 155}  
+  GOLD-NO-HOLD  BREAKOUT_CHATTER  rows=0  state=EMPTY   reason_code=None candidates=0 excluded={"BELOW_MIN_ABSOLUTE_JUMP": 36, "NO_SIGNAL_IN_WINDOW": 155}  
+  GOLD-AS-RUN input_coverage: RESOLVED 0 of 191 security windows (30 days each); unresolved names: 191; read-state totals over the run: {"denied": 0, "malformed": 0, "missing_body": 0, "no_coverage": 5675, "partial": 55}
+  GOLD-AS-RUN per-name read-state shapes (191 names): {'{"denied": 0, "malformed": 0, "missing_body": 0, "no_coverage": 30, "partial": 0}': 188, '{"denied": 0, "malformed": 0, "missing_body": 0, "no_coverage": 29, "partial": 1}': 1, '{"denied": 0, "malformed": 0, "missing_body": 0, "no_coverage": 3, "partial": 27}': 2}
+  guard code: lib/research/metrics/chatter_axis.py:628 ; lib/research/metrics/chatter_axis.py:664
+  => under the producer's own gold branch NEITHER movement publishes: FAILED / INCOMPLETE_GOLD_INPUT, zero rows, no pointer for the date (a _FAILED marker only); by CODE READING (not exercised: no write is permitted) the reader then serves the nearest earlier COMPLETE generation, dated (lib/research/api/scoped_amgt.py:562, lookback 14 days).
+  CHECK LEGACY TRENDING: full-order top-2 equals the producer's own rows: True (2 rows)
+  CHECK LEGACY BREAKOUT: full-order top-0 equals the producer's own rows: True (0 rows)
+  CHECK GOLD-NO-HOLD TRENDING: full-order top-10 equals the producer's own rows: True (10 rows)
+  CHECK GOLD-NO-HOLD BREAKOUT: full-order top-0 equals the producer's own rows: True (0 rows)
+
+=== SIDE BY SIDE: TRENDING x CHATTER (score = as-of-day value; TOP_N=10 rows are what would be written) ===
+  row counts written: SERVED-legacy=2  LEGACY(in memory)=2  GOLD-AS-RUN=0  GOLD-NO-HOLD(counterfactual)=10
+  rank | LEGACY (key score window_articles) | GOLD-AS-RUN    | GOLD-NO-HOLD (key score window_mention_score)             
+  1    | BA_US_Equity 0.0 1                 | (no rows: HOLD) | 992_HK_Equity 0.0 1.6                                     
+  2    | HD_US_Equity 0.0 1                 | (no rows: HOLD) | AAPL_US_Equity 0.0 0.4                                    
+  3    | -                                  | (no rows: HOLD) | ABBV_US_Equity 0.0 0.3                                    
+  4    | -                                  | (no rows: HOLD) | ABT_US_Equity 0.0 0.3                                     
+  5    | -                                  | (no rows: HOLD) | AMZN_US_Equity 0.0 8.4                                    
+  6    | -                                  | (no rows: HOLD) | ANET_US_Equity 0.0 0.3                                    
+  7    | -                                  | (no rows: HOLD) | AVGO_US_Equity 0.0 0.3                                    
+  8    | -                                  | (no rows: HOLD) | BAC_US_Equity 0.0 0.6                                     
+  9    | -                                  | (no rows: HOLD) | BA_US_Equity 0.0 12.5                                     
+  10   | -                                  | (no rows: HOLD) | COST_US_Equity 0.0 6.7                                    
+
+=== SIDE BY SIDE: BREAKOUT x CHATTER ===
+  LEGACY        rows=0 state=EMPTY candidates=0 excluded={"BELOW_MIN_ABSOLUTE_JUMP": 2, "NO_SIGNAL_IN_WINDOW": 189} empty_reason={"count": 189, "denominator": 191, "reason": "NO_SIGNAL_IN_WINDOW"}
+  GOLD-AS-RUN   rows=0 state=FAILED candidates=0 excluded={"INCOMPLETE_GOLD_INPUT": 36, "NO_SIGNAL_IN_WINDOW": 155} empty_reason=null
+  GOLD-NO-HOLD  rows=0 state=EMPTY candidates=0 excluded={"BELOW_MIN_ABSOLUTE_JUMP": 36, "NO_SIGNAL_IN_WINDOW": 155} empty_reason={"count": 155, "denominator": 191, "reason": "NO_SIGNAL_IN_WINDOW"}
+  SERVED BREAKOUT at as_of=2026-09-29: ranking_status=EMPTY state=EMPTY row_count=0
+
+=== EVERY COMPANY WHOSE RANK MOVES (TRENDING x CHATTER) ===
+  old = LEGACY rank in the written top-10 (- = not in the list); new-as-run = GOLD-AS-RUN (HOLD: no list);
+  new-no-hold = GOLD-NO-HOLD written top-10 rank, with the full-order position in [] where beyond TOP_N.
+  company          old      new-as-run new-no-hold            moved
+  BA_US_Equity     1        -(HOLD)    9                      MOVES
+  HD_US_Equity     2        -(HOLD)    -[17]                  MOVES
+  992_HK_Equity    -        -(HOLD)    1                      MOVES
+  AAPL_US_Equity   -        -(HOLD)    2                      MOVES
+  ABBV_US_Equity   -        -(HOLD)    3                      MOVES
+  ABT_US_Equity    -        -(HOLD)    4                      MOVES
+  AMZN_US_Equity   -        -(HOLD)    5                      MOVES
+  ANET_US_Equity   -        -(HOLD)    6                      MOVES
+  AVGO_US_Equity   -        -(HOLD)    7                      MOVES
+  BAC_US_Equity    -        -(HOLD)    8                      MOVES
+  COST_US_Equity   -        -(HOLD)    10                     MOVES
+  gold-no-hold top-10 members not in legacy: ['992_HK_Equity', 'AAPL_US_Equity', 'ABBV_US_Equity', 'ABT_US_Equity', 'AMZN_US_Equity', 'ANET_US_Equity', 'AVGO_US_Equity', 'BAC_US_Equity', 'COST_US_Equity']
+  legacy members not in gold-no-hold top-10: ['HD_US_Equity'] (full-order position under gold-no-hold: {'HD_US_Equity': 17})
+
+AS-OF-DAY MEASURE (TRENDING's score): names with an as-of-day value > 0 -> LEGACY 0 of 191, GOLD 0 of 191. Where that is 0 the TRENDING order is decided by the key tie-break alone (chatter_axis.py:503), under EITHER source.
+  gold chatter_daily on 2026-09-29: 191 rows; data_status {'DENIED': 191}; max day in the table 2026-09-29
+
+=== PASSING-MENTION TEST ===
+  Rule: company X 'outranks a subject company' under LEGACY when its legacy 30-day article count is strictly greater than company Y's, and it does NOT outrank Y under GOLD when Y's graded 30-day mention_score is strictly greater than X's. X is listed with every such Y. Measure = the 30-day window total of each source (the as-of-day measure is all-zero under both sources, see above, so it cannot separate anyone).
+  denominators: 191 covered names; 2 named by LEGACY (window article count > 0); 36 with a GOLD window score > 0; the test compares each legacy-named X against all 191 covered names.
+  X=BA_US_Equity   legacy_articles=1 gold_score=12.5 gold_tiers(A/B/C/D)=8/5/5/0 articles=18 mentions=129 -> outranks 0 company(ies) under legacy that outrank it under gold
+  X=HD_US_Equity   legacy_articles=1 gold_score=0.7 gold_tiers(A/B/C/D)=0/0/2/1 articles=3 mentions=7 -> outranks 7 company(ies) under legacy that outrank it under gold: AMZN_US_Equity(8.4), COST_US_Equity(6.7), DELL_US_Equity(2.3), 992_HK_Equity(1.6), HSY_US_Equity(1), KO_US_Equity(1), NVDA_US_Equity(0.9)
+  => PASSING-MENTION LIST (named by legacy, outranks subject companies under legacy but not under gold): ['HD_US_Equity']
+  => named by legacy and NOT listed: ['BA_US_Equity']
+  rank of each legacy-named company by GOLD window score (competition rank over 36 scored names): {'BA_US_Equity': 1, 'HD_US_Equity': 9}
+  NOTE the legacy list cannot show the effect on its own: it names 2 companies, so TOP_N=10 has no one to displace; the effect appears only against the 34 companies gold scores that legacy never names.
+
+DENOMINATORS: covered=191 legacy_signal=2 gold_signal=36 legacy_rows(T/B)=2/0 gold_as_run_rows=0 gold_no_hold_rows(T/B)=10/0 served_trending_rows=2
+
+wrote n3_ac2_result.json
