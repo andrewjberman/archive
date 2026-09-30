@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ac-4.the-store-docstring",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5d3052d8d730a926a4a28c711d2d6a30e973dbd4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "cb37037d95f182f33dd898350683099bd9295741",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ac-4.the-store-docstring.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~192",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/fetch.py",
+      "kind": "script",
+      "commit_or_etag": "f044cdd2404c655e0b485da32887101c646ad12d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: pool_key builds its path segment with crosswalk.slash_safe_key(security_key); docstring notes the encoding. Callers analyze.py:1345/:1470/:1636 and filings/batch.py:478 inherit it unchanged (none builds a filings/v1 path itself, so none was touched). No S3 write, no deploy.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "f044cdd2404c655e0b485da32887101c646ad12d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, docstring text only (_read_filing_source_object): the false 'unavailable in the deployed package' clause replaced; states the reader does not import harvest.store/opal_naming (import surface), and that harvest.store IS packaged and IS imported on the /thesis path (corpus.dossier -> harvest.store).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_pool_key_slash_safe.py",
+      "kind": "test",
+      "commit_or_etag": "f044cdd2404c655e0b485da32887101c646ad12d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 3 tests -- BP/_LN_Equity encodes to BP-SLASH-_LN_Equity, UNRESOLVED-SOURCE form encoded, slash-free AMD_US_Equity unchanged.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(a) BP-SLASH-/NG-SLASH- keys; (b) AMD_US_Equity unchanged; (c) the read path requests filings/v1/BP-SLASH-_LN_Equity/...; EVERY FILINGS/V1 KEY GOES THROUGH SLASH_SAFE_KEY: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round53/checks/ac_4_fetch.py; echo \"exit=$?\"",
+      "output_evidence": "(a) filings/v1/BP-SLASH-_LN_Equity/000000000000000001.analysis.json | filings/v1/NG-SLASH-_LN_Equity/UNRESOLVED-SOURCE.source.json\n(b) filings/v1/AMD_US_Equity/000000000000000001.analysis.json\n(c) filings/v1 keys the read path requested: ['filings/v1/BP-SLASH-_LN_Equity/000000000000000001.analysis.json']\nEVERY FILINGS/V1 KEY GOES THROUGH SLASH_SAFE_KEY: YES\nexit=0",
+      "denominator": "3 of 3 sub-checks (a,b,c) true; 1 filings/v1 key requested by the reverify read path, 1 of 1 encoded",
+      "status": "PASS",
+      "expect": "BP-SLASH-.*AMD_US_Equity.*BP-SLASH-_LN_Equity.*SLASH_SAFE_KEY: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "claims that store is unavailable in the deployed package: 0; dynamic: True; THE ADAPTER'S TEXT STATES HARVEST.STORE IS PACKAGED: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round53/checks/ac_4_store.py; echo \"exit=$?\"",
+      "output_evidence": "claims that store is unavailable in the deployed package: 0 []\ndynamic: harvest.store loaded on the /thesis path: True\nTHE ADAPTER'S TEXT STATES HARVEST.STORE IS PACKAGED: YES\nexit=0",
+      "denominator": "0 false claims of 1 module file scanned; dynamic probe True (1 of 1)",
+      "status": "PASS",
+      "expect": "unavailable in the deployed package: 0.*True.*PACKAGED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "N passed and 0 failed, N > 127 (plus your new tests) -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest lib/research/filings/tests -q; echo \"exit=$?\"",
+      "output_evidence": "134 passed in 28.35s\nexit=0",
+      "denominator": "134 passed, 0 failed of 134 collected; N=134 > 127 (the 3 new tests are in test_pool_key_slash_safe.py)",
+      "status": "PASS",
+      "expect": "\\d+ passed.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted discriminator: replace fetch.pool_key with the pre-change raw formula (POOL_PREFIX + raw security_key) and run ac_4_fetch main().",
+      "expected": "AC1 prints NO and returns 1 (raw BP/_LN_Equity path).",
+      "observed": "With pool_key monkeypatched to the raw formula: (a) filings/v1/BP/_LN_Equity/..., (c) read path requested filings/v1/BP/_LN_Equity/...analysis.json; 'EVERY FILINGS/V1 KEY GOES THROUGH SLASH_SAFE_KEY: NO'; main rc 1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ac_4_fetch.py run twice on the committed tree",
+      "observed": "Both runs printed EVERY FILINGS/V1 KEY GOES THROUGH SLASH_SAFE_KEY: YES",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "analyze.py and batch.py edits",
+      "reason": "None of the four callers builds a filings/v1 path itself; each inherits pool_key, so per the order no caller was changed."
+    },
+    {
+      "item": "Any S3 write, live reverify, deploy",
+      "reason": "Out of BOUNDS by the order."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~192/none (no separate session log; evidence is in this instance and the commit)",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~192 <0.9.0_WK_AMGT_RESAPP~192@opal.agent>\" -F .scratch/msg1.txt -- lib/research/filings/fetch.py lib/research/api/scoped_amgt.py lib/research/filings/tests/test_pool_key_slash_safe.py",
+      "result": "commit f044cdd2404c655e0b485da32887101c646ad12d"
+    }
+  ]
+}
