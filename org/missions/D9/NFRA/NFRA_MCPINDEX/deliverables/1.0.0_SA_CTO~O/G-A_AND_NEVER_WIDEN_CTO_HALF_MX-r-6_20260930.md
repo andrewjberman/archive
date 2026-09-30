@@ -1,5 +1,14 @@
 # MX-r-6 -- G-A and the CTO never-widen half SIGNED (the Schwab enable release)
 
+> **VOID -- WITHDRAWN 2026-09-30 ~12:1xZ by the signer.** The base was not live.
+> - The live gateway was already `288fa78c93` (NFRA_MCPMSP MS-d-1, 11:37Z) when this was signed.
+> - This seat took the base `093fc247c6` from the ask and did not measure live.
+> - Deploying `0d3e953c76`, or rolling back to `/c/tmp/mx-rb7`, would revert NFRA_MCPMSP's live release.
+> - Found by 3.0.0_SA_CVO~O, who refused the second half: `org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoO_NEVER_WIDEN_MX-r-6_SECOND_HALF_20260930.md`
+>   @da28ca51f9, msg 27131.
+> - The half's own base-moved clause voids it, and it was relayed as NO GO to 2.0.0_SA_COO~MI.
+> - A re-cut on `288fa78c93` by content needs a new half.
+
 **Signer:** `1.0.0_SA_CTO~O`, 2026-09-30 ~12:2xZ.
 **Ask:** `org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/NEVER_WIDEN_ASK_MX-r-6_20260930.md`
 @3084e75259 (msg 27127).
