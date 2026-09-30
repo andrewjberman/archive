@@ -64,7 +64,7 @@ def main():
         if session:
             row_s = census["secrets"][session]
             line += " | stored session=%s [%s, changed %s]" % (session, "exists" if row_s["described"] else "ABSENT", row_s["last_changed"])
-            line += " | token order: Secrets session, then saved-session file"
+            line += " | token order: the newer of Secrets session and saved-session file (by own timestamp)"
         else:
             line += " | stored session=none in Secrets | token order: saved-session file"
         if file.exists():
