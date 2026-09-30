@@ -62,6 +62,8 @@ mbp = load("mbp_m3", os.path.join(RES, "model_block_pull.py"))
 mbp._FIELD_MAP_PATH = tmp
 mbp._FIELD_MAP_CACHE = None
 
+# CRPS-aa-4: M3_KEYS (comma list of STORE keys, e.g. BP-SLASH-_LN_Equity) measures only those keys, the EXCLUDED ones included.
+ONLY = set(filter(None, os.environ.get("M3_KEYS", "").split(",")))
 s3 = boto3.client("s3")
 latest = {}
 for pg in s3.get_paginator("list_objects_v2").paginate(Bucket=B, Prefix="derived/model_block/"):
@@ -69,7 +71,10 @@ for pg in s3.get_paginator("list_objects_v2").paginate(Bucket=B, Prefix="derived
         rest = o["Key"][len("derived/model_block/"):]
         if rest.endswith("/model_block.json"):
             k = rest.rsplit("/", 2)[0]
-            if "/" in k or "-SLASH-" in k:
+            if ONLY:
+                if k not in ONLY:
+                    continue
+            elif "/" in k or "-SLASH-" in k:
                 continue
             if k not in latest or o["Key"] > latest[k]:
                 latest[k] = o["Key"]
