@@ -40,10 +40,14 @@ for page in s3.get_paginator("list_objects_v2").paginate(Bucket=B, Prefix="deriv
             key, stamp = rest.rsplit("/", 2)[0], rest.rsplit("/", 2)[1]
             if key not in latest or stamp > latest[key][0]:
                 latest[key] = (stamp, o["Key"])
-excluded = sorted(k for k in latest if "/" in k)
-keys = sorted(k for k in latest if "/" not in k)
+# AMENDMENT 1 (row Z-W1-S21): RESAPP round-53 ac-3 copies the slash keys to their encoded form (`-SLASH-`); an identity is
+# EXCLUDED in either form and counted ONCE (the encoded segment decodes to the same identity).
+excluded = sorted({k.replace("-SLASH-", "/") for k in latest if "/" in k or "-SLASH-" in k})
+keys = sorted(k for k in latest if "/" not in k and "-SLASH-" not in k)
 blocks = [json.loads(s3.get_object(Bucket=B, Key=latest[k][1])["Body"].read()) for k in keys]
-measured = sum(1 for b in blocks for f in b.get("figures", []) if str(f.get("unit", "")).startswith("UNRESOLVED"))
+# AMENDMENT 2 (row Z-W3-S11): both sides count the SAME population -- a figure whose unit is UNRESOLVED or the not-yet-built
+# `SEE field_map` pointer is not measured, served or projected.
+measured = sum(1 for b in blocks for f in b.get("figures", []) if str(f.get("unit", "")).startswith(("UNRESOLVED", "SEE field_map")))
 
 d = tempfile.mkdtemp(prefix="z1_")
 tmp = Path(d) / "field_map.json"
