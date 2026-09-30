@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""Seed `etf-classifications` with the CONSTITUENT securities held inside Opal's own ETFs.
+
+WHY THIS EXISTS (Andrew-direct 2026-08-25): "I want an agent to run through all the securities
+from the ETFs and make sure there is an etf-classification row for them that has all the same info
+with the notable exception of making sure it is properly capitalized (no all caps) and also does
+not have any weird naming conventions"; and, on the home, "Pretty sure it is etf-classifications
+that is the filter layer ... as we just canonized that function".
+
+THE UNIVERSE THIS SEEDS IS DIFFERENT FROM `seed-etf-classifications.py`, AND THAT IS THE POINT.
+That seeder writes the MODELS universe -- the ~116 ETFs Opal's model portfolios hold. This one
+writes the UNDERLYING SECURITIES of Opal's own four ETFs (DIVZ / IDVZ / PFDE / PFOE). Measured
+2026-08-25: the two sets intersect on ZERO tickers. One table, two disjoint populations, one
+schema -- which is what makes `ETFClassifier` a single filter layer rather than two.
+
+WHY THE UNIVERSE IS READ FROM DATA AND THE NAMES ARE A LITERAL MAP:
+A model's ETF list is stable, so `seed-etf-classifications.py` can freeze it as literals. A fund's
+CONSTITUENTS change with every rebalance -- a frozen 170-ticker list would be stale the next
+trading day and would quietly stop covering new holdings, which is exactly how VUG shipped a
+placeholder name (it entered the models AFTER the 2026-03-25 sweep). So the universe is read from
+the served artifact, and only the CORRECTIONS are literal.
+
+⛔ THIS SEEDER NEVER FALLS BACK TO THE TICKER, AND THAT IS THE LOAD-BEARING DIFFERENCE.
+`seed-etf-classifications.py:62` writes `name = ETF_NAME_OVERRIDES.get(ticker, ticker)`. A miss
+there writes the literal string "SALXX" into the name column and PRESENTS AS SUCCESS -- the VUG
+defect, where the registry carried `name='VUG'` and the portal rendered junk. Here a ticker with
+no correction keeps THE ISSUER'S OWN STRING, which is already correct for 145 of 170.
+
+⛔ AND IT IS ATTRIBUTE-PRESERVING BY DEFAULT. An existing row's `name` is NOT overwritten: a human
+correction in the table outranks anything this script derives. `--force-names` overrides that and
+says so in `updated_by`. Same discipline as the VUG remediation's targeted update.
+
+Usage:
+    python seed-etf-constituents.py --dry-run          # show what would change, write nothing
+    python seed-etf-constituents.py                    # create missing rows only
+    python seed-etf-constituents.py --force-names      # ALSO rewrite names on existing rows
+
+No non-ASCII (CLAUDE.md code-quality rule).
+"""
+from __future__ import annotations
+
+import argparse
+import json
+from datetime import datetime, timezone
+
+import boto3
+
+TABLE = "etf-classifications"
+SERVED_BUCKET = "opal-data-portal-v2"
+SERVED_KEY = "platinum/etfs/positioning_data.json"
+
+# ---------------------------------------------------------------------------
+# NAME CORRECTIONS -- the literal half.
+#
+# CENSUS THAT PRODUCED THIS (served artifact, 2026-08-25): 189 holding rows, 170 DISTINCT
+# tickers, of which 145 were ALREADY CLEAN and are deliberately absent from this map. A map
+# cannot damage what it does not name.
+#
+# THERE IS NO CLEAN UPSTREAM TO PREFER -- MEASURED, not assumed. Bloomberg's own NAME field is
+# WORSE on every defective ticker: all-caps with registration suffixes ('KIMBERLY-CLARK DE
+# MEXICO-ADR', 'GRUPO AEROPORTUARIO CEN-ADR', 'HUNT (JB) TRANSPRT SVCS INC'), and `nan` outright
+# for ICT. That is why these strings are asserted here rather than sourced.
+# ---------------------------------------------------------------------------
+
+# ISSUER ALL-CAPS. Six names are all-caps; only these three are DEFECTS.
+# BP PLC / GSK PLC / MPLX LP are deliberately ABSENT: they are ACRONYM COMPANIES where the
+# capitals ARE the name (Z-S48, Andrew's product call). Title-casing them would be the damage.
+NAME_CORRECTIONS: dict[str, str] = {
+    "JPM": "JPMorgan Chase & Co.",
+    "MRVL": "Marvell Technology Inc",
+    "VZ": "Verizon Communications Inc",
+
+    # ISSUER TRUNCATION AT EXACTLY 30 CHARS. Nine names are 30 chars; only these four are cut.
+    # AEP / BBSEY / BIPC / JBHT / NU are COMPLETE names that happen to land on 30 -- including
+    # them would have been the length heuristic reporting its own threshold as a finding.
+    "AIG": "American International Group Inc",
+    "ICT": "International Container Terminal Services Inc",
+    "KCDMY": "Kimberly-Clark de Mexico SAB de CV",
+    "OMAB": "Grupo Aeroportuario del Centro Norte SAB de CV",
+
+    # TRAILING JURISDICTION / STATE SUFFIX -- vendor disambiguators, not part of the name.
+    # Explicit rows rather than a regex: the suffix set is OPEN (a US state here, a country
+    # there), and a pattern over an open set eventually eats a real name.
+    "MAR": "Marriott International Inc",
+    "NU": "NU Holdings Ltd",
+
+    # MONEY-MARKET / CASH LINES. SALXX is Andrew's own string, verbatim (2026-08-25 ~07:3xZ).
+    # FXFXX drops a FABRICATED maturity date -- a money-market fund has none.
+    "SALXX": "State Street U.S. Government MMKT",
+    "FXFXX": "First American Treasury Obligations Fund",
+    # THE ONE CANONICAL CASH LINE, identical in every book (Andrew-direct 2026-08-25: "it should
+    # always be managed the same way: Fixed Income for Asset Class, Ultra Short Duration for Sub
+    # Asset, CASH for ticker, and Cash & Cash Equivalents for Name"). The producer normalises BOTH
+    # the derived residual row and the issuer sentinel onto this ticker, so CASH&OTHER no longer
+    # reaches the served artifact and needs no row here.
+    "CASH": "Cash & Cash Equivalents",
+}
+
+# THE ONE CORRECTION THAT IS A RULE, NOT A ROW.
+# Vendor feeds render a leading definite article as a TRAILING "/The" -- "Boeing Co/The".
+# Measured: 10 of 170 distinct tickers, same construction every time, no counter-example.
+#
+# WHY A RULE HERE WHEN TITLE-CASING WAS REJECTED: title-casing is LOSSY and guesses at domain
+# acronyms (it turns MMKT into "Mmkt"). This moves a token the feed itself delimited with "/",
+# and "X/The" -> "The X" is exact and reversible. A rule is right when the transform is total on
+# a CLOSED shape; that holds here and did not hold there.
+_TRAILING_THE = "/The"
+
+
+def normalise_trailing_article(name: str) -> str:
+    """'Boeing Co/The' -> 'The Boeing Co'. Anything else returned UNCHANGED."""
+    if not isinstance(name, str) or not name.endswith(_TRAILING_THE):
+        return name
+    stem = name[: -len(_TRAILING_THE)].strip()
+    return ("The " + stem) if stem else name
+
+
+def clean_name(ticker: str, issuer_name: str | None) -> str | None:
+    """Correction first, then the trailing-article rule, then the issuer's own string.
+
+    NEVER the ticker. A security we have nothing better for keeps what the issuer called it.
+    """
+    fixed = NAME_CORRECTIONS.get((ticker or "").strip().upper())
+    if fixed:
+        return fixed
+    if issuer_name is None:
+        return None
+    return normalise_trailing_article(issuer_name)
+
+
+# gold emits display-cased asset classes; this table's column is lowercase snake. Cash maps to
+# fixed_income per the table's own stated methodology (etf_classification.py header: "Cash
+# equivalents (T-Bills, Money Market) are classified as 'fixed_income'").
+ASSET_CLASS_MAP = {
+    "Fixed Income": "fixed_income",
+    "Equity": "equity",
+    "Cash": "fixed_income",
+    "Hedge": "hedge",
+}
+
+
+def load_constituents() -> dict[str, dict]:
+    """Every distinct constituent in the served ETF artifact, with its gold classification."""
+    body = boto3.client("s3").get_object(Bucket=SERVED_BUCKET, Key=SERVED_KEY)["Body"].read()
+    doc = json.loads(body.decode("utf-8"))
+    out: dict[str, dict] = {}
+    for book in doc.get("portfolios", {}).values():
+        for h in book.get("holdings", []) or []:
+            t = str(h.get("ticker") or "").strip().upper()
+            if t and t not in out:
+                out[t] = {
+                    "name": h.get("name"),
+                    "asset_class": h.get("asset_class"),
+                    "sub_asset_class": h.get("sub_asset_class"),
+                }
+    return out
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Seed ETF CONSTITUENT rows into etf-classifications")
+    ap.add_argument("--region", default="us-east-1")
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--force-names", action="store_true",
+                    help="rewrite name on EXISTING rows too (default: preserve)")
+    a = ap.parse_args()
+
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    table = boto3.resource("dynamodb", region_name=a.region).Table(TABLE)
+
+    constituents = load_constituents()
+    print("CONSTITUENTS in the served artifact: %d distinct ticker(s)" % len(constituents))
+
+    existing = {}
+    scan_kw: dict = {}
+    while True:
+        page = table.scan(**scan_kw)
+        for it in page.get("Items", []):
+            existing[str(it.get("ticker", "")).strip().upper()] = it
+        if not page.get("LastEvaluatedKey"):
+            break
+        scan_kw["ExclusiveStartKey"] = page["LastEvaluatedKey"]
+    print("EXISTING rows in %s: %d (fully paginated)" % (TABLE, len(existing)))
+
+    creates, updates, skips = [], [], []
+    for t, c in sorted(constituents.items()):
+        name = clean_name(t, c["name"])
+        row = {
+            "ticker": t,
+            "name": name,
+            "asset_class": ASSET_CLASS_MAP.get(c["asset_class"], "unknown"),
+            # GICS sector for a constituent equity, per Andrew's ruling 2026-08-25. `sector` is
+            # left unset for constituents: its existing values are ETF style buckets
+            # ('US Growth', 'US Dividend') and writing GICS there would put two vocabularies on
+            # one axis.
+            "sub_asset_class": c["sub_asset_class"] or "",
+            # An individual security has no management style. 'unknown' is an EXISTING member of
+            # this column (18 rows), so this adds no vocabulary.
+            "management_style": "unknown",
+            "last_updated": stamp,
+            "updated_by": "seed-etf-constituents (1.0.0_SA_CTO~Z, Andrew-direct 2026-08-25)",
+        }
+        if t not in existing:
+            creates.append(row)
+        elif a.force_names:
+            updates.append(row)
+        else:
+            skips.append((t, existing[t].get("name"), name))
+
+    print()
+    print("PLAN: %d create / %d update / %d preserve-existing" % (len(creates), len(updates), len(skips)))
+    for r in creates[:200]:
+        print("   CREATE %-12s %-46r %s / %s" % (r["ticker"], r["name"], r["asset_class"], r["sub_asset_class"]))
+    for t, was, now in skips:
+        flag = "" if was == now else "   <-- table differs from derived; --force-names to change"
+        print("   KEEP   %-12s table=%r derived=%r%s" % (t, was, now, flag))
+
+    if a.dry_run:
+        print("\n[DRY RUN] nothing written.")
+        return 0
+
+    wrote = 0
+    with table.batch_writer() as batch:
+        for r in creates + updates:
+            # DROP EMPTY VALUES, NOT JUST None. `sub_asset_class` backs a GSI
+            # (sub-asset-class-index) and DynamoDB REFUSES an empty string for an indexed key
+            # attribute -- measured: ValidationException on the first real write. An ABSENT
+            # attribute is valid; the item simply does not appear in that index, which is the
+            # correct outcome for a security we could not classify. Writing "" to make the
+            # shape uniform is what the table itself rejects.
+            batch.put_item(Item={k: v for k, v in r.items() if v is not None and v != ""})
+            wrote += 1
+    print("\nWROTE %d item(s) to %s" % (wrote, TABLE))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

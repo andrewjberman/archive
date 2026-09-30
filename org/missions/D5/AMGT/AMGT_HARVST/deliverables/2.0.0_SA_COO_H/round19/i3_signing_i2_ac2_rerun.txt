@@ -1,0 +1,38 @@
+== HVST-i-2 AC2: publishers_covered_codes, IN MEMORY, over today's inputs ==
+securities input: org\missions\D5\AMGT\AMGT_HARVST\deliverables\0.9.0_WK_AMGT_HARVST~46\securities.universe.json (191 securities)
+SERVED newest chatter_daily part: amgt/harvest/gold/chatter_daily/date=2026-09-29/part-20260929T192649Z.parquet (parts=7, rows=51952, as_of=2026-09-29)
+served part has the column publishers_covered_codes: False
+inputs: silver articles=120, listing_hit rows=60
+base code (7668249a78) schema columns=21; new code schema columns=22; extra column(s): ['publishers_covered_codes']
+
+== (a) every PRE-EXISTING column, served vs in-memory rebuild ==
+denominator: served rows=51952 (distinct keys 51952); rebuilt rows=51952 (distinct keys 51952); base-code rebuilt rows=51952; pre-existing columns=21
+rows where the NEW code differs from the BASE code on a pre-existing column (same inputs): 0 of 51952
+(a) rows with any pre-existing-column difference: 0 of 51952 served rows -> DRIFT=0 NON-DRIFT=0
+
+== (b) publishers_covered_codes ==
+rows=51952; ENABLED_PUBLISHERS=['barrons', 'bbg', 'ft', 'sa', 'wsj']
+row counts per data_status: {'DENIED': 51803, 'PARTIAL': 149}
+violations: len(codes)!=publishers_covered=0; codes out of ENABLED order=0; PARTIAL naming 0 codes=0; DENIED naming >0 codes=0; COMPLETE not naming all=0
+securities with a PARTIAL day: 3
+  992_HK_Equity                partial_days=1    codes={'wsj': 1}
+  ASML_NA_Equity               partial_days=74   codes={'sa': 74}
+  ASML_US_Equity               partial_days=74   codes={'sa': 74}
+in-memory parquet round trip (no S3): 51952 rows equal: True; column type: list<item: string>
+ASML: {'ASML_NA_Equity': (74, {'sa': 74}), 'ASML_US_Equity': (74, {'sa': 74})}
+
+== (c) timeline_api bodies over the in-memory rows (loaders stubbed) ==
+
+ASML_NA_Equity: series entries=272 per class={'DENIED': 198, 'PARTIAL': 74}; every entry carries both fields: True
+  /timeline series entry (PARTIAL): {'date': '2026-07-15', 'mention_score': 0.0, 'articles_total': 0, 'tier_a': 0, 'tier_b': 0, 'tier_c': 0, 'tier_d': 0, 'mention_count_total': 0, 'publishers_distinct': 0, 'trailing_7d_sum': 0.0, 'trailing_30d_sum': 0.0, 'cumulative_ytd': 1.2, 'data_status': 'PARTIAL', 'publishers_covered': 1, 'publishers_covered_codes': ['sa'], 'breakout_ratio': None, 'z_score': 0.0}
+  timeline_day body      (PARTIAL): {'security_key': 'ASML_NA_Equity', 'date': '2026-07-15', 'data_status': 'PARTIAL', 'publishers_covered': 1, 'publishers_covered_codes': ['sa'], 'articles': []}
+  /timeline series entry (DENIED): {'date': '2026-01-01', 'mention_score': 0.0, 'articles_total': 0, 'tier_a': 0, 'tier_b': 0, 'tier_c': 0, 'tier_d': 0, 'mention_count_total': 0, 'publishers_distinct': 0, 'trailing_7d_sum': 0.0, 'trailing_30d_sum': 0.0, 'cumulative_ytd': 0.0, 'data_status': 'DENIED', 'publishers_covered': 0, 'publishers_covered_codes': [], 'breakout_ratio': None, 'z_score': None}
+  timeline_day body      (DENIED): {'security_key': 'ASML_NA_Equity', 'date': '2026-01-01', 'data_status': 'DENIED', 'publishers_covered': 0, 'publishers_covered_codes': [], 'articles': []}
+
+FDX_US_Equity: series entries=272 per class={'DENIED': 272}; every entry carries both fields: True
+  FDX_US_Equity: no PARTIAL entry for this security
+  /timeline series entry (DENIED): {'date': '2026-01-01', 'mention_score': 0.0, 'articles_total': 0, 'tier_a': 0, 'tier_b': 0, 'tier_c': 0, 'tier_d': 0, 'mention_count_total': 0, 'publishers_distinct': 0, 'trailing_7d_sum': 0.0, 'trailing_30d_sum': 0.0, 'cumulative_ytd': 0.0, 'data_status': 'DENIED', 'publishers_covered': 0, 'publishers_covered_codes': [], 'breakout_ratio': None, 'z_score': None}
+  timeline_day body      (DENIED): {'security_key': 'FDX_US_Equity', 'date': '2026-01-01', 'data_status': 'DENIED', 'publishers_covered': 0, 'publishers_covered_codes': [], 'articles': []}
+
+problems: 0
+AC2 RESULT: PASS

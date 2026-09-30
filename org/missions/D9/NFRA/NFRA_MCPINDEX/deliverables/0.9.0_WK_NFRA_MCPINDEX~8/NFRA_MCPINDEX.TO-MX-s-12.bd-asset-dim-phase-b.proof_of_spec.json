@@ -1,0 +1,175 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-12",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "f382d1848c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-12.bd-asset-dim-phase-b.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ssm/opal-bd-asset-dim-download.json",
+      "kind": "config_data",
+      "commit_or_etag": "0ff972bc38",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Published as SSM document opal-bd-asset-dim-download version 4 (Hash 294a7036...ae95e). Repo file cmp byte-equal to git show 0ff972bc38. update-document --document-version $LATEST created v4 (Hash == file sha256); update-document-default-version 4. G1 prior DefaultVersion read live = 3 (rollback = update-document-default-version 3). get-document (DEFAULT) content equals the file as parsed JSON; carries MERGE_RC=92 refusal x1 and build_bd_assets_dim.py --union-bronze x1. TRIGGER FACT: the trigger Lambda invokes the document at $LATEST, not DEFAULT; the acceptance run's DocumentVersion reads $LATEST. describe-document now reads DefaultVersion=4 AND LatestVersion=4, so v4 is both; DEFAULT alone would NOT have been sufficient had $LATEST differed from v4.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/bd-pipeline/eventbridge.tf",
+      "kind": "terraform",
+      "commit_or_etag": "0db7e2edef",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "eventbridge.tf section 1d and lambdas.tf module fees_trigger removed (lambdas.tf same commit). Plan graded before apply and again after the issuer disarmed row Z-W8-S1: exactly 'Plan: 0 to add, 0 to change, 5 to destroy' (bd_fees_pipeline rule, its target, eventbridge_fees permission, fees_trigger log group + lambda); 0 mentions of aws_instance, bd-49f-fees-runner, silver-merge, asset-dim. safe-apply.sh: 'Apply complete! Resources: 0 added, 0 changed, 5 destroyed.' rc 0. Post-apply terraform plan -detailed-exitcode: no differences, rc 0. events describe-rule bd-fees-pipeline-trigger: does not exist; bd-49f-fees-session-daily still ENABLED cron(20 22 ? * MON-FRI *); bd-49f-fees-runner Active.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "0db7e2edef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same commit git rm of infra/aws/lambda/bd-pipeline/bd-fees-trigger/, download-daily-asset-dim.ts and download-daily-fees.ts; EC2_MANIFEST.json drops the asset-dim _ts_source entry as ordered and the fees _ts_source entry as well (dangling after the deletion; issuer ACCEPTED). JSON still parses.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-bd/silver/bd_assets_dim.parquet (served dim, written by the scheduled fire)",
+      "kind": "s3_object",
+      "commit_or_etag": "VersionId qcSdLjLW0d1QbDZ1w9lg6SRPjwF7ou92 (22:11:33Z, 977308 B); G1 baseline VersionId kittUyy.WHGfmKRaAag.p4TqGFycZ3eA",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Written by the 22:10Z scheduled fire (no ad-hoc fire, no hand builder run by this worker). G2 comparison read from both S3 versions: see J1. No rollback (condition not met).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260928T2032Z_nfra-mcpindex-bd-asset-dim-rest-schedule_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 ledger nfra-mcpindex-bd-asset-dim-rest-schedule opened and committed before any change; 5 legs all proven; sentinel removed by deploy_ledger.py close.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "03527b9e7a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened at c03dedb277, L3 at 03527b9e7a; sentinel .open_deploys json removed at close. Rows NFRA_MCPINDEX-Z-W8-S1 (BLOCKING/INERT: safe-apply halt gate resolved the worker to the issuer serial) and NFRA_MCPINDEX-Z-W8-S2 (OBSERVATION/INERT: disarm by the issuer-written serial file).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "served document: rest-pull refs>=1 builder refs>=1 playwright refs=0 BD_PASSWORD refs=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s10.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "served document: rest-pull refs=4 builder refs=4 playwright refs=0 BD_PASSWORD refs=0\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 served DEFAULT document (v4) read via get-document",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "rule state=ENABLED schedule=cron(10 22 ? * MON-FRI *) targets=1 targets bd-asset-dim-trigger=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s10.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "rule state=ENABLED schedule=cron(10 22 ? * MON-FRI *) targets=1 targets bd-asset-dim-trigger=yes\nRESULT: PASS\nexit=0 (run after the apply at 21:17Z, and again after the fire)",
+      "denominator": "1 of 1 asset-dim rules; 1 of 1 targets",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "runs at/after slot>=1 success>=1 dim rewritten after the successful run=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s10.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "first slot=2026-09-28T22:10Z runs at/after slot=1 success=1 dim rewritten after the successful run=yes\nRESULT: PASS\nexit=0. Origin check: Lambda bd-asset-dim-trigger log shows Scheduled Event from rule bd-asset-dim-pipeline-trigger, time 22:10:00Z, invoked 22:10:19Z, sent SSM command 16d855de-b971-4d4c-bf8c-bc9f8503c6d3; list-commands renders LOCAL offset -04:00, RequestedDateTime 18:11:06-04:00 = 22:11:06Z.",
+      "denominator": "1 run at or after the slot, 1 Success; served dim LastModified 22:11:33Z after the request 22:11:06Z",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "s10.J1 (judgment, CVO-graded at L9 by 3.0.0_SA_CVO~O): the worker RECORDS the G2 delta block and the run log excerpt, no verdict. Is the dim written by the 22:10Z fire one a Black Diamond tool may answer from -- ids >= the G1 count, zero non-null->null cusip, and the non-null->non-null cusip-change count explained against MX-s-6's 42.",
+      "method": "manual_read_with_citation",
+      "invocation": "aws s3 cp s3://opal-data-bd/logs/asset-dim-download-2026-09-28.log (uploaded run log, 6751 B); s3api get-object of VersionIds kittUyy.WHGfmKRaAag.p4TqGFycZ3eA (G1) and qcSdLjLW0d1QbDZ1w9lg6SRPjwF7ou92 (after), compared with pandas in the worker scratch dir (outside the repo)",
+      "output_evidence": "BUILDER BLOCK (log): 'Reading current dim ... 12,141 rows, 22 cols'; 'Reading REST bronze ... 12,132 rows, 15 cols'; '=== DELTA on the 12,132 already-served rows (measured BEFORE the write) ===' cusip 0 changed (0.00%), alternative_identifier 0, symbol 0, ticker 0, asset_name 0, asset_display_name 0, original_asset_name 0, asset_super_class_bd 0, asset_class 0, asset_segment 0 (each 0.00%). '=== UNION (latest-wins per asset_id) ===' in BOTH (refreshed) 12,132; ONLY in pull (added) 0; ONLY in dim (kept) 9; TOTAL 12,141. Key coverage: cusip 10957 / 12141 (90.2%). Acceptance criteria (W4) AC1 row count PASS (12,141), AC2 zero duplicate asset_id PASS, AC3 super_class non-null PASS (100.00%). 'Dim rebuild exit code: 0'; 'REST pull exit code: 0'; 'export rows (pre-dedup): 12132; dedup 12132'. INDEPENDENT G1-vs-AFTER (worker read of both S3 versions): ids before 12141, after 12141, added 0, removed 0, id-set sha256 equal both sides b38a8b0a5dd07053a2d822ef6ad6e76e44d7e9a59b6615f7d259c9c74cb9616a; columns 22 both, same names; cusip non-null before 10957, after 10957; cusip non-null->null 0; non-null->non-null changed 0 (MX-s-6's 42 not reproduced: 0 today); null->non-null 0; changed values per column: 0 in every column except built_at (12141 of 12141). The 9 ids kept from the dim but absent from the 12,132 pull are retained by --union-bronze (nothing removed). No asset rows recorded here.",
+      "denominator": "12141 ids compared on both S3 versions; 12,132 already-served rows in the builder delta; 10957 non-null cusip rows before and after",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO grades it at L9 (3.0.0_SA_CVO~O). The worker records the material and no verdict."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No defect planted: this cell publishes existing signed bytes. The discriminating negative arms observed instead: (a) the BEFORE state of the DEFAULT (v3 carried download-daily-asset-dim.ts x1 and pull_bd_asset_dim_rest x0), against which AC1 could not pass; (b) the fees rule bd-fees-pipeline-trigger existed before apply and reads 'does not exist' after.",
+      "expected": "AC1 would read FAIL against v3 (playwright refs>=1, rest-pull refs=0); the fees rule exists before the apply.",
+      "observed": "Before: v3 content read live had playwright refs 1, rest-pull refs 0, --union-bronze 0. After the publish AC1 read rest-pull 4, builder 4, playwright 0, BD_PASSWORD 0. Fees rule present in the pre-apply plan (5 destroys) and absent after apply.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 each run more than once (AC1 and AC2 before and after the fire); terraform plan -detailed-exitcode re-run after apply; the G1 baseline id-set sha256 re-computed on the after version.",
+      "observed": "AC1/AC2/AC3 read PASS exit 0 on every run; post-apply plan rc 0; id-set sha256 identical before and after (b38a8b0a...9616a).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "bd-49f-fees-runner, its session-chain rule, bd-silver-merge and the SSM document opal-bd-fees-download were not touched.",
+      "reason": "G3 and order step 4; the fees SSM document stays registered and inert."
+    },
+    {
+      "item": "git push; any ad-hoc fire of the served document; any hand run of the builder (the Z-S46 path).",
+      "reason": "Order bounds 4 and step 5: no push; the acceptance is the scheduled fire only."
+    },
+    {
+      "item": "The task order's status flip to complete.",
+      "reason": "The task order file is outside this worker's paths and the face says do not edit the task order; J1 is a judgment criterion graded by 3.0.0_SA_CVO~O, so the order is not terminal on the worker's word."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W8-S1",
+    "NFRA_MCPINDEX-Z-W8-S2"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-12.bd-asset-dim-phase-b.md",
+  "compiler_tools": [
+    {
+      "tool": "aws (ssm)",
+      "invocation": "aws ssm describe-document / update-document --document-version $LATEST / update-document-default-version / get-document / list-commands / list-command-invocations",
+      "result": "G1 DefaultVersion 3 read live; v4 created and set DEFAULT; readback parsed-JSON equal; scheduled run 16d855de-b971-4d4c-bf8c-bc9f8503c6d3 Success at $LATEST."
+    },
+    {
+      "tool": "aws (s3api)",
+      "invocation": "aws s3api list-object-versions / get-object --version-id",
+      "result": "G1 kittUyy... and after qcSdLjLW... both read; 12141 ids, sha equal, cusip 10957 both."
+    },
+    {
+      "tool": "terraform",
+      "invocation": "terraform init; terraform plan -out; .tools/safe-apply.sh -chdir=infra/aws/terraform/bd-pipeline apply <plan>; terraform plan -detailed-exitcode",
+      "result": "0 add / 0 change / 5 destroy; Apply complete 5 destroyed; post-apply plan rc 0."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open | close-leg | close --slug nfra-mcpindex-bd-asset-dim-rest-schedule",
+      "result": "5 legs opened before any change and all closed with proof; sentinel removed."
+    }
+  ]
+}

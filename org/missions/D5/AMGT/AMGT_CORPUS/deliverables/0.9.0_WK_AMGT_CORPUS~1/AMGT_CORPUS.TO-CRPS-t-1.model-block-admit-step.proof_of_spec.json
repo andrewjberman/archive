@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-t-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-t-1.model-block-admit-step.md",
+    "group": "OTHER",
+    "vintage_commit": "48a5b4a1cf5ee498cbece998064b3c7122ebddc4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "48a5b4a1cf5ee498cbece998064b3c7122ebddc4",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-t-1.model-block-admit-step.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW stage `admit [--dry-run]` (cmd_admit): population = backlog.build(library_root()) records with a security_key (key form <ROOT>_<CC>_Equity = the producer's security.replace(' ','_')); without-block = no object under derived/model_block/<key>/ in the producer bucket (one paginated list, no delimiter); DAPI health opened first, rc 4 + REFUSED line if unreachable; then stage_pull + stage_derive per name in batches of 3. --securities stays required for every other stage. Live run was --dry-run only (S3 list, no vendor call).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/induction_scheduled.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run_admit_step runs the admit stage after induction_run returns (dry-run -> admit --dry-run), prints `induction_scheduled step model_block_admit rc <n>`; closing line stays last, its rc the worse of the two steps. Not run against the vendor or a Scheduled Task.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_model_block_admit.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW offline test: stub S3 (two-page listing), real backlog.build over scratch library + crosswalk env overrides, stubbed pull/derive/blp; 2 passed.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_induction_schedule.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "existing test kept green (admit step stubbed to rc 0 because conftest poisons boto3); NEW test_t1_scheduled_steps drives the scheduled dry-run with the real run_admit_step wiring over a stub module; 2 passed.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t1_AC1.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t1_AC1.sh",
+      "output_evidence": "admit population registered 96 without_block 0 pulled 0 bloomberg_calls 0",
+      "denominator": "96 of 96 library folders resolved to a security_key; 0 without a derived/model_block/<key>/ object; S3 list only, 0 Bloomberg calls.",
+      "expect": "(?m)^admit population registered 96 without_block 0 pulled 0 bloomberg_calls 0$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t1_AC2.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t1_AC2.sh",
+      "output_evidence": "t1 refuses_loudly True rc_nonzero True names_surface True population_printed_first True planted_pulled 1",
+      "denominator": "2 of 2 tests passed (planted name pulled; session-open failure refused, rc 4); 1 planted name of 2 registered lacked a block and 1 was pulled.",
+      "expect": "(?m)^t1 refuses_loudly True rc_nonzero True names_surface True population_printed_first True planted_pulled 1$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t1_AC3.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t1_AC3.sh",
+      "output_evidence": "t1 scheduled_steps registration,model_block_admit",
+      "denominator": "2 of 2 tests in test_induction_schedule.py passed (the existing r1 test and the new t1 test); 2 steps observed in order.",
+      "expect": "(?m)^t1 scheduled_steps registration,model_block_admit$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1, AC2 and AC3 each run twice in this worktree (AC3 three times).",
+      "observed": "the deciding line was identical on every run.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Scratch copy (.scratch/t1/mut, uncommitted) of model_block_pull.py with the DAPI-refusal `return 4` changed to `return 0`, and of test_model_block_admit.py pointed at it; pytest run against the copy.",
+      "expected": "the refusal arm asserts rc != 0, so it fails and the `t1 refuses_loudly ...` line is not printed (AC2's expect unmet).",
+      "observed": "1 failed, 1 passed; assert 0 != 0 in test_b_session_open_fails_refuses_loudly; no t1 line printed.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No non-dry-run admit, pull or derive against the real DAPI or S3; no Scheduled Task change",
+      "reason": "Order section 4: no vendor call, no S3 write, no Scheduled Task; the real-fire is the issuer's cell t-4 under a pair."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W1-S18"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "t1_AC1.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t1_AC1.sh",
+      "result": "rc 0"
+    },
+    {
+      "tool": "t1_AC2.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t1_AC2.sh",
+      "result": "rc 0"
+    },
+    {
+      "tool": "t1_AC3.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t1_AC3.sh",
+      "result": "rc 0"
+    }
+  ]
+}

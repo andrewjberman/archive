@@ -1,0 +1,98 @@
+== HVST-j-2 AC1: THE STORY-SPAN CENSUS (row Z-W41-S1) -- measurement only, no verdict ==
+inputs: served event part amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T192706Z.parquet (8 parts; 8 events)
+        served mention part amgt/harvest/gold/article_security_mention/date=2026-09-29/part-20260929T192610Z.parquet (6 parts; 304 rows; tier A/B rows 146); silver articles 120
+        titled mention rows: 304 of 304
+
+== (a) BASELINE: event_rows under the CURRENT rule vs the SERVED newest chatter_event part ==
+served events=8 (distinct ids 8); current-rule rebuild events=8 (distinct ids 8)
+(a) baseline row-by-row equal: 8 of 8 served events equal in every field
+(a) HOLDS
+
+== (b) THE CANDIDATE RULE, verbatim ==
+   CANDIDATE SPAN RULE (lives ONLY in this file; `candidate_event_rows` below):
+     "SAME STORY" = exactly the served rule's story test: `publication_gold._security_stories` -- one security's tier
+         A/B mention rows linked by headline-term overlap (name stems dropped, earnings class terms, tight-cluster
+         refusal, link window max_gap_days + 1 = 2 days). Not re-implemented, called.
+     "CONSECUTIVE"   = a story-day is a UTC day (`publication_gold._day_of`) on which the story has at least one
+         tier A or B article. Two story-days are consecutive when the number of EMPTY days between them is at most
+         `publication_gold.EVENT_MAX_GAP_DAYS` (= 1, the served rule's own section-1b tolerance). A maximal chain of
+         consecutive story-days is ONE story-run.
+     THE CANDIDATE: each story-run is ONE event iff the RUN AS A WHOLE qualifies under the served thresholds
+         (>= EVENT_MIN_ARTICLES tier A/B articles, from >= EVENT_MIN_PUBLISHERS distinct publishers that each
+         contribute at least one tier-A article of the run). Its span is [first story-day, last story-day]; its
+         members are every tier A/B article of the story on those days; its lead is the earliest tier-A article
+         (`_event_sort_key`, as served); its event_id is `publication_gold._event_id` of (security, first, last, lead).
+     WHAT DIFFERS FROM THE SERVED RULE: the served rule tests qualification PER DAY and spans only from qualifying
+         day to qualifying day; the candidate tests it per RUN and spans the whole run. Story test, thresholds,
+         lead, ordering, id function and tier filter are the served ones.
+     An informational sensitivity line is also printed at gap 0 (strictly calendar-adjacent story-days).
+   
+
+== (c) THE AMZN FIXTURE (AMZN_US_Equity) ==
+AMZN tier A/B rows=10; stories under the served story test=4 (informational -- the candidate reuses these)
+   story 0: 1 rows, days 2026-09-01..2026-09-01
+      . 2026-09-01 | tier A | bbg | YouTube Inks Amazon Partnership to Boost Online Shopping Bet
+   story 1: 1 rows, days 2026-09-02..2026-09-02
+      . 2026-09-02 | tier A | bbg | Amazon, Walmart Looped Into DOJ Beef-Price Antitrust Probe
+   story 2: 5 rows, days 2026-09-06..2026-09-08
+      . 2026-09-06 | tier A | bbg | Amazon Cargo Plane Overshoots Runway in Miami, Killing Five
+      . 2026-09-07 | tier A | barrons | Scene of Fatal Amazon Plane Crash in Miami Is \u2018Devastating\u2019
+      . 2026-09-07 | tier A | wsj | Amazon Plane Crash Probe Examines Aircraft Speed, Runway Safeguards
+      . 2026-09-07 | tier B | bbg | NTSB Says Amazon Cargo Jet Hit Van, Car After Runway Overrun
+      . 2026-09-08 | tier B | barrons | Everything to Know About the Boeing Jet That Overshot a Miami Runway
+   story 3: 1 rows, days 2026-09-10..2026-09-10
+      . 2026-09-10 | tier A | bbg | Amazon Jet Tried to Abort Landing Before Fatal Crash, NTSB Says
+AMZN events under the CURRENT rule: 1
+   CURRENT event c9e34b38e4ba AMZN_US_Equity span 2026-09-07..2026-09-07 (days_span=1) articles=3 tier_a=2 tier_b=1 publishers=3
+      lead: Scene of Fatal Amazon Plane Crash in Miami Is \u2018Devastating\u2019
+      - 2026-09-07 | tier A | barrons | Scene of Fatal Amazon Plane Crash in Miami Is \u2018Devastating\u2019 | barrons:WP-BAR-000190450
+      - 2026-09-07 | tier A | wsj | Amazon Plane Crash Probe Examines Aircraft Speed, Runway Safeguards | wsj:59813697-51a6-40db-8
+      - 2026-09-07 | tier B | bbg | NTSB Says Amazon Cargo Jet Hit Van, Car After Runway Overrun | bbg:TL0J5YKJH6V500
+AMZN events under the CANDIDATE: 1
+   CANDIDATE event 472a1836a7be AMZN_US_Equity span 2026-09-06..2026-09-08 (days_span=3) articles=5 tier_a=3 tier_b=2 publishers=3
+      lead: Amazon Cargo Plane Overshoots Runway in Miami, Killing Five
+      - 2026-09-06 | tier A | bbg | Amazon Cargo Plane Overshoots Runway in Miami, Killing Five | bbg:TKYJAAVTTCZL00
+      - 2026-09-07 | tier A | barrons | Scene of Fatal Amazon Plane Crash in Miami Is \u2018Devastating\u2019 | barrons:WP-BAR-000190450
+      - 2026-09-07 | tier A | wsj | Amazon Plane Crash Probe Examines Aircraft Speed, Runway Safeguards | wsj:59813697-51a6-40db-8
+      - 2026-09-07 | tier B | bbg | NTSB Says Amazon Cargo Jet Hit Van, Car After Runway Overrun | bbg:TL0J5YKJH6V500
+      - 2026-09-08 | tier B | barrons | Everything to Know About the Boeing Jet That Overshot a Miami Runway | barrons:WP-BAR-000190470
+(informational sensitivity, gap 0 = strictly calendar-adjacent story-days) AMZN events: 1
+   gap0 event 472a1836a7be span 2026-09-06..2026-09-08 articles=5 lead: Amazon Cargo Plane Overshoots Runway in Miami, Killing Five
+
+== (d) THE SERVED-EVENT DELTA under the candidate (denominator 8 served events) ==
+   KEPT    c6406ab65afa 992_HK_Equity served span 2026-02-12..2026-02-12 articles=2 -> candidate c6406ab65afa(2026-02-12..2026-02-12,2)
+   KEPT    df65e860ac9b 992_HK_Equity served span 2026-05-22..2026-05-22 articles=2 -> candidate df65e860ac9b(2026-05-22..2026-05-22,2)
+   CHANGED a95c2232e1a8 992_HK_Equity served span 2026-08-13..2026-08-13 articles=2 -> candidate 8be45608d81b(2026-08-13..2026-08-14,3)
+   CHANGED c9e34b38e4ba AMZN_US_Equity served span 2026-09-07..2026-09-07 articles=3 -> candidate 472a1836a7be(2026-09-06..2026-09-08,5)
+   KEPT    88d9df907e03 BA_US_Equity served span 2026-09-08..2026-09-08 articles=2 -> candidate 88d9df907e03(2026-09-08..2026-09-08,2)
+   KEPT    f51394fda7e3 COST_US_Equity served span 2026-09-14..2026-09-14 articles=2 -> candidate f51394fda7e3(2026-09-14..2026-09-14,2)
+   CHANGED a4be84824eec HD_US_Equity served span 2026-08-18..2026-08-18 articles=2 -> candidate 88233de75a30(2026-08-17..2026-08-20,4)
+   KEPT    39c0b3d69453 NVDA_US_Equity served span 2026-06-01..2026-06-01 articles=3 -> candidate 39c0b3d69453(2026-06-01..2026-06-01,3)
+   COUNTS of 8 served: KEPT=5 MERGED=0 CHANGED=3 GONE=0  (sum 8); NEW candidate events=0; candidate events total=8
+   MERGED candidate events (one candidate holding >= 2 served events): 0
+   members of every NEW, MERGED (and, for completeness, CHANGED) candidate event:
+   CHANGED event 8be45608d81b 992_HK_Equity span 2026-08-13..2026-08-14 (days_span=2) articles=3 tier_a=3 tier_b=0 publishers=2
+      lead: Lenovo Posts Record Revenue, Expects to Hit $100 Billion Goal This Year
+      - 2026-08-13 | tier A | wsj | Lenovo Posts Record Revenue, Expects to Hit $100 Billion Goal This Year | wsj:6d60459e-90da-40cf-8
+      - 2026-08-13 | tier A | sa | Lenovo Group jumps on strong Q1 revenue, AI growth | sa:4632421
+      - 2026-08-14 | tier A | sa | Lenovo gets upgraded to Buy at BofA following earnings | sa:4633118
+   CHANGED event 472a1836a7be AMZN_US_Equity span 2026-09-06..2026-09-08 (days_span=3) articles=5 tier_a=3 tier_b=2 publishers=3
+      lead: Amazon Cargo Plane Overshoots Runway in Miami, Killing Five
+      - 2026-09-06 | tier A | bbg | Amazon Cargo Plane Overshoots Runway in Miami, Killing Five | bbg:TKYJAAVTTCZL00
+      - 2026-09-07 | tier A | barrons | Scene of Fatal Amazon Plane Crash in Miami Is \u2018Devastating\u2019 | barrons:WP-BAR-000190450
+      - 2026-09-07 | tier A | wsj | Amazon Plane Crash Probe Examines Aircraft Speed, Runway Safeguards | wsj:59813697-51a6-40db-8
+      - 2026-09-07 | tier B | bbg | NTSB Says Amazon Cargo Jet Hit Van, Car After Runway Overrun | bbg:TL0J5YKJH6V500
+      - 2026-09-08 | tier B | barrons | Everything to Know About the Boeing Jet That Overshot a Miami Runway | barrons:WP-BAR-000190470
+   CHANGED event 88233de75a30 HD_US_Equity span 2026-08-17..2026-08-20 (days_span=4) articles=4 tier_a=3 tier_b=1 publishers=3
+      lead: Home Depot Stock Rises as Earnings Defy Housing Slump
+      - 2026-08-17 | tier A | barrons | Home Depot Stock Rises as Earnings Defy Housing Slump | barrons:WP-BAR-000187580
+      - 2026-08-18 | tier A | bbg | Home Depot Results Beat Estimates, Overcoming Housing Slump | bbg:TJX9W8T96OSJ00
+      - 2026-08-18 | tier A | wsj | Home Depot Posts Higher Sales, Backs Outlook | wsj:0c650fdf-6652-4371-8
+      - 2026-08-20 | tier B | barrons | 6 Big Takeaways From Retail\u2019s Big Week of Earnings | barrons:WP-BAR-000187961
+   (informational sensitivity, gap 0) COUNTS of 8 served: KEPT=5 MERGED=0 CHANGED=3 GONE=0; NEW=0
+
+== (e) EVENT_ID UNIQUENESS under the candidate ==
+(e) candidate events=8, distinct event_ids=8 -> UNIQUE
+    (informational) article memberships shared by two candidate events of one security: 0
+
+AC1 RESULT: PASS

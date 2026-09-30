@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ww-2.list-rows-carry-the-served-name-and-classification",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "9ebf76b6da45effd4e493450dc5cf01b23978e4b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "9ebf76b6da45effd4e493450dc5cf01b23978e4b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ww-2.list-rows-carry-the-served-name-and-classification.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~171",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDITED. Adds _classification_for_ticker, _join_classification, CLASSIFICATIONS_TABLE; read_rankings joins rows. DynamoDB action called: dynamodb:GetItem on etf-classifications.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_list_rows_classification.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 7 tests (SERVED with name, bare-token key, SERVED no name, ABSENT, READ_FAILED, row join, one read per distinct ticker); 7 of 7 pass.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ranking rows read: N (N > 0) and LIST ROWS CARRY THE SERVED NAME AND CLASSIFICATION: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round48/checks/ww-2.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "ranking rows read: 2\nLIST ROWS CARRY THE SERVED NAME AND CLASSIFICATION: YES\nexit=0",
+      "denominator": "2 live ranking rows read, 0 BAD lines (BA US equals the table row; ZZZNOTHELD US ABSENT with reason)",
+      "status": "PASS",
+      "expect": "ranking rows read: [1-9][0-9]*\nLIST ROWS CARRY THE SERVED NAME AND CLASSIFICATION: YES\nexit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest reports N passed and 0 failed (308 passed at the cut, plus your new tests) -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round48/checks/api-suite.sh; echo \"exit=$?\"",
+      "output_evidence": "5 failed, 287 passed, 23 errors\nexit=1. All 28: FileNotFoundError on paths outside the cone (infra/aws/terraform/harvest/scoped-amgt-api.tf x5 in test_scoped_amgt_mount.py; portal/.../__harness__/tabsFixture.BA_US_Equity.json x23 in the print tests). Earlier, before the issuer widened the cone to infra/logic: 2 collection errors, 24 passed, 268 errors.",
+      "denominator": "287 passed, 5 failed, 23 errors of 315 collected; 0 of the 28 non-passes touch scoped_amgt or the new tests (7 of 7 new tests pass)",
+      "status": "FAIL",
+      "expect": "[1-9][0-9]* passed\nexit=0",
+      "judgment": false,
+      "status_reason": "Instrument absence, not a code failure: the suite reads infra/aws/terraform/harvest and portal/ fixtures, both outside this sparse cone. Re-run in a tree carrying them (row AMGT_RESAPP-Z-W171-S2)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control.",
+      "expected": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE",
+      "observed": "n/a"
+    },
+    "determinism": {
+      "method": "AC1 run once; AC2 not runnable.",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON",
+      "reason": "single run; AC2 blocked by the cone"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC2 full pass",
+      "reason": "infra/aws/terraform/harvest and portal/.../__harness__ are outside the sparse cone; the order forbids widening it. Rows AMGT_RESAPP-Z-W171-S1 (cause resolved by the issuer's infra/logic widening) and -S2 (residual)."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W171-S1",
+    "AMGT_RESAPP-Z-W171-S2"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~171/AMGT_RESAPP.TO-AMGT-ww-2.list-rows-carry-the-served-name-and-classification.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/test_list_rows_classification.py",
+      "result": "7 passed"
+    }
+  ]
+}

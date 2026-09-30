@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-u-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-u-1.scalar-exception-readers.md",
+    "group": "OTHER",
+    "vintage_commit": "65f1025c46c9db47350d962ca2b8329c54254edc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "65f1025c46",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-u-1.scalar-exception-readers.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "e099da5cf3b27e2271979310fcbf80b5fb263166",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New _scalar_exception helper (lines 690-712) called from _resolved_unit (scalar branch, ~728-729) and _resolved_sign (scalar branch, ~747-748); dict-valued fields untouched; _ensure_unit_map untouched. 6501 BEST_SALES unit now reads 'UNRESOLVED-ON-6501 JP Equity: sampled magnitude 11962163.4 does not discriminate absolute vs millions' (the entry's own status text).",
+      "introduces": [
+        "_scalar_exception"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_model_block_resolved_exception.py",
+      "kind": "test",
+      "commit_or_etag": "e099da5cf3b27e2271979310fcbf80b5fb263166",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 tests on a temp map: exception form, pre-exception status form, MEASURED and unlisted security keep the scalar (control), dict-valued field unchanged.",
+      "introduces": [
+        "test_exception_form",
+        "test_pre_exception_status_form",
+        "test_measured_security_and_unlisted_security_keep_scalar",
+        "test_dict_valued_field_unchanged"
+      ],
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u1_AC1.sh -- expect (?m)^u1 reader best_sales_6501 unit UNRESOLVED sign UNRESOLVED control_8035 unit MILLIONS sign POSITIVE module_in_toplevel yes$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u1_AC1.sh",
+      "output_evidence": "u1 reader best_sales_6501 unit UNRESOLVED sign UNRESOLVED control_8035 unit MILLIONS sign POSITIVE module_in_toplevel yes",
+      "denominator": "1 of 1 run, rc 0; real committed map; 6501 unit and sign UNRESOLVED, 8035 control on same scalar field still MILLIONS/POSITIVE",
+      "expect": "(?m)^u1 reader best_sales_6501 unit UNRESOLVED sign UNRESOLVED control_8035 unit MILLIONS sign POSITIVE module_in_toplevel yes$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u1_AC2.sh -- expect (?m)^u1 served best_sales_6501 FY1 value 11962163\\.4 served_unit_class UNRESOLVED reader_unit_class UNRESOLVED agree yes$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u1_AC2.sh",
+      "output_evidence": "u1 served best_sales_6501 FY1 value 11962163.4 served_unit_class UNRESOLVED reader_unit_class UNRESOLVED agree yes",
+      "denominator": "1 of 1 served Hitachi block FY1 BEST_SALES figure (1 S3 GET); served class and fixed reader class agree, so the served block stands",
+      "expect": "(?m)^u1 served best_sales_6501 FY1 value 11962163\\.4 served_unit_class UNRESOLVED reader_unit_class UNRESOLVED agree yes$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u1_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round19/u1_AC3.sh",
+      "output_evidence": "7 passed in 0.92s",
+      "denominator": "7 of 7 tests passed (4 new + 3 in the classification-split suite), 0 failed",
+      "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1's own 8035 control: a MEASURED security under the same scalar field.",
+      "expected": "8035 keeps MILLIONS/POSITIVE while 6501 reads UNRESOLVED.",
+      "observed": "8035 MILLIONS/POSITIVE, 6501 UNRESOLVED (AC1 line).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1-AC3 run once each after the change; before the change the order records all three failing.",
+      "observed": "all three PASS.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "_ensure_unit_map, field_map.json, S3 writes, vendor calls, derive",
+      "reason": "BOUNDS: read-only or another cell's surface; nothing outside the four <paths> touched."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh commit-gate",
+      "invocation": "bash .tools/safe-commit.sh --author ... -- <2 files>",
+      "result": "commit e099da5cf3 landed, gates OK"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+PRODUCER: Lambda amgt-resapp-chatter-axis  LastModified=2026-09-24T05:09:00.000+0000  CodeSha256=Xdwp7IrPaNho7y0Nz1L4TsihsueqDG+QDuvRsA+acYM=
+CHATTER_AXIS_SOURCE = 'legacy'   (raw deployed env: {"CHATTER_AXIS_SOURCE": "legacy"})   select_source(env) -> 'legacy'   [infra/aws/terraform/harvest/lambda_src/lambda_function.py:102]
+  Terraform pin: infra/aws/terraform/harvest/chatter-axis-schedule.tf:70   (chatter_axis_source = "legacy")
+
+SERVED ROUTE: GET /api/scoped/amgt/lead-panel/rankings/{movement}/{subject}   handler branch lib/research/api/scoped_amgt.py:4320 ; function lib/research/api/scoped_amgt.py:644
+DEFAULT-DATE READ TRENDING x CHATTER: http=200 axis=TRENDING_CHATTER ranking_status=SERVED state=COMPLETE as_of_date=2026-09-29 requested_as_of=2026-09-30 dated=True generation_id=20260929T100015Z-d09ee37a8f3b row_count=2 coverage_vintage=pool:universe/v1/2026-09-16.json#as_of=2026-09-16
+   rank 1   BA US      key=BA_US_Equity     score=0 raw_chatter_count(as-of day)=0 window_total_count=1 movement_raw_score=0
+   rank 2   HD US      key=HD_US_Equity     score=0 raw_chatter_count(as-of day)=0 window_total_count=1 movement_raw_score=0
+DEFAULT-DATE READ BREAKOUT x CHATTER: http=200 axis=BREAKOUT_CHATTER ranking_status=ABSENT state=None as_of_date=2026-09-30 requested_as_of=2026-09-30 dated=False generation_id=None row_count=0 coverage_vintage=None
+   (no rows served; ranking_reason: no generation pointer at BREAKOUT_CHATTER#2026-09-30 / _CURRENT: no committed ranking exists for this date -- this is not an empty membership)
+
+AS-OF the TRENDING read served = 2026-09-29 (route's requested_as_of = 2026-09-30, dated fallback = True); pinning as_of=2026-09-29 on both movements:
+PINNED as_of=2026-09-29 READ TRENDING x CHATTER: http=200 axis=TRENDING_CHATTER ranking_status=SERVED state=COMPLETE as_of_date=2026-09-29 requested_as_of=2026-09-29 dated=False generation_id=20260929T100015Z-d09ee37a8f3b row_count=2 coverage_vintage=pool:universe/v1/2026-09-16.json#as_of=2026-09-16
+   rank 1   BA US      key=BA_US_Equity     score=0 raw_chatter_count(as-of day)=0 window_total_count=1 movement_raw_score=0
+   rank 2   HD US      key=HD_US_Equity     score=0 raw_chatter_count(as-of day)=0 window_total_count=1 movement_raw_score=0
+PINNED as_of=2026-09-29 READ BREAKOUT x CHATTER: http=200 axis=BREAKOUT_CHATTER ranking_status=EMPTY state=EMPTY as_of_date=2026-09-29 requested_as_of=2026-09-29 dated=False generation_id=20260929T100015Z-25147d66b259 row_count=0 coverage_vintage=pool:universe/v1/2026-09-16.json#as_of=2026-09-16
+   (no rows served; ranking_reason: the pointer at BREAKOUT_CHATTER#2026-09-29 / _CURRENT commits EMPTY generation 20260929T100015Z-25147d66b259: a successful ranking with no members -- empty_reason: NO_SIGNAL_IN_WINDOW 189 of 191)
+
+PRODUCER'S OWN COMPUTE PATH, IN MEMORY (write_fn=None; source=legacy; as_of=2026-09-29; window 2026-08-31..2026-09-29 = 30 days)
+  universe object: pool:universe/v1/2026-09-16.json   read-failure states over the whole run: {"denied": 0, "malformed": 0, "missing_body": 0, "partial": 0}
+  crosswalk_status over 191 reads: {'MEASURED': 191}
+
+POPULATION RULE, STEP BY STEP (count remaining after each step; TRENDING and BREAKOUT shown separately where they diverge)
+  STEP 0  universe object names (pool universe/v1)         remaining=250  dropped=0   
+           at lib/research/metrics/chatter_axis.py:242 ; lib/research/metrics/chatter_axis.py:287
+           the identity layer's union universe object pool:universe/v1/2026-09-16.json (snapshot_date 2026-09-15)
+  STEP 1  names carrying a canonical security_key = COVERED DENOMINATOR remaining=191  dropped=59  
+           at lib/research/metrics/chatter_axis.py:224 (identity = security_key, union shape: lib/research/metrics/chatter_axis.py:223)
+           a name with no security_key has nothing to query the store by and is not ranked (names_without_identifier=59)
+  STEP 2  names with >=1 publication-links object in the pool, ANY date remaining=3    dropped=188 
+           at lib/research/metrics/chatter_axis.py:364 -> lib/research/coverage/pool_reader.py:496 over lib/research/coverage/pool_reader.py:308
+           legacy reads publication-links/v1/<alias>/ per identity (store_item_count); 188 of 191 identities have an empty store, so they can never score under legacy. Held: BA_US_Equity, COST_US_Equity, HD_US_Equity
+  STEP 3  names with >=1 article PUBLISHED inside the 30-day window remaining=2    dropped=1   
+           at lib/research/coverage/pool_reader.py:524
+           a link whose body `published` date is outside [2026-08-31, 2026-09-29] is skipped, not counted; per-name store_item_count / items_in_window: BA_US_Equity=2/1, COST_US_Equity=2/0, HD_US_Equity=3/1
+  STEP 4  names with window total > 0 (chatter signal test) = candidates of BOTH movements remaining=2    dropped=189 
+           at lib/research/metrics/chatter_axis.py:652 ; lib/research/metrics/chatter_axis.py:654
+           an all-zero 30-day series is dropped BEFORE either movement sees it (reason NO_SIGNAL_IN_WINDOW, excluded_no_signal=189 of candidates=191); window totals: BA_US_Equity=1, HD_US_Equity=1
+  STEP 5-T  TRENDING: movement_scores (score = as-of-day count) remaining=2    dropped=0   
+           at lib/research/metrics/movement_gate.py:454
+           TRENDING scores every remaining name on the LAST day of the series (movement_gate.subject_level_score ABSOLUTE_COUNT_ON_AS_OF_DAY); it excludes nothing, and a name with a nonzero window but a zero as-of day is KEPT with score 0 (this is why BA and HD hold score 0)
+  STEP 6-T  TRENDING: rank_top_n, TOP_N=10                   remaining=2    dropped=0   
+           at lib/research/metrics/chatter_axis.py:504 ; TOP_N lib/research/metrics/chatter_gate.py:34
+           no name dropped here: 2 candidates < TOP_N 10; order = score desc, tie-break key asc (lib/research/metrics/chatter_axis.py:503)
+  STEP 5-B  BREAKOUT: movement_scores / breakout_qualifies (min absolute jump 3.0) remaining=0    dropped=2   
+           at lib/research/metrics/movement_gate.py:429 ; floor lib/research/metrics/movement_gate.py:125
+           a name qualifies only if as-of-day count minus trailing mean >= 3.0 articles; exclusion reasons over the run: {"BELOW_MIN_ABSOLUTE_JUMP": 2, "NO_SIGNAL_IN_WINDOW": 189}
+  STEP 6-B  BREAKOUT: rows in the generation                 remaining=0    dropped=0   
+           at lib/research/metrics/chatter_axis.py:689
+           zero rows -> the generation is committed EMPTY (state=EMPTY, empty_reason={"count": 189, "denominator": 191, "reason": "NO_SIGNAL_IN_WINDOW"})
+  STEP 7  SERVED: read_rankings follows the _CURRENT pointer to the generation's rows remaining=2    dropped=0   
+           at lib/research/api/scoped_amgt.py:698
+           the reader takes the generation whole (no filter, no re-sort); TRENDING served row_count=2, BREAKOUT at the pinned as-of ranking_status=EMPTY state=EMPTY; at the route's own default date (2026-09-30) BREAKOUT is ABSENT because the walk-back (lib/research/api/scoped_amgt.py:562) only accepts a COMPLETE pointer, and an EMPTY one is never promoted
+
+IN-MEMORY TRENDING rows: [(1, 'BA US', 'BA_US_Equity', 0.0, 1), (2, 'HD US', 'HD_US_Equity', 0.0, 1)]
+SERVED    TRENDING rows: [(1, 'BA US', 'BA_US_Equity', 0, 1), (2, 'HD US', 'HD_US_Equity', 0, 1)]
+IN-MEMORY == SERVED (same keys, same order): True   (in-memory 2 rows, served 2 rows)
+IN-MEMORY BREAKOUT rows: 0 state=EMPTY   SERVED BREAKOUT (pinned) row_count=0 state=EMPTY
+
+WHAT THE LEGACY STORE HOLDS FOR THE 3 NAMES WITH LINKS (window_read over 2000-01-01..2026-09-29, read-only):
+  BA_US_Equity   links=2 published_days=['2026-07-18', '2026-09-03'] states={"missing_body": 0, "malformed": 0, "denied": 0, "partial": 0}
+  COST_US_Equity links=2 published_days=['2026-07-26', '2026-08-21'] states={"missing_body": 0, "malformed": 0, "denied": 0, "partial": 0}
+  HD_US_Equity   links=3 published_days=['2026-08-22', '2026-08-26', '2026-09-01'] states={"missing_body": 0, "malformed": 0, "denied": 0, "partial": 0}
+
+ANSWER: under CHATTER_AXIS_SOURCE=legacy the ranked population is the set of the 191 covered names whose pool store holds >=1 article PUBLISHED in the trailing 30 days; that set is 2 (BA_US_Equity, HD_US_Equity) out of 191, because only 3 of 191 identities have any publication-links object at all. TRENDING ranks them all (2 < TOP_N 10); BREAKOUT drops both at the 3.0 absolute-jump floor and commits EMPTY.
+DENOMINATORS: names_read=250  covered=191  with_links=3  in_window=2  signal=2  trending_rows=2  breakout_rows=0  served_trending_rows=2
+
+wrote n3_ac1_result.json

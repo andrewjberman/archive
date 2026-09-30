@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-yy-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "7e9fe4c5bbcb748468854d571b9bcacc0db8b27c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "7e9fe4c5bbcb748468854d571b9bcacc0db8b27c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-yy-1.fwd30-grader-compares-values.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~176",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/sweep.py",
+      "kind": "script",
+      "commit_or_etag": "60d2315e1f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CHECK CODE ONLY: reads the deployed function through capture_lib (read-only lambda:Invoke) and renders the page locally; writes nothing to AWS, S3 or the portal.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "unplanted verdict 'OK'; page plant -> 999.99: verdict 'NOT_OK' naming FIGURES; THE PAGE VALUE PLANT FAILS THE GRADE: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round50/checks/yy_1_plant.py --side page; echo \"exit=$?\"",
+      "output_evidence": "AMD_US_Equity: unplanted verdict 'OK' reason ''\npage plant '-0.6' -> 999.99: verdict 'NOT_OK' reason 'FIGURES(values) differ'\nTHE PAGE VALUE PLANT FAILS THE GRADE: YES\nexit=0",
+      "denominator": "1 name (AMD_US_Equity), 1 planted cell (first data-model-cell of the IS_EPS row, -0.6 -> 999.99), 1 unplanted arm",
+      "status": "PASS",
+      "expect": "unplanted verdict 'OK'.*?NOT_OK.*?FIGURES.*?THE PAGE VALUE PLANT FAILS THE GRADE: YES.*?exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "unplanted verdict 'OK'; export plant -> 999.99: verdict 'NOT_OK' naming FIGURES; THE EXPORT VALUE PLANT FAILS THE GRADE: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round50/checks/yy_1_plant.py --side export; echo \"exit=$?\"",
+      "output_evidence": "AMD_US_Equity: unplanted verdict 'OK' reason ''\nexport plant '-0.6' -> 999.99: verdict 'NOT_OK' reason 'FIGURES(values) differ'\nTHE EXPORT VALUE PLANT FAILS THE GRADE: YES\nexit=0",
+      "denominator": "1 name (AMD_US_Equity), 1 planted export figure (first IS_EPS line, -0.6 -> 999.99), 1 unplanted arm",
+      "status": "PASS",
+      "expect": "unplanted verdict 'OK'.*?NOT_OK.*?FIGURES.*?THE EXPORT VALUE PLANT FAILS THE GRADE: YES.*?exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "FWD-30 GRADE: equal 3 of 3 identified names; values equal 3 of 3; ...; THE GRADE COMPARES VALUES ON THE NAMED SET: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round50/checks/yy-1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "FWD-30 GRADE: equal 3 of 3 identified names; values equal 3 of 3; unidentified 0 of 96 folders; keyed on: data-attributes\nTHE GRADE COMPARES VALUES ON THE NAMED SET: YES\nexit=0",
+      "denominator": "3 named live names (AMD_US_Equity, ASML_NA_Equity, BABA_US_Equity); 3 of 3 equal, 3 of 3 values equal, 0 unidentified of 96 folders. Beyond the criterion (not its evidence): the full served sweep of the live library, 96 folders, read_at 2026-09-29T23:37:00Z, read 'equal 96 of 96 identified names; values equal 96 of 96', 19125 value facts compared, 0 differ, 349 identity-only (61 OFFICER + 288 CASE), 6 digits-compared-scale-unchecked (row Z-W176-S1).",
+      "status": "PASS",
+      "expect": "FWD-30 GRADE: equal 3 of 3 identified names; values equal 3 of 3;.*?THE GRADE COMPARES VALUES ON THE NAMED SET: YES.*?exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The two criteria's own plants (CVO ruling 1) are the falsifiers: the grader at its base read both planted arms OK; with the value read they read NOT_OK. A third plant: renaming the served base-case label to \"Opal's historical-multiple reference\" in the fixture (both served label paths) and in the export line, graded against the unchanged page.",
+      "expected": "value plants fail the grade; the relabel does not move it.",
+      "observed": "AC1/AC2 NOT_OK 'FIGURES(values) differ'; relabel arms (both paths, model.cases only, model_cases only) each verdict OK, reason ''.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AMD/ASML/BABA served grade run three times (sweep --only, this session's cache; AC3's own fresh capture; the 96-name run)",
+      "observed": "equal 3 of 3, values equal 3 of 3 each time",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "AMGT_RESAPP-Z-W176-S1"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~176/AMGT_RESAPP.TO-AMGT-yy-1.fwd30-grader-compares-values.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python sweep.py --served --live --require-cases --diff",
+      "invocation": "PYTHONPATH=$(pwd) python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/sweep.py --served --live --require-cases --diff --cache .scratch/cache --out .scratch/full2.tsv",
+      "result": "FWD-30 GRADE: equal 96 of 96 identified names; values equal 96 of 96; unidentified 0 of 96 folders; keyed on: data-attributes"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "_comment_1": "NFRA_OPLGTW TO-OG-g-1: the DERIVED grant scope for the controlled identity of gate G-C.",
+  "_comment_2": "NOT a runnable candidate. Two dimensions are deliberately absent, each for a stated reason:",
+  "_comment_3": "  tid/oid -- ABSENT because no controlled identity exists in the tenant (see the evidence file, AC1). A placeholder GUID is refused by AC1 by design, so none is written.",
+  "_comment_4": "  scope.accounts -- the COUNT only, per amendments A2/A3 (ruling 1.0.0_SA_CTO~O @8bf2bf37c6): the grant's accounts are EXACTLY the set SEALED_EXPECTED_V2.json was computed over, per master; record the COUNT, never an identifier. The candidate names its ids only off-repo. Measured by probes/og_g1_accounts.py over the 5 pinned objects: 08242234 -> 7460, 08335338 -> 7548. This is EVERY account in both masters and that is forced by the seal -- RQ2-2..RQ2-6 are aggregates, so any subset breaks the hash match. Cost: the account dimension yields no refusal discriminator (row NFRA_OPLGTW-Z-S13).",
+  "_comment_5": "Every other dimension is final and is what GCG1-AC5 grades against SEALED_EXPECTED_V2.json at HEAD.",
+  "derivation_sources": {
+    "seal": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~10/SEALED_EXPECTED_V2.json",
+    "protocol": "infra/aws/ec2/opal-gateway/tests/acceptance/WALKTHROUGH_PROTOCOL.md sections 3 (A7) and 4 (RQ2-1..RQ2-7)",
+    "contract": "org/standards/NFRA_OPLGTW_CONTRACT.json contract_version 1.3"
+  },
+  "scope": {
+    "masters": ["08242234", "08335338"],
+    "datasets": ["dim_asset", "dim_balance", "dim_position"],
+    "accounts": {
+      "_rule": "A2/A3: exactly the set SEALED_EXPECTED_V2.json was computed over, per master. COUNTS here; the ids live only in the off-repo candidate.",
+      "08242234": {"count": 7460, "ids": "<<OFF-REPO-A2>>"},
+      "08335338": {"count": 7548, "ids": "<<OFF-REPO-A2>>"}
+    },
+    "_accounts_provenance": {
+      "instrument": "probes/og_g1_accounts.py -- S3 GetObject by pinned VersionId on the 5 seal objects, pyarrow decode, DISTINCT account_id per master",
+      "source_column": "account_id (the PHYSICAL column; the contract's catalog name account_ref is the Gateway's keyed HMAC over it and exists only in responses -- app/integrations/schwab/datasets.json:12)",
+      "objects_read": 5,
+      "serialised_size_bytes": 195102,
+      "dynamodb_item_limit_pct": 47.6
+    },
+    "dates": {
+      "mode": "fixed_dates",
+      "dates": ["2026-09-24", "2026-09-25"]
+    },
+    "columns": {
+      "dim_balance": [
+        "account_ref",
+        "business_date",
+        "cash_balance_settled_only",
+        "mkt_value_long",
+        "mkt_value_short",
+        "net_mv_plus_cash",
+        "net_mv_positions"
+      ],
+      "dim_position": [
+        "business_date",
+        "cusip",
+        "l_s",
+        "market_value_settled_unsettled",
+        "quantity_settled_unsettled"
+      ],
+      "dim_asset": [
+        "cusip",
+        "security_description_line_1",
+        "ticker_symbol"
+      ]
+    },
+    "operations": ["describe", "download_filtered", "list", "query"]
+  },
+  "deliberately_excluded": {
+    "dim_balance_columns": ["bank_cash", "bank_sweep_ibf"],
+    "dim_position_columns": ["closing_price", "quantity_settled", "quantity_unsettled_long", "quantity_unsettled_short", "ticker_symbol"],
+    "dim_asset_columns": ["closing_price", "maturity_date", "prod_code", "prodcatg_code", "security_description_line_2", "security_description_line_3"],
+    "dates": ["every date other than 2026-09-24 and 2026-09-25"],
+    "operations": ["download_original", "write"],
+    "why": "GCG1-AC5's bound: a grant wide enough to answer everything destroys the refusal evidence OG-v-7 exists to grade. Each excluded column is a real name in the contract's field catalog, so a request for one is refused as OUT OF SCOPE rather than as an unknown field -- which is what makes it a discriminator."
+  },
+  "discriminator_pair": {
+    "must_succeed": {
+      "question": "RQ2-3",
+      "request": "master 08335338, dataset dim_balance, date 2026-09-25, columns net_mv_positions + cash_balance_settled_only + net_mv_plus_cash, operation query",
+      "why": "every dimension is inside the grant; expected_class VALUE in the seal"
+    },
+    "must_be_refused": {
+      "request": "master 08335338, dataset dim_balance, date 2026-09-25, column bank_cash, operation query",
+      "why": "identical on master, dataset, date and operation -- ONLY the column differs, so the refusal isolates the grant's column dimension and can be caused by nothing else. bank_cash is a real dim_balance field in the contract's catalog, so this is an out-of-scope refusal, never an unknown-field error.",
+      "expected": "refused, revealing nothing about whether the field holds a value"
+    },
+    "second_axis": {
+      "request": "master 08335338, dataset dim_balance, date 2026-09-23, column net_mv_positions, operation query",
+      "why": "a qualified closure marker exists for 2026-09-23 (measured, 19 markers per master), so the date is real but outside the fixed_dates grant -- the refusal isolates the date dimension",
+      "expected": "refused as outside the granted fixed_dates"
+    }
+  }
+}

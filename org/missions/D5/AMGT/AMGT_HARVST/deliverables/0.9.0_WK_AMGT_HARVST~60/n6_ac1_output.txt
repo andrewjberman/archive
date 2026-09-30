@@ -1,0 +1,84 @@
+=== (a) DEPLOYED opal-amgt-scoped-api /timeline/day: 3 named days + 1 extra, 3 invokes each ===
+  992_HK_Equity 2026-09-23  #1  client_wall=1.657s  REPORT {'duration_ms': 1206.91, 'max_mem_mb': 276}  status=200 articles=0 body_sha256=32b5257d204ee31a
+  992_HK_Equity 2026-09-23  #2  client_wall=1.880s  REPORT {'duration_ms': 1467.93, 'max_mem_mb': 276}  status=200 articles=0 body_sha256=32b5257d204ee31a
+  992_HK_Equity 2026-09-23  #3  client_wall=1.994s  REPORT {'duration_ms': 1444.96, 'max_mem_mb': 277}  status=200 articles=0 body_sha256=32b5257d204ee31a
+  992_HK_Equity 2026-09-23  REPORT duration ms: [1206.91, 1467.93, 1444.96]  median=1445
+  AMZN_US_Equity 2026-09-07  #1  client_wall=5.985s  REPORT {'duration_ms': 5393.19, 'max_mem_mb': 279}  status=200 articles=3 body_sha256=5aecd79e8001bdff
+  AMZN_US_Equity 2026-09-07  #2  client_wall=6.208s  REPORT {'duration_ms': 5647.84, 'max_mem_mb': 279}  status=200 articles=3 body_sha256=5aecd79e8001bdff
+  AMZN_US_Equity 2026-09-07  #3  client_wall=5.922s  REPORT {'duration_ms': 5323.87, 'max_mem_mb': 279}  status=200 articles=3 body_sha256=5aecd79e8001bdff
+  AMZN_US_Equity 2026-09-07  REPORT duration ms: [5393.19, 5647.84, 5323.87]  median=5393
+  HD_US_Equity 2026-08-18  #1  client_wall=5.870s  REPORT {'duration_ms': 5307.11, 'max_mem_mb': 279}  status=200 articles=3 body_sha256=de64cc82313f886e
+  HD_US_Equity 2026-08-18  #2  client_wall=5.823s  REPORT {'duration_ms': 5319.12, 'max_mem_mb': 279}  status=200 articles=3 body_sha256=de64cc82313f886e
+  HD_US_Equity 2026-08-18  #3  client_wall=5.684s  REPORT {'duration_ms': 5210.31, 'max_mem_mb': 276}  status=200 articles=3 body_sha256=de64cc82313f886e
+  HD_US_Equity 2026-08-18  REPORT duration ms: [5307.11, 5319.12, 5210.31]  median=5307
+  992_HK_Equity 2026-08-13  [EXTRA day, not named by the TO]  #1  client_wall=5.696s  REPORT {'duration_ms': 5148.17, 'max_mem_mb': 277}  status=200 articles=2 body_sha256=dac6b73942cbe3af
+  992_HK_Equity 2026-08-13  [EXTRA day, not named by the TO]  #2  client_wall=5.714s  REPORT {'duration_ms': 5255.59, 'max_mem_mb': 277}  status=200 articles=2 body_sha256=dac6b73942cbe3af
+  992_HK_Equity 2026-08-13  [EXTRA day, not named by the TO]  #3  client_wall=5.725s  REPORT {'duration_ms': 5166.63, 'max_mem_mb': 277}  status=200 articles=2 body_sha256=dac6b73942cbe3af
+  992_HK_Equity 2026-08-13  [EXTRA day, not named by the TO]  REPORT duration ms: [5148.17, 5255.59, 5166.63]  median=5167
+
+=== (b) OLD code path, local, same S3 reads (rep 1 = COLD fresh process, reps 2-3 = warm) ===
+--- 992_HK_Equity 2026-09-23  (articles=0)
+  rep 1 COLD total=1.841s | S3 list ops=2 pages=2 (0.538s) | S3 gets=2 bytes=69296 (sum 0.147s) | parquet decode sum=0.330s
+      step gold:chatter_daily                 1.704s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.114s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.023s  lists=0 pages=0 gets=0 bytes=0
+  rep 2 warm total=0.750s | S3 list ops=2 pages=2 (0.101s) | S3 gets=2 bytes=69296 (sum 0.117s) | parquet decode sum=0.006s
+      step gold:chatter_daily                 0.605s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.122s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.023s  lists=0 pages=0 gets=0 bytes=0
+  rep 3 warm total=0.799s | S3 list ops=2 pages=2 (0.103s) | S3 gets=2 bytes=69296 (sum 0.121s) | parquet decode sum=0.006s
+      step gold:chatter_daily                 0.652s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.120s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.026s  lists=0 pages=0 gets=0 bytes=0
+--- AMZN_US_Equity 2026-09-07  (articles=3)
+  rep 1 COLD total=9.200s | S3 list ops=7 pages=7 (0.795s) | S3 gets=111 bytes=4965457 (sum 6.868s) | parquet decode sum=0.642s
+      step silver                             7.323s  lists=5 pages=5 gets=109 bytes=4896161
+      step gold:chatter_daily                 1.740s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.113s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.023s  lists=0 pages=0 gets=0 bytes=0
+  rep 2 warm total=7.836s | S3 list ops=7 pages=7 (0.350s) | S3 gets=111 bytes=4965457 (sum 6.699s) | parquet decode sum=0.282s
+      step silver                             7.188s  lists=5 pages=5 gets=109 bytes=4896161
+      step gold:chatter_daily                 0.523s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.103s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.021s  lists=0 pages=0 gets=0 bytes=0
+  rep 3 warm total=7.837s | S3 list ops=7 pages=7 (0.345s) | S3 gets=111 bytes=4965457 (sum 6.667s) | parquet decode sum=0.288s
+      step silver                             7.157s  lists=5 pages=5 gets=109 bytes=4896161
+      step gold:chatter_daily                 0.543s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.116s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.022s  lists=0 pages=0 gets=0 bytes=0
+--- HD_US_Equity 2026-08-18  (articles=3)
+  rep 1 COLD total=8.773s | S3 list ops=7 pages=7 (0.800s) | S3 gets=111 bytes=4965457 (sum 6.508s) | parquet decode sum=0.606s
+      step silver                             7.001s  lists=5 pages=5 gets=109 bytes=4896161
+      step gold:chatter_daily                 1.627s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.123s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.022s  lists=0 pages=0 gets=0 bytes=0
+  rep 2 warm total=7.818s | S3 list ops=7 pages=7 (0.356s) | S3 gets=111 bytes=4965457 (sum 6.654s) | parquet decode sum=0.291s
+      step silver                             7.162s  lists=5 pages=5 gets=109 bytes=4896161
+      step gold:chatter_daily                 0.522s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.112s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.022s  lists=0 pages=0 gets=0 bytes=0
+  rep 3 warm total=7.679s | S3 list ops=7 pages=7 (0.324s) | S3 gets=111 bytes=4965457 (sum 6.475s) | parquet decode sum=0.314s
+      step silver                             6.981s  lists=5 pages=5 gets=109 bytes=4896161
+      step gold:chatter_daily                 0.573s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.103s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.022s  lists=0 pages=0 gets=0 bytes=0
+--- 992_HK_Equity 2026-08-13  (articles=2)
+  rep 1 COLD total=9.380s | S3 list ops=7 pages=7 (0.837s) | S3 gets=111 bytes=4965457 (sum 6.872s) | parquet decode sum=0.652s
+      step silver                             7.340s  lists=5 pages=5 gets=109 bytes=4896161
+      step gold:chatter_daily                 1.903s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.113s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.024s  lists=0 pages=0 gets=0 bytes=0
+  rep 2 warm total=7.520s | S3 list ops=7 pages=7 (0.350s) | S3 gets=111 bytes=4965457 (sum 6.325s) | parquet decode sum=0.294s
+      step silver                             6.825s  lists=5 pages=5 gets=109 bytes=4896161
+      step gold:chatter_daily                 0.563s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.109s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.023s  lists=0 pages=0 gets=0 bytes=0
+  rep 3 warm total=7.982s | S3 list ops=7 pages=7 (0.350s) | S3 gets=111 bytes=4965457 (sum 6.765s) | parquet decode sum=0.298s
+      step silver                             7.287s  lists=5 pages=5 gets=109 bytes=4896161
+      step gold:chatter_daily                 0.567s  lists=1 pages=1 gets=1 bytes=31953
+      step gold:article_security_mention      0.105s  lists=1 pages=1 gets=1 bytes=37343
+      step join+serve+other                   0.023s  lists=0 pages=0 gets=0 bytes=0
+
+DOMINANT STEP votes over the reps of the days with articles ((cold?, step): n): {(True, 'silver'): 3, (False, 'silver'): 6}
+DOMINANT STEP: silver
+wrote C:\Users\Opal Bloomberg\Desktop\wk-hvst-r24-60\org\missions\D5\AMGT\AMGT_HARVST\deliverables\0.9.0_WK_AMGT_HARVST~60\n6_ac1_profile.json

@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_AMGTV1.TO-AV-t-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_AMGTV1/task-orders/DSGN_AMGTV1.TO-AV-t-2.the-header-reads-as-four-cards.md",
+    "group": "OTHER",
+    "vintage_commit": "907b295b4cf0757d042b1ade501ddff246179c47"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_AMGTV1/decompositions/DSGN_AMGTV1_DECOMP.md",
+    "vintage_commit": "fc8fea95775d0175c4f87155d1c25e348f36ceaa",
+    "to_ref": "org/missions/D13/DSGN/DSGN_AMGTV1/task-orders/DSGN_AMGTV1.TO-AV-t-2.the-header-reads-as-four-cards.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_AMGTV1~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/components/HeaderCards.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "bdf07b6b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal commit bdf07b6b (portal branch wk-DSGN_AMGTV1-2-portal), not the outer gitlink. NEW: HeaderCards (four card buttons) and HeaderCardDetail (window body); HeroDialog + DialogStamp loaded lazily on first open (row DSGN_AMGTV1-Z-W2-S2). tsc --noEmit -p tsconfig.app.json rc=0, 0 lines.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/components/SecurityOverlay.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "bdf07b6b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the STAT_TILE_DEFS.map row replaced by <HeaderCards bundle={bundle} />; two import lines swapped; nothing else moved.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/constants.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "bdf07b6b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "HEADER_CARD_DEFS added (four card definitions as data); STAT_TILE_DEFS left in place unused.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 is the face on Valero's served overlay (four cards in order, each with a lead, no stat tile left) plus an arm with every figure removed (four designed not-carried cards) and no mnemonic in visible text.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; node \"org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/2.0.0_SA_COO~D/round1/checks/t-2.AC1.cjs\"; echo \"exit=$?\"",
+      "expect": "HEADER FOUR CARDS: 3 of 3 arms",
+      "output_evidence": "ARM PASS A four cards in order, each with a lead, no stat tiles :: cards=[price,financials,market_features,trading_technicals] leads=4 stat_tiles=0\nARM PASS B no figures carried: four designed not-carried cards :: cards=4 states=[NOT_CARRIED,NOT_CARRIED,NOT_CARRIED,NOT_CARRIED] leads=4\nARM PASS C no vendor mnemonic in visible text :: A=none B=none\nHEADER FOUR CARDS: 3 of 3 arms\nexit=0",
+      "denominator": "3 of 3 arms; 4 of 4 cards with a lead on the Valero payload; 4 of 4 not-carried cards on the bare payload",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is each card's window body on the same payload (Valero carries no volatility and no trend: those two read NOT_CARRIED).",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; node \"org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/2.0.0_SA_COO~D/round1/checks/t-2.AC2.cjs\"; echo \"exit=$?\"",
+      "expect": "CARD WINDOWS: 5 of 5 arms",
+      "output_evidence": "ARM PASS financials window :: figures=[enterprise_value:SERVED,net_debt:SERVED] wrong=[]\nARM PASS market_features window :: figures=[beta:SERVED,volatility:NOT_CARRIED] wrong=[]\nARM PASS trading_technicals window :: figures=[trend:NOT_CARRIED,avg_volume:SERVED,short_interest:SERVED] wrong=[]\nARM PASS price window :: figures=[price:SERVED,market_cap:SERVED,avg_volume:SERVED] wrong=[]\nARM PASS no vendor mnemonic in any window :: hits=[]\nCARD WINDOWS: 5 of 5 arms\nexit=0",
+      "denominator": "5 of 5 arms; 4 of 4 card windows; 10 figure elements across the four windows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is the bound: the two page harnesses that load this header and read green at the base stay green.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; node \"org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/2.0.0_SA_COO~D/round1/checks/bound.cjs\" HEADER tabs.harness.cjs:20 errorEmpty.harness.cjs:12; echo \"exit=$?\"",
+      "expect": "HEADER BOUND: 2 of 2 harnesses green",
+      "output_evidence": "HARNESS GREEN tabs.harness.cjs :: CHECKS-OK 20 of 20 (floor 20)\nHARNESS GREEN errorEmpty.harness.cjs :: CHECKS-OK 12 of 12 (floor 12)\nHEADER BOUND: 2 of 2 harnesses green\nexit=0",
+      "denominator": "2 of 2 harnesses green (tabs 20 of 20 checks, errorEmpty 12 of 12)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 is JUDGMENT, graded by 3.0.0_SA_CVO~Z at L9 on the issuer's signed-in walk screenshots, never self-graded -- the header reads as four cards on the band and the Financials window reads as the Philosophy modal pattern with its date and source stamp.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment=\"true\": no invocation; the issuer walks the signed-in page and the CVO grades the screenshots at L9",
+      "output_evidence": "Output for the grader, no verdict: the change is portal@bdf07b6b (HeaderCards.tsx; the window is HeroDialog + DialogStamp, stamp = latest figure vintage date | Source: Bloomberg; card buttons use band ink tokens, 1px palette-mediumGray border, no shadow, no translucent white).",
+      "denominator": "N/A -- judgment criterion, ungraded by the worker",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: the substitute oracle is the CVO L9 grade on the issuer walk screenshots; the worker records output and no verdict."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "constants.ts card key 'financials' renamed 'finance' in the worktree only, never staged or committed.",
+      "expected": "AC1 arm A fails (card order/keys no longer price, financials, market_features, trading_technicals).",
+      "observed": "HEADER FOUR CARDS: 2 of 3 arms, exit=1. File restored from a copy and the portal tree read clean before the final runs.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice back-to-back, output md5sum compared.",
+      "observed": "AC1 462b4839e8025cbb9b1d76f0888f5f51 both runs; AC2 678473285c1dbd4282413d898a1b88f3 both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4 judgment (window opening, contrast, layout on the band).",
+      "reason": "Judgment criterion, graded by 3.0.0_SA_CVO~Z at L9 on the issuer walk; static markup with stubbed estate chrome cannot show a window opening."
+    }
+  ],
+  "surprises": [
+    "DSGN_AMGTV1-Z-W2-S1",
+    "DSGN_AMGTV1-Z-W2-S2"
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/0.9.0_WK_DSGN_AMGTV1~2/DSGN_AMGTV1.TO-AV-t-2.the-header-reads-as-four-cards.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "tsc --noEmit",
+      "invocation": "cd portal && npx tsc --noEmit -p tsconfig.app.json",
+      "result": "rc=0, 0 diagnostic lines"
+    }
+  ]
+}

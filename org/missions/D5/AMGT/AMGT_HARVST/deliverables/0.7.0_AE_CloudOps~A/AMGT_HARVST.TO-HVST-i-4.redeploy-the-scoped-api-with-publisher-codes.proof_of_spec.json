@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-i-4.redeploy-the-scoped-api-with-publisher-codes",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-i-4.redeploy-the-scoped-api-with-publisher-codes.md",
+    "group": "C",
+    "vintage_commit": "11b353048314ade5f84660c264dbad31659c0640"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "11b353048314ade5f84660c264dbad31659c0640",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-i-4.redeploy-the-scoped-api-with-publisher-codes.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "ac5bf4de12",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Identity carried here because commit_or_etag takes a commit-ish only: NEW VersionId kABTI4GujV6ALYZiP.yK7AZWQ7ym1tq3, 40098371 bytes, S3 content-sha256 metadata uv0oTSMaW3gDvq0H/pn64hORUYCYFAzWN7OsjC2x+Ng= EQUAL to the locally computed sha256 (upload-integrity control). The deployed function's CodeSha256 after the apply equals this artifact's sha exactly, so the running bytes are the built bytes. PRIOR VersionId 61Fb7L90ggUdpjcXaX4T8CcMgquyzn0U (40097441 B, sha256 960e8d27624b61b4...) is the rollback target named on both halves; AC2 arm (2) confirms it STILL EXISTS, so the BOUNDS' no-S3-delete clause held. 42 versions under the key at the read.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/",
+      "kind": "terraform",
+      "commit_or_etag": "ac5bf4de12",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NO terraform SOURCE CHANGE was made or needed by this cell: the function's code moves through the S3 artifact object, which modules/yang-lambda reads for source_code_hash, so the apply only re-points it. ONE safe-apply, 21:57:11-21:58:02Z, against the exact saved plan that was graded. The plan was read in FULL (24 lines, rendered from i4.tfplan via terraform show): EXACTLY ONE resource, module.scoped_amgt_api.aws_lambda_function.this, update in-place, moving s3_object_version and source_code_hash with last_modified known-after-apply; 28 attributes and 4 blocks unchanged; 'Plan: 0 to add, 1 to change, 0 to destroy.' The order's REFUSAL condition (a plan moving anything other than the scoped API's code) did not fire -- no IAM, route, layer, runtime, memory or timeout movement. Post-apply re-plan: 'No changes. Your infrastructure matches the configuration.'",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260929T2149Z_amgt-harvst-i4-scoped-api-publisher-codes-20260929_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "3fc45f7c44",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Identity carried here because commit_or_etag takes a commit-ish only: opened AND committed 3fc45f7c44 BEFORE the build and verified to read back from the git object store (not the worktree); B0 proof committed 8d8230b17c before the irreversible leg; CLOSED 20260929T220154Z with all 3 legs proven and the sentinel removed. Its Log also carries this seat's CORRECTION to its own B0 proof (see the controls block).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The CLOSURE DIFF was measured against the DEPLOYED OBJECT BY CONTENT rather than inherited from the two halves, and the object's identity was established before it was used as a comparand -- a build-input claim resolved by version label alone is not resolved (CLAUDE.md Rule 22a, CODE layer). Both halves assert the deployed artifact is VersionId 61Fb7L90ggUdpjcXaX4T8CcMgquyzn0U at 40,097,441 B with sha256 960e8d27...; this seat pulled that exact version and recomputed both.",
+      "expected": "The pulled object's size and sha256 equal what the halves state; then an entry-by-entry comparison against the fresh build shows EXACTLY the 3 source files the halves name differing, with no entry added or removed, and nothing unnamed differing (anything else is a STOP).",
+      "observed": "Identity confirmed: 40,097,441 bytes, sha256 960e8d27624b61b4dcf59b650da03d9dc92e35239a6599ac60acc38d13db077b. Entry-by-entry over the WHOLE package, not just the 80-entry source subset: deployed 344 entries, new 344, only-in-deployed NONE, only-in-new NONE -- so no module enters or leaves and the closure SET is unchanged, matching the halves' 'no import line changed' finding. Of 344 common entries exactly 3 differ, and all 3 are source: lib/research/corpus/continuation.py, lib/research/harvest/publication_gold.py, lib/research/harvest/timeline_api.py. NON-SOURCE DIFFERING ENTRIES: 0, so the pyarrow and rpds wheels at the HVST-a-2 pins are byte-identical and the halves' 'plus the wheels' clause is satisfied by their not moving at all. Anything differing the halves do not name: NONE. No STOP fired. All three moving files' PACKAGED bytes also equal CLOUD HEAD (continuation.py 55240 B, publication_gold.py 61299 B, timeline_api.py 18089 B), which is CTO condition 1's first clause. BUDGET (a STOP over 262,144,000 B): 131,726,798 package + 121,743,633 layer = 253,470,431 B, 96.7%, 8,673,569 spare -- under the ceiling, and +3,505 B against the half's 253,466,926 base, the 'kilobytes' it predicted.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "CTO condition 1's second clause: at build time the executor re-confirms continuation.py still has NO request-path caller. Re-traced independently rather than taken from the ruling -- an AST reachability trace over lib/research/corpus/dossier.py asking whether read_dossier reaches any function that imports continuation directly or imports substrate. CARRIES A CORRECTION TO THIS SEAT'S OWN FIRST READING, recorded because it was asserted in a committed leg proof before it was caught.",
+      "expected": "read_dossier's transitive reach should not intersect the importer set. The CTO half enumerates FOUR function-scope continuation importers (_picked_reports:279, _section_block_items:321, _pdf_words_reader:674, _resolved_security_keys:1360) plus 3 substrate importers.",
+      "observed": "VERDICT AS EXPECTED AND UNCHANGED: read_dossier's transitive named-call reach is 5 functions (read_dossier, _read_dossier_detail, _dossier_as_of_date, _list_stored_objects, _pick_newest); the intersection with the importer set is EMPTY; continuation.py is INERT on this function. CORRECTION: my first pass reported FIVE continuation importers against the half's four and called that a discrepancy in the signed half. THAT WAS MY ERROR, NOT THE HALF'S. The fifth, `read`, is a NESTED function inside _pdf_words_reader, and ast.walk() on a FunctionDef descends into nested defs, so the single import at line 674 was attributed twice. THE TELL WAS IN MY OWN OUTPUT AND I DID NOT READ IT: two supposedly distinct functions reported an import at the IDENTICAL line 674, which is impossible unless one encloses the other. Re-counted over module-level defs only: 4, matching the half exactly. The double-count ran in the CONSERVATIVE direction (a larger tainted set), so it could never have produced a false pass -- what it produced was a false claim against a signed half, which is why it is corrected in the ledger entry's Log and here rather than left to stand. No surprise row is filed: there is no defect in the half to carry. STATED LIMIT: the trace follows NAMED calls only and cannot see a call made through a function passed as a value, the same limit the COO half declares. AC2's three RESAPP control routes (992_HK_Equity /thesis, /overlay, /peers) all answer 200 on the new bytes, and that empirical arm is what closes the blind spot the trace cannot.",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any deploy of AMGT_CORPUS's CRPS-p-5 change, and any combined act with it",
+      "reason": "The COO half's AMENDMENT 1 @0abf041dfa, on the CTO closure ruling @3a354b0720, rules i-4 runs ALONE: continuation.py ships INERT, no combined act and no CORPUS pair is owed. The half's earlier condition requiring ONE COMBINED ACT is explicitly SUPERSEDED, with the supersession marker sitting on the superseded bytes where it belongs, so which text governs is unambiguous. CRPS-p-5's own act was store-only and CLOSED 4 of 4 @247d2dace6 under its own pair."
+    },
+    {
+      "item": "Any IAM, route, layer, runtime, memory or timeout change",
+      "reason": "The order's BOUNDS and both halves' NOT-COVERED sections exclude them. The preflight also records that comp-iam finds 4 pre-existing UNRESOLVED/UNGRANTED DynamoDB calls in scoped_amgt.py -- untouched by this cell, and the new code reads the same chatter_daily object the deployed function already reads under the HVST-a-2 gold grant, so no IAM change is needed."
+    },
+    {
+      "item": "Any S3 delete, including of a noncurrent artifact version",
+      "reason": "BOUNDS 2: the prior version IS the rollback. AC2 arm (2) affirmatively verifies 61Fb7L90ggUdpjcXaX4T8CcMgquyzn0U still exists after the act."
+    },
+    {
+      "item": "The portal's rendering of the publisher codes",
+      "reason": "Both halves place it with DSGN_AMGTV1, not this deploy. This cell ships the API that serves the two fields; whether a page draws them is another project's surface."
+    },
+    {
+      "item": "Pushing any commit",
+      "reason": "Shared-branch law: this lane commits LOCAL; 0.0.0_AB_MSTR or 0.0.0_AB_MSTR~Z pushes on Andrew's word."
+    }
+  ],
+  "surprises": [],
+  "session_log": "No session-log path lies inside this lane's <paths> write surface beyond this deliverables folder. The substance is in the acceptance block, the controls block (including this seat's correction to its own B0 reading) and the NEVER-2 entry, opened 3fc45f7c44 and CLOSED 20260929T220154Z with 3 of 3 legs proven. Commits this cell, all LOCAL per shared-branch law: 3fc45f7c44 (entry opened and committed BEFORE the build, verified to read back from the object store), 8d8230b17c (B0 leg proof, committed before the irreversible leg so it would survive a crash), plus the closing commit carrying the A1 and V1 proofs, the correction and this instance. No surprise row was filed for this cell: the one candidate turned out to be this seat's own parser error, not a defect in any artifact.",
+  "compiler_tools": [
+    {
+      "tool": "build-and-upload-scoped-amgt.sh (--build-only first, then the upload)",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh [--build-only <tmp>]",
+      "result": "--build-only FIRST, deliberately, so the closure and the budget could be graded before any irreversible S3 write: rc=0, 344 entries, 40,098,371 B zipped; VERIFY 63 of 63 required modules packaged, missing []; VERIFY-SCOPE module-scope [] and function-scope []; VERIFY-DATA 15 of 15 data members and 8 of 8 vendored packages; ISOLATED battery 3 of 3 arms OK. The full run then uploaded, rc=0, with the local sha256 equal to the object's content-sha256 metadata. NOTE: this script pip-downloads pinned wheels from PyPI, which is egress off Opal infrastructure; it is declared as the cell's egress class (A) and is recorded here rather than treated as authorised by silence."
+    },
+    {
+      "tool": "terraform plan / show / re-plan",
+      "invocation": "terraform plan -out=i4.tfplan -no-color; terraform show -no-color i4.tfplan; terraform plan -no-color (post-apply), in infra/aws/terraform/harvest",
+      "result": "Graded on the WHOLE plan rendered from the saved file (24 lines, read in full) rather than a slice. Exactly one resource, update in-place, moving only s3_object_version and source_code_hash. 'Plan: 0 to add, 1 to change, 0 to destroy.' Post-apply: 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "tool": "safe-apply.sh (CLAUDE.md Rule 18)",
+      "invocation": ".tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -no-color i4.tfplan",
+      "result": "ONE apply against the exact graded plan. ITS EXIT CODE IS DELIBERATELY NOT CITED: the invocation was piped to tail, so the rc observed was TAIL's, not safe-apply's -- the same pipeline trap caught earlier this session. The oracle used instead is the world: live CodeSha256 uv0oTSMaW3gDvq0H/pn64hORUYCYFAzWN7OsjC2x+Ng= equal to the uploaded artifact's sha, LastUpdateStatus Successful, LastModified 21:57:59Z, and a 0-diff re-plan. THE HALT GATE PASS IS ALSO NOT CITED: a live inbox Monitor moves mail before the gate reads and a ~lane seat is unhaltable (ADHC_HALTGT, LD-0267); this seat read its own inbox directly immediately before the apply and it was empty."
+    },
+    {
+      "tool": "deploy_ledger.py (the NEVER-2 contract)",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg|close --slug amgt-harvst-i4-scoped-api-publisher-codes-20260929",
+      "result": "Opened with 3 legs BEFORE the build and committed before the build; B0 closed and committed before the irreversible leg; A1 and V1 closed with proof; entry CLOSED 20260929T220154Z, 'nothing stranded', sentinel removed, and the slug absent from both the open and the drift partitions of `list`."
+    },
+    {
+      "tool": "proof-of-spec-check.py (self-graded before reporting)",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2 --governing-order <the order>",
+      "result": "Run by this seat BEFORE reporting, because the previous instance this seat wrote today (AMGT_RESAPP ww-1) was returned INVALID by the issuer with 4 violations -- schema keys that do not exist and artifact rows with no covering criterion. Grading my own instance first is the cheap way not to spend a peer's turn on it twice."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 RESULT: PASS (0 failure(s))",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round19/checks/i-4.AC1.py",
+      "output_evidence": "TRUE exit=0, taken by REDIRECT and not off a pipe. Final line verbatim: 'AC1 RESULT: PASS (0 failure(s))'. Against deployed CodeSha256 uv0oTSMaW3gDvq0H/pn64hORUYCYFAzWN7OsjC2x+Ng=, LastModified 2026-09-29T21:57:59Z. Eight arms, all PASS: /timeline ASML_NA_Equity HTTP 200 with 272 series days; (1) every series entry carries publishers_covered AND publishers_covered_codes, missing on 0 of 272; series classes PARTIAL=74 DENIED=198 other=0; (2) every PARTIAL entry names >=1 code with len == publishers_covered, bad 0 of 74; (2) every DENIED entry names 0 codes, bad 0 of 198; (2) at least one PARTIAL entry names 'sa'; (3) SERVED CODES == NEWEST LANDED chatter_daily CODES ON EVERY DAY -- 0 unequal of 272 compared, 272 landed days, which is the CTO half's actual condition (the served value must equal the LANDED column, not merely that a field appears); (4) /timeline/day/2026-07-15 HTTP 200 with keys ['articles','data_status','date','publishers_covered','publishers_covered_codes','security_key'] and codes=['sa']; (5) control FDX_US_Equity 200 with every day DENIED and 0 codes, 0 of 272 off. The ASML_NA reading of 74 PARTIAL days at ['sa'] matches the CTO half's predicted 149 PARTIAL days (ASML_NA 74 + ASML_US 74 + 992_HK 1) on its ASML_NA arm exactly. Arm (2)-DENIED, which the issuer's base dry-run notes passed VACUOUSLY at the base because no codes existed anywhere, is real here and passes on 198 days.",
+      "denominator": "272 of 272 series days swept on ASML_NA_Equity; 0 of 272 missing either field; 74 PARTIAL + 198 DENIED + 0 other = 272; 0 of 74 PARTIAL bad; 0 of 198 DENIED bad; 0 unequal of 272 compared against the landed column; 1 of 1 timeline_day read; 0 of 272 off on the FDX control; 8 of 8 arms PASS; 0 failures; exit 0 of an expected 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 RESULT: PASS (0 failure(s))",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round19/checks/i-4.AC2.py",
+      "output_evidence": "TRUE exit=0, taken by REDIRECT and not off a pipe. Final line verbatim: 'AC2 RESULT: PASS (0 failure(s))'. Six arms, all PASS: (1) code moved off the round-19 base lg6NJ2JLYbTc9ZtlDaA9nckuNSOaZZmsYKzDjRPbB3s= -- that base is this seat's own AMGT_RESAPP ww-1 deploy from 19:18:58Z earlier today; (1) LastUpdateStatus Successful; (2) 42 artifact versions under research/opal-amgt-scoped-api.zip with latest kABTI4GujV6ALYZiP.yK7AZWQ7ym1tq3; (2) THE PRIOR VERSION 61Fb7L90ggUdpjcXaX4T8CcMgquyzn0U STILL EXISTS, affirmatively verifying the rollback target survived and that BOUNDS 2's no-S3-delete clause held; (2) a NEW version is latest; (3) all THREE RESAPP control routes answer 200 -- /api/scoped/amgt/security/992_HK_Equity/thesis, /overlay and /peers. Those three controls carry weight beyond their own arm: they are the empirical discharge of the ONE limit declared in the controls block, namely that an AST reachability trace follows named calls only and cannot see a call made through a function passed as a value. continuation.py's inertness rested on a trace with that stated blind spot; these routes exercise the served RESAPP surface on the new bytes and answer 200. NO ROLLBACK TRIGGER FIRED: neither criterion failed and no control route answered non-200, so every trigger condition in both halves is unmet.",
+      "denominator": "2 of 2 build arms PASS; 3 of 3 artifact-version arms PASS (42 versions enumerated, prior present, new latest); 3 of 3 RESAPP control routes 200; 6 of 6 arms PASS; 0 failures; exit 0 of an expected 0.",
+      "status": "PASS"
+    }
+  ]
+}

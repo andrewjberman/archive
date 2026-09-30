@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "2.2",
+  "description": "BD Allocation silver merge - convert the allocation bronze files landed by the live 49F REST session chain to silver parquet. The Playwright portal download this document used to run is removed: BD added MFA and it failed every run since 2026-06-23.",
+  "parameters": {},
+  "mainSteps": [
+    {
+      "action": "aws:runShellScript",
+      "name": "download",
+      "inputs": {
+        "timeoutSeconds": "3600",
+        "runCommand": [
+          "#!/bin/bash",
+          "set -eo pipefail",
+          "cd /opt/bd-exporter",
+          "TODAY=$(date +%Y-%m-%d)",
+          "LOG=/tmp/allocation-download-$TODAY.log",
+          "",
+          "echo \"=== BD Allocation silver merge - $TODAY ===\" | tee $LOG",
+          "",
+          "# NO PORTAL LOGIN AND NO PORTAL CREDENTIALS, BY DESIGN. The Playwright portal download that stood",
+          "# here failed every run since Black Diamond added MFA (~2026-06-23; 70 of 70 dated logs). The allocation",
+          "# bronze is landed daily by the live 49F REST session chain, and the merge below reads it.",
+          "# Order NFRA_MCPINDEX MX-s-14, amendment A2.",
+          "",
+          "# Run allocation silver conversion - capture exit code",
+          "echo \"Running allocation silver conversion...\" | tee -a $LOG",
+          "aws s3 cp s3://opal-data-bd/scripts/merge-daily-incremental.py . 2>&1 | tee -a $LOG || echo 'WARNING: Script download failed' | tee -a $LOG",
+          "set +e",
+          "python3 merge-daily-incremental.py --allocations 2>&1 | tee -a $LOG",
+          "MERGE_RC=${PIPESTATUS[0]}",
+          "set -e",
+          "echo \"Merge exit code: $MERGE_RC\" | tee -a $LOG",
+          "",
+          "# Upload log regardless of outcome",
+          "aws s3 cp $LOG s3://opal-data-bd/logs/allocation-download-$TODAY.log || true",
+          "",
+          "# Arm the shutdown BEFORE the failure branch. The `exit 1` below is what makes SSM report the",
+          "# truth, but an exit that PRECEDES the shutdown strands this t3.medium on every failing run, and",
+          "# no CloudWatch auto-stop exists for it (NFRA_MCPINDEX-Z-S17). Same order as",
+          "# opal-bd-asset-dim-download.",
+          "echo \"Shutting down in 2 minutes...\" | tee -a $LOG",
+          "shutdown -h +2 &",
+          "",
+          "# Exit non-zero if the merge failed so SSM and CloudWatch reflect the failure",
+          "if [ $MERGE_RC -ne 0 ]; then",
+          "  echo \"ERROR: Pipeline failed (merge_rc=$MERGE_RC)\" | tee -a $LOG",
+          "  aws s3 cp $LOG s3://opal-data-bd/logs/allocation-download-$TODAY.log || true",
+          "  exit 1",
+          "fi",
+          "",
+          "echo \"NOTE: bd-price-update is NOT invoked by this document (MX-s-14 carve-out; it has been unreachable since 2026-06-22).\" | tee -a $LOG",
+          "echo \"Done.\" | tee -a $LOG"
+        ]
+      }
+    }
+  ]
+}

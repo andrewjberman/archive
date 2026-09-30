@@ -1,0 +1,62 @@
+== HVST-m-3 AC1: FWD-8 collected-but-undelivered desktop articles vs the served store (READ-ONLY) ==
+main workspace root (derived from git worktree list): C:/Users/Opal Bloomberg/Desktop/ajb_workspace
+paths searched for an inventory: ['C:/Users/Opal Bloomberg/Desktop/ajb_workspace\\.runtime\\opal-data-harvest\\progress.sqlite3']
+inventory source: C:/Users/Opal Bloomberg/Desktop/ajb_workspace\.runtime\opal-data-harvest\progress.sqlite3 (opened mode=ro; size 589824 bytes)
+
+-- inventory counts (table -> rows) --
+  article_objects          120
+  article_aliases          120
+  article_links            121
+  articles                 121
+  upload_outbox            241
+  harvest_raw_outbox       16
+  harvest_listing_outbox   4
+  legacy upload_outbox by (prefix,status): {('publications', 'pending'): 120, ('publication-links', 'pending'): 121}
+  harvest_raw_outbox by (publisher,status): [('sa', 'uploaded', 5), ('wsj', 'uploaded', 11)]
+  NOTE: upload-legacy (HVST-h-9) reads the legacy tables read-only and never marks upload_outbox, so a
+        'pending' outbox row is NOT evidence of an undelivered article; the store match below is.
+
+-- bodies (article_objects) by publisher: {'sa': 46, 'bbg': 19, 'barrons': 15, 'wsj': 26, 'ft': 14}  total 120
+   record files present on this desktop: 120 of 120
+-- links (article_links) by publisher: {'sa': 46, 'bbg': 19, 'barrons': 15, 'wsj': 26, 'ft': 15}  total 121
+
+-- store side (S3 LIST/GET) --
+  sa       bronze article partitions 52 (objects 52) | silver article rows 46 in 35 parts
+  bbg      bronze article partitions 19 (objects 19) | silver article rows 19 in 19 parts
+  barrons  bronze article partitions 15 (objects 15) | silver article rows 15 in 15 parts
+  wsj      bronze article partitions 26 (objects 26) | silver article rows 26 in 26 parts
+  ft       bronze article partitions 14 (objects 14) | silver article rows 14 in 14 parts
+
+-- per-publisher match of the desktop inventory to the store --
+  pub      bodies  brz_key  slv_key  slv_url   in_store     NOT_IN   dup_store
+  sa           46       46       46       41         46          0           0
+  bbg          19       19       19       19         19          0           0
+  barrons      15       15       15       15         15          0           0
+  wsj          26       26       26       15         26          0           0
+  ft           14       14       14       14         14          0           0
+  TOTAL       120      120      120      104        120          0           0
+
+INVENTORY ARTICLES NOT IN THE STORE (by key or URL): 0 of 120
+article_key != publisher:article_id in the inventory: 0 of 120
+DUPLICATES of inventory articles in the store:
+   bronze partitions holding >1 object: 0  []
+   silver article_key in >1 part, SAME record_hash (a re-stored identical row): 0  []
+   silver article_key in >1 part, DIFFERENT record_hash (a changed row appended): 0  []
+
+-- links (article_links, legacy security keys) against silver discovered_for --
+  pair carried in silver discovered_for: 121 | article in silver but pair absent: 0 | article not in silver: 0 | total 121
+   sa       carried 46 | article not in silver 0 | pair absent 0
+   bbg      carried 19 | article not in silver 0 | pair absent 0
+   barrons  carried 15 | article not in silver 0 | pair absent 0
+   wsj      carried 26 | article not in silver 0 | pair absent 0
+   ft       carried 15 | article not in silver 0 | pair absent 0
+  duplicate (security,article) link rows in the inventory: 0
+
+-- store articles (silver article_key) with NO desktop inventory row, by publisher: {} (total 0 of 120 silver keys)
+-- bronze article partitions with NO desktop inventory row, by publisher: {'sa': 6, 'bbg': 0, 'barrons': 0, 'wsj': 0, 'ft': 0} (the SA REST channel's own objects)
+
+-- legacy prefixes in the store (informational) --
+  s3://opal-data-harvest/publications/v1/ objects: 7
+  s3://opal-data-harvest/publication-links/v1/ objects: 7
+
+END AC1 (measured, not graded)

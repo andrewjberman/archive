@@ -1,0 +1,54 @@
+(a) BEFORE: 5 parquet parts under the prefix; newest key = s3://opal-data-harvest/amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T002311Z.parquet
+      part: amgt/harvest/gold/chatter_event/date=2026-09-22/part-20260922T215254Z.parquet  ETag="6979ab7b40383f6341fc935b197684b2"
+      part: amgt/harvest/gold/chatter_event/date=2026-09-23/part-20260923T021336Z.parquet  ETag="6979ab7b40383f6341fc935b197684b2"
+      part: amgt/harvest/gold/chatter_event/date=2026-09-24/part-20260924T134754Z.parquet  ETag="109c67f721261748f7a1e9ef339a926a"
+      part: amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet  ETag="58755afa077103a89063a1c916cef788"
+      part: amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T002311Z.parquet  ETag="5eca38eba5c919a0e0c5c620bb9334b3"
+(a) BEFORE newest snapshot event count = 8 (expected 8)
+      992_HK_Equity    2026-02-12..2026-02-12 id=1b5df12b12348f3ca49da894bde0bbd686cad8ca6af960616036b75de30b4e2c lead=wsj:e23ed60f-5c77-4f8f-8d7f-fcc7368a3da5
+      992_HK_Equity    2026-05-22..2026-05-22 id=3169b045cbd11ba23749dfad4627a54fc8d01f297c89a8a05a116e56b3495a2c lead=sa:4596129
+      992_HK_Equity    2026-08-13..2026-08-13 id=e6ee43d88cf1a91d868d2b0d346a76a73929934654db63ca5c91501ec5db2d95 lead=wsj:6d60459e-90da-40cf-8949-4616279210fc
+      BA_US_Equity     2026-08-26..2026-08-26 id=e0896a56faa0f1d77ce7fbb026d02c8e74815834c24fafcf805ee11d202b1cfb lead=bbg:TKDOGDKJH6V600
+      BA_US_Equity     2026-09-08..2026-09-08 id=852a1466eecda93133dfd953a3017e133169e8282e85735dce02eeeb8d6ed1ac lead=bbg:TL11A6T9NJLS00
+      COST_US_Equity   2026-09-14..2026-09-14 id=e15ab8e93350cde8466264afff0c0aedf667333a545402b103ac19ce41009804 lead=sa:4642623
+      HD_US_Equity     2026-08-18..2026-08-18 id=a91db4a21307cb5810cf2568ecf70bc35ffbe3245f52ea0377588b6e145d0c58 lead=bbg:TJX9W8T96OSJ00
+      NVDA_US_Equity   2026-06-01..2026-06-01 id=f6b88c34c3c1aea35d5e2a6ffd1b6eefd80367d731a7fa5e410182a3ff9ebd6c lead=wsj:e57b5a3a-9b3b-4c15-aad4-f30a21195c84
+(a2) PRE-PUT in-memory outcome: 7 events (expected 7), BA 2026-08-26 gone, the 7 others kept with unchanged lead: True
+(b) producer: publication_gold.main(['build-event', '--securities-json', 'C:\\Users\\Opal Bloomberg\\Desktop\\wk-hvst-r13-39\\org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~4/securities.json', '--as-of', '2026-09-29'])
+(b) write_gold receipt: {"bucket": "opal-data-harvest", "content_length": 6133, "key": "amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T062617Z.parquet", "rows": 7, "uri": "s3://opal-data-harvest/amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T062617Z.parquet"}
+{"events": 7, "events_per_security": {"992_HK_Equity": 3, "BA_US_Equity": 1, "COST_US_Equity": 1, "HAL_US_Equity": 0, "HD_US_Equity": 1, "NVDA_US_Equity": 1, "VLO_US_Equity": 0}, "key": "amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T062617Z.parquet", "securities": 6}
+(b) producer returned rc=0; write_gold calls = 1
+PASS: exactly ONE put (one write_gold call) 
+PASS: receipt rows == 7 rows=7 content_length=6133
+(c) AFTER: 6 parquet parts; newest key = amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T062617Z.parquet
+PASS: newest snapshot IS the one just written newest=amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T062617Z.parquet receipt=amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T062617Z.parquet
+PASS: exactly one part added 5 -> 6
+PASS: newest snapshot (via _latest_gold_snapshot_rows) carries 7 events n=7
+(d) every prior served event and what it became (denominator 8):
+      992_HK_Equity    2026-02-12..2026-02-12  ->  KEPT (same span: True, same tier-A membership: True, lead unchanged: True, articles_total 2 -> 2, tier_a 2 -> 2)
+      992_HK_Equity    2026-05-22..2026-05-22  ->  KEPT (same span: True, same tier-A membership: True, lead unchanged: True, articles_total 3 -> 2, tier_a 2 -> 2)
+      992_HK_Equity    2026-08-13..2026-08-13  ->  KEPT (same span: True, same tier-A membership: True, lead unchanged: True, articles_total 2 -> 2, tier_a 2 -> 2)
+      BA_US_Equity     2026-08-26..2026-08-26  ->  GONE
+      BA_US_Equity     2026-09-08..2026-09-08  ->  KEPT (same span: True, same tier-A membership: False, lead unchanged: True, articles_total 4 -> 2, tier_a 3 -> 2)
+      COST_US_Equity   2026-09-14..2026-09-14  ->  KEPT (same span: True, same tier-A membership: True, lead unchanged: True, articles_total 2 -> 2, tier_a 2 -> 2)
+      HD_US_Equity     2026-08-18..2026-08-18  ->  KEPT (same span: True, same tier-A membership: True, lead unchanged: True, articles_total 2 -> 2, tier_a 2 -> 2)
+      NVDA_US_Equity   2026-06-01..2026-06-01  ->  KEPT (same span: True, same tier-A membership: True, lead unchanged: True, articles_total 3 -> 3, tier_a 3 -> 3)
+      SIX 992_HK_Equity    2026-02-12: exactly one served event with the same span and tier-A membership: True
+      SIX 992_HK_Equity    2026-05-22: exactly one served event with the same span and tier-A membership: True
+      SIX 992_HK_Equity    2026-08-13: exactly one served event with the same span and tier-A membership: True
+      SIX COST_US_Equity   2026-09-14: exactly one served event with the same span and tier-A membership: True
+      SIX HD_US_Equity     2026-08-18: exactly one served event with the same span and tier-A membership: True
+      SIX NVDA_US_Equity   2026-06-01: exactly one served event with the same span and tier-A membership: True
+PASS: the SIX one-company events each EXACTLY ONE served event, same span, same tier-A membership 6 of 6
+(d) BA_US_Equity 2026-08-26 (expected gone): GONE
+(d) new event_ids (all moved, 7 of 7?): 7 of 7 new ids absent from the prior snapshot
+PASS: every event_id unique 7 ids, 7 distinct
+(f) amgt/harvest/gold/chatter_event/date=2026-09-22/part-20260922T215254Z.parquet ETag before="6979ab7b40383f6341fc935b197684b2" HEAD="6979ab7b40383f6341fc935b197684b2" unchanged=True
+(f) amgt/harvest/gold/chatter_event/date=2026-09-23/part-20260923T021336Z.parquet ETag before="6979ab7b40383f6341fc935b197684b2" HEAD="6979ab7b40383f6341fc935b197684b2" unchanged=True
+(f) amgt/harvest/gold/chatter_event/date=2026-09-24/part-20260924T134754Z.parquet ETag before="109c67f721261748f7a1e9ef339a926a" HEAD="109c67f721261748f7a1e9ef339a926a" unchanged=True
+(f) amgt/harvest/gold/chatter_event/date=2026-09-28/part-20260928T210944Z.parquet ETag before="58755afa077103a89063a1c916cef788" HEAD="58755afa077103a89063a1c916cef788" unchanged=True
+(f) amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T002311Z.parquet ETag before="5eca38eba5c919a0e0c5c620bb9334b3" HEAD="5eca38eba5c919a0e0c5c620bb9334b3" unchanged=True
+PASS: ALL 5 prior parts exist at their own keys with ETag unchanged 5 of 5
+S3 KEY WRITTEN: s3://opal-data-harvest/amgt/harvest/gold/chatter_event/date=2026-09-29/part-20260929T062617Z.parquet
+RESULT: PASS (0 failure(s))
+rc=0

@@ -4,6 +4,26 @@
 record @bda25438c8). **Unblocks:** NFRA_OPALAI FWD-1 (the Analyst answers a colleague in Teams from its own account)
 and NFRA_MCPORTAL FWD-1 (you change a colleague's access from the dashboard).
 
+**CURRENT PATH -- Andrew's gate answers of 2026-09-28 ~15:2xZ-16:0xZ supersede Parts A-C below where they differ**
+(`org/tier1_exec/2.0.0_SA_COO~O/ANDREW_DIRECT_20260928_152xZ_NFRA_GATES_ANSWERED.md`):
+- Parts A and B (G-ACCT): an ELEVATED agent session runs them, not Andrew by hand, from the handoff
+  `org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/HANDOFF_G-ACCT_ELEVATED_20260928.md`.
+- Part B step 4 (G-AUTH): no browser sign-in. `claude setup-token` on the dedicated Analyst account sets Opal_Agent's
+  `CLAUDE_CODE_OAUTH_TOKEN`, and the gateway sign-in as Opal Bloomberg takes ONE relayed MFA.
+- Part C (G-ASKER): the colleague is Menachem, asking which clients hold which Opal assets, NOT Alyssa Keith. His grant
+  waits on his verified tid/oid (NFRA_OPLGTW G-E). Whether the A1 close run can also use Alyssa is asked of Andrew.
+- Part D: unchanged. G-HDR is done; the header carries `sub` and `exp` (MCPORTAL PRD v0.3).
+
+**RE-CONFIRMED after the reboot (`2.0.0_SA_COO~O`, 2026-09-28 ~20:1xZ): ALL FOUR MET**, each measured that session
+(`org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/SWITCHOVER_PRECONDITIONS_RECONFIRM_20260928.md`
+@c0030ea9db). Two deltas from the text below: the gateway now serves `6a98a0553a` (OG-s-1's sprint-owner release; CORRECTED from `fe94911257` per
+`2.0.0_SA_COO~O` @e992df46c4, the live `.env`'s `SPRINT_VIEW_ALLOWED_EMAILS` key being the discriminator), which contains
+`fe94911257`,
+`df724ef284`, `1f7128201a` and `c5f8099440`; and `C:\opal_runtime\opal_ai` already exists as an EMPTY directory, which
+step 0's clone accepts.
+**UPDATE ~20:2xZ (`2.0.0_SA_COO~AI`, @73e5968e67):** step 0 is now DONE -- a full clone at PROD `fd8ab8a57f` -- and
+Part C's grant is ACTIVE. Start at Part A step 1.
+
 **Precondition status (`2.0.0_SA_COO~O`, 2026-09-26 ~09:5xZ): ALL FOUR MET.**
 - (a) MET. `opal_ai` DEV and PROD are both at `fd8ab8a57f` on origin. `0.0.0_AB_MSTR~Z` pushed them (msg
   20260925T235909Z) and verified by `ls-remote`.

@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-vv-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-vv-5.fwd30s-harness-reads-the-redesigned-page.md",
+    "group": "OTHER",
+    "vintage_commit": "d87419d386beb84c8276349add7a1a0988ab00b6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "d87419d386beb84c8276349add7a1a0988ab00b6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-vv-5.fwd30s-harness-reads-the-redesigned-page.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~168",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/exportCompare.harness.cjs",
+      "kind": "test",
+      "commit_or_etag": "ed109cedcfe977a2b86dd944250441187f9d757d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two edits. (1) STUBS gains '@/ui/components/graphic/HeroGraphic': { HeroDialog: nothing, DialogStamp: nothing } (ThesisCards.tsx:29 static import; the dialog is closed at render so it shows nothing). (2) pageFigures() also reads data-card-figure-state=\"SERVED\" data-card-figure-mnemonic=\"<M>\" as header|<M>, and because HeaderCards.tsx renders those attributes only inside a card's window (HeaderCardDetail, shown on click; the static page render shows only the card lead), the harness renders each HEADER_CARD_DEFS card's own HeaderCardDetail off the same overlay and feeds that markup to pageFigures() only. data-stat-tile read kept; ABSENCES/CITES/CASES still read combinedHtml unchanged. LOCAL portal commit only, never pushed; portal gitlink not committed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round47/checks/vv-5.AC1.sh; echo \"exit=$?\" -- expect: FWD-30 HARNESS READS THE REDESIGNED PAGE: YES (harness rc=0; sets exact (missing=0 extra=0): 4 of 4; FIGURES page=182) -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round47/checks/vv-5.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "VERBATIM (capture org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~168/vv-5.AC1.out.txt):\nFIGURES page=182 rich=182 same=182 missing=0 extra=0\nCITES page=0 rich=0 same=0 missing=0 extra=0\nABSENCES page=17 rich=17 same=17 missing=0 extra=0\nCASES page=3 rich=3 same=3 missing=0 extra=0\nharness rc=0; sets exact (missing=0 extra=0): 4 of 4\nFWD-30 HARNESS READS THE REDESIGNED PAGE: YES\nexit=0\nIntermediate reading with only the HeroGraphic stub (before the card-detail render): FIGURES page=176 rich=182 same=176 missing=0 extra=6, sets 3 of 4, rc=1 -- the header|<mnemonic> figures reach the DOM only inside a card window, so reading the attribute alone was not enough.",
+      "denominator": "4 of 4 sets exact (missing=0 extra=0); FIGURES 182 of 182; harness rc=0 of expected 0; 1 of 1 served fixture (1299_HK_Equity)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round46/checks/uu-2.AC2.sh; echo \"exit=$?\" -- expect: THE VERDICT COUNTS A DROPPED ABSENCE (tokens, not rc): 2 of 2 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round46/checks/uu-2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "VERBATIM (capture org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~168/uu-2.AC2.out.txt):\nRKT_LN_Equity: harness rc=1; ABSENCES page=33 rich=32 same=32 missing=1 extra=0; EXPORT-COMPARE NOT OK\nAMD_US_Equity: harness rc=1; ABSENCES page=31 rich=30 same=30 missing=1 extra=0; EXPORT-COMPARE NOT OK\nTHE VERDICT COUNTS A DROPPED ABSENCE (tokens, not rc): 2 of 2\nexit=0",
+      "denominator": "2 of 2 pre-fix exports still read missing=1 and EXPORT-COMPARE NOT OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2 is the difference control: the pre-fix RKT_LN_Equity and AMD_US_Equity exports, run through the edited harness, must still read a dropped absence and NOT OK.",
+      "expected": "missing=1 and EXPORT-COMPARE NOT OK on both, 2 of 2, exit=0",
+      "status": "FIRED-AS-EXPECTED",
+      "observed": "FIRED AS EXPECTED: RKT_LN_Equity ABSENCES page=33 rich=32 missing=1 EXPORT-COMPARE NOT OK; AMD_US_Equity ABSENCES page=31 rich=30 missing=1 EXPORT-COMPARE NOT OK; 2 of 2. The added figure read did not blind or loosen the instrument."
+    },
+    "determinism": {
+      "method": "vv-5.AC1.sh and uu-2.AC2.sh each run in a second fresh process after the portal commit and the outputs compared byte for byte with the first captures (cmp).",
+      "observed": "STABLE: both captures byte-identical (cmp rc=0 on each); FIGURES page=182 rich=182 in both.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any page, export, Python or fixture file",
+      "reason": "Order bound 1: the harness file only."
+    },
+    {
+      "item": "Flip of the order's <status> to complete",
+      "reason": "The task order file is not in this order's <paths> write grant (harness, own deliverables folder, INVESTIGATION_v1.md); the issuer flips it."
+    }
+  ],
+  "surprises": [],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface.",
+  "compiler_tools": [
+    {
+      "tool": "node driving exportCompare.harness.cjs (installed typescript transpiles the actual components; react-dom/server renders them)",
+      "invocation": "see AC1",
+      "result": "rc=0, 4 of 4 sets exact"
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-o-3.silver-latest-tie-break-on-run-stamp",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-o-3.silver-latest-tie-break-on-run-stamp.md",
+    "group": "OTHER",
+    "vintage_commit": "65aa9251bc3a07c38e5ffe386c50b69bf1a2ece4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "65aa9251bc3a07c38e5ffe386c50b69bf1a2ece4",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-o-3.silver-latest-tie-break-on-run-stamp.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~63",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~63, L7 subagent of 2.0.0_SA_COO~H, worktree wk-hvst-r25-63 on branch wk-AMGT_HARVST-63 cut from 65aa9251bc, TREE-OK. Read-only S3 LIST/GET (a proxy exposing nothing else); no PUT, no delete, no vendor call, no deploy, no silver written. Change: store.py gains part_order_key and supersedes (a strictly newer fetched_at wins; on a tie the part with the later run_stamp wins, a -r<n> collision-retry suffix sorting after its base stamp) and silver_latest calls it; publication_gold._latest_articles_for_keys calls the same store.supersedes; _iter_latest_articles delegates to silver_latest. The census found a fourth newest-wins reader outside the paths (silver_from_bronze.rows_by_company_mention) -> row Z-W63-S1. The served silver has 0 tied keys, so all 4 named /timeline/day bodies are byte-identical under the old and new rule. MEASURED.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/store.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds part_order_key and supersedes; silver_latest applies them. Readers only; no served silver written; not redeployed (the scoped-API redeploy and the paired rebuild are later orders).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/publication_gold.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_latest_articles_for_keys calls store.supersedes with per-source held part keys; _iter_latest_articles gains a comment only. publisher_coverage, daily_rows and build_daily untouched (HVST-o-1's).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_o3_silver_tie_break.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "19 offline tests against an in-memory S3.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_timeline_day_read_path.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One assertion and its comment updated from 'tie keeps the first part' to 'tie goes to the later run_stamp'.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~63/scripts/o3_ac2_readers_and_served_ties.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only: S3 LIST/GET through a proxy that refuses every other call.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "all pass, with the pass count printed; for EACH newest-wins silver reader two plants: a same-fetched_at row in a LATER part is the one returned, and a same-fetched_at row in an EARLIER part is not; a strictly newer fetched_at in an earlier-stamped part still wins; a mutant reverting any one reader to first-in-listing-order fails",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_o3_silver_tie_break.py -rA --tb=line",
+      "output_evidence": "rc 0 (timeout 900). Final line: '19 passed in 0.99s'. Tests passed: test_tie_goes_to_the_later_run_stamp_and_newer_fetched_at_still_wins x6 (3 readers x natural/reversed layout, incl. the strictly-newer-fetched_at-in-the-EARLY-stamp-part plant), test_earlier_part_tie_row_is_not_returned x6, mutants x4 (silver_latest reverted -> silver_latest and _iter_latest_articles plants fail; _latest_articles_for_keys reverted -> its plants fail; shared comparator reverted -> all 3 readers fail; last-in-listing-wins -> all 3 fail on the reversed layout), test_part_order_key_sorts_stamps_and_collision_retry_suffixes, test_supersedes_rule, test_a_rebuilt_row_keeping_its_fetched_at_supersedes_through_silver_append. Full output: o3_ac1_output.txt",
+      "denominator": "19 tests: 12 plant tests (3 readers x 2 plants x 2 layouts), 4 mutants, 3 comparator/integration tests; 19 of 19 passed",
+      "status": "PASS",
+      "expect": "19 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the census of newest-wins silver readers under lib/ with file:line and the pattern searched (denominator printed); over the SERVED silver of every source, the count of record keys whose newest fetched_at is tied across parts (a zero printed as a zero) and, for each tie, which row the old and new rule pick; and the /timeline/day body sha256 for AMZN_US_Equity 2026-09-07, HD_US_Equity 2026-08-18, 992_HK_Equity 2026-08-13 and 992_HK_Equity 2026-09-23 under the old and new rule, equal when no served tie touches them",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~63/scripts/o3_ac2_readers_and_served_ties.py",
+      "output_evidence": "rc 0 (timeout 900); full output o3_ac2_output.txt. Census: 'denominator: 345 .py files scanned under lib/ (tests included in the scan, marked TEST)'; 'hits: 30 in production files, 29 in test files'; newest-wins readers: store.silver_latest (store.py:373), publication_gold._iter_latest_articles (:760, delegates), publication_gold._latest_articles_for_keys (:844), plus silver_from_bronze.rows_by_company_mention (:406, OUTSIDE paths -> row Z-W63-S1). Served ties: 'TOTAL over 8 (source, table) pairs read: record keys=489  tied across parts=0  picks that move old->new=0' (each of the 8 pairs prints 'tied newest-fetched_at across parts=0'). Bodies, OLD sha == NEW sha: AMZN_US_Equity 2026-09-07 5aecd79e8001bdff9a4d8ab032b4ee01d8893e47d25349815448f217455c53e5; HD_US_Equity 2026-08-18 de64cc82313f886e39dec240939f3fd59cbbebc387b0b96d62003d3e42bd931b; 992_HK_Equity 2026-08-13 dac6b73942cbe3af8347a8628b67d4393a984856cd12ed0da0b08c3b917209fe; 992_HK_Equity 2026-09-23 32b5257d204ee31a08411476b83aa7db4378a3113fccf3d710341bc6630499ed. Deciding line: 'OLD==NEW byte-equal on 4 of 4 named days'",
+      "denominator": "10 (source, table) silver pairs listed, 8 read (2 listing_hit tables are not collapsed by any reader), 489 record keys, 0 tied; 345 .py files scanned for the census; 4 of 4 named days OLD==NEW",
+      "status": "PASS",
+      "expect": "tied across parts=0.*OLD==NEW byte-equal on 4 of 4 named days"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "no test that passed at the base fails (base and after pass counts printed)",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest/tests/ lib/research/api/tests/test_timeline_routes.py -rA --tb=line",
+      "output_evidence": "rc 0 (timeout 900). BASE (65aa9251bc, git archive of lib/ + integrations/ run in a scratch copy): '239 passed'. AFTER (this worktree): '258 passed' = 239 base + 19 new in test_o3_silver_tie_break.py; 0 failed at either. One base test's assertion was edited in place: test_timeline_day_read_path.py::test_timeline_day_body_byte_equal_before_and_after_the_read_path_change asserted the OLD tie rule ('sa2 tie A', first part); it now asserts 'sa2 tie B' (later run_stamp); it passes at base and after. Full output: o3_ac3_output.txt",
+      "denominator": "258 of 258 passed after; 239 of 239 passed at base; 0 base-passing tests fail",
+      "status": "PASS",
+      "expect": "258 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Adversary arm: one reader keeps the old first-in-listing-order rule while the others move (the page and the builder then disagree on the current row).",
+      "expected": "the plants fail for the reverted reader and only for it; reverting the shared comparator fails all three readers",
+      "observed": "4 mutant tests pass inside the 19: silver_latest reverted -> silver_latest and _iter_latest_articles plants raise AssertionError while _latest_articles_for_keys still passes; _latest_articles_for_keys reverted -> its plants fail while silver_latest passes; shared supersedes reverted to '>' -> 3 of 3 readers fail; '>=' (last-in-listing wins) -> 3 of 3 fail on the reversed layout.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 run twice against the same store (the second after tightening the census pattern only)",
+      "observed": "the served-tie section (0 tied of 489 record keys) and the four body sha256 values are identical across both runs; S3 call counts identical (125 LIST, 118 GET)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any silver write, deploy, or vendor call",
+      "reason": "Standing clause 0.1 and section 3 of the order; the paired served rebuild is HVST-o-4."
+    },
+    {
+      "item": "silver_from_bronze.rows_by_company_mention (lib/opal_data_harvest/silver_from_bronze.py:406)",
+      "reason": "Outside the order's <paths>; it takes rows with no part name and has no production caller. Filed as row AMGT_HARVST-Z-W63-S1."
+    },
+    {
+      "item": "A tie between two rows inside ONE run_stamp (the same part name under two date partitions)",
+      "reason": "The rule names run_stamp only; such a tie keeps the row read first, as before. None exists in the served silver (0 same-part duplicates at max fetched_at in every pair)."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W63-S1: a fourth newest-wins reader, silver_from_bronze.rows_by_company_mention, is outside the order's paths and keeps the first-seen tie rule; it has no production caller"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~63 <0.9.0_WK_AMGT_HARVST~63@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see the worker report"
+    }
+  ]
+}

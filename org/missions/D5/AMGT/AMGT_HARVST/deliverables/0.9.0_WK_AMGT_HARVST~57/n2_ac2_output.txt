@@ -1,0 +1,46 @@
+AC2 - REAL sa bronze objects rebuilt IN MEMORY by the new builder (S3 GET/LIST only; nothing written)
+sa bronze article objects listed: 52
+served sa silver article rows read: 46 (distinct bronze_key 46, distinct article_key 46)
+bronze objects by received-form: as_received=5, normalised_record=41, unlabelled=6
+bronze objects with a served silver row: 46; WITHOUT: 6
+rebuilt in memory: 52 rows (one per bronze object)
+
+FIELDS (JSON:API bronze = data/included/meta envelope: 11 of 52 objects; the other 41 are normalised_record objects)
+BEFORE (served silver rows): articles missing >=1 bronze field: 5 of 5 served JSON:API rows; fields: links(5), meta.page(5), meta.path(5), meta.proStatus(5), meta.redirectPath(5), type(5)
+AFTER  (rebuilt in memory): articles missing >=1 bronze field: 0 of 11 JSON:API objects rebuilt (as_received + unlabelled); fields: (none)
+missing count over the 5 as_received articles: BEFORE 5 -> AFTER 0
+the six named fields: rebuilt row value == bronze value, per JSON:API object (BEFORE = present in the served row):
+    links              AFTER kept-and-equal in 11 of 11 rebuilt JSON:API rows; BEFORE present in 0 of 5 served JSON:API rows
+    type               AFTER kept-and-equal in 11 of 11 rebuilt JSON:API rows; BEFORE present in 0 of 5 served JSON:API rows
+    meta.path          AFTER kept-and-equal in 11 of 11 rebuilt JSON:API rows; BEFORE present in 0 of 5 served JSON:API rows
+    meta.page          AFTER kept-and-equal in 11 of 11 rebuilt JSON:API rows; BEFORE present in 0 of 5 served JSON:API rows
+    meta.redirectPath  AFTER kept-and-equal in 11 of 11 rebuilt JSON:API rows; BEFORE present in 0 of 5 served JSON:API rows
+    meta.proStatus     AFTER kept-and-equal in 11 of 11 rebuilt JSON:API rows; BEFORE present in 0 of 5 served JSON:API rows
+    arrow types of the new columns: links=struct<self: string, canonical: string, uriImage: string, schemaImage: list<item: string>>, type=string, meta=struct<proStatus: int64, page: struct<title: string, description: string, robots_meta_tag: string>, path: string, redirectPath: null>
+
+THE 6 bronze objects with NO served silver row:
+    20260911T040311Z.json | form=unlabelled | data.type=fullArticle | article=True | ROW BUILT sa:4943384 | Boeing Needs To Come Down From Orbit (Rating Downgrade) | text_blocks=4 | article_key already in served silver: no
+    20260911T040348Z.json | form=unlabelled | data.type=fullArticle | article=True | ROW BUILT sa:4934799 | Costco: Don't Count On A Sustained Share Price Recovery | text_blocks=5 | article_key already in served silver: no
+    20260911T040307Z.json | form=unlabelled | data.type=fullArticle | article=True | ROW BUILT sa:4943496 | Boeing And Airbus: A Surprisingly Close Race | text_blocks=4 | article_key already in served silver: no
+    20260911T040227Z.json | form=unlabelled | data.type=fullArticle | article=True | ROW BUILT sa:4941330 | Alibaba: Three-Year AI CapEx Payback Period Silence Bear | text_blocks=7 | article_key already in served silver: no
+    20260911T040351Z.json | form=unlabelled | data.type=fullArticle | article=True | ROW BUILT sa:4934221 | Costco: Bears Have Been Calling It Overpriced For Years, | text_blocks=4 | article_key already in served silver: no
+    20260911T040224Z.json | form=unlabelled | data.type=fullArticle | article=True | ROW BUILT sa:4944152 | Alibaba: Decoding The AI Pivot Beyond Insider Signals | text_blocks=1 | article_key already in served silver: no
+unlabelled objects: 6; articles (data.type fullArticle) -> a row built: 6; not an article (no row, reason named): 0
+ASSUMED for these rows (not derivable from bronze): retrieval_mode='backfill', fetched_at/run_stamp = the stamp in the bronze key, discovery = none (discovered_for null)
+
+SERVED ROWS THAT WOULD MOVE (denominator = 46 served sa silver article rows; each compared with the row rebuilt from its own bronze object):
+  value-level: served rows whose rebuilt row differs on >=1 column: 5 of 46; unchanged: 41 of 46
+  columns that differ (rows): links(5), meta(5), type(5)
+    MOVES sa:4640871 (as_received) | links, meta, type
+    MOVES sa:4411819 (as_received) | links, meta, type
+    MOVES sa:4429803 (as_received) | links, meta, type
+    MOVES sa:4640637 (as_received) | links, meta, type
+    MOVES sa:4411320 (as_received) | links, meta, type
+  hash-level (the silver_append skip test): store.record_hash(rebuilt) != served record_hash: 5 of 46
+  positive control: served rows whose OWN read-back re-hash equals their stored record_hash: 46 of 46
+  rows whose hash differs but no column value does (read-back drift, not a builder change): 0
+  moved rows by received-form: as_received=5
+  every OTHER served row unchanged: 41 of 46
+  rows ADDED by the rebuild (bronze objects with no served row): 6 -> served silver rows 46 -> 52 if applied
+
+WRITABLE in memory: rows that would be appended (moved + new) = 11, in 3 fetch-date group(s); 3 of 3 groups round-trip through pa.Table.from_pylist + pq.write_table

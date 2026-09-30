@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-n-5.backfill-plan-for-every-covered-name",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-n-5.backfill-plan-for-every-covered-name.md",
+    "group": "OTHER",
+    "vintage_commit": "d357a9e247fa4cd6bcd272378eb4c70fdb4c31ad"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "d357a9e247fa4cd6bcd272378eb4c70fdb4c31ad",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-n-5.backfill-plan-for-every-covered-name.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~59",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~59, L7 subagent of 2.0.0_SA_COO~H, worktree wk-hvst-r24-59 on branch wk-AMGT_HARVST-59 cut from d357a9e247, TREE-OK. PLAN only: S3 LIST/GET on s3://opal-data-harvest/ (stored listings, silver watermark), no put, no vendor call, no fetch, no backfill, no deploy. Two rows filed: Z-W59-S1, Z-W59-S2.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~59/scripts/n5_ac1_backfill_plan.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Planning script; drives the collector's own plan command per name; S3 LIST/GET only.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~59/n5_backfill_plan.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The plan: 191 names, pages per publisher with basis, totals; nothing run.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~59/n5_ac1_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim output of the literal AC1 invocation, rc 0, byte-identical on a second run.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "A PLAN written to deliverables/0.9.0_WK_AMGT_HARVST~59/n5_backfill_plan.json and printed: for each of the 191 covered names (Lenovo first), pages per publisher back to 2026-01-01 with each count's basis (MEASURED from a stored listing size, or DEFAULT with the default named), the per-name, per-publisher and grand totals, the count of MEASURED vs DEFAULT page figures, the Seeking Alpha leg marked WAITS-ON-RENEWAL, and the planning code named by file:line. PASS only if all 191 names appear and every page count carries its basis",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~59/scripts/n5_ac1_backfill_plan.py",
+      "expect": "all 191 names present, every page count carries its basis: True",
+      "output_evidence": "rc 0 (run as: timeout 900 <the invocation>); full output n5_ac1_output.txt. Deciding lines: 'PLAN (no vendor call, no fetch, no S3 write) floor=2026-01-01 names=191 first=992_HK_Equity'; 'per-publisher totals: {\"sa\": 4759, \"bbg\": 4775, \"ft\": 4775, \"wsj\": 4775, \"barrons\": 4775}'; 'GRAND TOTAL pages: 23859 (excluding SA: 19100); planner cap-only grand total: 23875'; 'figures: 955 total, MEASURED=3, DEFAULT=952'; 'SA leg: WAITS-ON-RENEWAL'; 'all 191 names present, every page count carries its basis: True'. Planning code: lib/opal_data_harvest/__main__.py:104-135 (plan command, cap fallback :122), config.json:21-27, harvest_grammar.py:157-165 (backfill_bound), publishers.py:142.",
+      "denominator": "191 of 191 names, 955 of 955 page figures carry a basis (3 MEASURED, 952 DEFAULT of 25)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Adversary arm: page counts that are guesses printed as if known. Every figure carries basis MEASURED or DEFAULT with the default named; the 952 DEFAULT figures are the planner's 25-page cap, printed as DEFAULT, and the cap-only total is printed beside the refined one.",
+      "expected": "most figures DEFAULT because few listing sizes are stored",
+      "observed": "MEASURED=3 of 955 (Seeking Alpha Lenovo 9, ASML NA and ASML US 26 capped to 25); DEFAULT=952",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "literal invocation run twice against the same store",
+      "observed": "both outputs byte-identical (cmp)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, vendor call, fetch, backfill run, lib/ change or deploy",
+      "reason": "Standing clause 1; the cell plans only."
+    },
+    {
+      "item": "Resolving Seeking Alpha symbols for the 190 names without one",
+      "reason": "Out of scope; filed as AMGT_HARVST-Z-W59-S2."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W59-S1",
+    "AMGT_HARVST-Z-W59-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~59 <0.9.0_WK_AMGT_HARVST~59@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see the worker report"
+    }
+  ]
+}

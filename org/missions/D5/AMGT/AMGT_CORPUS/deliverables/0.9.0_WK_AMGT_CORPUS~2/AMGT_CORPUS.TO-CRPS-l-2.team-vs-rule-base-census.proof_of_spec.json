@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-l-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-l-2.team-vs-rule-base-census.md",
+    "group": "OTHER",
+    "vintage_commit": "f59d76dee87dc4ead2997f5a77584833d79ed4ee"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "f59d76dee87dc4ead2997f5a77584833d79ed4ee",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-l-2.team-vs-rule-base-census.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/base_census.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "NEW read-only census. Pairs each resolved name's team Base Price (served dossier, year = the rule's consensus EPS fiscal_year, else the team's first year) with the rule Base (SERVED value, or ratio_to_px_last x px_last.value when the band refused it). Live run over 95 names: base_census names 95 both 22 team_only 6 rule_only 49 neither 18 within_10pct 5 beyond_2x 8 median_ratio 0.6931.",
+      "introduces": [
+        "rule_figure",
+        "team_figure",
+        "pair_one",
+        "run",
+        "main"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_base_census.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "8 offline tests under the package poison: SERVED pair, band-refused ratio x px reconstruction, rule-year pairing, first-year fallback, rule-only/neither causes, team-lacks-year, partition sums to N with band counts, dossier read failure as a reason.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Row AMGT_CORPUS-Z-W2-S12 appended (OBSERVATION, INERT).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round10/l2_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round10/l2_AC1.sh",
+      "output_evidence": "........                                                                 [100%]\n8 passed in 1.11s",
+      "denominator": "8 of 8 tests passed, 0 failed",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round10/l2_AC2.sh -- expect ADBE line and base_census line",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round10/l2_AC2.sh",
+      "output_evidence": "base ADBE_US_Equity team 233.0000 rule 793.1023 ratio 0.2938 year 2026E rule_status ABSENT team_unit none listing USD\nbase_census names 95 both 22 team_only 6 rule_only 49 neither 18 within_10pct 5 beyond_2x 8 median_ratio 0.6931",
+      "denominator": "95 names; 22+6+49+18 = 95; within_10pct and beyond_2x counted over the 22 both",
+      "expect": "(?ms)^base ADBE_US_Equity team \\S+ rule \\S+ ratio \\S+.*^base_census names [1-9]\\d* both [1-9]\\d* team_only \\d+ rule_only \\d+ neither \\d+ within_10pct \\d+ beyond_2x \\d+ median_ratio \\S+",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "full census run twice (the .scratch run and the AC2 run)",
+      "observed": "identical summary line both runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": ".scratch/l2/mutant.py (not committed): a band-refused ADBE-shaped block (ABSENT, ratio_to_px_last 3.319, px_last 238.93, FY2026) paired with a team Base Price 2026E 233, through the real pair_one; the MUTANT replaces rule_figure with one that skips the ratio x px reconstruction for non-SERVED blocks.",
+      "expected": "FIX classifies the name 'both'; MUTANT classifies it 'team_only', so the reconstruction is what pairs ADBE.",
+      "observed": "FIX both; MUTANT team_only (run twice, identical).",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, derive, or vendor call",
+      "reason": "BOUNDS: the census only lists and gets S3 objects through dossier.read_dossier and dossier._model_block_read; tests run under the poison."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W2-S12"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "bash l2_AC1.sh",
+      "result": "rc 0; 8 passed"
+    },
+    {
+      "tool": "base_census (AC2)",
+      "invocation": "bash l2_AC2.sh",
+      "result": "rc 0; names 95 both 22 team_only 6 rule_only 49 neither 18"
+    }
+  ]
+}

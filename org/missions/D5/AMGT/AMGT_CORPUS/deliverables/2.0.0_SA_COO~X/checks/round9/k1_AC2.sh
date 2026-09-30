@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# AMGT_CORPUS round 9 -- check as a file (spine v3.19 L6): k1_AC2. Run from the repo root under the worker timeout.
+cd "$(git rev-parse --show-toplevel)" || exit 2
+export PYTHONPATH=.
+python -m lib.research.corpus.dossier --case-census 2>&1 | grep -E "^case_census |Traceback|Error|error:" | tail -3

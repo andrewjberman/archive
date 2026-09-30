@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-n-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "81af5f02c0",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-n-1.gateway-eip.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "81af5f02c0"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/eip.tf",
+      "kind": "config_data",
+      "commit_or_etag": "062e036d54",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply targeted apply rc=0; eip 3.214.118.242 eipalloc-093d97376b28d2388 associated eipassoc-03d10cd025b196726 with i-07dccb1615503ac99; old address 54.197.78.28.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260929T1940Z_nfra-oplgtw-gateway-eip_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "473217c119",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 ledger nfra-oplgtw-gateway-eip opened 062e036d54, closed 473217c119, 2 legs proven, sentinel removed.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- one Elastic IP is associated with the instance, and it equals the instance's public IP.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/eip.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "addresses associated with i-07dccb1615503ac99=1; association=eipassoc-03d10cd025b196726; eip=3.214.118.242; instance public ip=3.214.118.242\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 address associated with the instance",
+      "status": "PASS",
+      "expect": "(?s)associated with i-07dccb1615503ac99=1.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the root declares both resources, and a plan TARGETED at them reports no changes.",
+      "method": "command",
+      "invocation": "TF_VAR_mcportal_owner_key_claim=sub TF_VAR_mcportal_owner_key=\"$(.tools/aws lambda get-function-configuration --function-name mcportal-grant-writer-lambda --region us-east-1 --query Environment.Variables.MCPORTAL_OWNER_KEY --output text | tr -d '\\r')\" bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/eip.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "declared eip resources=2 of 2; targeted plan rc=0 (No changes. Your infrastructure matches the configuration.)\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 declared resources; targeted plan rc=0",
+      "status": "PASS",
+      "expect": "(?s)declared eip resources=2 of 2; targeted plan rc=0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- NEVER-2 closed, and the served /mcp path still answers 401 unauthenticated.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/eip.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "entry files at HEAD=1; sentinel at HEAD=no; listed OPEN/HELD=0; /mcp unauthenticated=401; SCAN DENOMINATOR: 15 of 15 sentinel(s) scanned\nRESULT: PASS\nexit=0",
+      "denominator": "15 of 15 sentinels scanned; 0 open; /mcp 401",
+      "status": "PASS",
+      "expect": "(?s)sentinel at HEAD=no; listed OPEN/HELD=0; /mcp unauthenticated=401.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Targeted plan read 2 to add before the apply and No changes after; AC1-AC3 run once each after the close.",
+      "observed": "stable",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Untargeted plan after the apply-precondition placement",
+      "reason": "Read 2 to add, 0 to change, 0 to destroy (aws_eip.gw, aws_eip_association.gw only) before the apply; no NFRA_MCPORTAL drift."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W14-S1",
+    "NFRA_OPLGTW-Z-W14-S2",
+    "NFRA_OPLGTW-Z-W14-S3"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-apply.sh",
+      "invocation": "bash .tools/safe-apply.sh apply -auto-approve -target=aws_eip.gw -target=aws_eip_association.gw",
+      "result": "rc=0"
+    }
+  ]
+}

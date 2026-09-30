@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "411236c2b75d3199a70eab17d57da38e1df75a5a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "411236c2b75d3199a70eab17d57da38e1df75a5a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-yy-3.proxy-officers-served-as-neos.md"
+  },
+  "to_id": "AMGT_RESAPP.TO-AMGT-yy-3",
+  "assignee": "0.9.0_WK_AMGT_RESAPP~177",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/management/proxy_officers.py",
+      "kind": "script",
+      "commit_or_etag": "58a7b5b7d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--persist --dry-run only; no real write (yy-5's act). EDGAR read through fetch.py: 8 requests in this order's runs (2 per name per run, 4 runs).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "58a7b5b7d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "adapter code only; the deploy is yy-5's.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_proxy_officers_persist.py",
+      "kind": "test",
+      "commit_or_etag": "58a7b5b7d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 tests, stubbed fetch and pool: label and source, RESOLVED refusal, not-SERVED refusal, dry run writes nothing, real path uses the batch writer, CLI stdout one object, CLI refusal rc 2.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_management_officer_set.py",
+      "kind": "test",
+      "commit_or_etag": "58a7b5b7d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "2 tests: pass-through on a proxy object; a filing roster reads the fields null.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/management/management.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "8ef950c194",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "schema widened: officer.source enum gains 'proxy'; top-level officer_set (enum [named_executive_officers]), officer_set_label, source_form, source_url, retrieved_at (strings), document_sha256 (64 hex); additionalProperties stays false. No write.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "INTU_US_Equity and HAL_US_Equity each officers >= 3, set 'named_executive_officers', source 'DEF 14A' + an accession, each \"validates against management.schema.json\"; THE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS (plan): YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round50/checks/yy_neo.py --plane plan; echo \"exit=$?\"",
+      "output_evidence": "  INTU_US_Equity officers 5, set 'named_executive_officers', source 'DEF 14A' '000089687825000057'\n  INTU_US_Equity validates against management.schema.json\n  HAL_US_Equity officers 5, set 'named_executive_officers', source 'DEF 14A' '000004501226000033'\n  HAL_US_Equity validates against management.schema.json\nTHE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS (plan): YES\nexit=0 (checker read at worktree HEAD 8ef950c194 after the issuer's sync merge; row Z-W177-S5 resolved)",
+      "denominator": "2 of 2 names (INTU_US_Equity 5 officers, HAL_US_Equity 5 officers), each validating against management.schema.json",
+      "status": "PASS",
+      "expect": "THE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS \\(plan\\): YES.*?exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the same through this tree's read_management; THE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS (local): YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round50/checks/yy_neo.py --plane local; echo \"exit=$?\"",
+      "output_evidence": "  INTU_US_Equity officers 5, set 'named_executive_officers', source 'DEF 14A' '000089687825000057'\n  HAL_US_Equity officers 5, set 'named_executive_officers', source 'DEF 14A' '000004501226000033'\nTHE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS (local): YES\nexit=0",
+      "denominator": "2 of 2 names through read_management (pool read stubbed to the planned object)",
+      "status": "PASS",
+      "expect": "THE PROXY'S OFFICERS ARE SERVED AS NAMED EXECUTIVE OFFICERS \\(local\\): YES.*?exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pytest reports N passed and 0 failed -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round48/checks/api-suite.sh; echo \"exit=$?\"",
+      "output_evidence": "340 passed in 35.03s\nexit=0",
+      "denominator": "340 passed, 0 failed",
+      "status": "PASS",
+      "expect": "[0-9]+ passed.*?exit=0"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 plan run twice more per name via the direct --dry-run command",
+      "observed": "same officers 5, same accessions (INTU 000089687825000057, HAL 000004501226000033)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The RESOLVED-name refusal is exercised by test_a_resolved_name_is_refused_and_the_proxy_is_never_read (VLO shape: refused, zero EDGAR calls).",
+      "expected": "PersistRefused, stub.calls == []",
+      "observed": "7 passed in test_proxy_officers_persist.py",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "AMGT_RESAPP-Z-W177-S2",
+    "AMGT_RESAPP-Z-W177-S3",
+    "AMGT_RESAPP-Z-W177-S4",
+    "AMGT_RESAPP-Z-W177-S5"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~177/AMGT_RESAPP.TO-AMGT-yy-3.proxy-officers-served-as-neos.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=$(pwd) python -m pytest lib/research/management/tests -q",
+      "result": "117 passed, 13 subtests passed, 0 failed"
+    }
+  ]
+}
