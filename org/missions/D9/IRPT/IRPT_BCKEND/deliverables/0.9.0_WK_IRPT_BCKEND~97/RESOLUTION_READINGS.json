@@ -1,0 +1,63 @@
+{
+ "sync_layout": "MEASURED: data/inf/scripts/gold/orion-gold-dispatch.sh:65 SCRIPTS=/tmp/orion_gold_scripts; sync_scripts() (lines 532-635) inventories prefixes ['code/gold/','code/manual_api/','code/silver/','code/bronze/'] (line 545), keys every object by obj['Key'].split('/')[-1] (basename) and writes one file per basename to dest via open(os.path.join(dest, fname),'wb'); no subdirectory is created, so code/<x>/lib/silver_ids.py would land as /tmp/orion_gold_scripts/silver_ids.py. A basename in 2+ prefixes with differing sha256 exits 1 (FATAL collision). Steps run as python3 $SCRIPTS/gold_prof.py $SCRIPTS/<file> (lines 718/727/788). Live census: 0 objects named silver_ids* under any of the four prefixes before the ship. Consequence: the on-box import must be FLAT (silver_ids), which matches every other INF script (dtype_coerce).",
+ "deployed_dispatch": "MEASURED: s3://opal-data-inf/code/gold/orion-gold-dispatch.sh LastModified 2026-08-30 14:03:13 GMT, 113320 bytes, sha256 d6b00f6fdd75c51634eb555d176b8592a233ac5df2852e65e8c235bd05f57a62; repo data/inf/scripts/gold/orion-gold-dispatch.sh sha256 d6b00f6fdd75c51634eb555d176b8592a233ac5df2852e65e8c235bd05f57a62 -> IDENTICAL; the sync code cited above is the code the box runs.",
+ "sys_path_reading": "MEASURED from s3://opal-data-inf/diagnostic/chain_logs/chain_full_20260930_113303.log lines 196-201: '/tmp/orion_gold_scripts/convert_orion_api_to_silver.py', line 60 -> '/tmp/orion_gold_scripts/_orion_api_silver_lib.py', line 284: from lib.silver_ids import ... -> ModuleNotFoundError: No module named 'lib.silver_ids' (NOT 'lib': the name lib resolves, as a namespace package, so the parent import succeeded). The script runs from the flat dir so sys.path[0]=/tmp/orion_gold_scripts; _orion_api_silver_lib.py:279-282 inserts _REPO_ROOT = four dirs above the file = '/' (from /tmp/orion_gold_scripts), so lib resolves to the system dir /lib, which has no silver_ids.py. No lib/ is materialized anywhere on the path, so no key makes lib.silver_ids importable; the flat fallback (silver_ids beside the importer) is the fix. Same failure hit INF_ECLIPSE_SILVER (log lines 273-278, convert_eclipse_portfolios_to_silver.py).",
+ "resolved_targets": [
+  {
+   "s3_key": "code/silver/silver_ids.py",
+   "repo_path": "lib/silver_ids.py",
+   "sha256": "d04e4920e60612ba2b7258538f611421ab08ee01bedb854c4cdf36bc07c09377"
+  },
+  {
+   "s3_key": "code/silver/_orion_api_silver_lib.py",
+   "repo_path": "data/inf/scripts/silver/_orion_api_silver_lib.py",
+   "sha256": "ed85e079a5505c1545f50bc9a50a1706704a4b41797454dba2c14a3f7620d04a"
+  }
+ ],
+ "collision_census": [
+  {
+   "s3_key": "code/gold/silver_ids.py",
+   "http": 404
+  },
+  {
+   "s3_key": "code/bronze/silver_ids.py",
+   "http": 404
+  },
+  {
+   "s3_key": "code/manual_api/silver_ids.py",
+   "http": 404
+  },
+  {
+   "s3_key": "code/gold/lib/silver_ids.py",
+   "http": 404
+  },
+  {
+   "s3_key": "code/lib/silver_ids.py",
+   "http": 404
+  },
+  {
+   "s3_key": "code/silver/lib/silver_ids.py",
+   "http": 404
+  }
+ ],
+ "safe_deploy_refusal": "bash .tools/safe-deploy.sh --author 0.9.0_WK_IRPT_BCKEND~97 data/inf/scripts/silver/_orion_api_silver_lib.py exited rc=1 with: 'HALT-GATE: blocked. Review the message(s) above, then re-run with HALT_ACK=1.' (the gate listed unacked inbox messages: RED ledger notices for irpt-export-async-submit-20260927, irpt-export-receipt-running-20260928, irpt-export-reopen-rule-20260927, irpt-holdings-schedule-enable-m-20260929, irpt-ui-walk-principal-w21-20260929, leadpanel-price-producer-schedule, and 1.0.0_SA_CTO RE 103053). HALT_ACK=1 not used (a gate override is outside the grant); the order's sanctioned fallback aws s3 cp was used; sha256 of both S3 objects re-read equal to the committed files.",
+ "after_run": {
+  "run_id": "chain_full_20260930_145412",
+  "status": "failed (at step 33 of 65, INF_C_01, after the raw writers)",
+  "trigger": "inf-gold-trigger invoked once 2026-09-30T14:53:10Z, StatusCode 200, lock_run_id lock-full-433e434ec160, command_id 6295b378-557d-4d5b-a68e-6f7861fd859a (trigger_invoke.json)",
+  "steps_of_note": "INF_API_SILVER_REPS ok (1s), INF_API_PULL_TXN ok (460s), INF_API_PULL_PERF warn (600s timeout exit=124, tolerated), INF_API_PULL_POSITIONS_DAILY ok (234s), INF_C_01 fail exit=1 (NNACoverageRegression, nna_coverage_guard.py:385, chain log diagnostic/chain_logs/chain_full_20260930_145328.log)",
+  "raw_files": {
+   "bronze/positions/2026-09-28.jsonl.gz": "ABSENT (HTTP 404)",
+   "bronze/positions/2026-09-29.jsonl.gz": "ABSENT (HTTP 404)",
+   "bronze/positions/2026-09-30.jsonl.gz": "PRESENT 2309545 bytes LastModified 2026-09-30T15:18:55Z",
+   "bronze/transactions/2026-09-30.jsonl.gz": "PRESENT 41420455 bytes LastModified 2026-09-30T15:03:57Z",
+   "bronze/performance/2026-09-30.jsonl.gz": "ABSENT (HTTP 404; INF_API_PULL_PERF timed out at 600s and was tolerated)"
+  },
+  "p26_1_ac2": "P26-1-AC2 PASS (run chain_full_20260930_145412)"
+ },
+ "pre_ship_target_probe": {
+  "s3_key": "code/silver/silver_ids.py",
+  "http": 404,
+  "note": "probed before the copy (the target itself; a post-ship 200 is the ship, not a collision), so it is not in collision_census"
+ }
+}
