@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-y-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-y-1.unit-families.md",
+    "group": "OTHER",
+    "vintage_commit": "46540fd5f6c8d4d8730aec81c9ef2b876b43a2f4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "46540fd5f6c8d4d8730aec81c9ef2b876b43a2f4",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-y-1.unit-families.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/build_unit_map.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "23 unfamilied mnemonics placed into families with FIELD_BASIS grounds named in comments; EQY_FUND_CRNCY to TEXT; PRICE_FIELDS names PX_LAST; unfamilied_mnemonics() census; classify_unit takes an optional header and reads a per-share value that fails the 0-2000 band against a same-currency PX_LAST in a stated per-field band. field_map.json, model_block_pull.py, unit_anchor.py and the discriminator untouched. No S3 write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_build_unit_map_families.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file, 7 offline tests: census covers every pulled mnemonic, named mnemonics have families, EQY_FUND_CRNCY is TEXT, JPY-scale per-share resolves with same-currency PX_LAST, currency mismatch / missing PX_LAST / out-of-band ratio stay UNRESOLVED, magnitude band unchanged.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y1_AC1.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y1_AC1.sh",
+      "output_evidence": "y1 blocks 100 before unresolved 9595 pointer_before 6457 no_family_before 9176 after unresolved 622 pointer_after 0 no_family_after 0 crncy_after 0 per_share_after 199",
+      "denominator": "100 of 100 newest served model blocks read; no_family_after 0 and crncy_after 0; UNRESOLVED figures 9595 before, 622 after (199 of them the three large-number per-share names, reported not demanded). rc 0, about 63 s.",
+      "expect": "(?m)^y1 blocks \\d+ before unresolved \\d+ pointer_before \\d+ no_family_before \\d+ after unresolved \\d+ pointer_after \\d+ no_family_after 0 crncy_after 0 per_share_after \\d+$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y1_AC2.sh",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y1_AC2.sh",
+      "output_evidence": "30 passed in 0.62s",
+      "denominator": "30 of 30 tests passed across the five build_unit_map suites (7 in test_build_unit_map_families.py), 0 failed. rc 0.",
+      "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC2 run under the literal invocation and the families file run alone.",
+      "observed": "AC2 30 passed; families file 7 passed.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The builder as at HEAD before this change (git show HEAD:integrations/bloomberg/research/build_unit_map.py) run in-process: the census of ALL_MNEMONICS minus the union of its families, and classify_unit on EQY_FUND_CRNCY.",
+      "expected": "A non-empty unfamilied set and an UNRESOLVED EQY_FUND_CRNCY (the families test and AC1 would refuse it).",
+      "observed": "23 unfamilied mnemonics; classify_unit('EQY_FUND_CRNCY','USD','S') -> (None, 'UNRESOLVED', \"non-numeric value 'USD'\")",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "field_map.json, model_block_pull.py, unit_anchor.py, the discriminator's currency branch, the anchor hookup",
+      "reason": "Read-only to this order (section 1 item 6, section 3); the hookup is the issuer's at the merge."
+    },
+    {
+      "item": "Per-share remainder (199 figures) and the other 423 UNRESOLVED figures",
+      "reason": "Reported, not demanded (AC1): an undecidable figure stays UNRESOLVED with its reason, never guessed."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "y1_census.py live read-only census (AC1, via y1_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y1_AC1.sh",
+      "result": "rc 0; no_family_after 0, crncy_after 0"
+    },
+    {
+      "tool": "pytest over the five build_unit_map suites (AC2, via y1_AC2.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y1_AC2.sh",
+      "result": "rc 0; 30 passed"
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-c-1.package-core-and-issuer-collector",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "57af02c3ea",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-c-1.package-core-and-issuer-collector.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "01e5499ae7"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/homes.py",
+      "kind": "script",
+      "commit_or_etag": "fba7ae919e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, tests and checks run against a local sink and the live issuer read",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/markers.py",
+      "kind": "script",
+      "commit_or_etag": "fba7ae919e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, tests and checks run against a local sink and the live issuer read",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/sinks.py",
+      "kind": "script",
+      "commit_or_etag": "fba7ae919e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, tests and checks run against a local sink and the live issuer read",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/collector_issuer.py",
+      "kind": "script",
+      "commit_or_etag": "fba7ae919e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, tests and checks run against a local sink and the live issuer read",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/adapters/basg.py",
+      "kind": "script",
+      "commit_or_etag": "fba7ae919e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, tests and checks run against a local sink and the live issuer read",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_c1_core_and_collector.py",
+      "kind": "script",
+      "commit_or_etag": "fba7ae919e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, tests and checks run against a local sink and the live issuer read",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "live daily fetch of BASG from the issuer, landed in a local sink with its sidecar and marker; rerun is a no-op -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/c-1.AC1.py",
+      "output_evidence": "first run: {\"status\": \"OK\", \"batch_id\": \"chk-2026-09-29\", \"outputs\": [\"s3://opal-data-etfs/issuer-site/etfs/bronze/holdings/date=2026-09-30/basg-20260930T075658Z-bfd36047cb41.txt\"], \"marker\": \"s3://opal-data-etfs/rivalfunds/etfs/state/fetch-holdings/date=2026-09-29/chk-2026-09-29.json\", \"detail\": {\"days\": {\"2026-09-29\": \"OK\"}}}\nOK:   status OK in OK/PARTIAL\nOK:   exactly one raw .txt output (1)\nOK:   raw lands under the builder's issuer bronze prefix s3://opal-data-etfs/issuer-site/etfs/bronze/holdings/date=\nOK:   a JSON sidecar beside the raw object\nOK:   sidecar sha256 == sha256 of the landed bytes\nOK:   sidecar requested_date == 2026-09-29\nOK:   status OK and claimed_report_date == 2026-09-29 (got OK, 2026-09-29)\nOK:   date_evidence == internal-date-column\nOK:   the landed bytes carry BASG rows\nOK:   stage marker written\nOK:   second run of the same batch returns the same marker\nOK:   second run landed nothing new (1 raw object(s) in the sink)\nAC1 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "12 of 12 checks OK; 1 live fetch (BASG, requested 2026-09-29)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "real archived bytes: own day OK, another day DATE-MISMATCH, no BASG rows NO-FUND-ROWS, neither with a report date -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/c-1.AC2.py",
+      "output_evidence": "OK:   control arm: the real file for its own day -> OK, report date 2026-09-28 (got OK, 2026-09-28)\nOK:   requested another day -> DATE-MISMATCH (got DATE-MISMATCH)\nOK:   DATE-MISMATCH carries no report_date\nOK:   no BASG rows -> NO-FUND-ROWS (got NO-FUND-ROWS)\nOK:   NO-FUND-ROWS carries no report_date\nAC2 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "5 of 5 checks OK; real archived file 2026-09-28 (35 BASG rows)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "homes equal address()/name() output; no typed bucket, URI or resource name in product files -- expect: AC3 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/c-1.AC3.py",
+      "output_evidence": "OK:   homes.all_addresses()['issuer_bronze'] == s3://opal-data-etfs/issuer-site/etfs/bronze/holdings/date=2026-09-29 (got s3://opal-data-etfs/issuer-site/etfs/bronze/holdings/date=2026-09-29)\nOK:   homes.all_addresses()['issuer_silver'] == s3://opal-data-etfs/issuer-site/etfs/silver/holdings/date=2026-09-29 (got s3://opal-data-etfs/issuer-site/etfs/silver/holdings/date=2026-09-29)\nOK:   homes.all_addresses()['canonical_shape'] == s3://opal-data-etfs/rivalfunds/etfs/gold/canonical_shape/date=2026-09-29 (got s3://opal-data-etfs/rivalfunds/etfs/gold/canonical_shape/date=2026-09-29)\nOK:   homes.all_addresses()['trade_schedule'] == s3://opal-data-etfs/rivalfunds/etfs/gold/trade_schedule/date=2026-09-29 (got s3://opal-data-etfs/rivalfunds/etfs/gold/trade_schedule/date=2026-09-29)\nOK:   homes.all_addresses()['page'] == s3://opal-data-etfs/rivalfunds/etfs/platinum/page/date=2026-09-29 (got s3://opal-data-etfs/rivalfunds/etfs/platinum/page/date=2026-09-29)\nOK:   homes.marker_prefix('fetch-holdings') == s3://opal-data-etfs/rivalfunds/etfs/state/fetch-holdings/date=2026-09-29 (got s3://opal-data-etfs/rivalfunds/etfs/state/fetch-holdings/date=2026-09-29)\nOK:   homes.marker_prefix('build-silver') == s3://opal-data-etfs/rivalfunds/etfs/state/build-silver/date=2026-09-29 (got s3://opal-data-etfs/rivalfunds/etfs/state/build-silver/date=2026-09-29)\nOK:   homes.marker_prefix('build-canonical-shape') == s3://opal-data-etfs/rivalfunds/etfs/state/build-canonical-shape/date=2026-09-29 (got s3://opal-data-etfs/rivalfunds/etfs/state/build-canonical-shape/date=2026-09-29)\nOK:   homes.marker_prefix('build-trade-schedule') == s3://opal-data-etfs/rivalfunds/etfs/state/build-trade-schedule/date=2026-09-29 (got s3://opal-data-etfs/rivalfunds/etfs/state/build-trade-schedule/date=2026-09-29)\nOK:   homes.marker_prefix('publish-page') == s3://opal-data-etfs/rivalfunds/etfs/state/publish-page/date=2026-09-29 (got s3://opal-data-etfs/rivalfunds/etfs/state/publish-page/date=2026-09-29)\nOK:   homes.all_names() carries etfs-rivalfunds-daily == name('etfs', None, 'rivalfunds', 'daily')\nOK:   homes.all_names() carries etfs-rivalfunds-daily-lambda == name('etfs', None, 'rivalfunds', 'lambda', 'daily')\nOK:   homes.all_names() carries etfs-rivalfunds-fetch-holdings-lambda == name('etfs', None, 'rivalfunds', 'lambda', 'fetch-holdings')\nOK:   homes.all_names() carries rivalfunds-build-silver-lambda == name('rivalfunds', None, 'build-silver', 'lambda')\nOK:   homes.all_names() carries rivalfunds-build-canonical-shape-lambda == name('rivalfunds', None, 'build-canonical-shape', 'lambda')\nOK:   homes.all_names() carries rivalfunds-publish-page-lambda == name('rivalfunds', None, 'publish-page', 'lambda')\nOK:   no typed bucket, s3:// literal or resource name in product files ([])\nAC3 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "17 of 17 checks OK over every product .py in the package",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted: the issuer's checks carry their own negative arms (AC2 feeds a wrong-day request and a BASG-stripped file through land_bronze; AC1 reruns the batch).",
+      "expected": "AC2's DATE-MISMATCH and NO-FUND-ROWS arms carry no report_date; AC1's rerun lands 0 new objects.",
+      "observed": "AC2 5 of 5 OK including both negative arms; AC1 rerun: 1 raw object in the sink after two runs.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1..AC3 and the 14 unit tests were each run twice (once before the commit, once after the naming-gate key rename in homes.py).",
+      "observed": "same verdict lines both times; 14 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The task order file is outside this cell's <paths> (the write grant); the flip is left for the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S1",
+    "ETFS_RIVALS-Z-W1-S2"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "fba7ae919e (the naming-gate refused once on two dict keys ending _lambda; renamed, then landed)"
+    }
+  ]
+}
