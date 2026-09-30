@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e7",
+  "firm": "MDPF",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R2.md",
+    "vintage_commit": "5d3432a201bbe44adcea42c6bb8d852faecb9cd5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e7.e18-iam-and-schedule.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/bd-pipeline/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "82e505dafa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build bound (task order BOUNDS): Terraform fmt/validate only, no plan against shared state, no apply, no deploy. `terraform fmt -check -diff iam.tf` rc=0 (no diff); `terraform init -backend=false -input=false` then `terraform validate` -> 'Success! The configuration is valid.' rc=0.",
+      "artifact_covered_by": ["SC2-e7-AC1"]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/E_18.detect_new_securities.py",
+      "kind": "script",
+      "commit_or_etag": "82e505dafa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Amendment 1 fix (parents[3] -> parents[4], row MDPF_SECCLASS-W6-S1). Proof of resolution: a plain-script subprocess run from repo root (`python data/black_diamond/scripts/gold/E_18.detect_new_securities.py`, no --upload, no table write) completed rc=0 past the deferred `from etf_classification_scheduled import (...)` line and printed the full detection summary against live S3/DynamoDB reads.",
+      "artifact_covered_by": ["SC2-e7-AC1"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_E18_IAM_20260930.json",
+      "kind": "doc",
+      "commit_or_etag": "82e505dafa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A record artifact (org/**), not a deploy. table_rows_at_build=2309 measured live via `aws dynamodb scan --table-name etf-classifications --select COUNT --region us-east-1` (2026-09-30).",
+      "artifact_covered_by": ["SC2-e7-AC1"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_E18_IAM_20260930.md",
+      "kind": "doc",
+      "commit_or_etag": "82e505dafa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The never-widen half for the IAM apply + the E_18 code deploy (DS lane), naming the act, blast radius (including the shared-infra/main.tf gap), rollback per key and acceptance. Not yet sent/signed -- that is the issuer's act, not this worker's.",
+      "artifact_covered_by": ["SC2-e7-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "82e505dafa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise row MDPF_SECCLASS-W6-S2 appended (never editing a pre-existing row); row MDPF_SECCLASS-W6-S1 (pre-existing, from SC-e-4) is disarmed by this commit's E_18.py fix."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC2-e7-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py e18 -- expect E18-IAM-DESIRED",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py e18",
+      "output_evidence": "E18-IAM-DESIRED principal=bd-exporter-ec2-role",
+      "denominator": "1 of 1 evidence file present, table_rows_at_build=2309 (>= 2309 floor), putitem_etf_classifications=true, putitem_bd_securities=false (this file's own state), fmt_ok=true, validate_ok=true, schedule named",
+      "status": "PASS",
+      "expect": "E18-IAM-DESIRED"
+    },
+    {
+      "criterion_id": "SC2-e7-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_E18_IAM_20260930.md -- expect HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_E18_IAM_20260930.md",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_E18_IAM_20260930.md",
+      "denominator": "0 unfilled {{slot}}s of 0 found; required sections present: '## The act', '## Blast radius', 'Rollback per key', 'candidate' -- 4 of 4 required markers present",
+      "status": "PASS",
+      "expect": "HALF-READY"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The rule this grant must never violate: no dynamodb:PutItem action on bd-securities is added anywhere in this diff. Mutant check: grep the staged bd-pipeline/iam.tf diff for the literal string 'bd-securities' beside 'PutItem'.",
+      "expected": "Zero occurrences of a PutItem grant naming bd-securities in this file's diff.",
+      "observed": "The only bd-securities reference in the file (pre-existing, untouched by this diff) is the Scan-only AdviChainBdSecuritiesScan statement (a07/etf_classifier control-import read); the new statement added by this cell (E18ScheduledEtfClassificationsPut) names only the etf-classifications table ARN.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "terraform fmt -check -diff and terraform validate were each run once after terraform init -backend=false; the plain-script import proof and the live DynamoDB row count were each run once against live state (not re-run, since neither depends on retry-sensitive timing).",
+      "observed": "fmt rc=0 (no diff), validate rc=0 ('Success!'), import proof rc=0 (full detection summary printed), aws dynamodb scan --select COUNT returned 2309 -- all single, stable reads of static configuration / infrastructure, not a race-prone measurement.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Removing infra/aws/terraform/shared-infra/main.tf's aws_iam_policy.bd_securities_access unconditional bd-securities PutItem (the actual live grant for this principal)",
+      "reason": "Outside this order's <paths> write grant (only infra/aws/terraform/bd-pipeline/iam.tf is granted for Terraform). Recorded as surprise row MDPF_SECCLASS-W6-S2 and named in this cell's NEVER_WIDEN half's SURPRISE/gap section for the issuer to route to a follow-on order."
+    },
+    {
+      "item": "Editing infra/aws/terraform/cot-pipeline/iam.tf to add COT's own equivalent etf-classifications PutItem grant",
+      "reason": "Outside this order's <paths> write grant; Build step 1 asks only to NAME the COT principal (done: cot-gold-layer-ec2-role, currently a P1 skeleton with no attached EC2 and zero dynamodb grants), never to edit COT's file."
+    },
+    {
+      "item": "Applying the Terraform diff or deploying the E_18.py fix to opal-data-bd/code/",
+      "reason": "LOCAL build bound (BOUNDS: fmt/validate only, no apply, no deploy, no table write). Both are named as the act the NEVER_WIDEN half covers, pending issuer sign-off."
+    },
+    {
+      "item": "Flipping this TO's <status> to complete from a separate commit",
+      "reason": "Per the standing worker rule, the flip is committed together with this proof instance in the same commit as this file."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W6-S2: the task order's Build step 2 names infra/aws/terraform/bd-pipeline/iam.tf as the file carrying BD's E_18 principal's bd-securities PutItem to remove, but no such grant exists in that file -- the live, unconditional grant on both bd-securities and etf-classifications for this exact principal (bd-exporter-ec2-role) is infra/aws/terraform/shared-infra/main.tf's aws_iam_policy.bd_securities_access, outside this order's <paths> write grant. This cell adds the etf-classifications PutItem grant to the named file per the letter of the step, and documents the gap inline and in the half rather than silently reporting the grant as fully removed."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~6/MDPF_SECCLASS.TO-SC-e7.e18-iam-and-schedule.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt -check -diff iam.tf (cwd infra/aws/terraform/bd-pipeline)",
+      "result": "rc=0, no diff"
+    },
+    {
+      "tool": "terraform init + validate",
+      "invocation": "terraform init -backend=false -input=false && terraform validate (cwd infra/aws/terraform/bd-pipeline)",
+      "result": "Success! The configuration is valid. rc=0"
+    },
+    {
+      "tool": "python (plain-script subprocess)",
+      "invocation": "python data/black_diamond/scripts/gold/E_18.detect_new_securities.py (cwd repo root, no --upload)",
+      "result": "rc=0; detection summary printed (1,636 tickerless holdings, 1 scheduled-classification candidate); no ModuleNotFoundError"
+    },
+    {
+      "tool": ".tools/aws (dynamodb scan, read-only)",
+      "invocation": "aws dynamodb scan --table-name etf-classifications --select COUNT --region us-east-1",
+      "result": "{\"Count\": 2309, \"ScannedCount\": 2309}"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/black_diamond/scripts/gold/E_18.detect_new_securities.py",
+      "result": "OK: pre-commit gate clean for 1 of 1 file(s)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md (staged)",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (1 new row of 11 total)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~6 <0.9.0_WK_MDPF_SECCLASS~6@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "82e505dafa (iam.tf + E_18.py + evidence + half + surprise row)"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py e18",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py e18",
+      "result": "E18-IAM-DESIRED principal=bd-exporter-ec2-role"
+    },
+    {
+      "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_E18_IAM_20260930.md",
+      "result": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_E18_IAM_20260930.md"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py <instance> SC2-e7-AC1,SC2-e7-AC2",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~6/MDPF_SECCLASS.TO-SC-e7.e18-iam-and-schedule.proof_of_spec.json SC2-e7-AC1,SC2-e7-AC2",
+      "result": "TO BE RUN BEFORE THE COMPLETE FLIP"
+    }
+  ]
+}
