@@ -10,6 +10,7 @@ last=$(git log -n1 --format=%H -- "$M")
 c=$(mf HEAD); prev=$(mf "${last}^")
 desc=no; [ -n "$prev" ] && git merge-base --is-ancestor "$prev" "$c" 2>/dev/null && desc=yes
 allowed=$(printf '%s\n' "$G/app/tenant_registry.py" "$G/app/firm_role.py" "$G/app/asker_scope.py" "$G/app/audit.py" "$G/app/config.py" \
+  "$G/app/access_state.py" "$G/tests/test_access_state.py" \
   "$G/tests/test_mcpmsp_asker_firm.py" "$G/app/admin_tenants.py" "$G/tests/test_admin_tenants.py" "$G/app/admin_api.py" \
   "$G/deploy-to-ec2.sh" | sort -u)
 shipped=$(git diff --name-only "$prev" "$c" -- "$G" 2>/dev/null | sort -u)
