@@ -1,4 +1,4 @@
-"""AMGT_RESAPP round 50, AMGT-yy-7 -- THE POOL UNION SITS IN THE CHOKE POINT: every crosswalk/v1 write keeps a served record, whichever
+"""AMGT_RESAPP round 51, AMGT-zz-1 (cut at round 50 as yy-7, refused by the one-issuance gate) -- THE POOL UNION SITS IN THE CHOKE POINT: every crosswalk/v1 write keeps a served record, whichever
 writer makes it (CTO round-49 analysis cell 5 follow-up @1b2294bbd6; AMGT_CORPUS row Z-S66).
 
 A fake S3 (in memory; no AWS write) is seeded with the REAL latest served crosswalk PLUS a planted record `ZZPLANTED_US_Equity` (the
