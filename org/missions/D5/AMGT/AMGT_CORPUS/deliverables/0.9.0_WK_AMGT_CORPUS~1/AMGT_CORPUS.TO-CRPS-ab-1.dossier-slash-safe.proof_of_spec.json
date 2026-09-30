@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-ab-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ab-1.dossier-slash-safe.md",
+    "group": "OTHER",
+    "vintage_commit": "0c234ef97d4740fc8063752856bdfb27f95f2403"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "0c234ef97d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ab-1.dossier-slash-safe.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/dossier.py",
+      "kind": "script",
+      "commit_or_etag": "0c234ef97d4740fc8063752856bdfb27f95f2403",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_model_block_read and _model_block_stamp build the model-block prefix via crosswalk.slash_safe_key(security_key); slash-free keys byte-identical.",
+      "introduces": [
+        "slash_safe_key"
+
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier_slash_safe_round26.py",
+      "kind": "test",
+      "commit_or_etag": "0c234ef97d4740fc8063752856bdfb27f95f2403",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 offline tests with a stub S3 client: slashed key encoded prefix, slash-free byte-identical prefix, stamp on encoded base.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ab1_AC1.sh -- expect ab1 bp_reads encoded bp_newest True ng_reads encoded ng_newest True control_unchanged True",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round26/ab1_AC1.sh",
+      "output_evidence": "ab1 bp_reads encoded bp_newest True ng_reads encoded ng_newest True control_unchanged True",
+      "denominator": "2 of 2 slash-bearing names (BP, NG) encoded with newest stamp; 1 of 1 control unchanged",
+      "expect": "(?m)^ab1 bp_reads encoded bp_newest True ng_reads encoded ng_newest True control_unchanged True$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "ab1_AC2.sh -- expect N passed in",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round26/ab1_AC2.sh",
+      "output_evidence": "3 passed in 0.29s",
+      "denominator": "3 of 3 tests passed",
+      "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 and AC2 each run once against committed bytes",
+      "observed": "both PASS",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Pre-change dossier.py (raw-slash prefix) is the mutant; the issuer's dry-run at base ae1c849af1 recorded it.",
+      "expected": "mutant: ab1 ... bp_reads raw bp_newest False ng_reads raw ng_newest False",
+      "observed": "issuer dry-run: ab1 bp_reads raw bp_newest False ng_reads raw ng_newest False control_unchanged True; fixed bytes read encoded True",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "write_one / any S3 write",
+      "reason": "Order bound: no S3 write, no vendor call; reads only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC2)",
+      "invocation": "ab1_AC2.sh",
+      "result": "rc 0; 3 passed"
+    }
+  ]
+}
