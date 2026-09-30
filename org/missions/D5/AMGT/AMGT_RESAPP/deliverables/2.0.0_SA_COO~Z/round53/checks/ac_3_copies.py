@@ -1,8 +1,8 @@
-"""AMGT_RESAPP round 53, AMGT-ac-3 -- the 30 raw-slash objects are copied to their encoded keys, byte-equal, and the raw objects are KEPT
+"""AMGT_RESAPP round 53, AMGT-ac-3 -- the raw-slash objects (40: CTO msg 27160, AMENDMENT 1) are copied to their encoded keys, byte-equal, and the raw objects are KEPT
 (CTO round-52 ruling 4; CORPUS round-23 ruling 2's single window).
 Reads the object list `round53/SLASH_OBJECTS.json` (written by 2.0.0_SA_COO~Z from 2.0.0_SA_COO~X's supplied list and before-state, before
 the GO): {"bucket": "opal-data-harvest", "objects": [{"raw_key": ..., "encoded_key": ..., "raw_sha256": ...}, ...]}. For EVERY object:
-the raw key still exists with its listed sha256 (kept, unchanged), and the encoded key exists with the SAME sha256. PASS when 30 of 30.
+the raw key still exists with its listed sha256 (kept, unchanged), and the encoded key exists with the SAME sha256. PASS when every listed object holds and the list has 40 (AMENDMENT 1).
 usage: python <this>   (from the repo root; S3 GET/HEAD only)"""
 import hashlib
 import json
@@ -38,7 +38,7 @@ def main():
     for b in bad[:8]:
         print("  BAD", b)
     print("objects %d; raw kept and encoded byte-equal: %d" % (len(objs), len(objs) - len({b.split(': ', 1)[1] for b in bad})))
-    ok = len(objs) == 30 and not bad
+    ok = len(objs) == 40 and not bad
     print("THE RAW-SLASH OBJECTS READ AT THEIR ENCODED KEYS, BYTE-EQUAL, RAW KEPT: %s" % ("YES" if ok else "NO"))
     return 0 if ok else 1
 
