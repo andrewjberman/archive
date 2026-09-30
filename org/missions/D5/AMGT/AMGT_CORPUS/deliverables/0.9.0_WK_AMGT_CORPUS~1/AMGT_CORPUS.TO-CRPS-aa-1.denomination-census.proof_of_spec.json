@@ -19,14 +19,28 @@
       "kind": "script",
       "commit_or_etag": "e0ab961ad8",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Order forbids a derive and any S3 write; the label rule is committed on the worker branch. Only _figure_currency changed (new keyword security=None) plus the constants _DENOMINATION_REPORTING_MNEMONICS, _DENOMINATION_QUOTE, _DENOMINATION_UNRESOLVED, _DENOMINATION_REASONS above it. The four call sites in other functions still pass no security (row Z-W1-S22), so the rule is not yet reached by the served derive.",
+      "deploy_evidence": "Label rule committed on the worker branch: _figure_currency (keyword security=None) and the constants _DENOMINATION_* above it. No derive, no S3 write.",
       "introduces": [
         "_DENOMINATION_REPORTING_MNEMONICS",
         "_DENOMINATION_QUOTE",
         "_DENOMINATION_UNRESOLVED",
         "_DENOMINATION_REASONS"
       ],
-      "artifact_covered_by": ["AC1", "AC2"]
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "528da11fe2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1: the four _figure_currency call sites (:1127, :1208, :1367, :1409) each pass security=security; no other change to the file.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
     },
     {
       "path_or_key": "integrations/bloomberg/research/tests/test_figure_currency_round25.py",
@@ -34,7 +48,9 @@
       "commit_or_etag": "e0ab961ad8",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "8 offline tests: TSM CUR_MKT_CAP reads USD; a reporting-class statement figure on TSM stays TWD; a reporting-class census figure reads the reporting currency; an UNRESOLVED census figure returns None with an UNMEASURED: basis; a same-currency name is unchanged; three-argument calls keep the old rule; GBp/GBP names print GBP; the reader matches all 73 census figures with every class exercised.",
-      "artifact_covered_by": ["AC2"]
+      "artifact_covered_by": [
+        "AC2"
+      ]
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/DENOMINATION_CENSUS_ROUND25.json",
@@ -42,7 +58,10 @@
       "commit_or_etag": "e0ab961ad8",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Census by measurement: 73 figures on 25 securities, each with class quote/reporting/UNRESOLVED and the read that decided it. CUR_MKT_CAP 12 quote + 5 reporting + 8 UNRESOLVED (25); NET_DEBT 0 quote + 5 reporting + 20 UNRESOLVED (25); CURR_ENTP_VAL 0 quote + 10 reporting + 13 UNRESOLVED (23). Read from S3 only, no write.",
-      "artifact_covered_by": ["AC1", "AC2"]
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/DENOMINATION_CENSUS_ROUND25.md",
@@ -50,28 +69,39 @@
       "commit_or_etag": "e0ab961ad8",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Human-readable counts, method and per-figure class table beside the JSON.",
-      "artifact_covered_by": ["AC1"]
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_currency_labels.py",
+      "kind": "test",
+      "commit_or_etag": "528da11fe2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1: 992 HK Equity fixture pins for CUR_MKT_CAP (HKD, quote (CRNCY)) and NET_DEBT (None, UNMEASURED:) changed in arm 1 and arm 3, each with a comment citing the amendment; every other assertion unchanged; 5 passed.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
     }
   ],
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round25/aa1_AC1.sh -- expect (?m)^aa1 population 73 securities 25 census_covered 73 classes_valid True reader_matches 73 tsm_mkt_cap USD control_reporting TWD unmeasured_labelled 0$",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round25/aa1_AC1.sh -- expect (?m)^aa1 population 73 securities 25 census_covered 73 classes_valid True reader_matches 73 tsm_mkt_cap USD control_reporting TWD unmeasured_labelled 0 callers [1-9]\\d* unwired 0$",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round25/aa1_AC1.sh",
-      "output_evidence": "aa1 population 79 securities 27 census_covered 73 classes_valid True reader_matches 73 tsm_mkt_cap USD control_reporting TWD unmeasured_labelled 0",
-      "denominator": "census covers 73 of 73 ordered figures on 25 securities; reader matches 73 of 73; the checker itself measures the population as 79 figures on 27 securities because S3 holds BP-SLASH-_LN_Equity and NG-SLASH-_LN_Equity beside the excluded BP/_LN_Equity and NG/_LN_Equity, and aa1_check.py EXCLUDED names only the slash forms (row AMGT_CORPUS-Z-W1-S21). Every other field of the expected line matches; only 'population 79 securities 27' differs from 'population 73 securities 25'.",
-      "expect": "(?m)^aa1 population 73 securities 25 census_covered 73 classes_valid True reader_matches 73 tsm_mkt_cap USD control_reporting TWD unmeasured_labelled 0$",
-      "status": "FAIL",
-      "status_reason": "The issuer's checker aa1_check.py measures the population as 79 figures on 27 securities (it excludes BP/_LN_Equity and NG/_LN_Equity but not their -SLASH- twin keys), so 'population 73 securities 25' cannot be printed whatever the census holds; all other fields match. Filed as row AMGT_CORPUS-Z-W1-S21 (BLOCKING, disarm_owner 2.0.0_SA_COO~X)."
+      "output_evidence": "aa1 population 73 securities 25 census_covered 73 classes_valid True reader_matches 73 tsm_mkt_cap USD control_reporting TWD unmeasured_labelled 0 callers 4 unwired 0",
+      "denominator": "census covers 73 of 73 figures on 25 securities; reader matches 73 of 73; 4 of 4 _figure_currency calls in model_block_pull.py carry security= (unwired 0); 0 UNRESOLVED figures labelled",
+      "expect": "(?m)^aa1 population 73 securities 25 census_covered 73 classes_valid True reader_matches 73 tsm_mkt_cap USD control_reporting TWD unmeasured_labelled 0 callers [1-9]\\d* unwired 0$",
+      "status": "PASS"
     },
     {
       "criterion_id": "AC2",
       "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round25/aa1_AC2.sh -- expect (?m)^\\d+ passed(, \\d+ \\w+)* in ",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round25/aa1_AC2.sh",
-      "output_evidence": "13 passed in 0.68s",
-      "denominator": "13 of 13 tests passed, 0 failed (8 in test_figure_currency_round25.py + 5 in the unchanged test_currency_labels.py)",
+      "output_evidence": "13 passed in 0.76s",
+      "denominator": "13 of 13 tests passed, 0 failed (8 in test_figure_currency_round25.py + 5 in test_currency_labels.py, whose arm-1 and arm-3 992 HK CUR_MKT_CAP / NET_DEBT pins changed per AMENDMENT 1)",
       "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
       "status": "PASS"
     }
@@ -80,32 +110,41 @@
     "mutant": {
       "description": "Negative control on the reader: the same aa1_AC1.sh run BEFORE the label rule existed (model_block_pull.py without the security keyword and with no census file), which is the unmutated old behaviour the rule replaces.",
       "expected": "The old three-argument rule labels TSM CUR_MKT_CAP TWD and the census is empty.",
-      "observed": "aa1 population 79 securities 27 census_covered 0 classes_valid False reader_matches 0 tsm_mkt_cap TWD control_reporting TWD unmeasured_labelled 0",
+      "observed": "aa1 population 79 securities 27 census_covered 0 classes_valid False reader_matches 0 tsm_mkt_cap TWD control_reporting TWD unmeasured_labelled 0 (pre-rule run, before AMENDMENT 1); after wiring the checker also reads callers 4 unwired 0",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "aa1_AC1.sh and aa1_AC2.sh each run twice after the commit; the census was built once from one S3 read.",
-      "observed": "AC1 line identical on both runs; AC2 13 passed on both runs.",
+      "observed": "AC1 line identical on repeat runs after the wiring commit; AC2 13 passed on repeat runs.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
-    {"item": "Wiring security= into the four _figure_currency call sites (the derive)", "reason": "The order says do not derive and do not touch any other function in model_block_pull.py; filed as row Z-W1-S22. Because of this, no assertion in test_currency_labels.py is superseded and none was changed."},
-    {"item": "Census entries for BP-SLASH-_LN_Equity and NG-SLASH-_LN_Equity", "reason": "BP and NG are excluded under Z-S64 and the order's population is 73 on 25; row Z-W1-S21."},
-    {"item": "Deciding NET_DEBT (20 of 25) and CURR_ENTP_VAL (13 of 23) and 8 of 25 market caps", "reason": "No stated same-block read separates the quote and reporting currencies beyond the 12% tolerance, or the market-cap currency is not established; those figures are UNRESOLVED and print no currency, never a guess. Rows Z-W1-S22 and Z-W1-S23 name what would decide them."},
-    {"item": "Any external FX rate", "reason": "Order: never invent an FX rate. The only conversion factor used is one implied by the block's own Bloomberg PX_TO_BOOK_RATIO x BOOK_VAL_PER_SH / PX_LAST and PE_RATIO x IS_EPS / PX_LAST, stated per figure."}
+    {
+      "item": "Census entries for BP-SLASH-_LN_Equity and NG-SLASH-_LN_Equity",
+      "reason": "BP and NG are excluded under Z-S64; AMENDMENT 1 (Z-W1-S21) makes the checker exclude both key forms, so the population reads 73 on 25."
+    },
+    {
+      "item": "Deciding NET_DEBT (20 of 25) and CURR_ENTP_VAL (13 of 23) and 8 of 25 market caps",
+      "reason": "No stated same-block read separates the quote and reporting currencies beyond the 12% tolerance, or the market-cap currency is not established; those figures are UNRESOLVED and print no currency, never a guess. Rows Z-W1-S22 and Z-W1-S23 name what would decide them."
+    },
+    {
+      "item": "Any external FX rate",
+      "reason": "Order: never invent an FX rate. The only conversion factor used is one implied by the block's own Bloomberg PX_TO_BOOK_RATIO x BOOK_VAL_PER_SH / PX_LAST and PE_RATIO x IS_EPS / PX_LAST, stated per figure."
+    }
   ],
   "surprises": [
-    "AMGT_CORPUS-Z-W1-S21: AC1 cannot pass as written: the checker measures the population as 79 on 27 because the -SLASH- twin keys of BP and NG are not excluded.",
-    "AMGT_CORPUS-Z-W1-S22: the derive's four _figure_currency call sites pass no security, so the rule is inert in the served path until wired; test_currency_labels.py unchanged.",
-    "AMGT_CORPUS-Z-W1-S23: the GBp-quoted names' market cap is in GBP, which neither label states; AZN, HSBA, ULVR print no currency and RIO's ratio 1.367 is unexplained."
+    "AMGT_CORPUS-Z-W1-S21: the checker did not exclude the -SLASH- twin keys of BP and NG; resolved by AMENDMENT 1.",
+    "AMGT_CORPUS-Z-W1-S22: the derive's call sites passed no security; resolved by AMENDMENT 1 (four call sites wired).",
+    "AMGT_CORPUS-Z-W1-S23: the GBp-quoted names' market cap is in GBP, which neither label states; AZN, HSBA, ULVR print no currency and RIO's ratio 1.367 is unexplained.",
+    "AMGT_CORPUS-Z-W1-S24: AMENDMENT 1 names the arm-1 pins, but the wired rule also breaks arm 3 on the same 992 HK fixture; only its CUR_MKT_CAP / NET_DEBT assertions were changed."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "pytest (AC2)",
       "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round25/aa1_AC2.sh",
-      "result": "13 passed in 0.68s"
+      "result": "13 passed in 0.76s"
     },
     {
       "tool": "census builder (worker scratch, not committed)",
