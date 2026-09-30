@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPMSP.TO-MS-t-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/prd/NFRA_MCPMSP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06804f9f99"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/decompositions/NFRA_MCPMSP_DECOMP.md",
+    "vintage_commit": "06804f9f99",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPMSP/task-orders/NFRA_MCPMSP.TO-MS-t-1.asker-firm-path.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPMSP~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tenant_registry.py",
+      "kind": "script",
+      "commit_or_etag": "c19f86c295",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed by order (bound 1: no deploy); the release is MS-d-1's.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/firm_role.py",
+      "kind": "script",
+      "commit_or_etag": "c19f86c295",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed by order (bound 1: no deploy).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/asker_scope.py",
+      "kind": "script",
+      "commit_or_etag": "c19f86c295",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed by order (bound 1: no deploy).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/audit.py",
+      "kind": "script",
+      "commit_or_etag": "c19f86c295",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed by order (bound 1: no deploy).",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/config.py",
+      "kind": "script",
+      "commit_or_etag": "c19f86c295",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed by order (bound 1: no deploy).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_mcpmsp_asker_firm.py",
+      "kind": "test",
+      "commit_or_etag": "c19f86c295",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file; not deployed.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest: N passed; test_registered_tenant_is_firm_principal=1 test_unregistered_tenant_refused_and_logged=1 test_firm_fetch_assumes_firm_role=1 test_missing_role_arn_refuses=1 test_firm_fetch_never_uses_gateway_identity=1 (each >=1, 0 failed) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/t1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest: ============================== 6 passed in 0.43s ==============================; test_registered_tenant_is_firm_principal=1 test_unregistered_tenant_refused_and_logged=1 test_firm_fetch_assumes_firm_role=1 test_missing_role_arn_refuses=1 test_firm_fetch_never_uses_gateway_identity=1\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 named tests PASSED once each; 6 of 6 tests in tests/test_mcpmsp_asker_firm.py passed, 0 failed. Run once from the worktree root after code commit c19f86c295.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "asker suites: >=23 passed, 0 failed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/t1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "asker suites: 1 failed, 22 passed in 1.86s\nRESULT: FAIL\nexit=1",
+      "denominator": "22 passed and 1 failed of 23 tests across test_asker_scope.py, test_asker_binding.py, test_asker_nochannels.py. The one failure is tests/test_asker_binding.py::test_resolve_asker_class: resolve_asker_class(<foreign guid>) with the default store now reaches the tenant registry, and the real access_state adapter refuses the tenant_firm record type (POLICY_RECORD_TYPES lacks it) with AccessStateRefused before any AWS call. Row NFRA_MCPMSP-Z-W1-S1 carries the measurement and the remedy (one tuple entry in app/access_state.py, outside this order's paths): with it applied in-process the same four suites ran 29 passed, 0 failed. Run once after c19f86c295; NOT met as written.",
+      "status": "FAIL",
+      "status_reason": "Not met as written: 22 of 23 passed. The one failing pre-existing test (test_asker_binding.py::test_resolve_asker_class) reads the default store, and app/access_state.py (read-only for this cell) refuses the tenant_firm record type; row NFRA_MCPMSP-Z-W1-S1 (BLOCKING, INERT, disarm_owner 2.0.0_SA_COO~MS) names the one-line remedy and its measured effect (29 passed, 0 failed with it applied in-process). Masking the refusal as 'unregistered' was declined."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "opal_asker_query includes asker_oid,bytes,key,verdict; asker_sender_refusal includes chat_id,display_name,oid,reason,tid; text_fields=[] verdict=OK -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/t1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "opal_asker_query=['asker_oid', 'bytes', 'key', 'verdict'] asker_sender_refusal=['chat_id', 'display_name', 'oid', 'reason', 'tid'] text_fields=[] verdict=OK\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 allowlist entries carry every required field; 0 text/message/body/content fields in either. Run once after c19f86c295.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. Beside the negative arms, test_registered_tenant_is_firm_principal is the positive control (a registered tenant is served under its role) and Opal's own tenant is asserted unchanged with no registry read.",
+      "expected": "The firm arm serves under the assumed role and the refusal arms are not a blanket refusal.",
+      "observed": "test_firm_fetch_assumes_firm_role PASSED (served, one AssumeRole on FIRM_ROLE_ARNS[firm], read with the assumed credentials).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Each criterion was run once after the commit, as the order names.",
+      "observed": "AC1 rc=0, AC2 rc=1, AC3 rc=0; AC1 and AC2 also run once before the commit with the same result.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_MCPMSP-Z-W1-S1",
+    "NFRA_MCPMSP-Z-W1-S2"
+  ],
+  "session_log": "2026-09-30 UTC. Worktree C:/tmp/ms-1 (wk-NFRA_MCPMSP-1, TREE-OK). Built app/tenant_registry.py (firm_of, TENANT_PK_PREFIX, sk 'tenant_firm'), app/firm_role.py (AssumeRole fetch, no gateway-identity fallback), the asker_scope.py firm arm plus the asker_sender_refusal entry, config.FIRM_ROLE_ARNS and the audit allowlist entries, and tests/test_mcpmsp_asker_firm.py. Found that app/access_state.py (read-only here) refuses the tenant_firm record type, so the default-store read in test_asker_binding.py::test_resolve_asker_class raises; I did not treat AccessStateRefused as 'absent' (that would hide the cause and relabel every registered tenant as denied). AC2 is left FAIL as measured; the order stays open. Code commit c19f86c295.",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3",
+      "result": "see the worker report; only the exit code is the verdict."
+    }
+  ]
+}
