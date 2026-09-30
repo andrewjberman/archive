@@ -38,9 +38,9 @@
   {
    "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~5/d2_live.json",
    "kind": "config_data",
-   "commit_or_etag": "89810aeef5",
+   "commit_or_etag": "9c2243d41c",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "LEG A record incl. gold counts and the sweep-r2 request; gateway_deploy_commit null (LEG B stopped, row W5-S12)"
+   "deploy_evidence": "LEG A record plus gateway_deploy_commit 4ce794642699e78a718b8154664e1428737f996a, gateway_base_commit 288fa78c93, the five key-16 post-deploy host sha256 and the SSM ids (627cf662, ee25f0a2, 1bbbeb80)"
   },
   {
    "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
@@ -53,15 +53,15 @@
    "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
    "kind": "script",
    "commit_or_etag": "1ef9f50b67",
-   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "hookup_d2.patch applied and committed on the worker branch (never a deploy ref); the gateway deploy was NOT run (row ETFS_RIVALS-Z-W5-S8); git apply --check of the server.py hunks against 288fa78c93 (the now-deployed commit) rc 0"
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "hookup_d2.patch applied on the worker branch (never a deploy ref). The issuer deployed ref 4ce794642699 (BASE 288fa78c93 + key-16) at ~14:37Z: host server.py sha256 45d0494d... == ref, /rivalfunds 401. At 14:41:53Z NFRA_MCPINDEX's deploy-only ref 2e2254156e (no rivalfunds hookup) was deployed over it: host server.py sha256 82fd0421..., /rivalfunds 404, AC2 FAIL (row ETFS_RIVALS-Z-W5-S16, BLOCKING)"
   },
   {
    "path_or_key": "org/critical_paths/change_management/20260930T1013Z_etfs-rivalfunds-thread-r1_deploy_completion.md",
    "kind": "config_data",
    "commit_or_etag": "PENDING-THIS-COMMIT",
    "deployed_state": "STAGED-AWAITING-GATE",
-   "deploy_evidence": "ledger OPEN: L1, L2, L5 closed with proof; L3 (gateway files), L4 (health) and L6 (AC1-AC3 + /rivalfunds read) left OPEN with STOP row W5-S12"
+   "deploy_evidence": "ledger OPEN: L1, L2, L5 closed with proof; L3, L4, L6 left OPEN (AC2 FAIL, row W5-S16); the sentinel log records the ref, BASE, the five post-deploy host hashes and the SSM ids"
   },
   {
    "path_or_key": "s3://opal-data-etfs/rivalfunds/etfs/gold/canonical_shape/",
@@ -103,6 +103,13 @@
     "AC3"
    ],
    "deploy_evidence": "STAGED gains the positioning-vocabulary line; safe-apply etfs-rivalfunds: Apply complete! Resources: 0 added, 5 changed, 0 destroyed (source_code_hash only); rebuild + terraform plan then read No changes"
+  },
+  {
+   "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+   "kind": "config_data",
+   "commit_or_etag": "9c2243d41c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "byte-surgical: opal-gateway deployed_commit 288fa78c93 -> 4ce794642699e78a718b8154664e1428737f996a and deployed_at 11:37:34Z -> 2026-09-30T14:37Z (git diff: 2 lines). Stale for the host as of 14:41:53Z (row W5-S16)"
   }
  ],
  "acceptance": [
@@ -121,10 +128,10 @@
    "criterion_verbatim": "AC2 RESULT: PASS 0 failures",
    "method": "command",
    "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/d-2.AC2.py",
-   "output_evidence": "FAIL: exception: CalledProcessError: Command '['git', 'show', 'None:infra/aws/ec2/opal-gateway/app/rivalfunds_view.py']' returned non-zero exit status 128.\nAC2 RESULT: FAIL 1 failures\nrc=1 (re-run ~14:04Z). Cause: LEG B STOPPED at amendment 4 step 5 (row ETFS_RIVALS-Z-W5-S12): step 4 passed (manifest 288fa78c93, host equals BASE 76 of 76) but safe-ec2-deploy.sh from the deploy-only tree (ref 4ce794642699e78a718b8154664e1428737f996a) was refused by the HALTGT identity gate rc=3 before any build or upload, so d2_live.json gateway_deploy_commit is null.",
-   "denominator": "0 of 3 checks (the check aborts before the SSM read)",
+   "output_evidence": "OK:   deploy commit 4ce794642699e78a718b8154664e1428737f996a carries HEAD's rivalfunds_view.py\nOK:   SSM sha256sum Status Success (command 6fc20d44-4479-4a75-98b0-a954c90d2677)\nOK:   deployed app/rivalfunds_view.py sha256 4af183597d6b7c7e300d2646f961062e05e158bc1a5d1def3dbaa1cea2a992fc == deploy commit 4af183597d6b7c7e300d2646f961062e05e158bc1a5d1def3dbaa1cea2a992fc\nFAIL: deployed app/server.py sha256 82fd0421a60e777fca94fe29deca8df57d40f275adebccce04aee45840ed5b34 == deploy commit 45d0494d3bc4266e7d6440a873384146460447c3d8b58330236b86de8f721b84\nAC2 RESULT: FAIL 1 failures\nrc=1 (~14:48Z)",
+   "denominator": "3 of 4 checks passed",
    "status": "FAIL",
-   "status_reason": "LEG B STOP (row ETFS_RIVALS-Z-W5-S12, BLOCKING): the halt gate cannot admit the worker in a BASE-rooted deploy-only tree; the gateway was not deployed."
+   "status_reason": "The gateway deploy of ref 4ce794642699 landed at ~14:37Z (SSM 627cf662: host == ref 80/80, /rivalfunds 401), but NFRA_MCPINDEX's later deploy-only ref 2e2254156e (built on 288fa78c93 without the key-16 files) replaced server.py at 14:41:53Z: host server.py sha256 == that ref's (82fd0421...), 0 'rivalfunds' matches, /rivalfunds 404 (SSM eb02d72c). Row ETFS_RIVALS-Z-W5-S16 (BLOCKING/ARMED)."
   },
   {
    "criterion_id": "AC3",
@@ -152,12 +159,12 @@
  },
  "declared_exclusions": [
   {
-   "item": "LEG B steps 5-7 (infra/aws/ec2/opal-gateway/app/server.py deployed state): gateway deploy from ref 4ce794642699e78a718b8154664e1428737f996a, health 200, AC2, /rivalfunds read equal to the newest page, EC2 manifest and d2_live.json gateway_deploy_commit, ledger close",
-   "reason": "STOP at step 5 (row ETFS_RIVALS-Z-W5-S12): step 4 passed (manifest deployed_commit 288fa78c93; SSM sha256 of the host app tree equals BASE 76 of 76), the HALTGT identity gate then refused the worker rc=3 in the deploy-only tree, which carries no ETFS_RIVALS order; nothing built or deployed, the gateway is unchanged. Unauthenticated reads of the ALB return 302 (Entra); CTO condition 5 is a human's (row W5-S13 records the newest page sha256 87fb2763...762e6c)."
+   "item": "Ledger etfs-rivalfunds-thread-r1 close (L3, L4, L6)",
+   "reason": "AC2 FAILS after a later gateway release overwrote server.py (row W5-S16); the order closes the ledger only if all checks pass, so it is left OPEN for the issuer (window ends ~16:13Z)."
   },
   {
-   "item": "Ledger etfs-rivalfunds-thread-r1 close",
-   "reason": "L3, L4, L6 are unproven; the entry is left OPEN for the issuer (window ends ~16:13Z)."
+   "item": "CTO condition 5 authenticated /rivalfunds read",
+   "reason": "A worker cannot pass the Entra login; it is a human's. Unauthenticated evidence: /rivalfunds and /rivalfunds/archive read 401 at 14:37Z (SSM 1bbbeb80), then 404 at ~14:50Z after the overwrite; newest platinum/page object date=2026-09-30/index.html sha256 87fb276390e589c5fc6a3eb5b17dae475ba187b24a0ce5f1343eaefcad762e6c (row W5-S13)."
   },
   {
    "item": "etfs-netassets-daily next-fire confirmation",
@@ -177,7 +184,10 @@
   "ETFS_RIVALS-Z-W5-S10 -- BLOCKING/ARMED: LEG B STOP, the ref commit was refused by the lane gate (no order at a BASE tree HEAD); the issuer ruled it and committed the ref 4ce794642699e78a718b8154664e1428737f996a.",
   "ETFS_RIVALS-Z-W5-S11 -- OBSERVATION/INERT: README-only mcportal gitlink (working checkout a3bff71ffa) and a registry-dependent gateway test at BASE.",
   "ETFS_RIVALS-Z-W5-S12 -- BLOCKING/ARMED: LEG B STOP at amendment 4 step 5, the HALTGT identity gate refuses the worker in the BASE-rooted deploy-only tree (no order at its HEAD), not overridable; gateway not deployed, unchanged.",
-  "ETFS_RIVALS-Z-W5-S13 -- OBSERVATION/INERT: what a worker could read for condition 5: newest page sha256 87fb2763...762e6c, the app health route is /health (200), /healthz is 404, ALB 302."
+  "ETFS_RIVALS-Z-W5-S13 -- OBSERVATION/INERT: what a worker could read for condition 5: newest page sha256 87fb2763...762e6c, the app health route is /health (200), /healthz is 404, ALB 302.",
+  "ETFS_RIVALS-Z-W5-S14 -- OBSERVATION/INERT: safe-ec2-deploy.sh's manifest rewrite turned escaped non-ASCII in unrelated entries into mojibake (discarded; the manifest was edited byte-surgically instead).",
+  "ETFS_RIVALS-Z-W5-S15 -- OBSERVATION/INERT: deploy-only gateway refs 288fa78c93 and 093fc247c6 carry no tag; reachable by branch only.",
+  "ETFS_RIVALS-Z-W5-S16 -- BLOCKING/ARMED: AC2 FAIL, a later NFRA_MCPINDEX gateway deploy (ref 2e2254156e) reverted server.py at 14:41:53Z; /rivalfunds is 404 again; ledger L3/L4/L6 open."
  ],
  "session_log": "org/critical_paths/change_management/20260930T1013Z_etfs-rivalfunds-thread-r1_deploy_completion.md",
  "compiler_tools": [
@@ -220,6 +230,16 @@
    "tool": "bash infra/aws/ec2/safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh (from C:/tmp/wk-rivals-5gw)",
    "invocation": "two runs, before and after provisioning the gitignored session serial file",
    "result": "rc=3 both: HALT-GATE IDENTITY UNRESOLVED; then SERIAL RESOLVES TO NO KNOWN AGENT; refused before Step 2, nothing built or deployed"
+  },
+  {
+   "tool": "aws ssm send-command (AWS-RunShellScript, read-only)",
+   "invocation": "gw_hash_compare.py vs 4ce794642699 (0d95b020-5a00-484b-b0ab-538dc93bcfa1); grep/stat/curl localhost (eb02d72c-0318-43f8-a0c3-2402dac3510b); AC2's sha256sum (6fc20d44-4479-4a75-98b0-a954c90d2677)",
+   "result": "host 80 files, equal 70, differ 10 incl. server.py; grep -c rivalfunds server.py = 0; /health 200, /rivalfunds 404, /rivalfunds/archive 404; gateway restarted 14:41:53Z"
+  },
+  {
+   "tool": "issuer-run safe-ec2-deploy.sh (2.0.0_SA_COO~RV, recorded here from the issuer's measurements)",
+   "invocation": "HALT_ACK=1 bash infra/aws/ec2/safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh from the ref tree",
+   "result": "rc 0 ~14:37Z; post-deploy SSM 627cf662-bd05-4c0c-a455-88e89d49dc13 host == ref 80/80; health SSM 1bbbeb80-7533-42ab-bf98-f036dc6aa720 /health 200, /rivalfunds 401, /rivalfunds/archive 401"
   }
  ]
 }
