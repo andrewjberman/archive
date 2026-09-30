@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_AMGTV1.TO-AV-n-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_AMGTV1/prd/DSGN_AMGTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "2274b529ef"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_AMGTV1/decompositions/DSGN_AMGTV1_DECOMP.md",
+    "vintage_commit": "eacffcbd94",
+    "to_ref": "org/missions/D13/DSGN/DSGN_AMGTV1/task-orders/DSGN_AMGTV1.TO-AV-n-4.the-walker-waits-for-the-load-state.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_AMGTV1~43",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".claude/skills/ui-walk/walk.mjs",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local walker script; no deploy grant in this order."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: node round11/checks/loadstate.cjs -- expect: WALKER WAITS FOR THE LOAD STATE: 3 of 3 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; node \"org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/2.0.0_SA_COO~D/round11/checks/loadstate.cjs\"; echo \"exit=$?\"",
+      "output_evidence": "ARM PASS the load wait resolves on the page's panel state, and a held read reads \"ceiling\" :: 4 of 4 scenarios (ceiling 45000 ms)\nARM PASS the pick and every tab shot wait for the load state, not a fixed settle\nARM PASS every wait is recorded in load-states.json :: 2 loadStates record site(s)\nWALKER WAITS FOR THE LOAD STATE: 3 of 3 arms\nexit=0",
+      "denominator": "3 of 3 arms",
+      "status": "PASS",
+      "expect": "WALKER WAITS FOR THE LOAD STATE: 3 of 3 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: node round8/checks/walkerbound.cjs -- expect: WALKER BOUND: 3 of 3 checks green -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; node \"org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/2.0.0_SA_COO~D/round8/checks/walkerbound.cjs\"; echo \"exit=$?\"",
+      "output_evidence": "CHECK GREEN round5/checks/pickstep.cjs :: WALK PICKS A NAME: 3 of 3 arms\nCHECK GREEN round6/checks/walkthread.cjs :: WALK GRADES BY NAME: 3 of 3 arms\nCHECK GREEN round7/checks/walkday.cjs :: WALK OPENS A DAY BY DATE: 3 of 3 arms\nWALKER BOUND: 3 of 3 checks green\nexit=0",
+      "denominator": "3 of 3 checks green",
+      "status": "PASS",
+      "expect": "WALKER BOUND: 3 of 3 checks green"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: bash round11/checks/walkvoid.sh -- expect: SIGNED-OUT CONTROL: the walk FAILS on the sign-in page: YES -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash \"org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/2.0.0_SA_COO~D/round11/checks/walkvoid.sh\"; echo \"exit=$?\"",
+      "output_evidence": "walker rc=3; WALK VOID lines=1; account lines=0; last: SUMMARY: 1 unique finding(s) from 1 observations, 1 screenshot(s), 0 guard abort(s), 0 telemetry stubbed, 0 API issue(s), 2 console error(s), walk void\nSIGNED-OUT CONTROL: the walk FAILS on the sign-in page: YES\nexit=0",
+      "denominator": "1 of 1 signed-out control",
+      "status": "PASS",
+      "expect": "SIGNED-OUT CONTROL: the walk FAILS on the sign-in page: YES"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 is JUDGMENT, graded by 3.0.0_SA_CVO~Z at L9 on the issuer's signed-in walk, never self-graded: the no-dossier name's header and Thesis tab are shot loaded, and load-states.json records the state the walker saw for every name and tab.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment=true: no invocation; graded by 3.0.0_SA_CVO~Z at L9 on the issuer's signed-in walk",
+      "output_evidence": "Worker output for the reader: walk.mjs now calls waitForLoaded(page) after the pick and after each tab click, before the shot, and writes load-states.json. Not walked signed in (bounds).",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: graded by 3.0.0_SA_CVO~Z at L9; a worker-assigned PASS/FAIL is refused.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 arms 2 and 3 demand waitForLoaded wiring and loadStates records absent from the base walk.mjs.",
+      "expected": "AC1 fails at the base, 3 of 3 after the build.",
+      "observed": "After build: AC1 3 of 3, AC2 3 of 3, AC3 YES, all exit=0. Base not re-run by this worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Ran each check once after the final source.",
+      "observed": "Tallies as recorded.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "signed-in walk",
+      "reason": "Bounds forbid arming the walker account; AC4 is the CVO's."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D13/DSGN/DSGN_AMGTV1/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "node",
+      "invocation": "node loadstate.cjs",
+      "result": "WALKER WAITS FOR THE LOAD STATE: 3 of 3 arms"
+    }
+  ]
+}
