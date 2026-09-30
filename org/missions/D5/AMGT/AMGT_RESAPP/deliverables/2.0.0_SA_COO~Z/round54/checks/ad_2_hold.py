@@ -10,6 +10,7 @@ ad-1's `drafting_build --hold-unspanned`, read on the store and on the DEPLOYED 
                          text does not move -- the adapter already held these sentences at read), `held_no_span_count` equal,
                          `held_no_span_at_read` 0, `held_no_span_on_object` = the pre-act at-read count, basis READ_GATE_PLUS_OBJECT,
                          every other key equal apart from generated_at / as_of_date and the per-section held_no_span_at_read.
+                         AMENDMENT 2: those read-time stamps are dropped at every depth, not only at the top level.
 usage: python <this> --what save|store|served --dir D   (from the repo root)"""
 import argparse
 import importlib.util
@@ -38,6 +39,16 @@ def load(name, path):
 def keys_of(s3):
     pages = s3.get_paginator("list_objects_v2").paginate(Bucket=crosswalk.POOL_BUCKET, Prefix="drafting/v1/")
     return [o["Key"] for p in pages for o in p.get("Contents", []) if o["Key"].endswith(".json")]
+
+
+def unvolatile(o):
+    """AMENDMENT 2: the read-time stamps are dropped at EVERY depth (VLO's nested model.generated_at moved 19:37Z -> 19:53Z between
+    two reads of an unchanged model block), never a data field."""
+    if isinstance(o, dict):
+        return {k: unvolatile(v) for k, v in o.items() if k not in VOLATILE}
+    if isinstance(o, list):
+        return [unvolatile(v) for v in o]
+    return o
 
 
 def sec_sentences(body):
@@ -102,7 +113,7 @@ def main():
                 "basis READ_GATE_PLUS_OBJECT": post.get("held_no_span_basis") == "READ_GATE_PLUS_OBJECT",
             }
             others = [k for k in set(pre) | set(post) if k not in VOLATILE and k not in MOVES
-                      and json.dumps(pre.get(k), sort_keys=True) != json.dumps(post.get(k), sort_keys=True)]
+                      and json.dumps(unvolatile(pre.get(k)), sort_keys=True) != json.dumps(unvolatile(post.get(k)), sort_keys=True)]
             if others:
                 checks["other keys unmoved (moved: %s)" % others[:4]] = False
             failed = [c for c, ok in checks.items() if not ok]
