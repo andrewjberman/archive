@@ -218,7 +218,10 @@ def main():
     txt_hits = []
     m_scanned = 0
     cpat = re.compile(r"listing pages|pages (?:each|per) publisher|pages_planned|plan_pages", re.I)
+    own = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
     for dp, _dn, fns in os.walk(mission):
+        if os.path.abspath(dp).startswith(own):
+            continue  # this cell's own outputs are not a source it may read
         for fn in fns:
             if fn.endswith(("_PRD.md", "_DECOMP.md")) or "task-orders" in dp or "brief" in dp or "prd" in dp \
                     or "decompositions" in dp:
