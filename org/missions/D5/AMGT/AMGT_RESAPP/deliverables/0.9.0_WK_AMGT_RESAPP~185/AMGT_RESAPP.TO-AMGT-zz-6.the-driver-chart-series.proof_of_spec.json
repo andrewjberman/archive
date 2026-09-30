@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-zz-6",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-zz-6.the-driver-chart-series.md",
+    "group": "OTHER",
+    "vintage_commit": "77712167dcdb4998947dd0d13fa86aba9515feed"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "77712167dcdb4998947dd0d13fa86aba9515feed",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-zz-6.the-driver-chart-series.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~185",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/analyze.py",
+      "kind": "script",
+      "commit_or_etag": "f923c597a34e3af819aabf0130ff7a9fd39ba3e6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: reverify_stored_thesis_driver gains dry_run=False (True: same document, no crosswalk.write_pool, receipt string 'DRY-RUN -- nothing written; ...'; False: byte-for-byte prior behaviour). New _columnar_verify + _apply_point_verification fallback: a point the per-block gate HELD is re-tried against a columnar table (header run of one 4-digit year per line; value must equal the number at the same column index of a following run of exactly len(header) whole-number lines); otherwise stays held. Library code, no deploy target; no S3 write, no vendor call.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_reverify_dry_run.py",
+      "kind": "test",
+      "commit_or_etag": "f923c597a34e3af819aabf0130ff7a9fd39ba3e6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 7 tests over a stub S3 client and monkeypatched source lookup -- dry_run writes nothing (0 write_pool calls, 0 puts) and names itself; default and dry_run=False still write; dry and real return equal documents; columnar table spans every year in its own column; a value absent from the excerpt stays unspanned; a wrong-column value stays held; a header run wider than the points is still column-aligned.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round51/checks/zz_6_reverify.py; echo \"exit=$?\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round51/checks/zz_6_reverify.py; echo \"exit=$?\"",
+      "output_evidence": "VERBATIM (capture org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~185/zz-6.AC1.out.txt):\ndry run receipt: 'DRY-RUN -- nothing written; 3 points kept, 0 held'; re-verified points 3 (with span 3); chart SERVED source 'filing' points 3\nTHE DRIVER CHART IS SERVED FROM THE FILING'S VERIFIED POINTS: YES\nexit=0",
+      "denominator": "3 of 3 ASML_NA_Equity driver points spanned and charted (was 1 of 3 before the fix); the check's S3 client raises on any put, none raised",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest lib/research/filings/tests -q; echo \"exit=$?\"",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest lib/research/filings/tests -q; echo \"exit=$?\"",
+      "output_evidence": "VERBATIM (capture org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~185/zz-6.AC2.out.txt):\n118 passed in 12.85s\nexit=0",
+      "denominator": "118 passed, 0 failed (111 at the cut + 7 new); N=118 > 111",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative arms held as tests: a value absent from the excerpt, a value in the wrong column, and the dry-run write-count of 0 against the default path's 1.",
+      "expected": "7 of 7 new tests pass inside the 118.",
+      "observed": "FIRED AS EXPECTED: 118 passed, 0 failed, including the absent-value, wrong-column and dry-run-write-count arms (capture org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~185/zz-6.AC2.out.txt).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "zz_6_reverify.py run twice against the live stored objects and compared (cmp).",
+      "observed": "STABLE: byte-identical output.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The real rewrite of ASML's stored analysis object",
+      "reason": "Order: AMGT-zz-8's act under its pair, not this cell's; no call with dry_run=False outside a stubbed test."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W185-S1"
+  ],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface.",
+  "compiler_tools": [
+    {
+      "tool": "python + pytest",
+      "invocation": "see AC1-AC2",
+      "result": "AC1 YES exit=0; AC2 118 passed"
+    }
+  ]
+}
