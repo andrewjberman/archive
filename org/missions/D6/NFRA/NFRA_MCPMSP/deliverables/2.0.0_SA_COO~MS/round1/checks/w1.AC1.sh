@@ -6,6 +6,7 @@
 . "$(dirname "$0")/_root.sh"
 if pytest_named "$MPW_DIR/tests/test_register_tenant.py" 1 \
   test_register_tenant_writes_tenant_firm test_register_tenant_refused_firm_not_live \
-  test_register_tenant_refused_other_firm_row test_register_tenant_records_each_outcome; then
+  test_register_tenant_refused_other_firm_row test_register_tenant_records_each_outcome \
+  test_register_tenant_writes_through_operator_transact; then
   echo "RESULT: PASS"; exit 0; fi
 echo "RESULT: FAIL"; exit 1
