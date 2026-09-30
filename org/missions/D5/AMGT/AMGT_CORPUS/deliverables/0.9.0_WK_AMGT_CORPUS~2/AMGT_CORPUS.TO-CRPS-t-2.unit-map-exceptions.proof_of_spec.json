@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-t-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-t-2.unit-map-exceptions.md",
+    "group": "OTHER",
+    "vintage_commit": "6fcaa52f793959f5ab845737baea71753c56d203"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "48a5b4a1cf",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-t-2.unit-map-exceptions.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/build_unit_map.py",
+      "kind": "script",
+      "commit_or_etag": "7a42db923d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_entries freezes an existing field's shared surface (unit_status, sign_status, unit/sign type, finding); an unmeasurable name or one disagreeing with a shared MEASURED scalar is recorded at fields[m].per_security_detail[<security>][\"exception\"] = {scope: <security>, unit: <reason>, sign: <reason>} and left out of measured_on; a dict-form field still gets the name's entry. Local library code, no deploy surface.",
+      "introduces": [
+        "frozen",
+        "exception"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_build_unit_map_exceptions.py",
+      "kind": "test",
+      "commit_or_etag": "7a42db923d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 tests against temp maps only: measured scalar + ambiguous name -> exception; scalar + disagreeing measured name -> exception; scalar + agreeing name -> measured_on only; per-security MEASURED field + new measured name -> entry added; per-security field + unmeasurable name -> status kept, exception; a second run over the written map does not flip the shared status.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_build_unit_map_classification_split.py",
+      "kind": "test",
+      "commit_or_etag": "7a42db923d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "branch-1 test now builds against an empty temp map (monkeypatch FIELD_MAP_PATH) so its premise no longer depends on the committed NAME field's scalar shape; both split tests stay green (3 of 3).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t2_AC1.sh -- expect (?m)^t2 replay rc 0 shared_changed 0 shared_removed 0 type_changed 0 hitachi_reproduced \\d+ of 214 non6501_added 0$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t2_AC1.sh",
+      "output_evidence": "t2 replay rc 0 shared_changed 0 shared_removed 0 type_changed 0 hitachi_reproduced 209 of 214 non6501_added 0",
+      "denominator": "209 of 214 committed Hitachi additions reproduced by the CLI replay of Hitachi's landed raw against the pre-Hitachi map (ead621d685^1) in a temp file; 0 extra paths; the 5 not reproduced are /fields[mnemonic=X]/measured_on[+\"6501 JP Equity\"] for BEST_DPS, BEST_EBITDA, BEST_EPS, BEST_PE_RATIO, CIE_DES_BULK - the CLI passes the raw header (CIE_DES_BULK a row-dict list, no BEST_ FY1 values) while the producer's _ensure_unit_map pre-joins and merges bestdata, so the CLI records those five as exceptions (row AMGT_CORPUS-Z-W2-S14). Run three times at the final code (identical). Issuer's dry-run at base 9dc713f359 read 209 of 214 as well.",
+      "expect": "(?m)^t2 replay rc 0 shared_changed 0 shared_removed 0 type_changed 0 hitachi_reproduced \\d+ of 214 non6501_added 0$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t2_AC2.sh -- expect (?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t2_AC2.sh",
+      "output_evidence": "9 passed in 0.46s",
+      "denominator": "9 of 9 tests passed, 0 failed: 3 in test_build_unit_map_classification_split.py + 6 in test_build_unit_map_exceptions.py; run twice, identical",
+      "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The replay against the pre-Hitachi map is the discriminator: the unmodified build_unit_map.py (HEAD 48a5b4a1cf) is the negative arm - the issuer's dry-run at base 9dc713f359 read shared_changed 23 type_changed 4 on the same replay. The exceptions tests plant a scalar MEASURED field and an ambiguous magnitude (11962163.4) and assert the shared surface equal to a deepcopy of its before-state.",
+      "expected": "unmodified builder: shared_changed > 0 and type_changed > 0; modified builder: both 0.",
+      "observed": "modified builder: shared_changed 0 shared_removed 0 type_changed 0 (issuer's dry-run of the unmodified builder: 23 and 4, quoted in the order, not re-run by this worker). CONTROL FIRED-AS-EXPECTED True on the positive arm.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 replay run three times; AC2 run twice.",
+      "observed": "identical output every run (AC1 line, 9 passed).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reader-side honouring of the exception (model_block_pull._resolved_unit/_resolved_sign)",
+      "reason": "Outside the order's paths (read-only); carried as row AMGT_CORPUS-Z-W2-S13, ARMED, disarm_owner 2.0.0_SA_COO~X."
+    },
+    {
+      "item": "Any write to the committed field_map.json, any vendor call, any S3 write",
+      "reason": "BOUNDS: the replay works on a temp copy and reads Hitachi's bronze from S3 only; git status shows field_map.json untouched."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W2-S13",
+    "AMGT_CORPUS-Z-W2-S14"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "t2_AC1.sh / t2_replay.py (issuer's)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t2_AC1.sh",
+      "result": "rc 0; t2 replay rc 0 shared_changed 0 shared_removed 0 type_changed 0 hitachi_reproduced 209 of 214 non6501_added 0"
+    },
+    {
+      "tool": "pytest via t2_AC2.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round18/t2_AC2.sh",
+      "result": "rc 0; 9 passed in 0.46s"
+    }
+  ]
+}
