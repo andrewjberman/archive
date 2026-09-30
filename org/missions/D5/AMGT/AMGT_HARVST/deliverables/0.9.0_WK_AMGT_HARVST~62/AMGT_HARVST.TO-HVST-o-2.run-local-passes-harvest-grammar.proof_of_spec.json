@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-o-2.run-local-passes-harvest-grammar",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-o-2.run-local-passes-harvest-grammar.md",
+    "group": "OTHER",
+    "vintage_commit": "65aa9251bc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "65aa9251bc",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-o-2.run-local-passes-harvest-grammar.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~62",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/run-local.ps1",
+      "kind": "script",
+      "commit_or_etag": "ca1a2a3c9e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "line 6 workerArgs now ends with --harvest-grammar; nothing else changed. Scheduled Task not touched.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/README.md",
+      "kind": "doc",
+      "commit_or_etag": "ca1a2a3c9e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one line describing run-local.ps1 passing --harvest-grammar",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~62/scripts/o2_ac1_stub_argv.py",
+      "kind": "script",
+      "commit_or_etag": "ca1a2a3c9e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "executes run-local.ps1 via powershell.exe with a stub .cmd interpreter recording argv",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "run-local.ps1 executed by powershell.exe with -Python a stub recording argv; both no-switch and -AllSecurities -MaxJobs 2 argv contain --harvest-grammar with run and --new-only; base script argv lacks --harvest-grammar",
+      "method": "test_suite",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~62/scripts/o2_ac1_stub_argv.py",
+      "output_evidence": "script=run-local.ps1 extra=[] rc=0\n  argv: -m lib.opal_data_harvest run --new-only --harvest-grammar --max-jobs 1\nscript=run-local.ps1 extra=['-AllSecurities', '-MaxJobs', '2'] rc=0\n  argv: -m lib.opal_data_harvest run --new-only --harvest-grammar --all-securities --max-jobs 2\nscript=o2_base_run-local.ps1 extra=[] rc=0\n  argv: -m lib.opal_data_harvest run --new-only --max-jobs 1\nAC1 PASS",
+      "denominator": "3 of 3 stub runs as expected (2 new script, 1 base), rc 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "all pass, pass count printed, including grammar-path tests",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/opal_data_harvest/ -rA --tb=line",
+      "output_evidence": "======================= 183 passed, 1 skipped in 8.17s ========================",
+      "denominator": "183 passed, 1 skipped (pre-existing quarantined test_verification), 0 failed; full output in o2_ac2_output.txt",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "same harness run against the merge-base run-local.ps1",
+      "expected": "argv without --harvest-grammar",
+      "observed": "argv '-m lib.opal_data_harvest run --new-only --max-jobs 1'",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "AC1 script run twice (once before and once at proof time)",
+      "expected": "identical argv and PASS",
+      "observed": "identical argv lines, AC1 PASS both times",
+      "status": "STABLE",
+      "method": "rerun of o2_ac1_stub_argv.py; compare output"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Scheduled Task enable/register/run, install-schedule.ps1, collector run, AWS/vendor calls",
+      "reason": "Standing clause 1 and section 3; the stub interpreter replaces python."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "powershell.exe + stub cmd",
+      "invocation": "o2_ac1_stub_argv.py",
+      "result": "AC1 PASS"
+    }
+  ]
+}
