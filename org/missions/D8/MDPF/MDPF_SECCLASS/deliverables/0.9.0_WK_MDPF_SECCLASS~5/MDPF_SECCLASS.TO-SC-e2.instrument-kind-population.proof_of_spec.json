@@ -1,0 +1,218 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e2",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R2.md",
+    "vintage_commit": "1302fa149e4697558564b070c277aadd7e8a4a05",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e2.instrument-kind-population.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/set-instrument-kind.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New script: ONE additive conditional update per row, SET instrument_kind = <fund|single_security> WHERE attribute_not_exists(instrument_kind), touching no other attribute; refuses (KindAlreadySet) any row already carrying instrument_kind; refuses (UnknownKind) before any write attempt for a kind outside the contract's two values, never defaulting. --source constituents derives its plan from the served ETF constituents feed via seed-etf-constituents.py's own load_constituents()/instrument_kind_for(), never bd-securities. CLI runs --dry-run only in this build (no live-write path exercised). Live scan this build: table_rows_at_build=2309, rows_absent_kind=2163, would_set=156, defaulted=0.",
+      "introduces": [
+        "def set_kind_if_absent",
+        "def plan_absent_kind",
+        "def rows_from_constituents_feed",
+        "class KindAlreadySet",
+        "class UnknownKind"
+      ],
+      "artifact_covered_by": [
+        "SC2-e2-AC1",
+        "SC2-e2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds the order's step-2 kind-only mode: set_kind_only_if_absent() (same conditional-update shape as set-instrument-kind.py, kept local so the constituents seeder needs no sibling-script import) and a new --kind-only CLI flag that plans, for every constituent ticker with a determinate instrument_kind_for() value, ONE conditional SET instrument_kind on attribute_not_exists(instrument_kind) -- regardless of the row's current classified_by, and touching no other attribute. Run --dry-run only in this build.",
+      "introduces": [
+        "def set_kind_only_if_absent",
+        "class KindAlreadySet",
+        "--kind-only"
+      ],
+      "artifact_covered_by": [
+        "SC2-e2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_set_instrument_kind.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 tests: only instrument_kind changes in the UpdateExpression/ConditionExpression/ExpressionAttributeValues (asserted verbatim, no other attribute name in the call, on both set-instrument-kind.py's and the constituents seeder's kind-only mode); a row that already has instrument_kind raises KindAlreadySet and is never overwritten (both call sites); an unknown kind raises UnknownKind before any update_item call (table.calls == []); plan_absent_kind excludes rows that already carry the attribute; rows_from_constituents_feed excludes a ticker whose kind is undetermined (a cash-residual line). python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_set_instrument_kind.py -q -p no:cacheprovider: 7 passed in 0.30s.",
+      "introduces": [
+        "def test_only_instrument_kind_changes",
+        "def test_kind_only_mode_touches_no_other_attribute_on_the_constituents_seeder",
+        "def test_row_with_existing_kind_is_refused",
+        "def test_constituents_kind_only_mode_refuses_existing_kind",
+        "def test_unknown_kind_is_refused_before_any_write",
+        "def test_plan_absent_kind_excludes_rows_that_already_carry_it",
+        "def test_rows_from_constituents_feed_excludes_undetermined_kind"
+      ],
+      "artifact_covered_by": [
+        "SC2-e2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Amendment 1 (row MDPF_SECCLASS-W5-S1): test_constituent_seeder_never_sets_classified_by (the round-1, RULING-103050 assertion the four-label C-WRITER contract retired) replaced with test_constituent_seeder_sets_constituents_label_and_refuses_seed_or_scheduled, asserting row['classified_by'] == 'constituents' on a written row and RowProtected on a seed-labelled ticker (AAPL) and a scheduled-labelled ticker (JPM) alike. No other assertion in the file touched. python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py -q -p no:cacheprovider: 19 passed in 0.23s (was 1 failed, 18 passed before this edit).",
+      "introduces": [
+        "def test_constituent_seeder_sets_constituents_label_and_refuses_seed_or_scheduled"
+      ],
+      "artifact_covered_by": [
+        "SC2-e2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_KIND_CENSUS_20260930.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built from set-instrument-kind.py --dry-run --source constituents against the live table (one fully-paginated scan, read-only). table_rows_at_build=2309, rows_absent_kind=2163, would_set=156, defaulted=0, from_bd_securities=1970 (excluded per Andrew-direct 2026-09-30 ~02:2xZ: a bd-securities value may seed a NEW row, never write into an existing one -- every absent-kind row here is existing). source_named names the ETF constituents feed (served artifact, path + coverage stated). rows[] lists the 156 {ticker, instrument_kind, source} entries (154 single_security + 2 fund). The remaining 2163-156-1970=37 tickers (36 with no candidate source at all, plus CASH, a cash-residual line the feed itself resolves to no kind) are named in unresolved_no_source / cash_residual_absent_by_design, not defaulted, not counted in would_set.",
+      "artifact_covered_by": [
+        "SC2-e2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_INSTRUMENT_KIND_20260930.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Never-widen half for the future signed instrument_kind write: names the act (one additive conditional UpdateItem per absent-kind, constituents-feed-determined row), the measured blast radius (156 candidate rows, zero other attributes touched, the 1,970 from_bd_securities and 36 unresolved rows explicitly out of scope, a repo-wide census of instrument_kind readers finding none today), and a rollback per key (REMOVE instrument_kind per written key, the 156-ticker list named in the census).",
+      "artifact_covered_by": [
+        "SC2-e2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One new row appended (append-only, schema-valid, jsonschema-checked): MDPF_SECCLASS-W5-S4 records that the amendment-1-named disarm of MDPF_SECCLASS-W5-S1 (the stale test_seed_fields.py assertion) is performed under this order, with the before/after pytest evidence; hazard_standing INERT, no new ARMED item opened.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC2-e2-AC1",
+      "criterion_verbatim": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_set_instrument_kind.py -q -p no:cacheprovider -> passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_set_instrument_kind.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": ".......                                                                  [100%]\n7 passed in 0.30s",
+      "denominator": "7 of 7 tests passed (0 failed, 0 errors, 0 skipped).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC2-e2-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py kind -> KIND-CENSUS",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py kind",
+      "expect": "KIND-CENSUS",
+      "output_evidence": "KIND-CENSUS would_set=156 of 2163 absent (source: ETF constituents feed: served artifact s3://opal-data-portal-v2/platinum/etfs/positioning_data.json, read via infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py load_constituents()/instrument_kind_for() (also wired as set-instrument-kind.py --source constituents). Coverage: 157 of the 2,309 live etf-classifications tickers overlap this feed (156 with a determinate kind: 154 single_security + 2 fund; 1, CASH, is a cash-residual line the feed itself leaves absent by design, never defaulted).)",
+      "denominator": "table_rows_at_build=2309 (>= MIN_ROWS 2309); would_set (156) == len(rows) (156); defaulted=0; source_named non-empty.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC2-e2-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_INSTRUMENT_KIND_20260930.md -> HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_INSTRUMENT_KIND_20260930.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_INSTRUMENT_KIND_20260930.md",
+      "denominator": "0 of 0 unresolved {{slot}} placeholders; 4 of 4 required strings present (## The act, ## Blast radius, Rollback per key, candidate).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Changed set_kind_if_absent()'s UpdateExpression from 'SET instrument_kind = :v' to also SET last_updated = :ts (a second attribute), keeping the test's assertion that only instrument_kind is named in the expression.",
+      "expected": "test_only_instrument_kind_changes fails on its UpdateExpression-equality assertion",
+      "observed": "FAILED test_only_instrument_kind_changes - AssertionError: assert 'SET instrument_kind = :v, last_updated = :ts' == 'SET instrument_kind = :v' (1 failed, 6 passed). Reverted immediately; re-run: 7 passed in 0.28s.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_set_instrument_kind.py -q -p no:cacheprovider invoked twice back to back; outputs diffed.",
+      "observed": "diff of the two runs is empty apart from pytest's own per-run timing line ('7 passed in 0.30s' vs '7 passed in 0.25s') -- same 7 node ids in the same order both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running set-instrument-kind.py or seed-etf-constituents.py --kind-only against the live table without --dry-run (an actual write).",
+      "reason": "Forbidden by the order's BOUNDS: LOCAL build + record, no table write. The never-widen half is the artifact that hands the real run to the issuer to sign."
+    },
+    {
+      "item": "Writing instrument_kind for the 1,970 from_bd_securities-only tickers.",
+      "reason": "Every one is an EXISTING etf-classifications row (scheduled or legacy), and Andrew-direct 2026-09-30 ~02:2xZ restricts a bd-securities value to seeding a NEW row only, never writing into an existing one. Counted separately in the census, left out of rows/would_set, per the order's own step 1."
+    },
+    {
+      "item": "Sourcing the 36 unresolved-no-source tickers (foreign ADR/local-exchange codes) from data/assets' Schwab-derived dim_security (a03_dim_security.py).",
+      "reason": "That dataset is scoped to a different firm's (49financial) own account data (opal-data-49financial), not a cross-firm-safe reference the estate holds for arbitrary tickers -- using it here would risk the cross-firm data rule (CLAUDE.md hard stop). Named as a candidate, not used; no default, no guess for these 36."
+    },
+    {
+      "item": "Calling any LLM classifier (Kimi K3 or otherwise) to resolve the unresolved 36.",
+      "reason": "Forbidden by the order and by CTO 103120: any LLM classifier step needs Andrew's per-use word, and this order calls no model."
+    },
+    {
+      "item": "Deploy, push, merge or rebase.",
+      "reason": "Forbidden by the order. The commit is LOCAL on branch wk-MDPF_SECCLASS-5; the COO drains it."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_INSTRUMENT_KIND_20260930.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_set_instrument_kind.py -q -p no:cacheprovider",
+      "result": "7 passed in 0.30s"
+    },
+    {
+      "tool": "pytest (test_seed_fields.py, amendment 1)",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py -q -p no:cacheprovider",
+      "result": "19 passed in 0.23s"
+    },
+    {
+      "tool": "r2_evidence.py kind (SC2-e2-AC2 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R2_CHECKS/r2_evidence.py kind",
+      "result": "KIND-CENSUS would_set=156, rc=0"
+    },
+    {
+      "tool": "r20_half_ready.py (SC2-e2-AC3 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_INSTRUMENT_KIND_20260930.md",
+      "result": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_INSTRUMENT_KIND_20260930.md, rc=0"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/v2_portal/yang_pipeline/set-instrument-kind.py infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py infra/aws/lambda/v2_portal/_shared/tests/test_set_instrument_kind.py infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~5 <0.9.0_WK_MDPF_SECCLASS~5@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-MDPF_SECCLASS-5"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC2-e2-AC1,SC2-e2-AC2,SC2-e2-AC3",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}
