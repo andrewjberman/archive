@@ -28,16 +28,16 @@
       "kind": "s3-prefix",
       "target": "safe-deploy --mint-bundle irpt_holdings_49f/inf/cot from CLOUD 9fef6a7e9c+",
       "proof_required": "BUNDLE MINTED x3 + head-object members-sha256 + member-count; closure carries bd_securities_fallback.py + etf_classifications_dynamodb.py",
-      "proof": null,
-      "closed_at": null
+      "proof": "safe-deploy --mint-bundle (HALT_ACK=1): 49f 15:18:56Z from 17ad3ea043 -> s3://opal-data-49financial/irpt/49financial/code/gold/investor-reporting-holdings.tar.gz md5=a227d01ccd3f7a9fed1775d0cc84226e member-count=44 members-sha256=6db487251edbee3653c61a585188f2408fb71fcaf9106076e00d2d019aec3ae0; inf 15:31:55Z from 743d611217 md5=476ed366bc6fe6d2d61f58e0029d3276 member-count=44 members-sha256=3cf01e2fd93f928a902f3e2a94cc67514fcfe1967d1f0c1432f255ee3c1cb4dd; cot 15:33:13Z from 24fdc82554 md5=bfc1d8b663e18b3410dd35ac191474dd member-count=44 members-sha256=2c95e1aac1e18ab7dda4f1a6682abfc8d2f6a2295c6b7ac9a83bc476c3caa86d. Closure (44 members, safe_deploy_core._IRPT_HOLDINGS_CLOSURE) diff EMPTY over 9fef6a7e9c..17ad3ea043..24fdc82554, so all three carry IB-mr-291's bytes; the closure carries bd_securities_fallback.py + etf_classifications_dynamodb.py and not the BD library (count 43 -> 44). The inf/cot mints first failed 15:20-15:22Z on a transient SyntaxError in lib/opal_naming.py (a peer's mid-edit in the shared tree), re-run clean",
+      "closed_at": "20260930T154351Z"
     },
     {
       "id": "H4",
       "kind": "verify",
       "target": "QA fire irpt-holdings-refresh-lambda {qa:true}",
       "proof_required": "3 of 3 Success; holdings_qa per firm: PHYS/GLD commodities/Metals, VXX structured/Hedge, to_unclassified 0; served manifests VersionId unchanged",
-      "proof": null,
-      "closed_at": null
+      "proof": "QA fire 15:41:57Z (lambda invoke irpt-holdings-refresh-lambda {qa:true}, DISPATCHED 3 firms): SSM 49financial 156a0153 / cottonwood d3a9537b / inflection edbf7720 all Success/0 by 15:47:44Z. holdings_qa read by r29_qa_after_read.py (served node shape, every SECURITY node): cottonwood securities=15354 unclassified=65 PHYS=commodities/Metals GLD=commodities/Metals VXX=structured/Hedge all basis TABLE; inflection securities=34348 unclassified=4 PHYS absent GLD=commodities/Metals VXX=structured/Hedge basis TABLE; 49financial securities=121125 unclassified=179 PHYS/GLD=commodities/Metals VXX=structured/Hedge basis TABLE. BEFORE (served holdings, same reader, HOLDINGS_NAMESPACE=holdings): unclassified 65 / 4 / 179 identical -> to_unclassified 0 at every firm; PHYS/GLD read alternatives/Gold and VXX alternatives/Volatility before. Served holdings/current/manifest.json VersionIds .e0bQWBReuxI.H2wF2eSPvqP5CdH1ntJ (49f, 14:23:54Z) / 2lvMn_5SnlTiSrNradJJDohptu8FKhbE (inf, 14:16:38Z) / yPNnC6xyjhojOD693_zi..ZUCycLBGFu (cot, 14:21:28Z) unchanged by the QA fire (all predate 15:41Z)",
+      "closed_at": "20260930T162939Z"
     },
     {
       "id": "H5",
@@ -52,16 +52,16 @@
       "kind": "s3-prefix",
       "target": "safe-deploy 5 BD files to opal-data-bd code/{gold,silver}",
       "proof_required": "DEPLOYED + VERIFY OK per file, bytes = CLOUD HEAD",
-      "proof": null,
-      "closed_at": null
+      "proof": "HALT_ACK=1 safe-deploy 16:29:39Z from CLOUD b6cfb3316e (the five files unchanged since @ae7aa281b0, contained in 9fef6a7e9c): DEPLOYED [bd] gold/lib/etf_classifier.py, silver/build_bd_assets_dim.py, gold/D_03.composition_artifacts.py, gold/D_04.client_portal_summary.py, gold/C_06.client_mix_timeseries.py; VERIFY OK comp-pipescript deployed x5 (SHA after copy); OK safe-deploy gate PASS 5 of 5. Order held: H1-H4 closed before the first byte copied (CTO condition 1)",
+      "closed_at": "20260930T163447Z"
     },
     {
       "id": "B2",
       "kind": "verify",
       "target": "live IAM read bd-exporter-ec2-role",
       "proof_required": "bd-securities-access attached with GetItem on etf-classifications; no new inline policy added",
-      "proof": null,
-      "closed_at": null
+      "proof": "live IAM read 14:3xZ (list-attached-role-policies + get-policy-version) and the CTO's own read 15:0xZ: bd-exporter-ec2-role carries managed policy bd-securities-access (Scan, GetItem, PutItem, UpdateItem, BatchWriteItem on table/bd-securities AND table/etf-classifications) plus AmazonSSMManagedInstanceCore; GetItem on etf-classifications is present today; inline policies 16 (CTO count), 0 added by this window -- the half's candidate etf-classifications-read inline policy is NOT applied (redundant; the surviving read grant is SC-e-12's, W6-S2)",
+      "closed_at": "20260930T163353Z"
     },
     {
       "id": "B3",
@@ -83,7 +83,11 @@
   "log": [
     "20260930T150735Z OPENED by 2.0.0_SA_COO~M with 9 leg(s)",
     "20260930T151315Z LEG H1 closed: terraform plan investor-reporting/directory from CLOUD (HEAD past 9fef6a7e9c, init -reconfigure) 15:1xZ: Plan 0 to add, ",
-    "20260930T152621Z LEG H2 closed: HALT_ACK=1 safe-apply 15:13:15Z investor-reporting/directory: aws_iam_role_policy.irpt_holdings[49financial|inflection|c"
+    "20260930T152621Z LEG H2 closed: HALT_ACK=1 safe-apply 15:13:15Z investor-reporting/directory: aws_iam_role_policy.irpt_holdings[49financial|inflection|c",
+    "20260930T154351Z LEG H3 closed: safe-deploy --mint-bundle (HALT_ACK=1): 49f 15:18:56Z from 17ad3ea043 -> s3://opal-data-49financial/irpt/49financial/cod",
+    "20260930T162939Z LEG H4 closed: QA fire 15:41:57Z (lambda invoke irpt-holdings-refresh-lambda {qa:true}, DISPATCHED 3 firms): SSM 49financial 156a0153 /",
+    "20260930T163353Z LEG B2 closed: live IAM read 14:3xZ (list-attached-role-policies + get-policy-version) and the CTO's own read 15:0xZ: bd-exporter-ec2-r",
+    "20260930T163447Z LEG B1 closed: HALT_ACK=1 safe-deploy 16:29:39Z from CLOUD b6cfb3316e (the five files unchanged since @ae7aa281b0, contained in 9fef6a7"
   ],
   "last_red_at": null
 }
