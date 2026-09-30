@@ -1,0 +1,64 @@
+diff --git a/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-117.footer-source-words.test.tsx b/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-117.footer-source-words.test.tsx
+index b0117295..d1440546 100644
+--- a/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-117.footer-source-words.test.tsx
++++ b/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-117.footer-source-words.test.tsx
+@@ -14,9 +14,9 @@
+  *       cannot recur.
+  *   (c) The map and the table render the same footer string on the SAME fixture snapshot (`renderToStaticMarkup`).
+  *
+- * The WORDS themselves come from a registry vendor view (`infra/logic/registry/systems.json` VENDOR rows through
+- * `lib/opal_naming.py generate`, the `firmDisplayNames.generated.ts` mechanism) -- not generated at this pin, so the
+- * live face reads the fallback on every footer until that view lands; the reader is ready for it. No hand-typed map.
++ * The WORDS come from the registry vendor view `header/vendorDisplayNames.generated.ts` (`infra/logic/registry/systems.json`
++ * VENDOR rows through `lib/opal_naming.py generate`, the `firmDisplayNames.generated.ts` mechanism; FAST item 41, CTO 103308),
++ * which is `holdingsFooterSource`'s default. No hand-typed map.
+  *
+  * NO SERVER, NO BROWSER, NO NETWORK. Prints `VERDICT: FOOTER-SOURCE-WORDS-OK`.
+  */
+@@ -64,12 +64,15 @@ describe('IV-e-117 -- the footer source line reads words, never a producer coord
+     const withKeys: HoldingsSnapshot = { ...base, sourceVendorKeys: ['blackdiamond', 'schwab', 'blackdiamond'] }
+     const noKeys: HoldingsSnapshot = { ...base, sourceVendorKeys: null }
+     const words = holdingsFooterSource(withKeys, VENDOR_WORDS)
+-    const noView = holdingsFooterSource(withKeys)
++    const noView = holdingsFooterSource(withKeys, null)
++    // FAST item 41 (CTO 103308): the DEFAULT view is the generated registry vendor view -- words with no map handed in.
++    const registryWords = holdingsFooterSource(withKeys)
+     const noKeysLine = holdingsFooterSource(noKeys, VENDOR_WORDS)
+     const unknownKey = holdingsFooterSource({ ...base, sourceVendorKeys: ['not-a-vendor'] }, VENDOR_WORDS)
+-    console.log(`ARM(a) keys+view -> ${JSON.stringify(words)}; keys, no view -> ${JSON.stringify(noView)}; no keys -> ${JSON.stringify(noKeysLine)}; unknown key -> ${JSON.stringify(unknownKey)}`)
++    console.log(`ARM(a) keys+view -> ${JSON.stringify(words)}; keys, default registry view -> ${JSON.stringify(registryWords)}; keys, no view -> ${JSON.stringify(noView)}; no keys -> ${JSON.stringify(noKeysLine)}; unknown key -> ${JSON.stringify(unknownKey)}`)
+     if (words !== 'Source: Black Diamond + Charles Schwab.') failures.push(`ARM(a): words not printed de-duplicated in served order, got ${JSON.stringify(words)}`)
+     if (noView !== HOLDINGS_FOOTER_SOURCE_FALLBACK) failures.push(`ARM(a): with no vendor view the line is not the fallback, got ${JSON.stringify(noView)}`)
++    if (registryWords !== 'Source: Black Diamond + Charles Schwab.') failures.push(`ARM(a): the default (registry) vendor view did not print the words, got ${JSON.stringify(registryWords)}`)
+     if (noKeysLine !== HOLDINGS_FOOTER_SOURCE_FALLBACK) failures.push(`ARM(a): with no keys the line is not the fallback, got ${JSON.stringify(noKeysLine)}`)
+     if (unknownKey !== HOLDINGS_FOOTER_SOURCE_FALLBACK) failures.push(`ARM(a): an unknown key printed something other than the fallback, got ${JSON.stringify(unknownKey)}`)
+     for (const line of [words, noView, noKeysLine, unknownKey]) {
+diff --git a/src/pages/InvestorReporting/tabs/holdings/slices.ts b/src/pages/InvestorReporting/tabs/holdings/slices.ts
+index b5ccc1e1..b8316981 100644
+--- a/src/pages/InvestorReporting/tabs/holdings/slices.ts
++++ b/src/pages/InvestorReporting/tabs/holdings/slices.ts
+@@ -54,6 +54,7 @@
+  * current, so the drill is refused rather than rendered.
+  */
+ 
++import { VENDOR_DISPLAY_NAMES } from '../../header/vendorDisplayNames.generated'
+ import type {
+   AdvisoryValue,
+   HoldingsBasis,
+@@ -341,12 +342,13 @@ export const HOLDINGS_FOOTER_SOURCE_FALLBACK = 'Source: Opal Capital Analysis.'
+  * (`holdings_snapshot.build_cot` on the walk's shot); that fact stays one hover down in `holdingsFactsHelp`, off the
+  * face. The words come from the snapshot's own `sourceVendorKeys` (IB-mr-203) through `vendorWords`, the REGISTRY
+  * vendor view (the same generated-view mechanism `header/firmDisplayNames.generated.ts` uses; never a hand-typed map).
+- * Until that view is generated, or for a snapshot that carries no vendor keys, every footer reads
+- * `HOLDINGS_FOOTER_SOURCE_FALLBACK` -- one string on every footer of the tab, which is the acceptance's letter.
++ * The view is `header/vendorDisplayNames.generated.ts` (FAST item 41, CTO 103297: builder output over the registry's 23
++ * VENDOR rows, key and long form both mapped). A snapshot that carries no vendor keys reads
++ * `HOLDINGS_FOOTER_SOURCE_FALLBACK` -- one string on every footer of the tab either way.
+  */
+ export function holdingsFooterSource(
+   snapshot: HoldingsSnapshot,
+-  vendorWords: Readonly<Record<string, string>> | null = null,
++  vendorWords: Readonly<Record<string, string>> | null = VENDOR_DISPLAY_NAMES,
+ ): string {
+   const keys = snapshot.sourceVendorKeys ?? []
+   const words = vendorWords === null ? [] : uniqueDefined(keys.map((key) => vendorWords[key]))
