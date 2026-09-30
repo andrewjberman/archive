@@ -10,8 +10,10 @@ import p1_common as c  # noqa: E402
 from lib.opal_data_harvest.harvest_grammar import SOURCE_FOR_PUBLISHER  # noqa: E402
 from lib.research.harvest import store  # noqa: E402
 
-WRITE = ("bbg", "wsj")
-NO_NEW = ("barrons", "ft", "sa")
+# AMENDMENT 1: wsj only -- the cached-path arm. bbg is excluded: its prior rejection predates aa-1's hold table, so a
+# bbg job would re-fetch NM5NLQ6K50XZ01 into the 403/challenge (q-1's failure). bbg joins the no-write roots.
+WRITE = ("wsj",)
+NO_NEW = ("barrons", "ft", "sa", "bbg")
 LENOVO = "992_HK_Equity"
 RUNTIME = "C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.runtime/opal-data-harvest"
 WK = os.path.join(c.ROOT, "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~77")
