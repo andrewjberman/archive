@@ -12,6 +12,10 @@ shapes through the new code on stubs.
    story route of the seeded key is counted: on the hold's day it is HELD (0 requests); the next UTC day
    is the hold's designed retry (1 request).
 
+4. bbg PRE-FLOOR REPLAY (amendment 1). The three recorded bbg Lenovo pages (p1 x2, p2) are each
+   replayed as a one-page BACKFILL job at floor 2026-01-01 over a stub transport: hits, dated hits,
+   fetched, skipped_pre_floor -- a dated hit before the floor is not fetched, an undated one still is.
+
 Sockets are blocked and counted for the whole script. No publisher, no S3.
 """
 
@@ -62,6 +66,8 @@ LISTINGS = RUNTIME / "harvest_listing"
 WSJ_PAGE = LISTINGS / "wsj_p1_e513433c8e6841d6.html"
 BBG_PAGES = {1: LISTINGS / "bbg_p1_30dc8b1ceb74344a.json", 2: LISTINGS / "bbg_p2_f24dcb2958e9f3c7.json"}
 STORY = "https://www.bloomberg.com/article/api/story/id/%s"
+FLOOR_PAGES = ["bbg_p1_30dc8b1ceb74344a.json", "bbg_p1_93ba43e4efdf296e.json", "bbg_p2_f24dcb2958e9f3c7.json"]
+FLOOR = dt.date(2026, 1, 1)
 
 
 def section(title):
@@ -160,11 +166,51 @@ def step_bbg(row):
     assert gets2 == 1
 
 
+def step_pre_floor():
+    section("4. bbg BACKFILL at floor %s over the three recorded Lenovo listing pages" % FLOOR)
+    from lib.opal_data_harvest.publishers import _hit_date
+    totals = {"hits": 0, "dated": 0, "pre_floor": 0, "fetched": 0, "skipped_pre_floor": 0}
+    for name in FLOOR_PAGES:
+        body = (LISTINGS / name).read_bytes()
+        results = json.loads(body.decode("utf-8"))["results"]
+        articles = [h for h in results if h.get("subtype") == "Article" and h.get("resourceId")]
+        dates = [_hit_date(h) for h in articles]
+        routes = {"https://www.bloomberg.com/nemo-next/api/search/query?page=1": body}
+        for hit in articles:
+            identity = hit["resourceId"]
+            routes[STORY % identity] = json.dumps({"story": {
+                "headline": "Replay %s" % identity, "id": identity, "publishedAt": _PUBLISHED,
+                "url": "https://www.bloomberg.com/news/articles/replay-%s" % identity,
+                "body": {"content": _typed("BBG replay %s" % identity)}}}).encode("utf-8")
+        inners = {}
+        publisher = make_factory({"bbg": {"routes": routes, "article_urls": set(), "module": _BBGModule()}},
+                                 inners)("bbg", None, lambda event: None)
+        publisher.retrieval_mode, publisher.bound_date, publisher.max_listing_pages = "backfill", FLOOR, 1
+        list(publisher.bloomberg(SECURITY, 50))
+        gets = sum(1 for inner in inners["bbg"] for url in inner.calls if url.startswith(STORY.split("%s")[0]))
+        skipped = publisher.pre_floor_skips
+        row = {"hits": len(articles), "dated": sum(d is not None for d in dates),
+               "pre_floor": sum(d is not None and d < FLOOR for d in dates),
+               "fetched": len(publisher.fetched_keys), "skipped_pre_floor": len(skipped)}
+        print("%s: hits=%d dated=%d pre-floor=%d | fetched=%d skipped_pre_floor=%d (story GETs %d)"
+              % (name, row["hits"], row["dated"], row["pre_floor"], row["fetched"], row["skipped_pre_floor"], gets))
+        for entry in skipped:
+            print("    skipped_pre_floor: %s %s" % (entry["key"], entry["date"]))
+        assert row["fetched"] == gets == row["hits"] - row["pre_floor"], row
+        assert row["skipped_pre_floor"] == row["pre_floor"], row
+        for key in totals:
+            totals[key] += row[key]
+    print("TOTAL over 3 pages: hits=%(hits)d dated=%(dated)d pre-floor=%(pre_floor)d | fetched=%(fetched)d "
+          "skipped_pre_floor=%(skipped_pre_floor)d" % totals)
+    print("base (fetch every hit) would have fetched %d; the floor gate fetches %d" % (totals["hits"], totals["fetched"]))
+
+
 def main():
     print("today (UTC):", dt.datetime.now(dt.timezone.utc).date().isoformat())
     row = step_seed()
     step_wsj()
     step_bbg(row)
+    step_pre_floor()
     # the runtime db carries exactly the one seeded row
     db = sqlite3.connect("file:%s?mode=ro" % (RUNTIME / "progress.sqlite3").as_posix(), uri=True)
     try:

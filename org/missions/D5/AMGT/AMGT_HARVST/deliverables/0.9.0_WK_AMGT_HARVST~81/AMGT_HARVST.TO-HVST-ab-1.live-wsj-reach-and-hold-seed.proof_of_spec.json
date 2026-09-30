@@ -14,22 +14,27 @@
     "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ab-1.live-wsj-reach-and-hold-seed.md"
   },
   "assignee": "0.9.0_WK_AMGT_HARVST~81",
-  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~81, L7 subagent of 2.0.0_SA_COO~H, worktree wk-hvst-r29-81 on branch wk-AMGT_HARVST-81 (base CLOUD 123befacf8), TREE-OK. (1) publishers._HIT_DATE_KEYS also reads timestamp then printPublicationDate; the wsj/barrons loop (dow_jones) now carries each wsj listing item's dates onto its hit (DowJones._parse_dates, discover() records page_dates) because its hits were bare {url} dicts and _stop_paging already read _hit_date (row Z-W81-S1). Barrons and every other publisher's hits are unchanged. (2) worker.py: comment only. (3) test_p2: the legacy no-client arm kept, its ACCEPTED LIMIT docstring corrected, plus a harvest-mode arm (two same-day runs fetch the rejected key once). (4) Seed: scripts/ab1_seed_hold.py derives bbg:NM5NLQ6K50XZ01 from the runtime events.jsonl -> job result files, replays each body-rejection day through Worker._hold_on_rejection on a scratch Worker, and INSERT OR IGNOREs the one row into the runtime rejected_hold: before null, after {failed_days 1, last_failed_day 2026-09-30, state held}; the second run is a no-op. No network, no S3, no publisher request; sockets blocked and counted (0).",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~81, L7 subagent of 2.0.0_SA_COO~H, worktree wk-hvst-r29-81 on branch wk-AMGT_HARVST-81 (base CLOUD 123befacf8), TREE-OK. (1) publishers._HIT_DATE_KEYS also reads timestamp then printPublicationDate; the wsj/barrons loop (dow_jones) now carries each wsj listing item's dates onto its hit (DowJones._parse_dates, discover() records page_dates) because its hits were bare {url} dicts and _stop_paging already read _hit_date (row Z-W81-S1). Barrons and every other publisher's hits are unchanged. (2) worker.py: comment only. (3) test_p2: the legacy no-client arm kept, its ACCEPTED LIMIT docstring corrected, plus a harvest-mode arm (two same-day runs fetch the rejected key once). (4) Seed: scripts/ab1_seed_hold.py derives bbg:NM5NLQ6K50XZ01 from the runtime events.jsonl -> job result files, replays each body-rejection day through Worker._hold_on_rejection on a scratch Worker, and INSERT OR IGNOREs the one row into the runtime rejected_hold: before null, after {failed_days 1, last_failed_day 2026-09-30, state held}; the second run is a no-op. No network, no S3, no publisher request; sockets blocked and counted (0). AMENDMENT 1 (continuation, same worker): change 4. Publisher._pre_floor_skip (publishers.py) is called in sa/bbg/wsj-barrons loops just before the held-skip and fetch: in backfill, a hit whose own _hit_date is before bound_date (= max(floor, watermark), row Z-W81-S5) is not fetched and is noted {key, date} in client.pre_floor_skips; undated hits are fetched; live mode passes bound None. worker.py folds it into result.skipped_pre_floor and the run record: top-level skipped_pre_floor [{key,date}] and per-job skipped_pre_floor count (the counts block is unchanged). AC1 plant (e) added with two mutants; AC2 section 4 replays the three recorded bbg Lenovo pages: 17 Article hits, 13 skipped_pre_floor, 4 fetched (row Z-W81-S6). The seed was not re-run as a write: AC2's seed step printed the same row before and after. Merge of CLOUD (4ab1e33623) kept both sides' surprise rows.",
   "artifacts_produced": [
     {
       "path_or_key": "lib/opal_data_harvest/publishers.py",
       "kind": "script",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Date keys + wsj hits carry listing dates; not deployed."
+      "deploy_evidence": "Date keys; wsj hits carry listing dates; Publisher._pre_floor_skip (backfill: a dated hit before the bound is not fetched); not deployed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
     },
     {
       "path_or_key": "lib/opal_data_harvest/worker.py",
       "kind": "script",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Comment only.",
+      "deploy_evidence": "skipped_pre_floor folded into the job result and the run record (list + per-job count); not deployed.",
       "artifact_covered_by": [
+        "AC1",
         "AC3"
       ]
     },
@@ -45,7 +50,7 @@
       "kind": "test",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "AC1: 17 tests incl. 6 mutants."
+      "deploy_evidence": "AC1: 23 tests incl. 8 mutants."
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~81/scripts/ab1_seed_hold.py",
@@ -111,20 +116,20 @@
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "AC1: python -m pytest lib/opal_data_harvest/test_ab1_live_reach_and_seed.py -rA --tb=line -- expect: passed. Asserts (a) a live wsj page's hits yield reached_span from their own dates, basis listing_dates; (b) a wsj backfill with floor 2026-01-01 stops older_than_bound on a page whose hits all carry a timestamp before the floor; (c) a mixed dated/undated page does not bound-stop; (d) a bbg harvest-mode job with the seeded hold makes no request for that key; a mutant restoring each base behaviour fails.",
+      "criterion_verbatim": "AC1: python -m pytest lib/opal_data_harvest/test_ab1_live_reach_and_seed.py -rA --tb=line -- expect: passed. Asserts (a) a live wsj page's hits yield reached_span from their own dates, basis listing_dates; (b) a wsj backfill with floor 2026-01-01 stops older_than_bound on a page whose hits all carry a timestamp before the floor; (c) a mixed dated/undated page does not bound-stop; (d) a bbg harvest-mode job with the seeded hold makes no request for that key; (e) (AMENDMENT 1) a backfill job over a recorded-shape bbg page mixing pre- and post-floor publishedAt hits fetches only the on-or-after-floor hits and records the rest skipped_pre_floor, an undated hit is fetched, a live-mode job is unchanged; a mutant restoring each base behaviour fails.",
       "method": "command",
       "invocation": "python -m pytest lib/opal_data_harvest/test_ab1_live_reach_and_seed.py -rA --tb=line",
-      "output_evidence": "rc 0. 17 passed in 13.84s. (a) test_ab1a_a_live_wsj_page_yields_a_span_from_its_hits_own_dates, test_ab1a_the_print_date_alone_also_dates_a_hit, test_ab1a_other_publishers_dates_are_unchanged, mutant test_ab1a_mutant_restoring_the_base_date_keys_fails; (b) test_ab1b_a_wsj_backfill_stops_older_than_bound_on_a_page_dated_before_the_floor, test_ab1b_a_dated_page_after_the_floor_does_not_stop, test_ab1b_the_cached_page_is_dated_too, mutants test_ab1b_mutant_restoring_the_base_date_keys_fails and test_ab1b_mutant_undated_hits_carried_without_dates_fails; (c) test_ab1c_a_mixed_dated_and_undated_page_does_not_bound_stop, mutant test_ab1c_mutant_dating_the_undated_hit_old_fails; (d) test_ab1d_a_bbg_harvest_job_with_the_seeded_hold_makes_no_request_for_that_key, mutants test_ab1d_mutant_ignoring_the_hold_fails and test_ab1d_mutant_seeding_nothing_fails; seed: test_ab1_the_seed_is_derived_and_a_second_run_is_a_no_op, test_ab1_a_request_level_rejection_is_not_a_body_rejection; test_sockets_are_blocked. Last line: 17 passed. Full output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~81/ab1_ac1_output.txt",
-      "denominator": "17 of 17 tests passed",
+      "output_evidence": "rc 0. 23 passed in 17.81s (6 new under (e)): test_ab1e_a_backfill_fetches_only_on_or_after_floor_hits_and_records_the_rest (bbg-1 2015-03-01 and bbg-4 2025-12-31 skipped_pre_floor; bbg-2, undated bbg-3 and bbg-5 dated on the floor fetched), test_ab1e_an_undated_hit_is_still_fetched, test_ab1e_a_live_job_over_the_same_page_is_unchanged (5 of 5 fetched, nothing skipped), test_ab1e_the_run_record_names_each_skipped_hit_and_counts_them_per_job (through the real Worker: record skipped_pre_floor 2 entries with key+date, job count 2, keys_fetched 3), mutants test_ab1e_mutant_restoring_the_base_fetches_the_pre_floor_hits and test_ab1e_mutant_skipping_an_undated_hit_fails; plus the 17 (a)-(d) tests as before. Last line: 23 passed. Full output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~81/ab1_ac1_output.txt",
+      "denominator": "23 of 23 tests passed",
       "status": "PASS"
     },
     {
       "criterion_id": "AC2",
-      "criterion_verbatim": "AC2: python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~81/scripts/ab1_ac2_seed_and_replay.py -- expect: NETWORK CALLS MADE: 0. Prints the seed row before and after, the live-shaped wsj reached_span, that bbg:NM5NLQ6K50XZ01 is HELD (not fetched), and the line NETWORK CALLS MADE: 0.",
+      "criterion_verbatim": "AC2: python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~81/scripts/ab1_ac2_seed_and_replay.py -- expect: NETWORK CALLS MADE: 0. Prints the seed row before and after, the live-shaped wsj reached_span, that bbg:NM5NLQ6K50XZ01 is HELD (not fetched), (AMENDMENT 1) for the recorded bbg Lenovo pages replayed in backfill with floor 2026-01-01: hits, fetched, skipped_pre_floor, and the line NETWORK CALLS MADE: 0.",
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~81/scripts/ab1_ac2_seed_and_replay.py",
-      "output_evidence": "rc 0. Seed row BEFORE: null; AFTER: {\"fetch_key\": \"bbg:NM5NLQ6K50XZ01\", \"reason\": \"short_or_partial_body\", \"failed_days\": 1, \"last_failed_day\": \"2026-09-30\", \"state\": \"held\"}. wsj reached_span: {\"start\": \"2025-11-20\", \"end\": \"2026-09-30\", \"basis\": \"listing_dates\"} (recorded page: 20 hits, 2025-11-20 .. 2026-09-23). bbg:NM5NLQ6K50XZ01 is HELD (not fetched): 0 story GETs on 2026-09-30; 1 GET on 2026-10-01 (the designed retry). Last line: NETWORK CALLS MADE: 0. Second run (ab1_ac2_output_second_run.txt): before == after == the same row (no-op).",
-      "denominator": "1 seed row derived from 2 recorded body rejections (both 2026-09-30); 1 wsj page (20 of 20 hits dated); 1 bbg key held of 12 Article ids; 0 network calls",
+      "output_evidence": "rc 0. Seed row BEFORE == AFTER (the seed was written by the prior instance; this re-run is the no-op): {\"fetch_key\": \"bbg:NM5NLQ6K50XZ01\", \"reason\": \"short_or_partial_body\", \"failed_days\": 1, \"last_failed_day\": \"2026-09-30\", \"state\": \"held\"}; runtime rejected_hold rows: 1. wsj reached_span: {\"start\": \"2025-11-20\", \"end\": \"2026-09-30\", \"basis\": \"listing_dates\"}. bbg:NM5NLQ6K50XZ01 is HELD (not fetched): 0 story GETs on 2026-09-30; 1 GET on 2026-10-01. PRE-FLOOR REPLAY (section 4, backfill, floor 2026-01-01): bbg_p1_30dc8b1ceb74344a hits=5 pre-floor=3 fetched=2 skipped_pre_floor=3; bbg_p1_93ba43e4efdf296e hits=5 pre-floor=3 fetched=2 skipped_pre_floor=3; bbg_p2_f24dcb2958e9f3c7 hits=7 pre-floor=7 fetched=0 skipped_pre_floor=7; TOTAL hits=17 dated=17 pre-floor=13 fetched=4 skipped_pre_floor=13 (base would fetch 17). Last line: NETWORK CALLS MADE: 0. Output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~81/ab1_ac2_output.txt",
+      "denominator": "1 seed row (no-op re-run); 1 wsj page (20 of 20 hits dated); 1 bbg key held of 12 Article ids; 3 bbg pages: 17 Article hits, 13 skipped_pre_floor, 4 fetched; 0 network calls",
       "status": "PASS"
     },
     {
@@ -132,20 +137,20 @@
       "criterion_verbatim": "AC3: python -m pytest lib/opal_data_harvest/ -rA --tb=line -- expect: passed. The base is commit 6caac02338, pinned. Print the base and after pass counts. No test that passed at the base fails.",
       "method": "command",
       "invocation": "python -m pytest lib/opal_data_harvest/ -rA --tb=line",
-      "output_evidence": "rc 0. AFTER: 271 passed, 1 skipped in 55.96s. BASE 6caac02338 (git archive of lib + integrations/seekingalpha + the ~71 fixture dir, same command): 253 passed, 1 skipped in 23.16s. Set difference of PASSED lines: 253 at base, 271 after, 0 passed at base but not after, 18 new (17 in test_ab1 + 1 harvest-mode arm in test_p2). The 1 skip is the pre-existing HVST-x-1 quarantine in test_verification.py, at base and after.",
-      "denominator": "271 of 271 collected tests passed or skipped-by-quarantine (1 skipped); 0 of 253 base-passing tests regressed",
+      "output_evidence": "rc 0. AFTER: 277 passed, 1 skipped in 117.81s. BASE 6caac02338 (recorded earlier: ab1_ac3_base_6caac02338_suite.txt, 253 passed, 1 skipped). Set difference of PASSED lines (path separators normalised): 253 at base, 277 after, 0 passed at base but not after, 24 new (23 in test_ab1 + 1 harvest-mode arm in test_p2). The 1 skip is the pre-existing HVST-x-1 quarantine in test_verification.py. Output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~81/ab1_ac3_base_vs_after.txt",
+      "denominator": "277 of 277 collected tests passed or skipped-by-quarantine (1 skipped); 0 of 253 base-passing tests regressed",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Six mutants: base _HIT_DATE_KEYS against (a) and (b); wsj hits carried without dates against (b); an undated hit credited an old date against (c); Worker._current_holds returning {} against (d); no seed row against (d).",
+      "description": "Eight mutants: base _HIT_DATE_KEYS against (a) and (b); wsj hits carried without dates against (b); an undated hit credited an old date against (c); Worker._current_holds returning {} against (d); no seed row against (d); _pre_floor_skip returning False (the base fetch-every-hit) against (e); an undated hit credited an old date against (e).",
       "expected": "the real code passes the plants; each mutant raises AssertionError",
-      "observed": "test_ab1a_mutant_restoring_the_base_date_keys_fails, test_ab1b_mutant_restoring_the_base_date_keys_fails, test_ab1b_mutant_undated_hits_carried_without_dates_fails, test_ab1c_mutant_dating_the_undated_hit_old_fails, test_ab1d_mutant_ignoring_the_hold_fails and test_ab1d_mutant_seeding_nothing_fails all PASSED: each mutant failed its plant.",
+      "observed": "test_ab1a_mutant_restoring_the_base_date_keys_fails, test_ab1b_mutant_restoring_the_base_date_keys_fails, test_ab1b_mutant_undated_hits_carried_without_dates_fails, test_ab1c_mutant_dating_the_undated_hit_old_fails, test_ab1d_mutant_ignoring_the_hold_fails and test_ab1d_mutant_seeding_nothing_fails all PASSED: each mutant failed its plant. Added: test_ab1e_mutant_restoring_the_base_fetches_the_pre_floor_hits and test_ab1e_mutant_skipping_an_undated_hit_fails PASSED (each mutant failed plant (e)).",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AC1 run twice (17 passed both times); AC2 run twice: the first applied the seed, the second printed the same row before and after",
+      "method": "AC1 run twice (17 passed both times); AC2 run twice: the first applied the seed, the second printed the same row before and after; AC1 run at 17.81s (23 passed); AC2 third and fourth runs both no-op on the seed",
       "observed": "AC1 counts identical; AC2 second run before == after (idempotent by INSERT OR IGNORE)",
       "status": "STABLE"
     }
@@ -168,7 +173,9 @@
     "AMGT_HARVST-Z-W81-S1",
     "AMGT_HARVST-Z-W81-S2",
     "AMGT_HARVST-Z-W81-S3",
-    "AMGT_HARVST-Z-W81-S4"
+    "AMGT_HARVST-Z-W81-S4",
+    "AMGT_HARVST-Z-W81-S5",
+    "AMGT_HARVST-Z-W81-S6"
   ],
   "compiler_tools": [
     {
