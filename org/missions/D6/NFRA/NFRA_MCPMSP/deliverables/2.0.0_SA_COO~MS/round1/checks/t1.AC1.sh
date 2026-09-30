@@ -6,6 +6,7 @@
 . "$(dirname "$0")/_root.sh"
 if pytest_named "$G/tests/test_mcpmsp_asker_firm.py" 1 \
   test_registered_tenant_is_firm_principal test_unregistered_tenant_refused_and_logged \
-  test_firm_fetch_assumes_firm_role test_missing_role_arn_refuses test_firm_fetch_never_uses_gateway_identity; then
+  test_firm_fetch_assumes_firm_role test_missing_role_arn_refuses test_firm_fetch_never_uses_gateway_identity \
+  test_tenant_firm_admitted_by_adapter; then
   echo "RESULT: PASS"; exit 0; fi
 echo "RESULT: FAIL"; exit 1
