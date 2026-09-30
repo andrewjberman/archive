@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-m29-291",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m29-291.holdings-narrowed-canonical-release.md",
+    "group": "OTHER",
+    "vintage_commit": "571d032b98"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R29_M.md",
+    "vintage_commit": "571d032b98",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m29-291.holdings-narrowed-canonical-release.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~93",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/bd_securities_fallback.py",
+      "kind": "script",
+      "commit_or_etag": "c5f8b8ddd5d88f44b98b94e8f564296256e0d426",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: the declared FWD-6 fallback, the pre-SC-t-1 BD library logic verbatim from git show 1f327f52a2:data/black_diamond/scripts/gold/lib/etf_classifier.py; only reads bd-securities, never writes it",
+      "artifact_covered_by": [
+        "IBM29-291-AC1",
+        "IBM29-291-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+      "kind": "script",
+      "commit_or_etag": "c5f8b8ddd5d88f44b98b94e8f564296256e0d426",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "canonical_classifier() now loads etf_classifications_dynamodb.ETFClassifier (the one home) plus bd_securities_fallback; classify_security() tries the canonical table first (asset_class_basis TABLE, class_source etf-classifications, no fold), falls to the fallback otherwise (class_source bd-securities-fallback); annotate_classification pops class_source into a new by_class_source census key, never onto a node; the BD library import is gone",
+      "artifact_covered_by": [
+        "IBM29-291-AC1",
+        "IBM29-291-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdings_narrowed.py",
+      "kind": "test",
+      "commit_or_etag": "c5f8b8ddd5d88f44b98b94e8f564296256e0d426",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 5 tests -- a canonical row wins over a disagreeing fallback answer (PHYS), a ticker the table lacks gets the fallback's class, a fallback-classified security never becomes unclassified, the cash line is unchanged, annotate_classification reports by_class_source and never serves it on a node",
+      "artifact_covered_by": [
+        "IBM29-291-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdings_classification.py",
+      "kind": "test",
+      "commit_or_etag": "c5f8b8ddd5d88f44b98b94e8f564296256e0d426",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "REPAIRED (no assertion weakened): _classifier() fixture now builds bd_securities_fallback.ETFClassifier wrapped in a _NoCanonicalHit stand-in instead of stubbing the moved BD library's removed _ticker_map/_name_map; test_an_empty_classifier_is_refused monkeypatches the fallback module directly",
+      "artifact_covered_by": [
+        "IBM29-291-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdings_snapshot.py",
+      "kind": "test",
+      "commit_or_etag": "c5f8b8ddd5d88f44b98b94e8f564296256e0d426",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "REPAIRED (no assertion weakened, one assertion added): test_the_bd_cash_line_classifies_cash_and_pathward_stays_with_the_table's fake Clf gains canonical_lookup() returning None; the cash-line equality assertion now also checks class_source",
+      "artifact_covered_by": [
+        "IBM29-291-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/safe_deploy_core.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_IRPT_HOLDINGS_CLOSURE: data/black_diamond/scripts/gold/lib/etf_classifier.py replaced by bd_securities_fallback.py + infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py. Re-traced with a real Cottonwood build (17,699 nodes): both new modules imported, neither the BD library nor any other undeclared repo module touched",
+      "artifact_covered_by": [
+        "IBM29-291-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/directory/holdings_refresh.tf",
+      "kind": "terraform",
+      "commit_or_etag": "c5f8b8ddd5d88f44b98b94e8f564296256e0d426",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "DESIRED ONLY, not applied (BOUNDS). Added CanonicalClassifierLookup statement (dynamodb:GetItem, dynamodb:Query) on etf-classifications and its two GSI ARNs, per Holdings firm principal. terraform fmt -write=true and terraform validate both run; validate: 'Success! The configuration is valid.'"
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R29_NARROWED_CENSUS_20260930.json",
+      "kind": "config_data",
+      "commit_or_etag": "c5f8b8ddd5d88f44b98b94e8f564296256e0d426",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Real local builds, all 3 firms, live etf-classifications table (2,309 rows) and today's business date (2026-09-28): 49financial moved=6503/fallback=1171/securities=120944, inflection moved=569/fallback=9370/securities=34347, cottonwood moved=1061/fallback=3121/securities=15355; to_unclassified=0 at every firm; GLD/PHYS/VXX placed from the table wherever held",
+      "artifact_covered_by": [
+        "IBM29-291-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_HOLDINGS_NARROWED_RELEASE_20260930.md",
+      "kind": "doc",
+      "commit_or_etag": "c5f8b8ddd5d88f44b98b94e8f564296256e0d426",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The act, both branches, the declared exception, the census with largest moves by weight, every reader (1 writer counted: holdings_snapshot.py, the only asset_class_basis definition in the estate), blast radius with the local candidate diff, rollback per key, and the release order (this half -> IAM apply -> drain -> ~M's package re-mint -> ~D's served after-read of PHYS/GLD/VXX)",
+      "artifact_covered_by": [
+        "IBM29-291-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c5f8b8ddd5d88f44b98b94e8f564296256e0d426",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Appended row IRPT_BCKEND-W93-S1 (OBSERVATION, INERT, disarmed same-turn): the published HoldingsSnapshot contract is additionalProperties:false with a fixed asset_class_basis enum with no CANONICAL member, and it sits outside this cell's <paths> -- resolved by reusing the existing TABLE value and keeping class_source census-only"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBM29-291-AC1",
+      "criterion_verbatim": "the whole investor_reporting suite passes on the narrowed classifier, with the BD-library dependency gone.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R27_CHECKS/r27_suite_whole.py data/assets/scripts/gold/investor_reporting/tests",
+      "output_evidence": "SUITE-WHOLE 319 passed in 67.93s (final run after the W93-S2 naming fix; before it 61.44s, after the 07:52Z reboot at the same tree; the pre-crash runs read 46.07s and 41.09s, same count). Base @571d032b98 (dry-run cited in the TO): SUITE-BROKEN rc=1, 30 failed, 268 passed, 16 errors -- all AttributeError on the moved BD library's removed _ticker_map/_client. comp-find '\"black_diamond.*etf_classifier|import etf_classifier\"' data/assets/scripts/gold/investor_reporting/ -> 0 import hits (only this cell's own docstring mentions it).",
+      "denominator": "319 of 319 tests passed",
+      "expect": "^SUITE-WHOLE",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBM29-291-AC2",
+      "criterion_verbatim": "real builds at three firms: zero to unclassified, moves weighted, and PHYS/GLD/VXX from the table.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R29_CHECKS/r29_narrowed_census.py",
+      "output_evidence": "NARROWED-CENSUS 49financial=6503/1171/120944 inflection=569/9370/34347 cottonwood=1061/3121/15355 (rc=0). Underlying census: table_rows_at_build=2309; to_unclassified=0/120944, 0/34347, 0/15355; every GLD/PHYS/VXX placed entry reads {asset_class, sub_asset_class} matching the live table (commodities/Metals, commodities/Metals, structured/Hedge) with class_source etf-classifications (inflection does not hold PHYS).",
+      "denominator": "3 of 3 firms censused (49financial, inflection, cottonwood)",
+      "expect": "^NARROWED-CENSUS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBM29-291-AC3",
+      "criterion_verbatim": "the new half, for the issuer to sign and send.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/NEVER_WIDEN_HALF_REQUEST_HOLDINGS_NARROWED_RELEASE_20260930.md",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_HOLDINGS_NARROWED_RELEASE_20260930.md (rc=0): 0 {{slot}} placeholders, '## The act', '## Blast radius', 'Rollback per key' and 'candidate' all present.",
+      "denominator": "N/A -- boolean readiness check",
+      "expect": "^HALF-READY",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The naturally-occurring mutant is the base tree itself: MDPF_SECCLASS's SC-t-1 thread had already moved the BD library onto the canonical table and removed _ticker_map/_name_map, so the unfixed suite is the failing arm; separately, the fallback-only (pre-narrowing) answer for GLD/PHYS/VXX is the wrong answer this release corrects.",
+      "expected": "unfixed base fails the suite; a fallback-only classification of PHYS/GLD/VXX disagrees with the canonical table",
+      "observed": "base @571d032b98: SUITE-BROKEN rc=1, 30 failed / 268 passed / 16 errors, all AttributeError. Every recorded 'move' in R29_NARROWED_CENSUS_20260930.json is before=alternatives (the fallback's hedge-shaped guess) -> after=commodities|structured (the table's real answer) for GLD/PHYS/VXX specifically -- no other ticker in the live table disagreed with the fallback for a security any of the three firms holds.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the whole suite invocation (AC1) run twice back to back",
+      "observed": "319 passed in 46.07s, then 319 passed in 41.09s -- same count both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "asset_class_basis served as the literal enum value CANONICAL, and a class_source field served on the node itself",
+      "reason": "the published contract (docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json) is additionalProperties:false with a fixed asset_class_basis enum with no CANONICAL member, and that file is outside this cell's <paths>; row IRPT_BCKEND-W93-S1. Resolved instead with the existing contract-legal TABLE value and a census-only class_source (annotate_classification's by_class_source, and this deliverable's per-ticker class_source)."
+    },
+    {
+      "item": "the IAM apply, the drain, the Holdings package re-mint, and the served after-read Andrew is shown",
+      "reason": "BOUNDS: LOCAL build + record only, no upload/mint/deploy/IAM apply. Named as the release order in the new half for the issuer to execute after sign-off."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W93-S1 -- the build's literal asset_class_basis CANONICAL / class source node fields cannot be served: the published contract is additionalProperties:false with a fixed enum, and it sits outside this cell's write grant",
+    "IRPT_BCKEND-W93-S2 -- the LGIC naming limb refuses the order's own 'bd' spellings in a NEW module (spelled through the naming registry instead; values byte-identical)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/gold/investor_reporting/tests -q",
+      "result": "319 passed (base @571d032b98 before this cell: 30 failed, 268 passed, 16 errors)"
+    },
+    {
+      "tool": "terraform",
+      "invocation": "terraform fmt -diff -write=true holdings_refresh.tf && terraform init -backend=false -input=false && terraform validate",
+      "result": "fmt applied one whitespace alignment fix; validate: Success! The configuration is valid. (.terraform/ and .terraform.lock.hcl removed afterward, not part of this cell's write grant)"
+    },
+    {
+      "tool": "aws dynamodb",
+      "invocation": "aws dynamodb get-item --table-name etf-classifications --key '{\"ticker\":{\"S\":\"PHYS\"}}' (and GLD, VXX); aws dynamodb describe-table --table-name etf-classifications",
+      "result": "PHYS/GLD: asset_class=commodities, sub_asset_class=Metals; VXX: asset_class=structured, sub_asset_class=Hedge; ItemCount=2309 -- confirms Andrew's report and grounds the census's table_rows_at_build"
+    }
+  ]
+}
