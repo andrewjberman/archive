@@ -27,6 +27,8 @@ def root() -> pathlib.Path:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
+    ap.add_argument("--with-g3", action="store_true",
+                    help="also mirror the SERVED G3 corporate_actions (RIV-d-3: re-run after G3 lands, before G5 writes)")
     args = ap.parse_args()
     r = root()
     for p in (str(r / "data" / "etfs" / "scripts"), str(r)):
@@ -49,7 +51,11 @@ def main() -> int:
     silver_pre = pre("issuer-site", "etfs", "silver", "holdings", "date=")
     bronze_pre = pre("issuer-site", "etfs", "bronze", "holdings", "date=")
     n_in = 0
-    for k in keys(silver_pre) + [k for k in keys(bronze_pre) if k.endswith(".json")]:
+    g3_keys = keys(pre("rivalfunds", "etfs", "gold", "corporate_actions", "date=")) if args.with_g3 else []
+    if args.with_g3 and not g3_keys:
+        print("STOP: --with-g3 but no served G3 object exists yet")
+        return 2
+    for k in keys(silver_pre) + [k for k in keys(bronze_pre) if k.endswith(".json")] + g3_keys:
         dst = sink / BUCKET / k
         dst.parent.mkdir(parents=True, exist_ok=True)
         s3.download_file(BUCKET, k, str(dst))
@@ -89,7 +95,8 @@ def main() -> int:
         return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
     new_g1, new_g5 = local("canonical_shape"), local("trade_schedule")
-    out = {"inputs_mirrored": n_in, "newest_report_date": newest, "stage_results": {k: str(v)[:300] for k, v in res.items()}}
+    out = {"inputs_mirrored": n_in, "g3_objects_mirrored": len(g3_keys), "newest_report_date": newest,
+           "stage_results": {k: str(v)[:300] for k, v in res.items()}}
     # G1: rows per (fund, date) and column set
     fcol_s = "fund_ticker" if "fund_ticker" in served["canonical_shape"].columns else "fund_id"
     fcol_n = "fund_ticker" if "fund_ticker" in new_g1.columns else "fund_id"
@@ -157,7 +164,7 @@ def main() -> int:
     if len(s5k) and len(n5k):
         out["g5"]["values"] = cell_diff(s5k.drop(columns=["_date"], errors="ignore"), n5k.drop(columns=["_date"], errors="ignore"), ["_k"])
     pathlib.Path(args.out).write_text(json.dumps(out, indent=2, default=str), encoding="utf-8")
-    print(json.dumps({k: out[k] for k in ("inputs_mirrored", "newest_report_date", "g1", "g5")}, indent=1, default=str)[:5000])
+    print(json.dumps({k: out[k] for k in ("inputs_mirrored", "g3_objects_mirrored", "newest_report_date", "g1", "g5")}, indent=1, default=str)[:5000])
     return 0
 
 
