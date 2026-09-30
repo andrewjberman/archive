@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-291",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-291.receipt-carries-vendor-endpoint-ledger.md",
+    "group": "OTHER",
+    "vintage_commit": "64a37ccbd5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R29_Y.md",
+    "vintage_commit": "64a37ccbd5",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-291.receipt-carries-vendor-endpoint-ledger.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~94",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~94/candidate_strict_validate.patch",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Candidate job.py diff (strict ten-key validation); NOT applied to job.py because the replay records carry an eleventh key, row W94-S1",
+      "artifact_covered_by": [
+        "Y29-1-AC1",
+        "Y29-1-AC2",
+        "Y29-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y29-1-AC1",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_291_receipt_ledger.py",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_291_receipt_ledger.py",
+      "output_evidence": "At the committed tree (job.py unchanged): FAIL: receipt.vendor_requests is NoneType, not a list. With the strict candidate: JobRefused VENDOR_LEDGER_SHAPE rc=1 (replay records carry an 11th key `location`, row W94-S1). With the strip-location candidate: PASS, 7 records, 0 off-shape.",
+      "denominator": "7 replay records at the committed tree",
+      "expect": "^PASS: receipt vendor_requests carries every transport record on the ten-key shape",
+      "status": "FAIL",
+      "status_reason": "Refusal clause: strict ten-key validation makes the replay refuse (11-key records); the criterion cannot be met as written. Row IRPT_BCKEND-W94-S1."
+    },
+    {
+      "criterion_id": "Y29-1-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_291_dup_control.py",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y/R29_checks/check_291_dup_control.py",
+      "output_evidence": "At the committed tree (job.py unchanged) this control is PASS (base). With the strict candidate it goes RED: suite printed no RESULT block (rc=1), the same JobRefused. With the strip-location candidate: PASS : duplicate re-delivery spends 0 vendor requests; first run spent 7.",
+      "denominator": "first run 7 vendor requests, duplicate 0",
+      "expect": "^PASS : duplicate re-delivery spends 0 vendor requests",
+      "status": "FAIL",
+      "status_reason": "Control stays green only if job.py is unchanged; the strict change turns it red. Committed tree unchanged, so no receipt ledger exists. Row IRPT_BCKEND-W94-S1."
+    },
+    {
+      "criterion_id": "Y29-1-AC3",
+      "criterion_verbatim": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_receipt_ledger.py",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_receipt_ledger.py",
+      "output_evidence": "Test file not committed (moved to deliverables/candidate_test_receipt_ledger.py.txt). Against the strict candidate: 1 failed, 1 passed (control node passes, equality node fails on the `location` key); against strip-location: same 1 failed because ledger != tx.evidence literally.",
+      "denominator": "2 nodes, 1 failed",
+      "expect": "^[0-9]+ passed",
+      "status": "FAIL",
+      "status_reason": "Test not committed: literal 'ledger equal to tx.evidence' fails against the replay's 11-key records. Row IRPT_BCKEND-W94-S1."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Off-shape record (key `cookie`) planted before the receipt write.",
+      "expected": "JobRefused VENDOR_LEDGER_SHAPE and no receipt object",
+      "observed": "control node passed against both candidates; neither candidate is committed to job.py",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- offline replay on fixed inputs",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W94-S1 -- ReplayTransport records carry an eleventh key `location`; the ten-key ledger criteria cannot all be met as written; refusal clause applied"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ycharts/generate/tests/test_receipt_ledger.py (candidate file, run before it was moved to deliverables)",
+      "result": "strict candidate: 1 failed, 1 passed"
+    }
+  ]
+}
