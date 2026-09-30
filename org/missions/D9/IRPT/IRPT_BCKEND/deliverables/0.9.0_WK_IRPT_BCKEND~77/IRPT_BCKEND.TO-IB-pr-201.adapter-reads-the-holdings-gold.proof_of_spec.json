@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-201",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "A",
+    "vintage_commit": "c0c0ae560637503969312f5c285070d2475bcb98"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "1c7136213d09047456014d1a84aa7b1836be2b3b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-201.adapter-reads-the-holdings-gold.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~77",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/installed.py",
+      "kind": "script",
+      "commit_or_etag": "cd2f1d86e6588909da46a313bcfe421a5d0481c9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob cd2f1d86e6588909da46a313bcfe421a5d0481c9, committed 8fe8108d95e7f708daf2732658621b2414657fe0 on wk-IRPT_BCKEND-77. build_runtime now also computes runners_49f = root / \"data/assets/scripts/gold/runners_49f\" and inserts it into the same sys.path loop as root/lib and root/relative (the investor_reporting dir), from the SAME root build_runtime already resolves. 49F-alone; no other line in this file changed (verified by git diff: 2 lines added, 1 changed).",
+      "introduces": [
+        "runners_49f"
+      ],
+      "artifact_covered_by": [
+        "P20-3-AC1",
+        "P20-1-AC2",
+        "P20-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py",
+      "kind": "test",
+      "commit_or_etag": "46d7c178c3aeeecaaa534124f62f226e6d158974",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 46d7c178c3aeeecaaa534124f62f226e6d158974, committed 8fe8108d95e7f708daf2732658621b2414657fe0. New test test_build_runtime_packages_runners_49f_onto_sys_path_for_ruled_periods: removes the module-level sys.path insert this file itself makes at collection time (line 30) for the runners_49f directory and pops the cached parity_period_returns module, asserts hg._period_for then raises ModuleNotFoundError (the exact rollback defect), calls installed.build_runtime with AWS-call-refusing stubs, then asserts the runners_49f path is now on sys.path and hg._period_for('2026-01-01','2026-09-25') resolves to 'YTD' -- so only build_runtime's own insert can make the assertion pass.",
+      "artifact_covered_by": [
+        "P20-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P20-3-AC1",
+      "criterion_verbatim": "the adapter layout is built from the source map using your worktree's bytes. In an interpreter whose import path is only that layout, installed.build_runtime(...) then holdings_gold._period_for for YTD resolves without ModuleNotFoundError. Base: FAIL (No module named 'parity_period_returns'); with the one-line insert: PASS (measured at the cut).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_3_ac1_packaged_ruled_period.py\" .",
+      "output_evidence": "Base (fix reverted in-place, same worktree, re-applied after): 'layout members 70 (missing 0)' / 'arm YTD resolves: False ModuleNotFoundError No module named \\'parity_period_returns\\'' / 'P20-3-AC1 FAIL' rc=1. With the fix (current committed state, run twice): 'layout members 70 (missing 0)' / 'arm YTD resolves: True' / 'P20-3-AC1 PASS' rc=0, identical both runs.",
+      "denominator": "1 of 1 arm (YTD) PASS; base FAIL confirmed on the same check before the fix",
+      "status": "PASS",
+      "expect": "P20-3-AC1 PASS"
+    },
+    {
+      "criterion_id": "P20-1-AC2",
+      "criterion_verbatim": "the seam probe against the REAL gold, read-only: the thread account's YTD through holdings_gold.calculate equals the independent chain of its landed days within 1e-12. (The gold was re-emitted today under PRD v0.20/v0.21, so the chain value differs from round 20's 0.058285199226; the check computes its own oracle.)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_1_ac2_gold_live.py\" .",
+      "output_evidence": "rc=0. Live gold, thread account: 'gold days 184 | independent chain 0.058285199226 | holdings_gold 0.058285199226 | provider OPAL_HOLDINGS' / 'P20-1-AC2 PASS'. Unchanged behaviour re-confirmed after the runners_49f fix (this criterion's own window, since-inception-adjacent path never touches _period_for's lazy import, so it was never the broken arm; re-run here per the amendment's instruction to re-check unchanged behaviour).",
+      "denominator": "1 of 1 arm PASS",
+      "status": "PASS",
+      "expect": "P20-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "P20-2-AC1",
+      "criterion_verbatim": "a pre-switch engine report is not reopened; the holdings answer reopens with no second gold read.",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_2_ac1_retained_recompute.py\" .",
+      "output_evidence": "rc=0. '1 passed in 2.49s' / 'P20-2-AC1 PASS'. Unchanged behaviour re-confirmed after the runners_49f fix: retained.py and its accepted-key basis switch were not touched by this amendment (this instance's only artifact_produced rows are installed.py and tests/test_holdings_gold.py).",
+      "denominator": "1 of 1 pytest case PASS",
+      "status": "PASS",
+      "expect": "P20-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The rollback defect itself is the mutant this fix disarms: with build_runtime's sys.path loop reverted to (root/lib, root/relative) -- i.e. the runners_49f insert removed -- the packaged-layout probe (P20-3-AC1's own invocation) was re-run against the unmodified worktree.",
+      "expected": "Reverted: P20-3-AC1 FAILS with ModuleNotFoundError: No module named 'parity_period_returns' (the exact served defect, CTO 102736/CRO 102735). Restored: P20-3-AC1 PASSES.",
+      "observed": "Reverted (installed.py edited in place to drop the runners_49f directory from the loop, then re-run): 'arm YTD resolves: False ModuleNotFoundError No module named \\'parity_period_returns\\'' / 'P20-3-AC1 FAIL' rc=1. Restored (installed.py edited back to the committed line, then re-run): 'arm YTD resolves: True' / 'P20-3-AC1 PASS' rc=0. Worktree confirmed clean of the mutant (git diff installed.py empty; matches the committed blob cd2f1d86e6) before this instance was written.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "P20-3-AC1's own check run twice back-to-back at the committed (fixed) state; the full performance/tests package suite run twice back-to-back at the committed state.",
+      "observed": "P20-3-AC1: 'arm YTD resolves: True' / 'P20-3-AC1 PASS' rc=0, identical both runs. Full suite: '227 passed, 2 warnings' both runs (5.77s and 6.84s; the 2 warnings are the pre-existing pandas FutureWarning in test_f49_engine.py, unrelated to this change and present before it).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "holdings_gold.py, retained.py, entry.py",
+      "reason": "Granted in this order's <paths> but the amendment's own instruction is 'Change nothing else' -- the whole fix is the one runners_49f line in installed.py's build_runtime, plus a test. git diff confirms these three files are byte-identical to HEAD before this session (git status: only installed.py and tests/test_holdings_gold.py modified)."
+    },
+    {
+      "item": "P20-1-AC1",
+      "reason": "Task order states explicitly: 'P20-1-AC1 stays as written below and is not re-graded here.' Not in <expected_criteria> for this amendment."
+    },
+    {
+      "item": "any deploy or AWS write",
+      "reason": "BOUNDS clause: 'No deploy, no AWS write.' P20-1-AC2 reads S3 read-only via the package's own HoldingsGoldSource/calculate; no object was written, no Lambda updated, no Terraform applied. The served move is the issuer's under both never-widen halves."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~77/IRPT_BCKEND.TO-IB-pr-201.adapter-reads-the-holdings-gold.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (p20_3_ac1_packaged_ruled_period.py, base confirmation before the fix)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_3_ac1_packaged_ruled_period.py\" .",
+      "result": "rc=1, P20-3-AC1 FAIL: 'arm YTD resolves: False ModuleNotFoundError No module named \\'parity_period_returns\\'' -- confirms the rolled-back defect this amendment fixes"
+    },
+    {
+      "tool": "python (p20_3_ac1_packaged_ruled_period.py, with the fix, run twice)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_3_ac1_packaged_ruled_period.py\" .",
+      "result": "rc=0 both runs, P20-3-AC1 PASS, 'arm YTD resolves: True'"
+    },
+    {
+      "tool": "python (p20_1_ac2_gold_live.py, live read-only S3, re-run after the fix)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_1_ac2_gold_live.py\" .",
+      "result": "rc=0, P20-1-AC2 PASS, independent chain matches holdings_gold value within 1e-12"
+    },
+    {
+      "tool": "python -m pytest (p20_2_ac1_retained_recompute.py, re-run after the fix)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r20/p20_2_ac1_retained_recompute.py\" .",
+      "result": "rc=0, P20-2-AC1 PASS, '1 passed in 2.49s'"
+    },
+    {
+      "tool": "python -m pytest (tests/test_holdings_gold.py, corroborating suite incl. the new test)",
+      "invocation": "cd infra/aws/lambda/investor-reporting/performance && python -m pytest tests/test_holdings_gold.py -q",
+      "result": "13 passed (12 pre-existing + 1 new)"
+    },
+    {
+      "tool": "python -m pytest (tests/test_retained_performance.py, corroborating suite, no change made there)",
+      "invocation": "cd infra/aws/lambda/investor-reporting/performance && python -m pytest tests/test_retained_performance.py -q",
+      "result": "20 passed"
+    },
+    {
+      "tool": "python -m pytest (full performance package suite, run twice for determinism)",
+      "invocation": "cd infra/aws/lambda/investor-reporting/performance && python -m pytest tests/ -q",
+      "result": "227 passed, 2 warnings (pre-existing pandas FutureWarning, unrelated), both runs identical"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/performance/installed.py infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~77 <0.9.0_WK_IRPT_BCKEND~77@opal.agent>\" -F .scratch/commit-msg-amend2.txt -- infra/aws/lambda/investor-reporting/performance/installed.py infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold.py",
+      "result": "committed 8fe8108d95e7f708daf2732658621b2414657fe0 on wk-IRPT_BCKEND-77, msg-verify MATCH len=1208"
+    }
+  ]
+}

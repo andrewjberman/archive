@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-er-301",
+  "firm": "INF",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "a51fd34194",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-er-301.holdings-gold-inflection.md"
+  },
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md ADDENDUM v0.19 rulings 1-6, 9, 11 and ADDENDUM v0.20 rulings 13-17 (@613bfc6ecf), on 1.0.0_SA_CTO ruling 102611 and 4.0.0_SA_CRO's refused never-widen half @eca8083ad2 (row IRPT_BCKEND-S195). TO amendment 1 @a51fd34194 puts step 0 -- the v0.20 producer fix and the 49F re-emit -- before the Inflection slice. | FIRM FIELD: the enum is single-valued and the round's outcome_ref is FWD-3 (INF); amendment 1's step 0 re-emits all 557 49F partitions under v0.20 and is carried in artifacts_produced and in acceptance E3-AC4 rather than in that field.",
+    "group": "OTHER",
+    "vintage_commit": "613bfc6ecf"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~E",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+      "kind": "script",
+      "commit_or_etag": "f302ab14cd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The v0.20 core, on the round-2 build e29adc9fa7. (13) the key is (account, IDENTIFIER) where the identifier is the first non-empty of the declared identifier columns, and `_unident` is carried in BOTH the grouping and the day-t price join so an UNIDENTIFIED row can never be priced by an identifier; (14) an identifier-less row priced 1.00 with quantity == value is cash, every other one is excluded; (15) `in_basket = member & (value >= 0)`, so the denominator is the long holdings plus POSITIVE cash, and `negative_value` + `leveraged` carry what is outside it (cash_value stays SIGNED); (16) a second-pass band on the computed answer emits the fifth status IMPLAUSIBLE-RETURN with a NULL daily_return; (17) unchanged, but the manifest population moved to the new `held_count`. Also: `PartitionCache`, a bounded thread-safe LRU, because every day reads its own positions partition and its prior day's -- measured 226 hits / 1,445 misses over the 557-day 49F run and 634 / 2,590 over the 1,609-day INF run. Run ad hoc from the working tree for QA; no S3 code prefix and no schedule here. Naming gate on the commit diff: PASS, 1 graded, 0 REFUSE. commit-gate (py_compile + ds-precommit + ruff py39) clean.",
+      "artifact_covered_by": [
+        "E3-AC1",
+        "E3-AC2",
+        "E3-AC4"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/sources.json",
+      "kind": "config_data",
+      "commit_or_etag": "f302ab14cd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Declaration schema 1.0 -> 1.1 and the Inflection channel added AS AN ENTRY, never a code branch. New fields, each carrying its measured basis and denominator: `identifier_columns` (ordered, ruling 13), `quantity_column` (ruling 14's cash test), `account_id_zero_pad` (10 for 49F, 0 for INF -- the Orion accountId is a 3-to-5 character integer key and padding it would invent digits), `cash_flag_column` (INF's isCustodialCash) and `monolith`. THE NAMING LIMB REFUSED THE FIRST CUT AND THE REFUSAL WAS CORRECT: an authored JSON carrying the registered token `inflection` is a hand-kept carrier under LGIC_ENFORCE DEC-6 (3 REFUSE lines at sources.json:41, :43, :46). So the entry is keyed `orion`, declares `monolith: orion`, and its positions_prefix is the TEMPLATE `{monolith}/{scope}/silver/fact_positions/`; firm_scope() resolves a monolith to its unique registry scope and REFUSES when the monolith carries any other number -- measured at the cut, orion 1, eclipse 1, blackdiamond 2, so the first Black Diamond channel declared this way stops loudly instead of picking a firm. The token now exists only in infra/logic/registry/.",
+      "artifact_covered_by": [
+        "E3-AC1",
+        "E3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/tests/test_holdings_performance.py",
+      "kind": "test",
+      "commit_or_etag": "f302ab14cd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "python -m pytest data/assets/scripts/gold/irpt_holdings_performance/tests/ -q -> 24 passed (was 13). The four the amendment names: two identifier-less positions at different prices stay TWO positions (a merged key reports one, which is the +1e57 mechanism); an identifier-less cash row joins the basket (+0.04 not +0.10) with BOTH near-misses excluded -- quantity != value, and price 1.01; a margin-debit account reads +0.01 where the netted base read +1.00, with leveraged true and the debit visible; the +/-100% band tested AT ITS EDGE (exactly +1.0 is not computable, 0.999 is an ordinary day). Plus the structural claim that a long-only basket cannot reach -100% (a 100.00 -> 0.01 collapse stays OK at -0.9999), four Inflection cases, a short-only account's place in the completeness population, and the no-cash-carrier refusal. TWO EXISTING TESTS CHANGED AND BOTH CHANGES ARE THE RULING: `test_the_status_vocabulary_is_closed` counts five members instead of four (ruling 16 is an emission-contract change and this count is where it is recorded), and the NON-POSITIVE-BASE fixture moved from a cash debit to a short-only book, because under ruling 15 a debit no longer reaches that member -- which is the defect being retired, not a weakened check. No 49F METHOD test was altered.",
+      "artifact_covered_by": [
+        "E3-AC1",
+        "E3-AC2",
+        "E3-AC4"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/date=2024-07-09..2026-09-25/data.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "per-partition ETag == local MD5, verified inside lib stream_parquet finalize()",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ALL 557 partitions RE-EMITTED under v0.20, measured by ListObjectsV2 independently of the producer: 557 daily partitions over 2024-07-09..2026-09-25, missing 0, extra 0, 0 empty, min 4,075 rows, max 7,540. TOTAL ROWS read back from the 557 parquet FOOTERS: 3,188,339 -- equal to the producer's own tally, the footer read being the independent instrument. The emission now carries 19 columns (was 16): negative_count, negative_value, leveraged, held_count added. At date=2026-09-25: 20 of 7,540 rows leveraged, negative_value summing -6,405,637.37, against 1,300 negative dim_position rows summing -6,410,080.70 measured in the silver before the run.",
+      "artifact_covered_by": [
+        "E3-AC4"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_manifest/date=2024-07-09..2026-09-25/",
+      "kind": "s3_object",
+      "commit_or_etag": "per-partition ETag == local MD5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "557 manifest partitions, missing 0, extra 0; 0 days carry a daily partition without a manifest. Each carries the four completeness keys (ruling 17) and now also not_computable_reasons -- ruling 16's 'the reason named in the manifest' -- projected from the same one dict as the JSON surface, plus implausible_band naming the -1/+1 edges.",
+      "artifact_covered_by": [
+        "E3-AC4"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-inflection/irpt/inflection/gold/holdings_performance_daily/date=2020-04-27..2026-09-25/data.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "per-partition ETag == local MD5, verified inside lib stream_parquet finalize()",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "1,609 daily partitions over 2020-04-27..2026-09-25, missing 0, extra 0, 0 empty, min 880 rows, max 960; 1,420,782 footer rows, equal to the producer's tally. The 4 trading days NOT emitted are exactly the 4 the criterion excludes: 2026-07-01 and 2026-08-06 have no silver partition, and 2026-07-02 and 2026-08-07 therefore have no prior-day base (ruling 5's ABSENT). Every address is builder output; nothing under data/inflection/ was minted.",
+      "artifact_covered_by": [
+        "E3-AC1",
+        "E3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-inflection/irpt/inflection/gold/holdings_performance_manifest/date=2020-04-27..2026-09-25/",
+      "kind": "s3_object",
+      "commit_or_etag": "per-partition ETag == local MD5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "1,609 manifest partitions, missing 0, extra 0; 0 days carry a daily partition without a manifest. At date=2026-09-25: accounts_with_prior_holdings 960, computable_count 792, not_computable_count 168, complete true -- read back exactly as E3-AC1 reads it.",
+      "artifact_covered_by": [
+        "E3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260929T0619Z_irpt-holdings-gold-v020-inf-e-20260929_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "f302ab14cd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened BEFORE the first S3 write of this round (slug irpt-holdings-gold-v020-inf-e-20260929, 4 legs: the code commit, the 49F re-emit, the INF mint, the acceptance re-run), as the TO requires. Committed on branch ds-e-irpt-r3-holdings together with its .open_deploys sentinel, so the OPEN state survives the drain.",
+      "artifact_covered_by": [
+        "E3-AC1",
+        "E3-AC2",
+        "E3-AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E3-AC1",
+      "criterion_verbatim": "on 2026-09-25, every INF account holding positions on 2026-09-24 has exactly one gold row, and the manifest reads complete with matching counts. Base: FAIL (960 accounts, 0 rows, manifest absent).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r3e/e3_ac1_inf_all_accounts_manifest.py\"",
+      "output_evidence": "silver accounts at 2026-09-24: 960 | gold rows at 2026-09-25: 960 | missing 0 | duplicated 0 | manifest {'accounts_with_prior_holdings': 960, 'computable_count': 792, 'not_computable_count': 168, 'complete': True} / E3-AC1 PASS / exit 0, read unpiped. The 168 not-computable accounts are NON-POSITIVE-BASE and the number is corroborated from the SILVER, before the gold existed: at date=2026-09-25, 792 of 960 accounts sum a currentValue above zero, so 168 hold a book of exactly 0.00. The population reads 960 rather than 792 because `held_count` counts every t-1 position key an account carried, and an account holding only zero-value lines still held positions.",
+      "denominator": "960 distinct accountId values in the Inflection positions silver at date=2026-09-24 (the check's own read, independent of the producer); 960 gold rows at date=2026-09-25, 0 missing, 0 duplicated. The completeness population is the same 960 because held_count counts every t-1 position key an account carried; 792 computable and 168 not, and the 168 are corroborated from the SILVER -- 792 of 960 accounts sum a currentValue above zero at date=2026-09-25, so 168 hold a book of exactly 0.00.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "E3-AC2",
+      "criterion_verbatim": "a non-empty gold partition exists for every computable trading day 2020-04-27..2026-09-25 (the check prints the 4 non-computable days it excludes). Base: FAIL (1,609 of 1,609 missing).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r3e/e3_ac2_inf_full_history.py\"",
+      "output_evidence": "silver partitions 2343 from 2020-04-24 | trading days 1613 | computable 1609 (2020-04-27..2026-09-25) | not computable 4 | missing gold 0 / E3-AC2 PASS / exit 0, read unpiped. The check's 4 non-computable days and the producer's 4 ABSENT lines are the SAME four (2026-07-01, 2026-07-02, 2026-08-06, 2026-08-07), derived independently -- the check from a silver partition listing, the producer from a failed read.",
+      "denominator": "2,343 silver calendar-day partitions from 2020-04-24; 1,613 trading days over 2020-04-27..2026-09-25 on lib/trading_calendar; 1,609 COMPUTABLE (the day and its prior trading day both landed) and 4 not; 1,609 non-empty gold partitions, missing 0. The check derives its 4 from a silver listing and the producer derives its 4 from a failed read; they are the same four dates.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "E3-AC4",
+      "criterion_verbatim": "(amendment 1) over all 557 49F days: 0 OK rows at |daily_return| >= 1, a `leveraged` column on every day, and every manifest complete. Base: FAIL (2,846 OK rows at |r| >= 1; `leveraged` absent on 557 days).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r3e/e3_ac4_49f_reemit_v020.py\"",
+      "output_evidence": "days 557 | partitions absent 0 | OK rows |r|>=1: 0 | OK rows |r|>0.5: 4 | days without `leveraged`: 0 | manifests complete 557 of 557 / E3-AC4 PASS / exit 0, read unpiped. THE CRO'S BEFORE/AFTER CENSUS, which the amendment asks to be printed: |r| >= 1 went 2,846 -> 0 and |r| > 0.5 went 4,061 -> 4. The 4 survivors are ordinary large days, not artefacts: they are inside the band ruling 16 leaves servable, and ruling 15 makes the lower edge structurally unreachable rather than merely unobserved.",
+      "denominator": "557 trading days 2024-07-09..2026-09-25, 0 partitions absent, 557 of 557 manifests complete, 557 of 557 days carrying `leveraged`. OK rows at |daily_return| >= 1: 0 of 3,188,339 emitted rows (base 2,846); OK rows at |r| > 0.5: 4 (base 4,061). The row denominator is the footer read-back, not the producer's tally.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO planted mutants, one per claim, each written through the SAME parquet path the producer writes so it is indistinguishable from a real bad emission, and each RESTORED by re-running the producer for that day rather than by writing the good bytes back. M1 attacks ruling 16's claim: one OK row in the landed 49F date=2026-09-25 daily partition (account 0010023253) was given daily_return = 1.5. M2 attacks the INF completeness claim: account 100 was dropped from the landed INF date=2026-09-25 daily partition, 960 rows to 959.",
+      "expected": "M1 -> E3-AC4 FAIL naming 1 OK row at |r| >= 1, then PASS at 0 after the restore. M2 -> E3-AC1 FAIL naming 1 missing account, then PASS at 0 after the restore.",
+      "observed": "M1 PLANTED: 'OK rows |r|>=1: 1 | OK rows |r|>0.5: 5' / E3-AC4 FAIL. M1 RESTORED: 'OK rows |r|>=1: 0 | OK rows |r|>0.5: 4' / E3-AC4 PASS. M2 PLANTED: 'gold rows at 2026-09-25: 959 | missing 1' / E3-AC1 FAIL. M2 RESTORED: 'gold rows at 2026-09-25: 960 | missing 0' / E3-AC1 PASS. Both criteria are live oracles and neither passes on absence.",
+      "note": "M2 also shows the limit of the manifest half of E3-AC1 in isolation: with the row dropped straight out of the parquet, the manifest still read accounts_with_prior_holdings 960 / complete true, because the manifest was computed by the producer from the frame it emitted and not from the bytes that survived. The criterion catches it anyway -- the row-level 'missing 1' limb fires -- but a manifest is a producer's SELF-REPORT and the row count is the independent instrument. Worth stating rather than leaving for someone to discover.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Three instruments on the same population. (a) The date=2026-09-25 partition of EACH channel was produced three times -- the pre-run dry run, the full-range upload, and the mutant restore -- and the census compared across all three. (b) The landed row totals were read back from the parquet FOOTERS (an instrument the producer does not touch) and compared with the producer's own printed tally. (c) The 24-test suite was re-run against the final committed bytes.",
+      "observed": "49F date=2026-09-25 produced 7,540 rows on every run with the identical census {OK 6650, NO-PRIOR-HOLDINGS 881, NON-POSITIVE-BASE 6, ALL-HOLDINGS-EXCLUDED 3} and identical counts (6341/6338/3, complete True). INF date=2026-09-25 produced 960 rows on every run with the identical census {OK 792, NON-POSITIVE-BASE 168} and counts (960/792/168, complete True). FOOTER vs TALLY: 49F 3,188,339 = 3,188,339 over 557 partitions; INF 1,420,782 = 1,420,782 over 1,609. Run logs: 0 tracebacks; 49F 0 days not computed; INF 4, all ABSENT and all named. No day reported complete=False.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Widening the daily schedule's runner to the Inflection channel",
+      "reason": "The TO says in terms that the daily schedule's runner is NOT changed here -- its role is scoped to one firm and widening it is a later cell. The INF slice was run ad hoc for QA under the deploy ledger, exactly as instructed."
+    },
+    {
+      "item": "The Cottonwood channel",
+      "reason": "PRD v0.19 ruling 11 orders the firms: 49F, then Inflection, then Cottonwood. Cottonwood is not in this order."
+    },
+    {
+      "item": "Re-emitting the INF slice under a corrected identifier chain if `name` is ever needed",
+      "reason": "Not applicable at the cut and measured rather than assumed: `ticker` is non-empty on 36,077 of 36,077 rows at date=2026-09-24, so the declared chain never reaches `name` and no INF row is UNIDENTIFIED today."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-09-29/",
+  "compiler_tools": [
+    {
+      "tool": "naming-gate.py (the LGIC_ENFORCE DEC-6 commit limb)",
+      "invocation": "run inside .tools/safe-commit.sh on the round-3 diff",
+      "result": "FIRST ATTEMPT: REFUSE 4 graded -- sources.json:41 `orion_inflection`, :43 `inflection`, :46 `orion/inflection/silver/fact_positions/`, each 'a NEW hand-kept carrier of inflection outside every permitted context: read it through lookup(inflection)'. The refusal was correct and is the reason the declaration is keyed by monolith with a templated prefix. SECOND ATTEMPT: NAMING-GATE PASS, 1 graded (opal-data-assets, CONFORMANT as S3_BUCKET), 0 REFUSE."
+    },
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py --pipeline all",
+      "result": "OUT-OF-GRAPH SCRIPT -- the curated DAG does not carry this file, so the answer is a deterministic AST derivation with chain membership, run order and portal consumers DECLARED ABSENT rather than measured. 4 recognized I/O call sites: 1 write (put_object, the manifest.json surface) and 3 UNRESOLVED reads whose targets are built at runtime from the declaration, which is the shape rule 30 asks for and the shape the AST cannot follow. Read as presence, never as a consumer census."
+    },
+    {
+      "tool": "comp-estate --resource",
+      "invocation": "comp-estate --resource holdings_performance",
+      "result": "ANSWER-STATE SUBJECT_ABSENT_FROM_CORPUS -- absent from all 135 measured estate chains, scanned 135 of 135 within budget. Together with the adapter switch not having landed (4.0.0_SA_CRO's half refused @eca8083ad2), this is the basis for 'the re-emit moves no served output': nothing reads these prefixes yet."
+    },
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "comp-pipescript deployed",
+      "result": "STATE NOT-DECIDABLE (rc=4), ANSWER-STATE PARTIAL_OR_BLIND: the 90 s budget was reached with 1 of 1 s3_head_object DEFERRED, so the printed rows are a PREFIX and carry no verdict. NOT treated as a pass. It does not gate this round either way: this producer has no S3 code prefix -- it is run ad hoc from the working tree, and the deploy legs are the DATA partitions, verified by footer read-back instead."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <the two .py files>",
+      "result": "py_compile + ds-precommit + ruff py39 clean for 2 of 2 files; no unguarded strict-utf8 log reads."
+    }
+  ]
+}

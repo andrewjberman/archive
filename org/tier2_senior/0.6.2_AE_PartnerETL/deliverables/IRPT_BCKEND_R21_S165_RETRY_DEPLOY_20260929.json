@@ -1,0 +1,75 @@
+{
+  "command_id": "4aca0b28-7989-4880-867a-eb48aac37027",
+  "ledger_slug": "cot-login-retry-s165-m-20260929",
+  "running_md5": "7d37465ba68e8ddf44a66c008179d080",
+  "env_lines": [
+    "BD_FIRM_ID=cot",
+    "BD_IDENTITY_COOKIE=.bd.identity",
+    "BD_DEVICE_COOKIE=bd_DeviceRegistration",
+    "BD_DEBUG_PREFIX=ec2/bd-cot-auto-login/debug",
+    "BD_MAX_LOGIN_ATTEMPTS=3",
+    "BD_LOGIN_BACKOFF_MS=5000"
+  ],
+  "claim": "measured",
+  "to_id": "IRPT_BCKEND.TO-IB-m21-212",
+  "rows": [
+    "IRPT_BCKEND-S165",
+    "IRPT_BCKEND-S199"
+  ],
+  "instance_id": "i-0643a5bee8a8feabf",
+  "go": {
+    "issuer_msg": 102683,
+    "diff_at_cloud": "8b20b75d63",
+    "build_commit": "fdf12eadb1",
+    "cto_read": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_READ_COT_LOGIN_PORT_DIFF_20260929.md@76a44392fd",
+    "claim": "measured"
+  },
+  "legs": {
+    "A1": {
+      "state": "CLOSED",
+      "claim": "measured",
+      "detail": "BLOB bytes uploaded (git show CLOUD:<path>), 0 CR verified before upload. head-object: .js 40333 B ETag 7d37465ba68e8ddf44a66c008179d080 VersionId WZpnhv6I66AqZYUzsS.d3BVAoU37OMKD; env 2525 B ETag 8e879af5e8e7a608e34a4864c179ee71 VersionId lbA4Qva2uA1d67GDfkNpF6SNijwuTsoc"
+    },
+    "A2": {
+      "state": "CLOSED",
+      "claim": "measured",
+      "detail": "SSM deeb49bb-189f-49b2-bb64-7062b4dbcd28 Status Success rc=0, both files pulled S3 -> /opt/bd-cot-auto-login/, PULL-OK"
+    },
+    "V1": {
+      "state": "CLOSED",
+      "claim": "measured",
+      "detail": "SSM 9d73a0f7-0ea9-4df9-ac6f-ca90221b890e, a SEPARATE read-only command so the proof is an independent read: running .js md5 7d37465ba68e8ddf44a66c008179d080; running env md5 8e879af5e8e7a608e34a4864c179ee71, 2525 B; CR_COUNT=0; 4 of 4 required config lines present; node --check on the box -> NODE-CHECK-OK; ---END--- marker present NOTE: this command printed a COUNT of the required config lines, not the lines; the AC1 checker needs the literal lines, so command_id above points at 4aca0b28."
+    },
+    "V2": {
+      "state": "CLOSED",
+      "claim": "measured",
+      "command_id": "edb17c3d-43ce-485d-8bf6-22a963eb7dfd",
+      "detail": "ONE forced opal-cot-bd-session-fetch login (amendment 4 @7ea14b1305; egress covered by the Andrew-direct @4c330ce53c, and the CTO session that holds that word was verified LIVE at fire time because the word lapses with it). Sent the way the scheduler's own Lambda sends it: InstanceIds + DocumentName + TimeoutSeconds 1800 + Comment, no parameters, never by hand. Status Success, ResponseCode 0.",
+      "session_advanced": {
+        "captured_at_before": "2026-09-27T18:42:27.162Z",
+        "captured_at_after": "2026-09-29T11:53:43.537Z",
+        "claim": "measured",
+        "note": "read from blackdiamond/cot/session before and after; only captured_at and bd_device_cookie_name were read, never a cookie value"
+      },
+      "box_log_exercises": {
+        "group_A_retry": "'login attempt 1/3' -- a line that exists only in the ported retry loop",
+        "group_B_persist": "'OK: fresh session written to SM (blackdiamond/cot/session) + device-trust=present(bd_DeviceRegistration)' -- group B's rewrapped persist block, in its new wording",
+        "group_C_naming": "'device-trust: bd_DeviceRegistration injected' and 'partner=cot' -- the env-sourced cookie name and the required firm id both resolved",
+        "flow": "step 0/1 LOGIN -> step 2/3/4 MFA_OTP through the gateway adapter -> step 5 LOGGED_IN -> exit rc=0",
+        "claim": "measured"
+      },
+      "not_exercised": "the retry's FAILURE branch never fired because attempt 1 succeeded, so the recovery path is proven only by the local harness (7 of 7 arms), not by the world. ABSENT is not EXERCISED-AGAINST and this row says so rather than implying coverage.",
+      "knock_on_named_in_advance": "a session-fetch Success fires the ENABLED rule cot-session-complete (pattern: document-name opal-cot-bd-session-fetch + status Success -> the trigger Lambda), so a second bronze/silver/gold chain ran today: bronze c683e7b5 Success, silver c590b10f Success, gold b332fd76. Measured before firing and flagged on the broker; today's first chain had already completed at 11:32Z, so there was no in-flight collision."
+    }
+  },
+  "rollback": {
+    "claim": "measured",
+    "js": "restore md5 28dd27a054b826cc3a87f6b4498d3b5a from infra/aws/ec2/bd-cot-auto-login/bd_49f_auto_login.js.running-capture.txt, or S3 VersionId yidWek0qE6oJXDpoY_5xF0vimE3tMHXL",
+    "env": "restore md5 9b55e03c9575d4f6b58d1d239c8409fb, 1200 B, captured from S3 BEFORE the upload and verified byte-identical to the box copy the GO names; S3 VersionId a0xSDh0tLG0Ba5oroOcf8a4kqJG2VzOb",
+    "partial": "port left in place, BD_MAX_LOGIN_ATTEMPTS=1 -- exercised in Part 1's harness as byte-equal to the prior single-attempt behaviour"
+  },
+  "command_id_note": "the AC1 read: IBM21-212-AC1 greps ONE command's output for BD_MAX_LOGIN_ATTEMPTS=, BD_LOGIN_BACKOFF_MS= and the repo .js md5 together. The V1 ledger read 9d73a0f7 printed a grep -c COUNT of the config lines rather than the lines, so it satisfied V1's own proof (md5s + CR count + node --check) but not this checker as written. Issuer read at 10:2xZ caught it; 4aca0b28 is a second read-only command printing all three tokens. Both are post-deploy reads of the same box and agree on the .js md5.",
+  "v1_command_id": "9d73a0f7-0ea9-4df9-ac6f-ca90221b890e",
+  "ledger_status": "CLOSED -- all 4 legs proven; sentinel removed",
+  "criterion": "IBM21-212-AC1 -> RETRY-LIVE 7d37465ba68e (rc=0)"
+}

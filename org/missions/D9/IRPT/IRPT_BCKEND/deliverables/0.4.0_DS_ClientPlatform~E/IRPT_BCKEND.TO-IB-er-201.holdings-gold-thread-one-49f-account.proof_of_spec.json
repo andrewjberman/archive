@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-er-201",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "8ed5c62a86",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-er-201.holdings-gold-thread-one-49f-account.md"
+  },
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md ADDENDUM v0.19 rulings 1-5, 10-11, plus 2.0.0_SA_COO~P's ruling on row IRPT_BCKEND-S191 (msg 102514): the declaration is keyed by custody source, the firm is registry-derived, and E1-AC1 is amended @5e273c614f to select its entry by positions_prefix instead of a firm key",
+    "group": "OTHER",
+    "vintage_commit": "82e1700237"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~E",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/sources.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The source declaration is read from the working tree by the producer and by the amended E1-AC1. Keyed by CUSTODY SOURCE (schwab_08335338) and carrying only `master`: no firm token, which is the ruling on row S191 and what clears the naming limb. The firm scope every gold address is built from is opal_naming.lookup(master)['firm'], read from infra/logic/registry/scopes.json's MASTER row. Naming gate re-graded on both new files: PASS, 3 CONFORMANT, 0 REFUSE."
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Run ad hoc from the working tree for QA (the TO step 3); no S3 code prefix and no schedule this round. THE MODULE NAMES NO FIRM AT ALL: the selector is a custody source, the firm comes from the registry, and every address comes from lib/opal_naming.address(). Measured: the string '49financial' does not appear anywhere in the file. Naming gate: PASS.",
+      "artifact_covered_by": [
+        "E1-AC1",
+        "E1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/tests/test_holdings_performance.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "python -m pytest data/assets/scripts/gold/irpt_holdings_performance/tests/ -q -> 9 passed. Two of the nine FAILED on first run and each named a real defect in the producer, both fixed before any S3 write: (1) the full-exit case was graded NON-POSITIVE-BASE because the base test ran before the all-excluded test, naming the wrong remedy; (2) declared_firms() treated the declaration's doc string key as a firm scope."
+    },
+    {
+      "path_or_key": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/date=2026-01-02..2026-09-25/data.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "per-partition ETag == local MD5, verified inside lib stream_parquet finalize()",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ListObjectsV2 over the prefix: 184 landed partitions, expected 184 trading days (lib/trading_calendar), missing 0, extra 0, range 2026-01-02..2026-09-25 -- measured independently of the producer's own report. Re-landed in full by the rewired producer after the S191 ruling, and both criteria re-run green against the re-land. Target bucket encryption is AES256 with no KMS (get-bucket-encryption), the condition under which a single-part ETag equals the stored bytes' MD5, so the primitive's verification is sound on this bucket.",
+      "artifact_covered_by": [
+        "E1-AC1",
+        "E1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_manifest/date=2026-01-02..2026-09-25/manifest.json",
+      "kind": "s3_object",
+      "commit_or_etag": "put_object per partition",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ListObjectsV2: 184 partitions, missing 0, extra 0. Each manifest carries the method sentence, the status census, the declared cash columns, the calendar source and both builder addresses."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260929T0023Z_irpt-holdings-gold-thread-49f-20260928_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened BEFORE the first S3 write (ledger slug irpt-holdings-gold-thread-49f-20260928, 3 legs), as the TO step 3 requires."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E1-AC1",
+      "criterion_verbatim": "the thread account's gold daily_return for 2026-09-25 equals an independent recompute from the declared silver within 1e-9, with the same excluded_count. Base: FAIL (no declaration, no gold). [AMENDED @5e273c614f by the issuer on row S191: the check now selects the declaration entry whose positions_prefix is the 49F Schwab dim_position source and never reads a firm key.]",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r1e/e1_ac1_thread_day_recompute.py\"",
+      "output_evidence": "Against the AMENDED check @5e273c614f, after the declaration was re-keyed by custody source and the producer rewired to derive the firm from the registry: recompute 0.004612117916 (excluded 0) | gold 0.004612117916 (excluded 0) / E1-AC1 PASS / exit 0, read unpiped. The value is UNCHANGED from the pre-ruling run, which is the point: the re-key moved the entry's NAME and the firm's SOURCE, never the method or the number. The producer's core had separately agreed with a hand-written probe of the same rule to delta 0.0 before the first write.",
+      "denominator": "1 (account, day) pair -- the thread account 0010498003 at 2026-09-25, the pair the criterion names; tolerance 1e-9 on daily_return and exact equality on excluded_count",
+      "status": "PASS",
+      "expect": "E1-AC1 PASS"
+    },
+    {
+      "criterion_id": "E1-AC2",
+      "criterion_verbatim": "every trading day 2026-01-02..2026-09-25 carries the thread account's row, and the chained YTD is finite and above -1. Base: FAIL (184 of 184 days missing).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r1e/e1_ac2_thread_ytd_coverage.py\"",
+      "output_evidence": "trading days 184 (2026-01-02..2026-09-25) | missing thread rows 0 | chained YTD 0.058285 / E1-AC2 PASS / exit 0, read unpiped",
+      "denominator": "184 trading days from lib/trading_calendar.trading_days_between(2026-01-02, 2026-09-25); 184 rows read, 0 missing",
+      "status": "PASS",
+      "expect": "E1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The landed 2026-09-25 partition's daily_return was perturbed by +1e-6 (0.004612117916 -> 0.004613117916) and re-landed through the same ETag-verified primitive the producer uses, so the mutant reached S3 by the same path as the truth. The perturbation is 1000x the criterion's 1e-9 tolerance and invisible at two decimal places -- exactly the class of error a coarse check would miss.",
+      "expected": "E1-AC1 FAIL while the mutant is in place, then PASS after the producer re-lands the partition",
+      "observed": "Under the mutant: recompute 0.004612117916 (excluded 0) | gold 0.004613117916 (excluded 0) / E1-AC1 FAIL. After the producer's own re-run of date=2026-09-25: PASS / exit 0. E1-AC2 then re-read all 184 partitions and PASSED, which also proves no other partition was disturbed. The mutant was planted against the pre-ruling land; the post-ruling re-land reproduced the same value on every day, so the control still describes the bytes now served.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "date=2026-09-25 was produced FOUR times by independent invocations -- the first 184-day land, the post-mutant restore, and the full 184-day re-land after the S191 re-key (plus a dry run) -- and each output was compared against the check's independent recompute from silver.",
+      "observed": "Every invocation produced daily_return 0.004612117916 and excluded_count 0, each matching the recompute within 1e-9, INCLUDING across the re-key: the firm moved from a typed token to a registry lookup with no change to any emitted value. The 184-day dry run and both 184-day uploads produced the same status census (OK on every day, 0 days not computed).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Every 49F account other than the thread account 0010498003, and every firm other than 49financial",
+      "reason": "The TO scopes round 1 to ONE invested 49F account, YTD; PRD v0.19 ruling 11 sequences Inflection and Cottonwood as later rounds. The producer takes --accounts and the declaration takes a new firm entry, so neither widening needs a code change."
+    },
+    {
+      "item": "The daily schedule irpt-holdings-performance-daily",
+      "reason": "PRD v0.19 ruling 9 places the schedule in a later round; this round is the ad-hoc QA run the TO step 3 names. Nothing here makes success-of-upstream a trigger."
+    },
+    {
+      "item": "Switching any reader to the new gold",
+      "reason": "The TO BOUNDS: no reader is switched this round. irpt-performance-adapter, c02_twr_engine.py and every served table are untouched, so the write needed no never-widen sign-off and none was sought."
+    },
+    {
+      "item": "comp-pipescript graph registration, gold_pipeline_deps.yaml and gold_validate_config.yaml entries for the new producer",
+      "reason": "UNVALIDATED BY THOSE INSTRUMENTS, stated rather than implied: comp-pipescript io and postdeps both REFUSE the script as an unknown id in every tree, and comp-validate has no config for it, so per org/XXX.md this producer is UNVALIDATED by comp-validate and no SAFE is signalled on it. The evidence standing in their place is the 9 unit tests, the two acceptance checks with a fired mutant, and the listing-verified landing. Registration belongs with the schedule round, which is where a deployed code prefix first exists to census."
+    },
+    {
+      "item": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_manifest/date=2026-01-02..2026-09-25/manifest.json -- no acceptance criterion reads it",
+      "reason": "Neither E1-AC1 nor E1-AC2 opens the manifest: both read the daily partition. The manifest's only verification this round is the independent listing (184 partitions, missing 0, extra 0) plus the producer's own emit path, so its CONTENT is asserted by construction and not exercised by a criterion. Declared rather than left to look covered: a reader wanting the method sentence or the status census from the manifest has no check standing behind it until a later round reads it."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-S189",
+    "IRPT_BCKEND-S190",
+    "IRPT_BCKEND-S191",
+    "IRPT_BCKEND-S192"
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-09-29/",
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io holdings_performance.py --pipeline advi",
+      "result": "REFUSED -- Unknown script in tree [advi]: HOLDINGS_PERFORMANCE, 71 valid ids listed. CORRECT AND EXPECTED: the graph is a built artifact queried, never rebuilt (CLAUDE.md rule 20), and its vintage predates this producer by hours. Recorded as a refusal, not a pass; the producer's reads and writes are instead declared in sources.json and asserted by the acceptance checks."
+    },
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "comp-pipescript deployed",
+      "result": "STATE NOT-DECIDABLE (rc=4), ANSWER-STATE PARTIAL_OR_BLIND -- the 90 s budget was reached with 0 of 1 s3_head_object scanned, so the output is a PREFIX carrying no verdict. Also DECLARED-NOT-APPLICABLE to this round on its own terms: the producer ran from the working tree and has no deployed code prefix to compare against. Both facts recorded; neither is read as a clean deployed verdict."
+    },
+    {
+      "tool": "comp-pipescript postdeps",
+      "invocation": "comp-pipescript postdeps holdings_performance.py --firm bd",
+      "result": "REFUSED (rc=2) -- unknown script id in tree bd, universe searched 35 distinct ids. Same cause as io above. No downstream consumer exists to disturb in any case: the prefixes written are new and no reader is switched."
+    },
+    {
+      "tool": "comp-validate",
+      "invocation": "comp-validate data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+      "result": "NO CONFIG for this script (the BD and INF validate configs cover 21 scripts, none of them this one). Per org/XXX.md that means UNVALIDATED and no SAFE signal is given. Named as a declared exclusion above rather than left as an implied pass."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'stream_parquet' --limit 20 --band DEF -- lib data",
+      "result": "MEASURED zero over 1,634 scanned files in scope, with 105 binary and 2,794 ephemeral-floor files declared unsearched -- so the zero was NOT read as an absence. The module was then located at data/assets/scripts/lib/stream_parquet.py and reused for the atomic, ETag-verified write rather than a hand-rolled put_object (build ladder rung 2: the estate already has it)."
+    },
+    {
+      "tool": "ruff and py_compile",
+      "invocation": "ruff check --target-version py39 data/assets/scripts/gold/irpt_holdings_performance/ ; python -m py_compile holdings_performance.py",
+      "result": "All checks passed; compiles clean. Non-ASCII census on both new files: 0 bytes and 0 characters, byte-delta and character-count measured separately per CLAUDE.md."
+    },
+    {
+      "tool": "naming-gate.py (the LGIC_ENFORCE DEC-6 commit limb)",
+      "invocation": "python .tools/naming-gate.py --diff <both new files as added>",
+      "result": "First grading REFUSED 3 literals; the commit was ABORTED by safe-commit.sh and no override was taken. Two were redundancies removed on their own merits (a firm_scope field duplicating its own key; a typed --firm default). The last was sources.json's firm-scope KEY, which the then-current E1-AC1 read directly -- an unsatisfiable pair under this cell's grant, filed as row IRPT_BCKEND-S191 and escalated. The issuer amended E1-AC1 @5e273c614f and ruled the re-key (msg 102514). Final grading: NAMING-GATE PASS, 3 CONFORMANT (one S3_BUCKET, two S3Key), 0 REFUSE."
+    }
+  ]
+}

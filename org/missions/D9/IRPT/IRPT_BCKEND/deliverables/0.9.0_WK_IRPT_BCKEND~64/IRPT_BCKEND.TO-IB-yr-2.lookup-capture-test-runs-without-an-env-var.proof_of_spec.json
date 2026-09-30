@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "be111d1e5d53eff514292e345943d0a4f16bcb43"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R19_Y.md",
+    "vintage_commit": "ecbb08548fd051f084949b161bfd2a5a77242e74",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-2.lookup-capture-test-runs-without-an-env-var.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~64",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_security_resolution.py",
+      "kind": "test",
+      "commit_or_etag": "cbabacd02cffff975e13f05140e7c73509113f13",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Not deployed by this order (a test file; BOUNDS excludes AWS calls/deploy). git hash-object of the worktree blob at commit time; line 31 changed from os.environ[\"IRPT_LOOKUP_FIXTURE_ROOT\"] (hard KeyError when unset) to os.environ.get(...) defaulting to Path(__file__).resolve().parent / \"fixtures\" / \"lookup_capture\"; no other line changed.",
+      "introduces": ["os.environ.get(", "lookup_capture"],
+      "artifact_covered_by": ["Y19-2-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/fixtures/lookup_capture/02_securities_info.json",
+      "kind": "test",
+      "commit_or_etag": "6160249d80a09a0b9050fc7bffef04893439bd7e",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "git hash-object of the worktree blob; sha256 matches org/tier1_exec/4.0.0_SA_CRO/deliverables/IRPT_YCHARTS_LOOKUP_CAPTURE_20260923/02_securities_info.json byte for byte (verified directly by sha256sum, independent of the checker, and again via the checker script).",
+      "artifact_covered_by": ["Y19-2-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/fixtures/lookup_capture/03_suggest_ALPPL.json",
+      "kind": "test",
+      "commit_or_etag": "1c62ada388f18d7edc21df2fb420008d3a1e764d",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "git hash-object of the worktree blob; sha256 matches org/tier1_exec/4.0.0_SA_CRO/deliverables/IRPT_YCHARTS_LOOKUP_CAPTURE_20260923/03_suggest_ALPPL.json byte for byte.",
+      "artifact_covered_by": ["Y19-2-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/fixtures/lookup_capture/04_suggest_BREIT.json",
+      "kind": "test",
+      "commit_or_etag": "db8a51edf7138bc66d475de27fc009c19c47e828",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "git hash-object of the worktree blob; sha256 matches org/tier1_exec/4.0.0_SA_CRO/deliverables/IRPT_YCHARTS_LOOKUP_CAPTURE_20260923/04_suggest_BREIT.json byte for byte.",
+      "artifact_covered_by": ["Y19-2-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~64/IB-yr-2.result.md",
+      "kind": "doc",
+      "commit_or_etag": "9fa674eaee274fd861bf4d8afc14780614ee2194",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object -- the session log for this order.",
+      "artifact_covered_by": ["Y19-2-AC1", "Y19-2-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y19-2-AC1",
+      "criterion_verbatim": "the built behaviour: the whole module passes with the variable unset. Base: 1 failed, 23 passed (KeyError).",
+      "method": "test_suite",
+      "invocation": "env -u IRPT_LOOKUP_FIXTURE_ROOT python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/intake/tests/test_security_resolution.py",
+      "output_evidence": "24 passed in 0.15s (reproduced twice more: 0.13s, 0.09s; a third run with IRPT_LOOKUP_FIXTURE_ROOT explicitly set to the same directory also produced 24 passed, confirming the override path is unchanged).",
+      "denominator": "24 of 24 tests in the module PASS",
+      "status": "PASS",
+      "expect": "24 passed"
+    },
+    {
+      "criterion_id": "Y19-2-AC2",
+      "criterion_verbatim": "the three copies are byte-identical to the CRO capture (sha256). Base: 3 MISSING, exit 1.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R19_CHECKS/r19_y2_fixture_copies.py",
+      "output_evidence": "COPIES-IDENTICAL 3/3 (rc=0), reproduced twice more at the final restored bytes; independently confirmed by direct sha256sum comparison of all three files against the CRO source.",
+      "denominator": "3 of 3 files byte-identical",
+      "status": "PASS",
+      "expect": "COPIES-IDENTICAL 3/3"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Appended a trailing line to the committed copy of 02_securities_info.json (a real byte divergence from the CRO source) and re-ran AC2's checker script unchanged.",
+      "expected": "the checker names the file as DIFFERS and exits 1.",
+      "observed": "DIFFERS 02_securities_info.json, rc=1. Restored the file from a pre-mutation backup; git hash-object on the restored file matched the pre-mutation hash (6160249d80a09a0b9050fc7bffef04893439bd7e) exactly, and the checker returned to COPIES-IDENTICAL 3/3, rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's pytest invocation and AC2's checker were each run three times (AC1) / twice (AC2) at the final bytes, plus AC1 once more with IRPT_LOOKUP_FIXTURE_ROOT explicitly set.",
+      "observed": "All AC1 runs: 24 passed, identical test names and counts. All AC2 runs: COPIES-IDENTICAL 3/3, rc=0, identical output.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "every other line of test_security_resolution.py, including all assertions",
+      "reason": "BOUNDS: 'Change nothing else in the test or its assertions.' Only line 31's fixture-root resolution changed."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~64/IB-yr-2.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (Y19-2-AC1, before and after the fix)",
+      "invocation": "env -u IRPT_LOOKUP_FIXTURE_ROOT python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/intake/tests/test_security_resolution.py",
+      "result": "Before: 1 failed, 23 passed (KeyError on IRPT_LOOKUP_FIXTURE_ROOT unset), matches the task order's stated base exactly. After: 24 passed, reproduced 3 times."
+    },
+    {
+      "tool": "r19_y2_fixture_copies.py (Y19-2-AC2, before and after the fix)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R19_CHECKS/r19_y2_fixture_copies.py",
+      "result": "Before: MISSING x3, rc=1, matches the task order's stated base exactly. After: COPIES-IDENTICAL 3/3, rc=0, reproduced twice, and again after the mutant-control round-trip."
+    },
+    {
+      "tool": "sha256sum (independent cross-check, not the checker)",
+      "invocation": "sha256sum org/tier1_exec/4.0.0_SA_CRO/deliverables/IRPT_YCHARTS_LOOKUP_CAPTURE_20260923/<name> vs infra/aws/lambda/investor-reporting/intake/tests/fixtures/lookup_capture/<name> for all three names",
+      "result": "All three pairs matched exactly."
+    },
+    {
+      "tool": "git hash-object (before/after isolation, no working-tree stash)",
+      "invocation": "git hash-object over the test file, the three fixtures, and the session log",
+      "result": "Confirmed the exact worktree bytes of every artifact listed above; confirmed the fixture file's hash after the mutant-control restore matched its pre-mutation hash."
+    }
+  ]
+}

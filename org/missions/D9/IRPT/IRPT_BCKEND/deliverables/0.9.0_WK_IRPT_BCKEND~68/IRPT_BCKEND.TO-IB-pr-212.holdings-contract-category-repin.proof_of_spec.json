@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-212",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "4a6402ad8c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-212.holdings-contract-category-repin.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-212.holdings-contract-category-repin.md",
+    "group": "OTHER",
+    "vintage_commit": "4a6402ad8c"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~68",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Both irpt-holdings and irpt-ycharts-generate staged_from rows for docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json re-pinned from b3e3bcb044ae74a02b17173482d5a13318499179 and 19d8f3038cd8a553260c68a20d76a92f05368b94 respectively to a69fe8e33ed52169342ade509d0c87040f2e5a9c, sha256 set to 3795c92733953581348c250805f88f69898668b3907ccab7fb873bfb5d1ce833 (verified: `git show a69fe8e33e:docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json | sha256sum` == recorded value). No build-and-upload run, no apply -- pin-only edit per the order's refusal clause. No other row in either function's staged_from list touched (git diff shows exactly these two hunks).",
+      "artifact_covered_by": ["P21-2-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/HoldingsSnapshot.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Replaced with the a69fe8e33e blob's exact bytes (`git show a69fe8e33e:docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json > ...`); byte-equal diff confirmed (`diff` rc=0) before and after the acceptance script's own byte-equal check (also PASS).",
+      "artifact_covered_by": ["P21-2-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P21-2-AC1",
+      "criterion_verbatim": "P21-2-AC1 -- both functions stage the a69fe8e33e blob with its sha256, the _contracts copy is byte-equal to it, and its node_kind enum carries CATEGORY plus every prior member. Base: FAIL (pins b3e3bcb044 and 19d8f3038c; copy differs).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r21/p21_2_ac1_holdings_contract_repin.py\" .",
+      "output_evidence": "irpt-holdings: pin a69fe8e33e sha 3795c927 -> True\nirpt-ycharts-generate: pin a69fe8e33e sha 3795c927 -> True\n_contracts copy byte-equal to a69fe8e33e (line endings normalised): True\nnode_kind enum: CATEGORY present and every prior member kept: True\nP21-2-AC1 PASS",
+      "denominator": "2 of 2 staged functions re-pinned + verified; 1 of 1 _contracts copy byte-equal; 1 of 1 node_kind enum additive-checked -- all 4 sub-conditions true",
+      "status": "PASS",
+      "expect": "P21-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the task order names no mutant: P21-2-AC1 is a static re-pin/byte-equality/enum-subset read over committed files, not a computation with an injectable wrong answer. The base state itself (pins b3e3bcb044/19d8f3038c, copy differing) is the negative control the order names.",
+      "expected": "N/A -- no mutant is constructible for a pin/byte-equality read; the base-state FAIL is the standing negative control",
+      "observed": "base-state run (this worktree, pre-edit): irpt-holdings pin b3e3bcb0.. -> False, irpt-ycharts-generate pin 19d8f303.. -> False, copy byte-equal -> False, P21-2-AC1 FAIL rc=1 (confirmed by inspection of the unedited file before the two Edit calls). Post-edit run: P21-2-AC1 PASS rc=0. The check discriminates.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two consecutive runs of the acceptance script against the same worktree state, output captured and diffed",
+      "observed": "0 differing lines across the two runs; both printed the four sub-condition lines then 'P21-2-AC1 PASS', rc=0 both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Step 3 (S3-read proof that today's documents stay valid)",
+      "reason": "evidentiary, not an <expected_criteria> id, and carries no acceptance row by the order's own structure; its result is recorded in artifacts_produced/compiler_tools and the worker report, not as a graded criterion."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p21_2_ac1_holdings_contract_repin.py -- the P21-2-AC1 acceptance check",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r21/p21_2_ac1_holdings_contract_repin.py\" .",
+      "result": "base (pre-edit, this worktree): pins b3e3bcb044/19d8f3038c, copy differs -> FAIL rc=1 (by inspection, matching the order's stated base). Post-edit: P21-2-AC1 PASS rc=0."
+    },
+    {
+      "tool": "git show + sha256sum -- independent verification of the recorded pin/sha256 pair",
+      "invocation": "git show a69fe8e33e:docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json | sha256sum",
+      "result": "3795c92733953581348c250805f88f69898668b3907ccab7fb873bfb5d1ce833 -- matches the value written into both staged_from rows and independently matches the check script's own hashlib.sha256 computation."
+    },
+    {
+      "tool": "step 3 proof -- today's documents stay valid: full-document jsonschema Draft2020-12 validation of the latest served HoldingsSnapshot for each of the three firms, reconstructed from S3 (header + every part, per HoldingsPublication._load_parts's own assembly rule), against the new a69fe8e33e schema",
+      "invocation": ".tools/aws s3api get-object (current/manifest.json, then the per-date manifest) per firm to find the latest revision + partition list, then .tools/aws s3 cp --recursive (filtered to that exact revision's header+parts) per firm, then .scratch/validate_served.py",
+      "result": "49financial: 184 parts, 151697 nodes, node_kinds {ACCOUNT,CASH,MODEL_LEAF,SECURITY,SLEEVE} -> VALID. cottonwood: 26 parts, 16749 nodes, node_kinds {ACCOUNT,MODEL_LEAF,MODEL_WRAPPER,SECURITY,SLEEVE} -> VALID. inflection: 43 parts, 33328 nodes, node_kinds {ACCOUNT,MODEL_LEAF,SECURITY,SLEEVE} -> VALID. 'ALL THREE FIRMS VALID UNDER a69fe8e33e' rc=0. No CATEGORY node observed in any of the three firms' current served documents (expected -- CATEGORY is the NEW additive kind this cell exists to admit; today's documents predate it), confirming the additive change is non-breaking against the whole of today's live population, not a sample."
+    }
+  ]
+}

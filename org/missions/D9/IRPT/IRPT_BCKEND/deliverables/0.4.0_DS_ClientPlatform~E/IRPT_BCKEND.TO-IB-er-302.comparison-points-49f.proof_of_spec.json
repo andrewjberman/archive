@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-er-302",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "82cedfc442",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-er-302.comparison-points-49f.md"
+  },
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md ADDENDUM v0.19 rulings 7, 8, 9 (FWD-13: an analyst compares Opal's holdings-basis figure against the vendor's official figure at pre-set points, with both bases stated; for 49F the landed points are the Black Diamond reporting_performance pulls). Depends on ~E round 3 step 0, which re-emitted the 49F gold under ADDENDUM v0.20.",
+    "group": "OTHER",
+    "vintage_commit": "82cedfc442"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~E",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/holdings_comparison.py",
+      "kind": "script",
+      "commit_or_etag": "6851215833",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The comparison producer, beside the holdings producer and reading its declaration. ONE ROW PER BRONZE FILE, no file dropped and no figure invented. Composition (ruling 7) is a column slice and two row sums over a date-by-account matrix of account_value * daily_return and account_value: a level's accounts are unioned and weighted by account_value, which already IS the prior-day basket, so the composite is value-weighted rather than averaged. The chain window is HALF-OPEN -- a gold row dated `start` is the move INTO start, and including it would add a day the vendor's figure does not carry. A day with no computable row for a mapped account is counted in `partial_days` and flagged on the row, never treated as a flat day. Run ad hoc for QA; no schedule, no alarm, no standing comparator (CLAUDE.md's moratorium and ruling 12). Naming gate on the new file: PASS, 0 graded. commit-gate clean.",
+      "artifact_covered_by": [
+        "E3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/sources.json",
+      "kind": "config_data",
+      "commit_or_etag": "6851215833",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The 49F entry grows a `comparison` block: the bronze and cross-reference prefixes as TEMPLATES (the literal paths carry the firm's registered short token, which the naming limb refuses in an authored file), the vendor return path, the stated bases, and the period rule with its measured denominators. NEITHER JOIN COLUMN IS NAMED: see the xref artifact below.",
+      "artifact_covered_by": [
+        "E3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/tests/test_holdings_comparison.py",
+      "kind": "test",
+      "commit_or_etag": "6851215833",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "python -m pytest data/assets/scripts/gold/irpt_holdings_performance/tests/ -q -> 39 passed (24 from er-301, 15 new). The order's step 4 asks for the composition, the period selection and EACH named reason, and each is a hand-derivable fixture: a two-account level where 9,000 at +10% beside 1,000 at -10% must read +0.08 and not the 0.00 an average gives; two +10% days chaining to +0.21 and not +0.20, with the half-open window separating +0.21 from +0.331; a missing day counted as partial rather than flat; the longest-fully-covered rule with its dedup of the repeated range, its earliest-start tie-break (asserted on the list AND its reverse, because a rule that depends on list order is not a rule), and a null vendor return never becoming a candidate; one test per reason; and a schema test asserting the row dict, the column list and the arrow schema are one contract.",
+      "artifact_covered_by": [
+        "E3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_comparison/date=2026-06-30/ and date=2026-08-28/",
+      "kind": "s3_object",
+      "commit_or_etag": "per-partition ETag == local MD5, verified inside lib stream_parquet finalize()",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "TWO partitions, one per as-of date the bronze filenames carry. Read back independently of the producer: date=2026-06-30 footer 1 row, date=2026-08-28 footer 5,317 rows, 5,318 total against 5,318 bronze files, 5,318 distinct source_key, 0 duplicated, 24 columns. 5,278 rows carry both figures and a period; 40 carry a named reason (PERIOD-OUTSIDE-GOLD 35, NO-VENDOR-FIGURE 4, ACCOUNT-UNRESOLVED 1); 0 rows carry neither. Each partition also carries a manifest.json with the reason census, both bases and the selection rule. Nothing reads this table. || WHAT THE COMPARISON MEASURED, three findings, all `measured`. [FWD13-F1] WHERE BOTH METHODS HAVE SOMETHING TO MEASURE, THEY AGREE. Of the 4,256 fully-covered comparison rows (no partial days), 4,098 are on accounts that still held priced positions at the period end, and 3,994 of those 4,098 -- 97.5% -- agree within 5 percentage points over a 251-trading-day year, with a median absolute difference of 1.64pp. The sign is consistent and expected: the median difference is -1.62pp, Opal below the vendor, which is the shape of a basis that carries no income and no flow term against one that does. [FWD13-F2] THE TAIL IS NEAR-EMPTY ACCOUNTS, NOT A PRODUCER DEFECT, AND A CONSUMER MUST NOT READ IT AS ONE. 20 fully-covered rows differ by more than 50 percentage points; 16 of them are accounts whose gold row holds ZERO priced positions at the period end (account_value median $112.00, minimum $1.09), where the holdings basis correctly reads 0.00% per day because the account is cash, while the vendor's time-weighted figure on the same account ranges -74.1% to +150.0% because it is driven by flows into and out of a near-empty book. Three worked examples at date=2026-08-28: accounts ending 1531, 2884 and 1173 carry account_value 334.67, 52.39 and 317.48 with included_count 0, against vendor returns of +150.0%, +144.6% and +146.6%. This is the two bases being structurally incomparable on a shell account, which is what FWD-13 exists to make visible -- but the comparison table does not carry account_value, so a reader cannot see it from the row alone. [FWD13-F3] 1,022 of 5,278 compared rows (19.4%) are PARTIAL -- at least one trading day in the selected period has no computable gold row for the mapped account -- and their differences are not usable as a comparison: the median is -0.99pp but the maximum absolute difference is 13.98, against 1.50 among fully-covered rows. `opal_partial` and `partial_days` are on every row precisely so a reader can exclude them; a consumer that ignores those two columns will read a partial chain as a full-period return.",
+      "artifact_covered_by": [
+        "E3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/blackdiamond/<firm_short>/silver/dim_account_xref/ (read only)",
+      "kind": "s3_object",
+      "commit_or_etag": "latest landed partition date=2026-09-28",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "THE ACCOUNT MAP, AND IT IS NOT THE ONE THE ORDER NAMED -- declared under declared_exclusions with the measurement that forced it. Read only; this cell writes nothing here. 6,202 rows, 6,202 distinct vendor ids, 5,376 resolved, 826 unresolved. BOTH JOIN COLUMNS ARE FOUND BY MEASUREMENT, NOT TYPED: resolve_xref_columns() takes the vendor-side column to be the one whose values actually contain the ids read from a 32-file bronze probe, and the custodian-side column to be the one whose values match the entry's declared account_id_zero_pad form, REFUSING if either test matches anything other than exactly one column. Two reasons, and the second is the better one: the column names carry another pipeline's vendor token which the naming limb refuses here, AND typing a join key assumes it while measuring it checks it -- an ambiguous join key does not fail, it produces a plausible wrong answer. The resolved pair is printed on every run ('join bd_account_id -> schwab_account_id (matched, not typed)').",
+      "artifact_covered_by": [
+        "E3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260929T0735Z_irpt-holdings-comparison-49f-e-20260929_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "6851215833",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened BEFORE the first S3 write of this cell (slug irpt-holdings-comparison-49f-e-20260929, 3 legs: the code commit, the comparison partitions, the acceptance re-run), as the order's step 5 requires. Committed with its .open_deploys sentinel so the OPEN state survives the drain."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E3-AC3",
+      "criterion_verbatim": "for each as-of date, the comparison partition has exactly one row per bronze file carrying that as-of, and every row carries both figures and the period or a named reason, with no duplicate source_key. Base: FAIL (1 and 5,317 files, 0 rows).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r3e/e3_ac3_49f_comparison_points.py\"",
+      "output_evidence": "as-of 2026-06-30: bronze files 1 | comparison rows 1 | compared 1 | named not-comparable 0 | missing 0 | dup 0 | neither 0 / as-of 2026-08-28: bronze files 5317 | comparison rows 5317 | compared 5277 | named not-comparable 40 | missing 0 | dup 0 | neither 0 / E3-AC3 PASS / exit 0, read unpiped. The producer's own printed census for the same run was compared=5277 not_comparable=40, derived from the emitted frame; the check re-derives its row counts from the landed parquet and its file counts from a fresh bronze listing, so the two agree without sharing an instrument.",
+      "denominator": "5,318 bronze .json files under the vendor performance prefix, from a paginated listing: 4 pull dates (2026-07-17 x1, 2026-08-30 x5, 2026-08-31 x3, 2026-09-01 x5,309) resolving to 2 as-of dates (2026-06-30 x1, 2026-08-28 x5,317), 3,164.6 MB in total. 5,318 comparison rows, 5,318 distinct source_key, 0 duplicated, 0 rows carrying neither figures nor a reason. The gold read beneath it: 557 trading-day partitions 2024-07-09..2026-09-25 over 7,814 distinct accounts.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO planted mutants on E3-AC3's two distinctive limbs, both on the 1-file as-of 2026-06-30 partition so that the restore re-reads one bronze file instead of 5,317. M1 attacks 'one row per bronze file': the single row was duplicated. M2 attacks 'both figures OR a named reason': the same row kept its period but lost its opal_return AND its reason -- the exact shape of a silently dropped figure. Both were written through the same parquet path the producer writes, and both were restored by RE-RUNNING THE PRODUCER for that as-of rather than by writing the good bytes back.",
+      "expected": "M1 -> E3-AC3 FAIL naming dup 1 against 1 bronze file, then PASS after the restore. M2 -> E3-AC3 FAIL naming neither 1, then PASS after the restore.",
+      "observed": "M1 PLANTED: 'bronze files 1 | comparison rows 2 | compared 2 | dup 1 | neither 0' / E3-AC3 FAIL. M1 RESTORED: 'comparison rows 1 | dup 0' / E3-AC3 PASS. M2 PLANTED: 'bronze files 1 | comparison rows 1 | compared 0 | named not-comparable 0 | missing 0 | dup 0 | neither 1' / E3-AC3 FAIL. M2 RESTORED: 'compared 1 | neither 0' / E3-AC3 PASS. Both limbs are live oracles and neither passes on absence.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full 5,318-file pass was run TWICE end to end -- once under the first column naming and once after `bd_account_ids` was renamed `vendor_account_ids` and the xref join moved from typed names to measured ones -- plus the as-of 2026-06-30 partition a further two times in the mutant restores. The landed row counts were then read back from the parquet FOOTERS rather than from the producer's tally.",
+      "observed": "Both full passes produced identical counts: 1 row for as-of 2026-06-30 and 5,317 for as-of 2026-08-28, compared 5,277, not_comparable 40, partial 1,021, and the identical reason census {PERIOD-OUTSIDE-GOLD 35, NO-VENDOR-FIGURE 4, ACCOUNT-UNRESOLVED 1}. The measured xref resolution returned the same column pair the typed version had used, which is the cross-check that the measurement is not merely self-consistent. FOOTER vs TALLY: 1 and 5,317 against 1 and 5,317. Both mutant restores reproduced the baseline row exactly. 0 tracebacks in either run log.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Mapping the vendor account to the gold by its `accountNumber`, as the order's step 2 words it",
+      "reason": "IT CANNOT BE DONE AS WRITTEN, and the criterion was not weakened to make it look as though it could. The bronze `accountNumber` is MASKED to its last four characters ('XXXX5115') in 40 of 40 sampled files, and last-four does not identify an account: the 7,540 gold account ids hold only 5,279 distinct last-four values, 1,801 of those values are shared by more than one account, 4,062 accounts sit in an ambiguous bucket, and 23 of 40 sampled vendor accounts land in one. The landed account cross-reference carries the map instead, keyed on the same `externalId` the bronze already publishes, and an unresolved row becomes the NAMED reason ACCOUNT-UNRESOLVED rather than a guess. The order's intent -- map the vendor account to the gold's account id -- is met; its named mechanism is not, and that substitution is this entry."
+    },
+    {
+      "item": "Comparing against the vendor's money-weighted return, its benchmarks, or any period the gold does not wholly cover",
+      "reason": "Ruling 8 names the vendor's official TIME-weighted figure as the comparison point. `moneyWeightedReturns` and the per-benchmark returns are present in the same node and are deliberately not read. A period the gold does not wholly cover is refused rather than truncated, because a full vendor figure against a partial Opal one is the silent failure FWD-13 exists to prevent; 35 files carry PERIOD-OUTSIDE-GOLD for exactly this reason (the 49F gold begins 2024-07-09 and their only ranges are calendar 2024 or earlier)."
+    },
+    {
+      "item": "Inflection's comparison points (the weekly Orion household factors) and Cottonwood's",
+      "reason": "Ruling 8 scopes this cell to 49F at the 4 landed Black Diamond pulls. INF's points are a later cell and COT is NOT COMPARED until Andrew gives a per-use word for a pull."
+    },
+    {
+      "item": "Any schedule, alarm or standing comparator over this table",
+      "reason": "FWD-13 is a bounded check at defined points (ruling 12, and CLAUDE.md's standing moratorium on alert/monitor building). The producer is run ad hoc and nothing reads its output."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-09-29/",
+  "compiler_tools": [
+    {
+      "tool": "naming-gate.py (the LGIC_ENFORCE DEC-6 commit limb)",
+      "invocation": "python .tools/naming-gate.py --diff <the new-file diff> ; then inside safe-commit.sh",
+      "result": "FIRST ATTEMPT: REFUSE 4 graded on holdings_comparison.py:101,:108,:168,:277 -- the emitted column `bd_account_ids` and the xref's own `bd_account_id`, each 'a NEW hand-kept carrier of bd outside every permitted context'. The refusal changed the design for the better: the emitted column became `vendor_account_ids`, and the two join columns became MEASURED rather than typed. SECOND ATTEMPT: PASS, 0 graded on the new file and 0 graded on the modified pair."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh holdings_comparison.py tests/test_holdings_comparison.py",
+      "result": "py_compile + ds-precommit + ruff py39 clean for 2 of 2 files; no unguarded strict-utf8 log reads."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read .tools/naming-gate.py --for \"permitted contexts for a hand-kept carrier ...\"",
+      "result": "Returned THE CONTEXT RULE at lines 21-26 (registry files, generated blocks, key()/address()/name()/lookup() arguments, the opal_name Terraform module) and the ungraded set (prose, comments, */tests/*) from a 1,576-line file in 64 ms. This is what made the second attempt a design change rather than a guess."
+    },
+    {
+      "tool": "comp-estate --resource",
+      "invocation": "comp-estate --resource holdings_performance",
+      "result": "SUBJECT_ABSENT_FROM_CORPUS across 135 of 135 measured chains -- the basis for 'nothing reads this table', carried over from er-301 and unchanged by this cell, which only adds a new prefix."
+    }
+  ]
+}

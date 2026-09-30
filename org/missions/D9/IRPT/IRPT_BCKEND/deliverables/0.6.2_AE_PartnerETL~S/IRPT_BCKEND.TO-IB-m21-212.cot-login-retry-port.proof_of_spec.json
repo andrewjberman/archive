@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-m21-212",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m21-212.cot-login-retry-port.md",
+    "group": "OTHER",
+    "vintage_commit": "7ea14b1305bd7c49b35994551676ac994bbafa71"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R21_M.md",
+    "vintage_commit": "c3a90445864cd627361d33412aba769f1ea5d35b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m21-212.cot-login-retry-port.md"
+  },
+  "assignee": "0.6.2_AE_PartnerETL~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/bd-cot-auto-login/bd_49f_auto_login.js",
+      "kind": "script",
+      "commit_or_etag": "6a0ce7fe65",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the deployable cot login script, md5 7d37465ba68e8ddf44a66c008179d080, 40333 B, built FROM TO-IB-m21-211's byte-exact capture. 10 hunks in three named groups: A the bounded retry (row S165), B the F2 persist-binding (row S199, amendment 3), C naming C0-C7 so the naming limb passes with no waiver (amendment 2). DEPLOYED and EXERCISED: S3 upload of the BLOB bytes, S3 -> box pull (SSM deeb49bb), and the running path re-read independently (SSM 9d73a0f7 / 4aca0b28) shows that same md5 on /opt/bd-cot-auto-login/bd_49f_auto_login.js with node --check OK on the box's own node. A real vendor login then ran it end to end (SSM edb17c3d) and the box's own log carries 'login attempt 1/3', a line that exists only in group A.",
+      "introduces": ["MAX_LOGIN_ATTEMPTS", "BASE_BACKOFF_MS", "async function attemptLogin", "IDENTITY_COOKIE", "DEVICE_COOKIE", "DEBUG_PREFIX", "smPut FAILED to persist the fresh session"],
+      "artifact_covered_by": ["IBM21-212-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/bd-cot-auto-login/secret-ids.env",
+      "kind": "config_data",
+      "commit_or_etag": "6a0ce7fe65",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "three required lines added (BD_IDENTITY_COOKIE, BD_DEVICE_COOKIE, BD_DEBUG_PREFIX), 1685 -> 2525 B as committed. This is the carrier group C moves the graded firm/vendor names to, because the naming limb grades every string literal on an added line of a .js and js_literals has no builder-call skip, while a .env is outside its graded set. Deployed in the SAME act as the .js and re-read on the box: md5 8e879af5e8e7a608e34a4864c179ee71, 2525 B, CR_COUNT=0, 4 of 4 required lines present. The login then resolved both cookie names from it, proven by 'device-trust: bd_DeviceRegistration injected' and a device-trust capture in the advanced session.",
+      "introduces": ["BD_IDENTITY_COOKIE=", "BD_DEVICE_COOKIE=", "BD_DEBUG_PREFIX="],
+      "artifact_covered_by": ["IBM21-212-AC1"]
+    },
+    {
+      "path_or_key": ".gitattributes",
+      "kind": "config_data",
+      "commit_or_etag": "626033ace0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "infra/aws/ec2/bd-cot-auto-login/*.env text eol=lf, with a bare-CR repair to its own comment at 2a4c589512. MEASURED need: the working copy carried 35 CR while the blob was LF, and leg A1 uploads for a file the box SOURCES WITH BASH, so a CRLF upload would have put a carriage return on every value -- BD_FIRM_ID=cot<CR> resolves every derived secret-id to a name that does not exist. Lane BASE_EXEC, so committed ALONE under the CLAUDE.md Rule 14a audited override with the authority stated in its own message: the issuer put .gitattributes in this order's <paths> grant in amendment 1.",
+      "artifact_covered_by": ["IBM21-212-AC1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/IRPT_BCKEND_R21_S165_PORT_DIFF_20260929.md",
+      "kind": "doc",
+      "commit_or_etag": "fdf12eadb1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the Part 1 diff document: the unified diff against the capture with one line per hunk, grouped A / B / C, plus section 2 (why no firm literal is writable in a .js at all), section 5 (the two-artifact coupling), section 5a (the measured env CRLF hazard) and section 7 (every instrument run). READ by 1.0.0_SA_CTO -- verdict READ, fit for Part 2, no hunk struck (org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_READ_COT_LOGIN_PORT_DIFF_20260929.md @76a44392fd) -- which is the gate ruling S198 placed on this cell.",
+      "artifact_covered_by": ["IBM21-212-AC1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/IRPT_BCKEND_R21_S165_RETRY_DEPLOY_20260929.json",
+      "kind": "doc",
+      "commit_or_etag": "d7044697f9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the order's read-back JSON: command_id, ledger_slug, running_md5, env_lines, all four legs with their proofs, the before/after captured_at, and the rollback per key. IBM21-212-AC1 reads command_id and ledger_slug out of this file and re-queries the live SSM invocation, so the file is EXERCISED by the criterion rather than merely present.",
+      "artifact_covered_by": ["IBM21-212-AC1"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260929T0931Z_cot-login-retry-s165-m-20260929_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "602143feb1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the deploy ledger, opened at deploy-START before any upload and now CLOSED with all 4 legs carrying proof (A1 s3-prefix, A2 ec2-baked-asset, V1 verify, V2 verify). It also carries a recorded HOLD and release: when the 11:30Z trigger skipped the login, the entry was HELD on a named external gate with a reread date rather than left OPEN to age into a false RED, then released when amendment 4 re-scoped V2.",
+      "artifact_covered_by": ["IBM21-212-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBM21-212-AC1",
+      "criterion_verbatim": "the box runs the retry-capable script with the retry variables set, under a closed ledger.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R21_CHECKS/r21_s165_retry_live.py",
+      "output_evidence": "RETRY-LIVE 7d37465ba68e (rc=0), run from the worktree root after the ledger closed.",
+      "denominator": "5 of 5 conjuncts in the checker pass: the read-back JSON exists; the repo .js md5 is NOT the pre-retry 28dd27a0; the SSM invocation it names returns Status Success; that output contains BD_MAX_LOGIN_ATTEMPTS=, BD_LOGIN_BACKOFF_MS= AND the repo .js md5; and exactly one ledger entry for the named slug reads **Status:** CLOSED",
+      "expect": "RETRY-LIVE",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three arms, two of them real refusals this session rather than constructed ones. (1) The order's own recorded base at 04:3xZ: NOT-LIVE, the read-back JSON absent. (2) A LIVE mis-pointed command_id: the checker was run against V1's read (SSM 9d73a0f7), which printed a grep -c COUNT of the config lines instead of the lines, and it refused -- the issuer caught this at 10:2xZ and it is why command_id now names 4aca0b28. (3) The ledger arm: with all SSM conditions already satisfied, the checker still refused on 'ledger not CLOSED' until leg V2 closed. Arms 2 and 3 are the load-bearing ones: each isolates ONE conjunct while the others were already true, which an absent-file arm cannot do.",
+      "expected": "arm 2 must refuse naming the MISSING TOKENS and not the md5; arm 3 must refuse naming the LEDGER and nothing else; and the verdict must flip to RETRY-LIVE only once both are fixed.",
+      "observed": "arm 1: 'NOT-LIVE: the read-back JSON absent'. arm 2: 'NOT-LIVE: SSM 9d73a0f7... status Success, missing in output [BD_MAX_LOGIN_ATTEMPTS=, BD_LOGIN_BACKOFF_MS=]' -- refused for the tokens, with Status Success, so the arm isolated exactly the conjunct it targeted. arm 3: 'NOT-LIVE: ledger cot-login-retry-s165-m-20260929 not CLOSED' -- the sole remaining reason, every SSM-side condition passing. After V2 closed: 'RETRY-LIVE 7d37465ba68e' rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the checker was run at four distinct states this session (JSON absent; command_id mis-pointed; ledger open; ledger closed), and twice at the final state. Each run re-queries the live SSM invocation rather than a cached value, and the invocation is a fixed historical record.",
+      "observed": "each state produced its own stable verdict, and the final state gave 'RETRY-LIVE 7d37465ba68e' rc=0 on both runs. The retry harness, run against the candidate before and after the naming hunks, likewise gave 'RETRY-LOOP OK: 7 of 7 arms passed' both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the retry's FAILURE branch, and therefore its in-run recovery, exercised against the world",
+      "reason": "attempt 1 of the real login SUCCEEDED, so the loop never took its backoff path. Group A's presence in the running bytes is proven by the box's own 'login attempt 1/3' line, and the recovery arithmetic by the local harness (7 of 7 arms, including a persist-failure arm), but no live failure has occurred since the deploy. ABSENT is not EXERCISED-AGAINST, and this order does not claim otherwise. The honest next discriminator is the first real transient failure, or the 2026-10-05 scheduled mint."
+    },
+    {
+      "item": "classifyByDom and the other 49F-only divergences",
+      "reason": "amendment 3 is explicit: the port carries the retry and the F2 persist-binding and no other 49F hunk. The capture and the 49F copy at HEAD differ in 12 hunks; this cell touched the two it was told to."
+    },
+    {
+      "item": "a .gitattributes eol rule for the sibling 49F and smartx env files, which carry the same CRLF hazard",
+      "reason": "outside this order's grant. Measured (49F worktree 37 CR, smartx 263 CR, both attr-unspecified, 2 of the 3 tracked *.env under infra/aws/ec2/) and filed as a row with an owner at the CTO's own instruction (condition 3 of its read)."
+    },
+    {
+      "item": "suppressing the second bronze/silver/gold chain that the login's Success triggered",
+      "reason": "cot-session-complete is an ENABLED rule keyed on exactly that document and status; re-running the chain is the estate's own designed wiring, not this order's act. It was measured BEFORE firing, flagged on the broker, and today's first chain had already completed at 11:32Z so there was no in-flight collision. Changing that rule is not in this cell."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-S165: OBSERVATION, ARMED, UNDER_INVESTIGATION -- the cell's own row: the cot box had no in-run login retry, so one transient failure cost a whole day and the chain stayed frozen 09-24..09-27. The deployed port is the remedy; group A is now in the running bytes and the box's own log shows 'login attempt 1/3'.",
+    "IRPT_BCKEND-S199: OBSERVATION, ARMED, UNDER_INVESTIGATION -- the cot script's session smPut was unguarded, so a Secrets Manager failure left rc=0 and the retry loop would have broken on a run whose session was never persisted. Ruled INTO this cell by amendment 3 and carried as group B; the box's log shows that block's new wording, 'OK: fresh session written to SM'.",
+    "IRPT_BCKEND-S198: BLOCKING, INERT, UNDER_INVESTIGATION -- the naming limb refused the byte-exact .js and the CTO ruled no gate widening, which is why 211 landed the capture as non-graded evidence and this cell builds the deployable script whose group C passes the limb with no waiver (WARN 7 graded, 0 REFUSE, against REFUSE 15 before)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.6.2_AE_PartnerETL~S/IRPT_BCKEND.TO-IB-m21-212.cot-login-retry-port.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "naming-gate.py -- the limb amendment 2 required the port to pass with no waiver",
+      "invocation": "git add -f <the .js>; git diff --cached --no-color --no-ext-diff -- <the .js> > ng.diff; python .tools/naming-gate.py --diff ng.diff --post-from-index",
+      "result": "NAMING-GATE: WARN 7 graded, rc=0, ZERO REFUSE. The same bytes before group C gave REFUSE 15 and aborted the commit twice. The 7 are 2 CONFORMANT + 5 RAISE, every RAISE a {x} placeholder already present in the captured bytes."
+    },
+    {
+      "tool": "node --check, locally and then on the box's own node",
+      "invocation": "node --check <candidate>; and inside SSM 9d73a0f7: node --check /opt/bd-cot-auto-login/bd_49f_auto_login.js",
+      "result": "OK locally; NODE-CHECK-OK on the box. 0 CR bytes, 0 non-ASCII bytes in the candidate."
+    },
+    {
+      "tool": "a local harness lifting the ported retry loop VERBATIM, attemptLogin stubbed and setTimeout recorded",
+      "invocation": "python make_harness.py && node retry_harness.js",
+      "result": "RETRY-LOOP OK: 7 of 7 arms passed, rc=0 -- including the A+B interaction (a persist failure is RETRIED, not broken on) and the equivalence arm (BD_MAX_LOGIN_ATTEMPTS=1 = the prior single-attempt behaviour, which is also the rollback needing no redeploy). No playwright, no AWS, no vendor request."
+    },
+    {
+      "tool": "the real candidate RUN offline, with BD_PW_PATH at a stub browser module and a stub aws on PATH",
+      "invocation": "env -u BD_FIRM_ID -u BD_IDENTITY_COOKIE -u BD_DEVICE_COOKIE BD_PW_PATH=<stub> node <candidate>",
+      "result": "BD_FIRM_ID unset -> rc=3 'FATAL naming: BD_FIRM_ID is unset' before any secret read; cookie names unset -> rc=3 'BD_IDENTITY_COOKIE and BD_DEVICE_COOKIE must be set'; all config present -> rc=2 at the normal secret path with 'partner=cot' resolved. The third arm is the control proving the new guards do not fire spuriously."
+    },
+    {
+      "tool": "SSM (read-only and deploy) -- four commands, the verification kept separate from the deploy",
+      "invocation": "aws ssm send-command --cli-input-json file://... (A2 pull; V1 read-back; AC1 read) and --document-name opal-cot-bd-session-fetch (V2)",
+      "result": "deeb49bb A2 Success PULL-OK; 9d73a0f7 V1 Success (md5s, CR_COUNT=0, node --check); 4aca0b28 AC1 Success (the two retry lines + the md5 in one output); edb17c3d V2 Success (a real login, session advanced 2026-09-27T18:42:27.162Z -> 2026-09-29T11:53:43.537Z)"
+    },
+    {
+      "tool": "aws s3api head-object -- leg A1's read-back, and the rollback baseline captured BEFORE the upload",
+      "invocation": "aws s3api head-object --bucket opal-313476888478-lambda-artifacts --key ec2/bd-cot-auto-login/{bd_49f_auto_login.js,secret-ids.env}",
+      "result": "after: .js 40333 B ETag 7d37465ba68e8ddf44a66c008179d080, env 2525 B ETag 8e879af5e8e7a608e34a4864c179ee71, both = the blob md5s. before (the rollback baseline): env 1200 B md5 9b55e03c9575d4f6b58d1d239c8409fb, measured byte-identical to the box copy the GO names; .js 35049 B ETag 28dd27a054b826cc3a87f6b4498d3b5a."
+    },
+    {
+      "tool": "aws logs get-log-events -- the trigger Lambda's own log, which falsified the GO's V2 premise",
+      "invocation": "aws logs get-log-events --log-group-name /aws/lambda/cot-bd-session-trigger --log-stream-name 2026/09/29/[$LATEST]1ea4f25b...",
+      "result": "'Lever A: cot cookie POSITIVE-live (probe positive (captured_at=2026-09-27T18:42:27.162Z, age 1.7d <= 7d)) -> SKIP OIDC-login mint, direct bronze-run' -- so the 11:30Z trigger never invoked the login and no scheduled run would exercise the port until 2026-10-05. This is what produced the ledger HOLD and amendment 4."
+    },
+    {
+      "tool": "aws events describe-rule -- measuring the knock-on BEFORE firing the login rather than discovering it after",
+      "invocation": "aws events describe-rule --name cot-session-complete; list-targets-by-rule",
+      "result": "State ENABLED, pattern {document-name: [opal-cot-bd-session-fetch], status: [Success]} -> target cot-bd-session-trigger. Predicted a second chain; observed after V2: bronze c683e7b5 Success, silver c590b10f Success, gold b332fd76. Today's first chain had completed at 11:32Z, so no collision."
+    },
+    {
+      "tool": "deploy_ledger.py -- open at deploy-START, per-leg closes, a recorded HOLD and release, then CLOSE",
+      "invocation": "deploy_ledger.py open --slug cot-login-retry-s165-m-20260929 ...; close-leg A1|A2|V1|V2; hold --gate-type external --gate-ref ... --reread-date 2026-10-05; hold --release; close",
+      "result": "CLOSED, all 4 legs proven, sentinel removed. The HOLD is why the entry never aged into a false RED while the login was ungated."
+    },
+    {
+      "tool": "safe-commit.sh / safe-merge.sh -- every commit gated, three audited lane overrides on .gitattributes",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.6.2_AE_PartnerETL~S <...>\" -F <msgfile> -- <paths>; bash .tools/safe-merge.sh wk-irpt-m21-s-211 -m ...",
+      "result": "the naming limb refused the .js twice before group C and passed after; the surprise-row gate refused once on a CO-WORKER's malformed row (class 'BLOCKER' not in the enum), which was routed to its author rather than overridden, and that seat fixed it at b88b92c57b"
+    }
+  ]
+}

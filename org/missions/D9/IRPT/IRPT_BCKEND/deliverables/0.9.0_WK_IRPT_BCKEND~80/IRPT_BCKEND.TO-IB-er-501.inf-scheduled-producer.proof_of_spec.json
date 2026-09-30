@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-er-501",
+  "firm": "INF",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "4461f4494c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-er-501.inf-scheduled-producer.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md (1.0.0_SA_CTO 102832: an INF switch needs a SCHEDULED producer and fire) and decomposition section 19/21",
+    "group": "OTHER",
+    "vintage_commit": "c0c0ae5606"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~80",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/holdings-performance/locals.tf",
+      "kind": "terraform",
+      "commit_or_etag": "357f39fdf4",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Plan only, per this order's bound (no apply, no invoke, no upload). terraform plan (v1.14.5, -lock=false) resolves the new INF locals to: read arn:aws:s3:::opal-data-assets/orion/inflection/silver/fact_positions/*; write arn:aws:s3:::opal-data-inflection/irpt/inflection/gold/{holdings_performance_daily,holdings_performance_manifest}/*. The 49F locals above are untouched (0 changed on any pre-existing local/resource)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/holdings-performance/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "357f39fdf4",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "terraform plan: module.irpt_holdings_performance_inf.aws_lambda_function.this will be created, function_name=irpt-inf-holdings-performance-lambda, s3_key=investor-reporting/irpt-holdings-performance-lambda.zip (the SAME artifact key as the existing 49F function -- no second artifact built or uploaded). 0 changes to the existing irpt_holdings_performance module/outputs."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/holdings-performance/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "357f39fdf4",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "terraform plan: aws_iam_role.irpt_holdings_performance_inf (name irpt-inf-holdings-performance-role, carrying the opal_name-derived '-inf-' fence token for opal-data-inflection's DenyForeignFirmPrincipals-shaped fence) + its inline policy will be created; the policy document's only resources are the orion/inflection silver read ARNs and the Inflection gold write ARNs (checked by E5-AC1's own reader: 0 policies grant both firms' gold, 0 policies name blackdiamond). The existing 49F role/policy are 0 changed.",
+      "artifact_covered_by": ["E5-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/holdings-performance/schedule.tf",
+      "kind": "schedule",
+      "commit_or_etag": "357f39fdf4",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "terraform plan: aws_scheduler_schedule.irpt_holdings_performance_inf will be created, name=irpt-inf-holdings-performance-daily, state=ENABLED, cron(30 7 ? * MON-FRI *) America/New_York, target.input carries source=\"orion\" -- exactly the ONE new schedule E5-AC1 requires. The existing 49F schedule (irpt_holdings_performance) is 0 changed. Plan totals: 7 to add, 0 to change, 0 to destroy.",
+      "artifact_covered_by": ["E5-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "357f39fdf4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_BCKEND-W80-S1 appended (surprise-row-gate.py: '1 new row(s) of 474 total checked', OK), carrying the live S3 landing measurement for orion/inflection/silver/fact_positions/ and the resulting break of handler.py's next-morning day-selection assumption."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E5-AC1",
+      "criterion_verbatim": "the plan reads as follows: it CREATES exactly one schedule whose input has source == \"orion\"; the policies name an orion/ silver prefix and the INF gold prefix; no policy names blackdiamond, and no single policy grants both firms' gold; nothing is destroyed. Base: FAIL (no orion schedule).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/e5/e5_ac1_inf_scheduled_producer_plan.py\" .",
+      "output_evidence": "created schedules with source orion: ['aws_scheduler_schedule.irpt_holdings_performance_inf']\npolicy names orion/ silver: True | INF gold prefix: True | blackdiamond: False | policies granting both firms: 0 | destroys: []\nE5-AC1 PASS",
+      "denominator": "1 of 1 named acceptance criterion; 4 sub-conditions (exactly-1 orion-schedule created, orion/ silver named, INF gold prefix named, no blackdiamond AND no mixed-firm policy AND no destroys) all true",
+      "status": "PASS",
+      "expect": "E5-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the task order names the base state itself as the negative control ('Base: FAIL (no orion schedule)'). Reproduced directly rather than assumed: the working tree's 4 changed .tf files were checked out back to their PRE-this-order committed content (git checkout <parent commit 31af5e8188> -- <the 4 files>), the check re-run, then the files restored to this order's committed content (git checkout HEAD -- <the 4 files>) with a clean `git status` confirming the restore before proceeding.",
+      "expected": "at the parent commit's content: no orion schedule, no orion/ silver or INF gold prefix in any policy -> E5-AC1 FAIL",
+      "observed": "base-state run (working tree reset to parent commit 31af5e8188's 4 files): 'created schedules with source orion: []' / 'policy names orion/ silver: False | INF gold prefix: False | blackdiamond: False | policies granting both firms: 0 | destroys: []' / 'E5-AC1 FAIL' rc=1. Restored-state run (this order's committed content, HEAD 357f39fdf4): 'E5-AC1 PASS' rc=0. The check discriminates.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two consecutive runs of the acceptance script (a fresh terraform init+plan each time, -lock=false) against the same committed content, output captured and diffed",
+      "observed": "0 differing lines across the two runs; both printed \"created schedules with source orion: ['aws_scheduler_schedule.irpt_holdings_performance_inf']\" then the same policy/destroy summary and 'E5-AC1 PASS', rc=0 both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-W80-S1: OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~P) -- orion/inflection/silver/fact_positions/ lands the SAME calendar day (~13:05 UTC worst case, 2,343 partitions measured), not next-morning like 49F's silver; handler.py's shared, source-blind day-selection (unedited per this order's bound) therefore leaves Inflection one trading day staler than its own landing supports on every fire. The INF schedule reuses 49F's safe (not landing-optimized) cadence rather than working around the gap."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "e5_ac1_inf_scheduled_producer_plan.py -- the E5-AC1 acceptance check",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/e5/e5_ac1_inf_scheduled_producer_plan.py\" .",
+      "result": "base (parent commit 31af5e8188 content): 'created schedules with source orion: []' / E5-AC1 FAIL rc=1. This order's committed content (HEAD 357f39fdf4), run twice: identical 'E5-AC1 PASS' rc=0 both times."
+    },
+    {
+      "tool": "terraform validate/plan -- infra/aws/terraform/investor-reporting/holdings-performance (terraform v1.14.5 on PATH, per this order's bound)",
+      "invocation": "terraform validate; terraform plan -input=false -no-color -lock=false",
+      "result": "validate: 'Success! The configuration is valid.' plan: 'Plan: 7 to add, 0 to change, 0 to destroy.' -- new resources: aws_iam_role/aws_iam_role_policy x2 (function role + scheduler role), aws_scheduler_schedule, aws_cloudwatch_log_group, aws_lambda_function; 0 destroys, 0 changes to any pre-existing 49F resource."
+    },
+    {
+      "tool": ".tools/naming-gate.py --enforce -- LGIC_ENFORCE naming limb",
+      "invocation": "git diff --cached > diff.patch; python .tools/naming-gate.py --diff diff.patch --enforce",
+      "result": "first pass REFUSED 2 lines (lambda.tf output description, iam.tf output description) as a NEW hand-kept carrier of 'inf' outside a permitted lookup()/name() context -- both were literal copies of the builder-derived name in a description string. Fixed by rephrasing both descriptions to not retype the name; re-run: 'NAMING-GATE: PASS 0 graded'."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py -- the surprise channel row gate",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md (row staged)",
+      "result": "'1 new row(s) of 474 total checked (473 pre-existing, NOT re-graded)' / 'OK: 1 file(s), all new rows carry their step-7/step-10 fields.'"
+    },
+    {
+      "tool": "aws s3api list-objects-v2 / head-object -- the live landing measurement behind row IRPT_BCKEND-W80-S1",
+      "invocation": "aws s3api list-objects-v2 --bucket opal-data-assets --prefix orion/inflection/silver/fact_positions/ --query \"Contents[?ends_with(Key,'data.parquet')].[Key,LastModified]\"; aws s3api head-object --bucket opal-data-assets --key orion/inflection/silver/fact_positions/date=2026-09-28/data.parquet (and date=2026-09-29)",
+      "result": "2,343 partitions, every landed one same-calendar-day, worst case 13:05:37Z (spot-checked 2026-08-29..2026-09-27); date=2026-09-28 and date=2026-09-29 both 404 Not Found at measurement time (2026-09-29T14:52Z)."
+    },
+    {
+      "tool": ".tools/safe-commit.sh -- the commit gate chain (commit-gate.sh, naming-gate, to-pipeline-gate, surprise-corpus/surprise-row-gate, missions-tree-check)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~80 <0.9.0_WK_IRPT_BCKEND~80@opal.agent>\" -F .scratch/commit_msg_1.txt -- <the 4 .tf files + the surprise-channel .md>",
+      "result": "every gate OK ('commit-gate OK 4 of 5', naming-gate PASS 0 graded, to-pipeline-gate OK, surprise-row-gate OK 1 new row, missions-tree-check 0 violations); committed 357f39fdf4, msg-verify MATCH."
+    }
+  ]
+}

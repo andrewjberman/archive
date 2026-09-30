@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-er-401",
+  "firm": "COT",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "530836097d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-er-401.holdings-gold-cottonwood.md"
+  },
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md ADDENDUM v0.19 rulings 1-9 and 11, v0.20 rulings 13-17, and v0.21 ruling 18 (1.0.0_SA_CTO RULING S200, 102669, on 4.0.0_SA_CRO row S200 @131c55fcf1). Step 0 is ruling 18; the Cottonwood slice is built under all three addenda. The channel was BLOCKED on a registry key until 4.0.0_SA_CRO landed MASTER z09 -> cottonwood @de56cfd02f on 1.0.0_SA_CTO ruling 102723 (CRO 102727, CTO 102729, GO 102730).",
+    "group": "OTHER",
+    "vintage_commit": "530836097d"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~E",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+      "kind": "script",
+      "commit_or_etag": "e79dd684bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commits bf1683f172 (ruling 18) then e79dd684bf (the Cottonwood rules). RULING 18: a sixth status FOLLOWS-DISCONTINUITY, applied to a row that would otherwise read OK when the account's previous trading day was IMPLAUSIBLE-RETURN. It does NOT cascade (only an IMPLAUSIBLE-RETURN day triggers it) and never overwrites a row already carrying its own named reason. The mechanism is ImplausibleIndex, a memoised (source, day) -> accounts lookup -- the only rule in this producer that reaches across days. Recursion terminates because _frame_for() grades ruling 16 only, so asking for D-1's implausible set cannot ask for D-2's, and the memo is what keeps the cost off 2x (49F: 1,832 cache hits against 1,508 misses). THE COTTONWOOD RULES: price_of() reads a declared price_column when there is one and otherwise derives value/quantity, selected STRUCTURALLY so it is a declaration shape and never a firm branch; an absent OR ZERO quantity yields a NULL price (ruling 4's price-missing). _flag() parses a boolean column however the silver stored it and REFUSES an unparseable value. validate_entry() now requires one of price_column or quantity_column.",
+      "artifact_covered_by": [
+        "E4-AC1",
+        "E4-AC2",
+        "E4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/sources.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The THIRD channel, added as an entry and never a code branch (ruling 1). Keyed `blackdiamond_z09`, declaring registry_key z09, monolith blackdiamond, the templated prefix {monolith}/{scope}/silver/fact_holdings/, account_id_zero_pad 0, identifier_columns [CUSIP, Symbol, Asset Name], value_column `Market Value`, quantity_column `Units`, price_column NULL (the channel publishes no price) and cash_flag_column `Cash Equivalent`. NO FIRM TOKEN IS TYPED: naming-gate on the entry's diff reads PASS, 1 graded (opal-data-assets, CONFORMANT as S3_BUCKET), 0 REFUSE. Every measured claim carries its denominator, and one of them was CORRECTED during verification: the first draft said the 6,775 price-missing rows carry -7,607,341.30 in Market Value. They carry EXACTLY 0.00. That figure is the 31 NEGATIVE-Units rows, which are priced (a short's value and units are both negative, so the derived price is positive and correct) and which ruling 15 then puts outside the basket. The declaration now says so.",
+      "artifact_covered_by": [
+        "E4-AC1",
+        "E4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/tests/test_holdings_performance.py",
+      "kind": "test",
+      "commit_or_etag": "e79dd684bf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commits bf1683f172 then e79dd684bf. 45 passed (was 39 at round 3). Ruling 18: the glitch-then-reversion pair the ruling was written for -- a price 100 -> 250 -> 100 reads +150% then -60%, and the REVERSION is an ORDINARY day on its own arithmetic, which is exactly why it needed a rule rather than a wider ruling-16 band; plus the no-cascade and no-overwrite bounds, both of which a looser reading would cross. The Cottonwood rules: Market Value / Units gives the same +10% a published price would, and a UNIT change with the value is NOT a price move (2,200 over 20 units is still 110.00); absent AND zero Units are both price-missing with the account_value left finite; the text cash flag is parsed and an unparseable value REFUSES. The status-vocabulary test caught the sixth member on its own, which is what it is for.",
+      "artifact_covered_by": [
+        "E4-AC1",
+        "E4-AC2",
+        "E4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cottonwood/irpt/cottonwood/gold/holdings_performance_daily/date=2026-06-10..2026-09-25/data.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "per-partition ETag == local MD5, verified inside lib stream_parquet finalize()",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "75 daily partitions + 75 manifests over 2026-06-10..2026-09-25, missing 0, extra 0, 0 empty, min 680 rows, max 984; 66,587 footer rows, equal to the producer's tally. 19 columns. THE VALUE DECOMPOSITION RECONCILES TO THE CENT against the silver, which is the strongest available check on the basket arithmetic: at date=2026-09-25 (t-1 = 2026-09-24) included_value 562,744,973.40 + excluded_value 43,493.21 + negative_value -7,607,341.30 = 555,181,125.32, and the silver partition's own total Market Value over 19,784 rows is 555,181,125.32. 31 leveraged account rows against 31 negative-Market-Value silver rows. account_id carries the vendor form (z09 + eight digits) unpadded, firm_scope reads cottonwood on every row.",
+      "artifact_covered_by": [
+        "E4-AC1",
+        "E4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-49financial/... and s3://opal-data-inflection/... holdings_performance_{daily,manifest} (re-emitted under ruling 18)",
+      "kind": "s3_object",
+      "commit_or_etag": "per-partition ETag == local MD5",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "STEP 0. 49F: 557 of 557 days re-emitted, 3,188,339 rows, 0 not computed. INF: 1,609 of 1,609 computable days, 1,420,782 rows, 4 ABSENT and named. EXACTLY 2 rows flipped to FOLLOWS-DISCONTINUITY, both 49F (2025-12-15 and 2025-12-18) -- the count ruling 18 predicted from the 2 IMPLAUSIBLE-RETURN rows, and the reason the flip was verified on those two dates by dry run BEFORE either full run started.",
+      "artifact_covered_by": [
+        "E4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b88b92c57b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The BLOCKING row that stopped this cell and the measurements that unblocked it: 4 candidate carriers graded and REFUSED, and the z09 prefix measured 19,784/19,784 on COT and 6,202/6,202 on 49F with zero overlap. It is the row the registry commit @de56cfd02f answers. FILED WRONG FIRST TIME AND IT COST ANOTHER SEAT: class 'BLOCKER' is not in the ratified enum ['OBSERVATION','BLOCKING'], and because the channel is append-only and shared that refused EVERY seat's commit of the file -- 0.6.2_AE_PartnerETL~S was holding row S202 behind it and messaged rather than taking the audited override. Corrected to BLOCKING and committed within the cycle.",
+      "artifact_covered_by": [
+        "E4-AC1",
+        "E4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260929T0904Z_irpt-holdings-gold-v021-cot-e-20260929_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "bf1683f172",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened BEFORE the first S3 write (5 legs). It spent part of this round deliberately RED: L1-L3 were closed with proof, L4 (the Cottonwood mint) had NEVER BEEN STARTED, and `hold` was refused because a half-landed deploy cannot be HELD while an apply leg is open. That nothing was half-landed was MEASURED with a positive control -- 0 objects under both Cottonwood gold prefixes against 557 under the 49F daily prefix -- and the blocker record carried the escalation NEVER-2 asks for. All 5 legs are now closed with proof."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E4-AC1",
+      "criterion_verbatim": "on 2026-09-25, every COT account holding positions on 2026-09-24 has exactly one gold row, and the manifest reads complete with matching counts. Base: FAIL (984 accounts, 0 rows).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r4e/e4_ac1_cot_all_accounts_manifest.py\"",
+      "output_evidence": "silver accounts at 2026-09-24: 984 | gold rows at 2026-09-25: 984 | missing 0 | duplicated 0 | manifest {'accounts_with_prior_holdings': 984, 'computable_count': 908, 'not_computable_count': 76, 'complete': True} / E4-AC1 PASS / exit 0, read unpiped. The producer's own printed census for the same day was prior_holdings=984 computable=908 not_computable=76 complete=True, derived from the emitted frame; the check re-derives the account set from a fresh silver read.",
+      "denominator": "984 distinct AccountID values in the Cottonwood positions silver at date=2026-09-24 (19,784 rows), read by the check independently of the producer; 984 gold rows at date=2026-09-25, 0 missing, 0 duplicated. The 76 not-computable accounts are 62 NON-POSITIVE-BASE and 14 ALL-HOLDINGS-EXCLUDED, and computable + not_computable == accounts_with_prior_holdings == 984.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "E4-AC2",
+      "criterion_verbatim": "a non-empty gold partition exists for every computable trading day 2026-06-10..2026-09-25. Base: FAIL (75 of 75 missing).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r4e/e4_ac2_cot_full_history.py\"",
+      "output_evidence": "silver partitions 81 from 2026-06-09 | trading days 75 | computable 75 (2026-06-10..2026-09-25) | not computable 0 | missing gold 0 / E4-AC2 PASS / exit 0, read unpiped. Every computable day is computable here -- unlike Inflection, no Cottonwood trading day in range lacks a partition, so the not-computable count is 0 rather than a number that needed explaining.",
+      "denominator": "81 silver calendar-day partitions from 2026-06-09; 75 trading days over 2026-06-10..2026-09-25 on lib/trading_calendar, all 75 computable (the day and its prior trading day both landed); 75 non-empty gold partitions, missing 0. Footer read-back over the 75: 66,587 rows, 0 empty, min 680, max 984.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "E4-AC3",
+      "criterion_verbatim": "(step 0) in the re-emitted 49F and INF gold, no account's next row after an IMPLAUSIBLE-RETURN day is OK; the check prints ..0090 and ..4714's 1Y chains. Base: FAIL (2 violations, the two S200 accounts).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r4e/e4_ac3_ruling18_follow_day.py\"",
+      "output_evidence": "49financial: IMPLAUSIBLE-RETURN rows 2 | follow-day OK violations 0 / inflection: IMPLAUSIBLE-RETURN rows 0 | follow-day OK violations 0 / ..0090 1Y chain 0.1020 over 249 OK days / ..4714 1Y chain -0.6535 over 226 OK days / E4-AC3 PASS / exit 0, read unpiped. Reported to the issuer the moment it passed, as the dispatch asked, because the adapter switch was gated on it.",
+      "denominator": "Every gold row over 49financial 2024-07-09..2026-09-25 (557 days, 3,188,339 rows) and inflection 2020-04-27..2026-09-25 (1,609 days, 1,420,782 rows), grouped per account and shifted one row: 2 IMPLAUSIBLE-RETURN rows in total, 0 of them followed by an OK row. Exactly 2 rows were flipped to FOLLOWS-DISCONTINUITY, both 49F, and the two dates (2025-12-15, 2025-12-18) were verified by dry run BEFORE either full re-emit started.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO planted mutants on the two Cottonwood claims, each written through the producer's own path and each restored by re-running the producer for that day rather than by writing the good bytes back. M1 attacks E4-AC1's 'every account has exactly one row': account z0925724581 was dropped from the landed date=2026-09-25 daily partition. M2 attacks E4-AC2's coverage claim: the whole date=2026-08-12 daily partition was deleted -- a MID-HISTORY day, not an endpoint, because an endpoint is the one a range check is most likely to notice for the wrong reason.",
+      "expected": "M1 -> E4-AC1 FAIL naming 1 missing account, then PASS at 0 after the restore. M2 -> E4-AC2 FAIL naming 1 missing gold partition and printing the date, then PASS at 0 after the restore.",
+      "observed": "M1 PLANTED: 'gold rows at 2026-09-25: 983 | missing 1' / E4-AC1 FAIL. M1 RESTORED: 'gold rows 984 | missing 0' / E4-AC1 PASS. M2 PLANTED: 'computable 75 | missing gold 1 (first [2026-08-12])' / E4-AC2 FAIL. M2 RESTORED: 'missing gold 0' / E4-AC2 PASS. Both criteria are live oracles and neither passes on absence. NOTE, as at round 3: M1's manifest limb did NOT fire -- with the row dropped straight out of the parquet the manifest still read accounts_with_prior_holdings 984 / complete true, because it is the producer's own SELF-REPORT of the frame it emitted rather than a reading of the bytes that survived. The row-level 'missing 1' limb is what caught it.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Three instruments. (a) date=2026-09-25 was produced three times -- the pre-run dry run, the 75-day upload, and the M1 restore -- and the census compared across all three; date=2026-08-12 twice. (b) The landed row total was read back from the parquet FOOTERS, an instrument the producer does not touch, and compared with its printed tally. (c) THE VALUE DECOMPOSITION was reconciled against the silver independently of both.",
+      "observed": "date=2026-09-25 produced 984 rows on every run with the identical census {OK 908, NON-POSITIVE-BASE 62, ALL-HOLDINGS-EXCLUDED 14} and identical counts (984/908/76, complete True). FOOTER vs TALLY: 66,587 = 66,587 over 75 partitions. RECONCILIATION: included 562,744,973.40 + excluded 43,493.21 + negative -7,607,341.30 = 555,181,125.32 against the silver's own 555,181,125.32 over 19,784 rows -- to the cent, and it is what turned a suspected coincidence into a checked identity. 0 tracebacks; 0 days not computed; no day reported complete=False.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Widening the daily schedule's runner to the Cottonwood channel",
+      "reason": "The order says the runner's firm scope widens in a later cell and that this run is ad hoc for QA under a deploy ledger. No schedule, runner or reader was touched."
+    },
+    {
+      "item": "Cottonwood comparison points (FWD-13)",
+      "reason": "PRD v0.19 ruling 8 in terms: 'COT: NOT COMPARED until Andrew gives a per-use word for a pull.' No vendor call was made anywhere in this round -- every input was landed silver."
+    },
+    {
+      "item": "Re-emitting the Cottonwood gold under ruling 18",
+      "reason": "Not applicable rather than skipped: the channel was built WITH ruling 18 from its first partition, and it emitted 0 IMPLAUSIBLE-RETURN rows over all 75 days, so there is no follow-day to flip."
+    },
+    {
+      "item": "The structural selector that would have avoided the registry row",
+      "reason": "Under blackdiamond, 49financial carries masters and cottonwood carries none, so 'the master-less blackdiamond scope' would have selected it with no token anywhere and the cell would have completed hours earlier. REJECTED: it encodes an accident of the current registry as a firm's identity, which fails CLAUDE.md rule 24 (iii) -- the axis would be 'has masters', not identity -- and rule 30 says a builder refusal IS a missing registry row, never a cleverer predicate. The row landed instead, and it is reusable by every future channel."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-09-29/",
+  "compiler_tools": [
+    {
+      "tool": "naming-gate.py (the LGIC_ENFORCE DEC-6 commit limb)",
+      "invocation": "python .tools/naming-gate.py --diff <a synthetic new-file diff per candidate>, then inside safe-commit.sh",
+      "result": "USED AS A MEASUREMENT INSTRUMENT, not only as a gate. Four candidate carriers for the Cottonwood scope were graded in about five minutes -- entry key `blackdiamond_cottonwood` REFUSE, `registry_key: cottonwood` REFUSE, `scope_bucket: opal-data-cottonwood` REFUSE ('CONFORMANT as S3_BUCKET, but a NEW hand-kept carrier'), `registry_key: F-COT` REFUSE -- and a fifth, `registry_key: z09`, PASS. That is what let the blocker be reported with a printed denominator and a working alternative instead of a complaint. The final entry grades PASS, 1 graded, 0 REFUSE."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py <the channel file>, then inside safe-commit.sh",
+      "result": "BLOCKED on my own row: class 'BLOCKER' is not in the ratified enum ['OBSERVATION','BLOCKING']. Corrected to BLOCKING. The gate was right and the failure mode is worth recording: the channel is append-only and shared, so one malformed row refuses EVERY seat's commit of that file."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open / close-leg x5 / hold / close",
+      "result": "`hold` REFUSED while an apply leg was open -- 'a half-landed deploy cannot be HELD (stays RED)'. Correct, and it forced the honest move: measure that L4 had written nothing (0 objects under both COT prefixes against a 557-object positive control) and escalate loudly in a record rather than dress an unstarted leg as held. All 5 legs are now closed with proof."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <the two .py files>",
+      "result": "py_compile + ds-precommit + ruff py39 clean on every commit of this round."
+    },
+    {
+      "tool": "boto3 head_bucket / list_objects_v2 (with a positive control)",
+      "invocation": "head_bucket on opal-data-cottonwood; prefix listings on the COT and 49F gold roots",
+      "result": "opal-data-cottonwood EXISTS and is reachable, which retired the order's 'COT bucket fence' refusal branch before it was reached -- and showed the registry's own alias note on that firm ('opal-data-cottonwood does not exist yet') to be STALE, routed as a separate small correction. The 0-object COT listing was always read beside a 557-object 49F control, so an empty answer was never read as a broken instrument."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-S203: BLOCKING, INERT, disarm_owner 1.0.0_SA_CTO. RESOLVED WITHIN THE ROUND by registry commit @de56cfd02f (MASTER z09 -> cottonwood) on CTO ruling 102723; the GO arrived as 102730 and E4-AC1/E4-AC2 followed. The row's own measurements -- the 4 refused carriers and the z09 census -- are what made the remedy a one-line row rather than a discussion."
+  ]
+}

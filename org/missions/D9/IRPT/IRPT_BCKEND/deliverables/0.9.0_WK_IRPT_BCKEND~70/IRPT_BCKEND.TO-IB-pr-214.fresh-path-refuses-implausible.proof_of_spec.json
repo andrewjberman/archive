@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-214",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "4a6402ad8c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-214.fresh-path-refuses-implausible.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md ruling 16 (\"The fresh path refuses any series point at or below -1, as the reopen path does.\"), line 549",
+    "group": "OTHER",
+    "vintage_commit": "613bfc6ecf"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~70",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/retained.py",
+      "kind": "script",
+      "commit_or_etag": "dd3be9a28a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "no deploy in this order's grant (BOUNDS: 'no deploy, no AWS write'); the served move is the issuer's. The 49F fresh path (holdings_gold branch of RetainedPerformance._compute) now applies implausible_engine_series to outcome[\"report\"] before persist/return and raises f49_engine.EngineReturnImplausible, matching the reopen path's existing guard.",
+      "artifact_covered_by": ["P21-4-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/tests/test_retained_performance.py",
+      "kind": "script",
+      "commit_or_etag": "dd3be9a28a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "added test_fresh_path_refuses_an_ok_day_at_or_below_minus_one: arm A (OK day, daily_return -1.2) raises f49_engine.EngineReturnImplausible and persists no REPORT# row; arm B (control, same day NOT_COMPUTABLE) serves OPAL_HOLDINGS over the remaining days. Full suite re-run green: 225 passed.",
+      "artifact_covered_by": ["P21-4-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P21-4-AC1",
+      "criterion_verbatim": "P21-4-AC1 -- through RetainedPerformance(holdings_source=...).compute on in-memory gold: arm A, an OK day of -1.2, refuses as EngineReturnImplausible (no figure); arm B (control), the same day NOT_COMPUTABLE, answers OPAL_HOLDINGS over the other days. Base: FAIL (arm A served -1.20502; arm B passed).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r21/p21_4_ac1_fresh_path_refuses_implausible.py\" .",
+      "output_evidence": "..                                                                       [100%]\n2 passed in 2.06s\nP21-4-AC1 PASS",
+      "denominator": "2 of 2 pytest cases (arm A, arm B) inside the check's own suite",
+      "status": "PASS",
+      "expect": "P21-4-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the added guard (`if implausible_engine_series(outcome[\"report\"]): raise f49_engine.EngineReturnImplausible(...)`) was disabled in place (`if False and implausible_engine_series(...)`), the acceptance check re-run, then the line restored verbatim (git diff against the restored file showed only the intended 7-line addition, nothing else changed).",
+      "expected": "with the guard disabled, arm A serves the implausible figure again and the check fails (rc!=0, 'P21-4-AC1 FAIL')",
+      "observed": "mutated run: 'AssertionError: served a figure: -1.20502' / '1 failed, 1 passed' / 'P21-4-AC1 FAIL' rc=1. Restored run: '2 passed in 2.06s' / 'P21-4-AC1 PASS' rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two consecutive runs of the acceptance script against the same worktree state, output diffed",
+      "observed": "both runs: '2 passed' and 'P21-4-AC1 PASS', rc=0; the only differing text between the two captured outputs was the pytest wall-clock duration line (2.06s vs 2.45s) -- the verdict and all evidentiary lines are identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p21_4_ac1_fresh_path_refuses_implausible.py -- the P21-4-AC1 acceptance check",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r21/p21_4_ac1_fresh_path_refuses_implausible.py\" .",
+      "result": "base (pre-fix, this session): 'AssertionError: served a figure: -1.20502' / '1 failed, 1 passed' / 'P21-4-AC1 FAIL' rc=1. Post-fix: '2 passed' / 'P21-4-AC1 PASS' rc=0."
+    },
+    {
+      "tool": "pytest -- full performance package suite",
+      "invocation": "python -m pytest -q tests/ (run from infra/aws/lambda/investor-reporting/performance)",
+      "result": "225 passed, 2 warnings (unrelated pandas FutureWarning in f49_engine.py, pre-existing) -- no regression from the fix or the new test."
+    },
+    {
+      "tool": ".tools/commit-gate.sh -- py_compile + ds-precommit + ruff py39 on both changed files",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/performance/retained.py infra/aws/lambda/investor-reporting/performance/tests/test_retained_performance.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    }
+  ]
+}

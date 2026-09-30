@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-er-202",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "5847d14dd6",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-er-202.holdings-gold-every-49f-account.md"
+  },
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md ADDENDUM v0.19 rulings 4, 6, 9, 12, on 1.0.0_SA_CTO ruling 102520 (~E round 2 = every 49F account, full history from each account's first holdings day)",
+    "group": "OTHER",
+    "vintage_commit": "5847d14dd6"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~E",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Round-2 changes, on the round-1 build 23004aaf98: (1) the per-account roll-up is VECTORIZED -- round 1 looped over accounts, which was free for one account over 184 days and is not for ~3,350 to ~6,350 accounts over 557 days; (2) manifest_counts() adds the completeness triple plus its guards; (3) the manifest gains a PARQUET surface beside its JSON, projected from one dict. Run ad hoc from the working tree for QA; no S3 code prefix and no schedule here (the schedule is IB-er-203, another assignee). Naming gate on the round-2 diff: PASS, 0 graded, 0 REFUSE. Ruff clean at py39; non-ASCII census 0 bytes and 0 characters.",
+      "artifact_covered_by": ["E2-AC1", "E2-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_holdings_performance/tests/test_holdings_performance.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "python -m pytest data/assets/scripts/gold/irpt_holdings_performance/tests/ -q -> 13 passed (9 from round 1, 4 new for the manifest, the TO's step 3). The four new ones test the completeness CLAIM rather than the fields' presence: the population is prior-HOLDINGS not rows; a restricted run can never read complete; an empty day does not read complete (without the len(pop) > 0 guard, 0 + 0 == 0 satisfies the identity and publishes complete over nothing, which is the shape a silent upstream failure takes); a duplicated account row breaks complete. The 9 round-1 tests were re-run UNCHANGED against the vectorized core and still pass, which is what holds the branch order the round-1 full-exit defect taught.",
+      "artifact_covered_by": ["E2-AC1"]
+    },
+    {
+      "path_or_key": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/date=2024-07-09..2026-09-25/data.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "per-partition ETag == local MD5, verified inside lib stream_parquet finalize()",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "557 partitions landed over 557 trading days (lib/trading_calendar), missing 0, extra 0, range 2024-07-09..2026-09-25, measured by ListObjectsV2 independently of the producer. TOTAL ROWS read back from the 557 parquet FOOTERS: 3,188,339, equal to the producer's own tally -- the footer read is the independent instrument, the tally is the self-report. 0 empty partitions; min 4,075 rows, max 7,540. The round-1 partitions for 2026-01-02..2026-09-25 were single-account and are REPLACED here by full-population ones, which is what lets a completeness claim be made at all.",
+      "artifact_covered_by": ["E2-AC1", "E2-AC2"]
+    },
+    {
+      "path_or_key": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_manifest/date=2024-07-09..2026-09-25/data.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "per-partition ETag == local MD5, verified inside lib stream_parquet finalize()",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "557 partitions, missing 0, extra 0. NEW THIS ROUND: the manifest partition carries a PARQUET (22 columns, one row) beside its manifest.json, because E2-AC1 reads the manifest with a .parquet listing and round 1 wrote only JSON -- a criterion the round-1 shape would have failed for a reason that has nothing to do with the numbers. Read back exactly as the check reads it: accounts_with_prior_holdings 3346 (int), computable_count 3346 (int), not_computable_count 0 (int), complete True (bool) at date=2024-07-09, identity holding and bool(complete) is True. Both surfaces are projected from ONE dict, which is why they cannot drift.",
+      "artifact_covered_by": ["E2-AC1"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260929T0135Z_irpt-holdings-gold-all-49f-20260929_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened BEFORE the first S3 write of this round (ledger slug irpt-holdings-gold-all-49f-20260929, 3 legs), as the TO step 4 requires.",
+      "artifact_covered_by": ["E2-AC1", "E2-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E2-AC1",
+      "criterion_verbatim": "on 2026-09-25, every account holding positions on 2026-09-24 in the declared silver has exactly one gold row, and the manifest reads complete with matching counts. Base: FAIL (6,341 accounts, 1 row, 6,340 missing, manifest fields absent).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r2e/e2_ac1_all_accounts_manifest.py\"",
+      "output_evidence": "silver accounts at 2026-09-24: 6341 | gold rows at 2026-09-25: 7540 | missing 0 | duplicated 0 | manifest {'accounts_with_prior_holdings': 6341, 'computable_count': 6338, 'not_computable_count': 3, 'complete': True} / E2-AC1 PASS / exit 0, read unpiped. The producer's own count for the same day, printed before the check ran, was prior_holdings=6341 computable=6338 not_computable=3 -- derived from the emitted frame, and equal to the silver count the check computes independently.",
+      "denominator": "6,341 distinct account_id values in the declared positions silver at 2026-09-24 (the check's own read); 7,540 gold rows, the extra 1,199 being accounts that held cash but no position at t-1 and so sit outside the completeness population; 0 missing, 0 duplicated",
+      "status": "PASS",
+      "expect": "E2-AC1 PASS"
+    },
+    {
+      "criterion_id": "E2-AC2",
+      "criterion_verbatim": "a non-empty gold partition exists for every trading day 2024-07-09..2026-09-25. Base: FAIL (373 of 557 missing).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r2e/e2_ac2_full_history.py\"",
+      "output_evidence": "trading days 557 (2024-07-09..2026-09-25) | missing gold partitions 0 / E2-AC2 PASS / exit 0, read unpiped. Corroborated by a separate footer read: 0 of 557 partitions are empty, min 4,075 rows and max 7,540.",
+      "denominator": "557 trading days from lib/trading_calendar between the declared silver's first partition's next trading day and 2026-09-25; 557 partitions present, 0 missing",
+      "status": "PASS",
+      "expect": "E2-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Round 2's claim is COMPLETENESS, not a value, so the mutant attacks completeness rather than arithmetic: ONE account that held 15 positions at t-1 (0010023253) was dropped from the landed 2026-09-25 daily partition, 7,540 rows to 7,539, re-landed through the same ETag-verified primitive. The MANIFEST WAS DELIBERATELY LEFT UNTOUCHED, so it went on asserting complete=True over a partition that was now short -- which is precisely the silent failure the four completeness fields exist to make visible, and the thing a check that trusted the manifest would have missed.",
+      "expected": "E2-AC1 FAIL on a missing account while the manifest still claims complete, then PASS after the producer re-lands the partition",
+      "observed": "Under the mutant: 'gold rows at 2026-09-25: 7539 | missing 1 | duplicated 0 | manifest {... 'complete': True} / E2-AC1 FAIL / exit 1'. The check reported the missing account AND printed the manifest's contradicting claim beside it. After the producer's own re-run of date=2026-09-25: 7,540 rows, missing 0, E2-AC1 PASS / exit 0; E2-AC2 re-run PASS, confirming no other partition was disturbed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two independent instruments on the same population, plus a cross-round regression: (a) the 557-day dry run and the 557-day upload; (b) date=2026-09-25 produced twice more, in the mutant restore and in a prior single-day run; (c) the vectorized core checked against the round-1 committed value for the thread account.",
+      "observed": "Every run of date=2026-09-25 produced 7,540 rows with the identical census {OK 6650, NO-PRIOR-HOLDINGS 881, NON-POSITIVE-BASE 6, ALL-HOLDINGS-EXCLUDED 3} and identical counts (6341/6338/3, complete True). All 557 partitions reported complete=True, 0 days not computed, 0 SKIP/ABSENT/EMPTY notes and 0 tracebacks in the run log. CROSS-ROUND: the vectorized core reproduces round 1's committed thread value 0.004612117916 to a delta of 8.67e-19 -- NOT bit-identical, because summing per-account groups reassociates the floating-point additions, and about 1e-10 of the 1e-9 tolerance E1-AC1 grades on. Stated rather than rounded away.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The daily schedule irpt-holdings-performance-daily, and the check e2_ac3_daily_schedule.py that grades it",
+      "reason": "IB-er-203 is a separate cell in this round with another assignee, and this order says in terms not to build it here. e2_ac3 sits in the same checks directory but is NOT in this order's <expected_criteria> (E2-AC1,E2-AC2), so it was neither run nor claimed. Until that cell lands, this producer has no production trigger and every partition here came from an ad-hoc QA run."
+    },
+    {
+      "item": "Inflection and Cottonwood",
+      "reason": "PRD v0.19 ruling 11 sequences them as later rounds. A new firm channel is a new entry in sources.json keyed by its own custody source; no code branch, and this round touched none."
+    },
+    {
+      "item": "Switching any reader to the new gold",
+      "reason": "The TO BOUNDS: no reader is switched. ~P's adapter switch serves only after this manifest reads complete (ruling 102520), which is now true but is ~P's own cell to act on. The adapter, c02_twr_engine.py and every served table are untouched, so no never-widen sign-off was needed and none was sought."
+    },
+    {
+      "item": "An account's trading days BEFORE it first appears in the declared silver -- no row is emitted for them",
+      "reason": "MEASURED, not overlooked: the thread account 0010498003 has no row on 75 of the 557 days, because it appears in neither the positions nor the balance partition at t-1 on those days. The emitted universe is accounts present at t-1, so a series begins at each account's own first computable day -- which is what 'since inception' means per account and what E2-AC1 requires (it asks only that accounts IN the t-1 silver carry a row). Naming it because a consumer charting a fixed window would otherwise read the absence as a gap."
+    },
+    {
+      "item": "comp-pipescript graph registration, gold_pipeline_deps.yaml and gold_validate_config.yaml entries",
+      "reason": "UNCHANGED from round 1 and re-checked this round: comp-pipescript io still REFUSES the script as an unknown id in tree advi, so it is still UNVALIDATED by that instrument and no SAFE is signalled on it. Registration belongs with the schedule cell, which is where a deployed code prefix first exists to census."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-09-29/",
+  "compiler_tools": [
+    {
+      "tool": "naming-gate.py (the LGIC_ENFORCE DEC-6 commit limb)",
+      "invocation": "python .tools/naming-gate.py --diff <the round-2 diff of data/assets/scripts/gold/irpt_holdings_performance/>",
+      "result": "NAMING-GATE PASS, 0 graded, 0 REFUSE. The round-1 resolution holds: the declaration is keyed by custody source and the firm scope is registry-derived, so the round-2 edits added no hand-kept carrier. No override taken."
+    },
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io holdings_performance.py --pipeline advi",
+      "result": "REFUSED -- 'Unknown script in tree [advi]: HOLDINGS_PERFORMANCE'. Re-run this round to confirm the state is unchanged rather than assumed: the graph is queried, never rebuilt (CLAUDE.md rule 20), and its vintage still predates this producer. Recorded as a refusal, not a pass."
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/gold/irpt_holdings_performance/tests/ -q",
+      "result": "13 passed. The 9 round-1 tests were re-run UNCHANGED against the rewritten vectorized core -- the point of not touching them is that they grade the new implementation against the old contract, and the full-exit branch-order test is the one that would catch a reassociated np.select getting the precedence wrong."
+    },
+    {
+      "tool": "ruff and py_compile",
+      "invocation": "ruff check --target-version py39 data/assets/scripts/gold/irpt_holdings_performance/",
+      "result": "All checks passed. Non-ASCII census on the changed files: 0 bytes and 0 characters, byte-delta and character-count measured separately per CLAUDE.md."
+    },
+    {
+      "tool": "pyarrow.parquet.read_metadata (the independent landing instrument)",
+      "invocation": "read_metadata(<each of 557 partitions>).num_rows, summed",
+      "result": "3,188,339 rows across 557 footers, equal to the producer's reported tally. Used deliberately INSTEAD of trusting the producer's own EMIT line (CLAUDE.md: never trust a producer's self-report), alongside a ListObjectsV2 partition census of both gold tables."
+    }
+  ]
+}
