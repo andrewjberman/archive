@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ac-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ac-2.regeneration-keeps-served-sentences.md",
+    "group": "OTHER",
+    "vintage_commit": "e1b5fd6d8c0e60f6b84f4d5f379f4f8b34631fc8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "e1b5fd6d8c0e60f6b84f4d5f379f4f8b34631fc8",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ac-2.regeneration-keeps-served-sentences.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~191",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row AMGT_RESAPP-Z-W191-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z) appended: the 8 dropped ASML sentences were served with no verbatim span under the pre-HOLD rule and genuinely fail today's gate. No code changed; no S3 write.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round53/checks/ac_2_keep.py; echo \"exit=$?\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round53/checks/ac_2_keep.py; echo \"exit=$?\"",
+      "output_evidence": "VERBATIM (capture org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~191/ac-2.AC1.out.txt):\nstored  {'company_description': 6, 'investment_thesis': 1, 'risks': 2, 'ceo_bio': 0, 'recommendation': 1}\nrebuilt {'company_description': 1, 'investment_thesis': 0, 'risks': 0, 'ceo_bio': 0, 'recommendation': 1}\n  BAD company_description: stored 6, rebuilt 1, lost 5\n  BAD investment_thesis: stored 1, rebuilt 0, lost 1\n  BAD risks: stored 2, rebuilt 0, lost 2\nA D-1 REGENERATION KEEPS EVERY SERVED SENTENCE: NO\nexit=1\nNOT MET, BY DESIGN OF THE CELL'S OWN STOP CLAUSE: the 8 lost sentences have quoted_spans [] in the stored document and no verbatim run in the excerpt; they were served under the pre-HOLD vacuous rule. See row AMGT_RESAPP-Z-W191-S1.",
+      "denominator": "8 of 10 stored served sentences lost on rebuild; 2 of 10 (both span-carrying) kept; rebuild split 13 drafted = 2 served_on_span + 8 held_no_span + 3 refused",
+      "status": "FAIL",
+      "status_reason": "Cell STOP clause: the 8 dropped sentences were served with quoted_spans [] under the pre-HOLD vacuous rule and are non-verbatim in the excerpt, so they genuinely fail today's gate; a ruling, not a build. Row AMGT_RESAPP-Z-W191-S1."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest lib/research/filings/tests -q; echo \"exit=$?\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest lib/research/filings/tests -q; echo \"exit=$?\"",
+      "output_evidence": "VERBATIM (capture org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~191/ac-2.AC2.out.txt):\n131 passed in 36.08s\nexit=0",
+      "denominator": "131 of 131 tests passed, 0 failed (no new test: no code change)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No code changed, so no mutant. The per-sentence diagnosis is the control: every stored sentence was re-run through today's longest_verbatim_run and is_verbatim against the excerpt and its cited passages.",
+      "expected": "a sentence served verbatim-on-span survives; a non-verbatim sentence stays held",
+      "observed": "2 of 2 span-carrying stored sentences survive the rebuild; 8 of 8 no-span stored sentences are held with no verbatim run at the 8-token floor",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ac_2_keep.py's rebuild is the deterministic producer (FilingsProducer, no model call); diag.py and ac_2_keep.py rebuilt the same stored analysis twice.",
+      "observed": "STABLE: identical rebuilt counts {1,0,0,0,1} both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any change to drafting_build.py, lib/research/drafting/ or new tests",
+      "reason": "The cell's STOP clause: the stored sentences were served under an older, looser rule and genuinely fail today's gate; that is a ruling, not a build. Loosening the gate is forbidden."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W191-S1"
+  ],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface.",
+  "compiler_tools": [
+    {
+      "tool": "python + pytest",
+      "invocation": "see AC1-AC2",
+      "result": "AC1 NO exit=1; AC2 131 passed exit=0"
+    }
+  ]
+}
