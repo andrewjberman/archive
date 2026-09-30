@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ac-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "cb37037d95",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ac-1.grader-reads-the-displayed-figure.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "5d3052d8d7"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~190",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/sweep.py",
+      "kind": "script",
+      "commit_or_etag": "64b4e7905d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Grader script only; _PageReader tracks a tooltip subtree (role=tooltip / data-figure-tooltip) and drops its text and spans from every value read. No deploy, no product file."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "(a) tooltip plant: read unchanged: True; (b) visible-figure control: PX_LAST read changed: True; THE GRADER READS THE DISPLAYED FIGURE, NOT THE TOOLTIP: YES -- and exit=0",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; T=\"$(mktemp -d)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round53/checks/ac_1_plant.py --cache \"$T\"; echo \"exit=$?\"",
+      "output_evidence": "header value facts read: 6; PX_LAST as rendered: [[\"EUR 1503.20\", \"\"]]\n(a) tooltip plant: read unchanged: True\n(b) visible-figure control: PX_LAST read changed: True ([[\"EUR 999.999\", \"\"]])\nTHE GRADER READS THE DISPLAYED FIGURE, NOT THE TOOLTIP: YES\nexit=0",
+      "denominator": "6 header value facts read on ASML_NA_Equity (1 of 1 name)",
+      "status": "PASS",
+      "expect": "unchanged: True[\\s\\S]*changed: True[\\s\\S]*NOT THE TOOLTIP: YES[\\s\\S]*exit=0",
+      "status_reason": "Run under timeout 120 after the edit; exit=0."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "FWD-30 GRADE: ... values equal 3 of 3; differ=0; THE THREE NAMES READ VALUES-EQUAL ON THE DISPLAYED FIGURES: YES -- and exit=0",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round53/checks/ac-1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "FWD-30 GRADE: equal 3 of 3 identified names; values equal 3 of 3\nvalue facts over 3 compared names: compared=1064 differ=0\nTHE THREE NAMES READ VALUES-EQUAL ON THE DISPLAYED FIGURES: YES\nexit=0\n(grader under test: round45/checks/sweep.py, run by ac-1.AC2.sh)",
+      "denominator": "3 of 3 names values equal; 1064 value facts compared, differ=0",
+      "status": "PASS",
+      "expect": "values equal 3 of 3[\\s\\S]*differ=0[\\s\\S]*VALUES-EQUAL ON THE DISPLAYED FIGURES: YES[\\s\\S]*exit=0",
+      "status_reason": "Run under timeout 120 after the edit; exit=0."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's own AC1 arms: (a) plant replacing every tooltip's text and data-full-value with 999.999; (b) control replacing the visible PX_LAST figure with 999.999.",
+      "expected": "(a) read unchanged, (b) PX_LAST read changed",
+      "observed": "(a) unchanged True, (b) changed True (EUR 999.999); base was AC1 FAIL per issuer notes",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the grader is a pure reader of a captured fixture; no repeat run was compared (reason above).",
+      "observed": "One run each, both exit=0; no repeat run compared, so no stability claim beyond that.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Full 96-name FWD-30 re-grade.",
+      "reason": "the issuer's drain run, beyond a 120 s bound (per the order)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "none: worker session; commits 64b4e7905d in git",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg1.txt -- sweep.py",
+      "result": "commit 64b4e7905d; msg-verify MATCH len=386"
+    }
+  ]
+}

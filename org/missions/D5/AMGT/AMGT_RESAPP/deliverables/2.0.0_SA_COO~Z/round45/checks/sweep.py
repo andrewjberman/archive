@@ -138,6 +138,9 @@ def render_page_html(fixture_path):
     return p.stdout
 
 
+_VOID_TAGS = frozenset(("area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"))
+
+
 class _PageReader(HTMLParser):
     """Walks the rendered page and collects facts from data attributes ONLY. The one piece of text it ever reads is the Model
     sheet's own column headers (the years), which are the coordinate of a cell that carries no year attribute."""
@@ -158,10 +161,20 @@ class _PageReader(HTMLParser):
         self.row_cells = []      # td index of every data-model-cell td in the row
         self.row_refused = False
         self.row_refusals = []
+        self.tt_depth = 0        # elements open inside a hover tooltip (role="tooltip" / data-figure-tooltip): never a displayed figure
+
+    def _tooltip_tag(self, tag, a):
+        """Track the tooltip subtree so its text is never part of a value read (attributes still read as before)."""
+        if self.tt_depth:
+            if tag not in _VOID_TAGS:
+                self.tt_depth += 1
+        elif a.get("role") == "tooltip" or "data-figure-tooltip" in a:
+            self.tt_depth = 1
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
         f = self.f
+        self._tooltip_tag(tag, a)
         if tag == "table":
             self.in_sheet = "data-model-sheet" in a
         elif self.in_sheet and tag == "thead":
@@ -187,7 +200,7 @@ class _PageReader(HTMLParser):
             f["FIGURES"].add(("HEADER", a["data-card-figure-mnemonic"]))
             if tag == "li":
                 self.card, self.card_spans = a["data-card-figure-mnemonic"], []
-        elif self.card is not None and tag == "span":
+        elif self.card is not None and tag == "span" and not self.tt_depth:
             self.card_spans.append("")
         if a.get("data-thesis-passage"):
             f["CITES"].add(("THESIS", a["data-thesis-passage"]))
@@ -221,6 +234,8 @@ class _PageReader(HTMLParser):
             self.cell_depth += 1
 
     def handle_data(self, data):
+        if self.tt_depth:
+            return
         if self.in_th:
             self.years[-1] += data.strip()
         if self.cell is not None and self.cell_depth == 0:
@@ -229,6 +244,8 @@ class _PageReader(HTMLParser):
             self.card_spans[-1] += data
 
     def handle_endtag(self, tag):
+        if self.tt_depth and tag not in _VOID_TAGS:
+            self.tt_depth -= 1
         if tag == "td" and self.cell is not None:
             self.row_values[self.cell] = self.cell_text.strip()
             self.cell = None
