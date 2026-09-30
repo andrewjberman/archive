@@ -16,25 +16,52 @@
  "assignee": "0.9.0_WK_ETFS_RIVALS~5",
  "artifacts_produced": [
   {
-   "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
-   "kind": "script",
-   "commit_or_etag": "1ef9f50b67",
+   "path_or_key": "s3://opal-data-etfs/issuer-site/etfs/bronze/holdings/date=2026-09-30/",
+   "kind": "s3_object",
+   "commit_or_etag": "6d51af5322",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "AC3"
+   ],
+   "deploy_evidence": "325 raw + 325 sidecar objects written by etfs-rivalfunds-fetch-holdings-lambda (requests fcdfce7c, 7b2bb944, 096abceb); every sidecar status OK"
+  },
+  {
+   "path_or_key": "s3://opal-data-etfs/issuer-site/etfs/silver/holdings/",
+   "kind": "s3_object",
+   "commit_or_etag": "6d51af5322",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "AC3"
+   ],
+   "deploy_evidence": "325 parquet, one per report date 2025-06-13..2026-09-29; state markers fetch_holdings 3, build_silver 3"
+  },
+  {
+   "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~5/d2_live.json",
+   "kind": "config_data",
+   "commit_or_etag": "6d51af5322",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "hookup_d2.patch applied and committed; the gateway deploy was NOT run (COO-half act-start gate 1 failed, row ETFS_RIVALS-Z-W5-S1)"
+   "deploy_evidence": "LEG A record; gateway_deploy_commit null (LEG B stopped, row W5-S6)"
   },
   {
    "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
    "kind": "config_data",
+   "commit_or_etag": "6d51af5322",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "five rivalfunds entries stamped with the live CodeSha256, last_deployed_commit df977d32d2 and LastModified from get-function-configuration"
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+   "kind": "script",
    "commit_or_etag": "1ef9f50b67",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "five rivalfunds function entries from the patch; artifact_sha256 / last_deployed_commit / last_deployed_at NOT stamped because the order stopped at gate 1"
+   "deploy_evidence": "hookup_d2.patch applied and committed on the worker branch (never a deploy ref); the gateway deploy was NOT run (row ETFS_RIVALS-Z-W5-S6); git apply --check of the server.py hunks against 093fc247c6 rc 0"
   },
   {
    "path_or_key": "org/critical_paths/change_management/20260930T1013Z_etfs-rivalfunds-thread-r1_deploy_completion.md",
    "kind": "config_data",
    "commit_or_etag": "df977d32d2",
    "deployed_state": "STAGED-AWAITING-GATE",
-   "deploy_evidence": "ledger OPEN, L1 and L2 closed with apply output, L3-L6 unproven; safe-apply etfs-rivalfunds: Apply complete! Resources: 39 added, 0 changed, 0 destroyed; safe-apply opal-gateway targeted gw_rivalfunds_read: Apply complete! Resources: 1 added, 0 changed, 0 destroyed"
+   "deploy_evidence": "ledger OPEN: L1, L2, L5 closed with proof; L3 (gateway files), L4 (healthz) and L6 (AC1-AC3 + /rivalfunds read) left OPEN with rows W5-S6 and W5-S4"
   }
  ],
  "acceptance": [
@@ -43,30 +70,30 @@
    "criterion_verbatim": "AC1 RESULT: PASS 0 failures",
    "method": "command",
    "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/d-2.AC1.py",
-   "output_evidence": "FAIL: exception: FileNotFoundError: [Errno 2] No such file or directory: '...deliverables\\0.9.0_WK_ETFS_RIVALS~5\\d2_live.json'\nAC1 RESULT: FAIL 1 failures\nrc=1. Cause: d2_live.json was never written; the order stopped at COO-half gate 1 (23 rider files differ between the deployed gateway and HEAD), so the backfill and the page were not produced. Row ETFS_RIVALS-Z-W5-S1.",
-   "denominator": "0 of 1 checks (the check aborts at its first read)",
+   "output_evidence": "FAIL: exception: NoSuchKey: An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.\nAC1 RESULT: FAIL 1 failures\nrc=1. Cause: no page exists: platinum/page holds 0 objects because the gold stage fails (canonical_shape: FileNotFoundError /var/task/gold/etf_positioning_gold.py, the Lambda package omits gold/etf_positioning_gold.py). Row ETFS_RIVALS-Z-W5-S4.",
+   "denominator": "0 of 4 checks (the check aborts at its first read of platinum/page/date=2026-09-30/index.html)",
    "status": "FAIL",
-   "status_reason": "Stopped at COO-half act-start gate 1 (row ETFS_RIVALS-Z-W5-S1): no backfill, no page, no d2_live.json."
+   "status_reason": "Gold stage packaging gap (row ETFS_RIVALS-Z-W5-S4, BLOCKING): no canonical_shape, trade_schedule or page object was produced."
   },
   {
    "criterion_id": "AC2",
    "criterion_verbatim": "AC2 RESULT: PASS 0 failures",
    "method": "command",
    "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/d-2.AC2.py",
-   "output_evidence": "FAIL: exception: FileNotFoundError: [Errno 2] No such file or directory: '...deliverables\\0.9.0_WK_ETFS_RIVALS~5\\d2_live.json'\nAC2 RESULT: FAIL 1 failures\nrc=1. Cause: the gateway was not deployed. Independent read-only measurement: sha256 of the deployed /opt/opal-gateway files (ssm:a22ea652-4d07-40f1-b1fc-74ea0fd67a27, 76 files) against HEAD (84 files) shows 8 only in HEAD and 20 differing, so the deployed gateway does not equal HEAD.",
-   "denominator": "0 of 1 checks (the check aborts at its first read)",
+   "output_evidence": "FAIL: exception: CalledProcessError: Command '['git', 'show', 'None:infra/aws/ec2/opal-gateway/app/rivalfunds_view.py']' returned non-zero exit status 128.\nAC2 RESULT: FAIL 1 failures\nrc=1. Cause: LEG B stopped at amendment 2 step 2 (row ETFS_RIVALS-Z-W5-S6): rivalfunds_view.py imports audit.py and config.py, which differ between 093fc247c6 and HEAD; no deploy commit exists, so d2_live.json gateway_deploy_commit is null and the gateway serves its 093fc247c6 bytes unchanged.",
+   "denominator": "0 of 3 checks (the check aborts before the SSM read)",
    "status": "FAIL",
-   "status_reason": "Stopped at COO-half act-start gate 1 (row ETFS_RIVALS-Z-W5-S1): the gateway was not deployed; 23 rider files differ."
+   "status_reason": "LEG B STOP (row ETFS_RIVALS-Z-W5-S6, BLOCKING): the gateway was not deployed."
   },
   {
    "criterion_id": "AC3",
    "criterion_verbatim": "AC3 RESULT: PASS 0 failures",
    "method": "command",
    "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/d-2.AC3.py",
-   "output_evidence": "FAIL: exception: FileNotFoundError: [Errno 2] No such file or directory: '...deliverables\\0.9.0_WK_ETFS_RIVALS~5\\d2_live.json'\nAC3 RESULT: FAIL 1 failures\nrc=1. Cause: no fetch was invoked; issuer-site/etfs/bronze/holdings/ read 0 objects at act start (positive control platinum/ read 38) and no invocation followed.",
-   "denominator": "0 of 1 checks (the check aborts at its first read)",
+   "output_evidence": "OK:   325 BASG raw objects in issuer bronze date=2026-09-30 (>= 300)\nOK:   325 sidecars status OK written by the fetch Lambda (>= 300; 325 sidecars listed)\nOK:   silver parquet exists for the newest report 2026-09-29\nFAIL: canonical_shape parquet exists for the newest report 2026-09-29\nFAIL: trade_schedule parquet exists for the newest report 2026-09-29\nAC3 RESULT: FAIL 2 failures\nrc=1. Cause: row ETFS_RIVALS-Z-W5-S4 (gold package gap).",
+   "denominator": "3 of 5 checks passed (bronze raws, sidecars, silver); canonical_shape and trade_schedule failed",
    "status": "FAIL",
-   "status_reason": "Stopped at COO-half act-start gate 1 (row ETFS_RIVALS-Z-W5-S1): no fetch invoked; bronze holdings prefix reads 0 objects."
+   "status_reason": "Bronze and silver landed from AWS (325 each); the gold half failed on the missing packaged module (row ETFS_RIVALS-Z-W5-S4)."
   }
  ],
  "controls": {
@@ -77,29 +104,36 @@
    "status": "N/A-SPEC-NAMES-NONE"
   },
   "determinism": {
-   "method": "the host hash set was compared once against HEAD and once against the deploy-only commit 093fc247c6 named by EC2_MANIFEST (git diff --stat 093fc247c6 HEAD over the shipped paths): 28 differing files, 5 this order's, 23 others",
-   "observed": "the two reads agree on the rider set",
+   "method": "sweep-r1 (ran build-canonical-shape 3 times) and a direct invoke of the same Lambda on the scheduled batch, both against the same silver",
+   "observed": "the same FAILED / no-marker outcome, the same missing-file cause",
    "status": "STABLE"
   }
  },
  "declared_exclusions": [
   {
-   "item": "Steps 2-7 of the order: gateway deploy, backfill, marker-driven stages, d2_live.json, ledger close",
-   "reason": "COO-half act-start gate 1 failed (23 rider files differ between the deployed gateway and HEAD; row ETFS_RIVALS-Z-W5-S1). No rollback was run either; the 40 applied resources are create-only inside the signed radius."
+   "item": "LEG B steps 2-7 (infra/aws/ec2/opal-gateway/app/server.py deployed state): deploy-only commit, gateway deploy, /healthz 200, /rivalfunds read equal to the newest page, EC2 manifest record, d2_live.json gateway_deploy_commit",
+   "reason": "STOP at step 2 (row ETFS_RIVALS-Z-W5-S6): rivalfunds_view.py imports audit.py and config.py, both differing between 093fc247c6 and HEAD. Worktree C:/tmp/wk-rivals-5gw and branch deploy-rivalfunds-gw-r1 exist at 093fc247c6 unchanged. Unauthenticated reads of /healthz, /health and /rivalfunds return 302 to the Entra login (ALB OIDC), so nothing about the gateway was read through OIDC; CTO condition 5 (page read) also cannot be met while no page exists (row W5-S4)."
+  },
+  {
+   "item": "gold canonical_shape, gold trade_schedule, platinum page, state markers for those stages",
+   "reason": "The canonical-shape Lambda returns FAILED without a marker on every batch (row ETFS_RIVALS-Z-W5-S4); the fix lies in rivalfunds_package.py and an applied Lambda code update, outside this order's paths and outside the pair's create-only description."
   },
   {
    "item": "Ledger etfs-rivalfunds-thread-r1 close",
-   "reason": "L3-L6 are unproven; the entry is left OPEN for the issuer's decision (recut on a deploy-only commit, or roll back per key)."
+   "reason": "L3, L4, L6 are unproven; the entry is left OPEN for the issuer (window ends ~16:13Z)."
   },
   {
-   "item": "infra/aws/ec2/opal-gateway/app/server.py deployed state (and rivalfunds_view.py, rivalfunds_location.json, gen_rivalfunds_location.py)",
-   "reason": "Committed by the hookup patch at 1ef9f50b67 but NOT deployed: gate 1 failed and safe-ec2-deploy.sh was not run; AC2 grades the deployed hash equality and reads FAIL."
+   "item": "etfs-netassets-daily next-fire confirmation",
+   "reason": "Untouched by this act (no key of its homes read or written; its latest Lambda log stream is 2026-09-29); a read at its next scheduled fire is the COO's."
   }
  ],
  "surprises": [
-  "ETFS_RIVALS-Z-W5-S1 -- BLOCKING/ARMED: gate 1 failed, 23 rider files; gateway deploy, backfill and read not run; ledger OPEN.",
+  "ETFS_RIVALS-Z-W5-S1 -- BLOCKING/ARMED: gate 1 failed, 23 rider files; ruled by amendment 2 (no rollback; data plane now, gateway from a deploy-only commit).",
   "ETFS_RIVALS-Z-W5-S2 -- OBSERVATION/INERT: safe-apply HALTGT needed a provisioned session serial and HALT_ACK=1.",
-  "ETFS_RIVALS-Z-W5-S3 -- OBSERVATION/INERT: opal-gateway stack needed TF_VAR placeholders and two gitignored build outputs copied to plan and apply a targeted create-only policy."
+  "ETFS_RIVALS-Z-W5-S3 -- OBSERVATION/INERT: opal-gateway stack needed TF_VAR placeholders and two gitignored build outputs to plan and apply a targeted create-only policy.",
+  "ETFS_RIVALS-Z-W5-S4 -- BLOCKING/ARMED: the canonical-shape Lambda package omits gold/etf_positioning_gold.py; gold and page cannot be produced; AC1 and AC3 (gold half) FAIL.",
+  "ETFS_RIVALS-Z-W5-S5 -- OBSERVATION/INERT: gate 3 (keys 1-10 = 0) was already non-zero from the stack's own 07:00 ET scheduled fire (11:00Z); the backfill was cut at 2026-09-28.",
+  "ETFS_RIVALS-Z-W5-S6 -- BLOCKING/ARMED: LEG B STOP, rivalfunds_view.py imports audit.py and config.py, both differ between 093fc247c6 and HEAD; gateway not deployed."
  ],
  "session_log": "org/critical_paths/change_management/20260930T1013Z_etfs-rivalfunds-thread-r1_deploy_completion.md",
  "compiler_tools": [
@@ -112,6 +146,16 @@
    "tool": "aws ssm send-command (AWS-RunShellScript, read-only sha256sum)",
    "invocation": "i-07dccb1615503ac99, /opt/opal-gateway app deploy requirements.txt identity_tool_allowlist.txt",
    "result": "ssm:a22ea652-4d07-40f1-b1fc-74ea0fd67a27 Success, 76 files hashed"
+  },
+  {
+   "tool": "aws lambda invoke (etfs-rivalfunds-fetch-holdings-lambda, etfs-rivalfunds-daily-lambda, rivalfunds-build-canonical-shape-lambda)",
+   "invocation": "mode=backfill 2025-06-13..2025-12-31 batch backfill-r1a; 2026-01-01..2026-09-28 batch backfill-r1b; sweep sweep-r1; direct gold invoke of the scheduled batch",
+   "result": "fetch OK 139/139 and 185/185; sweep PARTIAL stopped_at build-canonical-shape; gold FAILED FileNotFoundError /var/task/gold/etf_positioning_gold.py"
+  },
+  {
+   "tool": "python .tools/deploy_ledger.py close-leg",
+   "invocation": "--slug etfs-rivalfunds-thread-r1 --leg-id L5",
+   "result": "OK: leg L5 closed. Remaining open: ['L3', 'L4', 'L6']"
   }
  ]
 }
