@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e10",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b9680cfe86d95f277f519b1aa98a149a16694950"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R4.md",
+    "vintage_commit": "a29da4ac98c8f1cfd92f59d370d28d22d7940c35",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e10.residual-model-classify.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classification_model.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module: the Kimi K3 classify_one/classify_many pattern, reusing estate_report_runner.call_kimi_sub's Chat Completions JSON shape and resolution_kimi.py's injected-transport/exact-schema-key discipline. Sends ONLY name+ticker (build_prompt's only data inputs). A reply outside the 5-value asset_class vocabulary or malformed/unparseable is refused to null with a reason, never coerced. LOW_CONFIDENCE_THRESHOLD=0.80. MAX_TOKENS raised to 4000 after a live probe measured kimi-k3's hidden reasoning-token consumption starving a naive 300-token budget to zero content tokens (KIMI_LENGTH_STARVED) -- see row MDPF_SECCLASS-W8-S1.",
+      "artifact_covered_by": [
+        "SC4-e10-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_model_classifier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "18 tests, network stubbed throughout (send always caller-injected): prompt/payload carry only name+ticker; out-of-vocabulary and malformed replies refused to null; never coerced (capitalization drift 'Equity' refused, not lowered); low_confidence true at 0.79 / false at 0.80; classify_many preserves entry order under concurrency; timeout terminal (no retry), transient 5xx retries once; contract carries contract_version 0.3.0, classified_by values incl. model, classification_confidence and low_confidence fields with rule24_records.",
+      "artifact_covered_by": [
+        "SC4-e10-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/standards/MDPF_SECCLASS_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "contract_version 0.2.0 -> 0.3.0. classified_by.values gains 'model' (written by classify-residual-model.py, conditional on ticker absence, exactly like scheduled/constituents; a seed row always wins per the existing precedence text, now extended to name model). New fields classification_confidence (number 0..1, present only on a model row) and low_confidence (boolean, present only on a model row, true below 0.80), each with a rule24_record naming what a seed correction does NOT move (state_coherence) and a word-boundary token census (zero collisions outside this cell's own new files).",
+      "artifact_covered_by": [
+        "SC4-e10-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/classify-residual-model.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The runner: reads the residual (E8's R2_UNRESOLVED_REVIEW_20260930.json, proposed_class null), reads the live table's row count (Select=COUNT full scan) and its sub_asset_class vocabulary per asset_class (etf_classification_scheduled.TableVocabulary.from_live_table, the same live-read pattern SC-k-1 already established), reads the Kimi key from Secrets Manager 'astn/kimi/api-key' (the exact id estate-report-runner's ESTATE_KIMI_SECRET_ID resolves to, infra/aws/terraform/estate-report/instance.tf:133) -- never printed or written -- calls the model, and writes ONLY the census JSON. NO table write: no PutItem/UpdateItem import, no --write flag. --workers enables concurrent calls (each an independent HTTP request, no shared state); the real run used --workers 20.",
+      "artifact_covered_by": [
+        "SC4-e10-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R4_MODEL_CLASSIFY_CENSUS_20260930.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The real run against the live table and the real Kimi K3 endpoint, all 357 residual entries, name+ticker only. table_rows_at_build 2309. classified 260 (asset_class non-null), flagged 130 (confidence<0.80 among classified; 216 total rows below 0.80 including null-class rows the model itself was unsure enough to refuse), keyed 41, cusip_only 8, name_only 308 (41+8+308=357), would_write 41 (per the census's own definition: a keyed ticker absent from the live table -- 26 of these 41 carry a resolved class, 15 are model refusals (7 KIMI_TIMEOUT, 8 self-declared no-signal), see the half), overwrites 0 (structural -- this runner never writes the table).",
+      "artifact_covered_by": [
+        "SC4-e10-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_MODEL_ROWS_20260930.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Never-widen half for the FUTURE model-path write of the 26 real candidate rows (fixed_income 13, equity 7, alternatives 4, commodities 2; 11 of 26 flagged low_confidence). Names every classified_by reader (label-legacy-classified-by.py's attribute_not_exists-guarded scan, the ETFClassifier find_by_* client at its measured zero call sites, seed-etf-classifications.py's unconditional-seed-wins precedence), the writers counted (the model path itself; scheduled/constituents/seed are unaffected structurally), both branches (a ticker with no row gains one; a ticker with a row is untouched), and holds the 15 keyed-but-null, 308 name-only and 8 CUSIP-only entries for the round-4 analysis, naming them as having no key in this order.",
+      "artifact_covered_by": [
+        "SC4-e10-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC4-e10-AC1",
+      "criterion_verbatim": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_model_classifier.py -q -p no:cacheprovider -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_model_classifier.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "18 passed in 0.17s",
+      "denominator": "18 of 18 tests passed, 0 failed, 0 errors, 0 skipped -- covers name+ticker-only payload, refusal-to-null (out-of-vocabulary and malformed), the 0.79/0.80 low_confidence threshold, order-preservation under concurrency, retry policy, and the contract's model/classification_confidence/low_confidence fields.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC4-e10-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R4_CHECKS/r4_model_census.py -- expect: MODEL-CENSUS",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R4_CHECKS/r4_model_census.py",
+      "expect": "MODEL-CENSUS",
+      "output_evidence": "MODEL-CENSUS classified=260 flagged=130 of 357 (keyed=41 cusip_only=8 name_only=308, overwrites 0)",
+      "denominator": "357 of 357 residual entries (E8's own denominator: every R2_UNRESOLVED_REVIEW_20260930.json entry with proposed_class null) carry exactly one result; table_rows_at_build 2309 >= the checker's 2309 floor; keyed 41 + cusip_only 8 + name_only 308 = 357 = len(results).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC4-e10-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_MODEL_ROWS_20260930.md -- expect: HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_MODEL_ROWS_20260930.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_MODEL_ROWS_20260930.md",
+      "denominator": "0 {{slot}} placeholders left; all four required substrings present ('## The act', '## Blast radius', 'Rollback per key', 'candidate').",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Ran a live probe at MAX_TOKENS=300 (the naive value before measurement) against the same real endpoint/input used by the real run.",
+      "expected": "The call starves before emitting content (finish_reason=length, 0 content tokens) and this module's own refusal path turns it into asset_class=null, reason=KIMI_LENGTH_STARVED, rather than raising or silently returning a wrong class.",
+      "observed": "MET exactly: {'asset_class': None, 'confidence': None, 'reason': 'refused: KIMI_LENGTH_STARVED'} at max_tokens=300; the same input at max_tokens=4000 (the shipped value) returned a full parsed classification with confidence 0.8. Recorded as surprise row MDPF_SECCLASS-W8-S1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R4_CHECKS/r4_model_census.py invoked twice back to back against the same committed census file.",
+      "observed": "Identical output both times: MODEL-CENSUS classified=260 flagged=130 of 357 (keyed=41 cusip_only=8 name_only=308, overwrites 0) (rc=0). Note: the underlying MODEL CALL itself is not deterministic (temperature=1 is mandatory for kimi-k3, per the estate's own prior finding) -- this control is over the CHECKER reading the one committed census, not over re-running the model.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Writing any of the 26 candidate rows (or any row) to the live etf-classifications table.",
+      "reason": "BOUNDS: 'The real run is authorised; no table write.' classify-residual-model.py has no write mode, no --write flag, and never imports a PutItem/UpdateItem-capable write function -- overwrites is 0 by construction, not by observation of a zero-attempt run."
+    },
+    {
+      "item": "Resolving the 7 KIMI_TIMEOUT and 8 self-declared low-signal keyed refusals, or any of the 308 name-only / 8 CUSIP-only residual entries, to a class.",
+      "reason": "A transport timeout and a genuine model refusal ('no reliable signal') are both refused to null per spec (never coerced); a name-only or CUSIP-only entry has no ticker key in this order at all. All are named and held for the round-4 analysis in the half, per the task order's own instruction."
+    },
+    {
+      "item": "Wiring E9's CUSIP:<9>-prefixed key as a live writer target for the 8 CUSIP-shaped entries.",
+      "reason": "Not part of this cell (SC-e-9, slot ~4, owns that key); this cell only counts them (cusip_only=8) and holds them for the round analysis, per the task order text."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W8-S1",
+    "MDPF_SECCLASS-W8-S2"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R4_MODEL_CLASSIFY_CENSUS_20260930.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest (SC4-e10-AC1 instrument)",
+      "invocation": "python -m pytest infra/aws/lambda/v2_portal/_shared/tests/test_model_classifier.py -q -p no:cacheprovider",
+      "result": "18 passed in 0.17s, rc=0"
+    },
+    {
+      "tool": "r4_model_census.py (SC4-e10-AC2 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R4_CHECKS/r4_model_census.py",
+      "result": "MODEL-CENSUS classified=260 flagged=130 of 357 (keyed=41 cusip_only=8 name_only=308, overwrites 0), rc=0"
+    },
+    {
+      "tool": "r20_half_ready.py (SC4-e10-AC3 instrument)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_MODEL_ROWS_20260930.md",
+      "result": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_MODEL_ROWS_20260930.md, rc=0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECCLASS~8 <0.9.0_WK_MDPF_SECCLASS~8@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "PENDING-THIS-COMMIT on wk-MDPF_SECCLASS-8 (LOCAL)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> SC4-e10-AC1,SC4-e10-AC2,SC4-e10-AC3",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}
