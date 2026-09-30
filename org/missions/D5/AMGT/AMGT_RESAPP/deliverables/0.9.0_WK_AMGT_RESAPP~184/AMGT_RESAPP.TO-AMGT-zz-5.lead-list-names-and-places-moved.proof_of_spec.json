@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-zz-5.lead-list-names-and-places-moved",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "496b42d7258cc761d8469706dd16de9cace4a7da"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "77712167dcdb4998947dd0d13fa86aba9515feed",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-zz-5.lead-list-names-and-places-moved.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~184",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "92b23cb108026344d5decea7c2a1744c0be39c75",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: _join_classification adds name_source; new _crosswalk_names / _fill_names_from_crosswalk (exact security_key match, never the ticker) / _join_places_moved (one prior-generation read per axis via _find_latest_served_pointer + read_generation_rows); read_rankings calls both. No route, rank, score, order or row count changes. Not deployed (order bound: no deploy).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_lead_list_names_and_places_moved.py",
+      "kind": "test",
+      "commit_or_etag": "92b23cb108026344d5decea7c2a1744c0be39c75",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 10 stubbed tests -- places_moved up/down/zero and one prior read, not-ranked-then null+reason, no-previous-generation null+reason, walk past EMPTY, short previous generation null+reason, ticker-keyed rows, name source labels and crosswalk fill, ticker-equal name refused, unreadable crosswalk empty map, identity.name parse. 10 passed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/conftest.py",
+      "kind": "test",
+      "commit_or_etag": "92b23cb108026344d5decea7c2a1744c0be39c75",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ADDED autouse fixture no_crosswalk_names_in_reach stubbing scoped_amgt._crosswalk_names to {} (hermetic; a test overrides it).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_scoped_amgt.py",
+      "kind": "test",
+      "commit_or_etag": "92b23cb108026344d5decea7c2a1744c0be39c75",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ADJUSTED one assertion: the call sequence is now get_item, query, then only get_item pointer reads (the prior-generation walk).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_list_rows_classification.py",
+      "kind": "test",
+      "commit_or_etag": "92b23cb108026344d5decea7c2a1744c0be39c75",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ADJUSTED one assertion: the added fields name_source, places_moved, places_moved_reason are excluded from the 'nothing else changes' equality.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "rows with a name N of R, N > 16, each with name_source; LEAD-LIST ROWS CARRY MORE NAMES, EACH WITH ITS SOURCE: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round51/checks/zz_5_rows.py --what names; echo \"exit=$?\"",
+      "output_evidence": "axis trending/chatter: 2 rows\naxis trending/price: 32 rows\naxis breakout/chatter: 0 rows\naxis breakout/price: 32 rows\nrows with a name 18 of 66; by source {'etf-classifications': 16, 'crosswalk': 2} (base 16)\nLEAD-LIST ROWS CARRY MORE NAMES, EACH WITH ITS SOURCE: YES\nexit=0",
+      "denominator": "18 of 66 rows named (16 etf-classifications + 2 crosswalk), 0 named-by-ticker, 0 named without name_source; over 4 axes (2+32+0+32)",
+      "status": "PASS",
+      "expect": "rows with a name (1[7-9]|[2-9][0-9]) of 66.*LEAD-LIST ROWS CARRY MORE NAMES, EACH WITH ITS SOURCE: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "every row carries places_moved (int, or null with a reason), at least one int; LEAD-LIST ROWS CARRY PLACES MOVED: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round51/checks/zz_5_rows.py --what moved; echo \"exit=$?\"",
+      "output_evidence": "axis trending/chatter: 2 rows\naxis trending/price: 32 rows\naxis breakout/chatter: 0 rows\naxis breakout/price: 32 rows\nrows 66; places_moved int on 66; null-with-reason on 0\nLEAD-LIST ROWS CARRY PLACES MOVED: YES\nexit=0",
+      "denominator": "66 of 66 rows carry places_moved: 66 int, 0 null-with-reason (null branches proven in stubbed tests); 66s wall of the 120s bound",
+      "status": "PASS",
+      "expect": "rows 66; places_moved int on [1-9][0-9]*.*LEAD-LIST ROWS CARRY PLACES MOVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pytest reports N passed and 0 failed (plus your new tests) -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round48/checks/api-suite.sh; echo \"exit=$?\"",
+      "output_evidence": "FAILED lib/research/api/tests/test_harvest_prefixes.py::test_ii_registry_hash_matches - AssertionError: assert '3118e82e9c47...3d8156c4878b1' == '54d1865c8a65...4d...\n1 failed, 349 passed in 44.86s\nexit=1",
+      "denominator": "349 passed, 1 failed of 350 (lib/research/api/tests + lib/research/print/tests); the 1 failure is preexisting registry drift in the generated _harvest_prefixes.py, outside this order's <paths>; zz-5's 10 new tests all pass",
+      "status": "FAIL",
+      "status_reason": "Row AMGT_RESAPP-Z-W184-S1 (BLOCKING, INERT): 0 failed is unreachable inside the write grant; the remedy is regenerating lib/research/api/_harvest_prefixes.py against the current registry hash.",
+      "expect": "[0-9]+ passed(?!.*failed).*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant run recorded; the order names none.",
+      "expected": "N/A",
+      "observed": "Not mutated in this run; 10 new tests pass.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Not re-run twice: the live check reads current DynamoDB/S3 state.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Regenerating lib/research/api/_harvest_prefixes.py",
+      "reason": "Outside <paths>; the sole AC3 failure; see row AMGT_RESAPP-Z-W184-S1."
+    },
+    {
+      "item": "Any deploy of scoped_amgt.py",
+      "reason": "Order bound: no deploy, no push."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W184-S1: api-suite AC3 1 failed (test_harvest_prefixes registry hash drift), outside this order's paths"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~184/AMGT_RESAPP.TO-AMGT-zz-5.lead-list-names-and-places-moved.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh ... at 92b23cb108",
+      "result": "All checks passed"
+    }
+  ]
+}
