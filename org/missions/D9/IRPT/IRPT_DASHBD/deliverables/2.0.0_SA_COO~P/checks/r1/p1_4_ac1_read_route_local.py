@@ -19,9 +19,20 @@ from pathlib import Path
 
 root = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 sys.path.insert(0, str(root))
+
+
+def _thread_account(root):
+    """The thread account: the seat's record deliverables/0.4.0_DS_ClientPlatform~S/THREAD_ACCOUNT.json ({"thread_account": "..."}),
+    chosen by census in DB-b-1 (issuer amendment 1, 2026-09-30 17:1xZ); the roster's first account is the fallback."""
+    import json as _json
+    p = root / "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.4.0_DS_ClientPlatform~S/THREAD_ACCOUNT.json"
+    try:
+        return str(_json.loads(p.read_text(encoding="utf-8"))["thread_account"])
+    except Exception:  # noqa: BLE001
+        return "0027265115"
+THREAD = _thread_account(root)
 SRC = root / "infra/aws/lambda/investor-reporting/reporting/entry.py"
 PLAN = root / "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/reporting-read.plan.txt"
-THREAD = "0027265115"
 
 
 def fail(msg):
