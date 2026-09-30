@@ -1,0 +1,144 @@
+{
+ "to_id": "IRPT_BCKEND.TO-IB-pr-273",
+ "worker": "0.9.0_WK_IRPT_BCKEND~100",
+ "adapter": {
+  "function": "irpt-performance-adapter",
+  "code_sha256": "+h/AH/RY7PK+MLuXyflt+YYzWg+jXHSXTOUBwr0EHbo=",
+  "last_modified": "2026-09-29T16:40:25.000+0000",
+  "artifact_match": "get-function Code.Location zip downloaded (424,586 bytes); base64(sha256(bytes)) equals Configuration.CodeSha256 equals the CodeSha256 read at check time; extracted and run cold by checks/r27/s237_cold_probe.py, a same-composition variant of r20/adapter_cold_periods.py (row IRPT_BCKEND-W100-S1). Verbatim run output: adapter_cold_probe_output.txt",
+  "accounts": {
+   "0093614544": {
+    "SI": "-1.0692% (actual 2024-07-09..2026-09-28)",
+    "3Y": "REFUSED UNSUPPORTED_OPERATION (HoldingsWindowNotRuled: requested window is not a ruled holdings period)",
+    "reads": "irpt/49financial/gold/holdings_performance_daily/ (holdings gold, OPAL_HOLDINGS)",
+    "gold_daily_return_2025-01-10": -0.0027492450233967338,
+    "ruled_YTD_at_2025-06-30": "+0.8295% (actual 2025-01-02..2025-06-30)"
+   },
+   "0027256463": {
+    "SI": "+19.0591% (actual 2024-07-09..2026-09-28)",
+    "3Y": "REFUSED UNSUPPORTED_OPERATION (HoldingsWindowNotRuled: requested window is not a ruled holdings period)",
+    "reads": "irpt/49financial/gold/holdings_performance_daily/ (holdings gold, OPAL_HOLDINGS)",
+    "gold_daily_return_2025-01-10": -0.00114392779908189,
+    "ruled_YTD_at_2025-06-30": "+9.1200% (actual 2025-01-02..2025-06-30)"
+   },
+   "0036184450": {
+    "SI": "REFUSED OBJECT_NOT_COVERED (HoldingsGoldRefused: engine account mapping missing or duplicate)",
+    "3Y": "REFUSED UNSUPPORTED_OPERATION (HoldingsWindowNotRuled: requested window is not a ruled holdings period)",
+    "reads": "irpt/49financial/gold/holdings_performance_daily/ (holdings gold, OPAL_HOLDINGS)",
+    "gold_daily_return_2025-01-10": -0.007996290808976193,
+    "ruled_YTD_at_2025-06-30": "+9.1565% (actual 2025-01-07..2025-06-30)"
+   }
+  },
+  "propagates": false,
+  "propagates_basis": "MEASURED: the deployed adapter composes HoldingsGoldSource only (installed._holdings_source; holdings_gold.calculate) and never reads canonical/twr_daily; the holdings gold's own 2025-01-10 daily_return for 0093614544 is -0.2749% (the engine served +56.10%; c02 counterfactual -0.2863%) and its SI is -1.0692% (the engine-era perfrp SI for the same account is +69.80%). The gold holds no 2025-01-09 partition (558 partitions: 2025-01-08 then 2025-01-10)."
+ },
+ "reader_shape": "NOT_A_TWR_DAILY_READER",
+ "retained": {
+  "bucket_prefix": "s3://opal-data-irpt/irpt/49financial/platinum/performance_reports/",
+  "objects_read": 110,
+  "by_provider": {
+   "OPAL_HOLDINGS": 71,
+   "OPAL_ENGINE": 39
+  },
+  "engine_era_spanning_2025-01-10": 0,
+  "holdings_basis_spanning_2025-01-10": 27,
+  "statement": "MEASURED: 39 retained 49F reports are engine-era (lineage.provider OPAL_ENGINE) and every one has start >= 2025-09-22, so none spans 2025-01-10; the 27 retained reports spanning 2025-01-10 are holdings-basis (OPAL_HOLDINGS, SI windows from 1970-01-01). Code read at the deployed bytes (retained.py): a pre-switch OPAL_ENGINE pointer sits at the OLD accepted-key namespace and is never found by the reopen path, so even those 39 do not reopen.",
+  "census_file": "retained_performance_reports_census.json"
+ },
+ "readers": [
+  {
+   "file": "data/assets/scripts/gold/runners_49f/perfrp_emit_core.py",
+   "served_surface": "Advisor Intelligence Perfrp Performance card, account level: leaf platinum/advi/49financial/perfrp_performance_account.json in s3://opal-data-portal-v2 (LastModified 2026-09-01T03:16:07Z, as_of 2026-09-01, window SI 2024-07-08..2026-09-01); the shared advisor router serves platinum/advi/{firm}/ from opal-data-portal-v2 (infra/aws/lambda-edge/_shared/firm-config.mjs:46 records mix_summary.json HTTP 200 on the same path class); this leaf itself was NOT fetched over HTTP by this worker (authenticated API, not called)",
+   "reads_2025_01_09": "no -- CALENDAR_ENUMERATION: _period_window takes lib.trading_calendar.trading_days_between (skips the NYSE closure) and _read_twr_window reads exactly those days (n_partitions_read 538 of 540 requested, absent only 2026-08-31 and 2026-09-01), so the 2025-01-09 partition is never loaded and the gap is invisible",
+   "propagates": true,
+   "measured_figure": "served SI window_return vs c02-counterfactual (2025-01-10 replaced by (EMV-CF)/BMV-1 with the 01-09 external CF folded in): 0093614544 +69.81% vs +8.47% (error +61.34 pp, COMPUTED_PARTIAL); 0063952925 +99.79% vs +4.54% (error +95.24 pp, COMPUTED_PARTIAL); 0027256463 -83.34% vs +28.47% (error -111.81 pp, COMPUTED_PARTIAL); 0036184450 -12.75% vs +28.06% (error -40.81 pp, COMPUTED_PARTIAL)",
+   "measured_population": "figure_state census of the leaf: COMPUTED_PARTIAL 7,620 / NOT_COMPUTED_INPUTS_PRESENT 997 / NOT_COMPUTED_INPUTS_ABSENT 15 of 8,632 entries; the four S237 accounts probed are all COMPUTED_PARTIAL carrying a figure"
+  },
+  {
+   "file": "data/assets/scripts/gold/runners_49f/perfrp_rollup.py",
+   "served_surface": "same leaf as perfrp_emit_core (link_returns is the linker the emitter calls)",
+   "reads_2025_01_09": "no -- receives only the days the emitter hands it",
+   "propagates": true,
+   "measured_figure": "the same four SI window_return figures as perfrp_emit_core: link_returns links every non-None daily value and the 2025-01-10 row is status OK with a live r_net"
+  },
+  {
+   "file": "portal/src/pages/AdvisorIntelligence/_shared/perfrp/contract.ts",
+   "served_surface": "Perfrp Performance card figure-state rendering (COMPUTED_PARTIAL hasValue: true at :166); a renderer of the leaf, no return arithmetic",
+   "reads_2025_01_09": "no -- reads the served leaf, not the partitions (:451 is a declared source-history floor constant)",
+   "propagates": true,
+   "measured_figure": "hasValue true for COMPUTED_PARTIAL, so the leaf's inflated window_return renders as a figure with a coverage note; same four figures"
+  },
+  {
+   "file": "portal/src/pages/AdvisorIntelligence/_shared/perfrp/cards.ts",
+   "served_surface": "Perfrp Performance card; its line-17 comment says twr_daily is refused for 100% of accounts at the frontier, which the served leaf contradicts (7,620 of 8,632 entries carry a figure)",
+   "reads_2025_01_09": "no -- reads the served leaf",
+   "propagates": true,
+   "measured_figure": "the card renders the leaf entries the contract marks hasValue; same four figures (row IRPT_BCKEND-W100-S2)"
+  },
+  {
+   "file": "data/assets/scripts/gold/runners_49f/parity_period_returns.py",
+   "served_surface": "none (internal BD-parity oracle, OUR side of the Black Diamond comparison; imported only by QA and check scripts and the retired f49_engine copy)",
+   "reads_2025_01_09": "yes when its caller hands it a daily frame that includes the partition; neutral-by-value (S239) links the 01-09 NO-PRIOR-TRADING-DAY rows x1.0",
+   "propagates": false,
+   "measured_figure": "arithmetic carries the 2025-01-10 inflation per S239's code read (:373-388); not a served reader, so not counted toward the verdict"
+  },
+  {
+   "file": "data/assets/scripts/gold/runners_49f/perfrp_contract.py",
+   "served_surface": "none (constants and shape declaration; twr_daily floor 2024-07-09 at :181)",
+   "reads_2025_01_09": "no",
+   "propagates": false
+  },
+  {
+   "file": "data/assets/scripts/gold/runners_49f/c04_validation_battery.py",
+   "served_surface": "none (validation battery; twr_daily=None hardcoded at :165, NOT WIRED)",
+   "reads_2025_01_09": "no",
+   "propagates": false
+  },
+  {
+   "file": "data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py",
+   "served_surface": "none (chain orchestration that runs c02 and writes canonical/twr_daily; no reader)",
+   "reads_2025_01_09": "n/a (producer)",
+   "propagates": false
+  },
+  {
+   "file": "data/assets/scripts/gold/runners_49f/c02_twr_engine.py",
+   "served_surface": "none directly (the PRODUCER of the 2025-01-10 row: served daily r_net +56.10% for 0093614544 lives in the gold table perfrp_emit_core reads); no change made",
+   "reads_2025_01_09": "reads flow_ledger at date=D only (c02:460)",
+   "propagates": false
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/performance/f49_engine.py",
+   "served_surface": "none since 2026-09-29T16:40:25Z (the deployed adapter no longer calls f49_engine.calculate; the module stays in the zip for ruled_period_for, map_account and EngineReturnImplausible only)",
+   "reads_2025_01_09": "n/a (PARTITION_LISTING shape, retired)",
+   "propagates": false
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/performance/holdings_gold.py",
+   "served_surface": "Performance adapter (irpt-performance-adapter), 49F path, reads the holdings gold only",
+   "reads_2025_01_09": "no partition exists in the holdings gold at 2025-01-09; the adapter lists partitions and reads those",
+   "propagates": false,
+   "measured_figure": "0093614544 SI -1.0692% vs engine-era +69.80%; gold 2025-01-10 daily_return -0.2749%"
+  },
+  {
+   "file": "infra/aws/lambda/investor-reporting/performance/retained.py",
+   "served_surface": "Performance reopen path (accepted-report pointers)",
+   "reads_2025_01_09": "no",
+   "propagates": false,
+   "measured_figure": "0 of 39 engine-era retained reports span 2025-01-10; 27 holdings-basis retained reports span it and carry holdings-gold values"
+  },
+  {
+   "file": "data/assets/scripts/gold/irpt_holdings_performance/holdings_performance.py",
+   "served_surface": "none (the holdings-gold producer; names twr_daily in a docstring at :34 only)",
+   "reads_2025_01_09": "no",
+   "propagates": false
+  }
+ ],
+ "verdict": "PROPAGATES",
+ "verdict_basis": "One served reader carries it: the perfrp emitter (CALENDAR_ENUMERATION over twr_daily) published perfrp_performance_account.json to the platinum/advi/49financial/ serve origin with Since-inception window_return figures that include the inflated 2025-01-10 day. The deployed Performance adapter does NOT propagate (holdings gold only). Not measured: an authenticated HTTP fetch of the leaf through the portal API, and whether a person is currently exposed to it.",
+ "claims": {
+  "adapter_figures": "measured",
+  "perfrp_leaf_figures": "measured (S3 read of the served object)",
+  "counterfactual_figures": "inferred (c02's own EOD form with the 01-09 external CF folded in, the S237 method; not a vendor figure)",
+  "leaf_reaches_a_person": "held (object present on the serve origin and path class routed; no HTTP fetch made)"
+ }
+}
