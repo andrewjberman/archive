@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-282",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-282.served-answers-tell-the-truth.md",
+    "group": "OTHER",
+    "vintage_commit": "cc08e7db74"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R28_Y.md",
+    "vintage_commit": "cc08e7db74",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-282.served-answers-tell-the-truth.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~92",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "UploadService._answer shapes NEEDS_CORRECTION findings whose code has envelope words: actions=[CORRECT], description=the envelope's words; top level unchanged (closed contract, row W92-S1)",
+      "artifact_covered_by": [
+        "Y28-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_correction_words.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 tests: words equal ops/status.py CORRECTION_WORDS; served answer carries them; answer still valid against AnalysisUploadResult; unmapped code unchanged. 2 of 4 fail against base uploads.py",
+      "artifact_covered_by": [
+        "Y28-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/owned_report.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ReportBundleAbsent(AnalysisUnavailable) with public_reason_code NOT_READY, raised when the retained report bytes read returns NoSuchKey/NoSuchVersion/404/NotFound; _authz untouched",
+      "artifact_covered_by": [
+        "Y28-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/tests/test_owned_report.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 tests added (2 parametrized absent-bundle -> NOT_READY not UNEXPECTED, 1 control that other store errors propagate); 20 passed before, 23 after",
+      "artifact_covered_by": [
+        "Y28-2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y28-2-AC1",
+      "criterion_verbatim": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider intake/tests/ -k correction -> at least 1 test selected, 0 failed",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider intake/tests/ -k correction",
+      "output_evidence": "11 passed, 243 deselected in 0.55s (rc=0). 11 selected: 4 new in intake/tests/test_correction_words.py plus 7 that already matched -k at base (row W92-S3).",
+      "denominator": "11 of 11 selected tests passed (254 collected)",
+      "expect": "^11 passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y28-2-AC2",
+      "criterion_verbatim": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ops/tests/test_owned_report.py -> 0 failed, including an added absent-bundle test answering NOT_READY not UNEXPECTED",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider ops/tests/test_owned_report.py",
+      "output_evidence": "23 passed in 4.57s (rc=0); 20 passed at base. The 3 added tests include test_ready_report_with_absent_bundle_answers_not_ready_not_unexpected[NoSuchKey|NoSuchVersion]; against the unmodified owned_report.py those two fail with the raw store error.",
+      "denominator": "23 of 23 tests passed",
+      "expect": "^23 passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y28-2-AC3",
+      "criterion_verbatim": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider reports/tests/test_status_installed.py ops/tests/test_status.py -> 0 failed (control)",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider reports/tests/test_status_installed.py ops/tests/test_status.py",
+      "output_evidence": "27 passed in 0.30s (rc=0); ops/status.py and _authz/ not modified.",
+      "denominator": "27 of 27 tests passed",
+      "expect": "^27 passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "New tests run against the unmodified uploads.py and owned_report.py.",
+      "expected": "new tests fail at base",
+      "observed": "test_correction_words: 2 of 4 fail (no CORRECTION_WORDS attribute; actions still REPLACE_FILE); test_owned_report: 2 of 2 absent-bundle cases fail with the raw store error",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- offline doubles on fixed inputs",
+      "observed": "each suite run twice with the same counts",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W92-S1 -- the published AnalysisUploadResult is closed, so the vocabulary rides on the finding items rather than top-level actions/public_reason_code",
+    "IRPT_BCKEND-W92-S2 -- ops/status.py is not staged into irpt-ycharts-generate; CORRECTION_WORDS is a literal copy locked by an equality test",
+    "IRPT_BCKEND-W92-S3 -- -k correction selects 7 tests at base, not zero",
+    "IRPT_BCKEND-W92-S4 -- absent-bundle fix proven against a doubled store error only; live S213 cause not read back"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest -q -p no:cacheprovider intake/tests/ _contracts/tests/test_upload_template_lane_contract.py _contracts/test_upload_contract.py",
+      "result": "269 passed, 1 skipped (intake 253 passed/1 skipped; contract tests 16 passed): the published closed upload contract still admits the served NEEDS_CORRECTION answer"
+    }
+  ]
+}
