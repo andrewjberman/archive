@@ -1,0 +1,100 @@
+== (1) NEWEST-WINS SILVER READER CENSUS under lib/ ==
+denominator: 345 .py files scanned under lib/ (tests included in the scan, marked TEST)
+pattern searched: P1 fetched_at compared with < or >   /fetched_at["']?\)?\]?\s*[<>]/
+pattern searched: P2 call or def of silver_latest   /\bsilver_latest\b/
+pattern searched: P3 max()/sorted() keyed on fetched_at   /(max|sorted)\(.{0,120}fetched_at/
+pattern searched: P4 store.supersedes( / store.part_order_key( call, or their def (the shared comparator)   /(store\.(supersedes|part_order_key)\(|def (supersedes|part_order_key)\()/
+hits: 30 in production files, 29 in test files
+-- production hits (file:line  function  pattern  classification) --
+  lib/opal_data_harvest/harvest_grammar.py:142  watermark  P2  mention of silver_latest (docstring/comment)
+  lib/opal_data_harvest/harvest_grammar.py:146  watermark  P2  CALLER of store.silver_latest (inherits the rule)
+  lib/opal_data_harvest/silver_from_bronze.py:406  rows_by_company_mention  P1  OUTSIDE PATHS: pure function over rows ALREADY read (no part names) -> surprise row, not an edit
+  lib/opal_data_harvest/uploads.py:23  _silver_append_retrying_object_name  P2  mention of silver_latest (docstring/comment)
+  lib/research/corpus/fund_form.py:243  gather_items  P2  mention of silver_latest (docstring/comment)
+  lib/research/corpus/fund_form.py:249  gather_items  P2  CALLER of store.silver_latest (inherits the rule)
+  lib/research/corpus/sector_template.py:9  <module>  P2  mention of silver_latest (docstring/comment)
+  lib/research/corpus/sector_template.py:446  _all_rows  P2  CALLER of store.silver_latest (inherits the rule)
+  lib/research/corpus/typed.py:580  reports_for  P2  CALLER of store.silver_latest (inherits the rule)
+  lib/research/corpus/typed.py:724  _run_census  P2  CALLER of store.silver_latest (inherits the rule)
+  lib/research/corpus/typed.py:746  _run_reports_for_first_multi  P2  CALLER of store.silver_latest (inherits the rule)
+  lib/research/filings/analyze.py:1372  reverify_stored_thesis_driver  P2  CALLER of store.silver_latest (inherits the rule)
+  lib/research/filings/analyze.py:1436  source_from_pool  P2  CALLER of store.silver_latest (inherits the rule)
+  lib/research/harvest/filings.py:502  move_m2  P2  mention of silver_latest (docstring/comment)
+  lib/research/harvest/filings.py:585  move_m2  P2  CALLER of store.silver_latest (inherits the rule)
+  lib/research/harvest/lusha.py:144  already_fetched  P2  CONSUMER: a `fetched_at >= since` threshold on store.silver_latest's output, no pick of its own
+  lib/research/harvest/lusha.py:145  already_fetched  P1  CONSUMER: a `fetched_at >= since` threshold on store.silver_latest's output, no pick of its own
+  lib/research/harvest/lusha.py:146  already_fetched  P2  CONSUMER: a `fetched_at >= since` threshold on store.silver_latest's output, no pick of its own
+  lib/research/harvest/lusha.py:151  already_fetched  P1  CONSUMER: a `fetched_at >= since` threshold on store.silver_latest's output, no pick of its own
+  lib/research/harvest/publication_gold.py:714  _iter_all_listing_hits  P2  mention of silver_latest (docstring/comment)
+  lib/research/harvest/publication_gold.py:716  _iter_all_listing_hits  P2  mention of silver_latest (docstring/comment)
+  lib/research/harvest/publication_gold.py:760  _iter_latest_articles  P2  READER -> delegates to store.silver_latest
+  lib/research/harvest/publication_gold.py:762  _iter_latest_articles  P2  READER -> delegates to store.silver_latest
+  lib/research/harvest/publication_gold.py:844  _latest_articles_for_keys  P2  READER (newest-wins over parts) -> calls store.supersedes
+  lib/research/harvest/publication_gold.py:880  build_mention  P2  mention of silver_latest (docstring/comment)
+  lib/research/harvest/store.py:369  supersedes  P1  COMPARATOR: the one shared newest-wins rule
+  lib/research/harvest/store.py:373  silver_latest  P2  READER (newest-wins over parts) -> calls store.supersedes
+  lib/research/harvest/store.py:431  silver_append  P2  CALLER of silver_latest (dedupe read, no pick of its own)
+  lib/research/management/batch.py:118  census_filings  P2  CALLER of store.silver_latest (inherits the rule)
+  lib/research/management/roster.py:1094  _silver_rows_for_security  P2  CALLER of store.silver_latest (inherits the rule)
+-- newest-wins readers (distinct) --
+  lib/opal_data_harvest/silver_from_bronze.py::rows_by_company_mention
+  lib/research/harvest/publication_gold.py::_iter_latest_articles
+  lib/research/harvest/publication_gold.py::_latest_articles_for_keys
+  lib/research/harvest/store.py::silver_latest
+UNCLASSIFIED production hits: 0  (any other function whose hit is only `store.silver_latest(` / `hstore.silver_latest(` is a CALLER)
+test-file hits: 29 (not readers; listed by count per file)
+  lib/opal_data_harvest/test_legacy_upload.py: 3
+  lib/opal_data_harvest/test_n1_received_bytes_and_run_record.py: 1
+  lib/opal_data_harvest/test_retrieval_provenance.py: 1
+  lib/opal_data_harvest/test_silver_from_bronze.py: 1
+  lib/research/corpus/tests/test_fund_form.py: 4
+  lib/research/corpus/tests/test_fwd17_scratch_drive.py: 1
+  lib/research/corpus/tests/test_typed.py: 1
+  lib/research/harvest/tests/test_bright_data_serp.py: 1
+  lib/research/harvest/tests/test_filings.py: 2
+  lib/research/harvest/tests/test_m2_move.py: 1
+  lib/research/harvest/tests/test_o3_silver_tie_break.py: 9
+  lib/research/harvest/tests/test_store.py: 1
+  lib/research/management/tests/test_jp_president_and_readable_reasons.py: 1
+  lib/research/management/tests/test_management.py: 1
+  lib/research/social/tests/test_collect_harvest.py: 1
+
+== (2) SERVED SILVER: record keys whose newest fetched_at is tied across parts ==
+denominator: 24 bucket top-level prefixes listed; 10 (source, silver table) pairs hold silver
+  amgt/research-report: parts=5  record keys=355  tied newest-fetched_at across parts=0  (same-part duplicates at max=0)  keys whose picked part moves old->new=0  [control: store.silver_latest and old rule both cover all 355 keys: True]
+  barrons/article: parts=15  record keys=15  tied newest-fetched_at across parts=0  (same-part duplicates at max=0)  keys whose picked part moves old->new=0  [control: store.silver_latest and old rule both cover all 15 keys: True]
+  bloomberg/article: parts=19  record keys=19  tied newest-fetched_at across parts=0  (same-part duplicates at max=0)  keys whose picked part moves old->new=0  [control: store.silver_latest and old rule both cover all 19 keys: True]
+  ft/article: parts=14  record keys=14  tied newest-fetched_at across parts=0  (same-part duplicates at max=0)  keys whose picked part moves old->new=0  [control: store.silver_latest and old rule both cover all 14 keys: True]
+  issuer-site/filing_source: parts=1  record keys=1  tied newest-fetched_at across parts=0  (same-part duplicates at max=0)  keys whose picked part moves old->new=0  [control: store.silver_latest and old rule both cover all 1 keys: True]
+  sec/filing_source: parts=1  record keys=13  tied newest-fetched_at across parts=0  (same-part duplicates at max=0)  keys whose picked part moves old->new=0  [control: store.silver_latest and old rule both cover all 13 keys: True]
+  seeking-alpha/article: parts=35  record keys=46  tied newest-fetched_at across parts=0  (same-part duplicates at max=0)  keys whose picked part moves old->new=0  [control: store.silver_latest and old rule both cover all 46 keys: True]
+  seeking-alpha/listing_hit: no newest-wins reader collapses this table to one row per key (a hit table; publication_gold._listing_hit_rows keeps every row) -- SKIPPED, not counted
+  wsj/article: parts=26  record keys=26  tied newest-fetched_at across parts=0  (same-part duplicates at max=0)  keys whose picked part moves old->new=0  [control: store.silver_latest and old rule both cover all 26 keys: True]
+  wsj/listing_hit: no newest-wins reader collapses this table to one row per key (a hit table; publication_gold._listing_hit_rows keeps every row) -- SKIPPED, not counted
+TOTAL over 8 (source, table) pairs read: record keys=489  tied across parts=0  picks that move old->new=0
+
+== (3) /timeline/day body sha256 under the OLD rule and the NEW rule (local route calls, read-only) ==
+tied article_keys in the served silver: 0
+AMZN_US_Equity 2026-09-07  articles=3  tied article_keys touching this day=0 []
+  OLD rule  route sha256 5aecd79e8001bdff9a4d8ab032b4ee01d8893e47d25349815448f217455c53e5  len 1127
+  NEW rule  route sha256 5aecd79e8001bdff9a4d8ab032b4ee01d8893e47d25349815448f217455c53e5  len 1127
+  legacy _iter_latest_articles loaders: OLD rule 5aecd79e8001bdff9a4d8ab032b4ee01d8893e47d25349815448f217455c53e5  NEW rule 5aecd79e8001bdff9a4d8ab032b4ee01d8893e47d25349815448f217455c53e5
+  OLD==NEW byte-equal: True   route==legacy under NEW rule: True   route==legacy under OLD rule: True
+HD_US_Equity 2026-08-18  articles=3  tied article_keys touching this day=0 []
+  OLD rule  route sha256 de64cc82313f886e39dec240939f3fd59cbbebc387b0b96d62003d3e42bd931b  len 1112
+  NEW rule  route sha256 de64cc82313f886e39dec240939f3fd59cbbebc387b0b96d62003d3e42bd931b  len 1112
+  legacy _iter_latest_articles loaders: OLD rule de64cc82313f886e39dec240939f3fd59cbbebc387b0b96d62003d3e42bd931b  NEW rule de64cc82313f886e39dec240939f3fd59cbbebc387b0b96d62003d3e42bd931b
+  OLD==NEW byte-equal: True   route==legacy under NEW rule: True   route==legacy under OLD rule: True
+992_HK_Equity 2026-08-13  articles=2  tied article_keys touching this day=0 []
+  OLD rule  route sha256 dac6b73942cbe3af8347a8628b67d4393a984856cd12ed0da0b08c3b917209fe  len 777
+  NEW rule  route sha256 dac6b73942cbe3af8347a8628b67d4393a984856cd12ed0da0b08c3b917209fe  len 777
+  legacy _iter_latest_articles loaders: OLD rule dac6b73942cbe3af8347a8628b67d4393a984856cd12ed0da0b08c3b917209fe  NEW rule dac6b73942cbe3af8347a8628b67d4393a984856cd12ed0da0b08c3b917209fe
+  OLD==NEW byte-equal: True   route==legacy under NEW rule: True   route==legacy under OLD rule: True
+992_HK_Equity 2026-09-23  articles=0  tied article_keys touching this day=0 []
+  OLD rule  route sha256 32b5257d204ee31a08411476b83aa7db4378a3113fccf3d710341bc6630499ed  len 159
+  NEW rule  route sha256 32b5257d204ee31a08411476b83aa7db4378a3113fccf3d710341bc6630499ed  len 159
+  legacy _iter_latest_articles loaders: OLD rule 32b5257d204ee31a08411476b83aa7db4378a3113fccf3d710341bc6630499ed  NEW rule 32b5257d204ee31a08411476b83aa7db4378a3113fccf3d710341bc6630499ed
+  OLD==NEW byte-equal: True   route==legacy under NEW rule: True   route==legacy under OLD rule: True
+OLD==NEW byte-equal on 4 of 4 named days
+
+S3 calls made: 125 LIST, 118 GET (read-only proxy; no PUT/DELETE/vendor call is reachable)
