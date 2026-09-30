@@ -13,6 +13,10 @@ from lib.research.harvest import store  # noqa: E402
 
 LIVE = ("barrons", "bbg", "ft", "wsj")
 CONTROL = ("sa",)
+# AMENDMENT 1: attempt 1 ran one job (config jobs_per_run: 1) and barrons was challenged (Branch B, not retried).
+# The re-cut runs jobs on bbg, ft and wsj only; barrons joins sa as a root that must gain NO object.
+JOB_PUBLISHERS = ("bbg", "ft", "wsj")
+NO_NEW = ("sa", "barrons")
 SECURITY_KEY = "992_HK_Equity"
 WK = os.path.join(ROOT, "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~65")
 SIGNING_BEFORE = os.path.join(ROOT, "org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round25/o5_signing_before.json")

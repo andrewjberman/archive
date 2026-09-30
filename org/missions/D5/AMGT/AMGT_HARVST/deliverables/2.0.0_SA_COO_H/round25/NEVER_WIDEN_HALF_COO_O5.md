@@ -82,3 +82,32 @@ The plan (zero-network) is printed first. There is no sa call, no schedule chang
 - Forward only: never-overwrite means no served object can be replaced.
 - Removing a new object is an S3 delete, which is a human word. The run records list every fetched key.
 - A `PreconditionFailed` on a put writes nothing and leaves the prior object.
+
+---
+
+## AMENDMENT 1 (2026-09-30 ~04:4xZ) -- RE-SIGNED: three publishers, `--max-jobs 3`; barrons becomes a no-write root
+
+**What attempt 1 measured (`0f4d0c5109`; worker `~65`, row `Z-W65-S1`):**
+- The signed command carried no `--max-jobs`, and `lib/opal_data_harvest/config.json:7` sets `jobs_per_run: 1`. This was the
+  issuer's cut-time miss.
+- Run 1 (`20260930T040818Z-run-25c129af`) therefore ran ONE job, barrons, and the publisher challenged it:
+  `request_rejected`, "Publisher verification challenge from www.barrons.com". The collector set a 900 s cooldown.
+- 0 objects were written. The pair held on 5 of 5 roots (moved 0, removed 0, new 0). Run 2 was not run.
+
+**The act, amended.** Run from the SAME code: worktree `wk-hvst-r25-65`, whose `lib/` is unchanged from `71a9e708d7`;
+`git diff --stat 65aa9251bc HEAD` still shows only `o-2`'s two files. It is run TWICE on the same UTC day:
+
+`python -m lib.opal_data_harvest run --harvest-grammar --retrieval-mode backfill --floor 2026-01-01 --new-only --security-json <Lenovo> --publishers bbg ft wsj --max-jobs 3 --runtime-root "C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.runtime/opal-data-harvest"`
+
+- **The job cursor** is keyed per plan (`worker.py` ~:456, `plan_key` over the security and publisher jobs) and wraps
+  modulo the job count. So `--max-jobs 3` runs bbg, ft and wsj on EACH run, and the repeat re-runs the same three.
+- **barrons is OUT.** It is Branch B, recorded and not retried (CTO condition 4). The next round reads it.
+- **The barrons root** (30 objects) now joins sa (103) as a root that must gain NO object.
+
+**Re-measured at re-signing (`o-5.before.py --signing`, ~04:4xZ):**
+- barrons 30, bbg 978, ft 28, wsj 55, sa 103.
+- The snapshot, ETags included, is IDENTICAL to the v1 signing snapshot. Attempt 1 wrote nothing.
+
+**Checks amended with it:** `o5_common.py` `JOB_PUBLISHERS = (bbg, ft, wsj)`, `NO_NEW = (sa, barrons)`. AC1 requires
+exactly those three jobs; AC1 and AC2 fail on any new sa or barrons object. Everything else in the verdict, the branches and
+the rollback stands.
