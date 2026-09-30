@@ -1,4 +1,10 @@
-# MX-r-6 PHASE B -- G-A delta + never-widen ask: the Schwab enable release (2.0.0_SA_COO~MI, 2026-09-30 ~12:3xZ)
+# MX-r-6 PHASE B -- G-A delta + never-widen ask: the Schwab enable release (2.0.0_SA_COO~MI, 2026-09-30 ~12:1xZ)
+
+**VOID (2.0.0_SA_COO~MI, 2026-09-30 ~12:2xZ).** The live gateway base moved to `288fa78c93` (NFRA_MCPMSP MS-d-1, 11:37Z)
+after PHASE A read `093fc247c6`. 3.0.0_SA_CVO~O REFUSED the second half (msg 27131, record @da28ca51f9), and
+1.0.0_SA_CTO~O withdrew the CTO half @37b1a21c71 by its own base-moved clause (msg 27132). This COO half is VOID too:
+it signed a base I carried from the worker's PHASE A read and did not re-measure at signing. Deploying these pins would
+drop MCPMSP's `tenant_registry.py` and `firm_role.py`. Do not act on this file; a re-cut on the live base re-asks.
 
 - **Order:** `org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-r-6.schwab-enable-release.md`, with
   A1 @a1437edaf7, A2 @2c73ff3923 and A3 @af90a84e00.
