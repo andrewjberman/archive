@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPMSP.TO-MS-sg-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/prd/NFRA_MCPMSP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7926f5194c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/decompositions/NFRA_MCPMSP_DECOMP.md",
+    "vintage_commit": "7926f5194c",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPMSP/task-orders/NFRA_MCPMSP.TO-MS-sg-1.gateway-sender-gate.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPMSP~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/sender_gate.py",
+      "kind": "script",
+      "commit_or_etag": "df4d410b66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "n/a",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/asker_scope.py",
+      "kind": "script",
+      "commit_or_etag": "df4d410b66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "n/a",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/audit.py",
+      "kind": "script",
+      "commit_or_etag": "df4d410b66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "n/a",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_mcpmsp_sender_gate.py",
+      "kind": "test",
+      "commit_or_etag": "df4d410b66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "n/a",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest: N passed, 0 failed; each of the six named tests >=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round2/checks/e2g.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest: ============================== 6 passed in 0.43s ==============================; test_allowed_domain_matching_tenant_served=1 test_domain_not_allowed_refused_and_logged=1 test_domain_tenant_mismatch_refused=1 test_guest_form_refused=1 test_opal_sender_refused_only_for_msp_calling_identity=1 test_refusal_entry_has_sender_email_domain_no_text=1\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 tests passed; 6 of 6 named tests >=1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "asker + adapter + round-1 suites: >=48 passed, 0 failed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round2/checks/e2g.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "asker + adapter + round-1 suites: 17 failed, 31 passed, 1 warning in 15.80s\nRESULT: FAIL\nexit=1",
+      "denominator": "31 of 48 existing tests passed; 17 failed, every one code asker_sender_domain (existing fakes carry no member email); with the gate patched out in a scratch run: 48 passed. Row NFRA_MCPMSP-Z-W3-S3.",
+      "status": "FAIL",
+      "status_reason": "17 of 48 existing asker/adapter tests fail: the gate refuses an absent sender address (asker_sender_domain) as the TO specifies, and those suites' Graph fakes return chat members with no email. Their files are outside this order's paths. Cause isolated (48 pass with the gate patched out in a scratch run). Row NFRA_MCPMSP-Z-W3-S3."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "asker_sender_refusal allowlist includes chat_id display_name oid reason tid sender_email sender_domain; text_fields=[] verdict=OK -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round2/checks/e2g.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "asker_sender_refusal=['chat_id', 'display_name', 'oid', 'reason', 'sender_domain', 'sender_email', 'tid'] text_fields=[] verdict=OK\nRESULT: PASS\nexit=0",
+      "denominator": "7 of 7 required fields present; 0 text fields",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "none named by spec",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: offline fakes",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "status flip of the task order to complete",
+      "reason": "AC2 is FAIL, so the order stays open; the TO file is outside worker paths in any case"
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPMSP-Z-W3-S3",
+    "NFRA_MCPMSP-Z-W3-S4"
+  ],
+  "session_log": "none",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "e2g.AC1.sh / e2g.AC2.sh",
+      "result": "AC1 6 passed; AC2 31 passed 17 failed"
+    }
+  ]
+}
