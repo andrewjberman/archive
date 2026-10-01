@@ -2,7 +2,8 @@
 
 Holds one InputSourceMonitor window open for as long as the driver runs and rewrites a snapshot every 60 s:
 `.runtime/harvest-backfill/load_monitor.json` = {instrument, window_start, snapshot_at, hardware_input_events,
-injected_input_events, hardware_event_times[<=50]}. Exits (closing the window) when `.runtime/harvest-backfill/STOP_MONITOR`
+injected_input_events, hardware_event_times[<=50],
+hardware_events_per_minute{YYYY-MM-DDTHH:MM: n}}. Exits (closing the window) when `.runtime/harvest-backfill/STOP_MONITOR`
 exists. It reads input flags only, never key codes or coordinates.
 """
 import json
@@ -22,11 +23,16 @@ STOP = os.path.join(ROOT, ".runtime/harvest-backfill/STOP_MONITOR")
 
 class _TimedMonitor(InputSourceMonitor):
     hardware_times = None
+    hardware_minutes = None
 
     def _count(self, injected):
         super()._count(injected)
         if not injected:
-            self.hardware_times = (self.hardware_times or [])[-49:] + [self.now()]
+            at = self.now()
+            self.hardware_times = (self.hardware_times or [])[-49:] + [at]
+            minute = str(at)[:16]
+            self.hardware_minutes = self.hardware_minutes or {}
+            self.hardware_minutes[minute] = self.hardware_minutes.get(minute, 0) + 1
 
 
 def write(m, final=False):
@@ -34,7 +40,8 @@ def write(m, final=False):
     rec.update({"instrument": rec.get("instrument") or "InputSourceMonitor (lib/opal_data_harvest/input_source.py)",
                 "snapshot_at": m.now(), "final": final,
                 "hardware_input_events": m.hardware_input_events, "injected_input_events": m.injected_input_events,
-                "hardware_event_times": m.hardware_times or []})
+                "hardware_event_times": m.hardware_times or [],
+                "hardware_events_per_minute": m.hardware_minutes or {}})
     tmp = OUT + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(rec, fh, indent=1, default=str)
