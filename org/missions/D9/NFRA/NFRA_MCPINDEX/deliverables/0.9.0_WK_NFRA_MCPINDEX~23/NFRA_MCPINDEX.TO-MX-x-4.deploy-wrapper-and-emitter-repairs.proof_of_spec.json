@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-x-4",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e91ce9a0d5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "f797d8594a",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-x-4.deploy-wrapper-and-emitter-repairs.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~23",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/safe-ec2-deploy.sh",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The manifest rewrite is a Python JSON parse and dump (UTF-8 in and out; ensure_ascii only when the file holds no raw non-ASCII; LF/CRLF and trailing newline kept) in a heredoc helper; moves only deployed_commit, deployed_at, deployed_by, _last_updated. Interface and exit codes unchanged; not deployed, no real manifest edit.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_safe_ec2_deploy_manifest.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 tests: both escape styles, CRLF, unknown service, real-manifest copy, wrapper-no-longer-jq|tr, and the old jq|tr negative control (ran, differed).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/halt-gate-check.sh",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "halt_gate_resolve_serial order: own sessions file, then OPAL_AGENT_SERIAL, then the shared root (as before). Existing callers .tools/halt-gate-ld0131-test.sh 7/7 and .tools/tests/test_safe_apply_targeted.sh PASS with OPAL_AGENT_SERIAL exported.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_halt_gate_session_serial.sh",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three arms in temp dirs with fake session files plus a pre-change-gate control; exit 0 only when all hold.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/emit_catalog_v02.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--census-dir and --portal-api declared (defaults = today paths); census absent/empty/partial -> EMIT REFUSED rc=2 before any read or write; census_text raises CensusAbsent instead of returning None.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/tests/test_emit_declared_inputs.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 offline tests: absent/empty/partial census refuses with the catalog sha unchanged; present census rows carry refs; --portal-api declared; defaults unchanged; CLI refusal rc != 0.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest passes with 0 failed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round6/checks/x4.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "PASSED .tools/tests/test_safe_ec2_deploy_manifest.py::test_real_manifest_copy_roundtrip_moves_only_target\nPASSED .tools/tests/test_safe_ec2_deploy_manifest.py::test_wrapper_no_longer_rewrites_with_jq_tr\nPASSED .tools/tests/test_safe_ec2_deploy_manifest.py::test_negative_control_old_jq_tr_shape_differs\n8 passed in 3.11s\nRESULT: PASS\nexit=0",
+      "denominator": "8 of 8 pytest tests passed (0 failed, 0 skipped; the jq negative control ran)",
+      "status": "PASS",
+      "judgment": false,
+      "expect": "^\\d+ passed in [0-9.]+s.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "three arms pass (own serial / issuer serial / shared-root fallback) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round6/checks/x4.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "PASS: 3a no env, no own file -> shared root -> '0.0.0_TEST_ISSUER'\n--- CONTROL: the pre-change gate resolves ARM 1b to the ISSUER (the defect this repairs)\nPASS: control: pre-change gate, env declared, no own file -> '0.0.0_TEST_ISSUER'\nRESULT: three arms pass (own serial / issuer serial / shared-root fallback)\nRESULT: PASS\nexit=0",
+      "denominator": "7 of 7 graded checks pass (3 arms: 1a-1c, 2a-2b, 3a, plus the pre-change-gate control)",
+      "status": "PASS",
+      "judgment": false,
+      "expect": "RESULT: three arms pass \\(own serial / issuer serial / shared-root fallback\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pytest passes with 0 failed (absent census refuses; present census keeps refs) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round6/checks/x4.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "PASSED workflows/atom_decomposition/tests/test_emit_declared_inputs.py::DeclaredInputs::test_portal_api_is_a_declared_input\nPASSED workflows/atom_decomposition/tests/test_emit_declared_inputs.py::DeclaredInputs::test_present_census_rows_carry_their_refs\nPASSED workflows/atom_decomposition/tests/test_emit_declared_inputs.py::DeclaredInputs::test_refs_follow_the_declared_dir_not_the_default\n10 passed in 0.39s\nRESULT: PASS\nexit=0",
+      "denominator": "10 of 10 pytest tests passed (0 failed)",
+      "status": "PASS",
+      "judgment": false,
+      "expect": "^\\d+ passed in [0-9.]+s.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each test carries its own negative arm: AC1 runs the old jq|tr shape on the same fixture; AC2 runs the pre-change halt-gate-check.sh on the env-declared worktree; AC3 passes an absent, empty and partial census and compares the catalog sha.",
+      "expected": "AC1 old shape output differs from the helper output; AC2 pre-change gate resolves the ISSUER where the new one resolves the worker; AC3 refusal rc != 0 with the catalog byte-identical.",
+      "observed": "AC1 test_negative_control_old_jq_tr_shape_differs PASSED (jq present, ran); AC2 CONTROL line printed PASS (pre-change gate resolved 0.0.0_TEST_ISSUER for the env-declared worktree); AC3 absent/empty/partial census tests PASSED. After the commit the AC2 control prints SKIP (HEAD already carries the change), which is not graded.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each AC invocation, verdict lines compared",
+      "observed": "AC1 verdict lines run1==run2: True; AC2: True; AC3: True (pytest durations differ run to run)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running safe-ec2-deploy.sh end to end, editing the real EC2_MANIFEST.json, any deploy or AWS call.",
+      "reason": "Order bound 1: offline tests only; the helper was run on a temp copy of the real manifest (byte-equal round trip) and via the wrapper heredoc on a temp copy."
+    },
+    {
+      "item": "A census-present full emit through emit_catalog_v02.py main().",
+      "reason": "It would write the live DATA_CATALOG.yaml, and portal/src/api is absent in this worktree (row Z-W23-S3); present-census behaviour is proven at census_ref_for with a temp census."
+    },
+    {
+      "item": "Repairing .tools/test-haltgt-recipient-scoping.sh and test_merged_definition::test_condition_helpers_census_and_accessors.",
+      "reason": "Both fail before this change and sit outside <paths> (rows Z-W23-S2, Z-W23-S3)."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W23-S1: the order names :99 as a rewrite (it is a read), the wrapper also moves deployed_by, and the helper is embedded in the wrapper because <paths> admits no helper file.",
+    "NFRA_MCPINDEX-Z-W23-S2: .tools/test-haltgt-recipient-scoping.sh is red at HEAD (0 of 9) via the retired .agent_context, before and independent of this change.",
+    "NFRA_MCPINDEX-Z-W23-S3: portal/src/api is absent in the worker worktree; test_merged_definition accessors test fails before and after; default emitter invocation needs --portal-api there."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-x-4.deploy-wrapper-and-emitter-repairs.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest, bash, jq, python json",
+      "invocation": "the three x4.AC*.sh checks; python -m pytest workflows/atom_decomposition/tests; bash .tools/halt-gate-ld0131-test.sh; bash .tools/tests/test_safe_apply_targeted.sh",
+      "result": "AC1 8 passed; AC2 three arms pass; AC3 10 passed; atom_decomposition suite 39 passed 1 failed (pre-existing, row Z-W23-S3); halt-gate-ld0131 7/7 and safe_apply_targeted PASS with OPAL_AGENT_SERIAL exported."
+    }
+  ]
+}
