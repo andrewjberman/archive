@@ -1,0 +1,147 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ag-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ag-1.the-one-redeploy.md",
+  "group": "D",
+  "vintage_commit": "1e2ce86cce8177677b77c29ba30afdfafce94da7"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "1e2ce86cce8177677b77c29ba30afdfafce94da7",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ag-1.the-one-redeploy.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~A",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh (item 0)",
+   "kind": "file",
+   "commit_or_etag": "957a020416",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "ledger leg L1",
+    "ledger leg L2 zip membership",
+    "AC1 FWD-33"
+   ],
+   "deploy_evidence": "CLOSURE_ROOTS gains lib.trading_calendar. Single-occurrence anchored edit (asserted exactly 1 match before writing), bash -n OK, 4 insertions 1 deletion. The commit's parent ef6c65c2195e9110200684648e035b22af4344dd contains the ag-2 drain cb5f25b9de, with the reverse ancestry test run as a directional control. Necessity verified at the source, not taken from the order: scoped_amgt.py:745 does a request-time `import lib.trading_calendar as trading_calendar`, and :743's own comment already named the CLOSURE_ROOT requirement and why the DOTTED form is used. Proven in the zip (ADDED) and proven LIVE by AC1 FWD-33, whose stale_trading_days clauses could only raise ImportError without it."
+  },
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+   "kind": "s3_object",
+   "commit_or_etag": "RhEQ661Bi9gnVKhBphUCMtjH_rrsscPS",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "ledger leg L2",
+    "ledger leg L3"
+   ],
+   "deploy_evidence": "ONE upload, rc=0. Prior VersionId C9brZ5Qd6_.iSbxw3NKZOxHuDByQScll (40,117,280 B) re-read LIVE immediately before and EQUAL to both halves' rollback table -> new VersionId RhEQ661Bi9gnVKhBphUCMtjH_rrsscPS, content-sha256 /HInwjrnGBzDLzV2EnYyGFseCcXIuWC/ddnyYUpUEX8=, ContentLength 41,115,264, read BACK from S3 by the script and reported 'matches'."
+  },
+  {
+   "path_or_key": "lambda opal-amgt-scoped-api",
+   "kind": "lambda_function",
+   "commit_or_etag": "/HInwjrnGBzDLzV2EnYyGFseCcXIuWC/ddnyYUpUEX8=",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "ledger leg L3",
+    "AC1",
+    "AC2"
+   ],
+   "deploy_evidence": "ONE code-only safe-apply of a SAVED plan. 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Live get-function-configuration after the act: CodeSha256 /HInwjrnGBzDLzV2EnYyGFseCcXIuWC/ddnyYUpUEX8=, LastModified 2026-10-01T08:20:58.000+0000, CodeSize 41,115,264. The CodeSha256 EQUALS the uploaded artifact's content-sha256, so the deployed bytes are the built bytes rather than merely different from the old ones."
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "description": "Every gating quantity was read from the plane that owns it, with its denominator printed, and the one value the act was supposed to produce was PREDICTED before it existed and then checked.",
+   "method": "(i) base CodeSha256 re-read live immediately before the build and compared to both halves; (ii) the artifact's current VersionId re-read live as the rollback input; (iii) the CONTENT-DIFF graded by SET EQUALITY in both directions against the COO half's table, with a per-line tally computed independently of the SUMMARY line and a fabricated-path negative control; (iv) the same grade re-run on the UPLOAD run's own output, not only the --build-only run; (v) the plan saved and the SAVED plan applied; (vi) post-act CodeSha256 / LastModified / CodeSize read live rather than taken from the apply's rc.",
+   "expected": "(i) unmoved; (ii) equal to the halves; (iii)+(iv) 350/336/8/6/0 with zero files outside the list and zero listed-but-unmoved; (v) exactly one resource, update in-place, only the source hash; (vi) CodeSha256 equal to the uploaded artifact's content-sha256.",
+   "observed": "All six hold. (i) /QP4upEVzTjnHV2bAeIXIud0k0DgjDDGrlMgtm0uo7o= UNMOVED, LastModified 2026-09-30T15:22:01Z, equal to both halves -- not a STOP. (ii) C9brZ5Qd6_.iSbxw3NKZOxHuDByQScll at 40,117,280 B, equal to the halves. (iii)+(iv) BOTH grades CLEAR: summary 350/336/8/6/0 matching the half; independent per-line tally 336/8/6/0 agreeing, so the summary is not self-reporting; CHANGED outside the list none, ADDED outside none, REMOVED none, listed-but-not-moved none; the fabricated path reads ABSENT. The re-grade mattered: peers advanced CLOUD HEAD from the build commit 957a020416 to 5429f9284b between the two builds, so 'nothing moved underneath me' is measured rather than assumed. (v) 'Plan: 0 to add, 1 to change, 0 to destroy', one resource, three attribute lines (last_modified, s3_object_version, source_code_hash), 28 unchanged attributes and 4 unchanged blocks hidden, NO destroy/IAM/route/gateway/alias. (vi) live CodeSha256 equals the uploaded content-sha256 exactly.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The negative arms are the halves' own base readings, plus the controls this seat added where a check could have passed vacuously.",
+   "expected": "Per the issuer's comp-adversary note, AC1 and AC2 each FAIL at the base against the deployed function: C0 with CodeSha256 /QP4upEV... unmoved; FWD-32 400 refused; FWD-33 overlay ABSENT; FWD-34 breakout a fraction; the text arm with 16 status tokens and ASML posture without an absent_reason.",
+   "observed": "POST-ACT both PASS, and each base symptom is specifically answered: C0 moved on BOTH fields; FWD-32 serves 200 with 95 of 95 covered names; FWD-33 overlay SERVES 2026-09-29 with stale_trading_days=1; FWD-34 serves ASML's stored 0.09213960191641024 as 9.21396019, i.e. percent not fraction, 0 bad of 32 breakout rows and 0 bad of 32 trending rows; the text arm reads 0 status tokens across 1,114 reason strings and ASML's absent posture now carries a plain-words absent_reason. NON-VACUOUS ARMS this seat checked rather than assumed: FWD-32's C8 positive control (BA 2026-09 collected=20) rules out an all-empty pass; FWD-32's C5 requires ZERO zero-collected cells, so absence is distinguished from a served zero; the CONTENT-DIFF membership test was given a fabricated path and read ABSENT. ONE ARM IS WEAKER THAN ITS OWN SENTENCE and is filed, not smoothed: AC2's print route contributed 0 of the 1,114 strings for all 3 names while the printed sentence still claims '3 names x 4 routes' -- see declared_exclusions and AMGT_RESAPP-Z-S330.",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "AC2's C1 is UNPROVEN for the print route on the deployed function.",
+   "reason": "The print route returned status 200 with content_type application/pdf for BA and ASML and a genuine 404 for AMZN; capture_lib._invoke cannot json-parse a non-JSON body and returns (None, meta), so a SUCCESSFUL 200 is classed REFUSED and the leaf contributes nothing. print is 1 of the 4 routes in af_7_text.py:21's LEAVES, and the ':83' sentence is built from len(NAMES) x len(LEAVES) -- the constants -- so it cannot shrink when a leaf drops out. The LOCAL check graded that body by its text (af_7_text.py:36); the deployed swap lost it. AC2 is still MET AS WRITTEN and leg L5 closed on that basis. Filed as AMGT_RESAPP-Z-S330; the adequacy of the census is the issuer's call."
+  },
+  {
+   "item": "The riders that ride this redeploy are not graded by this act.",
+   "reason": "CORPUS ab-3 case_rule.py, CORPUS ab-1 dossier.py, HARVST ae-1 publication_gold.py (NON-INERT: timeline counts may fall for names with quarantined sa rows) and the VENDOR display_name naming change all ride per the halves' file list. The COO half names them and states their owners were told; HARVST's correction is HARVST's own. This act graded that they are the only files that moved, not what they do."
+  },
+  {
+   "item": "A HALTGT checkpoint pass is not cited as evidence anywhere in this instance.",
+   "reason": "Per /cloud-ops and LD-0267 the checkpoint sees only unread files directly under inbox/<serial>/, and a ~lane seat is unhaltable regardless, so a pass cannot evidence that this seat was not halted."
+  },
+  {
+   "item": "MSTR~Z HOLD 27462 has no row in org/ref/LIVE_ARMS.md.",
+   "reason": "That register states it is the only source of truth for live holds and that a row absent there arms nothing; its Holds section carries one row (2.0.0_SA_COO base, D2) and no terraform-apply row. The GO and the order each state the hold's condition directly, so this act complied with it as stated -- the plan was taken from the shared tree on branch CLOUD, never a detached pin worktree -- rather than this seat adjudicating whether the hold is live."
+  },
+  {
+   "item": "No rollback was taken and none was needed.",
+   "reason": "Both criteria passed. The rollback stayed available throughout: artifact VersionId C9brZ5Qd6_.iSbxw3NKZOxHuDByQScll through one further code-only safe-apply, restoring CodeSha256 /QP4upEV..., which is a write and not a delete."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-S330"
+ ],
+ "session_log": "0.7.0_AE_CloudOps~A, site-z, session a769140b. Second order of this session (after ae-1, closed out). GO msg 27624 READ-acked; it states ag-2 RIDES, so AC2 was GRADED rather than carried. NEVER-2 entry 20261001T0759Z_amgt-resapp-r57-ag1-scoped-api-redeploy opened and COMMITTED BEFORE any deploy act at 47ee1cbee2, all 5 legs closed with proof, entry CLOSED. Build commit 957a020416.",
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'trading_calendar' lib/research --files",
+   "result": "PASS and load-bearing for item 0: 7 hits across 346 files scanned, bands SURFACED=5 TEST=2, the 5 SURFACED all in lib/research/api/scoped_amgt.py. It proved something a line edit cannot -- that packaged code actually IMPORTS the module, without which adding the closure root would change nothing and --build-only would still pass rc=0 with the file absent."
+  },
+  {
+   "tool": "comp-schedule",
+   "invocation": "not run -- the order's preflight declares it NOT-APPLICABLE (no cron, alarm, monitor or cadence; one redeploy by hand)",
+   "result": "DECLARED-NOT-APPLICABLE by the issuer at the cut; not re-derived here."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "not re-run -- RUN BY THE ISSUER at the cut, including an IAM simulate on opal-amgt-scoped-api-role with a PutObject negative control",
+   "result": "The order requires the PLAN to show no IAM change, and that is the clause this seat graded: the plan's single resource is the lambda function with three attribute lines and no IAM. Corroborated live by AC1, which exercises the riders' reads end to end (gold chatter_daily, article_security_mention, research_dossier/) and returns 200 on every route it calls."
+  },
+  {
+   "tool": "comp-adversary",
+   "invocation": "not re-run -- RUN BY THE ISSUER at the cut",
+   "result": "Its base arm is recorded under controls.mutant and each base symptom was answered specifically post-act rather than in aggregate."
+  },
+  {
+   "tool": "comp-pipescript deployed / postdeps",
+   "invocation": "not run -- not applicable",
+   "result": "This act deploys a Lambda artifact, not a gold/silver/bronze data script, and triggers no pipeline; the AE minimum in org/XXX.md binds on gold-run triggers and ad-hoc gold runs."
+  },
+  {
+   "tool": "comp-routes behaviors",
+   "invocation": "not run",
+   "result": "GAP, named rather than papered over: the plan contained no CloudFront or gateway change, so the tool's subject did not move. It is also the tool closest to 'is this HTTP route deployed', and it reads CloudFront behaviors rather than a handler's own route table -- the distinction that mattered in this seat's earlier ae-1 finding (Z-S325). The apply output did print the function's own 18-route table, which is the denominator the COO half names."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "C0 PASS (CodeSha256 and LastModified moved off the printed pre values); FWD-32, FWD-33 and FWD-34 each YES on the deployed function; THE DEPLOYED FUNCTION SERVES THE FRIDAY FEED: YES -- and exit=0",
+   "method": "command",
+   "denominator": "FWD-32: 95 covered names read fresh from research_dossier/, 95 served rows, 95 distinct, 147 name-months with collected>0, months 2026-01..2026-09. FWD-34: 32 breakout rows and 32 trending rows. FWD-33: one name under test (ASML_NA_Equity) across BREAKOUT/PRICE and TRENDING/PRICE on overlay and ranking.",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round57/checks/ag_1_served.py --what post --pre org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~A/ag1-pre.json; echo \"exit=$?\"",
+   "output_evidence": "PASS, exit=0. C0 PASS with both fields moved. FWD-32 C1-C8 all PASS -- 200 not refused; 95 rows / 95 distinct vs covered 95; months ascending including the as_of month and the two before; as_of 2026-09-30 equals the newest gold day, source named gold chatter_daily; 0 zero-collected cells; 0 collected mismatches vs the gold recompute; 0 by_publisher mismatches vs the mention recompute; positive control BA 2026-09 collected=20 -- 'THE MONTHLY CHATTER ROUTE SERVES EVERY COVERED NAME FROM GOLD: YES'. FWD-33 all PASS -- BREAKOUT/PRICE and TRENDING/PRICE SERVED from 2026-09-29 matching the oracle with stale_trading_days=1 against T-1 2026-09-30 on a day with no pointer of its own; both rankings likewise; overlay breakout_price is the BREAKOUT/PRICE row (PCT_JUMP_VS_TRAILING_BASELINE) and overlay price stays TRENDING/PRICE -- 'THE PER-NAME READ SERVES THE LATEST TRADING DAY AND BREAKOUT READS BREAKOUT: YES'. FWD-34 C1-C8 all PASS -- ASML stored 0.09213960191641024 serves score=score_pct=9.21396019; pct_jump_pct 9.214 with no unsuffixed pct_jump; 0 bad of 32 breakout and 0 bad of 32 trending; no unit field contradicts percent -- 'EVERY SERVED PRICE MOVEMENT IS PERCENT BY NAME: YES'. Final: 'THE DEPLOYED FUNCTION SERVES THE FRIDAY FEED: YES'. Evidence ag1-evidence/ag1_ac1.txt.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C0 PASS; C1, C2 and C3 PASS on the deployed function; THE DEPLOYED FUNCTION SERVES EVERY REASON IN PLAIN WORDS: YES -- and exit=0 (only if the GO says ag-2 rides; otherwise the GO states AC2 is carried, not graded)",
+   "method": "command",
+   "denominator": "1,114 served reason strings actually walked. The check's own sentence scopes that to '3 names x 4 routes', but that factor is computed from len(NAMES) x len(LEAVES); the print route contributed 0 strings for all 3 names, so the walked scope is 3 names x 3 routes.",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round57/checks/ag_1_served.py --what text --pre org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~A/ag1-pre.json; echo \"exit=$?\"",
+   "output_evidence": "PASS, exit=0, GRADED because the GO states ag-2 rides. C0 PASS; C1 PASS -- 0 bad across 1,114 served reason strings; C2 PASS -- BA's research-pack claims agree, 'no research pack' at [] with pack-derived fields served by ['overlay', 'thesis']; C3 PASS -- ASML's absent posture carries a plain-words absent_reason ('No verdict was made because no comparable company could be chosen to judge it against...'). Final: 'THE DEPLOYED FUNCTION SERVES EVERY REASON IN PLAIN WORDS: YES'. REPORTED, NOT SMOOTHED: the run printed three 'REFUSED: deployed read failed' lines first, all print-route -- BA and ASML status 200 application/pdf (a successful 200 misclassed as a refusal because _invoke cannot json-parse a PDF) and AMZN a genuine 404 whose body is itself a plain-words reason. See declared_exclusions and AMGT_RESAPP-Z-S330. Evidence ag1-evidence/ag1_ac2.txt.",
+   "status": "PASS"
+  }
+ ]
+}
