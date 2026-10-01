@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPMSP.TO-MS-rq-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/prd/NFRA_MCPMSP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06804f9f99"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/decompositions/NFRA_MCPMSP_DECOMP.md",
+    "vintage_commit": "06804f9f99",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPMSP/task-orders/NFRA_MCPMSP.TO-MS-rq-1.admin-refusal-routes.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPMSP~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_refusals.py",
+      "kind": "script",
+      "commit_or_etag": "e138cec769",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed by order (no push, no deploy); mount is MS-d-2 item 0.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_refusals.py",
+      "kind": "script",
+      "commit_or_etag": "e138cec769",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed by order (no push, no deploy); mount is MS-d-2 item 0.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest: N passed, 0 failed; each of the six named tests >=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round2/checks/e3g.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest: ======================== 6 passed, 1 warning in 0.47s =========================; test_non_owner_refused=1 test_lists_refusals_newest_first_c4_fields=1 test_approve_unregistered_tenant_registers_then_widens=1 test_approve_registered_tenant_only_widens=1 test_gateway_writes_nothing=1 test_sender_fields_read_from_entry_args=1\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 named tests passed once each; 6 of 6 in tests/test_admin_refusals.py, 0 failed (post-amendment code).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "admin suites: >=12 passed, 0 failed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round2/checks/e3g.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "admin suites: 12 passed, 3 warnings in 1.28s\nRESULT: PASS\nexit=0",
+      "denominator": "12 of 12 passed, 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. test_approve_registered_tenant_only_widens is the positive control beside the register-first arm; test_non_owner_refused asserts zero Lambda invokes.",
+      "expected": "Register is invoked only for an unregistered tid; REFUSED stops the chain.",
+      "observed": "Both arms passed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Each criterion run once; offline fakes, no clock or network dependence beyond the tmp audit file.",
+      "expected": "Same result on rerun.",
+      "observed": "Single run, PASS; offline fakes.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_MCPMSP-Z-W4-S3"
+  ],
+  "session_log": "2026-10-01 UTC. Resumed after AMENDMENT 1: merged CLOUD (row file conflict resolved by taking CLOUD and re-appending Z-W4-S3 verbatim). Listing now reads sender_email/sender_domain from args only (null when absent); added test_sender_fields_read_from_entry_args; docstring states widen is required. AC1 6/6, AC2 12/12.",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see the worker report; only the exit code is the verdict."
+    }
+  ]
+}

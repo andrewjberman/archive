@@ -33,8 +33,16 @@ def main():
     if set(d["run_record"][2]) != set(keys):
         failures.append("new run records != the act's list")
     records = c.run_records(keys)
-    order = list(plan)
-    jobs = [j for rec in sorted(records, key=lambda r: r.get("started_at") or "") for j in rec.get("jobs") or []]
+    # AMENDMENT 1: the stop rule and the order are graded on the A2 re-run's own records (the first pass ran under the
+    # old rule and is the record). Everything else below grades the COMBINED record.
+    a2 = set(runs.get("a2_run_record_keys") or keys)
+    order = runs.get("a2_order") or list(plan)
+    rule_records = [r for k, r in zip(keys, records) if k in a2]
+    jobs = [j for rec in sorted(rule_records, key=lambda r: r.get("started_at") or "") for j in rec.get("jobs") or []]
+    all_jobs = [j for rec in records for j in rec.get("jobs") or []]
+    for j in all_jobs:
+        if j.get("publisher") != "sa" or j.get("signed_in"):
+            failures.append("a non-sa job or a sign-in: %s %s" % (j.get("security_key"), j.get("publisher")))
     print("jobs: %d over %d run records" % (len(jobs), len(records)))
     stopped = False
     last_idx = -1

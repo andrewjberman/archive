@@ -1,6 +1,6 @@
 """RIV-d-3 AC1 (LIVE) -- the peer-group map and the Bloomberg channel are served: G0 map_version 1 exists in the real bucket
-with 13 rows and both home funds' source_policy set from RIV-m-1's verdict (READ -> home_producer, JOIN_BLOOMBERG ->
-bloomberg_primary; never home_producer_pending); Bloomberg bronze holds >= 900 imported capture objects (503 IDVZ-group +
+with 13 rows and both home funds' source_policy home_producer (d-3 amendment 2, Andrew-direct "1b": RIVALS reads the Positioning
+pull's landing for IDVZ/PFOE; never home_producer_pending); Bloomberg bronze holds >= 900 imported capture objects (503 IDVZ-group +
 441 PFOE-group raws, each with a sidecar) under the builder prefix."""
 import io
 import json
@@ -27,8 +27,9 @@ def run(v):
         df = pd.read_parquet(io.BytesIO(s3.get_object(Bucket="opal-data-etfs", Key=sorted(keys)[-1])["Body"].read()))
         v.check(len(df) == 13, f"G0 rows {len(df)} == 13")
         m1 = json.loads((root / M1).read_text(encoding="utf-8"))
+        print("m-1 verdicts (measurement on record, not the policy):", {f: m1["funds"][f]["verdict"] for f in ("IDVZ", "PFOE")})
         for fund in ("IDVZ", "PFOE"):
-            want = "home_producer" if m1["funds"][fund]["verdict"] == "READ" else "bloomberg_primary"
+            want = "home_producer"  # amendment 2: Andrew-direct "1b" -- homes read the Positioning landing, whatever m-1 measured
             got = list(df[(df["fund_id"] == fund) & (df["role"] == "home")]["source_policy"])
             v.check(got and all(g == want for g in got), f"{fund} home source_policy {got} == {want} (m-1 verdict)")
     pre = c.address("bloomberg", "etfs", "bronze", "holdings", "date=")[len("s3://opal-data-etfs/"):].rsplit("date=", 1)[0]
