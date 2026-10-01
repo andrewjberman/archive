@@ -46,6 +46,19 @@ Run facts: both builds green, 16 of 16 documents built, 0 errors. The Tax-on bui
    control) and its last complete figure carries. Unit-tested; the real data has 0 such accounts of 47.
 5. **Tax off (today):** nothing moves. Measured at TX-r-1 on the deployed function, 16 of 16.
 
+## Addendum 2026-10-01 17:3xZ -- now asked, on Andrew's word to activate (record @28e5589af0)
+
+- **The code is deployed.** The Gold function runs pin 8ade880fad since 15:00Z: the table above is that code (measured
+  at 04:3xZ on the same candidates). Activation adds environment and a secret value only, no code.
+- **It meets the HEALGAP hookup's condition 3.** The 2026-10-02 13:30Z run is that deploy's leg V2, whose trigger
+  rolls back on "any served change outside the five Cottonwood dates and Global's same five". Activated before it,
+  that run also carries branch 2 above (extension fields; a null `tax` member at 49 Financial and Global; Tax-off
+  values unchanged). So this request also asks `1.0.0_SA_CTO` to amend that trigger to admit exactly the Tax changes
+  named here, or to rule that activation waits for the leg's read.
+- **When dollars first appear.** Branch 2 holds on 10-02; the Saturday and Sunday runs fail the Tax read on Black
+  Diamond's late Friday file (STATUS Parked) and carry nothing; the first run with Tax dollars is **Monday 2026-10-05
+  13:30Z** (valuation 10-02), unless Andrew rules that the first observation also covers the prior business day.
+
 ## What is NOT in this request
 
 - **The writer count per served key.** Not measured here. The signer reads it: the Gold function writes the dated
