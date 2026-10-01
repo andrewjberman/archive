@@ -1,0 +1,125 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ae-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ae-1.posture-batch-over-the-held-names.md",
+  "group": "D",
+  "vintage_commit": "8e5e899de9d49586991062f0bc47055faefb1a45"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "8e5e899de9d49586991062f0bc47055faefb1a45",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ae-1.posture-batch-over-the-held-names.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~A",
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-harvest/posture/v1/ (the 12 named keys, same-key overwrite)",
+   "kind": "s3_object",
+   "commit_or_etag": "51df60aa1a",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "AC1 store limbs",
+    "ledger leg L1",
+    "ledger leg L3"
+   ],
+   "deploy_evidence": "12 judge runs, one per target, each at the target's PRIOR as_of so every dated input but D-1 is what the prior run read. Fired from a sparse pin worktree whose HEAD was read back as 51df60aa1a4c0c7bd37dc49998246919db99ef83. 12 of 12 moved off their prior VersionIds, 0 unmoved, read back live. 9 model calls (claude-opus-5); the 3 classed-ABSENT targets made none, per judge.py _absent_document. Producer's own usage.usd summed: $0.9692. ONE verdict moved: KMB_US_Equity hold -> better."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~A/ae1-pre/pre.json",
+   "kind": "file",
+   "commit_or_etag": "local",
+   "deployed_state": "NOT-DEPLOYED",
+   "artifact_covered_by": [
+    "the rollback"
+   ],
+   "deploy_evidence": "The pre-batch capture holding each key's prior VersionId -- the rollback per key named in both halves. Live and untouched."
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "description": "Every quantity this chain rests on was read by an instrument independent of the producer's self-report, and each denominator is printed beside its number.",
+   "method": "(i) the 12 prior VersionIds re-read live by head_object immediately before the first call and diffed against the COO half's transcribed table, with a mutated-expectation control; (ii) the pin honoured as a real sparse worktree with HEAD read back, and the import closure diffed against both the pin and the GO run commit with a HEAD~400 negative control; (iii) two dry-runs per branch compared between the pin worktree and the main tree until byte-identical; (iv) the 12 new VersionIds, verdicts, cites and generation blocks read back from S3 after the act; (v) the D-1 census read as VersionId AND content sha256 before and after the batch.",
+   "expected": "(i) 12 of 12 unmoved and the mutated control reads MOVED; (ii) closure diff empty against the pin and non-empty against HEAD~400; (iii) dry-run diff empty with 0 WARN on both branches; (iv) 12 of 12 moved; (v) 0 D-1 VersionIds moved across the batch.",
+   "observed": "All five hold. (i) UNMOVED 12 of 12; the mutated control reads MOVED, so the comparison discriminates. (ii) closure diff EMPTY vs 51df60aa1a and vs 0abf99fcd4; the HEAD~400 control is non-empty; the one lib/ file that differs from the pin is lib/opal_data_harvest/test_o1_run_record_reach.py, a test outside the import closure, and that denominator is printed. (iii) the sparse cone INITIALLY changed a code path -- infra/logic/registry/systems.json, then org/standards/NAMING_SCHEMA.json, fell outside it and the candidate universe fell back to a worker folder with a WARN; the cone was widened until WARN count was 0 and the worktree/main-tree dry-run diff was empty on BOTH branches, the two different targets still differing as the control. (iv) 12 of 12 moved, 0 unmoved. (v) 0 of 12 D-1 VersionIds moved, so every pack read one fixed D-1 state.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The negative arm was measured on the criterion that failed, and the failure was localised by a control drawn from a printed denominator rather than reasoned about.",
+   "expected": "Per the halves: at the base AC1 FAILS (12 keys at their pre-batch VersionIds); it PASSES on a simulated post-state with new VersionIds and packs equal to the live D-1 sections; it FAILS with the packs unchanged.",
+   "observed": "POST-ACT AC1 FAILED, exit=1, label NO -- but on ONE limb only and for a cause outside the act. All 24 BAD lines are a single signature, 'served /as_of None != stored ...' plus 'served /verdict None != stored ...', on 12 of 12 targets and on both branches. Measured, not inferred: the deployed opal-amgt-scoped-api has NO /posture route -- GET /api/scoped/amgt/security/<K>/posture returns 404 'no /api/scoped/amgt route for GET ...' on 3 of 3 keys this act overwrote AND on 3 of 3 keys it never touched, drawn from a printed denominator of 33 posture subjects (12 touched, 21 untouched), while /thesis on the SAME function returns 200 at 658,610 B. So the act cannot be the cause. The check misreports it because serve() discards _invoke's meta, turning a 404 into an empty dict; and the pre capture could not have caught it, because two empty serves differ on 0 paths and so read identically to a stable route. Every limb AC1 can actually reach PASSES: 12 of 12 at new VersionIds, packs equal to the live D-1 sections on all 12, cites validated == total on all 12, every verdict in the enum.",
+   "status": "FIRED-AS-EXPECTED-ON-THE-STORE-LIMBS-AND-UNTESTABLE-ON-THE-SERVED-LIMB"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The act was NOT rolled back although AC1 failed.",
+   "reason": "Stop limb 6 makes a failing AC1 the rollback trigger, and this seat does not self-adjudicate it. The rollback stayed armed and available throughout -- all 12 prior VersionIds are live in ae1-pre/pre.json and the half's rollback is a VersionId copy-back, a write, not a delete. The failing limb was measured to be independent of the act (the untouched-subject control) and reported upward the same turn, which is the discipline the issuer itself ruled correct for ad-2 L3 (msg 27355, AMENDMENT 2 @9d5bd13f74). The disposition is the issuer's."
+  },
+  {
+   "item": "The served plane is not evidenced by this instance.",
+   "reason": "There is no deployed /posture route to read. Filed as AMGT_RESAPP-Z-S325 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z)."
+  },
+  {
+   "item": "Whether /posture was ever deployed and later removed, or never cut, was NOT swept.",
+   "reason": "A code and deploy-history question on another seat's surface; out of this order's bounds and out of its paths."
+  },
+  {
+   "item": "The CTO half's claim that AC1 checks the generated_at condition was not relied on.",
+   "reason": "The strings generation and generated_at appear 0 times in ae_1_posture.py, so AC1 is silent about it. Condition 1 is evidenced in ledger leg L3 instead. Filed as AMGT_RESAPP-Z-S324."
+  },
+  {
+   "item": "Cost is the producer's own usage.usd field, not an invoice.",
+   "reason": "$0.9692 summed over the 9 bodies. A list-price estimate computed first ($0.5815) was WRONG-OBJECT -- it applied sonnet rates to an opus-5 run -- and is withdrawn."
+  },
+  {
+   "item": "Only 9 Anthropic calls were made, not the 12 authorized.",
+   "reason": "The 3 classed-ABSENT targets make no model call by the producer's own rule (judge.py:394 region). Fewer than 12 is strictly inside Andrew's per-use word; a 13th would have been a REFUSAL."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-S324",
+  "AMGT_RESAPP-Z-S325"
+ ],
+ "session_log": "0.7.0_AE_CloudOps~A, site-z, session a769140b. First order of this session. GO msg 27510 READ-acked; Andrew's per-use word 2026-10-01T00:41:29Z recorded at 17f29440e8 and verified byte-equal between the pin and the worktree. NEVER-2 entry 20261001T0500Z_amgt-resapp-r55-ae1-posture-batch opened and COMMITTED BEFORE the act at f3ea4d2556; legs L1 and L3 CLOSED with proof, L2 left OPEN because AC1 is refused upward to the issuer rather than graded here.",
+ "compiler_tools": [
+  {
+   "tool": "comp-schedule",
+   "invocation": "not run -- the order's preflight declares it NOT-APPLICABLE (no cron, alarm, monitor or cadence; the batch runs once, by hand)",
+   "result": "DECLARED-NOT-APPLICABLE by the issuer at the cut; this seat did not re-derive it."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "not re-run -- RUN BY THE ISSUER at the cut (same executor identity already reads opal-data-harvest and wrote posture/v1 under rk-22)",
+   "result": "No new prefix was reached. Corroborated by the act itself: 12 of 12 PutObject succeeded and were read back, and 0 writes landed outside the 12 keys."
+  },
+  {
+   "tool": "comp-adversary",
+   "invocation": "not re-run -- RUN BY THE ISSUER at the cut",
+   "result": "Its positive arm was a SIMULATED post-state, and a simulated post-state cannot see an absent route -- which is exactly the limb that failed. Recorded as the instrument's blind spot, not as a defect of the arm."
+  },
+  {
+   "tool": "comp-secrets",
+   "invocation": "comp-secrets get anthropic-api-key --reveal",
+   "result": "PASS. Shape probed WITHOUT printing the value: 4 lines, the value line 108 chars starting sk-ant-. The driver refuses to make any call unless the fetched value matches sk-ant-*, so an empty or malformed secret is a loud stop, never a silent 0-call run."
+  },
+  {
+   "tool": "comp-pipescript deployed / postdeps",
+   "invocation": "not run -- not applicable",
+   "result": "This act is not a gold run and triggers no pipeline; the AE minimum in org/XXX.md binds on gold-run triggers and ad-hoc gold runs, neither of which this is."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "12 targets each at a new VersionId, packs equal to their live D-1 sections, cites all validated, verdicts in the enum and served as stored, verdict moves printed; THE POSTURE BATCH READS THE HELD PACKS AND SERVES ITS OWN OUTPUT: YES -- and exit=0",
+   "method": "command",
+   "denominator": "12 posture subjects whose own name or comparable holds D-1 sentences, derived by the check itself from 12 names holding 179 sentences; pre listed exactly 12, which is stop limb 3. The served control was drawn from 33 posture subjects: 12 touched, 21 untouched.",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round55/checks/ae_1_posture.py --what post --dir org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~A/ae1-pre; echo \"exit=$?\"",
+   "output_evidence": "'targets 12; verdicts moved 1 (read from the batch's output, not graded)', then 24 BAD lines of ONE signature and 'THE POSTURE BATCH READS THE HELD PACKS AND SERVES ITS OWN OUTPUT: NO', exit=1. Store limbs, all passing: 12 of 12 at new VersionIds; packs equal to the live D-1 sections (BABA 38->34, HD 38->20, BA 38->17, COST 39->15, HD 36->20, INTU 40->26, KMB 39->18, NU 27->8, SAP 38->30, VLO 39->13, each equal to ad-2's post-hold counts, and BABA 34 / HD 20 predicted by the pre-act dry-run); cites validated == total on all 12; every verdict in the enum. Served limb: untestable -- no /posture route is deployed (404 on touched and untouched alike, /thesis 200 on the same function). Evidence: evidence/ae1_ac1.txt, evidence/ae1_served_probe.txt.",
+   "status": "FAIL"
+  }
+ ]
+}

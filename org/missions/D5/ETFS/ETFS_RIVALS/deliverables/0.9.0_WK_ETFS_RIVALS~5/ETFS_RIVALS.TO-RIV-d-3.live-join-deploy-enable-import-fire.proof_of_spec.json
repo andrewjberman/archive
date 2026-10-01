@@ -20,7 +20,7 @@
    "kind": "terraform",
    "commit_or_etag": "96ba9a72ab",
    "deployed_state": "DEPLOYED-VERIFIED",
-   "deploy_evidence": "the stack (five Lambdas, four role policies, two marker rules) via safe-apply (saved plan): Apply complete! Resources: 6 added, 9 changed, 0 destroyed; plan was in place or create-only, rivalfunds-only; the five Lambdas run the code of 96ba9a72ab (source_code_hash in d3_live.json)",
+   "deploy_evidence": "the stack (five Lambdas, four role policies, two marker rules) via safe-apply (saved plan): Apply complete! Resources: 6 added, 9 changed, 0 destroyed; plan was in place or create-only, rivalfunds-only; the five Lambdas run the code of 96ba9a72ab (source_code_hash in d3_live.json); second safe-apply 2026-10-01T04:10Z: Apply complete! Resources: 0 added, 5 changed, 0 destroyed (source_code_hash only, code pin e622b2fef9)",
    "artifact_covered_by": [
     "AC1",
     "AC2",
@@ -61,9 +61,9 @@
   {
    "path_or_key": "s3://opal-data-etfs/bloomberg/etfs/bronze/holdings/",
    "kind": "s3_object",
-   "commit_or_etag": "7 of 9 batches",
+   "commit_or_etag": "9 of 9 batches",
    "deployed_state": "DEPLOYED-VERIFIED",
-   "deploy_evidence": "776 raw + 776 sidecars = captures requested 2024-09-30..2026-06-03 (batches 00-06); batches 07 and 08 (161 captures) not started at the wind-down; AC1 needs >= 900 so it FAILS at the stop",
+   "deploy_evidence": "937 raw + 937 sidecars = import batches 00-08 (captures requested 2024-09-30..2026-09-29); fetch_bloomberg markers 9; d-3.AC1 PASS",
    "artifact_covered_by": [
     "AC1"
    ]
@@ -71,9 +71,9 @@
   {
    "path_or_key": "s3://opal-data-etfs/rivalfunds/etfs/gold + platinum + state (round-2 prefixes)",
    "kind": "s3_object",
-   "commit_or_etag": "96ba9a72ab",
+   "commit_or_etag": "e622b2fef9",
    "deployed_state": "DEPLOYED-VERIFIED",
-   "deploy_evidence": "G0 1, G2 120, G3 1, G6 419, G1 745, G5 743, page 12, markers fetch_bloomberg 7, build_bloomberg_silver 5, build_coverage 2, build_flow_reconciliation 7, pull_enrichment 1; counts in d3_live.json s3_prefixes",
+   "deploy_evidence": "G0 1, G1 827, G2 501, G3 1, G5 825, G6 501, page 16, markers fetch_bloomberg 9, build_bloomberg_silver 7, pull_enrichment 1, build_coverage 4, build_flow_reconciliation 9; counts and request ids in d3_live.json",
    "artifact_covered_by": [
     "AC2",
     "AC3"
@@ -82,16 +82,16 @@
   {
    "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
    "kind": "config_data",
-   "commit_or_etag": "96ba9a72ab",
+   "commit_or_etag": "878746ee3e",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "five rivalfunds entries re-stamped: artifact_sha256 = the applied source_code_hash, last_deployed_commit 96ba9a72ab"
+   "deploy_evidence": "five rivalfunds entries re-stamped at the second apply: artifact_sha256 = the applied source_code_hash, last_deployed_commit e622b2fef9"
   },
   {
    "path_or_key": "integrations/bloomberg/pipeline/scheduled_daily_pull.cmd",
    "kind": "script",
-   "commit_or_etag": "96ba9a72ab",
+   "commit_or_etag": "878746ee3e",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "the one enabling line was written, b-1.AC3 PASSed with it, and it was removed unmerged at the wind-down: the file equals HEAD and the leg stays gated OFF",
+   "deploy_evidence": "ONE added line set \"RIVALFUNDS_BBG_LEG=1\" at the head of :rivalfunds_bbg_leg's gate (+1/-0 vs HEAD); b-1.AC3 PASS 0 failures after it; the first live 08:03 fetch waits on Andrew's Terminal sign-in",
    "artifact_covered_by": [
     "AC3"
    ]
@@ -99,9 +99,9 @@
   {
    "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~5/d3_live.json",
    "kind": "config_data",
-   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "commit_or_etag": "878746ee3e",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "the act record: gates, order of acts, request ids, prefix counts, what remains",
+   "deploy_evidence": "the act record: gates, order of acts, request ids, prefix counts, remaining emptied",
    "artifact_covered_by": [
     "AC3"
    ]
@@ -109,7 +109,7 @@
   {
    "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~5/key4_with_g3.json",
    "kind": "config_data",
-   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "commit_or_etag": "5bd961a47d",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "the CTO condition's served delta with the imported G3: G1 0 of 325 fund-dates differ (only gold_version), G5 837 = 837, every class 0 incl. other, only the three label cells"
   },
@@ -118,7 +118,51 @@
    "kind": "config_data",
    "commit_or_etag": "PENDING-THIS-COMMIT",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "ledger etfs-rivalfunds-round2 OPEN: L1 closed with proof; L2 to L6 open with the state of each in the completion doc"
+   "deploy_evidence": "ledger etfs-rivalfunds-round2 CLOSED: all 6 legs proven (L3-L6 closed with proof on the resume); sentinel removed"
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/silver_bloomberg.py",
+   "kind": "script",
+   "commit_or_etag": "e622b2fef9",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "supersede without delete (row W5-S24); batches 07 and 08 silver returned OK with markers on the live build-silver Lambda; test_d1_silver_supersede_retains.py PASS",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_g01_universe.py",
+   "kind": "script",
+   "commit_or_etag": "e622b2fef9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "row S19 / amendment 4: both home funds home_producer expected; pytest data/etfs/scripts/rivalfunds/tests: 188 passed, 2 skipped, 1 failed (test_b1 stale test, row W5-S26, outside this order's paths)",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_g12_canonical_multi_source.py",
+   "kind": "script",
+   "commit_or_etag": "e622b2fef9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "row S19 / amendment 4: both home funds home_producer expected; pytest data/etfs/scripts/rivalfunds/tests: 188 passed, 2 skipped, 1 failed (test_b1 stale test, row W5-S26, outside this order's paths)",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_d1_silver_supersede_retains.py",
+   "kind": "script",
+   "commit_or_etag": "e622b2fef9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "row S19 / amendment 4: both home funds home_producer expected; pytest data/etfs/scripts/rivalfunds/tests: 188 passed, 2 skipped, 1 failed (test_b1 stale test, row W5-S26, outside this order's paths)",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
   }
  ],
  "acceptance": [
@@ -127,10 +171,10 @@
    "criterion_verbatim": "AC1 RESULT: PASS 0 failures",
    "method": "command",
    "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/d-3.AC1.py",
-   "output_evidence": "OK:   G0 objects under rivalfunds/etfs/gold/peer_group_map/: 1\nOK:   G0 rows 13 == 13\nm-1 verdicts (measurement on record, not the policy): {'IDVZ': 'JOIN_BLOOMBERG', 'PFOE': 'JOIN_BLOOMBERG'}\nOK:   IDVZ home source_policy ['home_producer'] == home_producer (m-1 verdict)\nOK:   PFOE home source_policy ['home_producer'] == home_producer (m-1 verdict)\nbloomberg bronze: 776 raw, 776 sidecars under bloomberg/etfs/bronze/holdings/\nFAIL: >= 900 raws each with a sidecar (776, 776)\nAC1 RESULT: FAIL 1 failures\nrc=1",
-   "denominator": "4 of 5 checks passed (G0 objects, G0 13 rows, both home funds home_producer; 776 raws vs >= 900 FAIL)",
-   "status": "FAIL",
-   "status_reason": "The act was wound down on 2.0.0_SA_COO~RV's word after import batches 00-06: 776 of 937 captures are in Bloomberg bronze. Batches 07 and 08 (161 captures) are the remaining step; no delete or rollback of what landed.",
+   "output_evidence": "OK:   G0 objects under rivalfunds/etfs/gold/peer_group_map/: 1\nOK:   G0 rows 13 == 13\nm-1 verdicts (measurement on record, not the policy): {'IDVZ': 'JOIN_BLOOMBERG', 'PFOE': 'JOIN_BLOOMBERG'}\nOK:   IDVZ home source_policy ['home_producer'] == home_producer (m-1 verdict)\nOK:   PFOE home source_policy ['home_producer'] == home_producer (m-1 verdict)\nbloomberg bronze: 937 raw, 937 sidecars under bloomberg/etfs/bronze/holdings/\nOK:   >= 900 raws each with a sidecar (937, 937)\nAC1 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "6 of 6 checks passed (G0 object count, G0 13 rows, IDVZ and PFOE home_producer, 937 raws with 937 sidecars)",
+   "status": "PASS",
+   "status_reason": "d-3.AC1 run from the worktree root against the served bucket after the resume (2026-10-01 ~04:4xZ)",
    "expect": "AC1 RESULT: PASS 0 failures"
   },
   {
@@ -138,10 +182,10 @@
    "criterion_verbatim": "AC2 RESULT: PASS 0 failures",
    "method": "command",
    "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/d-3.AC2.py",
-   "output_evidence": "OK:   served pages 1\nOK:   rivalfunds/etfs/platinum/page/date=2026-09-30/index.html is grouped (IDVZ and PFOE)\nOK:   G2 objects 120\nFAIL: SCHY: 120 new days vs census 501\nFAIL: INEQ: 119 new days vs census 498\nFAIL: CGIC: 119 new days vs census 496\nFAIL: BIDD: 117 new days vs census 464\nFAIL: TXUE: 120 new days vs census 417\nAC2 RESULT: FAIL 5 failures\nrc=1",
-   "denominator": "3 of 8 checks passed (page served, page grouped, G2 objects exist; five new-day counts FAIL)",
-   "status": "FAIL",
-   "status_reason": "G2 holds only the daily-window objects the per-batch chain wrote (120 days); the full-history replay (etfs-rivalfunds-daily-lambda event {mode replay, only [build-coverage]}) was not run before the wind-down, and batches 07-08 are not landed. A local rehearsal of the same code over all 937 captures read SCHY 501, INEQ 498, CGIC 496, BIDD 464, TXUE 417 (equal to the census).",
+   "output_evidence": "OK:   served pages 1\nOK:   rivalfunds/etfs/platinum/page/date=2026-09-30/index.html is grouped (IDVZ and PFOE)\nOK:   G2 objects 501\nOK:   SCHY: 501 new days vs census 501\nOK:   INEQ: 498 new days vs census 498\nOK:   CGIC: 496 new days vs census 496\nOK:   BIDD: 464 new days vs census 464\nOK:   TXUE: 417 new days vs census 417\nAC2 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "8 of 8 checks passed (page served, grouped, G2 501 objects, five new-day counts equal the census)",
+   "status": "PASS",
+   "status_reason": "d-3.AC2 run from the worktree root against the served bucket after the resume (2026-10-01 ~04:4xZ)",
    "expect": "AC2 RESULT: PASS 0 failures"
   },
   {
@@ -149,10 +193,10 @@
    "criterion_verbatim": "AC3 RESULT: PASS 0 failures",
    "method": "command",
    "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/d-3.AC3.py",
-   "output_evidence": "OK:   G5 rows 16440\nOK:   trades for every IDVZ rival ([] missing)\nOK:   no G5 trade on a ' Curncy' security\nOK:   SCHY cash-line movement recorded in G6\nFAIL: enable line recorded None\nAC3 RESULT: FAIL 1 failures\nrc=1",
-   "denominator": "4 of 5 checks passed (G5 rows, trades for every IDVZ rival, no Curncy trade, SCHY cash-line movement; the enable line FAILs)",
-   "status": "FAIL",
-   "status_reason": "The enabling line is not applied: it was reverted at the wind-down because the import is partial (the IDVZ group's history stops at 2026-06-03) and b-1.AC3 passes with and without it. d3_live.json records vehicle_enable_line null and the literal line not applied.",
+   "output_evidence": "OK:   G5 rows 19916\nOK:   trades for every IDVZ rival ([] missing)\nOK:   no G5 trade on a ' Curncy' security\nOK:   SCHY cash-line movement recorded in G6\nOK:   enable line recorded RIVALFUNDS_BBG_LEG=1\nAC3 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "5 of 5 checks passed (G5 19916 rows, trades for every IDVZ rival, no Curncy trade, SCHY cash-line movement in G6, enable line recorded)",
+   "status": "PASS",
+   "status_reason": "d-3.AC3 run from the worktree root against the served bucket after the resume (2026-10-01 ~04:4xZ)",
    "expect": "AC3 RESULT: PASS 0 failures"
   }
  ],
@@ -171,12 +215,8 @@
  },
  "declared_exclusions": [
   {
-   "item": "Import batches 07 and 08, the G2 full-history replay, the final page, the vehicle enabling line, and the close of the ledger",
-   "reason": "2.0.0_SA_COO~RV's wind-down word (the fabric reboots): finish the in-flight leg, start no new one that is not the last step. Each is listed in d3_live.json `remaining`. The status flip is the issuer's."
-  },
-  {
-   "item": "Rollback of keys 1-5",
-   "reason": "A delete is a human's word in both halves; every landed object is new and under its own prefix, and nothing reads a half-landed batch as complete (batch markers)."
+   "item": "A live Bloomberg fetch, the Terminal health re-read and any sign-in",
+   "reason": "The order bars any Bloomberg request and Terminal sign-in this session; the first live 08:03 fetch waits on Andrew's sign-in and is the issuer's close-read. Batches 04 and 05 silver markers were left absent (gold built by replay events; AC2 reads no gap)."
   }
  ],
  "surprises": [
@@ -186,7 +226,11 @@
   "ETFS_RIVALS-Z-W5-S21 -- OBSERVATION/INERT: land_capture is quadratic on S3; the import used a sidecar-caching sink object.",
   "ETFS_RIVALS-Z-W5-S22 -- OBSERVATION/INERT: the order names exit 80 for the leg; it exits 90-97.",
   "ETFS_RIVALS-Z-W5-S23 -- OBSERVATION/INERT: four wiring choices the order does not state (daily G0, fallback page, the gate, the only event).",
-  "ETFS_RIVALS-Z-W5-S24 -- BLOCKING/ARMED: silver_bloomberg deletes superseded silver and the role has no DeleteObject; carried-date batches write no silver marker (import batches 04 and 05; the daily leg on any carried-date day); disarm owner 2.0.0_SA_COO~RV."
+  "ETFS_RIVALS-Z-W5-S24 -- BLOCKING/ARMED: silver_bloomberg deletes superseded silver and the role has no DeleteObject; carried-date batches write no silver marker (import batches 04 and 05; the daily leg on any carried-date day); disarm owner 2.0.0_SA_COO~RV.",
+  "ETFS_RIVALS-Z-W5-S25 -- OBSERVATION/INERT: resolution of S24, silver supersedes without deleting; batches 07 and 08 silver OK with markers.",
+  "ETFS_RIVALS-Z-W5-S26 -- OBSERVATION/ARMED: test_b1 test_latest_capture_wins asserts the deleted-silver behaviour and fails; file outside the order's paths; disarm owner 2.0.0_SA_COO~RV.",
+  "ETFS_RIVALS-Z-W5-S27 -- OBSERVATION/INERT: the apply was five Lambda source_code_hash updates, not build-silver only (all five stage the same package).",
+  "ETFS_RIVALS-Z-W5-S28 -- OBSERVATION/INERT: page for batch 08 published with PARTIAL and no marker (freshness guardrail, four issuer_first funds one trading day behind)."
  ],
  "session_log": "org/critical_paths/change_management/20261001T0043Z_etfs-rivalfunds-round2_deploy_completion.md",
  "compiler_tools": [
@@ -214,6 +258,16 @@
    "tool": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~5/d3_act.py",
    "invocation": "counts; mirror; g3; chunk 0..6",
    "result": "937 captures counted; G3 4823 rows landed; 776 captures landed in bronze in 7 date-ordered batches"
+  },
+  {
+   "tool": ".tools/safe-apply.sh",
+   "invocation": "HALT_ACK=1 -chdir=infra/aws/terraform/etfs-rivalfunds apply <saved plan> (2026-10-01T04:10Z)",
+   "result": "Apply complete! Resources: 0 added, 5 changed, 0 destroyed."
+  },
+  {
+   "tool": "python .tools/deploy_ledger.py",
+   "invocation": "close-leg L3 L4 L5 L6; close etfs-rivalfunds-round2",
+   "result": "OK: CLOSED deploy ledger 'etfs-rivalfunds-round2' -- all 6 legs proven; sentinel removed"
   }
  ]
 }
