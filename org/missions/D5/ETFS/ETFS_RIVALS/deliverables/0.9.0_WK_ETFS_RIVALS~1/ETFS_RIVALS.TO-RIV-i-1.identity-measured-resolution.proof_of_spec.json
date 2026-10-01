@@ -86,13 +86,44 @@
       ]
     },
     {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "85f442ffe1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDIT (amendment 2). stable_key: G5 matches positions on the row's own raw identifier family; security_id a label, the trade's security_key the resolved id only when both reports agree; G3 lookup also tries the resolved id. Local sink only.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_i1_trade_stable_key.py",
+      "kind": "script",
+      "commit_or_etag": "85f442ffe1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 8 tests. rivalfunds suite 249 passed, 2 skipped, 0 failed.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~1/served_delta_after.json",
+      "kind": "config_data",
+      "commit_or_etag": "9a723d4b81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Report (not a criterion): served_delta_r3.py after the fix, per fund g5_removed/g5_added: BASG 0/0, CGIC 0/0, ETFT 0/0, INEQ 0/0, PCLG 0/0, SCHY 0/0, TXUE 0/0, BIDD 2/1, TSEL 0/6, WCMG 0/1, IDVZ 0/33, PFOE 0/18 (home). Residuals named in row Z-W1-S27.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
       "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
       "kind": "doc",
-      "commit_or_etag": "2d52ce2bb1",
+      "commit_or_etag": "9a723d4b81",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "APPEND: rows ETFS_RIVALS-Z-W1-S21 (resolves S17), S22, S23 (all OBSERVATION, INERT).",
+      "deploy_evidence": "APPEND: rows ETFS_RIVALS-Z-W1-S21..S23 (round 1 of this order), S26 and S27 (amendment 2), all OBSERVATION, INERT.",
       "artifact_covered_by": [
-        "AC1"
+        "AC1",
+        "AC2"
       ]
     }
   ],
@@ -105,6 +136,15 @@
       "output_evidence": "BASG (issuer) non-cash resolved 33/33\nOK:   BASG non-cash resolved >= 95% (33/33)\nOK:   every joined BASG key is a BASG Bloomberg id in key grammar ([])\nOK:   ambiguous ABNB refused, both candidates named (['UNRESOLVED'], 'issuer join AMBIGUOUS, refused: 2 Bloomberg candidates for root ABNB and quantity 70277: ABNB LN Equity (POSITION 70277,')\nWCMG (bloomberg) non-cash resolved 48/48\nOK:   WCMG: >= 95% resolved in the key grammar (48/48)\nTSEL (bloomberg) non-cash resolved 28/28\nOK:   TSEL: >= 95% resolved in the key grammar (28/28)\nETFT (bloomberg) non-cash resolved 29/29\nOK:   ETFT: >= 95% resolved in the key grammar (29/29)\nPCLG (bloomberg) non-cash resolved 29/29\nOK:   PCLG: >= 95% resolved in the key grammar (29/29)\nAC1 RESULT: PASS 0 failures\nrc=0",
       "denominator": "6 of 6 checks OK (BASG 33 of 33 non-cash excluding the planted ABNB on 2026-09-28; WCMG 48/48, TSEL 28/28, ETFT 29/29, PCLG 29/29)",
       "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "BASG's trades in 2026-01-02..02-17, replayed by the branch over the served inputs, equal the served ones (identity never moves a trade) -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/i-1.AC2.py",
+      "output_evidence": "mirrored 63 objects for 2026-01-02..2026-02-17\nBASG trades in window: served 47, branch 47; removed 0, added 0\n  removed e.g. []  added e.g. []\nOK:   control: >= 20 served BASG trades in the window (47)\nOK:   BASG trades unchanged by identity (0 removed, 0 added)\nOK:   control: BASG G1 carries RESOLVED rows\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (63 objects mirrored; BASG trades in the window: served 47, branch 47, removed 0, added 0)",
+      "status": "PASS"
     }
   ],
   "controls": {
@@ -115,8 +155,8 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AC1 run three times (before and after each commit); the rivalfunds suite run three times.",
-      "observed": "same verdict line every time; 225 passed, 2 skipped, the same 2 hp-1 failures.",
+      "method": "AC1 and AC2 each run twice (before and after the served-delta run); the rivalfunds suite run three times.",
+      "observed": "same verdict lines every time; 249 passed, 2 skipped, 0 failed.",
       "status": "STABLE"
     }
   },
@@ -126,21 +166,23 @@
       "reason": "The face leaves the flip to the issuer."
     },
     {
-      "item": "The two failing RIV-hp-1 tests in test_hp1_home_producer.py",
-      "reason": "Outside this order's paths; they assert the runtime read amendment 1 removes (row W1-S22)."
+      "item": "served_delta_r3.py residuals BIDD 2/1, TSEL 0/6, WCMG 0/1",
+      "reason": "Not identity; named with causes in row ETFS_RIVALS-Z-W1-S27. The served-delta run is a report, not a criterion."
     }
   ],
   "surprises": [
     "ETFS_RIVALS-Z-W1-S21",
     "ETFS_RIVALS-Z-W1-S22",
-    "ETFS_RIVALS-Z-W1-S23"
+    "ETFS_RIVALS-Z-W1-S23",
+    "ETFS_RIVALS-Z-W1-S26",
+    "ETFS_RIVALS-Z-W1-S27"
   ],
   "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
   "compiler_tools": [
     {
       "tool": ".tools/safe-commit.sh",
       "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "2d52ce2bb1"
+      "result": "9a723d4b81"
     }
   ]
 }
