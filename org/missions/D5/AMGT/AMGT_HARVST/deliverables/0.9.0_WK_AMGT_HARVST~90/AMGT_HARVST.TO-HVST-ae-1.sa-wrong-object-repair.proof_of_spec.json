@@ -17,11 +17,11 @@
     {
       "path_or_key": "lib/opal_data_harvest/publishers.py",
       "kind": "script",
-      "commit_or_etag": "1b55276f0deac9623abdbfe91a8e09c74f5aeca1",
+      "commit_or_etag": "03457e5899",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Phase A LOCAL: sa leg takes the body from the listing; page cap 200. Not deployed.",
+      "deploy_evidence": "Phase A LOCAL: sa leg takes the body from the listing (bronze capture {\"data\": item}), notes it fetched with no request; page cap 200. Not deployed.",
       "introduces": [
-        "HVST-ae-1: the body comes from the LISTING item"
+        "HVST-ae-1 AMENDMENT 1 (row Z-W90-S2)"
       ],
       "artifact_covered_by": [
         "AC1"
@@ -58,11 +58,11 @@
     {
       "path_or_key": "lib/opal_data_harvest/test_ae1_sa_listing_body.py",
       "kind": "test",
-      "commit_or_etag": "1b55276f0deac9623abdbfe91a8e09c74f5aeca1",
+      "commit_or_etag": "03457e5899",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "8 plants; 5 fail on the base behaviour.",
+      "deploy_evidence": "9 plants (8 + the AMENDMENT 1 fetched-no-request plant); 5 of the first 8 fail on the base behaviour.",
       "introduces": [
-        "test_i_two_listing_items_yield_two_articles"
+        "test_i_a_stored_listing_item_counts_as_fetched_with_no_request"
       ],
       "artifact_covered_by": [
         "AC1"
@@ -80,6 +80,32 @@
       "artifact_covered_by": [
         "AC2"
       ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_bronze_capture.py",
+      "kind": "test",
+      "commit_or_etag": "03457e5899",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1: sa arm updated to the listing-body behaviour (rows Z-W90-S1/S2).",
+      "introduces": [
+        "HVST-ae-1 (rows Z-W90-S1/S2): the sa bronze capture"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_n1_received_bytes_and_run_record.py",
+      "kind": "test",
+      "commit_or_etag": "03457e5899",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1: sa arm updated to the listing-body behaviour (rows Z-W90-S1/S2).",
+      "introduces": [
+        "HVST-ae-1 (row Z-W90-S1): the sa bronze capture"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
     }
   ],
   "acceptance": [
@@ -89,9 +115,9 @@
       "method": "test_suite",
       "invocation": "python -m pytest lib/opal_data_harvest/test_ae1_sa_listing_body.py -rA --tb=line",
       "expect": "passed",
-      "output_evidence": "============================== 8 passed in 0.38s ============================== | rc=0 | 8 PASSED lines",
+      "output_evidence": "============================== 9 passed in 0.36s ============================== | rc=0 | 9 PASSED lines",
       "status": "PASS",
-      "denominator": "8 of 8 tests passed; 5 of 8 fail on the base publishers.py/publication_gold.py"
+      "denominator": "9 of 9 tests passed; 5 of the first 8 fail on the base publishers.py/publication_gold.py"
     },
     {
       "criterion_id": "AC2",
@@ -99,7 +125,7 @@
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-1.AC2.py",
       "expect": "AC2 RESULT: PASS",
-      "output_evidence": "QUARANTINE: none (no manifest at C:/Users/Opal Bloomberg/Desktop/wk-hvst-r32-90\\org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~90\\ae1_quarantine.json) | ROWS CHECKED: 85 (silver parts 66; listing-discovered 79; listing hits read 120) | WRONG-OBJECT: 38 of 85; quarantined 0; outside quarantine 38 | RE-CHECK MISMATCHES: 38 of 85 | AC2 RESULT: FAIL (1 failure(s)) |   FAIL: 38 wrong-object rows outside the quarantine | rc=1",
+      "output_evidence": "ROWS CHECKED: 85 | WRONG-OBJECT: 38 of 85; quarantined 0; outside quarantine 38 | AC2 RESULT: FAIL (1 failure(s)) | FAIL: 38 wrong-object rows outside the quarantine | rc=1",
       "status": "FAIL",
       "status_reason": "phase B pending",
       "denominator": "38 wrong-object of 85 rows checked; 0 quarantined"
@@ -110,7 +136,7 @@
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-1.AC3.py",
       "expect": "AC3 RESULT: PASS",
-      "output_evidence": "MANIFEST: absent (C:/Users/Opal Bloomberg/Desktop/wk-hvst-r32-90\\org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~90\\ae1_quarantine.json) | AC3 RESULT: FAIL (1 failure(s)) |   FAIL: no quarantine manifest | rc=1",
+      "output_evidence": "MANIFEST: absent | AC3 RESULT: FAIL (1 failure(s)) | FAIL: no quarantine manifest | rc=1",
       "status": "FAIL",
       "status_reason": "phase B pending",
       "denominator": "0 manifests of 1 required"
@@ -134,11 +160,16 @@
     {
       "item": "Phase B: quarantine --apply and the gold rebuild",
       "reason": "owed after the never-widen pair is signed and the issuer hands it over"
+    },
+    {
+      "item": "python -m pytest lib/opal_data_harvest/ -q reading 0 failed",
+      "reason": "1 failed, 394 passed, 1 skipped; the 1 failure is test_worker.py::test_rotated_http_cookies_survive_next_job_without_new_login_timestamp (row Z-W91-S1; fixed on CLOUD @250c895b8e, not an ancestor of this branch; outside this order's paths). 0 of the 4 sa tests named by row Z-W90-S2 fail."
     }
   ],
   "surprises": [
     "AMGT_HARVST-Z-W90-S1",
-    "AMGT_HARVST-Z-W90-S2"
+    "AMGT_HARVST-Z-W90-S2",
+    "AMGT_HARVST-Z-W90-S3"
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
