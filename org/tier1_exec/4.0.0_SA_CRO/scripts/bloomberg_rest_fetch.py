@@ -65,7 +65,6 @@ def build_session(*, bundle=None):
     for c in bundle["all_cookies"]:
         s.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path", "/"))
     s.headers.update({
-        "User-Agent": bundle.get("user_agent") or "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "application/json, text/plain, */*",
     })
     print(f"OK: parked session loaded, captured_at={bundle.get('captured_at')}", flush=True)

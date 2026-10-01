@@ -129,8 +129,7 @@ def build_session(use_proxy=True, *, bundle=None):
             )
         except Exception:
             pass
-    if bundle.get("user_agent"):
-        s.headers.update({"User-Agent": bundle["user_agent"]})
+    # HVST-ae-2: no UA override; curl_cffi presents the agent string of the fingerprint it impersonates.
     s.sa_user_id = bundle_user_id(cookies)
     return s, bundle["captured_at"]
 
