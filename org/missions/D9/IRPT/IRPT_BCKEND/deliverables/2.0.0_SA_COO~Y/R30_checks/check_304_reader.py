@@ -32,8 +32,9 @@ from botocore.stub import Stubber  # noqa: E402
 
 import comparison_catalogue as cc  # noqa: E402
 
-SCAN = {"TableName": "etf-classifications", "ProjectionExpression": "#t, #n, #ns",
-        "ExpressionAttributeNames": {"#t": "ticker", "#n": "name", "#ns": "identifier_namespace"}}
+SCAN = {"TableName": "etf-classifications", "ProjectionExpression": "#t, #n, #ns, #cb",
+        "ExpressionAttributeNames": {"#t": "ticker", "#n": "name", "#ns": "identifier_namespace",
+                                     "#cb": "classified_by"}}
 PAGE_1 = {"Items": [{"ticker": {"S": "spy"}, "name": {"S": "SPDR S&P 500 ETF Trust"}}, {"ticker": {"S": "BIL"}}],
           "LastEvaluatedKey": {"ticker": {"S": "BIL"}}}
 PAGE_2 = {"Items": [{"ticker": {"S": "VNQ"}, "name": {"S": "Vanguard Real Estate ETF"}},
