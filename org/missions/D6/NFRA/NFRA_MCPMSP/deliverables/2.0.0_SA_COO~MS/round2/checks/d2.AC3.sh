@@ -3,7 +3,7 @@
 # /opt/opal-gateway/app/{internal_role,sender_gate,admin_refusals}.py equals that file's blob at the manifest's
 # deployed_commit; /opt/opal-gateway/.env carries exactly one INTERNAL_READER_ROLE_ARN line and exactly one
 # MSP_CALLING_IDENTITIES line (values never printed); round 1's modules are still served (tenant_registry.py present).
-# AMENDMENT A1 (C1/C2, ruling R5): the .env KEY count equals EXPECT_KEYS (default 37 = live 35 + own 2) and both
+# AMENDMENT A1 (C1/C2, ruling R5): the .env KEY count equals EXPECT_KEYS (default 39 = live 37 after MX-r-7 + own 2; AMENDED A2) and both
 # principal keys MASTER_ADMIN_PRINCIPALS / WRITE_CAPABLE_PRINCIPALS are still present once each.
 . "$(dirname "$0")/_root.sh"
 c=$(git show "HEAD:infra/aws/ec2/EC2_MANIFEST.json" | python -c "import json,sys;print(json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'].get('deployed_commit','NONE'))" 2>/dev/null | tr -d '\r')
@@ -24,6 +24,6 @@ EOF
 ssm_run "$T/params.json"; rm -rf "$T"
 v() { printf '%s\n' "$SSM_OUT" | sed -n "s/^$1=//p"; }
 ok=1; got=""; for f in internal_role sender_gate admin_refusals; do l=$(v $f); w=$(printf '%s' "$want" | tr ' ' '\n' | sed -n "s/^$f=//p"); r=MISMATCH; [ -n "$l" ] && [ "$l" = "$w" ] && r=match; got="$got $f=$r"; [ "$r" = match ] || ok=0; done
-echo "ssm command=$SSM_CID status=$SSM_ST; deployed_commit=$c; /health=$(v health);$got; tenant_registry=$(v r1); INTERNAL_READER_ROLE_ARN lines=$(v irr); MSP_CALLING_IDENTITIES lines=$(v msp); .env keys=$(v keys) (expect ${EXPECT_KEYS:-37}); MASTER_ADMIN_PRINCIPALS lines=$(v map); WRITE_CAPABLE_PRINCIPALS lines=$(v wcp)"
-if [ "$(v health)" = 200 ] && [ "$ok" = 1 ] && [ "$(v r1)" = present ] && [ "$(v irr)" = 1 ] && [ "$(v msp)" = 1 ] && [ "$(v keys)" = "${EXPECT_KEYS:-37}" ] && [ "$(v map)" = 1 ] && [ "$(v wcp)" = 1 ]; then echo "RESULT: PASS"; exit 0; fi
+echo "ssm command=$SSM_CID status=$SSM_ST; deployed_commit=$c; /health=$(v health);$got; tenant_registry=$(v r1); INTERNAL_READER_ROLE_ARN lines=$(v irr); MSP_CALLING_IDENTITIES lines=$(v msp); .env keys=$(v keys) (expect ${EXPECT_KEYS:-39}); MASTER_ADMIN_PRINCIPALS lines=$(v map); WRITE_CAPABLE_PRINCIPALS lines=$(v wcp)"
+if [ "$(v health)" = 200 ] && [ "$ok" = 1 ] && [ "$(v r1)" = present ] && [ "$(v irr)" = 1 ] && [ "$(v msp)" = 1 ] && [ "$(v keys)" = "${EXPECT_KEYS:-39}" ] && [ "$(v map)" = 1 ] && [ "$(v wcp)" = 1 ]; then echo "RESULT: PASS"; exit 0; fi
 echo "RESULT: FAIL"; exit 1
