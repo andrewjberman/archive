@@ -138,6 +138,20 @@ const noTilesNoRules = (h, label, f) => {
   }
   arm(8, "BA's sheet shows the served 2026E-2028E columns", f);
 }
+// 9 READABLE FORECASTS (added at the drain after the real run, issuer direct act): the served consensus figures carry float
+// noise ("-0.8280000000000001", "4342.833333333333"), which pushed BA's sheet past the page edge. No number visible in the sheet
+// carries more than 4 decimals, and each forecast cell still carries its full served value in data-full-value.
+{
+  const f = [];
+  if (rendered(served, 'SERVED face', f)) {
+    const sheetHtml = L.innerOf(served, 'data-model-sheet', '') || '';
+    const long = (L.textOf(sheetHtml).match(/-?\d+\.\d{5,}/g) || []);
+    if (long.length) f.push(`${long.length} sheet number(s) print more than 4 decimals, e.g. ${long.slice(0, 3).join(', ')}`);
+    const fc = (thesis.model && thesis.model.forecast_figures || []).find((x) => x.mnemonic === 'BEST_EPS' && Number(x.fiscal_year) === 2026);
+    if (fc && !sheetHtml.includes(`data-full-value="${String(fc.value)}"`)) f.push(`BEST_EPS 2026's full value ${fc.value} is not carried in data-full-value`);
+  }
+  arm(9, 'forecast cells read at the sheet\'s precision, full value kept', f);
+}
 const k = results.filter(Boolean).length;
-console.log(`THE MODEL FACE IN THE TEAM'S SHAPE: ${k} of 8 arms`);
-process.exit(k === 8 ? 0 : 1);
+console.log(`THE MODEL FACE IN THE TEAM'S SHAPE: ${k} of 9 arms`);
+process.exit(k === 9 ? 0 : 1);
