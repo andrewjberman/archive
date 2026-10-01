@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-s-4.security-market-g4-producer",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "d302af2186",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-s-4.security-market-g4-producer.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cbf0cfd6b0"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "ffb53529cb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 3 code cell; no served write and no Bloomberg call, checks run against a local sink over the real characteristics.parquet (read-only mirror) and real G1",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_s4_security_market.py",
+      "kind": "script",
+      "commit_or_etag": "ffb53529cb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "python -m pytest data/etfs/scripts/rivalfunds/tests -q: 197 passed, 2 skipped, 0 failed (9 new G4 tests)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_e1_enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "ffb53529cb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "daily-mode stub now answers the G4 market call with empty responses so the G3 assertion on the dividends call stays exact; 8 passed",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "import-market over the real characteristics file writes G4: one row per input security, the key grammar, GICS sector and industry group (with the 4-digit code) on exactly the rows that carry them, the C-GOLD-MODEL columns, claim MEASURED -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/s-4.AC1.py",
+      "output_evidence": "input: 172 distinct securities, 164 with GICS_SECTOR_NAME\nimport-market: {'status': 'OK', ... 'rows': 172 ...}\nOK:   G4 rows 172 == distinct input securities 172\nOK:   security_id is the key grammar of security_bloomberg on every row\nOK:   gics_sector populated on 164 of 164\nOK:   gics_industry_group_code is the 4-digit code\nOK:   C-GOLD-MODEL columns present, claim MEASURED ([])\nAC1 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "5 OK of 5 check lines, 0 FAIL; 172 of 172 input securities as G4 rows, gics_sector on 164 of 164 rows whose input carries it (8 rows NULL); local sink, no S3 write",
+      "status": "PASS",
+      "expect": "AC1 RESULT: PASS 0 failures"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "plan-market over real G1 returns exactly G1's non-cash Bloomberg securities and the field list with the four GICS names, PX_LAST and CRNCY, without a session -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/s-4.AC2.py",
+      "output_evidence": "G1 non-cash securities at 2026-09-29: 406\nOK:   plan securities 406 == G1 non-cash 406 (diff [])\nOK:   plan fields include all six\nAC2 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "2 OK of 2 check lines, 0 FAIL; 406 of 406 G1 non-cash Bloomberg securities in the plan, symmetric difference empty, 0 Bloomberg calls (the mode never imports the client)",
+      "status": "PASS",
+      "expect": "AC2 RESULT: PASS 0 failures"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted: unit tests carry the negative arms (a vendor security error and a NaN/blank field are NULL rows, a failing client batch writes no object and no marker, plan-market makes 0 client calls, cash and superseded-revision G1 rows are excluded).",
+      "expected": "NULL never guessed; a failed batch leaves no marker; plan-market 0 client calls.",
+      "observed": "test_key_grammar_and_total_mapping, test_market_failure_writes_nothing, test_plan_market_reads_g1_offline_latest_revision_non_cash pass (197 passed, 2 skipped in the package).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the import revision is <date>-<sha256[:12] of the input file>; test_import_market_one_row_per_security_provenance_and_noop_rerun reruns the same input under a new batch id.",
+      "observed": "second batch, same input: written_new 0, one object; same batch id: marker short-circuits.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "Left for the issuer per the order's WHEN YOU ARE DONE."
+    },
+    {
+      "item": "The market mode's live Bloomberg pull",
+      "reason": "Terminal signed out; the pull runs against an injected stub in tests and its first live run is RIV-d-4's or the vehicle leg's. No Bloomberg call was made."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W3-S15"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~3 <0.9.0_WK_ETFS_RIVALS~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "ffb53529cb"
+    }
+  ]
+}
