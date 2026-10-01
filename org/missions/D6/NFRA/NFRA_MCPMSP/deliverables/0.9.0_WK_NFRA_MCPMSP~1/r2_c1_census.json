@@ -1,0 +1,189 @@
+{
+  "claim": "measured",
+  "scan": {
+    "tool": "python ast over every .py under infra/aws/ec2/opal-gateway/app/** (incl. tests/), counting Call nodes: .client('s3'...)/.client(<expr>) and .get_object/.head_object/.list_objects_v2/.list_objects/.get_paginator/.download_file(obj)",
+    "files_with_sites": 11
+  },
+  "call_sites_scanned": 24,
+  "readers": [
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/query_v0.py",
+      "line": 100,
+      "read_line": 101,
+      "bucket": "opal-data-portal-v2",
+      "prefixes": [
+        "json/*",
+        "json-tiered/*",
+        "platinum/*",
+        "market-metrics.json.gz"
+      ],
+      "identity": "gateway-instance-role",
+      "op": "get_object",
+      "note": "_fetch_capped; module-scope default boto3 client; keys come from the catalog (catalog_gate); IAM grants only json/* and platinum/* (the root object and json-tiered/* are not granted)"
+    },
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/integrations/portal_index/integration.py",
+      "line": 273,
+      "read_line": 275,
+      "bucket": "opal-data-portal-v2",
+      "prefixes": [
+        "json/*",
+        "json-tiered/*",
+        "platinum/*",
+        "market-metrics.json.gz"
+      ],
+      "identity": "gateway-instance-role",
+      "op": "get_object",
+      "note": "s3_getter; bucket = catalog's declared bucket, key = catalog row admitted by catalog_gate"
+    },
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/integrations/opal_discover/integration.py",
+      "line": 228,
+      "read_line": 230,
+      "bucket": "opal-data-portal-v2",
+      "prefixes": [
+        "json/*",
+        "json-tiered/*",
+        "platinum/*",
+        "market-metrics.json.gz"
+      ],
+      "identity": "gateway-instance-role",
+      "op": "head_object",
+      "note": "_s3_head; HeadObject needs s3:GetObject; LastModified only, object not read"
+    },
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/sprint_view.py",
+      "line": 120,
+      "read_line": 135,
+      "bucket": "opal-data-portal-v2",
+      "prefixes": [
+        "daily-reports/*"
+      ],
+      "identity": "gateway-instance-role",
+      "op": "get_object+list_objects_v2 (line 150)",
+      "note": "bucket = config.DAILY_REPORTS_BUCKET default opal-data-portal-v2, prefix DAILY_REPORTS_PREFIX default daily-reports/; not firm data"
+    },
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/firm_role.py",
+      "line": 55,
+      "read_line": 102,
+      "bucket": "opal-data-portal-v2",
+      "prefixes": [
+        "catalog keys for the asking firm"
+      ],
+      "identity": "firm-role",
+      "op": "get_object",
+      "note": "client built from sts:AssumeRole credentials of config.FIRM_ROLE_ARNS[firm]; no default-credential path"
+    }
+  ],
+  "not_readers": [
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/audit.py",
+      "lines": [
+        44
+      ],
+      "why": "put_object to AUDIT_S3_BUCKET (opal-mcp-audit/audit/*); write only"
+    },
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/schwab_audit.py",
+      "lines": [
+        321
+      ],
+      "why": "write-only audit client; no read call in the scan"
+    },
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/rivalfunds_view.py",
+      "lines": [
+        98,
+        117,
+        133
+      ],
+      "why": "bucket opal-data-etfs (rivalfunds_location.json), not portal-v2"
+    },
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/integrations/schwab/catalog.py",
+      "lines": [
+        736,
+        790,
+        983,
+        1080,
+        1090
+      ],
+      "why": "assumed Schwab reader role session; bucket = contract source_bucket (runtime contract, no portal-v2 literal in app/); identity is not the gateway instance role"
+    },
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py",
+      "lines": [
+        196,
+        205
+      ],
+      "why": "same Schwab role session"
+    },
+    {
+      "file": "infra/aws/ec2/opal-gateway/app/integrations/schwab/aws_roles.py",
+      "lines": [
+        186
+      ],
+      "why": "client factory for the Schwab role session (service param)"
+    }
+  ],
+  "iam_statements": [
+    {
+      "policy": "opal-gateway-queryv0-portal-read (inline)",
+      "sid": "QueryV0PortalCatalogRead",
+      "effect": "Allow",
+      "actions": [
+        "s3:GetObject"
+      ],
+      "resources": [
+        "arn:aws:s3:::opal-data-portal-v2/json/*",
+        "arn:aws:s3:::opal-data-portal-v2/platinum/*"
+      ]
+    },
+    {
+      "policy": "opal-gateway-daily-reports-read (inline)",
+      "sid": "DailyReportsGet",
+      "effect": "Allow",
+      "actions": [
+        "s3:GetObject"
+      ],
+      "resources": [
+        "arn:aws:s3:::opal-data-portal-v2/daily-reports/*"
+      ],
+      "also": "DailyReportsListPrefix: s3:ListBucket on opal-data-portal-v2 with s3:prefix daily-reports/ and daily-reports/*"
+    }
+  ],
+  "iam_read": {
+    "role": "opal-gateway-role",
+    "how": "live aws CLI: iam list-role-policies (14 inline), list-attached-role-policies (1: AmazonSSMManagedInstanceCore), get-role-policy per inline + get-policy-version for the attached",
+    "statements_scanned": "every statement of all 15 policies with an s3:* action or a portal-v2 resource; only the two above touch opal-data-portal-v2; no Deny on portal-v2 today",
+    "other_s3_statements": [
+      "gateway-rivalfunds-read-policy: GetObject opal-data-etfs/rivalfunds/etfs/platinum/page/*, ListBucket opal-data-etfs",
+      "opal-gateway-audit-lake-write: PutObject opal-mcp-audit/audit/*",
+      "opal-gateway-golive: GetObject opal-313476888478-lambda-artifacts/ec2/opal-gateway/*"
+    ]
+  },
+  "firm_segments": [
+    {
+      "pattern": "platinum/mdpf/{49financial|inflection|cottonwood}/aum-metrics.json",
+      "deny_key": "platinum/mdpf/{firm}/*",
+      "catalog": "app/refs/DATA_CATALOG.yaml channels.mdpf_model_portfolios (artifacts key platinum/mdpf/{scope}/aum-metrics.json; paths line with the firm alternation)"
+    },
+    {
+      "pattern": "platinum/mdpf/{49financial|inflection|cottonwood}/account-distribution.json",
+      "deny_key": "platinum/mdpf/{firm}/*",
+      "catalog": "same channel"
+    },
+    {
+      "pattern": "platinum/mdpf/{49financial|inflection|cottonwood}/aggregate-aua-timeseries.json",
+      "deny_key": "platinum/mdpf/{firm}/*",
+      "catalog": "same channel"
+    },
+    {
+      "pattern": "platinum/mdpf/cottonwood/account-units.json",
+      "deny_key": "platinum/mdpf/cottonwood/*",
+      "catalog": "same channel, literal key"
+    }
+  ],
+  "firm_segment_non_matches": "A scan of every key/primary field (76, 46 distinct) of DATA_CATALOG.yaml: the firm tokens appear as a path segment only under platinum/mdpf/. json/mdpf/**, platinum/mdpf/_manifests/**, platinum/mdpf/archive/** and platinum/mdpf/global/* carry no firm token in the catalog text and are NOT in the Deny keys on that evidence (their object contents were not read)."
+}
