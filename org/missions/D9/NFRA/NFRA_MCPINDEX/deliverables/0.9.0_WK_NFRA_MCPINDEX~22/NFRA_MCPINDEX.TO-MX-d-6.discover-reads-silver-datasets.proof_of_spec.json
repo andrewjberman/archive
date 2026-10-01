@@ -20,7 +20,7 @@
       "kind": "script",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "discover reads silver_datasets and matches portal_datasets rows on their own text; the silver gate is catalog_gate.gate() on a gate row built from firm_scope_rule. Nothing deployed; MX-r-8 releases.",
+      "deploy_evidence": "discover reads silver_datasets and matches portal_datasets rows on their own text. AMENDMENT A1 (fail closed, rules row Z-W22-S1): _silver_answer returns None for a firm-scoped silver row to every principal except OPAL_INTERNAL; the existing catalog_gate.gate() still grades the gate row. Nothing deployed; MX-r-8 releases.",
       "artifact_covered_by": [
         "AC1",
         "AC2",
@@ -44,7 +44,7 @@
       "kind": "test",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "MX-d-5 ETF assertion retired (now names etfs_get_positioning), +5 MX-d-6 tests; 20 passed. Nothing deployed; MX-r-8 releases.",
+      "deploy_evidence": "MX-d-5 ETF assertion retired (now names etfs_get_positioning); MX-d-6 tests; A1: test_silver_row_fails_closed_on_cross_firm_visibility replaces the fail-open firm-gate test (OPAL_INTERNAL gets blackdiamond_list_fees and schwab_query; each of the 3 KNOWN_FIRMS, an unknown firm and an unresolved principal get no silver match); 20 passed. Nothing deployed; MX-r-8 releases.",
       "artifact_covered_by": [
         "AC1",
         "AC2",
@@ -104,7 +104,7 @@
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "rows NFRA_MCPINDEX-Z-W22-S1 (OBSERVATION, ARMED, disarm 2.0.0_SA_COO~MI) and -S2 (OBSERVATION, INERT). Nothing deployed; MX-r-8 releases.",
+      "deploy_evidence": "rows NFRA_MCPINDEX-Z-W22-S1 (OBSERVATION, ARMED, disarm 2.0.0_SA_COO~MI) and -S2 (OBSERVATION, INERT). Nothing deployed; MX-r-8 releases. A1 (issuer ruling, CLOUD 5a3f56291d) implemented in discover; the C1 firm field is carried to the round-7 enrichment list.",
       "artifact_covered_by": [
         "AC1",
         "AC2",
@@ -157,7 +157,7 @@
   "declared_exclusions": [
     {
       "item": "Edits to catalog_gate.py",
-      "reason": "Not needed: a silver row is handed to the existing gate as a gate row; the file is unchanged, so query_v0's catalog behaviour is byte-equal."
+      "reason": "Not needed: a silver row is handed to the existing gate as a gate row (A1 additionally refuses a firm-scoped row to every non-OPAL_INTERNAL principal in discover before the gate); the file is unchanged, so query_v0's catalog behaviour is byte-equal."
     },
     {
       "item": "Deploy, push, and any change to a tool, role, grant, query_v0 or the HTTP route",
@@ -176,8 +176,8 @@
   "compiler_tools": [
     {
       "tool": "pytest",
-      "invocation": "python -m pytest tests/test_opal_discover.py from infra/aws/ec2/opal-gateway; plus -k 'catalog or discover or query_v0 or portal_index or index' over tests; plus workflows/atom_decomposition/tests",
-      "result": "20 passed; 59 passed (460 deselected); 30 passed"
+      "invocation": "python -m pytest tests/test_opal_discover.py from infra/aws/ec2/opal-gateway; plus -k 'catalog or discover or query_v0 or portal_index or index' over tests; plus workflows/atom_decomposition/tests; A1 re-run: python -m pytest infra/aws/ec2/opal-gateway/tests/test_opal_discover.py -q",
+      "result": "20 passed; 59 passed (460 deselected); 30 passed; A1 re-run: 20 passed (test_opal_discover.py), d6.AC1 2 of 2, AC2 24 of 27, AC3 10 of 10, all as OPAL_INTERNAL, unchanged"
     },
     {
       "tool": "emit_catalog_v02.py",
