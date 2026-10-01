@@ -30,6 +30,15 @@ UNIVERSE = os.environ.get("HVST_GOLD_UNIVERSE") or os.path.join(
     c.ROOT, "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~46/securities.universe.json")
 
 
+# The 21 keys ADDENDUM 1 names (round33/NEVER_WIDEN_HALF_COO_GOLD_UNIVERSE_ADDENDUM.md; CTO half @e24ca120a2).
+ADDED_21 = frozenset({
+    "ADBE_US_Equity", "AI_FP_Equity", "CDNS_US_Equity", "CELH_US_Equity", "CLX_US_Equity", "GPN_US_Equity",
+    "HEI_US_Equity", "ICT_PM_Equity", "JD_US_Equity", "MSCI_US_Equity", "MER_PM_Equity", "ML_FP_Equity",
+    "8306_JP_Equity", "NKE_US_Equity", "SLB_US_Equity", "SHOP_CN_Equity", "8316_JP_Equity", "SNPS_US_Equity",
+    "8035_JP_Equity", "8766_JP_Equity", "ZTS_US_Equity",
+})
+
+
 def digest(rows):
     h = hashlib.sha256()
     for r in sorted(json.dumps(r, sort_keys=True, default=str) for r in rows):
@@ -55,9 +64,9 @@ def rule(before_m, before_d, after_m, after_d):
     nm = {mk(r): json.dumps(r, sort_keys=True, default=str) for r in after_m}
     gone = [k for k in om if k not in nm]
     changed = [k for k in nm if k in om and nm[k] != om[k]]
-    # ADDENDUM 1 (gold universe 191 -> 212): a served row may change ONLY in the co-mention fields, and only when its new
-    # co-mentions include an added security (one not in the BEFORE snapshot's security set).
-    before_secs = {r.get("security_key") for r in before_m}
+    # ADDENDUM 1 (gold universe 191 -> 212; CTO half @e24ca120a2): a served row may change ONLY in the co-mention fields,
+    # and only when the securities it NEWLY co-mentions are a non-empty subset of the 21 named keys (ADDED_21); a
+    # co-mention change naming any other new key is a STOP.
     after_rows = {mk(r): r for r in after_m}
     before_rows = {mk(r): r for r in before_m}
     co_fields = {"co_mention_count", "co_mentioned_securities", "is_roundup"}
@@ -65,7 +74,8 @@ def rule(before_m, before_d, after_m, after_d):
     def co_mention_only(k):
         a, b = after_rows[k], before_rows[k]
         diff = {f for f in set(a) | set(b) if json.dumps(a.get(f), default=str) != json.dumps(b.get(f), default=str)}
-        return diff <= co_fields and bool(set(a.get("co_mentioned_securities") or []) - before_secs)
+        new_co = set(a.get("co_mentioned_securities") or []) - set(b.get("co_mentioned_securities") or [])
+        return diff <= co_fields and bool(new_co) and new_co <= ADDED_21
 
     changed = [k for k in changed if not co_mention_only(k)]
     added_secs = {k[1] for k in nm if k not in om}
