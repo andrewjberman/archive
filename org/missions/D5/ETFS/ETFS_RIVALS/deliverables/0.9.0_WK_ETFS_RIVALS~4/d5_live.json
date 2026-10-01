@@ -4,7 +4,7 @@
  "act_day": "2026-10-01",
  "act_state": "ACTED",
  "page_day": "2026-10-01",
- "publish_marker": "s3://opal-data-etfs/rivalfunds/etfs/state/publish_page/date=2026-10-01/d5-publish-r4.json",
+ "publish_marker": "s3://opal-data-etfs/rivalfunds/etfs/state/publish_page/date=2026-10-01/d5-publish-r4b.json",
  "newest_report_date": "2026-09-30",
  "floors": {
   "issuer": 0.23,
@@ -46,7 +46,8 @@
    "trade_schedule": 307,
    "flow_reconciliation": 307
   },
-  "gqgu_readback": "evidence/gqgu_g1_readback.txt: 305 of 305 dates carry GQGU rows in the newest G1 (10798 rows, source_channel issuer-site:gqgu only); G5 and G6 newest object present for 305 of 305 dates"
+  "gqgu_readback": "evidence/gqgu_g1_readback.txt: 305 of 305 dates carry GQGU rows in the newest G1 (10798 rows, source_channel issuer-site:gqgu only); G5 and G6 newest object present for 305 of 305 dates",
+  "g2_coverage": "full-window G2 replay 2025-07-14..2026-09-30 in one invocation (324.9 s): 307 coverage days, 3068 rows, 12 funds, 0 GQGU rows (G2's issuer reader is BASG-only, row Z-W4-S12); written_new 4 (the days 2026-04-23..04-28 the c3-00 chain run had written with a 04-28 through-date)"
  },
  "gqgu_import": {
   "files": 305,
@@ -87,7 +88,10 @@
    "rivalfunds-build-canonical-shape-lambda replay d5-replay-c3-01 2026-04-29..2026-05-27": "a6a4ea13-86eb-4890-a3a5-74a8288a426f",
    "rivalfunds-build-canonical-shape-lambda replay d5-replay-c3-02 2026-05-28..2026-06-25": "821386a3-e66c-4bd3-9c02-4f50466e09f2",
    "rivalfunds-build-canonical-shape-lambda replay d5-replay-last-00 2026-09-29..2026-09-30": "d75f494e-5f45-4b96-b15a-58e84d896a2f",
-   "etfs-rivalfunds-daily-lambda publish-page only d5-publish-r4 (the served page)": "48814ee7-0475-4507-b8c5-856fcd4b7e50"
+   "etfs-rivalfunds-daily-lambda publish-page only d5-publish-r4 (the served page)": "48814ee7-0475-4507-b8c5-856fcd4b7e50",
+   "etfs-rivalfunds-daily-lambda build-coverage only, replay probe 2026-09-14..2026-09-30 (d5-g2-r4-probe, nothing rewritten)": "53200ea1-6b4c-4dfb-9dbd-20890e800ae0",
+   "etfs-rivalfunds-daily-lambda build-coverage only, replay 2025-07-14..2026-09-30 (d5-g2-r4-full, 307 days, written_new 4)": "99756aa9-bde9-4b52-85e2-c53e35e680f7",
+   "etfs-rivalfunds-daily-lambda publish-page only d5-publish-r4b (the served page)": "d3d8440b-cd95-4037-a49e-76ec0246fbd9"
   },
   "marker_driven_complete": {
    "build-silver d5-gqgu-00..03": [
@@ -199,8 +203,13 @@
  },
  "remaining": [
   "acceptance (read at the close, never waited on): the next trading day's 07:00 issuer fetch for BASG and GQGU, the 08:03 Bloomberg leg and the 09:00 sweep",
-  "GQGU reads not-updated on the page by report_date_freshness (latest 2026-09-28 vs expected 2026-09-30, lag 2): the archive ends 2026-09-28 and the daily route fetches T-1 only; it is not an identity_coverage failure and no GQGU backfill of 2026-09-29/30 is in this cell",
+  "AC1 reads FAIL on ONE clause only, the GQGU block (no issuer badge): GQGU is served not-updated by report_date_freshness (latest 2026-09-28 vs expected 2026-09-30, lag 2) until the next trading day's 07:00 GQGU fetch; ruled expected by 2.0.0_SA_COO~RV (no backfill of 2026-09-29/30). The config and identity_coverage clauses read OK. The issuer grades the GQGU clause at the acceptance read",
+  "GQGU calendar unavailable on the page: G2 has no GQGU path (row Z-W4-S12 BLOCKING); G2's issuer reader attributes every issuer sidecar to BASG (row Z-W4-S13 BLOCKING ARMED, disarm_owner 2.0.0_SA_COO~RV, inferred hazard for the next trading day's G2)",
   "row Z-W4-S9 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~RV): a marker-driven G1 batch of 60 dates exceeds the 900 s ceiling; round-5 remediation",
   "row Z-W4-S8 (ARMED): the committed floors turn 19 package unit tests red; issuer remedy outside d-5's paths"
+ ],
+ "publish_history": [
+  "d5-publish-r4 (48814ee7-0475-4507-b8c5-856fcd4b7e50, before the G2 replay)",
+  "d5-publish-r4b (d3d8440b-cd95-4037-a49e-76ec0246fbd9, after the G2 replay; the served page)"
  ]
 }
