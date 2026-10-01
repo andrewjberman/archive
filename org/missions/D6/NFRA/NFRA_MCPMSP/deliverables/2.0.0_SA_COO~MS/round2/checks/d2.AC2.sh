@@ -13,7 +13,7 @@ for h in $(git log -n 40 --format=%H -- "$M"); do v=$(mf "$h"); [ "$v" != "$c" ]
 desc=no; [ -n "$prev" ] && git merge-base --is-ancestor "$prev" "$c" 2>/dev/null && desc=yes
 allowed=$(printf '%s\n' app/internal_role.py app/query_v0.py app/sender_gate.py app/asker_scope.py app/audit.py app/admin_refusals.py \
   app/admin_api.py deploy-to-ec2.sh tests/test_mcpmsp_internal_role.py tests/test_mcpmsp_sender_gate.py tests/test_admin_refusals.py \
-  tests/run_release_suites.sh | sed "s#^#$G/#" | sort -u)
+  tests/run_release_suites.sh tests/test_deploy_base_guard.py | sed "s#^#$G/#" | sort -u)
 shipped=$(git diff --name-only "$prev" "$c" -- "$G" 2>/dev/null | sort -u)
 nship=$(printf '%s\n' "$shipped" | grep -c .)
 foreign=$(comm -23 <(printf '%s\n' "$shipped" | grep .) <(printf '%s\n' "$allowed")); nf=$(printf '%s\n' "$foreign" | grep -c .)

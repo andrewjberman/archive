@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-e-6",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-e-6.opal-agent-loopback-reach.md",
+    "group": "OTHER",
+    "vintage_commit": "b239301bb1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "b239301bb1",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-e-6.opal-agent-loopback-reach.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~14/E6_LOOPBACK_REACH.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four TCP-connect arms; verdict PARTIAL (Opal_Agent 8194 REFUSED, 8790 OPEN); operator 8194 REFUSED so the 8194 control is dead."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "arms=4; cells filled once 4 of 4; valid results 4; verdict equals implied -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e6.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "arms=4; cells filled once 4 of 4; valid results 4; agent arms 8194=REFUSED 8790=OPEN; verdict=PARTIAL implied=PARTIAL\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 arms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "operator 8194=OPEN 8790=OPEN view_server_stopped=yes; Opal_Agent account=present -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e6.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "operator 8194=REFUSED 8790=OPEN view_server_stopped=yes; Opal_Agent account=present\nRESULT: FAIL\nexit=1",
+      "denominator": "1 of 2 operator control arms OPEN (8790 yes, 8194 no); view server stopped yes; account present yes",
+      "status": "FAIL",
+      "status_reason": "Operator 8194 arm read REFUSED (bbcomm.exe not running; the face forbids starting the terminal), so the control the criterion requires (operator 8194=OPEN) is not met; refused as written, not repaired. Row NFRA_OPALAI-Z-W14-S1."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Measure-only order; nothing to mutate.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Single measurement run by design.",
+      "observed": "one run",
+      "status": "N/A-WITH-REASON",
+      "reason": "Single TCP-connect measurement; terminal state is external."
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPALAI-Z-W14-S1"
+  ],
+  "session_log": "2026-10-01, worktree C:/tmp/oa-14. Operator probe: 8194 REFUSED (bbcomm not running; terminal not started per face), 8790 initially REFUSED; started view server with operator Python311 (BLOOMBERG_MCP_TRANSPORT=streamable-http), 8790 OPEN; Opal_Agent probe via Start-Process -Credential from state_dir: 8194 REFUSED, 8790 OPEN; probe script/result removed; view server stopped (0 listeners on 8790). TCP connect only. PUSH STATE: LOCAL.",
+  "compiler_tools": [
+    {
+      "tool": "powershell System.Net.Sockets.TcpClient",
+      "invocation": "probe.ps1 (3 s connect, close) run as operator and as Opal_Agent",
+      "result": "4 of 4 arms recorded: operator 8194 REFUSED / 8790 OPEN; Opal_Agent 8194 REFUSED / 8790 OPEN"
+    }
+  ]
+}
