@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-p-4.why-ft-and-barrons-refuse",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-p-4.why-ft-and-barrons-refuse.md",
+    "group": "OTHER",
+    "vintage_commit": "dd85531321"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "dd85531321",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-p-4.why-ft-and-barrons-refuse.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~69",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/scripts/p4_ac1_refusals.py",
+      "kind": "script",
+      "commit_or_etag": "8bd18c3e1d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only measurement script; nothing deployed; sockets blocked and asserted",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/scripts/p4_ac2_route.py",
+      "kind": "script",
+      "commit_or_etag": "8bd18c3e1d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only cause and route script; 26 assertions recomputed from the ledger and code; sockets blocked and asserted",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/scripts/p4_common.py",
+      "kind": "script",
+      "commit_or_etag": "8bd18c3e1d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "shared readers; session files touched with os.stat only",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/scripts/p4_control.py",
+      "kind": "script",
+      "commit_or_etag": "c561ebf76d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "mutant, determinism and socket controls; scratch copy removed",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/p4_ac1_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "8bd18c3e1d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "verbatim AC1 output, rc 0",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/p4_ac2_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "8bd18c3e1d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "verbatim AC2 output, rc 0",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "for each of ft and barrons: every recorded request/response event of the o-5 runs for that publisher (count printed, 0 named as 0) beside bbg's and wsj's, the session envelope's presence/age/source (no content), and the request difference from bbg/wsj by file:line",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/scripts/p4_ac1_refusals.py",
+      "output_evidence": "COUNTS (http request/response events over the o-5 jobs): {'barrons': 4, 'ft': 1, 'bbg': 19, 'wsj': 20}\nASSERTED: barrons 4 http (client, client, search, client); ft 1 http (search 403) + 0 in the cooldown job; bbg/wsj > 5 each\nbarrons detail='Publisher verification challenge from www.barrons.com'  => a marker MATCHED (which of the five is not recorded: bodies are not kept)\nft      detail='HTTP 403 from www.ft.com/search'  => NO marker matched; 403 with [270955] bytes (see ft history below)\n=> BEFORE the attempt: the envelope in use was the one written by the 09-23 reauth (auth/20260923T003258Z-barrons-028229ab, mtime 2026-09-23T00:33:12), 7.15 days before the attempt's first /client (112 bytes = logged out).\n=> SOURCE of the envelope in use at the refusal: the attempt's own SessionManager.refresh -> auth.py (dowjones_harvest_session.py), mtime 04:08:41.237 = reauth_succeeded; the /search 401 came 23.2 s after it.\n=> AGE at the refused o-5 ft job (2026-09-30T04:45:29): 15.05 days\nworker: repair ONLY on attempt 0 and ONLY bbg/barrons lib/opal_data_harvest/worker.py:393\nft:  HARD-CODED User-Agent Chrome/126 (not the bundle's) org/tier1_exec/4.0.0_SA_CRO/scripts/ft_rest_fetch.py:112\nwsj: UA from the bundle (wsj only)             lib/opal_data_harvest/publishers.py:263\nAC1 DONE rows_cited=28",
+      "denominator": "o-5 run records 3 of 3, jobs 7 of 7 (barrons 1, ft 2, bbg 2, wsj 2); http events barrons 4, ft 1 (second ft job 0), bbg 19, wsj 20 of 483 ledger rows; envelopes 4 of 4 by os.stat; 28 file:line rows cited; rc 0; full output in p4_ac1_output.txt",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "per publisher, the cause stated with the evidence line it rests on, and either the smallest scripted route to a clean fetch (the code or session step, and what act it would need: a pair, Andrew's word, or none) or a stated limit; the script makes no network call (it asserts socket creation is blocked while it runs)",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/scripts/p4_ac2_route.py",
+      "output_evidence": "CAUSE [MEASURED from the record + code]: the fresh post-reauth session was met by a bot-challenge (401 + marker) on the FIRST /search, and the collector's own challenge-repair for barrons never ran because the reauth had already spent the retry it needs (lib/opal_data_harvest/worker.py:393).\nCAUSE: NOT DETERMINED by the record -- a STATED LIMIT. What is measured: an unchanged request from an unchanged 15-day-old envelope returned 200 on 2026-09-15 and 403 (a ~270 KB page, no challenge marker, no login redirect) on 2026-09-23 and 2026-09-30, so the change is on the publisher's side or in time. Three readings fit and \nROUTE B1 (no code change): a further barrons job. The fresh envelope (secrets/barrons.dpapi, written 04:08:41Z) is now the saved session, so the job starts at attempt 0; a /search challenge then raises VerificationRequired at attempt 0, the branch at lib/opal_data_harvest/worker.py:392 runs repair_verification (auth.py:45-52 -> \nROUTE B2 (code, makes B1 automatic): in lib/opal_data_harvest/worker.py let a verification repair follow a reauth in the same job -- a per-job `verification_repaired` flag in place of `attempt` in the guard at lib/opal_data_harvest/worker.py:393 and one more loop turn at lib/opal_data_harvest/worker.py:258 (the AuthExpired branc\nROUTE F1 (evidence, no publisher request in the edit): a code cell that, when a 403/401 carries no marker, writes the rejection's classification (status, content-type, <title>, first 300 text chars with no cookie/header values, size, marker hits) into the run json -- a change at lib/opal_data_harvest/transport.py:95/lib/opal_dat\nROUTE F3: if F1 says (b)/(c) (edge or address block): NO route inside R-21 -- clearing it is either challenge solving or egress change, both outside this order; the limit stands and ft stays out of the live set until Andrew rules.\nASSERTIONS PASSED: 26\nNETWORK CALLS MADE: 0 (socket.socket replaced by a refusing stub and asserted at start; restored only after the last print)",
+      "denominator": "2 of 2 refused publishers (barrons: cause measured, routes B1 and B2; ft: stated limit, routes F1 to F3); 26 of 26 assertions passed; 0 network calls; rc 0; full output in p4_ac2_output.txt",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2 run on a scratch copy of the runtime records with barrons' verification_repairs set to 1",
+      "expected": "an assertion fails (the cause rests on verification_repairs=0)",
+      "observed": "rc=1, AssertionError: runs/20260930T040818Z-barrons-cfedbf8fb4.json: auth_refreshes=1, verification_repairs=0 (p4_control_output.txt)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "p4_control.py runs AC1 and AC2 twice each and compares stdout with the clock lines (NOW_UTC, age_now) removed",
+      "observed": "AC1 288 lines identical, AC2 56 lines identical, all rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any request to ft or barrons, any browser, login or challenge solving, any collection run, any S3 write",
+      "reason": "Standing clause 1 and section 3; the cell is a read of code, recorded events and run artifacts."
+    },
+    {
+      "item": "contents of secrets/*.dpapi and the auth/ *.dpapi files",
+      "reason": "Session files are read for presence, size and mtime only (os.stat); the age of the ft and barrons envelopes comes from mtime and the auth/ folder times, not from inside them."
+    },
+    {
+      "item": "the body of the ft 403 and of the barrons 401",
+      "reason": "Not recorded anywhere by the collector (row AMGT_HARVST-Z-W69-S1); the ft cause is therefore a stated limit."
+    },
+    {
+      "item": "a live confirmation of route B1 or F1",
+      "reason": "A run is a publisher request; it is not this cell and needs Andrew's per-use word."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W69-S1: the challenge marker is not on disk; events.jsonl and runs/*.json hold no response body, so the marker is proven only by the exception class",
+    "AMGT_HARVST-Z-W69-S2: barrons' contracted challenge repair cannot run after a reauth in the same job (worker.py:393 guard on attempt), ARMED, 2 of 2 logged-out starts ended request_rejected",
+    "AMGT_HARVST-Z-W69-S3: the ft envelope is 15 days old, not minted by the collector's reauth, with no path that refreshes it on a 403; cause stated as a limit"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python 3.11 (stdlib only)",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/scripts/p4_ac1_refusals.py ; python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/scripts/p4_ac2_route.py ; python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~69/scripts/p4_control.py",
+      "result": "rc 0, rc 0, rc 0 (controls: mutant FIRED-AS-EXPECTED, determinism STABLE, socket BLOCKED)"
+    },
+    {
+      "tool": "ruff (commit gate)",
+      "invocation": "bash .tools/safe-commit.sh",
+      "result": "passed on all four scripts"
+    }
+  ]
+}

@@ -93,6 +93,11 @@ const SOURCE_STUBS = {
     useStarredList: () => ({ data: [], isLoading: false, isError: false }),
     useSetStarred: () => ({ mutate: noop }),
     useRequestRefresh: () => ({ mutate: noop, isPending: false }),
+    // round 52 close: DSGN_AMGTV1 round 12 (portal DEV 2c01af6a) mounts the versions / ledger / compare surfaces; the captured served
+    // fixture carries none of them, so they render their empty state -- the export carries no line for them either
+    useModelVersions: () => ({ data: undefined, isLoading: false, isError: false }),
+    useInputLedger: () => ({ data: undefined, isLoading: false, isError: false }),
+    useModelCompare: () => ({ data: undefined, isLoading: false, isError: false }),
   },
   // AMGT-uu-2: HeaderBrief.tsx mounts TimelinePanel (HVST-y-3), which imports `@/api/api-client`
   // (no `@/` mapping in this loader). CHOSEN: a SOURCE_STUB that renders nothing, not an `@/`->src

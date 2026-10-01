@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-w-1.gateway-routes-and-read-grant",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "808f1eb30293ae4ea52082701067857393a653f6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "7926f5194c",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-w-1.gateway-routes-and-read-grant.md"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/rivalfunds_view.py",
+      "kind": "script",
+      "commit_or_etag": "d70267f372714dadfa91bc8c96228af745ba22ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW. is_rivalfunds_path, rivalfunds_page/day/archive/redirect handlers, module-level _s3/_viewer/_list_days/_location; 2 MB capped read, 60s TTL cache, audit.log_call per view; bucket and prefix read from rivalfunds_location.json. Not wired into server.py (COO hookup at merge), not deployed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/gen_rivalfunds_location.py",
+      "kind": "script",
+      "commit_or_etag": "d70267f372714dadfa91bc8c96228af745ba22ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW. Resolves bucket and key prefix from lib/opal_naming.py address('rivalfunds','etfs','platinum','page',...) and writes rivalfunds_location.json and rivalfunds-iam.policy.json. Run once; outputs committed.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/rivalfunds_location.json",
+      "kind": "config_data",
+      "commit_or_etag": "d70267f372714dadfa91bc8c96228af745ba22ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "GENERATED: bucket opal-data-etfs, key_prefix rivalfunds/etfs/platinum/page/ (equal to the builder, AC2).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/rivalfunds-iam.policy.json",
+      "kind": "iam",
+      "commit_or_etag": "d70267f372714dadfa91bc8c96228af745ba22ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "GENERATED: GetObject on <bucket>/<page prefix>*; ListBucket on the bucket conditioned on s3:prefix = page prefix. Nothing else. Not applied (RIV-d-2).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/rivalfunds-iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "d70267f372714dadfa91bc8c96228af745ba22ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: aws_iam_role_policy.gw_rivalfunds_read on aws_iam_role.gw with policy = file() of the policy JSON. No plan, no apply. AMENDMENT 1: name = module.gw_rivalfunds_read_policy_name.name (modules/opal_name, system gateway, function rivalfunds-read, kind policy). Plan-only; not applied.",
+      "artifact_covered_by": [
+        "AC3",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tests/test_rivalfunds_view.py",
+      "kind": "test",
+      "commit_or_etag": "d70267f372714dadfa91bc8c96228af745ba22ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 11 pytest tests (location and policy equal the generator, archive ordering, newest and named day, 400/404/401/307/502, pagination). 11 passed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the three routes on the module's handlers (S3 and viewer stubbed): archive, newest, day, 404/400, identity refusal",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/w-1.AC1.py",
+      "output_evidence": "OK: /rivalfunds/archive lists both days (200); OK: /rivalfunds serves (or redirects to) the newest day (200); OK: /rivalfunds/2026-09-28 serves that day (200); OK: a malformed day is refused (400); OK: an unpublished day is 404 (404); OK: is_rivalfunds_path matches /rivalfunds and /rivalfunds/... only; OK: no signed-in identity -> refused (401); OK: bucket and prefix are not typed in the module (builder output); AC1 RESULT: PASS 0 failures (rc=0)",
+      "denominator": "8 of 8 checks OK, 0 failures",
+      "status": "PASS",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "live: the module's _list_days() against the real page prefix, and _location() equal to the builder",
+      "method": "live_read",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/w-1.AC2.py",
+      "output_evidence": "live days: []; OK: _list_days() returned a list (list); OK: every listed day is YYYY-MM-DD (0 day(s)); OK: _location() is the builder's page prefix (opal-data-etfs/rivalfunds/etfs/platinum/page/); AC2 RESULT: PASS 0 failures (rc=0)",
+      "denominator": "3 of 3 checks OK, 0 failures; live listing returned 0 published days (expected before RIV-d-2, nothing published)",
+      "status": "PASS",
+      "expect": "AC2 RESULT: PASS 0 failures",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "IAM simulation of the read policy: page GET/List allowed; bronze GET, PUT, DELETE, other-prefix List denied",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/w-1.AC3.py",
+      "output_evidence": "OK: GetObject page: allowed; OK: ListBucket prefix=rivalfunds/etfs/platinum/page/: allowed; OK: GetObject bronze: implicitDeny; OK: PutObject page: implicitDeny; OK: DeleteObject page: implicitDeny; OK: ListBucket prefix=issuer-site/: implicitDeny; OK: policy grants only GetObject/ListBucket; AC3 RESULT: PASS 0 failures (rc=0)",
+      "denominator": "9 of 9 checks OK (6 simulated decisions, 3 structural), 0 failures",
+      "status": "PASS",
+      "expect": "AC3 RESULT: PASS 0 failures",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the gate's line for aws_iam_role_policy.gw_rivalfunds_read reads CONFORMANT, with name gateway-rivalfunds-read-policy, and NO line for that resource reads REFUSE",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/opal-gateway plan -lock=false -input=false -var mcportal_owner_key_claim=oid -var mcportal_owner_key=plan-only-dummy -out=<deliv>/w1a.tfplan; terraform show -json > <deliv>/w1a.plan.json; python .tools/naming-apply-gate.py --enforce --plan-json <deliv>/w1a.plan.json",
+      "output_evidence": "NAMING CONFORMANT aws_iam_role_policy.gw_rivalfunds_read gateway-rivalfunds-read-policy -> gateway-rivalfunds-read-policy (ADDITION: CONFORMANT as IAM_POLICY); summary NAMING-PLAN: WARN 59 graded; gate rc=0; REFUSE lines: 0 (w1a.gate.txt)",
+      "denominator": "1 of 1 resource lines for gw_rivalfunds_read CONFORMANT; 59 resource names graded, 0 REFUSE",
+      "status": "PASS",
+      "expect": "NAMING CONFORMANT aws_iam_role_policy.gw_rivalfunds_read gateway-rivalfunds-read-policy",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no planted mutant.",
+      "expected": "n/a",
+      "observed": "AC3 carries its own negative arm: four simulated denials (bronze GET, page PUT, page DELETE, other-prefix List) all read implicitDeny.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Ran w-1.AC1.py twice and cmp'd the filtered output",
+      "observed": "byte-identical (cmp rc=0)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "server.py Route lines, guard branch clause and import",
+      "reason": "HOOKUPS the order assigns to the COO at the merge; server.py is outside <paths>."
+    },
+    {
+      "item": "terraform plan/apply and any gateway deploy",
+      "reason": "RIV-d-2's, under the never-widen pair; section 0 says this order builds only."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W2-S1"
+  ],
+  "session_log": "No separate log file; worker 0.9.0_WK_ETFS_RIVALS~2 (re-spawn), code commit d70267f372714dadfa91bc8c96228af745ba22ed. No rows filed. One row filed: ETFS_RIVALS-Z-W2-S1 (status flip outside <paths>). Amendment 1 (reopen): worker 0.9.0_WK_ETFS_RIVALS~2 on branch wk-ETFS_RIVALS-2b; AC4 added; AC1-AC3 re-run PASS.",
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 <the three .py files>",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest app/tests/test_rivalfunds_view.py -q",
+      "result": "11 passed"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <6 paths>",
+      "result": "committed d70267f372"
+    }
+  ]
+}

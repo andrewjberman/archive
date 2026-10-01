@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-g-4.trade-schedule-v2-income-clean",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "787905d1a3",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-g-4.trade-schedule-v2-income-clean.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3027a47dc0"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "4fa3e25f5e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 2 code cell; no served write, checks run against a local sink over the real IDVZ-group captures and the real dividends.json",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_flow_reconciliation.py",
+      "kind": "script",
+      "commit_or_etag": "4fa3e25f5e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 2 code cell; G6 schema and writer, written by the same run as G5; local sink only",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_g52_trade_schedule_v2.py",
+      "kind": "script",
+      "commit_or_etag": "4fa3e25f5e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "17 passed; whole package tests/: 147 passed, 2 skipped, under python -m pytest data/etfs/scripts/rivalfunds/tests -q",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_g2_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "4fa3e25f5e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 passed; one assertion renamed (corporate_actions_applied 'none-available' when no G3 object is read)",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "over real data: no trade on a cash line; G6 per window; SCHY's cash movement recorded -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/g-4.AC1.py",
+      "output_evidence": "trades: {'status': 'OK', 'batch_id': 'chk', 'outputs': ['s3://opal-data-etfs/rivalfunds/etfs/gold/trade_schedule/date=2026-09-23/trades-20260930T151342Z-42a439f1f687.parq ...\nOK:   G5 rows 92\nOK:   no G5 trade on a ' Curncy' security\nOK:   G6 objects 5, rows 25\nOK:   G6 column fund_id\nOK:   G6 column window_end\nOK:   G6 column flow_factor_f\nOK:   G6 column cash_line_delta_base\nOK:   G6 column income_received_base\nOK:   G6 column fx_conversion_base\nOK:   G6 column corporate_action_count\nOK:   G6 column income_funded_trade_count\nOK:   G6 column unexplained_residual_base\nOK:   G6 column claim\nOK:   G6 windows per rival (>= 4 of 5 pairs) {'BIDD': 5, 'CGIC': 5, 'INEQ': 5, 'SCHY': 5, 'TXUE': 5}\nOK:   SCHY cash-line movement recorded (max |delta| 1465107.5300000003)\nAC1 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "15 OK of 15 check lines, 0 FAIL; G5 92 rows over 5 funds x 5 windows with 0 ' Curncy' trades; G6 5 objects, 25 rows (5 funds x 5 windows, each fund >= 4 of 5 pairs); SCHY max |cash_line_delta_base| 1465107.53 (non-zero)",
+      "status": "PASS",
+      "expect": "AC1 RESULT: PASS 0 failures"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a planted split is not a trade (control: without it, an add) -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/g-4.AC2.py",
+      "output_evidence": "OK:   split: no TXUE trade on TTE FP Equity (0 found)\nOK:   G6 TXUE corporate_action_count [1]\nOK:   control (no split record): the doubling reads as an add (['add'])\nAC2 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "3 OK of 3 check lines, 0 FAIL; split arm 0 of 0 TXUE trades on the doubled security, G6 corporate_action_count 1; control arm 1 add",
+      "status": "PASS",
+      "expect": "AC2 RESULT: PASS 0 failures"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a planted income-funded add is labelled income_funded (control: false) -- expect: AC3 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round2/checks/g-4.AC3.py",
+      "output_evidence": "OK:   the planted add on TTE FP Equity is a trade (1 row(s))\nOK:   income_funded true with income in the window ([True])\nOK:   control: income_funded false without income ([False])\nAC3 RESULT: PASS 0 failures\nexit=0",
+      "denominator": "3 OK of 3 check lines, 0 FAIL; planted add 1 row income_funded True; control arm 1 row income_funded False",
+      "status": "PASS",
+      "expect": "AC3 RESULT: PASS 0 failures"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Carried in the checks themselves: AC2 and AC3 each run the same plant without its record (no split, no income) as the control arm.",
+      "expected": "without the split record the doubled holding reads as an add; without the income record the add reads income_funded false.",
+      "observed": "AC2 control: ['add']; AC3 control: income_funded [False]. Unit tests add: pending-then-visible split, bonus and stock_div factors, cash cross-check blocking the label, a pence-scale amount rejected.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_g3_in_the_sink_is_applied_by_the_stage_and_the_g6_stage_alone_is_idempotent: a second batch over the same input writes 0 new objects; G5 and G6 are never-overwrite, named by the canonical revision.",
+      "observed": "second batch written_new 0, same two G6 outputs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "Left for the issuer per the spawn instruction."
+    },
+    {
+      "item": "Applying the pay-date share move on real data",
+      "reason": "The census ends 2026-09-29 and the JP splits land 2026-10-01; the later-window branch is proven on synthetic counts only (row ETFS_RIVALS-Z-W3-S10)."
+    },
+    {
+      "item": "A served write or a deploy",
+      "reason": "Build cell; every check runs against a local sink."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W3-S9",
+    "ETFS_RIVALS-Z-W3-S10",
+    "ETFS_RIVALS-Z-W3-S11",
+    "ETFS_RIVALS-Z-W3-S12",
+    "ETFS_RIVALS-Z-W3-S13",
+    "ETFS_RIVALS-Z-W3-S14"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~3 <0.9.0_WK_ETFS_RIVALS~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "4fa3e25f5e"
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-p-1.day-page-and-guardrails",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "57af02c3ea",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-p-1.day-page-and-guardrails.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "01e5499ae7"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/publish_page.py",
+      "kind": "script",
+      "commit_or_etag": "92f24a8b31",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, checks run against a local sink over real archived bronze through silver, canonical_shape, trade_schedule and the page",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/render.py",
+      "kind": "script",
+      "commit_or_etag": "92f24a8b31",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, checks run against a local sink over real archived bronze through silver, canonical_shape, trade_schedule and the page",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/guardrails.py",
+      "kind": "script",
+      "commit_or_etag": "92f24a8b31",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 1 code cell; no served write, checks run against a local sink over real archived bronze through silver, canonical_shape, trade_schedule and the page",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/guardrails_config.json",
+      "kind": "config_data",
+      "commit_or_etag": "92f24a8b31",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "every threshold marked PROVISIONAL; read by guardrails.load_config, which refuses a non-PROVISIONAL value",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_p1_page_and_guardrails.py",
+      "kind": "script",
+      "commit_or_etag": "92f24a8b31",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "69 passed (50 prior + 19 p-1) under python -m pytest data/etfs/scripts/rivalfunds/tests -q",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "page from 20 real days: trades lead, trace to two reports and the issuer file, six guardrails in the manifest, read back -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/p-1.AC1.py",
+      "output_evidence": "publish: {'status': 'OK', 'batch_id': 'chk', 'outputs': ['s3://opal-data-etfs/rivalfunds/etfs/platinum/page/date=2026-09-29/index.html', 's3://opal-data-etfs/rivalfunds/etfs/platinum/page/date=2026-09-29/manifest.json'], 'marker': 's3://opal-data-etfs/rivalfunds/etfs/state/publish-page/date=2026-09-29/chk.json', 'detail': {'not_updated': [], 'revisions_kept': 0, 'trades_shown': 4}}\nOK:   publish status OK (got OK)\nOK:   index.html and manifest.json at the platinum page prefix date=2026-09-29\nOK:   the trades section precedes the holdings section\nOK:   self-contained: no external script\nOK:   trace panels rendered (4)\nOK:   the first trace names two report dates\nOK:   the first trace names the issuer file URL and its sha256\nOK:   manifest names the six guardrails (['analysis_grounding', 'completeness', 'content_repeat', 'identity_coverage', 'render_readback', 'report_date_freshness'])\nOK:   analysis_grounding NOT-APPLICABLE in round 1\nOK:   every guardrail PASS or NOT-APPLICABLE ({'report_date_freshness': 'PASS', 'content_repeat': 'PASS', 'completeness': 'PASS', 'identity_coverage': 'PASS', 'analysis_grounding': 'NOT-APPLICABLE', 'render_readback': 'PASS'})\nOK:   manifest.readback is true\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "11 OK of 11 check lines, 0 FAIL; 20 of 20 real archived days through bronze, silver, canonical_shape and trade_schedule; 4 trades and 4 trace panels; 6 of 6 guardrails in the manifest",
+      "status": "PASS",
+      "expect": "AC1 RESULT: PASS 0 failures"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "planted completeness failure: BASG not updated, check named, no trades table (or nothing published) -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/p-1.AC2.py",
+      "output_evidence": "publish (planted): {'status': 'PARTIAL', 'batch_id': 'chk-plant', 'outputs': ['s3://opal-data-etfs/rivalfunds/etfs/platinum/page/date=2026-09-29/index.html', 's3://opal-data-etfs/rivalfunds/etfs/platinum/page/date=2026-09-29/manifest.json'], 'marker': None, 'detail': {'not_updated': ['completeness'], 'revisions_kept': 0, 'trades_shown': 4}}\nOK:   branch 'not updated': BASG carries data-status=\"not-updated\"\nOK:   the failing check is named on the page\nOK:   no trades table rendered as normal\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 OK of 3 check lines, 0 FAIL; 8 real archived days; 1 planted check (completeness); 3 of 3 assertions",
+      "status": "PASS",
+      "expect": "AC2 RESULT: PASS 0 failures"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a rerun with changed bytes keeps the prior page under revisions/ and names it in the manifest -- expect: AC3 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round1/checks/p-1.AC3.py",
+      "output_evidence": "OK:   first publish wrote index.html (status PARTIAL)\nOK:   second publish wrote changed bytes (status OK)\nOK:   the first page kept byte-identical under revisions/ (1 revision(s))\nOK:   manifest.revisions names the kept page ([{'index_sha256': '1574154d24948cbe346a44af5441de0d8e83fdb2a3e56af4ac35f1266461d834', 'index_uri': 's3://opal-data-etfs/rivalfunds/etfs/platinum/page/date=2026-09-29/revisions/20260930T091509Z/index.html', 'manifest_uri': 's3://opal-data-etfs/rivalfunds/etfs/platinum/page/date=2026-09-29/revisions/20260930T091509Z/manifest.json', 'revision_ts': '202609\nAC3 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 OK of 4 check lines, 0 FAIL; 8 real archived days (7 then 8); 1 of 1 prior page kept byte-identical; 1 of 1 revision named in the manifest",
+      "status": "PASS",
+      "expect": "AC3 RESULT: PASS 0 failures"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted: AC2 is the negative arm (planted completeness failure: not-updated page, no trades table); AC1 is the positive arm. 19 unit tests plant each of the six checks by event key, a stale day, a re-served report, a missing trade schedule, a thin report, missing identifiers and no reports at all.",
+      "expected": "a planted or genuine check failure publishes a not-updated page with no trades table and no batch marker; a good day publishes the trades first.",
+      "observed": "AC1 PASS, AC2 PASS; 19 of 19 p-1 tests pass.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 each run twice at the committed code (no edits between).",
+      "observed": "PASS on every run, identical result lines.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "Left for the issuer per the spawn instruction."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S5"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "92f24a8b31"
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-p-1.mention-rebuild",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-p-1.mention-rebuild.md",
+    "group": "OTHER",
+    "vintage_commit": "dd85531321fcf2fa0ff9485b03f68d4c86a5c137"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "dd85531321fcf2fa0ff9485b03f68d4c86a5c137",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-p-1.mention-rebuild.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~66",
+  "artifacts_produced": [
+    {
+      "path_or_key": "opal-data-harvest:amgt/harvest/gold/article_security_mention/date=2026-09-30/part-20260930T062354Z.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "7a9fa6c11f03310aaae203e91114eba0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ONE put_object (IfNoneMatch) by publication_gold build-mention --as-of 2026-09-30 (rc 0), head_object read-back ETag 7a9fa6c11f03310aaae203e91114eba0, 41682 bytes, 358 rows; parts 6 -> 7, 0 moved, 0 removed. Deployed /timeline/day read for 992_HK_Equity 2026-02-13 serves the NEW wsj article wsj:0ec5b5a0-... with mention_count 1.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~66/p1_deployed_day_read.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The CTO condition 3 read: one read-only Invoke of opal-amgt-scoped-api, status 200."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 RESULT: PASS (0 failure(s))",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round26/checks/p-1.AC1.py",
+      "output_evidence": "mention parts: before 6, after 7; moved 0, removed 0, new 1\n  new part amgt/harvest/gold/article_security_mention/date=2026-09-30/part-20260930T062354Z.parquet\n  rows written 358, expected 358; outside the pair 0, missing 0, differing 0\nAC1 RESULT: PASS (0 failure(s))",
+      "denominator": "358 of 358 expected rows written; 0 outside the pair, 0 missing, 0 differing; parts 6 -> 7 (0 moved, 0 removed, 1 new)",
+      "status": "PASS",
+      "expect": "AC1\\ RESULT:\\ PASS\\ \\(0\\ failure\\(s\\)\\)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 RESULT: PASS (0 failure(s))",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round26/checks/p-1.AC2.py",
+      "output_evidence": "served rows: 358; mention_count missing or < 1: 0\nmention_count distribution: [(1, 126), (2, 69), (3, 39), (4, 35), (5, 25), (6, 10), (7, 13), (8, 13), (9, 2), (10, 5), (11, 4), (13, 3), (14, 2), (15, 2), (16, 1), (17, 2), (18, 2), (22, 2), (25, 1), (28, 1), (34, 1)]\nNEW pairs served: 54 of 54; by publisher {'sa': 6, 'wsj': 48}\nLenovo pairs served: 43 (signed 43)\nAC2 RESULT: PASS (0 failure(s))",
+      "denominator": "358 served rows, 0 with mention_count missing or < 1; NEW pairs served 54 of 54; Lenovo 43 of 43 signed",
+      "status": "PASS",
+      "expect": "AC2\\ RESULT:\\ PASS\\ \\(0\\ failure\\(s\\)\\)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant; AC1 compares the written snapshot row-for-row to the signed expected rows and AC2 reads mention_count on every served row, so a builder change or a defaulted count fails them.",
+      "expected": "n/a",
+      "observed": "n/a: the spec names none",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: a one-put WORLD act with IfNoneMatch and no second rebuild in scope (NOT COVERED: a second rebuild); the pre-act stub dry build (p-1.signing.py) and the written part agree on 358 rows, KEPT 304, NEW 54.",
+      "observed": "dry build 358 pairs / 148 articles read; act 358 pairs / 148 articles read.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any other gold table, silver or bronze write, collection or vendor call, deploy, delete; Z-S44 (11 empty bbg silver rows)",
+      "reason": "NOT COVERED by the order; Z-S44 is a recorded repair cell before FWD-3 per the CTO half condition 4."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W66-S1: deployed /timeline/day serves the new article rows with counts but the envelope reads data_status DENIED and publishers_covered 0; cause unmeasured."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p-1.signing.py (act-start gate)",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round26/checks/p-1.signing.py",
+      "result": "BEFORE == signing (gold parts, expected rows): OK; git diff --stat b635dadc66 HEAD over the harvest libs empty"
+    },
+    {
+      "tool": "publication_gold build-mention",
+      "invocation": "python -m lib.research.harvest.publication_gold build-mention --securities-json org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~46/securities.universe.json --as-of 2026-09-30",
+      "result": "rc 0; key amgt/harvest/gold/article_security_mention/date=2026-09-30/part-20260930T062354Z.parquet; pairs 358; articles_read 148"
+    },
+    {
+      "tool": "deployed route read (n6_common.invoke_deployed)",
+      "invocation": "invoke_deployed('992_HK_Equity','2026-02-13')",
+      "result": "status 200; article wsj:0ec5b5a0-f589-432f-beb3-e80e575a2cf6 mention_count 1 (tier D); also wsj:122be645-... mention_count 3"
+    }
+  ]
+}

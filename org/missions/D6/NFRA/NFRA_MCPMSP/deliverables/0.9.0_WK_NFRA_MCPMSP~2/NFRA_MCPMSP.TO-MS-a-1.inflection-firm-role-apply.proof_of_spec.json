@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPMSP.TO-MS-a-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/prd/NFRA_MCPMSP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7926f5194c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/decompositions/NFRA_MCPMSP_DECOMP.md",
+    "vintage_commit": "7926f5194c",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPMSP/task-orders/NFRA_MCPMSP.TO-MS-a-1.inflection-firm-role-apply.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPMSP~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/mcpmsp_firm_roles.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1a5a3076ac",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "role arn:aws:iam::313476888478:role/gateway-inf-firm-reader-role; Plan: 3 to add, 0 to change, 0 to destroy.; Apply complete! Resources: 3 added, 0 changed, 0 destroyed."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260930T0844Z_nfra-mcpmsp-r1-firm-role_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "1a5a3076ac",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ledger CLOSED, both legs proven, sentinel removed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "slug nfra-mcpmsp-r1-firm-role: entry files at HEAD>=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR present -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/a1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "slug nfra-mcpmsp-r1-firm-role: entry files at HEAD=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 16 of 16 sentinel(s) scanned\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 invocation, exit 1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "role gateway-inf-firm-reader-role: own-prefix=allowed cot-prefix=(implicitDeny|explicitDeny) cot-bucket=(implicitDeny|explicitDeny) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/a1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "role gateway-inf-firm-reader-role: own-prefix=allowed cot-prefix=explicitDeny cot-bucket=explicitDeny\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 invocation, exit 1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "gateway role opal-gateway-role: AssumeRole(gateway-inf-firm-reader-role)=allowed; GetObject opal-data-inf=(implicitDeny|explicitDeny) opal-data-cot=(implicitDeny|explicitDeny) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/a1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "gateway role opal-gateway-role: AssumeRole(gateway-inf-firm-reader-role)=allowed; GetObject opal-data-inf=implicitDeny opal-data-cot=implicitDeny\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 invocation, exit 1",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "None named by the spec; the AC2/AC3 reads before the apply are the natural negative.",
+      "expected": "n/a",
+      "observed": "role absent (NoSuchEntity / implicitDeny) on the blocked first run, present and allowed after apply",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: live IAM reads before any change",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "push / vendor call",
+      "reason": "out of bounds for this order; none made"
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPMSP-Z-W2-S3"
+  ],
+  "session_log": "none",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan -target (3 addresses)",
+      "invocation": "private TF_DATA_DIR; terraform get; plan -target x3 with owner key vars read from the live writer env (not printed)",
+      "result": "Plan: 3 to add, 0 to change, 0 to destroy."
+    },
+    {
+      "tool": "bash .tools/safe-apply.sh apply -target x3 (HALT_ACK=1 after 0 STOP-class lines)",
+      "invocation": "safe-apply -chdir=infra/aws/terraform/opal-gateway apply",
+      "result": "Apply complete! Resources: 3 added, 0 changed, 0 destroyed.; NAMING-PLAN: WARN 59 graded"
+    }
+  ]
+}

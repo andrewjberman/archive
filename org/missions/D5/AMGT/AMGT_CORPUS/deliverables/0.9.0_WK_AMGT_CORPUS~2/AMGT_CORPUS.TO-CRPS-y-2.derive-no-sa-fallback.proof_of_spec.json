@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-y-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-y-2.derive-no-sa-fallback.md",
+    "group": "OTHER",
+    "vintage_commit": "46540fd5f6c8d4d8730aec81c9ef2b876b43a2f4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "46540fd5f6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-y-2.derive-no-sa-fallback.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "38238517dbfdb17aece32d519e7058cf195ec767",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stage_derive(..., sa_fallback=True), cmd_derive(..., sa_fallback=True), _derive_forecast_figures(..., sa_fallback=True); CLI --no-sa-fallback passes False. With False the fallback loader is never called; gaps carry fallback_status HELD_OFF and land as unresolved; forecast_fallback record classification HELD_OFF, gaps_before N, filled_by_sa 0. Dry-run line ends ' sa_fallback held_off'.",
+      "introduces": [
+        "--no-sa-fallback"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_model_block_no_sa_fallback.py",
+      "kind": "test",
+      "commit_or_etag": "38238517dbfdb17aece32d519e7058cf195ec767",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 offline tests with stubbed loader and S3: loader never called with flag; gaps labelled HELD_OFF, filled_by_sa 0; default path unchanged.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "y2_AC1.sh -- expect (?m)^DRY-RUN DERIVE: 8766 JP Equity -> .* sa_fallback held_off$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y2_AC1.sh",
+      "output_evidence": "DRY-RUN DERIVE: 8766 JP Equity -> would read the latest bronze stamp under bloomberg/harvest/bronze/refdata/security_key=8766_JP_Equity/ (paired with histdata) and would write derived/model_block/8766_JP_Equity/<stamp>/model_block.json sa_fallback held_off\nDRY RUN DERIVE DONE: 2 of 2 securities planned, 0 written",
+      "denominator": "2 of 2 securities (8316, 8766) print the held_off line; rc 0",
+      "expect": "(?m)^DRY-RUN DERIVE: 8766 JP Equity -> .* sa_fallback held_off$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "y2_AC2.sh -- expect (?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y2_AC2.sh",
+      "output_evidence": "10 passed in 0.53s",
+      "denominator": "10 of 10 tests passed across 4 files, 0 failed",
+      "expect": "(?m)^\\d+ passed(, \\d+ \\w+)* in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "First run of the new test caught a duplicate unresolved append in my own draft (66 vs 33); fixed.",
+      "expected": "33 unresolved",
+      "observed": "33",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice",
+      "observed": "identical output both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Real (non-dry-run) derive",
+      "reason": "Task order section 4: no vendor call, no S3 write."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "y2_AC1.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y2_AC1.sh",
+      "result": "rc 0"
+    },
+    {
+      "tool": "y2_AC2.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round23/y2_AC2.sh",
+      "result": "rc 0; 10 passed"
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_HARVST.TO-HVST-q-5.covered-vs-found-in-code",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-q-5.covered-vs-found-in-code.md",
+  "group": "OTHER",
+  "vintage_commit": "0cfb3406bf"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+  "vintage_commit": "0cfb3406bf",
+  "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-q-5.covered-vs-found-in-code.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_HARVST~74",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/harvest/publication_gold.py",
+   "kind": "script",
+   "commit_or_etag": "91b74a9047",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "daily_rows emits publishers_found_codes; GOLD_DAILY_SCHEMA appends it last; no S3 write, no deploy",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/harvest/timeline_api.py",
+   "kind": "script",
+   "commit_or_etag": "91b74a9047",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "series entry serves publishers_found_codes beside publishers_covered_codes; no deploy",
+   "artifact_covered_by": [
+    "AC1",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/harvest/tests/test_q5_covered_vs_found.py",
+   "kind": "script",
+   "commit_or_etag": "91b74a9047",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "5 tests incl. the found-into-covered mutant",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~74/scripts/q5_ac2_lenovo_2026_02_12.py",
+   "kind": "script",
+   "commit_or_etag": "91b74a9047",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local in-memory build_daily, write_gold replaced by a capture; S3 GET/LIST only",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~74/scripts/q5_ac3_base_and_after.py",
+   "kind": "script",
+   "commit_or_etag": "91b74a9047",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "runs the AC3 command at base ff4405d3d5 (git archive extract) and at HEAD",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "a found-only day keeps data_status and publishers_covered_codes unchanged and lists the publisher in publishers_found_codes; the route serves both fields; a mutant folding found into covered fails.",
+   "method": "command",
+   "invocation": "python -m pytest lib/research/harvest/tests/test_q5_covered_vs_found.py -rA --tb=line",
+   "output_evidence": "============================= test session starts =============================\nplatform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0\nrootdir: C:\\Users\\Opal Bloomberg\\Desktop\\wk-hvst-r27-74\nconfigfile: pytest.ini\nplugins: anyio-4.14.1\ncollected 5 items\n\nlib\\research\\harvest\\tests\\test_q5_covered_vs_found.py .....             [100%]\n\n=================================== PASSES ====================================\n=========================== short test summary info ===========================\nPASSED lib/research/harvest/tests/test_q5_covered_vs_found.py::test_a_found_only_day_keeps_status_and_covered_and_lists_the_publisher_as_found\nPASSED lib/research/harvest/tests/test_q5_covered_vs_found.py::test_the_found_column_is_in_the_schema_last_and_round_trips\nPASSED lib/research/harvest/tests/test_q5_covered_vs_found.py::test_the_route_serves_both_fields_beside_each_other\nPASSED lib/research/harvest/tests/test_q5_covered_vs_found.py::test_an_older_part_without_the_found_column_serves_null\nPASSED lib/research/harvest/tests/test_q5_covered_vs_found.py::test_a_mutant_folding_found_into_covered_is_caught\n============================== 5 passed in 0.77s ==============================\n",
+   "expect": "passed",
+   "denominator": "5 of 5 tests passed, 0 failed (found-only day, schema column last + round trip, route serves both, older part serves null, mutant caught)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "a LOCAL in-memory build_daily over the current gold inputs (no put) prints `992_HK_Equity 2026-02-12 covered=[...] found=[...]`, and a total of the days where found is not a subset of covered.",
+   "method": "command",
+   "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~74/scripts/q5_ac2_lenovo_2026_02_12.py",
+   "output_evidence": "BUILD (in memory, no put): table=chatter_daily securities=191 rows=52143 schema_has_found=True\n992_HK_Equity 2026-02-12 covered=['bbg'] found=['sa', 'wsj']\n  (data_status=PARTIAL articles_total=2)\nDAYS where found is not a subset of covered: 271 of 52143 rows (67 securities)\nDAYS with any found publisher: 272\nROWS where len(covered_codes) != publishers_covered: 0 (found never feeds the count)\n",
+   "expect": "992_HK_Equity 2026-02-12 covered=",
+   "denominator": "191 securities, 52,143 rows; found-not-subset-of-covered on 271 rows across 67 securities; the Lenovo line is 1 of 1 rows for that (security, day)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "the base is commit ff4405d3d5, pinned. It prints the base and after counts, and 0 failed.",
+   "method": "command",
+   "invocation": "python -m pytest lib/research/harvest/tests/ lib/research/api/tests/test_timeline_routes.py -rA --tb=line",
+   "output_evidence": "LITERAL INVOCATION (rc 0) last line: ============================ 298 passed in 10.16s =============================  (pytest prints no 'failed' token on an all-pass run; row AMGT_HARVST-Z-W74-S1)\nHELPER scripts/q5_ac3_base_and_after.py (same command at the pinned base and at HEAD):\nBASE  ff4405d3d5: 293 passed in 4.29s\nAFTER HEAD: 298 passed in 5.32s\nbase: 293 passed, 0 failed, 0 error\nafter: 298 passed, 0 failed, 0 error\n0 failed\n",
+   "expect": "0 failed",
+   "denominator": "base ff4405d3d5 293 tests, 293 passed, 0 failed; after 298 tests (293 + 5 new), 298 passed, 0 failed",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "test_a_mutant_folding_found_into_covered_is_caught: found folded into covered (and into the status) is run through the same assertions",
+   "expected": "the assertions fail on the mutant",
+   "observed": "AssertionError raised on the mutant, test passes (AC1 output, 5 of 5)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC2 reads live S3 inputs (current gold) so a byte-identical rerun is not promised; AC1 and AC3 are pure in-process tests",
+   "observed": "AC1 and AC3 ran twice each with the same counts (5 passed; 298 passed)",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "any S3 write, deploy, or gold rebuild",
+   "reason": "Standing clause 1; the serving rebuild rides q-7's pair or round 28's."
+  },
+  {
+   "item": "the day route body (get_timeline_day)",
+   "reason": "The order names the series rows only; publishers_found_codes is served on the series entry."
+  }
+ ],
+ "surprises": [
+  "AMGT_HARVST-Z-W74-S1: AC3's expect '0 failed' is not printed by pytest on an all-pass run; a helper prints base and after counts and the token",
+  "AMGT_HARVST-Z-W74-S2: AC2 names no securities input; the 191-security universe file of the round-26 rebuild was used"
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python 3.11 + pytest",
+   "invocation": "python -m pytest lib/research/harvest/tests/ lib/research/api/tests/test_timeline_routes.py",
+   "result": "298 passed, 0 failed"
+  },
+  {
+   "tool": "ruff (commit gate)",
+   "invocation": "bash .tools/safe-commit.sh",
+   "result": "passed on the two lib files, the test and both scripts"
+  }
+ ]
+}

@@ -17,6 +17,11 @@ CONTROL = ("sa",)
 # The re-cut runs jobs on bbg, ft and wsj only; barrons joins sa as a root that must gain NO object.
 JOB_PUBLISHERS = ("bbg", "ft", "wsj")
 NO_NEW = ("sa", "barrons")
+# AMENDMENT 2: ft was request_rejected in attempt 2 (Branch B), so it joins the no-write roots; the S3 writer is
+# `upload-harvest` over the local outbox, run once after both collection runs.
+NO_NEW = ("sa", "barrons", "ft")
+WRITE_PUBLISHERS = ("bbg", "wsj")
+RUNTIME = "C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.runtime/opal-data-harvest"
 SECURITY_KEY = "992_HK_Equity"
 WK = os.path.join(ROOT, "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~65")
 SIGNING_BEFORE = os.path.join(ROOT, "org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round25/o5_signing_before.json")
