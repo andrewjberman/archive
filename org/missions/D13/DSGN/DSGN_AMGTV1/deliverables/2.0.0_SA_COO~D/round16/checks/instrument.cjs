@@ -253,6 +253,9 @@ else {
       let ok;
       if (p.cls === 'SIZES') ok = below.includes(7) && !(g1.info.sizesBelow11 || []).includes(7);
       else if (p.cls === 'FWD18') ok = g.faults.some((x) => x.startsWith('FWD18:') && /Subject/.test(x) && /filled/.test(x));
+      // The face plants count only when the face WAS captured and its marks are what failed (an absent capture is not a catch).
+      else if (p.cls === 'PRICE') ok = g.faults.some((x) => /^PRICE: the price-face capture shows 0 /.test(x));
+      else if (p.cls === 'CHATTER') ok = g.faults.some((x) => /^CHATTER: the denominator /.test(x)) && !g.faults.some((x) => /^CHATTER: no chatter-face/.test(x));
       else ok = !!cls[p.cls];
       (ok ? caught : missed).push(`${p.id}->${p.cls}`);
     }

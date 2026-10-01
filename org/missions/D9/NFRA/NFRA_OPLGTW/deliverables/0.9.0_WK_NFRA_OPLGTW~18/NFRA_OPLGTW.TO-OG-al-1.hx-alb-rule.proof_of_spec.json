@@ -1,0 +1,85 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-al-1",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "7d2c0ae74e",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-al-1.hx-alb-rule.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7d2c0ae74e"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~18",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/hx-capability.tf",
+   "kind": "config_data",
+   "commit_or_etag": "8ae97ecaea",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "targeted plan 1 to add 0 to change 0 to destroy; safe-apply of the saved plan rc=0: Apply complete! Resources: 1 added, 0 changed, 0 destroyed.; live describe-rules priority 35 /hx/transcripts/* and /hx/mail/*, forward.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261001T0820Z_nfra-oplgtw-hx-alb-rule_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "d82b8893cb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEVER-2 ledger nfra-oplgtw-hx-alb-rule opened 45c0236a1c, closed d82b8893cb, 2 legs proven, sentinel removed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- one forward-only rule, exactly the two /hx/ patterns, nothing else declared.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/al.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "listener rules 1 ['hx_capability']; other resources []\npath patterns ['/hx/mail/*', '/hx/transcripts/*']\naction types ['forward']\nRESULT: PASS\nexit=0",
+   "denominator": "1 of 1 tf file; 1 listener rule; 2 of 2 path patterns",
+   "status": "PASS",
+   "expect": "(?s)listener rules 1 .*path patterns \\['/hx/mail/\\*', '/hx/transcripts/\\*'\\].*action types \\['forward'\\].*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- APPLIED and EXERCISED: the live listener carries it; both /hx/ prefixes are refused BY THE APP (4xx), not by the sign-in; negative arms: / still 302, /mcp unchanged; NEVER-2 closed.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/al.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "alb 89166a68f337e5a4; https listener 2904a0140214f982\ndescribe-rules rc=0\nprobe rc=0\nlive rules carrying /hx/: 1 [('35', ['/hx/mail/*', '/hx/transcripts/*'], ['forward'])]\nprobe hx_mail: status 404, redirects to sign-in False\nprobe hx_transcripts: status 404, redirects to sign-in False\nprobe control: status 302, redirects to sign-in True\nprobe root: status 302, redirects to sign-in True\nprobe mcp: status 401, redirects to sign-in False\nboth /hx/ probes refused BY THE APP (4xx, no sign-in): True\nledger entry files at HEAD=1; sentinel at HEAD=no\nRESULT: PASS\nexit=0",
+   "denominator": "1 of 1 live /hx/ rule; 2 of 2 /hx/ probes + 3 of 3 negative arms (control, root, mcp)",
+   "status": "PASS",
+   "expect": "(?s)live rules carrying /hx/: 1 .*probe control: status 302, redirects to sign-in True.*probe root: status 302, redirects to sign-in True.*probe mcp: status 401, redirects to sign-in False.*both /hx/ probes refused BY THE APP \\(4xx, no sign-in\\): True.*sentinel at HEAD=no.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The spec names no mutant control.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC2 run twice: before the ledger close (sentinel at HEAD=yes -> RESULT: FAIL, the one expected line) and after the close commit d82b8893cb (PASS); every probe line identical across both runs.",
+   "observed": "probe lines identical; only the sentinel line differed",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-gateway apply -input=false <saved targeted plan of aws_lb_listener_rule.hx_capability>",
+   "result": "rc=0"
+  }
+ ]
+}
