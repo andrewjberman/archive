@@ -41,9 +41,12 @@ def main():
                  len(j.get("keys_fetched") or []) if isinstance(j.get("keys_fetched"), list) else j.get("keys_fetched")))
         if not j.get("status"):
             failures.append("%s: no status" % k)
+        # Z-W88-S4 fix: a job MEASURES its pages when its listing reached a span, whatever its final status (a late
+        # article 5xx or proxy error ends the job non-concluded after the listing completed). REACHED = concluded.
+        if j.get("reached_span"):
+            measured.append(pages.get(k, 0))
         if concluded:
             reached.append(k)
-            measured.append(pages.get(k, 0))
             if not j.get("reached_span"):
                 failures.append("%s concluded with no reached_span" % k)
         if j.get("status") in c.STOP_STATUSES:
@@ -52,8 +55,8 @@ def main():
         failures.append("the batch ran %d of %d names with no recorded STOP status" % (len(jobs), c.N))
     mean = sum(measured) / len(measured) if measured else None
     per = mean if mean is not None else DEFAULT_PAGES
-    print("STOP: %s" % (stop or "none (ran all %d)" % len(jobs)))
-    print("MEASURED sa pages per name: mean %s over %d concluded job(s)" % (mean, len(measured)))
+    print("STOP: %s" % (("%s %s" % stop) if stop else "none (ran all %d)" % len(jobs)))
+    print("MEASURED sa pages per name: mean %s over %d job(s) whose listing reached a span" % (mean, len(measured)))
     print("RE-BASED sa CEILING for the other %d resolved names: %.0f listing pages (%s; DEFAULT would be %d)"
           % (REMAINING, per * REMAINING, "MEASURED" if measured else "DEFAULT", REMAINING * DEFAULT_PAGES))
     print("NAMES REACHED: %d -- %s" % (len(reached), reached))

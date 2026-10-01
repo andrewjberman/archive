@@ -1,0 +1,29 @@
+import json, sqlite3, datetime, sys
+W="org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~88/"
+RT="C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.runtime/opal-data-harvest"
+now=datetime.datetime.now(datetime.timezone.utc)
+db=sqlite3.connect("file:%s/progress.sqlite3?mode=ro"%RT,uri=True)
+cols=[r[1] for r in db.execute("pragma table_info(cooldown)")]
+rows=db.execute("select * from cooldown").fetchall()
+print("cooldown cols",cols); print("cooldown rows",rows); print("now",now.isoformat())
+reasons=[]
+act=[]
+for r in rows:
+    d=dict(zip(cols,r))
+    if d.get("publisher")=="sa":
+        u=d.get("until")
+        try:
+            ut=datetime.datetime.fromtimestamp(float(u),datetime.timezone.utc)
+        except Exception:
+            ut=None
+        print("sa until",u,"->",ut)
+        if ut is None or ut>now: act.append(d)
+if act: reasons.append("(a) sa cooldown active: %s"%act)
+b=json.load(open(W+"ad2_before.json"))["snapshot"]; a=json.load(open(W+"ad2_before_A2.json"))["snapshot"]
+for k in ("bbg","wsj","barrons","ft","chatter_daily","article_security_mention"):
+    print("(b)",k,len(b[k]),len(a[k]),"equal" if b[k]==a[k] else "DIFF")
+    if b[k]!=a[k]: reasons.append("(b) %s changed"%k)
+cut=now.replace(hour=7,minute=45,second=0,microsecond=0)
+print("(c) now",now.strftime("%H:%MZ"),"cutoff 07:45Z", "same-UTC-day cutoff",cut.isoformat())
+if not (now.hour<7 or (now.hour==7 and now.minute<45)): reasons.append("(c) after 07:45Z")
+print("A2 GATE: OK" if not reasons else "A2 GATE: STOP "+"; ".join(reasons))
