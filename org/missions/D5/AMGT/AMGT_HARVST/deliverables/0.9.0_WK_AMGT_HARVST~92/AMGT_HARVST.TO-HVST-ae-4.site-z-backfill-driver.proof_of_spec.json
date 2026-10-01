@@ -19,7 +19,7 @@
       "kind": "script",
       "commit_or_etag": "4901fd709b438d40b9ea01dd2e712d510e94532b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "PHASE A (LOCAL) only. New driver: UNIVERSE + one BUDGET line per publisher before any PLAN; sa always first; per (pub,name) round-31 invocation shape then one upload-harvest capped at the pending count; cooldown table waited out before a job; STOP set incl. error ends that publisher's leg; atomic checkpoint after each job (extra key `stored` carries per-pair article counts for the depth table across a resume); run summary beside the checkpoint; --dry-run opens no collector process and no database. No collector run, publisher request or S3 write was made.",
+      "deploy_evidence": "PHASE A (LOCAL) only. New driver: UNIVERSE + one BUDGET line per publisher before any PLAN; sa always first; per (pub,name) round-31 invocation shape then one upload-harvest capped at the pending count; cooldown table waited out before a job; STOP set incl. error ends that publisher's leg; atomic checkpoint after each job (extra key `stored` carries per-pair article counts for the depth table across a resume); run summary beside the checkpoint; --dry-run opens no collector process and no database. No collector run, publisher request or S3 write was made. AMENDMENT 2 (3f3e63f047): --stop-file PATH (checked before each job, so it ends after the current job; records stopped_by_operator + time + operator_stops in the checkpoint; deletes nothing) and --clear-stop PUB (new invocation; cooling -> prints COOLDOWN and exits 0 with no job and the checkpoint untouched; expired -> stop moved to cleared_stops {publisher,status,at} and the leg resumes from its next undone pair; `error` stays in the STOP set, no retry inside the run that stopped).",
       "introduces": [
         "lib.opal_data_harvest.backfill_driver"
       ],
@@ -33,7 +33,7 @@
       "kind": "test",
       "commit_or_etag": "4901fd709b438d40b9ea01dd2e712d510e94532b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "15 tests (6 plants; plant iv parametrised over the 8 STOP statuses typed in the test) with the collector stubbed: no process, no network.",
+      "deploy_evidence": "19 tests with the collector stubbed (15 phase A + 4 AMENDMENT 2: stop file after job 2 -> exactly 2 done and a re-run runs the other 8; stop file absent runs all; stopped publisher under cooldown not resumed, after expiry resumes from next undone pair with cleared_stops recorded; error inside the clearing run stops again with no retry).",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -45,8 +45,8 @@
       "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_ae4_backfill_driver.py -rA --tb=line -> passed",
       "method": "test_suite",
       "invocation": "python -m pytest lib/opal_data_harvest/test_ae4_backfill_driver.py -rA --tb=line",
-      "output_evidence": "PHASE B re-run: 15 passed in 2.87s (rc 0).",
-      "denominator": "15 of 15 tests passed",
+      "output_evidence": "PHASE B AMENDMENT 2 re-run: 19 passed in 3.56s (rc 0).",
+      "denominator": "19 of 19 tests passed",
       "status": "PASS",
       "expect": "passed"
     },
@@ -55,7 +55,7 @@
       "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC2.py -> AC2 RESULT: PASS",
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC2.py",
-      "output_evidence": "PHASE B re-run: AC2 RESULT: PASS (0 failure(s)), rc=0.",
+      "output_evidence": "PHASE B AMENDMENT 2 re-run: AC2 RESULT: PASS (0 failure(s)), rc=0.",
       "denominator": "5 of 5 publishers budgeted; 89 of 89 names planned for sa first",
       "status": "PASS",
       "expect": "AC2 RESULT: PASS"
@@ -65,10 +65,9 @@
       "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC3.py -> AC3 RESULT: PASS",
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC3.py",
-      "output_evidence": "PHASE B: SECURITIES WITH ANY: 3 of 89; AT 50+: 0 of 89; AT 100+: 0 of 89; SA DISTINCT SINCE 2026-01-01 (universe keys): 20 (cut baseline 20); DRIVER RUN started_at 2026-10-01T07:23:08.824440+00:00; AC3 RESULT: FAIL (1 failure(s)): sa distinct articles since January did not rise above the cut baseline. rc=1",
-      "denominator": "0 of 89 securities at 50+; sa distinct 20 vs baseline 20",
-      "status": "FAIL",
-      "status_reason": "phase B ran: job 1 (ASML) stored 229 bodies but ended status=error (Timeout) and its silver append failed (ArrowNotImplementedError, empty struct themes); nothing reached silver. Rows AMGT_HARVST-Z-W92-S1 (BLOCKING, ARMED) and -S2.",
+      "output_evidence": "UNIVERSE: 89; silver rows read sa=435 bbg=41 wsj=37 ft=14 barrons=15; SECURITIES WITH ANY: 5 of 89; AT 50+: 2 of 89; AT 100+: 0 of 89; SA DISTINCT SINCE 2026-01-01 (universe keys): 184 (cut baseline 20); DRIVER RUN started_at 2026-10-01T08:22:47.535104+00:00; AC3 RESULT: PASS (0 failure(s)). rc=0",
+      "denominator": "2 of 89 securities at 50+; sa distinct 184 vs baseline 20",
+      "status": "PASS",
       "expect": "AC3 RESULT: PASS"
     }
   ],
@@ -82,27 +81,28 @@
     "determinism": {
       "method": "AC1 test file run three times against the committed driver",
       "expected": "the same 15 tests pass on every run",
-      "observed": "15 passed each time (0.57s, 0.49s, 4.09s)",
+      "observed": "AC1 file: 19 passed (3.56s) at the AMENDMENT 2 commit; full collector suite 421 passed, 1 skipped, 6 subtests passed (CLOUD base 417 passed, 1 skipped)",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "FWD-15 (b) stop-and-resume on the real collector (3 jobs, stop, 3 jobs) and the 5 other publishers",
-      "reason": "Phase B ran ONLY sa over the first 6 names. Job 1 ended status=error, a STOP-set status, so the driver stopped the sa leg (checkpoint stopped={sa: error}); the same-command re-run printed 'SKIP sa: stopped earlier with error' and ran 0 jobs. Jobs 2-6 never ran. Row AMGT_HARVST-Z-W92-S2. Order <status> NOT flipped (AC3 FAIL)."
+      "item": "FWD-15 (b) live stop-and-resume on the real collector (3 post-clearing jobs, stop file, resume) and the 5 other publishers",
+      "reason": "Phase B 2: upload-harvest uploaded 229 of 229 pending rows (0 remaining, 0 errors). Then --clear-stop sa over the first 6 names: sa cleared (cooldown expired, recorded in cleared_stops), job 1 after clearing (ADBE security-37dddff4d4357038) stored 121 and ended status=error (ConnectionError after the 6th listing page), STOP set honoured, leg stopped at 2 done pairs total, so the stop file was never created live. The same-command re-run printed 'COOLDOWN sa: still cooling for 460 s' and ran no job, checkpoint byte-identical (the order forbids a second clearing). Stop-file and clear-stop-after-cooldown are proved by the plants. Jobs 3-6 never ran. Row AMGT_HARVST-Z-W92-S4 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~H)."
     }
   ],
   "surprises": [
     "AMGT_HARVST-Z-W92-S1",
     "AMGT_HARVST-Z-W92-S2",
-    "AMGT_HARVST-Z-W92-S3"
+    "AMGT_HARVST-Z-W92-S3",
+    "AMGT_HARVST-Z-W92-S4"
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "pytest",
       "invocation": "python -m pytest lib/opal_data_harvest/ -q",
-      "result": "378 passed, 1 skipped, 6 subtests passed"
+      "result": "421 passed, 1 skipped, 6 subtests passed"
     }
   ]
 }
