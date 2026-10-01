@@ -46,8 +46,10 @@ member's own value, another firm's row, or Global's. Adding dollars, a strategy 
 Negative arm (unit test): the same entry carrying `additive` at cottonwood is refused by the tree's own
 two-declarations check.
 
-## Not measured
+## The Client split at Cottonwood (read 2026-10-01 04:1xZ)
 
-Whether Cottonwood's `Client > Opal Supervised` figure (produced by `build_cottonwood_mdpf_pair`) already counts
-the two Tax accounts. The carve-out lowers Client, so the Unsupervised leg, which is the complement, drops by the
-Tax dollars. Owner: this lane, before activation.
+Cottonwood's `Client > Opal Supervised` figure cannot contain the two Tax accounts: its producer walks only
+accounts that carry a strategy (`build_cottonwood_mdpf_pair.build_units`, `assignment.strategy_name != "--"`), and
+both Tax accounts read `--`. So the carve-out lowers the Unsupervised leg, the complement, by the Tax dollars and
+leaves Supervised as it was. Other readers of Cottonwood's by_model: 0 (its aum-metrics and account-distribution
+come from the pair's own artifacts; the publisher does not read by_model).
