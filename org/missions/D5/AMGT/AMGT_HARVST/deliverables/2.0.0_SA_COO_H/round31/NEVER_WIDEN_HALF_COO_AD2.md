@@ -87,3 +87,21 @@ collector's listing path calls `check()`, and on the trunk it now uses the sessi
 ## 3. ROLLBACK
 
 Forward only: every put is never-overwrite. A delete is a human word.
+
+## ADDENDUM 1 -- RE-SIGN for phase A2, the re-run of the 9 zero-request names (2026-09-30 ~23:5xZ)
+
+- **The first pass**, drained as the record: BA ran first (the issuer's sorted plan file), 1 listing page, then a 502 on its
+  article. The job ended `upstream_unavailable` with a 15-min cooldown. The 9 others made 0 requests (`cooldown`). 0 reached.
+- **What changes:**
+  - the 9 names are re-run once each, in universe order (listed in the order's AMENDMENT 1);
+  - a cooldown check runs before each invocation;
+  - STOP statuses add `upstream_unavailable` and `cooldown`;
+  - BA is not re-run.
+- **Unchanged:** the argv (`--no-sign-in`, sa only), the code pin `9e68057327`, the upload cap and its STOP, and the no-write
+  roots.
+- **The re-run is not a retry into a refusal.** Those 9 invocations sent NOTHING.
+- **The before-state is re-measured at the A2 act-start:** sa is 106 + 2 (BA's listing bronze + silver) and run_record is 24.
+  Both are read, not assumed.
+- **Blast radius:** up to 9 more run records; sa bronze and silver for these 9 securities only.
+- **Rollback:** forward only.
+- **VERDICT: SIGNED (re-sign).**

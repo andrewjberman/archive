@@ -22,7 +22,8 @@ PLAN_SIGNED = os.path.join(HARVST, "deliverables/2.0.0_SA_COO_H/round31/ad2_plan
 RUNTIME = "C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.runtime/opal-data-harvest"
 FLOOR = "2026-01-01"
 N = 10
-STOP_STATUSES = ("bot_check", "unclassified", "account_or_harvester_unavailable", "sign_in_refused", "throttled")
+STOP_STATUSES = ("bot_check", "unclassified", "account_or_harvester_unavailable", "sign_in_refused", "throttled",
+                 "upstream_unavailable", "cooldown")
 OTHER_PUBLISHERS = ("bbg", "wsj", "barrons", "ft")
 
 
@@ -112,4 +113,4 @@ def load(path):
 def dump(path, obj):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        json.dump(obj, fh, indent=1, sort_keys=True, default=str)
+        json.dump(obj, fh, indent=1, default=str)

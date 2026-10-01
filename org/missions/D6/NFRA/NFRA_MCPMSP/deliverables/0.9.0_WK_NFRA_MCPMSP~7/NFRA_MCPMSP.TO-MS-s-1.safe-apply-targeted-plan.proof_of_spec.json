@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPMSP.TO-MS-s-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/prd/NFRA_MCPMSP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06804f9f99"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/decompositions/NFRA_MCPMSP_DECOMP.md",
+    "vintage_commit": "b90073c197",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPMSP/task-orders/NFRA_MCPMSP.TO-MS-s-1.safe-apply-targeted-plan.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPMSP~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/safe-apply.sh",
+      "kind": "script",
+      "commit_or_etag": "35941fb592",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local gate script; not deployed. Exercised only against a fake terraform in a sandbox copy (never a real tree).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_safe_apply_targeted.sh",
+      "kind": "script",
+      "commit_or_etag": "35941fb592",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local self-test; not deployed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "working safe-apply: arms PASS 5 of 5, final RESULT: PASS lines>=1; base safe-apply (0af3c52597): arms PASS fewer than 5 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round2/checks/s1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "working safe-apply: arms PASS 5 of 5, final RESULT: PASS lines=1; base safe-apply (0af3c52597): arms PASS 1 of 5\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 arms PASS on the working script; 1 of 5 on the base bytes (only untargeted_apply_unchanged passes; the other four FAIL); 1 final RESULT: PASS line",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant; the base-bytes run (0af3c52597) is the difference control inside AC1.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 ran twice (before and after the commit) and the test alone ran once more.",
+      "observed": "AC1 rc=0 both times, 5 of 5 and base 1 of 5 both times.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_MCPMSP-Z-W7-S1"
+  ],
+  "session_log": "Tree check TREE-OK on wk-NFRA_MCPMSP-7. Built: the caller's apply args are parsed once after the first apply word (SA_TARGETED, SA_PLANFILE, SA_PLAN_ARGS); a scoped apply passes -target/-replace/-var/-var-file/-refresh/-destroy to plan or reads the planfile with show -json, binds on its verdict (exit 7), refuses an unrenderable plan in ENFORCE (exit 7), and the pre-plan stage is WARN only. Unscoped path kept verbatim. Test sandbox: copy of script under test, halt-gate-check.sh copy with a sandbox serial/empty inbox, stub naming-apply-gate.py running the real grader, fake terraform. Row Z-W7-S1: tag-authz and tombstone gates still re-plan the whole tree.",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1",
+      "result": "see the worker report; only the exit code is the verdict."
+    }
+  ]
+}
