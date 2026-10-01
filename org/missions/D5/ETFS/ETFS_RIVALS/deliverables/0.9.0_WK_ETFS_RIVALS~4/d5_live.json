@@ -4,7 +4,7 @@
  "act_day": "2026-10-01",
  "act_state": "ACTED",
  "page_day": "2026-10-01",
- "publish_marker": "s3://opal-data-etfs/rivalfunds/etfs/state/publish_page/date=2026-10-01/d5-publish-r4b.json",
+ "publish_marker": "s3://opal-data-etfs/rivalfunds/etfs/state/publish_page/date=2026-10-01/d5-publish-a1.json",
  "newest_report_date": "2026-09-30",
  "floors": {
   "issuer": 0.23,
@@ -203,13 +203,80 @@
  },
  "remaining": [
   "acceptance (read at the close, never waited on): the next trading day's 07:00 issuer fetch for BASG and GQGU, the 08:03 Bloomberg leg and the 09:00 sweep",
-  "AC1 reads FAIL on ONE clause only, the GQGU block (no issuer badge): GQGU is served not-updated by report_date_freshness (latest 2026-09-28 vs expected 2026-09-30, lag 2) until the next trading day's 07:00 GQGU fetch; ruled expected by 2.0.0_SA_COO~RV (no backfill of 2026-09-29/30). The config and identity_coverage clauses read OK. The issuer grades the GQGU clause at the acceptance read",
-  "GQGU calendar unavailable on the page: G2 has no GQGU path (row Z-W4-S12 BLOCKING); G2's issuer reader attributes every issuer sidecar to BASG (row Z-W4-S13 BLOCKING ARMED, disarm_owner 2.0.0_SA_COO~RV, inferred hazard for the next trading day's G2)",
   "row Z-W4-S9 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~RV): a marker-driven G1 batch of 60 dates exceeds the 900 s ceiling; round-5 remediation",
-  "row Z-W4-S8 (ARMED): the committed floors turn 19 package unit tests red; issuer remedy outside d-5's paths"
+  "row Z-W4-S8 (ARMED): the committed floors turn 19 package unit tests red; issuer remedy outside d-5's paths",
+  "addendum 1 resolved the GQGU calendar and the G2 reader (rows Z-W4-S12, S13); see addendum1.remaining"
  ],
  "publish_history": [
   "d5-publish-r4 (48814ee7-0475-4507-b8c5-856fcd4b7e50, before the G2 replay)",
-  "d5-publish-r4b (d3d8440b-cd95-4037-a49e-76ec0246fbd9, after the G2 replay; the served page)"
- ]
+  "d5-publish-r4b (d3d8440b-cd95-4037-a49e-76ec0246fbd9, after the G2 replay; the served page)",
+  "d5-publish-a1 (8a6012e1-a017-40d4-a673-5fc06dec76e4, after addendum 1; the served page)"
+ ],
+ "addendum1": {
+  "authority": "TO amendment 1 @84384fc1f7; COO half ADDENDUM1 @ad07f847d2; CTO half @1ef54f4ff8; pin CLOUD 25f4ac5418",
+  "gates": {
+   "1": "served_delta_g2.py re-run from this worktree (served_delta_g2_act.json) equals the addendum table: GQGU 0 -> 307 added; the other 12 funds 0 changed / 0 added / 0 removed; issuer_rows_reading_another_funds_capture_in_fix []; control 4094 of 4094 (13 of 13 funds equal)",
+   "2": "five live CodeSha256 values equal evidence/lambda_after_apply_r4.txt (5 of 5) before the apply",
+   "3": "NEVER-2 union read over 116 live worktrees (0 missing, 53 distinct names): only the CLOSED etfs-rivalfunds-round2 stale copies; ledger etfs-rivalfunds-round4-a1 + sentinel committed at 35d94bd5e3 before the apply",
+   "4": "plan 0 to add, 5 to change, 0 to destroy: five aws_lambda_function in place (source_code_hash, last_modified), nothing else (evidence/apply_plan_a1.txt)"
+  },
+  "A1": {
+   "tool": "HALT_ACK=1 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-rivalfunds apply -input=false <saved plan>",
+   "at_utc": "2026-10-01T21:54Z",
+   "result": "Apply complete! Resources: 0 added, 5 changed, 0 destroyed.",
+   "codesha256_before": {
+    "etfs-rivalfunds-daily-lambda": "RLPWZacmgR868lFsW5VR01071NSEybC1IoJnx+DwlYI=",
+    "etfs-rivalfunds-fetch-holdings-lambda": "xI022e4Yg/H88QMtMVomXgINpaSaeF9Qn1rSQVzADyY=",
+    "rivalfunds-build-canonical-shape-lambda": "WAUfqC0Q58uzmDMqPB2WxDMFk5vbO5l1nj80a2kSxS8=",
+    "rivalfunds-build-silver-lambda": "/EmLoqquboQ+Op6iLQ00ZQd+rL44yr7edaW1CMjtRIM=",
+    "rivalfunds-publish-page-lambda": "F+ayajONXvUlxQFdivc/DQnWwtqA9QNpt6kAoUoqoCc="
+   },
+   "codesha256_after": {
+    "etfs-rivalfunds-daily-lambda": "C/lTSdk7iBQsm/G8Oi4dhTerEXgShnearVouIxFCDLs=",
+    "etfs-rivalfunds-fetch-holdings-lambda": "sLwaf78FKLBiyOqhjHYGVULnylvJR58omGPa4n6vkMs=",
+    "rivalfunds-build-canonical-shape-lambda": "DSDRr5thMhBN1XwLIo3d6qzoddamFcbui2lTP7xg2Yc=",
+    "rivalfunds-build-silver-lambda": "bDpv4QkstsPpbQizAdmABZ2KXvWAo7Xh/fr/MIYNSdo=",
+    "rivalfunds-publish-page-lambda": "rphyMKONPMa2WnhEi+fbAlRXRMmsx0rw5USwyCNT4/4="
+   },
+   "last_modified_after": "2026-10-01T21:54:46Z..21:55:09Z",
+   "evidence": "evidence/lambda_after_apply_a1.txt"
+  },
+  "A2": {
+   "event": "daily-lambda only build-coverage, mode replay, start 2025-07-14, end 2026-09-30, batch d5-g2-a1-full",
+   "request_id": "e83248aa-b484-401c-a48d-a8cdbfed971e",
+   "seconds": 354.5,
+   "status": "OK",
+   "written_new_days": 307,
+   "g2_rows_per_fund_served_now": {
+    "BASG": 645,
+    "BIDD": 471,
+    "CGIC": 502,
+    "ETFT": 208,
+    "GQGU": 307,
+    "IDVZ": 28,
+    "INEQ": 502,
+    "PCLG": 240,
+    "PFOE": 27,
+    "SCHY": 502,
+    "TSEL": 438,
+    "TXUE": 420,
+    "WCMG": 111
+   },
+   "readback": "all 502 coverage objects read back: every fund equals the addendum table's rows_fix (0 mismatches); GQGU 307 days, 305 rows name a gqgu- capture; 0 BASG rows name a gqgu- capture (evidence/g2_readback_a1.txt)"
+  },
+  "A3": {
+   "event": "daily-lambda only publish-page, date 2026-10-01, batch d5-publish-a1",
+   "request_id": "8a6012e1-a017-40d4-a673-5fc06dec76e4",
+   "publish_marker": "s3://opal-data-etfs/rivalfunds/etfs/state/publish_page/date=2026-10-01/d5-publish-a1.json",
+   "manifest": "funds_updated 12 of 13; GQGU block carries data-calendar status ok (20 days) and the issuer badge"
+  },
+  "ac_rerun": "AC1 PASS 0 failures; AC2 PASS 0 failures (382 s); AC3 PASS 0 failures (evidence/d-5.AC*.a1.output.txt)",
+  "rows_resolved": [
+   "ETFS_RIVALS-Z-W4-S12 (by ETFS_RIVALS-Z-W4-S15)",
+   "ETFS_RIVALS-Z-W4-S13 (by ETFS_RIVALS-Z-W4-S16)"
+  ],
+  "remaining": [
+   "acceptance (read at the close, never waited on): the 2026-10-02 07:00 ET issuer fetch for BASG and GQGU, the 08:03 leg and the 09:00 sweep; the first G2 daily with both funds' captures is the live test of the S13 fix"
+  ]
+ }
 }
