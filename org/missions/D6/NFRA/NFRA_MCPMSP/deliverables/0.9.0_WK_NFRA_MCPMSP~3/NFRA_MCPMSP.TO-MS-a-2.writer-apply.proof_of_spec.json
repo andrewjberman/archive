@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPMSP.TO-MS-a-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/prd/NFRA_MCPMSP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7926f5194c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/decompositions/NFRA_MCPMSP_DECOMP.md",
+    "vintage_commit": "7926f5194c",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPMSP/task-orders/NFRA_MCPMSP.TO-MS-a-2.writer-apply.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPMSP~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "a609ba3dfe",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "function mcportal-grant-writer-lambda: Apply complete! Resources: 0 added, 1 changed, 0 destroyed.; CodeSha256 OiLZPOdSVMPhekBLD+87w3UJp0FmGODSFeHxBJiOiaw= -> nhz+dwJsDJLO9X3o1exvKdQ+OYE+PraxZSop2BJt9zI=; a2.AC2 identical=True",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260930T1020Z_nfra-mcpmsp-r1-writer-apply_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "a609ba3dfe",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ledger CLOSED, both legs proven, sentinel removed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "slug nfra-mcpmsp-r1-writer-apply: entry files at HEAD>=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR present -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/a2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "slug nfra-mcpmsp-r1-writer-apply: entry files at HEAD=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 16 of 16 sentinel(s) scanned\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 invocation, exit 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "function mcportal-grant-writer-lambda: identical=True register_tenant=True verdict=OK -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/a2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "function mcportal-grant-writer-lambda: live sha256=7e80d4359859 head sha256=7e80d4359859 identical=True register_tenant=True verdict=OK\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 invocation, exit 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "function mcportal-grant-writer-lambda: LIVE_FIRMS=None or empty -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/a2.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "function mcportal-grant-writer-lambda: LIVE_FIRMS=None\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 invocation, exit 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "None named by the spec; AC2's first read after apply 1 (identical=False, CRLF package) is the natural negative.",
+      "expected": "n/a",
+      "observed": "apply 1: identical=False verdict=NO; apply 2 (LF-exact staged handler): identical=True verdict=OK",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: live reads of the deployed package and configuration",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "push / vendor call / layer rebuild / LIVE_FIRMS",
+      "reason": "out of bounds for this order; none made (layer zip copied from the main tree, hash equals live layer v1 CodeSha256)"
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPMSP-Z-W3-S2"
+  ],
+  "session_log": "none",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan -target=aws_lambda_function.mcportal_grant_writer",
+      "invocation": "private TF_DATA_DIR (providers + tfstate copied, terraform get); owner key vars read from the live writer env, not printed",
+      "result": "Plan: 0 to add, 1 to change, 0 to destroy. (source_code_hash only)"
+    },
+    {
+      "tool": "bash .tools/safe-apply.sh apply -target (HALT_ACK=1 after 0 STOP-class lines), run twice",
+      "invocation": "safe-apply -chdir=infra/aws/terraform/opal-gateway apply -target=aws_lambda_function.mcportal_grant_writer",
+      "result": "Apply complete! Resources: 0 added, 1 changed, 0 destroyed. (both runs)"
+    }
+  ]
+}

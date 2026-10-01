@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-t-12",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3d06751450"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "5f69de201d",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-t-12.portal-tool-advi.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~20",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~20/MX-t-12.emitter-candidate.uncommitted.patch",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one emitter change made before the order's stop (ALLOWED_PREFIXES + authored advisor_intelligence channel and its one row + v0.4 header carrying Andrew's verbatim and @1eba868308). A record file, never graded by the naming limb; NOT a substitute for the gated-path commit, which the naming limb refuses (row Z-W20-S3). Nothing deployed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~20/MX-t-12.naming-gate-dryrun.txt",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim output of python .tools/naming-gate.py --diff <the emitter diff> --enforce: NAMING-GATE: REFUSE 5 graded, rc=1.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "placed and naming their reader N of N with N>=6",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round5/checks/t12.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)placed and naming their reader [0-9]+ of [0-9]+.*minimum rows required: 6.*RESULT: PASS.*exit=0",
+      "output_evidence": "portal_index ROWS entries read: 4\nportal rows: 4 total; under silver_datasets 0; under portal_datasets 4\nplaced and naming their reader 4 of 4\nminimum rows required: 6\nRESULT: FAIL\nexit=1",
+      "denominator": "4 of 4 portal_* rows placed under portal_datasets naming their reader; 4 ROWS entries; minimum 6 not met (this cell was stopped by the naming limb before adding its row, and even with it the tree reaches 5 because MX-t-10 is uncommitted)",
+      "status": "FAIL",
+      "status_reason": "The naming limb refuses the advi key literals at the first emitter change (row NFRA_MCPINDEX-Z-W20-S3), so per order A1 the row was not built; and the minimum of 6 needs MX-t-10's uncommitted row (row Z-W20-S4), so the tree reaches 5 at most."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest rc=0; passed>7; failed/error 0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round5/checks/t12.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; passed (?:[89]|[1-9][0-9]+); failed/error 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; passed 11; failed/error 0\nRESULT: PASS\nexit=0",
+      "denominator": "11 passed of 11 in tests/test_portal_index.py on the UNCHANGED gateway tree (no test of this cell was written: the order stopped at the naming limb), so this PASS does not exercise the advi tool",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control on the naming dry run: the same emitter diff graded the EXISTING platinum/mdpf/ prefix on the same line as REFUSE (the limb is able to refuse an out-of-pattern key), and graded the advi literals REFUSE as NEW.",
+      "expected": "REFUSE on the new advi literals",
+      "observed": "NAMING REFUSE emit_catalog_v02.py:55 platinum/advi/49financial/ and :71 platinum/advi/49financial/mix_summary.json; NAMING-GATE: REFUSE 5 graded; rc=1 with --enforce",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the emitter was run unmodified at the worktree base and reproduced the committed catalog except for the built_at_git_head stamp (census dir added to the sparse cone first).",
+      "observed": "git diff --stat: 1 file changed, 2 insertions, 2 deletions (the stamp).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The advi tool, its catalog entry file, the ROWS entry, INDEX_TOOLS, the tests, EQUALITY_MX-t-12.md and the regenerated catalog",
+      "reason": "Order A1: if the naming limb refuses the advi key, file a BLOCKING row and STOP; it refused (row Z-W20-S3)."
+    },
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "A FAIL row leaves the order open; also the order says do not edit it."
+    },
+    {
+      "item": "Deploy, push, any write to S3",
+      "reason": "Order bounds 1 and 2; the only S3 calls were read-only get-object and list-objects-v2."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W20-S3: BLOCKING, INERT. The naming limb refuses the advi key literals at the first emitter change; the cell stops, per order A1.",
+    "NFRA_MCPINDEX-Z-W20-S4: AC1's minimum of 6 needs MX-t-10's uncommitted row; the cell reaches 5 at most. OBSERVATION, INERT.",
+    "NFRA_MCPINDEX-Z-W20-S5: the platinum/advi/49financial objects are the frozen, held twin, not the page's source. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "naming-gate.py",
+      "invocation": "python .tools/naming-gate.py --diff .scratch/emitter_only.diff --enforce",
+      "result": "rc=1; NAMING-GATE: REFUSE 5 graded (2 REFUSE on advi literals, 1 REFUSE on the existing mdpf prefix, 2 WARN on existing 49financial tokens)"
+    },
+    {
+      "tool": "aws s3api get-object (read-only)",
+      "invocation": ".tools/aws s3api get-object --bucket opal-data-portal-v2 --key platinum/advi/49financial/mix_summary.json",
+      "result": "rc=0; 11129 bytes; VersionId KNCXZL68gRU_LR2eIwxIXGoBb_bWEB_a; data_as_of 2026-08-20; total_market_value 1770756051.72; read for the row draft, not an equality proof of a tool"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see the worker report"
+    }
+  ]
+}

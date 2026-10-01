@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPMSP.TO-MS-t-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/prd/NFRA_MCPMSP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "06804f9f99"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPMSP/decompositions/NFRA_MCPMSP_DECOMP.md",
+    "vintage_commit": "06804f9f99",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPMSP/task-orders/NFRA_MCPMSP.TO-MS-t-4.run-record-shipper.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPMSP~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "opal_ai/opal/runtime-msp/record/ship-run.py",
+      "kind": "script",
+      "commit_or_etag": "01d7446",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not run against AWS by order (bound 1: no put). Commit 01d7446 is in the NESTED opal_ai repo, branch wk-NFRA_MCPMSP-4-opal_ai.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "opal_ai/opal/runtime-msp/record/test_ship_run.py",
+      "kind": "script",
+      "commit_or_etag": "01d7446",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Fixture-only test; commit 01d7446 in the nested opal_ai repo.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "opal_ai/opal/runtime-msp/record/fixtures/",
+      "kind": "config_data",
+      "commit_or_etag": "01d7446",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two local fixture files; commit 01d7446 in the nested opal_ai repo.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest: N passed; test_dry_run_writes_nothing=1 test_keys_under_builder_address=1 test_audit_rows_filtered_to_window_and_identity=1 test_record_tagged_firm_advisor_run=1 (each >=1, 0 failed) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPMSP/deliverables/2.0.0_SA_COO~MS/round1/checks/t4.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest: ============================== 4 passed in 0.05s ==============================; test_dry_run_writes_nothing=1 test_keys_under_builder_address=1 test_audit_rows_filtered_to_window_and_identity=1 test_record_tagged_firm_advisor_run=1\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 tests passed, 0 failed; each named test passed once",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant. The audit fixture carries a row before the window, a row after it and a row of another user; only 2 of 5 rows are kept.",
+      "expected": "audit_kept == 2",
+      "observed": "test_audit_rows_filtered_to_window_and_identity and test_record_tagged_firm_advisor_run assert tools [a, b] and audit_kept 2.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Criterion run once after the nested commit, as the order names.",
+      "observed": "AC1 rc=0.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "2026-09-30 UTC. Merged CLOUD first. Built record/ship-run.py (dry run default, --write puts via boto3, address from lib/opal_naming.py under --workspace) and test_ship_run.py on a fake S3 client. Tests use firm 49financial because address() takes the LONG scope form and refuses 'bd'. The audit window is inclusive and the user match is case-insensitive. Nested commit 01d7446 was plain git under the worker author (opal_ai has no safe-commit.sh). No row filed.",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1",
+      "result": "see the worker report; only the exit code is the verdict."
+    }
+  ]
+}

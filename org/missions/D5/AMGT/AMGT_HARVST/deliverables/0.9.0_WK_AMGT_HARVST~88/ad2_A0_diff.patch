@@ -1,0 +1,165 @@
+diff --git a/lib/opal_data_harvest/__main__.py b/lib/opal_data_harvest/__main__.py
+index 3be256eeab..17a4d12570 100644
+--- a/lib/opal_data_harvest/__main__.py
++++ b/lib/opal_data_harvest/__main__.py
+@@ -69,7 +69,16 @@ def main():
+                             " harvest_grammar) and build+pass a harvest_client to Worker so its"
+                             " harvest path is reachable -- writes nothing to S3 by itself"
+                             " (HVST-h-10 row AMGT_HARVST-Z-W10-S2, text fixed by AMGT_HARVST-Z-S27)")
++    # HVST-ad-2:
++    parser.add_argument("--no-sign-in", action="store_true",
++                       help="run only: no sign-in of any kind -- a 401 ends the job sign_in_refused (no refresh), a 402"
++                            " keeps its body and ends account_or_harvester_unavailable (no fresh-session retry), a"
++                            " verification challenge is not repaired; no browser, no credential read")
+     args = parser.parse_args()
++    if args.no_sign_in and args.command != "run":
++        parser.error("--no-sign-in applies to run only")
++    if args.no_sign_in and args.bbg_symbol_probe:
++        parser.error("--no-sign-in cannot be combined with --bbg-symbol-probe (the probe builds its own session manager)")
+     config = json.loads(args.config.read_text(encoding="utf-8"))
+     if args.new_only:
+         config["new_only"] = True
+@@ -181,7 +190,8 @@ def main():
+         config["harvest_grammar"] = True
+         import lib.research.harvest.store as store
+         harvest_client = store._default_client()
+-    worker = Worker(root, config, harvest_client=harvest_client)
++    worker = Worker(root, config, harvest_client=harvest_client,
++                    **({"no_sign_in": True} if args.no_sign_in else {}))
+     try:
+         if args.command == "migrate":
+             with WorkerLock(root):
+diff --git a/lib/opal_data_harvest/sessions.py b/lib/opal_data_harvest/sessions.py
+index 7ed8e5314f..e66b33a058 100644
+--- a/lib/opal_data_harvest/sessions.py
++++ b/lib/opal_data_harvest/sessions.py
+@@ -25,6 +25,11 @@ from .transport import AccountUnavailable
+ SOURCE_FRESH = "fresh_sign_in"
+ 
+ 
++class SignInRefused(RuntimeError):
++    """HVST-ad-2 (`--no-sign-in`): a sign-in path was reached and refused. Not an AccountUnavailable: the account
++    was never tried, so the worker ends the job `sign_in_refused`, not `account_or_harvester_unavailable`."""
++
++
+ def _parse_time(value):
+     """An ISO timestamp (Z or offset; naive read as UTC) as an aware datetime, or None."""
+     if not isinstance(value, str) or not value:
+@@ -37,8 +42,11 @@ def _parse_time(value):
+ 
+ 
+ class TokenFirstSessions:
+-    def __init__(self, inner, record, secrets=None, signin=None):
++    def __init__(self, inner, record, secrets=None, signin=None, no_sign_in=False):
+         self.inner, self.record = inner, record
++        # HVST-ad-2: True (the collector's `run --no-sign-in`) makes `refresh` and `repair_verification` -- the two
++        # paths that sign in or open a browser -- refuse before any credential read. False changes nothing.
++        self.no_sign_in = bool(no_sign_in)
+         self._times = {}
+         self.secrets = secrets or SecretsReader()
+         # signin(publisher, credentials) -> envelope. The default hands the sign-in to the collector's
+@@ -48,7 +56,7 @@ class TokenFirstSessions:
+         self._described = {}
+ 
+     def __getattr__(self, name):
+-        if name in ("inner", "_described"):
++        if name in ("inner", "_described", "no_sign_in"):
+             raise AttributeError(name)
+         return getattr(self.inner, name)
+ 
+@@ -105,7 +113,20 @@ class TokenFirstSessions:
+         self._described[publisher] = {"token_source": SOURCE_FRESH, "signed_in": True}
+         return envelope
+ 
++    def repair_verification(self, publisher, envelope, **recovery_args):
++        """The verification repair opens a browser on the publisher: a sign-in path, refused under `--no-sign-in`;
++        otherwise the collector's own repair, untouched."""
++        if self.no_sign_in:
++            self.record({"event": "sign_in_refused", "publisher": publisher, "path": "repair_verification",
++                         "credentials_read": False})
++            raise SignInRefused("repair_verification refused: --no-sign-in")
++        return self.inner.repair_verification(publisher, envelope, **recovery_args)
++
+     def refresh(self, publisher):
++        if self.no_sign_in:
++            self.record({"event": "sign_in_refused", "publisher": publisher, "path": "refresh",
++                         "credentials_read": False})
++            raise SignInRefused("sign-in refused: --no-sign-in")
+         name = credential_secret_name(publisher)
+         try:
+             credentials = self.secrets.read_credentials(publisher)
+diff --git a/lib/opal_data_harvest/worker.py b/lib/opal_data_harvest/worker.py
+index 03a70bb9e1..45392d0bd9 100644
+--- a/lib/opal_data_harvest/worker.py
++++ b/lib/opal_data_harvest/worker.py
+@@ -13,7 +13,7 @@ from . import bot_check
+ from .auth import SessionManager
+ from .catalog import ARTICLE_FIELDS, Catalog
+ from .publishers import Publisher, REGISTRY
+-from .sessions import TokenFirstSessions
++from .sessions import SignInRefused, TokenFirstSessions
+ from .storage import WorkerLock, atomic_json
+ from .transport import AccountUnavailable, AuthExpired, ContractUnavailable, RequestRejected, Throttled, VerificationRequired, UpstreamUnavailable, backoff_policy
+ 
+@@ -213,8 +213,13 @@ def repair_permitted(publisher, attempt, result):
+ 
+ 
+ class Worker:
+-    def __init__(self, root, config, publisher_factory=Publisher, session_manager=None, harvest_client=None):
++    def __init__(self, root, config, publisher_factory=Publisher, session_manager=None, harvest_client=None,
++                 no_sign_in=False):
+         self.root, self.config = Path(root).resolve(), config
++        # HVST-ad-2 (`run --no-sign-in`): no sign-in of any kind. A 401 ends the job `sign_in_refused`; a 402 keeps
++        # its body, gets NO fresh-session retry and ends `account_or_harvester_unavailable`; a verification
++        # challenge is not repaired. False (the default) leaves every path as it was.
++        self.no_sign_in = bool(no_sign_in)
+         self.root.mkdir(parents=True, exist_ok=True)
+         # Harvest mode only (config key "harvest_grammar", default False -- ruling 4). None
+         # (the default) means the bucket-authority check below never runs, so a Worker built with
+@@ -241,7 +246,8 @@ class Worker:
+         self.factory = publisher_factory
+         # HVST-ab-1 (C-HV-TRUST-TOKEN): the default session seam is token-first -- the stored token, then a
+         # sign-in whose credentials come from Secrets. A caller-supplied session_manager is used as given.
+-        self.sessions = session_manager or TokenFirstSessions(SessionManager(self.root, self.record), self.record)
++        self.sessions = session_manager or TokenFirstSessions(SessionManager(self.root, self.record), self.record,
++                                                                   no_sign_in=self.no_sign_in)
+         self.catalog = Catalog(self.root, self.db)
+ 
+     def close(self):
+@@ -645,6 +651,8 @@ class Worker:
+                         self.sessions.persist_http_cookies(publisher, envelope, client.session)
+                     break
+                 except VerificationRequired as exc:
++                    if self.no_sign_in:
++                        raise  # HVST-ad-2: the repair opens a browser -- a sign-in path; the challenge ends the job
+                     if not repair_permitted(publisher, attempt, result):
+                         raise
+                     envelope = self.sessions.persist_http_cookies(publisher, envelope, client.session)
+@@ -677,7 +685,7 @@ class Worker:
+                         raise
+                     result["account_402_count"] = result.get("account_402_count", 0) + 1
+                     self._keep_account_402_body(job_id, exc, result, result["account_402_count"])
+-                    if result["account_402_count"] > 1 or attempt >= MAX_ATTEMPTS - 1:
++                    if self.no_sign_in or result["account_402_count"] > 1 or attempt >= MAX_ATTEMPTS - 1:
+                         raise
+                     if client:
+                         client.close()
+@@ -688,6 +696,8 @@ class Worker:
+                     self.record({"event": "retry_after_402_fresh_session", "publisher": publisher,
+                                  "security_key": security["key"]})
+                 except AuthExpired:
++                    if self.no_sign_in:
++                        raise SignInRefused("401 under --no-sign-in: no refresh")
+                     if attempt:
+                         result.update(status="auth_failed_after_refresh", retry_at=self.cooldown(publisher, 3600, "auth_failed_after_refresh"))
+                         break
+@@ -704,6 +714,9 @@ class Worker:
+                         client.close()
+         except Throttled as exc:
+             result.update(status="throttled", retry_at=self.cooldown(publisher, exc.retry_after, "429"))
++        except SignInRefused as exc:
++            # HVST-ad-2: a STOP class, never a cooldown -- nothing was tried, so nothing is held against the account.
++            result.update(status="sign_in_refused", detail=str(exc), no_sign_in=True)
+         except AccountUnavailable:
+             result.update(status="account_or_harvester_unavailable", retry_at=self.cooldown(publisher, 3600, "account_or_harvester_unavailable"))
+         except UpstreamUnavailable as exc:

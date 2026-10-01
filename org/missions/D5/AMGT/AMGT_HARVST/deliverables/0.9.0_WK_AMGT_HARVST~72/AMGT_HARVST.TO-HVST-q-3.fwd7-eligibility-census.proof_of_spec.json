@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-q-3.fwd7-eligibility-census",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-q-3.fwd7-eligibility-census.md",
+    "group": "OTHER",
+    "vintage_commit": "3a735f88e69550c95f807d41a4e8ded215ade06b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "3a735f88e69550c95f807d41a4e8ded215ade06b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-q-3.fwd7-eligibility-census.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~72",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~72, L7 subagent of 2.0.0_SA_COO~H, worktree wk-hvst-r27-72 on branch wk-AMGT_HARVST-72 cut from 3a735f88e6, TREE-OK. Read-only S3 LIST/GET of the served gold chatter_daily only; no PUT, no vendor call, no deploy. Eligibility reuses chatter_axis.classify_eligibility and window_dates (merged HVST-q-4), not re-derived; coverage reads publishers_covered_codes only. MEASURED. No surprise rows filed.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~72/scripts/q3_ac1_eligibility_census.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census script; S3 LIST/GET on harvest gold chatter_daily only.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~72/q3_ac1_output.txt",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Recorded output of AC1.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~72/scripts/q3_ac1_eligibility_census.py prints 'ELIGIBLE UNDER (bbg, wsj):' with the served part and as-of, window, universe of 191, excluded names by reason, eligible names, negative arms, and the floor test.",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~72/scripts/q3_ac1_eligibility_census.py",
+      "output_evidence": "rc 0. Served part date=2026-09-30/part-20260930T072527Z.parquet, as-of 2026-09-30, window 2026-09-01..2026-09-30 (30 days), universe 191. 'ELIGIBLE UNDER (bbg, wsj): 0 of 191'. Excluded: NOT_SEARCHED 190, PARTIAL_COVERAGE 1 (992_HK_Equity). Eligible names: none. Negative arms: found-set read 0 of 191; any-single-publisher 1 of 191. Floor: 0 against 10 -> BELOW FLOOR (HOLD). Full output: q3_ac1_output.txt",
+      "denominator": "191 universe names; 0 eligible + 1 partial + 190 not searched = 191",
+      "status": "PASS",
+      "expect": "ELIGIBLE UNDER \\(bbg, wsj\\):"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Adversary arm: eligibility read from the found set or from any-publisher coverage instead of publishers_covered_codes for the declared set.",
+      "expected": "a found-set or any-publisher read gives a different count than the contract read, printed beside it",
+      "observed": "contract 0 of 191; found-set read 0 of 191; any-single-publisher read 1 of 191 (the any-publisher read diverges)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice against the same served store",
+      "observed": "the two outputs are identical modulo line endings",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write, deploy or vendor call",
+      "reason": "Standing clause 0.1 (read-only census)."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W72-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "see the worker report"
+    }
+  ]
+}

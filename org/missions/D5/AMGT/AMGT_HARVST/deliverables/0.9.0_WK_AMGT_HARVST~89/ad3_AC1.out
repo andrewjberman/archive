@@ -1,0 +1,33 @@
+== Q1 product and zone
+  product = Bright Data RESIDENTIAL, sticky-session pool (not fixed IP) -- MEASURED (config)
+    infra/aws/ec2/astn-wsjft/ft_proxy_test.js:2  | // THE decisive test: does routing our browser through a US sticky-session residential proxy defeat
+    infra/aws/ec2/astn-wsjft/ft_proxy_test.js:12  | const SESSION_ID = 'astnft1'; // fixed within this run -> BD holds ONE sticky IP for the whole fetch
+    infra/aws/ec2/astn-wsjft/ft_proxy_test.js:15  | username: `${px.username}-country-${px.country || 'us'}-session-${SESSION_ID}`,
+    infra/aws/ec2/bd-49f-auto-login/bd_49f_auto_login.js:6  | * RESIDENTIAL proxy (ALWAYS-ON -- BD blocks AWS-datacenter egress) + Kimi-VL vision.
+  host/port/zone = held only inside the Secrets Manager value, not in repo -- INFERRED (value not read, by clause)
+    infra/aws/ec2/astn-wsjft/ft_proxy_test.js:14  | server: `http://${px.host}:${px.port}`,
+    AWS secretsmanager:describe-secret.Name = astn/brightdata/residential-proxy LastChangedDate = 2026-06-24T19:21:12.944000-04:00 -- MEASURED
+== Q2 how existing hosts reach it
+  EC2 host is a proxy CLIENT of the superproxy (server=http://host:port, per-run username suffix), IP is NOT bound to the host -- MEASURED
+    infra/aws/ec2/astn-wsjft/ft_proxy_test.js:29  | const browser = await chromium.launch({ headless: true, proxy, timeout: 60000 });
+    infra/aws/ec2/astn-wsjft/ft_proxy_test.sh:11  | aws secretsmanager get-secret-value --secret-id astn/brightdata/residential-proxy --query SecretString --output text --region "$REGION" > "$PX"
+    infra/aws/ec2/bd-49f-auto-login/bd_49f_auto_login.js:27  | *     BD_PROXY_SECRET_ID       (=astn/brightdata/residential-proxy) -> host:port:user:pass (resi, ALWAYS-ON)
+    infra/aws/ec2/bd-49f-auto-login/bd_49f_auto_login.js:380  | launch.proxy = { server: `http://${p.host}:${p.port}`,
+  bd-49f box currently on NATIVE IP, proxy dropped 2026-06-25, secret retained revert-only -- MEASURED
+    infra/aws/ec2/bd-49f-auto-login/secret-ids.env:34  | # NATIVE-IP: NO BD_PROXY_SECRET_ID. BrightData proxy DROPPED 2026-06-25 (Andrew-direct via CVO 203246Z);
+    infra/aws/ec2/bd-49f-auto-login/run-bd-auto-login.sh:23  | # 203246Z; box role has no brightdata grant -> native-IP is structurally enforced; resi-proxy secret
+== Q3 can a second EC2 host use the same egress
+    AWS ec2 instance i-059405dfefcb4b44a profile=arn:aws:iam::313476888478:instance-profile/astn-wsjft-scraper-profile sg=sg-008a36fc02f98f961 -- MEASURED
+    AWS ec2 instance i-0fa1846f04ed7e337 profile=arn:aws:iam::313476888478:instance-profile/bd-49f-auto-login-profile sg=sg-0f3cf1a6e74d6e66f -- MEASURED
+    AWS sg-008a36fc02f98f961.IpPermissionsEgress = ['-1', '0.0.0.0/0', 'All egress (WSJ / FT / Bright Data / S3 / SES / package mirrors)'] -- MEASURED (egress open to all)
+  credential is a per-secret login not per-host: access = IAM GetSecretValue on the secret name (bd-49f lost it by removing the grant) -- MEASURED
+    infra/aws/ec2/bd-49f-auto-login/secret-ids.env:35  | # the box role has no brightdata grant -> native-IP is structurally enforced. astn/brightdata/residential-proxy
+    infra/aws/ec2/astn-wsjft/ft_proxy_test.sh:2  | # ASTN_WSJFT FT-through-proxy proof runner. Pulls the proxy + session secrets from SM (the EC2 role
+  no caller-IP whitelist appears in any config; BD-side zone allowlist / concurrent-session cap not shown -- INFERRED (absence of config, BD console unread)
+  second host must use the proxy (BD blocks AWS datacenter egress) -- INFERRED (prose comment, not routing config):
+    infra/aws/ec2/bd-49f-auto-login/bd_49f_auto_login.js:6  | * RESIDENTIAL proxy (ALWAYS-ON -- BD blocks AWS-datacenter egress) + Kimi-VL vision.
+== Q4 verdict
+ASSIGNABILITY: ASSIGNABLE
+  reason: hosts are proxy clients reading a shared SM credential with a per-run sticky session id, so a new host needs only an IAM read grant -- class MEASURED for the client model; INFERRED that BD zone has no caller-IP allowlist or session cap
+BLOCKED NON-AWS SOCKETS: 0
+VENDOR CALLS: 0

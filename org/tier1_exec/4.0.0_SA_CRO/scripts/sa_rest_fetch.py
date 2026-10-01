@@ -36,6 +36,7 @@ Env:      SA_SECRETS_DIR=<dir>  read secret_*.json from disk instead of Secrets 
 import json
 import os
 import random
+import re
 import sys
 import time
 
@@ -43,6 +44,9 @@ BASE = "https://seekingalpha.com"
 SESSION_SECRET_ID = "seeking-alpha/session"
 PROXY_SECRET_ID = "astn/brightdata/residential-proxy"
 IDENTITY_COOKIE = "user_id"
+# contracts.json sa auth_check: GET /api/v3/account/{user_id}/info -- {user_id} is the value of the
+# parked bundle's `user_id` cookie (bundle["all_cookies"]); check() never uses a literal account id.
+USER_ID_SHAPE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 PACE_SECONDS = 1.5
 
 
@@ -69,6 +73,20 @@ def _secret(name):
         .get_secret_value(SecretId=name)["SecretString"]
         .strip()
     )
+
+
+def bundle_user_id(cookies):
+    """The account id the parked bundle carries: the value of its `user_id` cookie. Raises
+    NotAuthorized when no such cookie has a usable value (the message never holds a value)."""
+    ids = {str(c.get("value")) for c in cookies if c.get("name") == IDENTITY_COOKIE and c.get("value")}
+    if len(ids) != 1:
+        raise NotAuthorized(
+            "parked bundle carries %d distinct non-empty %s values, need exactly 1" % (len(ids), IDENTITY_COOKIE)
+        )
+    user_id = ids.pop()
+    if not USER_ID_SHAPE.match(user_id):
+        raise NotAuthorized("parked bundle %s value is not a plain account id" % IDENTITY_COOKIE)
+    return user_id
 
 
 def build_session(use_proxy=True, *, bundle=None):
@@ -113,6 +131,7 @@ def build_session(use_proxy=True, *, bundle=None):
             pass
     if bundle.get("user_agent"):
         s.headers.update({"User-Agent": bundle["user_agent"]})
+    s.sa_user_id = bundle_user_id(cookies)
     return s, bundle["captured_at"]
 
 
@@ -227,8 +246,11 @@ def article(s, article_id):
 
 def check(s):
     """Is the parked session still an authorized paying user? The account endpoint is the oracle."""
+    user_id = getattr(s, "sa_user_id", None)
+    if not isinstance(user_id, str) or not USER_ID_SHAPE.match(user_id):
+        raise NotAuthorized("session carries no %s -- no account id to check" % IDENTITY_COOKIE)
     j = get_json(
-        s, "/api/v3/account/1btfwdu/info?include=proSubscription", "/symbol/RTX"
+        s, "/api/v3/account/%s/info?include=proSubscription" % user_id, "/symbol/RTX"
     )
     d = j.get("data") or {}
     if d.get("type") != "authorizedUser":

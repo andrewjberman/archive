@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ac-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ac-2.regeneration-keeps-served-sentences.md",
+    "group": "OTHER",
+    "vintage_commit": "e1b5fd6d8c0e60f6b84f4d5f379f4f8b34631fc8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "e1b5fd6d8c0e60f6b84f4d5f379f4f8b34631fc8",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ac-2.regeneration-keeps-served-sentences.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~191",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row AMGT_RESAPP-Z-W191-S1 appended (BLOCKING/ARMED at filing); resolved by CTO ruling msg 27185 and row AMGT_RESAPP-Z-S316 (C-VERBATIM-GATE HOLD working as designed; AC1 re-scoped by AMENDMENT 1). No code changed; no S3 write.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round53/checks/ac_2_keep.py; echo \"exit=$?\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round53/checks/ac_2_keep.py; echo \"exit=$?\"",
+      "output_evidence": "VERBATIM (capture .../0.9.0_WK_AMGT_RESAPP~191/ac-2.AC1.out.txt), under AMENDMENT 1:\nstored (all) {'company_description': 6, 'investment_thesis': 1, 'risks': 2, 'ceo_bio': 0, 'recommendation': 1}\nstored (span-carrying) {'company_description': 1, 'investment_thesis': 0, 'risks': 0, 'ceo_bio': 0, 'recommendation': 1}\nrebuilt {'company_description': 1, 'investment_thesis': 0, 'risks': 0, 'ceo_bio': 0, 'recommendation': 1}\nstored without a span (held on rebuild by design): 8\nA D-1 REGENERATION KEEPS EVERY SPAN-CARRYING SERVED SENTENCE: YES\nexit=0",
+      "denominator": "2 of 2 span-carrying stored served sentences kept on rebuild; 8 no-span stored sentences held by design (C-VERBATIM-GATE HOLD)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest lib/research/filings/tests -q; echo \"exit=$?\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" timeout 115 python -m pytest lib/research/filings/tests -q; echo \"exit=$?\"",
+      "output_evidence": "VERBATIM (capture .../ac-2.AC2.out.txt):\n134 passed\nexit=0",
+      "denominator": "134 of 134 passed, 0 failed, N=134 > 127 (no new test: no code change)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No code changed, so no mutant. The per-sentence diagnosis is the control: every stored sentence was re-run through today's longest_verbatim_run and is_verbatim against the excerpt and its cited passages.",
+      "expected": "a sentence served verbatim-on-span survives; a non-verbatim sentence stays held",
+      "observed": "2 of 2 span-carrying stored sentences survive the rebuild; 8 of 8 no-span stored sentences are held with no verbatim run at the 8-token floor",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ac_2_keep.py's rebuild is the deterministic producer (FilingsProducer, no model call); diag.py and ac_2_keep.py rebuilt the same stored analysis twice.",
+      "observed": "STABLE: identical rebuilt counts {1,0,0,0,1} both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any change to drafting_build.py, lib/research/drafting/ or new tests",
+      "reason": "The cell's STOP clause: the stored sentences were served under an older, looser rule and genuinely fail today's gate; that is a ruling, not a build. Loosening the gate is forbidden. Z-W191-S1 is RESOLVED by the CTO's ruling (msg 27185, row AMGT_RESAPP-Z-S316): the 8 no-span sentences are held by design and AC1 is re-scoped to span-carrying stored sentences."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W191-S1"
+  ],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface.",
+  "compiler_tools": [
+    {
+      "tool": "python + pytest",
+      "invocation": "see AC1-AC2",
+      "result": "AC1 YES exit=0 (AMENDMENT 1); AC2 134 passed exit=0"
+    }
+  ]
+}

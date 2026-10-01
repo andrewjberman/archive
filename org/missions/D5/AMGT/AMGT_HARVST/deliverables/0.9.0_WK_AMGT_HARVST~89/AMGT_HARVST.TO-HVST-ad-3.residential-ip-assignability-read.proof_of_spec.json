@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ad-3.residential-ip-assignability-read",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ad-3.residential-ip-assignability-read.md",
+    "group": "OTHER",
+    "vintage_commit": "fa71ab063e7e61fc007e68c5a405be5568c1be21"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "fa71ab063e7e61fc007e68c5a405be5568c1be21",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ad-3.residential-ip-assignability-read.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~89",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~89/scripts/ad3_ac1_assignability.py",
+      "kind": "script",
+      "commit_or_etag": "90c2f55cf8135e3be792ba5d5e71b6c9b6b526ef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only script: repo config reads plus AWS describe reads; non-AWS sockets blocked and counted.",
+      "introduces": [
+        "BLOCKED NON-AWS SOCKETS"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~89/ad3_AC1.out",
+      "kind": "doc",
+      "commit_or_etag": "90c2f55cf8135e3be792ba5d5e71b6c9b6b526ef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Saved literal output of AC1.",
+      "introduces": [
+        "VENDOR CALLS: 0"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~89/scripts/ad3_ac1_assignability.py",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~89/scripts/ad3_ac1_assignability.py",
+      "output_evidence": "rofile=arn:aws:iam::313476888478:instance-profile/bd-49f-auto-login-profile sg=sg-0f3cf1a6e74d6e66f -- MEASURED\n    AWS sg-008a36fc02f98f961.IpPermissionsEgress = ['-1', '0.0.0.0/0', 'All egress (WSJ / FT / Bright Data / S3 / SES / package mirrors)'] -- MEASURED (egress open to all)\n  credential is a per-secret login not per-host: access = IAM GetSecretValue on the secret name (bd-49f lost it by removing the grant) -- MEASURED\n    infra/aws/ec2/bd-49f-auto-login/secret-ids.env:35  | # the box role has no brightdata grant -> native-IP is structurally enforced. astn/brightdata/residential-proxy\n    infra/aws/ec2/astn-wsjft/ft_proxy_test.sh:2  | # ASTN_WSJFT FT-through-proxy proof runner. Pulls the proxy + session secrets from SM (the EC2 role\n  no caller-IP whitelist appears in any config; BD-side zone allowlist / concurrent-session cap not shown -- INFERRED (absence of config, BD console unread)\n  second host must use the proxy (BD blocks AWS datacenter egress) -- INFERRED (prose comment, not routing config):\n    infra/aws/ec2/bd-49f-auto-login/bd_49f_auto_login.js:6  | * RESIDENTIAL proxy (ALWAYS-ON -- BD blocks AWS-datacenter egress) + Kimi-VL vision.\n== Q4 verdict\nASSIGNABILITY: ASSIGNABLE\n  reason: hosts are proxy clients reading a shared SM credential with a per-run sticky session id, so a new host needs only an IAM read grant -- class MEASURED for the client model; INFERRED that BD zone has no caller-IP allowlist or session cap\nBLOCKED NON-AWS SOCKETS: 0\nVENDOR CALLS: 0\n | ASSIGNABILITY: ASSIGNABLE | last line: VENDOR CALLS: 0 | rc=0 | 1 of 1 criteria",
+      "status": "PASS",
+      "denominator": "1 of 1 criteria; 4 of 4 questions answered"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not applicable: read-only report, no producer behaviour to mutate.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Script run twice; both runs ended with VENDOR CALLS: 0 and the same verdict.",
+      "expected": "identical verdict",
+      "observed": "ASSIGNABILITY: ASSIGNABLE both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ad3_ac1_assignability.py",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~89/scripts/ad3_ac1_assignability.py",
+      "result": "rc 0; ASSIGNABILITY: ASSIGNABLE; VENDOR CALLS: 0"
+    }
+  ]
+}

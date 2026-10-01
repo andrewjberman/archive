@@ -2,8 +2,8 @@
 
 PASS requires: no object that existed at act start moved or vanished (all five publishers); no new sa or barrons object; the first run's run record exists, names 992_HK_Equity on exactly bbg, ft and wsj (AMENDMENT 1),
 and its fetched keys are each backed by a new bronze object. Printed as measurement, not graded: new objects per
-tier/table, each job's status, and each publisher's listing reach from 2026-01-01 through the run date. Writes the
-after-run-1 snapshot the AC2 check compares against.
+tier/table, each job's status, and each publisher's listing reach from 2026-01-01 through the run date. Run after
+the upload (AMENDMENT 2).
 """
 import datetime
 import os
@@ -51,11 +51,24 @@ def main():
         want = sorted((p, c.SECURITY_KEY) for p in c.JOB_PUBLISHERS)
         if pairs != want:
             failures.append("run 1 jobs %s != %s" % (pairs, want))
-        new_bronze = [k for p in c.LIVE for k in d[p][2] if c.table_of(k).startswith("bronze/")]
         fetched = rec.get("keys_fetched") or []
-        print("run 1 keys fetched: %d; new live bronze objects: %d" % (len(fetched), len(new_bronze)))
-        if fetched and not new_bronze:
-            failures.append("run 1 fetched %d key(s) but no new bronze object landed" % len(fetched))
+        print("run 1 keys fetched: %d" % len(fetched))
+        # AMENDMENT 2: the S3 act is `upload-harvest`; every WRITE_PUBLISHERS root must gain bronze, and the local
+        # outbox must hold no pending row for them.
+        for p in c.WRITE_PUBLISHERS:
+            nb = [k for k in d[p][2] if c.table_of(k).startswith("bronze/")]
+            ns = [k for k in d[p][2] if c.table_of(k).startswith("silver/")]
+            print("  %-4s new bronze %d, new silver parts %d" % (p, len(nb), len(ns)))
+            if not nb:
+                failures.append("%s: no new bronze object after the upload" % p)
+        import sqlite3
+        db = sqlite3.connect(os.path.join(c.RUNTIME, "progress.sqlite3"))
+        for table in ("harvest_raw_outbox", "harvest_listing_outbox"):
+            rows = db.execute("SELECT publisher, status, count(*) FROM %s GROUP BY publisher, status" % table).fetchall()
+            print("  outbox %s: %s" % (table, rows))
+            pend = [r for r in rows if r[1] == "pending" and r[0] in c.WRITE_PUBLISHERS]
+            if pend:
+                failures.append("%s still pending after the upload: %s" % (table, pend))
         run_date = datetime.date.fromisoformat(str(rec.get("started_at"))[:10])
         reach(run_date)
 
