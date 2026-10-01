@@ -10,8 +10,9 @@ low-level DynamoDB client; no AWS call is made):
      attribute); the one CUSIP-keyed row (`identifier_namespace` CUSIP) is dropped, as the table's own client
      drops it. (The CUSIP arm was added when the build read that client; the first draft of this check
      projected two attributes and would have listed a CUSIP as a ticker.)
-  2. WIRED: build_catalogue(tenant, read_classifications=<that reader>) serves SPY labelled by its
-     etf-classifications name (`name_source` etf_classifications) and BIL verbatim (`ticker_verbatim`).
+  2. WIRED: build_catalogue(tenant, read_classifications=<that reader>) LISTS SPY labelled by its
+     etf-classifications name (`name_source` etf_classifications) and does NOT list the unnamed BIL (CTO
+     rulings batch 61: the list serves named rows only); entry_for_ticker still answers BIL verbatim.
   3. A FAILED READ PROPAGATES: an AccessDeniedException from Scan raises ClientError out of the reader; it is
      never caught and turned into "no names" (an empty answer would serve every ticker verbatim and hide the
      missing grant).
@@ -78,12 +79,14 @@ def main():
         case(1, False, "%s %s" % (type(exc).__name__, exc))
     try:
         c, stub = two_pages()
+        rows = cc.classifications_reader(c)()
         entries = {e["key"]: e for e in cc.build_catalogue(
-            tenant="cottonwood", read_classifications=cc.classifications_reader(c))["entries"]}
-        spy, bil = entries.get("SPY") or {}, entries.get("BIL") or {}
+            tenant="cottonwood", read_classifications=lambda: rows)["entries"]}
+        spy = entries.get("SPY") or {}
+        bil = cc.entry_for_ticker("BIL", tenant="cottonwood", read_classifications=lambda: rows)
         case(2, spy.get("label") == "SPDR S&P 500 ETF Trust" and spy.get("name_source") == "etf_classifications"
-             and bil.get("label") == "BIL" and bil.get("name_source") == "ticker_verbatim",
-             "SPY %r BIL %r" % (spy, bil))
+             and "BIL" not in entries and bil.get("label") == "BIL" and bil.get("name_source") == "ticker_verbatim",
+             "SPY %r BIL listed %s BIL typed %r" % (spy, "BIL" in entries, bil))
     except Exception as exc:
         case(2, False, "%s %s" % (type(exc).__name__, exc))
     try:
