@@ -1,0 +1,63 @@
+{
+  "slug": "etfs-rivalfunds-round2",
+  "title": "ETFS_RIVALS round-2 live join (RIV-d-3): etfs-rivalfunds in-place deploy, G0, G3 + Bloomberg capture import, vehicle leg enabled, fire, read",
+  "author": "0.9.0_WK_ETFS_RIVALS~5",
+  "status": "OPEN",
+  "opened_at": "2026-10-01T00:43:58.436130+00:00",
+  "window_hours": 8.0,
+  "entry_path": "org/critical_paths/change_management/20261001T0043Z_etfs-rivalfunds-round2_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "activation",
+      "target": "safe-apply infra/aws/terraform/etfs-rivalfunds (5 Lambdas source_code_hash in place, 5 role policies widened, 2 new marker rules + targets + permissions; no destroy)",
+      "proof_required": "apply output: Apply complete, 0 destroyed, plan in-place or create-only",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "activation",
+      "target": "G0 map_version 1 (home funds home_producer) + G3 import of dividends.json (G3 BEFORE any G5, row W3-S13) + key-4 served delta re-run WITH the imported G3 (CTO condition) before G5 writes",
+      "proof_required": "G0 object + G3 marker + key4_with_g3.json read",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "s3-prefix",
+      "target": "opal-data-etfs bloomberg/etfs/bronze/holdings/ 937 imported captures (501 IDVZ-group + 436 PFOE-group), raw + sidecar each, 9 date-ordered batches",
+      "proof_required": "S3 object counts by prefix + fetch_bloomberg markers",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "activation",
+      "target": "marker-driven build-bloomberg-silver, G1, G2 (+ replay), G5, G6 and the grouped page via rivalfunds Lambdas",
+      "proof_required": "Lambda request ids + S3 object counts by prefix",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L5",
+      "kind": "git",
+      "target": "scheduled_daily_pull.cmd the ONE enabling line inside :rivalfunds_bbg_leg; b-1.AC3 still PASS",
+      "proof_required": "commit hash + b-1.AC3 PASS",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L6",
+      "kind": "verify",
+      "target": "d-3.AC1 AC2 AC3 PASS against the served bucket; Terminal state recorded (never a sign-in attempt)",
+      "proof_required": "AC RESULT lines",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261001T004358Z OPENED by 0.9.0_WK_ETFS_RIVALS~5 with 6 leg(s)"
+  ],
+  "last_red_at": null
+}
