@@ -1,0 +1,37 @@
+"""MX-v-7 host probe: ON the gateway host under .venv python as ec2-user. READ-ONLY. .env parsed in Python, never
+shell-sourced; no env value printed. Prints the tool census, the three discover asks, and the in-process
+blackdiamond answer's non-row fields (no row content, no account id)."""
+import json, os, sys
+ROOT = "/opt/opal-gateway"
+with open(os.path.join(ROOT, ".env"), encoding="utf-8") as f:
+    for line in f:
+        line = line.rstrip("\n")
+        if not line or line.lstrip().startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        os.environ[k.strip()] = v
+sys.path.insert(0, ROOT)
+os.chdir(ROOT)
+from app import integrations
+from app.tools import mcp
+native = sorted(t.name for t in mcp._tool_manager.list_tools())
+ids = os.environ["ENABLED_INTEGRATIONS"].split()
+integrations.register_enabled(mcp, ids)
+allnames = sorted(t.name for t in mcp._tool_manager.list_tools())
+print("---TOOLS " + json.dumps({"ids": ids, "native": len(native), "integration": len(allnames) - len(native), "total": len(allnames), "all": allnames}))
+from app.graphql_plumbing import catalog_gate as g
+from app.integrations.opal_discover import integration as od
+for ask in ("what fees did Black Diamond charge", "Schwab positions", "ETF positioning"):
+    d = od.discover(ask, g.OPAL_INTERNAL, "")
+    ms = d.get("matches", [])
+    print("---DISCOVER " + json.dumps({"ask": ask, "catalogued": d.get("catalogued"), "n_matches": len(ms),
+          "next_tools": [(m.get("next_tool") or {}).get("name") for m in ms]}))
+from app.integrations.blackdiamond import integration as bd
+principal = (g.OPAL_INTERNAL, "")
+inst = bd.BlackDiamondIntegration()
+s3 = inst._s3(lambda: bd.check_scope("49financial", principal))
+out = bd.answer(s3, principal, scope="49financial")
+keys = ("status", "tool", "scope", "source", "as_of", "as_of_field", "source_as_of", "date_from", "date_to", "complete",
+        "truncated", "row_cap", "rows_matched", "rows_returned", "duplicate_transaction_ids", "partitions_read",
+        "partitions_empty", "partitions_absent", "totals_by_trade_date", "totals_basis")
+print("---BD " + json.dumps({k: out.get(k) for k in keys}, default=str))

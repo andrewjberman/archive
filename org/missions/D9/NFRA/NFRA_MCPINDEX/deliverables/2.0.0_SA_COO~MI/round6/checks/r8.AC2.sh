@@ -21,5 +21,7 @@ o=$(timeout 20 "$AWS" ssm get-command-invocation --command-id "$cid" --instance-
 rm -rf "$T"
 h=$(printf '%s\n' "$o" | sed -n 's/^health=//p'); bd=$(printf '%s\n' "$o" | sed -n 's/^bd=//p'); etf=$(printf '%s\n' "$o" | sed -n 's/^etf=//p')
 echo "ssm command=${cid:-NONE} status=${st:-NONE}; /health=$h; BD ask next_tools=[$bd]; ETF ask next_tools=[$etf]"
+# Row Z-S75: an EMPTY read with status=Success is an INSTRUMENT read, not a served verdict -- print what was fetched.
+if [ -z "$h" ]; then echo "INSTRUMENT: empty fields with status=${st:-NONE}; fetched output head: $(printf '%s' "$o" | head -c 300 | tr '\n' ' ')"; fi
 if [ "$h" = 200 ] && printf '%s' ",$bd," | grep -q ',blackdiamond_list_fees,' && printf '%s' ",$etf," | grep -q ',etfs_get_positioning,'; then echo "RESULT: PASS"; exit 0; fi
 echo "RESULT: FAIL"; exit 1
