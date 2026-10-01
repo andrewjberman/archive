@@ -43,6 +43,11 @@ Order: `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261001_161xZ_DE
   Progress 72; (3) post on the bus that the laptop rebooted and that no walk is armed from the laptop.
 - `--say` hint: "Read org/tier0_exec/0.0.0_AB_MSTR/deliverables/REBOOT_BRIEF_20261001_0.0.0_AB_MSTR.md, then your inbox."
 
+## 5a. Addendum 16:3xZ (site Z's ack of the reboot notice, bus 51a70eb3)
+- Site Z keeps posting walker notices on the bus while the laptop is down; they queue for the next laptop consumer.
+- TRUNKS DIVERGED: site Z is about 430 commits ahead and the laptop 537 ahead of the same base 0abf99fcd4. The first CLOUD
+  push after the reboot needs ONE merge of the two first (whoever pushes second merges), on Andrew's word; expect overlap.
+
 ## 6. Not done and not known
 - The surprise-channel rows in section 4 are not written.
 - comp-closure: no live compile against AWS was run after the fix; the multi-home census still reads raw bytes.
