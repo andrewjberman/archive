@@ -64,6 +64,15 @@ try {
     const html = L.render(m.FigureTooltip, { mnemonic: fig.mnemonic, label, rows: m.figureTooltipRows(fig) });
     f1.push(...faults(html, label, fig).map((x) => `${fig.mnemonic} ${x}`));
   }
+  // Issuer amendment at the round-21 drain: the Model tab's what-moved line (ModelTab.tsx:643-647, AMGT_CORPUS's) passes its OWN rows,
+  // including { label: 'mnemonic' }; FigureTooltip must keep that code off the face too.
+  {
+    const { label, fig } = FIGS[0];
+    const rows = [{ label: 'earlier', value: String(fig.value) }, { label: 'later', value: '1' }, { label: 'mnemonic', value: fig.mnemonic },
+      { label: 'definition', value: fig.basis.definition }];
+    const html = L.render(m.FigureTooltip, { mnemonic: fig.mnemonic, label, rows });
+    f1.push(...faults(html, label, fig).map((x) => `what-moved ${x}`));
+  }
 } catch (e) { f1.push('RENDER: ' + String(e.message).split('\n')[0]); }
 const a1 = f1.length === 0;
 
