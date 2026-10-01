@@ -35,10 +35,15 @@ binds to the contract FILE, so a rename in the contract fails the page's test in
    days (C-METHOD); days whose `day_quality` is `NOT_MEASURABLE` break the link with a stated gap and are counted; a start before
    `first_data_date` is clipped and says so (C-HONESTY); no annualization under one year, since-inception annualized only past a
    year; nothing summed that the file does not serve.
-3. `dashboard/coverageWords.ts` -- one plain sentence per member of each axis (PRD v0.2 ruling 12): `history_scope` (FULL,
-   PARTIAL_HISTORY, MISSING_HISTORY), `day_quality` (MEASURED, FLOW_UNRECONCILED, LARGE_FLOW, NOT_MEASURABLE, SOURCE_LAG),
-   `return_basis` (TWR, HOLDINGS_INCOME_FALLBACK, NOT_MEASURABLE). An unknown member reads as its words, never a code, and fails
-   a pin test so the list cannot fall behind the contract.
+3. `dashboard/coverageWords.ts` -- one plain sentence per member of each axis (PRD v0.2 ruling 12), the member lists read
+   from the gold contract's own `enums` block (`org/standards/IRPT_DASHBD_ACCOUNT_RETURN_DAILY_CONTRACT.json`). Its DRAFT
+   (uncommitted in the shared tree at 18:4xZ, contract_version 0.1.0, schema_hash b5fa8e4e48bf60ab) declares:
+   `history_scope` FULL, PARTIAL_HISTORY (no MISSING_HISTORY: that member is the topics view's, C-TOPICS); `day_quality`
+   MEASURED, FLOW_UNRECONCILED, LARGE_FLOW, NOT_MEASURABLE, SOURCE_LAG; `return_basis` TWR, HOLDINGS_INCOME_FALLBACK,
+   NOT_MEASURABLE; plus column reasons `holdings_price_return_reason` NO_HOLDINGS_ROW, HOLDINGS_NOT_OK and
+   `fee_amount_reason` FEE_RAIL_UNUSED (the label already says "before advisory fees"; no sentence repeats it). The page reads
+   whichever of these the SERIES contract carries per day. An unknown member reads as its words, never a code, and fails a pin
+   test so the list cannot fall behind the contract. Buildable the tick the gold contract is COMMITTED (a draft can move).
 4. `dashboard/DashboardPerformance.tsx` -- the cumulative total-return chart with the headline number, presets 1M / 3M / YTD /
    1Y / Since inception plus the custom date pair and a brush (ruling 6.8); the label "Total return, before advisory fees" with
    the method version and "GIPS-aligned methodology, not GIPS compliance" one hover down (C-LABEL, ruling 6.1); the coverage

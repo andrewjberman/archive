@@ -3,7 +3,7 @@ from the LANDED Black Diamond pulls only, and proposes the tolerance and the flo
 
 Usage: python p1_3_ac1_tieout_record.py <worktree root>
 Reads org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.4.0_DS_ClientPlatform~S/tieout/TIEOUT_49F_BLACKDIAMOND_R1.json:
-  vendor_calls == 0; oracle_keys: >= 1, every key under blackdiamond/49f/bronze/reporting_performance/ and each HeadObject 200;
+  vendor_calls == 0, or > 0 only beside overlap_before_pull < 5 (amendment 1); oracle_keys: >= 1, every key under blackdiamond/49f/bronze/reporting_performance/ and each HeadObject 200;
   periods: >= 5 rows, each with account, bd_account, start, end, bd_twr, opal_twr_start, opal_twr_end, opal_twr_mid, abs_diff (of
   the END convention unless winner says otherwise) and reasons (list, may be empty when abs_diff <= proposed tolerance);
   summary: median, p90, max over abs_diff (recomputed here and compared, 1e-12); proposed_tieout_tolerance: a number > 0;
@@ -28,8 +28,14 @@ def fail(msg):
 if not REC.exists():
     fail("record absent: %s" % REC)
 d = json.loads(REC.read_text(encoding="utf-8"))
-if int(d.get("vendor_calls", -1)) != 0:
-    fail("vendor_calls = %r (must be 0: the oracle is the landed bronze)" % d.get("vendor_calls"))
+vc = int(d.get("vendor_calls", -1))
+if vc < 0:
+    fail("vendor_calls absent")
+if vc > 0:
+    # Issuer amendment 1 (Andrew's egress grant @4c4989c800): a pull is admitted only when the landed overlap cannot carry the check.
+    ov = d.get("overlap_before_pull")
+    if not isinstance(ov, int) or ov >= 5:
+        fail("vendor_calls = %d without an overlap_before_pull below 5 (got %r)" % (vc, ov))
 keys = d.get("oracle_keys") or []
 if not keys or any(not k.startswith(ORACLE_PREFIX) for k in keys):
     fail("oracle_keys empty or outside %s" % ORACLE_PREFIX)
