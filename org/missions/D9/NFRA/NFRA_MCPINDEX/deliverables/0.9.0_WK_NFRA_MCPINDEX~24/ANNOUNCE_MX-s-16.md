@@ -1,6 +1,6 @@
-# ANNOUNCE -- NFRA_MCPINDEX MX-s-16 PHASE A, RE-ISSUED under amendment A1 (0.9.0_WK_NFRA_MCPINDEX~24)
+# ANNOUNCE -- NFRA_MCPINDEX MX-s-16 PHASE A, RE-ISSUED under amendment A2 (per-key ruling; supersedes the A1 re-plan; sections 0-2 are the A1 measurements, unchanged) (0.9.0_WK_NFRA_MCPINDEX~24)
 
-Worktree branch `wk-nfra_mcpindex-6-24`, merged with CLOUD `0de93e672c` (carries A1). Push state: LOCAL (nothing pushed).
+Worktree branch `wk-nfra_mcpindex-6-24`, merged with CLOUD `fbc1afdecc` (carries A1 and A2). Push state: LOCAL (nothing pushed).
 Re-issue measured 2026-10-01 ~09:55-10:45Z, read-only: S3 list/head/get on `opal-data-bd`, CloudWatch filter-log-events,
 `aws events describe-rule`, `ssm list-commands`. No publish, no apply, no ledger, no S3 write, no SSM document version,
 no Lambda invoke. Every read ran outside 21:30-22:15Z and 00:00-00:30Z.
@@ -150,72 +150,124 @@ Sundays carry a sentinel (the 4-table runs), so bd-silver-merge sees every real 
 - **DS deploy leg (separate act, `.tools/safe-deploy.sh`):** that file -> `s3://opal-data-bd/code/silver/merge-daily-incremental.py`
   (today md5 `c54d07908c69e2d9a9035050e0367f40`, 59,077 B). Rollback: re-deploy `git show f797d8594a:<that path>`.
 
-## 3. Saved Terraform plan (targeted, never applied) -- unchanged
+## 3. Saved Terraform plan -- RE-CUT under A2 (never applied)
 
-`infra/aws/terraform/bd-pipeline`; files `mx-s-16.plan.txt` (tracked), `mx-s-16.tfplan` (gitignored, this worktree).
-Negative control: `No changes`. With the edits: `Plan: 0 to add, 5 to change, 0 to destroy.` 4 rules `ENABLED -> DISABLED`;
-`bd_data_bucket` in place, `ProcessAllocationFiles` block removed; no destroy. The plan covers all four rules, so a
-subset GO needs the plan re-cut to exclude the held rules (item 4 below).
+`infra/aws/terraform/bd-pipeline`; `TF_DATA_DIR` = the worktree's `.scratch/tfdata`, `-lock=false`, `-input=false`, state
+read-only; the same method as the first plan, with `-target` now limited to FOUR resources:
+`aws_s3_bucket_notification.bd_data_bucket`, `aws_cloudwatch_event_rule.bd_unrealized_pipeline`,
+`aws_cloudwatch_event_rule.bd_transaction_pipeline`, `aws_cloudwatch_event_rule.bd_allocation_pipeline`.
+`bd_realized_pipeline` is NOT a target and its `state = "ENABLED"` line is restored on the branch (the diff of
+`eventbridge.tf` against CLOUD carries 0 realized lines).
 
-## 4. Documents -- unchanged
+- **Summary line, verbatim:** `Plan: 0 to add, 4 to change, 0 to destroy.`
+- 3 rules `state "ENABLED" -> "DISABLED"` (unrealized, transaction, allocation); `bd_data_bucket` updated in place.
+  The notification diff prints as index shifts across three `lambda_function` blocks; the net is the
+  `ProcessAllocationFiles` block removed, `GoldLayerPricesTrigger` and `BronzeCompleteSilverMerge` unchanged,
+  `eventbridge = true` unchanged. No destroy. The processor, its lambda permission, and the rules' targets and
+  permissions stay.
+- Files: `mx-s-16.plan.txt` (tracked render; sha256 `eef7b17d3f224611ea864bc1ee532cc4b954c8c8bc096329bfcf924180c49a69`);
+  `mx-s-16.tfplan` (binary, gitignored `**/*.tfplan`, local to this worktree, 182,235 B).
+- **Plan binary sha256: `af1537fdf47099c50f47c7d16d1e95afc1705591d949a728bedfed2b5fc1e214`.** It replaces the
+  5-resource A1 plan (moved aside to `.scratch/`, also local). The 5-resource plan must not be applied.
+- The negative control from the first issue still stands (same targets before the edits: `No changes`).
 
-The four `infra/aws/ssm/opal-bd-*-download.json` are rewritten on the branch as a one-step no-op, NOT published. Live
-versions: transaction 3, realized 3, unrealized 3, allocation 5 (Default == Latest). Since MX-s-14 the documents run
-Success on 09-29 and 09-30 (download stripped) but still run the stale merge, which on those two days found "No new ...
-files to process".
+## 4. Documents (branch state, NOT published) and live state
 
-## 5. RE-PLAN PER KEY (A1 item 2) AND RECOMMENDATION
+The unrealized, transaction and allocation documents (`infra/aws/ssm/opal-bd-{unrealized,transaction,allocation}-download.json`)
+are one-step no-ops on the branch. **`opal-bd-realized-download.json` is restored to the CLOUD bytes** (the no-op
+rewrite is reverted, HOLD).
 
-| key | plan | basis |
-|---|---|---|
-| unrealized | STANDS: DS leg first, then publish no-op document, disable `bd-unrealized-pipeline-trigger` | no sentinel dependence; 0 partitions added or removed |
-| allocations | STANDS: publish no-op document, disable `bd-allocation-pipeline-trigger`, remove `ProcessAllocationFiles` block | 4 of 4 snapshot landings on sentinel days; 131 of 131 coverage |
-| transactions | **(c) RETIRE, accepting the lag** (recommended) | the document's gap-day write is an empty placeholder on 8 of 8; real rows land on sentinel days either way; served-content DELTA 0 |
-| realized | **(b) HOLD this round, cause carried to L10** (recommended), with **(a)** as the carried leg | the document is the only same-day real-rows writer on 9 of 9 gap dates; (c) costs +26.5 h every Monday, +2.5 h every Tuesday |
+Live at about 10:17Z 2026-10-01 (read-only):
+- `describe-document` DefaultVersion / LatestVersion: transaction 3 / 3, unrealized 3 / 3, allocation 5 / 5, realized 3 / 3.
+- `describe-rule`: all four trigger rules ENABLED.
+- `get-bucket-notification-configuration` lambda IDs: ProcessAllocationFiles, GoldLayerPricesTrigger, BronzeCompleteSilverMerge.
+- Served `code/silver/merge-daily-incremental.py`: ETag/md5 `c54d07908c69e2d9a9035050e0367f40`, 59,077 B, VersionId
+  `gDNvsypwihDy3Rd6KfZ0CosUiD.MM3ma`, LastModified 2026-07-02T20:49:25Z. These are the bytes of CLOUD's copy; the branch
+  fix is md5 `91eaf2486fc56ece76db2f0d862096f7`.
 
-**Recommendation: split. Retire transactions now; HOLD realized.** The documents and rules are independent keys, so
-this is separable.
-- **Served-freshness consequence of retiring transactions (c):** none in content. An empty partition for a gap date
-  appears at the next sentinel (24-72 h) instead of 21:54Z that day; real transaction rows land when the overlapping
-  chunk re-pull is merged on a sentinel day, which today's document does not accelerate. UNMEASURED: whether a consumer
-  tests that partition's existence.
-- **Served-freshness consequence of holding realized (b):** none; today's behaviour stands. Realized and transactions
-  keep two writers (AC1 refused as written for realized, 3 of 4 tables with 1 writer), carried to the round-6 slug with
-  the cause in 0.2.
-- **Why not (c) for realized:** `silver/realized/<D>.parquet` for a Monday run date would appear ~48 h after landing
-  instead of ~21.6 h (measured, n=9 above); +26.5 h on served realized every Monday.
-- **Why not (a) in this order:** the fix is a one-predicate change in the SHARED script
-  `data/cot/scripts/bronze/cot_bronze_ingest.py` (`emit_bronze_sentinel`/`_table_complete`: accept a MEASURED
-  `has_data_rows=0` sidecar for a PERIOD table such as transactions, keep the `>=1 row` rule for the snapshot tables the
-  2026-07-09 ruling protects). That file is under `data/cot/` and outside this order's `<paths>`; it is shared with cot,
-  so it must be table-scoped; it deploys as a DS leg to `code/bronze/`. Its negative control is a snapshot table with 0
-  rows still refused. After it lands, the first sentinel on a Monday/Tuesday (next: 10-05, 10-06 00:0xZ) is the proof, and
-  only then does the realized document's retirement carry DELTA 0 on timing as well. This is the round-7 enrichment.
-  An alternative lives in the runner (exclude an empty PERIOD table from `landed` before the call), also outside
-  `<paths>` (`infra/aws/lambda/...`, Terraform-deployed).
-- Retiring both under (c) is a legal choice for the issuer: the transactions half is costless, the realized half is the
-  +26.5 h.
+## 5. THE A2 PER-KEY PLAN
 
-**If the issuer takes the split:** the saved plan must be re-cut or applied with `-target` limited to
-`bd_unrealized_pipeline_trigger`, `bd_allocation_pipeline_trigger`, `bd_transaction_pipeline_trigger` and the notification;
-`bd_realized_pipeline_trigger` stays ENABLED and the realized document stays version 3. That re-cut is a Phase B act and
-was NOT run here (no plan, no apply under A1).
+PHASE B runs only on the issuer's GO after both halves. Every act is outside 21:30-22:15Z and 00:00-00:30Z.
 
-DELTA and rollback per key (unchanged except as above): transactions, SSM `opal-bd-transaction-download` v4 /
-`bd-transaction-pipeline-trigger`, rollback = default back to 3, rule ENABLED; unrealized and allocations as in the first
-issue (allocations: default back to 5, rule ENABLED, re-add the notification block and re-plan; unrealized: default back to
-3, rule ENABLED, re-deploy prior script bytes). Ledger `nfra-mcpindex-r6-bd-merge-retire` opens only on a GO; AC3 reads an
-OPEN ledger as FAIL, so close it in the same session. Any act outside 21:30-22:15Z and 00:00-00:30Z.
+### unrealized (GO, DS leg first)
 
-## 6. Baseline of the order's checks at this base (from the first issue, not re-run)
+1. **DS deploy leg.** `.tools/safe-deploy.sh` of `data/black_diamond/scripts/silver/merge-daily-incremental.py` to
+   `s3://opal-data-bd/code/silver/merge-daily-incremental.py` (S3 cp + SHA verify). If safe-deploy refuses the worker
+   serial (the DS lane), file a BLOCKING row naming the refusal and STOP this key; the issuer routes the leg to a DS seat.
+2. **Document retire.** Publish the no-op `opal-bd-unrealized-download` as the next version (v4 at today's read), set
+   DEFAULT, read back Default == Latest; `bd-unrealized-pipeline-trigger` ENABLED -> DISABLED (saved plan).
+- **Expected served DELTA: 0.** No partition added or removed, no row changed: the six
+  `silver/unrealized/2026-07-0{3,4,5,6,7,9}.parquet` 0-row partitions (8,016 B each) stay, and the document's only writes were
+  those same six. The visible effect is `bd-silver-merge` unrealized `failures=6` reading `failures=0 ... empty_stub=6`
+  on its next sentinel run, with the six etags recorded.
+- **Rollback:** the script: re-deploy the prior bytes (S3 VersionId `gDNvsypwihDy3Rd6KfZ0CosUiD.MM3ma`, md5 `c54d0790...`,
+  or `git show f797d8594a:data/black_diamond/scripts/silver/merge-daily-incremental.py`); the document: default back to 3;
+  the rule: ENABLED (revert the `state` line and `safe-apply`, ledger-recorded).
+
+### allocations (GO)
+
+Publish the no-op `opal-bd-allocation-download` (v6 at today's read), set DEFAULT, Default == Latest;
+`bd-allocation-pipeline-trigger` DISABLED; the `ProcessAllocationFiles` block removed (all by the saved plan except the
+document).
+- **Expected served DELTA: 0.** `bd-silver-merge` already holds every input: 131 of 131 current etags equal the manifest
+  etags, 0 xlsx missing. The processor's `bd-price-update` invoke (2 in 60 days) stops; the transactions merge still
+  invokes it.
+- **Rollback:** document default back to 5; rule ENABLED; re-add the block in `s3-notifications.tf` and re-plan/apply.
+
+### transactions (GO on one precondition, option (c))
+
+1. **Read-only consumer trace FIRST.** Question: does any consumer key on the same-day existence of
+   `s3://opal-data-bd/silver/transactions/<date>.parquet`? Instruments: `comp-estate --resource silver/transactions`;
+   `comp-pipescript io` on each bd gold script that reads it; the gold/served readers; `comp-freshness` entries naming it.
+   A hit is a reader that needs the partition for a given date to exist (not a latest-available read). Writes nothing.
+2. **Only if 0 hits: retire.** Publish the no-op `opal-bd-transaction-download` (v4 at today's read), set DEFAULT, Default
+   == Latest; `bd-transaction-pipeline-trigger` DISABLED (saved plan).
+3. **If any hit:** file a BLOCKING row naming the consumer and HOLD transactions. The saved plan then holds a rule that
+   must not move, so it is NOT applied as saved: re-cut a 3-resource plan (`bd_unrealized_pipeline`,
+   `bd_allocation_pipeline`, the notification) first and report its sha256.
+- **Expected served DELTA: content 0.** On gap days the document writes only an empty 34,882 B placeholder (8 of 8); real
+  rows land on sentinel days either way. What moves: that empty partition's existence, from 21:54Z the same day to the
+  next sentinel (24-72 h, table in 0.4).
+- **Rollback:** document default back to 3; rule ENABLED.
+
+### realized (HOLD this round)
+
+No act: the realized document stays v3 and `bd-realized-pipeline-trigger` stays ENABLED. **Expected served DELTA: 0**
+(nothing changes). Carried to the round-6 slug with the producer fix (section 7, item 2).
+
+### Apply order and acceptance
+
+One `safe-apply` of the saved plan (3 rules plus the notification move together), AFTER the DS leg and the transactions
+trace, then the three document publishes. Nothing is deleted.
+- s16.AC1 is REFUSED as written for realized (2 writers by design this round); the other 3 tables must read 1 writer.
+- s16.AC2: the next scheduled `bd-silver-merge` run clean on 3 of 3 graded tables (unrealized printed).
+- s16.AC3: entry at HEAD, sentinel removed, nothing OPEN/HELD.
+- The ledger `nfra-mcpindex-r6-bd-merge-retire` opens only on the GO, naming BOTH the entry and the `.open_deploys/`
+  sentinel paths, and closes in the same session.
+
+### BASE-MOVED CLAUSE (applies at the GO, before any act)
+
+This ANNOUNCE is a snapshot at about 10:17Z 2026-10-01. At the GO, re-read:
+1. each SSM document's `DefaultVersion` and `LatestVersion` (today: transaction 3/3, unrealized 3/3, allocation 5/5,
+   realized 3/3), and set each new version number from that read;
+2. each trigger rule's `State` and schedule (today: four ENABLED) and the bucket notification IDs (today: three);
+3. the served script's ETag (today `c54d0790...`) and the bucket's `eventbridge` flag.
+If any differs, the saved plan is stale: re-cut it with the same four-target command and re-issue its sha256 before
+apply. Terraform refuses a stale saved plan at apply, but an SSM document-version drift is not a Terraform fact, so the
+document read is the guard for it.
+
+## 6. Baseline of the order's checks (first issue, not re-run)
 
 s16.AC1 FAIL (0 of 4; transactions 2, realized 2, unrealized 2, allocations 3 writers); s16.AC2 PASS (3 of 3 clean
-newest runs; unrealized `failures=6` printed, ungraded); s16.AC3 FAIL (no entry; scan denominator 18 of 18).
-Grading under A1: if realized is held, AC1 is REFUSED as written for realized with this measurement.
+newest runs; unrealized `failures=6` printed, ungraded); s16.AC3 FAIL (no entry; scan denominator 18 of 18). Under A2,
+AC1 is expected to read 3 of 4 with realized refused.
 
-## 7. Open for the issuer
+## 7. Open for the issuer / carried
 
-1. Take the split (transactions retire under (c), realized HOLD under (b)), hold both, or retire both under (c).
-2. Route the producer fix (0.2, item "Why not (a)") as a round-7 DS leg or a runner change; neither is in this order's paths.
-3. Whether the 6 empty `silver/unrealized/2026-07-0x` partitions stay (they do under this plan).
-4. Rows to disposition before GO: Z-W24-S2 (BLOCKING, ARMED), S4 (cause), S5 (runner log), S6 (test contamination).
+1. Both never-widen halves on the A2 per-key plan (the GO).
+2. Route the realized producer fix (0.2, "Why not (a)": a table-scoped accept of a MEASURED `has_data_rows=0` for the
+   transactions PERIOD table in `data/cot/scripts/bronze/cot_bronze_ingest.py`) to the round-6 slug; the realized
+   retirement waits on its proof (the first Monday/Tuesday sentinel after it lands).
+3. Rows carried: Z-W24-S2 (BLOCKING, ARMED; cause supplied in 0.2), S4 (cause), S5 (the runner prints "OK ... emitted"
+   after the module said "NOT emitted"), S6 (test contamination), S7 (merge committed outside safe-commit; INERT).
+4. The 6 empty `silver/unrealized/2026-07-0x` partitions stay under this plan.
