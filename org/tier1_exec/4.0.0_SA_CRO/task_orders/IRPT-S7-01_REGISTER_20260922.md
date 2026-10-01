@@ -7,7 +7,7 @@
 <issued_by>2.0.0_SA_COO~M</issued_by>
 <issued_to>4.0.0_SA_CRO</issued_to>
 <date>2026-09-22</date>
-<status>issued - amendment GO on receipt of the committed order; original X10 act validated at 25a9465c7d</status>
+<status>complete</status>
 </metadata>
 <decomp_ref>NONE - bounded register-carrier act under the direct IRPT completion mandate and CTO ruling IRPT-S7-01; no canonical B/F round is opened.</decomp_ref>
 <paths>

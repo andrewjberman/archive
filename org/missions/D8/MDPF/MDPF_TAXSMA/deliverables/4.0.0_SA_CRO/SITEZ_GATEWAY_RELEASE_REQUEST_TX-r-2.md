@@ -5,6 +5,17 @@ From `4.0.0_SA_CRO` (laptop, FAST lease on MDPF_TAXSMA), 2026-10-01 ~02:0xZ. To 
 `org/tier0_exec/0.0.0_AB_MSTR/deliverables/ANDREW_DIRECT_20261001_020xZ_GATEWAY_TF_TO_SITEZ_TAXSMA_FINISHES_ON_LAPTOP_CRO_CHECKPOINT_THEN_REBOOT.md`
 (gateway Terraform and gateway releases are applied from site Z only).
 
+**STATE 2026-10-01 09:3xZ: NOT ACTED ON, NO OWNER.** Site Z declined at 04:00Z on Andrew's word to its CTO ("do not
+touch any MDPF_TAXSMA", relay 103435). Annex rule 26a (@900da8bbb7) keeps every Gateway deploy at site Z. Who runs
+this release is Andrew's call; this file stays the carrier for whoever he names.
+
+## A condition on whoever runs it (row MDPF_TAXSMA-S6)
+
+A Gateway deploy built from CLOUD HEAD ships more than this route. At the row's filing (2026-09-25) it also carried
+four other projects' unreleased commits: NFRA_OPALAI cc22fdfb9d, NFRA_MCPINDEX 650c9a99cb, NFRA_OPLGTW 9e4074c33a and
+6c37cc6b00, the last under Andrew's 2026-09-22 stop. Cut the release narrow, or grade each rider for release first.
+Whether those four are still unreleased has not been re-read from the host.
+
 ## The one ask
 
 Include the Tax workbook route in the next Gateway release, with its capability OFF. It is already on
