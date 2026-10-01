@@ -7,7 +7,8 @@ beside it. Here that field is the function's CodeSha256 and LastModified (`--pre
   --what post --pre <json>     C0: CodeSha256 AND LastModified both moved off the printed pre values; then runs the round-56 graders
                                (af_1_route.py, af_2_serve.py fwd33 + fwd34) with their call swapped from the LOCAL handler to an
                                invoke of the DEPLOYED `opal-amgt-scoped-api` (capture_lib._invoke; a non-200 is a REFUSAL).
-Verdict: THE DEPLOYED FUNCTION SERVES THE FRIDAY FEED: YES|NO
+  --what text --pre <json>     C0 as above; then round 56's served-text check (af_7_text.py) against the DEPLOYED function.
+Verdict: THE DEPLOYED FUNCTION SERVES THE FRIDAY FEED: YES|NO  (text: ... SERVES EVERY REASON IN PLAIN WORDS)
 """
 from __future__ import annotations
 
@@ -37,7 +38,7 @@ def _config(cl):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--what", choices=("pre", "post"), required=True)
+    ap.add_argument("--what", choices=("pre", "post", "text"), required=True)
     ap.add_argument("--out")
     ap.add_argument("--pre")
     a = ap.parse_args()
@@ -60,6 +61,15 @@ def main():
             return meta.get("status"), {"refused": True}
         return 200, body
 
+    if a.what == "text":
+        a7 = _load("af_7_text", R56 + "af_7_text.py")
+        a7._call = deployed
+        sys.argv = ["af_7_text.py"]
+        print("== SERVED TEXT (deployed)")
+        ok = a7.main() == 0
+        verdict = moved and ok
+        print(f"THE DEPLOYED FUNCTION SERVES EVERY REASON IN PLAIN WORDS: {'YES' if verdict else 'NO'}")
+        return 0 if verdict else 1
     results = []
     a1 = _load("af_1_route", R56 + "af_1_route.py")
     a1._live_body = lambda: deployed(a1.PATH)
