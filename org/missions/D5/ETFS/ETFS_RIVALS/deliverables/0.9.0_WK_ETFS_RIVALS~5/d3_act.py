@@ -6,6 +6,7 @@ state, no served write). It is a driver, not product code: every address, name, 
   counts                              print the capture-file counts (gate 6) and the chunk plan
   mirror <dir>                        mirror the served rivalfunds + issuer state into <dir> (read-only against S3)
   g3 --sink S                         enrichment_bloomberg import over dividends.json (G3 BEFORE any G5, row W3-S13)
+  invoke <function> '<json event>'   synchronous Lambda invoke (boto3); prints the request id, status and payload (the act's request ids)
   chunk <k> --sink S [--chain]        collector_bloomberg import of chunk k (a batch, a marker). With --chain and a local sink the
                                       downstream stages run in process, as the marker rules would run them in AWS.
 
@@ -190,6 +191,19 @@ def cmd_chunk(a):
     return 0
 
 
+def cmd_invoke(a):
+    import boto3
+    from botocore.config import Config
+    lam = boto3.client("lambda", region_name="us-east-1", config=Config(read_timeout=900, connect_timeout=30, retries={"max_attempts": 0}))
+    t0 = time.time()
+    r = lam.invoke(FunctionName=a.function, InvocationType="RequestResponse", Payload=a.event.encode("utf-8"), LogType="Tail")
+    body = r["Payload"].read().decode("utf-8")
+    print(json.dumps({"function": a.function, "request_id": r["ResponseMetadata"]["RequestId"], "status_code": r["StatusCode"],
+                      "function_error": r.get("FunctionError"), "seconds": round(time.time() - t0, 1)}))
+    print(body[:3000])
+    return 0 if r["StatusCode"] == 200 and not r.get("FunctionError") else 1
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -200,6 +214,9 @@ def main(argv=None):
     g = sub.add_parser("g3")
     g.add_argument("--sink", required=True)
     g.add_argument("--batch-id", default="import-r2-g3")
+    i = sub.add_parser("invoke")
+    i.add_argument("function")
+    i.add_argument("event")
     k = sub.add_parser("chunk")
     k.add_argument("k", type=int)
     k.add_argument("--sink", required=True)
@@ -207,7 +224,7 @@ def main(argv=None):
     k.add_argument("--chain", action="store_true")
     k.add_argument("--act-day", default=ACT_DAY)
     a = ap.parse_args(argv)
-    return {"counts": cmd_counts, "mirror": cmd_mirror, "g3": cmd_g3, "chunk": cmd_chunk}[a.cmd](a)
+    return {"counts": cmd_counts, "mirror": cmd_mirror, "g3": cmd_g3, "chunk": cmd_chunk, "invoke": cmd_invoke}[a.cmd](a)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,422 @@
+{
+ "to_id": "ETFS_RIVALS.TO-RIV-d-3",
+ "worker": "0.9.0_WK_ETFS_RIVALS~5",
+ "act_day": "2026-09-30",
+ "act_state": "STOPPED CLEAN ON 2.0.0_SA_COO~RV'S WIND-DOWN WORD: keys 6, 7, 8 landed; keys 1-5 partial (import batches 00-06 of 00-08 landed); key 9 NOT applied (written in the worktree, removed before any commit); key 10 not started. Ledger etfs-rivalfunds-round2 left OPEN.",
+ "worktree_head_at_write": "96ba9a72abbfed3347d6bc43a4d13ed3bf706bea",
+ "written_at_utc": "2026-10-01T02:24:46Z",
+ "code_pin": "96ba9a72ab (the code every Lambda runs); ledger open 7346dda59b",
+ "vehicle_enable_line": null,
+ "vehicle_enable_line_literal_not_applied": "set \"RIVALFUNDS_BBG_LEG=1\" (the one line, at the head of :rivalfunds_bbg_leg's gate)",
+ "vehicle_state": "scheduled_daily_pull.cmd is byte-identical to HEAD (git diff clean). The line was written in the worktree and b-1.AC3 passed with it; it was removed unmerged at the wind-down because the import is partial (the IDVZ group's history stops at 2026-06-03) and an enabled leg on a half-landed history would pair a new day's G5 against a stale prior report. The leg stays gated OFF; the next session enables it after the import and a b-1.AC3 PASS.",
+ "gates": {
+  "0": "PASS: the printed request holds no IDVZ and no PFOE: get(id()) for(holdings(['TXUE US Equity','BIDD US Equity','CGIC US Equity','INEQ US Equity','SCHY US Equity','WCMG US Equity','TSEL US Equity','ETFT US Equity','PCLG US Equity'],dates=2026-09-29)); GQGU is excluded (NO-BLOOMBERG-ROUTE)",
+  "1": "PASS: keys 1, 3 and 5 read 0 objects before the first landing (bloomberg bronze 0, silver 0, peer_group_map 0, holdings_coverage 0, corporate_actions 0, flow_reconciliation 0, the six new state tables 0); key 4: canonical_shape 325, trade_schedule 324, page 6",
+  "2": "PASS: plan 6 to add, 9 to change, 0 to destroy, all rivalfunds-only: 5 aws_lambda_function and 4 aws_iam_role_policy in place; 2 event rules + 2 targets + 2 lambda permissions create-only",
+  "3": "PASS while the line was in: b-1.AC3 PASS 0 failures with the line (all base lines in order, nothing edited but the new leg); the line was then removed and b-1.AC3 PASSes again on the unmodified file",
+  "4": "Terminal NOT up: bloomberg_health ok=false (could not start blpapi session to 127.0.0.1:8194) at 2026-09-30 20:08 ET; no reference_data attempted beyond health; no sign-in attempted. Any 08:03 leg would read exit 91 (branch B).",
+  "5": "PASS: union read over 61 live worktrees, 0 unreadable, 39 distinct open-deploy entries, none naming etfs-rivalfunds, ETFS or opal-data-etfs; the ledger etfs-rivalfunds-round2 and its sentinel were committed (7346dda59b) before the apply",
+  "6": "printed before the first landing: idvz 501 dated captures (503 directory entries) + pfoe 436 (444 entries) = 937 captures; the pair says 503 + 441 = 944 (row W5-S18)"
+ },
+ "order_of_acts": "G0 (sweep Lambda, only build-peer-group-map) -> G3 import (enrichment_bloomberg import, sink s3) -> key4_served_delta.py --with-g3 (PASS) -> Bloomberg bronze import in date-ordered batches, each batch's silver, G1, G2, then G5+G6 (gated on the G3 marker, row W3-S13) and the page. G3 landed before any G5 write, for every batch.",
+ "w3_s13_disarm": "enrichment_gate in sweep.py: build-trade-schedule for a batch is due only when a pull-enrichment marker is partitioned on or after the batch's newest report date; run_dag and run_gold_chain both apply it; tests/test_d1_sweep.py covers it. The import's G3 marker is state/pull_enrichment/date=2026-09-30/import-r2-g3.json.",
+ "apply": {
+  "tool": "HALT_ACK=1 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/etfs-rivalfunds apply <saved plan>",
+  "at_utc": "2026-10-01T01:08Z",
+  "result": "Apply complete! Resources: 6 added, 9 changed, 0 destroyed.",
+  "lambda_source_code_hash": {
+   "etfs-rivalfunds-daily-lambda": "QXvsiT5q6vja6Ix7wD52eJyghTSI0NbOwulk1tQI+7s=",
+   "etfs-rivalfunds-fetch-holdings-lambda": "7CdrCMZjbs+o6pQZ5s7MzpUF1md7irCTMWKaR8wZF+g=",
+   "rivalfunds-build-canonical-shape-lambda": "voL5E/gW60YLxLn1gXG/mBxvjf0l3vBiYweYNhg3+KI=",
+   "rivalfunds-build-silver-lambda": "Trlep4srzM+UFsSCc/8b3PUO/3n8gRCM1zFLFL9QQ+s=",
+   "rivalfunds-publish-page-lambda": "Z7svHbgltu+RokSbogR0Ht/xvaIfp+9APA1KYGGfLo4="
+  },
+  "new_rules": [
+   "rivalfunds-build-silver-bloomberg-on-marker-created (state/fetch_bloomberg/ -> rivalfunds-build-silver-lambda)",
+   "rivalfunds-build-canonical-shape-bloomberg-on-marker-created (state/build_bloomberg_silver/ -> rivalfunds-build-canonical-shape-lambda)"
+  ]
+ },
+ "iam_simulation": "evidence/iam_simulation.txt: iam simulate-custom-policy over the five generated policies. Every stage role may Put/Get exactly the prefixes it owns or reads; no role may PutObject on Bloomberg bronze (the terminal machine's), G3 or the tier-first roots; no role holds DeleteObject. The one DIFF is the canonical role also reading the build_bloomberg_silver marker, which the design includes.",
+ "g0": {
+  "request_id": "a4ad74d5-58da-4558-8d27-4784e8bb0dfd",
+  "object": "s3://opal-data-etfs/rivalfunds/etfs/gold/peer_group_map/date=2026-09-30/map-1.parquet",
+  "rows": 13,
+  "home_funds_source_policy": {
+   "IDVZ": "home_producer",
+   "PFOE": "home_producer"
+  },
+  "map_version": 1
+ },
+ "g3": {
+  "object": "s3://opal-data-etfs/rivalfunds/etfs/gold/corporate_actions/date=2026-09-30/actions-20260930-95af6e3d1a1c.parquet",
+  "marker": "s3://opal-data-etfs/rivalfunds/etfs/state/pull_enrichment/date=2026-09-30/import-r2-g3.json",
+  "rows": 4823,
+  "event_rows": 4780,
+  "status_rows": 43,
+  "securities": 738
+ },
+ "key4_with_g3": {
+  "file": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~5/key4_with_g3.json",
+  "g3_objects_mirrored": 1,
+  "g1": {
+   "fund_dates_differing": 0,
+   "fund_dates": 325,
+   "differing_cells": {
+    "gold_version": 11272
+   },
+   "columns_added": [
+    "corporate_action_adjusted",
+    "is_cash_line",
+    "source_used"
+   ]
+  },
+  "g5": {
+   "served": 837,
+   "new": 837,
+   "added": 0,
+   "removed": 0,
+   "classes": {
+    "cash_line": 0,
+    "corporate_action": 0,
+    "income": 0,
+    "source": 0,
+    "other": 0
+   },
+   "differing_cells": {
+    "corporate_actions_applied": 837,
+    "dividends_applied": 837,
+    "inference_version": 837
+   }
+  },
+  "verdict": "PASS the CTO condition: run after the G3 import landed and before any G5 write"
+ },
+ "import_batches": [
+  {
+   "k": 0,
+   "requested_dates": "2024-09-30..2024-12-23",
+   "files": 60,
+   "silver_marker": true,
+   "gold_via": "marker",
+   "request_ids": {
+    "silver": "050f0c5f-9ed0-4e0d-a9fe-401da284e3b1",
+    "canonical_G1_G2_G5_G6": "07b924f8-95e8-4b23-8913-13573d365f14",
+    "page": "de006d1d-4f71-43fd-a95f-a98a944e3ce1"
+   }
+  },
+  {
+   "k": 1,
+   "requested_dates": "2024-12-24..2025-03-24",
+   "files": 116,
+   "silver_marker": true,
+   "gold_via": "marker"
+  },
+  {
+   "k": 2,
+   "requested_dates": "2025-03-25..2025-06-18",
+   "files": 120,
+   "silver_marker": true,
+   "gold_via": "marker"
+  },
+  {
+   "k": 3,
+   "requested_dates": "2025-06-20..2025-09-15",
+   "files": 120,
+   "silver_marker": true,
+   "gold_via": "marker"
+  },
+  {
+   "k": 4,
+   "requested_dates": "2025-09-16..2025-12-09",
+   "files": 120,
+   "silver_marker": false,
+   "silver_status": "PARTIAL (DeleteObject denied, row W5-S24)",
+   "gold_via": "replay event, request 6320eb08-a86a-40c7-a1d2-7cdb74f62c3c"
+  },
+  {
+   "k": 5,
+   "requested_dates": "2025-12-10..2026-03-09",
+   "files": 120,
+   "silver_marker": false,
+   "silver_status": "PARTIAL",
+   "gold_via": "replay event, request e34a01b4-ff89-4377-b4b8-2f494c9257fd"
+  },
+  {
+   "k": 6,
+   "requested_dates": "2026-03-10..2026-06-03",
+   "files": 120,
+   "silver_marker": true,
+   "gold_via": "marker"
+  },
+  {
+   "k": 7,
+   "requested_dates": "2026-06-04..2026-08-28",
+   "files": 120,
+   "state": "NOT STARTED (wind-down)"
+  },
+  {
+   "k": 8,
+   "requested_dates": "2026-08-31..2026-09-29",
+   "files": 41,
+   "state": "NOT STARTED (wind-down)"
+  }
+ ],
+ "silver_partial_cause": "row ETFS_RIVALS-Z-W5-S24 (BLOCKING/ARMED): silver_bloomberg deletes superseded silver and the role has no DeleteObject (key 7); batches 04 and 05 wrote every silver object but no marker; gold for them was driven by explicit replay events on the canonical Lambda; the worker deleted no object.",
+ "lambda_request_ids": {
+  "etfs-rivalfunds-daily-lambda": [
+   {
+    "request_id": "a4ad74d5-58da-4558-8d27-4784e8bb0dfd",
+    "at": "01:11:33Z",
+    "duration_ms": 5978.75,
+    "max_memory_mb": 230
+   }
+  ],
+  "etfs-rivalfunds-fetch-holdings-lambda": [],
+  "rivalfunds-build-silver-lambda": [
+   {
+    "request_id": "050f0c5f-9ed0-4e0d-a9fe-401da284e3b1",
+    "at": "01:18:19Z",
+    "duration_ms": 29084.93,
+    "max_memory_mb": 249
+   },
+   {
+    "request_id": "96ba988e-5b0c-44f5-abf8-a297a48f114c",
+    "at": "01:30:54Z",
+    "duration_ms": 45464.28,
+    "max_memory_mb": 254
+   },
+   {
+    "request_id": "06d8875a-ba7d-4638-807d-e93fd9a505fa",
+    "at": "01:34:58Z",
+    "duration_ms": 43209.96,
+    "max_memory_mb": 255
+   },
+   {
+    "request_id": "5576cdf2-23ad-41f4-82fe-bf4243dca094",
+    "at": "01:39:33Z",
+    "duration_ms": 46118.95,
+    "max_memory_mb": 257
+   },
+   {
+    "request_id": "ca0ce414-e70b-469a-80a1-ff359dbaf650",
+    "at": "01:44:11Z",
+    "duration_ms": 52594.83,
+    "max_memory_mb": 259
+   },
+   {
+    "request_id": "0d1b3347-abb0-4f31-bd87-f9cf11b77875",
+    "at": "01:59:18Z",
+    "duration_ms": 20037.19,
+    "max_memory_mb": 162
+   },
+   {
+    "request_id": "e5169551-345a-49c9-972c-653ce7d6f430",
+    "at": "01:59:54Z",
+    "duration_ms": 18919.69,
+    "max_memory_mb": 162
+   },
+   {
+    "request_id": "f00a7b31-8b06-4a7a-bb04-bdd4005af954",
+    "at": "02:08:10Z",
+    "duration_ms": 65268.24,
+    "max_memory_mb": 260
+   },
+   {
+    "request_id": "630108ff-1e9d-4572-80b6-e13ab35758b8",
+    "at": "02:16:33Z",
+    "duration_ms": 66076.4,
+    "max_memory_mb": 261
+   }
+  ],
+  "rivalfunds-build-canonical-shape-lambda": [
+   {
+    "request_id": "07b924f8-95e8-4b23-8913-13573d365f14",
+    "at": "01:19:23Z",
+    "duration_ms": 62260.75,
+    "max_memory_mb": 323
+   },
+   {
+    "request_id": "dac4fc7d-c211-454e-97b5-927755390203",
+    "at": "01:32:11Z",
+    "duration_ms": 74766.04,
+    "max_memory_mb": 332
+   },
+   {
+    "request_id": "fd983075-15e9-4fcf-9b93-1201c1ee15e7",
+    "at": "01:36:14Z",
+    "duration_ms": 74311.41,
+    "max_memory_mb": 345
+   },
+   {
+    "request_id": "2e45d3e3-b9c0-48e2-a5ae-7c3d73f67b15",
+    "at": "01:40:53Z",
+    "duration_ms": 79786.87,
+    "max_memory_mb": 350
+   },
+   {
+    "request_id": "6320eb08-a86a-40c7-a1d2-7cdb74f62c3c",
+    "at": "02:04:43Z",
+    "duration_ms": 143401.06,
+    "max_memory_mb": 346
+   },
+   {
+    "request_id": "e34a01b4-ff89-4377-b4b8-2f494c9257fd",
+    "at": "02:12:49Z",
+    "duration_ms": 143104.58,
+    "max_memory_mb": 360
+   },
+   {
+    "request_id": "fadb13bd-cc2e-49d9-8565-10e990ab7afb",
+    "at": "02:18:16Z",
+    "duration_ms": 102639.89,
+    "max_memory_mb": 366
+   }
+  ],
+  "rivalfunds-publish-page-lambda": [
+   {
+    "request_id": "de006d1d-4f71-43fd-a95f-a98a944e3ce1",
+    "at": "01:19:31Z",
+    "duration_ms": 3368.53,
+    "max_memory_mb": 240
+   },
+   {
+    "request_id": "33044667-da05-46e4-9439-0233a502b055",
+    "at": "01:32:19Z",
+    "duration_ms": 3011.36,
+    "max_memory_mb": 240
+   },
+   {
+    "request_id": "ef91986c-666f-41e9-a7ed-c05cd757ba04",
+    "at": "01:36:17Z",
+    "duration_ms": 2607.46,
+    "max_memory_mb": 241
+   },
+   {
+    "request_id": "1a7743ed-5ef6-4dfc-978f-015af2254b70",
+    "at": "01:40:56Z",
+    "duration_ms": 1928.05,
+    "max_memory_mb": 241
+   },
+   {
+    "request_id": "d35a3092-b9c4-4b31-bba4-7ecf0acb7f7f",
+    "at": "02:04:51Z",
+    "duration_ms": 3792.71,
+    "max_memory_mb": 241
+   },
+   {
+    "request_id": "1a253aff-e9f1-4781-a0da-a6431e10ddba",
+    "at": "02:12:57Z",
+    "duration_ms": 4384.86,
+    "max_memory_mb": 241
+   },
+   {
+    "request_id": "9645e842-5a49-4a64-b428-941ac1d2be89",
+    "at": "02:18:20Z",
+    "duration_ms": 3333.36,
+    "max_memory_mb": 242
+   }
+  ]
+ },
+ "s3_prefixes": {
+  "bloomberg_bronze": {
+   "prefix": "s3://opal-data-etfs/bloomberg/etfs/bronze/holdings/",
+   "objects": 1552,
+   "raw": 776,
+   "sidecars": 776
+  },
+  "bloomberg_silver": {
+   "prefix": "s3://opal-data-etfs/bloomberg/etfs/silver/holdings/",
+   "objects": 2829
+  },
+  "g0_peer_group_map": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/gold/peer_group_map/",
+   "objects": 1
+  },
+  "g1_canonical_shape": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/gold/canonical_shape/",
+   "objects": 745
+  },
+  "g2_holdings_coverage": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/gold/holdings_coverage/",
+   "objects": 120
+  },
+  "g3_corporate_actions": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/gold/corporate_actions/",
+   "objects": 1
+  },
+  "g5_trade_schedule": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/gold/trade_schedule/",
+   "objects": 743
+  },
+  "g6_flow_reconciliation": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/gold/flow_reconciliation/",
+   "objects": 419
+  },
+  "platinum_page": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/platinum/page/",
+   "objects": 12
+  },
+  "issuer_bronze": {
+   "prefix": "s3://opal-data-etfs/issuer-site/etfs/bronze/holdings/",
+   "objects": 650
+  },
+  "issuer_silver": {
+   "prefix": "s3://opal-data-etfs/issuer-site/etfs/silver/holdings/",
+   "objects": 325
+  },
+  "state_fetch_bloomberg": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/fetch_bloomberg/",
+   "objects": 7
+  },
+  "state_build_bloomberg_silver": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/build_bloomberg_silver/",
+   "objects": 5
+  },
+  "state_pull_enrichment": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/pull_enrichment/",
+   "objects": 1
+  },
+  "state_build_peer_group_map": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/build_peer_group_map/",
+   "objects": 1
+  },
+  "state_build_coverage": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/build_coverage/",
+   "objects": 2
+  },
+  "state_build_flow_reconciliation": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/build_flow_reconciliation/",
+   "objects": 7
+  },
+  "state_fetch_holdings": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/fetch_holdings/",
+   "objects": 3
+  },
+  "state_build_silver": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/build_silver/",
+   "objects": 3
+  },
+  "state_build_canonical_shape": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/build_canonical_shape/",
+   "objects": 10
+  },
+  "state_build_trade_schedule": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/build_trade_schedule/",
+   "objects": 10
+  },
+  "state_publish_page": {
+   "prefix": "s3://opal-data-etfs/rivalfunds/etfs/state/publish_page/",
+   "objects": 10
+  }
+ },
+ "acceptance_at_stop": {
+  "AC1": "FAIL 1: 776 Bloomberg raws (>= 900 needed); G0 13 rows and both home funds home_producer PASS",
+  "AC2": "FAIL 5: the page is grouped (PASS); G2 new-day counts 117-120 per fund vs census 417-501 (only the daily-window G2 objects exist; the full-history replay was not run)",
+  "AC3": "FAIL 1 at the stop: trades for every IDVZ rival, no Curncy trade and SCHY cash-line movement PASS; the enabling line is not recorded because it is not applied"
+ },
+ "remaining": [
+  "import batches 07 (2026-06-04..2026-08-28, 120 files) and 08 (2026-08-31..2026-09-29, 41 files): d3_act.py chunk 7 / 8 --sink s3, then gold by marker, or by a replay event when the silver marker is absent (row W5-S24)",
+  "G2 full-history replay: etfs-rivalfunds-daily-lambda event {date 2026-09-29, mode replay, end 2026-09-29, only [build-coverage]}; then {date 2026-09-30, only [publish-page]}",
+  "row W5-S24 disarm (DeleteObject on the Bloomberg silver prefix, or a silver cell change) before the daily leg is enabled",
+  "the one enabling line in scheduled_daily_pull.cmd, then b-1.AC3, then AC1-AC3, then close the ledger"
+ ]
+}
