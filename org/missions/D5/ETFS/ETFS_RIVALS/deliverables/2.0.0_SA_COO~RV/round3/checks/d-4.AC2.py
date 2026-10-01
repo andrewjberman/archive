@@ -25,8 +25,15 @@ def run(v):
     body = json.loads(L.get(mk[len("s3://opal-data-etfs/"):])) if mk else {}
     v.check(body.get("status") == "OK", f"silver marker {mk} status OK ({body.get('status')})")
     key, g1 = L.latest_parquet(f"rivalfunds/etfs/gold/canonical_shape/date={rd}/")
-    revs = set(g1.loc[g1["fund_ticker"].astype(str).str.strip() == "BASG", "dataset_revision"].astype(str)) if g1 is not None else set()
-    v.check(any(cid in r for r in revs), f"G1 {key} reads the re-capture for BASG ({sorted(revs)[:2]})")
+    # amendment 1 (row Z-W4-S3): a home-inclusive G1 revision does not carry the issuer capture id, so the read is checked
+    # on the row lineage -- the BASG rows' silver_uri / snapshot_id name the silver object they were built from.
+    b = g1[g1["fund_ticker"].astype(str).str.strip() == "BASG"] if g1 is not None else None
+    lineage = set()
+    if b is not None and len(b):
+        for col in ("silver_uri", "snapshot_id", "bronze_uri"):
+            if col in b.columns:
+                lineage |= set(b[col].dropna().astype(str))
+    v.check(any(cid in x for x in lineage), f"G1 {key}: BASG rows' lineage names the re-capture {cid} ({sorted(lineage)[:2]})")
 
 
 failures = c.guarded("AC2", run)
