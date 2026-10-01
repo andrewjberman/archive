@@ -106,6 +106,33 @@
       "artifact_covered_by": [
         "AC1"
       ]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/seeking-alpha/harvest/silver/quarantine/date=2026-10-01/20261001T064759Z.json",
+      "kind": "s3_object",
+      "commit_or_etag": "20261001T064759Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "quarantine --apply ONCE: 33 article keys, rows_checked 85, never-overwrite; AC2 and AC3 read it back (manifest present, 33 keys).",
+      "introduces": [
+        "quarantine manifest"
+      ],
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/amgt/harvest/gold/article_security_mention/date=2026-10-01/part-20261001T064839Z.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "part-20261001T064839Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "build-mention ONCE as-of 2026-10-01: 379 rows; DELTA gate digest 08f636c18d66ce8888f8d7cfdc761bacf8f047d9a22c3bf65fce9248415c0e6a == signed digest (ae1B_delta_gate.out).",
+      "introduces": [
+        "quarantine-honouring mention snapshot"
+      ],
+      "artifact_covered_by": [
+        "AC3"
+      ]
     }
   ],
   "acceptance": [
@@ -115,9 +142,9 @@
       "method": "test_suite",
       "invocation": "python -m pytest lib/opal_data_harvest/test_ae1_sa_listing_body.py -rA --tb=line",
       "expect": "passed",
-      "output_evidence": "============================== 9 passed in 0.36s ============================== | rc=0 | 9 PASSED lines",
+      "output_evidence": "Phase B re-run: ============================== 9 passed in 0.32s ============================== | rc=0 | 9 PASSED lines (ae1B_AC1.out)",
       "status": "PASS",
-      "denominator": "9 of 9 tests passed; 5 of the first 8 fail on the base publishers.py/publication_gold.py"
+      "denominator": "9 of 9 tests passed"
     },
     {
       "criterion_id": "AC2",
@@ -125,10 +152,9 @@
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-1.AC2.py",
       "expect": "AC2 RESULT: PASS",
-      "output_evidence": "ROWS CHECKED: 85 | WRONG-OBJECT: 38 of 85; quarantined 0; outside quarantine 38 | AC2 RESULT: FAIL (1 failure(s)) | FAIL: 38 wrong-object rows outside the quarantine | rc=1",
-      "status": "FAIL",
-      "status_reason": "phase B pending",
-      "denominator": "38 wrong-object of 85 rows checked; 0 quarantined"
+      "output_evidence": "QUARANTINE: 33 article keys at s3://opal-data-harvest/seeking-alpha/harvest/silver/quarantine/date=2026-10-01/20261001T064759Z.json | ROWS CHECKED: 85 | WRONG-OBJECT: 38 of 85; quarantined 38; outside quarantine 0 | RE-CHECK MISMATCHES: 0 of 85 | AC2 RESULT: PASS (0 failure(s)) | rc=0 (ae1B_AC2.out)",
+      "status": "PASS",
+      "denominator": "38 of 38 wrong-object rows quarantined (33 distinct keys); 0 mismatches of 85 rows checked"
     },
     {
       "criterion_id": "AC3",
@@ -136,10 +162,9 @@
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-1.AC3.py",
       "expect": "AC3 RESULT: PASS",
-      "output_evidence": "MANIFEST: absent | AC3 RESULT: FAIL (1 failure(s)) | FAIL: no quarantine manifest | rc=1",
-      "status": "FAIL",
-      "status_reason": "phase B pending",
-      "denominator": "0 manifests of 1 required"
+      "output_evidence": "MANIFEST: 33 article keys, written_at 2026-10-01T06:47:59.788917+00:00, rows_checked 85 | NEWEST MENTION PART: amgt/harvest/gold/article_security_mention/date=2026-10-01/part-20261001T064839Z.parquet: 379 rows, 139 sa, 0 quarantined keys present | AC3 RESULT: PASS (0 failure(s)) | rc=0 (ae1B_AC3.out)",
+      "status": "PASS",
+      "denominator": "1 manifest of 1 required; 0 of 33 quarantined keys present in 379 mention rows"
     }
   ],
   "controls": {
@@ -152,18 +177,18 @@
     "determinism": {
       "method": "Census run twice (once to ae1_census_A.out, once inside AC2).",
       "expected": "same count",
-      "observed": "WRONG-OBJECT 38 of 85 both times",
+      "observed": "WRONG-OBJECT 38 of 85 in three runs (phase A, AC2 phase A, phase B pre-apply census)",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "Phase B: quarantine --apply and the gold rebuild",
-      "reason": "owed after the never-widen pair is signed and the issuer hands it over"
+      "item": "build-daily",
+      "reason": "dropped from phase B by AMENDMENT 2 item 2 (the daily producer's own cadence)"
     },
     {
       "item": "python -m pytest lib/opal_data_harvest/ -q reading 0 failed",
-      "reason": "1 failed, 394 passed, 1 skipped; the 1 failure is test_worker.py::test_rotated_http_cookies_survive_next_job_without_new_login_timestamp (row Z-W91-S1; fixed on CLOUD @250c895b8e, not an ancestor of this branch; outside this order's paths). 0 of the 4 sa tests named by row Z-W90-S2 fail."
+      "reason": "phase A: 1 failed, 394 passed, 1 skipped; the 1 failure is test_worker.py::test_rotated_http_cookies_survive_next_job_without_new_login_timestamp (row Z-W91-S1; fixed on CLOUD @250c895b8e; outside this order's paths). Not re-run in phase B."
     }
   ],
   "surprises": [
@@ -177,6 +202,16 @@
       "tool": "sa_quarantine census",
       "invocation": "python -m lib.opal_data_harvest.sa_quarantine census",
       "result": "rc 0; ROWS CHECKED 85; WRONG-OBJECT 38 of 85"
+    },
+    {
+      "tool": "sa_quarantine quarantine --apply",
+      "invocation": "python -m lib.opal_data_harvest.sa_quarantine quarantine --apply",
+      "result": "rc 0; WROTE s3://opal-data-harvest/seeking-alpha/harvest/silver/quarantine/date=2026-10-01/20261001T064759Z.json (33 article keys)"
+    },
+    {
+      "tool": "publication_gold build-mention",
+      "invocation": "python -m lib.research.harvest.publication_gold build-mention --securities-json .../0.9.0_WK_AMGT_HARVST~46/securities.universe.json --as-of 2026-10-01",
+      "result": "rc 0; part-20261001T064839Z.parquet, 379 pairs; digest == 08f636c1...0e6a"
     }
   ]
 }
