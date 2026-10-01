@@ -1,0 +1,48 @@
+diff --git a/src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs b/src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs
+index bfaa6eb8..b61afecf 100644
+--- a/src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs
++++ b/src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs
+@@ -164,6 +164,8 @@ const SOURCE_STUBS = {
+     useInputLedger: () => ({ data: undefined, isLoading: false }),
+     useLeadPanelRankings: () => rankingState,
+     useRankTimeSeries: () => seriesState,
++    // DSGN_AMGTV1 AV-n-2 RE-ANCHOR: LeadPanel reads the monthly collected-articles route (CONTRACT s.1) for the bubbles.
++    useCollectedChatter: () => ({ data: undefined, isLoading: false }),
+     useStarredList: () => ({ data: [], isLoading: false, isError: false }),
+     useSetStarred: () => ({ mutate: noop }),
+     useRequestRefresh: () => ({ mutate: noop, isPending: false }),
+@@ -537,16 +539,30 @@ if (adapter) {
+   // untouched by that move (`RankedChart.tsx` still renders the real `<GenerationCaption>`),
+   // which is why `chart_panel` alone read true before this fix. This arm now reads the text
+   // each surface actually carries instead of the retired attribute.
++  // DSGN_AMGTV1 AV-n-1/AV-n-2 RE-ANCHOR (live_absent_panel, chart_panel): the Lead Panel no longer renders the ranked
++  // list or the rank line chart (rulings: chatter is bubbles only, price is bars only, no List/Chart toggle). The ABSENT
++  // designed state is read off RankedList itself (the row renderer StarredList still composes) over the same live
++  // payload, the panel still says "generation: none" in its caption; the chart's generations line is retired with the
++  // chart, so the generation is read where the panel now carries it -- the caption's data-generation-id on the served
++  // payload. Was: livePanel carried data-ranking-status="ABSENT"; chartPanel carried data-generation-caption="<gen>".
++  const liveList = renderToStaticMarkup(
++    React.createElement(RankedList, {
++      rows: fixtures.BA_US_Equity.rankings_live.rows || [], starredTickers: new Set(),
++      resolution: fixtures.BA_US_Equity.rankings_live.resolution, onToggleStar: noop, onSelectSecurity: noop,
++      rankingStatus: fixtures.BA_US_Equity.rankings_live.ranking_status, rankingReason: fixtures.BA_US_Equity.rankings_live.ranking_reason,
++    })
++  );
++  void chartPanel;
+   captionsInLists =
+     refusedPanel.includes(`generation ${gen}`) && refusedPanel.includes('read SHORT_READ') &&
+     servedPanel.includes(`generation ${gen}`) &&
+-    livePanel.includes('generation: none') && livePanel.includes('data-ranking-status="ABSENT"') &&
+-    chartPanel.includes(`data-generation-caption="${gen}"`);
++    livePanel.includes('generation: none') && liveList.includes('data-ranking-status="ABSENT"') &&
++    servedPanel.includes(`data-generation-id="${gen}"`);
+   detail.captions = {
+     refused_panel: refusedPanel.includes(`generation ${gen}`) && refusedPanel.includes('read SHORT_READ'),
+     served_panel: servedPanel.includes(`generation ${gen}`),
+-    live_absent_panel: livePanel.includes('generation: none') && livePanel.includes('data-ranking-status="ABSENT"'),
+-    chart_panel: chartPanel.includes(`data-generation-caption="${gen}"`),
++    live_absent_panel: livePanel.includes('generation: none') && liveList.includes('data-ranking-status="ABSENT"'),
++    chart_panel: servedPanel.includes(`data-generation-id="${gen}"`),
+     security_mode_overlay_captions: tally.captionsSecurityMode,
+   };
+ }

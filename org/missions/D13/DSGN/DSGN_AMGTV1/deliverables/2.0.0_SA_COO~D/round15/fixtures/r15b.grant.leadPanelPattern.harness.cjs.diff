@@ -1,0 +1,32 @@
+diff --git a/src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs b/src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs
+index dd091572..c8e72ef5 100644
+--- a/src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs
++++ b/src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs
+@@ -75,8 +75,13 @@ function load(name, fromRel) {
+     '@/lib/utils': 'src/lib/utils.ts',
+     '@/lib/designTokens': 'src/lib/designTokens.ts',
+     '@/lib/dateUtils': 'src/lib/dateUtils.ts',
++    // DSGN_AMGTV1 round 15 (AV-n-3): the panel header is the extracted /philosophy card face -- REAL, like the controls.
++    '@/ui/components/graphic/GraphicCard': 'src/ui/components/graphic/GraphicCard.tsx',
++    '@/ui/components/graphic/HeroGraphic': 'src/ui/components/graphic/HeroGraphic.tsx',
+   };
+   if (name in REAL) return source(REAL[name]);
++  // HeroGraphic's modal is never opened by a panel header; its dialog primitive renders nothing here.
++  if (name === '@/ui/components/catalyst/dialog') return { Dialog: () => null };
+   if (name === '@/ui/components/panels') {
+     // NOT the index.ts's full re-export set -- that also pulls in `SmartPanelFooter`,
+     // `NestedCard`, `DarkCard`, `PanelGrid`, `SectionCard`, none of which this cell's
+@@ -338,7 +343,12 @@ const checks = {
+     !movementGroup.match(PURPLE_FILL_RE) &&
+     !subjectGroup.match(PURPLE_FILL_RE),
+   purple_fill_classes: countMatches(universeHtml, PURPLE_FILL_RE) === 0,
+-  starred_toggle: universeHtml.includes('data-starred-toggle'),
++  // DSGN_AMGTV1 round 15 (AV-n-3): Starred is still a toggle, now the estate's two-option `Segmented` ("Starred filter")
++  // with one active option, not a hand-built button.
++  starred_toggle: (() => {
++    const g = firstGroup(universeHtml, 'Starred filter');
++    return g !== null && countMatches(g, /<button/g) === 2 && activeButtons(g).length === 1;
++  })(),
+   view_icon_segmented: viewGroup !== null && countMatches(viewGroup, /<button/g) === 2,
+   source_footer: sourceFooterOccurrences === 1 && footerCarriesAll,
+   stale_dated_said: expectDated === true && staleSaid,

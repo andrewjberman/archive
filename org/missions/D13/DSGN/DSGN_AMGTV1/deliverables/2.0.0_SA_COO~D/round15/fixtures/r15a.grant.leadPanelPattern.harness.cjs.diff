@@ -1,0 +1,83 @@
+diff --git a/src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs b/src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs
+index dd091572..472c2e6f 100644
+--- a/src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs
++++ b/src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs
+@@ -100,6 +100,7 @@ function load(name, fromRel) {
+     return {
+       useLeadPanelRankings: () => rankingState,
+       useRankTimeSeries: () => ({ data: undefined, isLoading: false }),
++      useCollectedChatter: () => ({ data: undefined, isLoading: false }),
+       useStarredList: () => ({ data: [], isLoading: false }),
+       useSetStarred: () => ({ mutate: noop }),
+     };
+@@ -123,7 +124,7 @@ function load(name, fromRel) {
+ // Compile order matters only for readable stack traces here (the cache makes it
+ // otherwise safe): leaves first, LeadPanel last.
+ source('src/pages/SecurityAnalysis/components/GenerationCaption.tsx');
+-source('src/pages/SecurityAnalysis/components/RankedList.tsx');
++const { RankedList: RankedListComponent } = source('src/pages/SecurityAnalysis/components/RankedList.tsx');
+ source('src/pages/SecurityAnalysis/components/StarredList.tsx');
+ const { LeadPanel } = source('src/pages/SecurityAnalysis/components/LeadPanel.tsx');
+ 
+@@ -257,7 +258,25 @@ function tickersInOrder(html) {
+   }
+   return out;
+ }
+-const renderedTickers = tickersInOrder(universeHtml);
++// DSGN_AMGTV1 AV-n-1/AV-n-2 RE-ANCHOR (rows_rendered, row_line_tabular): the Lead Panel no longer renders the ranked
++// list (chatter is bubbles only, price is bars only). The row checks read RankedList itself -- the row renderer
++// StarredList still composes -- over the same served rows, with the props LeadPanel passed it. Was: the rows inside
++// the LeadPanel universe render.
++const listHtml = renderToStaticMarkup(
++  React.createElement(RankedListComponent, {
++    rows: RANKINGS.rows,
++    starredTickers: new Set(),
++    resolution: RANKINGS.resolution,
++    onToggleStar: noop,
++    onSelectSecurity: noop,
++    isLoading: false,
++    readError: null,
++    rankingStatus: RANKINGS.ranking_status,
++    rankingReason: RANKINGS.ranking_reason ?? null,
++    emptyReason: RANKINGS.empty_reason ?? null,
++  })
++);
++const renderedTickers = tickersInOrder(listHtml);
+ 
+ // row_line_tabular: every row's own `<li>...</li>` carries the tabular class
+ // together with its rank, ticker and score -- one line, not three.
+@@ -265,7 +284,7 @@ function rowSlices(html) {
+   const re = /<li[^>]*>[\s\S]*?<\/li>/g;
+   return html.match(re) || [];
+ }
+-const rows = rowSlices(universeHtml);
++const rows = rowSlices(listHtml);
+ const rowLineTabular =
+   rows.length === RANKINGS.rows.length &&
+   rows.every((li, i) => li.includes('tabular-nums') && li.includes(RANKINGS.rows[i].ticker) && li.includes('#' + RANKINGS.rows[i].rank));
+@@ -328,18 +347,20 @@ const captionFactsUnchanged =
+ 
+ const checks = {
+   band_is_lead_panel: countMatches(universeHtml, /dark-band/g) === 1,
++  // DSGN_AMGTV1 AV-n-1/AV-n-2 RE-ANCHOR (segmented_controls, view_icon_segmented): Trending only through the demo, so the
++  // Movement control is gone and Subject is the one Segmented (same weight-and-rule active mark, no purple fill); the
++  // List/Chart view toggle is removed (chatter is bubbles only, price is bars only), so the check now reads its ABSENCE.
++  // Was: Movement AND Subject groups present with one weighted active option each; a View group of two icon buttons.
+   segmented_controls:
+-    movementGroup !== null &&
++    movementGroup === null &&
++    movementActive.length === 0 &&
+     subjectGroup !== null &&
+-    movementActive.length === 1 &&
+     subjectActive.length === 1 &&
+-    movementActive.every((b) => b.includes('font-bold') && b.includes('border-')) &&
+     subjectActive.every((b) => b.includes('font-bold') && b.includes('border-')) &&
+-    !movementGroup.match(PURPLE_FILL_RE) &&
+     !subjectGroup.match(PURPLE_FILL_RE),
+   purple_fill_classes: countMatches(universeHtml, PURPLE_FILL_RE) === 0,
+   starred_toggle: universeHtml.includes('data-starred-toggle'),
+-  view_icon_segmented: viewGroup !== null && countMatches(viewGroup, /<button/g) === 2,
++  view_icon_segmented: viewGroup === null && !/aria-label="(List view|Chart view)"/.test(universeHtml),
+   source_footer: sourceFooterOccurrences === 1 && footerCarriesAll,
+   stale_dated_said: expectDated === true && staleSaid,
+   rows_rendered: JSON.stringify(renderedTickers) === JSON.stringify(expectedTickers),

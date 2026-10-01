@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ae-4.site-z-backfill-driver",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ae-4.site-z-backfill-driver.md",
+    "group": "OTHER",
+    "vintage_commit": "a1eb58cd7572e4d8d542f09162e79ffd4ece4ca3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "a1eb58cd7572e4d8d542f09162e79ffd4ece4ca3",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ae-4.site-z-backfill-driver.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~92",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/backfill_driver.py",
+      "kind": "script",
+      "commit_or_etag": "4901fd709b438d40b9ea01dd2e712d510e94532b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "PHASE A (LOCAL) only. New driver: UNIVERSE + one BUDGET line per publisher before any PLAN; sa always first; per (pub,name) round-31 invocation shape then one upload-harvest capped at the pending count; cooldown table waited out before a job; STOP set incl. error ends that publisher's leg; atomic checkpoint after each job (extra key `stored` carries per-pair article counts for the depth table across a resume); run summary beside the checkpoint; --dry-run opens no collector process and no database. No collector run, publisher request or S3 write was made.",
+      "introduces": [
+        "lib.opal_data_harvest.backfill_driver"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_ae4_backfill_driver.py",
+      "kind": "test",
+      "commit_or_etag": "4901fd709b438d40b9ea01dd2e712d510e94532b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "15 tests (6 plants; plant iv parametrised over the 8 STOP statuses typed in the test) with the collector stubbed: no process, no network.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_ae4_backfill_driver.py -rA --tb=line -> passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_ae4_backfill_driver.py -rA --tb=line",
+      "output_evidence": "15 passed in 0.57s (rc 0). Full collector suite: 378 passed, 1 skipped, 6 subtests passed (base 363 passed, 1 skipped; +15).",
+      "denominator": "15 of 15 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC2.py -> AC2 RESULT: PASS",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC2.py",
+      "output_evidence": "UNIVERSE: 89; 5 BUDGET lines (each 4320 requests/day, pacing 86400/(15s minimum + 10s jitter/2); no per-publisher daily cap in config or contracts) before the first PLAN line, which is a sa job; NETWORK CALLS: 0; guard refused 0 sockets; rc=0; AC2 RESULT: PASS (0 failure(s))",
+      "denominator": "5 of 5 publishers budgeted; 89 of 89 names planned for sa first",
+      "status": "PASS",
+      "expect": "AC2 RESULT: PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC3.py -> AC3 RESULT: PASS",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC3.py",
+      "output_evidence": "SECURITIES WITH ANY: 3 of 89; AT 50+: 0 of 89; AT 100+: 0 of 89; SA DISTINCT SINCE 2026-01-01 (universe keys): 20 (cut baseline 20); AC3 RESULT: FAIL (2 failure(s)): no driver run summary at ~92/ae4_run_summary.json; sa distinct articles did not rise above the cut baseline",
+      "denominator": "0 of 89 securities at 50+",
+      "status": "FAIL",
+      "status_reason": "phase B pending",
+      "expect": "AC3 RESULT: PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Removed `error` from STOP_STATUSES in backfill_driver.py (working copy, restored byte-identical after), then ran test_ae4_backfill_driver.py. A first version of the plant parametrised over bd.STOP_STATUSES itself and the mutant slipped through (13 passed); the plant was changed to type the ruled set and assert equality.",
+      "expected": "the plants FAIL on the mutant",
+      "observed": "2 failed (test_stop_set_is_exactly_the_ruled_set, test_stop_status_stops_that_publishers_leg_and_next_publisher_proceeds[error]), 13 passed; restored driver passes 15 of 15",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 test file run three times against the committed driver",
+      "expected": "the same 15 tests pass on every run",
+      "observed": "15 passed each time (0.57s, 0.49s, 4.09s)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Phase B (the sa run over all 89 names, stop-and-resume, ae4_run_summary.json, AC3 PASS) and the real Collector class's subprocess/sqlite paths",
+      "reason": "Order section 1 item 3 and section 2: phase A is LOCAL, a collector run is forbidden in phase A; Collector.run_job/upload/pending/cooldown_until are exercised only in phase B under the signed never-widen pair. The order's <status> is not flipped."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/opal_data_harvest/ -q",
+      "result": "378 passed, 1 skipped, 6 subtests passed"
+    }
+  ]
+}

@@ -17,7 +17,10 @@ n=0; gone=0; still=""
 for f in $OLD; do n=$((n+1)); if git cat-file -e "HEAD:$f" 2>/dev/null; then still="$still $f"; else gone=$((gone+1)); fi; done
 k=0; kept=0; lost=""
 for f in $KEEP; do k=$((k+1)); if [ "$(git rev-parse -q --verify "HEAD:$f")" = "$(git rev-parse -q --verify "$OA_BASE:$f")" ]; then kept=$((kept+1)); else lost="$lost $f"; fi; done
-ns=$(git diff --numstat "$OA_R2_BASE" HEAD -- "$C" | awk '{print $1" "$2}')
+# AMENDMENT 3 (2.0.0_SA_COO~AI, drive tick 2, row Z-W12-S1): the catalog diff counts ONLY this slot's own commits on it
+# since the round-2 cut. Other seats (NFRA_MCPINDEX) edit the catalog by design; a cut-to-HEAD diff went stale twice.
+# Authorship survives the drain merge, so the count is the same on the worker's branch and after the drain.
+ns=$(git log --no-merges --format=%H --author="0.9.0_WK_NFRA_OPALAI~12 <" "$OA_R2_BASE"..HEAD -- "$C" \n  | while read -r h; do git diff --numstat "$h~1" "$h" -- "$C"; done | awk '{a+=$1; d+=$2} END {print a+0" "d+0}')
 [ -z "$ns" ] && ns="0 0"
 gr=no; git show "HEAD:$C" | grep -q 'guardrails_ref: opal_ai/opal/agent/refs/BLOOMBERG_GUARDRAILS.md' && gr=yes
 PAT='0\.0\.3_BG_BBGTerminal/(refs/(BLOOMBERG_GUARDRAILS|BUCKET_ALLOWLIST|PORTAL_RETRIEVAL|RELAUNCH|REQUEST_CATALOG|TEAMS_DUTY|THREAD_MEMORY)|prompt\.md|tools/portal_lookup)|skills/bbg-teams-assist'
@@ -25,7 +28,7 @@ SCOPE=".claude/ .tools/ org/mcp/ infra/ integrations/ lib/ *.ps1"
 hits=$(git grep -l -E "$PAT" HEAD -- .claude/ .tools/ org/mcp/ infra/ integrations/ lib/ '*.ps1' \
   ':!.tools/hooks/bg-concierge-gate.sh' ':!.tools/hooks/tests/test_bg_concierge_gate.sh' | sed 's/^HEAD://')
 nh=$(printf '%s' "$hits" | grep -c . )
-echo "moved paths absent at HEAD: $gone of $n; census files kept at HEAD: $kept of $k; catalog lines added/removed vs cut: $ns (guardrails_ref re-pointed=$gr); code/config files still referencing moved paths: $nh (scope: $SCOPE)"
+echo "moved paths absent at HEAD: $gone of $n; census files kept at HEAD: $kept of $k; catalog lines added/removed by this slot: $ns (guardrails_ref re-pointed=$gr); code/config files still referencing moved paths: $nh (scope: $SCOPE)"
 [ -n "$still" ] && echo "still present:$still"
 [ -n "$lost" ] && echo "census not byte-equal to the cut:$lost"
 [ "$nh" != 0 ] && printf '%s\n' "$hits" | sed 's/^/  ref: /'
