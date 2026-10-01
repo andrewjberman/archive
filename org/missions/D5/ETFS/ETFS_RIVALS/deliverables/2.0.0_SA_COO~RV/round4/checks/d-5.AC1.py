@@ -25,7 +25,7 @@ def run(v):
     body = blk.group(1) if blk else ""
     v.check("data-calendar" in body and 'data-source="issuer"' in body, "GQGU served with a calendar and an issuer badge")
     cfg = json.loads(pathlib.Path("data/etfs/scripts/rivalfunds/guardrails_config.json").read_text(encoding="utf-8"))
-    mrf = (cfg.get("min_resolved_fraction") or {})
+    mrf = ((cfg.get("thresholds") or cfg).get("min_resolved_fraction") or {})  # the file nests thresholds (load_config)
     vals = mrf.get("value", mrf) if isinstance(mrf, dict) else mrf
     v.check(isinstance(vals, dict) and {"issuer", "bloomberg", "home_producer"} <= set(vals)
             and all(float(vals[k]) == float(floors.get(k, -1)) for k in ("issuer", "bloomberg", "home_producer")),
