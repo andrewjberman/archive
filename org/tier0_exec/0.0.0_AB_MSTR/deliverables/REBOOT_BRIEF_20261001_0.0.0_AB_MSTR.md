@@ -35,6 +35,10 @@ Order: `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261001_161xZ_DE
   portal 486b07fd or later); whether `3.0.0_SA_CVO` runs on Codex instead of Claude; GLOBALALARM in D8 or D10; who runs
   the Tax SMA gateway deploy (`4.0.0_SA_CRO` blocked); removal of the four `wt-gw-*` worktrees; the endpoint-protection
   memory growth (about 450 MB an hour, IT-managed).
+- OPEN RELAY (17:17Z): laptop 4.0.0_SA_CRO asked site Z to push Gateway commit 0a1d9079c6 to origin/CLOUD so it can
+  release the Tax SMA route on top (its msg 103923, on Andrew-direct ~17:0xZ @28e5589af0). Sent as bus 524dbc40; site Z's
+  answer (pushed / site Z releases it / refused) goes to 4.0.0_SA_CRO. The relay names that a CLOUD push is MSTR~Z's act
+  on Andrew's word and that the 16:22Z reboot order said no new deploy; it rules nothing.
 - TO THIS SEAT: nothing outstanding that blocks it.
 
 ## 5. Relaunch
