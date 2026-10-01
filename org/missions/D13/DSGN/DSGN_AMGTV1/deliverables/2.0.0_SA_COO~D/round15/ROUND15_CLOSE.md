@@ -49,3 +49,25 @@ page harnesses; `tsc -b` rc=0.
 - Z-W56-S1..S4: OBSERVATION, INERT (S2 folded into AV-f-3; S3 the ranking caption still shows while the chatter payload is unserved;
   S4 errorEmpty's starred claims green by absence).
 - Z-S10: BLOCKING, ARMED (auth refresh 500), disarm owner 1.0.0_SA_CTO~Z.
+
+## 4. ADDENDUM 07:3xZ -- the signed-in walk, after the walker account was freed (CTO 27608, MSTR~Z serialisation)
+
+- Arm and disarm posted to 0.0.0_AB_MSTR~Z (laptop held). Walk `tmp/ui-walk/20261001T073050Z` (5174 = DEV f4adf790; BA, VLO, 6501):
+  armed 07:30:53Z, logged in 07:31:13Z, **walk void: no**, 143 shots, 5.8 min, disarm 07:36:40Z proven (a login with the walk
+  password after the disarm is REFUSED, HTTP 401).
+- **Read on the shots:**
+  - `004-lead-Trending-Price-List.png`: the price face sits in its loading skeleton with "Source: no ranking has been read"; the
+    selected-name header reads "no ranking has been published for this date yet" -- the live ranking read has no row for today until
+    AMGT_RESAPP's server-side T-1 fallback (af-2) deploys. Server-side, not DSGN.
+  - The chatter face: `GET /api/scoped/amgt/lead-panel/timeseries/collected/chatter` answers **400** (15 calls) -- the route is not
+    deployed yet (RESAPP round 57); the face prints "Read failure" (round-16 cell 4 replaces it with a designed sentence).
+  - `010-BA-US-overlay.png`: the four header cards at uneven widths, "MARKET FEATURES" over its icon (round-16 cell 2); the Thesis
+    pillars "no research pack for this security" (page text from reasonWords.ts:33, AMGT_RESAPP row Z-W200-S1 -> round-16 cell 5).
+  - Every tab with no name selected: "Select a name from the Lead Panel ..." (round-16 cell 5).
+- **Findings:** 21 unique; `walker:control-missing` x4 (the walker still walks Trending/Breakout x List/Chart -- removed by R5/R6;
+  round-16 cell 1 item 2); `design:contrast` x9 (the header eyebrows and the band's secondary ink; cell 2); `design:tinted-status`
+  x3; `format:money` x1 ("USD 1,234" beside "$1,234"); `timeline:no-event-element` x2 (VLO, 6501: no event served); `occluded-popover`
+  x1 (the Price tile's tooltip covers the description).
+- **Round-14 render checks re-run on DEV f4adf790** (`/c/tmp/cood-r15-close.log`): foldopen 3/3; peersempty 2/3 (arm 1 needs a full
+  fwd19 PASS -- fails on `list/loading` missing, round-16 cell 3); styles 2/3 (sizes FAIL 10px in six states, round-16 cell 2);
+  rendercontrol 2/3 (arm 3: the posture harness rc=1 -- it reads S3 live, unstable, excluded from every bound). No new cause.
