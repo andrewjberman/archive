@@ -47,6 +47,8 @@ Order: `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261001_161xZ_DE
 - Site Z keeps posting walker notices on the bus while the laptop is down; they queue for the next laptop consumer.
 - TRUNKS DIVERGED: site Z is about 430 commits ahead and the laptop 537 ahead of the same base 0abf99fcd4. The first CLOUD
   push after the reboot needs ONE merge of the two first (whoever pushes second merges), on Andrew's word; expect overlap.
+- WALKER AT THE REBOOT: site-Z 2.0.0_SA_COO~D ARMED the shared walker at 16:33Z (bus ee5b1f32). If no site-Z DISARMED is
+  in the queued bus mail when you come up, the account is site Z's: clear no laptop walk until it arrives.
 
 ## 6. Not done and not known
 - The surprise-channel rows in section 4 are not written.
