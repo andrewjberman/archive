@@ -5,8 +5,8 @@ Real data, one plant: the last 4 IDVZ-group captures run to canonical_shape in a
 SECOND-newest capture (so TXUE's own prior report date is the third-newest, while the global prior date is the second-newest).
 A canonical marker for a daily batch naming ONLY the newest date's G1 object is written, then build-trade-schedule runs in
 DAILY mode for that batch:
-  - TXUE has G5 rows whose window_start is its OWN prior date (the third-newest capture's date);
-  - control: SCHY (no plant) has G5 rows whose window_start is the global prior date;
+  - TXUE's G6 window (flow_reconciliation; amendment 1, row W1-S28) starts at its OWN prior date (the third-newest capture's date);
+  - control: SCHY (no plant) has a G6 window starting at the global prior date;
   - every fund that has G1 rows on the newest date and on any earlier date gets a window ending on the newest date."""
 import json
 import pathlib
@@ -47,9 +47,13 @@ def run(v):
                          {"status": "OK", "outputs": [uri]})
     r = gold_trade_schedule.handler_entry({"mode": "daily", "date": newest, "batch_id": "t5-daily", "sink": f"local:{sink}"})
     print("daily G5:", r.get("status"), str(r.get("detail"))[:200])
-    df, n = c.read_parquets(c.gold_dir(sink, "trade_schedule") / f"date={newest}")
+    df5, n = c.read_parquets(c.gold_dir(sink, "trade_schedule") / f"date={newest}")
     v.check(n >= 1, f"a daily G5 object for {newest} ({n})")
+    # amendment 1 (row Z-W1-S28): a window with zero inferred trades has no G5 row, so the window is read from G6
+    # flow_reconciliation, which carries one row per fund x window whatever its trade count.
+    df, n6 = c.read_parquets(c.gold_dir(sink, "flow_reconciliation") / f"date={newest}")
     if not len(df):
+        v.check(False, f"a daily G6 object for {newest} ({n6})")
         return
     starts = lambda f: set(df.loc[df["fund_id"].astype(str) == f, "window_start"].astype(str).str[:10])  # noqa: E731
     print(f"dates: own_prior {own_prior}, global_prior {global_prior}, newest {newest}; TXUE starts {starts('TXUE')}, "
