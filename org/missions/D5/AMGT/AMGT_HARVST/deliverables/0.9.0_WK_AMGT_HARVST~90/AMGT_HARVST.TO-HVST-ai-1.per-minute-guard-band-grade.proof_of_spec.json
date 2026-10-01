@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ai-1.per-minute-guard-band-grade",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ai-1.per-minute-guard-band-grade.md",
+    "group": "OTHER",
+    "vintage_commit": "fa2be63ade"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "fa2be63ade",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ai-1.per-minute-guard-band-grade.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~90",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/load_window_grade.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL read-only grader; per-minute guard-band rule.",
+      "introduces": [
+        "def guarded_clean"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_ah2_load_window_grade.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 plants with tmp-dir fakes pass.",
+      "introduces": [
+        "test_1439_clean_minutes_is_insufficient"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_ah2_load_window_grade.py -rA --tb=line",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_ah2_load_window_grade.py -rA --tb=line",
+      "expect": "passed",
+      "output_evidence": "worktree wk-hvst-r32-90 on wk-AMGT_HARVST-90-r36: 13 passed in 1.26s, rc 0",
+      "status": "PASS",
+      "denominator": "13 of 13 tests passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round36/checks/ai-1.AC2.py",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round36/checks/ai-1.AC2.py",
+      "expect": "AC2 RESULT: PASS",
+      "output_evidence": "Ran in the WORKTREE (not the main tree) with a temporary .runtime junction to the main tree data (row Z-W90-S10); the issuer re-runs in the main tree after the drain. RULE per_minute_guard_band guard_band 1 required_clean_minutes 1440. bbg INSUFFICIENT requests=1068 clean_minutes=191 cc_presented=8 cc_passed=8; wsj INSUFFICIENT 907/182/0/0; barrons INSUFFICIENT 52/0/0/0; ft INSUFFICIENT 1061/113/0/0; sa INSUFFICIENT 493/21/0/0. AC2 RESULT: PASS (0 failure(s))",
+      "status": "PASS",
+      "denominator": "1 of 1 checks"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W90-S10"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "load_window_grade",
+      "invocation": "python <worktree>/lib/opal_data_harvest/load_window_grade.py (cwd main tree)",
+      "result": "bbg 1059 requests 188 clean minutes; wsj 897/179; barrons 52/0; ft 1061/113; sa 493/21; all INSUFFICIENT (need 1440)"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "Not run: the live monitor window grows each minute, so two live runs differ by design; plants use fixed tmp-dir fakes.",
+      "expected": "n/a",
+      "observed": "not measured",
+      "status": "N/A-WITH-REASON"
+    },
+    "mutant": {
+      "description": "guarded_clean guard band removed (range (-1,0,1) replaced by (0,)), then the 13 plants run.",
+      "expected": "the minute-before and minute-after plants fail",
+      "observed": "3 failed, 10 passed under the mutant (before, before-enough-minutes, after); 13 pass on the real module",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md"
+}

@@ -2,7 +2,7 @@
 # OA-f-10 AC2 (built): opal_ai/opal/runtime/provision/wall-dapi-8194.ps1 at ${OA_F10_REF:-HEAD} -- the apply script for
 # the CTO's R1 wall. Arms:
 #   plan  -Plan (default accounts) -> exactly 2 'PLAN: RULE' lines; each names OUTBOUND, BLOCK, TCP, 8194, 127.0.0.0/8 and
-#         ::1, and the LIVE SID of Opal_Agent / Opal_MSP (read here via Get-LocalUser, never from the script); no line names 8790
+#         NO '::1' (AMENDMENT 2, CTO msg 28005: New-NetFirewallRule rejects ::1; bbcomm listens on 127.0.0.1 only, so the rule is 127.0.0.0/8 only), and the LIVE SID of Opal_Agent / Opal_MSP (read here via Get-LocalUser, never from the script); no line names 8790
 #   unk   -Plan -Accounts NoSuchAccount -> 'WALL: REFUSE UNKNOWN-ACCOUNT', exit 2
 #   elev  real mode from this (non-elevated) token -> 'ELEVATION REQUIRED', exit 3, before any act (skipped, and said so,
 #         if this token IS elevated)
@@ -18,7 +18,7 @@ sids=$(ps -Command "(Get-LocalUser -Name Opal_Agent).SID.Value; (Get-LocalUser -
 sa=$(printf '%s\n' "$sids" | sed -n 1p); sm=$(printf '%s\n' "$sids" | sed -n 2p)
 plan=$(ps -File "$WT\\w.ps1" -Plan); prc=$(timeout 60 powershell -NoProfile -ExecutionPolicy Bypass -File "$WT\\w.ps1" -Plan >/dev/null 2>&1; echo $?)
 nrule=$(printf '%s\n' "$plan" | grep -c '^PLAN: RULE ')
-good=$(printf '%s\n' "$plan" | grep '^PLAN: RULE ' | grep -i 'OUTBOUND' | grep -i 'BLOCK' | grep -i 'TCP' | grep -F '8194' | grep -F '127.0.0.0/8' | grep -F '::1' | grep -c .)
+good=$(printf '%s\n' "$plan" | grep '^PLAN: RULE ' | grep -i 'OUTBOUND' | grep -i 'BLOCK' | grep -i 'TCP' | grep -F '8194' | grep -F '127.0.0.0/8' | grep -v -F '::1' | grep -c .)
 hasA=$(printf '%s\n' "$plan" | grep '^PLAN: RULE ' | grep -c -F "$sa"); hasM=$(printf '%s\n' "$plan" | grep '^PLAN: RULE ' | grep -c -F "$sm")
 n8790=$(printf '%s\n' "$plan" | grep -c '8790')
 unk=$(ps -File "$WT\\w.ps1" -Plan -Accounts NoSuchAccount | grep -m1 'WALL: REFUSE UNKNOWN-ACCOUNT'); urc=$(timeout 60 powershell -NoProfile -ExecutionPolicy Bypass -File "$WT\\w.ps1" -Plan -Accounts NoSuchAccount >/dev/null 2>&1; echo $?)

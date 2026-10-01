@@ -66,7 +66,8 @@
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "round 4 build cell; no served write, no deploy; checks run against a local sink (AC1 mirrors live S3 read-only)",
       "artifact_covered_by": [
-        "AC1"
+        "AC1",
+        "AC4"
       ]
     },
     {
@@ -121,6 +122,16 @@
       "artifact_covered_by": [
         "AC3"
       ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_v2_enrichment_cli.py",
+      "kind": "script",
+      "commit_or_etag": "4fe8d6dc4d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 amendment 3 (row Z-S10); no deploy; handler_entry stubbed",
+      "artifact_covered_by": [
+        "AC4"
+      ]
     }
   ],
   "acceptance": [
@@ -150,6 +161,15 @@
       "output_evidence": "date 2026-09-28: basg object basg-20260929T204617Z-2a559d4deb4e.parquet, planted gqgu-20260929T214617Z-2a559d4deb4e.parquet\nG1 rows: BASG 35, GQGU 35 (silver rows 35)\nsource_channel: GQGU ['issuer-site:gqgu'], BASG ['issuer-site:basg']\nOK:   G1's GQGU rows carry source_channel issuer-site:gqgu\nOK:   control: G1's BASG rows carry source_channel issuer-site:basg\nAC3 RESULT: PASS 0 failures\nrc=0",
       "denominator": "2 of 2 checks OK (GQGU rows and BASG control, from the planted GQGU silver object beside real BASG bytes)",
       "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the vehicle's enrichment step is a real CLI with the collector's exit contract (--help names --mode; OK 0, unreachable 1, PARTIAL 2, SKIPPED 3; mode daily passed through) -- expect: AC4 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round4/checks/v-2.AC4.py",
+      "output_evidence": "--help rc=0 stdout_bytes=1015\nOK:   `-m rivalfunds.enrichment_bloomberg --help` prints a usage naming --mode\nstub {\"status\": \"OK\"} -> rc=0 mode=daily\nOK:   result {\"status\": \"OK\"} exits 0 with mode daily\nstub {\"status\": \"FAILED\", \"detail\": {\"unreachable\": true}} -> rc=1 mode=daily\nOK:   result {\"status\": \"FAILED\", \"detail\": {\"unreachable\": true}} exits 1 with mode daily\nstub {\"status\": \"PARTIAL\"} -> rc=2 mode=daily\nOK:   result {\"status\": \"PARTIAL\"} exits 2 with mode daily\nstub {\"status\": \"SKIPPED\"} -> rc=3 mode=daily\nOK:   result {\"status\": \"SKIPPED\"} exits 3 with mode daily\nAC4 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "5 of 5 checks OK (--help, and four stubbed results; no Bloomberg or S3 call)",
+      "status": "PASS"
     }
   ],
   "controls": {
@@ -161,7 +181,7 @@
     },
     "determinism": {
       "method": "AC1 and AC2 each run twice (first run, then after the commit); rivalfunds/tests run 3 times.",
-      "observed": "same PASS line each time; suite 292 passed, 2 skipped, 0 failed at 44f95d2c6c.",
+      "observed": "same PASS line each time; suite 302 passed, 2 skipped, 0 failed at 4fe8d6dc4d.",
       "status": "STABLE"
     }
   },
@@ -177,14 +197,16 @@
     "ETFS_RIVALS-Z-W1-S32",
     "ETFS_RIVALS-Z-W1-S33",
     "ETFS_RIVALS-Z-S9",
-    "ETFS_RIVALS-Z-W1-S35"
+    "ETFS_RIVALS-Z-W1-S35",
+    "ETFS_RIVALS-Z-S10",
+    "ETFS_RIVALS-Z-W1-S36"
   ],
   "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
   "compiler_tools": [
     {
       "tool": ".tools/safe-commit.sh",
       "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "44f95d2c6c"
+      "result": "4fe8d6dc4d"
     }
   ]
 }
