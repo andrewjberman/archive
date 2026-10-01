@@ -28,25 +28,25 @@
     {
       "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~25/F10_FALSIFIER.json",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "ad80aa7769",
       "artifact_covered_by": [
-        "AC1"
+        "AC2"
       ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "mechanism INCONCLUSIVE: no non-elevated codex sandbox invocation reaches the CodexSandboxOffline identity."
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~25/F10_ACCEPTANCE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 TCP-connect arms, all OPEN; rules live 2 of 2; view server started by the cell and stopped (8790 listeners=0 after)."
     }
   ],
   "acceptance": [
-    {
-      "criterion_id": "AC1",
-      "criterion_verbatim": "inside whoami differs from outside; outside result=OPEN; mechanism equals implied (FIREWALL-RULE or LOOPBACK-EXEMPT) -- RESULT: PASS -- exit=0",
-      "method": "live_read",
-      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/f10.AC1.sh; echo \"exit=$?\"",
-      "output_evidence": "inside whoami=opal_bloomberg\\opal bloomberg result=OPEN; outside whoami=opal_bloomberg\\opal bloomberg result=OPEN; distinct identity=no; mechanism=INCONCLUSIVE implied=LOOPBACK-EXEMPT\nRESULT: FAIL\nexit=1",
-      "denominator": "0 of 1 falsifier arms discriminating: inside arm ran as the operator (same identity as outside), mechanism INCONCLUSIVE; row NFRA_OPALAI-Z-W25-S1.",
-      "status": "FAIL",
-      "status_reason": "Refused as written: no non-elevated codex sandbox invocation runs under the CodexSandboxOffline identity, so the falsifier is INCONCLUSIVE (row NFRA_OPALAI-Z-W25-S1)."
-    },
     {
       "criterion_id": "AC2",
       "criterion_verbatim": "plan rc=0 PLAN: RULE lines=2 well-formed=2 Opal_Agent SID named=1 Opal_MSP SID named=1 lines naming 8790=0; unknown 'WALL: REFUSE UNKNOWN-ACCOUNT' rc=2; real-mode 'ELEVATION REQUIRED' rc=3; S-1-5-21 literals=0; parse errors=0; other files changed vs e69acf7=0 -- RESULT: PASS -- exit=0",
@@ -61,10 +61,10 @@
       "criterion_verbatim": "live 8194 block rules matching an account SID: 2 of 2; agent 8194=REFUSED|TIMEOUT 8790=OPEN; msp 8194=REFUSED|TIMEOUT 8790=OPEN; operator 8194=OPEN; arms ok=yes -- RESULT: PASS -- exit=0",
       "method": "live_read",
       "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/f10.AC3.sh; echo \"exit=$?\"",
-      "output_evidence": "live 8194 block rules matching an account SID: 0 of 2; F10_ACCEPTANCE.json absent; arms ok=no\nRESULT: FAIL\nexit=1",
-      "denominator": "0 of 2 live 8194 block rules (the Administrator apply has not happened); F10_ACCEPTANCE.json not written (the arms need live rules and the account credentials). FAIL is the expected first read.",
+      "output_evidence": "live 8194 block rules matching an account SID: 2 of 2; agent 8194=OPEN 8790=OPEN; msp 8194=OPEN 8790=OPEN; operator 8194=OPEN; arms ok=no\nRESULT: FAIL\nexit=1",
+      "denominator": "rules live 2 of 2; account 8194 arms blocked 0 of 2 (agent OPEN, msp OPEN); 8790 OPEN 2 of 2; operator 8194 OPEN 1 of 1",
       "status": "FAIL",
-      "status_reason": "Expected first read: the Administrator has not applied the rules (0 of 2 live); the order stays open until the apply and the arms re-run."
+      "status_reason": "Falsifier fired: per-user firewall rules do not block loopback 8194 for Opal_Agent or Opal_MSP (row NFRA_OPALAI-Z-W25-S3); order left open for CTO re-rule to a raw WFP filter."
     }
   ],
   "controls": {
@@ -93,9 +93,10 @@
   ],
   "surprises": [
     "NFRA_OPALAI-Z-W25-S1",
-    "NFRA_OPALAI-Z-W25-S2"
+    "NFRA_OPALAI-Z-W25-S2",
+    "NFRA_OPALAI-Z-W25-S3"
   ],
-  "session_log": "2026-10-01, worktree C:/tmp/oa-25. Falsifier: outside (operator) 8194 OPEN; every non-elevated codex sandbox form ran as the operator, inside OPEN but same identity; elevated override denied (SetNamedSecurityInfoW 5). Script written and committed nested 6284295. AC2 PASS, AC1 FAIL (INCONCLUSIVE), AC3 FAIL (rules not applied, expected). Status left open. PUSH STATE: LOCAL.",
+  "session_log": "2026-10-01, worktree C:/tmp/oa-25. Falsifier: outside (operator) 8194 OPEN; every non-elevated codex sandbox form ran as the operator, inside OPEN but same identity; elevated override denied (SetNamedSecurityInfoW 5). Script written and committed nested 6284295. AC2 PASS, AC1 FAIL (INCONCLUSIVE), AC3 FAIL (rules not applied, expected). Status left open. PUSH STATE: LOCAL. ACCEPTANCE run (AC3): rules live; all 5 arms OPEN, falsifier fired (loopback exempt), row Z-W25-S3. AC3 FAIL, order left open. PUSH STATE: LOCAL.",
   "compiler_tools": [
     {
       "tool": "powershell Parser.ParseFile + Get-LocalUser",
