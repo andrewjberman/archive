@@ -28,6 +28,7 @@ ap.add_argument("--out", required=True)
 ap.add_argument("--span-minutes", type=float, default=122)
 ap.add_argument("--cap-minutes", type=float, default=178)
 ap.add_argument("--floor", default="2026-01-01")
+ap.add_argument("--wrapper", help="run the collector through this script (an experiment wrapper) instead of -m lib.opal_data_harvest")
 ap.add_argument("--skip", nargs="*", default=[], help="universe keys to leave out")
 args = ap.parse_args()
 
@@ -85,7 +86,7 @@ for sec in rows:
         break
     sec_file = workdir / "securities" / (sec["key"] + ".json")
     sec_file.write_text(json.dumps(sec, indent=2), encoding="utf-8")
-    cmd = [sys.executable, "-m", "lib.opal_data_harvest", "--runtime-root", str(runtime), "run", "--harvest-grammar",
+    cmd = [sys.executable] + ([args.wrapper] if args.wrapper else ["-m", "lib.opal_data_harvest"]) + ["--runtime-root", str(runtime), "run", "--harvest-grammar",
            "--retrieval-mode", "backfill", "--floor", args.floor, "--new-only", "--no-sign-in", "--security-json", str(sec_file),
            "--publishers", "ft", "--max-jobs", "1"]
     print("%s JOB START ft %s (%s) cap-remaining %.0f min" % (stamp(), sec["key"], sec["company"], remaining / 60), flush=True)
