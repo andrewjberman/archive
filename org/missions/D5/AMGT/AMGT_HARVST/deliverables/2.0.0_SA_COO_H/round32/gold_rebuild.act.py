@@ -25,7 +25,9 @@ import ae1_common as c  # noqa: E402
 from lib.research.harvest import publication_gold as pg  # noqa: E402
 from lib.research.harvest import store  # noqa: E402
 
-UNIVERSE = os.path.join(c.ROOT, "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~46/securities.universe.json")
+# HVST_GOLD_UNIVERSE overrides the gold securities file (the signing dry run reads the same variable).
+UNIVERSE = os.environ.get("HVST_GOLD_UNIVERSE") or os.path.join(
+    c.ROOT, "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~46/securities.universe.json")
 
 
 def digest(rows):
@@ -53,6 +55,19 @@ def rule(before_m, before_d, after_m, after_d):
     nm = {mk(r): json.dumps(r, sort_keys=True, default=str) for r in after_m}
     gone = [k for k in om if k not in nm]
     changed = [k for k in nm if k in om and nm[k] != om[k]]
+    # ADDENDUM 1 (gold universe 191 -> 212): a served row may change ONLY in the co-mention fields, and only when its new
+    # co-mentions include an added security (one not in the BEFORE snapshot's security set).
+    before_secs = {r.get("security_key") for r in before_m}
+    after_rows = {mk(r): r for r in after_m}
+    before_rows = {mk(r): r for r in before_m}
+    co_fields = {"co_mention_count", "co_mentioned_securities", "is_roundup"}
+
+    def co_mention_only(k):
+        a, b = after_rows[k], before_rows[k]
+        diff = {f for f in set(a) | set(b) if json.dumps(a.get(f), default=str) != json.dumps(b.get(f), default=str)}
+        return diff <= co_fields and bool(set(a.get("co_mentioned_securities") or []) - before_secs)
+
+    changed = [k for k in changed if not co_mention_only(k)]
     added_secs = {k[1] for k in nm if k not in om}
     od = {dk(r): json.dumps(r, sort_keys=True, default=str) for r in before_d}
     nd = {dk(r): json.dumps(r, sort_keys=True, default=str) for r in after_d}
@@ -67,7 +82,7 @@ def rule(before_m, before_d, after_m, after_d):
 def main():
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     as_of = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
-    record = {"stamp": stamp, "as_of": as_of}
+    record = {"stamp": stamp, "as_of": as_of, "universe_file": UNIVERSE}
     bm, bd = snap()
     record["before"] = {"mention_rows": len(bm), "mention_digest": digest(bm), "daily_rows": len(bd), "daily_digest": digest(bd),
                         "mention_part": newest_part(pg.GOLD_TABLE), "daily_part": newest_part(pg.GOLD_DAILY_TABLE)}

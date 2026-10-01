@@ -39,7 +39,9 @@ def rows_by(rows, key):
 
 
 def main():
-    securities = json.load(open(sg.UNIVERSE, encoding="utf-8"))
+    # HVST_GOLD_UNIVERSE: the gold securities file the builders run over (default: ~46's file)
+    securities = json.load(open(os.environ.get("HVST_GOLD_UNIVERSE") or sg.UNIVERSE, encoding="utf-8"))
+    print("UNIVERSE FILE: %s (%d securities)" % (os.environ.get("HVST_GOLD_UNIVERSE") or sg.UNIVERSE, len(securities)))
     as_of = datetime.datetime.now(datetime.timezone.utc).date()
     real = store._default_client()
     served_m = pg._latest_gold_snapshot_rows(pg.GOLD_TABLE)
