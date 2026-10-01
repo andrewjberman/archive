@@ -1,0 +1,151 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-rl-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~15",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "dabb8e1e9f"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "4546f3f1ce",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rl-2.hx-mail-listing-release.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-0a1d9079c6.tar.gz (+ opal-gateway-latest.tar.gz)",
+   "kind": "s3_object",
+   "commit_or_etag": "6201fccf058741d785232904ccd25855",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "head-object on -latest: git-ref 0a1d9079c682c640e619612f804257681c5db357, 463612 bytes, LastModified 2026-10-01T15:33:58Z; deploy log 'uploaded ... (+ latest)'; base guard equal e3567ce5f7 at both reads; prior object opal-gateway-e3567ce5f7.tar.gz intact (ETag 9b440e69).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/mail_route.py",
+   "kind": "script",
+   "commit_or_etag": "0a1d9079c682c640e619612f804257681c5db357",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "the listing route (GET /hx/mail/messages); one of the 5 gateway files vs e3567ce5f7 (+555/-13), on i-07dccb1615503ac99:/opt/opal-gateway; deploy SSM 747cc4ba Success; verify SSM a25dbdb3: /health 200, 92 of 92 shipped files md5 == release, tools 65 -> 65 (names byte-equal), ENABLED_INTEGRATIONS unchanged, .env 46 -> 46 same key set, /ms/* and by-id /hx/* as before; rl2.AC1.sh LIST ARMS 9 of 9.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+   "kind": "script",
+   "commit_or_etag": "0a1d9079c682c640e619612f804257681c5db357",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "the shipped template (release branch only, sender table read host-side); deploy printed 'OK: MAIL_SENDER_TABLE read host-side from the shipped deploy/mail_sender_table.txt (3 entries)'; L1 set hash MATCH before/after on the host.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+   "kind": "config_data",
+   "commit_or_etag": "1686678d5080ba16be4f7ce0657ffb1965327b26",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "deployed_commit 0a1d9079c6, previous e3567ce5f7, deployed_at 2026-10-01T15:34:29Z, deployed_by 0.9.0_WK_NFRA_OPLGTW~15; on wk-NFRA_OPLGTW-15-r8 (the wrapper's own commit 329e19d1d2 is on the release branch only).",
+   "artifact_covered_by": [
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261001T1531Z_nfra-oplgtw-hx-mail-listing-release_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "2121ce481b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEVER-2 ledger, 4 legs closed with proof (upload, install_verify, manifest, rollback_proven), sentinel removed at HEAD; opened 9286738c2a before the act.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the v1.4 acceptance on the SERVED route: the laptop's four checks and the issuer's two token arms, 9 conditions.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/rl2.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "arm known row listed, internetMessageId equal, rows minimal (2 rows) status=200 OK\narm off-table sender                                               status=403 OK\narm empty window 200, 0 rows, null token                           status=200 OK\narm paging page_size=1: 5 rows over 6 pages, no repeat             status=200 OK\narm transcripts bearer refused                                     status=401 OK\narm /ms bearer refused                                             status=401 OK\narm token replayed under another table sender refused              status=400 OK\narm token replayed under an altered window refused                 status=400 OK\narm raw Graph URL token refused                                    status=400 OK\nLIST ARMS 9 of 9\nRESULT: PASS\nexit=0",
+   "denominator": "LIST ARMS 9 of 9 against https://mcp.opalinvest.dev; run 2026-10-01T15:38:53Z, about 4 min after the deploy ended; bearers read from Secrets Manager into memory, never printed",
+   "status": "PASS",
+   "expect": "(?s)LIST ARMS 9 of 9.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: NEVER-2 is closed, and the release is narrow (only OG-hl-1's files plus the template; /ms/* unshipped).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/rl2.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "entry files at HEAD=1; sentinel at HEAD=no; deployed=0a1d9079c682c640e619612f804257681c5db357 previous=e3567ce5f788f45195bec065f4d2fc5a68a38cd3; gateway files shipped 5, outside OG-hl-1's set 0; ms_ingest.py shipped 0\nRESULT: PASS\nexit=0",
+   "denominator": "5 gateway files shipped (e3567ce5f7..0a1d9079c6), 0 outside OG-hl-1's set; 1 ledger entry file at HEAD, sentinel absent",
+   "status": "PASS",
+   "expect": "(?s)sentinel at HEAD=no;.*outside OG-hl-1's set 0; ms_ingest.py shipped 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: the SHIPPED template reads the sender table host-side and refuses an empty one (row Z-S36 disarmed).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/rl2.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "deployed_commit (manifest at HEAD): 0a1d9079c682c640e619612f804257681c5db357\ntemplate reads deploy/mail_sender_table.txt host-side: True\ntemplate still takes OG_MAIL_SENDER_TABLE from the deploying shell: False\nempty-table refusal lines naming MAIL_SENDER_TABLE: 1\n.env render: %s 15, args 15; MAIL_SENDER_TABLE line True\nbash -n rc=0\nRESULT: PASS\nexit=0",
+   "denominator": "1 shipped template at manifest deployed_commit 0a1d9079c6; 5 reads (host-side True, shell input False, refusal lines 1, printf 15/15, bash -n rc 0)",
+   "status": "PASS",
+   "expect": "(?s)reads deploy/mail_sender_table.txt host-side: True.*from the deploying shell: False.*empty-table refusal lines naming MAIL_SENDER_TABLE: [1-9].*bash -n rc=0.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "The 90 s verify bound (step 10)",
+   "reason": "Missed: the host verify read at 15:37:31Z, about 3 minutes after the restart; filed as row Z-W15-S18. Every reading passed."
+  },
+  {
+   "item": "Terraform, IAM, the ALB, the instance, the identity allowlist, any secret write",
+   "reason": "Bounds of the order; untouched."
+  },
+  {
+   "item": "The rollback re-deploy",
+   "reason": "Not needed (no verify failed, L1 MATCH, no L2 refusal); the rollback tree and the prior S3 object were proven intact instead (94 of 94)."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W15-S18"
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). PHASE B trail on wk-NFRA_OPLGTW-15-r8: 9286738c2a (ledger open + sentinel, before the act), 1686678d50 (manifest + row S18), 2121ce481b (ledger close), and the proof commit. Release-branch commit by the wrapper: 329e19d1d2 (manifest on the release branch only). Sequence (UTC): step 7 at 15:23Z live ref e3567ce5f7 unchanged (manifest on CLOUD, S3 git-ref, host md5 91 of 91 vs git show); halt gate 0 STOP lines; step 8 BEFORE reads 15:29Z (65 tools, 46 keys, 7 integrations, L1 BEFORE hash stored on the host mode 600, 3 items); act 15:33:12Z, deploy rc 0 15:34:56Z; verify 15:37:31Z; L1 after 15:38:25Z (MATCH x2); AC1 15:38:53Z 9 of 9; host hash file removed. No rollback.",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/rl2.AC{1,2,3}.sh",
+   "invocation": "each under timeout from the worktree root; AC2 and AC3 after the ledger close commit 2121ce481b",
+   "result": "AC1 rc 0 PASS; AC2 rc 0 PASS; AC3 rc 0 PASS"
+  },
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open (9286738c2a), close-leg x4, close (2121ce481b)",
+   "result": "all 4 legs proven; sentinel removed"
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "surprise-row gate, naming gate, msg-verify on every commit",
+   "result": "9286738c2a, 1686678d50, 2121ce481b committed, MATCH"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "_rl2.py (the AC3 template reader) run against the LIVE pre-release template (git show e3567ce5f7:infra/aws/ec2/opal-gateway/deploy-to-ec2.sh) as the unmutated-world control; and rl2.AC1's listing route read 404 on the live host before the release (probe 1dc2895b).",
+   "expected": "FAIL on the live template (host-side read False, shell input True, 0 refusal lines); listing route 404 before, 401 without a bearer after",
+   "observed": "template reads deploy/mail_sender_table.txt host-side: False | template still takes OG_MAIL_SENDER_TABLE from the deploying shell: True | empty-table refusal lines naming MAIL_SENDER_TABLE: 0 | .env render: %s 15, args 15; MAIL_SENDER_TABLE line True | bash -n rc=0 | RESULT: FAIL | rc=1 || listing route none/bad bearer BEFORE: 404 404; AFTER: 401 401",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "rl2.AC3.sh run twice on the same HEAD and the two outputs compared byte for byte (cmp)",
+   "observed": "identical (AC3-STABLE)",
+   "status": "STABLE"
+  }
+ }
+}
