@@ -1,6 +1,6 @@
 """HVST-ag-3 AC2 (issuer, read-only): the backfill driver collects bbg and wsj through the date-ordered sitemaps.
 
-Reads `~92/ag3_runs.json` = {"<pub>": {"run_summary": <the driver's run summary JSON, verbatim>,
+Reads `2.0.0_SA_COO_H/round34/ag3_runs.json` (the issuer direct act's record; first written under ~92, a lane the issuer cannot write) = {"<pub>": {"run_summary": <the driver's run summary JSON, verbatim>,
 "run_records": [<each job's collector run record, verbatim>]}} for pub in bbg, wsj.
 
 PASS requires, for EACH of bbg and wsj:
@@ -14,7 +14,7 @@ import subprocess
 import sys
 
 ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True).stdout.strip()
-RECORD = os.path.join(ROOT, "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~92/ag3_runs.json")
+RECORD = os.path.join(ROOT, "org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round34/ag3_runs.json")
 
 
 def main():
