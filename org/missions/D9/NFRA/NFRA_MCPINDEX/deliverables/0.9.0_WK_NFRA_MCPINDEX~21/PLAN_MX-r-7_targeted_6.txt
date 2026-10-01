@@ -1,0 +1,201 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_iam_role.bd_read will be created
+  + resource "aws_iam_role" "bd_read" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = (sensitive value)
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "gateway-blackdiamond-read-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags                  = {
+          + "Name"    = "gateway-blackdiamond-read-role"
+          + "Project" = "NFRA_MCPINDEX"
+          + "Purpose" = "blackdiamond-silver-fees-read"
+        }
+      + tags_all              = {
+          + "Environment" = "Production"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "gateway-blackdiamond-read-role"
+          + "Project"     = "NFRA_MCPINDEX"
+          + "Purpose"     = "blackdiamond-silver-fees-read"
+          + "System"      = "OpalGateway"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role_policy.bd_read_policy will be created
+  + resource "aws_iam_role_policy" "bd_read_policy" {
+      + id          = (known after apply)
+      + name        = "gateway-blackdiamond-read-policy"
+      + name_prefix = (known after apply)
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                          + "s3:GetObjectVersion",
+                          + "s3:ListBucket",
+                        ]
+                      + Resource  = "*"
+                      + Sid       = "DenyAllNonReadActions"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                          + "s3:GetObjectVersion",
+                        ]
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-bd/silver/fees/*",
+                        ]
+                      + Sid         = "DenyReadsOutsideTheFeesPrefix"
+                    },
+                  + {
+                      + Action      = "s3:ListBucket"
+                      + Effect      = "Deny"
+                      + NotResource = "arn:aws:s3:::opal-data-bd"
+                      + Sid         = "DenyListingOtherBuckets"
+                    },
+                  + {
+                      + Action    = "s3:ListBucket"
+                      + Condition = {
+                          + StringNotLike = {
+                              + "s3:prefix" = [
+                                  + "silver/fees/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + Resource  = "arn:aws:s3:::opal-data-bd"
+                      + Sid       = "DenyListingOutsideTheFeesPrefix"
+                    },
+                  + {
+                      + Action   = [
+                          + "s3:GetObject",
+                          + "s3:GetObjectVersion",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-bd/silver/fees/*",
+                        ]
+                      + Sid      = "AllowFeesObjectReads"
+                    },
+                  + {
+                      + Action    = "s3:ListBucket"
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = [
+                                  + "silver/fees/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = "arn:aws:s3:::opal-data-bd"
+                      + Sid       = "AllowFeesPrefixListing"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy.gw_assume_bd_reader will be created
+  + resource "aws_iam_role_policy" "gw_assume_bd_reader" {
+      + id          = (known after apply)
+      + name        = "gateway-assume-blackdiamond-reader-policy"
+      + name_prefix = (known after apply)
+      + policy      = (sensitive value)
+      + role        = "opal-gateway-role"
+    }
+
+  # aws_secretsmanager_secret.bd_reader_external_id will be created
+  + resource "aws_secretsmanager_secret" "bd_reader_external_id" {
+      + arn                            = (known after apply)
+      + description                    = "NFRA_MCPINDEX MX-t-13: the dedicated sts:ExternalId of gateway-blackdiamond-read-role (data_read). Read by opal-gateway-role only."
+      + force_overwrite_replica_secret = false
+      + id                             = (known after apply)
+      + name                           = "opal/mcp/opal-gateway-blackdiamond-reader-external-id"
+      + name_prefix                    = (known after apply)
+      + policy                         = (known after apply)
+      + recovery_window_in_days        = 30
+      + tags_all                       = {
+          + "Environment" = "Production"
+          + "ManagedBy"   = "Terraform"
+          + "Project"     = "OpalPortal"
+          + "System"      = "OpalGateway"
+        }
+
+      + replica (known after apply)
+    }
+
+  # aws_secretsmanager_secret_policy.bd_reader_external_id_gw_read will be created
+  + resource "aws_secretsmanager_secret_policy" "bd_reader_external_id_gw_read" {
+      + id         = (known after apply)
+      + policy     = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "secretsmanager:GetSecretValue"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::313476888478:role/opal-gateway-role"
+                        }
+                      + Resource  = "*"
+                      + Sid       = "GatewayReadsBlackDiamondReaderExternalId"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + secret_arn = (known after apply)
+    }
+
+  # aws_secretsmanager_secret_version.bd_reader_external_id will be created
+  + resource "aws_secretsmanager_secret_version" "bd_reader_external_id" {
+      + arn                  = (known after apply)
+      + has_secret_string_wo = (known after apply)
+      + id                   = (known after apply)
+      + secret_id            = (known after apply)
+      + secret_string        = (sensitive value)
+      + secret_string_wo     = (write-only attribute)
+      + version_id           = (known after apply)
+      + version_stages       = (known after apply)
+    }
+
+Plan: 6 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + opal_gateway_blackdiamond_reader_external_id_secret_name = "opal/mcp/opal-gateway-blackdiamond-reader-external-id"
+  + opal_mcp_blackdiamond_read_role_arn                      = (known after apply)
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: C:/tmp/mx-r7-bd-reader-targeted6.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "C:/tmp/mx-r7-bd-reader-targeted6.tfplan"
