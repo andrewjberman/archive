@@ -1,0 +1,243 @@
+
+READ CALLS: 8 of 8 client read calls passed ConsistentRead=True (get_item 3, query pages 5)
+READ CALL SITES: 2 of 2 in app/access_state.py pass ConsistentRead=True (get_item:350, query:380)
+.
+WRITE ITEMS: 6 of 6 written items carried a ConditionExpression (3 write calls: transact_write_items)
+UNCONDITIONAL WRITES REFUSED: 15 of 15 attempts (5 write APIs x 3 empty conditions), 0 AWS calls
+TRANSACTIONS: failed condition wrote 0 of 2 items; satisfied condition wrote 2 of 2 in 1 call
+WRITE CALL SITES: 3 single-item sites all pass ConditionExpression; batch_write_item sites: 0
+.
+KEYS: 11 of 11 contract record types map to one namespace (POLICY 5, RUNTIME 6)
+MALFORMED KEYS REFUSED: 7 of 7
+STORED PARTITION KEYS: POLICY#tid-a#oid-b, POLICY#tid-a#oid-b, RUNTIME#ticket#hash-1
+.
+POLICY# REFUSED: 4 of 4 runtime write APIs, 0 AWS calls (client that fails on any touch)
+RUNTIME# ACCEPTED: 4 of 4, the same calls, 1 AWS call each
+LOOKALIKE KEYS REFUSED: 7 of 7 (x3 write APIs each), 0 AWS calls
+.
+EXPIRED-BUT-PRESENT: raw get_item present; adapter get -> None, query -> 0 records (expiry now-1 and now)
+UNEXPIRED: same record, expiry now+60 -> present; clock moved past expiry -> absent again
+LIVE CONDITION: consume on the expired record -> ConditionFailed; on the unexpired record -> applied
+.
+UNAVAILABLE: 22 of 22 arms raised DEPENDENCY_UNAVAILABLE; 0 returned a value or a default
+ARMS: no-table 5, unreachable 5, malformed records 10, malformed responses 2
+ALARMS: 22 of 22 fail-closed alarms emitted
+.
+EMULATOR: moto 5.2.3 (boto3 1.43.46, botocore 1.43.46), DynamoDB mocked in-process via mock_aws
+SINGLE-ITEM: failed ConditionExpression -> ConditionalCheckFailedException
+TRANSACTION: failed ConditionCheck -> TransactionCanceledException, CancellationReasons=['None', 'ConditionalCheckFailed']; its Put wrote 0 of 1
+POSITIVE CONTROL: the same transaction with a satisfiable condition committed
+ADAPTER: both surface as ConditionFailed, reasons [['ConditionalCheckFailed'], ['None', 'ConditionalCheckFailed']]
+.
+OGZ3-AC1: refs minted 6 (2 masters x 3 accounts); shape acr_v1_<26 base32> 6 of 6; equal to an independent HMAC-SHA256(key, domain|version|master|account)[:16] recomputation 6 of 6; key read through app/integrations/base.py SecretsCredential (secretsmanager:GetSecretValue), first 1 call(s) SecretId=opal-gateway/test/account-ref-key (the configured name, env SCHWAB_ACCOUNT_REF_SECRET_ID), cached across 6 mints; keyed: another key -> 6 of 6 differ, unkeyed SHA-256 -> 0 of 6 equal; versioned: the same key bytes under v2 -> 6 of 6 differ, prefix acr_v2_; fail closed 6 of 6: name unset -> KeyUnavailable, resolve UNAVAILABLE; no such secret -> KeyUnavailable, resolve UNAVAILABLE; not JSON -> KeyUnavailable, resolve UNAVAILABLE; 16-byte key -> KeyUnavailable, resolve UNAVAILABLE; no key for current_version -> KeyUnavailable, resolve UNAVAILABLE; key not base64 -> KeyUnavailable, resolve UNAVAILABLE; control: the configured secret again -> resolved
+.
+OGZ3-AC2: population 200 account ids, each minted under 08242234 and 08335338: 200 of 200 pairs differ, 400 distinct references of 400; the principal is granted the same 2 account ids under both masters: own-master resolution 4 of 4; a reference presented under the other master -> ENTITLEMENT_DENIED 4 of 4 (1 of 1 account reference(s) are not in the principal's current authorized account set for master 08335338); a request mixing one reference of each master -> ENTITLEMENT_DENIED, 0 accounts returned
+.
+OGZ3-AC3: control: a granted account resolves (revision 1); outside the set, 3 of 3 probes -> ENTITLEMENT_DENIED with 1 distinct denial body ({"code": "entitlement_denied", "error": "1 of 1 account reference(s) are not in the principal's current authorized account set for master 08242234", "error_code": "ENTITLEMENT_DENIED", "guard_denied": true}): an account granted to another principal, an account in no grant anywhere, a random well-formed reference; reads during the 3 probes 6, all strong get_item on the principal's own POLICY partition, other partitions 0, query/scan 0; the other principal resolves its own account (the account exists); after grant revision 2 drops one account's slot: the dropped account -> the same denial body, the kept account resolves at revision 2; after revocation -> ENTITLEMENT_DENIED (the principal holds no active data entitlement); raw account ids in the 5 denial bodies 0
+.
+OGZ3-AC4: capture = the root logger at DEBUG (the SDK wire loggers botocore/boto3/urllib3/moto/s3transfer held at WARNING, their level on the host, which configures no logging), stdout and stderr at the file-descriptor level, and the audit JSONL through app/audit.py; arms 13: resolved, 3 references: resolved; resolved, the other master: resolved; another principal's account: ENTITLEMENT_DENIED; an account in no grant: ENTITLEMENT_DENIED; the other master's reference: ENTITLEMENT_DENIED; a raw account id passed as a reference: INVALID_REQUEST; a raw account id passed as the master: INVALID_REQUEST; no principal: ENTITLEMENT_DENIED; store unavailable: UNAVAILABLE; key unavailable: UNAVAILABLE; a retired key version: EXPIRED_REFERENCE; mint: a malformed account id: ValueError; mint: a raw account id as the master: ValueError; captured: log records 35 (opal_gateway.account_ref 11 = one per resolution), stderr lines 1 (the access-state alarm among them), audit lines 11; raw account ids found 0 across 5 ids x 5 corpora, key material (base64 and hex of 2 keys) found 0; control: the same scanner on a line carrying a raw id finds 1
+.
+OGZ3-AC5: rule REJECT -- a reference whose version is not the current one -> EXPIRED_REFERENCE, decided on the version token alone; before rotation the v1 reference resolves; rotated to v2 (the v1 key left in the secret), the secret re-read 1 time(s): 5 of 5 probes -> EXPIRED_REFERENCE with 1 distinct denial body (1 of 1 account reference(s) were issued under a retired key version; obtain current references again): v1 reference of a granted account, v1 reference of another principal's account, v1 reference of an account in no grant, random v1 reference, v3 reference (never issued); the same account under v2 -> a new reference acr_v2_ (equal to an independent recomputation), resolved; a request mixing a v2 and a v1 reference -> EXPIRED_REFERENCE, 0 accounts; order: the entitlement is checked first, so a revoked principal's v1 reference -> ENTITLEMENT_DENIED
+.......................F..............F.F..............F
+OGA3-AC2: refused 400 with no redirect and no session cookie on 4 of 4 arms (forged state, another browser's state, no transaction cookie, mismatched nonce); upstream redemptions for the 3 state arms [0, 0, 0] (refused before the code exchange), for the nonce arm 1; control (state and nonce match) -> 302 /schwab/download with a session naming the signed-in principal
+.
+OGA3-AC3: refused 400, no session cookie, on 3 of 3 arms, each by its own check: wrong signature -> InvalidSignatureError; wrong issuer -> InvalidIssuerError; wrong audience -> InvalidAudienceError; control (correct signature, issuer and audience) -> 302 with the principal's session; key lookups 4
+.
+OGA3-AC4: 2 of 2 cookies (__Secure-og_dl_login, __Secure-og_dl_session) Secure + HttpOnly + SameSite=lax + Path=/schwab/download + no Domain + Max-Age 600s/900s; the transaction cookie is cleared (Max-Age=0) at the callback; the jar sends the session to 4 of 4 download URLs and to 0 of 10 others (incl. /login, /mcp, /schwab/downloadx and plain http)
+.
+OGA3-AC5: one fixture (tid, oid, email): MCP OAuth principal key == browser session principal key (True), tid equal True, oid equal True; upstream redirect URIs differ (MCP /callback, browser /schwab/download/callback), scopes OpenID-only both; difference: same email, another oid -> another key (True)
+.
+OGA3-AC6: browser_oidc.py (268 lines): imports of app/identity.py and references to 4 ALB helper names or the ALB OIDC header 0 (module globals bound to identity 0); controls: app/server.py 4 hit(s) incl. 'from .identity' and get_user_email, 5 of 5 specimens caught
+. [ 14%]
+F
+OGZ1-AC1: principal_profile key pk=POLICY#<tid>#<oid> sk=principal_profile (no email in the key); data_entitlement key sk=data_entitlement#0000000001 in the same partition; statuses seen pending -> active -> revoked at revisions 1 -> 2 -> 3; stale-revision update refused (ConditionFailed), grant revision rewrite refused (ConditionFailed); status values refused before AWS: ['enabled', '', None] and 'live' for a grant; delete of the profile refused (AccessStateRefused) -- the revoked record stays, the grant record stays; revoked principal: whoami -> entitlement_denied, discovery 0 tools; the same email under another oid: whoami served (Test User)
+.
+OGZ1-AC2: tools/list -> profile reads 1, grant reads 1 (rev 1), all strong; tools/call schwab_list_files -> profile reads 1, grant reads 1 (rev 1), all strong; tools/call schwab_describe_dataset -> profile reads 1, grant reads 1 (rev 1), all strong; GET /teams/poll -> profile reads 1, grant reads 1 (rev 1), all strong; POST /query/v0 -> profile reads 1, grant reads 1 (rev 1), all strong; after grant revision 2 (operator transaction between requests): tools/call schwab_describe_dataset -> profile reads 1, grant reads 1 (rev 2); tools/list -> profile reads 1, grant reads 1 (rev 2); a principal with no profile: 3 tools/list -> 3 strong profile reads; POLICY reads in the whole test 17, strong 17 of 17 (get_item ConsistentRead=True), cached 0
+.
+OGZ1-AC3: healthy -> schwab_query served (1 credential fetch), discovery 2 tools, /query/v0 403 (restricted); 9 failure arms -> schwab_query entitlement_unavailable/UNAVAILABLE, 0 credential fetches, discovery 0 tools, /query/v0 503, on 9 of 9: store unavailable (POLICY reads fail at the endpoint); profile status 'enabled'; profile revision not a number; profile tid not its key's; profile kind missing; profile names absent grant revision 9; grant operations include download_original; grant scope without columns; grant status 'live'; healthy again -> served
+.
+OGZ1-AC4: registered tools 56 (Schwab 5); unknown user: discovery 51 tools, Schwab among them 0 of 5; direct tools/call of the 5 Schwab tools -> entitlement_denied 5 of 5; the chokepoint (run_integration_tool) -> entitlement_denied 5 of 5; credential fetches and tool bodies 0; master_admin with no profile: discovery 51 tools, Schwab among them 0 of 5; direct tools/call of the 5 Schwab tools -> entitlement_denied 5 of 5; the chokepoint (run_integration_tool) -> entitlement_denied 5 of 5; credential fetches and tool bodies 0; control: an active restricted profile sees 5 of 5 Schwab tools and schwab_get_access is served
+.F
+OGZ1-AC6: registered tools 56 (native 35, integration 9, Schwab stand-ins 5); grant ['list', 'describe'] -> 3 of 56 registered: ['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files']; grant ['query', 'download_filtered'] -> 3 of 56 registered: ['schwab_get_access', 'schwab_prepare_download', 'schwab_query']; grant ['list', 'describe', 'query', 'download_filtered'] -> 5 of 56 registered: ['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files', 'schwab_prepare_download', 'schwab_query']; pending profile -> 0; revoked profile -> 0; control: a principal with no profile -> 51 (every registered tool but the 5 Schwab)
+.
+OGZ1-AC7: registered tools 56 = Schwab 5 allowed + 51 others (native 42, integration 9: graph_cypher, graph_status, opal_data_refresh_upload, ycharts_freshness, ycharts_fund_series, ycharts_risk_return_scatter, ycharts_search, ycharts_snapshot_metrics, ycharts_time_series); tools/call of the 51 others as the restricted profile -> entitlement_denied 51 of 51; the chokepoints with the MCP layer bypassed (tools._run 42, run_integration_tool 9) -> entitlement_denied 51 of 51; credential fetches (delegated Graph token, silent MSAL, integration credential providers), Graph calls and tool bodies during those 102 calls: 0; control: schwab_query served with 1 credential fetch
+.F
+OGZ1-AC9: restricted principals whose email domain query_v0 classes as opal-internal: opalinvest.com -> 403; handle() direct, opalinvest.com -> 403; opalinvest.dev -> 403; handle() direct, opalinvest.dev -> 403; catalog gate and S3 fetch calls 0; control: a principal with no profile at opalinvest.com -> 200, catalog gate called with principal class opal-internal, S3 fetch 1
+.
+OGZ1-AC10: base request in scope (0 failures); one dimension out at a time, 6 of 6 fail exactly that dimension: operations: operation 'describe' is not granted; masters: master '08335338' is not granted; datasets: dataset 'dim_balance' is not granted; accounts: 1 of 2 requested account(s) are not granted for master '08242234'; dates: 1 of 2 requested date(s) are outside the granted fixed_dates; columns: column(s) ['cost_basis'] are not granted for dataset 'dim_position'; download_original -> operations (disabled by the contract); the same account id under the other granted master -> accounts only; rolling window anchored at 2026-09-11: 2026-08-13 in, 2026-08-12 out, no qualified date -> dates; raw account ids in the reasons 0; malformed scopes refused 6 of 6; through the store: allowed at grant revision 1, a column outside -> ['columns'], after revocation -> profile
+.
+OGZ1-AC11: identity-scope entries 1 (seed + identity_tool_allowlist.txt overlay) + 1 unlisted internal user; registered tools 51; opalbloomberg@opalinvest.com (allowlist 11): discovery before == after (51 tools), dispatch verdicts before == after 51 of 51 (bodies reached 8); unlisted.internal@opalinvest.com (allowlist 0): discovery before == after (51 tools), dispatch verdicts before == after 51 of 51 (bodies reached 36); control: a restricted principal before -> discovery 51, reached 36; after -> discovery 0, reached 0
+.
+OGZ1-AC12: restricted profile scoped by an overlay row: bodies reached ['schwab_list_files'], discovery 3; row removed (identity_scope now returns None -- unlisted): bodies reached ['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files'], discovery 3, legacy tools reached 0 of 51 and listed 0 of 51; control: a principal with no profile and an overlay row -> reached ['whoami'], row removed -> reached 36 tools (the unlisted path reopens for it)
+.......................
+OGZ2-AC1: 3 of 3 empty/unknown-identity candidates refused
+.
+OGZ2-AC2: 2 of 2 (unapproved account, unapproved field) candidates refused
+.
+OGZ2-AC3: 2 of 2 malformed-date candidates refused
+.
+OGZ2-AC4: diff printed by prepare() (7 dimension lines) precedes the activate() call
+.
+OGZ2-AC5: stale base (None, now superseded) refused with ConditionFailed;
+current base (revision 1) activated to revision 2
+.F
+OGZ2-AC7: revoke() -> 1 transact_write_items call, 0 Delete items, 0 delete_item calls; profile still readable, status=revoked revision=2; a direct delete Op is refused before any AWS call
+.
+OGZ2-AC8: DENOMINATOR 60 registered tool(s) (42 native + 9 integration across ['blackdiamond', 'globgrph', 'opal_discover', 'opal_portal', 'portal_index', 'schwab', 'ycharts']) backed by 26 file(s) scanned -- 0 hit(s)
+
+OGZ2-AC8/MXC4-AC9: per-integration pin mismatches=[]
+.
+OGZ2-AC9: operator role ARN accepted (role+assumed-role form); runtime role ARN 'arn:aws:iam::313476888478:role/opal-gateway-role' refused (role+assumed-role form)
+............................. [ 29%]
+....................................
+OGA1-AC1: registration 201 JSON for 4 redirects; authorize accepted 7 of 7 registered forms (any loopback port), refused 11 of 11 unregistered forms; hosted-only client: loopback refused, callback accepted
+.
+OGA1-AC2: 11 of 11 hosted/malformed registrations refused invalid_redirect_uri, 0 client records written; control https://claude.ai/api/mcp/auth_callback -> 201, 1 client record
+.
+OGA1-AC3: same code -- no client_id 400 invalid_request; other client 400 invalid_grant; issued client_id 200 (token client_id=mcp-NIeQpuGjB0-x8clqsHqlng)
+.
+OGA1-AC4: 4 of 4 unregistered client_ids refused 400, upstream hops 0, pending records 0; registered control 307, 1 pending record
+.
+OGA1-AC5: advertised http://localhost:8080/mcp; authorize other=400 adv=307 none=307; code exchange other=400 adv=200; refresh other=400 adv=200; token aud == advertised
+.
+OGA1-AC6: authorize plain=400 absent-method=400 absent-challenge=400 S256=307; token wrong-verifier=400 plain-trick=400 right-verifier=200; advertised ['S256']
+.
+OGA1-AC7: first redemption 200, second 400 invalid_grant; family from the first: revoked (authorization_code_replay), its refresh 400
+.
+OGA1-AC8: write calls during one refresh: 1 (transact_write_items), items 3 ['Update', 'Update', 'Put'], every item conditional; head generation 1 -> 2; g1 consumed, g2 installed with the successor's sha256; raw refresh tokens found in the table: 0
+.
+OGA1-AC9: reuse of consumed g1 -> 400 invalid_grant, family revoked (refresh_token_reuse); newest g2 -> 400; control family's newest -> 200
+.
+OGA1-AC10: 8 concurrent refreshes of one token -> 1 x 200, 7 x 400 invalid_grant; head generation 2, successors installed 1 (generation records 2: g1 consumed + g2); the one successor refreshes -> 200
+.
+OGA1-AC11: family scope 'mcp mcp.read'; broader request -> 400 invalid_scope (no rotation); narrower 'mcp.read' -> 200, recorded on head (scope_reduced_at) and g2 (scope_reduced_from); no-scope refresh -> 'mcp.read'; re-broaden -> 400 invalid_scope; configured set grown -> 'mcp.read'
+.
+OGA1-AC12: access exp-iat=900 expires_in=900; head absolute-created=2592000 idle-last_used=604800; idle 7d-1s -> 200, 7d -> 400 (record present); absolute 30d-1s -> 200, 30d -> 400 (record present, idle not reached)
+.
+OGA1-AC13: after restart, resume -> 302 to the bound redirect with the original state, token sub=resume@opalinvest.com; lost transaction arms ['expired', 'gone', 'nonce'] -> 400 restart_login each, upstream identity lookups 0, codes minted 0
+.
+OGA1-AC14: module-level mutable OAuth stores in oauth_as.py: 0; client registered, restart, authorize -> 307; same client_id over a table without the registration -> 400 invalid_client
+.
+OGA1-AC15: store failing -> code 503, refresh 503, register 503, authorize 503, legacy JWT refresh 400, alarms 4; store healthy -> same code 200, same refresh 200, legacy JWT refresh 400
+.
+OGA1-AC16: 13 fields compared equal to the enforced configuration (issuer, authorization_endpoint, token_endpoint, registration_endpoint, jwks_uri, scopes_supported, code_challenge_methods_supported, grant_types_supported, response_types_supported, token_endpoint_auth_methods_supported, resource, authorization_servers, scopes_supported(prm)); endpoints routed; token iss/aud/scope == advertised; plain, response_type=token, other resource, client_secret_basic and client_credentials all refused
+.
+OGA1-AC17: token exchange as JSON -> 400 invalid_request; the same code as form -> 200 (Cache-Control no-store); registration as form -> 400
+.
+OGA1-AC18: 12 parallel connections; max server time (s) per class, n: discovery 0.052 n=24, registration 0.057 n=12, authorize 0.109 n=12, callback 0.547 n=12, token 1.072 n=12, refresh 0.950 n=24; budgets 10/30; overrun arm (1.5 s work, 0.3 s budget): registration 503 in 0.31 s, refresh 503 in 0.32 s
+...............F... [ 44%]
+....FF...................EEEEEEEEEEE...........EEE......FEEEE
+AUTHKIND: [('ASSUMED_ROLE', 'assumed_role'), ('DELEGATED_USER', 'delegated_user'), ('NONE', 'none'), ('SHARED_SECRET', 'shared_secret')]
+STS: 2 AssumeRole call(s), 2 of 2 roles with their own ExternalId, duration 900s
+  reader  gateway-schwab-read-role ExternalId=ogk1-reader-external-id-0001
+  catalog gateway-schwab-catalog-read-role ExternalId=ogk1-catalog-external-id-0002
+SIGNED BY: 2 of 2 sts client(s) built from the ambient identity (no role chaining)
+CONFIG REFUSALS: 4 of 4, each before any STS call:
+  a role the contract does not name  -> SCHWAB_READER_ROLE_ARN names role 'opal-assets-read'; the contract's reader_role is 'gateway-schwab-read-role' -- refusing a role the contract does not name
+  no ExternalId                      -> SCHWAB_READER_EXTERNAL_ID is not set to a well-formed ExternalId
+  not an ARN                         -> SCHWAB_CATALOG_ROLE_ARN is not set to an IAM role ARN
+  one ExternalId reused              -> SCHWAB_READER_EXTERNAL_ID and SCHWAB_CATALOG_EXTERNAL_ID carry the same ExternalId; each role's trust is its own (PRD C6)
+.
+ORDER (fresh):   ['policy:call', 'policy:allowed', 'sts:AssumeRole:gateway-schwab-read-role']
+ORDER (denied):  ['policy:call', 'policy:denied'] -- 0 STS calls
+ORDER (cached):  ['policy:call', 'policy:allowed'] -- 0 STS calls, policy still ran
+ORDER (expired): ['policy:call', 'policy:allowed', 'sts:AssumeRole:gateway-schwab-read-role']
+CATALOG BUILD:   2 of 2 AssumeRole call(s) preceded by an allowed policy check
+POLICY: app/data_entitlement.py authorize() over the moto DynamoDB table, grant revision 1
+.
+FAILING ADAPTER: status=unavailable classes=('DEPENDENCY_UNAVAILABLE',) | s3 clients built 0 | s3 calls 0 | ambient-key s3 calls 0 of 0
+HEALTHY ADAPTER: status=complete | s3 clients built 2, all from assumed-role keys ['ASIAUR7FNW6PGYSBSKH7', 'ASIAUR7FNW6PI5XFXDEN'] | ambient-key s3 calls 0 of 10
+ROLES ASSUMED: ['arn:aws:iam::313476888478:role/gateway-schwab-catalog-read-role', 'arn:aws:iam::313476888478:role/gateway-schwab-read-role']
+.
+CATALOG ROLE (gateway-schwab-catalog-read-role): 1 key(s), 1 of 1 under the contract's 2 completion prefixes; ops ['GetObject']
+  schwab/08242234/meta/complete/date=2026-07-10.json
+DATA ROLE (gateway-schwab-read-role): 3 key(s), 3 of 3 under the contract's 6 data prefixes; ops ['GetObject', 'HeadObject']
+  schwab/08242234/silver/dim_asset/date=2026-07-10/data.parquet
+  schwab/08242234/silver/dim_balance/date=2026-07-10/data.parquet
+  schwab/08242234/silver/dim_position/date=2026-07-10/data.parquet
+CROSSED: catalog-role keys under a data prefix 0 of 1; data-role keys under a completion prefix 0 of 3; ambient-key calls 0 of 10
+.
+NAMED: 7 object(s) in the closure; 3 under the contract's data_prefixes
+HEADED BY VersionId: 3 of 3
+  schwab/08242234/silver/dim_asset/date=2026-07-10/data.parquet 16ba77e1-d06b-4122-ac8f-48172ff5c3d2
+  schwab/08242234/silver/dim_balance/date=2026-07-10/data.parquet b95479d7-b8c7-4ca6-95d7-158ae337294b
+  schwab/08242234/silver/dim_position/date=2026-07-10/data.parquet 8fecd2b7-f77c-48f5-933b-6885949848ed
+.
+ARMS: 4 of 4, one fixture each (no arm is complete):
+  changed      2026-07-08 -> status=unavailable classes=('VERSION_CHANGED',)
+  null         2026-07-02 -> status=incomplete  classes=('UNVERSIONED_OBJECT',)
+  unavailable  2026-07-09 -> status=incomplete  classes=('VERSION_CHANGED', 'VERSION_UNAVAILABLE')
+  unversioned  2026-06-24 -> status=incomplete  classes=('INCONSISTENT_RECORD', 'UNVERSIONED_OBJECT')
+.
+REJECTED: 3 of 3 arms, each with 0 silver reads:
+  another bucket   -> result=rejected classes=('REJECTED_FOREIGN_BUCKET',)
+  another dataset  -> result=rejected classes=('INCONSISTENT_GRAIN', 'INCONSISTENT_RECORD', 'REJECTED_FOREIGN_DATASET')
+  another master   -> result=rejected classes=('INCONSISTENT_GRAIN', 'REJECTED_FOREIGN_MASTER')
+CONTROL: the same marker without the foreign name -> status=complete, 3 file(s)
+.
+SNAPSHOT KEY: RUNTIME#catalog#08242234#2026-07-10#sha256:e6a24f7564c6af38e9d87c9294e42ab57f27c56f63dd158537a0999ee6593f53 / catalog_snapshot
+CLOSURE: sha256:e6a24f7564c6af38e9d87c9294e42ab57f27c56f63dd158537a0999ee6593f53 (schema opal.silver.closure/v1), marker version eb2c2d72-32b3-4579-8742-d2896b261367
+VALIDATION: qualified
+FILES: 3 of 3 contract datasets, each with 8 of 8 required fields:
+  dim_asset    version=1a9b75a7-1355-4704-b0b7-fc80eb0291ba size=8425 rows=4 sha256:a35d0120e0bc id=sf-51646ec505bf996c880bef3e9ac97924
+  dim_balance  version=5b492851-0177-406e-80b0-3ab3deec4e88 size=10687 rows=3 sha256:04f7cfa48480 id=sf-4f164dec3b83b690a10a786e100d69f7
+  dim_position version=e3dfe8e2-09df-4cdc-b343-6d44573c54f6 size=8663 rows=5 sha256:84c8ba1dfc8f id=sf-d713bdc85b4340dc9f0c10b07790c689
+.
+KEY: RUNTIME#catalog#08242234#2026-07-10#sha256:7b57bfa906ca84a6107ec2fd5d904d7c70e15676faf449ff77db8f12a393740e
+WRITES: 1 accepted, 2 refused of 2 attempted (identical body and mutated body), refusal=ConditionFailed
+STORED ITEM: unchanged (byte-equal DynamoDB item before and after both refusals)
+REBUILD: reused=True, 3 of 3 file IDs identical
+.
+SAME KEY: schwab/08242234/meta/complete/date=2026-06-25.json
+LEGACY v1 MARKER (9 field(s), no closure): status=unavailable result=legacy_marker, 0 silver read(s)
+QUALIFIED CLOSURE, same date: status=complete, 3 file(s), closure sha256:39eb291eda3b7232
+.
+ANCHOR AND WINDOW, per master and dataset (29 days before the anchor, inclusive):
+  08242234 dim_position latest=2026-07-13 window=[2026-06-14 .. 2026-07-13] available=4 of 13 evaluated: ['2026-07-07', '2026-07-09', '2026-07-10', '2026-07-13']
+  08242234 dim_asset    latest=2026-07-10 window=[2026-06-11 .. 2026-07-10] available=4 of 14 evaluated: ['2026-06-11', '2026-07-07', '2026-07-09', '2026-07-10']
+  08335338 dim_position latest=2026-07-10 window=[2026-06-11 .. 2026-07-10] available=2 of 2 evaluated: ['2026-07-09', '2026-07-10']
+BOUNDARY: 2026-06-11 (anchor-29) is in dim_asset's window; 2026-06-10 (anchor-30) is in no window
+PER DATASET: 2026-07-13 delivers rld+rps only, so dim_position's anchor is 2026-07-13 while dim_asset's is 2026-07-10
+. [ 59%]
+
+ENUMERATED: 5 date(s) asked; 3 served; 2 refused
+  2026-06-24 -> ['NO_MARKER']
+  2026-07-08 -> ['VERSION_CHANGED']
+NO WINDOW APPLIED: 2026-06-01 is 39 days before the latest qualified date and is served under the enumeration
+OUTSIDE THE SET: 2026-07-10 is complete and is NOT served
+REFUSALS: 4 of 4
+  a date that is not one   -> fixed date '2026-02-30' is not a calendar date
+  a mode the contract lacks -> date mode 'everything' is not one of the contract's (('rolling_complete_window', 'fixed_dates'),)
+  fixed with no dates      -> a fixed_dates grant is an enumerated date set; none was given
+  rolling with dates       -> a rolling_complete_window grant enumerates no dates
+.
+ROLLING: available_dates=['2026-07-07', '2026-07-09', '2026-07-10'] latest_qualified_date=2026-07-10 (evaluated 12 of 13 listed)
+FIXED:   available_dates=['2026-07-09'] latest_qualified_date=2026-07-09; refused [('2026-06-29', ['MISSING_OUTPUT'])]
+NOTHING QUALIFIED: available_dates=[] latest_qualified_date=None staleness=None -- stated, not omitted
+.
+ACROSS DATASETS: 2026-07-13 delivered rld+rps; dim_position lists it, dim_asset does not (reason [['DATASET_NOT_IN_CLOSURE']])
+ACROSS MASTERS: SmartX serves ['2026-07-07', '2026-07-09', '2026-07-10', '2026-07-13']; BlackDiamond serves ['2026-07-09', '2026-07-10']; SmartX-only dates never appear under BlackDiamond: ['2026-07-07', '2026-07-13']
+FIXED GRANT of a SmartX-only date under BlackDiamond: []
+FILES: 9 of 9 resolve to their own master/dataset/date key
+.
+CLOCK: 2026-07-13T14:00:00Z (MANIFEST.json clock_utc)
+ROLLING: latest=2026-07-10 days_since_business_date=3 source_observed_at=2026-07-10T12:00:00Z catalog_validated_at=2026-07-13T14:00:00Z
+CLOCK + 1 DAY: days_since_business_date=4 (same business date)
+FIXED GRANT of 2026-06-01: days_since_business_date=42
+BASIS: calendar days from the Schwab business-date label to the Gateway clock's UTC date; no business calendar is applied, so this is not a claim about lateness
+.
+SWEEP: 8 availability responses (2 masters x 4 datasets, rolling)
+DATA ROLE HEAD+GET: 86 call(s) over 21 distinct key(s); 21 of 21 under the 6 data_prefixes read from C:\tmp\mx-rb11\org\standards\NFRA_OPLGTW_CONTRACT.json
+CATALOG ROLE: 15 distinct key(s); 15 of 15 under the 2 completion_prefixes
+NOT VACUOUS: the bucket's closures name 90 distinct object(s), of which 53 lie outside the data_prefixes; 0 of those 53 were HEADed or GOT
+AMBIENT KEY: 0 of 201 calls
+.
+CLOSURE sha256:5bace126eaf705c3 names 7 object(s): 3 dim, 4 fact
+  fact named, never read: schwab/08242234/silver/fact_rld/date=2026-07-10/data.parquet
+  fact named, never read: schwab/08242234/silver/fact_rps/date=2026-07-10/data.parquet
+  fact named, never read: schwab/08242234/silver/fact_rps_s2/date=2026-07-10/data.parquet
+  fact named, never read: schwab/08242234/silver/fact_sec/date=2026-07-10/data.parquet
+ARM 1 (all objects present): status=complete, 3 file(s) on dims, 0 of 4 S3 calls under a fact_ key
+ARM 2 (one DIM object deleted, same closure_id): status=incomplete classes=('VERSION_UNAVAILABLE',), 0 S3 call(s) under a fact_ key
+EMULATOR: moto 5.2.3 (boto3 1.43.46, botocore 1.43.46)
+.EErc=124
