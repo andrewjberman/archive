@@ -63,6 +63,22 @@ def main():
     om, nm = rows_by(served_m, mk), rows_by(mention, mk)
     m_gone = [k for k in om if k not in nm]
     m_changed = [k for k in nm if k in om and nm[k] != om[k]]
+    # ADDENDUM 1 (CTO half @e24ca120a2): with a widened universe file, a served row may change ONLY in the co-mention
+    # fields and only when what it NEWLY co-mentions is a non-empty subset of the keys the file adds over the base file.
+    base_keys = {r["security_key"] for r in json.load(open(sg.UNIVERSE, encoding="utf-8"))}
+    added_keys = {r["security_key"] for r in securities} - base_keys
+    before_rows = {mk(r): r for r in served_m}
+    after_rows = {mk(r): r for r in mention}
+    co_fields = {"co_mention_count", "co_mentioned_securities", "is_roundup"}
+
+    def co_mention_only(k):
+        a, b = after_rows[k], before_rows[k]
+        diff = {f for f in set(a) | set(b) if json.dumps(a.get(f), default=str) != json.dumps(b.get(f), default=str)}
+        new_co = set(a.get("co_mentioned_securities") or []) - set(b.get("co_mentioned_securities") or [])
+        return diff <= co_fields and bool(new_co) and new_co <= added_keys
+
+    m_co_only = [k for k in m_changed if co_mention_only(k)]
+    m_changed = [k for k in m_changed if k not in set(m_co_only)]
     m_added = [k for k in nm if k not in om]
     new_days = {}
     for r in mention:
@@ -81,7 +97,8 @@ def main():
     d_other = [k for k in d_changed if not explained(k)]
     out = {"measured_at": datetime.datetime.now(datetime.timezone.utc).isoformat(), "as_of": str(as_of),
            "mention": {"served": len(served_m), "built": len(mention), "gone": len(m_gone), "changed": len(m_changed),
-                       "added": len(m_added), "key": mkey, "bytes": len(mbody)},
+                       "added": len(m_added), "co_mention_only_changes": len(m_co_only), "added_universe_keys": sorted(added_keys),
+                       "key": mkey, "bytes": len(mbody)},
            "daily": {"served": len(served_d), "built": len(daily), "gone": len(d_gone), "changed": len(d_changed),
                      "added": len(d_added), "changed_explained": len(d_changed) - len(d_other),
                      "changed_other": len(d_other), "other_sample": [list(k) for k in d_other[:20]],
@@ -89,8 +106,9 @@ def main():
            "securities_with_new_mentions": len(new_days), "puts_sent": 0}
     json.dump(out, open(OUT, "w", encoding="utf-8"), indent=1, default=str)
     m, d = out["mention"], out["daily"]
-    print("MENTION: served %d -> built %d; gone %d, changed %d, added %d" % (m["served"], m["built"], m["gone"],
-                                                                         m["changed"], m["added"]))
+    print("MENTION: served %d -> built %d; gone %d, changed %d, added %d; co-mention-only changes %d (added universe keys %d)"
+          % (m["served"], m["built"], m["gone"], m["changed"], m["added"], m["co_mention_only_changes"],
+             len(m["added_universe_keys"])))
     print("DAILY: served %d -> built %d; gone %d, added %d, changed %d (on securities with new mentions %d, OTHER %d)"
           % (d["served"], d["built"], d["gone"], d["added"], d["changed"], d["changed_explained"], d["changed_other"]))
     print("SECURITIES WITH NEW MENTIONS: %d" % out["securities_with_new_mentions"])

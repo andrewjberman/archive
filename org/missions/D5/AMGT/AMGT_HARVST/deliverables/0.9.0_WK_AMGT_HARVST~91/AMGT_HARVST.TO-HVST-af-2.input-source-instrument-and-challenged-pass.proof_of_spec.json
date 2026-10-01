@@ -14,12 +14,12 @@
     "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-af-2.input-source-instrument-and-challenged-pass.md"
   },
   "assignee": "0.9.0_WK_AMGT_HARVST~91",
-  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~91 on branch wk-AMGT_HARVST-91-r33 (base CLOUD 058d094e4a), TREE-OK. PHASE A: input_source.InputSourceMonitor (WH_MOUSE_LL + WH_KEYBOARD_LL on a private message-loop thread, LLMHF/LLKHF injected + lower-IL flags, installer seam for tests); verification.solve()/renew() take an optional monitor and stamp solved_at (UTC ISO) when given; 4 plants; seam run: one SendInput move -> injected 1, hardware 0. PHASE B: five runs under the monitor in the main-tree bbg/wsj/barrons profiles, hardware_input_events 0 in all five; bbg met a PerimeterX press-and-hold 403 once (run 1, unhandled by that driver), a later solve attempt raised 'Frame was detached' (row S12), and the 10-request cap was reached with no pass; wsj and barrons met no slider in two runs each (6 of 10 requests each). AC2 therefore FAILS: no challenged pass (row S11). No ft/sa traffic, no residential proxy, no Secrets write, no vision/AI API.",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~91 on branch wk-AMGT_HARVST-91-r33b (base CLOUD 83271415ba), TREE-OK. Recut under AMENDMENT 1. Z-W91-S12: verification._relocating re-locates the control once on the page's current frames after a 'Frame was detached' (no request), a second detach ends solve() passed false (test_v); collector suite 457 passed, 1 skipped (base 456/1). Challenged pass: ONE bbg collector job for BA (floor 2026-09-24, --new-only --no-sign-in) through the package's own main() in the same process as InputSourceMonitor (af2_driver.py), window 12:45:56.68Z..12:50:00.94Z, hardware 0, injected 24. The job: status new_articles, 8 accepted, 12 in-tab requests (cap 15, none a search): sitemaps 2026-10 and 2026-9 200, article 1 attempt 1 403 bot_check bloomberg_press_and_hold, solver press_and_hold_adaptive, challenge_passed event 12:47:34.32Z, retried request attempt 2 200, 7 further articles 200. The main runtime's worker.lock was held by the issuer's ft backfill, so the job ran on this worktree's runtime root (row Z-W91-S14); the bbg profile junction and the bbg.dpapi copy were removed afterwards. wsj and barrons not re-run (none). No ft/sa traffic, no search, no proxy, no Secrets write, no vision/AI API.",
   "artifacts_produced": [
     {
       "path_or_key": "lib/opal_data_harvest/input_source.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "fec699e075",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "InputSourceMonitor; hardware vs injected counts from the hook flags; always unhooks.",
       "artifact_covered_by": [
@@ -29,9 +29,9 @@
     {
       "path_or_key": "lib/opal_data_harvest/verification.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "640483677d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "solve()/renew() accept monitor= and stamp solved_at (UTC ISO) only when a monitor is given; no other change.",
+      "deploy_evidence": "solve()/renew() accept monitor= and stamp solved_at; solve() re-locates the control once on a 'Frame was detached' (Z-W91-S12).",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -39,9 +39,9 @@
     {
       "path_or_key": "lib/opal_data_harvest/test_af2_input_source.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "640483677d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "4 tests, plants (i)-(iv).",
+      "deploy_evidence": "5 tests: plants (i)-(iv) plus (v) the Z-W91-S12 detached-frame re-locate.",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -49,7 +49,7 @@
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~91/af2_seam.out",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "fec699e075",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "seam run: SendInput move under the monitor -> injected 1, hardware 0.",
       "artifact_covered_by": [
@@ -61,7 +61,17 @@
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the record AC2 reads; bbg passed false (403 signature), wsj/barrons none; runs 1-5 listed.",
+      "deploy_evidence": "the record AC2 reads: bbg bloomberg_press_and_hold / press_and_hold_adaptive / passed true / solved_at 12:47:34Z inside the window; hardware 0; wsj/barrons none.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~91/af2_driver.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "driver: monitor + collector main() in one process; output af2_job_monitor.json, af2_job_run_record.json, af2_job_events.jsonl, af2_job_stdout.txt.",
       "artifact_covered_by": [
         "AC2"
       ]
@@ -73,8 +83,8 @@
       "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_af2_input_source.py -rA --tb=line -- expect: passed",
       "method": "command",
       "invocation": "python -m pytest lib/opal_data_harvest/test_af2_input_source.py -rA --tb=line",
-      "output_evidence": "rc 0. Last line: 4 passed. Output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~91/af2_ac1_output.txt. Collector suite: 446 passed, 1 skipped (org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~91/af2_suite.txt; base 442 passed, 1 skipped).",
-      "denominator": "4 of 4 tests passed",
+      "output_evidence": "rc 0. '5 passed in 0.06s'. Output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~91/af2_ac1_output.txt. Collector suite: 457 passed, 1 skipped (org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~91/af2_suite.txt; base 456 passed, 1 skipped).",
+      "denominator": "5 of 5 tests passed",
       "status": "PASS"
     },
     {
@@ -82,22 +92,21 @@
       "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round33/checks/af-2.AC2.py -- expect: AC2 RESULT: PASS",
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round33/checks/af-2.AC2.py",
-      "output_evidence": "rc 1. 'INSTRUMENT: windows_low_level_hooks(...); window 2026-10-01T11:51:33Z .. 11:53:54Z; hardware 0, injected 12'; 'CHALLENGED PASSES: 0 ()'; 'AC2 RESULT: FAIL (1 failure(s))'; 'FAIL: no publisher met a challenge and passed it'. Output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~91/af2_ac2_output.txt. hardware_input_events is 0 and the instrument is named; the sole failure is that no challenge was met and passed within the 10-request cap (row AMGT_HARVST-Z-W91-S11).",
-      "denominator": "0 of 3 publishers met a challenge and passed it",
-      "status": "FAIL",
-      "status_reason": "No publisher met a challenge and passed it inside the 10-request-per-publisher cap: bbg met a PerimeterX press-and-hold 403 once (run 1, no solve step in that driver), a later solve attempt raised 'Frame was detached', and the budget was then spent; wsj and barrons met no DataDome slider in two runs each. Instrument side is met (hardware_input_events 0, instrument named, seam injected 1 / hardware 0). Row AMGT_HARVST-Z-W91-S11 (disarm_owner 2.0.0_SA_COO~H)."
+      "output_evidence": "rc 0. 'INSTRUMENT: windows_low_level_hooks(...); window 2026-10-01T12:45:56.681747+00:00 .. 2026-10-01T12:50:00.936932+00:00; hardware 0, injected 24'; 'bbg challenge=bloomberg_press_and_hold path=press_and_hold_adaptive passed=True solved_at=2026-10-01T12:47:34.317801+00:00'; 'CHALLENGED PASSES: 1 (bbg)'; 'AC2 RESULT: PASS (0 failure(s))'. Output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~91/af2_ac2_output.txt.",
+      "denominator": "1 of 3 publishers met a challenge and passed it (wsj, barrons not re-run: none)",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
       "description": "input_source.MOUSE_INJECTED_MASK set to 0 (no mouse event ever classed injected).",
       "expected": "test_i fails",
-      "observed": "1 failed, 3 passed: test_i assert (2 == 4) (org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~91/af2_mutant_mouse_mask.txt); file restored, 4 passed",
+      "observed": "1 failed, 3 passed (round-1 control): test_i assert (2 == 4) (org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~91/af2_mutant_mouse_mask.txt); file restored",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AC1 run four times",
-      "observed": "4 passed each",
+      "method": "AC1 run three times (before the commit, at the AC run, in the suite)",
+      "observed": "5 passed each",
       "status": "STABLE"
     }
   },
@@ -107,8 +116,8 @@
       "reason": "The issuer's running backfills; nothing was sent to ft.com or seekingalpha.com."
     },
     {
-      "item": "a bbg/wsj/barrons request beyond 10 per publisher, and any search",
-      "reason": "The cap bound the run; the bbg budget is spent (10 of 10)."
+      "item": "wsj/barrons traffic and any search",
+      "reason": "Amendment 1 item 4: not re-run; bbg used 12 of 15 requests, none a search."
     },
     {
       "item": "seam run as a proof control",
@@ -118,7 +127,9 @@
   "surprises": [
     "AMGT_HARVST-Z-W91-S11",
     "AMGT_HARVST-Z-W91-S12",
-    "AMGT_HARVST-Z-W91-S13"
+    "AMGT_HARVST-Z-W91-S13",
+    "AMGT_HARVST-Z-W91-S14",
+    "AMGT_HARVST-Z-W91-S15"
   ],
   "compiler_tools": [
     {

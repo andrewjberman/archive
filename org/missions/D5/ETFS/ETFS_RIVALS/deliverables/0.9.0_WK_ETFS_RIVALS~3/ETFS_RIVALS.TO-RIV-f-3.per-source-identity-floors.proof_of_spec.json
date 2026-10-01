@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-f-3.per-source-identity-floors",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "53784a663e",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-f-3.per-source-identity-floors.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "53784a663e"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/guardrails.py",
+      "kind": "script",
+      "commit_or_etag": "a1a01427c9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 code cell; no served write, no deploy; check runs against a local sink and live S3 read-only mirrors",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/guardrails_config.json",
+      "kind": "script",
+      "commit_or_etag": "a1a01427c9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 code cell; no served write, no deploy; check runs against a local sink and live S3 read-only mirrors",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_f3_identity_floors.py",
+      "kind": "script",
+      "commit_or_etag": "a1a01427c9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 code cell; no served write, no deploy; check runs against a local sink and live S3 read-only mirrors",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "with an impossible Bloomberg floor via the override, TXUE fails identity_coverage naming 'bloomberg'; IDVZ (home) and BASG (issuer) pass their own floors -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round4/checks/f-3.AC1.py",
+      "output_evidence": "publish: PARTIAL\n  TXUE: FAIL -- 49 of 49 non-cash lines identified (min 0.9); 49 of 49 resolved by the crosswalk (floor 1.01 for source bloomberg; min_resolved_fraction); t\nOK:   TXUE (bloomberg) FAILS its own impossible floor, reason names the source\n  IDVZ: PASS -- 41 of 41 non-cash lines identified (min 0.9); 0 of 41 resolved by the crosswalk (floor 0.0 for source home_producer fund IDVZ; min_resolved_\nOK:   IDVZ (home, 0.0 resolved) PASSES its own floor\n  BASG: PASS -- 34 of 34 non-cash lines identified (min 0.9); 0 of 34 resolved by the crosswalk (floor 0.0 for source issuer; min_resolved_fraction); thresh\nOK:   BASG (issuer) PASSES its own floor\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (TXUE, IDVZ, BASG); unit tests 7 of 7 plus 45 of 45 existing p1/p2/r3 tests pass",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted: the check's own negative arm is the impossible Bloomberg floor 1.01, which flips TXUE to FAIL while the other two sources stay PASS.",
+      "expected": "TXUE FAIL naming bloomberg; IDVZ and BASG PASS",
+      "observed": "as expected, 3 of 3 OK",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run twice after the commit on live read-only inputs",
+      "observed": "AC1 RESULT: PASS 0 failures both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The order says to leave the flip to the issuer; the task order file is outside this cell's <paths>."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~3 <0.9.0_WK_ETFS_RIVALS~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "a1a01427c9"
+    }
+  ]
+}
