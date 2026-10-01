@@ -47,10 +47,16 @@ def live(rules_path, probe_path):
     print("live rules carrying /hx/: %d %s" % (len(hits), hits))
     ok = len(hits) == 1 and hits[0][1] == PATHS and hits[0][2] == ["forward"]
     p = json.load(open(probe_path, encoding="utf-8"))
-    for k in ("hx_mail", "hx_transcripts", "control"):
+    for k in ("hx_mail", "hx_transcripts", "control", "root", "mcp"):
         print("probe %s: status %s, redirects to sign-in %s" % (k, p[k]["status"], p[k]["to_signin"]))
-    ok &= not p["hx_mail"]["to_signin"] and not p["hx_transcripts"]["to_signin"]
-    ok &= p["control"]["to_signin"]  # negative control: a non-/hx path still meets the OIDC sign-in
+    app_refused = [isinstance(p[k]["status"], int) and 400 <= p[k]["status"] < 500 and not p[k]["to_signin"]
+                   for k in ("hx_mail", "hx_transcripts")]
+    print("both /hx/ probes refused BY THE APP (4xx, no sign-in): %s" % all(app_refused))
+    ok &= all(app_refused)
+    # negative arms (CTO 27605 condition 4, as measured): a non-/hx path and / still meet the OIDC sign-in; /mcp is
+    # unchanged -- its own forward rule (priority 10) answers 401 from the app, never the sign-in.
+    ok &= p["control"]["to_signin"] and p["root"]["to_signin"]
+    ok &= p["mcp"]["status"] == 401 and not p["mcp"]["to_signin"]
     done(ok)
 
 
