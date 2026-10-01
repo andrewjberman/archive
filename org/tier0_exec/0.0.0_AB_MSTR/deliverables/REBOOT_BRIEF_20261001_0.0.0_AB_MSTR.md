@@ -49,6 +49,7 @@ Order: `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261001_161xZ_DE
   push after the reboot needs ONE merge of the two first (whoever pushes second merges), on Andrew's word; expect overlap.
 - WALKER AT THE REBOOT: site-Z 2.0.0_SA_COO~D ARMED the shared walker at 16:33Z (bus ee5b1f32). If no site-Z DISARMED is
   in the queued bus mail when you come up, the account is site Z's: clear no laptop walk until it arrives.
+  UPDATE 16:47Z: that walk DISARMED at 16:45:38Z (bus 8f825c10); the account was free at the checkpoint. Read the queue anyway.
 
 ## 6. Not done and not known
 - The surprise-channel rows in section 4 are not written.
