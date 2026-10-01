@@ -16,8 +16,9 @@ read -r cred pstart tmpf redir adddir refs orc elev envv drive <<EOF
 $(python - "$T/l.ps1" <<'PY'
 import re, sys
 raw = open(sys.argv[1], encoding="utf-8", errors="replace").read()
-code = "\n".join(l for l in raw.splitlines() if not l.lstrip().startswith("#"))
-code = re.sub(r"<#.*?#>", "", code, flags=re.S)
+# block comments first: stripping '#' lines first drops the '#>' closer and leaves the block's body as code (row Z-W24-S1)
+code = re.sub(r"<#.*?#>", "", raw, flags=re.S)
+code = "\n".join(l for l in code.splitlines() if not l.lstrip().startswith("#"))
 j = re.sub(r"`\r?\n\s*", " ", code)
 cred = sum(1 for m in re.finditer(r"Start-Process\b[^\n]*", j) if "-Credential" in m.group(0))
 print(cred,
