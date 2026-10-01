@@ -1,0 +1,79 @@
+{
+  "slug": "nfra-mcpindex-r6-bd-merge-retire",
+  "title": "NFRA_MCPINDEX MX-s-16: one writer per BD silver table (unrealized, allocations, transactions retired behind bd-silver-merge; realized HELD)",
+  "author": "0.9.0_WK_NFRA_MCPINDEX~24",
+  "status": "OPEN",
+  "opened_at": "2026-10-01T10:35:03.336095+00:00",
+  "window_hours": 20.0,
+  "entry_path": "org/critical_paths/change_management/20261001T1035Z_nfra-mcpindex-r6-bd-merge-retire_deploy_completion.md",
+  "legs": [
+    {
+      "id": "U1",
+      "kind": "s3-prefix",
+      "target": "opal-data-bd code/silver/merge-daily-incremental.py (DS deploy via safe-deploy.sh; rollback ETag c54d0790)",
+      "proof_required": "safe-deploy MATCH line + head-object md5 91eaf248",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "U2",
+      "kind": "activation",
+      "target": "SSM opal-bd-unrealized-download no-op v4 set DEFAULT",
+      "proof_required": "Default==Latest==4 read-back",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "A1",
+      "kind": "activation",
+      "target": "SSM opal-bd-allocation-download no-op v6 set DEFAULT",
+      "proof_required": "Default==Latest==6 read-back",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "T0",
+      "kind": "verify",
+      "target": "read-only consumer trace of same-day silver/transactions/<date>.parquet existence",
+      "proof_required": "recorded readers list; 0 same-day-existence consumers else HOLD",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "T1",
+      "kind": "activation",
+      "target": "SSM opal-bd-transaction-download no-op v4 set DEFAULT (only if T0 clean)",
+      "proof_required": "Default==Latest==4 read-back",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "TF",
+      "kind": "activation",
+      "target": "safe-apply targeted plan sha af1537fd: rules unrealized+transaction+allocation DISABLED, ProcessAllocationFiles notification removed",
+      "proof_required": "Plan 0/4/0 line + Apply complete line + describe-rule DISABLED x3 + notification ids read-back",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "AC",
+      "kind": "verify",
+      "target": "s16.AC1 (3 of 4 tables at 1 writer, realized 2 by ruling) and s16.AC2 read-back; scheduled bd-silver-merge run ~00:1xZ reads failures=0 empty_stub=6 on unrealized",
+      "proof_required": "AC outputs + the scheduled run's log line",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "G1",
+      "kind": "git",
+      "target": "ledger entry + sentinel + deliverables committed on wk-nfra_mcpindex-6-24",
+      "proof_required": "commit hash",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261001T103503Z OPENED by 0.9.0_WK_NFRA_MCPINDEX~24 with 8 leg(s)"
+  ],
+  "last_red_at": null
+}
