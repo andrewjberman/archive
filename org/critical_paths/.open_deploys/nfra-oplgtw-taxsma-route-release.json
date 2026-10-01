@@ -1,0 +1,47 @@
+{
+  "slug": "nfra-oplgtw-taxsma-route-release",
+  "title": "NFRA_OPLGTW OG-tr-1 Tax SMA workbook route narrow gateway release, capability ON (train slot 6) on live 0a1d9079c6",
+  "author": "0.9.0_WK_NFRA_OPLGTW~15",
+  "status": "OPEN",
+  "opened_at": "2026-10-01T18:46:25.229194+00:00",
+  "window_hours": 4.0,
+  "entry_path": "org/critical_paths/change_management/20261001T1846Z_nfra-oplgtw-taxsma-route-release_deploy_completion.md",
+  "legs": [
+    {
+      "id": "upload",
+      "kind": "s3-prefix",
+      "target": "opal-313476888478-lambda-artifacts ec2/opal-gateway/opal-gateway-<release sha>.tar.gz and -latest with git-ref=release sha",
+      "proof_required": "deploy's own upload success lines + head-object git-ref",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "install_verify",
+      "kind": "ec2-baked-asset",
+      "target": "i-07dccb1615503ac99 /opt/opal-gateway release 3a7d6a7dc8 on live 0a1d9079c6",
+      "proof_required": "SSM deploy Success + /health 200 + shipped md5 == release + tools 65 -> 65 + .env 46 -> 48 keys (+TAXSMA_WORKBOOK_BEARER, +TAXSMA_WORKBOOK_IDENTITY) + ENABLED_INTEGRATIONS unchanged + /ms/* and /hx/* as before + M1 arm (mail and transcripts bearers read 401 UNAUTHORIZED_CAPABILITY on the Tax route) + tr.AC1.sh TAX ARMS 4 of 4",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "manifest",
+      "kind": "git",
+      "target": "infra/aws/ec2/EC2_MANIFEST.json services.opal-gateway deployed_commit=release sha on wk-NFRA_OPLGTW-15-r8",
+      "proof_required": "safe-commit hash + tr.AC2.sh PASS",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "rollback_proven",
+      "kind": "verify",
+      "target": "rollback tree /c/tmp/og-rb6 at 0a1d9079c6 with DEPLOY_BASE_REF=release sha (artifact 95 of 95 == live S3, built not uploaded; or executed if a verify fails)",
+      "proof_required": "rollback command named + artifact equality read",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261001T184625Z OPENED by 0.9.0_WK_NFRA_OPLGTW~15 with 4 leg(s)"
+  ],
+  "last_red_at": null
+}
