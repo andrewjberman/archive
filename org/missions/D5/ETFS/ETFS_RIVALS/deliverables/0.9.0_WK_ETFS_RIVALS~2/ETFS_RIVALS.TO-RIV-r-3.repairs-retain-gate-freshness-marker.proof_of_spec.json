@@ -1,0 +1,189 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ETFS_RIVALS.TO-RIV-r-3.repairs-retain-gate-freshness-marker",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D4/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "808f1eb30293ae4ea52082701067857393a653f6"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+  "vintage_commit": "d302af2186",
+  "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-r-3.repairs-retain-gate-freshness-marker.md"
+ },
+ "assignee": "0.9.0_WK_ETFS_RIVALS~2",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/silver_issuer.py",
+   "kind": "script",
+   "commit_or_etag": "5db308439c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "EDIT: the superseded-silver _delete is removed; earlier captures' silver is retained and recorded retained: True; a re-capture returns OK with a marker (row Z-S4). Not deployed (no deploy in this cell).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/sweep.py",
+   "kind": "script",
+   "commit_or_etag": "5db308439c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "EDIT: enrichment_gate returns (ok, why, held) and holds only the funds with a share-changing action in window; run_gold_chain passes hold_funds and reports detail.held_funds; run_dag rebuilds a held batch as <batch>-hNN once the hold changes (row W5-S23). Not deployed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+   "kind": "script",
+   "commit_or_etag": "5db308439c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "EDIT: held_funds(); hold_funds in the stage event; partial G5/G6 omit the held funds and record them (schema metadata, marker); a later run writes the next -vNN object, never an overwrite (row W5-S23). Not deployed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/publish_page.py",
+   "kind": "script",
+   "commit_or_etag": "5db308439c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "EDIT: FRESHNESS_ALLOWANCE + freshness_by_source (trading days per source, row W5-S28); the batch marker is written whenever a fund published and carries not_updated (row W1-S5). Not deployed.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r3_repairs.py",
+   "kind": "test",
+   "commit_or_etag": "5db308439c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: 7 pytest tests (held_funds, gate over a local sink, run_gold_chain hold, partial then -v02 object with G6, freshness allowances, fund_source, no marker when nothing publishes). Full rivalfunds suite: 197 passed, 2 skipped.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_s1_silver_issuer.py",
+   "kind": "test",
+   "commit_or_etag": "5db308439c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ASSERTION CHANGED: test_newer_capture_replaces_the_silver_of_an_older_one -> ..._supersedes_..._without_deleting; it asserted len(uris)==1 after a re-capture (the delete) and now asserts both objects kept, OK with a marker, retained: True.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_d1_sweep.py",
+   "kind": "test",
+   "commit_or_etag": "5db308439c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ASSERTIONS CHANGED where they encoded the round-2 whole-batch hold: the waits-for-G3 test and the gate test now inject held_fn (every fund held waits; one held or none builds); two tests added (held fund builds under <batch>-h02; held_funds on run_gold_chain).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_p2_page_grouped_by_fund.py",
+   "kind": "test",
+   "commit_or_etag": "5db308439c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ASSERTIONS CHANGED: the failing-fund test asserted marker None on PARTIAL (round 2) and now asserts the marker names the not-updated fund; the stale-fund test moved TXUE's last report 09-25 -> 09-24 because a Bloomberg fund 1 trading day behind now passes (threshold 0 -> allowance 1).",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+   "kind": "doc",
+   "commit_or_etag": "5db308439c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "APPEND: rows ETFS_RIVALS-Z-W2-S6 (BLOCKING on AC2), S7, S8 (ARMED, disarm_owner 2.0.0_SA_COO~RV), S9.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "a re-capture of a landed issuer report date keeps both silver objects, writes its marker, records the earlier one retained, and G1 reads the newer (.../round3/checks/r-3.AC1.py)",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/r-3.AC1.py",
+   "output_evidence": "OK:   control: first replay OK with one object (OK, ['basg-<ts>-2a559d4deb4e.parquet']) | OK:   re-capture: status OK with a marker | OK:   both silver objects kept (2) | OK:   the earlier object is recorded retained ([{'report_date': '2026-09-28', ..., 'was_in_silver': True, 'retained': True}]) | OK:   G1 reads the later capture | AC1 RESULT: PASS 0 failures (rc=0)",
+   "denominator": "5 of 5 checks OK (4 criterion checks + 1 control), 0 failures",
+   "status": "PASS",
+   "expect": "AC1 RESULT: PASS 0 failures",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "with a pull-enrichment marker that does NOT cover the newest date and a planted split on one TXUE holding, the chain builds G5 for the un-held funds, holds TXUE with a reason, and reports held_funds (.../round3/checks/r-3.AC2.py)",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/r-3.AC2.py",
+   "output_evidence": "planted split on TTE FP Equity ex 2026-09-29 ; pull-enrichment marker at 2026-09-24 | chain: build-trade-schedule SKIPPED, waiting: 'newest report date 2026-09-29 is after the newest pull-enrichment marker 2026-09-24 and every fund of the batch is held (row W5-S23)', held_funds BIDD, CGIC, INEQ, SCHY, TXUE | OK: detail.held_funds present (dict) | OK: TXUE held with a reason | FAIL: a G5 object for 2026-09-29 (0) | OK: no held fund has a G5 row ([]) | FAIL: at least one fund that is not held has G5 rows | OK: held_funds is a strict subset of the batch's funds | AC2 RESULT: FAIL 2 failures (rc=1)",
+   "denominator": "3 of 5 checks OK, 2 failures (G5 object for the newest date; a non-held fund with G5 rows)",
+   "status": "FAIL",
+   "status_reason": "The fixture cannot leave a fund un-held: the plant on TTE FP Equity reaches BIDD, CGIC, SCHY and TXUE (all hold TTE FP) and real 2026-09-29 JP splits in the same G3 hold CGIC and INEQ, so all five funds with G1 rows are held and build-trade-schedule is correctly skipped (cell: skipped only when every fund is held). Row ETFS_RIVALS-Z-W2-S6; control with the split on a TXUE-only security holds CGIC, INEQ, TXUE and builds SCHY (8 rows), then writes the -v02 object. The check is the issuer's to amend; the worker did not edit it.",
+   "expect": "AC2 RESULT: PASS 0 failures",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "a Bloomberg fund 1 trading day behind passes freshness, one 2 behind fails with a trading-day reason, and the publish marker is written naming the failing fund under not_updated (.../round3/checks/r-3.AC3.py)",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/r-3.AC3.py",
+   "output_evidence": "TXUE: PASS -- latest report 2026-09-25 vs expected 2026-09-28: lag 1 trading day(s) against the allowance of 1 trading day(s) for source bloomberg | CGIC: FAIL -- latest report 2026-09-24 vs expected 2026-09-28: lag 2 trading day(s) against the allowance of 1 trading day(s) for source bloomberg | SCHY: PASS (control) | OK: publish marker written and names CGIC under not_updated ({'not_updated': {'IDVZ/CGIC': 'report_date_freshness: ... lag 2 trading day(s) ...'}}) | AC3 RESULT: PASS 0 failures (rc=0)",
+   "denominator": "4 of 4 checks OK, 0 failures",
+   "status": "PASS",
+   "expect": "AC3 RESULT: PASS 0 failures",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no planted mutant.",
+   "expected": "n/a",
+   "observed": "AC1 carries a control (the first replay writes exactly one object); AC3 carries SCHY (no plant) as its control; the narrowing was also driven on a TXUE-only plant outside the check (held CGIC, INEQ, TXUE; SCHY built; later -v02 object with every fund).",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "Ran r-3.AC1.py, r-3.AC2.py and r-3.AC3.py twice and compared the verdict and OK/FAIL lines with the revision stamps stripped",
+   "observed": "identical (cmp rc=0 for all three)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Lambda tree packaging and any deploy of the five stage Lambdas",
+   "reason": "No deploy, no S3 write in this cell (worker face section 3); the code is COMMITTED-NOT-DEPLOY-SCOPE."
+  },
+  {
+   "item": "guardrails.py report_date_freshness and guardrails_config.json",
+   "reason": "Not in <paths>; the per-source check is implemented in publish_page.py (row ETFS_RIVALS-Z-W2-S7)."
+  }
+ ],
+ "surprises": [
+  "ETFS_RIVALS-Z-W2-S6",
+  "ETFS_RIVALS-Z-W2-S7",
+  "ETFS_RIVALS-Z-W2-S8",
+  "ETFS_RIVALS-Z-W2-S9"
+ ],
+ "session_log": "Worker 0.9.0_WK_ETFS_RIVALS~2 on branch wk-rivals3-2, code commit 5db308439c. AC1 and AC3 PASS; AC2 FAIL on the fixture (row Z-W2-S6), implementation matches the cell. The order's <status> is left for the issuer.",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "cd data/etfs/scripts && python -m pytest rivalfunds/tests -q",
+   "result": "197 passed, 2 skipped"
+  },
+  {
+   "tool": ".tools/commit-gate.sh (via safe-commit.sh)",
+   "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <9 paths>",
+   "result": "committed 5db308439c (ruff py39 clean)"
+  }
+ ]
+}
