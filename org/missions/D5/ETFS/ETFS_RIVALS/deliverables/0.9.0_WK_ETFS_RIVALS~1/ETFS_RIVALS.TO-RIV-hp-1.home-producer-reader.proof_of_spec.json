@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-hp-1.home-producer-reader",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "ec32d715013024da78b41578b8acc7f9cd28c18f",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-hp-1.home-producer-reader.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-hp-1.home-producer-reader.md",
+    "group": "OTHER",
+    "vintage_commit": "ec32d715013024da78b41578b8acc7f9cd28c18f"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/home_producer.py",
+      "kind": "script",
+      "commit_or_etag": "dfbce817fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW. Reader over the Positioning landing bbg/<D>/constituents/constituents_issuer_fill.parquet; address parsed from the producer's source; report date = row date; read-only, no write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_canonical_shape.py",
+      "kind": "script",
+      "commit_or_etag": "dfbce817fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDIT. home_producer policy has a reader: build_home_rows, select_sources(home_funds), revision h-marker, replay considers landing dates; docstring updated. Local sink only, no served write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_holdings_coverage.py",
+      "kind": "script",
+      "commit_or_etag": "dfbce817fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDIT. Home funds get G2 rows from the landing (source home_producer, new, selected); a trading day with no landing row reads gap with its cause.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_hp1_home_producer.py",
+      "kind": "script",
+      "commit_or_etag": "dfbce817fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 18 pytest tests. Full rivalfunds suite: 207 passed, 2 skipped. No existing test assertion changed (test_g12 and test_g21 pass unedited).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "998d0e5ff5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPEND: rows ETFS_RIVALS-Z-W1-S17 (ARMED, disarm_owner 2.0.0_SA_COO~RV), S18, S19, S20 (INERT).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "G1 carries IDVZ and PFOE rows from the landing (source_used = home_producer), row counts equal to the landing's, no DIVZ/PFDE, TXUE still bloomberg, nothing written under bbg/ -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/hp-1.AC1.py",
+      "output_evidence": "OK:   a G1 object for 2026-09-29 (1)\nOK:   IDVZ: 41 G1 rows vs 41 landing rows, source_used ['home_producer']\nOK:   PFOE: 25 G1 rows vs 25 landing rows, source_used ['home_producer']\nOK:   no non-universe landing fund in G1\nOK:   control: TXUE source_used bloomberg\nOK:   no second copy under bbg/ (2 objects)\nAC1 RESULT: PASS 0 failures\nAC1 rc=0",
+      "denominator": "6 of 6 checks OK (newest landing date 2026-09-29: IDVZ 41 of 41 rows, PFOE 25 of 25 rows; 2 objects under the sink's bbg/)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "G2 has an IDVZ row selected from home_producer, and the page shows IDVZ and PFOE with a calendar and a home_producer badge, with no placeholder -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/hp-1.AC2.py",
+      "output_evidence": "publish: OK\nOK:   G2 has an IDVZ row selected from home_producer (4 objects, 4 IDVZ rows)\nOK:   page written (548894 chars)\nOK:   IDVZ: calendar and home_producer badge on the page\nOK:   PFOE: calendar and home_producer badge on the page\nOK:   no 'home-producer reader: next round' placeholder\nOK:   control: TXUE keeps a bloomberg badge\nAC2 RESULT: PASS 0 failures\nAC2 rc=0",
+      "denominator": "6 of 6 checks OK (4 G2 objects, 4 IDVZ rows; page 548894 chars; IDVZ, PFOE, TXUE blocks)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted by the worker: the checks plant no mutant; the unit tests plant a fund with no landing rows (counted unread), an unreadable producer file (stage FAILED loud), a duplicated fund-day in two folders (later folder wins) and a trading day with no landing row (gap with cause).",
+      "expected": "home rows only where the landing has them; failures loud.",
+      "observed": "18 hp1 tests pass.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (before and after the commit); the rivalfunds suite run twice.",
+      "observed": "same verdict lines every time; 207 passed, 2 skipped.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S17",
+    "ETFS_RIVALS-Z-W1-S18",
+    "ETFS_RIVALS-Z-W1-S19",
+    "ETFS_RIVALS-Z-W1-S20"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "998d0e5ff5"
+    }
+  ]
+}
