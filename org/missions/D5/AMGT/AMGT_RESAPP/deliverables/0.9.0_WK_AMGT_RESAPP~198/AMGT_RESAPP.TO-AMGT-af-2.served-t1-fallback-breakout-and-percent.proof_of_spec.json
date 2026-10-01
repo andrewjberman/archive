@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-af-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-af-2.served-t1-fallback-breakout-and-percent.md",
+    "group": "OTHER",
+    "vintage_commit": "4a7d8bcb0fd9f325f720debaf5d8dbaa1f3215e2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "4a7d8bcb0fd9f325f720debaf5d8dbaa1f3215e2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-af-2.served-t1-fallback-breakout-and-percent.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~198",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "a88531512b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"],
+      "deploy_evidence": "Read-path code on the worker branch; af-5 deploys. AC2 and AC3 ran this worktree's handler() against the live DynamoDB tables read-only."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_t1_fallback_and_pct.py",
+      "kind": "test",
+      "commit_or_etag": "a88531512b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC1"],
+      "deploy_evidence": "Offline tests, fake DynamoDB seam, pinned clock; no deploy."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_overlay_check_face.py",
+      "kind": "test",
+      "commit_or_etag": "a88531512b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC1"],
+      "deploy_evidence": "One assertion updated: the overlay key set now includes breakout_price."
+    }
+  ],
+  "surprises": ["AMGT_RESAPP-Z-W198-S1"],
+  "session_log": "0.9.0_WK_AMGT_RESAPP~198 on wk-AMGT_RESAPP-198. One row filed: AMGT_RESAPP-Z-W198-S1 (AC1 errors on 3 portal-fixture tests the sparse worktree cannot see; same 3 at base).",
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every test passes, test_t1_fallback_and_pct.py included, and exit=0",
+      "method": "test_suite",
+      "denominator": "330 passed + 2 skipped + 3 errors = 335 collected; test_t1_fallback_and_pct.py 21 of 21 passed",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/; echo \"exit=$?\"",
+      "output_evidence": "330 passed, 2 skipped, 186 warnings, 3 errors in 39.14s; exit=1. The 3 errors are test_print_format_rich.py FileNotFoundError on portal/src/pages/SecurityAnalysis/__harness__/tabsFixture.BA_US_Equity.json (portal is a gitlink the sparse worktree does not check out); the same 3 errored at base 4a7d8bcb0f (309 passed, 2 skipped, 3 errors) before any edit. Row AMGT_RESAPP-Z-W198-S1.",
+      "status": "FAIL",
+      "status_reason": "exit=1 because 3 test_print_format_rich.py tests error on a missing portal submodule fixture in the sparse worktree, identical at base before any edit; every other test passes (330), test_t1_fallback_and_pct.py 21 of 21. The criterion as literally written is not met; the issuer decides whether to re-run AC1 in a tree that carries portal (row AMGT_RESAPP-Z-W198-S1)."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "every clause PASS; THE PER-NAME READ SERVES THE LATEST TRADING DAY AND BREAKOUT READS BREAKOUT: YES -- and exit=0",
+      "method": "live_read",
+      "denominator": "8 of 8 clauses PASS (C1 and C2 on 2 axes, C3 on 2 rankings, C4, C5)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round56/checks/af_2_serve.py --what fwd33; echo \"exit=$?\"",
+      "output_evidence": "PASS C2 overlay TRENDING/PRICE states trading-day staleness stale_trading_days=1 served=2026-09-29 t1=2026-09-30; PASS C4 overlay breakout_price is the BREAKOUT/PRICE row breakout_price measure=PCT_JUMP_VS_TRAILING_BASELINE; PASS C5 overlay price stays the TRENDING/PRICE row; THE PER-NAME READ SERVES THE LATEST TRADING DAY AND BREAKOUT READS BREAKOUT: YES; exit=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "C1-C8 PASS; EVERY SERVED PRICE MOVEMENT IS PERCENT BY NAME: YES -- and exit=0",
+      "method": "live_read",
+      "denominator": "8 of 8 clauses PASS (C3 over 32 breakout rows, C5 over 32 trending rows)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round56/checks/af_2_serve.py --what fwd34; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 ASML NA stored 0.09213960191641024 served score=9.21396019 score_pct=9.21396019; PASS C2 stored 0.09214 served pct_jump_pct=9.214 has pct_jump=False; PASS C3 bad 0 of 32; PASS C5 bad 0 of 32; PASS C8 rank series point score_pct 9.21396019; EVERY SERVED PRICE MOVEMENT IS PERCENT BY NAME: YES; exit=0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "_serve_percent was temporarily made to return every row unchanged; the new test file must fail.",
+      "expected": "test_t1_fallback_and_pct.py fails on the percent assertions",
+      "observed": "5 failed, 16 passed (rank series: 0.0921396 != 9.21396; overlay: KeyError score_pct); the original was restored and the file passes 21 of 21",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: offline tests run on a fake DynamoDB seam and a pinned clock; AC2 and AC3 read live tables whose latest generation is dated 2026-09-29",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider lib/research/api/tests/",
+      "result": "330 passed, 2 skipped, 3 errors (portal fixture absent from the sparse worktree)"
+    }
+  ]
+}

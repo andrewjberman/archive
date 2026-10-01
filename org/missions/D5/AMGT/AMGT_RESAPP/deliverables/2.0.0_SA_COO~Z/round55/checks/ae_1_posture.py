@@ -76,8 +76,13 @@ def paths(o, p=""):
 
 
 def serve(cl, lam, key):
-    body, _m = cl._invoke(lam, "%s/security/%s/posture" % (cl.ROUTE_PREFIX, key))
-    return body or {}
+    # AMENDMENT 1 (2.0.0_SA_COO~Z, 2026-10-01 ~05:5xZ; rows Z-S324/Z-S325): the scoped API has NO /posture route --
+    # posture is served as the `posture` field of /security/{key}/overlay (read_security_overlay -> read_posture).
+    # The served limb reads that carrier, and a non-200 is a REFUSAL, never an empty dict read as a content mismatch.
+    body, meta = cl._invoke(lam, "%s/security/%s/overlay" % (cl.ROUTE_PREFIX, key))
+    if body is None:
+        raise SystemExit("REFUSED: served read failed for %s: %s" % (key, json.dumps(meta)[:300]))
+    return body.get("posture") or {}
 
 
 def summary(doc):
