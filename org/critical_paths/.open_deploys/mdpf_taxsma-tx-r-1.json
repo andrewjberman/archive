@@ -1,0 +1,63 @@
+{
+  "slug": "mdpf_taxsma-tx-r-1",
+  "title": "MDPF_TAXSMA TX-r-1: backend release with Tax DISABLED and the rollout switch OFF -- functions mdpf-gold-lambda and opal-assets-mdpf-portal-publisher (each $LATEST only: 0 aliases, 0 published versions), packages built at e8994f23af",
+  "author": "4.0.0_SA_CRO",
+  "status": "OPEN",
+  "opened_at": "2026-10-01T02:10:40.180621+00:00",
+  "window_hours": 14.0,
+  "entry_path": "org/critical_paths/change_management/20261001T0210Z_mdpf_taxsma-tx-r-1_deploy_completion.md",
+  "legs": [
+    {
+      "id": "U1",
+      "kind": "verify",
+      "target": "both artifacts uploaded: s3://opal-data-assets/portal/gold/mdpf/_code/mdpf-gold-lambda.zip and s3://opal-313476888478-lambda-artifacts/opal-assets/opal-assets-mdpf-portal-publisher.zip",
+      "proof_required": "each downloaded back, sha256 equal to the built zip (gold ee12387e.., publisher a63f896a..), content-sha256 metadata carries the same hex; prior versions recorded for rollback",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "P1",
+      "kind": "verify",
+      "target": "fresh saved plans of mdpf-pipeline and opal-assets",
+      "proof_required": "each plan changes only its one function (code + the commit pin; the publisher also gains TAXSMA_ROLLOUT_SWITCH=OFF)",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "D1",
+      "kind": "activation",
+      "target": "safe-apply mdpf-pipeline (mdpf-gold-lambda)",
+      "proof_required": "deployed CodeSha256 equals the built zip; no Tax env var set; re-plan No changes",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "D2",
+      "kind": "activation",
+      "target": "safe-apply opal-assets (opal-assets-mdpf-portal-publisher)",
+      "proof_required": "deployed CodeSha256 equals the built zip; TAXSMA_ROLLOUT_SWITCH=OFF on the applied plane; re-plan No changes",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "V1",
+      "kind": "verify",
+      "target": "deployed qa_local invoke of mdpf-gold-lambda (dry run, zero S3 writes), before and after the apply",
+      "proof_required": "both green 16 of 16; every body difference a process-time path; Tax DISABLED",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "V2",
+      "kind": "verify",
+      "target": "the next scheduled publisher run (13:50Z)",
+      "proof_required": "both served category-views keys content-equal to before on every field other than generation time (DELTA=0, comparison printed)",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261001T021040Z OPENED by 4.0.0_SA_CRO with 6 leg(s)"
+  ],
+  "last_red_at": null
+}
