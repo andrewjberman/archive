@@ -45,7 +45,7 @@
       "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_ae4_backfill_driver.py -rA --tb=line -> passed",
       "method": "test_suite",
       "invocation": "python -m pytest lib/opal_data_harvest/test_ae4_backfill_driver.py -rA --tb=line",
-      "output_evidence": "15 passed in 0.57s (rc 0). Full collector suite: 378 passed, 1 skipped, 6 subtests passed (base 363 passed, 1 skipped; +15).",
+      "output_evidence": "PHASE B re-run: 15 passed in 2.87s (rc 0).",
       "denominator": "15 of 15 tests passed",
       "status": "PASS",
       "expect": "passed"
@@ -55,7 +55,7 @@
       "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC2.py -> AC2 RESULT: PASS",
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC2.py",
-      "output_evidence": "UNIVERSE: 89; 5 BUDGET lines (each 4320 requests/day, pacing 86400/(15s minimum + 10s jitter/2); no per-publisher daily cap in config or contracts) before the first PLAN line, which is a sa job; NETWORK CALLS: 0; guard refused 0 sockets; rc=0; AC2 RESULT: PASS (0 failure(s))",
+      "output_evidence": "PHASE B re-run: AC2 RESULT: PASS (0 failure(s)), rc=0.",
       "denominator": "5 of 5 publishers budgeted; 89 of 89 names planned for sa first",
       "status": "PASS",
       "expect": "AC2 RESULT: PASS"
@@ -65,10 +65,10 @@
       "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC3.py -> AC3 RESULT: PASS",
       "method": "command",
       "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round32/checks/ae-4.AC3.py",
-      "output_evidence": "SECURITIES WITH ANY: 3 of 89; AT 50+: 0 of 89; AT 100+: 0 of 89; SA DISTINCT SINCE 2026-01-01 (universe keys): 20 (cut baseline 20); AC3 RESULT: FAIL (2 failure(s)): no driver run summary at ~92/ae4_run_summary.json; sa distinct articles did not rise above the cut baseline",
-      "denominator": "0 of 89 securities at 50+",
+      "output_evidence": "PHASE B: SECURITIES WITH ANY: 3 of 89; AT 50+: 0 of 89; AT 100+: 0 of 89; SA DISTINCT SINCE 2026-01-01 (universe keys): 20 (cut baseline 20); DRIVER RUN started_at 2026-10-01T07:23:08.824440+00:00; AC3 RESULT: FAIL (1 failure(s)): sa distinct articles since January did not rise above the cut baseline. rc=1",
+      "denominator": "0 of 89 securities at 50+; sa distinct 20 vs baseline 20",
       "status": "FAIL",
-      "status_reason": "phase B pending",
+      "status_reason": "phase B ran: job 1 (ASML) stored 229 bodies but ended status=error (Timeout) and its silver append failed (ArrowNotImplementedError, empty struct themes); nothing reached silver. Rows AMGT_HARVST-Z-W92-S1 (BLOCKING, ARMED) and -S2.",
       "expect": "AC3 RESULT: PASS"
     }
   ],
@@ -88,11 +88,15 @@
   },
   "declared_exclusions": [
     {
-      "item": "Phase B (the sa run over all 89 names, stop-and-resume, ae4_run_summary.json, AC3 PASS) and the real Collector class's subprocess/sqlite paths",
-      "reason": "Order section 1 item 3 and section 2: phase A is LOCAL, a collector run is forbidden in phase A; Collector.run_job/upload/pending/cooldown_until are exercised only in phase B under the signed never-widen pair. The order's <status> is not flipped."
+      "item": "FWD-15 (b) stop-and-resume on the real collector (3 jobs, stop, 3 jobs) and the 5 other publishers",
+      "reason": "Phase B ran ONLY sa over the first 6 names. Job 1 ended status=error, a STOP-set status, so the driver stopped the sa leg (checkpoint stopped={sa: error}); the same-command re-run printed 'SKIP sa: stopped earlier with error' and ran 0 jobs. Jobs 2-6 never ran. Row AMGT_HARVST-Z-W92-S2. Order <status> NOT flipped (AC3 FAIL)."
     }
   ],
-  "surprises": [],
+  "surprises": [
+    "AMGT_HARVST-Z-W92-S1",
+    "AMGT_HARVST-Z-W92-S2",
+    "AMGT_HARVST-Z-W92-S3"
+  ],
   "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {

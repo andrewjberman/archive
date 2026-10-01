@@ -43,7 +43,15 @@ def tf():
 
 def simulate(path):
     d = json.load(open(path, encoding="utf-8"))
-    rows = [(r.get("EvalResourceName", ""), r.get("EvalDecision")) for r in d.get("EvaluationResults", [])]
+    rows = []
+    for r in d.get("EvaluationResults", []):
+        # a multi-resource simulate puts the per-ARN decision in ResourceSpecificResults (row Z-W18-S3); a
+        # single-resource one carries it on the result itself. Read both, never just the top level.
+        specific = r.get("ResourceSpecificResults") or []
+        if specific:
+            rows += [(x.get("EvalResourceName", ""), x.get("EvalResourceDecision")) for x in specific]
+        else:
+            rows.append((r.get("EvalResourceName", ""), r.get("EvalDecision")))
     granted = [dec for arn, dec in rows if any(":secret:%s-" % n in arn for n in SECRETS)]
     sibling = [dec for arn, dec in rows if ":secret:gateway/" in arn and not any(":secret:%s-" % n in arn for n in SECRETS)]
     print("simulate: granted ARNs %d %s; sibling gateway/* ARNs %d %s" % (len(granted), granted, len(sibling), sibling))
