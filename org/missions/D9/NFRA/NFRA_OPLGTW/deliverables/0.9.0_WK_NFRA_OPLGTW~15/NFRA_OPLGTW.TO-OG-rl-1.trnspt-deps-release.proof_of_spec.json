@@ -1,0 +1,153 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-rl-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~15",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "2b8f3151c6"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "7bf0ce5cb0",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rl-1.trnspt-deps-release.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-daa56d81ac.tar.gz (+ opal-gateway-latest.tar.gz)",
+   "kind": "s3_object",
+   "commit_or_etag": "b78383f960d3cfa8ea7e37446374386e",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "head-object on -latest: git-ref daa56d81ac7c91795f1a9c47b2c2430cb3879e24, 457214 bytes, LastModified 2026-10-01T10:43:27Z; deploy log 'uploaded ... (+ latest)'; base guard equal 2c0f84966d at both reads.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+   "kind": "script",
+   "commit_or_etag": "daa56d81ac7c91795f1a9c47b2c2430cb3879e24",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "one of the 17 gateway files the release ships (+1989/-39 vs 2c0f84966d) on i-07dccb1615503ac99:/opt/opal-gateway; SSM e6f13c38 Success; verify SSM 636356a3 at 10:44:50Z: /health 200, 91 of 91 files md5 == release, tools 60 -> 65 (+5), ENABLED_INTEGRATIONS unchanged, .env 39 -> 46 keys, /ms/* unchanged, cot OTP old 401 / new 200.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+   "kind": "script",
+   "commit_or_etag": "daa56d81ac7c91795f1a9c47b2c2430cb3879e24",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "the shipped template (release branch only, host-side roster read) at the manifest's deployed_commit; deploy printed 'OK: principal rosters read host-side and valid (master_admin 1 pair; write_capable 1 pairs)'.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+   "kind": "config_data",
+   "commit_or_etag": "05ca371e006a1cb3e65852c886a1b05c8d54c2cb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "deployed_commit daa56d81ac, previous 2c0f84966d, deployed_at 2026-10-01T10:43:56Z, deployed_by 0.9.0_WK_NFRA_OPLGTW~15; on wk-NFRA_OPLGTW-15-r8 (the wrapper's own commit 8611e9eab3 is on the release branch only).",
+   "artifact_covered_by": [
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261001T1038Z_nfra-oplgtw-trnspt-deps-release_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "675a5dd853",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEVER-2 ledger, 5 legs closed with proof, sentinel removed at HEAD. Leg secrets: blackdiamond/cot/otp-gateway-token put 2026-10-01T10:42:59Z (new VersionId 80ab5930 AWSCURRENT, old f5210e57 AWSPREVIOUS, value never printed); on the host /otp/health AWSPREVIOUS 401, AWSCURRENT 200.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: C7's first criterion for each route, against the SERVED gateway. The issuer supplies the four message and attachment ids at run time; an arm without its input is NOT RUN, which is a FAIL.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/rl.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "arm mail bearer on the transcripts prefix                      status=401 OK\narm transcripts bearer on the mail prefix                      status=401 OK\narm off-allowlist meeting, own bearer                          status=403 OK\narm off-table sender                                           status=403 OK\narm off-table sender in a table thread                         status=403 OK\narm non-PDF attachment metadata only (byte keys none)          status=200 OK\nARMS 6 of 6 refused-or-metadata\nRESULT: PASS\nexit=0",
+   "denominator": "ARMS 6 of 6 refused-or-metadata (4 inputs set: OG_RL_OFF_TABLE_MSG, OG_RL_THREAD_MSG, OG_RL_NONPDF_MSG, OG_RL_NONPDF_ATT); run 2026-10-01T10:45:51Z, 86 s after the deploy ended",
+   "status": "PASS",
+   "expect": "(?s)ARMS 6 of 6 refused-or-metadata.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: NEVER-2 is closed, and the release is narrow, shipping only the build slots' files with /ms/* unshipped.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/rl.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "entry files at HEAD=1; sentinel at HEAD=no; deployed=daa56d81ac7c91795f1a9c47b2c2430cb3879e24 previous=2c0f84966dc452d367ab1e4fc5d4849f08c1625e; gateway files shipped 17, outside the build slots' set 0; ms_ingest.py shipped 0\nRESULT: PASS\nexit=0",
+   "denominator": "17 gateway files shipped (2c0f84966d..daa56d81ac), 0 outside the build slots' set; 1 ledger entry file at HEAD, sentinel absent",
+   "status": "PASS",
+   "expect": "(?s)sentinel at HEAD=no;.*outside the build slots' set 0; ms_ingest.py shipped 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: the SHIPPED template reads the rosters host-side (R4); no release after this one needs an off-repo hand-off.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/rl.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "deployed_commit (manifest at HEAD): daa56d81ac7c91795f1a9c47b2c2430cb3879e24\nGUID literals in the template: 0\ntemplate reads gateway/principals/rosters host-side: True\ndeploying-shell roster requirement still present: False\n.env render: %s 15, args 15; MASTER_ADMIN_PRINCIPALS line True, WRITE_CAPABLE_PRINCIPALS line True\nbash -n rc=0 \nRESULT: PASS\nexit=0",
+   "denominator": "1 shipped template at manifest deployed_commit daa56d81ac; 5 reads (GUID 0, host-side True, shell requirement False, printf 15/15, bash -n rc 0)",
+   "status": "PASS",
+   "expect": "(?s)GUID literals in the template: 0.*template reads gateway/principals/rosters host-side: True.*deploying-shell roster requirement still present: False.*bash -n rc=0.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "The positive PDF arm (one admitted message's bytes land with a hash, NFRA_TRNSPT order 103564)",
+   "reason": "The issuer runs it after AC1; the order does not grade it."
+  },
+  {
+   "item": "The cot box's deployed copy of bd_49f_auto_login.js (row Z-W15-S13)",
+   "reason": "cot-exporter is stopped; A3/S13 lets the rotation proceed with the box stopped; the gateway side is proved by the /otp/health old-401 / new-200 read."
+  },
+  {
+   "item": "Terraform, IAM, the ALB, the instance, the identity allowlist, the 49f token",
+   "reason": "Bounds of the order; untouched."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W15-S15"
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). PHASE B trail on wk-NFRA_OPLGTW-15-r8: 4dc40b3d83 (ledger open + sentinel + row Z-W15-S15, before the act), 05ca371e00 (manifest), 675a5dd853 (ledger close), and the proof commit. Release-branch commit by the wrapper: 8611e9eab3 (manifest on the release branch only). Sequence: 7a live ref 2c0f84966d unchanged (manifest on CLOUD, S3 git-ref, host md5 89 of 89 vs git show); BEFORE reads 60 tools / 39 keys / 7 integrations; K1 MASTER_ADMIN_PRINCIPALS MATCH, WRITE_CAPABLE_PRINCIPALS MATCH; halt-gate probe rc 0 with 0 pending lines (K4) after the cone fix (row S15); cot put 10:42:59Z; deploy rc 0 at 10:44:25Z; verify 10:44:50Z; AC1 10:45:51Z. No rollback.",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/rl.AC{1,2,3}.sh",
+   "invocation": "each under timeout 120 from the worktree root; AC2 and AC3 after the ledger close commit 675a5dd853",
+   "result": "AC1 rc 0 PASS; AC2 rc 0 PASS; AC3 rc 0 PASS"
+  },
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open (4dc40b3d83), close-leg x5, close (675a5dd853)",
+   "result": "all 5 legs proven; sentinel removed"
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "surprise-row gate, naming gate, msg-verify on every commit",
+   "result": "4dc40b3d83, 05ca371e00, 675a5dd853 committed, MATCH"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The shipped-template reader rl.AC3's _pr.py template run against the LIVE pre-release template (git show 2c0f84966d:infra/aws/ec2/opal-gateway/deploy-to-ec2.sh) as the unmutated-world control.",
+   "expected": "FAIL on exactly the two roster arms (host-side read False, shell requirement True) and PASS on the other three reads",
+   "observed": "GUID literals in the template: 0 | template reads gateway/principals/rosters host-side: False | deploying-shell roster requirement still present: True | .env render: %s 12, args 12; MASTER_ADMIN_PRINCIPALS line True, WRITE_CAPABLE_PRINCIPALS line True | bash -n rc=0  | RESULT: FAIL",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "rl.AC3.sh run twice on the same HEAD and the two outputs compared byte for byte (cmp)",
+   "observed": "identical (AC3-STABLE)",
+   "status": "STABLE"
+  }
+ }
+}
