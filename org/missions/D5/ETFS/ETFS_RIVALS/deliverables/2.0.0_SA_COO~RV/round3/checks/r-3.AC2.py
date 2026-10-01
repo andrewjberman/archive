@@ -2,7 +2,7 @@
 every fund whose trade window touches NO corporate action, and holds only the funds whose window does.
 
 Real data: the last 4 IDVZ-group captures through canonical_shape in a local sink; G3 imported from a COPY of the real
-dividends.json in which one real TXUE holding of the newest capture gains a 'Stock Split' (amount 2.0) ex-dated on the
+dividends.json in which one real holding ONLY TXUE holds across the batch (amendment 1, row W2-S6) gains a 'Stock Split' (amount 2.0) ex-dated on the
 newest requested date. The pull-enrichment marker is partitioned at the OLDEST capture's date, so it does NOT cover the
 batch's newest report date (the round-2 gate would hold the whole batch). Then sweep.run_gold_chain runs the real stages:
   - build-trade-schedule is NOT skipped and writes a G5 object for the newest date;
@@ -11,17 +11,28 @@ batch's newest report date (the round-2 gate would hold the whole batch). Then s
   - held_funds is a strict subset of the funds in the batch."""
 import json
 import pathlib
+import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import _common as c  # noqa: E402
 
 
-def planted_dividends(newest_capture: pathlib.Path) -> tuple[pathlib.Path, str]:
-    d = c.capture(newest_capture)
+def planted_dividends(files: list) -> tuple[pathlib.Path, str]:
+    """Plant on a security ONLY TXUE holds across the batch's captures (amendment 1, row W2-S6: a security shared with
+    other funds held every fund, so no un-held fund was left to build)."""
+    other = set()
+    for f in files:
+        dd = c.capture(f)
+        h = dd["rows"][0]
+        for r in dd["rows"][1:]:
+            if not str(r[h.index("ORIG_IDS")]).startswith("TXUE"):
+                other.add(r[h.index("ID")])
+    d = c.capture(files[-1])
     rows, hdr = d["rows"], d["rows"][0]
     ii, fi = hdr.index("ID"), hdr.index("ORIG_IDS")
-    sec = next(r[ii] for r in rows[1:] if str(r[fi]).startswith("TXUE") and not str(r[ii]).endswith(" Curncy"))
+    sec = next(r[ii] for r in rows[1:] if str(r[fi]).startswith("TXUE") and not str(r[ii]).endswith(" Curncy")
+               and r[ii] not in other and not re.fullmatch(r"\d+D", str(r[ii]).split(" ")[0]))  # 9996651D-class = cash
     div = json.loads(c.dividends_path().read_text(encoding="utf-8"))
     rec = {"Declared Date": d["requested_date"], "Ex-Date": d["requested_date"], "Record Date": d["requested_date"],
            "Payable Date": d["requested_date"], "Dividend Amount": 2.0, "Dividend Frequency": "None",
@@ -42,7 +53,7 @@ def run(v):
     c.run_idvz_chain(sink, files, "canonical")
     newest = c.capture(files[-1])["requested_date"]
     oldest = c.capture(files[0])["requested_date"]
-    planted, sec = planted_dividends(files[-1])
+    planted, sec = planted_dividends(files)
     print("planted split on", sec, "ex", newest, "; pull-enrichment marker at", oldest)
     enrichment_bloomberg.handler_entry({"mode": "import", "dividends_json": str(planted), "batch_id": "r3-g3",
                                         "sink": f"local:{sink}", "date": oldest})
