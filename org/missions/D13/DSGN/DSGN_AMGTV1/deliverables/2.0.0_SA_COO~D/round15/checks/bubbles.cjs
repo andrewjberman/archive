@@ -2,6 +2,9 @@
  * bubbles.cjs -- DSGN_AMGTV1 round 15, AV-n-2: CHATTER IS BUBBLES BY MONTH (FWD-21; CONTRACT s.1; rulings: chatter has
  * ONLY bubbles, the List view / line chart / List-Chart toggle removed, Trending only through the demo).
  *
+ * ISSUER AMENDMENT (round 15, CONTRACT amendment 2 @5ca1a00f56): arm 1 also requires the denominator line
+ *   "<k> of <n> covered names" (k = rows with a count in the month, n = all served rows); the fixture drops zero publishers
+ *   and carries 10 covered names with an empty by_month; arm 3 adds the mutant 'nodenom'.
  * Usage (repo root): node <this file>          (portal/ under the cwd is the checkout under test)
  *        node <this file> --grade-only     (internal: prints "GRADE-JSON {...}" for arm 1's predicates and exits; arm 2
  *                                           runs it with the cwd at the extracted base tree)
@@ -143,6 +146,9 @@ function bubbleFaults(html, data, month) {
   if (!partial && /\bpartial\b/i.test(text)) f.push(`PARTIAL: ${month} is complete and the text calls it partial`);
   const unnamed = want.filter((r) => !text.includes(r.display_name)).map((r) => r.security_key);
   if (unnamed.length) f.push(`NAME: ${unnamed.length} bubbled row(s) without their display name in the chart text, first ${unnamed[0]}`);
+  // Issuer amendment (CONTRACT amendment 2 @5ca1a00f56, CTO msg 27571): the denominator beside the chart.
+  const denom = `${want.length} of ${data.rows.length} covered names`;
+  if (!text.includes(denom)) f.push(`DENOMINATOR: the text does not print "${denom}" (names with a count in ${month} of all served names)`);
   return f;
 }
 
@@ -354,12 +360,13 @@ function synth(month, mut) {
     const gone = DATA.rows.find((r) => !r.by_month[month]);
     circles.push(`<circle cx="0" cy="0" r="0" data-bubble="${esc(gone.security_key)}" data-collected="0"><title>${esc(gone.display_name)}</title></circle>`);
   }
-  return `<figure><figcaption>${month}${partial ? ' (partial month)' : ''} -- ${caption}</figcaption><svg>${circles.join('')}</svg></figure>`;
+  const denom = mut === 'nodenom' ? '' : `<p>${rows.length} of ${DATA.rows.length} covered names have collected articles this period</p>`;
+  return `<figure><figcaption>${month}${partial ? ' (partial month)' : ''} -- ${caption}</figcaption><svg>${circles.join('')}</svg>${denom}</figure>`;
 }
 const f3 = [];
 const ctl3 = [...bubbleFaults(synth(LATEST), DATA, LATEST), ...bubbleFaults(synth(M1), DATA, M1)];
 if (ctl3.length) f3.push(`the reference markup fails: ${ctl3[0]}`);
-const MUTANTS = [['linear', 'AREA', M1], ['zero', 'ABSENT', LATEST], ['chatter', 'CAPTION', M1], ['unlabelled', 'PARTIAL', LATEST]];
+const MUTANTS = [['linear', 'AREA', M1], ['zero', 'ABSENT', LATEST], ['chatter', 'CAPTION', M1], ['unlabelled', 'PARTIAL', LATEST], ['nodenom', 'DENOMINATOR', LATEST]];
 const caught = [];
 for (const [mut, cls, month] of MUTANTS) {
   const fx = bubbleFaults(synth(month, mut), DATA, month);

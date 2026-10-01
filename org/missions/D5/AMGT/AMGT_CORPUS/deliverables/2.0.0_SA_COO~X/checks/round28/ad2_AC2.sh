@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# AMGT_CORPUS round 28 -- check as a file: ad2_AC2 -- the zero-sample sign tests with the sign, unit-map and check-face suites. Run from the repo root.
+cd "$(git rev-parse --show-toplevel)" || exit 2
+export PYTHONPATH="$(pwd)"
+python -m pytest -q --color=no -p no:cacheprovider integrations/bloomberg/research/tests/test_zero_sample_sign_round28.py integrations/bloomberg/research/tests/test_model_block_sign_per_figure.py integrations/bloomberg/research/tests/test_model_block_resolved_exception.py integrations/bloomberg/research/tests/test_cases_report_refuses_unresolved.py integrations/bloomberg/research/tests/test_unresolved_overlay_renders_marked.py integrations/bloomberg/research/tests/test_build_unit_map_zero_dominated_round27.py integrations/bloomberg/research/tests/test_build_unit_map_series_round26.py integrations/bloomberg/research/tests/test_build_unit_map_classification_split.py integrations/bloomberg/research/tests/test_build_unit_map_exceptions.py 2>&1 | grep -E 'passed|failed|error|no tests ran' | tail -2
