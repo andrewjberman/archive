@@ -8,6 +8,7 @@ PASS requires:
 """
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -35,8 +36,8 @@ def main():
         failures.append("no captured-at-load fixture")
     else:
         r = subprocess.run([sys.executable, "-m", "pytest", "lib/opal_data_harvest/test_ah1_fixture_solve.py", "-rA",
-                            "--tb=line", "-p", "no:cacheprovider"], cwd=ROOT, capture_output=True, text=True)
-        out = r.stdout + r.stderr
+                            "--tb=line", "--color=no", "-p", "no:cacheprovider"], cwd=ROOT, capture_output=True, text=True)
+        out = re.sub(r"\x1b\[[0-9;]*m", "", r.stdout + r.stderr)
         print(out.strip().splitlines()[-1] if out.strip() else "(no pytest output)")
         if r.returncode != 0:
             failures.append("fixture solve test rc=%d" % r.returncode)

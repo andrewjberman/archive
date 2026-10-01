@@ -39,7 +39,8 @@ const settle = async (page, ms = 1200) => { await page.waitForLoadState('network
 const MEASURE = (tip) => {
   const r = tip.getBoundingClientRect()
   const faults = []
-  for (let e = tip.parentElement; e && e !== document.documentElement; e = e.parentElement) {
+  // <body> is skipped: its rect scrolls with the page (it reads negative once scrolled), and the viewport test below covers it.
+  for (let e = tip.parentElement; e && e !== document.body && e !== document.documentElement; e = e.parentElement) {
     const s = getComputedStyle(e)
     if (s.overflow === 'visible' && s.overflowX === 'visible' && s.overflowY === 'visible') continue
     const a = e.getBoundingClientRect()
@@ -73,16 +74,22 @@ const MEASURE = (tip) => {
 
 const results = []
 let n = 0
-async function hoverAll(page, anchorSel, label, limit = 12) {
+async function hoverAll(page, anchorSel, label, limit = 12, optional = false) {
   const anchors = page.locator(anchorSel)
   const k = Math.min(await anchors.count().catch(() => 0), limit)
+  if (!k && optional) { log(`n/a ${label}: none on this name (${anchorSel})`); return }
   if (!k) { results.push({ where: label, faults: [`MISSING: no anchor ${anchorSel}`] }); return }
   for (let i = 0; i < k; i++) {
     const a = anchors.nth(i)
     await a.scrollIntoViewIfNeeded().catch(() => {})
+    // Place the anchor mid-viewport (as a reader scrolls to it; an upward or a downward tooltip both fit); scrollIntoViewIfNeeded leaves it at the bottom edge,
+    // where a downward tooltip reads as off-screen. Inside a pop-up the dialog does not scroll, so this is a no-op there.
+    if (!label.endsWith('-popup')) await a.evaluate((el) => window.scrollBy(0, el.getBoundingClientRect().top - 420)).catch(() => {})
     await a.hover({ timeout: 3000 }).catch(() => {})
     await page.waitForTimeout(250)
     const tip = a.locator('[role=tooltip]').first()
+    // A row whose figure is not carried renders no tooltip at all (HeaderCards tooltipOf returns null): nothing to grade.
+    if (!(await tip.count().catch(() => 0))) { log(`n/a ${label} #${i + 1}: no tooltip in the markup (figure not carried)`); continue }
     if (!(await tip.isVisible().catch(() => false))) { results.push({ where: `${label} #${i + 1}`, faults: ['OPEN: no tooltip became visible on hover'] }); continue }
     const m = await tip.evaluate(MEASURE)
     n += 1
@@ -133,8 +140,9 @@ try {
   await settle(page, 2000)
   await page.mouse.move(5, 5)
   // The sheet's figure cells (ModelTab.tsx:136-150) and the what-moved lines (:648-656, their own rows incl. a "mnemonic" row).
-  await hoverAll(page, 'td.group:has(> [data-figure-tooltip])', 'model-cell', 3)
-  await hoverAll(page, 'li.group[data-model-change]', 'model-what-moved', 3)
+  // One cell per row, three rows (the first three anchors were all the first row's cells).
+  await hoverAll(page, 'tr:nth-child(-n+3) > td.group:has(> [data-figure-tooltip]):first-of-type, tr:nth-child(-n+3) > td.group:has(> [data-figure-tooltip]):nth-of-type(2)', 'model-cell', 3)
+  await hoverAll(page, 'li.group[data-model-change]', 'model-what-moved', 3, true)
 } catch (e) {
   results.push({ where: 'probe', faults: [`ERROR: ${String(e.message).split('\n')[0]}`] })
 } finally {
