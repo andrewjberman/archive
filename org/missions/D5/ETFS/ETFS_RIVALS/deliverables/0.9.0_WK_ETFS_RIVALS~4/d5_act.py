@@ -61,13 +61,13 @@ def cmd_markers(a):
     from rivalfunds import markers, sinks
     s = sinks.S3Sink()
     landed = json.loads(pathlib.Path(a.bronze).read_text(encoding="utf-8"))["bronze"]
-    ds = sorted(landed)
-    chunks = [ds[i:i + CHUNK] for i in range(0, len(ds), CHUNK)]
+    ds = sorted(d for d in landed if d >= a.from_date)
+    chunks = [ds[i:i + a.chunk] for i in range(0, len(ds), a.chunk)]
     print(f"{len(ds)} days, {len(chunks)} chunks")
     for k, ch in enumerate(chunks):
         if k < a.start_at:
             continue
-        bid = f"d5-gqgu-{k:02d}"
+        bid = f"{a.prefix}-{k:02d}"
         outs = [landed[d] for d in ch]
         uri = markers.write_marker("fetch-holdings", ACT_DAY, bid, s,
                                    {"status": "OK", "outputs": outs, "days": {f"GQGU:{d}": "OK" for d in ch}})
@@ -141,6 +141,9 @@ def main(argv=None):
     m.add_argument("--bronze", required=True)
     m.add_argument("--start-at", type=int, default=0)
     m.add_argument("--wait", type=int, default=900)
+    m.add_argument("--from-date", default="0000-00-00")
+    m.add_argument("--chunk", type=int, default=CHUNK)
+    m.add_argument("--prefix", default="d5-gqgu")
     i = sub.add_parser("invoke")
     i.add_argument("function")
     i.add_argument("event")
