@@ -1,0 +1,51 @@
+import json, subprocess, sys, datetime, sqlite3, time, re, os
+W="org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~88/"
+RT="C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.runtime/opal-data-harvest"
+SEC="org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round31/ad2_securities/"
+ORDER=["security-81a74ed057551e58","security-37dddff4d4357038","security-dac5b3449b489f3f","security-b05e0ccdc9868504","security-dc7848a34d3ffabd","security-5f0ff2697ffe2748","security-2674f09dec47231a","security-e1596d485e713579","security-a37b3e6572f2baa4"]
+STOPS=("bot_check","unclassified","account_or_harvester_unavailable","sign_in_refused","throttled","upstream_unavailable","cooldown")
+def now(): return datetime.datetime.now(datetime.timezone.utc)
+def ts(): return now().strftime("%Y-%m-%dT%H:%M:%SZ")
+def cooldown_active():
+    db=sqlite3.connect("file:%s/progress.sqlite3?mode=ro"%RT,uri=True)
+    return [r for r in db.execute("select publisher,until,reason from cooldown where publisher='sa'") if float(r[1])>time.time()]
+inv=json.load(open(".scratch/a2_inv_progress_part1.json"))["invocations"]
+stop=None
+last_status="error"
+for i,key in enumerate(ORDER,1):
+    if i<=len(inv): continue
+    n=now()
+    if n.hour>7 or (n.hour==7 and n.minute>=45):
+        stop={"at":ts(),"reason":"after 07:45Z, not started","name":key}; break
+    cd=cooldown_active()
+    if cd and last_status=="error" and all(r[2]=="transport_or_runtime_error" for r in cd):
+        w=max(float(r[1]) for r in cd)-time.time()+5
+        print("waiting %.0fs for the collector's own transport-error cooldown to expire"%w,flush=True)
+        time.sleep(max(w,0)); cd=cooldown_active()
+    if cd:
+        stop={"at":ts(),"reason":"(a) sa cooldown active before start: %s"%cd,"name":key}; break
+    argv=["python","-m","lib.opal_data_harvest","run","--harvest-grammar","--retrieval-mode","backfill","--floor","2026-01-01","--new-only","--no-sign-in","--security-json",SEC+key+".security.json","--publishers","sa","--max-jobs","1","--runtime-root",RT]
+    start=ts()
+    p=subprocess.run(argv,capture_output=True,text=True,encoding="utf-8",errors="replace")
+    end=ts()
+    out=p.stdout+("\n--STDERR--\n"+p.stderr if p.stderr else "")
+    tag="%02d"%i
+    open(W+"ad2_A2_inv_%s_%s.out"%(tag,key),"w",encoding="utf-8",newline="\n").write(out)
+    open(W+"ad2_A2_inv_%s.rc"%tag,"w").write("%d\n"%p.returncode)
+    open(W+"ad2_A2_inv_%s.start"%tag,"w").write(start+"\n")
+    open(W+"ad2_A2_inv_%s.end"%tag,"w").write(end+"\n")
+    status=None; rk=None
+    for line in p.stdout.splitlines():
+        if line.startswith("{"):
+            try: e=json.loads(line)
+            except Exception: continue
+            if e.get("event")=="job_finished": status=e.get("status")
+            if e.get("event")=="run_record_persisted": rk=e.get("key")
+    rec={"name":key,"argv":argv,"rc":p.returncode,"job_status":status,"run_record_key":rk,"started":start,"ended":end}
+    inv.append(rec); last_status=status
+    print(tag,key,"rc",p.returncode,status,rk,start,end,flush=True)
+    json.dump({"invocations":inv,"stop":stop},open(".scratch/a2_inv_progress.json","w"),indent=1)
+    if status in STOPS or status is None:
+        stop={"at":end,"name":key,"status":status,"rc":p.returncode}; break
+json.dump({"invocations":inv,"stop":stop},open(".scratch/a2_inv_progress.json","w"),indent=1)
+print("DONE stop=",stop,flush=True)
