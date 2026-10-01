@@ -166,7 +166,7 @@ def main() -> int:
             return pd.Series(dtype=str)
         return df["fund_ticker"].astype(str).str.strip() if "fund_ticker" in df.columns else df["fund_id"].astype(str)
 
-    src_col = next((c for c in ("source", "holdings_source", "source_system") if c in g1n.columns), None)
+    src_col = next((c for c in ("source_channel", "source", "holdings_source", "source_system") if c in g1n.columns), None)
     out = {"inputs": counts, "newest_report_date": newest, "stage_results": {k: str(v)[:240] for k, v in res.items()},
            "g1_source_column": src_col, "per_fund": {}}
     changed_dates_all, changed_dates_old = set(), set()
