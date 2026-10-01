@@ -80,7 +80,10 @@ def main():
                 total += 1
                 if TOKEN.search(v):
                     bad.append((n, leaf, p, v[:90]))
-    print(f"denominator: {total} served reason string(s) across {len(NAMES)} names x {len(LEAVES)} routes")
+    # AMGT-ah (row Z-S330): the denominator names the (name, route) pairs that carried reason strings, not the route list's length
+    carried = sorted({(n, leaf) for (n, leaf), body in bodies.items() if any(True for _ in _walk(body))})
+    print(f"denominator: {total} served reason string(s) across {len(carried)} of {len(NAMES) * len(LEAVES)} (name, route) pairs "
+          f"that carried any (the print route serves a PDF and is skipped)")
     ok1 = not bad
     print(f"{'PASS' if ok1 else 'FAIL'} C1 no served reason carries a status token -- {len(bad)} bad")
     for b in bad[:12]:
