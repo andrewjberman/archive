@@ -35,7 +35,16 @@ nested = (pre or "\0").startswith(other) or other.startswith(pre or "\0")
 print("prefix nests with %r: %s" % (other, nested))
 ok &= not nested
 server = "infra/aws/ec2/opal-gateway/app/server.py"
-base = subprocess.run(["git", "merge-base", "HEAD", "CLOUD"], capture_output=True, text=True).stdout.strip()
+MODULES = {"transcripts": "infra/aws/ec2/opal-gateway/app/transcript_route.py",
+           "mail": "infra/aws/ec2/opal-gateway/app/mail_route.py"}
+# The CUT BASE is the parent of the commit that ADDED this route's module (so a drained branch still grades against
+# the tree before the cell); before the module exists it is the merge-base with CLOUD.
+added = subprocess.run(["git", "log", "--diff-filter=A", "--format=%H", "HEAD", "--", MODULES[key]],
+                       capture_output=True, text=True).stdout.split()
+if added:
+    base = subprocess.run(["git", "rev-parse", added[-1] + "^"], capture_output=True, text=True).stdout.strip()
+else:
+    base = subprocess.run(["git", "merge-base", "HEAD", "CLOUD"], capture_output=True, text=True).stdout.strip()
 if base:
     at_base = subprocess.run(["git", "show", "%s:%s" % (base, server)], capture_output=True, text=True,
                              encoding="utf-8", errors="replace")

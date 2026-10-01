@@ -1,0 +1,45 @@
+........................................................................ [ 19%]
+........................................................................ [ 38%]
+........................................................................ [ 58%]
+........................................................................ [ 77%]
+..............................................................s..... [ 95%]
+........F.......                                                       [100%]
+================================== FAILURES ===================================
+_ Tests.test_rotated_http_cookies_survive_next_job_without_new_login_timestamp _
+
+self = <opal_data_harvest.test_worker.Tests testMethod=test_rotated_http_cookies_survive_next_job_without_new_login_timestamp>
+
+    def test_rotated_http_cookies_survive_next_job_without_new_login_timestamp(self):
+        from curl_cffi import requests
+        manager = SessionManager(self.root, lambda value: None)
+        envelope = {"network_auth_corroborated": True,
+                    "bundle": {"captured_at": "2026-09-14T00:00:00Z", "all_cookies": [], "user_agent": "test"}}
+        with requests.Session() as session:
+            session.cookies.set("session", "TEST-ROTATED-VALUE", domain="www.barrons.com", path="/")
+            manager.persist_http_cookies("barrons", envelope, session)
+>       saved = manager.get("barrons")
+                ^^^^^^^^^^^^^^^^^^^^^^
+
+lib\opal_data_harvest\test_worker.py:331: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+lib\opal_data_harvest\auth.py:24: in get
+    return saved or self.refresh(publisher)
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <opal_data_harvest.auth.SessionManager object at 0x000002249B053770>
+publisher = 'barrons'
+
+    def _poisoned_refresh(self, publisher):
+>       raise HarvestPoisonError(
+            "POISON (HVST-r-4): lib.opal_data_harvest.auth.SessionManager.refresh(publisher=%r) was "
+            "called from a test that did not opt out with @pytest.mark.allow_real_session -- this "
+            "would have run a real browser-harvester subprocess against a live publisher session. "
+            "See rows AMGT_HARVST-Z-W10-S3 / -Z-W10-S5." % (publisher,)
+        )
+E       opal_data_harvest.conftest.HarvestPoisonError: POISON (HVST-r-4): lib.opal_data_harvest.auth.SessionManager.refresh(publisher='barrons') was called from a test that did not opt out with @pytest.mark.allow_real_session -- this would have run a real browser-harvester subprocess against a live publisher session. See rows AMGT_HARVST-Z-W10-S3 / -Z-W10-S5.
+
+lib\opal_data_harvest\conftest.py:62: HarvestPoisonError
+=========================== short test summary info ===========================
+FAILED lib/opal_data_harvest/test_worker.py::Tests::test_rotated_http_cookies_survive_next_job_without_new_login_timestamp
+1 failed, 370 passed, 1 skipped, 6 subtests passed in 22.23s
