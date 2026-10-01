@@ -1,0 +1,129 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-hr-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~16",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "2b8f3151c6"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "4d483eb6ff",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-hr-1.headless-transcripts-route.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/transcript_route.py",
+   "kind": "script",
+   "commit_or_etag": "2fbc683db9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "BUILD only; no deploy (the release is OG-rl-1's). New module: own bearer, constant-time compare, meeting allowlist, GET-only Graph path allowlist, allow-by-key output, audit without content, NeedsLogin returned.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+   "kind": "script",
+   "commit_or_etag": "2fbc683db9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "BUILD only. Two Route registrations under the literal prefix; no other change.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/config.py",
+   "kind": "script",
+   "commit_or_etag": "2fbc683db9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "BUILD only. TRANSCRIPT_BEARER, TRANSCRIPT_BEARER_LABELS, TRANSCRIPT_MEETING_ALLOWLIST; default empty (fails closed).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_transcript_route.py",
+   "kind": "test",
+   "commit_or_etag": "2fbc683db9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Nine tests, Graph and the token broker stubbed; hr1.AC1.sh: 9 of 9.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~16/ROUTE_NAMES.json",
+   "kind": "config_data",
+   "commit_or_etag": "2fbc683db9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Names record under key transcripts: prefix /hx/transcripts, secret gateway/transcripts/bearer, bearer_label trnspt, probes.transcripts_of_meeting.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the C7 headless boundary for transcripts, by the 9 named tests.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/hr1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 9 of 9; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "9 of 9 named tests passed",
+   "status": "PASS",
+   "expect": "named tests passed 9 of 9; failed/error lines 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the prefix is the v1.3 literal, distinct (not under /ms/, not nested with /hx/mail, absent from server.py at the cut base) and used in the code; the secret grades CONFORMANT; /ms/* is byte-unchanged.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/hr1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "prefix: committed '/hx/transcripts' v1.3 literal '/hx/transcripts'\nprefix under /ms/: False\nprefix nests with '/hx/mail': False\nprefix occurrences in infra/aws/ec2/opal-gateway/app/server.py at base 6903868aa7: 0\nsecret: 'gateway/transcripts/bearer' grade ('CONFORMANT', 'gateway/transcripts/bearer')\nprefix literal occurrences in app/*.py: 5\nroute keys sharing this prefix or secret: 0 of 0\nNAMES ok transcripts\napp/ms_ingest.py changed since base 6903868aa7: 0\nRESULT: PASS\nexit=0",
+   "denominator": "NAMES ok transcripts (all arms); app/ms_ingest.py changed files 0 of 1 since base 6903868aa7",
+   "status": "PASS",
+   "expect": "(?s)NAMES ok transcripts.*app/ms_ingest\\.py changed since base \\w+: 0.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "In a scratch git-archive copy of the committed gateway, transcript_route.py `if meeting_id not in meeting_allowlist():` mutated to `if False:`; test_transcript_route.py run against it.",
+   "expected": "the allowlist tests fail and the others pass",
+   "observed": "mutant: 3 failed (test_off_allowlist_meeting_refused, test_empty_allowlist_fails_closed, test_audit_records_ids_bytes_label_never_text), 6 passed; unmutated: 9 passed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "test_transcript_route.py run three times alone and once together with test_login_retire.py and test_taxsma_workbook.py, each with its own AUDIT_PATH",
+   "observed": "9 passed on each of the three alone runs; 32 passed (9+23) together",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Live Graph reach, a real transcript read, secret creation, deploy and the four real meeting ids",
+   "reason": "Order is BUILD only (no AWS, Graph or deploy). The allowlist ships empty so the route fails closed until G-MEETINGS resolves the ids and OG-rl-1 releases."
+  },
+  {
+   "item": "Audit args allowlist in app/audit.py",
+   "reason": "app/audit.py is outside the order's paths; ids, byte counts and the label ride the log_call detail field (the OG-tx-1 pattern); args are left empty."
+  }
+ ],
+ "surprises": [],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail on wk-NFRA_OPLGTW-16-r8: 2fbc683db9 (build; the first commit attempt was refused by the naming gate on the literal 'transcripts' as a default label and an output key, renamed to 'trnspt' and 'rows') and the proof commit.",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/hr1.AC{1,2}.sh",
+   "invocation": "each under timeout 120 from the worktree root after the commit",
+   "result": "AC1 rc 0 RESULT: PASS; AC2 rc 0 RESULT: PASS"
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "per commit, with commit-gate on every .py and the naming gate",
+   "result": "naming-gate PASS 0 graded on the second attempt"
+  }
+ ]
+}
