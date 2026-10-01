@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ah-2.load-window-grader",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ah-2.load-window-grader.md",
+    "group": "OTHER",
+    "vintage_commit": "33bace02e0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "33bace02e0",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ah-2.load-window-grader.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~90",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/load_window_grade.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL read-only grader over runtimes.json and monitor windows.",
+      "introduces": [
+        "def grade",
+        "def minute_state"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_ah2_load_window_grade.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 plants with tmp-dir fakes pass.",
+      "introduces": [
+        "test_unmonitored_minute_is_void"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_ah2_load_window_grade.py -rA --tb=line",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_ah2_load_window_grade.py -rA --tb=line",
+      "expect": "passed",
+      "output_evidence": "9 passed in 3.07s, rc 0; collector suite 477 passed, 1 skipped",
+      "status": "PASS",
+      "denominator": "9 of 9 tests passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round35/checks/ah-2.AC2.py",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round35/checks/ah-2.AC2.py",
+      "expect": "AC2 RESULT: PASS",
+      "output_evidence": "GRADER rc=1, stdout not JSON: No module named lib.opal_data_harvest.load_window_grade; AC2 RESULT: FAIL (1 failure(s)); the main tree's lib/ shadows the worktree module. Direct script run over live data grades 2 windows and 5 publishers (all INSUFFICIENT). Issuer re-runs AC2 after the drain.",
+      "status": "FAIL",
+      "denominator": "0 of 1 checks; blocked by import path only",
+      "status_reason": "Run from the main tree with PYTHONPATH=<worktree> (per the spawn), the check's subprocess cannot import the module: the main tree's lib/ shadows it. Row AMGT_HARVST-Z-W90-S9. Issuer re-runs after the drain."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W90-S9"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "load_window_grade",
+      "invocation": "python lib/opal_data_harvest/load_window_grade.py (cwd main tree)",
+      "result": "2 windows (window1 void whole; window2 10 void minutes); bbg/wsj/barrons/ft/sa all INSUFFICIENT, clean_hours 0 of 24"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "Not run: the live monitor window grows each minute, so two live runs differ by design; plants use fixed tmp-dir fakes.",
+      "expected": "n/a",
+      "observed": "not measured",
+      "status": "N/A-WITH-REASON"
+    },
+    "mutant": {
+      "description": "load_window_grade.minute_state monkeypatched to always return clean, then the 9 plants run.",
+      "expected": "the void/unmonitored plants fail",
+      "observed": "4 failed, 5 passed under the mutant (void-window, void-minute, void-hour, unmonitored plants fail); 9 pass on the real module",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md"
+}
