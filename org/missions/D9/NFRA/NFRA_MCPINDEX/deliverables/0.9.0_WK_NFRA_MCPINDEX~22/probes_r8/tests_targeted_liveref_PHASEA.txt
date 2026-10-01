@@ -1,0 +1,338 @@
+..............F....................
+OGZ2-AC1: 3 of 3 empty/unknown-identity candidates refused
+.
+OGZ2-AC2: 2 of 2 (unapproved account, unapproved field) candidates refused
+.
+OGZ2-AC3: 2 of 2 malformed-date candidates refused
+.
+OGZ2-AC4: diff printed by prepare() (7 dimension lines) precedes the activate() call
+.
+OGZ2-AC5: stale base (None, now superseded) refused with ConditionFailed;
+current base (revision 1) activated to revision 2
+.F
+OGZ2-AC7: revoke() -> 1 transact_write_items call, 0 Delete items, 0 delete_item calls; profile still readable, status=revoked revision=2; a direct delete Op is refused before any AWS call
+.
+OGZ2-AC8: DENOMINATOR 60 registered tool(s) (42 native + 9 integration across ['blackdiamond', 'globgrph', 'opal_discover', 'opal_portal', 'portal_index', 'schwab', 'ycharts']) backed by 26 file(s) scanned -- 0 hit(s)
+
+OGZ2-AC8/MXC4-AC9: per-integration pin mismatches=[]
+.
+OGZ2-AC9: operator role ARN accepted (role+assumed-role form); runtime role ARN 'arn:aws:iam::313476888478:role/opal-gateway-role' refused (role+assumed-role form)
+.
+OGZ1-AC1: principal_profile key pk=POLICY#<tid>#<oid> sk=principal_profile (no email in the key); data_entitlement key sk=data_entitlement#0000000001 in the same partition; statuses seen pending -> active -> revoked at revisions 1 -> 2 -> 3; stale-revision update refused (ConditionFailed), grant revision rewrite refused (ConditionFailed); status values refused before AWS: ['enabled', '', None] and 'live' for a grant; delete of the profile refused (AccessStateRefused) -- the revoked record stays, the grant record stays; revoked principal: whoami -> entitlement_denied, discovery 0 tools; the same email under another oid: whoami served (Test User)
+.
+OGZ1-AC2: tools/list -> profile reads 1, grant reads 1 (rev 1), all strong; tools/call schwab_list_files -> profile reads 1, grant reads 1 (rev 1), all strong; tools/call schwab_describe_dataset -> profile reads 1, grant reads 1 (rev 1), all strong; GET /teams/poll -> profile reads 1, grant reads 1 (rev 1), all strong; POST /query/v0 -> profile reads 1, grant reads 1 (rev 1), all strong; after grant revision 2 (operator transaction between requests): tools/call schwab_describe_dataset -> profile reads 1, grant reads 1 (rev 2); tools/list -> profile reads 1, grant reads 1 (rev 2); a principal with no profile: 3 tools/list -> 3 strong profile reads; POLICY reads in the whole test 17, strong 17 of 17 (get_item ConsistentRead=True), cached 0
+.
+OGZ1-AC3: healthy -> schwab_query served (1 credential fetch), discovery 2 tools, /query/v0 403 (restricted); 9 failure arms -> schwab_query entitlement_unavailable/UNAVAILABLE, 0 credential fetches, discovery 0 tools, /query/v0 503, on 9 of 9: store unavailable (POLICY reads fail at the endpoint); profile status 'enabled'; profile revision not a number; profile tid not its key's; profile kind missing; profile names absent grant revision 9; grant operations include download_original; grant scope without columns; grant status 'live'; healthy again -> served
+.
+OGZ1-AC4: registered tools 56 (Schwab 5); unknown user: discovery 51 tools, Schwab among them 0 of 5; direct tools/call of the 5 Schwab tools -> entitlement_denied 5 of 5; the chokepoint (run_integration_tool) -> entitlement_denied 5 of 5; credential fetches and tool bodies 0; master_admin with no profile: discovery 51 tools, Schwab among them 0 of 5; direct tools/call of the 5 Schwab tools -> entitlement_denied 5 of 5; the chokepoint (run_integration_tool) -> entitlement_denied 5 of 5; credential fetches and tool bodies 0; control: an active restricted profile sees 5 of 5 Schwab tools and schwab_get_access is served
+.F
+OGZ1-AC6: registered tools 56 (native 35, integration 9, Schwab stand-ins 5); grant ['list', 'describe'] -> 3 of 56 registered: ['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files']; grant ['query', 'download_filtered'] -> 3 of 56 registered: ['schwab_get_access', 'schwab_prepare_download', 'schwab_query']; grant ['list', 'describe', 'query', 'download_filtered'] -> 5 of 56 registered: ['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files', 'schwab_prepare_download', 'schwab_query']; pending profile -> 0; revoked profile -> 0; control: a principal with no profile -> 51 (every registered tool but the 5 Schwab)
+.
+OGZ1-AC7: registered tools 56 = Schwab 5 allowed + 51 others (native 42, integration 9: graph_cypher, graph_status, opal_data_refresh_upload, ycharts_freshness, ycharts_fund_series, ycharts_risk_return_scatter, ycharts_search, ycharts_snapshot_metrics, ycharts_time_series); tools/call of the 51 others as the restricted profile -> entitlement_denied 51 of 51; the chokepoints with the MCP layer bypassed (tools._run 42, run_integration_tool 9) -> entitlement_denied 51 of 51; credential fetches (delegated Graph token, silent MSAL, integration credential providers), Graph calls and tool bodies during those 102 calls: 0; control: schwab_query served with 1 credential fetch
+.F
+OGZ1-AC9: restricted principals whose email domain query_v0 classes as opal-internal: opalinvest.com -> 403; handle() direct, opalinvest.com -> 403; opalinvest.dev -> 403; handle() direct, opalinvest.dev -> 403; catalog gate and S3 fetch calls 0; control: a principal with no profile at opalinvest.com -> 200, catalog gate called with principal class opal-internal, S3 fetch 1
+.
+OGZ1-AC10: base request in scope (0 failures); one dimension out at a time, 6 of 6 fail exactly that dimension: operations: operation 'describe' is not granted; masters: master '08335338' is not granted; datasets: dataset 'dim_balance' is not granted; accounts: 1 of 2 requested account(s) are not granted for master '08242234'; dates: 1 of 2 requested date(s) are outside the granted fixed_dates; columns: column(s) ['cost_basis'] are not granted for dataset 'dim_position'; download_original -> operations (disabled by the contract); the same account id under the other granted master -> accounts only; rolling window anchored at 2026-09-11: 2026-08-13 in, 2026-08-12 out, no qualified date -> dates; raw account ids in the reasons 0; malformed scopes refused 6 of 6; through the store: allowed at grant revision 1, a column outside -> ['columns'], after revocation -> profile
+.
+OGZ1-AC11: identity-scope entries 1 (seed + identity_tool_allowlist.txt overlay) + 1 unlisted internal user; registered tools 51; opalbloomberg@opalinvest.com (allowlist 11): discovery before == after (51 tools), dispatch verdicts before == after 51 of 51 (bodies reached 8); unlisted.internal@opalinvest.com (allowlist 0): discovery before == after (51 tools), dispatch verdicts before == after 51 of 51 (bodies reached 36); control: a restricted principal before -> discovery 51, reached 36; after -> discovery 0, reached 0
+.
+OGZ1-AC12: restricted profile scoped by an overlay row: bodies reached ['schwab_list_files'], discovery 3; row removed (identity_scope now returns None -- unlisted): bodies reached ['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files'], discovery 3, legacy tools reached 0 of 51 and listed 0 of 51; control: a principal with no profile and an overlay row -> reached ['whoami'], row removed -> reached 36 tools (the unlisted path reopens for it)
+.
+MXC4-AC1: complete spec errs=[]
+missing-classification errs=["tool 'mxac1_x' has no classification declared on the integration spec (C2)"]
+missing-catalog-ref errs=["tool 'mxac1_x' has no catalog-entry reference declared on the integration spec (C2)"]
+missing-both errs=["tool 'mxac1_x' has no classification declared on the integration spec (C2)", "tool 'mxac1_x' has no catalog-entry reference declared on the integration spec (C2)"]
+.
+MXC4-AC2: declared tool -> class=<OpClass.SAFE: 'safe'> unclassified=None
+undeclared tool -> class=<OpClass.IRREVERSIBLE_SEND: 'irreversible_send'> unclassified=True
+.
+MXC4-AC3 (missing classification): report={'error': 'invalid integration spec (not registered)', 'violations': ["tool 'mxac3_a' has no classification declared on the integration spec (C2)"], 'spec': {'id': 'mxac3plant', 'display_name': 'mxac3_', 'auth_kind': 'none', 'tool_prefix': 'mxac3_', 'read_only': True, 'min_tier': 'read_only', 'hosts': ['example.opal.test'], 'secret_id': None, 'tools': ['mxac3_a']}} mcp.names=[]
+
+MXC4-AC3 (with classification): report={'tools': ['mxac3_a'], 'spec': {'id': 'mxac3plant', 'display_name': 'mxac3_', 'auth_kind': 'none', 'tool_prefix': 'mxac3_', 'read_only': True, 'min_tier': 'read_only', 'hosts': ['example.opal.test'], 'secret_id': None, 'tools': ['mxac3_a']}, 'unclassified': ['mxac3_a'], 'unclassified_note': 'denied at discovery and dispatch until classified in app/data_entitlement.py'} mcp.names=['mxac3_a']
+.
+MXC4-AC4 (missing catalog ref): report={'error': 'invalid integration spec (not registered)', 'violations': ["tool 'mxac4_a' has no catalog-entry reference declared on the integration spec (C2)"], 'spec': {'id': 'mxac4plant', 'display_name': 'mxac4_', 'auth_kind': 'none', 'tool_prefix': 'mxac4_', 'read_only': True, 'min_tier': 'read_only', 'hosts': ['example.opal.test'], 'secret_id': None, 'tools': ['mxac4_a']}} mcp.names=[]
+
+MXC4-AC4 (with catalog ref): report={'tools': ['mxac4_a'], 'spec': {'id': 'mxac4plant', 'display_name': 'mxac4_', 'auth_kind': 'none', 'tool_prefix': 'mxac4_', 'read_only': True, 'min_tier': 'read_only', 'hosts': ['example.opal.test'], 'secret_id': None, 'tools': ['mxac4_a']}, 'unclassified': ['mxac4_a'], 'unclassified_note': 'denied at discovery and dispatch until classified in app/data_entitlement.py'} mcp.names=['mxac4_a']
+.
+MXC4-AC7: destructive_ops.classify('read_teams_attachment') = {'class': <OpClass.SAFE: 'safe'>, 'reversible': True, 'irreversible': False, 'native_undo': None, 'blast_dimensions': []}
+.
+MXC4-AC9: with unpinned plant -> [('mxac9plant', ['mxac9_b'], [])]
+plant removed -> []
+.
+MXC4-AC12 (neither registry): report={'tools': [], 'spec': {'id': 'mxac12plant', 'display_name': 'mxac12_', 'auth_kind': 'none', 'tool_prefix': 'mxac12_', 'read_only': True, 'min_tier': 'read_only', 'hosts': ['example.opal.test'], 'secret_id': None, 'tools': []}, 'composed_path_refused': ['mxac12_orphan'], 'composed_path_refused_note': "reachable via register() but resolving through neither this spec's own classification nor app/data_entitlement.py (C2)"} mcp.names=['mxac12_orphan']
+
+MXC4-AC12 (resolves via data_entitlement): report={'tools': ['mxac12_orphan'], 'spec': {'id': 'mxac12plant', 'display_name': 'mxac12_', 'auth_kind': 'none', 'tool_prefix': 'mxac12_', 'read_only': True, 'min_tier': 'read_only', 'hosts': ['example.opal.test'], 'secret_id': None, 'tools': []}}
+.........
+AUTHKIND: [('ASSUMED_ROLE', 'assumed_role'), ('DELEGATED_USER', 'delegated_user'), ('NONE', 'none'), ('SHARED_SECRET', 'shared_secret')]
+STS: 2 AssumeRole call(s), 2 of 2 roles with their own ExternalId, duration 900s
+  reader  gateway-schwab-read-role ExternalId=ogk1-reader-external-id-0001
+  catalog gateway-schwab-catalog-read-role ExternalId=ogk1-catalog-external-id-0002
+SIGNED BY: 2 of 2 sts client(s) built from the ambient identity (no role chaining)
+CONFIG REFUSALS: 4 of 4, each before any STS call:
+  a role the contract does not name  -> SCHWAB_READER_ROLE_ARN names role 'opal-assets-read'; the contract's reader_role is 'gateway-schwab-read-role' -- refusing a role the contract does not name
+  no ExternalId                      -> SCHWAB_READER_EXTERNAL_ID is not set to a well-formed ExternalId
+  not an ARN                         -> SCHWAB_CATALOG_ROLE_ARN is not set to an IAM role ARN
+  one ExternalId reused              -> SCHWAB_READER_EXTERNAL_ID and SCHWAB_CATALOG_EXTERNAL_ID carry the same ExternalId; each role's trust is its own (PRD C6)
+. [ 81%]
+
+ORDER (fresh):   ['policy:call', 'policy:allowed', 'sts:AssumeRole:gateway-schwab-read-role']
+ORDER (denied):  ['policy:call', 'policy:denied'] -- 0 STS calls
+ORDER (cached):  ['policy:call', 'policy:allowed'] -- 0 STS calls, policy still ran
+ORDER (expired): ['policy:call', 'policy:allowed', 'sts:AssumeRole:gateway-schwab-read-role']
+CATALOG BUILD:   2 of 2 AssumeRole call(s) preceded by an allowed policy check
+POLICY: app/data_entitlement.py authorize() over the moto DynamoDB table, grant revision 1
+.
+FAILING ADAPTER: status=unavailable classes=('DEPENDENCY_UNAVAILABLE',) | s3 clients built 0 | s3 calls 0 | ambient-key s3 calls 0 of 0
+HEALTHY ADAPTER: status=complete | s3 clients built 2, all from assumed-role keys ['ASIAUR7FNW6PHHBGDJBF', 'ASIAUR7FNW6PKL43VY47'] | ambient-key s3 calls 0 of 10
+ROLES ASSUMED: ['arn:aws:iam::313476888478:role/gateway-schwab-catalog-read-role', 'arn:aws:iam::313476888478:role/gateway-schwab-read-role']
+.
+CATALOG ROLE (gateway-schwab-catalog-read-role): 1 key(s), 1 of 1 under the contract's 2 completion prefixes; ops ['GetObject']
+  schwab/08242234/meta/complete/date=2026-07-10.json
+DATA ROLE (gateway-schwab-read-role): 3 key(s), 3 of 3 under the contract's 6 data prefixes; ops ['GetObject', 'HeadObject']
+  schwab/08242234/silver/dim_asset/date=2026-07-10/data.parquet
+  schwab/08242234/silver/dim_balance/date=2026-07-10/data.parquet
+  schwab/08242234/silver/dim_position/date=2026-07-10/data.parquet
+CROSSED: catalog-role keys under a data prefix 0 of 1; data-role keys under a completion prefix 0 of 3; ambient-key calls 0 of 10
+.
+NAMED: 7 object(s) in the closure; 3 under the contract's data_prefixes
+HEADED BY VersionId: 3 of 3
+  schwab/08242234/silver/dim_asset/date=2026-07-10/data.parquet d1035326-3c80-4dd1-b086-ccb7dfab9701
+  schwab/08242234/silver/dim_balance/date=2026-07-10/data.parquet a1973647-625e-4f11-b989-68d95f54b707
+  schwab/08242234/silver/dim_position/date=2026-07-10/data.parquet 4dd1ef0d-7c09-42d2-8696-940fecb64416
+.
+ARMS: 4 of 4, one fixture each (no arm is complete):
+  changed      2026-07-08 -> status=unavailable classes=('VERSION_CHANGED',)
+  null         2026-07-02 -> status=incomplete  classes=('UNVERSIONED_OBJECT',)
+  unavailable  2026-07-09 -> status=incomplete  classes=('VERSION_CHANGED', 'VERSION_UNAVAILABLE')
+  unversioned  2026-06-24 -> status=incomplete  classes=('INCONSISTENT_RECORD', 'UNVERSIONED_OBJECT')
+.
+REJECTED: 3 of 3 arms, each with 0 silver reads:
+  another bucket   -> result=rejected classes=('REJECTED_FOREIGN_BUCKET',)
+  another dataset  -> result=rejected classes=('INCONSISTENT_GRAIN', 'INCONSISTENT_RECORD', 'REJECTED_FOREIGN_DATASET')
+  another master   -> result=rejected classes=('INCONSISTENT_GRAIN', 'REJECTED_FOREIGN_MASTER')
+CONTROL: the same marker without the foreign name -> status=complete, 3 file(s)
+.
+SNAPSHOT KEY: RUNTIME#catalog#08242234#2026-07-10#sha256:5f4113fa26331341db1d497f683f68f9ff68769b723e277c86ea556a9cba7190 / catalog_snapshot
+CLOSURE: sha256:5f4113fa26331341db1d497f683f68f9ff68769b723e277c86ea556a9cba7190 (schema opal.silver.closure/v1), marker version a994696f-ca65-4a3c-b164-16e39d6c990b
+VALIDATION: qualified
+FILES: 3 of 3 contract datasets, each with 8 of 8 required fields:
+  dim_asset    version=efad5b43-6aa8-4c45-8711-a8cdb8d5c363 size=8425 rows=4 sha256:a35d0120e0bc id=sf-fdc289e1c362eda0a8ab37a0a68c9253
+  dim_balance  version=e64b7b81-a338-4b36-accf-8a55ee8d40ba size=10687 rows=3 sha256:04f7cfa48480 id=sf-f0cb57f698fab691758a6880ad1c252b
+  dim_position version=5c669403-c2f2-422c-9d53-35b7fcf52e8a size=8663 rows=5 sha256:84c8ba1dfc8f id=sf-08905c6a157a6653b81f1f24779bb04b
+.
+KEY: RUNTIME#catalog#08242234#2026-07-10#sha256:160bc22aa2e612a500695b89495ff349e1b3412d2cb40f8e636003fb3d3c7e84
+WRITES: 1 accepted, 2 refused of 2 attempted (identical body and mutated body), refusal=ConditionFailed
+STORED ITEM: unchanged (byte-equal DynamoDB item before and after both refusals)
+REBUILD: reused=True, 3 of 3 file IDs identical
+.
+SAME KEY: schwab/08242234/meta/complete/date=2026-06-25.json
+LEGACY v1 MARKER (9 field(s), no closure): status=unavailable result=legacy_marker, 0 silver read(s)
+QUALIFIED CLOSURE, same date: status=complete, 3 file(s), closure sha256:105f4adc68ef40a8
+.
+ANCHOR AND WINDOW, per master and dataset (29 days before the anchor, inclusive):
+  08242234 dim_position latest=2026-07-13 window=[2026-06-14 .. 2026-07-13] available=4 of 13 evaluated: ['2026-07-07', '2026-07-09', '2026-07-10', '2026-07-13']
+  08242234 dim_asset    latest=2026-07-10 window=[2026-06-11 .. 2026-07-10] available=4 of 14 evaluated: ['2026-06-11', '2026-07-07', '2026-07-09', '2026-07-10']
+  08335338 dim_position latest=2026-07-10 window=[2026-06-11 .. 2026-07-10] available=2 of 2 evaluated: ['2026-07-09', '2026-07-10']
+BOUNDARY: 2026-06-11 (anchor-29) is in dim_asset's window; 2026-06-10 (anchor-30) is in no window
+PER DATASET: 2026-07-13 delivers rld+rps only, so dim_position's anchor is 2026-07-13 while dim_asset's is 2026-07-10
+.
+ENUMERATED: 5 date(s) asked; 3 served; 2 refused
+  2026-06-24 -> ['NO_MARKER']
+  2026-07-08 -> ['VERSION_CHANGED']
+NO WINDOW APPLIED: 2026-06-01 is 39 days before the latest qualified date and is served under the enumeration
+OUTSIDE THE SET: 2026-07-10 is complete and is NOT served
+REFUSALS: 4 of 4
+  a date that is not one   -> fixed date '2026-02-30' is not a calendar date
+  a mode the contract lacks -> date mode 'everything' is not one of the contract's (('rolling_complete_window', 'fixed_dates'),)
+  fixed with no dates      -> a fixed_dates grant is an enumerated date set; none was given
+  rolling with dates       -> a rolling_complete_window grant enumerates no dates
+.
+ROLLING: available_dates=['2026-07-07', '2026-07-09', '2026-07-10'] latest_qualified_date=2026-07-10 (evaluated 12 of 13 listed)
+FIXED:   available_dates=['2026-07-09'] latest_qualified_date=2026-07-09; refused [('2026-06-29', ['MISSING_OUTPUT'])]
+NOTHING QUALIFIED: available_dates=[] latest_qualified_date=None staleness=None -- stated, not omitted
+.
+ACROSS DATASETS: 2026-07-13 delivered rld+rps; dim_position lists it, dim_asset does not (reason [['DATASET_NOT_IN_CLOSURE']])
+ACROSS MASTERS: SmartX serves ['2026-07-07', '2026-07-09', '2026-07-10', '2026-07-13']; BlackDiamond serves ['2026-07-09', '2026-07-10']; SmartX-only dates never appear under BlackDiamond: ['2026-07-07', '2026-07-13']
+FIXED GRANT of a SmartX-only date under BlackDiamond: []
+FILES: 9 of 9 resolve to their own master/dataset/date key
+.
+CLOCK: 2026-07-13T14:00:00Z (MANIFEST.json clock_utc)
+ROLLING: latest=2026-07-10 days_since_business_date=3 source_observed_at=2026-07-10T12:00:00Z catalog_validated_at=2026-07-13T14:00:00Z
+CLOCK + 1 DAY: days_since_business_date=4 (same business date)
+FIXED GRANT of 2026-06-01: days_since_business_date=42
+BASIS: calendar days from the Schwab business-date label to the Gateway clock's UTC date; no business calendar is applied, so this is not a claim about lateness
+.
+SWEEP: 8 availability responses (2 masters x 4 datasets, rolling)
+DATA ROLE HEAD+GET: 86 call(s) over 21 distinct key(s); 21 of 21 under the 6 data_prefixes read from C:\tmp\mx-rb11\org\standards\NFRA_OPLGTW_CONTRACT.json
+CATALOG ROLE: 15 distinct key(s); 15 of 15 under the 2 completion_prefixes
+NOT VACUOUS: the bucket's closures name 90 distinct object(s), of which 53 lie outside the data_prefixes; 0 of those 53 were HEADed or GOT
+AMBIENT KEY: 0 of 201 calls
+.
+CLOSURE sha256:5b30780f93e47054 names 7 object(s): 3 dim, 4 fact
+  fact named, never read: schwab/08242234/silver/fact_rld/date=2026-07-10/data.parquet
+  fact named, never read: schwab/08242234/silver/fact_rps/date=2026-07-10/data.parquet
+  fact named, never read: schwab/08242234/silver/fact_rps_s2/date=2026-07-10/data.parquet
+  fact named, never read: schwab/08242234/silver/fact_sec/date=2026-07-10/data.parquet
+ARM 1 (all objects present): status=complete, 3 file(s) on dims, 0 of 4 S3 calls under a fact_ key
+ARM 2 (one DIM object deleted, same closure_id): status=incomplete classes=('VERSION_UNAVAILABLE',), 0 S3 call(s) under a fact_ key
+EMULATOR: moto 5.2.3 (boto3 1.43.46, botocore 1.43.46)
+.                                                         [100%]
+================================== FAILURES ===================================
+________________ test_index_vocabulary_routes_the_real_catalog ________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x000002A21D273380>
+
+    def test_index_vocabulary_routes_the_real_catalog(capsys):
+        """Q22's ask reaches mkt.01 through the channel's index-name keywords; a bare 'holdings' ETF ask does not."""
+        ans = od.discover("where is the S&P at?", catalog_gate.OPAL_INTERNAL)
+        first = ans["matches"][0]
+        etf = od.discover("ETF holdings and fund flows", catalog_gate.OPAL_INTERNAL)
+        _say(capsys, "MX-d-5 S&P first=%s; ETF ask catalogued=%r" % (first["property"]["entity"], etf["catalogued"]))
+        assert first["dataset"] == "json-tiered/market-overview/summary/all-returns.json"
+>       assert etf["catalogued"] is False
+E       assert True is False
+
+tests\test_opal_discover.py:390: AssertionError
+---------------------------- Captured stdout call -----------------------------
+MX-d-5 S&P first=mkt.01.tiered-all-returns-PRIMARY; ETF ask catalogued=True
+_______________________________ test_ogz2_ac06 ________________________________
+
+store = <app.access_state.AccessState object at 0x000002A21EACCCD0>
+spy = <test_entitlement_admin.Spy object at 0x000002A21EACD810>
+contract = {'contract_version': '1.3', 'project': 'NFRA_OPLGTW', 'authority': 'org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md#contracts', 'activation': 'DESIGN_ONLY_NOT_A_GRANT', ...}
+capsys = <_pytest.capture.CaptureFixture object at 0x000002A221C34350>
+
+    def test_ogz2_ac06(store, spy, contract, capsys):
+        """One transaction writes the POLICY# record and its operator_audit with approver, timestamp and
+        source authorization reference."""
+        candidate = _valid_candidate()
+        plan = sea.prepare(store, candidate, contract)
+        sea.activate(store, plan, approver="andrew@opalinvest.com", source_authorization="IT-TICKET-42",
+                    at="2026-09-16T01:02:03Z", summary="first grant")
+    
+        transacts = [c for c in spy.calls if c[0] == "transact_write_items"]
+        assert len(transacts) == 1, "expected exactly one transact_write_items call, got %d" % len(transacts)
+        items = transacts[0][1]["TransactItems"]
+        puts = [it["Put"] for it in items if "Put" in it]
+>       assert len(puts) == 3, "expected profile + grant + operator_audit puts, got %d" % len(puts)
+E       AssertionError: expected profile + grant + operator_audit puts, got 4
+E       assert 4 == 3
+E        +  where 4 = len([{'TableName': 'gateway-access-state-table', 'Item': {'tid': {'S': '11111111-1111-1111-1111-111111111111'}, 'oid': {'S... {':og_tid': {'S': '11111111-1111-1111-1111-111111111111'}, ':og_oid': {'S': '22222222-2222-2222-2222-222222222222'}}}])
+
+tests\test_entitlement_admin.py:249: AssertionError
+---------------------------- Captured stdout call -----------------------------
+SCOPE DIFF:
+  masters: {'added': ['08242234'], 'removed': []}
+  datasets: {'added': ['dim_position'], 'removed': []}
+  accounts: {'08242234': {'added': ['ACC1'], 'removed': []}}
+  columns: {'dim_position': {'added': ['account_ref', 'business_date', 'cusip'], 'removed': []}}
+  operations: {'added': ['describe', 'list'], 'removed': []}
+  dates: {'old_mode': None, 'new_mode': 'rolling_complete_window', 'added': [], 'removed': []}
+  portal_channels: {'added': [], 'removed': []}
+_______________________________ test_ogz1_ac05 ________________________________
+
+ge = <test_data_entitlement_guard.Harness object at 0x000002A22134FE10>
+schwab_tools = {'tools': ['schwab_get_access', 'schwab_list_files', 'schwab_describe_dataset', 'schwab_query', 'schwab_prepare_downlo...spec': {'id': 'schwab_standin', 'display_name': 'Schwab stand-in', 'auth_kind': 'none', 'tool_prefix': 'schwab_', ...}}
+capsys = <_pytest.capture.CaptureFixture object at 0x000002A2215AB750>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002A27478DEF0>
+
+    def test_ogz1_ac05(ge, schwab_tools, capsys, monkeypatch):
+        """A newly registered, unclassified tool is denied to the restricted profile."""
+        runs = []
+    
+        def brand_new_data_tool() -> dict:
+            """A tool registered straight on the served surface, outside both chokepoints."""
+            runs.append(1)
+            return {"leaked": True}
+    
+        tools.mcp.tool(name="brand_new_data_tool")(brand_new_data_tool)
+        try:
+            restricted = _connect(ge, email="restricted.six@opalinvest.com")
+            _restrict(ge, restricted.principal)
+            legacy = _connect(ge, email="legacy.six@opalinvest.com")
+            assert de.classify("brand_new_data_tool") is None
+            seen = {}
+            for label, s in (("restricted", restricted), ("no profile", legacy)):
+                names = _names(ge, s.access)
+                result = _call(ge, s.access, "brand_new_data_tool")
+                native = _dispatch(ge, s.principal, "brand_new_data_tool")
+                spec = ge.spec_of["schwab_get_access"]
+                ran = []
+                integ = _as(s.principal, base.run_integration_tool, spec, "brand_new_data_tool", {},
+                            lambda c: ran.append(1), credential_provider=lambda: ran.append("cred"))
+                assert "brand_new_data_tool" not in names and result["code"] == "tool_unclassified", (label, result)
+                assert native == "tool_unclassified" and integ["code"] == "tool_unclassified" and not ran, (label, native)
+                seen[label] = result["code"]
+            assert runs == []
+            # the registry reports an unclassified tool instead of registering it silently
+            scratch = FastMCP("og-z1-scratch")
+    
+            class _Fresh(Integration):
+                spec = IntegrationSpec(id="fresh", display_name="Fresh", description="d", auth_kind=AuthKind.NONE,
+                                       tool_prefix="fresh_", hosts=("example.invalid",))
+    
+                def register(self, mcp):
+                    mcp.tool(name="fresh_unclassified")(brand_new_data_tool)
+                    return ["fresh_unclassified"]
+    
+            registry.register_factory("fresh", _Fresh)
+            try:
+                report = registry.register_enabled(scratch, ["fresh"])["fresh"]
+            finally:
+                registry._FACTORIES.pop("fresh", None)
+>           assert report["unclassified"] == ["fresh_unclassified"], report
+                   ^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'unclassified'
+
+tests\test_data_entitlement_guard.py:627: KeyError
+------------------------------ Captured log call ------------------------------
+WARNING  mcp.server.lowlevel.server:server.py:494 Tool 'brand_new_data_tool' not listed, no validation will be performed
+WARNING  mcp.server.lowlevel.server:server.py:494 Tool 'brand_new_data_tool' not listed, no validation will be performed
+_______________________________ test_ogz1_ac08 ________________________________
+
+ge = <test_data_entitlement_guard.Harness object at 0x000002A222ED09E0>
+schwab_tools = {'tools': ['schwab_get_access', 'schwab_list_files', 'schwab_describe_dataset', 'schwab_query', 'schwab_prepare_downlo...spec': {'id': 'schwab_standin', 'display_name': 'Schwab stand-in', 'auth_kind': 'none', 'tool_prefix': 'schwab_', ...}}
+capsys = <_pytest.capture.CaptureFixture object at 0x000002A22327AFD0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002A27FE63CB0>
+
+    def test_ogz1_ac08(ge, schwab_tools, capsys, monkeypatch):
+        """/teams/poll, /query/v0 and every other non-MCP route are denied to the restricted profile before any
+        credential or data read, over all route declarations, denominator printed."""
+        for attr, value in {"OTP_BEARER": "otp-static-test", "OTP_MAILBOX": "mailbox@opalinvest.com",
+                            "MS_INGEST_BEARER": "ms-static-test", "MS_INGEST_IDENTITY": "ingest@opalinvest.com",
+                            "GRAPH_READ_BEARER": "graph-static-test"}.items():
+            monkeypatch.setattr(_CFG, attr, value)
+        s = _connect(ge, email="restricted.nine@opalinvest.com")
+        _restrict(ge, s.principal)
+        routes = {r.path: set(getattr(r, "methods", None) or ()) for r in ge.server.app.routes}
+>       assert len(routes) == len(ge.server.app.routes) and set(ROUTE_CLASS) == set(routes)
+E       AssertionError: assert (43 == 43 and {'/.well-know.../cypher', ...} == {'/', '/.well...h:path}', ...}
+E        +  where 43 = len({'/health': {'GET', 'HEAD'}, '/.well-known/oauth-protected-resource': {'GET', 'HEAD'}, '/.well-known/oauth-authorization-server': {'GET', 'HEAD'}, '/.well-known/jwks.json': {'GET', 'HEAD'}, ...})
+E        +  and   43 = len([Route(path='/health', name='health', methods=['GET', 'HEAD']), Route(path='/.well-known/oauth-protected-resource', na...egister', name='register', methods=['POST']), Route(path='/authorize', name='authorize', methods=['GET', 'HEAD']), ...])
+E        +    where [Route(path='/health', name='health', methods=['GET', 'HEAD']), Route(path='/.well-known/oauth-protected-resource', na...egister', name='register', methods=['POST']), Route(path='/authorize', name='authorize', methods=['GET', 'HEAD']), ...] = <starlette.applications.Starlette object at 0x000002A2220D2D50>.routes
+E        +      where <starlette.applications.Starlette object at 0x000002A2220D2D50> = <module 'app.server' from 'C:\\tmp\\mx-rb11\\infra\\aws\\ec2\\opal-gateway\\app\\server.py'>.app
+E        +        where <module 'app.server' from 'C:\\tmp\\mx-rb11\\infra\\aws\\ec2\\opal-gateway\\app\\server.py'> = <test_data_entitlement_guard.Harness object at 0x000002A222ED09E0>.server
+E         
+E         Extra items in the right set:
+E         '/hx/mail/messages/{message_id}/attachments/{attachment_id}'
+E         '/assets/{path:path}'
+E         '/rivalfunds/archive'
+E         '/rivalfunds'
+E         '/rivalfunds/'...
+E         
+E         ...Full output truncated (8 lines hidden), use '-vv' to show)
+
+tests\test_data_entitlement_guard.py:717: AssertionError
+============================== warnings summary ===============================
+tests\test_data_entitlement_guard.py:33
+  C:\tmp\mx-rb11\infra\aws\ec2\opal-gateway\tests\test_data_entitlement_guard.py:33: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests\test_opal_discover.py::test_index_vocabulary_routes_the_real_catalog - assert True is False
+FAILED tests\test_entitlement_admin.py::test_ogz2_ac06 - AssertionError: expected profile + grant + operator_audit puts, got 4
+FAILED tests\test_data_entitlement_guard.py::test_ogz1_ac05 - KeyError: 'unclassified'
+FAILED tests\test_data_entitlement_guard.py::test_ogz1_ac08 - AssertionError: assert (43 == 43 and {'/.well-know.../cypher', ...} == {'/'...
+4 failed, 84 passed, 1 warning in 32.48s
+rc=1

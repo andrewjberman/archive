@@ -1,0 +1,50 @@
+diff --git a/src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs b/src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs
+index e2bc30e4..839d6e9c 100644
+--- a/src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs
++++ b/src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs
+@@ -118,6 +118,7 @@ function source(rel) {
+       return {
+         useLeadPanelRankings: () => state,
+         useRankTimeSeries: () => ({}),
++        useCollectedChatter: () => ({}),
+         useStarredList: () => starredState,
+         useSetStarred: () => ({ mutate: noop }),
+         useRequestRefresh: () => ({ mutate: noop }),
+@@ -127,6 +128,9 @@ function source(rel) {
+     if (name === './RankedList') return loaded.ranked;
+     if (name === './StarredList') return loaded.starred;
+     if (name === './RankedChart') return { RankedChart: () => null };
++    // DSGN_AMGTV1 AV-n-1/AV-n-2: the price bars and the chatter bubbles are not this boundary's question.
++    if (name === './PriceBars') return { PriceBars: () => null };
++    if (name === './ChatterBubbles') return { ChatterBubbles: () => null, stepMonth: (_m, month) => month };
+     if (name === './SecurityOverlay') return { SecurityOverlay: () => null };
+     // AMGT-rj-9: the header brief renders only in Security mode, which no case here enters;
+     // the generation caption is the REAL component, so its text is inside every hash below.
+@@ -252,7 +256,26 @@ const results = {};
+ for (const [name, c] of Object.entries(cases)) {
+   state = c.ranking;
+   starredState = c.starred;
+-  const html = renderToStaticMarkup(React.createElement(LeadPanel, props(c.starredOnly)));
++  // DSGN_AMGTV1 AV-n-1/AV-n-2 RE-ANCHOR: the Lead Panel no longer renders the ranked list (rulings: chatter is bubbles
++  // only, price is bars only). The non-starred cases render RankedList itself -- the row renderer StarredList still
++  // composes -- with exactly the props LeadPanel passed it; the starred cases still render the real LeadPanel.
++  // Was: every case rendered LeadPanel with view 'list'.
++  const html = c.starredOnly
++    ? renderToStaticMarkup(React.createElement(LeadPanel, props(c.starredOnly)))
++    : renderToStaticMarkup(
++        React.createElement(loaded.ranked.RankedList, {
++          rows: (c.ranking.data && c.ranking.data.rows) || [],
++          starredTickers: new Set(),
++          resolution: c.ranking.data ? c.ranking.data.resolution : undefined,
++          onToggleStar: noop,
++          onSelectSecurity: noop,
++          isLoading: !!c.ranking.isLoading,
++          readError: c.ranking.isError ? c.ranking.error : null,
++          rankingStatus: c.ranking.data ? c.ranking.data.ranking_status : undefined,
++          rankingReason: (c.ranking.data && c.ranking.data.ranking_reason) || null,
++          emptyReason: (c.ranking.data && c.ranking.data.empty_reason) || null,
++        })
++      );
+   results[name] = {
+     html: html,
+     bytes: Buffer.byteLength(html),

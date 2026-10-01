@@ -1,0 +1,26 @@
+{
+  "measured_at": "2026-10-01T12:25Z",
+  "mechanism": "INCONCLUSIVE",
+  "inside": {
+    "whoami": "opal_bloomberg\\opal bloomberg",
+    "result": "OPEN",
+    "command": "codex sandbox --sandbox-state-json <managed profile, file_system restricted with a read-root entry, network restricted, sandboxCwd file:///C:/tmp/oa-25> --sandbox-state-disable-network powershell -NoProfile -ExecutionPolicy Bypass -File .scratch/probe.ps1 -Port 8194 (TcpClient ConnectAsync 127.0.0.1:8194, 3000 ms)",
+    "note": "NOT the offline identity: this ran as the operator's own restricted token (config windows.sandbox=unelevated). Recorded for completeness; it does not discriminate FIREWALL-RULE from LOOPBACK-EXEMPT."
+  },
+  "outside": {
+    "whoami": "opal_bloomberg\\opal bloomberg",
+    "result": "OPEN",
+    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .scratch/probe.ps1 -Port 8194 (TcpClient ConnectAsync 127.0.0.1:8194, 3000 ms)",
+    "note": "Windows whoami; the Git Bash whoami prints 'Opal Bloomberg' for the same account. Inside and outside are the SAME identity, which is why the inside arm is not a falsifier."
+  },
+  "tried": [
+    "codex sandbox whoami -> opal_bloomberg\\opal bloomberg (operator)",
+    "codex sandbox -P :read-only|:workspace whoami -> operator",
+    "codex sandbox -P :danger-no-sandbox -> 'unknown built-in profile'; -P read-only|workspace -> 'requires a [permissions] table'",
+    "codex sandbox --sandbox-state-json <managed, file_system unrestricted> -> 'only restricted managed filesystem permissions can be enforced by the Windows sandbox'",
+    "codex sandbox --sandbox-state-json <managed, file_system restricted, entries []> -> 'Restricted read-only access requires the elevated Windows sandbox backend'",
+    "codex sandbox --sandbox-state-json <managed, restricted with a read-root entry> -> runs, whoami = operator",
+    "codex sandbox -c windows.sandbox=\"elevated\" -P :read-only whoami -> 'helper_sandbox_lock_failed ... SetNamedSecurityInfoW sandbox dir failed: 5' (needs Administrator); not repeated"
+  ],
+  "reason_inconclusive": "The offline identity (CodexSandboxOffline, SID ...-1005, named by the live codex_sandbox_offline_block_loopback_* rules) exists only on the elevated Windows sandbox backend, which a non-elevated session cannot set up. See row NFRA_OPALAI-Z-W25-S1."
+}

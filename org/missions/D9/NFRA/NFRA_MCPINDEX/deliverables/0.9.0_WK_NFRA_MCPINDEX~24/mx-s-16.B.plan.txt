@@ -1,0 +1,62 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_cloudwatch_event_rule.bd_allocation_pipeline will be updated in-place
+  ~ resource "aws_cloudwatch_event_rule" "bd_allocation_pipeline" {
+        id                  = "bd-allocation-pipeline-trigger"
+        name                = "bd-allocation-pipeline-trigger"
+      ~ state               = "ENABLED" -> "DISABLED"
+        tags                = {
+            "Name"   = "bd-allocation-pipeline-trigger"
+            "System" = "BDPipeline"
+        }
+        # (9 unchanged attributes hidden)
+    }
+
+  # aws_cloudwatch_event_rule.bd_unrealized_pipeline will be updated in-place
+  ~ resource "aws_cloudwatch_event_rule" "bd_unrealized_pipeline" {
+        id                  = "bd-unrealized-pipeline-trigger"
+        name                = "bd-unrealized-pipeline-trigger"
+      ~ state               = "ENABLED" -> "DISABLED"
+        tags                = {
+            "Name"   = "bd-unrealized-pipeline-trigger"
+            "System" = "BDPipeline"
+        }
+        # (9 unchanged attributes hidden)
+    }
+
+  # aws_s3_bucket_notification.bd_data_bucket will be updated in-place
+  ~ resource "aws_s3_bucket_notification" "bd_data_bucket" {
+        id          = "opal-data-bd"
+        # (2 unchanged attributes hidden)
+
+      ~ lambda_function {
+          ~ filter_prefix       = "forwardfill_v2/allocations/" -> "silver/prices/20"
+          ~ filter_suffix       = ".xlsx" -> ".parquet"
+          ~ id                  = "ProcessAllocationFiles" -> "GoldLayerPricesTrigger"
+          ~ lambda_function_arn = "arn:aws:lambda:us-east-1:313476888478:function:bd-allocation-processor" -> "arn:aws:lambda:us-east-1:313476888478:function:bd-gold-trigger"
+            # (1 unchanged attribute hidden)
+        }
+      ~ lambda_function {
+          ~ filter_prefix       = "silver/prices/20" -> "bronze/"
+          ~ filter_suffix       = ".parquet" -> "_BRONZE_COMPLETE.json"
+          ~ id                  = "GoldLayerPricesTrigger" -> "BronzeCompleteSilverMerge"
+          ~ lambda_function_arn = "arn:aws:lambda:us-east-1:313476888478:function:bd-gold-trigger" -> "arn:aws:lambda:us-east-1:313476888478:function:bd-silver-merge"
+            # (1 unchanged attribute hidden)
+        }
+      - lambda_function {
+          - events              = [
+              - "s3:ObjectCreated:*",
+            ] -> null
+          - filter_prefix       = "bronze/" -> null
+          - filter_suffix       = "_BRONZE_COMPLETE.json" -> null
+          - id                  = "BronzeCompleteSilverMerge" -> null
+          - lambda_function_arn = "arn:aws:lambda:us-east-1:313476888478:function:bd-silver-merge" -> null
+        }
+    }
+
+Plan: 0 to add, 3 to change, 0 to destroy.

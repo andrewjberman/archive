@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-q-1.gqgu-issuer-route",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "53784a663e",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-q-1.gqgu-issuer-route.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "53784a663e"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_holdings_coverage.py",
+      "kind": "script",
+      "commit_or_etag": "c91d7dc313",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 amendment 1 (rows Z-W4-S12/S13); no deploy and no S3 touched by the worker; the QA deploy is the issuer's act before the 07:00 ET fetch",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_q1_gqgu_coverage.py",
+      "kind": "script",
+      "commit_or_etag": "c91d7dc313",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 amendment 1 (rows Z-W4-S12/S13); no deploy and no S3 touched by the worker; the QA deploy is the issuer's act before the 07:00 ET fetch",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "two REAL archived GQGU days land under gqgu- keys; issuer silver holds GQGU's 39 rows for 2026-09-28; BASG's object for that date is kept -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round4/checks/q-1.AC1.py",
+      "output_evidence": "gqgu bronze: ['gqgu-2026-09-25-20260929T204244Z-0229ddef9f87.json', 'gqgu-2026-09-25-20260929T204244Z-0229ddef9f87.txt', 'gqgu-2026-09-28-20260929T204244Z-5986610e156b.json', 'gqgu-2026-09-28-20260929T204244Z-5986610e156b.txt']\nOK:   a GQGU bronze object keyed gqgu-2026-09-28-<ts>-<sha12>\nsilver objects: ['basg-20260929T204617Z-2a559d4deb4e.parquet', 'gqgu-20260929T204244Z-5986610e156b.parquet']\nOK:   GQGU silver rows 39 == file GQGU rows 39\nOK:   control: BASG silver kept (35 == 35)\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (bronze key, GQGU silver 39 of 39, BASG silver kept 35 of 35)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "with BASG's and a 5-second-later GQGU capture of 2026-09-28 replayed through silver, G1 and G2, BASG's coverage row reads a basg-* capture with its 35 rows, GQGU has its own gqgu-* row with its 39 rows, and no row crosses funds -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round4/checks/q-1.AC2.py",
+      "output_evidence": "coverage rows for 2026-09-28: 2\nBASG [('basg-2026-09-28-20260929T204617Z-2a559d4', 35)]\nGQGU [('gqgu-2026-09-28-20260929T204622Z-5986610', 39)]\nOK:   BASG's coverage row reads a basg-* capture with BASG's 35 rows\nOK:   GQGU has its own coverage row from a gqgu-* capture with GQGU's 39 rows\nOK:   control: no coverage row points at the other fund's capture\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (BASG 35 rows, GQGU 39 rows, 0 cross-fund rows)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control: tests/test_q1_gqgu_coverage.py run against the previous gold_holdings_coverage.py (git show HEAD bytes).",
+      "expected": "the three displacement/observation tests fail.",
+      "observed": "3 failed, 1 passed (the legacy-sidecar test, BASG-only, passes on both by design); with the change 4 passed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (before and after the commit); suite run three times.",
+      "observed": "same PASS lines; suite 306 passed, 2 skipped, 0 failed at c91d7dc313.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S38",
+    "ETFS_RIVALS-Z-W1-S39"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "c91d7dc313"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-tt-1",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "7d2c0ae74e",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-tt-1.taxsma-alb-rule.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7d2c0ae74e"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~18",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/taxsma-capability.tf",
+   "kind": "config_data",
+   "commit_or_etag": "dda5627b41",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "targeted plan 1 to add 0 to change 0 to destroy; safe-apply of the saved plan rc=0: Apply complete! Resources: 1 added, 0 changed, 0 destroyed.; rule arn arn:aws:elasticloadbalancing:us-east-1:313476888478:listener-rule/app/opal-gateway/89166a68f337e5a4/2904a0140214f982/3a86fd5003423b64; live describe-rules priority 36 /ms/taxsma-workbook, forward.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261001T1752Z_nfra-oplgtw-taxsma-alb-rule_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "afdd757ab3",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEVER-2 ledger nfra-oplgtw-taxsma-alb-rule opened dda5627b41 (entry + sentinel before the act), closed afdd757ab3, 2 legs proven, sentinel removed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- one forward-only rule, exactly the Tax path, nothing else declared.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/tt.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "listener rules 1 ['taxsma_capability']; other resources []\npath patterns ['/ms/taxsma-workbook']\naction types ['forward']\nRESULT: PASS\nexit=0",
+   "denominator": "1 of 1 tf file; 1 listener rule; 1 of 1 path pattern",
+   "status": "PASS",
+   "expect": "(?s)listener rules 1 .*path patterns \\['/ms/taxsma-workbook'\\].*action types \\['forward'\\].*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- APPLIED and EXERCISED: the Tax path reaches the app (404 until OG-tr-1 mounts it), the negative arms hold.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/tt.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "describe-rules rc=0\nprobe rc=0\nlive rules carrying the Tax path: 1 [('36', ['/ms/taxsma-workbook'], ['forward'])]\nprobe tax: status 404, redirects to sign-in False\nprobe ms_unknown: status 302, redirects to sign-in True\nprobe root: status 302, redirects to sign-in True\nprobe ms_sites: status 401, redirects to sign-in False\nledger entry files at HEAD=1; sentinel at HEAD=no\nRESULT: PASS\nexit=0",
+   "denominator": "1 of 1 live Tax rule; 1 of 1 Tax probe + 3 of 3 negative arms (ms_unknown, root, ms_sites)",
+   "status": "PASS",
+   "expect": "(?s)live rules carrying the Tax path: 1 .*probe tax: status \\d+, redirects to sign-in False.*probe ms_unknown: status 302, redirects to sign-in True.*probe root: status 302, redirects to sign-in True.*probe ms_sites: status 401, redirects to sign-in False.*sentinel at HEAD=no.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The spec names no mutant control.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC2 run before the ledger close (sentinel at HEAD=yes -> RESULT: FAIL, the one expected line) and after the close commit afdd757ab3 (PASS).",
+   "observed": "probe lines identical; only the sentinel line differed",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-gateway apply -input=false <saved targeted plan of aws_lb_listener_rule.taxsma_capability>",
+   "result": "rc=0"
+  }
+ ]
+}

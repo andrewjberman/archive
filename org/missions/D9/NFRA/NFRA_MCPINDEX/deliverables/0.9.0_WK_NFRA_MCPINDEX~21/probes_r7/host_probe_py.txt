@@ -1,0 +1,38 @@
+import os, sys, json, re
+os.chdir('/opt/opal-gateway'); sys.path.insert(0, '/opt/opal-gateway')
+from dotenv import dotenv_values
+for k, v in dotenv_values('/opt/opal-gateway/.env').items():
+    os.environ[k] = v
+def scrub(s):
+    return re.sub(r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}', '<uuid>', str(s))
+from app import integrations
+from app.tools import mcp
+native = sorted(t.name for t in mcp._tool_manager.list_tools())
+ids = os.environ['ENABLED_INTEGRATIONS'].split()
+rep = integrations.register_enabled(mcp, ids)
+allnames = sorted(t.name for t in mcp._tool_manager.list_tools())
+print('---TOOLS', json.dumps({'ids': ids, 'native': len(native), 'integration': len(allnames) - len(native), 'total': len(allnames), 'all': allnames}))
+print('---REGREPORT', scrub(json.dumps(rep, default=str))[:600])
+from app.integrations.opal_discover import integration as od
+try:
+    d = od.discover('what fees did Black Diamond charge', 'opal-internal', '', head=lambda b, k: None)
+    ms = d.get('matches') or []
+    print('---DISCOVER', json.dumps({'catalogued': d.get('catalogued'), 'n_matches': len(ms),
+        'matches': [{'dataset': m.get('dataset'), 'servable': m.get('servable'), 'next_tool': m.get('next_tool')} for m in ms]}, default=str)[:1500])
+except Exception as e:
+    print('---DISCOVER EXC', type(e).__name__, scrub(e)[:300])
+from app.integrations.blackdiamond import integration as bd
+from app.graphql_plumbing import catalog_gate
+principal = (catalog_gate.OPAL_INTERNAL, '')
+try:
+    inst = bd.BlackDiamondIntegration()
+    s3 = inst._s3(lambda: bd.check_scope('49financial', principal))
+    print('---BD role_config_and_assume OK (no RoleConfigError)')
+    out = bd.answer(s3, principal, scope='49financial')
+    summ = {k: out.get(k) for k in ('status', 'tool', 'scope', 'source', 'as_of', 'source_as_of', 'date_from', 'date_to', 'complete', 'truncated', 'rows_matched', 'rows_returned', 'duplicate_transaction_ids')}
+    summ['partitions_read'] = out.get('partitions_read') if not isinstance(out.get('partitions_read'), list) else len(out['partitions_read'])
+    summ['partitions_absent'] = len(out.get('partitions_absent') or [])
+    summ['totals_days'] = len(out.get('totals_by_trade_date') or {})
+    print('---BD ANSWER', json.dumps(summ, default=str))
+except Exception as e:
+    print('---BD EXC', type(e).__name__, scrub(e)[:400])

@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-af-1.the-monthly-chatter-route",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "c505327bd79185def67c954c1ead61728e044b28"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "4a7d8bcb0fd9f325f720debaf5d8dbaa1f3215e2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-af-1.the-monthly-chatter-route.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~197",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/monthly_chatter.py",
+      "kind": "script",
+      "commit_or_etag": "45e4ac9009e0c689d42cecbaf3c7a35632571d09",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: read_monthly_chatter() -- one row per covered name, per-month collected from the newest gold chatter_daily snapshot, per-publisher from the newest gold article_security_mention snapshot deduplicated on (article_key, security_key); empty month absent. af-5 deploys; no deploy here.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "45e4ac9009e0c689d42cecbaf3c7a35632571d09",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: one import line and, in handler()'s timeseries block only, a collected branch (subject chatter -> monthly_chatter.read_monthly_chatter(); any other subject -> AdapterError 400 with a reason) ahead of read_rank_series. movement_gate untouched.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_monthly_chatter.py",
+      "kind": "test",
+      "commit_or_etag": "45e4ac9009e0c689d42cecbaf3c7a35632571d09",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 7 tests (every covered name, absent month, publisher de-dup and window, envelope/partial/vintage/names, month-end not partial, handler dispatch, collected/price 400). 7 passed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every test passes, test_monthly_chatter.py included (314 passed at the cut, before the new file), and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/; echo \"exit=$?\"",
+      "output_evidence": "316 passed, 2 skipped, 173 warnings, 3 errors in 11.65s\nexit=1\n(the 3 errors: lib/research/api/tests/test_print_format_rich.py FileNotFoundError portal/src/pages/SecurityAnalysis/__harness__/tabsFixture.BA_US_Equity.json -- the portal gitlink is not populated in the sparse worktree; test_monthly_chatter.py: 7 passed)",
+      "denominator": "316 passed + 2 skipped + 3 errors = 321 collected items; 0 failed; 3 errors all in one unrelated file",
+      "status": "FAIL",
+      "status_reason": "exit=1 on 3 fixture errors outside the order's paths; filed AMGT_RESAPP-Z-W197-S1, not re-scoped",
+      "expect": "every test passes, test_monthly_chatter.py included, and exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "C1-C8 PASS; THE MONTHLY CHATTER ROUTE SERVES EVERY COVERED NAME FROM GOLD: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round56/checks/af_1_route.py; echo \"exit=$?\"",
+      "output_evidence": "oracle: covered names 95 (fresh read of research_dossier/); gold as_of 2026-09-30; name-months with collected>0: 147\nPASS C1 status 200, not refused status=200 refused=None\nPASS C2 one row per covered name, no other served 95 rows / 95 distinct vs covered 95\nPASS C3 months ascending, include as_of month and the two before months ['2026-01']..['2026-09'] cur=2026-09\nPASS C4 as_of equals newest gold day; source names gold chatter_daily; partial month flagged as_of served=2026-09-30 oracle=2026-09-30 partial=[]\nPASS C5 no zero-collected month cell (an empty month is absent) zero cells 0\nPASS C6 every collected count equals the gold recompute mismatches 0 []\nPASS C7 every by_publisher equals the mention recompute mismatches 0 []\nPASS C8 positive control BA_US_Equity 2026-09 collected > 0 value 20\nTHE MONTHLY CHATTER ROUTE SERVES EVERY COVERED NAME FROM GOLD: YES\nexit=0",
+      "denominator": "C1-C8: 8 of 8 PASS; 95 of 95 covered names served; 147 name-months compared",
+      "status": "PASS",
+      "expect": "PASS C1.*PASS C8.*THE MONTHLY CHATTER ROUTE SERVES EVERY COVERED NAME FROM GOLD: YES.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A planted zero month cell in a saved copy of the live response, graded by af_1_route.py --from-json (the checker's own negative arm).",
+      "expected": "C5, C6 and C7 FAIL and the verdict reads NO.",
+      "observed": "C5 FAIL (zero cells 1), C6 FAIL (mismatches 1), C7 FAIL (mismatches 1); verdict NO.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two read_monthly_chatter() calls through the handler compared for equality",
+      "observed": "identical (a == b True); 95 rows, as_of 2026-09-30, 0 name-months where the publisher sum differs from collected",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any deploy, S3 write, terraform, gateway route, vendor call, movement_gate edit",
+      "reason": "Out of BOUNDS by the order; af-5 deploys."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W197-S1"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~197/AMGT_RESAPP.TO-AMGT-af-1.the-monthly-chatter-route.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m ruff",
+      "invocation": "python -m ruff check lib/research/api/monthly_chatter.py lib/research/api/tests/test_monthly_chatter.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~197 <0.9.0_WK_AMGT_RESAPP~197@opal.agent>\" -F <msgfile> -- <4 paths>",
+      "result": "pre-commit gate clean; commit 45e4ac9009"
+    }
+  ]
+}

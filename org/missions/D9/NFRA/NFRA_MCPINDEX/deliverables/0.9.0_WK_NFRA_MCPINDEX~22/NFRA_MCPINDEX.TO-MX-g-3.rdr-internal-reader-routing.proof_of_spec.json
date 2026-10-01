@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-g-3",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e91ce9a0d5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "f797d8594a",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-g-3.rdr-internal-reader-routing.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~22",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/portal_index/integration.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "s3_getter() takes its client from internal_role.s3_client(): role client when the ARN is set, default boto3 client when None, IntegrationError (fail closed, no fallback) on InternalRoleUnavailable. Nothing deployed; MX-r-8 releases.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/opal_discover/integration.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_s3_head() takes its client from internal_role.s3_client(): role client (wall-clock bounded, row Z-W22-S3) when the ARN is set, the default client with its own Config when None; InternalRoleUnavailable reaches _served_written_at, which records served_written_at absent. Nothing deployed; MX-r-8 releases.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_internal_role_routing.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three named tests, offline (internal_role.s3_client and boto3.client monkeypatched): 3 passed. Nothing deployed; MX-r-8 releases.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row NFRA_MCPINDEX-Z-W22-S3 (OBSERVATION, INERT). Nothing deployed; MX-r-8 releases.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "s3 call sites scanned>=1; portal-v2 reader files>=1; unrouted=0; verdict=OK -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round6/checks/g3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "s3 call sites scanned=20 portal-v2 reader files=3 unrouted=0 \nverdict=OK\nRESULT: PASS\nRESULT: PASS\nexit=0",
+      "denominator": "20 s3 call sites scanned; 3 portal-v2 reader files; unrouted=0 (base: unrouted=2, opal_discover and portal_index)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest rc=0; named tests passed 3 of 3; failed/error tests 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round6/checks/g3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error tests 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 named tests passed; 0 failed/error",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The issuer's dry run at base: g3.AC1 FAIL (unrouted=2), g3.AC2 FAIL (test file absent).",
+      "expected": "N/A for this worker: the checks are the issuer's scripts; no mutant planted.",
+      "observed": "Before the edit g3.AC1 would read unrouted=2 and g3.AC2 would find the test file absent (issuer's dry run); after, both PASS.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of each invocation compared",
+      "observed": "AC1 run1 == run2: True ; AC2 run1 == run2: True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "app/internal_role.py, query_v0.py, any role, policy, grant or .env change",
+      "reason": "Order act 3 and bound 1: not edited; the ARN reaches the host .env through NFRA_MCPMSP MS-d-2."
+    },
+    {
+      "item": "Deploy and push",
+      "reason": "Order bound 3; MX-r-8 releases."
+    },
+    {
+      "item": "botocore Config on the role-path HEAD in opal_discover",
+      "reason": "The cached role client is built by internal_role.py (not in this order's paths) and shared with query_v0; bounded by wall clock instead. Row NFRA_MCPINDEX-Z-W22-S3."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W22-S3"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-g-3.rdr-internal-reader-routing.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_portal_index.py tests/test_opal_discover.py tests/test_query_v0_tool.py tests/test_mcpmsp_internal_role.py from infra/aws/ec2/opal-gateway",
+      "result": "44 passed"
+    }
+  ]
+}

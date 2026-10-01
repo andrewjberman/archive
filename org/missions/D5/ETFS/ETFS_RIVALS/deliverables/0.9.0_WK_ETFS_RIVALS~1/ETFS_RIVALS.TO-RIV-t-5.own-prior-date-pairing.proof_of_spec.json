@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-t-5.own-prior-date-pairing",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "53784a663e",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-t-5.own-prior-date-pairing.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "53784a663e"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "5cd27dc0d2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 build cell; no served write, no deploy; checks run against a local sink",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_t5_own_prior_pairing.py",
+      "kind": "script",
+      "commit_or_etag": "5cd27dc0d2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 build cell; 4 unit tests, all fail on the base code and pass here",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a DAILY G5 build gives TXUE (dropped from the second-newest capture) a window starting at its OWN prior date; SCHY keeps the global prior -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round4/checks/t-5.AC1.py",
+      "output_evidence": "daily G5: OK {'written_new': 1, 'rows_written': 48, 'report_dates': ['2026-09-29'], 'no_prior_report': [], 'failures': {}, 'no_prior_report_funds': [], 'flow_reconciliation_outputs': ['s3://opal-data-etfs/rivalfun\nOK:   a daily G5 object for 2026-09-29 (1)\ndates: own_prior 2026-09-25, global_prior 2026-09-28, newest 2026-09-29; TXUE starts {'2026-09-25'}, SCHY starts {'2026-09-28'}\nOK:   TXUE's window starts at its own prior report date 2026-09-25\nOK:   control: SCHY's window starts at the global prior date 2026-09-28\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (a daily G5 object exists; TXUE's G6 window starts at its own prior 2026-09-25; SCHY control starts at the global prior 2026-09-28)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control: the four tests/test_t5_own_prior_pairing.py tests run against the base gold_trade_schedule.py (git show HEAD~1 bytes).",
+      "expected": "all four fail on the base code.",
+      "observed": "4 failed on base (set() == {'2026-09-25'}; KeyError no_prior_report_funds x2; daily != replay); 4 passed with the change.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run three times with the issuer's original check (same FAIL line each time), then once with the amended check at c17bb31c04 (PASS); rivalfunds/tests run once (249 passed, 2 skipped) before the new test file, the new file 4 passed.",
+      "observed": "original check FAIL x3 (G5 has no TXUE row); amended check PASS.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S28",
+    "ETFS_RIVALS-Z-W1-S29"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "5cd27dc0d2"
+    }
+  ]
+}

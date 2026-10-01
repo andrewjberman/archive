@@ -1,0 +1,193 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ETFS_RIVALS.TO-RIV-d-4.live-join-round3",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+  "vintage_commit": "ec32d715013024da78b41578b8acc7f9cd28c18f",
+  "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-d-4.live-join-round3.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-d-4.live-join-round3.md",
+  "group": "OTHER",
+  "vintage_commit": "e7b94e2fe861bedb69af861e036b1714b15af212"
+ },
+ "assignee": "0.9.0_WK_ETFS_RIVALS~4",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/etfs-rivalfunds/gen_policies.py",
+   "kind": "script",
+   "commit_or_etag": "e364f8971c",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "adds the home-landing and G4 read grants; regeneration of policies/ equals the committed copies (two policies change); safe-apply 0 added 7 changed 0 destroyed; IAM simulation in evidence/iam_simulation_r3.txt",
+   "artifact_covered_by": [
+    "AC1",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/etfs-rivalfunds/policies/rivalfunds-build-canonical-shape-lambda.json",
+   "kind": "terraform",
+   "commit_or_etag": "e364f8971c",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "aws_iam_role_policy in place x2 + five aws_lambda_function source_code_hash in place; CodeSha256 after in d4_live.json apply",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+   "kind": "config_data",
+   "commit_or_etag": "78c971d4a3",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "five rivalfunds entries: last_deployed_commit e364f8971c, artifact_sha256 = the live CodeSha256, last_deployed_at 2026-10-01T10:53:42Z",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-data-etfs/rivalfunds/etfs/gold/security_market/date=2026-09-29/",
+   "kind": "s3_object",
+   "commit_or_etag": "afcd903ad844 + 53bc393958bd",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "G4: QA import (172 rows) and the live market pull (434 rows); before 0 objects; AC3 reads a served G4",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-data-etfs/issuer-site/etfs/silver/holdings/date=2026-09-29/basg-20261001T105835Z-bfd36047cb41.parquet",
+   "kind": "s3_object",
+   "commit_or_etag": "bfd36047cb41",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "the issuer re-capture control: second silver object beside the retained earlier one, marker OK",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-data-etfs/rivalfunds/etfs/gold + platinum + state (round-3 revisions)",
+   "kind": "s3_object",
+   "commit_or_etag": "d4-replay-r3",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "G1 23, G2 25, G5 23, G6 23 new revisions for 2026-08-21..2026-09-29; page date=2026-10-01 (marker d4-publish-r3b) and 2026-09-29; counts in d4_live.json s3_prefixes",
+   "artifact_covered_by": [
+    "AC1",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~4/d4_live.json",
+   "kind": "config_data",
+   "commit_or_etag": "78c971d4a3",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the act record the three checks read",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/d-4.AC1.py",
+   "output_evidence": "page day 2026-10-01 funds_updated 12 of 13\nOK:   IDVZ: served with calendar + home_producer badge\nOK:   PFOE: served with calendar + home_producer badge\nOK:   no 'home-producer reader: next round' placeholder served\nOK:   12 freshness reasons count trading days\nOK:   publish marker s3://opal-data-etfs/rivalfunds/etfs/state/publish_page/date=2026-10-01/d4-publish-r3b.json names every not-updated fund ([])\nAC1 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "5 of 5 checks passed (IDVZ and PFOE served with calendar + home_producer badge, no placeholder, 12 freshness reasons count trading days, publish marker d4-publish-r3b names every FAIL-flagged fund: none flagged, not_updated GQGU only)",
+   "status": "PASS",
+   "status_reason": "run from the worktree root against the served bucket at 2026-10-01 ~11:3xZ after the republish (marker d4-publish-r3b); re-run literally at c1dd6d0b91 after the issuer's ruling fixed the marker-key clause (row ETFS_RIVALS-Z-W4-S4); the first run on marker d4-publish-r3 read FAIL on the old clause with 4 funds flagged",
+   "expect": "AC1 RESULT: PASS 0 failures"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/d-4.AC2.py",
+   "output_evidence": "control 2026-09-29 20261001T105835Z-bfd36047cb41 silver objects ['basg-20260930T110033Z-bfd36047cb41.parquet', 'basg-20261001T105835Z-bfd36047cb41.parquet']\nOK:   the re-capture 20261001T105835Z-bfd36047cb41 and an earlier object are both in silver (2)\nOK:   the re-capture is the newest by capture id\nOK:   silver marker s3://opal-data-etfs/rivalfunds/etfs/state/build_silver/date=2026-10-01/d4-control-basg-20260929.json status OK (OK)\nOK:   G1 rivalfunds/etfs/gold/canonical_shape/date=2026-09-29/holdings-20261001T105835Z-j20260929-71e7e87c.parquet: BASG rows' lineage names the re-capture 20261001T105835Z-bfd36047cb41 (['BASG-2026-09-29-bfd36047cb41', 's3://opal-data-etfs/issuer-site/etfs/bronze/holdings/date=2026-10-01/basg-2026-09-29-20261001T105835Z-bfd36047cb41.txt'])\nAC2 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "4 of 4 checks passed (re-capture + earlier silver object both present, re-capture newest, silver marker OK, G1 BASG rows' lineage names the re-capture)",
+   "status": "PASS",
+   "status_reason": "re-run literally at c1dd6d0b91 after the issuer's ruling fixed the clause (row ETFS_RIVALS-Z-W4-S3: it graded the capture id inside dataset_revision; it now reads snapshot_id / silver_uri / bronze_uri). The first run at 78c971d4a3 read FAIL on the old clause. No act was re-run.",
+   "expect": "AC2 RESULT: PASS 0 failures"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/checks/d-4.AC3.py",
+   "output_evidence": "OK:   G1 rivalfunds/etfs/gold/canonical_shape/date=2026-09-29/holdings-20261001T105835Z-j20260929-71e7e87c.parquet and a numeric floor 0.0\n  BASG: 0.939 resolved of 33\nOK:   BASG: resolved 0.939 >= 0.9 (measured lowest non-home BASG 0.924)\n  BIDD: 1.000 resolved of 48\nOK:   BIDD: resolved 1.000 >= 0.9 (measured lowest non-home BASG 0.924)\n  CGIC: 1.000 resolved of 193\nOK:   CGIC: resolved 1.000 >= 0.9 (measured lowest non-home BASG 0.924)\n  IDVZ: 0.000 resolved of 41\n  INEQ: 1.000 resolved of 100\nOK:   INEQ: resolved 1.000 >= 0.9 (measured lowest non-home BASG 0.924)\n  PFOE: 0.000 resolved of 23\n  SCHY: 0.990 resolved of 105\nOK:   SCHY: resolved 0.990 >= 0.9 (measured lowest non-home BASG 0.924)\n  TXUE: 1.000 resolved of 49\nOK:   TXUE: resolved 1.000 >= 0.9 (measured lowest non-home BASG 0.924)\nOK:   a served G4 object at or before 2026-09-29 (2)\nOK:   G1 carries RESOLVED GICS rows\nAC3 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "all non-home funds at 2026-09-29 >= 0.90 (BASG 0.939, BIDD 1.0, CGIC 1.0, INEQ 1.0, SCHY 0.990, TXUE 1.0) + a served G4 at or before it (2 objects) + RESOLVED GICS rows in G1; home funds IDVZ and PFOE reported (0.0), not graded",
+   "status": "PASS",
+   "status_reason": "newest_report_date in d4_live.json is 2026-09-29 (the newest replayed G1 date); BASG's own newest date 2026-09-30 reads 0.0 (organic batch, no Bloomberg co-holding; row ETFS_RIVALS-Z-W4-S2), recorded in identity_fraction_per_fund",
+   "expect": "AC3 RESULT: PASS 0 failures"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Live act under a signed never-widen pair; the gates were read before each step. The control for the retain path is the live issuer re-capture of a landed date (AC2's first three clauses), which kept the earlier object.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "gate 1 re-run of the served-delta instrument from this worktree (12 of 12 funds equal to the signed table); the replay is idempotent on batch_id and a revision already gold adds nothing",
+   "observed": "gate 1 equal to the COO half's table per fund; replay written_new 23 / 25 / 23 / 23",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Step 2 (the identity floor hookup)",
+   "reason": "Not done by issuer amendment 1: key 4 was refused by the CTO half; guardrails_config min_resolved_fraction stays 0.0 (read at the act)."
+  },
+  {
+   "item": "The one scripted GQGU BQL request (step 7)",
+   "reason": "Withdrawn by amendment 1 (needs Andrew's vendor word); GQGU stays UNMEASURED. No Bloomberg holdings request was made by this worker; the only vendor call was the scripted market reference-data pull."
+  },
+  {
+   "item": "The next trading day's 08:03 leg + 09:00 sweep",
+   "reason": "Acceptance read at the close by the issuer; never waited on."
+  }
+ ],
+ "surprises": [
+  "ETFS_RIVALS-Z-W4-S1 -- OBSERVATION/INERT: the committed generator and policies held neither key-2 grant; gen_policies.py extended inside the order's paths (read-only; plus ListBucket on bbg/).",
+  "ETFS_RIVALS-Z-W4-S2 -- OBSERVATION/INERT: BASG newest report date resolves 0 of 33 (identity needs a same-day Bloomberg co-holding the daily request does not carry).",
+  "ETFS_RIVALS-Z-W4-S3 -- OBSERVATION/INERT: AC2's last clause tests the capture id in dataset_revision, which the home-inclusive revision never carries.",
+  "ETFS_RIVALS-Z-W4-S4 -- OBSERVATION/INERT: AC1's marker comparison cuts manifest keys at '/' but not the marker's '<group>/<fund>' keys.",
+  "ETFS_RIVALS-Z-W4-S5 -- OBSERVATION/INERT: G4 newest-at-a-partition is the greatest object name, so the QA import outranks the later live pull by hex order.",
+  "ETFS_RIVALS-Z-W4-S6 -- OBSERVATION/INERT: the 07:00 ET fetch and the vehicle Bloomberg leg ran inside the act window and changed what the page read back."
+ ],
+ "session_log": "org/critical_paths/change_management/20261001T1049Z_etfs-rivalfunds-round3_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-apply.sh",
+   "invocation": "HALT_ACK=1 -chdir=infra/aws/terraform/etfs-rivalfunds apply <saved plan>",
+   "result": "Apply complete! Resources: 0 added, 7 changed, 0 destroyed."
+  },
+  {
+   "tool": "python .tools/deploy_ledger.py",
+   "invocation": "open etfs-rivalfunds-round3 (5 legs); close-leg L1..L5; close",
+   "result": "OK: CLOSED deploy ledger 'etfs-rivalfunds-round3' -- all 5 legs proven; sentinel removed"
+  },
+  {
+   "tool": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round3/served_delta_r3.py",
+   "invocation": "--out deliverables/0.9.0_WK_ETFS_RIVALS~4/served_delta_act.json (gate 1, before the apply)",
+   "result": "12 of 12 funds inside the signed table"
+  },
+  {
+   "tool": "aws lambda invoke (boto3) via .scratch/inv.py",
+   "invocation": "fetch-holdings backfill 2026-09-29; canonical-shape replay 2026-08-21..2026-09-29; daily-lambda only publish-page x2",
+   "result": "requests 52dc7b59-e450-4c53-b9aa-9d0f661513ed, 7ffcd65f-e6a6-4210-9524-1041104fcc4a, ca245e04-3f89-4686-a197-3fb453431fd2, 4721b79b-9853-4743-9f18-7be5031f8436 all StatusCode 200, no FunctionError"
+  },
+  {
+   "tool": "python data/etfs/scripts/rivalfunds/enrichment_bloomberg.py (handler_entry)",
+   "invocation": "import-market (2026-09-29) and market (2026-09-29, Python311 blpapi interpreter)",
+   "result": "G4 import 172 rows; live market pull 434 securities, 0 security errors"
+  }
+ ]
+}
