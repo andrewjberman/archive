@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# OPLGTW TRNSPT-DEPS OG-hr-2 AC2: the mail route's prefix and bearer-secret name are builder output, distinct from the
-# transcripts route's; and /ms/* is byte-unchanged since the cut base.
+# OPLGTW TRNSPT-DEPS OG-hr-2 AC2 (PRD v1.3 C7): the mail route's prefix is the fixed literal /hx/mail, distinct from
+# /hx/transcripts, with a CONFORMANT bearer secret name; and /ms/* is byte-unchanged since the cut base.
 . "$(dirname "$0")/_root.sh"
 H="$(pwd)/org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks"
 J="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~16/ROUTE_NAMES.json"

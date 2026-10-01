@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# OPLGTW TRNSPT-DEPS OG-hr-1 AC2: the transcripts route's prefix and bearer-secret name are builder output
-# (lib/opal_naming.py name(); a refusal is a missing registry row, rule 30) and are used in the app code; and /ms/*
+# OPLGTW TRNSPT-DEPS OG-hr-1 AC2 (PRD v1.3 C7): the transcripts route's prefix is the fixed literal /hx/transcripts,
+# graded for distinctness, and used in the app code; its bearer secret grades CONFORMANT (grade(), SECRET); and /ms/*
 # is byte-unchanged since the cut base (C7: "a new capability, never a widening of /ms/*").
 . "$(dirname "$0")/_root.sh"
 H="$(pwd)/org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks"
