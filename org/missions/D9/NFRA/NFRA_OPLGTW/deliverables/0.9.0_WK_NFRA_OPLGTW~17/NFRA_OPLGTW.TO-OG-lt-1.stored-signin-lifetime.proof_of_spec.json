@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-lt-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f22e8677ab"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "f22e8677ab",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-lt-1.stored-signin-lifetime.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~17",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~17/TOKEN_LIFETIME.json",
+   "kind": "config_data",
+   "commit_or_etag": "2d399eb2c4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Measurement record, not deployed; read-only SSM on i-07dccb1615503ac99, no secret in it.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~17/TOKEN_LIFETIME.md",
+   "kind": "doc",
+   "commit_or_etag": "2d399eb2c4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Instrument, inference of the interactive time, and what the measurement cannot see.",
+   "artifact_covered_by": [
+    "AC1",
+    "J1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "2d399eb2c4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Append-only channel: one row NFRA_OPLGTW-Z-W17-S1.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the record exists, every field is present, the timestamps are UTC, the claim class is declared, and the verdict agrees with the span.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/lt1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "fields present 9 of 9; malformed timestamps 0 of 3; claim class ok=True; verdict GE_1_DAY at 1126.87 h consistent=True\nOK\nRESULT: PASS\nexit=0",
+   "denominator": "9 of 9 fields; 0 of 3 timestamps malformed",
+   "status": "PASS",
+   "expect": "(?s)fields present 9 of 9; malformed timestamps 0 of 3; claim class ok=True; verdict \\w+ at [0-9.]+ h consistent=True.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "J1",
+   "criterion_verbatim": "J1: graded at L9 by 3.0.0_SA_CVO~O: the instrument reads the store the broker reads, the refresh was a real silent refresh on the server-held path, and the record's limits are stated. RECORD; NO VERDICT.",
+   "method": "manual_read_with_citation",
+   "invocation": "N/A -- judgment row, no invocation; see TOKEN_LIFETIME.md",
+   "output_evidence": "Store: the broker's own Fernet MSAL cache for the machine identity. Refresh: forced silent refresh via token_broker internals, OK at 2026-10-01T02:15:06Z, refresh-token hash prefix rotated d6e8db46 to 1e29f9bc. Limits stated in TOKEN_LIFETIME.md (lower bound; interactive time inferred from audit log; Entra policy unreadable).",
+   "denominator": "1 refresh; 1 identity",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment row per the task order; graded by 3.0.0_SA_CVO~O at L9, not self-graded",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Not run: the order is a read-only measurement; AC1 is a schema/consistency check.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "Not repeated: a single on-demand refresh is the measurement.",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Any code, .env, restart or deploy change on the host",
+   "reason": "Bound: read only."
+  },
+  {
+   "item": "Entra refresh-token policy",
+   "reason": "Not readable from the host; span is a lower bound."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W17-S1: the store holds no interactive-sign-in time (inferred from the audit log); one 64-hex .env line printed once to the worker's SSM output by a shell source (not committed)."
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~17/TOKEN_LIFETIME.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "none",
+   "result": "Not run: the order's worker face named every path."
+  }
+ ]
+}
