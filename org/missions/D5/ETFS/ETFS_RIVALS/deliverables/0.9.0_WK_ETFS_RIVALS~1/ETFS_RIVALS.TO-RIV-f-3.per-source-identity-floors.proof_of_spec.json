@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-f-3.per-source-identity-floors",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "53784a663e",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-f-3.per-source-identity-floors.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "53784a663e"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_p1_page_and_guardrails.py",
+      "kind": "script",
+      "commit_or_etag": "cbf9bba38a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 amendment 1 (row Z-W4-S8); tests only, no deploy; guardrails.py and guardrails_config.json unchanged",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_p2_page_grouped_by_fund.py",
+      "kind": "script",
+      "commit_or_etag": "cbf9bba38a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 amendment 1 (row Z-W4-S8); tests only, no deploy; guardrails.py and guardrails_config.json unchanged",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r3_repairs.py",
+      "kind": "script",
+      "commit_or_etag": "cbf9bba38a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 amendment 1 (row Z-W4-S8); tests only, no deploy; guardrails.py and guardrails_config.json unchanged",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_f3_identity_floors.py",
+      "kind": "script",
+      "commit_or_etag": "cbf9bba38a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 4 amendment 1 (row Z-W4-S8); tests only, no deploy; guardrails.py and guardrails_config.json unchanged",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "with an impossible Bloomberg floor via the override, TXUE fails identity_coverage naming 'bloomberg'; IDVZ (home) and BASG (issuer) pass their own floors -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round4/checks/f-3.AC1.py",
+      "output_evidence": "publish: PARTIAL\n  TXUE: FAIL -- 49 of 49 non-cash lines identified (min 0.9); 49 of 49 resolved by the crosswalk (floor 1.01 for source bloomberg; min_resolved_fraction); t\nOK:   TXUE (bloomberg) FAILS its own impossible floor, reason names the source\n  IDVZ: PASS -- 41 of 41 non-cash lines identified (min 0.9); 0 of 41 resolved by the crosswalk (floor 0.0 for source home_producer fund IDVZ; min_resolved_\nOK:   IDVZ (home, 0.0 resolved) PASSES its own floor\n  BASG: PASS -- 34 of 34 non-cash lines identified (min 0.9); 0 of 34 resolved by the crosswalk (floor 0.0 for source issuer; min_resolved_fraction); thresh\nOK:   BASG (issuer) PASSES its own floor\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (TXUE, IDVZ, BASG)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the whole rivalfunds suite reads 0 failed under the committed floors via the override, and under zero floors as the control -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round4/checks/f-3.AC2.py",
+      "output_evidence": "committed floors: 302 passed, 2 skipped in 17.09s (rc=0)\nOK:   suite 0 failed under the committed floors\nzero floors: 302 passed, 2 skipped in 15.12s (rc=0)\nOK:   control: suite 0 failed under the zero floors\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "2 of 2 suite runs 0 failed (302 passed, 2 skipped each; 19 failed before the fix at 1ceff05060)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before the fix, at 1ceff05060, the suite under the committed floors via the override (reproduced first in this worktree).",
+      "expected": "19 failed (test_p1 12, test_p2 6, test_r3 1).",
+      "observed": "19 failed, 283 passed, 2 skipped; after the fix 302 passed, 2 skipped, 0 failed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run once at cbf9bba38a; the suite also run four ways (committed override, zero override, no override, a config file carrying the committed values).",
+      "observed": "302 passed, 2 skipped, 0 failed each way.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S37"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "cbf9bba38a"
+    }
+  ]
+}
