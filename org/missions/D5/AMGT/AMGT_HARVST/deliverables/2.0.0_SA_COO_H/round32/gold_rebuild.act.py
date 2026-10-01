@@ -35,6 +35,11 @@ def digest(rows):
     return h.hexdigest()
 
 
+def newest_part(table):
+    keys = sorted(k for k, _ in c.keys(store.table_prefix("amgt", "gold", table)) if k.endswith(".parquet"))
+    return keys[-1] if keys else None
+
+
 def snap():
     m = pg._latest_gold_snapshot_rows(pg.GOLD_TABLE)
     d = pg._latest_gold_snapshot_rows(pg.GOLD_DAILY_TABLE)
@@ -64,7 +69,8 @@ def main():
     as_of = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
     record = {"stamp": stamp, "as_of": as_of}
     bm, bd = snap()
-    record["before"] = {"mention_rows": len(bm), "mention_digest": digest(bm), "daily_rows": len(bd), "daily_digest": digest(bd)}
+    record["before"] = {"mention_rows": len(bm), "mention_digest": digest(bm), "daily_rows": len(bd), "daily_digest": digest(bd),
+                        "mention_part": newest_part(pg.GOLD_TABLE), "daily_part": newest_part(pg.GOLD_DAILY_TABLE)}
     gate = subprocess.run([sys.executable, os.path.join(HERE, "checks", "gold_rebuild.signing.py")], cwd=c.ROOT,
                           capture_output=True, text=True, timeout=1800)
     record["gate"] = gate.stdout.strip().splitlines()[-6:]
@@ -82,7 +88,8 @@ def main():
             record["result"] = "STOP: %s rc %d" % (cmd, p.returncode)
             return finish(record, 1)
     am, ad = snap()
-    record["after"] = {"mention_rows": len(am), "mention_digest": digest(am), "daily_rows": len(ad), "daily_digest": digest(ad)}
+    record["after"] = {"mention_rows": len(am), "mention_digest": digest(am), "daily_rows": len(ad), "daily_digest": digest(ad),
+                       "mention_part": newest_part(pg.GOLD_TABLE), "daily_part": newest_part(pg.GOLD_DAILY_TABLE)}
     verdict = rule(bm, bd, am, ad)
     record["verify"] = verdict
     print("VERIFY:", json.dumps(verdict))
