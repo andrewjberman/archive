@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-af-3.depth-census-over-gold",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-af-3.depth-census-over-gold.md",
+    "group": "OTHER",
+    "vintage_commit": "67ff134cc1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "67ff134cc1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-af-3.depth-census-over-gold.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~90",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/depth_census.py",
+      "kind": "script",
+      "commit_or_etag": "f66359aaa9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: S3 reads only (read-only client wrapper); S3 WRITES: 0.",
+      "introduces": [
+        "def map_universe",
+        "def count_depth",
+        "def render"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_af3_depth_census.py",
+      "kind": "test",
+      "commit_or_etag": "f66359aaa9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 plants, in-memory, pass.",
+      "introduces": [
+        "test_no_ticker_row_maps_through_aliases"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~90/af3_census.out",
+      "kind": "doc",
+      "commit_or_etag": "f66359aaa9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Real run on gold part-20261001T114722Z: MAPPED 68 of 89, AT 50+ 5 of 89, AT 100+ 3 of 89.",
+      "introduces": [
+        "MAPPED: 68 of 89"
+      ],
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~90/af3_census.json",
+      "kind": "doc",
+      "commit_or_etag": "f66359aaa9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The table written by --json.",
+      "introduces": [
+        "rows"
+      ],
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_af3_depth_census.py -rA --tb=line",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_af3_depth_census.py -rA --tb=line",
+      "expect": "passed",
+      "output_evidence": "4 passed in 0.03s; 4 PASSED lines (af3_AC1.out)",
+      "status": "PASS",
+      "denominator": "4 of 4 tests passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round33/checks/af-3.AC2.py",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round33/checks/af-3.AC2.py",
+      "expect": "AC2 RESULT: PASS",
+      "output_evidence": "AC2 RESULT: FAIL (1 failure(s)) | FAIL: only 68 of 89 mapped | rc=1 (af3_AC2.out). DENOMINATOR 89, SOURCE gold part-20261001T114722Z, AT 50+: 5 of 89, AT 100+: 3 of 89, S3 WRITES: 0 all present; 21 UNMAPPED lines named in row Z-W90-S4.",
+      "status": "FAIL",
+      "denominator": "68 of 89 mapped (bar: 80)",
+      "status_reason": "MAPPED 68 of 89 is below the criterion's bar of 80: 21 names have no row in the gold securities file under any key the estate's resolvers produce; no key synthesized. Named in row AMGT_HARVST-Z-W90-S4 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~H)."
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "Census run three times (two standalone, one inside AC2); the first two read different gold parts (the issuer rebuilt gold 06:48Z -> 11:47Z).",
+      "expected": "same MAPPED count",
+      "observed": "MAPPED 68 of 89 in every run; counts rose with the newer part (AT 50+ 0 -> 5)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "depth_census.SINCE monkeypatched to 1990-01-01 (the date floor removed), then the pre-2026 plant called.",
+      "expected": "test_pre_2026_articles_excluded fails",
+      "observed": "the plant raised AssertionError under the mutant and passes on the real module",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC2 PASS",
+      "reason": "21 of 89 names are absent from the gold securities file under every key the resolvers produce; no key was synthesized (row Z-W90-S4). Order left open."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W90-S4"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "depth_census",
+      "invocation": "python -m lib.opal_data_harvest.depth_census --json org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~90/af3_census.json",
+      "result": "rc 0; MAPPED 68 of 89; AT 50+ 5 of 89; AT 100+ 3 of 89; S3 WRITES 0"
+    },
+    {
+      "tool": "collector suite",
+      "invocation": "python -m pytest lib/opal_data_harvest -q",
+      "result": "446 passed, 1 skipped (base 442 + 4 plants)"
+    }
+  ]
+}
