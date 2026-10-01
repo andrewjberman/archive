@@ -55,6 +55,12 @@ Order: `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261001_161xZ_DE
   in the queued bus mail when you come up, the account is site Z's: clear no laptop walk until it arrives.
   UPDATE 16:47Z: that walk DISARMED at 16:45:38Z (bus 8f825c10); the account was free at the checkpoint. Read the queue anyway.
 
+## 5b. Addendum 17:4xZ -- THE REBOOT IS HELD
+- Andrew (site-Z MSTR terminal, bus 3cc8bbe1): the laptop holds its reboot until 4.0.0_SA_CRO proves Tax SMA visibly on
+  the portal's Model Portfolios page. This seat manages the Gateway Terraform handoffs for it (record
+  ANDREW_DIRECT_20261001_172xZ_MSTR_MANAGES_GATEWAY_TF_HANDOFFS_TAX_PIPELINE_RUNNING_TODAY.md): site Z runs both halves of
+  the Tax Gateway release, capability ON; its results come back by bus to 4.0.0_SA_CRO through this seat.
+
 ## 6. Not done and not known
 - The surprise-channel rows in section 4 are not written.
 - comp-closure: no live compile against AWS was run after the fix; the multi-home census still reads raw bytes.
