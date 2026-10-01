@@ -1,0 +1,51 @@
+{
+  "SUPERSEDED": true,
+  "superseded_at": "2026-10-01T03:5xZ",
+  "superseded_by": "0.4.0_DS_ClientPlatform~S",
+  "claim": "contaminated",
+  "superseded_reason": "EVERY NUMBER BELOW IS CONTAMINATED AND NONE OF IT MAY BE PROMOTED INTO POLICY. The run that produced it valued an in-kind leg with no row price at quantity x market_value_settled_unsettled -- a WHOLE POSITION'S MARKET VALUE used as a UNIT PRICE. Measured on dim_position date=2026-09-25 (106,578 comparable rows of 106,835): the multiplier market_value_settled_unsettled / closing_price has median 71.0x, p90 718.0x, max 5,353,077.5x. 32,587 of 43,447 in-kind legs over the 561-partition history carry no positive row price and so reached that fallback. The observed tails recorded below as 'the data's own distribution' (tolerance max 214.58, large_flow max 217.996, observed_r_p001 -0.912047) are therefore instrument artifacts, not properties of the custodian's data.",
+  "root_cause": "sources.json declares inkind_price_column ('price', the TRANSACTION row's price) and position_value_column ('market_value_settled_unsettled') but never declares price_column. FlowCache._closes() reads src.get('price_column') and falls back to position_value_column when it is absent, so the fallback was dimensionally invalid from the first run that used it.",
+  "the_real_unit_price": "dim_position carries closing_price. VALIDATED rather than assumed: quantity_settled_unsettled x closing_price reproduces market_value_settled_unsettled within 1 basis point on 106,307 of 106,578 comparable rows on date=2026-09-25.",
+  "found_by": "a methodology review Andrew commissioned (REVIEW.md finding F01), confirmed at bytes by this seat against the producer and the live positions schema.",
+  "re_measure_required": true,
+  "ORIGINAL_CONTENT_BELOW_UNCHANGED": {
+    "tolerance": 0.010677,
+    "tolerance_basis": "p99 of |r_t - (holdings_price_return + income_return)| over 1098 reconciled account-days",
+    "large_flow_share": 1e-06,
+    "large_flow_share_basis": "p99 of |F_t| / V_(t-1) over 1098 account-days",
+    "plausibility_band_low": -0.5,
+    "plausibility_band_high": 0.5,
+    "denominators": {
+      "reconciled_account_days": 1098,
+      "flow_share_account_days": 1098,
+      "return_account_days": 1098
+    },
+    "observed_r_p001": -0.912047,
+    "observed_r_p999": 0.044193,
+    "plausibility_band_basis": "the data's own p0.1 (-0.912047) or p99.9 (0.044193) reaches the PRD's default band, so the band is REPORTED against the default rather than silently widened -- a widening is the CTO's, not this cell's.",
+    "tolerance_distribution": {
+      "median": 0.0,
+      "p90": 0.004244,
+      "p99": 0.010677,
+      "max": 214.579843
+    },
+    "large_flow_distribution": {
+      "median": 0.0,
+      "p90": 0.0,
+      "p99": 1e-06,
+      "max": 217.995703
+    },
+    "large_flow_conditional": {
+      "days_with_a_nonzero_flow": 13,
+      "of_account_days": 1098,
+      "share_of_days_with_any_flow": 1.184,
+      "median": 1e-06,
+      "p75": 0.79774,
+      "p90": 1.31846,
+      "p99": 192.000514,
+      "max": 217.995703
+    },
+    "large_flow_share_recommended": 1.31846,
+    "large_flow_share_recommendation_basis": "p90 of |F_t| / V_(t-1) over the 13 account-days that actually carry a flow, not over all 1098. The unconditional p99 the order names is 1e-06 -- a percentile of zeros. NOT SUBSTITUTED HERE: `large_flow_share` still carries the order's own rule and this is a recommendation beside it, because changing which population a served threshold is measured over is the issuer's call."
+  }
+}
