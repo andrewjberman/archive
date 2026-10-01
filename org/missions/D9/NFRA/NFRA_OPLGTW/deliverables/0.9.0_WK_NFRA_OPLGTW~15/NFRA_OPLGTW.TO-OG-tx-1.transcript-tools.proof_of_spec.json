@@ -1,0 +1,148 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-tx-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~15",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "c9fd271499"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "7bf0ce5cb0",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-tx-1.transcript-tools.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+   "kind": "script",
+   "commit_or_etag": "9fcd257fbd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "BUILD only; no deploy in this order (the release is OG-rl-1's). Three read-class tools, list_calendar change, _run innerError outcomes and audit_detail.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/graph.py",
+   "kind": "script",
+   "commit_or_etag": "9fcd257fbd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "BUILD only. Optional accept argument on call(); GraphError.inner_code.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/destructive_ops.py",
+   "kind": "script",
+   "commit_or_etag": "9fcd257fbd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "BUILD only. SAFE_TOOLS gains the three tools.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+   "kind": "script",
+   "commit_or_etag": "9fcd257fbd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "BUILD only. NATIVE_TOOLS gains the three tools.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_transcript_tools.py",
+   "kind": "test",
+   "commit_or_etag": "a7c70dc5b2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Eight tests, Graph stubbed; tx1.AC1.sh: 8 of 8.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py",
+   "kind": "test",
+   "commit_or_etag": "9fcd257fbd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "test_ogz2_ac08 hard count 55 -> 58, comment names the three tools; the test passes (1 passed run alone).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- the C7 transcript clauses, by the 8 named tests.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/tx1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 8 of 8; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "8 of 8 named tests passed",
+   "status": "PASS",
+   "expect": "named tests passed 8 of 8; failed/error lines 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- the three tools are in BOTH lists, the 17 Graph scopes are unchanged, and test_ogz2_ac08 passes.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/tx1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "tool find_online_meeting: SAFE_TOOLS=True NATIVE_TOOLS=True\ntool list_meeting_transcripts: SAFE_TOOLS=True NATIVE_TOOLS=True\ntool read_meeting_transcript: SAFE_TOOLS=True NATIVE_TOOLS=True\nGRAPH_SCOPES default scopes 17; pinned 17\nREG 3 of 3; SCOPES same\npytest rc=1; named tests passed 0 of 1; failed/error lines 1\nRESULT: FAIL\nexit=1",
+   "denominator": "REG 3 of 3 tools in both lists; 17 of 17 scopes same; named tests passed 0 of 1 (rc=1)",
+   "status": "FAIL",
+   "status_reason": "REG 3 of 3 and SCOPES same hold, and test_ogz2_ac08 passes at 58 run alone; the check's pytest_named limb reads rc=1 (test_ogz2_ac06 in the same file fails identically at HEAD~1, row NFRA_OPLGTW-Z-W15-S6) and `named tests passed 0 of 1` (the ac08 PASSED marker is split from its name by the test's capsys.disabled() printout, row NFRA_OPLGTW-Z-W15-S7). The order stays open.",
+   "expect": "(?s)REG 3 of 3; SCOPES same.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "In a scratch copy of the committed gateway (git archive), tools.py list_meeting_transcripts' `if not nxt:` mutated to `if True:` (stop after page 1); test_transcript_tools.py run against it.",
+   "expected": "test_list_transcripts_follows_next_link fails; the other seven pass",
+   "observed": "mutant: 1 failed (test_list_transcripts_follows_next_link), 7 passed; unmutated: 8 passed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "test_transcript_tools.py run three times into one shared AUDIT_PATH and once with none set, after the audit test was made to read only its own records",
+   "observed": "8 passed each time (a first version failed on the second run into one file, fixed at a7c70dc5b2)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "AC2 reads FAIL on the check's own two limbs, not on the cell's content",
+   "reason": "tx1.AC2.sh runs the whole tests/test_entitlement_admin.py and demands rc 0, and test_ogz2_ac06 in that file fails identically at HEAD~1 (row Z-W15-S6); it also greps `::test_ogz2_ac08 PASSED` on one line, which the test's own capsys.disabled() printout prevents (row Z-W15-S7). test_ogz2_ac08 itself passes at 58. The check and ac06 are outside this order's paths."
+  },
+  {
+   "item": "Live Graph reach, a real transcript read, and the audit allowlist in app/audit.py",
+   "reason": "Order is BUILD only (no Graph, AWS or deploy); the live REACH arm is OG-tx-2's. audit.py is outside the paths (row Z-W15-S5): ids ride the audit detail field."
+  },
+  {
+   "item": "Full gateway suite red lines (19 failed, 35 errors on this branch)",
+   "reason": "Sampled failures (test_ogz1_ac05, test_ogz1_ac08, test_principal_cutover x11) reproduce identically on a git archive of HEAD without this change; not graded by this order."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W15-S5",
+  "NFRA_OPLGTW-Z-W15-S6",
+  "NFRA_OPLGTW-Z-W15-S7"
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail on wk-NFRA_OPLGTW-15-r8: 9fcd257fbd (build), a7c70dc5b2 (audit-test fix + row S6), and the proof commit.",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/trnspt/checks/tx1.AC{1,2}.sh",
+   "invocation": "each under timeout 120 from the worktree root after the commit",
+   "result": "AC1 rc 0 RESULT: PASS; AC2 rc 1 RESULT: FAIL"
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "per commit, with commit-gate on every .py and the naming gate",
+   "result": "the first attempt was refused by the naming gate (dict key 'transcripts'); renamed to 'rows' and committed"
+  }
+ ]
+}
