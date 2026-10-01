@@ -6,7 +6,7 @@ import urllib.request
 
 BASE = "https://mcp.opalinvest.dev"
 PROBES = {"hx_mail": "/hx/mail/messages/AL-PROBE", "hx_transcripts": "/hx/transcripts/meetings/AL-PROBE/transcripts",
-          "control": "/hxal-control-not-a-route"}
+          "control": "/hxal-control-not-a-route", "root": "/", "mcp": "/mcp"}
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
