@@ -32,7 +32,8 @@ def run(v):
     body = json.loads(L.get(mk[len("s3://opal-data-etfs/"):])) if mk else {}
     flagged = {k.split("/")[-1] for k, e in (m.get("funds") or {}).items()
                if any(x.get("status") == "FAIL" for x in e.get("checks", []))}
-    v.check(bool(mk) and flagged <= set(map(str, (body.get("not_updated") or {}).keys())),
+    named = {str(k).split("/")[-1] for k in (body.get("not_updated") or {}).keys()}  # amendment 1 (row Z-W4-S4)
+    v.check(bool(mk) and flagged <= named,
             f"publish marker {mk} names every not-updated fund ({sorted(flagged)})")
 
 
