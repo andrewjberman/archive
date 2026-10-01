@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-f-11",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "C",
+    "vintage_commit": "20b2b561f5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "e058398966",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-f-11.dapi-8194-wfp-wall.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "opal_ai/opal/runtime/provision/wall-dapi-8194-wfp.ps1",
+      "kind": "script",
+      "commit_or_etag": "0fb3fcb694",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Nested repo opal_ai, branch wk-NFRA_OPALAI-26-opal_ai, blob b032cdef16. -Plan, real-mode and -Remove elevation refusals exercised; real mode and -Remove never run past the refusal (Administrator act); no WFP engine opened."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "plan rc=0 COMPILE OK>=1 SUBLAYER persistent 0xFFFF=1 FILTER lines=2 (V4=1 V6=1) well-formed=2 lines naming 8790=0; real and -Remove ELEVATION REQUIRED rc=3; S-1-5-21 literals=0; P/Invoke tokens=4 of 4; PERMIT-WEIGHT refusal>=1; removes R1 rules=1; parse errors=0; other files changed vs eeca5ca7d1=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/f11.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "opal_ai HEAD: plan rc=0 COMPILE OK=1 SUBLAYER persistent 0xFFFF=1 FILTER lines=2 (V4=1 V6=1) well-formed=2 lines naming 8790=0; elevated=False real ELEVATION REQUIRED=1 rc=3, -Remove ELEVATION REQUIRED=1 rc=3; S-1-5-21 literals=0; P/Invoke tokens=4 of 4; PERMIT-WEIGHT refusal=1; removes R1 rules=1; parse errors=0; other files changed vs eeca5ca7d1=0\nRESULT: PASS\nexit=0",
+      "denominator": "all 12 clauses of 12 met; nested commit 0fb3fcb694; plan lines 3 of 3 (1 sublayer, 2 filters)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "R1 Firewall rules still present: 0; agent 8194=REFUSED|TIMEOUT 8790=OPEN; msp 8194=REFUSED|TIMEOUT 8790=OPEN; operator 8194=OPEN; apply VERIFY OK lines>=3; arms ok=yes -- RESULT: PASS -- exit=0",
+      "method": "live_read",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/f11.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "R1 Firewall rules still present: 2; F11_ACCEPTANCE.json absent; arms ok=no\nRESULT: FAIL\nexit=1",
+      "denominator": "R1 rules still present 2 of 2 (expected 0); acceptance record absent; arms 0 of 3 measured; apply VERIFY OK lines 0 of 3",
+      "status": "FAIL",
+      "status_reason": "Expected first read: the Administrator has not applied the wall and the order forbids elevation; order left open until the apply, then arms are measured and F11_ACCEPTANCE.json written."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Build-and-measure order; the check scripts are the order's own graders.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Each check run once for this instance.",
+      "observed": "AC1 PASS, AC3 FAIL",
+      "status": "N/A-WITH-REASON",
+      "reason": "Single measurement run by design; no live firewall or WFP state may be changed to re-run."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC3 live arms (8194/8790 per account, operator) and apply_verify",
+      "reason": "The Administrator has not applied the wall; the order forbids elevation. First read FAIL recorded; order left open."
+    },
+    {
+      "item": "Live WFP ABI and SDK GUID read-back",
+      "reason": "The script's structs and GUIDs (layer, condition keys) are written from SDK names and checked only by compile and struct-size (FILTER*65536+COND = 200*65536+40); no engine was opened, so first live read is the Administrator's apply."
+    }
+  ],
+  "surprises": [],
+  "session_log": "2026-10-01, worktree C:/tmp/oa-26. Script written, compiled, committed nested 0fb3fcb694. AC1 PASS, AC3 FAIL (wall not applied, expected). Status left open. PUSH STATE: LOCAL.",
+  "compiler_tools": [
+    {
+      "tool": "powershell Add-Type + Parser.ParseFile + Get-LocalUser",
+      "invocation": "f11.AC1.sh",
+      "result": "COMPILE OK; parse errors 0; SIDs resolved at run time"
+    }
+  ]
+}
