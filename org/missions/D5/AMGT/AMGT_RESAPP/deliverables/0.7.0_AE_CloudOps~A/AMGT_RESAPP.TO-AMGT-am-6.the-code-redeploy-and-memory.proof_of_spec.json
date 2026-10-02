@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-am-6",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "leg": "LEG 1 of AMENDMENT 1 (act (A) only; act (B) and AC1 are leg 2's under a second pair)",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-am-6.the-code-redeploy-and-memory.md",
+    "section": "6 (AMENDMENT 1), leg 1",
+    "vintage_commit": "3a91036c27a44ea4d36de2668eeea7251d52f969"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "owned_cells": "AMGT-am-6",
+    "section": "s.71"
+  },
+  "never_widen_pair": {
+    "coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round63/NEVER_WIDEN_HALF_COO_AM6.md@18944b0ff6",
+    "cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND63_AM6_CTO_HALF.md@a0a7214220",
+    "never_2_entry": "org/critical_paths/change_management/20261002T1724Z_amgt-resapp-r63-am6-leg1-code-redeploy-20261002_deploy_completion.md",
+    "never_2_state": "CLOSED, 3 of 3 legs proven, sentinel removed"
+  },
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "risk_class": "WORLD",
+  "go_message": "28584 from 2.0.0_SA_COO~Z, acked READ at 2026-10-02T16:56:02Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "version_id": "Eb6lQYKJX.4eL8K.Qq0LHCRJs5AzCfk2",
+      "content_sha256": "JVMY1ZDAZifF2LycbC0hkjwD/be+sHjWkRBeYFQ354Y=",
+      "content_length": 41132193,
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Uploaded with content-sha256 metadata and read back by the uploader (metadata EQUALS the locally computed sha256; sha256_hex 255318d590c06627c5d8bc9c6c2d21923c03fdb7beb078d691105e605437e786). The live function's CodeSha256 after the apply equals this value, so the deployed bytes are the bytes built here.",
+      "rollback_target": "prior VersionId iDuPquXbC0ZpmHbnZREUzQd7CVYh15vi, 41118711 B, content-sha256 bZBmEtRrAagqpRJCa4JLvyZmNaM0EvkOp6K6Gcm9kW4= (read live at build, EQUAL to the then-live function CodeSha256)"
+    },
+    {
+      "path_or_key": "lambda:opal-amgt-scoped-api",
+      "kind": "lambda_function",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "POST-APPLY live get-function-configuration: CodeSha256 JVMY1ZDAZifF2LycbC0hkjwD/be+sHjWkRBeYFQ354Y= (differs from the bZBmEtRr base, equals the uploaded artifact), MemorySize 10240 (unchanged as the half requires), CodeSize 41132193, LastUpdateStatus Successful, LastModified 2026-10-02T17:40:56Z. Re-plan 0-diff by machine oracle: terraform plan -detailed-exitcode returned 0."
+    }
+  ],
+  "controls": {
+    "build_pin_resolved_by_content": {
+      "description": "The GO names build commit 4197279e67; HEAD is 3a91036c27, 39 commits later. A pin is resolved by CONTENT, never by merge-base --is-ancestor.",
+      "method": "git diff --name-only 4197279e67 HEAD, then intersect with the package's reachable roots (lib/research/, lib/opal_data_harvest/, infra/aws/lambda/research/scoped_amgt_api/, infra/logic/registry/, lib/opal_naming.py); plus git status --porcelain over those same roots for uncommitted drift.",
+      "expected": "If zero committed or uncommitted divergence falls inside the package roots, the worktree is content-equivalent to the pin for everything the artifact packages, and HEAD qualifies as 'a descendant whose CONTENT-DIFF equals the table'.",
+      "observed": "74 paths differ between the pin and HEAD; ZERO are in the package's reachable roots. git status over those roots is EMPTY. The authoritative confirmation is the built artifact's own CONTENT-DIFF against the deployed base, which equals the half's table exactly.",
+      "status": "STABLE"
+    },
+    "content_diff_graded_file_for_file": {
+      "description": "The CTO half's condition 1 requires the build-time content diff to equal the table FILE FOR FILE. Matching only the four summary counts would pass a diff that swapped one file for another.",
+      "method": "content_diff.py --zip compares the freshly built zip against the artifact the live function runs NOW. Run twice: once under --build-only BEFORE any upload (the STOP gate), once inside the real build. Each of the 10 non-identical rows was compared by path to the half's 10 table rows.",
+      "expected": "files 353, IDENTICAL 343, CHANGED 7, ADDED 3, REMOVED 0 against bZBmEtRr..., and the 10 named files are exactly the table's 10.",
+      "observed": "Both runs printed that summary identically. CHANGED: infra/logic/registry/reporting_policies.json, lib/research/api/monthly_chatter.py, lib/research/api/scoped_amgt.py, lib/research/coverage/pool_reader.py, lib/research/harvest/publication_gold.py, lib/research/provenance/render_print.py, lib/research/provenance/validate.py. ADDED: lib/research/peers/csc_plain_reasons.py, lib/research/posture/__init__.py, lib/research/posture/fit.py. REMOVED: none. 10 of 10 matched; ZERO files outside the table. The report is not a gate (CHANGED/ADDED/REMOVED lines exit 0), so this seat graded it rather than reading rc.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "THE NEGATIVE ARM WAS MEASURED, NOT INHERITED FROM THE HALF. Measured on the DEPLOYED function after the upload but before the apply, when the function was still running the bZBmEtRr base.",
+      "expected": "c3, c4 and c5 must all read SERVED: NO pre-act, reproducing the COO half's recorded base of 0 of 95 / 0 of 12 / 200.",
+      "observed": "Exactly that. c3: FAIL 0 of 95, FAIL 0 of 95, VLO overlay None vs ranking 13, ROG_SW reason 'None' -> SERVED: NO. c4: FAIL BA 0 of 12 classes [], FAIL VLO 0 of 12 classes [] -> SERVED: NO. c5: FAIL fabricated key status 200 -> SERVED: NO. The post-apply YES is therefore attributable to THIS act and the test is not vacuous.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "plan_read_in_full": {
+      "description": "A plan verdict read from a positional slice is not a read of the plan. My first look was a tail -60.",
+      "method": "terraform show of the saved am6leg1.tfplan (24 lines, all read), then terraform show -json graded programmatically against the FULL resource_changes denominator.",
+      "expected": "Exactly one non-no-op change, code attributes only, memory_size unchanged, and zero destroy / IAM / route / gateway movement.",
+      "observed": "49 resource_changes; exactly 1 non-no-op: module.scoped_amgt_api.aws_lambda_function.this ['update'], with exactly 3 differing attributes (last_modified -> known after apply; s3_object_version iDuPquXbC0Zp -> Eb6lQYKJX.4e; source_code_hash bZBmEtRr -> JVMY1ZDA). memory_size before=10240 after=10240 UNCHANGED, read from the plan's own before/after rather than inferred from its absence in the rendered diff. Sweep over all 49: 0 delete, 0 create, 0 iam changing, 0 route changing, 0 apigateway changing, 0 integration changing, 0 permission changing.",
+      "status": "STABLE"
+    },
+    "exit_code_oracle": {
+      "description": "An exit code read through a pipe belongs to the pipe receiver, not the script.",
+      "method": "Each graded criterion was run LITERALLY as the proof_of_spec names it, with no pipe, so 'exit=' is the script's own code.",
+      "observed": "A pre-apply exploratory run of mine piped into tail and printed exit=0 beside four FAIL lines -- that exit was tail's. All three graded runs below have no receiver and their exit=0 sits beside PASS lines and a SERVED: YES verdict.",
+      "status": "STABLE"
+    },
+    "never_2_union": {
+      "description": "NEVER-2 requires the open-deploy read to be UNIONED across every live worktree; a shared-tree read is not evidence.",
+      "method": "git worktree list --porcelain (51 trees), git -C <wt> ls-tree -r --name-only HEAD org/critical_paths/.open_deploys/ per tree, plus ls -a on the shared tree for untracked entries (ls -1 hides dotfiles). Per-tree denominators printed.",
+      "expected": "No open entry names opal-amgt-scoped-api.",
+      "observed": "60 DISTINCT entries across 51 trees (per-tree 5..27). 10 name amgt, which CONTRADICTS the COO half's '33 entries, 0 AMGT' at face value. RESOLVED: all 10 are absent from the shared tree in BOTH working tree and HEAD, i.e. closed-and-deleted, surviving only in stale worktree HEADs that predate their closure. Positive control: amgt-resapp-ww1 deleted by 4a5eeb4458 ('entry CLOSED, 4 of 4 legs proven'), amgt-resapp-vv4 by 1c410c5936 ('entry CLOSED 10 of 10'), each with a change_management completion record. Negative control: a fabricated slug returns 0 deletion commits. CONCLUSION: 0 open entries name this function; the half's conclusion is correct on live state, though its denominator came from a narrower scope than NEVER-2 mandates.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Act (B), the memory_size step-down from 10240",
+      "reason": "AMENDMENT 1 splits the act: leg 1 is act (A) only and memory stays 10240. No terraform file was edited at all, so scoped-amgt-api.tf:326 was never touched."
+    },
+    {
+      "item": "AC1 (c1), the cold BA_US_Equity 2026-09-08 timeline read under 5 s",
+      "reason": "AMENDMENT 1 and the COO half both state c1 is NOT graded on this leg; BA 2026-09-08 keeps today's deadline behavior until am-1's code lands in leg 2."
+    },
+    {
+      "item": "Any IAM, route, gateway, integration, permission, layer, runtime, env or timeout change",
+      "reason": "BOUNDS 1 and both halves' NOT-COVERED sections. Graded from the JSON plan across all 49 resource_changes, every one of those classes reading 0 changing."
+    },
+    {
+      "item": "Any store write, S3 delete, vendor API call or push of a shared branch",
+      "reason": "BOUNDS 1. The build's pip download of its own PINNED wheels is the EGRESS CLASS the order's preflight declares; wheel sha256s were recorded before unpack and every vendored file read IDENTICAL, so the pins did not drift under the rebuild."
+    },
+    {
+      "item": "A HALTGT pass as apply-time evidence",
+      "reason": "A live inbox Monitor moves mail before the gate reads it and a ~lane seat is unhaltable (ADHC_HALTGT, LD-0267). This seat read its own inbox DIRECTLY immediately before the apply instead: empty, with 10 of 10 ackable rows READ, nothing newer than the GO, and no STOP-class item."
+    }
+  ],
+  "surprises": [],
+  "forward_notes_for_leg_2": [
+    "ARTIFACT SIZE HEADROOM: this build reports 131927487 B unzipped over 353 entries plus layer opal-amgt-print-deps:1 at 121743633 B = 253671120 B against the 262144000-byte ceiling -- 96.8% used, 8472880 B spare. Leg 2 adds am-1's code into that 8.4 MB of headroom. Not a STOP here and the quantity is one the build script prints every run (a prior entry recorded 96.7%), but it is the figure to watch when leg 2 is cut.",
+    "The memory step-down in leg 2 steps 10240 -> 1769, runs AC1, then 3538, then restores 10240 if both miss. Each step is ONE safe-apply touching only memory_size at infra/aws/terraform/harvest/scoped-amgt-api.tf:326, which leg 1 left untouched."
+  ],
+  "session_log": "0.7.0_AE_CloudOps~A, site-z, session 58a967cb. Session start: /watcher (registered, Monitor armed, GO msg 28584 acked READ), org/XXX.md steps A.1-E, then /cloud-ops. First and only order of the session. Terraform resolved on PATH at v1.15.8 (.tools/terraform.exe is absent on site Z, as the cloud-ops profile states).",
+  "compiler_tools": [
+    {
+      "tool": "build-and-upload-scoped-amgt.sh --build-only (the pre-upload STOP gate)",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only <scratchpad>/am6leg1-buildonly.zip",
+      "result": "rc=0. CONTENT-DIFF SUMMARY files 353 / IDENTICAL 343 / CHANGED 7 / ADDED 3 / REMOVED 0 against bZBmEtRr... VERIFY 152 import sites across 82 packaged modules, 73 required / 73 packaged, missing []. VERIFY-SCOPE module-scope (cold-start FATAL) [] and function-scope (request-time break) []. VERIFY-DATA 15 of 15 data members, 8 of 8 vendored packages. ISOLATED OK 3 of 3 arms. Used as the gate BECAUSE content_diff is a report, not a gate -- it exits 0 on a mismatch, so the grading is the seat's."
+    },
+    {
+      "tool": "build-and-upload-scoped-amgt.sh (the real build and upload)",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh",
+      "result": "rc=0. Reproduced the build-only CONTENT-DIFF identically (same summary, same 10 files), so the diff graded pre-upload is the diff that shipped. Upload read back and matched: VersionId Eb6lQYKJX.4eL8K.Qq0LHCRJs5AzCfk2."
+    },
+    {
+      "tool": "terraform plan / show / show -json",
+      "invocation": "terraform -chdir=infra/aws/terraform/harvest plan -out=am6leg1.tfplan ; show -no-color am6leg1.tfplan ; show -json am6leg1.tfplan",
+      "result": "24-line plan read in full; JSON graded across all 49 resource_changes -> 1 non-no-op, 3 attributes, memory_size UNCHANGED, every STOP class 0."
+    },
+    {
+      "tool": ".tools/safe-apply.sh (Rule 18; bare terraform apply is banned)",
+      "invocation": ".tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -no-color am6leg1.tfplan",
+      "result": "rc=0. naming-apply WARN 14 graded and naming-plan WARN 20 graded -- every WARN is a PRE-EXISTING name on an existing resource with 0 additions, so none refuses. comp-tagauthz GATE PASSED, 0 of 0 candidates overwrite an access-granting tag (swept 284 roles / 61 local+attached policies / 7 users / 1 group; SCPs NOT APPLICABLE, account not in an Organization -- stated, not implied). tombstone-gate CLEAN, 0 creates against 7 tombstones. 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'"
+    },
+    {
+      "tool": "terraform plan -detailed-exitcode (0-diff verification)",
+      "invocation": "terraform -chdir=infra/aws/terraform/harvest plan -no-color -detailed-exitcode",
+      "result": "exit 0 (0 = no changes, 2 = changes present). 'No changes. Your infrastructure matches the configuration.' A machine oracle rather than a prose read."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (NEVER-2)",
+      "invocation": "open --slug amgt-resapp-r63-am6-leg1-code-redeploy-20261002 (3 legs) ; close-leg B0/A1/V1 ; close ; check",
+      "result": "Opened before the upload and committed to the SHARED tree at 28765a36ca (a branch-local entry is invisible to the union NEVER-2 mandates). B0 closed pre-upload; A1 and V1 closed post-act; entry CLOSED with 3 of 3 legs proven and the sentinel removed. check: 30 of 30 sentinels scanned, my slug absent from the open set; the 5 remaining OPEN/HELD entries are all 2.0.0_SA_COO~M's secclass work and none names this function."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (Rule 14a)",
+      "invocation": ".tools/safe-commit.sh --author ... -F <msgfile written by a non-shell writer> -- <paths>",
+      "result": "28765a36ca landed the opened ledger entry. NOTE: commit-gate reported 'checked 0 of 2 file(s) -- NOTHING WAS CHECKED' (JSON and MD fall outside its graded set) and risk-reflex reported NOT-DECIDABLE / PARTIAL_OR_BLIND on a 41.9h-stale danger map. Neither is cited as validation of anything, per each gate's own warning."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC2",
+      "cell_refs": "AMGT-am-6",
+      "criterion_verbatim": "C1 and C2 PASS (95 of 95 chatter rows carry ticker, classification and places_moved; every ticker non-empty); R63 C3 SERVED: YES -- and exit=0",
+      "method": "command",
+      "denominator": "95 collected-chatter rows served by the deployed function",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round63/checks/r63_served.py --cell c3 --where deployed; echo \"exit=$?\"",
+      "output_evidence": "exit=0 with no pipe receiver. 'PASS C1 every chatter row carries ticker, classification and places_moved 95 of 95'; 'PASS C2 every chatter row's ticker is non-empty 95 of 95'; 'PASS C3 VLO's overlay breakout_price.places_moved equals its rankings row overlay 13 ranking 13'; 'PASS C4 an unranked name (ROG_SW_Equity) serves the reason instead places_moved None reason this name was not among the names ranked on 2026-10-01, the latest ranking avail'; 'R63 C3 SERVED: YES'. Graded on the served FIELDS and their denominators, never on HTTP status. Pre-act base measured by this seat on the same deployed function: 0 of 95, 0 of 95, SERVED: NO.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "cell_refs": "AMGT-am-6",
+      "criterion_verbatim": "C1 PASS for BA_US_Equity and VLO_US_Equity (12 of 12 absent entries carry a reason_class); R63 C4 SERVED: YES -- and exit=0",
+      "method": "command",
+      "denominator": "12 absent peers columns per key, 2 keys",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round63/checks/r63_served.py --cell c4 --where deployed; echo \"exit=$?\"",
+      "output_evidence": "exit=0 with no pipe receiver. 'PASS C1 BA_US_Equity every absent column carries a reason_class 12 of 12; classes [DEFINITION_MISMATCH, HORIZON_LIMIT, NOT_REPORTED, RATIO_ONLY, WINDOW_LIMIT]'; 'PASS C1 VLO_US_Equity every absent column carries a reason_class 12 of 12' with the same five classes; 'R63 C4 SERVED: YES'. Pre-act base measured by this seat: BA 0 of 12 classes [], VLO 0 of 12 classes [], SERVED: NO.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "c5 (run and reported, not one of the three graded criteria)",
+      "cell_refs": "AMGT-am-6",
+      "criterion_verbatim": "a fabricated key's overlay answers 404 (base 200), and BA_US_Equity's overlay still answers 200",
+      "method": "command",
+      "denominator": "1 fabricated key + 1 covered key",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round63/checks/r63_served.py --cell c5 --where deployed; echo \"exit=$?\"",
+      "output_evidence": "exit=0. 'PASS C1 a fabricated key's overlay answers 404 status 404'; 'PASS C2 a covered key's overlay still answers 200 status 200'; 'R63 C5 SERVED: YES'. Pre-act base measured by this seat: fabricated key status 200, SERVED: NO. This is the one served change that is not an added key, and the CTO half accepted the 200 -> 404 flip by name.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTO half condition 3, third limb",
+      "cell_refs": "AMGT-am-6",
+      "criterion_verbatim": "covered keys' overlay, thesis and peers answer 200",
+      "method": "command",
+      "denominator": "6 reads (2 covered keys x 3 routes)",
+      "invocation": "python probe over capture_lib._invoke -- the SAME path the graded checks use -- for BA_US_Equity and VLO_US_Equity across /security/{key}/{overlay,thesis,peers}",
+      "output_evidence": "6 of 6 answered 200, 0 failures. BA_US_Equity overlay 200 (101996 B), thesis 200 (506924 B), peers 200 (51165 B); VLO_US_Equity overlay 200 (104807 B), thesis 200 (658857 B), peers 200 (51356 B). Body bytes are reported so a 200 serving an empty body could not pass as a success.",
+      "status": "PASS"
+    }
+  ]
+}
