@@ -18,21 +18,23 @@
     {
       "path_or_key": "data/etfs/scripts/rivalfunds/collector_bloomberg.py",
       "kind": "script",
-      "commit_or_etag": "d54ffaedeb",
+      "commit_or_etag": "677c1ab507",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "round 6 build cell; offline only, no S3 write, no deploy, no vendor call; hookup into producers is the issuer's",
       "artifact_covered_by": [
-        "AC1"
+        "AC1",
+        "AC4"
       ]
     },
     {
       "path_or_key": "data/etfs/scripts/rivalfunds/silver_bloomberg.py",
       "kind": "script",
-      "commit_or_etag": "d54ffaedeb",
+      "commit_or_etag": "677c1ab507",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "round 6 build cell; offline only, no S3 write, no deploy, no vendor call; hookup into producers is the issuer's",
       "artifact_covered_by": [
-        "AC1"
+        "AC1",
+        "AC4"
       ]
     },
     {
@@ -77,6 +79,16 @@
       "artifact_covered_by": [
         "AC1"
       ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6nm1_two_field.py",
+      "kind": "script",
+      "commit_or_etag": "677c1ab507",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 6 build cell, amendment A1; offline only, no S3 write, no deploy, no vendor call",
+      "artifact_covered_by": [
+        "AC4"
+      ]
     }
   ],
   "acceptance": [
@@ -106,18 +118,27 @@
       "output_evidence": "len('BB Seguridade Participacoes SA') = 30\n  'Kimberly-Clark de Mexico SAB de CV': alone 'Kimberly-Clark de Mexico SAB de CV', with blanks 'Kimberly-Clark de Mexico SAB de CV'\nOK:   a single good name passes through unchanged: 'Kimberly-Clark de Mexico SAB de CV'\n  'Alimentation Couche-Tard Inc': alone 'Alimentation Couche-Tard Inc', with blanks 'Alimentation Couche-Tard Inc'\nOK:   a single good name passes through unchanged: 'Alimentation Couche-Tard Inc'\n  'Siemens AG': alone 'Siemens AG', with blanks 'Siemens AG'\nOK:   a single good name passes through unchanged: 'Siemens AG'\n  'BB Seguridade Participacoes SA': alone 'BB Seguridade Participacoes SA', with blanks 'BB Seguridade Participacoes SA'\nOK:   a single good name passes through unchanged: 'BB Seguridade Participacoes SA'\n{'[None, None]': None, '[]': None, \"['', '   ']\": None}\nOK:   no candidate -> None ([None, None], [], blanks)\nticker only: '8306 JP Equity'\nOK:   with no real name the raw ticker is the fallback, never None\nAC3 RESULT: PASS 0 failures\nrc=0",
       "denominator": "6 of 6 checks OK",
       "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "expect: AC4 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/nm-1.AC4.py",
+      "output_evidence": "[real] import OK | silver OK | 1 silver object(s)\nOK:   (a) the real two-field capture imports and types into ONE silver object (today: refused)\nsilver columns: ['bronze_uri', 'captured_at', 'currency', 'dates', 'fund_ticker', 'id', 'id_expr', 'name', 'orig_ids', 'parser_version', 'position', 'position_change', 'position_type', 'report_date', 'reported_mkt_val', 'requested_date', 'sha256', 'source', 'weights']\nOK:   (b) silver keeps today's names for the id() metadata (orig_ids, position, report_date) and carries `name`\nG1 security_name: {'6098 JP Equity': 'Recruit Holdings Co Ltd', 'ASRNL NA Equity': 'ASR Nederland NV', '700 HK Equity': 'Tencent Holdings Ltd'}\nOK:   (c) G1 security_name carries each captured name verbatim\nexcel_fetch read ranges: ['Z'] | UsedRange.Columns: False\nOK:   (d) excel_fetch reads past column P (at least A:Z, or the used range's own width)\n[old] import OK | silver OK | 1 silver object(s)\nOK:   (e) control: today's single-field, unprefixed capture still imports and types\nAC4 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "5 of 5 checks OK",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Negative control: AC1 at the issuance commit 1e8515aa01 (query get(id()), no name column read) fails by construction on the name() asks; not re-run here.",
+      "description": "Negative control: nm-1.AC4 at the amended branch HEAD 41099f08df read FAIL 4 (limbs a-d) with control (e) PASS; the issuer's amendment records the same.",
       "expected": "FAIL without the change.",
-      "observed": "PASS with it.",
+      "observed": "PASS with it (AC4 RESULT: PASS 0 failures at 677c1ab507).",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "AC1-AC3 run once each at d54ffaedeb; package suite python -m pytest rivalfunds -q from data/etfs/scripts.",
-      "observed": "416 passed, 2 skipped, 0 failed.",
+      "method": "AC1-AC4 run at 677c1ab507; package suite python -m pytest rivalfunds -q from data/etfs/scripts.",
+      "observed": "424 passed, 2 skipped, 0 failed.",
       "status": "STABLE"
     }
   },
@@ -127,7 +148,7 @@
       "reason": "The face leaves the flip to the issuer."
     },
     {
-      "item": "Live BQL name() response shape; applying display_name in the producers",
+      "item": "Live BQL name() response shape against a real Bloomberg session; applying display_name in the producers",
       "reason": "The issuer's to prove LIVE after the drain / merge hookup per the face."
     }
   ],
