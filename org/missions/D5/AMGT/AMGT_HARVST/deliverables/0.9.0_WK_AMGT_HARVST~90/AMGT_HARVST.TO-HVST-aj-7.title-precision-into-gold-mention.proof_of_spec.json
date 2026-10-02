@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-aj-7.title-precision-into-gold-mention",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-aj-7.title-precision-into-gold-mention.md",
+    "group": "OTHER",
+    "vintage_commit": "cedca012726c6ce435cb74344c1ceba037c0705f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "cedca012726c6ce435cb74344c1ceba037c0705f",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-aj-7.title-precision-into-gold-mention.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~90",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/publication_gold.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-AMGT_HARVST-90-r37e; GOLD_MENTION_SCHEMA gains nullable title and published_precision (pa.string(), silver's type); mention_rows sets title = silver title or None, published_precision = silver's. build_event unchanged. Served gold moves only at the issuer's rebuild.",
+      "introduces": [
+        "HVST-aj-7"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/test_aj7_gold_title_precision.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 offline plants i-v; pre-existing fields pinned from base cedca01272.",
+      "introduces": [
+        "test_iv_pre_existing_fields_byte_identical"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/harvest/test_aj7_gold_title_precision.py -rA --tb=line -> expect \"passed\"",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/harvest/test_aj7_gold_title_precision.py -rA --tb=line",
+      "output_evidence": "6 passed in 0.57s: PASSED test_i_title_verbatim, test_ii_no_title_is_null_not_empty, test_iii_precision_equals_silver, test_iv_pre_existing_fields_byte_identical, test_iv_mutant_tier_change_fails, test_v_parquet_schema_carries_both",
+      "status": "PASS",
+      "denominator": "6 of 6 tests passed; suite lib/research/harvest 280 passed + 2 failed before, 286 passed + 2 failed after (the 2 are test_m1_move/test_m2_move FileNotFoundError on integrations/bloom..., absent from the sparse cone, failing identically at base)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round37/checks/aj-7.AC2.py -> expect \"AC2 RESULT: PASS\"",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round37/checks/aj-7.AC2.py",
+      "output_evidence": "Live silver read worked (9098 latest articles), but the real builder raised TypeError: expected string or bytes-like object, got 'dict' in _match_counts via _security_mentions line 176 (unchanged from base): 149 of 9098 silver articles (barrons) carry title as {'text': ...}. No 'AC2 RESULT: PASS' line produced. Row AMGT_HARVST-Z-W90-S17.",
+      "status": "FAIL",
+      "denominator": "0 of 1; cause is a pre-existing silver-shape defect outside this order's write grant",
+      "status_reason": "live silver holds 149 barrons articles whose title is a dict; the unchanged base matcher raises TypeError before any row is built (row AMGT_HARVST-Z-W90-S17)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Plant (iv) mutant: signal_tier set to Z and mention_count +1 on the pinned rows",
+      "expected": "serialised rows differ from the pin",
+      "observed": "test_iv_mutant_tier_change_fails passes: both mutants differ from the pin",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run once, suite twice",
+      "expected": "identical pass set",
+      "observed": "suite 286 passed + 2 identical failures on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "build_event whole-silver title scan",
+      "reason": "not redundant until served gold carries title (rebuild #5), so left as is"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W90-S17"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/harvest -q",
+      "result": "286 passed, 2 failed (pre-existing, sparse cone)"
+    }
+  ]
+}
