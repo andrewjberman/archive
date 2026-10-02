@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ak-1.finbert-tone-in-gold-mention",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ak-1.finbert-tone-in-gold-mention.md",
+    "group": "OTHER",
+    "vintage_commit": "18e6f874128000dfca94f7c5aaf0d66c0bd4a045"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "18e6f874128000dfca94f7c5aaf0d66c0bd4a045",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ak-1.finbert-tone-in-gold-mention.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~90",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/finbert_sentiment.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-AMGT_HARVST-90-r38a; SCORER, article_text, score_text, SENTIMENT_SCHEMA, latest_scores, score_missing, score/census CLI. No S3 write, score never run without --dry-run.",
+      "introduces": [
+        "HVST-ak-1"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/publication_gold.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "GOLD_MENTION_SCHEMA gains 3 nullable fields; build_mention(sentiment_by_hash=None) joins by record_hash. Served gold moves only at the issuer's rebuild.",
+      "introduces": [
+        "HVST-ak-1"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/test_ak1_finbert_sentiment.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 offline tests, plants i-v, stub invoker, no network.",
+      "introduces": [
+        "test_iv_a_mutant_that_alters_a_tier_is_caught"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/harvest/test_ak1_finbert_sentiment.py -rA --tb=line -> expect \"passed\"",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/harvest/test_ak1_finbert_sentiment.py -rA --tb=line",
+      "output_evidence": "rc=0; 12 passed in 0.63s (output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~90/ak1_AC1.out)",
+      "status": "PASS",
+      "denominator": "12 of 12 tests passed; suite lib/research/harvest 283 passed + 5 failed before, 295 passed + 5 failed after (same 5: test_m1_move, test_m2_move, 3 in test_timeline_day_read_path; sparse-cone / pre-existing)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round38/checks/ak-1.AC2.py -> expect \"AC2 RESULT: PASS\"",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round38/checks/ak-1.AC2.py",
+      "output_evidence": "rc=0; AC2 RESULT: PASS (0 failure(s)); labels positive 0.9456 / negative -0.9684 / neutral 0.0 (output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~90/ak1_AC2.out)",
+      "status": "PASS",
+      "denominator": "3 of 3 live Lambda texts, 0 failures"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round38/checks/ak-1.AC3.py -> expect \"AC3 RESULT: PASS\"",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round38/checks/ak-1.AC3.py",
+      "output_evidence": "rc=0; BUILT 740 rows over 5 securities; record_hashes 604, planted 302; PUTS SENT 0/0; planted wrong 0; unplanted carrying a tone 0; AC3 RESULT: PASS (output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~90/ak1_AC3.out)",
+      "status": "PASS",
+      "denominator": "740 rows, 302 planted hashes of 604, 0 wrong"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "assign_tier mutated to always return D",
+      "expected": "pre-existing-field comparison against the unmutated mention_rows baseline is non-empty",
+      "observed": "test_iv_a_mutant_that_alters_a_tier_is_caught passes",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice (once alone, once inside the suite)",
+      "expected": "identical pass set",
+      "observed": "12 passed both runs; suite 295 passed + the same 5 failures before and after",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "ft exclusion from scoring",
+      "reason": "CTO ruling via issuer 2.0.0_SA_COO~H: a separate PRD amendment order follows; not built here. The score CLI scores every source's silver-latest incl. ft until then."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/harvest -q",
+      "result": "295 passed, 5 failed (same 5 as before)"
+    }
+  ]
+}
