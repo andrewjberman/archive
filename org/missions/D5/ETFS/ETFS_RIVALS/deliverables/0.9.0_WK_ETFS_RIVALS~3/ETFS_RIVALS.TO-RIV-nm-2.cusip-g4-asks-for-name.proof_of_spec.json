@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-nm-2.cusip-g4-asks-for-name",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "fb44a3b170",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-nm-2.cusip-g4-asks-for-name.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fb44a3b170"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 7 worker cell; nothing deploys from a worker; LOCAL worktree commit",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_holding_contribution.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 7 worker cell; nothing deploys from a worker; LOCAL worktree commit",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_buying_trend.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 7 worker cell; nothing deploys from a worker; LOCAL worktree commit",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r7nm2_security_name.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 7 worker cell; nothing deploys from a worker; LOCAL worktree commit",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_s4_security_market.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 7 worker cell; nothing deploys from a worker; LOCAL worktree commit",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the OFFLINE G4 plan requests LONG_COMP_NAME and G4 rows carry it as security_name; control: a security without it stays NULL",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round7/checks/nm-2.AC1.py",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "output_evidence": "plan: OK | securities: ['/cusip/Y41157101', 'AAPL US Equity', 'ZZZ US Equity'] | fields: ['CRNCY', 'DAY_TO_DAY_TOT_RETURN_GROSS_DVDS', 'GICS_INDUSTRY', 'GICS_INDUSTRY_GROUP', 'GICS_INDUSTRY_GROUP_NAME', 'GICS_INDUSTRY_NAME', 'GICS_SECTOR_NAME', 'GICS_SUB_INDUSTRY', 'GICS_SUB_INDUSTRY_NAME', 'LONG_COMP_NAME', 'PX_LAST']\nOK:   the offline plan requests LONG_COMP_NAME for the CUSIP-keyed /cusip/Y41157101, with no client call\nmarket: OK {'rows': 3, 'with_gics_sector': 2, 'with_px_close': 3, 'written_new': 1, 'revision': '20261002T224817Z-797ba2d38966', 'mode': 'market', 'securities': 3, 'security_errors': 0, 'as_of_source_counts': {'historical': 0, 'pull': 3}, 'historical_request_failures': 0}\n   security_id                                 security_name  px_close            gics_sector\n     Y41157101 International Container Terminal Services Inc       5.1            Industrials\nAAPL_US_Equity                                     Apple Inc     189.5 Information Technology\n ZZZ_US_Equity                                           NaN      10.0                    NaN\nOK:   the G4 rows carry security_name from LONG_COMP_NAME ('International Container Terminal Services Inc', 'Apple Inc')\nOK:   control: no name in the response reads NULL; price and sector still land; the ten market fields stay\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (0 FAIL)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "both producers name IDVZ's 30-char-cut securities by the G4 full name via display_name; control: an uncut name is unchanged",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round7/checks/nm-2.AC2.py",
+      "expect": "AC2 RESULT: PASS 0 failures",
+      "output_evidence": "holding_contribution OK ['s3://opal-data-etfs/rivalfunds/etfs/gold/holding_contribution/date=2026-10-02/holding_contribution-20261002T224818Z-4ad657a71417.parquet'] \nbuying_trend OK ['s3://opal-data-etfs/rivalfunds/etfs/gold/buying_trend/date=2026-10-02/buying_trend-20261002T224818Z-5e753c160bf9.parquet'] \n  holding_contribution: Y41157101 -> ['International Container Terminal Services Inc']; G0593M107 -> ['AstraZeneca PLC']; P60694117 -> ['Kimberly-Clark de Mexico SAB d']\n  buying_trend: Y41157101 -> ['International Container Terminal Services Inc']; G0593M107 -> ['AstraZeneca PLC']; P60694117 -> ['Kimberly-Clark de Mexico SAB d']\nOK:   holding_contribution names Y41157101 by its G4 full name on every row, not the 30-character cut\nOK:   buying_trend names Y41157101 by its G4 full name, not the 30-character cut\nOK:   control: without a G4 name the G1 name stands (AstraZeneca PLC; the Kimberly-Clark cut is kept)\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (0 FAIL)",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~3 <0.9.0_WK_ETFS_RIVALS~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "PENDING-THIS-COMMIT"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base (no name field, no G4 name candidate) is the mutant; AC1 limbs 1-2 and AC2 limbs 1-2 FAIL at base per the check docstrings.",
+      "expected": "N/A",
+      "observed": "After the change AC1 and AC2 PASS 0 failures; nt-1.AC1 still PASS; package suite 543 passed, 2 skipped, 0 failed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "both checks run twice (once while building, once for the instance) on fresh local sinks, vendor hooks stubbed",
+      "observed": "identical PASS verdicts and names both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md"
+}
