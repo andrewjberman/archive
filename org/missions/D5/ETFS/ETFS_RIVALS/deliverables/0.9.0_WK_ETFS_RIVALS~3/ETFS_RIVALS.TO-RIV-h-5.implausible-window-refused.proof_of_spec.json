@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-h-5.implausible-window-refused",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "8542b30e10",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-h-5.implausible-window-refused.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-h-5.implausible-window-refused.md",
+    "group": "OTHER",
+    "vintage_commit": "8542b30e10"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "b137069123",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 5 build cell; no served write, no deploy; window_refusal in _pair_rows refuses on every path",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_flow_reconciliation.py",
+      "kind": "script",
+      "commit_or_etag": "b137069123",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 5 build cell; no deploy; G6 SCHEMA gains status and reason",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/guardrails_config.json",
+      "kind": "config_data",
+      "commit_or_etag": "b137069123",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 5 build cell; no deploy; flow_factor_band [0.5,1.5] and max_zero_quantity_share 0.2, PROVISIONAL",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r5h5_implausible_window_refused.py",
+      "kind": "script",
+      "commit_or_etag": "b137069123",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 new tests; no existing assertion changed",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "config carries flow_factor_band [0.5,1.5] and max_zero_quantity_share 0.2 PROVISIONAL; f=1.8 and a 50% zero window are REFUSED with 0 trades; control f=1.037 infers its trade -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round5/checks/h-5.AC1.py",
+      "output_evidence": "config: [0.5, 1.5] PROVISIONAL 0.2 PROVISIONAL\nOK:   guardrails_config carries flow_factor_band [0.5, 1.5] and max_zero_quantity_share 0.20, PROVISIONAL\nx1.8: ['REFUSED'] ['flow_factor_out_of_band'] trades 0\nOK:   f=1.8 is REFUSED (flow_factor_out_of_band), 0 trades\n4/8 zero: ['REFUSED'] ['zero_quantity_share'] trades 0\nOK:   a 50% zero-quantity window is REFUSED, 0 trades\nx1.037 control: [nan] [nan] trades 1\nOK:   control: f=1.037 with one move is not refused and infers 1 trade\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "on SERVED G1 (READ-ONLY), INEQ 2025-08-29 and TXUE 2025-04-14 are REFUSED with 0 trades; control: INEQ's previous window is not -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round5/checks/h-5.AC2.py",
+      "output_evidence": "(run under `timeout 600`, completed rc=0 inside the bound)\nINEQ 2025-08-28 -> 2025-08-29: status ['REFUSED'], f [0.0], trades 0\nOK:   INEQ 2025-08-29 is REFUSED with 0 trades\nTXUE 2025-04-11 -> 2025-04-14: status ['REFUSED'], f [83.0], trades 0\nOK:   TXUE 2025-04-14 is REFUSED with 0 trades\ncontrol INEQ 2025-08-27 -> 2025-08-28: status [nan], f [1.0], trades 0\nOK:   control: INEQ's previous window is not refused\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (INEQ f 0.0, TXUE f 83.0, control INEQ f 1.0)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not run: the face names no mutant control for this cell.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (before and at the proof write); package suite run.",
+      "observed": "320 passed, 2 skipped in 25.17s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W3-S17"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~3 <0.9.0_WK_ETFS_RIVALS~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "b137069123"
+    }
+  ]
+}
