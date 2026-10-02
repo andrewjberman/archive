@@ -1,0 +1,31 @@
+TO-DB-b-9 preparation, NOT applied: retires the foreign-tax override in account_return_daily.py.The carriage return in this line is deliberate: git leaves a file with a lone CR unconverted, so the patch stays LF on a CRLF checkout.
+
+--- a/data/assets/scripts/gold/irpt_reporting/account_return_daily.py
++++ b/data/assets/scripts/gold/irpt_reporting/account_return_daily.py
+@@ -581,19 +581,18 @@
+         | (t["_final"] == "FEE-MANAGEMENT")
+         | t["_prov"].isin(ACCOUNT_BOUNDARY_PROV)
+     )
+-    # (g) FOREIGN TAX IS NEITHER FLOW NOR INCOME IN THIS ADAPTER (amendment 5 (g), ruling 6.5),
+-    # WHATEVER PARTITION THE SHARED CODE TABLE GIVES IT. The table marks FTP/FC/WD and FTR/FC/WD
+-    # EXTERNAL, so without this override a foreign tax PAYMENT enters F_t as a client withdrawal
+-    # and a RECLAIM as a deposit -- withholding read as capital movement. Measured over the 561
+-    # partitions: 2,578 such rows, 39,818.98 dollars absolute, 229 accounts (row S9 / S6 limb e).
+-    # The override lives HERE and the shared table is NOT edited: it is the CRO's file and the
+-    # served 49F engine reads it, so changing it would move a served surface from this cell.
++    # (g) FOREIGN TAX IS NEITHER FLOW NOR INCOME IN THIS ADAPTER (amendment 5 (g), ruling 6.5), AND
++    # THE CLASSIFICATION NOW COMES FROM THE SHARED CODE TABLE ALONE (CTO ADDENDUM 1 A4). The table
++    # marks FTP/FC/WD (foreign tax paid) and FTR/FC/WD (reclaim) INTERNAL (tax), so neither enters
++    # F_t through the class route above; the override that used to subtract them here is retired
++    # with that table edit, in the same act. The income exclusion further down (WITHHOLDING_CODE)
++    # is a separate rule and stays. The census below is observation only: a withholding row the
++    # table classes EXTERNAL is counted, and with no override it WOULD enter F_t.
+     wh = t[wh_col].astype(str).str.strip().str.upper() == WITHHOLDING_CODE
+     census["withholding_rows"] = int(wh.sum())
+     census["withholding_rows_abs"] = round(
+         float(t.loc[wh & t["_is_cash"] & t["_sign"].notna(), "_signed"].abs().sum()), 2)
+     census["withholding_rows_that_were_external"] = int((wh & (t["_final"] == "EXTERNAL")).sum())
+-    crosses = crosses & ~wh
+     ext = t[crosses & t["_is_cash"] & t["_sign"].notna()]
+     census["external_cash_rows"] = int(len(ext))
+     flow = ext.groupby(acct_col)["_signed"].sum().to_dict()
