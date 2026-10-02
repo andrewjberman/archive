@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-12",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "aabc054e89"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "42d7a63a6f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-12.per-client-summary.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~1",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/CLIENT_SUMMARY_R5.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/publisher.py",
+      "kind": "script",
+      "commit_or_etag": "bf3a6bd2af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_client_summary, window_return, window_anchor, summary_address (naming builder), summary_bytes, ClientNotPublished: pure functions, no S3. Not packaged or applied.",
+      "artifact_covered_by": [
+        "DB5-2-AC1",
+        "DB5-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_client_summary.py",
+      "kind": "test",
+      "commit_or_etag": "bf3a6bd2af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 tests: each window equals the geometric link; not-spanned null; gap BREAK; no-published-account refusal names the client; fields and no custodian number; stray account refused; address is the builder's; builder refusal propagates.",
+      "artifact_covered_by": [
+        "DB5-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/CLIENT_SUMMARY_R5.json",
+      "kind": "doc",
+      "commit_or_etag": "bf3a6bd2af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local dry run, reads only, nothing uploaded: 6 clients, 6 accounts over the 49 Financial directory (4,620 clients, 7,576 account ids); 4,614 clients refused by name for no published account. Ids only.",
+      "artifact_covered_by": [
+        "DB5-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/client_summary_dryrun_r5.py",
+      "kind": "script",
+      "commit_or_etag": "bf3a6bd2af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The dry-run driver (S3 reads only).",
+      "artifact_covered_by": [
+        "DB5-2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB5-2-AC1",
+      "criterion_verbatim": "DB5-2-AC1 -- the summary tests pass (at least 4). Base: FAIL (no file).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r5/p5_2_ac1_client_summary_tests.py\" .",
+      "output_evidence": "OK: 8 passed, 0 failed\nDB5-2-AC1 PASS rc=0",
+      "denominator": "8 of 8 tests passed (4 required)",
+      "status": "PASS",
+      "expect": "DB5-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB5-2-AC2",
+      "criterion_verbatim": "DB5-2-AC2 -- the record's address is the builder's (the check re-runs the call), and the dry run built summaries for real clients. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r5/p5_2_ac2_summary_record.py\" .",
+      "output_evidence": "OK: builder address s3://opal-data-49financial/irpt/49financial/platinum/reporting/client=cli_2c2589adf711f8f5b1683503/summary.json; 6 clients, 6 accounts, 23.455s\nDB5-2-AC2 PASS rc=0",
+      "denominator": "6 clients and 6 accounts built of 4,620 directory clients and 7,576 directory account ids (6 published accounts, all 6 found in the directory; 4,614 clients refused by name, 0 other refusals)",
+      "status": "PASS",
+      "expect": "DB5-2-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB5-2-AC3",
+      "criterion_verbatim": "DB5-2-AC3 -- reporting-gold and reporting-publish suites pass unchanged. Base: PASS (a regression guard).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r5/p5_ac3_suites_unchanged.py\" . DB5-2-AC3",
+      "output_evidence": "OK: reporting-gold 14 passed; reporting-publish 21 passed\nDB5-2-AC3 PASS rc=0",
+      "denominator": "reporting-gold 14 of 14 (baseline 9, unchanged tests), reporting-publish 21 of 21 (13 existing unchanged + 8 new); 0 failed in each, each suite in its own pytest process",
+      "status": "PASS",
+      "expect": "DB5-2-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC2 checker was run against a scratch copy of the record whose address_example ends summary-typed.json (a typed key instead of the builder's).",
+      "expected": "DB5-2-AC2 FAIL (builder answered a different key)",
+      "observed": "'FAIL: builder answered ...summary.json, the record says ...summary-typed.json' / DB5-2-AC2 FAIL; the unaltered record PASSes twice in a row.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 run on the committed record three times.",
+      "observed": "DB5-2-AC2 PASS each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, upload, Terraform apply, Lambda invoke, packaging or deploy; the summary's contract file and read route; the publisher handler writing the summary",
+      "reason": "Outside the order (the issuer's next step); this cell builds the pure producer and proves it locally."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W1-S15",
+    "IRPT_DASHBD-W1-S16"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py at commit",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (2 new rows of 36 checked at bf3a6bd2af)"
+    }
+  ]
+}
