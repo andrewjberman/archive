@@ -1,4 +1,4 @@
-# ETFS_RIVALS -- DECOMPOSITION, ROUND 6 (ENRICHMENT) -- DRAFT: the AI accounts in production, the A1 plausibility guard, dividend currency and child identity, G4 price history, one repair cell, and the backfills as issuer acts
+# ETFS_RIVALS -- DECOMPOSITION, ROUND 6 (ENRICHMENT) -- DRAFT: the AI accounts in production, the A1 plausibility guard, dividend currency and child identity, one repair cell; the backfills and the G4 price history as issuer acts
 
 ```json
 {
@@ -8,10 +8,10 @@
  "prd_version": "v0.11",
  "analysis_ref": "org/missions/D5/ETFS/ETFS_RIVALS/ledger/ROUND_ANALYSIS.round5.md@56c99763bb (section 4)",
  "author": "2.0.0_SA_COO~RV",
- "cells": 5,
+ "cells": 4,
  "issuer_acts": 3,
  "chains": 3,
- "join_cells": 2,
+ "join_cells": 1,
  "frozen": false,
  "status": "DRAFT -- written under the FAST lease (to 17:08:53Z); cut as ONE issuance at the FAST -> FULL boundary, every check dry-run at the base first"
 }
@@ -31,12 +31,11 @@
 
 ## Issuer rulings at this cut
 
-1. **Cut by write set; three worker chains, two join cells, three issuer acts.** Fan-out: 3 of 3 chains at issuance, cap 8.
-   The joins start when both of their parents are terminal.
+1. **Cut by write set; three worker chains, one join cell, three issuer acts.** Fan-out: 3 of 3 chains at issuance, cap 8.
+   The join starts when both of its parents are terminal.
    - `~1` ap-1 (`ai_accounts.py`, `sweep.py`, `gen_policies.py`, `policies/*.json`, `main.tf`).
    - `~2` rk-2 (`gold_holding_contribution.py`, `guardrails_config.json`, `render.py`).
    - `~3` e-2 (`enrichment_bloomberg.py`, `gold_trade_schedule.py`).
-   - JOIN px-1 after rk-2 and e-2: it writes both `gold_holding_contribution.py` and `enrichment_bloomberg.py`.
    - JOIN r-6 after ap-1 and rk-2: it writes `ai_accounts.py` and `render.py`.
 2. **Workers never call a vendor, never write S3, never deploy** (rounds 1-5 stand). Every Bloomberg or OpenAI act, every S3
    write and every deploy in this round is the issuer's: the acts I-1 to I-3, each deploy under its own never-widen pair, and
@@ -45,8 +44,12 @@
    - G4 DOES carry prices now. `security_market` date=2026-09-29 holds a newer object with `px_close` on 430 of 434 rows, and
      S14's 0-of-172 read the older object. Date=2026-10-01 has 32 of 32.
    - The gap is HISTORY: rk-1 read ONE G4 date (10-02 manifest: `g4_dates` 1; `price_source` holding_implied 1849 / missing
-     1498). px-1 is therefore "rk-1 prices from G4 history where present". The history itself comes from issuer act I-3, a
-     historical market pull within the Bloomberg budget (`integrations/bloomberg/READ_HERE.md`).
+     1498).
+   - The code is already there. `gold_holding_contribution.handler_entry` reads every G4 date in the window
+     (`_newest_by_date` over `security_market`) and `build` prices a day from `px_close`. The market pull answers a past date
+     through `_blp_historical_data`, labelled per s-6.
+   - Cell 7 is therefore NO worker cell. It is issuer act I-3: the historical market pull over the YTD window, within the
+     Bloomberg budget (`integrations/bloomberg/READ_HERE.md`), with cost measured first.
 4. **The AI client in the Lambda uses `requests`, which the layer already carries** (`pandas-pyarrow-requests`, main.tf:93),
    against the OpenAI REST API: build-ladder rung 5, so no `openai` SDK is vendored. The seat path keeps `OpenAIClient`.
 5. **One AI run per page day stands (CALL 5).** The production stage is idempotent on its own marker per page day, a
@@ -92,13 +95,6 @@ Rounds 1-5's rulings stand (`ETFS_RIVALS_DECOMP.round{1..5}.md`):
   the suffix table stays the fallback, labelled.
 - W3-S12 is code only after issuer probe I-2 names a field. Until then the child line keeps its "entry" label.
 
-### `RIV-px-1` -- rk-1 prices from G4 history where present (analysis cell 7; JOIN after rk-2 and e-2)
-- `gold_holding_contribution` reads every G4 `security_market` date in the window and prices a day from `px_close`
-  (`total_return_index` for the return) where present.
-- CALL 1's holding-implied price stays the fallback, labelled `price_source`.
-- e-2's half: the market pull's as-of and historical request shape, with tests stubbing the vendor. The history itself
-  lands by I-3.
-
 ### `RIV-r-6` -- the repair cell (remediations batched; JOIN after ap-1 and rk-2)
 - The AI placeholder "No AI account. the ..." capitalised.
 - A trending-topic headline's own digits are not read as figures. They are identifiers of the reading, like ticker forms
@@ -118,8 +114,10 @@ Rounds 1-5's rulings stand (`ETFS_RIVALS_DECOMP.round{1..5}.md`):
   - The G5/G6 replay runs under its own never-widen pair.
   - The W3-S12 Bloomberg field probe.
 - **I-3 (analysis cell 7): the G4 price history.**
-  - A historical market pull over the YTD window, within the Bloomberg budget.
+  - The existing market pull's historical path over the YTD window's trading days, within the Bloomberg budget.
   - Cost measured first per READ_HERE.md.
+  - Proof: a republish's `holding_contribution` manifest reads `g4_dates` above 1, and the security rows priced from G4
+    (`price_source` g4_tri / g4_close, or mixed) rise from 0 while `holding_implied` falls.
 
 ## 4. DEPENDENCY EDGES AND CHAINS
 
@@ -128,7 +126,6 @@ Rounds 1-5's rulings stand (`ETFS_RIVALS_DECOMP.round{1..5}.md`):
 | ap-1 (`~1`) | `ai_accounts.py`, `sweep.py`, `gen_policies.py`, `policies/*.json`, `main.tf` | -- |
 | rk-2 (`~2`) | `gold_holding_contribution.py`, `guardrails_config.json`, `render.py` | -- |
 | e-2 (`~3`) | `enrichment_bloomberg.py`, `gold_trade_schedule.py` | -- |
-| px-1 (join) | `gold_holding_contribution.py`, `enrichment_bloomberg.py` | rk-2, e-2 |
 | r-6 (join) | `ai_accounts.py`, `render.py`, `gold_input_census.py` | ap-1, rk-2 |
 
 ## 5. BATTERY (to write and dry-run at the base before the cut; at most THREE mechanical criteria per build order)
@@ -146,8 +143,4 @@ Rounds 1-5's rulings stand (`ETFS_RIVALS_DECOMP.round{1..5}.md`):
   - (1) `DVD_CRNCY` is in the request's field list;
   - (2) G5 converts by it, with the suffix table as the labelled fallback;
   - (3) a stubbed child-identity field (if I-2 names one) ties the child to the parent.
-- px-1:
-  - (1) with G4 history planted, `price_source` reads g4 on those days;
-  - (2) without it, the holding-implied fallback is unchanged (the 10-02 tables byte-equal);
-  - (3) the census counts G4 days honestly.
 - r-6: the four repairs each have a named before/after string on the served page's overlay.
