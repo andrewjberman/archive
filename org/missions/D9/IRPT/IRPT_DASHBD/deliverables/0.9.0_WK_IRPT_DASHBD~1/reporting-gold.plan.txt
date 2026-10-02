@@ -1,7 +1,7 @@
-module.irpt_reporting_gold.data.aws_s3_object.artifact: Reading...
 data.aws_caller_identity.current: Reading...
-data.aws_iam_policy_document.irpt_reporting_gold_assume: Reading...
 data.aws_lambda_layer_version.irpt_performance_native: Reading...
+data.aws_iam_policy_document.irpt_reporting_gold_assume: Reading...
+module.irpt_reporting_gold.data.aws_s3_object.artifact: Reading...
 data.aws_iam_policy_document.irpt_reporting_gold_scheduler_assume: Reading...
 data.aws_iam_policy_document.irpt_reporting_gold_scheduler_assume: Read complete after 0s [id=52247394]
 data.aws_iam_policy_document.irpt_reporting_gold_assume: Read complete after 0s [id=2690255455]
@@ -61,6 +61,42 @@ Terraform will perform the following actions:
       + managed_policy_arns   = (known after apply)
       + max_session_duration  = 3600
       + name                  = "irpt-49f-reporting-gold-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = {
+          + "ManagedBy" = "Terraform"
+          + "Project"   = "OpalPortal"
+          + "System"    = "InvestorReporting"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role.irpt_reporting_gold_scheduler[0] will be created
+  + resource "aws_iam_role" "irpt_reporting_gold_scheduler" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "scheduler.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "IRPT_DASHBD cell DB-b-7: EventBridge Scheduler role for the reporting-gold daily schedule. Grants ONLY lambda:InvokeFunction on that one function."
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "irpt-reporting-gold-scheduler-role"
       + name_prefix           = (known after apply)
       + path                  = "/"
       + tags_all              = {
@@ -151,6 +187,43 @@ Terraform will perform the following actions:
       + role        = (known after apply)
     }
 
+  # aws_iam_role_policy.irpt_reporting_gold_scheduler[0] will be created
+  + resource "aws_iam_role_policy" "irpt_reporting_gold_scheduler" {
+      + id          = (known after apply)
+      + name        = "irpt-reporting-gold-scheduler-policy"
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_scheduler_schedule.irpt_reporting_gold["daily"] will be created
+  + resource "aws_scheduler_schedule" "irpt_reporting_gold" {
+      + arn                          = (known after apply)
+      + description                  = "IRPT_DASHBD cell DB-b-7: the reporting gold (account_return_daily) daily production trigger. Fires every trading weekday at the time read from REPORTING_GOLD_FIRE_TIME_R3.json (after the holdings-performance adapter's 07:30 America/New_York fire, before the publisher's 08:15), computing every trading day after the newest landed partition through T-1."
+      + group_name                   = "default"
+      + id                           = (known after apply)
+      + name                         = "irpt-49f-reporting-gold-daily"
+      + name_prefix                  = (known after apply)
+      + schedule_expression          = "cron(41 7 ? * MON-FRI *)"
+      + schedule_expression_timezone = "America/New_York"
+      + state                        = "ENABLED"
+
+      + flexible_time_window {
+          + mode = "OFF"
+        }
+
+      + target {
+          + arn      = (known after apply)
+          + input    = jsonencode(
+                {
+                  + kind = "irpt_reporting_gold_daily"
+                  + note = "scheduled fire; handler.py resolves T-1 and the days owed itself"
+                }
+            )
+          + role_arn = (known after apply)
+        }
+    }
+
   # module.irpt_reporting_gold.aws_cloudwatch_log_group.lambda will be created
   + resource "aws_cloudwatch_log_group" "lambda" {
       + arn               = (known after apply)
@@ -224,7 +297,7 @@ Terraform will perform the following actions:
       + tracing_config (known after apply)
     }
 
-Plan: 4 to add, 0 to change, 0 to destroy.
+Plan: 7 to add, 0 to change, 0 to destroy.
 
 Changes to Outputs:
   + irpt_reporting_gold_function_arn   = (known after apply)
@@ -237,6 +310,8 @@ Changes to Outputs:
       + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_return_daily/*",
     ]
   + irpt_reporting_gold_role_arn       = (known after apply)
+  + irpt_reporting_gold_schedule_name  = "irpt-49f-reporting-gold-daily"
+  + irpt_reporting_gold_schedule_state = "ENABLED"
   + irpt_reporting_gold_write_arns     = [
       + "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/account_return_daily/*",
     ]
