@@ -1,0 +1,139 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_MCPINDEX.TO-MX-x-5",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "ba8deeb52a"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+  "vintage_commit": "9108f11494",
+  "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-x-5.haltgate-fixture-recommit-warning-aws-utf8.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_MCPINDEX~27",
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/test-haltgt-recipient-scoping.sh",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "deploy_evidence": "Fixture declares its serial via exported OPAL_AGENT_SERIAL; no .agent_context reference remains."
+  },
+  {
+   "path_or_key": ".tools/proof-of-spec-check.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": [
+    "AC2"
+   ],
+   "deploy_evidence": "WARN naming each PENDING row when the instance already exists at HEAD and is being re-committed."
+  },
+  {
+   "path_or_key": ".tools/tests/test_pos_recommit_warning.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": [
+    "AC2"
+   ],
+   "deploy_evidence": "3 offline temp-repo tests: re-commit warns, first commit silent, all-pinned silent."
+  },
+  {
+   "path_or_key": ".tools/aws",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": [
+    "AC3"
+   ],
+   "deploy_evidence": "exports PYTHONUTF8=1 and PYTHONIOENCODING=utf-8."
+  },
+  {
+   "path_or_key": ".tools/aws.cmd",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": [
+    "AC3"
+   ],
+   "deploy_evidence": "sets PYTHONUTF8=1 and PYTHONIOENCODING=utf-8 (mirror of .tools/aws)."
+  },
+  {
+   "path_or_key": ".tools/tests/test_aws_shim_utf8.sh",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": [
+    "AC3"
+   ],
+   "deploy_evidence": "failure arm (cp1252 charmap error reproduced) and fixed arm (shim's exports) both printed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the scoping test passes with 0 failed; .agent_context references in the fixture: 0 -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round7/checks/x5.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "RESULT: 6 passed, 0 failed / .agent_context references in the fixture: 0 / RESULT: PASS / exit=0",
+   "denominator": "6 cases of 6 passed; 0 references",
+   "status": "PASS",
+   "status_reason": "Base read 2 passed 6 failed; gate unchanged."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "pytest passes with 0 failed (re-commit with pending rows warns; first commit and all-pinned stay silent) -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round7/checks/x5.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "3 passed in 8.38s / RESULT: PASS / exit=0",
+   "denominator": "3 of 3 tests passed",
+   "status": "PASS",
+   "status_reason": "Existing artifact-resolution (5) and content-rung (9) tests also pass; checker --self-test 45 of 45."
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "the shim test exits 0 with both arms printed -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round7/checks/x5.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "failure arm reproduced (UnicodeEncodeError 'charmap' U+2713); fixed arm: env PYTHONUTF8=1 PYTHONIOENCODING=utf-8 rc=0 printed cleanly / RESULT: PASS / exit=0",
+   "denominator": "2 arms of 2 plus both-shims presence check",
+   "status": "PASS",
+   "status_reason": "Failure arm reproducible on this device."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Failure arms of each test.",
+   "expected": "each repair's old behaviour fails its test arm",
+   "observed": "AC1 base 2 passed 6 failed; AC2 first-commit and all-pinned arms are silent controls; AC3 cp1252 arm raises charmap error",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "re-ran each check script",
+   "observed": "same verdicts",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the two stale MCPINDEX tests (Z-W21-S15)",
+   "reason": "ruled by the issuer, not in this cell"
+  }
+ ],
+ "surprises": [],
+ "session_log": "none: worker writes no telemetry",
+ "compiler_tools": [
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2,AC3",
+   "result": "run before commit; result in report"
+  }
+ ]
+}
