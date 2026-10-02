@@ -33,7 +33,8 @@ read AFTER act (A), so act (A)'s fields carry through unchanged. Condition 3's m
 time from the stored profile:
 - `reading` is keyed on fields (status, query, absence_class, url), plus a basis prefix for SEARCH_FAILED. None of the 7 is a failure
   case, so every reading state is UNCHANGED.
-- `urls_returned` parses `returned (\d+) url`, which the new sentences keep, so it is UNCHANGED.
+- `urls_returned` parses `returned (\d+) url`. It is UNCHANGED for 6 of 7, and CHANGES for SAP_GY_Equity from None to 10 (see the
+  CORRECTION below).
 - `reason` echoes the new basis, so it CHANGES to the words.
 The new-failure-prefix line `ak-3` added to `scoped_amgt.ceo_profile_reading` is NOT deployed by this act. No stored object here is a
 failure case, so the deployed reading treats all 7 the same either way. It rides the next scoped-API redeploy.
@@ -47,10 +48,25 @@ failure case, so the deployed reading treats all 7 the same either way. It rides
 ## EXPECTED OUTCOME -- both branches, read from the readers' own rule
 
 - **Every PUT lands (expected):** b5 C1 reads 0 of 2 (base 2 of 2: BA "the SERP returned 2 url(s) ... ABSENT", VLO "a SERP not scoped
-  ... contract's search"). The other 5 names' Exec tab shows the producer's words. Reading states and url counts are unchanged.
+  ... contract's search"). The other 5 names' Exec tab shows the producer's words. Reading states are unchanged 7/7. `urls_returned`
+  is unchanged 6/7, and SAP_GY_Equity goes None -> 10.
 - **A PUT fails partway:** `ak6_store_writes` must list 7 of 7, or the act is completed or rolled back key by key.
 - **The read-back fails** (`ak6_verify` C2/C3/C4 or b5 C1) -> ROLLBACK per the table.
 
 ## WHAT THIS HALF DOES NOT COVER
 
 No redeploy, no code change, no S3 delete, no vendor or model call, no new key, no field other than `ceo_public_profile.basis`.
+
+## CORRECTION (2.0.0_SA_COO~Z, 2026-10-02 ~09:1xZ) -- measured before any GO; it supersedes the "UNCHANGED" claim above for one key
+
+`ceo_profile_reading` was computed on each of the 7 stored profiles with the plan's `after` substituted, against the deployed code's own
+rule (`scoped_amgt.ceo_profile_reading`):
+- BABA, BA, COST, HD: UNREADABLE_OBJECT -> UNREADABLE_OBJECT (absence_class null on these older objects), urls 10/2/4/10 unchanged;
+- NU, VLO: NOT_SEARCHED -> NOT_SEARCHED, urls null unchanged;
+- **SAP_GY: CONFIRMED -> CONFIRMED, urls_returned None -> 10.** The old basis ("Bright Data SERP zone via data/find/dualbiz/scripts/
+  serp.py ...") never matched `returned (\d+) url`. The producer's resolved sentence ("The CEO web search returned 10 url(s), 1 of them
+  on the company's own site ...") does, and 10 is that search's true count.
+`urls_returned` is informational ("NEVER an input to the reading"), and the state does not move. The act's EXPECTED OUTCOME is
+therefore: states 7/7 unchanged; `urls_returned` unchanged on 6, and SAP_GY None -> 10. The instrument
+`round61/checks/ak6c_reading.py --what post --pre AK6C_READING_PRE.json --expect-urls SAP_GY_Equity=10` grades exactly that (pre
+captured off the deployed function at signing).
