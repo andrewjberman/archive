@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-295",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-295.history-client-filter-guard.md",
+    "group": "OTHER",
+    "vintage_commit": "1572729cfd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "1572729cfd",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-295.history-client-filter-guard.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~101",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "kind": "script",
+      "commit_or_etag": "2ad49400f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "OWNER_READ_QUERY_ALLOWLIST (served.py:203) = {analysis-request-history: {client_id}}; _owner_read_request (served.py:827) skips only the names the operation admits; not deployed",
+      "artifact_covered_by": [
+        "IB32-1-AC1",
+        "IB32-1-AC2",
+        "IB32-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_owner_history_client_filter.py",
+      "kind": "test",
+      "commit_or_etag": "2ad49400f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 tests through served.Entry: subset by item id for client-a, client-b, client-unknown; unknown answers items []; other scope names still refused",
+      "artifact_covered_by": [
+        "IB32-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_owner_read_client_refused.py",
+      "kind": "test",
+      "commit_or_etag": "2ad49400f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 tests through served.Entry: control arm per operation plus client_id refused on analysis-request-read, analysis-report, status-job",
+      "artifact_covered_by": [
+        "IB32-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB32-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r32/p32_1_ac1_history_client_subset.py\" . -> IB32-1-AC1 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r32/p32_1_ac1_history_client_subset.py\" .",
+      "output_evidence": "OK: 6 passed, 0 failed\nIB32-1-AC1 PASS (rc=0)",
+      "denominator": "6 of 6 new tests passed; file names client_id, Entry, subset, unknown",
+      "expect": "IB32-1-AC1 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (no file)."
+    },
+    {
+      "criterion_id": "IB32-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r32/p32_1_ac2_client_refused_elsewhere.py\" . -> IB32-1-AC2 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r32/p32_1_ac2_client_refused_elsewhere.py\" .",
+      "output_evidence": "OK: 6 passed, 0 failed; arms for analysis-request-read, analysis-report, status-job\nIB32-1-AC2 PASS (rc=0)",
+      "denominator": "6 of 6 new tests passed (3 control arms, 3 negative arms)",
+      "expect": "IB32-1-AC2 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (no file)."
+    },
+    {
+      "criterion_id": "IB32-1-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r32/p32_1_ac3_suites_unchanged.py\" . -> IB32-1-AC3 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r32/p32_1_ac3_suites_unchanged.py\" .",
+      "output_evidence": "OK: ops/tests 208 passed; directory/tests 171 passed; _authz/tests 189 passed, 6 baseline failures only\nIB32-1-AC3 PASS (rc=0)",
+      "denominator": "ops 208 of 208, directory 171 of 171, _authz 189 passed with only the 6 baseline test_unguarded_census failures (177 at base + 12 new)",
+      "expect": "IB32-1-AC3 PASS",
+      "status": "PASS",
+      "status_reason": "Base was PASS (regression guard); still PASS."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each refusal is paired with its permitted case: client_id served on history and refused on the three other owner reads; a control arm without client_id is served on each of those three.",
+      "expected": "client_id admitted only on analysis-request-history; every other scope name still refused beside it",
+      "observed": "test_owner_history_client_filter.py 6 passed; test_owner_read_client_refused.py 6 passed",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline unit tests",
+      "observed": "checks run once after the code commit, rc=0",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p32_1_ac1_history_client_subset.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r32/p32_1_ac1_history_client_subset.py\" .",
+      "result": "IB32-1-AC1 PASS"
+    },
+    {
+      "tool": "p32_1_ac2_client_refused_elsewhere.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r32/p32_1_ac2_client_refused_elsewhere.py\" .",
+      "result": "IB32-1-AC2 PASS"
+    },
+    {
+      "tool": "p32_1_ac3_suites_unchanged.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r32/p32_1_ac3_suites_unchanged.py\" .",
+      "result": "IB32-1-AC3 PASS"
+    }
+  ]
+}
