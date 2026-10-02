@@ -72,3 +72,8 @@ PHASE B publish plan: `aws ssm update-document --name <doc> --content file://...
 ## 7. For the never-widen halves
 
 Blast radius: two SSM document versions; the documents write only `silver/transactions/`, `silver/realized/`, their two manifests and `logs/`; rollback per key above. No role, policy, schedule or Terraform change.
+
+## 8. ADDENDUM (written during MX-s-18 PHASE A; corrects section 3's last paragraph)
+
+Section 3's "DELTA = 0" holds for a day whose bronze bd-silver-merge has already merged (a sentinel day). It does NOT hold for a sentinel-withheld day. On such a day (9 of 29 dates in 2026-09-03..10-01: 09-07, 09-08, 09-09, 09-14, 09-15, 09-21, 09-22, 09-28, 09-29) the day's bronze is still unmerged at 21:45Z, so the repointed documents will MERGE it: NEW files, the same column and dedup transform as the old script, written to `silver/transactions/<data-date>.parquet` and `silver/realized/<data-date>.parquet`. That is what the documents write on those days today (the gap-day write of row Z-W24-S8); the repoint changes the code version, not the set of keys written. Measured partitions on the gap dates (rows): transactions 0, 5,274, 3,194, 4,873, 50,191, 3,967, 52,792, 7,643, 110,689; realized 7,889, 6,432, 5,785, 7,746, 7,173, 9,330, 9,350, 11,298, 10,915. So the expected DELTA is: 0 on sentinel days; on a gap day, the day's new partitions, identical in transform to the old script's, with one behavioural difference: the ETag skip re-processes a same-name re-landed file (replaces its partition) where the old filename skip would not.
+Once MX-s-18 lands, Mon/Tue stop being gap days (bd-silver-merge merges them at ~00:1xZ) and the documents revert to the 0-delta case. MX-s-18 is held by row Z-W24-S11.

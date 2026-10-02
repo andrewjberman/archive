@@ -1,0 +1,161 @@
+diff --git a/infra/aws/lambda/bd-pipeline/bd-49f-runner/lambda_function.py b/infra/aws/lambda/bd-pipeline/bd-49f-runner/lambda_function.py
+index 2a4d241c72..13fae505ae 100644
+--- a/infra/aws/lambda/bd-pipeline/bd-49f-runner/lambda_function.py
++++ b/infra/aws/lambda/bd-pipeline/bd-49f-runner/lambda_function.py
+@@ -28,9 +28,18 @@ RETRY/BACKOFF (AC) -- distinguishes the two failure classes:
+     re-minting the bearer between attempts.
+ 
+ Bronze sentinel (ADVI_BDAPIMIG P1 D2, CTO GATE-1 sentinel-trigger shape): emitted HERE on
+-ALL-table success via mod.emit_bronze_sentinel (DS-owned, firm-bound to opal-data-bd -> writes
+-bronze/{date}/_BRONZE_COMPLETE.json). The bronze-complete -> S3/EventBridge -> bd-silver-merge
+-rule (AE infra) fires the merge ONLY on a COMPLETE bronze (a partial pull must NOT advance silver).
++ALL-table success -> bronze/{date}/_BRONZE_COMPLETE.json. The bronze-complete -> S3/EventBridge ->
++bd-silver-merge rule (AE infra) fires the merge ONLY on a COMPLETE bronze (a partial pull must NOT
++advance silver).
++
++NFRA_MCPINDEX MX-s-18 (CTO ruling Z-W24-S4/S5): the RUNNER decides completeness itself (_emit_sentinel)
++instead of calling the shared module's emit_bronze_sentinel, which stays UNCHANGED (data/cot/ is a
++separate firm and read-only to this runner). A landed table is complete iff the shared
++mod._table_complete says so (measured sidecar has_data_rows==1), OR it is the transactions PERIOD table
++and its sidecar is MEASURED and reads has_data_rows==0 (BD posts transactions ~2 days late, so a Monday
++or Tuesday window can be genuinely empty). A missing sidecar, has_data_rows -1, an inferred sidecar, or
++ANY other table at 0 rows is never complete and withholds the sentinel. 'OK: bronze sentinel emitted'
++prints only after a head_object reads the sentinel key back.
+ 
+ Idempotency (CTO GATE-1, required): the runner is invoked by BOTH the session-chain (0.7.0~A,
+ every mint) AND the D3 daily-cron belt (mint-failure nights) -- a same-night double-invoke MUST
+@@ -43,6 +52,7 @@ Author: 0.6.0_AE_PartnerETL  Project: ADVI_BDAPIMIG (P1-B runner)
+ from __future__ import annotations
+ 
+ import importlib.util
++import json
+ import os
+ import time
+ from datetime import datetime, timezone
+@@ -102,6 +112,93 @@ def _already_landed(mod, table: str, as_of: str) -> bool:
+         return False  # never skip on doubt
+ 
+ 
++# --- MX-s-18: the runner's own sentinel check ---------------------------------------------------
++# The one PERIOD table whose measured-empty window completes the day. realized is also a PERIOD
++# table but is NOT named by the ruling: it stays strict (has_data_rows==1 only).
++EMPTY_WINDOW_OK_TABLES = frozenset(("transactions",))
++SENTINEL_KEY_FMT = "bronze/{date}/_BRONZE_COMPLETE.json"  # the key this file already documents above
++_INFERRED_BASIS = "content_probe_backfill"  # mirrors the shared module's SIDECAR_BASIS_INFERRED
++
++
++def _measured_empty_sidecar(mod, table: str, as_of: str) -> bool:
++    """True IFF `table` may complete on an empty window AND its sidecar for as_of exists, is a
++    MEASURED record (never the retry-net's inferred class) and reads has_data_rows == 0. A missing
++    sidecar, a -1 (unparseable export) or any unreadable record is False (fail-closed)."""
++    if table not in EMPTY_WINDOW_OK_TABLES:
++        return False
++    try:
++        meta = json.loads(_s3.get_object(Bucket=BD_S3_BUCKET,
++                                         Key=mod._complete_key(table, as_of))["Body"].read())
++    except Exception:
++        return False
++    if meta.get("basis") == getattr(mod, "SIDECAR_BASIS_INFERRED", _INFERRED_BASIS):
++        return False
++    hdr = meta.get("has_data_rows")
++    return isinstance(hdr, int) and not isinstance(hdr, bool) and hdr == 0
++
++
++def _table_state(mod, table: str, as_of: str) -> str:
++    """'complete' | 'complete-empty' | 'missing' | 'incomplete' for one landed (table, as_of). Missing =
++    the bronze object itself is absent. 'complete-empty' = the measured-empty transactions exception."""
++    try:
++        _s3.head_object(Bucket=BD_S3_BUCKET, Key=mod._bronze_object_key(table, as_of))
++    except Exception:
++        return "missing"
++    if mod._table_complete(table, as_of):
++        return "complete"
++    if _measured_empty_sidecar(mod, table, as_of):
++        return "complete-empty"
++    return "incomplete"
++
++
++def _emit_sentinel(mod, run_date: str, landed: list) -> str:
++    """Decide completeness over `landed` [(table, as_of)], write the sentinel iff every table is
++    complete, then READ IT BACK with head_object and print 'OK: bronze sentinel emitted' only on that
++    read. Returns 'emitted' | 'withheld' | 'put-failed'. Raises RuntimeError when the read-back fails
++    (the invocation must visibly fail). Same key and body shape as the shared emit_bronze_sentinel."""
++    bad = {}
++    empty_ok = []
++    for table, as_of in landed:
++        state = _table_state(mod, table, as_of)
++        if state == "complete-empty":
++            empty_ok.append(table)
++        elif state != "complete":
++            bad[table] = state
++    if bad:
++        print("WARN: bronze sentinel NOT emitted for %s -- incomplete table(s): %s. Silver will NOT be "
++              "advanced on unverified content; the freshness/absence alarm is the signal."
++              % (run_date, ", ".join("%s(%s)" % (t, s) for t, s in sorted(bad.items()))))
++        return "withheld"
++    key = SENTINEL_KEY_FMT.format(date=run_date)
++    body = {
++        "stage": "bronze",
++        "run_date": run_date,
++        "completed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
++        "overall": "success",
++        "artifacts": {
++            "tables": [t for t, _ in landed],
++            "count": len(landed),
++            "as_of": {t: a for t, a in landed},
++        },
++        "producer": "cot_bronze_ingest.py",
++    }
++    try:
++        _s3.put_object(Bucket=BD_S3_BUCKET, Key=key, Body=json.dumps(body).encode("utf-8"),
++                       ContentType="application/json")
++    except Exception as exc:  # noqa: BLE001 -- unchanged contract: LOUD but non-fatal, re-emits next run
++        print("ERROR: bronze sentinel emit FAILED (%s) -- silver trigger will NOT fire this "
++              "run; the freshness alarm is the backstop; re-emits next run" % exc)
++        return "put-failed"
++    try:
++        _s3.head_object(Bucket=BD_S3_BUCKET, Key=key)
++    except Exception as exc:  # noqa: BLE001
++        print("ERROR: bronze sentinel s3://%s/%s written but NOT read back (%s)" % (BD_S3_BUCKET, key, exc))
++        raise RuntimeError("bd-49f-runner: bronze sentinel read-back failed for %s: %s" % (key, exc))
++    note = " [measured-empty window accepted for: %s]" % ", ".join(empty_ok) if empty_ok else ""
++    print("OK: bronze sentinel emitted for %s (tables=%s)%s" % (run_date, landed, note))
++    return "emitted"
++
++
+ def lambda_handler(event, context):  # noqa: ARG001 -- AWS Lambda signature
+     event = event or {}
+     # FIRM-SEP: set ALL 4 env vars EXPLICIT before the shared module imports.
+@@ -201,13 +298,16 @@ def lambda_handler(event, context):  # noqa: ARG001 -- AWS Lambda signature
+     # partial pull must NOT advance silver). Emit whenever the full set is present (freshly pulled
+     # OR idempotent-skipped) so a retry that COMPLETES the set (e.g. txn landing after the D1 chunk)
+     # still advances silver; D2's etag content-skip makes a redundant re-fire a cheap no-op.
++    sentinel, sentinel_err = "not-attempted", None
+     if not failed and landed:
+         try:
+-            mod.emit_bronze_sentinel(run_date, landed)
+-            print("OK: bronze sentinel emitted for %s (tables=%s)" % (run_date, landed))
++            sentinel = _emit_sentinel(mod, run_date, landed)
++        except RuntimeError as exc:  # read-back failed: the invocation must visibly fail (raised below)
++            sentinel, sentinel_err = "readback-failed", exc
+         except Exception as exc:  # noqa: BLE001 -- LOUD but non-fatal: bronze IS landed; the
+             # per-table freshness alarm (C) backstops a silver stall if the trigger didn't fire.
+-            print("ERROR: bronze sentinel emit FAILED (%s) -- silver trigger will NOT fire this "
++            sentinel = "error"
++            print("ERROR: bronze sentinel check FAILED (%s) -- silver trigger will NOT fire this "
+                   "run; the freshness alarm is the backstop; re-emits next run" % exc)
+ 
+     result = {"run_date": run_date,
+@@ -216,9 +316,12 @@ def lambda_handler(event, context):  # noqa: ARG001 -- AWS Lambda signature
+               "pulled": pulled,
+               "skipped": [t for t, _ in landed if t not in pulled],
+               "rejected": rejected,  # empty-snapshot rejects: nothing landed, nothing masked
++              "sentinel": sentinel,  # emitted (read back) | withheld | put-failed | readback-failed | ...
+               "failed": failed,
+               "auth_dead": auth_dead}
+     print("RESULT: %s" % result)
++    if sentinel_err is not None:
++        raise sentinel_err
+     if failed:
+         # Non-zero so the invocation is visibly failed; C's per-table absence alarms are
+         # the durable signal (this is a daily cron, so a raise here surfaces in CW too).
