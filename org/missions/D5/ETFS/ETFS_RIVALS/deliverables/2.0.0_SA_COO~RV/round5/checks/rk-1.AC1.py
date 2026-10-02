@@ -1,7 +1,7 @@
 """RIV-rk-1 AC1 (FWD-14 producer, amendment A1) -- holding contribution is the sum over the period's trading days of the prior
 day's reported weight times the day's return, ranked per fund x period x axis; a holding with no price is kept as missing.
 
-Pure, offline fixture (day 2026-10-02; one G1 report dated 2026-09-30; G4 prices on 2026-09-30, 10-01, 10-02):
+Pure, offline fixture (page day 2026-10-05, as-of T-1 2026-10-02 per CRO~RV CALL 3; one G1 report dated 2026-09-30; G4 prices on 2026-09-30, 10-01, 10-02):
   A weight 0.6, px 100 -> 110 -> 121 (returns +10%, +10%)  => MTD contribution 0.6*0.1 + 0.6*0.1 = 0.12
   B weight 0.4, px  50 ->  45 ->  45 (returns -10%, 0%)    => MTD contribution -0.04
   C weight 0.1, no G4 price at all                         => missing, kept, never ranked
@@ -18,7 +18,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import _common as c  # noqa: E402
 
-DAY = "2026-10-02"
+DAY = "2026-10-05"  # page day (Monday); CRO~RV CALL 3: periods run through prev_trading_day(DAY) = 2026-10-02
 ENTRIES = [{"group_id": "IDVZ", "fund_id": "TXUE", "role": "rival"}, {"group_id": "IDVZ", "fund_id": "SCHY", "role": "index_control"}]
 
 
