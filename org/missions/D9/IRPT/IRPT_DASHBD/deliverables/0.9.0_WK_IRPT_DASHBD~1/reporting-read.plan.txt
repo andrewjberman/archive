@@ -1,0 +1,324 @@
+data.aws_dynamodb_table.service_profile_users: Reading...
+data.aws_iam_policy_document.irpt_reporting_read_assume: Reading...
+data.aws_region.current: Reading...
+data.aws_caller_identity.current: Reading...
+data.aws_region.current: Read complete after 0s [id=us-east-1]
+data.aws_iam_policy_document.irpt_reporting_read_assume: Read complete after 0s [id=2690255455]
+data.aws_caller_identity.current: Read complete after 0s [id=313476888478]
+data.aws_iam_policy_document.irpt_reporting_read: Reading...
+data.aws_iam_policy_document.irpt_reporting_read: Read complete after 0s [id=2875813846]
+data.aws_dynamodb_table.service_profile_users: Read complete after 1s [id=opal-users-v2]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+ <= read (data resources)
+
+Terraform will perform the following actions:
+
+  # aws_apigatewayv2_integration.irpt_reporting_read will be created
+  + resource "aws_apigatewayv2_integration" "irpt_reporting_read" {
+      + api_id                                    = "7k3ed8px20"
+      + connection_type                           = "INTERNET"
+      + description                               = "IRPT_DASHBD DB-b-4: irpt-49f-reporting-read-lambda behind the existing portal authorizer"
+      + id                                        = (known after apply)
+      + integration_method                        = "POST"
+      + integration_response_selection_expression = (known after apply)
+      + integration_type                          = "AWS_PROXY"
+      + integration_uri                           = (known after apply)
+      + payload_format_version                    = "2.0"
+      + timeout_milliseconds                      = 29000
+    }
+
+  # aws_apigatewayv2_route.irpt_reporting_read will be created
+  + resource "aws_apigatewayv2_route" "irpt_reporting_read" {
+      + api_id             = "7k3ed8px20"
+      + api_key_required   = false
+      + authorization_type = "CUSTOM"
+      + authorizer_id      = "naqxlm"
+      + id                 = (known after apply)
+      + route_key          = "GET /api/scoped/investor-reporting/reporting/{account_id}/{which}"
+      + target             = (known after apply)
+    }
+
+  # aws_iam_role.irpt_reporting_read will be created
+  + resource "aws_iam_role" "irpt_reporting_read" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "IRPT_DASHBD cell DB-b-4: the reporting-read function. Reads and lists ONLY the platinum reporting prefix (account=<id>/series.json.gz and manifest.json) plus the directory and ownership-map scope dependencies the shared boundary reads."
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "irpt-49f-reporting-read-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = {
+          + "ManagedBy" = "Terraform"
+          + "Project"   = "OpalPortal"
+          + "System"    = "InvestorReporting"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role_policy.irpt_reporting_read will be created
+  + resource "aws_iam_role_policy" "irpt_reporting_read" {
+      + id          = (known after apply)
+      + name        = "irpt-49f-reporting-read-policy"
+      + name_prefix = (known after apply)
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "s3:ListBucket"
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = "irpt/49financial/platinum/reporting/*"
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = "arn:aws:s3:::opal-data-49financial"
+                      + Sid       = "ListExactlyThePlatinumReportingPrefix"
+                    },
+                  + {
+                      + Action   = "s3:GetObject"
+                      + Effect   = "Allow"
+                      + Resource = "arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/reporting/*"
+                      + Sid      = "ReadThePlatinumReportingPrefixOnly"
+                    },
+                  + {
+                      + Action   = "s3:GetObject"
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-bd/platinum/49financial/ownership_map.json",
+                          + "arn:aws:s3:::opal-data-bd/investor-reporting/directory/*",
+                        ]
+                      + Sid      = "ReadCurrentScopeDependencies"
+                    },
+                  + {
+                      + Action   = [
+                          + "logs:PutLogEvents",
+                          + "logs:CreateLogStream",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = "arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/irpt-49f-reporting-read-lambda:*"
+                      + Sid      = "OwnLogStreamOnly"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy.irpt_reporting_read_service_profile will be created
+  + resource "aws_iam_role_policy" "irpt_reporting_read_service_profile" {
+      + id          = (known after apply)
+      + name        = "irpt-49f-reporting-read-service-profile-policy"
+      + name_prefix = (known after apply)
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action   = [
+                          + "dynamodb:Query",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:dynamodb:us-east-1:313476888478:table/opal-users-v2/index/email-index",
+                        ]
+                      + Sid      = "ReadServiceProfileByEmailIndex"
+                    },
+                  + {
+                      + Action   = [
+                          + "dynamodb:GetItem",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:dynamodb:us-east-1:313476888478:table/opal-users-v2",
+                        ]
+                      + Sid      = "ReadServiceProfileRow"
+                    },
+                  + {
+                      + Action    = [
+                          + "kms:Decrypt",
+                        ]
+                      + Condition = {
+                          + StringEquals = {
+                              + "kms:EncryptionContext:aws:dynamodb:tableName" = "opal-users-v2"
+                              + "kms:ViaService"                               = "dynamodb.us-east-1.amazonaws.com"
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = [
+                          + "arn:aws:kms:us-east-1:313476888478:key/64f25291-4015-42c5-ad41-40e42325deb7",
+                        ]
+                      + Sid       = "DecryptUsersTableViaDynamoOnly"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + role        = (known after apply)
+    }
+
+  # aws_lambda_permission.irpt_reporting_read_apigw will be created
+  + resource "aws_lambda_permission" "irpt_reporting_read_apigw" {
+      + action              = "lambda:InvokeFunction"
+      + function_name       = "irpt-49f-reporting-read-lambda"
+      + id                  = (known after apply)
+      + principal           = "apigateway.amazonaws.com"
+      + source_arn          = "arn:aws:execute-api:us-east-1:313476888478:7k3ed8px20/*/GET/api/scoped/investor-reporting/reporting/*"
+      + statement_id        = "AllowPortalApiInvoke-irpt-reporting-read"
+      + statement_id_prefix = (known after apply)
+    }
+
+  # module.irpt_reporting_read.data.aws_s3_object.artifact will be read during apply
+  # (depends on a resource or a module with changes pending)
+ <= data "aws_s3_object" "artifact" {
+      + arn                           = (known after apply)
+      + body                          = (known after apply)
+      + bucket                        = "opal-313476888478-lambda-artifacts"
+      + bucket_key_enabled            = (known after apply)
+      + cache_control                 = (known after apply)
+      + checksum_crc32                = (known after apply)
+      + checksum_crc32c               = (known after apply)
+      + checksum_crc64nvme            = (known after apply)
+      + checksum_sha1                 = (known after apply)
+      + checksum_sha256               = (known after apply)
+      + content_disposition           = (known after apply)
+      + content_encoding              = (known after apply)
+      + content_language              = (known after apply)
+      + content_length                = (known after apply)
+      + content_type                  = (known after apply)
+      + etag                          = (known after apply)
+      + expiration                    = (known after apply)
+      + expires                       = (known after apply)
+      + id                            = (known after apply)
+      + key                           = "investor-reporting/irpt-reporting-read-lambda.zip"
+      + last_modified                 = (known after apply)
+      + metadata                      = (known after apply)
+      + object_lock_legal_hold_status = (known after apply)
+      + object_lock_mode              = (known after apply)
+      + object_lock_retain_until_date = (known after apply)
+      + server_side_encryption        = (known after apply)
+      + sse_kms_key_id                = (known after apply)
+      + storage_class                 = (known after apply)
+      + tags                          = (known after apply)
+      + version_id                    = (known after apply)
+      + website_redirect_location     = (known after apply)
+    }
+
+  # module.irpt_reporting_read.aws_cloudwatch_log_group.lambda will be created
+  + resource "aws_cloudwatch_log_group" "lambda" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + log_group_class   = (known after apply)
+      + name              = "/aws/lambda/irpt-49f-reporting-read-lambda"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 14
+      + skip_destroy      = false
+      + tags              = {
+          + "ManagedBy" = "Terraform"
+          + "System"    = "InvestorReporting"
+        }
+      + tags_all          = {
+          + "ManagedBy" = "Terraform"
+          + "Project"   = "OpalPortal"
+          + "System"    = "InvestorReporting"
+        }
+    }
+
+  # module.irpt_reporting_read.aws_lambda_function.this will be created
+  + resource "aws_lambda_function" "this" {
+      + architectures                  = (known after apply)
+      + arn                            = (known after apply)
+      + code_sha256                    = (known after apply)
+      + function_name                  = "irpt-49f-reporting-read-lambda"
+      + handler                        = "entry.lambda_handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + layers                         = []
+      + memory_size                    = 512
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "python3.12"
+      + s3_bucket                      = "opal-313476888478-lambda-artifacts"
+      + s3_key                         = "investor-reporting/irpt-reporting-read-lambda.zip"
+      + s3_object_version              = (known after apply)
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + skip_destroy                   = false
+      + source_code_hash               = (known after apply)
+      + source_code_size               = (known after apply)
+      + tags                           = {
+          + "Cell"      = "DB-b-4"
+          + "ManagedBy" = "Terraform"
+          + "Module"    = "yang-lambda"
+          + "Project"   = "IRPT_DASHBD"
+          + "System"    = "InvestorReporting"
+        }
+      + tags_all                       = {
+          + "Cell"      = "DB-b-4"
+          + "ManagedBy" = "Terraform"
+          + "Module"    = "yang-lambda"
+          + "Project"   = "IRPT_DASHBD"
+          + "System"    = "InvestorReporting"
+        }
+      + timeout                        = 29
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = {
+              + "IRPT_DIRECTORY_BUCKET_MAP" = jsonencode(
+                    {
+                      + "49financial" = "opal-data-bd"
+                    }
+                )
+              + "IRPT_FIRM_REGISTRY"        = "/var/task/firm_registry.json"
+            }
+        }
+
+      + ephemeral_storage (known after apply)
+
+      + logging_config (known after apply)
+
+      + tracing_config (known after apply)
+    }
+
+Plan: 8 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + irpt_reporting_read_function_arn       = (known after apply)
+  + irpt_reporting_read_function_name      = "irpt-49f-reporting-read-lambda"
+  + irpt_reporting_read_platinum_read_arns = [
+      + "arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/reporting/*",
+    ]
+  + irpt_reporting_read_role_arn           = (known after apply)
+  + irpt_reporting_read_route_key          = "GET /api/scoped/investor-reporting/reporting/{account_id}/{which}"
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
