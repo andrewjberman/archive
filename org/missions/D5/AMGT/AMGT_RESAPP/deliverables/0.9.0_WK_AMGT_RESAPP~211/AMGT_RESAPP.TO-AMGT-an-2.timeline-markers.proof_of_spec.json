@@ -1,0 +1,104 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-an-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-2.timeline-markers.md",
+  "group": "C",
+  "vintage_commit": "59aabebf8708335e25e2f20aff08078060417cae"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "59aabebf8708335e25e2f20aff08078060417cae",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-2.timeline-markers.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~211",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/harvest/timeline_api.py",
+   "kind": "script",
+   "commit_or_etag": "a966df15bfb6c21536f1fb23c1161b4abf79c42f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "get_timeline serves markers [{date, kind, label}] (a coverage_event per served event) and marker_kinds_absent (earnings_release with its reason); optional earnings_loader adds earnings_release markers with no route change. Helpers _coverage_markers, _earnings_markers.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/harvest/tests/test_timeline_api.py",
+   "kind": "script",
+   "commit_or_etag": "a966df15bfb6c21536f1fb23c1161b4abf79c42f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "4 new tests: event -> coverage marker with headline; headlineless event label empty and no events no coverage markers; earnings kind absent with its reason; a pulled earnings date becomes a marker.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The issuer's pre-flight adversary: r64_served c11 fails at the base (BA 1 event, 0 markers).",
+   "expected": "the same check run local on this branch passes for BA, AMD and VLO",
+   "observed": "PASS C1 for BA_US_Equity (markers 1, events 1), AMD_US_Equity and VLO_US_Equity (0 events, 0 markers, earnings absent with reason); R64 C11 SERVED: YES",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 pytest run once in full, and the 3 failing files re-run in a detached worktree of the pre-edit HEAD",
+   "observed": "7 failed, 684 passed in the worktree; the same 7 fail at the pre-edit base (7 failed, 47 passed over those 3 files)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No deploy, no store write, no vendor or model call, no portal write.",
+   "reason": "BOUNDS 1 of the face."
+  },
+  {
+   "item": "The 7 pre-existing failing tests in lib/research/harvest/tests are not fixed.",
+   "reason": "Outside the cell's act; they fail identically at the base; filed as AMGT_RESAPP-Z-W211-S1."
+  },
+  {
+   "item": "The portal submodule pointer shows modified in git status (--portal-ref cut) and is not committed.",
+   "reason": "Outside the face's <paths>."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W211-S1"
+ ],
+ "session_log": "N/A -- no session-log path in this worker's write surface. Worktree C:/tmp/r64-211, branch wk-AMGT_RESAPP-211. Code commit a966df15bfb6c21536f1fb23c1161b4abf79c42f LOCAL, never pushed. Package watch (AMENDMENT 1): SIZE: package 131943063 B unzipped over 354 entries + layer opal-amgt-print-deps:1 121743633 B = 253686696 B against the 262144000-byte ceiling (96.8% used, 8457304 B spare); CONTENT-DIFF SUMMARY: files 354, IDENTICAL 351, CHANGED 2, ADDED 1, REMOVED 0 (ADDED finbert_sentiment.py; CHANGED publication_gold.py and timeline_api.py).",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest (AC1 literal)",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/ lib/research/harvest/tests/; echo \"exit=$?\"",
+   "result": "7 failed, 684 passed, 201 warnings in 85.42s; exit=1 (the 7 fail identically at the pre-edit base)"
+  },
+  {
+   "tool": "r64_served.py (AC2 literal)",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c11 --where local; echo \"exit=$?\"",
+   "result": "PASS C1 BA_US_Equity markers 1 events 1 missing [] earnings 0 absent-with-reason True / PASS C1 AMD_US_Equity markers 0 events 0 / PASS C1 VLO_US_Equity markers 0 events 0 / R64 C11 SERVED: YES / exit=0"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every test passes, your new tests included, and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/ lib/research/harvest/tests/; echo \"exit=$?\"",
+   "output_evidence": "7 failed, 684 passed, 201 warnings in 85.42s; exit=1. The 7 failures (test_o1_run_record_coverage x2, test_publication_gold_daily x2, test_timeline_day_read_path x3) fail identically at the pre-edit base; the 4 new tests and all test_timeline_api tests pass.",
+   "denominator": "684 of 691 tests passed across lib/research/api/tests/ and lib/research/harvest/tests/ (4 of the 684 new); 7 pre-existing failures; exit=1.",
+   "status": "FAIL",
+   "status_reason": "7 tests in lib/research/harvest/tests fail identically at the pre-edit base (4 != 5 enabled publishers in daily-row fixtures; timeline-day read-path fixtures), none touching get_timeline; outside this cell's act; filed as AMGT_RESAPP-Z-W211-S1. The cell's own 4 new tests and all test_timeline_api tests pass."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C1 PASS for BA, AMD and VLO (markers for every event, the earnings kind absent with its reason); R64 C11 SERVED: YES -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c11 --where local; echo \"exit=$?\"",
+   "output_evidence": "PASS C1 BA_US_Equity serves markers for every event plus the earnings kind status 200 markers 1 events 1 missing [] earnings 0 absent-with-reason True; PASS C1 AMD_US_Equity ... markers 0 events 0 ...; PASS C1 VLO_US_Equity ... markers 0 events 0 ...; R64 C11 SERVED: YES; exit=0",
+   "denominator": "3 of 3 names PASS (events 1+0+0 = markers 1+0+0); exit=0.",
+   "status": "PASS"
+  }
+ ]
+}
