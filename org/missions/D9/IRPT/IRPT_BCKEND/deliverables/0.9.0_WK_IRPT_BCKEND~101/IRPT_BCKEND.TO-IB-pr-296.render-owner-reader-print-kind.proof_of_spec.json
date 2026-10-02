@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-296",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-296.render-owner-reader-print-kind.md",
+    "group": "OTHER",
+    "vintage_commit": "f937b90b5c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "f937b90b5c",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-296.render-owner-reader-print-kind.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~101",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_render_identity/report_owner.py",
+      "kind": "script",
+      "commit_or_etag": "acce364286",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "reader() (report_owner.py) reads DynamoReportIndex.get(storage firm, repository._key) and returns the validated owner or None; from_env() reads IRPT_REQUESTS_TABLE and returns None when unset; not deployed",
+      "artifact_covered_by": [
+        "IB33-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "kind": "script",
+      "commit_or_etag": "acce364286",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "render_ports_from_env (served.py:1155) passes report_owner=report_owner.from_env(...) to grant.render_ports; not deployed",
+      "artifact_covered_by": [
+        "IB33-1-AC1",
+        "IB33-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/retained_export.py",
+      "kind": "script",
+      "commit_or_etag": "acce364286",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "print_query(grant_record, report, kind=None): kind ANALYSIS decides analysis, the shape rule only when no kind is passed; not deployed",
+      "artifact_covered_by": [
+        "IB33-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/submit_service.py",
+      "kind": "script",
+      "commit_or_etag": "acce364286",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "serve_submit passes resolved.get('kind') to print_query; not deployed",
+      "artifact_covered_by": [
+        "IB33-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_render_ports_report_owner.py",
+      "kind": "test",
+      "commit_or_etag": "acce364286",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 tests through served.Entry and render_ports_from_env: admitted on a matching stored owner, refused on 5 differing fields, an unset index and a missing item; account-scoped render never reads the index",
+      "artifact_covered_by": [
+        "IB33-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/tests/test_print_query_kind.py",
+      "kind": "test",
+      "commit_or_etag": "acce364286",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 tests: ANALYSIS with a stray dates dict prints as analysis, PERFORMANCE unchanged",
+      "artifact_covered_by": [
+        "IB33-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB33-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r33/p33_1_ac1_render_ports_owner.py\" . -> IB33-1-AC1 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r33/p33_1_ac1_render_ports_owner.py\" .",
+      "output_evidence": "OK: 12 passed, 0 failed\nIB33-1-AC1 PASS (rc=0)",
+      "denominator": "12 of 12 new tests passed; file names report_owner, Entry, render_ports_from_env, refused",
+      "expect": "IB33-1-AC1 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (no file)."
+    },
+    {
+      "criterion_id": "IB33-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r33/p33_1_ac2_print_query_kind.py\" . -> IB33-1-AC2 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r33/p33_1_ac2_print_query_kind.py\" .",
+      "output_evidence": "OK: 5 passed, 0 failed\nIB33-1-AC2 PASS (rc=0)",
+      "denominator": "5 of 5 new tests passed; file names ANALYSIS, PERFORMANCE, dates",
+      "expect": "IB33-1-AC2 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (no file)."
+    },
+    {
+      "criterion_id": "IB33-1-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r33/p33_1_ac3_suites_unchanged.py\" . -> IB33-1-AC3 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r33/p33_1_ac3_suites_unchanged.py\" .",
+      "output_evidence": "OK: _authz/tests 201 passed, 6 baseline failure(s); reports/tests 88 passed, 1 baseline failure(s); export/tests 158 passed, 0 baseline failure(s); ops/tests 224 passed, 0 baseline failure(s); _render_identity/tests 45 passed, 0 baseline failure(s); directory/tests 171 passed, 0 baseline failure(s)\nIB33-1-AC3 PASS (rc=0)",
+      "denominator": "six suites, each in its own process: _authz 201 (189 + 12 new) with only the 6 baseline ids, reports 88 with the 1 baseline id, export 158 (153 + 5 new), ops 224, _render_identity 45, directory 171",
+      "expect": "IB33-1-AC3 PASS",
+      "status": "PASS",
+      "status_reason": "Base was PASS (regression guard); still PASS."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each owner-reader admit is paired with its refusal: a matching stored owner is admitted; five differing owner fields, an unset index, and a missing item are refused; the account-scoped render does not read the index.",
+      "expected": "admit only on an exact owner match; every other arm refused",
+      "observed": "test_render_ports_report_owner.py 12 passed",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline unit tests",
+      "observed": "checks run once after the code commit, rc=0",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-W101-S11",
+    "IRPT_BCKEND-W101-S12"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p33_1_ac1_render_ports_owner.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r33/p33_1_ac1_render_ports_owner.py\" .",
+      "result": "IB33-1-AC1 PASS"
+    },
+    {
+      "tool": "p33_1_ac2_print_query_kind.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r33/p33_1_ac2_print_query_kind.py\" .",
+      "result": "IB33-1-AC2 PASS"
+    },
+    {
+      "tool": "p33_1_ac3_suites_unchanged.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r33/p33_1_ac3_suites_unchanged.py\" .",
+      "result": "IB33-1-AC3 PASS"
+    }
+  ]
+}
