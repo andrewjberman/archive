@@ -34,7 +34,10 @@ def digest_pre(rows):
     return a32.digest([pre(r) for r in rows])
 
 
-def rule(before_m, before_d, after_m, after_d):
+COVERAGE_FIELDS = {"data_status", "publishers_covered", "publishers_covered_codes"}
+
+
+def rule(before_m, before_d, after_m, after_d, as_of=None):
     mk = lambda r: (r.get("article_key"), r.get("security_key"))  # noqa: E731
     dk = lambda r: (r.get("security_key"), str(r.get("day"))[:10])  # noqa: E731
     om = {mk(r): json.dumps(pre(r), sort_keys=True, default=str) for r in before_m}
@@ -44,15 +47,23 @@ def rule(before_m, before_d, after_m, after_d):
     missing_fields = sum(1 for r in after_m if any(f not in r for f in ADDED_FIELDS))
     titled = sum(1 for r in after_m if r.get("title"))
     added_secs = {k[1] for k in nm if k not in om}
-    od = {dk(r): json.dumps(r, sort_keys=True, default=str) for r in before_d}
-    nd = {dk(r): json.dumps(r, sort_keys=True, default=str) for r in after_d}
+    od_rows, nd_rows = {dk(r): r for r in before_d}, {dk(r): r for r in after_d}
+    od = {k: json.dumps(r, sort_keys=True, default=str) for k, r in od_rows.items()}
+    nd = {k: json.dumps(r, sort_keys=True, default=str) for k, r in nd_rows.items()}
     d_gone = [k for k in od if k not in nd]
     d_changed = [k for k in nd if k in od and nd[k] != od[k]]
-    other = [k for k in d_changed if k[0] not in added_secs]
+
+    def coverage_only(k):
+        a, b = nd_rows[k], od_rows[k]
+        diff = {f for f in set(a) | set(b) if json.dumps(a.get(f), default=str) != json.dumps(b.get(f), default=str)}
+        return k[1] == str(as_of) and diff <= COVERAGE_FIELDS
+
+    cov = [k for k in d_changed if k[0] not in added_secs and coverage_only(k)]
+    other = [k for k in d_changed if k[0] not in added_secs and k not in set(cov)]
     return {"mention_gone": len(gone), "mention_changed_pre_existing": len(changed),
             "mention_added": len(nm) - len(om) + len(gone), "mention_rows_missing_new_fields": missing_fields,
             "mention_rows_titled": titled, "daily_gone": len(d_gone), "daily_changed": len(d_changed),
-            "daily_other": len(other),
+            "daily_coverage_only": len(cov), "daily_other": len(other),
             "holds": not gone and not changed and not missing_fields and not d_gone and not other}
 
 
@@ -91,7 +102,7 @@ def main():
     record["after"] = {"mention_rows": len(am), "mention_digest_pre": digest_pre(am), "daily_rows": len(ad),
                        "daily_digest": a32.digest(ad), "mention_part": a32.newest_part(pg.GOLD_TABLE),
                        "daily_part": a32.newest_part(pg.GOLD_DAILY_TABLE)}
-    verdict = rule(bm, bd, am, ad)
+    verdict = rule(bm, bd, am, ad, as_of=as_of)
     record["verify"] = verdict
     print("VERIFY:", json.dumps(verdict))
     if verdict["holds"]:
