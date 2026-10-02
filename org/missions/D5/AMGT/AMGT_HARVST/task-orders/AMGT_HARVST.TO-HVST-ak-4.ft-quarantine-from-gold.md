@@ -107,9 +107,20 @@ After the merge: rebuild #6 (mention and daily) runs under a NEW never-widen pai
 - the rollback is the BEFORE snapshots as newer parts.
 The CTO half is owed. The served events are NOT rebuilt (28731).
 
+**COMPLETE 2026-10-02 ~21:3xZ (issuer):**
+- AC1 PASS: 11 passed (worker). Merged @eff5c79d35.
+- At the base:
+  - AC2 PASS (`round38/ak-4.AC2.issuer_grade.txt`): shipped 1,920 rows with 0 ft; control 1,978 with 58 ft; 1,920
+    non-ft keys in both and 0 differing; PUTS SENT 0.
+  - AC3 PASS (`ak-4.AC3.issuer_grade.txt`): 1,375 daily rows, 0 naming ft, publishers_enabled 4 on every row.
+- Row Z-W90-S22: 4 tests pinned ENABLED_PUBLISHERS as the graded set. It is resolved by the issuer's direct act (row
+  Z-S69): the two test files now read GRADED_PUBLISHERS. The suite at the base reads 317 passed and 3 failed (the
+  Z-S68 three only).
+- Next is the rebuild #6 signing dry run (`round38/gold_rebuild6.signing.py`, ft quarantine only), then the COO half.
+
 <risk>SERVED</risk>
 <worker_class>worker</worker_class>
-<status>pending</status>
+<status>complete</status>
 <round>38</round>
 <workstream>ftquarantine</workstream>
 <slot>~90</slot>
