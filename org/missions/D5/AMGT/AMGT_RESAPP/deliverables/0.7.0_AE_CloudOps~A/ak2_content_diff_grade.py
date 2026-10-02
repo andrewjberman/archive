@@ -36,7 +36,12 @@ def main():
     ap.add_argument("--built", required=True)
     ap.add_argument("--deployed", required=True)
     ap.add_argument("--out")
+    # al-1 act (B) reuses this grader over a ONE-file expected set rather than getting a copy.
+    # Omit it and the act (A)/ak-2 three-file set stands.
+    ap.add_argument("--expect-changed", action="append",
+                    help="repeatable; overrides the default expected CHANGED set")
     a = ap.parse_args()
+    expect = set(a.expect_changed) if a.expect_changed else EXPECT_CHANGED
 
     new, old = members(a.built), members(a.deployed)
     added = sorted(set(new) - set(old))
@@ -56,16 +61,17 @@ def main():
         print("    REMOVED  %s" % c)
 
     got = set(changed)
-    extra = sorted(got - EXPECT_CHANGED)        # changed but NOT signed for -- a STOP
-    missing = sorted(EXPECT_CHANGED - got)      # signed for but unmoved -- also a STOP
-    print("  SET EQUALITY, BOTH WAYS, against the halves' three signed files:")
+    extra = sorted(got - expect)        # changed but NOT signed for -- a STOP
+    missing = sorted(expect - got)      # signed for but unmoved -- also a STOP
+    print("  SET EQUALITY, BOTH WAYS, against the halves' %d signed file(s):" % len(expect))
     print("    changed-but-not-signed : %d %s" % (len(extra), extra))
     print("    signed-but-unmoved     : %d %s" % (len(missing), missing))
     print("  CONTROL fabricated path %s: %s" % (FABRICATED, "packaged -- GRADER BROKEN"
                                                 if FABRICATED in new else "not packaged (grader discriminates)"))
 
-    verdict = (not extra) and (not missing) and (not added) and (not removed) and len(changed) == 3
-    print("CONTENT-DIFF VERDICT: %s" % ("PASS -- exactly the three signed files moved"
+    verdict = ((not extra) and (not missing) and (not added) and (not removed)
+               and len(changed) == len(expect))
+    print("CONTENT-DIFF VERDICT: %s" % ("PASS -- exactly the %d signed file(s) moved" % len(expect)
                                         if verdict else "STOP -- the package diff is not the signed diff"))
     if a.out:
         json.dump({"built_members": len(new), "deployed_members": len(old),
