@@ -52,7 +52,42 @@ plan from a tree at CLOUD HEAD). Against the deployed pin 25f4ac5418 (d-5 addend
 
 **Gold G1 / G5 / G6 (round 5's semantics on the next runs).** Instrument `round5/served_delta_r5.py`
 (round 4's, served pick `revision.newest`, no GQGU import), output `round5/served_delta_r5.json`, run at the pin:
-RESULTS_PENDING -- the table below is filled from the run before the apply; anything beyond it STOPs the act.
+run 06:54Z-07:26Z at 7aa0186d45 (G1 re-run with the budget lifted: round 5's b-2 stopped the first run PARTIAL at
+600 s, and the instrument now refuses to compare over a partial G1). It REPLAYS THE WHOLE HISTORY over the served
+inputs, so it measures what WOULD change if history were rebuilt; this act rebuilds none (see "What the act moves").
+
+| fund | G1 rows served -> new | G5 trades removed / added | G6 windows served -> new | cause (from the replay's own G6 rows) |
+|---|---|---|---|---|
+| BASG | 11306 -> 11306 | 0 / 0 | 325 -> 325 | none |
+| BIDD | 20768 -> 20768 | 0 / 0 | 464 -> 464 | none |
+| CGIC | 90480 -> 90480 | 0 / 0 | 496 -> 496 | none |
+| GQGU | 10798 -> 10798 | 0 / 0 | 304 -> 304 | none |
+| SCHY | 67032 -> 67032 | 0 / 0 | 501 -> 501 | none |
+| INEQ | 51828 -> 51828 | **374** / 0 | 498 -> 498 | h-5: 6 windows REFUSED `zero_quantity_share` (2025-05-30, 06-02, 08-29, 09-02, 11-28, 12-01) |
+| TXUE | 21212 -> 21212 | **25** / 0 | 417 -> 417 | h-5: 2025-04-14 REFUSED `flow_factor_out_of_band` (f = 83.0) |
+| TSEL | 11018 -> 11018 | **19** / 0 | 394 -> 394 | h-5: 2025-01-16 REFUSED `flow_factor_out_of_band` (f = 3.801) |
+| ETFT | 6782 -> 6782 | **6** / 0 | 206 -> 206 | h-5: 2025-12-03 (f = 11.0) and 2026-01-07 (f = 2.509) REFUSED |
+| WCMG | 4338 -> 4338 | **5** / 0 | 90 -> **91** | h-5: 2026-07-20 REFUSED (f = 2.0); +1 window 2026-04-24>04-29 (see note) |
+| PCLG | 6387 -> 6387 | 0 / **6** | 224 -> **225** | +1 window 2026-03-12>03-31 (see note) |
+| IDVZ | 976 -> 976 | **1** / **2** | 22 -> 22 | h-4: 2026-09-23 an exit + entry no longer paired as ID-CHANGE on equal value alone |
+| PFOE | 555 -> 555 | **1** / **2** | 22 -> 22 | h-4: 2026-09-28, the same |
+
+- **G1: 0 differences** on every fund (rows, dates, newest date, resolved fraction).
+- **Changed dates (all funds):** 15, from 2025-01-16 to 2026-09-28; none is the newest window (2026-09-30).
+- **Note (INFERRED, not measured):** the PCLG and WCMG windows are absent from the served G5/G6 because those served
+  objects (built 2026-09-30T151301Z / T151306Z, not held: `held_of_bytes` reads no hold) predate round 4's t-5 (own
+  prior-date pairing), which d-5 deployed WITHOUT a G5 replay. Any replay with the DEPLOYED code builds them too; they
+  are not a round-5 change. No control replay at the deployed pin was run.
+- **Every other difference is a round-5 cell by design** (h-5 REFUSED windows infer zero trades; h-4 ID-CHANGE
+  pairing). Nothing outside rounds 5's cells.
+
+## WHAT THE ACT MOVES (and what the table does not)
+
+- The act replays NO history: G1/G5/G6 history stays exactly as served. The table bounds what the round-5 RULES do;
+  they act only on windows the new code builds from the next run on (the 2026-10-01 report window onward).
+- On those new windows, by rule: an implausible window is REFUSED with its reason and infers no trades (h-5); an
+  exit + entry pair stays two trades unless an identifier relation pairs them (h-4); G5 carries `key_resolution` and
+  confidence is no longer overridden by UNRESOLVED (h-6); the page headline counts current funds (f-4).
 
 ## THE BLAST RADIUS, PER KEY
 
