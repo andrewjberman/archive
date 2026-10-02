@@ -134,17 +134,23 @@ const arms = [];
   if (html) {
     const execText = L.textOf(html.exec);
     if (!execText.includes(PLAIN_LUSHA)) f.push(`exec: the plain Lusha skip reason "${PLAIN_LUSHA}" is not on the face`);
+    // AMENDMENT 1 (issuer, round 23, 2026-10-02 ~08:5xZ; row DSGN_AMGTV1-Z-W71-S1): CTO round-22 ruling 1 (@eee9380be7) puts the
+    // Peers absent-column reason on the face in PAGE-composed reader words and keeps R-1's served reason in
+    // `data-absent-column-reason`, so a plain served reason is PRESERVED when it is on the face OR carried verbatim in that
+    // attribute. The Exec clause (the plain Lusha reason prints verbatim) is unchanged.
     const peersText = L.textOf(html.peers);
+    const decodeAttr = (s) => String(s).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    const carried = new Set(Array.from(html.peers.matchAll(/data-absent-column-reason="([^"]*)"/g)).map((m) => decodeAttr(m[1])));
     const plainReasons = (FIX.peers.csc_columns.absent || [])
       .map((c) => c.reason)
       .filter((r) => typeof r === 'string' && r && census(`<p>${r}</p>`).total === 0);
     let shown = 0;
-    for (const r of plainReasons) { if (peersText.includes(r)) shown += 1; else f.push(`peers: plain reason not on the face: "${r.slice(0, 60)}"`); }
+    for (const r of plainReasons) { if (peersText.includes(r) || carried.has(r)) shown += 1; else f.push(`peers: plain reason neither on the face nor carried: "${r.slice(0, 60)}"`); }
     if (plainReasons.length === 0) f.push('INPUT: the fixture carries no plain absent-column reason to read');
-    arms.push(['PLAIN SERVED WORDS STAY: a plain Lusha reason and the plain absent-column reasons print verbatim', f.length === 0,
+    arms.push(['PLAIN SERVED WORDS STAY: a plain Lusha reason prints verbatim; each plain absent-column reason is on the face or carried', f.length === 0,
       f.length === 0 ? `exec 1 of 1, peers ${shown} of ${plainReasons.length}` : `${f.length} fault(s): ${f.slice(0, 4).join(' | ')}`]);
   } else {
-    arms.push(['PLAIN SERVED WORDS STAY: a plain Lusha reason and the plain absent-column reasons print verbatim', false, f.join(' | ')]);
+    arms.push(['PLAIN SERVED WORDS STAY: a plain Lusha reason prints verbatim; each plain absent-column reason is on the face or carried', false, f.join(' | ')]);
   }
 }
 
