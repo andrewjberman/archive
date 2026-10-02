@@ -1,0 +1,95 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-am-3.chatter-row-identity",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-am-3.chatter-row-identity.md",
+  "group": "OTHER",
+  "vintage_commit": "757b50b6ad152f9d24e0595c738a7ba68d298445"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "757b50b6ad152f9d24e0595c738a7ba68d298445",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-am-3.chatter-row-identity.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~206",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/monthly_chatter.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: read_monthly_chatter serves ticker, classification(+_reason), places_moved(+_reason) per row; NEW helpers _identities, _row_ticker, _classifications, _classification_fields, _places_moved_index, _places_moved_fields. Not deployed.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_monthly_chatter.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: fixture stubs resolve_identity, _classification_for_ticker, read_rankings; 5 new tests (13 in the file).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every test passes, your new tests included, and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/; echo \"exit=$?\"",
+   "output_evidence": "373 passed, 186 warnings in 42.22s\nexit=0",
+   "denominator": "373 of 373 tests passed (368 before + 5 new in test_monthly_chatter.py), run from C:/tmp/r63-206",
+   "status": "PASS",
+   "expect": "passed[\\s\\S]*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C1 PASS (95 of 95 rows carry ticker, classification, places_moved); C2 PASS (95 of 95 tickers non-empty); R63 C3 SERVED: YES -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round63/checks/r63_served.py --cell c3 --where local; echo \"exit=$?\"",
+   "output_evidence": "PASS C1 every chatter row carries ticker, classification and places_moved 95 of 95\nPASS C2 every chatter row's ticker is non-empty 95 of 95\nR63 C3 SERVED: YES\nexit=0",
+   "denominator": "95 of 95 rows carry the three keys; 95 of 95 tickers non-empty (0 of 95 at the base)",
+   "status": "PASS",
+   "expect": "PASS C1[\\s\\S]*95 of 95[\\s\\S]*PASS C2[\\s\\S]*95 of 95[\\s\\S]*C3 SERVED: YES\\s+exit=0"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 and AC2 each run twice after the final edit against the live pool (read-only).",
+   "observed": "AC1 373 passed both times; AC2 95 of 95 both times.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "Planted discriminator: the places_moved fields line removed from the row dict in read_monthly_chatter.",
+   "expected": "the places_moved tests fail.",
+   "observed": "3 failed, 10 passed (test_every_row_carries_ticker_classification_and_places_moved, test_places_moved_is_served_or_null_with_a_plain_reason, test_an_unserved_or_failed_ranking_gives_every_row_a_reason: KeyError 'places_moved'); file restored, 13 passed again.",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Effect on the deployed Lambda",
+   "reason": "Local handler against the live pool, read-only; the deployed function changes at the deploy cell. In the local run 93 of 95 rows carry a classification block (2 null with a plain reason), 32 of 95 carry a places_moved value (62 null: not ranked in the previous generation; 1 null: not ranked on the served ranking)."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~206/ac2.out.txt",
+ "compiler_tools": [
+  {
+   "tool": "python -m py_compile",
+   "invocation": "python -m py_compile lib/research/api/monthly_chatter.py lib/research/api/tests/test_monthly_chatter.py",
+   "result": "COMPILE-OK"
+  },
+  {
+   "tool": "ruff",
+   "invocation": "python -m ruff check <the two files> --target-version py39",
+   "result": "All checks passed"
+  }
+ ]
+}
