@@ -38,8 +38,27 @@ from lib.research.harvest import publication_gold as pg  # noqa: E402
 from lib.research.harvest import store  # noqa: E402
 
 ADDED_FIELDS = ("title", "published_precision")
-COVERAGE_FIELDS = {"data_status", "publishers_covered", "publishers_covered_codes"}
 OUT = os.path.join(HERE, "gold_rebuild5_signing.json")
+
+
+STATUS_RANK = {"DENIED": 0, "PARTIAL": 1, "COMPLETE": 2}
+
+
+def coverage_bounds(before, after, as_of, gained_mention):
+    """CTO half @b69262724d: class (b) COVERAGE-ONLY is IN only when all four bounds hold. Returns (in_b, bounds)."""
+    diff = {f for f in set(before) | set(after)
+            if json.dumps(before.get(f), default=str) != json.dumps(after.get(f), default=str)}
+    b1 = str(after.get("day"))[:10] == str(as_of)
+    b2 = bool(diff) and diff <= {"data_status", "publishers_covered", "publishers_covered_codes"}
+    b3 = ((after.get("publishers_covered") or 0) >= (before.get("publishers_covered") or 0)
+          and set(after.get("publishers_covered_codes") or []) >= set(before.get("publishers_covered_codes") or [])
+          and STATUS_RANK.get(after.get("data_status"), -1) >= STATUS_RANK.get(before.get("data_status"), -1))
+    b4 = not gained_mention
+    bounds = {"as_of_day": b1, "coverage_fields_only": b2, "coverage_grows": b3, "no_mention_gained": b4,
+              "changed": sorted(diff), "status": [before.get("data_status"), after.get("data_status")],
+              "covered": [before.get("publishers_covered"), after.get("publishers_covered")],
+              "codes": [list(before.get("publishers_covered_codes") or []), list(after.get("publishers_covered_codes") or [])]}
+    return b1 and b2 and b3 and b4, bounds
 
 
 def pre(r):
@@ -86,8 +105,12 @@ def main():
     d_changed = [k for k in nd_rows if k in od_rows and dumps(nd_rows[k]) != dumps(od_rows[k])]
     d_added = [k for k in nd_rows if k not in od_rows]
     by_mention = [k for k in d_changed if k[0] in added_secs]
-    coverage_only = [k for k in d_changed if k[0] not in added_secs and k[1] == str(as_of)
-                     and changed_fields(nd_rows[k], od_rows[k]) <= COVERAGE_FIELDS]
+    coverage_only, cov_bounds, other_bounds = [], {}, {}
+    for k in d_changed:
+        if k[0] in added_secs:
+            continue
+        in_b, bounds = coverage_bounds(od_rows[k], nd_rows[k], as_of, False)
+        (coverage_only.append(k), cov_bounds.__setitem__("|".join(k), bounds)) if in_b else other_bounds.__setitem__("|".join(k), bounds)
     d_other = [k for k in d_changed if k not in set(by_mention) and k not in set(coverage_only)]
 
     missing = sum(1 for r in mention if any(f not in r for f in ADDED_FIELDS))
@@ -110,6 +133,7 @@ def main():
                      "added": len(d_added), "changed_by_added_mention": len(by_mention),
                      "changed_coverage_only": len(coverage_only), "coverage_only_rows": [list(k) for k in coverage_only],
                      "changed_other": len(d_other), "other_sample": [list(k) for k in d_other[:20]],
+                     "coverage_bounds": cov_bounds, "other_bounds": dict(list(other_bounds.items())[:20]),
                      "key": dkey, "bytes": len(dbody)},
            "securities_with_new_mentions": len(added_secs), "puts_sent": cm.sent + cd.sent}
     json.dump(out, open(OUT, "w", encoding="utf-8"), indent=1, default=str)
@@ -122,6 +146,11 @@ def main():
           % (d["served"], d["built"], d["gone"], d["added"], d["changed"], d["changed_by_added_mention"],
              d["changed_coverage_only"], d["changed_other"]))
     print("SECURITIES WITH NEW MENTIONS: %d" % out["securities_with_new_mentions"])
+    print("CLASSES: (a) by added mention %d; (b) coverage-only %d; OTHER %d" % (len(by_mention), len(coverage_only), len(d_other)))
+    for k, b in list(cov_bounds.items()) + list(other_bounds.items())[:20]:
+        print("  %s %s bounds as_of=%s fields=%s grows=%s no_mention=%s status=%s covered=%s codes=%s" % (
+            "(b)" if k in cov_bounds else "OTHER", k, b["as_of_day"], b["coverage_fields_only"], b["coverage_grows"],
+            b["no_mention_gained"], b["status"], b["covered"], b["codes"]))
     holds = (not m_gone and not m_changed and not missing and not title_bad and not prec_bad
              and not d_gone and not d_other and out["puts_sent"] == 0)
     print("RULE (rebuild #5): %s" % ("HOLDS" if holds else "BROKEN"))
