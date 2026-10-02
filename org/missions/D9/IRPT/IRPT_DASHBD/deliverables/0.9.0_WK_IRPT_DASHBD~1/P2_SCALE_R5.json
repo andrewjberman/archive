@@ -1,0 +1,55 @@
+{
+  "record": "IRPT_DASHBD.TO-DB-b-11 P-2 scale record, 2026-10-02, 0.9.0_WK_IRPT_DASHBD~1. Reads only: no S3 write, no upload, no invoke.",
+  "claim_legend": "measured = timed or counted in this run; inferred = arithmetic on measured numbers, stated; held = a ruling or setting read from source.",
+  "population": {
+    "source": "s3://opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/date=2026-10-01/",
+    "source_basis": "address() output: lib/opal_naming.py address('irpt','49financial','gold','holdings_performance_daily','date=2026-10-01'); newest of 561 partitions (2024-07-09..2026-10-01)",
+    "accounts": 7570,
+    "accounts_basis": "measured: 7570 rows, 7570 distinct account_id (set of str, stripped)",
+    "with_positive_balance_on_day": 6685,
+    "without_positive_balance_on_day": 885,
+    "without_basis": "measured against dim_balance date=2026-10-01 net_mv_plus_cash: 885 population accounts carry no positive whole-account value (holdings status NO-PRIOR-HOLDINGS 875, NON-POSITIVE-BASE 6, ALL-HOLDINGS-EXCLUDED 3, OK 1); 0 of 7570 are absent from dim_balance; dim_balance holds 7577 accounts, 7 not in the population",
+    "currently_served_accounts": 6
+  },
+  "producer": {
+    "day": "2026-10-01",
+    "accounts": 7570,
+    "accounts_with_rows": 6686,
+    "rows": 6686,
+    "seconds": 102.7,
+    "seconds_basis": "measured on the laptop through the handler's own producer functions (load_declaration, first_data_dates, prefetch, compute_range) over the whole population, one day, scaled: the laptop link moved ~35-200 KB/s (a single 578 KB dim_balance GET took 2.7-50 s), so the 561-partition inception scan was timed on 3 partitions (29.0 s) instead of 563. Stages: list_trn_days 4.6, first_data_dates(3 of 563 partitions) 29.0, list_bal_days 1.8, prefetch (S3 reads of 2 balance days, 2 transaction days, 1 holdings day: ~2.2 MB) 65.6, compute_range 0.034 (CPU, 6686 rows). The seconds are network-dominated and are NOT the Lambda's.",
+    "cpu_compute_seconds": 0.034,
+    "gold_partition_bytes": 295486,
+    "gold_partition_bytes_basis": "measured: the day's 6686 rows as one parquet object, 44 B/row",
+    "lambda_projected_seconds": 22,
+    "lambda_projection_basis": "inferred from the live reporting-gold fire (CloudWatch /aws/lambda/irpt-49f-reporting-gold-lambda): 3 days x 6 accounts incl. the full 563-partition inception scan = 20.2 s, 2048 MB, 385 MB used. The reads (partitions) are the same bytes at any account count; the account-dependent compute is 0.034 s per day at 7570 accounts. One daily day at the population: about 20.2 + 0.1 = ~22 s with margin, against 900 s; memory unchanged order (385 MB of 2048).",
+    "no_account_drops": "account_set(population, newest) = sorted(population UNION newest reporting partition's accounts); never fewer than the newest partition (tests: test_newest_account_absent_from_population_is_kept)"
+  },
+  "publisher": {
+    "days_sampled": 562,
+    "accounts": 7570,
+    "seconds": 23.4,
+    "seconds_basis": "measured: handler.run() over the whole population in ONE invoke, 7570 accounts x 562 days, real 6-account history (1123 rows) replicated under synthetic ids held in memory behind a fake S3 (read 9.4 s CPU decode + 13.8 s build/put with 0 injected latency); peak working set 1582 MB against the deployed 1024 MB, so the single invoke does not fit memory",
+    "shard_runs": "measured: 8 shards (stable crc32 hash split), shard 0 and shard 1, 947 accounts each, 0.3 s injected per put/head call (pessimistic stand-in for the network): 56.0 s and 55.8 s, 1894 puts + 947 heads each, peak working set 392 and 395 MB",
+    "projected_seconds": 67,
+    "projected_basis": "inferred per invoke (the Lambda limit binds per invoke): 56 s measured shard build+put at 0.3 s/call + ~11 s to read 562 gold partitions (the live publish fire read 562 partitions in 7.6 s, 6 accounts; ~62 MB real history adds a few seconds) = ~67 s. 8 shards fan out concurrently, so the daily wall time is ~67 s; run back to back they would be ~536 s, still under 900. The live fire's per-call latency is not logged; at 0.1 s/call a shard is ~30 s.",
+    "unsharded_projection": "inferred: 22,710 calls x 0.3 s / 16 workers = 426 s plus 23 s read/build = ~450 s, and 1582 MB peak: over the deployed 300 s timeout and 1024 MB, so sharding is required, not optional",
+    "lambda_timeout_s": 900,
+    "lambda_timeout_note": "900 is the limit the order names (the reporting-gold Lambda). The DEPLOYED reporting-publish Lambda is timeout 300 s, memory 1024 MB (infra/aws/terraform/investor-reporting/reporting-publish/lambda.tf:44-45, held); the projected 67 s per shard fits both.",
+    "stays_under_by": "bounded parallel build+puts (PUT_WORKERS 16) AND an account shard per invoke (SHARD_ACCOUNTS 1000 -> 8 shards at 7570); a scheduled fire above the threshold self-invokes once per shard (Event type)",
+    "synthetic_gold_note": "the replicated gold compresses better than real rows (11.4 MB vs ~62 MB real at 44 B/row x 1.42M rows); the network read is projected from the real bytes, the decode CPU is measured on the synthetic"
+  },
+  "backfill": {
+    "first_data_day": "2024-07-08",
+    "to_day": "2026-10-01",
+    "days": 562,
+    "days_basis": "measured: lib/trading_calendar.py trading_days_between('2024-07-08','2026-10-01') = 562 = the existing account_return_daily partition count; the holdings population's first partition is 2024-07-09 (561)",
+    "projected_hours": 1.1,
+    "projected_basis": "inferred upper bound in-region: 562 days x 6.2 s per day (the producer docstring's serial per-day read cost, an upper bound; the prefetch is parallel) + 23 chunks x ~20 s inception scan = ~3,944 s = 1.1 h. From the laptop link as measured (~35 KB/s: 562 x ~2.0 MB of day reads + 324 MB of scan = ~1.5 GB) it would be ~12 h: do not run it from here.",
+    "plan": "Rewrite the 562 landed day partitions with the whole population (the resume rule cannot, it only extends past the newest landed day): one in-region driver composing handler.compute() + the producer's emit_day over the explicit 7570-account set, oldest first in 23 chunks of <=25 days (each <=20 s scan + 25 x 6.2 s = ~175 s, under 900 s), resumable by checking each day's row count, under a change-management ledger and the never-widen sign-off (it replaces 562 served partitions with supersets; the 6 served accounts' rows must come out unchanged: DELTA=0 on them). Then run the publisher once as 8 shards (lambda event shard i of shards 8), then widen the daily gold fire (this build) and the publisher fan-out (needs lambda:InvokeFunction on itself)."
+  },
+  "disk": {
+    "scratch_written_bytes_max": 40000,
+    "scratch_note": "the only files written: a 1123-row real-history parquet cache and four small logs in <worktree>/.scratch (about 40 KB); the synthetic gold lived in memory. All deleted at close. Free space at start: 4.8 GB (not 7)."
+  }
+}
