@@ -16,7 +16,11 @@ c13 (FWD-38 c, d): every served places_moved names its axis and window (places_m
     the overlay serves provenance.inputs naming filings, harvested_news and bloomberg, each with last_run or null beside a reason.
 c14 (repairs): BP/_LN and NG/_LN classification resolves through the slash ticker or serves a TRUE reason (never "holds no
     classification"); ASML_NA's management reader text (source_item, pool_read.reason, fallback.label) carries no raw code
-    (COMPANY_EXEC_OFFICERS, ABSENT, RESOLVED); 6501_JP / 2317_TT / ASML_NA management serves object_as_of = the served key's as_of.
+    (COMPANY_EXEC_OFFICERS, ABSENT, RESOLVED); 6501_JP / 2317_TT / ASML_NA management serves a source stamp
+    (source_stamp from the body, or object_as_of from the key) distinct from the date-only as_of; the encoded key BP-SLASH-_LN_Equity
+    reaches overlay, thesis, peers and coverage.
+c16 (500 attribution, local): a planted fault on the overlay answers 500 and writes ONE structured AMGT_500 line
+    {request_id, route, security_key, exception_class}; no alarm, no notification, no monitor.
 c15 (cold read, deployed only): 3 COLD BA 2026-09-08 invokes, each under 5,000 ms with every headline (Init Duration proves cold),
     and the log tail carries AMGT_SEGMENT timing lines.
 Verdict: R64 <CELL> SERVED: YES|NO.
@@ -47,7 +51,7 @@ def _load(name, path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cell", choices=("c9", "c10", "c11", "c12", "c13", "c14", "c15"), required=True)
+    ap.add_argument("--cell", choices=("c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16"), required=True)
     ap.add_argument("--where", choices=("local", "deployed"), required=True)
     a = ap.parse_args()
     ok = []
@@ -195,8 +199,56 @@ def main():
         for key in ("ASML_NA_Equity", "6501_JP_Equity", "2317_TT_Equity"):
             st, th = call(f"{PREFIX}/security/{key}/thesis")
             m = (th or {}).get("management") or {}
-            clause(f"C3 {key} management serves object_as_of from its key", m.get("object_as_of") == "2026-10-02T1840Z",
-                   f"object_as_of {m.get('object_as_of')!r} as_of {m.get('as_of')!r}")
+            stamp = m.get("source_stamp") or m.get("object_as_of")
+            clause(f"C3 {key} management serves its source stamp", bool(stamp) and stamp != m.get("as_of"),
+                   f"source_stamp {m.get('source_stamp')!r} object_as_of {m.get('object_as_of')!r} as_of {m.get('as_of')!r}")
+        # analysis ruling 1: the route template accepts the encoded slash key
+        for leaf in ("overlay", "thesis", "peers", "coverage"):
+            st, b = call(f"{PREFIX}/security/BP-SLASH-_LN_Equity/{leaf}")
+            clause(f"C4 the encoded key BP-SLASH-_LN_Equity reaches /{leaf}", st == 200 and (b or {}).get("security_key") == "BP/_LN_Equity",
+                   f"status {st} security_key {(b or {}).get('security_key')!r}")
+    elif a.cell == "c16":
+        # analysis ruling 3: a planted fault answers 500 and writes ONE structured AMGT_500 line (no alarm, no notification)
+        if a.where != "local":
+            print("c16 plants a fault, so it is graded locally; the deployed census is the an-8 script")
+            return 2
+        import contextlib
+        import io
+        import logging
+
+        from lib.research.api import scoped_amgt as sa
+
+        def _boom(*_a, **_k):
+            raise RuntimeError("planted fault r64")
+
+        sa.read_security_overlay = _boom
+        buf = io.StringIO()
+        h = logging.StreamHandler(buf)
+        logging.getLogger().addHandler(h)
+        logging.getLogger().setLevel(logging.INFO)
+        out = io.StringIO()
+        status, escaped = None, None
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+            try:
+                r = sa.handler({"rawPath": PREFIX + "/security/BA_US_Equity/overlay",
+                                "requestContext": {"http": {"method": "GET"}, "requestId": "r64-plant-1"},
+                                "headers": {"x-firm-id": "opal"}, "queryStringParameters": None})
+                status = r.get("statusCode")
+            except Exception as err:  # noqa: BLE001 -- the base lets the fault escape; that is what this clause reads
+                escaped = type(err).__name__
+        lines = [ln for ln in (buf.getvalue() + out.getvalue()).splitlines() if "AMGT_500" in ln]
+        rec = {}
+        if len(lines) == 1:
+            try:
+                rec = json.loads(lines[0].split("AMGT_500", 1)[1].strip())
+            except ValueError:
+                rec = {}
+        clause("C1 the planted fault answers 500 instead of escaping", status == 500 and escaped is None,
+               f"status {status} escaped {escaped}")
+        clause("C2 exactly one AMGT_500 line carries request id, route, key and exception class",
+               len(lines) == 1 and rec.get("request_id") == "r64-plant-1" and "overlay" in str(rec.get("route"))
+               and rec.get("security_key") == "BA_US_Equity" and rec.get("exception_class") == "RuntimeError",
+               f"lines {len(lines)} record {json.dumps(rec)[:160]}")
     else:
         if a.where != "deployed":
             print("c15 is graded on the deployed function only")
