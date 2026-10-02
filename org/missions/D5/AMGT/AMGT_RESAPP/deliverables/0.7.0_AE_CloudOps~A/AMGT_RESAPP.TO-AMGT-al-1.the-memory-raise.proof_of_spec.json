@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-al-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-al-1.the-memory-raise.md",
+  "group": "D",
+  "vintage_commit": "59d350c2a4"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "59d350c2a4",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-al-1.the-memory-raise.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~A",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/harvest/scoped-amgt-api.tf",
+   "kind": "terraform",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "deploy_evidence": "Ledger legs L1 and L2 of NEVER-2 entry 20261002T1047Z_amgt-resapp-r62-al1-memory-raise carry this act in full. memory_size 1769 -> 3538 -> 10240 in two steps under ONE entry, each step a SAVED plan applied through safe-apply, each plan showing exactly ONE planned resource block and exactly ONE changed attribute line (memory_size), with source_code_hash, s3_object_version, replacement and destroy all 0 and the positive control non-zero. Live after step 1: MemorySize 3538, Timeout 29, CodeSha256 E+FAZF0f63S5LxRWs4l3mCfOZgKc3erezTkjxCoVcBY= UNCHANGED. AC1's C1 MISSED at 3538 (0 of 3 under 20000 ms), so the order's escalation took it to 10240 and stopped there. Live after step 2: MemorySize 10240, Timeout 29, same CodeSha256 -- no code moved at either step, which is the point of a config-only act. Timeout was deliberately left at 29 because that is the API Gateway HTTP API integration ceiling and a Lambda timeout above it cannot help."
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "description": "Each gating value read from the plane that owns it; the no-pair exemption verified at its source rather than inherited from the order; both plans graded at the resource-block grain with a positive control; and the failing tier kept as evidence rather than discarded.",
+   "method": "(i) the live base read before the edit (MemorySize, Timeout, CodeSha256) and the terraform value read beside it, so file and world were compared before touching either; (ii) CTO round-61 addendum ruling 5 read at f1d5dac151 to confirm the track-A no-pair classification in the CTO's own words; (iii) each plan saved and the SAVED plan applied, with the changed-attribute lines counted rather than eyeballed; (iv) live MemorySize and CodeSha256 read back after each apply, not taken from the apply rc; (v) AC1 run at BOTH tiers, the failing one committed alongside the passing one; (vi) max memory used and Init Duration read out of the same REPORT lines the durations come from.",
+   "expected": "(i) 1769 in both file and world; (ii) the ruling classes track A config-only with no pair; (iii) one resource, memory_size only, at each step; (iv) MemorySize moves and CodeSha256 does not; (v) a verdict at each tier; (vi) figures that explain the result rather than only report it.",
+   "observed": "All hold. (i) live MemorySize 1769 / Timeout 29 / CodeSha256 E+FAZF0f... and scoped-amgt-api.tf:326 memory_size = 1769 -- file and world agreed, and the hash being ak-2's confirms nothing had redeployed this function since 07:45Z. (ii) ruling 5 reads 'config only; no served value moves, so no never-widen pair. Rollback: the memory back to 1769' -- the CTO's words, so the exemption is the ruling's and not an issuer inference. (iii) each plan: 'Plan: 0 to add, 1 to change, 0 to destroy', 1 planned resource block, exactly 1 changed attribute line (1769 -> 3538, then 3538 -> 10240); source_code_hash 0, s3_object_version 0, must-be-replaced 0, will-be-destroyed 0, forces-replacement 0, aws_lambda_alias 0, positive control memory_size non-zero. (iv) MemorySize 3538 then 10240; CodeSha256 identical throughout. (v) C1 FAIL at 3538 (21726.76 / 20439.58 / 22913.08 ms), C1 PASS at 10240 (16885.18 / 16551.67 / 19105.13 ms). (vi) max memory USED 455-463 MB at every tier, moving 8 MB across a 5.8x raise, and Init Duration 157-204 ms, about 0.9 percent of elapsed.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The base arm is the incident itself, and this act carries a REAL failing arm rather than a hypothetical one.",
+   "expected": "Per the order's preflight, AC1's C0 FAILS at the base (MemorySize unmoved) and the route times out cold at 1769 against the 29 s ceiling; CVO~Z measured 5 cold timeouts at 10Z (row Z-C-S29).",
+   "observed": "The discriminator is not a planted mutant here, it is the 3538 tier: the SAME criterion, the SAME invocation, read C1 FAIL 0 of 3 at 3538 and C1 PASS 3 of 3 at 10240, about three minutes apart, with C0 and C2 passing in both. That is a measured negative arm on the live system, which is stronger than a simulated one, and it is why the 10240 landing is an escalation rather than a guess that happened to work. Both outputs are committed. A SECOND, UNASKED-FOR READ sharpens it: memory USED never exceeded 463 MB at any tier, so the knob was never relieving memory pressure -- it buys vCPU, and the improvement from 27 s at 1769 to 21 s at 3538 to 17 s at 10240 tracks vCPU, not headroom.",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "There is no never-widen pair for this act, and that is the ruling's decision rather than this seat's.",
+   "reason": "CTO round-61 addendum ruling 5 @f1d5dac151 classes track A 'config only; no served value moves, so no never-widen pair'. This seat read the ruling rather than relying on the order's restatement of it, because CLAUDE.md's first NEVER forbids moving served output without the pair and 'no pair needed' is exactly the claim to confirm upstream. AC1's C2 is the standing evidence that nothing served moved: the AMD control day's body sha256 is byte-identical to its pre value at both tiers."
+  },
+  {
+   "item": "AC1's C1 is measured on ONE route, ONE day and ONE name (BA /timeline/day/2026-09-08), with 3 invokes.",
+   "reason": "That is the criterion as written and it is the demo-risk path the incident was reported on. It is not a statement about the route's behaviour on other names or heavier days, and the margin recorded in row AMGT_RESAPP-Z-S336 is why that distinction matters: the slowest passing run clears the 20 s target by 895 ms."
+  },
+  {
+   "item": "The pre probe in this seat's own run read BA WARM at 528.41 ms, while the order's preflight records 27,194 ms WARM at the same memory.",
+   "reason": "Both are warm reads at 1769 MB and they differ by roughly 50x, so 'warm' is plainly not one state for this route -- a repeatedly-warm sandbox with the day's data already in process is not the same as the first warm call after a deploy. It did not change the act, because AC1 grades COLD invokes and the incident is a cold-path timeout, and this seat had no license to profile the route. Recorded rather than smoothed over, because anyone comparing the two pre numbers will otherwise think one of them is wrong."
+  },
+  {
+   "item": "Why the remaining 16-19 s is spent was not measured.",
+   "reason": "Out of scope: BOUNDS 1 is the one property and nothing else, and profiling the handler is ruling 5's track C (stop reading whole-publisher silver), which is scheduled after the demo. Row AMGT_RESAPP-Z-S336 states this as unmeasured rather than implying the cause is known."
+  },
+  {
+   "item": "comp-iam and comp-schedule were not run.",
+   "reason": "Both are DECLARED-NOT-APPLICABLE in the order's preflight: a memory_size change grants nothing and arms no cadence. The gating clause is the plan carrying no IAM change, and both plans carried exactly one changed attribute."
+  },
+  {
+   "item": "A HALTGT checkpoint pass is cited nowhere.",
+   "reason": "Per /cloud-ops and LD-0267 the checkpoint sees only unread files directly under inbox/<serial>/, and a ~lane seat is unhaltable regardless. Two safe-apply invocations ran; neither pass is evidence of anything."
+  },
+  {
+   "item": "No rollback was taken.",
+   "reason": "C2 passed at both tiers, so the rollback trigger never fired. The rollback stayed available throughout and is named by ruling 5 itself: memory_size back to 1769 through one safe-apply."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-S336"
+ ],
+ "session_log": "0.7.0_AE_CloudOps~A, site-z, session 352b911c. Fourth act of this session (ak-2, ak-6 act A, ak-6 act C closed before it). URGENT, due 12:15Z before the 13:00Z demo; landed 10:55Z. GO msg 28409 READ-acked. NEVER-2 entry 20261002T1047Z_amgt-resapp-r62-al1-memory-raise opened and COMMITTED before the first apply at 5566f75d33, both legs closed with proof, entry CLOSED. One row filed, AMGT_RESAPP-Z-S336, DISMISSED_WITH_REASON so it does not hold a slug.",
+ "compiler_tools": [
+  {
+   "tool": "comp-schedule",
+   "invocation": "not run -- DECLARED-NOT-APPLICABLE in the order's preflight",
+   "result": "No cron, alarm, monitor or cadence; one config apply by hand."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "not run -- DECLARED-NOT-APPLICABLE in the order's preflight",
+   "result": "A memory_size change grants nothing. The gating clause is the plan's no-IAM change, and each plan carried exactly one changed attribute line."
+  },
+  {
+   "tool": "comp-adversary",
+   "invocation": "not re-run -- RUN BY THE ISSUER at the cut",
+   "result": "Its base arm (cold timeouts at 1769 against the 29 s ceiling, C0 failing on an unmoved MemorySize) was superseded by a stronger live negative arm: the same criterion reading C1 FAIL at 3538 three minutes before it read C1 PASS at 10240."
+  },
+  {
+   "tool": "git show (ruling verification)",
+   "invocation": "git show f1d5dac151 over ROUND_ANALYSIS.round61.md, with MSYS_NO_PATHCONV=1",
+   "result": "Load-bearing: it confirmed the track-A no-pair classification in the CTO's own words rather than through the order's restatement of it."
+  },
+  {
+   "tool": "comp-pipescript",
+   "invocation": "not run -- not applicable",
+   "result": "A Lambda configuration change; no gold/silver/bronze script, no pipeline, no store write."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "C0 PASS (MemorySize moved off 1769); C1 PASS (3 of 3 concurrent BA_US_Equity /timeline/day/2026-09-08 invokes each COLD -- REPORT carries Init Duration -- each status 200 with Duration under 20,000 ms); C2 PASS (the AMD timeline control's body sha256 equals its pre value); THE BA DAY ROUTE ANSWERS COLD UNDER TARGET: YES -- and exit=0",
+   "method": "command",
+   "denominator": "3 concurrent cold invokes of one route, one name and one day (BA_US_Equity /timeline/day/2026-09-08), plus one control day (AMD timeline) compared by body sha256. Run at BOTH memory tiers.",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round62/checks/timeline_day.py --what post --pre org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~A/al1-pre.json --target-ms 20000; echo \"exit=$?\"",
+   "output_evidence": "PASS at 10240 MB, exit=0. C0 PASS MemorySize moved 1769 -> 10240. C1 PASS 3 of 3 cold invokes status 200 under 20000 ms: 16885.18, 16551.67, 19105.13 ms, each carrying an Init Duration (163.98 / 157.68 / 189.82 ms) so each really was a fresh sandbox. C2 PASS the AMD control's body sha256 4df97114d5baf968 equals its pre value 4df97114d5baf968 -- the clause that evidences no served output moved, which is what licenses ruling 5's no-pair classification. Verdict THE BA DAY ROUTE ANSWERS COLD UNDER TARGET: YES. THE FAILING TIER IS COMMITTED BESIDE IT, not discarded: at 3538 MB the same invocation read C1 FAIL, 0 of 3 under 20000 (21726.76 / 20439.58 / 22913.08 ms), with C0 and C2 passing. Beyond the criterion and recorded as row AMGT_RESAPP-Z-S336: max memory USED was 455-463 MB at every tier (8 MB of movement across a 5.8x raise) and Init Duration was about 0.9 percent of elapsed, so this function is neither memory-bound nor cold-start-bound and memory_size is purely a vCPU proxy here; 10240 is Lambda's maximum, so the lever is exhausted, and the slowest passing run clears the AC target by 895 ms. Evidence: al1-evidence/al1_ac1_10240.txt, al1_ac1_3538.txt, al1_pre.txt.",
+   "status": "PASS"
+  }
+ ]
+}
