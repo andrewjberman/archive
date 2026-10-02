@@ -37,7 +37,8 @@ def _load(name, path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cell", choices=("c1", "c2", "c3", "c4", "c5"), required=True)
+    ap.add_argument("--cell", choices=("c1", "c2", "c3", "c4", "c5", "c6"), required=True)
+    ap.add_argument("--plan", help="c6: the frozen peers_slash_plan.json (am-8 AMENDMENT 1)")
     ap.add_argument("--where", choices=("local", "deployed"), required=True)
     ap.add_argument("--pool")
     a = ap.parse_args()
@@ -134,6 +135,19 @@ def main():
         ticked = [r for r in rows if r.get("ticker")]
         clause("C1 every chatter row carries ticker, classification and places_moved", rows and len(keyed) == len(rows), f"{len(keyed)} of {len(rows)}")
         clause("C2 every chatter row's ticker is non-empty", rows and len(ticked) == len(rows), f"{len(ticked)} of {len(rows)}")
+        # AMENDMENT 1 (CTO msg 28553, DSGN FWD-24): the overlay's breakout_price row serves places_moved from the rankings row
+        st, rk = call(PREFIX + "/lead-panel/rankings/breakout/price")
+        vrow = next((r for r in ((rk or {}).get("rows") or []) if r.get("security_key") == "VLO_US_Equity"), {})
+        st, ov = call(PREFIX + "/security/VLO_US_Equity/overlay")
+        bp = (ov or {}).get("breakout_price") or {}
+        clause("C3 VLO's overlay breakout_price.places_moved equals its rankings row", "places_moved" in bp
+               and bp.get("places_moved") == vrow.get("places_moved") and vrow.get("places_moved") is not None,
+               f"overlay {bp.get('places_moved')!r} ranking {vrow.get('places_moved')!r}")
+        st, ov2 = call(PREFIX + "/security/ROG_SW_Equity/overlay")
+        bp2 = (ov2 or {}).get("breakout_price") or {}
+        reason = bp2.get("places_moved_reason") or (ov2 or {}).get("places_moved_reason")
+        clause("C4 an unranked name (ROG_SW_Equity) serves the reason instead", bp2.get("places_moved") is None and bool(reason),
+               f"places_moved {bp2.get('places_moved')!r} reason {str(reason)[:80]!r}")
     elif a.cell == "c4":
         for key in ("BA_US_Equity", "VLO_US_Equity"):
             st, b = call(f"{PREFIX}/security/{key}/peers")
@@ -141,6 +155,26 @@ def main():
             classed = [e for e in absent if e.get("reason_class")]
             clause(f"C1 {key} every absent column carries a reason_class", absent and len(classed) == len(absent),
                    f"{len(classed)} of {len(absent)}; classes {sorted({e.get('reason_class') for e in classed})}")
+    elif a.cell == "c6":
+        # am-8 AMENDMENT 1 / am-7 AMENDMENT 1: every served_field_changes entry of the frozen plan reads its `after` on /peers
+        import re as _re
+
+        plan = json.load(open(a.plan, encoding="utf-8"))
+        tok = _re.compile(r"\.([A-Za-z0-9_]+)|\[(\d+)\]")
+        bad, n = [], 0
+        for e in plan.get("entries") or []:
+            st, body = call(f"{PREFIX}/security/{e['security_key']}/peers")
+            for ch in e.get("served_field_changes") or []:
+                n += 1
+                node = body
+                try:
+                    for k, i in tok.findall(ch["json_path"]):
+                        node = node[k] if k else node[int(i)]
+                except (KeyError, IndexError, TypeError):
+                    node = "<unlocatable>"
+                if node != ch.get("after"):
+                    bad.append((e["security_key"], ch["json_path"]))
+        clause("C1 every planned peers field serves its after value", n > 0 and not bad, f"{n - len(bad)} of {n}; differing {bad[:4]}")
     else:
         st, _b = call(PREFIX + "/security/ZZZZ_XX_Equity/overlay")
         clause("C1 a fabricated key's overlay answers 404", st == 404, f"status {st}")
