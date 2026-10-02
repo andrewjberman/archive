@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-f-12",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "d9aa31040e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "d9aa31040e",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-f-12.resolver-unreadable-profile.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": "opal_ai/opal/runtime/resolve-claude.ps1",
+      "kind": "script",
+      "commit_or_etag": "bd7cd5d1cec6319927fc08ce3c218c7abb95cff8",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Nested repo opal_ai branch wk-NFRA_OPALAI-27-opal_ai; existence test wrapped in try/catch, UnauthorizedAccessException or PermissionDenied trusts the configured path. Not deployed; runtime dir untouched."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "seam 'CLAUDE_EXE: <the configured path>' rc=0 access-denied text=0; miss 'LAUNCHER: REFUSE CLAUDE-NOT-FOUND ...' rc=5; found 'CLAUDE_EXE: ...fake-claude.exe' rc=0; parse errors=0; other files changed vs 0fb3fcb694=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/f12.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "opal_ai HEAD: seam 'CLAUDE_EXE: <configured path under the Opal_Agent profile>' rc=0 access-denied text=0; miss 'LAUNCHER: REFUSE CLAUDE-NOT-FOUND -- set claude_exe in the runtime config to the Claude Code install for the runtime account' rc=5; found 'CLAUDE_EXE: ...fake-claude.exe' rc=0; parse errors=0; other files changed vs 0fb3fcb694=0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 arms (seam, miss, found) as expected; 0 parse errors; 0 other files changed. The check reads the committed nested HEAD: a run before the commit read seam rc=1 FAIL.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 run once before the commit (FAIL: seam none rc=1, check reads committed HEAD) and once after.",
+      "observed": "FAIL before, PASS after.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "AC1 was run against the base resolver (nested HEAD 0fb3fcb694, before the fix) with the same access-denied seam.",
+      "expected": "The base throws on Test-Path access-denied, so the seam arm fails.",
+      "observed": "seam 'none' rc=1 access-denied text=1; RESULT: FAIL, exit=1. After the fix: PASS.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "launcher run, elevation, other-account process",
+      "reason": "Forbidden by BOUNDS; not run."
+    }
+  ],
+  "surprises": [],
+  "session_log": "2026-10-01 UTC. Worktree /c/tmp/oa-27, TREE-OK. Edited resolve-claude.ps1, committed nested bd7cd5d, AC1 PASS. PUSH STATE: LOCAL, never pushed.",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1",
+      "result": "see the worker report; only the exit code is the verdict."
+    }
+  ]
+}
