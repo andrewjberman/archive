@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ai-5.batched-silver-append-per-source",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ai-5.batched-silver-append-per-source.md",
+    "group": "OTHER",
+    "vintage_commit": "e68f90e2114b921e8f58efe848c2beee1d86edee"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "e68f90e2114b921e8f58efe848c2beee1d86edee",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ai-5.batched-silver-append-per-source.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~90",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "7336e9126091b195d8871454e72fe876e781f856",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on branch wk-AMGT_HARVST-90-r36e; the issuer merges and runs the upload pass. Not deployed, not drained by this worker.",
+      "introduces": [
+        "_isolate_bad_silver_rows"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_ai5_batched_silver_append.py",
+      "kind": "script",
+      "commit_or_etag": "7336e9126091b195d8871454e72fe876e781f856",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline test file on a stub S3 client; 5 tests; no network.",
+      "introduces": [
+        "test_cross_row_type_conflict_is_isolated_locally"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_ai5_batched_silver_append.py -rA --tb=line  -> expect \"passed\"",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_ai5_batched_silver_append.py -rA --tb=line",
+      "output_evidence": "=================================== PASSES ====================================\n=========================== short test summary info ===========================\nPASSED lib/opal_data_harvest/test_ai5_batched_silver_append.py::test_batched_and_per_row_write_the_same_rows\nPASSED lib/opal_data_harvest/test_ai5_batched_silver_append.py::test_batched_reads_silver_prefix_once_per_source\nPASSED lib/opal_data_harvest/test_ai5_batched_silver_append.py::test_mutant_per_row_grouping_fails_the_once_per_source_check\nPASSED lib/opal_data_harvest/test_ai5_batched_silver_append.py::test_type_conflict_row_does_not_strand_the_batch\nPASSED lib/opal_data_harvest/test_ai5_batched_silver_append.py::test_cross_row_type_conflict_is_isolated_locally\n============================== 5 passed in 0.63s ==============================\nrc=0; full collector suite python -m pytest lib/opal_data_harvest/ -q: 534 passed, 3 skipped (base 529 + 5 new)",
+      "status": "PASS",
+      "denominator": "5 of 5 tests passed; suite 534 passed of 537 collected, 3 skipped"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round36/checks/ai-5.AC2.py -> expect \"AC2 RESULT: PASS\"",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round36/checks/ai-5.AC2.py",
+      "output_evidence": "issuer-graded after drain; not run by this worker against the live outbox (the order forbids it)",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "rides the issuer's merge, upload pass on the live bbg runtime, and run of ai-5.AC2.py after the drain",
+      "denominator": "0 of 1 run by the worker; 1 of 1 left to the issuer"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Restore the per-row grouping by rewriting the one grouping line of uploads.py (key (source, run_stamp)); run the same 6-row fixture.",
+      "expected": "silver_latest read once per row (6 reads), failing the once-per-source check",
+      "observed": "test_mutant_per_row_grouping_fails_the_once_per_source_check: mutant read the prefix 6 times; batched code read it once",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice (before and after the amendment) plus a full-suite run; same pass set both times.",
+      "expected": "identical pass set",
+      "observed": "5 of 5 passed on the final run; the earlier 4-plant version also passed 4 of 4",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "live drain of the bbg outbox and AC2",
+      "reason": "the issuer merges, then runs the upload pass on the live runtime; the order forbids touching any .runtime directory"
+    },
+    {
+      "item": "store.py, silver_from_bronze.py, LegacyUploader, _run_listings",
+      "reason": "order item 3: change nothing else"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W90-S11: the sparse cone of this worktree lacks six paths the collector suite and the commit gates read; added locally with git sparse-checkout add (plus org/missions, org/projects, org/surprise_channel, org/modules/graph for the commit gates), no tracked file changed"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/opal_data_harvest/ -q",
+      "result": "534 passed, 3 skipped"
+    }
+  ]
+}
