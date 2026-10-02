@@ -58,7 +58,20 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
     ap.add_argument("--dry-run", action="store_true")
+    # ak-6 act (C) reuses this same audited writer over a different frozen plan and appendix
+    # rather than getting a second copy of the mechanism. Omit both and it runs act (A)'s set.
+    ap.add_argument("--plan", action="append", metavar="CELL=PATH=SHA256",
+                    help="repeatable; overrides the act (A) plan set")
+    ap.add_argument("--base", help="base/rollback appendix; overrides act (A)'s")
     a = ap.parse_args()
+
+    plans = PLANS
+    if a.plan:
+        plans = []
+        for spec in a.plan:
+            cell, path, sha = spec.split("=", 2)
+            plans.append((cell, path, sha))
+    base_path = a.base or BASE
 
     v = _load_verify()
     get, set_ = v._get, v._set
@@ -66,7 +79,7 @@ def main():
     # ---- condition 1, re-hashed here so the writer never trusts a prior check -------------
     print("CONDITION 1 -- plan sha256 at write time")
     by_key = defaultdict(list)
-    for cell, path, exp in PLANS:
+    for cell, path, exp in plans:
         raw = open(path, "rb").read()
         got = hashlib.sha256(raw).hexdigest()
         if got != exp:
@@ -76,7 +89,7 @@ def main():
         for e in json.loads(raw.decode("utf-8")).get("entries") or []:
             by_key[e["store_key"]].append(e)
 
-    base = {r["store_key"]: r for r in json.load(io.open(BASE, encoding="utf-8"))["rows"]}
+    base = {r["store_key"]: r for r in json.load(io.open(base_path, encoding="utf-8"))["rows"]}
     keys = sorted(by_key)
     n_ent = sum(len(v2) for v2 in by_key.values())
     print("WRITE SET: %d distinct key(s), %d entr(ies)" % (len(keys), n_ent))
@@ -172,7 +185,8 @@ def main():
         "keys_written": len(rows),
         "entries_planned": n_ent,
         "entries_written": sum(r["entries"] for r in rows),
-        "plan_sha256": {c: e for c, _p, e in PLANS},
+        "plan_sha256": {c: e for c, _p, e in plans},
+        "base_appendix": base_path,
         "failed": failed,
         "rows": rows,
     }
