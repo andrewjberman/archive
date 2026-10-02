@@ -37,7 +37,8 @@ def _load(name, path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cell", choices=("c1", "c2", "c3", "c4", "c5"), required=True)
+    ap.add_argument("--cell", choices=("c1", "c2", "c3", "c4", "c5", "c6"), required=True)
+    ap.add_argument("--plan", help="c6: the frozen peers_slash_plan.json (am-8 AMENDMENT 1)")
     ap.add_argument("--where", choices=("local", "deployed"), required=True)
     ap.add_argument("--pool")
     a = ap.parse_args()
@@ -154,6 +155,26 @@ def main():
             classed = [e for e in absent if e.get("reason_class")]
             clause(f"C1 {key} every absent column carries a reason_class", absent and len(classed) == len(absent),
                    f"{len(classed)} of {len(absent)}; classes {sorted({e.get('reason_class') for e in classed})}")
+    elif a.cell == "c6":
+        # am-8 AMENDMENT 1 / am-7 AMENDMENT 1: every served_field_changes entry of the frozen plan reads its `after` on /peers
+        import re as _re
+
+        plan = json.load(open(a.plan, encoding="utf-8"))
+        tok = _re.compile(r"\.([A-Za-z0-9_]+)|\[(\d+)\]")
+        bad, n = [], 0
+        for e in plan.get("entries") or []:
+            st, body = call(f"{PREFIX}/security/{e['security_key']}/peers")
+            for ch in e.get("served_field_changes") or []:
+                n += 1
+                node = body
+                try:
+                    for k, i in tok.findall(ch["json_path"]):
+                        node = node[k] if k else node[int(i)]
+                except (KeyError, IndexError, TypeError):
+                    node = "<unlocatable>"
+                if node != ch.get("after"):
+                    bad.append((e["security_key"], ch["json_path"]))
+        clause("C1 every planned peers field serves its after value", n > 0 and not bad, f"{n - len(bad)} of {n}; differing {bad[:4]}")
     else:
         st, _b = call(PREFIX + "/security/ZZZZ_XX_Equity/overlay")
         clause("C1 a fabricated key's overlay answers 404", st == 404, f"status {st}")
