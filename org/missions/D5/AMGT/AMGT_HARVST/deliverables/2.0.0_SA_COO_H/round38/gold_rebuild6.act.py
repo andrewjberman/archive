@@ -98,6 +98,15 @@ def main():
     record["before"] = {"mention_rows": len(bm), "mention_digest_pre": digest_pre(bm), "daily_rows": len(bd),
                         "daily_digest": a32.digest(bd), "mention_part": a32.newest_part(pg.GOLD_TABLE),
                         "daily_part": a32.newest_part(pg.GOLD_DAILY_TABLE)}
+    # CTO half @5eb4e11b3d condition (1): the counts signed at ~22:3xZ. A moved count is a STOP and a re-sign.
+    signed = {"mention_rows": 23691, "mention_ft": 926, "daily_rows": 58300}
+    seen = {"mention_rows": len(bm), "mention_ft": sum(1 for r in bm if pg.is_quarantined(r)), "daily_rows": len(bd)}
+    record["signed_counts"], record["before_counts"] = signed, seen
+    print("SIGNED COUNTS %s; BEFORE COUNTS %s" % (signed, seen))
+    if seen != signed:
+        record["result"] = "STOP: a signed count moved (%s != %s); re-sign before any write" % (seen, signed)
+        print(record["result"])
+        return finish(record, 1)
     env = dict(os.environ, HVST_R6_STRICT="1", HVST_GOLD_UNIVERSE=UNIVERSE_R33)
     gate = subprocess.run([sys.executable, "-u", os.path.join(HERE, "gold_rebuild6.signing.py")], cwd=c.ROOT, env=env,
                           capture_output=True, text=True, timeout=3000)
@@ -109,7 +118,7 @@ def main():
         return finish(record, 1)
     run_stamp = store.stamp(datetime.datetime.now(datetime.timezone.utc))
     rows = [dict(r, **{f: None for f in TONE}) for r in bm if not pg.is_quarantined(r)]
-    receipt = pg.write_gold(pg.GOLD_TABLE, rows, as_of, run_stamp, schema=pg.GOLD_MENTION_SCHEMA)
+    receipt = pg.write_gold(pg.GOLD_TABLE, rows, datetime.date.fromisoformat(as_of), run_stamp, schema=pg.GOLD_MENTION_SCHEMA)
     record["write-mention"] = {"rows": len(rows), "key": receipt.get("key")}
     print("write-mention", len(rows), receipt.get("key"))
     p = subprocess.run([sys.executable, "-m", "lib.research.harvest.publication_gold", "build-daily", "--securities-json",
@@ -127,8 +136,8 @@ def main():
         record["result"] = "DONE: rebuild-#6 (ft quarantine, STRICT) rule holds on the written parts"
         return finish(record, 0)
     run_stamp = store.stamp(datetime.datetime.now(datetime.timezone.utc))
-    pg.write_gold(pg.GOLD_TABLE, bm, as_of, run_stamp, schema=pg.GOLD_MENTION_SCHEMA)
-    pg.write_gold(pg.GOLD_DAILY_TABLE, bd, as_of, run_stamp, schema=pg.GOLD_DAILY_SCHEMA)
+    pg.write_gold(pg.GOLD_TABLE, bm, datetime.date.fromisoformat(as_of), run_stamp, schema=pg.GOLD_MENTION_SCHEMA)
+    pg.write_gold(pg.GOLD_DAILY_TABLE, bd, datetime.date.fromisoformat(as_of), run_stamp, schema=pg.GOLD_DAILY_SCHEMA)
     rm, rd = a32.snap()
     record["rollback"] = {"mention_digest_pre_equal": digest_pre(rm) == record["before"]["mention_digest_pre"],
                           "daily_digest_equal": a32.digest(rd) == record["before"]["daily_digest"]}
