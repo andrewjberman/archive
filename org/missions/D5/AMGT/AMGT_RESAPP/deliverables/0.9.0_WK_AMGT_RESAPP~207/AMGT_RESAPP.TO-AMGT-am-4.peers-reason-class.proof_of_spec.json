@@ -1,0 +1,129 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-am-4",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-am-4.peers-reason-class.md",
+  "group": "C",
+  "vintage_commit": "6507370187f9271ad6254f9f3f5e0236383f5a9f"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "6507370187f9271ad6254f9f3f5e0236383f5a9f",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-am-4.peers-reason-class.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~207",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/peers/csc_plain_reasons.py",
+   "kind": "script",
+   "commit_or_etag": "b4b8ebfc4d40c7d5d05aedd3dd4e6aa8d03c65e8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Adds the reason-class enum (NOT_REPORTED, RATIO_ONLY, HORIZON_LIMIT, DEFINITION_MISMATCH, WINDOW_LIMIT, UNCLASSIFIED), the one _REASON_CLASS column map over the twelve CSC absent columns, and reason_class(column).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/peers/csc.py",
+   "kind": "script",
+   "commit_or_etag": "b4b8ebfc4d40c7d5d05aedd3dd4e6aa8d03c65e8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "build_csc_map writes reason_class on every absent entry from csc_plain_reasons.reason_class.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "b4b8ebfc4d40c7d5d05aedd3dd4e6aa8d03c65e8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read_peer_set returns _with_reason_classes(served): fills reason_class from the same map for any stored absent entry that lacks it (copies; stored object not rewritten); unmapped column -> UNCLASSIFIED.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/peers/tests/test_csc_reason_class.py",
+   "kind": "script",
+   "commit_or_etag": "b4b8ebfc4d40c7d5d05aedd3dd4e6aa8d03c65e8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "3 tests: producer writes it on every absent entry; the twelve claimed-absent columns are all mapped and every enum member is used; unknown column -> UNCLASSIFIED.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_peers_reason_class_served.py",
+   "kind": "script",
+   "commit_or_etag": "b4b8ebfc4d40c7d5d05aedd3dd4e6aa8d03c65e8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "3 tests: stored entry without the field served with it and store bytes unchanged; unknown column served UNCLASSIFIED; stored reason_class kept, route handler serves it and fills a stored legacy entry.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The issuer's own pre-flight adversary: r63_served --cell c4 --where deployed fails at the base with 0 of 12 absent entries carrying reason_class.",
+   "expected": "the same check run local on this branch passes 12 of 12 for BA and VLO",
+   "observed": "12 of 12 for BA_US_Equity and 12 of 12 for VLO_US_Equity, SERVED: YES",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 pytest run twice in this session (once while iterating, once literal after the fix) and AC2 once",
+   "observed": "AC1 422 passed on both full runs after the fix (the earlier 2 failures were two defects in my own new tests, fixed before commit)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No store rewrite of the 234 stored peers objects, no deploy, no portal write.",
+   "reason": "BOUNDS 1 of the face; the route fills reason_class at read time. AC2 reads the pool as the local run resolves it; the deployed plane is graded by the issuer."
+  },
+  {
+   "item": "The portal submodule pointer shows modified in git status (--portal-ref a730d8ce cut) and is not committed.",
+   "reason": "Outside the face's <paths>."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- no session-log path in this worker's write surface. Worktree C:/tmp/r63-207, branch wk-AMGT_RESAPP-207, cut from 6507370187f9271ad6254f9f3f5e0236383f5a9f. Code commit b4b8ebfc4d40c7d5d05aedd3dd4e6aa8d03c65e8 LOCAL, never pushed.",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest (AC1 literal)",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/ lib/research/peers/tests/; echo \"exit=$?\"",
+   "result": "422 passed, 206 warnings in 39.37s; exit=0"
+  },
+  {
+   "tool": "r63_served.py (AC2 literal)",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round63/checks/r63_served.py --cell c4 --where local; echo \"exit=$?\"",
+   "result": "PASS C1 BA_US_Equity every absent column carries a reason_class 12 of 12; classes ['DEFINITION_MISMATCH', 'HORIZON_LIMIT', 'NOT_REPORTED', 'RATIO_ONLY', 'WINDOW_LIMIT'] / PASS C1 VLO_US_Equity every absent column carries a reason_class 12 of 12; classes [same five] / R63 C4 SERVED: YES / exit=0"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every test passes, your new tests included, and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/ lib/research/peers/tests/; echo \"exit=$?\"",
+   "output_evidence": "422 passed, 206 warnings in 39.37s; exit=0",
+   "denominator": "422 of 422 tests passed across lib/research/api/tests/ and lib/research/peers/tests/ (6 of them new); exit=0.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C1 PASS for BA_US_Equity and VLO_US_Equity (12 of 12 absent entries carry a reason_class); R63 C4 SERVED: YES -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round63/checks/r63_served.py --cell c4 --where local; echo \"exit=$?\"",
+   "output_evidence": "PASS C1 BA_US_Equity every absent column carries a reason_class 12 of 12; classes ['DEFINITION_MISMATCH', 'HORIZON_LIMIT', 'NOT_REPORTED', 'RATIO_ONLY', 'WINDOW_LIMIT'] / PASS C1 VLO_US_Equity every absent column carries a reason_class 12 of 12; classes [same five] / R63 C4 SERVED: YES / exit=0",
+   "denominator": "12 of 12 absent entries for BA_US_Equity and 12 of 12 for VLO_US_Equity carry a non-empty reason_class; exit=0.",
+   "status": "PASS"
+  }
+ ]
+}
