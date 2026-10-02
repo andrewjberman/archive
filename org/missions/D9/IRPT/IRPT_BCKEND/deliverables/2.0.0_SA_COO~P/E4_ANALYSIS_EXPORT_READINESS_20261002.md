@@ -19,7 +19,7 @@ read-only subagent's, measured at CLOUD `ac44b6aaaf` (no listed file changed aft
 **G2 -- `served.py` imports `report_owner` whenever `IRPT_EVIDENCE_BUCKET` is set (`_authz/served.py:1174`).**
 - `irpt-performance-adapter` sets the bucket and installs ports (`performance/entry.py:404`), but its source map does not stage
   `_render_identity/report_owner.py`, nor `reports/repository.py`, which `report_owner` imports lazily when a prospect read happens.
-- The adapter's next packet that re-pins `served.py` to HEAD would fail at import. ARMED for that packet.
+- The adapter's next packet that re-pins `served.py` to HEAD would fail at import. ARMED for that packet (row IRPT_BCKEND-S271).
 - Remedy: packaging, this seat's lane. Stage both files in every function that sets the bucket. Today that is the adapter; a
   function that gains the bucket later must stage them too.
 
@@ -69,3 +69,9 @@ read-only subagent's, measured at CLOUD `ac44b6aaaf` (no listed file changed aft
 - The actual contents of the layer `irpt-common:5` (its build manifest was read, not the zip).
 - What `opal-portal-data-proxy` returns for `/api/scoped/exports/{id}/download`.
 - Whether a render-token Analysis print succeeds end to end (not run).
+
+## Ruled (CTO batch 175, @6621e009c6, msg 104290)
+
+G1/G2: this seat's repair cell, IB-pr-297 (G2 binds every function that sets the bucket, now or later). G3: 2.0.0_SA_COO~Y carries
+irpt-status's render ports after M2 and hop 11 (batch 166's stop spent); requirements sent 14:41Z. G4: the live route is the contract;
+the receipt points at it and the live entry answers a SigV4 signed GET in hop 11's shape (IB-pr-297); 2.0.0_SA_COO~D does the portal half.

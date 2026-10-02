@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-297",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-297.export-packaging-and-download.md",
+    "group": "OTHER",
+    "vintage_commit": "98b6591a29"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "98b6591a29",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-297.export-packaging-and-download.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~101",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "fe3c387868",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-export-render stages AnalysisReport.schema.json as irpt_contracts/AnalysisReport.schema.json and report_owner.py beside grant.py, 14 members re-pinned to c4fedd31c5; irpt-performance-adapter and irpt-ycharts-generate re-pin grant.py and stage report_owner.py; artifact_sha256 and artifact_s3_key untouched; no build, no upload",
+      "artifact_covered_by": [
+        "IB34-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/test_render_ports_packaging.py",
+      "kind": "test",
+      "commit_or_etag": "fe3c387868",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 tests over the source map: every grant-staging function stages report_owner.py (beside grant.py) and reports/repository.py; the check fires on a function that stages grant.py alone",
+      "artifact_covered_by": [
+        "IB34-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/receipt.py",
+      "kind": "script",
+      "commit_or_etag": "c4fedd31c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DOWNLOAD_ROUTE is /api/scoped/investor-reporting/export/{export_id}/download; not deployed",
+      "artifact_covered_by": [
+        "IB34-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/download.py",
+      "kind": "script",
+      "commit_or_etag": "c4fedd31c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "regional_s3_client (SigV4, regional endpoint) and signed_answer (binds the artifact to the evidence bucket and the firm prefix, HEADs for byte_length, refuses a non-SigV4, off-bucket or over-300 s URL); not deployed",
+      "artifact_covered_by": [
+        "IB34-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/entry.py",
+      "kind": "script",
+      "commit_or_etag": "c4fedd31c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "export_download answers export_ref, download_route{route,requires_reauthorization,url,expires_at}, timestamps, vendor_signed_url_exposed:false, sha256, byte_length and no storage key; not deployed",
+      "artifact_covered_by": [
+        "IB34-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/tests/test_download_signed_answer.py",
+      "kind": "test",
+      "commit_or_etag": "c4fedd31c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 tests through entry.lambda_handler with a stub S3 client (one with the real boto3 presigner, offline credentials): X-Amz-Algorithm AWS4-HMAC-SHA256, X-Amz-Expires 300, sha256, byte_length, no storage key, cross-firm and cross-bucket refusals, missing object NOT_READY, out-of-scope receipt refused",
+      "artifact_covered_by": [
+        "IB34-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB34-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r34/p34_1_ac1_packaging.py\" . -> IB34-1-AC1 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r34/p34_1_ac1_packaging.py\" .",
+      "output_evidence": "OK: export stages both contracts at HEAD; 3 grant-staging function(s) stage report_owner + repository at HEAD; packaging test 3 passed\nIB34-1-AC1 PASS (rc=0)",
+      "denominator": "3 of 3 grant-staging functions (irpt-export-render, irpt-performance-adapter, irpt-ycharts-generate); 2 of 2 export contracts; packaging test 3 passed",
+      "expect": "IB34-1-AC1 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (AnalysisReport not staged)."
+    },
+    {
+      "criterion_id": "IB34-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r34/p34_1_ac2_download_signed_answer.py\" . -> IB34-1-AC2 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r34/p34_1_ac2_download_signed_answer.py\" .",
+      "output_evidence": "OK: receipt names the live route; 10 passed, 0 failed\nIB34-1-AC2 PASS (rc=0)",
+      "denominator": "10 of 10 new tests passed (>= 4 required); file names X-Amz-Algorithm, 300, sha256, byte_length, lambda_handler",
+      "expect": "IB34-1-AC2 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (receipt named the old route)."
+    },
+    {
+      "criterion_id": "IB34-1-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r34/p34_1_ac3_suites_unchanged.py\" . -> IB34-1-AC3 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r34/p34_1_ac3_suites_unchanged.py\" .",
+      "output_evidence": "OK: _authz/tests 201 passed, 6 baseline failure(s); export/tests 168 passed, 0 baseline failure(s); _contracts 185 passed, 0 baseline failure(s); _render_identity/tests 45 passed, 0 baseline failure(s)\nIB34-1-AC3 PASS (rc=0)",
+      "denominator": "four suites, each in its own process: _authz 201 with only the 6 baseline ids, export 168 (158 + 10 new), _contracts 185, _render_identity 45",
+      "expect": "IB34-1-AC3 PASS",
+      "status": "PASS",
+      "status_reason": "Base was PASS (regression guard); still PASS."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each refusal is paired with the admitted case: a receipt in this firm's prefix and the evidence bucket is signed; another firm's prefix, another bucket, a malformed sha256, a SigV2 URL, an off-bucket URL, a ttl over 300 s, a missing object and an out-of-scope receipt are refused and sign nothing; the packaging check fires on a function that stages grant.py alone.",
+      "expected": "sign only the bound firm's artifact on the evidence bucket as SigV4 for at most 300 s; every other arm refused",
+      "observed": "test_download_signed_answer.py 10 passed; test_render_ports_packaging.py 3 passed",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline unit tests",
+      "observed": "checks run once after the code commits, rc=0",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-W101-S13",
+    "IRPT_BCKEND-W101-S14",
+    "IRPT_BCKEND-W101-S15"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p34_1_ac1_packaging.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r34/p34_1_ac1_packaging.py\" .",
+      "result": "IB34-1-AC1 PASS"
+    },
+    {
+      "tool": "p34_1_ac2_download_signed_answer.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r34/p34_1_ac2_download_signed_answer.py\" .",
+      "result": "IB34-1-AC2 PASS"
+    },
+    {
+      "tool": "p34_1_ac3_suites_unchanged.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r34/p34_1_ac3_suites_unchanged.py\" .",
+      "result": "IB34-1-AC3 PASS"
+    }
+  ]
+}
