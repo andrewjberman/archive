@@ -72,35 +72,49 @@ Rounds 1-5's rulings stand (`ETFS_RIVALS_DECOMP.round{1..5}.md`):
 ## 3. THE CELLS
 
 ### `RIV-ap-1` -- the AI accounts as a production stage (analysis cell 1; WORLD at its deploy)
-- A DAG stage `ai-accounts` after the A1 producers and before `publish-page`. It is idempotent on a marker per page day
-  (CALL 5: one run per page day).
-- It calls `ai_accounts.run_day` with a `requests`-based client (`RestClient`: chat completions; `web_search` left
-  unavailable, since VEW-2 names web search a fallback only, and internal readings come first).
-- The key is read at runtime from a dedicated secret named by `name()` (an LGIC registry row added if the builder refuses).
-- `gen_policies.py` grants `secretsmanager:GetSecretValue` on that ARN only, to the daily role.
-- `main.tf` sets `RIVALFUNDS_AI_ENABLE=1` and `RIVALFUNDS_OPENAI_SECRET` on the daily Lambda alone.
-- The secret's VALUE is set by the issuer (I-act at the deploy), never by a worker.
-- Tests stub the transport.
+- `publish_page.handler_entry`, after `produce_a1` and before `load_a1`, calls `ai_accounts.run_day(day, sink,
+  client=ai_accounts.default_client(), provenance={"run_path": "scheduled", ...})` when `RIVALFUNDS_AI_ENABLE == "1"` and the
+  page day holds no `research_hypotheses` object. That makes one run per page day (CALL 5), and a FAIL is shown, never
+  re-rolled.
+- Only the daily Lambda carries the gate, so the run lands at the 09:00 ET sweep. The 07:00 marker-driven publish
+  (publish-page Lambda) never calls the vendor.
+- `ai_accounts.RestClient(api_key)`: `requests`, already in the layer, POSTs chat completions (model, messages,
+  `response_format` json_object, temperature 0.2). `default_client()` returns a RestClient built from the secret's
+  `api_key`, read at call time. Web search stays unavailable in the Lambda (VEW-2: a fallback only; internal readings first).
+- The dedicated secret is named by `name()` (an LGIC registry row is added if the builder refuses). `gen_policies.py`
+  grants `secretsmanager:GetSecretValue` on that ONE ARN to the daily role alone. The generated `lambdas` map gives the daily
+  Lambda an `environment` {RIVALFUNDS_AI_ENABLE: "1", RIVALFUNDS_OPENAI_SECRET: <name>}, which `main.tf` reads.
+- The secret's VALUE is set by the issuer at the deploy, never by a worker. Tests stub the transport.
 
 ### `RIV-rk-2` -- the A1 plausibility guard (analysis cell 2; CRO~RV CALL 13 C1 as amended)
-- Refusal is per fund x period, never the table:
-  - (a) a period total below -100% refuses (hard), and a planted -188% refuses;
-  - (b) a single holding with |c| > 0.25 refuses (PROVISIONAL, `guardrails_config.json`);
-  - (c) NAV reconciliation where a NAV is on file, with its tolerance from the residual distribution (PROVISIONAL).
-- A refused fund x period writes one row naming the bound it failed, and the page shows the refusal in place of the panel.
+- `gold_holding_contribution.plausibility_guard(df, bounds=None) -> df`, applied in `handler_entry` before the write.
+- Per fund x period, never the table, the security rows give way to ONE row: axis "refused", bucket = the bound, contribution
+  = the offending value.
+  - (a) a total below -100% -> `total_below_minus_100pct` (hard), checked first;
+  - (b) one holding with |c| above `contribution_single_holding_bound` (guardrails_config.json, 0.25, PROVISIONAL) ->
+    `single_holding_above_bound`;
+  - (c) NAV reconciliation where a NAV is on file, its tolerance from the residual distribution (PROVISIONAL; no NAV is on
+    file today, so (c) ships as a documented no-op hook).
+- `render._rank_panel` shows "Rankings refused" with the bound, marked `data-refused="<bucket>"`, in place of the panel.
+- Measured at 14:2xZ: the served 10-01 and 10-02 tables refuse nothing (lowest total -4.9%, largest holding 3.6%).
 
 ### `RIV-e-2` -- dividend currency and child identity (analysis cell 5; W3-S11, W3-S12)
-- `DVD_CRNCY` joins the enrichment request inside the worded rivalfunds pull (W3-S11).
-- G5 converts dividends by it and drops the exchange-suffix table (`SUFFIX_CCY`, `MIXED_UNIT_SUFFIX`) where it is present;
-  the suffix table stays the fallback, labelled.
-- W3-S12 is code only after issuer probe I-2 names a field. Until then the child line keeps its "entry" label.
+- `DVD_CRNCY` joins the dividend request: the plan mode's `fields` list it beside `DVD_HIST_ALL`.
+- `rows_from_responses` fills G3 `currency` from a security's `DVD_CRNCY`, NULL when absent.
+- `gold_trade_schedule.dividend_ccy(security_key, g3_currency) -> (ccy, source)`: the G3 currency wins ("g3"); otherwise
+  the suffix table answers, labelled "suffix_table", with the mixed-unit LN/SJ/IT rule unchanged. G5's income conversion
+  uses it.
+- W3-S12 (child identity) is code only after issuer probe I-2 names a field; until then the child line keeps its "entry"
+  label.
 
 ### `RIV-r-6` -- the repair cell (remediations batched; JOIN after ap-1 and rk-2)
-- The AI placeholder "No AI account. the ..." capitalised.
-- A trending-topic headline's own digits are not read as figures. They are identifiers of the reading, like ticker forms
-  (grounding_check/5).
-- The census renders as counts with the 766-line lists collapsed.
-- The prompt names securities by name, not ticker form (CALL 10 style; prompt a1-chain/5).
+- (1) An absence sentence reads as a sentence: the reason after "No AI account." (and "Input census not available.")
+  starts with a capital letter.
+- (2) grounding_check/5: a digit run INSIDE a market reading's own name, quoted in the text (a trending-topic headline,
+  "... 20 Years ..."), is not a figure. The run-time grade gets the names from the readings; the publish recheck gets them
+  from the row's `input_vintages` keys. A bare number outside the name still fails.
+- (3) Prompt a1-chain/5 names a security by its name, not its Bloomberg ticker form (CALL 10 style). JUDGMENT.
+- Dropped from the remediations, measured: the census lists are already collapsed in `<details>` (render `_census`).
 
 ## ISSUER ACTS (no worker; each WORLD under its own pair)
 
@@ -128,19 +142,27 @@ Rounds 1-5's rulings stand (`ETFS_RIVALS_DECOMP.round{1..5}.md`):
 | e-2 (`~3`) | `enrichment_bloomberg.py`, `gold_trade_schedule.py` | -- |
 | r-6 (join) | `ai_accounts.py`, `render.py`, `gold_input_census.py` | ap-1, rk-2 |
 
-## 5. BATTERY (to write and dry-run at the base before the cut; at most THREE mechanical criteria per build order)
+## 5. BATTERY -- issuer-written, DRY-RUN AT THE BASE (CLOUD 722f0db291+, 2026-10-02 ~14:5xZ): every check FAILS there for its defect
 
-- ap-1:
-  - (1) the DAG runs `ai-accounts` once per page day: a second invocation is a no-op on its marker;
-  - (2) `RestClient` builds the documented request with a stubbed transport and reads the key from the named secret only;
-  - (3) the generated policy grants GetSecretValue on the one ARN to the daily role alone.
-  - JUDGMENT: a production-run account reads as well as the seat run's, against the 10-02 accounts as the positive control.
-- rk-2:
-  - (1) a planted -188% fund x period refuses, and the 10-02 tables refuse nothing else;
-  - (2) |c| > 0.25 refuses at the provisional bound;
-  - (3) the page shows the refusal reason in place of the panel.
-- e-2:
-  - (1) `DVD_CRNCY` is in the request's field list;
-  - (2) G5 converts by it, with the suffix table as the labelled fallback;
-  - (3) a stubbed child-identity field (if I-2 names one) ties the child to the parent.
-- r-6: the four repairs each have a named before/after string on the served page's overlay.
+Checks: `deliverables/2.0.0_SA_COO~RV/round6/checks/` (shared `_common.py` re-exports round 5's fixtures). At most THREE
+mechanical criteria per build order:
+
+| order | AC | invocation | at base |
+|---|---|---|---|
+| ap-1 | AC1 | `python checks/ap-1.AC1.py` -- publish with the gate: one research_hypotheses object, the second publish calls nothing | FAIL (0 objects); control (gate off) OK |
+| ap-1 | AC2 | `python checks/ap-1.AC2.py` -- RestClient's request; default_client from the named secret | FAIL (no RestClient) |
+| ap-1 | AC3 | `python checks/ap-1.AC3.py` -- GetSecretValue on one ARN, daily role only; the gate and secret name on the daily Lambda only | FAIL |
+| rk-2 | AC1 | `python checks/rk-2.AC1.py` -- planted -188% refuses (a); TXUE untouched; the served 10-02 table refuses nothing (S3 READ-ONLY) | FAIL (no guard) |
+| rk-2 | AC2 | `python checks/rk-2.AC2.py` -- the 0.25 PROVISIONAL bound in config; 0.31 refuses (b), 0.24 passes | FAIL |
+| rk-2 | AC3 | `python checks/rk-2.AC3.py` -- the page shows "Rankings refused" with `data-refused`, no table; control renders | FAIL |
+| e-2 | AC1 | `python checks/e-2.AC1.py` -- the plan's fields list DVD_CRNCY | FAIL; control (DVD_HIST_ALL) OK |
+| e-2 | AC2 | `python checks/e-2.AC2.py` -- G3 currency from DVD_CRNCY; NULL without it | FAIL; control OK |
+| e-2 | AC3 | `python checks/e-2.AC3.py` -- dividend_ccy: g3 wins, suffix_table labelled, the LN base rule kept | FAIL (no function) |
+| r-6 | AC1 | `python checks/r-6.AC1.py` -- the absence sentences start with a capital | FAIL |
+| r-6 | AC2 | `python checks/r-6.AC2.py` -- a quoted headline's digits pass at the recheck AND at run time; a bare 20 fails | FAIL; control OK |
+
+JUDGMENT, graded at L9, each with its positive control (CALL 13 C2):
+- ap-1: the first scheduled account reads as well as a seat run's; positive control: the 10-02 accounts, run
+  20261002T110438Z-ai-rg4.
+- r-6 (3): the next run names securities by name; positive control: a 10-02 account's ticker forms (e.g. TXUE's "ORA FP
+  Equity").
