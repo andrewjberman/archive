@@ -1,0 +1,840 @@
+16a17,20
+> S3 I/O is boto3-native (ADVI_BDAPIMIG D2b) -- no aws-cli shell-out -- so this runs on a BARE Lambda
+> (the bd-silver-merge Lambda) AND on EC2/local unchanged. Programmatic entry: run(tables) /
+> lambda_handler(event) (event {"tables":["all"]} or a subset). CLI entry: main() (below).
+> 
+18,19c22,25
+<     python3 merge-daily-incremental.py
+<     python3 merge-daily-incremental.py --compact  # weekly compaction
+---
+>     python3 merge-daily-incremental.py            # transactions incremental (default)
+>     python3 merge-daily-incremental.py --all      # ALL 4 tables (== run(None); use for the one-time
+>                                                   #   first-run reprocess-once reconcile OFF the Lambda)
+>     python3 merge-daily-incremental.py --compact  # weekly transactions compaction
+62a69,71
+> ALLOC_MIN_ROW_FRACTION = 0.5  # ADVI_ETLFIX bd stub-guard (2026-07-02): reject an allocations SNAPSHOT
+>                               # with < this fraction of the most-recent OTHER-date partition's rows --
+>                               # the intraday T-0 undersized-stub guard (see process_alloc_xlsx_to_parquet).
+79,82c88,259
+< def run_cmd(cmd):
+<     """Run shell command and return output."""
+<     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+<     return result.stdout.strip()
+---
+> # ============================================================================
+> # boto3-native S3 I/O (ADVI_BDAPIMIG D2b) -- Lambda-runnable. Replaces the prior aws-cli
+> # subprocess shell-outs (aws s3 cp / aws s3 ls | grep | awk) so the merge runs on a BARE Lambda
+> # (no aws CLI) AND on EC2/local unchanged. Matches the bd-allocation-processor pure-boto3 pattern.
+> # ============================================================================
+> _S3_CLIENT = None
+> 
+> 
+> def _s3c():
+>     """Cached boto3 S3 client (Lambda-safe). None only if boto3 failed to import."""
+>     global _S3_CLIENT
+>     if _S3_CLIENT is None and boto3 is not None:
+>         _S3_CLIENT = boto3.client('s3', region_name='us-east-1')
+>     return _S3_CLIENT
+> 
+> 
+> def _s3_get_json(key):
+>     """Parse an S3 JSON object; None if absent/unreadable (replaces `aws s3 cp ... 2>/dev/null`)."""
+>     c = _s3c()
+>     if c is None:
+>         return None
+>     try:
+>         return json.loads(c.get_object(Bucket=S3_BUCKET, Key=key)['Body'].read())
+>     except Exception:
+>         return None
+> 
+> 
+> def _s3_put_json(key, obj):
+>     """Write a dict as an S3 JSON object (replaces the manifest `aws s3 cp` upload)."""
+>     c = _s3c()
+>     if c is None:
+>         return
+>     c.put_object(Bucket=S3_BUCKET, Key=key,
+>                  Body=json.dumps(obj, indent=2).encode('utf-8'),
+>                  ContentType='application/json')
+> 
+> 
+> def _s3_download(key, local_path):
+>     """Download S3 key -> local_path; True on success (replaces `aws s3 cp s3://.. local`)."""
+>     c = _s3c()
+>     if c is None:
+>         return False
+>     try:
+>         c.download_file(S3_BUCKET, key, str(local_path))
+>         return True
+>     except Exception:
+>         return False
+> 
+> 
+> def _s3_upload(local_path, key):
+>     """Upload local_path -> S3 key; True on success (replaces `aws s3 cp local s3://..`)."""
+>     c = _s3c()
+>     if c is None:
+>         return False
+>     try:
+>         c.upload_file(str(local_path), S3_BUCKET, key)
+>         return True
+>     except Exception:
+>         return False
+> 
+> 
+> def _s3_list_names(prefix, suffix='.xlsx'):
+>     """Basenames under prefix/ ending in suffix (replaces `aws s3 ls | grep | awk`)."""
+>     c = _s3c()
+>     if c is None:
+>         return []
+>     out = []
+>     for page in c.get_paginator('list_objects_v2').paginate(
+>             Bucket=S3_BUCKET, Prefix=prefix.rstrip('/') + '/'):
+>         for obj in page.get('Contents', []):
+>             name = obj['Key'].split('/')[-1]
+>             if name.endswith(suffix):
+>                 out.append(name)
+>     return out
+> 
+> 
+> def _s3_list_keys(prefix, suffix='.parquet'):
+>     """Full keys under prefix/ ending in suffix, recursive (replaces `aws s3 ls --recursive | grep`)."""
+>     c = _s3c()
+>     if c is None:
+>         return []
+>     out = []
+>     for page in c.get_paginator('list_objects_v2').paginate(
+>             Bucket=S3_BUCKET, Prefix=prefix.rstrip('/') + '/'):
+>         for obj in page.get('Contents', []):
+>             if obj['Key'].endswith(suffix):
+>                 out.append(obj['Key'])
+>     return out
+> 
+> 
+> # ============================================================================
+> # CONTENT-KEYED (S3 ETag) RE-PROCESS SKIP -- HALF-2 freeze-class durable fix
+> # ADVI_BREAKS TO-6b / ADVI_BDAPIMIG D2 (CTO arch-ratified 2026-07-01 021037Z; mechanism
+> # source-confirmed). The prior skip keyed on bare FILENAME (`processed_files`): a same-filename
+> # bronze RE-LAND of FRESHER data -- BD's ~1-day lag re-delivers TRANSACTIONS_DAILY_{d}.xlsx with new
+> # trade_dates, or a restatement / D1 chunk re-pull overwrites a day -- was FILENAME-skipped, so
+> # silver froze BEHIND available data (the 06-26->06-29 49F freeze, source-confirmed 2026-06-30 by
+> # 0.6.0_AE; the same class hit cot/bd/inf 3x). FIX (mirrors the proven cot_silver_merge Cond-2,
+> # data/cot/scripts/bronze/tests/test_retry_net.py::TestCondCSilverEtagSkip): skip on the bronze
+> # object's S3 ETag (content identity), NOT the filename -- a re-land changes the ETag -> reprocess ->
+> # the per-date parquet is wholesale REPLACED. Rule-17-preserving: changes ONLY the skip predicate,
+> # never the merge content/dedup/columns. Auto-heals ANY re-land (daily lag, restatement, D1 chunk,
+> # manual backfill) with no bronze<->silver orchestration coupling. Applies to ALL 4 bd silver merges
+> # (transactions/allocations/realized/unrealized -- all shared the filename-skip root).
+> # Andrew 2026-07-02 directive: "monitor over a few days, logged extensively, no silent skips" -- so
+> # every per-file decision + a per-run summary are logged (see _select_target_files).
+> # ============================================================================
+> 
+> def _bronze_etag(forwardfill_prefix, filename):
+>     """Current S3 ETag (content identity) of the bronze forwardfill xlsx; None if absent/error.
+>     A re-landed (overwritten) object gets a NEW ETag = exactly the 'content changed -> reprocess'
+>     signal we want (and the ETag is stable for genuinely-unchanged content)."""
+>     if boto3 is None:
+>         return None
+>     key = f"{forwardfill_prefix}/{filename}"
+>     try:
+>         head = boto3.client('s3', region_name='us-east-1').head_object(Bucket=S3_BUCKET, Key=key)
+>         return str(head['ETag']).strip('"')
+>     except Exception:
+>         return None
+> 
+> 
+> def _load_processed_etags(manifest):
+>     """Return the {filename: etag} content-skip map. MIGRATES a legacy processed_files list (no
+>     etags) by seeding each filename as None = etag-UNKNOWN -> reprocess-ONCE (the real ETag is then
+>     stored, so subsequent UNCHANGED runs skip). The reprocess-once is deliberate + bounded: it
+>     self-heals any latent same-name-reland-not-propagated partition on the first post-deploy run AND
+>     reconciles the historical TXN_DAILY_* -> TRANSACTIONS_DAILY_* rename (the new names are simply new
+>     keys; the stale old names remain harmless orphans, never matched by list_forwardfill_files())."""
+>     pe = manifest.get('processed_etags')
+>     if isinstance(pe, dict):
+>         return dict(pe)
+>     return {f: None for f in manifest.get('processed_files', [])}
+> 
+> 
+> def _should_skip(filename, cur_etag, processed_etags):
+>     """Skip IFF we have a KNOWN prior ETag for this filename AND it matches the current bronze ETag.
+>     New file (absent), legacy-unknown (None), or a re-land (etag changed) -> do NOT skip. cur_etag
+>     None (bronze missing/unreadable) -> do NOT skip (let the download fail-close downstream)."""
+>     return cur_etag is not None and processed_etags.get(filename) == cur_etag
+> 
+> 
+> def _select_target_files(table_label, forwardfill_prefix, all_files, processed_etags):
+>     """Content-keyed file selection with EXTENSIVE per-file logging (Andrew 2026-07-02: 'monitor
+>     over a few days, logged extensively, no silent skips'). Logs each candidate's filename,
+>     recorded_etag, current_etag, and decision. Returns (target_files, cur_etags, counts):
+>       NEW                      -- filename never seen
+>       REPROCESS-legacy-unknown -- migrated legacy entry (etag None) reprocessing ONCE
+>       REPROCESS-etag-changed   -- same name, FRESHER content (the freeze this fixes)
+>       SKIP-unchanged           -- known filename, identical bronze ETag (no needless reprocess)"""
+>     target_files = []
+>     cur_etags = {}
+>     counts = {"new": 0, "reprocess": 0, "skip": 0}
+>     for f in all_files:
+>         cur = _bronze_etag(forwardfill_prefix, f)
+>         if _should_skip(f, cur, processed_etags):
+>             counts["skip"] += 1
+>             print(f"  [{table_label}] SKIP-unchanged {f} (etag={cur})")
+>             continue
+>         if f not in processed_etags:
+>             decision, rec = "NEW", "ABSENT"
+>             counts["new"] += 1
+>         elif processed_etags.get(f) is None:
+>             decision, rec = "REPROCESS-legacy-unknown", "None(migrated)"
+>             counts["reprocess"] += 1
+>         else:
+>             decision, rec = "REPROCESS-etag-changed", processed_etags.get(f)
+>             counts["reprocess"] += 1
+>         print(f"  [{table_label}] {decision} {f} (recorded_etag={rec} current_etag={cur})")
+>         cur_etags[f] = cur
+>         target_files.append(f)
+>     return target_files, cur_etags, counts
+203,214c380,383
+<     """Load incremental manifest from S3."""
+<     LOCAL_DIR.mkdir(parents=True, exist_ok=True)
+<     manifest_path = LOCAL_DIR / "manifest.json"
+< 
+<     result = subprocess.run(
+<         f"aws s3 cp s3://{S3_BUCKET}/{MANIFEST_KEY} {manifest_path} 2>/dev/null",
+<         shell=True, capture_output=True
+<     )
+< 
+<     if result.returncode == 0:
+<         with open(manifest_path) as f:
+<             return json.load(f)
+---
+>     """Load incremental manifest from S3 (boto3-native)."""
+>     m = _s3_get_json(MANIFEST_KEY)
+>     if m is not None:
+>         return m
+225,232c394,395
+<     """Save manifest to S3."""
+<     manifest_path = LOCAL_DIR / "manifest.json"
+<     with open(manifest_path, 'w') as f:
+<         json.dump(manifest, f, indent=2)
+<     subprocess.run(
+<         f"aws s3 cp {manifest_path} s3://{S3_BUCKET}/{MANIFEST_KEY}",
+<         shell=True, capture_output=True
+<     )
+---
+>     """Save manifest to S3 (boto3-native)."""
+>     _s3_put_json(MANIFEST_KEY, manifest)
+236,240c399,400
+<     """List xlsx files in forwardfill_v2/."""
+<     output = run_cmd(f"aws s3 ls s3://{S3_BUCKET}/{FORWARDFILL_PREFIX}/ | grep xlsx | awk '{{print $4}}'")
+<     if output:
+<         return [f for f in output.split('\n') if f]
+<     return []
+---
+>     """List xlsx files in forwardfill_v2/transactions/ (boto3-native)."""
+>     return _s3_list_names(FORWARDFILL_PREFIX, '.xlsx')
+270,275c430
+<     result = subprocess.run(
+<         f"aws s3 cp s3://{S3_BUCKET}/{s3_xlsx_key} {xlsx_path}",
+<         shell=True, capture_output=True
+<     )
+< 
+<     if result.returncode != 0:
+---
+>     if not _s3_download(s3_xlsx_key, xlsx_path):
+364,367c519
+<         subprocess.run(
+<             f"aws s3 cp {parquet_path} s3://{S3_BUCKET}/{s3_parquet_key}",
+<             shell=True, capture_output=True
+<         )
+---
+>         _s3_upload(parquet_path, s3_parquet_key)
+378c530
+<     """Process only new files, append to daily partitions."""
+---
+>     """Process new AND re-landed (bronze etag changed) files; append to daily partitions."""
+380c532
+<     print(f"BD Incremental Merge - {datetime.now().isoformat()}")
+---
+>     print(f"BD Incremental Merge [transactions] - {datetime.now().isoformat()}")
+384,385c536,542
+<     processed = set(manifest.get('processed_files', []))
+<     print(f"Previously processed: {len(processed)} files")
+---
+>     migrated = 'processed_etags' not in manifest and bool(manifest.get('processed_files'))
+>     processed_etags = _load_processed_etags(manifest)
+>     if migrated:
+>         print(f"  [transactions] MIGRATION: legacy manifest ({len(processed_etags)} filenames, no "
+>               f"etags) -> etag-tracked; each reprocesses ONCE then etag-skips "
+>               f"(reconciles the TXN_DAILY_* -> TRANSACTIONS_DAILY_* rename).")
+>     print(f"Previously processed: {len(processed_etags)} files (etag-tracked)")
+387d543
+<     # List new files
+389c545,546
+<     new_files = [f for f in all_files if f not in processed]
+---
+>     target_files, cur_etags, counts = _select_target_files(
+>         "transactions", FORWARDFILL_PREFIX, all_files, processed_etags)
+391,392c548,550
+<     if not new_files:
+<         print("No new files to process")
+---
+>     if not target_files:
+>         print(f"No new or re-landed files to process  "
+>               f"[SUMMARY transactions: new=0 reprocess=0 skip={counts['skip']}]")
+395c553,554
+<     print(f"Found {len(new_files)} new files")
+---
+>     print(f"Found {len(target_files)} file(s) to process "
+>           f"(new={counts['new']} reprocess={counts['reprocess']} skip={counts['skip']})")
+398c557
+<     # Process each new file
+---
+>     # Process each target file (new + re-landed)
+400a560,561
+>     failures = 0
+>     processed_dates = []
+402c563
+<     for xlsx_file in new_files:
+---
+>     for xlsx_file in target_files:
+405c566,568
+<             processed.add(xlsx_file)
+---
+>             # Record the CONTENT identity we just processed (decision-time etag; fresh head only if
+>             # absent). A future re-land changes this -> reprocess -> REPLACE.
+>             processed_etags[xlsx_file] = cur_etags.get(xlsx_file) or _bronze_etag(FORWARDFILL_PREFIX, xlsx_file)
+407a571,573
+>             processed_dates.append(partition_key.split('/')[-1].replace('.parquet', ''))
+>         else:
+>             failures += 1
+409,410c575,577
+<     # Update manifest
+<     manifest['processed_files'] = list(processed)
+---
+>     # Update manifest (etag-tracked + back-compat filename list)
+>     manifest['processed_etags'] = processed_etags
+>     manifest['processed_files'] = sorted(processed_etags.keys())
+417c584
+<     # Only invoke if at least one new partition was actually written (not just skipped).
+---
+>     # Only invoke if at least one partition was actually written this run (not just skipped).
+421,422c588,589
+<         # Pass the data date of the most recently processed partition.
+<         latest_date = sorted(new_partitions)[-1].split('/')[-1].replace('.parquet', '')
+---
+>         # Pass the data date of the most-recently processed partition (this run only).
+>         latest_date = max(processed_dates)
+424a592
+>     max_data_date = max(processed_dates) if processed_dates else "(none)"
+427,430c595,598
+<     print("INCREMENTAL MERGE COMPLETE")
+<     print(f"  New files processed: {len(new_files)}")
+<     print(f"  Rows added: {total_rows}")
+<     print(f"  Total partitions: {len(new_partitions)}")
+---
+>     print("INCREMENTAL MERGE COMPLETE [transactions]")
+>     print(f"  SUMMARY: {len(target_files)} processed | new={counts['new']} "
+>           f"reprocess={counts['reprocess']} skip={counts['skip']} | failures={failures} | "
+>           f"rows_added={total_rows} | max_data_date={max_data_date}")
+445,446c613,614
+<     # List all parquet files in silver/daily/
+<     output = run_cmd(f"aws s3 ls s3://{S3_BUCKET}/{SILVER_DAILY_PREFIX}/ --recursive | grep parquet | awk '{{print $4}}'")
+---
+>     # List all parquet files in silver/transactions/ (boto3-native)
+>     parquet_files = _s3_list_keys(SILVER_DAILY_PREFIX, '.parquet')
+448c616
+<     if not output:
+---
+>     if not parquet_files:
+452d619
+<     parquet_files = [f for f in output.split('\n') if f]
+459,462c626
+<         subprocess.run(
+<             f"aws s3 cp s3://{S3_BUCKET}/{pq_key} {local_path}",
+<             shell=True, capture_output=True
+<         )
+---
+>         _s3_download(pq_key, local_path)
+491,495c655,656
+<     # Upload
+<     subprocess.run(
+<         f"aws s3 cp {compacted_path} s3://{S3_BUCKET}/{SILVER_COMPACTED_KEY}",
+<         shell=True
+<     )
+---
+>     # Upload (boto3-native)
+>     _s3_upload(compacted_path, SILVER_COMPACTED_KEY)
+557,568c718,721
+<     """Load allocation incremental manifest from S3."""
+<     LOCAL_DIR.mkdir(parents=True, exist_ok=True)
+<     manifest_path = LOCAL_DIR / "alloc_manifest.json"
+< 
+<     result = subprocess.run(
+<         f"aws s3 cp s3://{S3_BUCKET}/{ALLOC_MANIFEST_KEY} {manifest_path} 2>/dev/null",
+<         shell=True, capture_output=True
+<     )
+< 
+<     if result.returncode == 0:
+<         with open(manifest_path) as f:
+<             return json.load(f)
+---
+>     """Load allocation incremental manifest from S3 (boto3-native)."""
+>     m = _s3_get_json(ALLOC_MANIFEST_KEY)
+>     if m is not None:
+>         return m
+579,586c732,733
+<     """Save allocation manifest to S3."""
+<     manifest_path = LOCAL_DIR / "alloc_manifest.json"
+<     with open(manifest_path, 'w') as f:
+<         json.dump(manifest, f, indent=2)
+<     subprocess.run(
+<         f"aws s3 cp {manifest_path} s3://{S3_BUCKET}/{ALLOC_MANIFEST_KEY}",
+<         shell=True, capture_output=True
+<     )
+---
+>     """Save allocation manifest to S3 (boto3-native)."""
+>     _s3_put_json(ALLOC_MANIFEST_KEY, manifest)
+590,597c737,764
+<     """List xlsx files in forwardfill_v2/allocations/."""
+<     output = run_cmd(
+<         f"aws s3 ls s3://{S3_BUCKET}/{FORWARDFILL_ALLOC_PREFIX}/ "
+<         f"| grep xlsx | awk '{{print $4}}'"
+<     )
+<     if output:
+<         return [f for f in output.split('\n') if f]
+<     return []
+---
+>     """List xlsx files in forwardfill_v2/allocations/ (boto3-native)."""
+>     return _s3_list_names(FORWARDFILL_ALLOC_PREFIX, '.xlsx')
+> 
+> 
+> def _latest_alloc_row_count(exclude_date):
+>     """Row count of the most-recent silver/allocations/{date}.parquet whose date != exclude_date --
+>     the completeness baseline for the intraday-stub reject. Returns None (caller fails OPEN) if there
+>     is no prior partition or it can't be read. Excludes exclude_date so a re-landed same-date stub is
+>     compared to the last GOOD day, not to itself / an already-landed stub of the same date."""
+>     keys = _s3_list_keys(SILVER_ALLOC_PREFIX, '.parquet')
+>     others = [k for k in keys if k.split('/')[-1].replace('.parquet', '') != exclude_date]
+>     if not others:
+>         return None
+>     latest = sorted(others, key=lambda k: k.split('/')[-1])[-1]
+>     c = _s3c()
+>     if c is None:
+>         return None
+>     try:
+>         body = c.get_object(Bucket=S3_BUCKET, Key=latest)['Body'].read()
+>     except Exception:
+>         return None
+>     try:
+>         return len(pd.read_parquet(BytesIO(body), columns=['account_id']))
+>     except Exception:
+>         try:
+>             return len(pd.read_parquet(BytesIO(body)))
+>         except Exception:
+>             return None
+620,625c787
+<     result = subprocess.run(
+<         f"aws s3 cp s3://{S3_BUCKET}/{s3_xlsx_key} {xlsx_path}",
+<         shell=True, capture_output=True
+<     )
+< 
+<     if result.returncode != 0:
+---
+>     if not _s3_download(s3_xlsx_key, xlsx_path):
+676a839,854
+>         # Completeness stub-reject (ADVI_ETLFIX bd stub-guard, 2026-07-02): BD returns an INTRADAY T-0
+>         # allocations SNAPSHOT as an undersized PARTIAL stub (the live 45KB 2026-07-02 leak vs the ~1.2MB
+>         # norm). The col-count check passes it, so it would land + shadow the good T-1 snapshot (silent
+>         # partial). Reject a snapshot whose row count is < ALLOC_MIN_ROW_FRACTION of the most-recent
+>         # OTHER-date partition. Fail-OPEN when there is no prior baseline (first-ever land) -- never
+>         # reject on uncertainty. Mirrors the unrealized 0-row skip + the holdings nzf floor;
+>         # Rule-17-consistent (rejects an incomplete SOURCE FILE, not a field-slim/row-filter within a
+>         # valid file). Returns None -> not marked processed -> re-checked next run -> self-heals when BD
+>         # lands a full snapshot (etag reprocess).
+>         baseline = _latest_alloc_row_count(file_date)
+>         if baseline and len(df) < ALLOC_MIN_ROW_FRACTION * baseline:
+>             print(f"  SKIP: {xlsx_filename}: {len(df):,} rows < {ALLOC_MIN_ROW_FRACTION:.0%} of the prior "
+>                   f"partition ({baseline:,}) -- undersized intraday T-0 STUB; NOT writing "
+>                   f"(prior complete snapshot stays; re-checked next run)")
+>             return None, 0
+> 
+684,687c862
+<         subprocess.run(
+<             f"aws s3 cp {parquet_path} s3://{S3_BUCKET}/{s3_key}",
+<             shell=True, capture_output=True
+<         )
+---
+>         _s3_upload(parquet_path, s3_key)
+704,705c879,884
+<     processed = set(manifest.get('processed_files', []))
+<     print(f"Previously processed: {len(processed)} allocation files")
+---
+>     migrated = 'processed_etags' not in manifest and bool(manifest.get('processed_files'))
+>     processed_etags = _load_processed_etags(manifest)
+>     if migrated:
+>         print(f"  [allocations] MIGRATION: legacy manifest ({len(processed_etags)} filenames, no "
+>               f"etags) -> etag-tracked; each reprocesses ONCE then etag-skips.")
+>     print(f"Previously processed: {len(processed_etags)} allocation files (etag-tracked)")
+708c887,888
+<     new_files = [f for f in all_files if f not in processed]
+---
+>     target_files, cur_etags, counts = _select_target_files(
+>         "allocations", FORWARDFILL_ALLOC_PREFIX, all_files, processed_etags)
+710,711c890,892
+<     if not new_files:
+<         print("No new allocation files to process")
+---
+>     if not target_files:
+>         print(f"No new or re-landed allocation files to process  "
+>               f"[SUMMARY allocations: new=0 reprocess=0 skip={counts['skip']}]")
+714c895,896
+<     print(f"Found {len(new_files)} new allocation files")
+---
+>     print(f"Found {len(target_files)} allocation file(s) to process "
+>           f"(new={counts['new']} reprocess={counts['reprocess']} skip={counts['skip']})")
+718a901,902
+>     failures = 0
+>     processed_dates = []
+720c904
+<     for xlsx_file in new_files:
+---
+>     for xlsx_file in target_files:
+723c907
+<             processed.add(xlsx_file)
+---
+>             processed_etags[xlsx_file] = cur_etags.get(xlsx_file) or _bronze_etag(FORWARDFILL_ALLOC_PREFIX, xlsx_file)
+725a910,912
+>             processed_dates.append(s3_key.split('/')[-1].replace('.parquet', ''))
+>         else:
+>             failures += 1
+727c914,915
+<     manifest['processed_files'] = list(processed)
+---
+>     manifest['processed_etags'] = processed_etags
+>     manifest['processed_files'] = sorted(processed_etags.keys())
+732a921
+>     max_data_date = max(processed_dates) if processed_dates else "(none)"
+736,738c925,927
+<     print(f"  New files processed: {len(new_files)}")
+<     print(f"  Rows added: {total_rows:,}")
+<     print(f"  Total partitions: {len(new_partitions)}")
+---
+>     print(f"  SUMMARY: {len(target_files)} processed | new={counts['new']} "
+>           f"reprocess={counts['reprocess']} skip={counts['skip']} | failures={failures} | "
+>           f"rows_added={total_rows:,} | max_data_date={max_data_date}")
+750,761c939,942
+<     """Load realized incremental manifest from S3."""
+<     LOCAL_DIR.mkdir(parents=True, exist_ok=True)
+<     manifest_path = LOCAL_DIR / "realized_manifest.json"
+< 
+<     result = subprocess.run(
+<         f"aws s3 cp s3://{S3_BUCKET}/{REALIZED_MANIFEST_KEY} {manifest_path} 2>/dev/null",
+<         shell=True, capture_output=True
+<     )
+< 
+<     if result.returncode == 0:
+<         with open(manifest_path) as f:
+<             return json.load(f)
+---
+>     """Load realized incremental manifest from S3 (boto3-native)."""
+>     m = _s3_get_json(REALIZED_MANIFEST_KEY)
+>     if m is not None:
+>         return m
+772,779c953,954
+<     """Save realized manifest to S3."""
+<     manifest_path = LOCAL_DIR / "realized_manifest.json"
+<     with open(manifest_path, 'w') as f:
+<         json.dump(manifest, f, indent=2)
+<     subprocess.run(
+<         f"aws s3 cp {manifest_path} s3://{S3_BUCKET}/{REALIZED_MANIFEST_KEY}",
+<         shell=True, capture_output=True
+<     )
+---
+>     """Save realized manifest to S3 (boto3-native)."""
+>     _s3_put_json(REALIZED_MANIFEST_KEY, manifest)
+783,790c958,959
+<     """List xlsx files in forwardfill_v2/realized/."""
+<     output = run_cmd(
+<         f"aws s3 ls s3://{S3_BUCKET}/{FORWARDFILL_REALIZED_PREFIX}/ "
+<         f"| grep xlsx | awk '{{print $4}}'"
+<     )
+<     if output:
+<         return [f for f in output.split('\n') if f]
+<     return []
+---
+>     """List xlsx files in forwardfill_v2/realized/ (boto3-native)."""
+>     return _s3_list_names(FORWARDFILL_REALIZED_PREFIX, '.xlsx')
+810,815c979
+<     result = subprocess.run(
+<         f"aws s3 cp s3://{S3_BUCKET}/{s3_xlsx_key} {xlsx_path}",
+<         shell=True, capture_output=True
+<     )
+< 
+<     if result.returncode != 0:
+---
+>     if not _s3_download(s3_xlsx_key, xlsx_path):
+869,872c1033
+<         subprocess.run(
+<             f"aws s3 cp {parquet_path} s3://{S3_BUCKET}/{s3_key}",
+<             shell=True, capture_output=True
+<         )
+---
+>         _s3_upload(parquet_path, s3_key)
+889,890c1050,1055
+<     processed = set(manifest.get('processed_files', []))
+<     print(f"Previously processed: {len(processed)} realized files")
+---
+>     migrated = 'processed_etags' not in manifest and bool(manifest.get('processed_files'))
+>     processed_etags = _load_processed_etags(manifest)
+>     if migrated:
+>         print(f"  [realized] MIGRATION: legacy manifest ({len(processed_etags)} filenames, no "
+>               f"etags) -> etag-tracked; each reprocesses ONCE then etag-skips.")
+>     print(f"Previously processed: {len(processed_etags)} realized files (etag-tracked)")
+893c1058,1059
+<     new_files = [f for f in all_files if f not in processed]
+---
+>     target_files, cur_etags, counts = _select_target_files(
+>         "realized", FORWARDFILL_REALIZED_PREFIX, all_files, processed_etags)
+895,896c1061,1063
+<     if not new_files:
+<         print("No new realized files to process")
+---
+>     if not target_files:
+>         print(f"No new or re-landed realized files to process  "
+>               f"[SUMMARY realized: new=0 reprocess=0 skip={counts['skip']}]")
+899c1066,1067
+<     print(f"Found {len(new_files)} new realized files")
+---
+>     print(f"Found {len(target_files)} realized file(s) to process "
+>           f"(new={counts['new']} reprocess={counts['reprocess']} skip={counts['skip']})")
+903a1072,1073
+>     failures = 0
+>     processed_dates = []
+905c1075
+<     for xlsx_file in new_files:
+---
+>     for xlsx_file in target_files:
+908c1078
+<             processed.add(xlsx_file)
+---
+>             processed_etags[xlsx_file] = cur_etags.get(xlsx_file) or _bronze_etag(FORWARDFILL_REALIZED_PREFIX, xlsx_file)
+910a1081,1083
+>             processed_dates.append(s3_key.split('/')[-1].replace('.parquet', ''))
+>         else:
+>             failures += 1
+912c1085,1086
+<     manifest['processed_files'] = list(processed)
+---
+>     manifest['processed_etags'] = processed_etags
+>     manifest['processed_files'] = sorted(processed_etags.keys())
+917a1092
+>     max_data_date = max(processed_dates) if processed_dates else "(none)"
+921,923c1096,1098
+<     print(f"  New files processed: {len(new_files)}")
+<     print(f"  Rows added: {total_rows:,}")
+<     print(f"  Total partitions: {len(new_partitions)}")
+---
+>     print(f"  SUMMARY: {len(target_files)} processed | new={counts['new']} "
+>           f"reprocess={counts['reprocess']} skip={counts['skip']} | failures={failures} | "
+>           f"rows_added={total_rows:,} | max_data_date={max_data_date}")
+935,946c1110,1113
+<     """Load unrealized incremental manifest from S3."""
+<     LOCAL_DIR.mkdir(parents=True, exist_ok=True)
+<     manifest_path = LOCAL_DIR / "unrealized_manifest.json"
+< 
+<     result = subprocess.run(
+<         f"aws s3 cp s3://{S3_BUCKET}/{UNREALIZED_MANIFEST_KEY} {manifest_path} 2>/dev/null",
+<         shell=True, capture_output=True
+<     )
+< 
+<     if result.returncode == 0:
+<         with open(manifest_path) as f:
+<             return json.load(f)
+---
+>     """Load unrealized incremental manifest from S3 (boto3-native)."""
+>     m = _s3_get_json(UNREALIZED_MANIFEST_KEY)
+>     if m is not None:
+>         return m
+957,964c1124,1125
+<     """Save unrealized manifest to S3."""
+<     manifest_path = LOCAL_DIR / "unrealized_manifest.json"
+<     with open(manifest_path, 'w') as f:
+<         json.dump(manifest, f, indent=2)
+<     subprocess.run(
+<         f"aws s3 cp {manifest_path} s3://{S3_BUCKET}/{UNREALIZED_MANIFEST_KEY}",
+<         shell=True, capture_output=True
+<     )
+---
+>     """Save unrealized manifest to S3 (boto3-native)."""
+>     _s3_put_json(UNREALIZED_MANIFEST_KEY, manifest)
+968,975c1129,1135
+<     """List xlsx files in forwardfill_v2/unrealized/."""
+<     output = run_cmd(
+<         f"aws s3 ls s3://{S3_BUCKET}/{FORWARDFILL_UNREALIZED_PREFIX}/ "
+<         f"| grep xlsx | awk '{{print $4}}'"
+<     )
+<     if output:
+<         return [f for f in output.split('\n') if f]
+<     return []
+---
+>     """List xlsx files in forwardfill_v2/unrealized/ (boto3-native)."""
+>     return _s3_list_names(FORWARDFILL_UNREALIZED_PREFIX, '.xlsx')
+> 
+> 
+> # Returned as the s3_key by process_unrealized_xlsx_to_parquet for a 0-data-row stub: a deliberate SKIP,
+> # not a failure (NFRA_MCPINDEX MX-s-16, row Z-S72).
+> _EMPTY_STUB = "__EMPTY_STUB__"
+995,1000c1155
+<     result = subprocess.run(
+<         f"aws s3 cp s3://{S3_BUCKET}/{s3_xlsx_key} {xlsx_path}",
+<         shell=True, capture_output=True
+<     )
+< 
+<     if result.returncode != 0:
+---
+>     if not _s3_download(s3_xlsx_key, xlsx_path):
+1011a1167,1177
+>         # FRONTIER-SELECT robustness (ADVI_BREAKS TO-3, COO ruling 2026-06-30): BD emits the
+>         # freshest-date snapshot at T+N, so a latest-date file can be a 0-row stub (full header,
+>         # no data rows -- passes the col-count guard above). Skip it: do NOT write an empty silver
+>         # partition that would shadow the last good one. Keeps silver/unrealized always
+>         # latest-WITH-DATA; not marked processed, so it is re-checked until it lands data. Pairs
+>         # with the B_01 non-empty-unrealized resolve gate downstream.
+>         if len(df) == 0:
+>             print(f"  SKIP: {xlsx_filename}: 0 data rows (freshest-date-lag / empty stub) "
+>                   f"-- not writing an empty silver partition")
+>             return _EMPTY_STUB, 0
+> 
+1054,1057c1220
+<         subprocess.run(
+<             f"aws s3 cp {parquet_path} s3://{S3_BUCKET}/{s3_key}",
+<             shell=True, capture_output=True
+<         )
+---
+>         _s3_upload(parquet_path, s3_key)
+1074,1075c1237,1242
+<     processed = set(manifest.get('processed_files', []))
+<     print(f"Previously processed: {len(processed)} unrealized files")
+---
+>     migrated = 'processed_etags' not in manifest and bool(manifest.get('processed_files'))
+>     processed_etags = _load_processed_etags(manifest)
+>     if migrated:
+>         print(f"  [unrealized] MIGRATION: legacy manifest ({len(processed_etags)} filenames, no "
+>               f"etags) -> etag-tracked; each reprocesses ONCE then etag-skips.")
+>     print(f"Previously processed: {len(processed_etags)} unrealized files (etag-tracked)")
+1078c1245,1246
+<     new_files = [f for f in all_files if f not in processed]
+---
+>     target_files, cur_etags, counts = _select_target_files(
+>         "unrealized", FORWARDFILL_UNREALIZED_PREFIX, all_files, processed_etags)
+1080,1081c1248,1250
+<     if not new_files:
+<         print("No new unrealized files to process")
+---
+>     if not target_files:
+>         print(f"No new or re-landed unrealized files to process  "
+>               f"[SUMMARY unrealized: new=0 reprocess=0 skip={counts['skip']}]")
+1084c1253,1254
+<     print(f"Found {len(new_files)} new unrealized files")
+---
+>     print(f"Found {len(target_files)} unrealized file(s) to process "
+>           f"(new={counts['new']} reprocess={counts['reprocess']} skip={counts['skip']})")
+1088a1259,1260
+>     failures = 0
+>     processed_dates = []
+1090c1262,1263
+<     for xlsx_file in new_files:
+---
+>     empty_stubs = 0
+>     for xlsx_file in target_files:
+1092,1093c1265,1272
+<         if s3_key:
+<             processed.add(xlsx_file)
+---
+>         if s3_key == _EMPTY_STUB:
+>             # 0-data-row stub (BD freshest-date lag / empty template): a deliberate SKIP. Record the
+>             # etag so it is not re-listed NEW (and counted a failure) on every run; NO partition is
+>             # written. A later re-land with data changes the etag -> reprocessed. (Row Z-S72.)
+>             processed_etags[xlsx_file] = cur_etags.get(xlsx_file) or _bronze_etag(FORWARDFILL_UNREALIZED_PREFIX, xlsx_file)
+>             empty_stubs += 1
+>         elif s3_key:
+>             processed_etags[xlsx_file] = cur_etags.get(xlsx_file) or _bronze_etag(FORWARDFILL_UNREALIZED_PREFIX, xlsx_file)
+1095a1275,1277
+>             processed_dates.append(s3_key.split('/')[-1].replace('.parquet', ''))
+>         else:
+>             failures += 1
+1097c1279,1280
+<     manifest['processed_files'] = list(processed)
+---
+>     manifest['processed_etags'] = processed_etags
+>     manifest['processed_files'] = sorted(processed_etags.keys())
+1102a1286
+>     max_data_date = max(processed_dates) if processed_dates else "(none)"
+1106,1108c1290,1293
+<     print(f"  New files processed: {len(new_files)}")
+<     print(f"  Rows added: {total_rows:,}")
+<     print(f"  Total partitions: {len(new_partitions)}")
+---
+>     print(f"  SUMMARY: {len(target_files)} processed | new={counts['new']} "
+>           f"reprocess={counts['reprocess']} skip={counts['skip']} | failures={failures} | "
+>           f"rows_added={total_rows:,} | max_data_date={max_data_date} | "
+>           f"empty_stub={empty_stubs}")
+1109a1295,1352
+> 
+> 
+> # ============================================================================
+> # INVOCATION CONTRACT (ADVI_BDAPIMIG D2b) -- the bd-silver-merge Lambda / SSM / one-shot entry
+> # ============================================================================
+> 
+> # Canonical order -- transactions first so its bd-price-update trigger fires before the snapshots.
+> _MERGE_ORDER = ['transactions', 'allocations', 'realized', 'unrealized']
+> _TABLE_MERGES = {
+>     'transactions': incremental_merge,
+>     'allocations': incremental_alloc_merge,
+>     'realized': incremental_realized_merge,
+>     'unrealized': incremental_unrealized_merge,
+> }
+> 
+> 
+> def run(tables=None):
+>     """Programmatic entry -- the bd-silver-merge Lambda / SSM / one-shot all invoke this (boto3-native,
+>     no aws-cli). `tables` = a list of table names (subset of transactions/allocations/realized/
+>     unrealized) or None / ['all'] = all 4, run in canonical order with per-table isolation.
+> 
+>     STEADY-STATE ON LAMBDA ONLY (1-5 new/changed files/table). The one-time first-run reprocess-once
+>     reconcile (the etag migration reprocesses EVERY current forwardfill xlsx -> minutes) must run OUT
+>     of the nightly Lambda path -- `python merge-daily-incremental.py --all` on SSM/local, or a bounded
+>     batch -- to dodge the Lambda 15-min cap. Returns {table: 'ok' | 'error: <msg>'}."""
+>     if not tables or (len(tables) == 1 and str(tables[0]).lower() == 'all'):
+>         selected = list(_MERGE_ORDER)
+>     else:
+>         want = {str(t).lower() for t in tables}
+>         selected = [t for t in _MERGE_ORDER if t in want]
+>     results = {}
+>     for t in selected:
+>         try:
+>             _TABLE_MERGES[t]()
+>             results[t] = 'ok'
+>         except Exception as e:  # noqa: BLE001 -- per-table isolation; one table must not sink the rest
+>             print(f"  ERROR: {t} merge failed: {e}")
+>             results[t] = f'error: {e}'
+>     return results
+> 
+> 
+> def lambda_handler(event, context):  # noqa: ARG001 -- AWS Lambda signature
+>     """bd-silver-merge Lambda entry (fired by the opal-data-bd bronze-complete EventBridge rule).
+> 
+>     EVENT CONTRACT: {"tables": ["all"]} (default = all 4) or a subset e.g. {"tables": ["transactions"]};
+>     an absent/empty event -> all 4. Firm-sep: reads BD_S3_BUCKET (opal-data-bd) only; no cot path.
+>     Raises on any table failure so the invocation is VISIBLY failed (CW + the per-table absence alarm
+>     are the durable signal)."""
+>     event = event or {}
+>     tables = event.get('tables')
+>     print(f"bd-silver-merge invoked {datetime.now(timezone.utc).isoformat()} "
+>           f"tables={tables or 'all'} bucket={S3_BUCKET}")
+>     results = run(tables)
+>     print(f"RESULT: {results}")
+>     failed = [t for t, r in results.items() if r != 'ok']
+>     if failed:
+>         raise RuntimeError(f"bd-silver-merge: {len(failed)} table(s) failed: {failed}")
+>     return results
