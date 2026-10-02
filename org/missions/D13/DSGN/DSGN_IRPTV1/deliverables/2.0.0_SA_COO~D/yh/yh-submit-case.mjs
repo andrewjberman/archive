@@ -46,8 +46,8 @@ const CASES = {
   A: { sha256: '500837992a3b9caa', variant: 'overview', comparisons: [], expect: 'READY', note: 'easy file, 99 rows, Overview (Y-1)' },
   typo: { sha256: '87afdc7db1c58b38', variant: 'overview', comparisons: [], expect: 'NEEDS_CORRECTION', note: 'easy file with AAPL -> APPL (Y-B baseline; Y-4 once the check gate is wired)' },
   D: { sha256: 'f0d344fa967504bd', variant: 'overview', comparisons: [], expect: 'NEEDS_CORRECTION', note: 'Stevens, 20 rows (Y-B baseline; Y-5 once the swap gate is wired)' },
-  B: { sha256: '500837992a3b9caa', variant: 'comparison', comparisons: ['opal_ultra_long_term'], expect: 'READY', blocked: 'brief 2 item 2.1: the upload path offers no comparison picker yet' },
-  C: { sha256: '500837992a3b9caa', variant: 'multi-comp', comparisons: ['opal_ultra_long_term', 'IWM'], expect: 'READY', blocked: 'brief 2 items 2.1 and 2.3' },
+  B: { sha256: '500837992a3b9caa', variant: 'comparison', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }], expect: 'READY', note: 'easy file vs Opal Ultra Long-Term, Comparison (Y-2)' },
+  C: { sha256: '500837992a3b9caa', variant: 'multicomp', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }, { kind: 'etf', key: 'IWM' }], expect: 'READY', blocked: 'brief 2 item 2.3: a ticker admitted as a comparison (CTO batch 178 ruling 4) is 2.0.0_SA_COO~Y\'s half' },
 }
 
 // ---- args ---------------------------------------------------------------------------------------------------------
@@ -122,7 +122,12 @@ function fixturePlane() {
   const submission = { contract_version: 'v1', operation: 'analysis-requests', firm_id: firmId,
     data: { identity: { ...request.identity, tenant_firm_id: firmId, request_id: 'REQ-fixture-yh-0001' }, stage: 'QUEUED' },
     status: { ...status, state: 'PENDING', public_reason_code: 'QUEUED' }, unprojected_grant: { count: 0, denominator: 1, kinds: {} } }
-  const reads = { ...smoke, [`${BASE_API}/directory/search`]: { contract_version: 'v1', operation: 'directory-search', firm_id: firmId, data: smoke[`${BASE_API}/directory/browse`].data.entries, unprojected_grant: { count: 0, denominator: 1, kinds: {} } } }
+  const catalogue = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'ComparisonCatalogue.valid.json'), 'utf8')).instance
+  const entries = [...catalogue.entries,
+    { key: 'opal_ultra_long_term', label: 'Opal Ultra Long-Term', ticker: null, name_source: 'model_catalogue' },
+    { key: 'IWM', label: 'iShares Russell 2000 ETF', ticker: 'IWM', name_source: 'etf_classifications' }]
+  const reads = { ...smoke, [`${BASE_API}/analysis/comparisons`]: { contract_version: 'v1', operation: 'comparison-catalogue', firm_id: firmId, data: { ...catalogue, entries } },
+    [`${BASE_API}/directory/search`]: { contract_version: 'v1', operation: 'directory-search', firm_id: firmId, data: smoke[`${BASE_API}/directory/browse`].data.entries, unprojected_grant: { count: 0, denominator: 1, kinds: {} } } }
   const keys = Object.keys(reads).sort((a, b) => b.length - a.length)
   return { upload: { ...upload, firm_id: upload.firm_id ?? firmId }, submission, reads, keys }
 }
@@ -134,11 +139,15 @@ const INPUTS = /\/api\/scoped\/investor-reporting\/analysis\/inputs$/
 const SUBMIT = /\/api\/scoped\/investor-reporting\/analysis$/
 const INPUTS_CAP = 60
 
+/** What the page itself sent: the variant and the comparison keys of the one submission (no client data). */
+function noteSubmitted(req) {
+  try { const b = req.postDataJSON(); packet.submitted = { variant: b.variant ?? null, comparison_keys: b.comparison_keys ?? null } } catch { packet.submitted = { unreadable: true } }
+}
 let armed = false
 let holder = null
 let browser
 let context
-const packet = { case: opt.case, note: kase.note, expect: kase.expect, file_sha256_prefix: fileSha.slice(0, 16), fixture: opt.fixture, base: opt.base,
+var packet = { case: opt.case, note: kase.note, expect: kase.expect, file_sha256_prefix: fileSha.slice(0, 16), fixture: opt.fixture, base: opt.base,
   portal_head: execFileSync('git', ['-C', path.join(ROOT, 'portal'), 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim(), started_at: new Date(t0).toISOString() }
 let outcome = 'NOT_STARTED'
 try {
@@ -168,7 +177,7 @@ try {
       if (m === 'OPTIONS' && !url.startsWith(opt.base)) return route.fulfill({ status: 204, headers: json({}).headers, body: '' })
       if (p.startsWith('/auth/refresh')) return route.fulfill(json(SESSION))
       if (m === 'POST' && INPUTS.test(p)) { posts.inputs += 1; return route.fulfill(json(plane.upload)) }
-      if (m === 'POST' && SUBMIT.test(p)) { posts.submissions += 1; if (posts.submissions > 1) { guard.push(['second-submit', m, p].join('\t')); return route.abort('blockedbyclient') } return route.fulfill(json(plane.submission)) }
+      if (m === 'POST' && SUBMIT.test(p)) { noteSubmitted(req); posts.submissions += 1; if (posts.submissions > 1) { guard.push(['second-submit', m, p].join('\t')); return route.abort('blockedbyclient') } return route.fulfill(json(plane.submission)) }
       const key = p.startsWith('/api/') ? plane.keys.find((k) => url.includes(k)) : undefined
       if (key) return route.fulfill(json(plane.reads[key]))
       if (p.startsWith('/api/') || p.startsWith('/auth/') || p.startsWith('/v1/')) return route.fulfill(json({ error: 'no fixture (yh)' }, 404))
@@ -177,7 +186,7 @@ try {
     if (m === 'GET' || m === 'HEAD' || m === 'OPTIONS') return route.continue()
     if (ADMITTED_POST.some((re) => re.test(p))) return route.continue()
     if (m === 'POST' && INPUTS.test(p) && posts.inputs < INPUTS_CAP) { posts.inputs += 1; return route.continue() }
-    if (m === 'POST' && SUBMIT.test(p) && posts.submissions === 0) { posts.submissions += 1; return route.continue() }
+    if (m === 'POST' && SUBMIT.test(p) && posts.submissions === 0) { noteSubmitted(req); posts.submissions += 1; return route.continue() }
     if (/\/analytics\/ingest$/.test(p)) return route.fulfill({ status: 204, body: '' })
     guard.push([new Date().toISOString(), m, p].join('\t'))
     return route.abort('blockedbyclient')
@@ -228,10 +237,21 @@ try {
     outcome = uploadState === 'NEEDS_CORRECTION' ? 'NEEDS_CORRECTION' : 'UPLOAD_NOT_ANSWERED'
   } else {
     const prospect = page.locator('[data-slot="prospect-composer"]')
+    if (kase.comparisons.length > 0) {
+      await prospect.locator(`[data-slot="variant-card"][data-variant="${kase.variant}"]`).click()
+      await page.locator('[data-slot="comparison-picker"]').waitFor({ state: 'visible', timeout: 30000 })
+      for (const pick of kase.comparisons) {
+        if (pick.kind === 'etf') await page.locator('[data-slot="picker-search"]').fill(pick.key)
+        await page.locator(`[data-slot="picker-${pick.kind === 'etf' ? 'etf' : 'model'}"][data-key="${pick.key}"]`).click()
+      }
+      await page.locator('[data-slot="picker-done"]').click()
+      packet.picked_on_page = await prospect.locator('[data-slot="comparison-key-list"] [data-comparison-key]').evaluateAll((els) => els.map((e) => e.getAttribute('data-comparison-key')))
+      await shot(page, 'comparisons-picked')
+    }
     await prospect.getByLabel('Report title (optional)').fill(opt.title ?? `Y-H case ${opt.case} ${stamp}`)
     await prospect.getByLabel('Prepared for').fill(opt.preparedFor)
     mark('submit_pressed')
-    await prospect.getByRole('button', { name: /Generate Overview/ }).click()
+    await prospect.getByRole('button', { name: /^Generate (Overview|Comparison|Multi-Comp)$/ }).click()
     for (const start = Date.now(); Date.now() - start < 60000 && !ids.request_id;) await page.waitForTimeout(250)
     mark('submit_answered')
     await page.locator('[data-slot="prospect-job-status"]').first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => {})

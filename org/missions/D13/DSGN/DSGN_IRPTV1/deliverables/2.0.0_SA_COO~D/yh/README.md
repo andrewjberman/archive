@@ -20,7 +20,8 @@ python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/live_walk/backend_joi
 | A | 500837992a3b9caa | Overview | READY. HELD: row S279 (a fund ticker fails the upload) until ~Y's fix serves (CTO 104395) |
 | typo | 87afdc7db1c58b38 | Overview | NEEDS_CORRECTION (Y-B baseline) |
 | D | f0d344fa967504bd | Overview | NEEDS_CORRECTION (Y-B baseline) |
-| B, C | 500837992a3b9caa | Comparison / Multi-Comp | refused by the script until brief 2 items 2.1 (and 2.3 for C) land |
+| B | 500837992a3b9caa | Comparison vs Opal Ultra Long-Term | the page offers it since item 88 (portal b0e59116). Live: the same file, so HELD with A (row S279) |
+| C | 500837992a3b9caa | Multi-Comp vs ULT + IWM | refused by the script until brief 2 item 2.3 (a ticker admitted as a comparison, ~Y's half) |
 
 ## Safety
 
@@ -45,4 +46,11 @@ python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/live_walk/backend_joi
 - the HAR held 49 hops with content.
 
 `backend_join.py` read the HAR: every hop mapped to its route and Lambda and the UP- id was found. No invocation matched,
-as expected for a fixture run. The refusals hold: a live run without `--queue-empty`, and case B.
+as expected for a fixture run. The refusals held at that commit: a live run without `--queue-empty`, and case B (now
+unblocked by item 88; case C is the blocked one).
+
+`--case B --fixture` on portal DEV b0e59116 (item 88):
+- the Comparison card opened the picker, and Opal Ultra Long-Term was picked;
+- the page's one submission read variant `comparison` with comparison_keys `["opal_ultra_long_term"]` (recorded in
+  packet.json `submitted`);
+- 0 guard aborts.
