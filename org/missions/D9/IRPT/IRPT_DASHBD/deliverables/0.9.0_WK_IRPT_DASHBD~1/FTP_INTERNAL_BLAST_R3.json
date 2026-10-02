@@ -1,0 +1,176 @@
+{
+ "codes": [
+  "FTP/FC/WD",
+  "FTR/FC/WD"
+ ],
+ "table": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json",
+ "files_scanned": 52675,
+ "census": {
+  "instrument": "comp-find [content] over corpus=all, run 2026-10-02 from the worktree at b7a512991b; DENOMINATOR: 71 hit(s) across 52675 file(s) scanned | 44 EPHEMERAL-FLOOR, 1 UNREADABLE, 3017 BINARY not searched",
+  "queries": [
+   "SCHWAB_TRANSACTION_CODE_CLASSIFICATION (71 hits / 52675 files)",
+   "CODE_CLASSIFICATION -i (91-94 hits / 52702 files, incl. this worker's scratch copies)",
+   "classification_table (27-30 hits / 52702 files)",
+   "ref_txn_classification (112 hits / 52675 files; the DERIVED readers)"
+  ],
+  "bands": "of the 71 hits: HEAD=1 (the CRO's own .md), SURFACED=32 (a05, the P14 battery docstring, org/audit comp-which-rail log archives, which are not readers), CONFIG=15 (sources.json, lambda-source-map.json, proof_of_spec JSONs, scratch), DOC=23; the one code reader in the SURFACED band is a05_ref_txn_classification.py, and the adapter reaches the table through sources.json classification_table",
+  "non_readers": [
+   {
+    "path": "data/inf/scripts/gold/runners_inf/a05_ref_txn_classification.py",
+    "firm": "inf",
+    "why": "reads silver/transactions + orion_cashflow_taxonomy.yaml (Orion type vocabulary); 0 references to the Schwab table"
+   },
+   {
+    "path": "data/cot/scripts/gold/runners_cot/a05_ref_txn_classification.py",
+    "firm": "cot",
+    "why": "authored (Transaction Type, Sub Type) PAIR_RULES over Black Diamond types; 0 references to the Schwab table"
+   },
+   {
+    "path": "data/assets/scripts/gold/runners_49f/perfrp_transactions.py",
+    "firm": "49financial",
+    "why": "projects fact_trn columns through an allowlist; the 'joins to ref_txn_classification' text is a comment, the class is not read"
+   },
+   {
+    "path": "org/tier1_exec/4.0.0_SA_CRO/scripts/build_schwab_txn_classification.py",
+    "firm": "49financial",
+    "why": "the table's GENERATOR, not a reader (row IRPT_DASHBD-W1-S10)"
+   }
+  ],
+  "homes_of_the_table_bytes": [
+   {
+    "where": "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json",
+    "sha256_worktree_bytes": "d83ef318ed443b71a96ba95a4930cc04c7ce3a42756a5927418aecaee531df08",
+    "role": "the CRO's file; read by the adapter (sources.json classification_table) and by a05 in the repo layout"
+   },
+   {
+    "where": "s3://opal-data-49financial/_code/ref/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json",
+    "sha256_bytes": "d83ef318ed443b71a96ba95a4930cc04c7ce3a42756a5927418aecaee531df08",
+    "role": "the SERVED 49F bundle's vendored copy, byte-identical today; what a05 reads when it runs from the deployed bundle (row IRPT_DASHBD-W1-S9)"
+   },
+   {
+    "where": "infra/aws/lambda/ci/lambda-source-map.json irpt-reporting-gold-lambda staged_from (pin 5bb3b2626d, blob sha256 0f34bef7c8502da172e4db835a67d3713124f9136d2628d248783d7cbeafc709)",
+    "role": "the reporting-gold Lambda's pinned copy, with the producer pinned at e1b160d340"
+   }
+  ]
+ },
+ "readers": [
+  {
+   "path": "data/assets/scripts/gold/runners_49f/a05_ref_txn_classification.py",
+   "firm": "49financial",
+   "served": true,
+   "kind": "direct",
+   "served_where": "s3://opal-data-49financial/gold/advi/reference/ref_txn_classification/ (562 date partitions 2024-07-08..2026-09-30); reads the table from the repo path or the bundle copy s3://opal-data-49financial/_code/ref/"
+  },
+  {
+   "path": "data/assets/scripts/gold/runners_49f/c00_flow_ledger.py",
+   "firm": "49financial",
+   "served": true,
+   "kind": "derived: reads a05's emitted ref_txn_classification; a partition == EXTERNAL row gets a debit/credit-signed external flow",
+   "served_where": "s3://opal-data-49financial/gold/advi/canonical/flow_ledger/ (562 partitions to 2026-09-30); feeds canonical/twr_daily/ (562) via c02_twr_engine"
+  },
+  {
+   "path": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+   "firm": "49financial",
+   "served": true,
+   "kind": "direct (sources.json classification_table)",
+   "served_where": "s3://opal-data-49financial/irpt/49financial/gold/account_return_daily/ (559 partitions to 2026-09-28, six accounts per partition)"
+  },
+  {
+   "path": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+   "firm": "49financial",
+   "served": true,
+   "kind": "direct, PINNED: irpt-reporting-gold-lambda packages the producer at e1b160d340 and the table at 5bb3b2626d; deployed 2026-10-02",
+   "served_where": "same gold prefix as the adapter, from the first fire after 2026-09-28 (07:41 ET)"
+  },
+  {
+   "path": "org/tier2_senior/0.4.0_DS_ClientPlatform~U/deliverables/ADVI_49F.P14-STAMP_PS_DEPLOYED_BATTERY.py",
+   "firm": "49financial",
+   "served": false,
+   "kind": "mention only: a QA battery that runs the DEPLOYED bundle's a05; it reads no table of its own"
+  }
+ ],
+ "per_reader_delta": [
+  {
+   "path": "data/assets/scripts/gold/runners_49f/a05_ref_txn_classification.py",
+   "firm": "49financial",
+   "rows": 2578,
+   "abs_usd": 39818.98,
+   "net_usd": -39351.66,
+   "partitions": 375,
+   "accounts": 230,
+   "scope": "all accounts, every silver fact_trn partition the 49F gold covers (562 listed; 375 carry the two codes)",
+   "reads_from": "s3://opal-data-assets/schwab/08335338/silver/fact_trn/",
+   "by_code": {
+    "FTP": {
+     "rows": 2574,
+     "abs_usd": 39585.32,
+     "net_usd": -39585.32,
+     "partitions": 374,
+     "accounts": 229
+    },
+    "FTR": {
+     "rows": 4,
+     "abs_usd": 233.66,
+     "net_usd": 233.66,
+     "partitions": 2,
+     "accounts": 4
+    }
+   },
+   "served_output_moves": "ref_txn_classification: 2 of 187 code rows change partition and rule, table_version changes, so all 562 partitions of the ref differ after a re-run",
+   "corroboration": "served flow_ledger date=2026-09-29 holds 55 FTP rows, all final_class EXTERNAL dc-resolved, abs 1003.34 net -1003.34, equal to the silver rows of that day (55 / 1003.34)"
+  },
+  {
+   "path": "data/assets/scripts/gold/runners_49f/c00_flow_ledger.py",
+   "firm": "49financial",
+   "rows": 2578,
+   "abs_usd": 39818.98,
+   "net_usd": -39351.66,
+   "partitions": 375,
+   "accounts": 230,
+   "scope": "same silver rows; each moves final_class EXTERNAL -> INTERNAL in canonical/flow_ledger and leaves the external flow of 230 accounts, so canonical/twr_daily moves for those account-days",
+   "reads_from": "s3://opal-data-assets/schwab/08335338/silver/fact_trn/ + s3://opal-data-49financial/gold/advi/reference/ref_txn_classification/"
+  },
+  {
+   "path": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+   "firm": "49financial",
+   "rows": 7,
+   "abs_usd": 18.29,
+   "net_usd": -18.29,
+   "partitions": 7,
+   "accounts": 2,
+   "scope": "the six accounts the landed gold holds, silver dates <= 2026-09-28 (the 559 landed partitions)",
+   "reads_from": "s3://opal-data-assets/schwab/08335338/silver/fact_trn/",
+   "classification_rows_all_accounts_if_run_unrestricted": {
+    "rows": 2578,
+    "abs_usd": 39818.98,
+    "net_usd": -39351.66,
+    "partitions": 375,
+    "accounts": 230
+   },
+   "served_output_moves": "NONE when the retirement and the edit land together: external_flow and total_return_daily differ by 0 (FTP_ADAPTER_EQUIVALENCE_R3.json)"
+  },
+  {
+   "path": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+   "firm": "49financial",
+   "rows": 1,
+   "abs_usd": 5.46,
+   "net_usd": -5.46,
+   "partitions": 1,
+   "accounts": 1,
+   "scope": "the six accounts, silver dates after the landed gold (2026-09-29 so far; the function computes each new day on its own fire)",
+   "reads_from": "s3://opal-data-assets/schwab/08335338/silver/fact_trn/",
+   "served_output_moves": "NONE today (pinned producer and pinned table); NONE after a repackage with the patched producer AND the edited table (same code path as the adapter's equivalence run); a repackage of the edited table with the OLD producer also moves nothing (the override still subtracts); a repackage of the patched producer with the OLD table would move external_flow (negative control in the equivalence record)"
+  }
+ ],
+ "six_account_total_all_dates": {
+  "rows": 8,
+  "abs_usd": 23.75,
+  "net_usd": -23.75,
+  "partitions": 8,
+  "accounts": 2
+ },
+ "adapter_override_patch": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/ADAPTER_OVERRIDE_RETIREMENT_R3.patch",
+ "measured_at": "2026-10-02",
+ "measured_by": "0.9.0_WK_IRPT_DASHBD~1",
+ "claim": "measured: rows/abs/net/partitions are sums over the landed silver (562 fact_trn partitions read, 0 unread, 3,243,352 rows), codes selected on tran_srcde in (FTP, FTR), tr_cd FC, sb_cd WD; net_usd signs CREDIT +, DEBIT - as the adapter and the 49F ledger do"
+}

@@ -1,0 +1,31 @@
+{
+ "files_scanned": 482,
+ "census_command": "comp-find 'narrative_packet_ref' infra/aws/lambda/investor-reporting --all  (18 hit(s) across 482 file(s) scanned, corpus=all; repo-wide: comp-find 'narrative_packet_ref' --files --corpus default, 73 hit(s) across 52799 file(s))",
+ "readers": [
+  {
+   "path": "infra/aws/lambda/investor-reporting/export/submit_service.py",
+   "how": "serve_submit builds the bundle's reference: calls narrative_submit.build_and_bind and passes narrative_packet_ref= for PERFORMANCE; for ANALYSIS it builds no packet and passes analysis_report_ref=",
+   "disposition": "handles",
+   "why": "branches on resolved kind: an Analysis report gets analysis_report_ref (report_id, revision, sha256 from the retained row) and no narrative packet; PERFORMANCE path unchanged (tests test_serve_submit_analysis.py)"
+  },
+  {
+   "path": "infra/aws/lambda/investor-reporting/export/narrative_submit.py",
+   "how": "build_and_bind returns the narrative_packet_ref; docstring states it is required",
+   "disposition": "never-receives",
+   "why": "only ever called with a PERFORMANCE report (serve_submit skips it for ANALYSIS, narrative_step('ANALYSIS') is False); it produces the narrative reference and never reads a bundle; its docstring is brought in line"
+  },
+  {
+   "path": "infra/aws/lambda/investor-reporting/export/handler.py",
+   "how": "submit_export takes narrative_packet_ref and passes it to bundle.freeze; the lambda 'submit' action reads event narrative_packet_ref",
+   "disposition": "handles",
+   "why": "submit_export now also takes analysis_report_ref (default None) and passes both to freeze, which refuses both or neither; the event path reads both with .get"
+  },
+  {
+   "path": "infra/aws/lambda/investor-reporting/export/bundle.py",
+   "how": "freeze writes narrative_packet_ref into the bundle; rebrand compares it; validate checks the schema",
+   "disposition": "handles",
+   "why": "freeze carries exactly one of the two references (refuses both or neither, never writes a null); rebrand asserts whichever reference the bundle has is unchanged; validate runs the oneOf schema"
+  }
+ ],
+ "outside_the_tree": "portal/src/pages/InvestorReporting/contracts/adapt.ts (:1186, :1192 read wire.narrative_packet_ref.packet_id), wire/ExportBundle.ts, wire/consumed.ts read the field; they are outside this order's paths and not graded here -- row IRPT_BCKEND-W101-S8. The stored client fixtures (_contracts/fixtures/ExportBundle.*.json) and the two existing tests test_export.py/test_submit_service.py write or read it on the PERFORMANCE path and are unchanged."
+}
