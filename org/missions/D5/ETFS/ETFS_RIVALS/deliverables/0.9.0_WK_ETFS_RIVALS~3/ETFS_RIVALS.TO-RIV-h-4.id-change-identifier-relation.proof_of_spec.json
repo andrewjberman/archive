@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-h-4.id-change-identifier-relation",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "cd11d6edea",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-h-4.id-change-identifier-relation.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-h-4.id-change-identifier-relation.md",
+    "group": "OTHER",
+    "vintage_commit": "cd11d6edea"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "89c590c8ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 5 build cell; no served write, no deploy; _id_changes pairs only on an identifier relation",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/silver_issuer.py",
+      "kind": "script",
+      "commit_or_etag": "89c590c8ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 5 build cell; no served write, no deploy; parse_capture zero-pads a 1-8 character CUSIP to 9",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r5h4_id_change_identifier_relation.py",
+      "kind": "script",
+      "commit_or_etag": "89c590c8ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 new tests; two value-only ID-CHANGE tests in test_g2_trade_schedule.py and test_i1_trade_stable_key.py flipped",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "silver pads 55622104 -> 055622104; equal value alone infers an exit plus an entry (no ID-CHANGE); control: an 8/9-char CUSIP pair never splits -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round5/checks/h-4.AC1.py",
+      "output_evidence": "silver security_cusip: '055622104'\nOK:   silver zero-pads an 8-character CUSIP to 9 (55622104 -> 055622104)\nnormalised-CUSIP book rows (action, confidence): [('exit', 'ID-CHANGE')]\nOK:   control: the same security under 8- and 9-char CUSIPs never splits into an exit plus an entry (an ID-CHANGE or no row)\nequal-value rows: actions ['entry', 'exit'] confidence ['UNRESOLVED']\nOK:   equal value alone infers an exit plus an entry, never an ID-CHANGE\nOK:   control: an unchanged book infers 0 trades\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "on SERVED G1 (READ-ONLY), PFOE's window to 2026-09-28 reads UMG 91377B109 as an exit and PWR 74762E102 as an entry, no ID-CHANGE -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round5/checks/h-4.AC2.py",
+      "output_evidence": "(run under `timeout 600`, completed rc=0 well inside the bound)\nPFOE window 2026-09-25 -> 2026-09-28: 49 G1 rows\nOK:   control: the served G1 window is not empty\n   entry UNRESOLVED 74762E102 -> None\n   exit UNRESOLVED 91377B109 -> None\nOK:   control: the window infers trades\nOK:   no ID-CHANGE row names UMG or PWR\nOK:   UMG is an exit and PWR an entry\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK (49 served G1 rows, window 2026-09-25 -> 2026-09-28)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not run: the face names no mutant control for this cell.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (once before the proof write, once for this instance); package suite run.",
+      "observed": "314 passed, 2 skipped in 19.60s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W3-S16"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~3 <0.9.0_WK_ETFS_RIVALS~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "89c590c8ff"
+    }
+  ]
+}
