@@ -1,0 +1,97 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ETFS_RIVALS.TO-RIV-ic-2.census-three-states",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+  "vintage_commit": "1e8515aa01",
+  "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-ic-2.census-three-states.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-ic-2.census-three-states.md",
+  "group": "OTHER",
+  "vintage_commit": "1e8515aa01"
+ },
+ "assignee": "0.9.0_WK_ETFS_RIVALS~4",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/gold_input_census.py",
+   "kind": "script",
+   "commit_or_etag": "35019c3165",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "round 6 deploys nothing from a worker",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6ic2_census_three_states.py",
+   "kind": "test",
+   "commit_or_etag": "35019c3165",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "5 tests, no vendor call; passed"
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_a1ic_census.py",
+   "kind": "test",
+   "commit_or_etag": "35019c3165",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one assertion added (fallback column all NULL); no existing assertion changed"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/ic-2.AC1.py",
+   "output_evidence": "OK:   B (no G4 row, valued on both reports) reads covered_by_fallback, fallback holding_implied\nOK:   control: D (no valuation) reads missing with a NULL fallback; A (G4 px_close) reads arrived\nOK:   every status is in {arrived, covered_by_fallback, missing, stale}\nAC1 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "3 of 3 checks",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/ic-2.AC2.py",
+   "output_evidence": "OK:   TXUE gics X (sector only in BASG's file) reads covered_by_fallback, fallback other_fund\nOK:   control: TXUE gics Y (no file, no G4 row carries it) reads missing with a NULL fallback\nAC2 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "2 of 2 checks",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/ic-2.AC3.py",
+   "output_evidence": "OK:   holdings TXUE, price A and gics A read arrived with a NULL fallback\nOK:   the fresh reading reads arrived, the stale reading stays stale\nAC3 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "2 of 2 checks",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1 and AC2 each carry a control arm (D priced nowhere; Y sector nowhere) that must stay missing with NULL fallback; the pre-change code reads every non-arrived input missing.",
+   "expected": "pre-change code reads B price and X gics missing",
+   "observed": "not re-run on base; post-change arms read covered_by_fallback for B/X and missing for D/Y",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC1-AC3 run twice (before and after commit) plus the package suite",
+   "observed": "all PASS; package suite 417 passed, 2 skipped, 0 failed",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest",
+   "invocation": "python -m pytest rivalfunds -q (from data/etfs/scripts)",
+   "result": "417 passed, 2 skipped (0 failed)"
+  }
+ ]
+}
