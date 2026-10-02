@@ -23,11 +23,20 @@ by field. Final run: `read-20261002T184239Z/` (servedread.json + 5 screenshots),
 
 Served census at the read: collected-chatter rows carrying ticker 95 of 95, classification 93 of 95, a places_moved number 32 of 95.
 
-## THE OPEN LIMB -- sector
+## WHAT THIS READ DOES NOT GRADE -- the served values' correctness (added 19:0xZ)
+
+This read grades PRESENTATION: each mark prints the value its served row carries. It does not test whether that value is right.
+It is: CVO~Z's row `DSGN_AMGTV1-Z-C-S36` (ARMED) found the producer's places-moved join uses two key forms. On the base, 62 of 94
+bars carry a false places_moved and 32 a correct one. So "up 16 places" and the like above are faithfully printed but not
+established as true. The repair is RESAPP r63 am-3 AMENDMENT 2, cell R1 (@8ed109961e, CTO msg 28666). FWD-24's "places moved prints
+wherever served" limb is met as presentation; its truth rides on R1.
+
+## THE OPEN LIMB -- sector (already ruled: RESAPP am-3 AMENDMENT 2 cell R2, row Z-C-S37)
 
 Every mark reads "sector not served". The producer serves no sector: measured with the route's own resolver
 (`scoped_amgt.resolve_identity` + `_classification_for_ticker`), 0 of 95 covered names carry one. 85 have
-`classification.sector` null and 10 have no classification row. The page says so in words, as designed. Whether FWD-2's "sector"
-limb can grade with sector unserved, or needs a producer cell, is a ruling for 1.0.0_SA_CTO~Z.
+`classification.sector` null and 10 have no classification row. The page says so in words, as designed. Ruled already: am-3 AMENDMENT 2 cell R2 serves an
+equity's `classification.sector` = sub_asset_class when GICS-11 (with `sector_source`), else null with `sector_reason`. The page
+prints a served sector as served and needs no change. Next: a served re-read after R1 and R2 deploy.
 
 FWD-7 is not read here: its served write (RESAPP r63 am-7) is still pending.
