@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "to_id": "ETFS_RIVALS.TO-RIV-rk-2.a1-plausibility-guard",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "1e8515aa01",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-rk-2.a1-plausibility-guard.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1e8515aa01"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_holding_contribution.py",
+      "kind": "script",
+      "commit_or_etag": "3c7177004e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy; checks read the served table READ-ONLY",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/guardrails_config.json",
+      "kind": "config_data",
+      "commit_or_etag": "3c7177004e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy; checks read the served table READ-ONLY",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6rk2_plausibility_guard.py",
+      "kind": "test",
+      "commit_or_etag": "3c7177004e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy; checks read the served table READ-ONLY",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a planted -188% fund x period is ONE refused row naming bound (a); TXUE untouched; the served 2026-10-02 table refuses nothing (S3 READ-ONLY) -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/rk-2.AC1.py",
+      "output_evidence": "ETFT YTD after the guard: [['refused', 'total_below_minus_100pct', -1.88]]\nOK:   the planted -188% fund x period is ONE refused row naming bound (a) and carrying the total\nOK:   control: TXUE YTD passes untouched\nserved 2026-10-02: 3777 rows -> 3777 | refused rows: 0\nOK:   control: the served 2026-10-02 table refuses nothing\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (planted ETFT YTD one refused row; TXUE YTD untouched; served 2026-10-02 3777 rows -> 3777, 0 refused); run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the 0.25 PROVISIONAL single-holding bound is in guardrails_config; 0.31 refuses as bound (b), 0.24 passes -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/rk-2.AC2.py",
+      "output_evidence": "config entry: {'value': 0.25, 'status': 'PROVISIONAL', 'note': 'RIV-rk-2, CRO~RV CALL 13 C1 (b): a fund x period holding ONE security whose absolute contribution exceeds this (0.25 = 25 percentage points of the period return) is REFUSED as one row (axis refused, bucket single_holding_above_bound), never ranked; structural, not from the peer distribution; measured 2026-10-02 on the served 10-01 and 10-02 tables: largest single holding 3.6%, nothing refused. The total-below--100% bound (a) is hard and carries no config'}\nOK:   guardrails_config carries contribution_single_holding_bound = 0.25, PROVISIONAL\nBASG MTD: [['refused', 'single_holding_above_bound', 0.31]]\nOK:   a 0.31 single holding refuses its fund x period, naming bound (b) and the holding's value\nOK:   control: a 0.24 holding passes\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (config entry 0.25 PROVISIONAL; BASG MTD 0.31 refused as single_holding_above_bound; PCLG MTD 0.24 passes); run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "none run: the order names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 run once each after the commit; rivalfunds package suite run twice (before and after the new tests).",
+      "observed": "suite 412 passed, 2 skipped, 0 failed before the new tests; 424 passed, 2 skipped, 0 failed after.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "bound (c) NAV reconciliation tolerance",
+      "reason": "Ships as a documented hook (nav_check); no NAV is on file, so no tolerance is measured."
+    },
+    {
+      "item": "the page's 'Rankings refused' display",
+      "reason": "Cell ui-2's, not this order's (render.py is chain ~6's)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~2 <0.9.0_WK_ETFS_RIVALS~2@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "3c7177004e"
+    }
+  ]
+}
