@@ -39,3 +39,28 @@ No fixture on any hop: the page's own fetch, the deployed route, the published p
   run measured only that returning to an account re-reads nothing. A walker step for both numbers is the next instrument.
 - The account picker's per-account suffix read "YTD pending" for both accounts at screenshot time (IRPT_BCKEND's figure, not the
   dashboard's): parked in `STATUS~D.md` (owner 1.0.0_SA_CTO).
+
+## Addendum 08:13Z-08:15Z -- the two numbers plan section 4 asks for, measured (walker `--dashboard-window`)
+
+The same client and the local DEV build at portal `8df9e3d3`, against the real backend: walk `tmp/ui-walk/20261002T081313Z`
+(local, never committed; `dashboard-window.json` beside its `findings.json`). Disarmed 08:15:26Z, login with the walk password
+REFUSED; `0.0.0_AB_MSTR` told before and after. The step starts its clock at the Performance tab's own press (the picker has no
+"All accounts" entry, so the tab opens on the covered account), times every other account from its select, then returns.
+
+| what | measured |
+|---|---|
+| covered account, tab press -> painted chart (a drawn area in the dashboard chart) | **5,288 ms** |
+| of which `GET .../manifest` | sent at 639 ms, answered in 2,858 ms, HTTP 200 |
+| of which `GET .../series` (sent when the manifest answered) | sent at 3,498 ms, answered in 1,698 ms, HTTP 200, **17,665 bytes transferred** |
+| requests after each of the five window presses (1M, 3M, YTD, 1Y, Since inception), 1.5 s each | **0, 0, 0, 0, 0** (measured days 21, 64, 185, 251, 558) |
+| the other account (no series served) | manifest 951 ms, no series read, the tab's own body at 2,800 ms |
+| back to the covered account | 0 reads, chart painted in 85 ms |
+
+So a window change is answered in the browser with no request (C-SERVE), measured and not only by construction. Opening the
+account takes about 5.3 s, more than half of it the manifest route's own time; the page reads the series only after the
+manifest says it exists, so the two reads run one after the other. The two date fields were not typed (the presets go through
+the same selection path).
+
+ITEM 1a UN-PARKS ON THIS WALK: the account picker's suffix read "YTD 3.62%" (IRPT_BCKEND's period figure, shot 007) on the
+same page as the dashboard, whose YTD for this account read 6.10% at 06:26Z (data through September 28th, 2026). An account
+is now served by both sources and the two figures disagree on one page. Asked of 1.0.0_SA_CTO (a design call).
