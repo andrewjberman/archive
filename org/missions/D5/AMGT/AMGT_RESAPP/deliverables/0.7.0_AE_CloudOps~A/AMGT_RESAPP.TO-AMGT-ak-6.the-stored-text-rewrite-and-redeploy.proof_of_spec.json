@@ -1,0 +1,146 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ak-6",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ak-6.the-stored-text-rewrite-and-redeploy.md",
+  "group": "D",
+  "vintage_commit": "a59724703c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "a59724703c",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ak-6.the-stored-text-rewrite-and-redeploy.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~A",
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-harvest/management/v1/VLO_US_Equity/2026-09-18.json",
+   "kind": "s3_object",
+   "commit_or_etag": "vPoEgxsvoQRgqRLhj_W0kr_h4pt_yBR2",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ],
+   "deploy_evidence": "Representative of the 251-key write set; the full list with per-key prior and new VersionId is the receipt artifact below. This key is the one both halves single out because it carries TWO entries (B2 Lusha reason + B3 officers) applied in ONE put: prior VersionId YAZVVZSFEb6DVjE2EIWl2KAKtEZPaGIe -> new vPoEgxsvoQRgqRLhj_W0kr_h4pt_yBR2, fields lusha_enrichment.reason, officers. Ledger legs L1 and L2 of NEVER-2 entry 20261002T0829Z_amgt-resapp-r61-ak6-stored-field-rewrite carry this act in full. 251 of 251 distinct keys written (8 management/v1, 234 peers/v1, 9 posture/v1), 1,188 of 1,188 entries applied, every key moved off its prior VersionId, 0 PUT failures. Per-key prior and new VersionId in ak6_store_writes.json. Written in two phases: all 1,188 before-values asserted across all 251 keys with ZERO writes first, so a mismatch anywhere would have meant zero objects touched rather than a partial act. Read back by the CTO half's own verifier: AK6 READ-BACK CLEAN: YES, with C2 1,188 of 1,188 planned fields equal to their after and C3 251 of 251 objects semantically unchanged outside the planned fields. ACT (B) WAS NOT PERFORMED: AMENDMENT 1 removed it, and the measurement it rests on is this seat's own row AMGT_RESAPP-Z-S334 from ak-2 (0 of 350 packaged members changed), so no build, no upload and no apply happened in this order."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~A/ak6_store_writes.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ],
+   "deploy_evidence": "The write receipt and the full write set: 251 of 251 keys, 1,188 of 1,188 entries, each row carrying store_key, prior_version_id, new_version_id, fields_set, byte counts and prior_nonascii. CTO condition 2 requires the FULL set be read back rather than a sample, and this file plus ledger leg L2 are what satisfy it -- AC1-AC3 grade only BA and VLO. failed: []."
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "description": "Each gating value read at ACT time rather than inherited from the halves; the rollback input checked for drift, not just recorded; the write set proven whole before any object was touched; and every absence given a positive control.",
+   "method": "(i) the three plans re-hashed inside the writer itself, the B2 plan taken from worker commit 25ac521b3d by git show with a bogus-path positive control; (ii) phase 1 GET of all 251 keys asserting all 1,188 before-values with zero writes, run first as a dry run; (iii) each key's LIVE VersionId compared to the appendix VersionId that both halves name as the rollback; (iv) the writer importing the grader's own _parts/_get/_set so field addressing cannot diverge; (v) one whole-object PUT per key with all of that key's entries, ContentType and Metadata carried over; (vi) the issuer's read-back verifier over the full population; (vii) the served routes for the two graded names, plus a per-entry served-equals-after check the criteria do not contain.",
+   "expected": "(i) all three sha256 equal the halves' table; (ii) 1,188 of 1,188 before-values match; (iii) 0 pin drift; (v) 251 puts; (vi) AK6 READ-BACK CLEAN: YES; (vii) AC1-AC3 PASS and 14 of 14 served entries equal their after.",
+   "observed": "All hold. (i) B2 d373d061..c4, B3 11518fd5..24, B4 0e77bc0c..84 MATCH; the bogus-path control fails loudly, so the git show read is not a clean-empty that would hash as a match; the worktree copy of the B2 plan happens to equal the pin, so the drain did not move it -- measured, not assumed. (ii) keys GET 251 of 251, entries asserted 1,188 of 1,188, before-mismatches 0, missing-from-base 0. (iii) drift 0: all 251 keys still sat on their appendix VersionId, so the documented rollback is exact; had one moved, copying that version back would have reverted a third party's write too, which is why drift was treated as a STOP and not a warning. (v) 251 of 251 written, 1,188 of 1,188 entries, 0 failures, 251 of 251 moved off their prior VersionId. (vi) C1-C4 all PASS, AK6 READ-BACK CLEAN: YES. (vii) AC1-AC3 PASS at their literal invocations; the per-entry served check reads 14 of 14 equal to after, 0 still serving before, 0 unlocatable.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The issuer's base arm against the deployed function, and the discriminating power of the write itself.",
+   "expected": "Per the order's comp-adversary note, AC1-AC3 FAIL at the base: b2 C1 11 of 26 code-shaped, b3 C1/C2 fail on VLO, b4 C1 2 of 12 claims carrying a status token.",
+   "observed": "Post-act every base symptom is answered on the served plane: b2 0 of 26 code-shaped (base 11 of 26); b3 VLO's 5 officers all carry person names and 0 of 5 roles carry a trailing age, with BA's 12 unchanged; b4 0 of 12 claims carry a status token (base 2 of 12). THE ACT IS ITS OWN MUTANT ARM AND THAT IS THE STRONGER READ HERE: phase 1 asserted that all 1,188 stored fields still held exactly the plans' before-values immediately before the write, so the pre-state was measured rather than quoted, and the post-state is the verifier's 1,188 of 1,188 equal to after. The instrument therefore discriminates by construction: the same field was read as before and then as after by two independent programs.",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "AC1-AC3 grade TWO names out of 251 keys, and the per-entry served check is scoped to 14 of 1,188 entries.",
+   "reason": "The criteria read only BA_US_Equity and VLO_US_Equity. The COO half names this risk itself: a partial write covering those two can PASS. The full-population assurance is therefore NOT the criteria but ledger leg L2 -- the verifier's C2 (1,188 of 1,188 stored fields equal their after) and C3 (251 of 251 objects unchanged outside the planned fields) -- plus L1's receipt listing 251 of 251 keys written. The served plane is deliberately sampled at two names; ak6_served_after.py prints its own denominator (14 of 1,188) and states it says nothing about the other 1,174."
+  },
+  {
+   "item": "The graders print 'plan entries 0 from 0 file(s); stale or unlocatable 0 []' in all three AC runs, and that line is NOT a measurement.",
+   "reason": "The grader's C0 clause is guarded by 'if a.plan:' (b_served_text.py:155-156), so with no --plan it is SKIPPED and emits no PASS or FAIL -- no C0 verdict appears in any of the three outputs, so nothing passed on an empty denominator. --plan is the grader's PRE-ACT path: C0 asserts the served value still equals before and then patches the body in memory so C1-C3 can grade post-act text before the act exists. Run post-act with --plan it would correctly FAIL, because the route now serves after. The TO's literal post-act invocation passes no --plan and is the right one. Recorded because the printed zero reads like a result and a future reader could cite it as if C0 had run."
+  },
+  {
+   "item": "The whole-object PUT re-emits bodies with ensure_ascii=True, so bytes of non-planned fields holding non-ASCII are now escaped.",
+   "reason": "Chosen so the stored object stays pure ASCII per CLAUDE.md. The PARSED value of those fields is unchanged, which is why CTO condition 3 is graded semantically; the verifier's C3 reads 251 of 251 equal against the base VersionId. A byte-level comparison would have failed here and would have been the wrong instrument, because the condition is about content, not encoding. ak6_store_writes.json records prior_nonascii per key so the change is visible rather than silent."
+  },
+  {
+   "item": "Act (B), the redeploy, was not performed.",
+   "reason": "AMENDMENT 1 removed it. Its basis is this seat's ak-2 row AMGT_RESAPP-Z-S334: 0 of the 350 packaged members changed between the deployed build (E+FAZF0f..., ak-2 at 63e78fe4f7) and the merged round-61 tree, so a redeploy would rebuild identical code. No build, upload or apply was run, and no CONTENT-DIFF or plan resource count exists for this order -- the order's section 5 asks for them, and this is why they are absent rather than omitted."
+  },
+  {
+   "item": "comp-iam was not re-run; the writes used this seat's own credentials.",
+   "reason": "The order's preflight declares the issuer ran it at the halves: the writes are PutObject on opal-data-harvest by the executor, not by the function, and the function gains no permission. 251 of 251 PUTs returned a VersionId, so the write grant is exercised rather than asserted."
+  },
+  {
+   "item": "A HALTGT checkpoint pass is cited nowhere, and no terraform ran.",
+   "reason": "Per /cloud-ops and LD-0267 the checkpoint sees only unread files directly under inbox/<serial>/ and a ~lane seat is unhaltable regardless. This order ran no apply at all."
+  },
+  {
+   "item": "No rollback was taken and none was needed.",
+   "reason": "All five legs passed. The rollback stayed exact throughout: per key, copy the appendix VersionId back over it -- never an S3 delete -- and phase 1 confirmed all 251 keys still sat on that version at act time."
+  }
+ ],
+ "surprises": [],
+ "session_log": "0.7.0_AE_CloudOps~A, site-z, session 352b911c. Second order of this session (ak-2 closed before it at b8481055c0). GO reached read/ as a file whose broker leg errored and carries no Msg-ID; the issuer sent msg 28320 as the ackable carrier and that is what was acked. NEVER-2 entry 20261002T0829Z_amgt-resapp-r61-ak6-stored-field-rewrite opened and COMMITTED BEFORE the first PUT at 872b21a, all 5 legs closed with proof, entry CLOSED. Leg L1's proof had to be rewritten: its first version rode a shell argument and bash command-substituted every backticked word out of it, so the remaining legs were closed through a list-argv subprocess with no shell in the path.",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read on ak6_verify.py and b_served_text.py --for the plan-loading and clause semantics",
+   "result": "Both load-bearing. The second explained the 'plan entries 0 from 0 file(s)' line and established that C0 is skipped rather than vacuously passed, which is the difference between a declared exclusion and a false claim of coverage."
+  },
+  {
+   "tool": "comp-schedule",
+   "invocation": "not run -- the order's preflight declares it NOT-APPLICABLE",
+   "result": "DECLARED-NOT-APPLICABLE by the issuer: no cron, alarm, monitor or cadence. Corroborated by the COO half's writers table, which records no scheduled writer on any of the three key families."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "not re-run -- RUN BY THE ISSUER at the halves",
+   "result": "See declared_exclusions. 251 of 251 PUTs returned a VersionId, so the executor's write grant is exercised, not assumed."
+  },
+  {
+   "tool": "comp-adversary",
+   "invocation": "not re-run as a tool; its base figures were answered symptom by symptom post-act",
+   "result": "Declared base 11 of 26 (b2), VLO failing C1/C2 (b3), 2 of 12 (b4); measured post-act 0 of 26, VLO clean on both, 0 of 12."
+  },
+  {
+   "tool": "comp-pipescript",
+   "invocation": "not run -- not applicable",
+   "result": "No gold/silver/bronze script and no pipeline: the act is a direct S3 rewrite of served objects under a never-widen pair."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "C1 PASS (0 of the Lusha and peers absent reasons for BA and VLO carry a code-shaped token) and C2 PASS on the deployed function; B2 EVERY SERVED REASON IS WORDS: YES -- and exit=0",
+   "method": "command",
+   "denominator": "26 served reason strings across BA and VLO on thesis and peers; the issuer's base arm records 11 of 26 carrying a code-shaped token.",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round61/checks/b_served_text.py --cell b2 --where deployed; echo \"exit=$?\"",
+   "output_evidence": "PASS, exit=0. All four route reads status 200. C1 PASS no served reason carries a code-shaped token: 0 of 26 strings, []. C2 PASS control -- the old literal is seen and the producer's reason is words: 'Contact enrichment was skipped: no company web domain is on record for this name, and a guessed domain would enrich the wrong company'. Verdict B2 EVERY SERVED REASON IS WORDS: YES. The printed 'plan entries 0 from 0 file(s)' line is the skipped C0 clause, not a measurement -- see declared_exclusions. Beyond the criterion, the per-entry served check reads 14 of 14 plan entries for BA and VLO equal to their after, 0 still serving before. Evidence: ak6-evidence/ak6_ac_b2.txt, ak6_served_after.txt.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C1, C2 and C3 PASS on the deployed function (VLO's officers carry person names and full titles with no trailing age; BA 12); B3 EVERY OFFICER CARRIES A FULL TITLE AND NO AGE: YES -- and exit=0",
+   "method": "command",
+   "denominator": "VLO's 5 served officers on both clauses, plus BA's officer count of 12 as the regression side. The B3 plan holds exactly 1 entry, so BA was never in the write set.",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round61/checks/b_served_text.py --cell b3 --where deployed; echo \"exit=$?\"",
+   "output_evidence": "PASS, exit=0. C1 PASS VLO officers carry person names, none a bare title: 5 officers, title-as-name []. C2 PASS VLO roles carry no trailing age: 0 of 5, []. C3 PASS BA officers unchanged in count: 12 (cut 12). Verdict B3 EVERY OFFICER CARRIES A FULL TITLE AND NO AGE: YES. The five served officers off the deployed body: 'R. Lane Riggs' / 'Chairman of the Board, Chief Executive Officer and President'; 'Harminder S. \"Homer\" Bhullar' / 'Senior Vice President and Chief Financial Officer'; 'Gary K. Simmons' / 'Executive Vice President and Chief Operating Officer'; 'Richard J. Walsh' / 'Executive Vice President and General Counsel'; 'Eric A. Fisher' / 'Senior Vice President Product Supply, Trading and Wholesale'. The CFO row is the one the earlier investigation named -- an embedded quoted nickname and a title that had absorbed a trailing age -- and it now serves both fields whole. Evidence: ak6-evidence/ak6_ac_b3.txt.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "C1 and C2 PASS on the deployed function (0 of BA's and VLO's posture claims carry a status token); B4 EVERY POSTURE CLAIM STATES A MISSING SCORE IN WORDS: YES -- and exit=0",
+   "method": "command",
+   "denominator": "12 served posture claims across BA and VLO; the issuer's base arm records 2 of 12 carrying a status token.",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round61/checks/b_served_text.py --cell b4 --where deployed; echo \"exit=$?\"",
+   "output_evidence": "PASS, exit=0. C1 PASS no posture claim carries a status token: 0 of 12 claims, []. C2 PASS control -- the old claims carry the token and the drafter's normalizer answers in words: 'Fit scores for both names are not measured on both presets, so no factor-based discriminat...' and 'The two names are near-identical on size and classification (log cap distance 0.006, same ...'. Verdict B4 EVERY POSTURE CLAIM STATES A MISSING SCORE IN WORDS: YES. The second control string carries a FIGURE rather than a sentinel, which is the distinction B4 is about. No model call was made by this act: every after came from the deterministic judge.plain_claim on the stored basis, and avoiding a posture regeneration (which would make an Anthropic call) is the CTO half's own third reason for choosing an in-place rewrite. Evidence: ak6-evidence/ak6_ac_b4.txt.",
+   "status": "PASS"
+  }
+ ]
+}
