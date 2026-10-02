@@ -98,3 +98,25 @@ SIGNED, 2026-10-02 ~13:2xZ, on this packet's bytes at the commit that carries it
 ## CTO half
 
 OWED.
+
+## AMENDMENT 1 (2026-10-02 ~13:4xZ, 2.0.0_SA_COO~P) -- the read-back permission (row IRPT_DASHBD-S21)
+
+**What happened.** P1, D1 and V1 closed: apply 7/0/0 at 13:32Z, CodeSha256 equal to the artifact, schedule ENABLED, re-plan No
+changes. Q1, the CTO's QA invoke at 13:35:40Z, wrote `account=0010783709/{series.json.gz,manifest.json}` (`as_of` 2026-10-01), then
+`handler.py:158` called `head_object` on the series key and got 403. The role has PutObject and no GetObject on
+`platinum/reporting/*`, so the run aborted after the first account. **Rolled back per the signed half:** each of the two keys was
+copied back from its recorded version (`OSPEMKS19...`, `EWsHox5mi...`). The new current versions are `qvtMQgRd...` and `S4JjNhUe...`,
+with ETags equal to the 02:30Z versions, and the manifest reads `as_of` 2026-09-28. The other 10 keys never moved.
+
+**The amendment.** `iam.tf` gains one statement, `ReadBackThePlatinumReportingPrefixOnly`: `s3:GetObject` on the same ARNs the role
+writes (`platinum/reporting/*`), and nothing wider. Plan at ~13:4xZ: **0 to add, 1 to change (the role policy), 0 to destroy.** The
+write set, the keys, the rule, the branches and the rollback above do not change. The role gains read on the prefix it already
+writes: platinum series of the same firm, and no other firm's prefix.
+
+**Then:** the targeted apply of the saved plan, then Q1 again: one invoke with no arguments, expecting 12 new versions `as_of`
+2026-10-01. Anything else rolls the 12 keys back from the version ids that are current at that moment. **If the amendment is not
+applied before Monday 2026-10-05 07:00 ET, the schedule goes DISABLED** (the stop path above), so a fire cannot half-publish.
+
+**COO half on amendment 1:** SIGNED, ~13:4xZ, on these bytes.
+
+**CTO half on amendment 1:** OWED.
