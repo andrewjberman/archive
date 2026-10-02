@@ -27,8 +27,12 @@ B4 clauses (CTO msg 28264, analysis @b74c090804: thesis.posture.basis[*].claim):
   C1 0 claims carry a status token (\\bABSENT\\b | \\bNULL\\b | \\bMISSING\\b, case-sensitive: a lower-case word in a sentence is fine)
   C2 control: the two pre-round claims (BA basis[1], VLO basis[5]) carry the token, and the drafter's normalizer
      `lib.research.posture.judge.plain_claim` answers each without it
+B5 clauses (CTO msg 28318, analysis @2b1e921054: thesis.management.ceo_public_profile.basis):
+  C1 BA's and VLO's served basis carries neither "SERP" nor "contract's search"
+  C2 control: the two pre-round literals carry them, and the producer `enrich.ceo_public_profile` (no IR domain on file, a CEO
+     on the roster) answers a basis with neither
 Verdicts: B2 EVERY SERVED REASON IS WORDS: YES|NO / B3 EVERY OFFICER CARRIES A FULL TITLE AND NO AGE: YES|NO /
-          B4 EVERY POSTURE CLAIM STATES A MISSING SCORE IN WORDS: YES|NO
+          B4 EVERY POSTURE CLAIM STATES A MISSING SCORE IN WORDS: YES|NO / B5 THE CEO SEARCH BASIS IS WORDS: YES|NO
 """
 from __future__ import annotations
 
@@ -50,6 +54,11 @@ OLD_CLAIMS = (
     "Fit scores for both names are ABSENT (unmeasured) on both presets, so no factor-based discrimination is possible.",
     "The two names are near-identical on size and classification (log cap distance 0.006, same sector and industry group), so "
     "the comparison turns on evidence, and fit scores are ABSENT for both and therefore unmeasured on either side.",
+)
+SERP = re.compile(r"SERP|contract's search")
+OLD_BASES = (
+    "no declared IR domain for this name: a SERP not scoped to the company's own domain is not the contract's search",
+    "the SERP returned 2 url(s) and none on boeing.com -- ABSENT is the honest result, never a page from another host",
 )
 TITLE_WORDS = {"senior", "vice", "executive", "president", "chief", "officer", "chairman", "director", "general", "counsel"}
 BA_NAMES_AT_CUT = 12
@@ -93,7 +102,7 @@ def _absent_reasons(o, path="", in_absent=False):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cell", choices=("b2", "b3", "b4"), required=True)
+    ap.add_argument("--cell", choices=("b2", "b3", "b4", "b5"), required=True)
     ap.add_argument("--where", choices=("local", "deployed"), required=True)
     ap.add_argument("--plan", action="append", default=[])
     a = ap.parse_args()
@@ -163,6 +172,21 @@ def main():
         clause("C2 control: the old literal is seen; the producer's reason is words", bool(CODE.search(OLD_LUSHA)) and reason and not CODE.search(reason),
                f"producer reason now: {reason!r}")
         print(f"B2 EVERY SERVED REASON IS WORDS: {'YES' if all(ok) else 'NO'}")
+    elif a.cell == "b5":
+        bases = []
+        for n in NAMES:
+            prof = ((bodies[(n, "thesis")].get("management") or {}).get("ceo_public_profile")) or {}
+            if isinstance(prof.get("basis"), str):
+                bases.append((f"{n}/management.ceo_public_profile.basis", prof["basis"]))
+        bad = [(p, b[:120]) for p, b in bases if SERP.search(b)]
+        clause("C1 no served CEO-search basis says SERP or contract's search", len(bases) == len(NAMES) and not bad,
+               f"{len(bad)} of {len(bases)} bases: {bad[:2]}")
+        from lib.research.management import enrich
+
+        made = (enrich.ceo_public_profile([{"name": "Jane Q. Doe", "role": "President and Chief Executive Officer"}], None) or {}).get("basis")
+        clause("C2 control: the old bases are seen; the producer's no-domain basis is words",
+               all(SERP.search(b) for b in OLD_BASES) and isinstance(made, str) and not SERP.search(made), f"producer basis now: {made!r}")
+        print(f"B5 THE CEO SEARCH BASIS IS WORDS: {'YES' if all(ok) else 'NO'}")
     elif a.cell == "b4":
         claims = []
         for n in NAMES:
