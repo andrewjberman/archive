@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-298",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-298.fee-basis-gross-and-build-keeps-tracked.md",
+    "group": "OTHER",
+    "vintage_commit": "8b1df51795"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "8b1df51795",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-298.fee-basis-gross-and-build-keeps-tracked.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~101",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/holdings_gold.py",
+      "kind": "script",
+      "commit_or_etag": "394c246fb6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fee_basis assigned GROSS (was NET); method TIME_WEIGHTED and annualization NONE unchanged; served label moves at the next adapter deploy, not deployed",
+      "artifact_covered_by": [
+        "IB35-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/tests/test_holdings_gold_fee_basis.py",
+      "kind": "test",
+      "commit_or_etag": "394c246fb6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "2 tests through hg.calculate with synthetic partitions: measurement_basis.fee_basis GROSS (not NET); method and annualization unchanged",
+      "artifact_covered_by": [
+        "IB35-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/build-and-upload.sh",
+      "kind": "script",
+      "commit_or_etag": "394c246fb6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "cleanup_staged asks git ls-files per staged name, restores a tracked path from HEAD and rm -f only an untracked one; refuse_dirty_tracked_destinations refuses by name a tracked destination with uncommitted edits before staging; the script was not run against any function",
+      "artifact_covered_by": [
+        "IB35-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/test_build_staging_keeps_tracked.py",
+      "kind": "test",
+      "commit_or_etag": "394c246fb6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 tests in a temporary git repo over the functions lifted from the script: tracked member keeps HEAD bytes after cleanup_staged, untracked staged member removed, deleted tracked member restored, dirty tracked destination refused by name, clean tracked and untracked destinations admitted",
+      "artifact_covered_by": [
+        "IB35-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB35-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r35/p35_1_ac1_fee_basis_gross.py\" . -> IB35-1-AC1 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r35/p35_1_ac1_fee_basis_gross.py\" .",
+      "output_evidence": "OK: holdings_gold.py assigns GROSS; 2 passed, 0 failed\nIB35-1-AC1 PASS (rc=0)",
+      "denominator": "2 of 2 new tests passed (>= 2 required); 1 of 1 fee_basis assignment carries GROSS, 0 carry NET",
+      "expect": "IB35-1-AC1 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (NET)."
+    },
+    {
+      "criterion_id": "IB35-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r35/p35_1_ac2_build_keeps_tracked.py\" . -> IB35-1-AC2 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r35/p35_1_ac2_build_keeps_tracked.py\" .",
+      "output_evidence": "OK: cleanup_staged consults git ls-files; 5 passed, 0 failed\nIB35-1-AC2 PASS (rc=0)",
+      "denominator": "5 of 5 new tests passed (>= 2 required), run in a temporary git repo; cleanup_staged body names ls-files",
+      "expect": "IB35-1-AC2 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (cleanup did rm -f on every staged name)."
+    },
+    {
+      "criterion_id": "IB35-1-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r35/p35_1_ac3_suites_unchanged.py\" . -> IB35-1-AC3 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r35/p35_1_ac3_suites_unchanged.py\" .",
+      "output_evidence": "OK: performance 239 passed; export 168 passed; test_render_ports_packaging.py 3 passed\nIB35-1-AC3 PASS (rc=0)",
+      "denominator": "three suites, each in its own process: performance 239 (237 baseline + 2 new), export 168, packaging 3; 0 failed",
+      "expect": "IB35-1-AC3 PASS",
+      "status": "PASS",
+      "status_reason": "Base was PASS (regression guard); still PASS."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The cleanup tests pair the tracked arm with the untracked arm in one run, and the refusal test with the admitted case; the fee_basis test asserts GROSS and not NET.",
+      "expected": "tracked kept at HEAD bytes, untracked removed, dirty tracked refused by name, clean admitted, GROSS not NET",
+      "observed": "test_build_staging_keeps_tracked.py 5 passed; test_holdings_gold_fee_basis.py 2 passed",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline unit tests",
+      "observed": "checks run once after the code commit, rc=0",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-W101-S16"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p35_1_ac1_fee_basis_gross.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r35/p35_1_ac1_fee_basis_gross.py\" .",
+      "result": "IB35-1-AC1 PASS"
+    },
+    {
+      "tool": "p35_1_ac2_build_keeps_tracked.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r35/p35_1_ac2_build_keeps_tracked.py\" .",
+      "result": "IB35-1-AC2 PASS"
+    },
+    {
+      "tool": "p35_1_ac3_suites_unchanged.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r35/p35_1_ac3_suites_unchanged.py\" .",
+      "result": "IB35-1-AC3 PASS"
+    }
+  ]
+}
