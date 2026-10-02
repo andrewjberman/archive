@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-ui-2.ranking-panels",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "1e8515aa01",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-ui-2.ranking-panels.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1e8515aa01"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/render.py",
+      "kind": "script",
+      "commit_or_etag": "29f98e97d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 6 worker cell; nothing deploys from a worker; LOCAL worktree commit",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "J1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6ui2_ranking_panels.py",
+      "kind": "script",
+      "commit_or_etag": "29f98e97d1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 6 worker cell; nothing deploys from a worker; LOCAL worktree commit",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "J1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a 0-ranked fund-period renders ONE data-empty-state line with its count and no table shells; a refused fund-period shows 'Rankings refused' with data-refused and no table -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/ui-2.AC1.py",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "output_evidence": "IDVZ MTD text: Nothing ranked for IDVZ, month to date. None of its 3 holding(s) has a price on file for this period, so nothing can be ranked. 0 ranked; 3 without a price Month to date (October 2026), 2026-07-01 to 2026-10-02.\nIDVZ MTD: data-empty-state elements 1 | <table count 0\nOK:   a 0-ranked fund x period renders ONE empty-state element and no table\nOK:   the empty-state line carries the count of holdings without a price (3)\nETFT YTD panel: <div class=\"rf-rank\" data-rank-fund=\"ETFT\" data-rank-period=\"YTD\"><div class=\"rf-missing\" data-refused=\"total_below_minus_100pct\"><b>Rankings refused.</b> The rankings for this fund and period are withheld because the fund&#x27;s period tot\nOK:   a refused fund x period shows its refused state: no table, no empty state\nOK:   control: a ranked fund x period renders its tables\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK (0 FAIL)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "Unclassified is never a ranked row: one data-unclassified-share footnote with its % (accepts today's data shape and sx-1's) -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/ui-2.AC2.py",
+      "expect": "AC2 RESULT: PASS 0 failures",
+      "output_evidence": "OLD strongest: [('1', 'Energy'), ('3', 'Industrials')] | weakest: [('1', 'Financials')]\nOK:   OLD shape: no ranked row names the no-sector bucket (found [])\nNEW strongest: [('1', 'Energy'), ('2', 'Industrials')] | weakest: [('1', 'Financials')]\nOLD:\n  footnote: 1 0.2326 | 23.3% of this period's sector contribution is from holdings with no GICS sector in the source file; it is not ranked.\nNEW:\n  footnote: 1 0.2326 | 23.3% of this period's sector contribution is from holdings with no GICS sector in the source file; it is not ranked.\nOK:   one footnote under the sector tables states the no-sector share (0.233, '23%')\nOK:   control (NEW shape): the real sectors rank 1, 2; Financials is weakest; no Unclassified row\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (0 FAIL)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the checked period is the first of MTD/QTD/YTD that ranks at least one holding for the opening fund, else MTD -- expect: AC3 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/ui-2.AC3.py",
+      "expect": "AC3 RESULT: PASS 0 failures",
+      "output_evidence": "publish: OK | opening fund radio: ['rf-fund-IDVZ'] | checked period: ['rf-period-QTD']\nOK:   IDVZ opens; its MTD ranks nothing, so the page opens on Quarter to date\ncontrol publish: OK | checked period: ['rf-period-MTD']\nOK:   control: when MTD ranks a holding, the page opens on Month to date\nAC3 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "2 of 2 checks OK (0 FAIL)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "RFW-U04 (one count chip per block; the method text once per page behind an info element) and U02's second half (an empty period's switch shows its state); graded by 3.0.0_SA_CVO~RV at L9 on the served page",
+      "method": "manual_read_with_citation",
+      "invocation": "render.render_page over the tests/test_r6ui2_ranking_panels.py fixture (IDVZ: MTD unpriced, QTD and YTD ranked)",
+      "judgment": true,
+      "output_evidence": "method-info elements 1 | 'weight times its price return' occurrences 1\ncount chips 3 | empty-state lines 1 | tables in MTD panel 0\nchecked period: ['rf-period-QTD'] | switch state spans ['<span class=\"rf-state\" data-state-fund=\"IDVZ\">(nothing ranked)</span>']",
+      "denominator": "1 fixture page, 1 fund, 3 periods (served-page read is the CVO's at L9)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded by 3.0.0_SA_CVO~RV at L9 on the served page (positive control: the served 2026-10-02 page rv-publish-1002g)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "ui-2 checks run at base e5e6923fe1 before the change.",
+      "expected": "ui-2.AC1, AC2, AC3 each FAIL at base.",
+      "observed": "At base: AC1 FAIL 3 failures (refused panel raised IndexError), AC2 FAIL 2 failures, AC3 FAIL 1 failure; after the change all three PASS 0 failures; package suite 431 passed, 2 skipped, 0 failed; ui-1 AC1-AC3, rk-2 AC3, round-5 pg-1 AC1-AC2 still PASS.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Each AC run at base and after the change; package suite run after the change.",
+      "observed": "PASS 0 failures each time; 431 passed, 2 skipped, 0 failed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~6 <0.9.0_WK_ETFS_RIVALS~6@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "29f98e97d1"
+    }
+  ]
+}
