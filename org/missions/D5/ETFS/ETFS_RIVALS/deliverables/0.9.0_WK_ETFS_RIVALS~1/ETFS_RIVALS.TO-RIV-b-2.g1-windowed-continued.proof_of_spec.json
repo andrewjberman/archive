@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-b-2.g1-windowed-continued",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "53784a663e",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-b-2.g1-windowed-continued.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "53784a663e"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_canonical_shape.py",
+      "kind": "script",
+      "commit_or_etag": "bf1374f911",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy; checks run against a local sink",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/sweep.py",
+      "kind": "script",
+      "commit_or_etag": "bf1374f911",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy; checks run against a local sink",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/markers.py",
+      "kind": "script",
+      "commit_or_etag": "bf1374f911",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy; checks run against a local sink",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r5b1_g1_windowed.py",
+      "kind": "script",
+      "commit_or_etag": "bf1374f911",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy; checks run against a local sink",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a 50-date marker batch with budget_s 0.001 returns PARTIAL with no marker, then completes across several invocations with exactly one G1 object per date; without a budget it completes in one -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round5/checks/b-2.AC1.py",
+      "output_evidence": "fixture: 50 dates, 100 silver outputs in the marker\nfirst: PARTIAL {'written_new': 1, 'rows_written': 2, 'report_dates': ['2026-07-22'], 'no_rows': [], 'home_producer_unread': ['IDVZ', 'PFOE'], 'gics_resolved': {'2026-07-22': 0\nOK:   the first budgeted invocation returns PARTIAL and writes no output marker\ninvocations 50, final OK, G1 objects per date [1]\nOK:   the batch completes across 50 invocations (more than one)\nOK:   every date has exactly one G1 object\ncontrol (no budget): OK objects per date [1]\nOK:   control: without budget_s the batch completes in one invocation\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK (50 dates; 50 invocations; one G1 object per date on all 50; control completes in 1); run under `timeout 600` (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant: the `if rd in done` skip in gold_canonical_shape.handler_entry disabled (every invocation rebuilds the dates the cursor records), then tests/test_r5b1_g1_windowed.py.",
+      "expected": "the continuation test fails (no date rebuilt).",
+      "observed": "1 failed (test_reinvoking_the_same_event_continues_without_rebuilding_a_date), 8 passed; restored, 9 passed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "b-2.AC1 run twice (before and after the commit); rivalfunds package suite run 3 times.",
+      "observed": "same PASS line each time; suite 315 passed, 2 skipped, 0 failed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S40"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "4fe8d6dc4d"
+    }
+  ]
+}
