@@ -1,0 +1,139 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ETFS_RIVALS.TO-RIV-e-2.dividend-currency",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-e-2.dividend-currency.md",
+  "group": "OTHER",
+  "vintage_commit": "1e8515aa01"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+  "vintage_commit": "1e8515aa01",
+  "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-e-2.dividend-currency.md"
+ },
+ "assignee": "0.9.0_WK_ETFS_RIVALS~3",
+ "session_log": "Worker 0.9.0_WK_ETFS_RIVALS~3, L7 subagent of 2.0.0_SA_COO~RV, worktree C:/tmp/wk-riv6-3 on branch wk-ETFS_RIVALS-3, TREE-OK. Cell RIV-e-2 built at 2a655a0180/6ccc54f65e; amendment A1 (minor-unit currencies, AC4) built after 30cf6aab03: MINOR_UNIT table in gold_trade_schedule.py, G5 converts at major rate / divisor. AC1-AC4 PASS; x-1 AC1-AC3 PASS; package suite 424 passed, 2 skipped, 0 failed. No Bloomberg call, no S3 write, no deploy.",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+   "kind": "script",
+   "commit_or_etag": "2a655a0180",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "plan fields [DVD_HIST_ALL, DVD_CRNCY]; G3 currency from DVD_CRNCY; no deploy, no vendor call",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+   "kind": "script",
+   "commit_or_etag": "2a655a0180",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "dividend_ccy; G5 income conversion uses it; MINOR_UNIT (GBp/GBX, ZAr/ZAc, ILs/ILa) converts at major rate/100; no deploy",
+   "artifact_covered_by": [
+    "AC3",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6e2_dividend_currency.py",
+   "kind": "test",
+   "commit_or_etag": "2a655a0180",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "6 tests pass, incl. a G5 conversion arm (G3 currency over the suffix; control unchanged)",
+   "artifact_covered_by": []
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_e1_enrichment_bloomberg.py",
+   "kind": "test",
+   "commit_or_etag": "2a655a0180",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "three DVD_HIST_ALL field pins now read [DVD_HIST_ALL, DVD_CRNCY]: the plan's field list changed by design",
+   "artifact_covered_by": []
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6e2_minor_units.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "2 tests pass: minor units at major/100; major control",
+   "artifact_covered_by": [
+    "AC4"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the offline plan's fields list DVD_CRNCY beside DVD_HIST_ALL -- expect: AC1 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/e-2.AC1.py",
+   "output_evidence": "status: OK | plan fields: ['DVD_HIST_ALL', 'DVD_CRNCY']\nOK:   control: the plan still requests DVD_HIST_ALL\nOK:   the plan requests DVD_CRNCY\nAC1 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "2 of 2 checks OK",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "G3 currency comes from DVD_CRNCY; NULL without it -- expect: AC2 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/e-2.AC2.py",
+   "output_evidence": "{'AAPL US Equity': None, 'VOD LN Equity': 'GBp'}\nOK:   VOD LN's dividend row carries currency GBp from DVD_CRNCY\nOK:   control: no DVD_CRNCY in the response leaves currency NULL\nAC2 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "2 of 2 checks OK",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "dividend_ccy: a G3 currency wins ('g3'), the suffix table answers labelled 'suffix_table', the LN/SJ/IT base rule kept -- expect: AC3 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/e-2.AC3.py",
+   "output_evidence": "LN+g3: ('USD', 'g3') | JP no g3: ('JPY', 'suffix_table') | LN no g3: ('USD', 'suffix_table') | BASE_CCY: USD\nOK:   a G3 currency wins and is labelled g3\nOK:   with no G3 currency the suffix table answers, labelled suffix_table\nOK:   control: LN without G3 keeps the mixed-unit base rule, labelled\nAC3 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "3 of 3 checks OK",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "GBp/GBX and ZAr/ZAc dividends convert at GBP/100 and ZAR/100; control: a major currency (USD, JPY) converts at its own rate -- expect: AC4 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/e-2.AC4.py",
+   "output_evidence": "(a) GBp/ZAr: income_received_base 52.0500 want 52.0500\nOK:   (a) GBp and ZAr dividends convert at GBP/100 and ZAR/100 (today: UNCONVERTED)\n(b) GBX/ZAc: income_received_base 52.0500 want 52.0500\nOK:   (b) GBX and ZAc read as GBp and ZAr\n(c) USD/JPY: income_received_base 896.8000 want 896.8000\nOK:   (c) control: a major currency (SHEL LN paying USD; JPY) converts at its own rate\nAC4 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "3 of 3 checks OK",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Not run: the face names no mutant control for this cell.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC1-AC4 and x-1 AC1-AC3 run once each under timeout 120; whole package suite run.",
+   "observed": "all PASS; package 424 passed, 2 skipped, 0 failed.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Flipping the task order's <status> to complete",
+   "reason": "The face leaves the flip to the issuer."
+  },
+  {
+   "item": "W3-S12 child identity",
+   "reason": "Code only after I-2 names a field (cell text)."
+  }
+ ],
+ "surprises": [
+  "ETFS_RIVALS-Z-W3-S20"
+ ],
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~3 <0.9.0_WK_ETFS_RIVALS~3@opal.agent>\" -F <msgfile> -- <paths>",
+   "result": "2a655a0180"
+  }
+ ]
+}

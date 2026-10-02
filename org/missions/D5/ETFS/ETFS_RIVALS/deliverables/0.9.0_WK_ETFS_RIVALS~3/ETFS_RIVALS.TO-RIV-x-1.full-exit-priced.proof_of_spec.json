@@ -1,0 +1,110 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ETFS_RIVALS.TO-RIV-x-1.full-exit-priced",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-x-1.full-exit-priced.md",
+  "group": "OTHER",
+  "vintage_commit": "fb6b9d0b51"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+  "vintage_commit": "fb6b9d0b51",
+  "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-x-1.full-exit-priced.md"
+ },
+ "assignee": "0.9.0_WK_ETFS_RIVALS~3",
+ "session_log": "Worker 0.9.0_WK_ETFS_RIVALS~3, L7 subagent of 2.0.0_SA_COO~RV, worktree C:/tmp/wk-riv6-3 on branch wk-ETFS_RIVALS-3, TREE-OK, based at fb6b9d0b51 (carries A1). Cell RIV-x-1 and the A1 test pins built at ab0a58eaa4. AC1, AC2, AC3 PASS. Package suite: 422 passed, 2 skipped, 0 failed; e-2 checks and tests still pass. Row Z-W3-S20 disarmed; row Z-W3-S21 records it (no RESOLVED disposition exists in the schema). No Bloomberg call, no S3 write, no deploy.",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+   "kind": "script",
+   "commit_or_etag": "ab0a58eaa4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "est_price_source in SCHEMA/COLUMNS; full exits (absent or at quantity 0 later) priced from the prior valuation; no deploy",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6x1_full_exit_priced.py",
+   "kind": "test",
+   "commit_or_etag": "ab0a58eaa4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "4 tests pass",
+   "artifact_covered_by": []
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_s4_security_market.py",
+   "kind": "test",
+   "commit_or_etag": "ab0a58eaa4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A1: three DVD_HIST_ALL field pins read [DVD_HIST_ALL, DVD_CRNCY]; nothing else changed",
+   "artifact_covered_by": []
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "a line kept at quantity 0 and a line absent from the later report are both exits priced from the prior valuation (50.0 / -50,000), labelled prior_valuation -- expect: AC1 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/x-1.AC1.py",
+   "output_evidence": "est_price_source in COLUMNS: True\n  ATD CN Equity: action exit est_price 50.0 est_notional -50000.0 base -50000.0 source prior_valuation\n  GONE CN Equity: action exit est_price 50.0 est_notional -50000.0 base -50000.0 source prior_valuation\nOK:   a line carried at quantity 0 in the later report is an exit (today: a trim)\nOK:   the zero-later exit is priced: est_price 50.0, est_notional = est_notional_base = -50,000 (today: n/a)\nOK:   the zero-later exit's est_price_source is prior_valuation\nOK:   the absent-later exit: est_price 50.0, est_notional = est_notional_base = -50,000\nOK:   the absent-later exit's est_price_source is prior_valuation\nAC1 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "5 of 5 checks OK",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "control: trims and adds equal today's output exactly -- expect: AC2 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/x-1.AC2.py",
+   "output_evidence": "rows: [('ADD US Equity', 'add'), ('ATD CN Equity', 'exit'), ('TRM US Equity', 'trim')]\n  TRM US Equity: differs from base on nothing\nOK:   control: the trim row of TRM US Equity is identical to the base output\n  ADD US Equity: differs from base on nothing\nOK:   control: the add row of ADD US Equity is identical to the base output\nAC2 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "2 of 2 checks OK",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "control: 0->0 rows stay exit with no price or notional; a line at 0 on both reports produces no row -- expect: AC3 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/x-1.AC3.py",
+   "output_evidence": "window status: [None] | rows: [('GONE CN Equity', 'exit'), ('Z0 US Equity', 'exit'), ('Z1 US Equity', 'exit')]\nOK:   control: the window is inferred (not refused) and has its exit\n  Z0 US Equity: action exit shares 0.0 -> 0.0 est_price nan est_notional nan base nan source nan\nOK:   Z0 US Equity: the 0 -> 0 row is as today (action exit, shares 0 -> 0)\nOK:   Z0 US Equity: no price or notional is invented for a line that held no shares\n  Z1 US Equity: action exit shares 0.0 -> 0.0 est_price nan est_notional nan base nan source nan\nOK:   Z1 US Equity: the 0 -> 0 row is as today (action exit, shares 0 -> 0)\nOK:   Z1 US Equity: no price or notional is invented for a line that held no shares\nOK:   a line at quantity 0 on both reports yields no row\nAC3 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "6 of 6 checks OK",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Not run: the face names no mutant control for this cell.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "AC1-AC3 run once each under timeout 120; whole package suite run.",
+   "observed": "AC1-AC3 PASS. Package: 422 passed, 2 skipped, 0 failed.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Flipping the task order's <status> to complete",
+   "reason": "The face leaves the flip to the issuer."
+  },
+  {
+   "item": "Setting row Z-W3-S20 to RESOLVED in place",
+   "reason": "The schema has no RESOLVED disposition and an existing row is never edited; filed as row Z-W3-S21."
+  }
+ ],
+ "surprises": [
+  "ETFS_RIVALS-Z-W3-S21"
+ ],
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~3 <0.9.0_WK_ETFS_RIVALS~3@opal.agent>\" -F <msgfile> -- <paths>",
+   "result": "ab0a58eaa4"
+  }
+ ]
+}
