@@ -134,6 +134,19 @@ def main():
         ticked = [r for r in rows if r.get("ticker")]
         clause("C1 every chatter row carries ticker, classification and places_moved", rows and len(keyed) == len(rows), f"{len(keyed)} of {len(rows)}")
         clause("C2 every chatter row's ticker is non-empty", rows and len(ticked) == len(rows), f"{len(ticked)} of {len(rows)}")
+        # AMENDMENT 1 (CTO msg 28553, DSGN FWD-24): the overlay's breakout_price row serves places_moved from the rankings row
+        st, rk = call(PREFIX + "/lead-panel/rankings/breakout/price")
+        vrow = next((r for r in ((rk or {}).get("rows") or []) if r.get("security_key") == "VLO_US_Equity"), {})
+        st, ov = call(PREFIX + "/security/VLO_US_Equity/overlay")
+        bp = (ov or {}).get("breakout_price") or {}
+        clause("C3 VLO's overlay breakout_price.places_moved equals its rankings row", "places_moved" in bp
+               and bp.get("places_moved") == vrow.get("places_moved") and vrow.get("places_moved") is not None,
+               f"overlay {bp.get('places_moved')!r} ranking {vrow.get('places_moved')!r}")
+        st, ov2 = call(PREFIX + "/security/ROG_SW_Equity/overlay")
+        bp2 = (ov2 or {}).get("breakout_price") or {}
+        reason = bp2.get("places_moved_reason") or (ov2 or {}).get("places_moved_reason")
+        clause("C4 an unranked name (ROG_SW_Equity) serves the reason instead", bp2.get("places_moved") is None and bool(reason),
+               f"places_moved {bp2.get('places_moved')!r} reason {str(reason)[:80]!r}")
     elif a.cell == "c4":
         for key in ("BA_US_Equity", "VLO_US_Equity"):
             st, b = call(f"{PREFIX}/security/{key}/peers")
