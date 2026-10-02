@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-an-4.move-labels-provenance",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-4.move-labels-provenance.md",
+  "group": "OTHER",
+  "vintage_commit": "ee8c3482fae8c8e1e4e6523366ee8a066feb456d"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "ee8c3482fae8c8e1e4e6523366ee8a066feb456d",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-4.move-labels-provenance.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~213",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/monthly_chatter.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: _places_moved_fields serves places_moved_axis (TRENDING_PRICE) and places_moved_window_days. Not deployed.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: read_security_overlay (axis/window on the breakout_price row and axis_reads entry; provenance key); NEW _stamp_iso, _overlay_provenance. Not deployed.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_move_labels_and_overlay_provenance.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: 7 hermetic tests.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_overlay_check_face.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: the exact overlay key-set assertion now includes provenance.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every test passes, your new tests included, and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/; echo \"exit=$?\"",
+   "output_evidence": "412 passed, 202 warnings in 78.51s (0:01:18)\nexit=0",
+   "denominator": "412 of 412 tests passed (7 new in test_move_labels_and_overlay_provenance.py), run from C:/tmp/r64-213",
+   "status": "PASS",
+   "expect": "412 passed[\\s\\S]*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C1 PASS; C2 PASS for BA, AMD and VLO; R64 C13 SERVED: YES -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c13 --where local; echo \"exit=$?\"",
+   "output_evidence": "PASS C1 every chatter places_moved names its axis and window 94 of 94 labeled; e.g. []\nPASS C2 BA_US_Equity overlay provenance names filings, harvested news and Bloomberg with a last run or reason inputs ['bloomberg', 'filings', 'harvested_news'] missing-or-bare []\nPASS C2 AMD_US_Equity overlay provenance names filings, harvested news and Bloomberg with a last run or reason inputs ['bloomberg', 'filings', 'harvested_news'] missing-or-bare []\nPASS C2 VLO_US_Equity overlay provenance names filings, harvested news and Bloomberg with a last run or reason inputs ['bloomberg', 'filings', 'harvested_news'] missing-or-bare []\nR64 C13 SERVED: YES\nexit=0",
+   "denominator": "4 of 4 clauses PASS (C1: 94 of 94 chatter rows with a places_moved labelled; C2: 3 of 3 names)",
+   "status": "PASS",
+   "expect": "PASS C1[\\s\\S]*PASS C2 BA_US_Equity[\\s\\S]*PASS C2 AMD_US_Equity[\\s\\S]*PASS C2 VLO_US_Equity[\\s\\S]*R64 C13 SERVED: YES\\s+exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Base-state control: the same c13 check run on the unmodified worktree before any edit.",
+   "expected": "C1 FAIL (0 of 94 labelled) and C2 FAIL on BA, AMD, VLO (inputs []).",
+   "observed": "FAIL C1 0 of 94 labeled; FAIL C2 x3 inputs []; R64 C13 SERVED: NO.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 run twice on the final tree (412 passed each); AC2 run twice.",
+   "observed": "412 passed each time; C13 SERVED: YES each time.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A deploy of the Lambda or any store write",
+   "reason": "Out of BOUNDS by the order: no deploy, no store write; the local c13 run makes only the reads the functions already make."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~213/AMGT_RESAPP.TO-AMGT-an-4.move-labels-provenance.SESSION_LOG.md",
+ "compiler_tools": [
+  {
+   "tool": "python -m py_compile",
+   "invocation": "python -m py_compile lib/research/api/monthly_chatter.py lib/research/api/scoped_amgt.py lib/research/api/tests/test_move_labels_and_overlay_provenance.py lib/research/api/tests/test_overlay_check_face.py",
+   "result": "COMPILE-OK"
+  },
+  {
+   "tool": "ruff",
+   "invocation": "python -m ruff check lib/research/api/monthly_chatter.py lib/research/api/scoped_amgt.py lib/research/api/tests/test_move_labels_and_overlay_provenance.py lib/research/api/tests/test_overlay_check_face.py --target-version py39",
+   "result": "All checks passed"
+  }
+ ]
+}
