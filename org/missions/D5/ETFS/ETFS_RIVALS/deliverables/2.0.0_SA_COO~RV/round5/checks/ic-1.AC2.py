@@ -2,7 +2,8 @@
 
 The S3 sink is wrapped so any put raises. Expect:
   - one holdings row per universe fund (the denominator equals `len(universe.entries())`);
-  - price and gics rows for the same securities (equal, non-zero counts), and at least one price `arrived` (G4 holds 2026-09-29);
+  - price and gics rows for the same securities (equal, non-zero counts), and at least one gics `arrived` (G4 holds 2026-09-29
+    GICS but no price field, row Z-S14);
   - control: every status is in {arrived, missing, stale}, and every missing row carries a reason."""
 import pathlib
 import sys
@@ -36,7 +37,9 @@ def run(v):
           f" | gics rows {len(gics)} (arrived {int((gics.status == 'arrived').sum())})")
     print(hold[["subject", "status", "reason"]].to_string(index=False))
     v.check(len(hold) == len(ents), "one holdings row per universe fund")
-    v.check(len(px) == len(gics) > 0 and int((px.status == "arrived").sum()) > 0, "price and gics rows match, some prices arrived")
+    # issuer amendment 2026-10-02 (row Z-S14): served G4 carries no price field (px_close 0 of 172 rows), so the clause
+    # reads the gics rows; the census reporting every price missing is the truth, not a defect
+    v.check(len(px) == len(gics) > 0 and int((gics.status == "arrived").sum()) > 0, "price and gics rows match, some gics arrived")
     v.check(set(out["status"]) <= {"arrived", "missing", "stale"}
             and out[out.status == "missing"]["reason"].fillna("").astype(str).str.len().gt(0).all(),
             "control: statuses in the enum, every missing row carries a reason")
