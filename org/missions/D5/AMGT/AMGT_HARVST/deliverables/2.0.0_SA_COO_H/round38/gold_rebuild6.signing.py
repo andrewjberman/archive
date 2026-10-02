@@ -50,7 +50,7 @@ from lib.research.harvest import store  # noqa: E402
 
 TONE = ("sentiment_finbert_label", "sentiment_finbert_score", "sentiment_scorer")
 QFIELDS = {"publishers_enabled", "publishers_covered", "publishers_covered_codes", "publishers_found_codes"}
-OUT = os.path.join(HERE, "gold_rebuild6_signing.json")
+OUT = os.path.join(HERE, "gold_rebuild6_signing%s.json" % ("_strict" if os.environ.get("HVST_R6_STRICT") == "1" else ""))
 STATUS_RANK = {"DENIED": 0, "PARTIAL": 1, "COMPLETE": 2}
 
 
@@ -96,9 +96,19 @@ def main():
     served_m = pg._latest_gold_snapshot_rows(pg.GOLD_TABLE)
     served_d = pg._latest_gold_snapshot_rows(pg.GOLD_DAILY_TABLE)
     cm = sg.CapturingClient(real)
-    pg.build_mention(securities, as_of, client=cm)
+    strict = os.environ.get("HVST_R6_STRICT") == "1"
+    if strict:
+        # STRICT variant (the quarantine ALONE): the served mention snapshot minus the quarantined rows, each row
+        # gaining the 3 tone fields as NULL; nothing is added from collection since rebuild #5. Serialized through the
+        # builder's own writer and schema, so the bytes are what the act would put.
+        rows = [dict(r, **{f: None for f in TONE}) for r in served_m if not pg.is_quarantined(r)]
+        pg.write_gold(pg.GOLD_TABLE, rows, as_of, store.stamp(datetime.datetime.now(datetime.timezone.utc)),
+                      schema=pg.GOLD_MENTION_SCHEMA, client=cm)
+    else:
+        pg.build_mention(securities, as_of, client=cm)
     (mkey, mbody), = cm.puts.items()
     mention = pq.read_table(io.BytesIO(mbody)).to_pylist()
+    print("VARIANT: %s" % ("STRICT (served minus quarantined, nothing added)" if strict else "REBUILD (from silver)"))
     orig = pg._latest_gold_snapshot_rows
     pg._latest_gold_snapshot_rows = lambda table, client=None: mention if table == pg.GOLD_TABLE else orig(table, client=client)
     cd = sg.CapturingClient(real)
@@ -116,6 +126,11 @@ def main():
     ft_gone = sum(1 for r in served_ft if mk(r) not in nm)
     m_gone_nonft = [k for k in om if k not in nm]
     m_changed = [k for k in nm if k in om and nm[k] != om[k]]
+    om_rows = {mk(r): pre(r) for r in served_m if not is_q(r)}
+    nm_rows = {mk(r): pre(r) for r in mention}
+    changed_field_census = collections.Counter()
+    for k in m_changed:
+        changed_field_census[",".join(sorted(changed_fields(om_rows[k], nm_rows[k])))] += 1
     m_added = [k for k in nm if k not in om]
     built_ft = sum(1 for r in mention if is_q(r))
     tone_missing = sum(1 for r in mention if any(f not in r for f in TONE))
@@ -149,7 +164,8 @@ def main():
            "quarantined": sorted(quarantined), "graded": graded,
            "mention": {"served": len(served_m), "served_ft": len(served_ft), "ft_gone": ft_gone,
                        "built": len(mention), "built_ft": built_ft, "gone_non_ft": len(m_gone_nonft),
-                       "changed_pre_existing": len(m_changed), "added": len(m_added),
+                       "changed_pre_existing": len(m_changed),
+                       "changed_field_census": dict(changed_field_census.most_common(20)), "added": len(m_added),
                        "added_by_publisher": dict(added_by_pub), "tone_missing": tone_missing,
                        "tone_valued": tone_valued, "key": mkey, "bytes": len(mbody)},
            "daily": {"served": len(served_d), "built": len(daily), "gone": len(d_gone), "added": len(d_added),
@@ -162,6 +178,7 @@ def main():
     print("MENTION: served %d (ft %d) -> built %d (ft %d); ft gone %d; non-ft gone %d; changed (pre-existing) %d;"
           " added %d %s" % (m["served"], m["served_ft"], m["built"], m["built_ft"], m["ft_gone"], m["gone_non_ft"],
                             m["changed_pre_existing"], m["added"], m["added_by_publisher"]))
+    print("CHANGED-FIELD CENSUS (non-ft, pre-existing): %s" % m["changed_field_census"])
     print("TONE: rows missing a tone field %d; rows with a tone VALUE %d (must be 0: FWD-16 held)" % (
         m["tone_missing"], m["tone_valued"]))
     print("DAILY: served %d -> built %d; gone %d, added %d, changed %d; classes %s; OTHER %d; status transitions %s" % (
