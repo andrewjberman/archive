@@ -1,7 +1,7 @@
 """RIV-ap-1 AC2: the Lambda's AI client is SDK-free, using `requests`, which the layer already carries (build ladder rung 5).
-`ai_accounts.RestClient(api_key).chat(messages, model)` POSTs to https://api.openai.com/v1/chat/completions with
+`ai_client.RestClient(api_key).chat(messages, model)` (new module `rivalfunds/ai_client.py`) POSTs to https://api.openai.com/v1/chat/completions with
 `Authorization: Bearer <key>`, the model, the messages, `response_format` {"type": "json_object"} and temperature 0.2, and
-returns choices[0].message.content. `ai_accounts.default_client()`, with the gate and the secret name set, returns a RestClient
+returns choices[0].message.content. `ai_client.default_client()`, with the gate and the secret name set, returns a RestClient
 built from the secret's `api_key`, read at call time from Secrets Manager.
 Offline: `requests.post` and `boto3.client` are stubbed."""
 import json
@@ -18,7 +18,7 @@ def run(v):
     c.setup_path()
     import requests
 
-    from rivalfunds import ai_accounts as ai
+    from rivalfunds import ai_client as ai
 
     sent = {}
 
