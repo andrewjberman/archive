@@ -160,7 +160,7 @@ def main():
         import re as _re
 
         plan = json.load(open(a.plan, encoding="utf-8"))
-        tok = _re.compile(r"\.([A-Za-z0-9_]+)|\[(\d+)\]")
+        tok = _re.compile(r"(?:^|\.)([A-Za-z0-9_]+)|\[(\d+)\]")  # a bare first segment, then .key or [i]
         bad, n = [], 0
         for e in plan.get("entries") or []:
             st, body = call(f"{PREFIX}/security/{e['security_key']}/peers")
