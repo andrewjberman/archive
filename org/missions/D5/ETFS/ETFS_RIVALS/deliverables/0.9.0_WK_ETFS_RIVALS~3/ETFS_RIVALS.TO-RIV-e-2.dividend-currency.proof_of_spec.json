@@ -14,7 +14,7 @@
   "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-e-2.dividend-currency.md"
  },
  "assignee": "0.9.0_WK_ETFS_RIVALS~3",
- "session_log": "Worker 0.9.0_WK_ETFS_RIVALS~3, L7 subagent of 2.0.0_SA_COO~RV, worktree C:/tmp/wk-riv6-3 on branch wk-ETFS_RIVALS-3, TREE-OK, based at 1e8515aa01. Cell RIV-e-2 built at 2a655a0180. AC1, AC2, AC3 PASS. Package suite: 2 failed, 416 passed, 2 skipped; the 2 failures are test_s4_security_market.py (outside <paths>, pins fields == [DVD_HIST_ALL]) and are row ETFS_RIVALS-Z-W3-S20 (BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~RV). No Bloomberg call, no S3 write, no deploy.",
+ "session_log": "Worker 0.9.0_WK_ETFS_RIVALS~3, L7 subagent of 2.0.0_SA_COO~RV, worktree C:/tmp/wk-riv6-3 on branch wk-ETFS_RIVALS-3, TREE-OK. Cell RIV-e-2 built at 2a655a0180/6ccc54f65e; amendment A1 (minor-unit currencies, AC4) built after 30cf6aab03: MINOR_UNIT table in gold_trade_schedule.py, G5 converts at major rate / divisor. AC1-AC4 PASS; x-1 AC1-AC3 PASS; package suite 424 passed, 2 skipped, 0 failed. No Bloomberg call, no S3 write, no deploy.",
  "artifacts_produced": [
   {
    "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
@@ -32,9 +32,10 @@
    "kind": "script",
    "commit_or_etag": "2a655a0180",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "dividend_ccy(security_key, g3_currency) -> (ccy, source); G5 income conversion uses it; no deploy",
+   "deploy_evidence": "dividend_ccy; G5 income conversion uses it; MINOR_UNIT (GBp/GBX, ZAr/ZAc, ILs/ILa) converts at major rate/100; no deploy",
    "artifact_covered_by": [
-    "AC3"
+    "AC3",
+    "AC4"
    ]
   },
   {
@@ -52,6 +53,16 @@
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "three DVD_HIST_ALL field pins now read [DVD_HIST_ALL, DVD_CRNCY]: the plan's field list changed by design",
    "artifact_covered_by": []
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6e2_minor_units.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "2 tests pass: minor units at major/100; major control",
+   "artifact_covered_by": [
+    "AC4"
+   ]
   }
  ],
  "acceptance": [
@@ -81,6 +92,15 @@
    "output_evidence": "LN+g3: ('USD', 'g3') | JP no g3: ('JPY', 'suffix_table') | LN no g3: ('USD', 'suffix_table') | BASE_CCY: USD\nOK:   a G3 currency wins and is labelled g3\nOK:   with no G3 currency the suffix table answers, labelled suffix_table\nOK:   control: LN without G3 keeps the mixed-unit base rule, labelled\nAC3 RESULT: PASS 0 failures\nrc=0",
    "denominator": "3 of 3 checks OK",
    "status": "PASS"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "GBp/GBX and ZAr/ZAc dividends convert at GBP/100 and ZAR/100; control: a major currency (USD, JPY) converts at its own rate -- expect: AC4 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/e-2.AC4.py",
+   "output_evidence": "(a) GBp/ZAr: income_received_base 52.0500 want 52.0500\nOK:   (a) GBp and ZAr dividends convert at GBP/100 and ZAR/100 (today: UNCONVERTED)\n(b) GBX/ZAc: income_received_base 52.0500 want 52.0500\nOK:   (b) GBX and ZAc read as GBp and ZAr\n(c) USD/JPY: income_received_base 896.8000 want 896.8000\nOK:   (c) control: a major currency (SHEL LN paying USD; JPY) converts at its own rate\nAC4 RESULT: PASS 0 failures\nrc=0",
+   "denominator": "3 of 3 checks OK",
+   "status": "PASS"
   }
  ],
  "controls": {
@@ -91,8 +111,8 @@
    "status": "N/A-SPEC-NAMES-NONE"
   },
   "determinism": {
-   "method": "AC1-AC3 run once each under timeout 120; whole package suite run.",
-   "observed": "AC1-AC3 PASS. Package: 2 failed (test_s4_security_market.py, row Z-W3-S20), 416 passed, 2 skipped.",
+   "method": "AC1-AC4 and x-1 AC1-AC3 run once each under timeout 120; whole package suite run.",
+   "observed": "all PASS; package 424 passed, 2 skipped, 0 failed.",
    "status": "STABLE"
   }
  },
@@ -104,10 +124,6 @@
   {
    "item": "W3-S12 child identity",
    "reason": "Code only after I-2 names a field (cell text)."
-  },
-  {
-   "item": "test_s4_security_market.py (3 field pins)",
-   "reason": "Outside <paths>; filed as row ETFS_RIVALS-Z-W3-S20."
   }
  ],
  "surprises": [
