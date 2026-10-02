@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-cu-1.sweep-continues-open-cursors",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "292d3b924c",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-cu-1.sweep-continues-open-cursors.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "292d3b924c"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/sweep.py",
+      "kind": "script",
+      "commit_or_etag": "750251b138",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; check runs offline with stub runners",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r7cu1_sweep_cursors.py",
+      "kind": "script",
+      "commit_or_etag": "750251b138",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; check runs offline with stub runners",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r7sa1_sweep_ai_step.py",
+      "kind": "script",
+      "commit_or_etag": "750251b138",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; check runs offline with stub runners",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the sweep continues an open G1 cursor within 10 trading days (G1 from the cursor, then G2 and G5; marker written; a second sweep runs nothing), reports every open cursor (continued / beyond_lookback / out_of_time), caps G1's budget_s at 450 with 600 s left; control: no open cursor -> exactly today's sweep -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round7/checks/cu-1.AC1.py",
+      "output_evidence": "(a) plant: 60 report dates 2026-03-31 .. 2026-06-25 | cursor open: True | G1 marker: False\n(a) sweep: OK | ran: [] | runner calls: [('build-canonical-shape', '2026-10-01', 'd5-gqgu-03'), ('build-coverage', '2026-10-01', 'd5-gqgu-03'), ('build-trade-schedule', '2026-10-01', 'd5-gqgu-03')] | open_cursors: [{'date': '2026-10-01', 'batch_id': 'd5-gqgu-03', 'action': 'continued', 'status': 'OK', 'detail': {'build-canonical-shape': 'OK', 'build-coverage': 'OK', 'build-trade-schedule': 'OK', ' ...\n(a) G1 calls for the batch: [{'stage': 'build-canonical-shape', 'date': '2026-10-01', 'batch_id': 'd5-gqgu-03', 'mode': 'daily', 'budget_s': None, 'cursor_done': 44}]\nOK:   (a1) the sweep runs G1 ONCE for (2026-10-01, d5-gqgu-03), mode daily, and it reads the planted cursor (44 done)\n(a) after: G1 marker: True | cursor open: False | second sweep calls: [] | its entry: None\nOK:   (a2) the G1 marker is written and the cursor is closed; a second sweep with the same payload runs nothing\nOK:   (a3) the runner calls are exactly G1, G2 and G5 of the batch: [('build-canonical-shape', '2026-10-01', 'd5-gqgu-03'), ('build-coverage', '2026-10-01', 'd5-gqgu-03'), ('build-trade-schedule', '2026-10-01', 'd5-gqgu-03')]\nOK:   (a4) detail.open_cursors reports the batch: action continued, status OK\n(b) plant: I-1 end state, cursor open: False | own day: fetch-holdings marker only\n(b) runner calls: [('build-silver', '2026-10-02', 'own'), ('build-canonical-shape', '2026-10-02', 'own'), ('build-coverage', '2026-10-02', 'own'), ('build-trade-schedule', '2026-10-02', 'own'), ('publish-page', '2026-10-02', 'own')]\n(b) result: {'status': 'OK', 'ran': ['build-silver', 'build-canonical-shape', 'build-coverage', 'build-trade-schedule', 'publish-page'], 'complete': True, 'stopped_at': None, 'waiting': [], 'unresolved': {}, 'out_of_time': False} | outputs: 5 | open_cursors: None\n(b) sink: new [['build_canonical_shape', 'date=2026-10-02', 'own.json'], ['build_coverage', 'date=2026-10-02', 'own.json'], ['build_silver', 'date=2026-10-02', 'own.json'], ['build_trade_schedule', 'date=2026-10-02', 'own.json'], ['publish_page', 'date=2026-10-02', 'own.json']] | changed: []\nOK:   (b1) control: the runners called are exactly the day's DAG [('build-silver', '2026-10-02', 'own'), ('build-canonical-shape', '2026-10-02', 'own'), ('build-coverage', '2026-10-02', 'own'), ('build-trade-schedule', '2026-10-02', 'own'), ('publish-page', '2026-10-02', 'own')]\nOK:   (b2) control: the result is today's (status OK, the same ran and outputs, complete) and no open cursor is reported\nOK:   (b3) control: the sink gains exactly the five day markers and no planted object changes\n(c) window: 10 trading days before 2026-10-02 = 2026-09-18..2026-10-01 | planted under ['2026-09-18', '2026-09-17', '2026-06-01']\n(c) runner calls: [('build-canonical-shape', '2026-09-18', 'd5-edge-in'), ('build-coverage', '2026-09-18', 'd5-edge-in'), ('build-trade-schedule', '2026-09-18', 'd5-edge-in')] | open_cursors: [{'date': '2026-06-01', 'batch_id': 'd5-old-01', 'action': 'beyond_lookback', 'lookback_start': '2026-09-18'}, {'date': '2026-09-17', 'batch_id': 'd5-edge-out', 'action': 'beyond_lookback', 'lookback_start':  ...\nOK:   (c1) the cursors under 2026-09-17 and 2026-06-01 (beyond the lookback) are left alone: no runner call, bytes unchanged, no G1 marker\nOK:   (c2) both are reported in detail.open_cursors: action beyond_lookback\nOK:   (c3) the cursor under 2026-09-18 (the 10th trading day back) is continued: G1 runs, its marker is written\n(c) sweep.CURSOR_LOOKBACK_DAYS: 10\nOK:   (c4) sweep.CURSOR_LOOKBACK_DAYS == 10 (the stated lookback)\n(d) 600 s left at the start | G1 calls for the batch: [{'stage': 'build-canonical-shape', 'date': '2026-10-01', 'batch_id': 'd5-gqgu-03', 'mode': 'daily', 'budget_s': 449.98, 'cursor_done': 44}] | cap: 450.0\nOK:   (d) within the budget: G1 runs for the batch with 0 < budget_s <= 450\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "12 of 12 checks OK (a1-a4, b1-b3, c1-c4, d); run under a 120 s bound (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "cu-1.AC1, sa-1.AC1-AC3 and pv-1.AC1 run on the branch; rivalfunds package suite once.",
+      "observed": "cu-1.AC1, sa-1.AC1/AC2/AC3 and pv-1.AC1 PASS 0 failures; package suite 575 passed, 2 skipped, 0 failed (the 2 pv-1 failures fixed in the test per AMENDMENT 1).",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The spec names no mutant for this order.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "Deploy, terraform apply, S3 write, vendor call, the merge hookups",
+      "reason": "Order section 3: NEVER; the issuer owns them."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "750251b138"
+    }
+  ]
+}
