@@ -1,0 +1,145 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-an-6",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "34e9d1be75"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "34e9d1be75",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-6.repairs.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~215",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "f9245a8404",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "functions changed: _classification_for_ticker (new helpers _name_key, _table_key_for_slash_ticker, _slash_row_unconfirmed), _join_classification, _overlay_name, read_management (new _officer_face_words, _object_stamp), handler (new _request_id, _route_template, _served_500), new _route_security_key. The order deploys nothing.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/management/enrich.py",
+   "kind": "script",
+   "commit_or_etag": "f9245a8404",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "apply_bloomberg_fallback writes source_stamp (new source_stamp_of); management.schema.json admits it. No stored object rewritten.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_an6_repairs.py",
+   "kind": "script",
+   "commit_or_etag": "f9245a8404",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "24 tests: classification, encoded key, officer face, source stamp, AMGT_500 plant.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~215/census_500.py",
+   "kind": "script",
+   "commit_or_etag": "f9245a8404",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only CloudWatch Logs census; run --days 7: DENOMINATOR: 5 500s across 22415 invocations in 7 days.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every test passes, your new tests included, and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/; echo \"exit=$?\"",
+   "output_evidence": "429 passed, 201 warnings in 91.41s (0:01:31); exit=0",
+   "denominator": "429 of 429 tests passed (24 new in test_an6_repairs.py)",
+   "status": "PASS",
+   "status_reason": "all passed, exit 0",
+   "expect": "exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C1 PASS for BP/_LN and NG/_LN (sector resolved with its source, or a true reason); C2 PASS (no raw code in ASML_NA's reader text); C3 PASS for ASML_NA, 6501_JP and 2317_TT (a source stamp distinct from the date-only as_of); C4 PASS for overlay, thesis, peers and coverage (the encoded key resolves); R64 C14 SERVED: YES -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c14 --where local; echo \"exit=$?\"",
+   "output_evidence": "LITERAL on the branch's checks file (pre-amendment, clauses C1 x2, C2, C3 x3): all 6 PASS, R64 C14 SERVED: YES, exit=0. The same script as amended on CLOUD @13dc3f05ba (run from .scratch, row Z-W215-S1) adds C4: 10 of 10 PASS -- C1 BP sector 'Energy' source 'opal_classification.sub_asset_class', C1 NG sector None with reason 'the classification row for NG cannot be confirmed as this company: ...', C2 raw {}, C3 x3 object_as_of '2026-10-02T1840Z' vs as_of '2026-10-02', C4 x4 security_key 'BP/_LN_Equity'; R64 C14 SERVED: YES; exit=0",
+   "denominator": "literal 6 of 6 clauses PASS; amended copy 10 of 10 clauses PASS (C1 2, C2 1, C3 3, C4 4)",
+   "status": "PASS",
+   "status_reason": "literal run PASS; the amended copy's C4 clauses PASS as well",
+   "expect": "R64 C14 SERVED: YES",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "C1 PASS (the planted fault answers 500 instead of escaping); C2 PASS (exactly one AMGT_500 line with request id, route, key, exception class); R64 C16 SERVED: YES -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c16 --where local; echo \"exit=$?\"",
+   "output_evidence": "LITERAL on the branch's checks file: r64_served.py: error: argument --cell: invalid choice: 'c16' (choose from 'c9'..'c15'), exit=2 -- the branch carries the pre-amendment check. The same script as amended on CLOUD @13dc3f05ba (run from .scratch, row Z-W215-S1): PASS C1 the planted fault answers 500 instead of escaping status 500 escaped None; PASS C2 lines 1 record request_id r64-plant-1, route /security/{security_key}/overlay, security_key BA_US_Equity, exception_class RuntimeError; R64 C16 SERVED: YES; exit=0",
+   "denominator": "literal run: 0 of 2 clauses reachable (exit 2); amended copy: 2 of 2 clauses PASS",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "the checks file on the branch has no c16; the substitute oracle is the CLOUD @13dc3f05ba copy of the same script, run from the worktree root, 2 of 2 PASS, plus the AMGT_500 plant tests in test_an6_repairs.py; the issuer re-syncs the file and re-grades",
+   "expect": "R64 C16 SERVED: YES",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "_route_security_key's encoded-key decode disabled (if False and SLASH_SAFE_TOKEN in requested)",
+   "expected": "the encoded-key tests fail",
+   "observed": "8 failed, 16 passed in test_an6_repairs.py (route-key decode test plus 7 encoded-key leaf cases); file restored, git diff clean",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 scope, c14 and c16 each run twice (build time and close)",
+   "observed": "api suite 429 passed at close, 427+2 fixed earlier; c14 and c16 YES on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The package watch SIZE line and CONTENT-DIFF SUMMARY",
+   "reason": "reported in the worker report, not a criterion: SIZE 253695124 B of 262144000 (96.8%); CONTENT-DIFF CHANGED 2 ADDED 1 (scoped_amgt.py is this cell; finbert_sentiment.py and publication_gold.py are not this cell's edits)"
+  },
+  {
+   "item": "A deployed census of AMGT_500 lines",
+   "reason": "nothing is deployed by this order; the census ran against the pre-fix log (5 500s, all REPORT Status: timeout)"
+  }
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~215/SESSION_LOG.md",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "see AC1",
+   "result": "429 passed"
+  },
+  {
+   "tool": "r64_served.py c14, c16",
+   "invocation": "see AC2, AC3",
+   "result": "YES, YES"
+  },
+  {
+   "tool": "census_500.py",
+   "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~215/census_500.py --days 7",
+   "result": "DENOMINATOR: 5 500s across 22415 invocations in 7 days"
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W215-S1"
+ ]
+}
