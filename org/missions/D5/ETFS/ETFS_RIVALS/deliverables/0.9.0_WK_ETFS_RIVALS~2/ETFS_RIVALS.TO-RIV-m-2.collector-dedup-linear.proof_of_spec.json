@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-m-2.collector-dedup-linear",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "808f1eb302"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "e0729dbad3",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-m-2.collector-dedup-linear.md"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/collector_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDIT: per-run sidecar memo in handler_entry; no S3 write, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r5m2_dedup_memo.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDIT: per-run sidecar memo in handler_entry; no S3 write, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a 60-capture bulk import reads <= 180 sidecars (today 1830); control: a re-import writes no new data object (m-2.AC1.py)",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round5/checks/m-2.AC1.py",
+      "output_evidence": "import of 60: status OK, sidecar GETs 60\nOK:   sidecar GETs 60 <= 180\nre-import: status OK, objects before 120, after 120, sidecar GETs 60\nOK:   control: the re-import writes no new object (the dedup still dedups)\nAC1 RESULT: PASS 0 failures\n(rc=0)",
+      "denominator": "2 of 2 checks OK (60 <= 180 GETs; re-import 120 == 120 objects), 0 failures",
+      "status": "PASS",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no planted mutant.",
+      "expected": "n/a",
+      "observed": "AC1 carries its own control (BASG's silver object for 2026-09-28 is kept with its own 35 rows); test_q1 adds the negative arms (BASG file landed as GQGU = NO-FUND-ROWS, wrong date = DATE-MISMATCH, no report_date).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "q-1.AC1.py run twice (once before the commit, once after) and the whole rivalfunds suite once.",
+      "observed": "identical verdict and OK lines; suite 258 passed, 2 skipped (tests/test_q1_gqgu_route.py 9 of 9).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "Left for the issuer by the order's WHEN YOU ARE DONE section."
+    },
+    {
+      "item": "gold_canonical_shape.py per-fund issuer read",
+      "reason": "RIV-v-2's cell; the order forbids editing it. Armed exposure filed as ETFS_RIVALS-Z-W2-S11."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~2 <0.9.0_WK_ETFS_RIVALS~2@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "b4f1ee0e88 (commit-gate OK for 6 of 7 files, to-pipeline-gate OK)"
+    }
+  ]
+}

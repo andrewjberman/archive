@@ -1,0 +1,112 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ak-4.the-officer-parse",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ak-4.the-officer-parse.md",
+  "group": "OTHER",
+  "vintage_commit": "f234d5aa125a6d8c6ee44e42c0cbc0a8d18c78e0"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "f234d5aa125a6d8c6ee44e42c0cbc0a8d18c78e0",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ak-4.the-officer-parse.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~202",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/management/officer_plan.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: read-only census of every per-name M-1 object for the two defects and the re-parse of each defective object's STORED filing source with roster.derive_roster. Writes one local JSON; no pool write.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/management/tests/test_officer_plan.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: 3 tests, offline (fake S3): VLO's real shape parses to full names/titles with the age in its own field; BA's shape unchanged; plan census, entry and unreparseable arms.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~202/m1_officer_plan.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: denominator 17, defective 1, 1 entry (VLO_US_Equity, management/v1/VLO_US_Equity/2026-09-18.json, officers before/after), unreparseable 0.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every test passes, your new tests included, and exit=0",
+   "method": "test_suite",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/management/tests/ lib/research/api/tests/; echo \"exit=$?\"",
+   "output_evidence": "=========================== short test summary info ===========================\nERROR lib/research/api/tests/test_print_format_rich.py::test_default_and_fmt_pdf_are_byte_identical_to_build_pack_itself - FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\tmp\\\\r61-202\\\\...\nERROR lib/research/api/tests/test_print_format_rich.py::test_format_rich_returns_200_markdown_non_empty - FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\tmp\\\\r61-202\\\\...\nERROR lib/research/api/tests/test_print_format_rich.py::test_format_unknown_refuses_400_naming_both_legal_values - FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\tmp\\\\r61-202\\\\...\n476 passed, 2 skipped, 186 warnings, 3 errors, 13 subtests passed in 56.68s\nexit=1",
+   "denominator": "476 passed + 2 skipped + 3 errors of 481 collected, run from C:/tmp/r61-202; the 3 errors are test_print_format_rich.py reading the unpopulated portal submodule (row AMGT_RESAPP-Z-W202-S2); the 3 new test_officer_plan.py tests are among the 476 passed",
+   "status": "FAIL",
+   "status_reason": "exit=1: three FileNotFoundError setup errors on portal/src/pages/SecurityAnalysis/__harness__/tabsFixture.BA_US_Equity.json, the portal gitlink being an empty directory in the worker worktree and outside this order's paths; filed as AMGT_RESAPP-Z-W202-S2. The same invocation in the shared tree (portal populated) read 478 passed, exit=0, before this worker's tests existed there.",
+   "expect": "passed[\\s\\S]*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C0 PASS (every plan entry's before equals what the route serves now), C1 PASS (VLO's officers carry person names, none a bare title), C2 PASS (0 VLO roles end in an age), C3 PASS (BA 12); B3 EVERY OFFICER CARRIES A FULL TITLE AND NO AGE: YES -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round61/checks/b_served_text.py --cell b3 --where local --plan org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~202/m1_officer_plan.json; echo \"exit=$?\"",
+   "output_evidence": "read BA_US_Equity/thesis status 200\nread BA_US_Equity/peers status 200\nread VLO_US_Equity/thesis status 200\nread VLO_US_Equity/peers status 200\nplan entries 1 from 1 file(s); stale or unlocatable 0 []\nPASS C0 every plan entry matches what the route serves now 0 of 1\nPASS C1 VLO officers carry person names, none a bare title 5 officers; title-as-name []\nPASS C2 VLO roles carry no trailing age 0 of 5: []\nPASS C3 BA officers unchanged in count 12 (cut 12)\n   VLO officer: 'R. Lane Riggs' | 'Chairman of the Board, Chief Executive Officer and President'\n   VLO officer: 'Harminder S. \"Homer\" Bhullar' | 'Senior Vice President and Chief Financial Officer'\n   VLO officer: 'Gary K. Simmons' | 'Executive Vice President and Chief Operating Officer'\n   VLO officer: 'Richard J. Walsh' | 'Executive Vice President and General Counsel'\n   VLO officer: 'Eric A. Fisher' | 'Senior Vice President Product Supply, Trading and Wholesale'\nB3 EVERY OFFICER CARRIES A FULL TITLE AND NO AGE: YES\nexit=0",
+   "denominator": "4 of 4 clauses PASS (C0 0 stale of 1 plan entry; C1 0 title-as-name of 5 VLO officers; C2 0 of 5 roles end in an age; C3 BA 12 officers)",
+   "status": "PASS",
+   "expect": "PASS C0[\\s\\S]*PASS C1[\\s\\S]*PASS C2[\\s\\S]*PASS C3[\\s\\S]*FULL TITLE AND NO AGE: YES\\s+exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Planted discriminator: roster._split_trailing_age made to return (role, None) at its head, so an age stays in the role.",
+   "expected": "test_full_names_full_titles_and_the_age_in_its_own_field and test_plan_census_entry_and_unreparseable fail.",
+   "observed": "2 failed, 1 passed (those two tests, ages read None); roster.py restored byte-identical (git diff 0 lines) and the 3 tests pass again.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "officer_plan --out run twice against the live pool, sha1 of the two plan files compared",
+   "observed": "7355f52792dab88e1fc5f4e3fbacd6a9b3b0264f both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A parser code change",
+   "reason": "The roster parser at the issuance commit already reads VLO's table correctly (rk-46, 7e28fcb73d); the defect is only in the STORED object. Filed as AMGT_RESAPP-Z-W202-S1."
+  },
+  {
+   "item": "The store write of the plan's `after` officers",
+   "reason": "Bound by the face: no store write (ak-6 writes)."
+  },
+  {
+   "item": "A PARSER_VERSION bump",
+   "reason": "Outside the face; recorded in AMGT_RESAPP-Z-W202-S1."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W202-S1",
+  "AMGT_RESAPP-Z-W202-S2"
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~202/ac2.out.txt",
+ "compiler_tools": [
+  {
+   "tool": "python -m py_compile",
+   "invocation": "python -m py_compile lib/research/management/officer_plan.py lib/research/management/tests/test_officer_plan.py",
+   "result": "rc=0"
+  }
+ ]
+}
