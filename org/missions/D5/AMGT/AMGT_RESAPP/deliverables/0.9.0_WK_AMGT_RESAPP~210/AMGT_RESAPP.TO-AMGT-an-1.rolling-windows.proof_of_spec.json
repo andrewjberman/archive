@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-an-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "59aabebf8708335e25e2f20aff08078060417cae",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-1.rolling-windows.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "59aabebf8708335e25e2f20aff08078060417cae"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~210",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/rolling_windows.py",
+      "kind": "script",
+      "commit_or_etag": "2f11a291cbbe59f6a3879d7cd6d61ec7d9a3e907",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module; no deploy in this order (the code redeploy is a separate cell).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_rolling_windows.py",
+      "kind": "test",
+      "commit_or_etag": "2f11a291cbbe59f6a3879d7cd6d61ec7d9a3e907",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "11 new tests: both routes, each window, store-shorter note, 400s, qualified wait.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/monthly_chatter.py",
+      "kind": "script",
+      "commit_or_etag": "2f11a291cbbe59f6a3879d7cd6d61ec7d9a3e907",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Functions changed: monthly_chatter.read_monthly_chatter. No deploy in this order.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "2f11a291cbbe59f6a3879d7cd6d61ec7d9a3e907",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Functions changed: scoped_amgt.handler (the chatter branch and the breakout/price branch). No deploy in this order.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every test passes, your new tests included, and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/; echo \"exit=$?\"",
+      "output_evidence": "416 passed, 201 warnings in 101.02s\nexit=0",
+      "denominator": "416 of 416 collected tests passed (11 of them new, in test_rolling_windows.py)",
+      "status": "PASS",
+      "status_reason": "All tests pass and exit=0.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "C1 PASS for default, 30, 90 and 365; R64 C9 SERVED: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c9 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 days=default serves its window and every row its counts, tone or reason, and by_month status 200 window_days 30 start 2026-09-02 requested 2026-09-02 end 2026-10-01 note False rows 95 bad 0\nPASS C1 days=30 ... status 200 window_days 30 start 2026-09-02 requested 2026-09-02 end 2026-10-01 note False rows 95 bad 0\nPASS C1 days=90 ... status 200 window_days 90 start 2026-07-04 requested 2026-07-04 end 2026-10-01 note False rows 95 bad 0\nPASS C1 days=365 ... status 200 window_days 365 start 2026-01-01 requested 2025-10-02 end 2026-10-01 note True rows 95 bad 0\nR64 C9 SERVED: YES\nexit=0",
+      "denominator": "4 of 4 window clauses PASS over 95 covered rows each, bad 0",
+      "status": "PASS",
+      "status_reason": "Every window clause PASS, verdict YES, exit=0.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "C1 PASS for default and 30; C2 PASS for 90 and 365; R64 C10 SERVED: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c10 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 price days=default serves rows at window_days 30 status 200 rows 94\nPASS C1 price days=30 serves rows at window_days 30 status 200 rows 94\nPASS C2 price days=90 serves no rows and 'not produced yet' status 200 rows 0 reason 'the 90- and 365-day price windows are not produced yet: they need a longer price-history p'\nPASS C2 price days=365 serves no rows and 'not produced yet' status 200 rows 0 reason 'the 90- and 365-day price windows are not produced yet: they need a longer price-history p'\nR64 C10 SERVED: YES\nexit=0",
+      "denominator": "4 of 4 clauses PASS (2 C1 over 94 rows each, 2 C2 over 0 rows)",
+      "status": "PASS",
+      "status_reason": "Every clause PASS, verdict YES, exit=0.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutated monthly_chatter so the window sum ignores window_end (upper bound replaced by 9999), then re-ran test_rolling_windows.py.",
+      "expected": "The window-total tests fail.",
+      "observed": "3 failed, 8 passed (assert 106 == 7; assert 283 == 100+50+7+20+3+4); file restored byte-identical afterward.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 and AC3 invocations each ran once after the final code against the same live store; the unit tests run twice (24 passed twice for the two files).",
+      "observed": "Same clause results and row counts (95 chatter rows, 94 price rows) on repeat.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No deploy of the code.",
+      "reason": "The order's bounds exclude deploy; the code redeploy is a separate cell (an-7)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~210/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2,AC3",
+      "result": "run at commit time"
+    }
+  ]
+}
