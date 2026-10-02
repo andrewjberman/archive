@@ -58,8 +58,10 @@ def main():
     import jsonschema
     schema = json.loads((root / SCHEMA).read_text(encoding="utf-8"))
     v = jsonschema.Draft202012Validator(schema)
-    good = json.loads((root / (FIX % "valid")).read_text(encoding="utf-8"))
-    badfx = json.loads((root / (FIX % "invalid")).read_text(encoding="utf-8"))
+    # the stored fixtures are ENVELOPES ({_fixture, _source, _expect, instance}); the document graded is the `instance`
+    # (row IRPT_BCKEND-W101-S10: the wrapper itself fails the schema at the base, so it was never the thing graded)
+    good = json.loads((root / (FIX % "valid")).read_text(encoding="utf-8"))["instance"]
+    badfx = json.loads((root / (FIX % "invalid")).read_text(encoding="utf-8"))["instance"]
     errs = list(v.iter_errors(good))
     if errs:
         fail("the stored valid client fixture no longer validates: %s" % errs[0].message[:160])
