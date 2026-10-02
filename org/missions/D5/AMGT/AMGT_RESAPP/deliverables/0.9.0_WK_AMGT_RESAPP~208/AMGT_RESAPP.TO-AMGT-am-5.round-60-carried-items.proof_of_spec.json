@@ -1,0 +1,160 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-am-5.round-60-carried-items",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-am-5.round-60-carried-items.md",
+  "group": "OTHER",
+  "vintage_commit": "a5d74bc1ab3fa7a465a8f71032f2e8bb6a7aeedb"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "a5d74bc1ab3fa7a465a8f71032f2e8bb6a7aeedb",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-am-5.round-60-carried-items.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~208",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: handler per-security arm answers 404 for an UNRESOLVED key that is not covered (leaves overlay, thesis, peers, coverage, print, ledger, versions, compare); new _covered_key_known, _SECURITY_LEAVES. Not deployed.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/monthly_chatter.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: DAILY_COLUMNS / MENTION_COLUMNS; the two gold snapshot reads pass columns=. Not deployed.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/coverage/pool_reader.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: _gold_latest_snapshot_rows(columns=None) projects the parquet decode; cache key carries the projection. Default unchanged. Not deployed.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_am5_unknown_key_and_chatter_inputs.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: 18 tests, offline.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/conftest.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: autouse fixture makes _covered_key_known hermetic (False).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_generation_and_pool_routes.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: test_12 marks CTRL covered for its peers route 200.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_monthly_chatter.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: two stubs accept columns=.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every test passes, your new tests included, and exit=0",
+   "method": "test_suite",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/; echo \"exit=$?\"",
+   "output_evidence": "386 passed, 188 warnings in 42.31s\nexit=0",
+   "denominator": "386 of 386 tests passed (the 18 new tests are among them; base was 368)",
+   "status": "PASS",
+   "expect": "passed[\\s\\S]*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C1 PASS (a fabricated key overlay answers 404); C2 PASS (BA_US_Equity overlay answers 200); R63 C5 SERVED: YES -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round63/checks/r63_served.py --cell c5 --where local; echo \"exit=$?\"",
+   "output_evidence": "PASS C1 a fabricated key's overlay answers 404 status 404\nPASS C2 a covered key's overlay still answers 200 status 200\nR63 C5 SERVED: YES\nexit=0",
+   "denominator": "2 of 2 clauses PASS",
+   "status": "PASS",
+   "expect": "PASS C1[\\s\\S]*PASS C2[\\s\\S]*R63 C5 SERVED: YES[\\s\\S]*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Base (before this commit) behaviour, issuer's cut: r63_served --cell c5 --where deployed FAILS at the base, a fabricated key overlay answers 200.",
+   "expected": "C1 FAIL at base, PASS after",
+   "observed": "after: C1 PASS status 404, C2 PASS status 200 (local)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 is offline stubs; AC2 reads the live crosswalk and covered listing read-only.",
+   "observed": "AC2 exit=0 on the run.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Page universe collapse (LeadPanel.tsx)",
+   "reason": "portal code, DSGN's lane; filed as row AMGT_RESAPP-Z-W208-S1."
+  },
+  {
+   "item": "Duplicate dossier reads",
+   "reason": "none found on any served route: 1 listing and 1 GET per object per request (row AMGT_RESAPP-Z-W208-S2); corpus/dossier.py read amplification is outside the order's paths."
+  },
+  {
+   "item": "Legacy article-layout inputs",
+   "reason": "the chatter path reads none; the dead inputs removed are unread parquet columns (row AMGT_RESAPP-Z-W208-S2)."
+  },
+  {
+   "item": "Timeline routes' own identity resolution",
+   "reason": "the timeline arm resolves separately from the per-security leaf arm, so the 404 rule is not applied there."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W208-S1",
+  "AMGT_RESAPP-Z-W208-S2"
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python -m py_compile",
+   "invocation": "python -m py_compile lib/research/api/scoped_amgt.py lib/research/api/monthly_chatter.py lib/research/coverage/pool_reader.py",
+   "result": "COMPILE-OK"
+  },
+  {
+   "tool": "ruff",
+   "invocation": "python -m ruff check lib/research/api lib/research/coverage --target-version py39",
+   "result": "All checks passed!"
+  }
+ ]
+}
