@@ -199,7 +199,11 @@ def main():
         return 4
     moved = sum(1 for r in rows if r["new_version_id"] != r["prior_version_id"])
     print("  every key moved off its prior VersionId: %d of %d" % (moved, len(rows)))
-    print("AK6 ACT (A) WRITE COMPLETE: %s" % ("YES" if len(rows) == len(keys) else "NO"))
+    # The label is DERIVED from the plan set, never hardcoded. The first act (C) run printed
+    # "ACT (A) WRITE COMPLETE" because this line named act (A) literally -- a stale heading on a
+    # correct result, which is the class that makes an evidence file cite the wrong act.
+    print("AK6 ACT [%s] WRITE COMPLETE: %s"
+          % ("+".join(c for c, _p, _e in plans), "YES" if len(rows) == len(keys) else "NO"))
     return 0 if len(rows) == len(keys) else 5
 
 
