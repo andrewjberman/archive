@@ -107,3 +107,68 @@ def page_fixture():
     r = gold_trade_schedule.handler_entry({"date": tp2.DAY, "mode": "replay", "batch_id": "g", "sink": spec})
     assert r["status"] == "OK", r
     return spec, s, tmp
+
+
+# ---- amendment A1 (Addendum B) fixtures -------------------------------------------------------------------------------------
+
+AI_DAY = "2026-10-02"
+
+
+def ai2_tables():
+    """Small G5, G6, holding_contribution and buying_trend frames for fund TXUE (contract shapes, amendment A1)."""
+    import datetime as dt
+
+    import pandas as pd
+    d = dt.date.fromisoformat
+    g5 = pd.DataFrame([
+        {"fund_id": "TXUE", "fund_ticker": "TXUE", "security_id": "S1", "security_key": "S1", "action": "add",
+         "window_start": d("2026-09-14"), "window_end": d("2026-09-15"), "est_notional_base": 1000.0, "dataset_revision": "r1"},
+        {"fund_id": "TXUE", "fund_ticker": "TXUE", "security_id": "S2", "security_key": "S2", "action": "add",
+         "window_start": d("2026-07-31"), "window_end": d("2026-08-03"), "est_notional_base": 2000.0, "dataset_revision": "r1"}])
+    g6 = pd.DataFrame([{"fund_id": "TXUE", "window_end": d("2026-09-15"), "status": None, "reason": None},
+                       {"fund_id": "TXUE", "window_end": d("2026-08-03"), "status": None, "reason": None}])
+    hc = pd.DataFrame([
+        {"fund_id": "TXUE", "role": "rival", "period": p, "period_start": "2026-09-02", "period_end": AI_DAY, "axis": "security",
+         "bucket": "S1", "security_name": "S1", "contribution": 0.0125, "price_coverage": "full", "n_days_priced": 20,
+         "n_days_period": 20, "rank_best": 1, "rank_worst": 2, "n_ranked": 2, "n_missing": 0, "claim": "INFERRED", "revision": "hc1"}
+        for p in ("R30", "MTD")])
+    bt = pd.DataFrame([{"fund_id": "TXUE", "role": "rival", "window_start": "2026-01-02", "window_end": AI_DAY,
+                        "n_trading_days": 189, "axis": "security", "bucket": "S1", "security_name": "S1",
+                        "net_notional_base": 3000.0, "n_windows": 3, "lean": "into", "rank": 1, "reading": "tilt",
+                        "trend_mark": "+ + + 0 0 0 0 0 0 0", "n_refused_windows": 0, "claim": "INFERRED", "revision": "bt1"}])
+    return g5, g6, hc, bt
+
+
+def ai2_readings(missing=()):
+    """Market readings in the ai-1 contract; every source fresh unless named in `missing`."""
+    out = []
+    for src, name in (("fear_greed", "stock_price_strength"), ("rsi", "equities"), ("trending_topics", "rates"),
+                      ("keyword_sentiment", "tariffs"), ("harvest_chatter", "S1")):
+        if src in missing:
+            out.append({"source": src, "name": name, "value": None, "as_of": None, "age_trading_days": None, "status": "missing",
+                        "location": None, "series": None, "reason": "absent in fixture"})
+        else:
+            out.append({"source": src, "name": name, "value": 1.5, "as_of": "2026-10-01", "age_trading_days": 1, "status": "fresh",
+                        "location": f"s3://fixture/{src}", "series": [["2026-10-01", 1.5]], "reason": None})
+    return out
+
+
+class StubClient:
+    """The injected AI client (no vendor call): `chat(messages, model) -> str` returns the next canned JSON reply and records the
+    messages; `web_search(query, model) -> {"text", "urls"}` records the query."""
+
+    def __init__(self, replies):
+        self.replies, self.calls, self.web = list(replies), [], []
+
+    def chat(self, messages, model):
+        self.calls.append([dict(m) for m in messages])
+        return self.replies.pop(0)
+
+    def web_search(self, query, model):
+        self.web.append(query)
+        return {"text": "Web summary of the market this week.", "urls": ["https://example.com/a"]}
+
+
+def ai2_reply(text, cited, invalidation="a reversal of the S1 adds"):
+    return json.dumps({"text": text, "observed": [text], "inferred": ["the manager may keep adding"], "cited": cited,
+                       "invalidation": invalidation})
