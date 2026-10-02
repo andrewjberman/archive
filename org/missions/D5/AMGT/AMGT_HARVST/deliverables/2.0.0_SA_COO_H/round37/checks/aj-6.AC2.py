@@ -1,8 +1,8 @@
-"""HVST-aj-6 AC2 (issuer, read-only): ONE real, unattended ft sign-in whose hCaptcha the NopeCHA browser extension solved
-(CTO 28484; VEW-1; row Z-W92-S18: the NopeCHA Token API is discontinued).
+"""HVST-aj-6 AC2 (issuer, read-only): ONE real, unattended ft sign-in whose hCaptcha the Ocilar API solved
+(CTO 28484; AMENDED on Andrew-direct ~13:3xZ "LETS USE A NEW SOLVER"; row Z-W92-S18: the NopeCHA Token API is discontinued).
 
 Reads `org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~92/aj6_signin.json`. PASS requires:
-- `solved_by` == "nopecha_extension" and `nopecha_token_api_calls` == 0;
+- `solved_by` == "ocilar", `ocilar_calls` >= 1 and `nopecha_token_api_calls` == 0;
 - `kimi_vision_calls` == 0 and `hardware_input` == "none";
 - `identity_cookie_names` contains "FTSession_s" (the ft identity cookie) and `saved_to_vault` is true;
 - `challenge_events` holds a challenge_presented and a challenge_passed (ruling 8b), in that order.
@@ -28,8 +28,10 @@ def main():
     print("SIGNIN solved_by=%s token_api_calls=%s kimi_vision_calls=%s hardware_input=%s saved=%s cookies=%s" % (
         d.get("solved_by"), d.get("nopecha_token_api_calls"), d.get("kimi_vision_calls"), d.get("hardware_input"),
         d.get("saved_to_vault"), d.get("identity_cookie_names")))
-    if d.get("solved_by") != "nopecha_extension":
-        failures.append("solved_by %s, want nopecha_extension" % d.get("solved_by"))
+    if d.get("solved_by") != "ocilar":
+        failures.append("solved_by %s, want ocilar" % d.get("solved_by"))
+    if not isinstance(d.get("ocilar_calls"), int) or d.get("ocilar_calls") < 1:
+        failures.append("ocilar_calls %s, want >= 1" % d.get("ocilar_calls"))
     if d.get("nopecha_token_api_calls") != 0:
         failures.append("nopecha_token_api_calls %s, want 0" % d.get("nopecha_token_api_calls"))
     if d.get("kimi_vision_calls") != 0:
