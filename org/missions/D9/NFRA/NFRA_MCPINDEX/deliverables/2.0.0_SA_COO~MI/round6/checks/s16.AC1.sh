@@ -5,7 +5,10 @@
 #     still runs merge-daily-incremental (a document's merge writes its own table);
 #   - bd-silver-merge, when an S3 notification on opal-data-bd targets it (its code merges all 4 tables, run(["all"]));
 #   - bd-allocation-processor, when an S3 notification targets it (writes silver/allocations/).
+# Optional args name the tables GRADED (MX-s-16 A3: the tables A2 retired); all 4 are always printed (the denominator).
+# No args = grade all 4 (the original criterion).
 . "$(dirname "$0")/_root.sh"
+export S16_GRADE="${*:-transactions realized unrealized allocations}"
 AWS="$(pwd)/.tools/aws"
 T="${TMPDIR:-/tmp}/mx_s16_$$"; mkdir -p "$T"
 for d in transaction realized unrealized allocation; do
@@ -41,11 +44,16 @@ if any(f.endswith(":bd-silver-merge") for f in fns):
         w[t].append("lambda:bd-silver-merge")
 if any(f.endswith(":bd-allocation-processor") for f in fns):
     w["allocations"].append("lambda:bd-allocation-processor")
+graded = [t for t in os.environ.get("S16_GRADE", "").split() if t in w] or list(w)
 bad = 0
 for t, ws in w.items():
-    print("%s %s: %d writer(s) %s" % ("OK:" if len(ws) == 1 else "NOT-ONE:", t, len(ws), ws))
-    bad += len(ws) != 1
-print("WRITER CENSUS: %d of %d BD silver tables have exactly 1 writer" % (len(w) - bad, len(w)))
+    tag = ("OK:" if len(ws) == 1 else "NOT-ONE:") if t in graded else "NOT GRADED (MX-s-16 A2 HOLD):"
+    print("%s %s: %d writer(s) %s" % (tag, t, len(ws), ws))
+    if t in graded:
+        bad += len(ws) != 1
+one = sum(1 for ws in w.values() if len(ws) == 1)
+print("WRITER CENSUS: %d of %d BD silver tables have exactly 1 writer; graded %d of %d (%s)" % (
+    one, len(w), len(graded) - bad, len(graded), " ".join(graded)))
 sys.exit(0 if bad == 0 else 1)
 EOF
 ); rc=$?
