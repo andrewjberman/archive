@@ -1,0 +1,30 @@
+{
+  "files_scanned": 52756,
+  "census_command": "comp-find '(grant|_grant)\\.build\\(|render_grant\\(|import grant|from grant import' --all   (DENOMINATOR: 49 hit(s) across 52756 file(s) scanned, corpus=all; HEAD=12 DEF=3 SURFACED=15 TEST=11 DOC=8)",
+  "callers": [
+    {"path": "infra/aws/lambda/investor-reporting/export/retained_export.py",
+     "how": "retained_export.py:131 _grant.build(...) inside render_grant(): the ONLY production call of grant.build. PERFORMANCE and account-owned ANALYSIS still pass owner['account_ids'] (non-empty) and prospect=None, so the account branch runs unchanged; only a prospect-owned ANALYSIS report (empty account list, formerly refused by name) now passes prospect=<scope> with account_ids=[]."},
+    {"path": "infra/aws/lambda/investor-reporting/export/submit_service.py",
+     "how": "submit_service.py:48 and :64 _retained.render_grant(...): a Performance export passes an account-owned report, so its grant is unchanged (never an empty account list); an Analysis prospect report is the new, intended prospect grant."},
+    {"path": "infra/aws/lambda/investor-reporting/export/submit_async.py",
+     "how": "submit_async.py:125 _retained.render_grant(...): same arm as submit_service; a Performance export's grant is unchanged (non-empty accounts). Its pointer's account_ids list is [] for a prospect grant (row IRPT_BCKEND-W101-S4)."},
+    {"path": "infra/aws/lambda/investor-reporting/performance/entry.py",
+     "how": "entry.py:146/:173 grant.read(...) and grant.principal_row(...) in _render_grant: a READER of a stored grant, never a builder; an account grant reads back exactly as before (the prospect branch of read() is entered only when the record carries prospect_scope)."},
+    {"path": "infra/aws/lambda/investor-reporting/_authz/served.py",
+     "how": "served.py:1153 _grant.render_ports(): reads a stored grant for the Enforcer; unchanged, an account grant answers the same account_ids/bundle_id/pinned_ids."},
+    {"path": "infra/aws/lambda/investor-reporting/_render_identity/tests/test_grant.py",
+     "how": "test_grant.py:57 grant.build(**kw): account_ids [A, B] non-empty, so the account branch; suite passes unchanged."},
+    {"path": "infra/aws/lambda/investor-reporting/performance/tests/test_render_principal.py",
+     "how": "test_render_principal.py:68 grant.build(... account_ids=['acc_1'] ...): non-empty account list, account branch, unchanged."},
+    {"path": "infra/aws/lambda/investor-reporting/performance/tests/test_render_selection.py",
+     "how": "test_render_selection.py:48 grant.build(... account_ids=list(record['account_ids']) ...): the fixture record holds accounts, account branch, unchanged."},
+    {"path": "infra/aws/lambda/investor-reporting/export/tests/test_retained_export.py",
+     "how": "test_retained_export.py:91 and :126 rx.render_grant(...): Performance reports over accounts, grant unchanged."},
+    {"path": "infra/aws/lambda/investor-reporting/export/tests/test_retained_export_analysis.py",
+     "how": "test_retained_export_analysis.py:95,:150 (account-owned grants, unchanged) and :184 (a prospect report whose provenance names no composition/vendor PDF, still refused by name with 'no accounts')."},
+    {"path": "infra/aws/lambda/investor-reporting/export/tests/test_submit_service.py",
+     "how": "test_submit_service.py:155,:177 grant.read / GrantRefused on an account grant: unchanged."},
+    {"path": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r28/build_analysis_export_r28.py",
+     "how": "build_analysis_export_r28.py:107 rx.render_grant(...) in try/except ExportSubmitRefused: a round-28 evidence script that already tolerates a refusal; read-only, not edited here."}
+  ]
+}
