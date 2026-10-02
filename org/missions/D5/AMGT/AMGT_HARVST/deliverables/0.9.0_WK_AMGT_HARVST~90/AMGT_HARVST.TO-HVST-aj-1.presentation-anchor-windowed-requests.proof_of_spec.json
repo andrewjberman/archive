@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-aj-1.presentation-anchor-windowed-requests",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-aj-1.presentation-anchor-windowed-requests.md",
+    "group": "OTHER",
+    "vintage_commit": "f45007adc70a23d233580c69a6aca072b163f086"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "f45007adc70a23d233580c69a6aca072b163f086",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-aj-1.presentation-anchor-windowed-requests.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~90",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/transport.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-AMGT_HARVST-90-r37a; one record call; the bbg/wsj/sa drivers pick it up at their next job after merge.",
+      "introduces": [
+        "challenge_presented"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/load_window_grade.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-AMGT_HARVST-90-r37a; issuer merges.",
+      "introduces": [
+        "PRESENTATION ANCHOR",
+        "requests_counted"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_aj1_presentation_anchor.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline plants i-iv plus an attempt-time plant; 5 tests.",
+      "introduces": [
+        "test_requests_outside_every_window_read_not_evaluated"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_ai6_per_challenge_grade.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Superseded assertion updated: test_all_four_verdicts, the clean-publisher no-event line (MET-BY-ABSENCE -> NOT_EVALUATED with no windowed request; MET-BY-ABSENCE kept with one request).",
+      "introduces": [
+        "NOT_EVALUATED"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_aj1_presentation_anchor.py -rA --tb=line -> expect \"passed\"",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_aj1_presentation_anchor.py -rA --tb=line",
+      "output_evidence": "\n=================================== PASSES ====================================\n=========================== short test summary info ===========================\nPASSED lib/opal_data_harvest/test_aj1_presentation_anchor.py::test_presentation_3min_before_pass_with_input_after_presentation_is_void\nPASSED lib/opal_data_harvest/test_aj1_presentation_anchor.py::test_403_attempt_anchors_when_no_presented_event\nPASSED lib/opal_data_harvest/test_aj1_presentation_anchor.py::test_attempt_carrying_its_own_time_anchors\nPASSED lib/opal_data_harvest/test_aj1_presentation_anchor.py::test_requests_outside_every_window_read_not_evaluated\nPASSED lib/opal_data_harvest/test_aj1_presentation_anchor.py::test_transport_records_challenge_presented_when_classed_bot_check\n============================== 5 passed in 0.98s ==============================\nrc=0; full suite python -m pytest lib/opal_data_harvest/ -q: 546 passed, 3 skipped",
+      "status": "PASS",
+      "denominator": "5 of 5 tests passed; suite 546 passed, 3 skipped (base 541 + 5 new; test_ah2 unchanged, 1 test_ai6 assertion changed)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round37/checks/aj-1.AC2.py -> expect \"AC2 RESULT: PASS\"",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round37/checks/aj-1.AC2.py",
+      "output_evidence": "Run in the worktree: AC2 RESULT: FAIL (1 failure(s)) / FAIL: bbg nonvoid/passed 0/0, want 9/9; every publisher NOT_EVALUATED requests=0. Cause: the worktree has no .runtime, so the pinned runtimes resolve to nothing; no .runtime data copied or linked.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "real run records and windows are only at the base; issuer re-runs AC2 at the base after merge",
+      "denominator": "0 of 1 run against real windows by the worker; 1 of 1 left to the issuer"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not run: no mutation control was ordered for this cell.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run twice plus full suite",
+      "expected": "identical pass set",
+      "observed": "5 of 5 each run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC2 against real windows",
+      "reason": "grader resolves runtime against git root; worktree has no .runtime; order forbids touching it"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W90-S12"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/opal_data_harvest/ -q",
+      "result": "546 passed, 3 skipped"
+    }
+  ]
+}
