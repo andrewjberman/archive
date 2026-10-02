@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-11",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "aabc054e89"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "42d7a63a6f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-11.every-49f-account-measured.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~1",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/P2_SCALE_R5.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/P2_SCALE_R5.json",
+      "kind": "doc",
+      "commit_or_etag": "f0520d0ca4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The scale record: population 7,570; producer 6,686 rows; publisher sharded projection 67 s per invoke; backfill 562 days ~1.1 h in-region.",
+      "artifact_covered_by": [
+        "DB5-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "kind": "script",
+      "commit_or_etag": "f0520d0ca4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Account set = population UNION newest reporting partition's accounts; empty population refuses by name. Not packaged or applied: the deploy is the issuer's packet.",
+      "artifact_covered_by": [
+        "DB5-1-AC2",
+        "DB5-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_population_account_set.py",
+      "kind": "test",
+      "commit_or_etag": "f0520d0ca4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 tests: population supplies the set; newest-only account kept; empty population refuses; population read takes the newest holdings partition; empty newest partition refuses.",
+      "artifact_covered_by": [
+        "DB5-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py",
+      "kind": "script",
+      "commit_or_etag": "f0520d0ca4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Bounded parallel build+puts (16), stable-hash shards, self-invoke fan-out above 1,000 accounts; run end to end in memory at 7,570 accounts x 562 days (8 shards ~56 s each at 0.3 s/call injected; single invoke 1,582 MB peak). Not packaged or applied.",
+      "artifact_covered_by": [
+        "DB5-1-AC1",
+        "DB5-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/p2_producer_measure_r5.py",
+      "kind": "script",
+      "commit_or_etag": "f0520d0ca4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The producer measurement (reads only, in-memory).",
+      "artifact_covered_by": [
+        "DB5-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/p2_publisher_measure_r5.py",
+      "kind": "script",
+      "commit_or_etag": "f0520d0ca4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The publisher measurement over a fake in-memory S3 (reads only).",
+      "artifact_covered_by": [
+        "DB5-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB5-1-AC1",
+      "criterion_verbatim": "DB5-1-AC1 -- the scale record covers the population (at least 1,000 accounts) with producer, publisher and backfill numbers against 900 s. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r5/p5_1_ac1_scale_record.py\" .",
+      "output_evidence": "OK: population 7570; producer 6686 rows in 102.7 s; publisher projected 67 s against 900; backfill 562 days ~1.1 h\nDB5-1-AC1 PASS rc=0",
+      "denominator": "7570 of 7570 population accounts submitted to the producer (6686 with a row on 2026-10-01); 7570 of 7570 covered by the publisher run (8 shards of ~947); 562 of 562 backfill trading days",
+      "status": "PASS",
+      "expect": "DB5-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB5-1-AC2",
+      "criterion_verbatim": "DB5-1-AC2 -- the population account-set tests pass (at least 3). Base: FAIL (no file).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r5/p5_1_ac2_population_tests.py\" .",
+      "output_evidence": "OK: 5 passed, 0 failed\nDB5-1-AC2 PASS rc=0",
+      "denominator": "5 of 5 tests passed (3 required)",
+      "status": "PASS",
+      "expect": "DB5-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB5-1-AC3",
+      "criterion_verbatim": "DB5-1-AC3 -- reporting-gold (9) and reporting-publish (13) suites pass unchanged. Base: PASS (a regression guard).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r5/p5_ac3_suites_unchanged.py\" . DB5-1-AC3",
+      "output_evidence": "OK: reporting-gold 14 passed; reporting-publish 13 passed\nDB5-1-AC3 PASS rc=0",
+      "denominator": "reporting-gold 14 passed (the 9 baseline + the 5 new tests), reporting-publish 13 of 13 passed; 0 failed in each, each suite in its own pytest process",
+      "status": "PASS",
+      "expect": "DB5-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC1 checker was run against a scratch copy of the record with population.accounts, producer.accounts and publisher.accounts set to 6.",
+      "expected": "DB5-1-AC1 FAIL (below 1000 accounts)",
+      "observed": "'FAIL: population.accounts 6 is below 1000' / DB5-1-AC1 FAIL; the unaltered record PASSes.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times on the same record.",
+      "observed": "The same last two lines three times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, upload, Terraform apply, Lambda invoke, packaging or deploy; the backfill itself",
+      "reason": "Outside the order (the issuer's packet); this cell measures and builds source only."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W1-S12",
+    "IRPT_DASHBD-W1-S13",
+    "IRPT_DASHBD-W1-S14"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py at commit",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (3 new rows of 34 checked at f0520d0ca4)"
+    }
+  ]
+}
