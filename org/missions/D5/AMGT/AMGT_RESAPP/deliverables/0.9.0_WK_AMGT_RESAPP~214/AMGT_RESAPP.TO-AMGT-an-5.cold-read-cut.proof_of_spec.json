@@ -1,0 +1,129 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-an-5.cold-read-cut",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-5.cold-read-cut.md",
+  "group": "OTHER",
+  "vintage_commit": "59aabebf87"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "59aabebf87",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-5.cold-read-cut.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~214",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/harvest/publication_gold.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: _latest_gold_snapshot_rows_cached(table, client=None, columns=None, security_key=None, timings=None); None/None is the unchanged whole-snapshot read. Not deployed.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: _timeline_snapshot_rows, _timeline_daily_loader, _timeline_article_loader, _serve_timeline (+ _serve_timeline_body), handler timeline branch (identity timing); new _segment_log and column constants. Not deployed.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/harvest/tests/test_timeline_cold_read_projection.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: 10 tests, offline.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_timeline_routes.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: three fakes accept the seam's new keyword arguments.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_timeline_silver_deadline.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: one fake accepts the seam's new keyword arguments.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every test passes, your new tests included, and exit=0",
+   "method": "test_suite",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/ lib/research/harvest/tests/ lib/research/coverage/; echo \"exit=$?\"",
+   "output_evidence": "3 failed, 753 passed, 205 warnings in 87.53s\nexit=1\nFAILED lib/research/harvest/tests/test_timeline_day_read_path.py::test_timeline_day_body_byte_equal_before_and_after_the_read_path_change\nFAILED lib/research/harvest/tests/test_timeline_day_read_path.py::test_timeline_day_new_path_reads_only_the_publishers_the_day_names\nFAILED lib/research/harvest/tests/test_timeline_day_read_path.py::test_timeline_day_warm_process_reads_no_object_twice_and_still_lists",
+   "denominator": "753 of 756 tests passed (the 10 new tests are among the passes); the same 3 fail with this cell's edits absent (row AMGT_RESAPP-Z-W214-S1)",
+   "status": "FAIL",
+   "expect": "passed[\\s\\S]*exit=0",
+   "status_reason": "3 tests in lib/research/harvest/tests/test_timeline_day_read_path.py fail identically on a clean worktree of e0f5c4fd65 with this cell's edits absent (they pin the silver join removed by 59c2ef1b23); not fixed here, the order does not name them; filed as AMGT_RESAPP-Z-W214-S1."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C1 PASS (BA Sept 8 serves every headline from gold, no reason, with the silver reader planted to raise); R63 C1 SERVED: YES -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round63/checks/r63_served.py --cell c1 --where local; echo \"exit=$?\"",
+   "output_evidence": "PASS C1 BA Sept 8 serves every headline from gold, no reason status 200 articles 6 with headline 6 reason False\nR63 C1 SERVED: YES\nexit=0",
+   "denominator": "1 of 1 clauses PASS",
+   "status": "PASS",
+   "expect": "PASS C1[\\s\\S]*R63 C1 SERVED: YES[\\s\\S]*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Served bytes before vs after: the day route's body for BA_US_Equity 2026-09-08 from a fresh process at the pre-edit tree and at this tree.",
+   "expected": "byte-identical",
+   "observed": "cmp of two before/after pairs: identical (sha256 d44469a90107138e86b4455553d1e338474e27fff51e969218037d346cc98b13); new tests also compare day and range bodies against the whole-snapshot read",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "local cold profile run twice before and twice after",
+   "observed": "gold reads 2.6-3.1 s before vs 1.4-2.0 s after; bytes identical on every run",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Ranged column-chunk GET of the mention snapshot",
+   "reason": "file kept to the decode-level projection; the GET moves 2.63 MB and a ranged read is a different call shape; recorded in row AMGT_RESAPP-Z-W214-S2."
+  },
+  {
+   "item": "The three stale tests in test_timeline_day_read_path.py",
+   "reason": "pre-existing failures pinning the silver join am-1 removed; a neighbouring defect (row AMGT_RESAPP-Z-W214-S1)."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W214-S1",
+  "AMGT_RESAPP-Z-W214-S2"
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "python -m ruff check lib/research/api lib/research/harvest/publication_gold.py lib/research/harvest/tests/test_timeline_cold_read_projection.py --target-version py39",
+   "result": "All checks passed!"
+  }
+ ]
+}
