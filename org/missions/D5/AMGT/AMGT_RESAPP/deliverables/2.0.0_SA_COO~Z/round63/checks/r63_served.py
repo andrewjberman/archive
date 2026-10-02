@@ -11,6 +11,8 @@ c2 (FWD-7): ASML_NA_Equity's management is SERVED with roster_source BLOOMBERG_F
 c3 (FWD-2): every collected-chatter row carries `ticker`, `classification` and `places_moved` keys beside `display_name`; `ticker`
    is non-empty on every row.
 c4: every peers absent-column entry for BA_US_Equity and VLO_US_Equity carries a non-empty `reason_class`.
+c7 (R1, DSGN Z-C-S36): no ranked-in-both price bar serves the false "not ranked" reason; places_moved = prior rank - rank.
+c8 (R2, DSGN Z-C-S37): an equity's classification.sector = sub_asset_class when GICS-11 (sector_source named), else null + reason.
 c5 (Z-S332): a fabricated key's overlay answers 404 (base 200), and BA_US_Equity's overlay still answers 200.
 Verdict: R63 <CELL> SERVED: YES|NO.
 """
@@ -37,7 +39,7 @@ def _load(name, path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cell", choices=("c1", "c2", "c3", "c4", "c5", "c6"), required=True)
+    ap.add_argument("--cell", choices=("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"), required=True)
     ap.add_argument("--plan", help="c6: the frozen peers_slash_plan.json (am-8 AMENDMENT 1)")
     ap.add_argument("--where", choices=("local", "deployed"), required=True)
     ap.add_argument("--pool")
@@ -54,8 +56,8 @@ def main():
         cl = _load("capture_lib", CAPTURE_LIB)
         lam = boto3.client("lambda", region_name=cl.REGION)
 
-        def call(path):
-            body, meta = cl._invoke(lam, path)
+        def call(path, query=None):
+            body, meta = cl._invoke(lam, path, query)
             return (200, body) if body is not None else (meta.get("status"), None)
     else:
         if a.pool:
@@ -68,9 +70,9 @@ def main():
 
             scoped_amgt._timeline_silver_articles = _no_silver
 
-        def call(path):
+        def call(path, query=None):
             r = scoped_amgt.handler({"rawPath": path, "requestContext": {"http": {"method": "GET"}},
-                                     "headers": {"x-firm-id": "opal"}, "queryStringParameters": None})
+                                     "headers": {"x-firm-id": "opal"}, "queryStringParameters": query})
             try:
                 return r.get("statusCode"), json.loads(r.get("body") or "null")
             except ValueError:
@@ -175,6 +177,72 @@ def main():
                 if node != ch.get("after"):
                     bad.append((e["security_key"], ch["json_path"]))
         clause("C1 every planned peers field serves its after value", n > 0 and not bad, f"{n - len(bad)} of {n}; differing {bad[:4]}")
+    elif a.cell == "c7":
+        # R1 (DSGN Z-C-S36): no ranked-in-both name serves "not ranked in the previous generation"; moved = prior rank - rank
+        import re as _re
+
+        st, cur = call(PREFIX + "/lead-panel/rankings/breakout/price")
+        rows = (cur or {}).get("rows") or []
+        dates = {m.group(1) for r in rows for m in [_re.search(r"previous generation \((\d{4}-\d{2}-\d{2})\)", str(r.get("places_moved_reason")))] if m}
+        prior_date = sorted(dates)[0] if dates else None
+        prior_rows = []
+        if prior_date is None:
+            # no reason names the prior date: read the generation before the served one through the route's own as_of walk
+            served = (cur or {}).get("as_of_date")
+            import datetime as _dt
+            if served:
+                prior_date = (_dt.date.fromisoformat(served) - _dt.timedelta(days=1)).isoformat()
+        if prior_date:
+            st2, pr = call(PREFIX + "/lead-panel/rankings/breakout/price", {"as_of": prior_date})
+            prior_rows = (pr or {}).get("rows") or []
+            prior_date = (pr or {}).get("as_of_date") or prior_date
+        prior_rank = {}
+        for r in prior_rows:
+            for k in (r.get("security_key"), r.get("ticker")):
+                if k and r.get("rank") is not None:
+                    prior_rank[k] = r["rank"]
+        false_reason, wrong_math, moved_ok, new_ok = [], [], 0, 0
+        for r in rows:
+            pr_rank = prior_rank.get(r.get("security_key")) or prior_rank.get(r.get("ticker"))
+            if r.get("places_moved") is None:
+                if pr_rank is not None and "previous generation" in str(r.get("places_moved_reason")):
+                    false_reason.append(r.get("ticker"))
+                else:
+                    new_ok += 1
+            elif pr_rank is not None and r.get("rank") is not None:
+                if r["places_moved"] == int(pr_rank) - int(r["rank"]):
+                    moved_ok += 1
+                else:
+                    wrong_math.append(r.get("ticker"))
+        clause("C1 0 ranked-in-both bars serve the false 'not ranked' reason", rows and prior_rows and not false_reason,
+               f"{len(false_reason)} false of {len(rows)} bars (prior {prior_date}, {len(prior_rows)} rows); e.g. {false_reason[:5]}")
+        clause("C2 every served places_moved equals prior rank minus rank", rows and not wrong_math,
+               f"{moved_ok} correct, {len(wrong_math)} wrong, {new_ok} truly new with a reason")
+    elif a.cell == "c8":
+        # R2 (DSGN Z-C-S37): an equity's sector = sub_asset_class when GICS-11, source named; else null with a reason
+        gics = {"Communication Services", "Consumer Discretionary", "Consumer Staples", "Energy", "Financials", "Health Care",
+                "Industrials", "Information Technology", "Materials", "Real Estate", "Utilities"}
+        st, cur = call(PREFIX + "/lead-panel/rankings/breakout/price")
+        rows = (cur or {}).get("rows") or []
+        bad, served, reasoned = [], 0, 0
+        for r in rows:
+            c = r.get("classification") or {}
+            want = c.get("sub_asset_class") if c.get("asset_class") == "equity" and c.get("sub_asset_class") in gics else None
+            if want is not None:
+                if c.get("sector") == want and c.get("sector_source") == "opal_classification.sub_asset_class":
+                    served += 1
+                else:
+                    bad.append(r.get("ticker"))
+            elif c.get("sector") is None and (c.get("sector_reason") or r.get("sector_reason")):
+                reasoned += 1
+            else:
+                bad.append(r.get("ticker"))
+        amd = next((r for r in rows if r.get("security_key") == "AMD_US_Equity"), {})
+        ac = amd.get("classification") or {}
+        clause("C1 AMD serves Information Technology from sub_asset_class", ac.get("sector") == "Information Technology"
+               and ac.get("sector_source") == "opal_classification.sub_asset_class", f"sector {ac.get('sector')!r} source {ac.get('sector_source')!r}")
+        clause("C2 every bar serves a GICS sector with its source, or null with a reason", rows and not bad,
+               f"{served} served, {reasoned} null with a reason, {len(bad)} wrong of {len(rows)}; e.g. {bad[:5]}")
     else:
         st, _b = call(PREFIX + "/security/ZZZZ_XX_Equity/overlay")
         clause("C1 a fabricated key's overlay answers 404", st == 404, f"status {st}")
