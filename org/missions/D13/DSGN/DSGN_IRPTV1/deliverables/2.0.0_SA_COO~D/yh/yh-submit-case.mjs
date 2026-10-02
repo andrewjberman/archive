@@ -52,7 +52,7 @@ const CASES = {
 
 // ---- args ---------------------------------------------------------------------------------------------------------
 const argv = process.argv.slice(2)
-const opt = { base: 'http://localhost:5174', case: null, file: null, client: null, preparedFor: 'Opal Capital (Y-H harness)', title: null, queueEmpty: false, fixture: false, readyCeilingMin: 30, headed: false }
+const opt = { dryUpload: false, base: 'http://localhost:5174', case: null, file: null, client: null, preparedFor: 'Opal Capital (Y-H harness)', title: null, queueEmpty: false, fixture: false, readyCeilingMin: 30, headed: false }
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i]
   if (a === '--case') opt.case = argv[++i]
@@ -62,6 +62,9 @@ for (let i = 0; i < argv.length; i++) {
   else if (a === '--title') opt.title = argv[++i]
   else if (a === '--queue-empty') opt.queueEmpty = true
   else if (a === '--fixture') opt.fixture = true
+  // --dry-upload: a live, signed-in drive that ABORTS the upload POST at the browser and records the URL and query it
+  // carried -- no backend write, no vendor call. For checking what the page would send.
+  else if (a === '--dry-upload') opt.dryUpload = true
   else if (a === '--ready-ceiling-min') opt.readyCeilingMin = Number(argv[++i])
   else if (a === '--base') opt.base = argv[++i]
   else if (a === '--headed') opt.headed = true
@@ -71,7 +74,7 @@ const kase = CASES[opt.case]
 if (!kase) { console.error(`--case must be one of ${Object.keys(CASES).join(', ')}`); process.exit(2) }
 if (kase.blocked) { console.error(`REFUSED: case ${opt.case} is blocked -- ${kase.blocked}`); process.exit(2) }
 if (!/^http:\/\/localhost:\d+$/.test(opt.base)) { console.error('REFUSED: --base must be http://localhost:<port> (the local dev build)'); process.exit(2) }
-if (!opt.fixture && !opt.queueEmpty) {
+if (!opt.fixture && !opt.queueEmpty && !opt.dryUpload) {
   console.error('REFUSED: a live run submits a real job. Pass --queue-empty to assert the solo gate (one job at a time, queue empty, nobody signed in to YCharts in a browser), or --fixture for the offline drive.')
   process.exit(2)
 }
@@ -167,6 +170,8 @@ try {
     if (m !== 'POST' || !(INPUTS.test(p) || SUBMIT.test(p))) return
     try {
       const j = await res.json(); const d = j && j.data
+      if (INPUTS.test(p)) packet.upload_answer = { http: res.status(), ok: j?.ok ?? null, state: d?.state ?? j?.status?.state ?? null, reason: j?.status?.public_reason_code ?? null }
+      if (INPUTS.test(p) && j?.ok === false) log('UPLOAD REFUSED', res.status(), j?.status?.state, j?.status?.public_reason_code)
       if (INPUTS.test(p) && d) { if (d.upload_id && !ids.upload_ids.includes(d.upload_id)) ids.upload_ids.push(d.upload_id); if (d.input_id) ids.input_id = d.input_id; log('UPLOAD', res.status(), d.state, d.upload_id) }
       if (SUBMIT.test(p)) { ids.request_id = d?.identity?.request_id ?? null; log('SUBMIT', res.status(), ids.request_id, d?.stage) }
     } catch { log('POST answer not JSON', p, res.status()) }
@@ -185,6 +190,7 @@ try {
     }
     if (m === 'GET' || m === 'HEAD' || m === 'OPTIONS') return route.continue()
     if (ADMITTED_POST.some((re) => re.test(p))) return route.continue()
+    if (m === 'POST' && INPUTS.test(p) && opt.dryUpload) { const q = new URL(url).searchParams; packet.dry_upload = { query: [...q.keys()], selected_tenant_present: q.has('selected_tenant') }; log('DRY UPLOAD (aborted)', JSON.stringify(packet.dry_upload)); return route.abort('blockedbyclient') }
     if (m === 'POST' && INPUTS.test(p) && posts.inputs < INPUTS_CAP) { posts.inputs += 1; return route.continue() }
     if (m === 'POST' && SUBMIT.test(p) && posts.submissions === 0) { noteSubmitted(req); posts.submissions += 1; return route.continue() }
     if (/\/analytics\/ingest$/.test(p)) return route.fulfill({ status: 204, body: '' })
@@ -208,7 +214,12 @@ try {
     const combo = page.getByRole('combobox', { name: 'Client search' })
     await combo.click(); await combo.fill(client)
     const option = page.getByRole('option', { name: new RegExp(client.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') }).first()
-    await option.waitFor({ state: 'visible', timeout: 30000 }); await option.click()
+    await option.waitFor({ state: 'visible', timeout: 30000 })
+    // The page's selected scope (and its tenant) exists only once POST /selections is answered: wait for it, so the
+    // upload never races the selection (Case A dry drives 23:06Z and 23:11Z read the tenant absent, then present).
+    const accepted = page.waitForResponse((r) => r.request().method() === 'POST' && /\/investor-reporting\/selections$/.test(pathOnly(r.url())), { timeout: 45000 }).catch(() => null)
+    await option.click()
+    packet.selection_answered = Boolean(await accepted)
     await page.waitForTimeout(2000)
   }
   await page.getByRole('button', { name: 'Analysis', exact: true }).or(page.getByRole('tab', { name: 'Analysis' })).first().click()
@@ -219,6 +230,21 @@ try {
   await page.locator('[data-slot="upload-proceed"]').click()
   await page.locator('[data-slot="prospect-composer"]').getByLabel('I confirm amounts without a currency label are US dollars').check().catch(() => {})
   await shot(page, 'file-chosen')
+  packet.tenant_known_at_upload = await page.locator('[data-slot="prospect-composer"]').getAttribute('data-tenant-known').catch(() => null)
+  if (opt.dryUpload) packet.react_props = await page.evaluate(() => {
+    // Dry drives only: what the composer and the Analysis tab actually hold (keys and presence, never values).
+    const el = document.querySelector('[data-slot="prospect-composer"]')
+    const fk = el && Object.keys(el).find((k) => k.startsWith('__reactFiber'))
+    let f = fk ? el[fk] : null
+    const out = {}
+    while (f) {
+      const pr = f.memoizedProps
+      if (pr && typeof pr === 'object' && 'api' in pr && !out.composer) out.composer = { keys: Object.keys(pr), selectedTenant_present: Boolean(pr.selectedTenant) }
+      if (pr && typeof pr === 'object' && 'selectedScopeRef' in pr) { const r = pr.selectedScopeRef; out.analysis_tab = { selectedScopeRef: r ? Object.keys(r) : null, selectedTenant_present: Boolean(r && r.selectedTenant), tenant_present: Boolean(r && r.tenant) }; break }
+      f = f.return
+    }
+    return out
+  }).catch((e) => ({ error: String(e.message).slice(0, 120) }))
   mark('upload_pressed')
   await page.locator('[data-slot="prospect-composer"]').getByRole('button', { name: /Review portfolio/ }).click()
   let uploadState = null
@@ -233,8 +259,11 @@ try {
   packet.upload_alert = (await page.locator('[data-slot="prospect-composer"] [role=alert]').first().innerText().catch(() => null)) || null
   packet.upload_findings = await page.locator('[data-slot="upload-findings"] li').allInnerTexts().catch(() => [])
   await shot(page, `upload-${uploadState ?? 'no-state'}`)
-  if (uploadState !== 'NORMALIZED') {
-    outcome = uploadState === 'NEEDS_CORRECTION' ? 'NEEDS_CORRECTION' : 'UPLOAD_NOT_ANSWERED'
+  if (opt.dryUpload) {
+    outcome = packet.dry_upload ? `DRY_UPLOAD selected_tenant ${packet.dry_upload.selected_tenant_present ? 'PRESENT' : 'ABSENT'}` : 'DRY_UPLOAD_NOT_SENT'
+  } else if (uploadState !== 'NORMALIZED') {
+    outcome = uploadState === 'NEEDS_CORRECTION' ? 'NEEDS_CORRECTION'
+      : packet.upload_answer?.ok === false ? `UPLOAD_REFUSED: ${packet.upload_answer.state ?? '?'} / ${packet.upload_answer.reason ?? '?'}` : 'UPLOAD_NOT_ANSWERED'
   } else {
     const prospect = page.locator('[data-slot="prospect-composer"]')
     if (kase.comparisons.length > 0) {
