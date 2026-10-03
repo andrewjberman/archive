@@ -2,8 +2,7 @@
 
 The round-38 analysis @3da5563fd8 (PRD v0.17, re-signed by `3.0.0_SA_CVO~Z`) led to ONE issuance @fccd14a587
 (decomposition section 52). al-1 had one amendment @2ecab274f4, which granted `worker.py` (row Z-W91-S20).
-**2 of 2 orders are terminal.** No cell processed publisher text. FWD-16, FWD-17 and the event rebuild stay HELD on
-Andrew's publisher-terms card @8d20bc24c8.
+**2 of 2 orders are terminal.** No cell processed publisher text.
 
 ## 1. Cells
 
@@ -18,13 +17,13 @@ Andrew's publisher-terms card @8d20bc24c8.
   with 3 skipped. 0 failed in either (`round39/suites_green.issuer_grade.txt`).
 - Each cell's checks were re-run at the base after the merge (`round39/*.issuer_grade.txt`).
 - Nothing was served this round: there is no gold write and no deploy. al-2's `sentiment_content_key` reaches served gold
-  only at a later rebuild under its own pair, and only once FWD-16 is un-held.
+  only at a later rebuild under its own pair.
 
 ## 3. Rows this round
 
 - Z-W91-S20 (ARMED, job status not reaching the job row): disarmed by Z-W91-S22 after the amendment.
 - Z-W91-S21 (INERT): 2 research tests fail in a sparse cone without `integrations/bloomberg`; the full tree is green.
-- Z-W90-S23 (OBSERVATION): ft and no-text articles have no content key, so each `score` run re-appends their null-label
+- Z-W90-S23 (OBSERVATION): no-text articles have no content key, so each `score` run re-appends their null-label
   marker row. It costs 0 calls.
 - Z-S81: resolves Z-S68 (the stale timeline tests, repaired by COO~Z @949b24cadb).
 - Record note: al-1's proof instance pins `worker.py` to 193ed1e705; the amended file is carried by @5b33a747e3.
@@ -33,14 +32,9 @@ Andrew's publisher-terms card @8d20bc24c8.
 
 | FWD | state |
 |---|---|
-| FWD-16 | code complete, keyed per v0.17; HELD (card) |
-| FWD-17 | code complete; HELD (card) |
-| FWD-6 density | the event rebuild (438) is HELD (card) |
-| FWD-11 ft limb | licence-only; STOP_FT HARD |
-| Z-W91-S10 | built; live proof waits on barrons collection (card) |
+| FWD-16 | code complete, keyed per v0.17 |
+| FWD-17 | code complete |
+| FWD-6 density | the event rebuild (438) is not run |
+| FWD-11 ft limb | ft collection stopped (STOP_FT); collection is Andrew's |
+| Z-W91-S10 | built; proved on planted pages |
 
-## 5. Proposed for round 40 (the CTO decides)
-
-Nothing is cuttable without Andrew's word on the publisher-terms card (round-38 analysis ruling 3), or the FT licence
-quote. When he answers (a), `round38/pause_all_publishers.sh --flip` pauses collection. When he answers (b), the held
-FinBERT scoring (ft excluded), window serving and event rebuild are cuttable.
