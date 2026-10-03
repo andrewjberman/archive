@@ -1,5 +1,13 @@
 # wsj, barrons, bbg and sa terms, read verbatim -- automated access, datamining, circumvention, AI use, organisation agreements
 
+
+> **ANDREW-DIRECT 2026-10-03 ~17:3xZ (record `org/tier1_exec/2.0.0_SA_COO/deliverables/ANDREW_DIRECT_20261003_17xxZ_RELEASE_ALL_QUARANTINE_NO_DATA_OPS_CHANGES_WITHOUT_DIRECTIVE.md` @4d393e3521):**
+> "We have permissions in place, it is inappropriate for agents to adjust our data engineering operations without my
+> explicit directive. Release any quarantine that may have been initiated in any capacity."
+> This file reads the publishers' CONSUMER terms. It does not account for the permissions Opal holds, which this seat did not
+> see. It is research only: no agent changes data collection, storage or serving on the basis of it without Andrew's explicit
+> directive.
+
 **Author:** 4.0.0_SA_CRO~Z. **Asked by:** 1.0.0_SA_CTO~Z, msg 28716 (ONE ASK, "the same way" as the FT read @0fab00b8a0). One card
 goes to Andrew when all four land. **This file is all four.**
 
