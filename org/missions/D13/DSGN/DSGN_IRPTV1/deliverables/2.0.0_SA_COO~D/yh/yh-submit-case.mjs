@@ -46,6 +46,10 @@ const CASES = {
   A: { sha256: '500837992a3b9caa', variant: 'overview', comparisons: [], expect: 'READY', note: 'easy file, 99 rows, Overview (Y-1)' },
   typo: { sha256: '87afdc7db1c58b38', variant: 'overview', comparisons: [], expect: 'NEEDS_CORRECTION', note: 'easy file with AAPL -> APPL (Y-B baseline; Y-4 once the check gate is wired)' },
   D: { sha256: 'f0d344fa967504bd', variant: 'overview', comparisons: [], expect: 'NEEDS_CORRECTION', note: 'Stevens, 20 rows (Y-B baseline; Y-5 once the swap gate is wired)' },
+  // Y-5 (2.0.0_SA_COO~Y 104499): Stevens' four untracked rows answered with the proxy Alyssa Keith chose (SGOV), named
+  // on the page. Live once Y-5 serves; on the fixture plane the first answer offers NAME_PROXY and the re-post with
+  // corrections answers NORMALIZED naming them.
+  Dproxy: { sha256: 'f0d344fa967504bd', variant: 'overview', comparisons: [], proxies: { QKZAQ: 'SGOV', QBNYQ: 'SGOV', QUSBQ: 'SGOV', QBOKQ: 'SGOV' }, expect: 'READY', note: 'Stevens with user-named proxies (Y-5)' },
   B: { sha256: '500837992a3b9caa', variant: 'comparison', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }], expect: 'READY', note: 'easy file vs Opal Ultra Long-Term, Comparison (Y-2)' },
   C: { sha256: '500837992a3b9caa', variant: 'multicomp', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }, { kind: 'etf', key: 'IWM' }], expect: 'READY', blocked: 'brief 2 item 2.3: a ticker admitted as a comparison (CTO batch 178 ruling 4) is 2.0.0_SA_COO~Y\'s half' },
 }
@@ -121,7 +125,14 @@ function fixturePlane() {
   const request = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'AnalysisRequest.valid.json'), 'utf8')).instance
   const status = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'StatusEnvelope.valid.json'), 'utf8')).instance
   const firmId = smoke[`${BASE_API}/directory/resolve`].firm_id
-  const upload = kase.expect === 'NEEDS_CORRECTION' ? producer.correction.response : producer.normalized.response
+  const upload = kase.expect === 'NEEDS_CORRECTION' || kase.proxies ? producer.correction.response : producer.normalized.response
+  // Y-5 fixture: the first answer offers NAME_PROXY for each proxied ticker; the re-post with corrections answers the
+  // producer's NORMALIZED record, its disclosures naming each proxy the page sent.
+  const proxyFirst = kase.proxies ? { ...upload, data: { ...upload.data, state: 'NEEDS_CORRECTION', findings: Object.keys(kase.proxies).map((t, i) => ({
+    code: 'TICKER_DATA_NOT_ENTITLED', severity: 'ERROR', row: 14 + i, column: 'A', value: t, actions: ['NAME_PROXY'],
+    description: `${t} is a real fund our data provider does not cover. Name a proxy to analyse it as.` })) } } : null
+  const proxyAnswer = (corrections) => ({ ...producer.normalized.response, firm_id: producer.normalized.response.firm_id ?? firmId,
+    data: { ...producer.normalized.response.data, portfolio: { ...producer.normalized.response.data.portfolio, disclosures: { corrections } } } })
   const submission = { contract_version: 'v1', operation: 'analysis-requests', firm_id: firmId,
     data: { identity: { ...request.identity, tenant_firm_id: firmId, request_id: 'REQ-fixture-yh-0001' }, stage: 'QUEUED' },
     status: { ...status, state: 'PENDING', public_reason_code: 'QUEUED' }, unprojected_grant: { count: 0, denominator: 1, kinds: {} } }
@@ -132,7 +143,7 @@ function fixturePlane() {
   const reads = { ...smoke, [`${BASE_API}/analysis/comparisons`]: { contract_version: 'v1', operation: 'comparison-catalogue', firm_id: firmId, data: { ...catalogue, entries } },
     [`${BASE_API}/directory/search`]: { contract_version: 'v1', operation: 'directory-search', firm_id: firmId, data: smoke[`${BASE_API}/directory/browse`].data.entries, unprojected_grant: { count: 0, denominator: 1, kinds: {} } } }
   const keys = Object.keys(reads).sort((a, b) => b.length - a.length)
-  return { upload: { ...upload, firm_id: upload.firm_id ?? firmId }, submission, reads, keys }
+  return { upload: { ...(proxyFirst ?? upload), firm_id: upload.firm_id ?? firmId }, proxyAnswer, submission, reads, keys }
 }
 const SESSION = { accessToken: 'ui-smoke-token', user: { email: 'dev@opalcapital.com', name: 'Dev User', role: 'admin', userType: 'Dev', firmId: 'opal-capital', firmRole: null, advisorId: null, advisorRole: null, mustChangePassword: false } }
 
@@ -181,7 +192,12 @@ try {
     if (plane) {
       if (m === 'OPTIONS' && !url.startsWith(opt.base)) return route.fulfill({ status: 204, headers: json({}).headers, body: '' })
       if (p.startsWith('/auth/refresh')) return route.fulfill(json(SESSION))
-      if (m === 'POST' && INPUTS.test(p)) { posts.inputs += 1; return route.fulfill(json(plane.upload)) }
+      if (m === 'POST' && INPUTS.test(p)) {
+        posts.inputs += 1
+        let sent = null; try { sent = req.postDataJSON() } catch { /* not JSON */ }
+        if (sent && Array.isArray(sent.corrections)) { packet.corrections_sent = sent.corrections; return route.fulfill(json(plane.proxyAnswer(sent.corrections))) }
+        return route.fulfill(json(plane.upload))
+      }
       if (m === 'POST' && SUBMIT.test(p)) { noteSubmitted(req); posts.submissions += 1; if (posts.submissions > 1) { guard.push(['second-submit', m, p].join('\t')); return route.abort('blockedbyclient') } return route.fulfill(json(plane.submission)) }
       const key = p.startsWith('/api/') ? plane.keys.find((k) => url.includes(k)) : undefined
       if (key) return route.fulfill(json(plane.reads[key]))
@@ -259,6 +275,26 @@ try {
   packet.upload_alert = (await page.locator('[data-slot="prospect-composer"] [role=alert]').first().innerText().catch(() => null)) || null
   packet.upload_findings = await page.locator('[data-slot="upload-findings"] li').allInnerTexts().catch(() => [])
   await shot(page, `upload-${uploadState ?? 'no-state'}`)
+  if (kase.proxies && uploadState === 'NEEDS_CORRECTION') {
+    // Y-5: name each proxy the case states, then re-post with them through the page's own button.
+    const named = []
+    for (const [ticker, proxy] of Object.entries(kase.proxies)) {
+      const row = page.locator(`[data-slot="upload-proxy-row"][data-proxy-for="${ticker}"] input`)
+      if (await row.count()) { await row.fill(proxy); named.push(ticker) }
+    }
+    packet.proxies_named = named
+    mark('proxies_pressed')
+    await page.locator('[data-slot="upload-proxy-submit"]').click().catch(() => {})
+    for (const start = Date.now(); Date.now() - start < 240000;) {
+      uploadState = await page.locator('[data-slot="upload-state"]').getAttribute('data-state').catch(() => null)
+      if (uploadState === 'NORMALIZED' || (uploadState === 'NEEDS_CORRECTION' && Date.now() - start > 5000)) break
+      await page.waitForTimeout(500)
+    }
+    mark('proxies_answered')
+    packet.upload_state_after_proxies = uploadState
+    packet.proxies_shown = await page.locator('[data-slot="prospect-proxies-used"] li').allInnerTexts().catch(() => [])
+    await shot(page, `proxies-${uploadState ?? 'no-state'}`)
+  }
   if (opt.dryUpload) {
     outcome = packet.dry_upload ? `DRY_UPLOAD selected_tenant ${packet.dry_upload.selected_tenant_present ? 'PRESENT' : 'ABSENT'}` : 'DRY_UPLOAD_NOT_SENT'
   } else if (uploadState !== 'NORMALIZED') {
