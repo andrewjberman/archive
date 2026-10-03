@@ -1,0 +1,109 @@
+diff --git a/src/components/market-performance/RSIBars.tsx b/src/components/market-performance/RSIBars.tsx
+index 279440c7..a49e342d 100644
+--- a/src/components/market-performance/RSIBars.tsx
++++ b/src/components/market-performance/RSIBars.tsx
+@@ -137,23 +137,15 @@ export const RSIBars: FC<RSIBarsProps> = ({ marketData, period = '90D' }) => {
+     setSelectedAssetClass(assetClass)
+   }
+ 
+-  // Get gradient colors based on RSI value (0-100 scale)
++  // DSGN_REBRND E1 (row S3, FWD-3): RSI is ORDERED (0-100), so each bar's gradient is two neighbouring steps of the one
++  // ordered-scale ramp (`--ramp-1` lightest ... `--ramp-5` darkest), oversold to overbought -- the direction the Fear &
++  // Greed arc on this same panel reads (RB-s-4). The ramp's range follows its ground, so it stays legible on the band.
+   const getGradientColors = (value: number): { start: string; end: string } => {
+     const v = Math.max(0, Math.min(100, value))
+-
+-    if (v < 30) {
+-      // Oversold zone - muted (weak momentum)
+-      return { start: 'hsl(var(--perf-weak-neg))', end: 'hsl(var(--perf-weak-neg-dark))' }
+-    } else if (v > 70) {
+-      // Overbought zone - strong momentum
+-      return { start: 'hsl(var(--perf-strong-pos))', end: 'hsl(var(--perf-strong-pos-dark))' }
+-    } else if (v < 50) {
+-      // Lower neutral - Orange to Yellow
+-      return { start: 'hsl(var(--perf-neutral))', end: 'hsl(var(--perf-neutral-dark))' }
+-    } else {
+-      // Upper neutral - Yellow to Lime
+-      return { start: 'hsl(var(--perf-weak-pos-dark))', end: 'hsl(var(--perf-weak-pos))' }
+-    }
++    if (v < 30) return { start: 'hsl(var(--ramp-1))', end: 'hsl(var(--ramp-2))' } // oversold
++    if (v < 50) return { start: 'hsl(var(--ramp-2))', end: 'hsl(var(--ramp-3))' } // lower neutral
++    if (v <= 70) return { start: 'hsl(var(--ramp-3))', end: 'hsl(var(--ramp-4))' } // upper neutral
++    return { start: 'hsl(var(--ramp-4))', end: 'hsl(var(--ramp-5))' } // overbought
+   }
+ 
+   // Map period to human-readable label for tooltip
+diff --git a/src/components/market-performance/RSIModal.tsx b/src/components/market-performance/RSIModal.tsx
+index 98cfe996..bb869bb2 100644
+--- a/src/components/market-performance/RSIModal.tsx
++++ b/src/components/market-performance/RSIModal.tsx
+@@ -157,13 +157,25 @@ const COMMODITIES_CATEGORIES = {
+   'Digital Assets': ['Bitcoin', 'Ethereum'],
+ }
+ 
++// DSGN_REBRND E1 (row S3, FWD-3): RSI is an ORDERED quantity (0-100), so its bands are the one ordered-scale ramp --
++// `--ramp-1` lightest (oversold) ... `--ramp-5` darkest (overbought), the direction the Fear & Greed arc beside it already
++// reads (RB-s-4) -- never five unrelated hues. The ramp's range follows its ground (canvas or band, index.css), so every
++// step stays legible on both. The band edges are unchanged.
++export const RSI_BAND_COLORS = [
++  'hsl(var(--ramp-1))', // < 30   oversold
++  'hsl(var(--ramp-2))', // 30-45  weak
++  'hsl(var(--ramp-3))', // 45-55  neutral
++  'hsl(var(--ramp-4))', // 55-70  strong
++  'hsl(var(--ramp-5))', // > 70   overbought
++] as const
++
+ // RSI color based on value (0-100 scale)
+-function getRSIColor(value: number): string {
+-  if (value < 30) return '#ef4444'   // Oversold - red
+-  if (value < 45) return '#f97316'   // Weak - orange
+-  if (value <= 55) return '#eab308'  // Neutral - yellow (45-55 range)
+-  if (value <= 70) return '#84cc16'  // Strong - lime
+-  return '#22c55e'                   // Overbought - green
++export function getRSIColor(value: number): string {
++  if (value < 30) return RSI_BAND_COLORS[0]
++  if (value < 45) return RSI_BAND_COLORS[1]
++  if (value <= 55) return RSI_BAND_COLORS[2]
++  if (value <= 70) return RSI_BAND_COLORS[3]
++  return RSI_BAND_COLORS[4]
+ }
+ 
+ // RSI status label
+@@ -332,17 +344,17 @@ function IndexHistoryChart({
+           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+ 
+           {/* RSI zones as background */}
+-          <ReferenceArea y1={0} y2={30} fill="#ef4444" fillOpacity={0.05} />
+-          <ReferenceArea y1={30} y2={45} fill="#f97316" fillOpacity={0.05} />
+-          <ReferenceArea y1={45} y2={55} fill="#eab308" fillOpacity={0.05} />
+-          <ReferenceArea y1={55} y2={70} fill="#84cc16" fillOpacity={0.05} />
+-          <ReferenceArea y1={70} y2={100} fill="#22c55e" fillOpacity={0.05} />
++          <ReferenceArea y1={0} y2={30} fill={RSI_BAND_COLORS[0]} fillOpacity={0.05} />
++          <ReferenceArea y1={30} y2={45} fill={RSI_BAND_COLORS[1]} fillOpacity={0.05} />
++          <ReferenceArea y1={45} y2={55} fill={RSI_BAND_COLORS[2]} fillOpacity={0.05} />
++          <ReferenceArea y1={55} y2={70} fill={RSI_BAND_COLORS[3]} fillOpacity={0.05} />
++          <ReferenceArea y1={70} y2={100} fill={RSI_BAND_COLORS[4]} fillOpacity={0.05} />
+ 
+           {/* Zone reference lines */}
+-          <ReferenceLine y={30} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={1.5} strokeOpacity={0.4} />
+-          <ReferenceLine y={45} stroke="#f97316" strokeDasharray="3 3" strokeWidth={1} strokeOpacity={0.3} />
+-          <ReferenceLine y={55} stroke="#84cc16" strokeDasharray="3 3" strokeWidth={1} strokeOpacity={0.3} />
+-          <ReferenceLine y={70} stroke="#22c55e" strokeDasharray="3 3" strokeWidth={1.5} strokeOpacity={0.4} />
++          <ReferenceLine y={30} stroke={RSI_BAND_COLORS[0]} strokeDasharray="3 3" strokeWidth={1.5} strokeOpacity={0.4} />
++          <ReferenceLine y={45} stroke={RSI_BAND_COLORS[1]} strokeDasharray="3 3" strokeWidth={1} strokeOpacity={0.3} />
++          <ReferenceLine y={55} stroke={RSI_BAND_COLORS[3]} strokeDasharray="3 3" strokeWidth={1} strokeOpacity={0.3} />
++          <ReferenceLine y={70} stroke={RSI_BAND_COLORS[4]} strokeDasharray="3 3" strokeWidth={1.5} strokeOpacity={0.4} />
+ 
+           <XAxis
+             dataKey="date"
+@@ -881,7 +893,9 @@ export function RSIModal({ assetClass: initialAssetClass, onClose, preloadedData
+       onClick={onClose}
+     >
+       <div
+-        className="bg-[hsl(var(--bg-card))] border border-white/20 rounded-[4px]  w-[1400px] max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col"
++        // DSGN_REBRND E1: the modal is band-valued (`--bg-card`), so it declares the band (`dark-band`): the ramp then takes
++        // its band range here, the same as on the Global RSI panel it opens from.
++        className="dark-band bg-[hsl(var(--bg-card))] border border-white/20 rounded-[4px]  w-[1400px] max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col"
+         onClick={(e) => e.stopPropagation()}
+       >
+         {/* Header */}

@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-304",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-304.render-reach-reporting-route.md",
+    "group": "OTHER",
+    "vintage_commit": "278e485075"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "278e485075",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-304.render-reach-reporting-route.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~107",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/render_auth.mjs",
+      "kind": "script",
+      "commit_or_etag": "9eb6ed7dde",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "RENDER_API_PATH_PATTERNS gains {name: reporting, re: ^/api/scoped/investor-reporting/reporting/[^/]+/series$}; the three existing patterns kept; comment updated; the edge has no route-claim match to extend; not published (AWS: none)",
+      "artifact_covered_by": [
+        "IB39-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-read/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "9eb6ed7dde",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "IRPT_EVIDENCE_BUCKET = data.terraform_remote_state.core.outputs.evidence_bucket; depends_on gains the render-grant policy; text only, not planned, not applied (AWS: none)",
+      "artifact_covered_by": [
+        "IB39-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-read/remote_state.tf",
+      "kind": "terraform",
+      "commit_or_etag": "9eb6ed7dde",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the core remote-state data source, copied from the performance root; text only",
+      "artifact_covered_by": [
+        "IB39-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-read/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "9eb6ed7dde",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt_reporting_read_render_grant: GetObject on firms/*/generations/exr_*/render_grant.json, shape-bounded ListBucket, KMS decrypt via S3 for the evidence bucket; copied from performance/render_grant.tf; text only, not applied (AWS: none)",
+      "artifact_covered_by": [
+        "IB39-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "9eb6ed7dde",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-reporting-read-lambda entry only: files and staged_from gain _render_identity grant.py and report_owner.py at pin c4fedd31c5 (the performance adapter's), sha256 matching the blobs; artifact_s3_key and artifact_sha256 untouched; build-and-upload.sh not run",
+      "artifact_covered_by": [
+        "IB39-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB39-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r39/p39_render_reach.py\" . IB39-1-AC1 -> IB39-1-AC1 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r39/p39_render_reach.py\" . IB39-1-AC1",
+      "output_evidence": "OK: 4 patterns; ['reporting'] admits the series read and nothing else on the reporting route\nIB39-1-AC1 PASS\n(rc=0)",
+      "denominator": "4 patterns parsed; the reporting pattern matches the series path and neither the manifest nor the client summary path; performance, sections and narrative kept",
+      "expect": "IB39-1-AC1 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (no pattern admitted the series path)."
+    },
+    {
+      "criterion_id": "IB39-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r39/p39_render_reach.py\" . IB39-1-AC2 -> IB39-1-AC2 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r39/p39_render_reach.py\" . IB39-1-AC2",
+      "output_evidence": "OK: IRPT_EVIDENCE_BUCKET set; the render-grant read is scoped; grant.py and report_owner.py staged; the package installs render ports\nIB39-1-AC2 PASS\n(rc=0)",
+      "denominator": "env set; one scoped GetObject statement naming generations/exr_ and render_grant.json with no wildcard resource; 2 of 2 modules staged with sound pins; the materialized package imports entry and served.render_ports_from_env() returned non-None (PORTS_OK)",
+      "expect": "IB39-1-AC2 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (no IRPT_EVIDENCE_BUCKET)."
+    },
+    {
+      "criterion_id": "IB39-1-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r39/p39_render_reach.py\" . IB39-1-AC3 -> IB39-1-AC3 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r39/p39_render_reach.py\" . IB39-1-AC3",
+      "output_evidence": "OK: reporting 21 passed; _authz 207 passed with only the 6 base census failures\nIB39-1-AC3 PASS\n(rc=0)",
+      "denominator": "reporting 21 passed (>= 21), 0 failed; _authz 207 passed (>= 207), 6 failed, all 6 in test_unguarded_census.py (row S15)",
+      "expect": "IB39-1-AC3 PASS",
+      "status": "PASS",
+      "status_reason": "Base was PASS (a guard); still PASS."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC1 check tests the new pattern against the series path and against the manifest and client-summary paths on the same route; the AC2 rehearsal materializes the package from the map and imports it with the repo off sys.path.",
+      "expected": "the pattern admits only the series path; the package installs render ports",
+      "observed": "the checker passed on the edited tree and read FAIL on AC1 and AC2 at the base (278e485075 order preflight)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline static and unit checks",
+      "observed": "criteria run after the code commit, rc=0",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-W107-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p39_render_reach.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r39/p39_render_reach.py\" . IB39-1-AC1",
+      "result": "IB39-1-AC1 PASS"
+    },
+    {
+      "tool": "p39_render_reach.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r39/p39_render_reach.py\" . IB39-1-AC2",
+      "result": "IB39-1-AC2 PASS"
+    },
+    {
+      "tool": "p39_render_reach.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r39/p39_render_reach.py\" . IB39-1-AC3",
+      "result": "IB39-1-AC3 PASS"
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-19",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "aabc054e89"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "1ce7e8e9f0",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-19.short-div-debit-income.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~6",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/SHORT_DIV_DEBIT_R11.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "bc50d5711e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "classify_and_sum admits a plain DIV/FC/DV debit (SHORT_PAID_BY_SHARES_KEYS) into the income term only when the row's declared share_quantity_column value is negative; QDV, NDV and PDV stay admitted by key, adjustment keys stay out, METHOD_VERSION stays 2; transaction_columns() reads the declared column. Not packaged, re-pinned or run with --upload.",
+      "artifact_covered_by": [
+        "DB11-1-AC1",
+        "DB11-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "kind": "config_data",
+      "commit_or_etag": "bc50d5711e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "share_quantity_column = dividend_interest_share_quantity, basis measured, comment citing PRD v0.7 ruling 27.",
+      "artifact_covered_by": [
+        "DB11-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_short_div_debit.py",
+      "kind": "test",
+      "commit_or_etag": "bc50d5711e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 tests: the column is a declared read column; a DIV debit with negative share quantity is negative income; zero, null or positive quantity is not admitted; a frame without the column admits nothing; an adjustment key stays out; DIV credit and QDV treatment unchanged; flow/unvalued/cash_unknown identical; total return identical and METHOD_VERSION 2.",
+      "artifact_covered_by": [
+        "DB11-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/SHORT_DIV_DEBIT_R11.json",
+      "kind": "doc",
+      "commit_or_etag": "bc50d5711e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MEASURED by short_div_debit_measure_r11.py (S3 reads only) over 188 fact_trn partitions 2026-01-02..2026-10-01: 38 DIV debits admitted, 822.51 absolute, 0 with a non-negative quantity, 1 zero-share row excluded; Stage B (6 accounts carrying any DIV debit, 631 account-days, live-shaped thresholds) return delta 0, income moved on 37. Stage A (every account) flow, unvalued and cash_unknown identical on 188 of 188 partitions. Detail in SHORT_DIV_DEBIT_R11.detail.json.",
+      "artifact_covered_by": [
+        "DB11-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB11-1-AC1",
+      "criterion_verbatim": "DB11-1-AC1 -- the irpt_reporting suite passes, at least 17 tests (14 at the base), with the new file. Base: FAIL (no file).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r11/p11_1_ac1_short_div_debit_tests.py\" .",
+      "output_evidence": "OK: irpt_reporting suite 22 passed, 0 failed\nDB11-1-AC1 PASS rc=0",
+      "denominator": "22 of 22 tests passed (17 required; 14 at the base plus 8 new); the file names DIV, share_quantity and short",
+      "status": "PASS",
+      "expect": "DB11-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB11-1-AC2",
+      "criterion_verbatim": "DB11-1-AC2 -- exactly the 38 DIV debits are admitted (822.51), none with non-negative shares, and the zero-share row is excluded. Return DELTA=0 on every compared account-day. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r11/p11_1_ac2_short_div_debit_measured.py\" .",
+      "output_evidence": "OK: 38 short DIV debits admitted (822.51), 0 with non-negative shares, 1 zero-share row excluded; return DELTA=0 on 631 account-days, income moved on 37\nDB11-1-AC2 PASS rc=0",
+      "denominator": "188 of 188 fact_trn partitions scanned; 39 DIV debit rows (38 admitted, 1 zero-share excluded); return compared on 631 account-days of the 6 accounts carrying any DIV debit, 0 moved",
+      "status": "PASS",
+      "expect": "DB11-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB11-1-AC3",
+      "criterion_verbatim": "DB11-1-AC3 -- reporting-gold and reporting-publish suites pass with nothing removed. Base: PASS (a guard).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r5/p5_ac3_suites_unchanged.py\" . DB11-1-AC3",
+      "output_evidence": "OK: reporting-gold 24 passed; reporting-publish 37 passed\nDB11-1-AC3 PASS rc=0",
+      "denominator": "reporting-gold 24 of 24, reporting-publish 37 of 37, 0 failed in each, each suite in its own pytest process",
+      "status": "PASS",
+      "expect": "DB11-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base producer (share_quantity_column removed from the declaration) is the negative arm: the same 39 DIV debit rows are run through it and through the changed producer, and a row is counted admitted only where its income differs.",
+      "expected": "base admits 0 DIV debits; change admits exactly the negative-share rows",
+      "observed": "38 of 39 admitted (all negative quantity); the zero-share row (0.37) is not admitted; test_div_debit_with_negative_share_quantity... asserts the base returns {} for the same row.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 run on the committed tree; the Stage A counts (38, 822.51, 1 zero-share) equal row IRPT_DASHBD-W1-S17's own measurement taken independently in round 6.",
+      "observed": "All three PASS; counts reproduced exactly.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, upload, Terraform apply, packaging, re-pin, source-map change, gold rewrite or method-row write; any vendor call",
+      "reason": "Outside the order (the issuer's P-2 packet); S3 reads only, 0 vendor calls."
+    },
+    {
+      "item": "Stage B return comparison over every account",
+      "reason": "Return was compared end to end (compute_range with the measured thresholds) on the 6 accounts carrying a DIV debit, 631 account-days; for every other account Stage A shows flow, unvalued and cash_unknown identical on every partition and income unchanged, and income enters return only through the guard grade."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh data/assets/scripts/gold/irpt_reporting/account_return_daily.py data/assets/scripts/gold/irpt_reporting/tests/test_short_div_debit.py org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/short_div_debit_measure_r11.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); OK: pre-commit gate clean for 1 of 1 file(s) (py_compile, ds-precommit, ruff py39)"
+    }
+  ]
+}
