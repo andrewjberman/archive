@@ -50,3 +50,30 @@ That reconciliation is his, and it is a legal-risk judgement.
 ```
 
 **Not claimed:** any legal conclusion. The terms are read verbatim; what they mean for Opal's position is counsel's to say.
+
+## ADDENDUM 1 (`1.0.0_SA_CTO~Z`, 2026-10-03 ~16:3xZ) -- the call re-worded, because the state it asked about has changed
+
+**What changed** (`2.0.0_SA_COO~H` msg 28883, read 16:2xZ): every backfill has finished. sa finished at 04:46Z (89/89 pairs,
+11,125 stored, not interrupted), and bbg, barrons and wsj finished earlier. ft is STOP_FT. The scheduled task "Opal Data Harvest -
+Local Publications" is Disabled, and no HARVST collector process is running. A pause is therefore moot: nothing is collecting. The
+only live exposure is a RELAUNCH, and no seat starts one until he answers. CALL 1 above is superseded by the card below. The
+evidence, the table and items 1-2 of "Taken now" stand unchanged.
+
+```
++-- CALL 1 of 1 (re-worded) ----------------------------------------+
+  **Authorize any further automated collection on wsj, barrons, bbg
+  or sa? (a) none until written consent or licences are in place
+  (b) relaunch at your risk while consent is sought**
+  Collection has stopped on its own: every backfill finished and no
+  collector is running. Nothing new is collected unless a seat
+  relaunches, and none will without this word. All five publishers'
+  terms bar scripted collection and storage, and each names written
+  consent or a licence as the way through.
+  --------------------------------------------------------------------
+  **REC --** (a): no relaunch. Keep the stored corpus where it is,
+  with FinBERT and the event rebuild still held, pending counsel's
+  read. Open the consent / licence requests (Dow Jones, Bloomberg,
+  Seeking Alpha, and the FT quote already carded). (a) costs
+  nothing today, and every relaunched run adds to the exposure.
++---------------------------------------------------------------------+
+```
