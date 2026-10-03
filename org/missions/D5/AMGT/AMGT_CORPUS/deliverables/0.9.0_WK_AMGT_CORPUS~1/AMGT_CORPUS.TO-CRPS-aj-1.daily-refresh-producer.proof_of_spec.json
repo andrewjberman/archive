@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-aj-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-aj-1.daily-refresh-producer.md",
+    "group": "OTHER",
+    "vintage_commit": "bcd3b35abc7697b4f4969e4e7f338318b9f4211f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "bcd3b35abc7697b4f4969e4e7f338318b9f4211f",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-aj-1.daily-refresh-producer.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "a97635fc694195c52ef71186f3afe58ab2b8128c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "52 mnemonics appended at the END of the three lists (header 18 to 25, hist 39 to 83, forecast 11 to 12); a FIELD_BASIS entry for each; ERN_ANN_DT_AND_PER derived from its bulk row list into [{announcement_date ISO, period}] in Bloomberg's row order with rows_left_out in the figure basis; stage `refresh` (cmd_refresh). No Bloomberg call, no S3 write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/induction_scheduled.py",
+      "kind": "script",
+      "commit_or_etag": "a97635fc694195c52ef71186f3afe58ab2b8128c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run_refresh_step after the admit step; `induction_scheduled step model_block_refresh rc <n>` printed after the admit line and before the closing line; closing rc is the first non-zero of the three steps. The pinned checkout the Scheduled Task runs is unchanged (the issuer re-pins in CRPS-aj-2).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_model_block_round34.py",
+      "kind": "test",
+      "commit_or_etag": "a97635fc694195c52ef71186f3afe58ab2b8128c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file, 12 offline tests (fake clients, in-memory S3 stub, no blpapi, no boto3): bulk earnings derive, refused new header field, refresh skip-if-current / batches of 3 / rc 4 / one failure not hiding others / dry-run zero calls / no --securities.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_induction_schedule.py",
+      "kind": "test",
+      "commit_or_etag": "a97635fc694195c52ef71186f3afe58ab2b8128c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_r1_scheduled_path stubs run_refresh_step to rc 0 beside the admit stub; test_t1_scheduled_steps asserts the three-step order and a failing refresh step is a non-zero closing rc; every other assertion kept.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round34/aj1_check.py\"; echo \"exit=$?\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round34/aj1_check.py\"; echo \"exit=$?\"",
+      "output_evidence": "ARM b1 PASS v3 49 placed_once 49 not_once []\nARM b2 PASS header_missing []\nARM b3 PASS best_cps_in_forecast True override_listed False\nARM b4 PASS members_plus_new 118 no_basis 0 []\nARM b5 PASS cmd_refresh True refresh_choice True\nARM c1 PASS base_members 68 moved 0 []\nARM c2 PASS cmd_admit True ADMIT_BATCH 3 HIST_FIELDS_PER_REQUEST 25\nARM c3 PASS four_security_pull_refused True\naj1 build 5/5 control 3/3\nexit=0",
+      "denominator": "5 of 5 build arms and 3 of 3 control arms PASS; 49 of 49 V3 mnemonics placed once; 118 of 118 members-plus-new carry a FIELD_BASIS entry; 68 of 68 base members keep their index. rc 0.",
+      "expect": "(?m)^aj1 build 5/5 control 3/3$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round34/aj1_refresh_dry.sh\"",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round34/aj1_refresh_dry.sh\"",
+      "output_evidence": "AJ1-REFRESH-DRY PASS registered=96 with_block=96 fields=120 last=[refresh population registered 96 with_block 96 already_current 0 pulled 0 bloomberg_calls 0]",
+      "denominator": "K = 96 of N = 96 registered names carry a block (bar K >= 94); field counts sum to 120 = header 25 + hist 83 + forecast 12 (bar >= 118); pulled 0 and bloomberg_calls 0 of 96. rc 0. S3 list/get only, no Bloomberg session.",
+      "expect": "(?m)^AJ1-REFRESH-DRY PASS ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round34/aj1_sched_dry.sh\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round34/aj1_sched_dry.sh\"",
+      "output_evidence": "AJ1-SCHED-DRY PASS order admit:6 refresh:8 closing:9 [induction_scheduled step model_block_refresh rc 1]",
+      "denominator": "3 of 3 required lines present, in order (admit line 6, refresh line 8, closing line 9). The refresh rc 1 is the known dry-run poison (row AMGT_CORPUS-Z-S84), not graded by this check. rc 0.",
+      "expect": "(?m)^AJ1-SCHED-DRY PASS ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1, AC2 and AC3 each run twice under their literal invocations, before and after the commit of the producer change.",
+      "observed": "AC1 build 5/5 control 3/3 both times; AC2 registered=96 with_block=96 fields=120 both times; AC3 order admit:6 refresh:8 closing:9 both times.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The producer as at the base (git show bcd3b35abc:integrations/bloomberg/research/model_block_pull.py) inspected for the new stage and the new field.",
+      "expected": "No cmd_refresh and no BEST_CPS, so AC1's b5 and b3 arms (and AC2 and AC3) would refuse it.",
+      "observed": "grep -c 'def cmd_refresh' on the base file 0; grep -c BEST_CPS 0; the same greps on the committed file read 1 and the field present.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "field_map.json, build_unit_map.py and the unit-family census, and the five existing test files that pin the old list sizes or December unresolved set",
+      "reason": "Outside this order's <paths> and read-only by bound 3; filed as row AMGT_CORPUS-Z-W1-S29 (disarm_owner 2.0.0_SA_COO~X)."
+    },
+    {
+      "item": "A real Bloomberg pull, the first read of each new field's servability and request type",
+      "reason": "Bound 1: no Bloomberg call from this turn; the issuer's scripted fire in CRPS-aj-2 is the first read."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W1-S29"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest over the round-34 test file, test_model_block_admit.py and test_induction_schedule.py",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_model_block_round34.py integrations/bloomberg/research/tests/test_model_block_admit.py lib/research/corpus/tests/test_induction_schedule.py -q",
+      "result": "rc 0; 16 passed"
+    }
+  ]
+}

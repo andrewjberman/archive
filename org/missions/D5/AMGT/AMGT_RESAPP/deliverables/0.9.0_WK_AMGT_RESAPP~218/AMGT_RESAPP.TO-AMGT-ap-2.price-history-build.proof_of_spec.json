@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ap-2.price-history-build",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "2de1ef2251ebbc57086d468db9249d6abd28bea2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "b1aa5a6bb1d40ebbc5f330b555ca18dd2cf45667",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ap-2.price-history-build.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~218",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/price_history_pull.py",
+      "kind": "script",
+      "commit_or_etag": "c549695b69cec24cc2eb70018d0ec76e7b18b9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: --plan (default; no vendor call, no write) and --live (NOT run in this cell; AMGT-ap-3 runs it once). Not deployed: the issuer drains it under a pair.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/price_series_persist.py",
+      "kind": "script",
+      "commit_or_etag": "c549695b69cec24cc2eb70018d0ec76e7b18b9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: write-once history helper (persist_series via store.bronze_put, load_history, run_daily_window_step that never raises). Not deployed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/price_axis_pull.py",
+      "kind": "script",
+      "commit_or_etag": "c549695b69cec24cc2eb70018d0ec76e7b18b9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: one guarded call to run_daily_window_step after the unchanged 30-day leg; the 30-day writes and exit codes 0/3/other proven unchanged in AC1. The scheduled task runs the working tree, so this becomes the deploy only when the issuer drains it; never copied to the shared tree here.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/price/generation.py",
+      "kind": "script",
+      "commit_or_etag": "c549695b69cec24cc2eb70018d0ec76e7b18b9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ADD-ONLY: window_series, compute_price_window_axes, REASON_INSUFFICIENT_IN_WINDOW, one import line; compute_price_axis and every existing function byte-identical; existing lib/research/price/tests unchanged and green (42 passed with the new file).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/rolling_windows.py",
+      "kind": "script",
+      "commit_or_etag": "c549695b69cec24cc2eb70018d0ec76e7b18b9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ADD-ONLY: PRICE_WINDOWS and price_window_axis (the one partition-naming declaration). Packaged in the scoped-api Lambda closure; not deployed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "c549695b69cec24cc2eb70018d0ec76e7b18b9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ADD: read_window_rankings and one branch in the price ?days handler; ?days=30 and the default are untouched. Built --build-only: SIZE 253730953 B of 262144000 (96.8%), not uploaded.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/price/tests/test_price_windows.py",
+      "kind": "test",
+      "commit_or_etag": "c549695b69cec24cc2eb70018d0ec76e7b18b9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 10 tests for (i), (iv), (v), (vi).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_price_windows_route.py",
+      "kind": "test",
+      "commit_or_etag": "c549695b69cec24cc2eb70018d0ec76e7b18b9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 11 tests for (ii), (iii) and the 30-day-unchanged read.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_rolling_windows.py",
+      "kind": "test",
+      "commit_or_etag": "c549695b69cec24cc2eb70018d0ec76e7b18b9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: one fixture line stubbing read_generation_pointer so the existing price qualified-wait test stays hermetic (row AMGT_RESAPP-Z-W218-S1).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every case passes (90/365 rows from a planted series; the route serves window_end and window_note; \"not produced yet\" with no generation; write-once persist; the daily job's 30-day writes and exit code unchanged with the step on, failing, or without history; daily 90/365 ending at the as_of); and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/price/tests/test_price_windows.py lib/research/api/tests/test_price_windows_route.py; echo \"exit=$?\"",
+      "output_evidence": "test_i_planted_series_gives_the_declared_90_and_365_rows PASSED [  4%]\ntest_i_window_axis_names_are_the_routes_names_and_a_dry_run_writes_nothing PASSED [  9%]\ntest_iv_persist_writes_once_and_refuses_an_overwrite PASSED [ 14%]\n... (21 PASSED lines)\n21 passed, 174 warnings in 0.29s =======================\nexit=0",
+      "denominator": "21 of 21 collected tests passed (10 in test_price_windows.py, 11 in test_price_windows_route.py), 0 failed; beside it lib/research/api/tests/ 490 passed and lib/research/price/tests/ 42 passed",
+      "status": "PASS",
+      "expect": "21 passed.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "R64 C10 SERVED: YES (30 unchanged; 90/365 still \"not produced yet\", since no generation exists before the live pull); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c10 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 trending price days=default serves rows at window_days 30 status 200 rows 94\nPASS C1 trending price days=30 serves rows at window_days 30 status 200 rows 94\nPASS C2 trending price days=90 serves no rows and 'not produced yet' status 200 rows 0 reason 'the 90- and 365-day price windows are not produced yet: they need a longer price-history p'\nPASS C2 trending price days=365 serves no rows and 'not produced yet' status 200 rows 0 reason 'the 90- and 365-day price windows are not produced yet: they need a longer price-history p'\nPASS C1 breakout price days=default serves rows at window_days 30 status 200 rows 94\nPASS C1 breakout price days=30 serves rows at window_days 30 status 200 rows 94\nPASS C2 breakout price days=90 serves no rows and 'not produced yet' status 200 rows 0 reason 'the 90- and 365-day price windows are not produced yet: they need a longer price-history p'\nPASS C2 breakout price days=365 serves no rows and 'not produced yet' status 200 rows 0 reason 'the 90- and 365-day price windows are not produced yet: they need a longer price-history p'\nR64 C10 SERVED: YES\nexit=0",
+      "denominator": "8 of 8 clauses PASS (trending and breakout x default, 30, 90, 365)",
+      "status": "PASS",
+      "expect": "R64 C10 SERVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a plan naming the universe size, the 400-day window ending at the last trading day, an address()-built S3 key, the 90/365 partition names, and \"vendor calls 0, writes 0\"; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" \"C:/Users/Opal Bloomberg/AppData/Local/Programs/Python/Python311/python.exe\" integrations/bloomberg/research/price_history_pull.py --plan; echo \"exit=$?\"",
+      "output_evidence": "[price_history] PLAN (no vendor call, no write)\n[price_history] universe: 95 ticker(s) from 95 covered name(s); excluded 0 (no Bloomberg form)\n[price_history] window: 400 calendar days, 2025-08-28 .. 2026-10-02 (end = lib.trading_calendar.prev_trading_day(today))\n[price_history] S3 key: s3://opal-data-harvest/bloomberg/harvest/bronze/price_history_px_last/date=2026-10-02/year_pull.json\n[price_history] partitions: TRENDING_PRICE_90D#2026-10-02, BREAKOUT_PRICE_90D#2026-10-02, TRENDING_PRICE_365D#2026-10-02, BREAKOUT_PRICE_365D#2026-10-02\n[price_history] vendor calls 0, writes 0\nexit=0",
+      "denominator": "universe 95 tickers of 95 covered names, 0 excluded; 4 of 4 window partitions named",
+      "status": "PASS",
+      "expect": "universe: 95 ticker.*400 calendar days.*S3 key: s3://.*price_history_px_last.*TRENDING_PRICE_90D.*BREAKOUT_PRICE_365D.*vendor calls 0, writes 0.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The window rule (as_of - N calendar days) in generation.window_series, exercised by test_i_planted_series_gives_the_declared_90_and_365_rows against hand-checked values (BBB 20.0, CCC 100.0, 10/51, the 275/90 baseline mean).",
+      "expected": "A window start shifted by 40 days changes which observations are kept, so the declared scores no longer match and test_i fails.",
+      "observed": "Edited window_series to start = end - (N - 40) days: 1 failed, 9 passed in test_price_windows.py (comparison failed in test_i). Reverted; git diff on the file empty and 10 passed again.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "lib/research/price/tests ran three times in this session (before commit, after commit, and with the mutant reverted); the new files ran as part of each.",
+      "observed": "42 passed each time (10 passed in test_price_windows.py alone); the fakes use no clock or network, and the daily-job comparison drops timestamps and ids.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "price_history_pull.py --live and any real run of price_axis_pull.py",
+      "reason": "Out of BOUNDS: no vendor call, no S3 or table write. AMGT-ap-3 runs the year pull once; the daily job's first real run is after the drain."
+    },
+    {
+      "item": "A live read of the deployed route with a 90/365 generation present",
+      "reason": "No generation exists before the live pull (AC2 expects 'not produced yet'); the served 90/365 rows are proven over a planted DynamoDB fake in test_price_windows_route.py."
+    },
+    {
+      "item": "scheduled_daily_pull.cmd and the shared tree",
+      "reason": "Not in <paths>; never touched or copied."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W218-S1"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~218/AMGT_RESAPP.TO-AMGT-ap-2.price-history-build.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 <the 9 changed .py files>",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh, code commit c549695b69)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~218 <0.9.0_WK_AMGT_RESAPP~218@opal.agent>\" -F <msgfile> -- <9 paths>",
+      "result": "pre-commit gate clean for 9 of 9 file(s); naming-gate PASS 0 graded; commit c549695b69cec24cc2eb70018d0ec76e7b18b9c1"
+    },
+    {
+      "tool": "build-and-upload-scoped-amgt.sh --build-only",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only /c/tmp/r66-pkg-218.zip",
+      "result": "SIZE: package 131987320 B unzipped over 355 entries + layer opal-amgt-print-deps:1 121743633 B = 253730953 B against the 262144000-byte ceiling (96.8% used, 8413047 B spare); rc=0; NOT uploaded"
+    }
+  ]
+}
