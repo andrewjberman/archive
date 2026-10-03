@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-an-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "59aabebf8708335e25e2f20aff08078060417cae",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-3.feed-and-names.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "59aabebf8708335e25e2f20aff08078060417cae"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~212",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "served by the scoped-AMGT Lambda; the redeploy is AMGT-an-7, not this cell",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/monthly_chatter.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "served by the scoped-AMGT Lambda; the redeploy is AMGT-an-7, not this cell",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every test passes, your new tests included, and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/; echo \"exit=$?\"",
+      "output_evidence": "419 passed, 178 warnings in 79.25s; exit=0",
+      "denominator": "419 of 419 tests passed (14 new items in test_feed_and_names_an3.py)",
+      "status": "PASS",
+      "status_reason": "all passed, exit 0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "C1 PASS for BA, AMD and VLO (every day-view article in the feed's window is in the feed); C2 PASS for all 3 (one display name, cased, no share-class code); R64 C12 SERVED: YES -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c12 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 BA_US_Equity feed holds every day-view article in its window window 2026-09-03..2026-10-02 days 21 day-view 71 feed 71 missing 0\nPASS C2 BA_US_Equity serves one display name, cased, no share-class code names {'overlay': 'The Boeing Co', 'ranking': 'The Boeing Co', 'chatter': 'The Boeing Co', 'peers': 'The Boeing Co'}\nPASS C1 AMD_US_Equity feed holds every day-view article in its window window 2026-09-03..2026-10-02 days 9 day-view 13 feed 13 missing 0\nPASS C2 AMD_US_Equity serves one display name, cased, no share-class code names {'overlay': 'Advanced Micro Devices Inc', 'ranking': 'Advanced Micro Devices Inc', 'chatter': 'Advanced Micro Devices Inc', 'peers': 'Advanced Micro Devices Inc'}\nPASS C1 VLO_US_Equity feed holds every day-view article in its window window 2026-09-03..2026-10-02 days 3 day-view 3 feed 3 missing 0\nPASS C2 VLO_US_Equity serves one display name, cased, no share-class code names {'overlay': 'Valero Energy Corp', 'ranking': 'Valero Energy Corp', 'chatter': 'Valero Energy Corp', 'peers': 'Valero Energy Corp'}\nR64 C12 SERVED: YES\nexit=0",
+      "denominator": "3 of 3 names C1 PASS (feed 71/13/3 of day-view 71/13/3); 3 of 3 names C2 PASS",
+      "status": "PASS",
+      "status_reason": "6 of 6 clauses PASS, verdict YES, exit 0",
+      "judgment": false
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "see AC1",
+      "result": "419 passed"
+    },
+    {
+      "tool": "r64_served.py",
+      "invocation": "see AC2",
+      "result": "R64 C12 SERVED: YES"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W212-S1",
+    "AMGT_RESAPP-Z-W212-S2"
+  ],
+  "controls": {
+    "mutant": {
+      "description": "two mutants on scoped_amgt.py, each run against test_feed_and_names_an3.py: (a) _clean_display_name returns the name unchanged; (b) read_feed drops the window start bound",
+      "expected": "the new tests fail on each",
+      "observed": "(a) 5 failed, 9 passed; (b) 2 failed, 12 passed (test_the_feed_holds_every_day_view_article_in_its_window_newest_first, test_the_feed_says_which_absence); restored: 14 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_feed_and_names_an3.py run twice",
+      "observed": "14 passed both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy of the changed Lambda",
+      "reason": "Bounds forbid deploy; the redeploy is AMGT-an-7"
+    }
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~212/SESSION_LOG.md"
+}

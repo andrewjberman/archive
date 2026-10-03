@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-st-1.a1-follows-its-inputs",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "1e8515aa01",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-st-1.a1-follows-its-inputs.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1e8515aa01"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/publish_page.py",
+      "kind": "script",
+      "commit_or_etag": "34de6119c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy; checks run against a local sink",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6st1_a1_follows_inputs.py",
+      "kind": "script",
+      "commit_or_etag": "34de6119c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy; checks run against a local sink",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a planted newer G1 object makes the next publish (no refresh_a1) write a new holding_contribution object; the manifest reads stale_rebuilt true with stale_input -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/st-1.AC1.py",
+      "output_evidence": "publish 1: OK | objects: {'holding_contribution': 1, 'buying_trend': 1, 'input_census': 1}\nOK:   control: the first publish builds one object of each produced A1 table\nplanted: holdings-20261002T161516Z-bbbbbbbbbbbb.parquet | publish 2: PARTIAL | new holding_contribution objects: ['holding_contribution-20261002T161517Z-e57173d2f524.parquet']\nOK:   the second publish (no refresh_a1) writes a new holding_contribution object, built from the planted G1\nmanifest batch: d1b | a1_produced.holding_contribution: {'status': 'OK', 'stale_rebuilt': True, 'stale_input': 's3://opal-data-etfs/rivalfunds/etfs/gold/canonical_shape/date=2026-09-29/holdings-20261002T161516Z-bbbbbbbbbbbb.parquet'}\nOK:   manifest a1_produced.holding_contribution: status OK, stale_rebuilt true, stale_input names the planted G1\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "control: with no newer input a second publish SKIPS, as today -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/st-1.AC2.py",
+      "output_evidence": "publish 1: OK | publish 2: OK | objects before: {'holding_contribution': 1, 'buying_trend': 1, 'input_census': 1} after: {'holding_contribution': 1, 'buying_trend': 1, 'input_census': 1}\nOK:   a second publish with no newer input writes no new A1 object\nproduce_a1 again: {'holding_contribution': 'SKIPPED', 'buying_trend': 'SKIPPED', 'input_census': 'SKIPPED'}\nOK:   produce_a1 with no newer input reports SKIPPED for holding_contribution, buying_trend and input_census\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "2 of 2 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a1_stale exists and reads False for every table right after a rebuild; the census and the page read one G1 vintage (D02) -- expect: AC3 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/st-1.AC3.py",
+      "output_evidence": "OK:   publish_page.a1_stale exists\nafter the first build: {'holding_contribution': False, 'buying_trend': False, 'input_census': False}\nOK:   right after the first build, a1_stale is False for every produced table\nafter the G1 plant: {'holding_contribution': True, 'buying_trend': True, 'input_census': True}\nOK:   after a newer G1 lands, a1_stale is True for every produced table\npublish 2: PARTIAL | after the rebuild: {'holding_contribution': False, 'buying_trend': False, 'input_census': False}\nOK:   right after the rebuild, a1_stale is False for every produced table\ncensus holdings location: ['holdings-20261002T161525Z-bbbbbbbbbbbb.parquet'] | page G1 for 2026-09-29 : ['holdings-20261002T161525Z-bbbbbbbbbbbb.parquet']\nOK:   one G1 vintage: the census holdings rows and the page both read the planted 2026-09-29 object\nafter a newer G4: True\nOK:   a newer G4 security_market object in the window reads holding_contribution stale\nAC3 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "6 of 6 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "st-1.AC1-AC3 run twice (before and after the commit); rivalfunds package suite run once.",
+      "observed": "same PASS line each time; suite 419 passed, 2 skipped, 0 failed.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Mutant: the strict 'later than' filter in publish_page._a1_newer_input disabled (no input ever reads newer), then tests/test_r6st1_a1_follows_inputs.py and st-1.AC1.",
+      "expected": "the stale tests fail and AC1 FAILS (no rebuild, no stale_rebuilt).",
+      "observed": "unit tests 4 failed, 3 passed; st-1.AC1 'AC1 RESULT: FAIL 2 failures'; restored byte-identical, 7 passed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "34de6119c6"
+    }
+  ]
+}

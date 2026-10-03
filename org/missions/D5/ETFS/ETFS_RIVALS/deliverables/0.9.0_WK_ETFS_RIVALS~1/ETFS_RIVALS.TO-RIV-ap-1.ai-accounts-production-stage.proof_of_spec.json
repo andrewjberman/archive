@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-ap-1.ai-accounts-production-stage",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "1e8515aa01",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-ap-1.ai-accounts-production-stage.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1e8515aa01"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/ai_stage.py",
+      "kind": "script",
+      "commit_or_etag": "e0ece4712e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/ai_client.py",
+      "kind": "script",
+      "commit_or_etag": "e0ece4712e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6ap1_ai_stage.py",
+      "kind": "script",
+      "commit_or_etag": "e0ece4712e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/etfs-rivalfunds/gen_policies.py",
+      "kind": "script",
+      "commit_or_etag": "e0ece4712e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/etfs-rivalfunds/generated.auto.tfvars.json",
+      "kind": "config_data",
+      "commit_or_etag": "e0ece4712e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/etfs-rivalfunds/policies/etfs-rivalfunds-daily-lambda.json",
+      "kind": "iam",
+      "commit_or_etag": "e0ece4712e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/etfs-rivalfunds/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "e0ece4712e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ai_stage.run_for_day writes exactly one research_hypotheses object with the gate set, and a second call writes nothing; control: gate unset writes nothing -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/ap-1.AC1.py",
+      "output_evidence": "OK:   control: gate unset -> no AI call, no account written\nobjects after publish 1 / 2: 1 1 | client calls after 1 / 2: 4 4\nOK:   gate set -> the first stage call writes exactly one research_hypotheses object\nOK:   a second call for the same day calls nothing and writes nothing\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "ai_client.RestClient posts the documented chat-completions request; default_client builds it from the named secret, read at call time -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/ap-1.AC2.py",
+      "output_evidence": "sent: https://api.openai.com/v1/chat/completions {'model': 'gpt-5.4', 'response_format': {'type': 'json_object'}, 'temperature': 0.2}\nOK:   RestClient.chat posts the documented request and returns the message content\ndefault_client: RestClient | secret asked: ['fixture/openai']\nOK:   default_client builds a RestClient from the named secret, read at call time\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "2 of 2 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "only the daily role reads secrets (GetSecretValue on ONE ARN), and only the daily Lambda carries the gate and the secret name -- expect: AC3 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round6/checks/ap-1.AC3.py",
+      "output_evidence": "secretsmanager grants: {\"etfs-rivalfunds-daily-lambda\": [[[\"secretsmanager:GetSecretValue\"], [\"arn:aws:secretsmanager:us-east-1:313476888478:secret:rivalfunds/openai-api-key-??????\"]]]}\nOK:   only the daily role reads secrets: GetSecretValue on exactly one ARN\nlambdas carrying the AI variables: ['etfs-rivalfunds-daily-lambda']\nOK:   only the daily Lambda carries the gate and the secret name\nAC3 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "2 of 2 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "the first scheduled account reads as well as a seat run's; positive control: the 2026-10-02 accounts, run 20261002T110438Z-ai-rg4",
+      "method": "manual_read_with_citation",
+      "invocation": "none (judgment, graded by 3.0.0_SA_CVO~RV at L9 on the served page)",
+      "output_evidence": "No scheduled run exists: nothing deploys from a worker and no vendor call was made. Nothing to read.",
+      "denominator": "0 of 0",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded by 3.0.0_SA_CVO~RV at L9 on the served page; no scheduled account exists to read (no deploy, no vendor call in this order)"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "ap-1.AC1-AC3 run twice (before the mutant, after restore); rivalfunds package suite once.",
+      "observed": "same PASS lines each time; suite 433 passed, 2 skipped, 0 failed.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Mutant: ai_stage's held-account guard disabled (if held -> if False), then ap-1.AC1.",
+      "expected": "the second call re-runs and the append-only writer refuses: AC1 FAILS.",
+      "observed": "AC1 RESULT: FAIL 1 failures (FileExistsError: a run is never rewritten); ai_stage.py restored byte-identical.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S41",
+    "ETFS_RIVALS-Z-W1-S42",
+    "ETFS_RIVALS-Z-W1-S43"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "e0ece4712e"
+    }
+  ]
+}

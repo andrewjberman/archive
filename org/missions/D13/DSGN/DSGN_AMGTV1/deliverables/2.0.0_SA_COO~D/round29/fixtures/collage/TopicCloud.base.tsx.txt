@@ -1,0 +1,263 @@
+/**
+ * Topic Cloud - Display top 20 trending market keywords
+ *
+ * Shows keywords with real per-keyword sentiment and mention counts
+ * Sized by mention count, colored by actual sentiment
+ * Uses @visx/wordcloud for beautiful spiral layout
+ */
+
+import { PanelEmpty } from '@/ui/components/states'
+import { useMemo, useState, useRef, useEffect, type FC } from 'react'
+import { Text } from '@visx/text'
+import { Wordcloud } from '@visx/wordcloud'
+
+export interface KeywordSentiment {
+  keyword: string
+  sentiment: number // -1 (bearish) to +1 (bullish)
+  count: number // Article mention count (TRUE count)
+  size?: number // Log-normalized for word cloud visual weight (optional)
+}
+
+interface TopicCloudProps {
+  keywords: KeywordSentiment[]
+  size?: number // Base size in pixels (will scale with container)
+  onKeywordClick?: (keyword: KeywordSentiment) => void // Click handler for keyword selection
+}
+
+interface WordData {
+  text: string
+  value: number
+  sentiment: number
+}
+
+/**
+ * Map sentiment score to color using smooth gradient
+ *
+ * Gradient scale (asymmetric):
+ *   >= +0.20: Full green (#2dce89)
+ *   +0.05 to +0.20: Yellow-green to green
+ *   0 to +0.05: Yellow to yellow-green
+ *   -0.05 to 0: Light orange to yellow
+ *   -0.30 to -0.05: Red to light orange
+ *   <= -0.30: Full red (#f5365c)
+ */
+function getSentimentColor(sentiment: number): string {
+  // Color definitions (RGB)
+  const RED = { r: 245, g: 54, b: 92 }      // hsl(var(--danger)) - bearish
+  // The neutral lean keeps its yellow family (Andrew-direct 2026-09-14 ~18:5xZ: the neutral, yellow-green
+  // bullish lean and yellow-orange bearish lean "has been relegated to blue which is incorrect"). RB-s-4 had
+  // moved these three stops onto the one-hue ramp; his word restores the pre-round values.
+  const ORANGE = { r: 249, g: 115, b: 22 }  // yellow-orange - light bearish
+  const YELLOW = { r: 234, g: 179, b: 8 }   // yellow - neutral
+  const LIME = { r: 132, g: 204, b: 22 }    // yellow-green - light bullish
+  const GREEN = { r: 45, g: 206, b: 137 }   // hsl(var(--success)) - bullish
+
+  // Interpolate between two colors
+  const lerp = (a: typeof RED, b: typeof RED, t: number) => ({
+    r: Math.round(a.r + (b.r - a.r) * t),
+    g: Math.round(a.g + (b.g - a.g) * t),
+    b: Math.round(a.b + (b.b - a.b) * t),
+  })
+
+  const toHex = (c: typeof RED) =>
+    `#${c.r.toString(16).padStart(2, '0')}${c.g.toString(16).padStart(2, '0')}${c.b.toString(16).padStart(2, '0')}`
+
+  // Clamp sentiment to expected range
+  const s = Math.max(-0.5, Math.min(0.5, sentiment))
+
+  // Gradient mapping
+  if (s >= 0.20) {
+    return toHex(GREEN)  // Full green
+  } else if (s >= 0.05) {
+    // Yellow-green to green (0.05 to 0.20)
+    const t = (s - 0.05) / 0.15
+    return toHex(lerp(LIME, GREEN, t))
+  } else if (s >= 0) {
+    // Yellow to yellow-green (0 to 0.05)
+    const t = s / 0.05
+    return toHex(lerp(YELLOW, LIME, t))
+  } else if (s >= -0.05) {
+    // Light orange to yellow (-0.05 to 0)
+    const t = (s + 0.05) / 0.05
+    return toHex(lerp(ORANGE, YELLOW, t))
+  } else if (s >= -0.30) {
+    // Red to light orange (-0.30 to -0.05)
+    const t = (s + 0.30) / 0.25
+    return toHex(lerp(RED, ORANGE, t))
+  } else {
+    return toHex(RED)  // Full red
+  }
+}
+
+export const TopicCloud: FC<TopicCloudProps> = ({
+  keywords,
+  size: baseSizeProp = 150,
+  onKeywordClick,
+}) => {
+  const [hoveredWord, setHoveredWord] = useState<string | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerSize, setContainerSize] = useState(baseSizeProp)
+
+  // Measure container and update size
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const { width, height } = containerRef.current.getBoundingClientRect()
+        // Use the smaller dimension to ensure it fits
+        const newSize = Math.min(width, height)
+        if (newSize > 0) {
+          setContainerSize(newSize)
+        }
+      }
+    }
+
+    updateSize()
+
+    // Use ResizeObserver for responsive updates
+    const resizeObserver = new ResizeObserver(updateSize)
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current)
+    }
+
+    // Also listen for window resize
+    window.addEventListener('resize', updateSize)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateSize)
+    }
+  }, [])
+
+  // Use measured container size, fallback to prop
+  const size = containerSize || baseSizeProp
+
+  // Process keywords for visx wordcloud format
+  const words: WordData[] = useMemo(() => {
+    if (!keywords || keywords.length === 0) return []
+
+    return keywords
+      .slice(0, 20) // Limit to top 20
+      .map((kw) => ({
+        text: kw.keyword.charAt(0).toUpperCase() + kw.keyword.slice(1),
+        // Use 'size' (log-normalized) if available for visual weight, otherwise fall back to count
+        // This ensures bullish keywords with fewer mentions are still visible
+        value: Math.max(kw.size ?? kw.count, 1),
+        count: kw.count, // Keep true count for tooltips
+        sentiment: kw.sentiment,
+      }))
+  }, [keywords])
+
+  // Font size constants - scale proportionally with container size
+  // Base sizes are for a 150px container
+  // Reduced max to fit more words (20 keywords need smaller fonts)
+  const BASE_SIZE = 150
+  const scaleFactor = size / BASE_SIZE
+  const MIN_FONT_SIZE = Math.round(10 * scaleFactor)
+  const MAX_FONT_SIZE = Math.round(20 * scaleFactor)
+
+  // Normalized font size scale - ensures consistent visual difference
+  // Highest count word = MAX_FONT_SIZE, lowest = MIN_FONT_SIZE
+  const fontSizeSetter = useMemo(() => {
+    const values = words.map(w => w.value)
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const range = max - min || 1 // Avoid division by zero
+
+    return (datum: WordData) => {
+      // Normalize to 0-1 range, then scale to font size range
+      const normalized = (datum.value - min) / range
+      return MIN_FONT_SIZE + normalized * (MAX_FONT_SIZE - MIN_FONT_SIZE)
+    }
+  }, [words, MIN_FONT_SIZE, MAX_FONT_SIZE])
+
+  // No rotation - horizontal words fit better and are easier to read
+  const rotate = () => 0
+
+  if (words.length === 0) {
+    return (
+      <div ref={containerRef} className="w-full h-full">
+        <PanelEmpty compact className="h-full" message="No keywords are trending in the news feed yet." />
+      </div>
+    )
+  }
+
+  return (
+    <div ref={containerRef} className="w-full h-full relative flex items-center justify-center">
+      <svg width={size} height={size} className="flex-shrink-0">
+        <Wordcloud
+          words={words}
+          width={size}
+          height={size}
+          fontSize={fontSizeSetter}
+          font="Inter, system-ui, sans-serif"
+          fontWeight={600}
+          padding={Math.round(2 * scaleFactor)}
+          spiral="archimedean"
+          rotate={rotate}
+          random={() => 0.5}
+        >
+          {(cloudWords) =>
+            cloudWords.map((w, i) => {
+              const wordData = words.find(wd => wd.text === w.text)
+              const color = getSentimentColor(wordData?.sentiment ?? 0)
+              const isHovered = hoveredWord === w.text
+
+              // Find the original keyword data for click handler
+              const originalKeyword = keywords.find(
+                kw => kw.keyword.toLowerCase() === (w.text ?? '').toLowerCase()
+              )
+
+              return (
+                <Text
+                  key={`${w.text}-${i}`}
+                  fill={color}
+                  textAnchor="middle"
+                  transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
+                  fontSize={w.size}
+                  fontFamily={w.font}
+                  fontWeight={w.weight}
+                  style={{
+                    cursor: onKeywordClick ? 'pointer' : 'default',
+                    opacity: isHovered ? 0.7 : 1,
+                    transition: 'opacity 0.2s',
+                    filter: `drop-shadow(0 0 4px ${color}40)`,
+                  }}
+                  onMouseEnter={() => setHoveredWord(w.text ?? null)}
+                  onMouseLeave={() => setHoveredWord(null)}
+                  onClick={() => {
+                    if (onKeywordClick && originalKeyword) {
+                      onKeywordClick(originalKeyword)
+                    }
+                  }}
+                >
+                  {w.text}
+                </Text>
+              )
+            })
+          }
+        </Wordcloud>
+      </svg>
+
+      {/* Tooltip */}
+      {hoveredWord && (() => {
+        const w = words.find(wd => wd.text === hoveredWord)
+        if (!w || typeof w.sentiment !== 'number') return null
+        const sentimentColor = getSentimentColor(w.sentiment)
+        return (
+          // The one tooltip look -- solid indigo, no outline (Andrew-direct ~19:0xZ). Ink follows its ground: the
+          // text is white and the sentiment colour moves to a swatch, since coloured text on indigo is illegible.
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-[hsl(var(--palette-indigo))] rounded-[4px] px-4 py-3 whitespace-nowrap z-[9999] ">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-white/85">{w.text}</span>
+              <span className="text-sm font-bold text-white">{w.value} mentions</span>
+              <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: sentimentColor }} aria-hidden="true" />
+              <span className="text-sm font-medium text-white">
+                {w.sentiment > 0 ? '+' : ''}{w.sentiment.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        )
+      })()}
+    </div>
+  )
+}

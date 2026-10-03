@@ -38,3 +38,33 @@ Answers `1.0.0_SA_CTO~O` msg 27943. Every state below was measured at writing.
    passes its close run would leave Teams with no concierge, against PRD C11 ("the cutover drops nothing silently").
    The CLOUD push of that merge is `0.0.0_AB_MSTR~Z`'s, as for any trunk push.
 7. **OA-e-8** (the speed-stage measure) after step 5, on slot ~12.
+
+## Addendum 2026-10-02 ~15:0xZ (relaunch, Andrew-direct ~14:4xZ "yes do it")
+
+Measured at writing. Step 4 is DONE: OA-f-11 AC3 PASS, the wall is live. Step 2 is CORRECTED by row Z-S56.
+
+| item | value |
+|---|---|
+| opal_ai origin PROD | `9c0a80b8d0` (ls-remote read) |
+| local `nfra-opalai-r2-dev` | `bd7cd5d`, PROD + 3 commits, fast-forward (is-ancestor read), not on origin |
+| runtime checkout `C:\opal_runtime\opal_ai` | `9c0a80b8d0`, was `fd8ab8a57f`: pre-pulled by this seat (row Z-S56) |
+| OA-f-12 AC1 on `bd7cd5d`, non-elevated, re-run now | PASS (seam `CLAUDE_EXE: C:\Users\Opal_Agent\.local\bin\claude.exe` rc=0) |
+
+**Step 2 corrected.** A launcher that fast-forwards its own checkout keeps running the bytes it started with. The
+`fd8ab8a` launcher would also abort at its own fetch, so the runtime could not self-update through it. The runtime is now at
+PROD, and `launcher.ps1` on disk equals `bd7cd5d`'s. The push below changes only `resolve-claude.ps1` and the two wall
+scripts, so no second pre-pull is needed. Standing rule: after any push that changes `launcher.ps1`, pre-pull the runtime
+before the next launch.
+
+**G-PUSH card (Andrew's call; the relaunch word does not cover it).** Push `nfra-opalai-r2-dev` `bd7cd5d` to origin
+`PROD`, a fast-forward from `9c0a80b8d0`: yes / no? Pushed by `0.0.0_AB_MSTR~Z`.
+- `bd7cd5d` OA-f-12: `resolve-claude.ps1` trusts a configured `claude_exe` whose existence test is access-denied.
+  Without it the non-elevated launch dies before the Analyst starts.
+- `0fb3fcb` OA-f-11: the WFP wall installer, already applied live by Andrew.
+- `eeca5ca` OA-f-10: the per-user Firewall script fix. The mechanism is superseded; the file is inert.
+- REC: yes. This is the last code act before the item-0 close run.
+
+**Then the item-0 close run (Andrew).** From a NON-elevated PowerShell:
+`powershell -File C:\opal_runtime\opal_ai\opal\runtime\launcher.ps1 -Config C:\opal_runtime\runtime.config.json`.
+The launch pulls `bd7cd5d`. Andrew then messages the Analyst in Teams, and `3.0.0_SA_CVO~O` grades OA-t-1 J2. Steps 6 and 7
+follow as written above.

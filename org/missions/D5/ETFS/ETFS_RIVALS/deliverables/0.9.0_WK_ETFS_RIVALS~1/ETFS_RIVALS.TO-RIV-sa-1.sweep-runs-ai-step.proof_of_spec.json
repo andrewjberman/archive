@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-sa-1.sweep-runs-ai-step",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "fb44a3b170",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-sa-1.sweep-runs-ai-step.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fb44a3b170"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/sweep.py",
+      "kind": "script",
+      "commit_or_etag": "4265d2a3d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/ai_stage.py",
+      "kind": "script",
+      "commit_or_etag": "4265d2a3d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/publish_page.py",
+      "kind": "script",
+      "commit_or_etag": "4265d2a3d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r7sa1_sweep_ai_step.py",
+      "kind": "script",
+      "commit_or_etag": "4265d2a3d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r6ap1_ai_stage.py",
+      "kind": "script",
+      "commit_or_etag": "4265d2a3d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code/config commit; no deploy, no S3 write, no vendor call; checks run offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "with the publish marker already present, the schedule payload's sweep reaches the AI stage, writes ONE research_hypotheses object and republishes (manifest research_hypotheses_run OK); a second sweep makes no AI call -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round7/checks/sa-1.AC1.py",
+      "output_evidence": "OK:   control: the morning publish left the marker and the page and no account; the graph runs no upstream stage\nOK:   the sweep reaches the AI stage and writes exactly ONE research_hypotheses object\nOK:   the page is republished: a new batch, ONE kept revision, the account among its inputs, research_hypotheses_run status OK with the account's run_id\nOK:   one run per page day: a second sweep makes no AI call and the day still holds ONE object\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK; run under a 120 s bound (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "past ai_deadline_s the sweep still republishes, WITHOUT accounts, the manifest records FAILED with the deadline reason and the page shows it; no late writer; CALL 5 holds after a FAILED -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round7/checks/sa-1.AC2.py",
+      "output_evidence": "OK:   the sweep republishes past the deadline: a new batch with ONE kept revision\nOK:   the manifest records the AI step FAILED with the deadline reason\nOK:   the republished page shows the failure (it names the deadline)\nOK:   no research_hypotheses object, including after the slow reply drained (no late writer)\nOK:   CALL 5: a second sweep for the day makes no AI call and writes no research_hypotheses object\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "5 of 5 checks OK; run under a 120 s bound (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "control: gate unset -> no AI client, no extra republish, today's outputs byte-identical -- expect: AC3 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round7/checks/sa-1.AC3.py",
+      "output_evidence": "OK:   arm A: no AI client, no AI call, every file under the sink byte-identical (no extra republish)\nOK:   arm A: the result is today's (OK, no outputs, nothing ran, complete)\nOK:   arm B: the sweep publishes the page once as today, with no AI client and no account\nAC3 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK; run under a 120 s bound (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "the 2026-10-05 09:00 ET organic sweep writes that day's account and republishes, with no seat act (the organic trigger is the acceptance); positive control: the issuer's deliberate SWEEP invoke with its own schedule payload after the deploy, and the round-6 negative (the 10-02 sweep reached no AI stage)",
+      "method": "manual_read_with_citation",
+      "invocation": "none (judgment, graded by 3.0.0_SA_CVO~RV at L9 on the served page)",
+      "output_evidence": "No organic sweep exists yet: nothing deploys from a worker and no vendor call was made. Offline, sa-1.AC1 shows the schedule payload reaching the AI stage with the marker present. Nothing to read on the served page.",
+      "denominator": "0 of 0",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded by 3.0.0_SA_CVO~RV at L9 on the served page; the 2026-10-05 organic sweep has not happened and this order deploys nothing"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "sa-1.AC1-AC3 plus round-6 ap-1.AC1-AC3 and st-1.AC1-AC3 run on the branch; rivalfunds package suite once.",
+      "observed": "all nine round-6 checks and the three sa-1 checks PASS 0 failures; suite 561 passed, 2 skipped, 0 failed.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The spec names no mutant for this order.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "Deploy, S3 write, vendor call, the merge hookups",
+      "reason": "Order section 3: NEVER; the issuer owns them."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S45",
+    "ETFS_RIVALS-Z-W1-S46"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "4265d2a3d3"
+    }
+  ]
+}

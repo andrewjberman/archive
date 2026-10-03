@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-am-8",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "554fe04cff743caf7c8a33b77051e82306d3dec5",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-am-8.slash-key-pool-lookup.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "554fe04cff743caf7c8a33b77051e82306d3dec5"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~209",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/peers/engine.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build-time producer; not served at request time",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/peers/universe.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build-time producer module",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every test passes, the new test included, and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/peers/tests/ lib/research/api/tests/; echo \"exit=$?\"",
+      "output_evidence": "419 passed, 206 warnings in 42.14s; exit=0",
+      "denominator": "419 of 419 tests passed",
+      "status": "PASS",
+      "status_reason": "all passed, exit 0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "every test in the plant passes (a slash key reads its POOL block; a plain key is unchanged), and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/peers/tests/test_engine_slash_key_pool_lookup.py; echo \"exit=$?\"",
+      "output_evidence": "3 passed in 3.20s; exit=0 (mutant restoring raw-key lookup: 1 failed, 2 passed)",
+      "denominator": "3 of 3 plant tests passed",
+      "status": "PASS",
+      "status_reason": "all passed, exit 0",
+      "judgment": false
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "see AC1/AC2",
+      "result": "419 passed; plant 3 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "engine.py membership test restored to the raw key `security_key in pool_index`",
+      "expected": "test_slash_key_reads_pool_block fails (reads REPO_FILE)",
+      "observed": "1 failed, 2 passed: AssertionError 'REPO_FILE' == 'POOL'",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 plant run twice",
+      "observed": "3 passed both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Rebuild of peers/v1/ BP and NG objects",
+      "reason": "Bounds forbid store writes; read-only plan at peers_slash_plan.json"
+    }
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~209/SESSION_LOG.md",
+  "surprises": []
+}
