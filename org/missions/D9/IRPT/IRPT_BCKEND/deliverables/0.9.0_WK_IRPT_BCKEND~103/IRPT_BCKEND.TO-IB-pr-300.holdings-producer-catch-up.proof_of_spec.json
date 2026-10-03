@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-300",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-300.holdings-producer-catch-up.md",
+    "group": "OTHER",
+    "vintage_commit": "b91461602e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "b91461602e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-300.holdings-producer-catch-up.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~103",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/holdings-performance/handler.py",
+      "kind": "script",
+      "commit_or_etag": "1f8f66557d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a scheduled fire computes every trading day after the newest landed gold partition through T-1, oldest first, at most 5; stops at a day the producer cannot compute; explicit date unchanged; not built or deployed (the deploy packet carries both halves and the ListBucket grant, row IRPT_BCKEND-W103-S1)",
+      "artifact_covered_by": [
+        "IB36-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/holdings-performance/tests/test_catch_up.py",
+      "kind": "test",
+      "commit_or_etag": "1f8f66557d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 tests, stubbed producer and stubbed listing: no gap one day, one missed day both oldest first, gap over 5 the oldest 5, explicit date unchanged, no silver stops there, holiday/weekend skipped, empty or unreadable listing keeps one day, listing parsed at the producer's gold address",
+      "artifact_covered_by": [
+        "IB36-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB36-2-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r36/p36_pytest_floor.py\" . IB36-2-AC1 -> IB36-2-AC1 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r36/p36_pytest_floor.py\" . IB36-2-AC1",
+      "output_evidence": "OK: infra/aws/lambda/investor-reporting/holdings-performance/tests/test_catch_up.py 8 passed, 0 failed\nIB36-2-AC1 PASS (rc=0)",
+      "denominator": "8 of 8 catch-up tests passed (>= 4 required); the file names catch, trading and missed",
+      "expect": "IB36-2-AC1 PASS",
+      "status": "PASS",
+      "status_reason": "Base was FAIL (no file)."
+    },
+    {
+      "criterion_id": "IB36-2-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r36/p36_pytest_floor.py\" . IB36-2-AC2 -> IB36-2-AC2 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r36/p36_pytest_floor.py\" . IB36-2-AC2",
+      "output_evidence": "OK: data/assets/scripts/gold/irpt_holdings_performance/tests 60 passed, 0 failed\nIB36-2-AC2 PASS (rc=0)",
+      "denominator": "60 of 60 producer tests passed (>= 60 required); the producer is not edited (0 files changed under data/assets/scripts/gold/irpt_holdings_performance/)",
+      "expect": "IB36-2-AC2 PASS",
+      "status": "PASS",
+      "status_reason": "Base was PASS (a guard); unchanged."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The no-gap test (newest landed = T-2) asserts exactly one producer call for T-1, paired with the one-missed-day test (newest = T-3) that asserts two calls oldest first; the silver test makes the middle day fail while the later day would succeed and asserts the later day is NOT called.",
+      "expected": "no gap: 1 call; one missed: 2 calls oldest first; gap over 5: the oldest 5; no silver: stops, later day not called",
+      "observed": "test_catch_up.py 8 passed; real read-only listing: schwab_08335338 newest 2026-10-01 -> planned [2026-10-02]; orion newest 2026-10-01 -> planned [2026-10-02]",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline unit tests",
+      "observed": "checks run once after the code commit, rc=0",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-W103-S1",
+    "IRPT_BCKEND-W103-S2",
+    "IRPT_BCKEND-W103-S3"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p36_pytest_floor.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r36/p36_pytest_floor.py\" . IB36-2-AC1",
+      "result": "IB36-2-AC1 PASS"
+    },
+    {
+      "tool": "p36_pytest_floor.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r36/p36_pytest_floor.py\" . IB36-2-AC2",
+      "result": "IB36-2-AC2 PASS"
+    }
+  ]
+}
