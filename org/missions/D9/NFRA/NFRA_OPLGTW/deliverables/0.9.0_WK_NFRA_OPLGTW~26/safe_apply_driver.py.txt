@@ -1,0 +1,18 @@
+"""Runs safe-apply on the saved plan; TF_VAR_* read in memory from the live function env, child env only; output redacted."""
+import json, os, subprocess, sys
+def aws(*a):
+    r = subprocess.run(["aws"] + list(a) + ["--region", "us-east-1", "--output", "json"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if r.returncode: print("aws rc", r.returncode); sys.exit(1)
+    return json.loads(r.stdout)
+env = aws("lambda", "get-function-configuration", "--function-name", "mcportal-grant-writer-lambda")["Environment"]["Variables"]
+secrets = [env["MCPORTAL_OWNER_KEY"], env["MCPORTAL_OWNER_KEY_CLAIM"]]
+cenv = {k: v for k, v in os.environ.items() if not k.startswith("TF_VAR_")}
+cenv["TF_VAR_mcportal_owner_key_claim"] = env["MCPORTAL_OWNER_KEY_CLAIM"]
+cenv["TF_VAR_mcportal_owner_key"] = env["MCPORTAL_OWNER_KEY"]
+args = sys.argv[2:]
+r = subprocess.run(["bash", ".tools/safe-apply.sh"] + args, cwd=sys.argv[1], env=cenv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+out = r.stdout.decode("utf-8", "replace")
+for v in secrets:
+    if v: out = out.replace(v, "<REDACTED>")
+open(os.environ["DRV_OUT"], "w", encoding="utf-8").write(out)
+print("safe-apply rc", r.returncode)
