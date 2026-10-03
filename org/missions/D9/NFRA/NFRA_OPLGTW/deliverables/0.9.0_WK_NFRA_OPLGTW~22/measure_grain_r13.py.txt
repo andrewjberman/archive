@@ -1,0 +1,58 @@
+# Verbatim copy of the run script (kept as .txt: not production code, ruff-gate exempt). Run from the worktree root as .scratch/run.py after .scratch/list.py wrote .scratch/markers.json (latest_markers per master). Counts only.
+import sys, json, os
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
+import pyarrow.parquet as pq
+sys.path.insert(0,"org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~10")
+import og_v6_common as C, measure_grain as M
+lm=json.load(open(".scratch/markers.json"))
+CAND={"dim_position":("account_id","cusip","l_s","quantity_settled_unsettled"),"dim_asset":("cusip","security_description_line_1")}
+ADDED={"dim_position":"quantity_settled_unsettled","dim_asset":"security_description_line_1"}
+jobs=[]
+for m in C.MASTERS:
+    for date,row in sorted(lm[m].items()):
+        doc=C.get_marker(m,date,row["version_id"])
+        cl=doc.get("closure")
+        if not cl or cl.get("status")!="qualified": continue
+        for ds in ("dim_position","dim_asset"):
+            o=cl["tables"][ds]
+            assert o["disposition"]=="PRESENT",(m,date,ds)
+            jobs.append((m,ds,date,o["object"]["key"],o["object"]["version_id"],o.get("rows")))
+print("jobs",len(jobs),flush=True)
+def work(j):
+    m,ds,date,key,vid,mrows=j
+    p=C.fetch_silver(key,vid,f"{m}_{ds}_{date}_{vid}.parquet")
+    grain=C.DECLARED_GRAIN[ds]
+    r=M.measure(p,grain)
+    cand=CAND[ds]
+    t=pq.read_table(p,columns=sorted(set(cand)|set(grain)))
+    cols={c:t.column(c).to_pylist() for c in t.column_names}
+    n=t.num_rows
+    ck=list(zip(*[cols[c] for c in cand]))
+    cu=len(set(ck))==n
+    added_blank=sum(1 for v in cols[ADDED[ds]] if M.blank(v))
+    # blank by column for colliding keys under declared grain
+    dk=list(zip(*[cols[c] for c in grain])); cnt=Counter(dk)
+    coll={k for k,v in cnt.items() if v>1}
+    bycol=Counter(); rowsbycol=Counter(); rows_with_blank=0
+    for i,k in enumerate(dk):
+        if k in coll:
+            bl=[c for c,x in zip(grain,k) if M.blank(x)]
+            if bl: rows_with_blank+=1
+            for c in bl: rowsbycol[c]+=1
+    for k in coll:
+        for c,x in zip(grain,k):
+            if M.blank(x): bycol[c]+=1
+    # candidate collisions
+    cc=Counter(ck); ccoll=[k for k,v in cc.items() if v>1]
+    cand_blank_any={c:sum(1 for v in cols[c] if M.blank(v)) for c in cand}
+    return {"master":m,"dataset":ds,"date":date,"version_id":vid,"rows":r["rows"],"marker_rows":mrows,
+      "declared_unique":r["colliding_keys"]==0,"declared_colliding_keys":r["colliding_keys"],"declared_extra_rows":r["extra_rows"],
+      "declared_colliding_keys_with_blank_component":r["colliding_keys_with_blank_component"],
+      "candidate_unique":cu,"candidate_colliding_keys":len(ccoll),"candidate_blank":added_blank,
+      "blank_component_columns_in_colliding_keys":dict(bycol),"rows_in_colliding_keys_with_blank_component":rows_with_blank,
+      "candidate_blank_by_column":cand_blank_any}
+with ThreadPoolExecutor(4) as ex:
+    out=list(ex.map(work,jobs))
+json.dump(out,open(".scratch/results.json","w"),indent=1)
+print("done",len(out))
