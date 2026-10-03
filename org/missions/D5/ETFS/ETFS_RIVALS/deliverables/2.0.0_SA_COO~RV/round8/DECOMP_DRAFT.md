@@ -38,10 +38,17 @@ its checks are dry-run on this branch.
    is a later census/render cell if asked.
 6. **Event-gated, read Monday before the cut:** D04 (G4 at 601 securities), D05 (211 ticker names), D06 fixes 2-3 and
    D11 (the 30-character cuts) all depend on the 2026-10-05 vehicle run. Whatever stays open joins item 3.
-7. **D12 and D13 are issuer data acts, not worker cells.**
-   - D12 is the IDVZ/PFOE trend backfill (I-2).
-   - D13 is the v0.8 leg (ACWI/IWM). The leg adds 4 names to the same 1 query (measured offline, 5 -> 9). Its row cost
-     needs the scripted vehicle. Each runs under its own pair once scoped.
+7. **I-2 (D12, D13) needs a cell first, then issuer data acts.**
+   - Andrew-direct ~20:3xZ 2026-10-03 un-parked it (card 6, @9fe6e6f111).
+   - The scripted cost measurement for 2026-10-01 gave IDVZ 45 / PFOE 24 / ACWI 2,198 / IWM 1,979 rows (row Z-S20).
+   - The leg's single per-date query caps at 2,000 rows and crashes the whole leg on overflow, and the gate is
+     all-or-nothing. So the cell `RIV-lg-1` (below) lands before any gate flip or backfill.
+   - Then the issuer's acts, each under its own pair:
+     - the D12 gate and the IDVZ/PFOE backfill to inception;
+     - the D13 gate and the controls' backfill from 2026-01-02. That is ~800k rows, and its budget threshold is named in
+       the pair, because READ_HERE defines none.
+     - the replay and the page measure, since about 4,200 more lines a day pass through G1/A1, and the page sits at 1.89 of
+       2.10 MB.
 
 ## Cells and chains (cut by write set)
 
@@ -50,7 +57,8 @@ its checks are dry-run on this branch.
 | `~1` | dt-1 | `ai_client.py`, `ai_stage.py`, `sweep.py` | SERVED |
 | `~2` | an-1 -> rw-1 | `render.py` | SERVED |
 | `~3` | rp-1 | `gold_input_census.py` | SERVED |
-| `~4..` | item 3 cells | after the grades | -- |
+| `~4` | lg-1 | `collector_bloomberg.py`, `universe.py` | WORLD (the vehicle runs the CLOUD tree) |
+| `~5..` | item 3 cells | after the grades | -- |
 
 ### `RIV-dt-1`: the deadline-aware vendor timeout (W1-S46, CTO ruling 1, item 1)
 
@@ -82,6 +90,18 @@ its checks are dry-run on this branch.
 - Every control PASSES at base, and all PASS under the fix.
 - Candidate fourth item if sized in: the audit trail's 56 code words. It needs its own check, and a fourth criterion
   carries a reason.
+
+### `RIV-lg-1`: the Bloomberg leg carries index-control-sized holdings and switches D12 and D13 apart (row Z-S20)
+
+- Measured: 4,246 rows for one date across the four new names. The cap is 2,000 per multi-fund query, and an overflow
+  raises an uncaught RuntimeError, which crashes the leg.
+- Interface (to fix at the cut):
+  - an index control is queried on its own per date, with a cap sized from the measurement (>= 2,500 with headroom), and
+    the range read never truncates silently;
+  - an overflow is a per-name partial, never a leg crash;
+  - `universe` splits the gate so the home funds (D12) and the controls (D13) switch independently.
+- Organic trigger: the vehicle's 07:00 ET leg. The check plants a 2,300-row control beside the existing funds offline.
+- Check: to be written at the cut, dry-run at base (it must FAIL: today's overflow is a crash).
 
 ### `RIV-rp-1`: the census repair (Z-S18 + the contradictory miss reason)
 
