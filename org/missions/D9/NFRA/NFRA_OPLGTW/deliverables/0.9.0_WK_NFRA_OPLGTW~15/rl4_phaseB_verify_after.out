@@ -1,0 +1,46 @@
+2026-10-03T16:56:49Z
+ssm 6b1527ed-d866-4215-af32-6ea58726f1d7 status=Success
+PASS host /health 200: health 200, service active, MainPID 608118 (before 572341)
+PASS shipped md5 = release bytes: 94 of 94 identical; not-ok []
+PASS tool list unchanged: before 65 after 65 tools
+PASS .env key names = RL4_ENV_KEYS_BEFORE.txt (50) = the BEFORE state: names 50 vs list 50; added [] removed []
+PASS every service-process env value equals its BEFORE value (hash prefix): 50 of 50 identical; differing names []; absent from the process []
+PASS ENABLED_INTEGRATIONS unchanged; both TAXSMA_WORKBOOK_ keys non-empty: integrations ycharts opal_portal globgrph opal_discover portal_index schwab blackdiamond; taxsma non-empty {'TAXSMA_WORKBOOK_BEARER': True, 'TAXSMA_WORKBOOK_IDENTITY': True}
+PASS host probe codes as before: 10 probes compared; differing {}
+PASS /hx/mail listing, own bearer: 200: status 200 keys ['count', 'next_page_token', 'rows'] (before 200)
+PASS /hx/teams/me, own bearer: 200: status 200 keys ['display_name', 'id', 'mail'] (before 200)
+PASS /hx/transcripts, own bearer ACCEPTED (403 meeting_not_allowed or 200; 401 = the refusal fired): status 403 error meeting_not_allowed (before 403 meeting_not_allowed)
+VERIFY PASS: 10 of 10
+--- rl4.AC1.sh ---
+ssm 27312ac2-ccfb-4bdb-852f-320d8e526316 status=Success
+ssm ac91e9a0-7515-4849-aa6b-ecf68d30441c status=Success
+arm 1 key names equal the before-set (50): OK
+arm 2 systemd and bash parses agree on every value: OK
+arm 3 host deploy/ contract equals org/standards (a86f7e667cfc): OK
+arm 4 Tax keys present and non-empty: OK
+RELEASE READ-BACK ARMS 4 of 4
+RESULT: PASS
+--- tr.AC1.sh ---
+ssm fed1cec3-d9c9-4cc8-9643-9a560205f1b0 status=Success
+HOST module_sha256 56d4f49017e4c17f721c8613e57195cfe341b7b6e0e1f96bc3524999a65f83a7
+HOST env_keys 50 taxsma_keys 2 identity_empty False bearer_empty False
+arm 1 module sha256 equals CLOUD HEAD (56d4f49017e4): OK
+arm 2 no-bearer -> UNAUTHORIZED_CAPABILITY (status 401): OK
+arm 3 /mcp unauth 401 with resource challenge (public /health 302): OK
+arm 4 .env keys / capability ON: FAIL
+TAX ARMS 3 of 4
+RESULT: FAIL
+--- ht.AC2.sh ---
+ssm a6bdf892-a0ce-497b-a7c4-a43c1ad9ec24 status=Success
+HOST teams_route_sha256 f470540078a23b8a874e0bebd2fa67cad7e23a82c1aa513c6f904e012ae87337
+HOST taxsma_workbook_sha256 56d4f49017e4c17f721c8613e57195cfe341b7b6e0e1f96bc3524999a65f83a7
+HOST env_keys 50 teams_bearer_present True teams_bearer_empty False teams_labels_ok True tax_nonempty True
+arm 1 host teams_route.py = db92656c72 (f470540078a2): OK
+arm 2 .env 50 keys, TEAMS_BEARER non-empty, label teamsassist, Tax keys intact: OK
+arm 3 /hx/teams/x no bearer -> 404 (app refusal, no redirect): OK
+arm 4 / -> 302 (sign-in intact): OK
+SERVED ARMS 4 of 4
+RESULT: PASS
+rl4_verify: host/route checks rc=0; rl4.AC1 rc=0; tr.AC1 rc=1 (graded yes-with-stale-arm-4); ht.AC2 rc=0
+VERIFY rc=0
+2026-10-03T16:57:40Z
