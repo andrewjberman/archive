@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ao-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "scope": "Section 1 as amended by section 6 AMENDMENT 1: ONE code-only redeploy of opal-amgt-scoped-api at pin 19cb3df089, carrying AMGT-ao-1 (FWD-38 (b) title case) and the ft publisher-quarantine mechanism deletion. memory_size stays 1769.",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ao-2.the-code-redeploy.md",
+    "round": 65,
+    "amendment": "section 6 AMENDMENT 1 -- re-pinned from 9a8cbd2c97 to 19cb3df089 (CHANGED 3) on this seat's STOP"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "owned_cells": "AMGT-ao-2",
+    "section": "s.73"
+  },
+  "never_widen_pair": {
+    "coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round65/NEVER_WIDEN_HALF_COO_AO2.md @b5f723dbdf (AMENDMENT 1)",
+    "cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND65_AO2_CTO_HALF.md @2c758d373c (AMENDMENT 1)",
+    "never_2_entry": "org/critical_paths/change_management/20261003T1937Z_amgt-resapp-r65-ao2-code-redeploy-20261003_deploy_completion.md",
+    "never_2_state": "CLOSED, 3 of 3 legs proven. Sentinel org/critical_paths/.open_deploys/amgt-resapp-r65-ao2-code-redeploy-20261003.json was opened AND COMMITTED at 4922fbb96f BEFORE the upload, per CTO condition 4, so the full lifecycle is in git and not only in a worktree."
+  },
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "risk_class": "WORLD",
+  "go_message": "28969 from 2.0.0_SA_COO~Z, acked READ. Preceded by GO 28935 (pin 9a8cbd2c97, WITHDRAWN on this seat's STOP) and ruling 28960.",
+  "carries": "AMGT-ao-1 (drained 9f8f4ee4b6) FWD-38 (b) title case at the producer, plus fc5a0bf42d -- the HVST-ak-4 ft publisher-quarantine mechanism deleted from publication_gold.py and finbert_sentiment.py per ANDREW-DIRECT 2026-10-03 ~18:xxZ.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "version_id": "5xO0vR9UWlx.XI59G0KNLJyAsjMKOes4",
+      "content_sha256": "lPTMo20TWOn9GxEyMPa4EausVvWKpvyGQTeZcVFZlW0=",
+      "content_length": 41150318,
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Uploaded with content-sha256 metadata and read back by the uploader (metadata equals the computed hash, ContentLength matches). After the apply, aws lambda get-function-configuration reads CodeSha256 lPTMo20TWOn9GxEyMPa4EausVvWKpvyGQTeZcVFZlW0=, MemorySize 1769, CodeSize 41150318, LastModified 2026-10-03T19:47:12Z, State Active, LastUpdateStatus Successful.",
+      "rollback_target": "prior VersionId .xFOZLD1X0znp_5COtZvp3UgWTBrw19p / CodeSha256 KQSA62c3Diw5XqjBeKKZc0ZTZuTnaaRBbhuEQHfOdXQ= -- NOT USED"
+    }
+  ],
+  "controls": {
+    "the_stop_this_act_raised": {
+      "description": "The order makes any CHANGED/ADDED/REMOVED file not on the halves' list a STOP, and CTO condition 1 requires the build-time diff to EQUAL the two files. The halves asserted 'HEAD equals 9a8cbd2c97 on both packaged files'. That citation had aged.",
+      "observed": "--build-only at the then-HEAD ac5c378c1d read files 355, IDENTICAL 352, CHANGED 3, ADDED 0, REMOVED 0 -- a THIRD file, lib/research/harvest/finbert_sentiment.py, on neither half's list. Cause: fc5a0bf42d (2.0.0_SA_COO~H, ANDREW-DIRECT ~18:xxZ) deleted the ak-4 mechanism from BOTH publication_gold.py and finbert_sentiment.py after the pin.",
+      "resolution": "STOPPED and surfaced rather than adjudicated (msgs 28947, 28949). The pin arm was PROVEN compliant against the deployed bytes, but shipping the pin would re-ship the mechanism Andrew's ~18:xxZ record orders removed, so this seat recommended amending the halves rather than taking the mechanically-compliant arm. COO~Z and CTO~Z both amended to CHANGED 3 at 19cb3df089.",
+      "status": "FIRED-AND-HELD"
+    },
+    "second_drift_caught_before_the_build": {
+      "description": "After the re-pin, the tip moved AGAIN. The re-signed condition admits 'a descendant with an equal content diff', so a tip build had to be re-tested rather than assumed.",
+      "observed": "lib/research/api/rolling_windows.py -- a seed .py under lib/research/api/, therefore packaged -- reads a759b3f0df93 on the deployed base AND at pin 19cb3df089 (IDENTICAL), but 55ed981d3e0c at the tip (CHANGED). So a tip build reads CHANGED 4 and is a STOP; the pin reads CHANGED 3. Introduced by c20fd8cc98 (COO~H, same ~18:xxZ terms-card cleanup), carried in via drain 9dd29bca73 and invisible to a plain git log on the path (merge path-simplification; --full-history shows it).",
+      "resolution": "Built from a DETACHED sparse worktree at exactly 19cb3df089 (/c/tmp/ao2-pin), not from the shared tree. rolling_windows.py rides the next deploy per GO 28969.",
+      "status": "FIRED-AND-AVOIDED"
+    },
+    "base_identity_control": {
+      "description": "Every base claim in this instance is about the bytes actually running, not about a label.",
+      "observed": "s3api get-object at VersionId .xFOZLD1X0znp_5COtZvp3UgWTBrw19p returned 41,149,311 B whose sha256 base64 equals the deployed CodeSha256 KQSA62c3Diw5XqjBeKKZc0ZTZuTnaaRBbhuEQHfOdXQ= (control MATCH). The three packaged files were then compared base-vs-pin-vs-tip out of that object: scoped_amgt.py CHANGED at both, publication_gold.py CHANGED at both (and pin != tip), finbert_sentiment.py IDENTICAL at the pin and CHANGED at the tip.",
+      "status": "STABLE"
+    },
+    "content_diff_graded_file_for_file": {
+      "description": "CTO condition 1 requires the diff to EQUAL the half's list. Matching only the COUNT would pass a different 3-file set.",
+      "observed": "The real build reproduced the --build-only figure EXACTLY: files 355, IDENTICAL 352, CHANGED 3, ADDED 0, REMOVED 0 against KQSA62c3, and the three named files are scoped_amgt.py, publication_gold.py, finbert_sentiment.py -- the amended list, file for file.",
+      "status": "STABLE"
+    },
+    "ceiling_limb": {
+      "description": "The order makes a build over the 262,144,000 B ceiling a STOP and requires the size printed.",
+      "observed": "253,725,663 B total (package 131,982,030 B over 355 entries plus layer opal-amgt-print-deps:1 at 121,743,633 B) = 96.8% used, 8,418,337 B spare. That is 3,407 B SMALLER than the half's 253,729,070 B, consistent with the mechanism deletion removing code.",
+      "status": "STABLE"
+    },
+    "code_only_proven_from_the_plan_json": {
+      "description": "BOUNDS 1 and both halves forbid a memory change, and any destroy/IAM/route/gateway change in the plan is a STOP. 'Unchanged attributes hidden' in the human plan is not a measurement.",
+      "observed": "terraform show -json: 49 resource_changes, 1 non-no-op (module.scoped_amgt_api.aws_lambda_function.this, actions ['update']), exactly 3 changed attributes (last_modified, s3_object_version, source_code_hash). memory_size before 1769 after 1769 UNCHANGED. Action shapes across all 49: only no-op and update. Any delete or replace: FALSE. Re-plan after the apply: 'No changes. Your infrastructure matches the configuration', -detailed-exitcode = 0.",
+      "status": "STABLE"
+    },
+    "base_arms_as_the_negative_control": {
+      "description": "Each criterion was measured on the DEPLOYED function BEFORE the apply, so a pass after it is a movement and not a standing truth.",
+      "observed": "c17 base SERVED NO: breakout/price names 94 all-caps 55, collected/chatter names 95 all-caps 56, 'MITSUBISHI UFJ FINANCIAL GRO' served on both routes. c12, c9, c10, c11, c13, c14 base all SERVED YES. After: c17 YES with all-caps 0 and 0; the other six still YES with every printed figure identical to the base capture.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "mixed_plane_instrument_declared": {
+      "description": "r65_served.py --where deployed invokes the deployed function but imports DISPLAY_NAME_ACRONYMS from the LOCAL tree, so the grade depends on which checkout it runs from. This is row Z-S342 and the reason the GO directs grading from the pin checkout.",
+      "observed": "The halves' base figure (60 of 94, 61 of 95) came from a predicate with no acronym exception (row Z-S340); the same unchanged deployed bytes read 55 and 56 once the local tree carried the 36-acronym constant. Identical denominators 94 and 95 across both reads are the tell that the population did not move. AC1 was therefore graded from the 19cb3df089 checkout, where local and deployed agree.",
+      "status": "DECLARED-AND-HONOURED"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "Any memory change", "reason": "BOUNDS 1 and both halves: memory stays 1769. Graded from the plan's own before/after, not from a post-hoc read alone."},
+    {"item": "Any store write or S3 delete", "reason": "BOUNDS 1. The only write is the versioned artifact PUT; no object was deleted and the prior version is retained as the rollback."},
+    {"item": "Any vendor call", "reason": "BOUNDS 1 and EGRESS CLASS NONE. The build pip-downloads its pinned wheels only, which the preflight declares."},
+    {"item": "Any IAM, route or gateway change", "reason": "A STOP per both halves. Proven absent from the plan JSON: 1 non-no-op, 3 attributes, no delete or replace."},
+    {"item": "Any data-engineering operation (collector, schedule or gold write)", "reason": "CTO condition 3 and ANDREW-DIRECT ~17:3xZ. Deleting an unused code path starts no collection and no scoring run; no collector, schedule or gold write was touched."},
+    {"item": "lib/research/api/rolling_windows.py", "reason": "Moved at the tip after the re-pin. Outside the re-signed CHANGED-3 list, so it rides the next deploy per GO 28969 rather than being smuggled in by building at the tip."},
+    {"item": "The <status> flip on the task order", "reason": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/ is not in this order's <paths>; the flip is the issuer's."}
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-S342 (this seat, committed 326e271887): r65_served.py --where deployed is a MIXED-PLANE instrument -- it grades deployed names with a local predicate, so the halves' base figure is not reproducible once the build commit is checked out. INERT: c17's verdict is NO under both predicates, so the rollback trigger is unaffected. disarm_owner 2.0.0_SA_COO~Z."
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "cell_refs": "AMGT-ao-2",
+      "method": "command",
+      "criterion_verbatim": "C1 PASS on both routes (0 all-caps names, acronym-only excepted); C2 PASS on both routes; R65 C17 SERVED: YES on the deployed function; and exit=0",
+      "denominator": "2 routes; 94 served display_name values on breakout/price and 95 on collected/chatter, plus the named cut name on both",
+      "invocation": "cd /c/tmp/ao2-pin (detached at 19cb3df089) && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round65/checks/r65_served.py --cell c17 --where deployed; echo \"exit=$?\"",
+      "output_evidence": "declared acronyms: 36 with source printed. PASS C1 breakout/price serves 0 all-caps names (acronym-only excepted) status 200 names 94 all-caps 0; e.g. []. PASS C2 price serves Mitsubishi UFJ Financial Group whole served ['Mitsubishi UFJ Financial Group']. PASS C1 collected/chatter serves 0 all-caps names status 200 names 95 all-caps 0; e.g. []. PASS C2 chatter serves Mitsubishi UFJ Financial Group whole served ['Mitsubishi UFJ Financial Group']. R65 C17 SERVED: YES. exit=0. Base arm on the same routes pre-apply: all-caps 55 of 94 and 56 of 95 with 'MITSUBISHI UFJ FINANCIAL GRO' on both.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "cell_refs": "AMGT-ao-2",
+      "method": "command",
+      "criterion_verbatim": "R64 C12 SERVED: YES on the deployed function (one display name per security, unchanged); and exit=0",
+      "denominator": "3 securities x 4 surfaces (overlay, ranking, chatter, peers), plus the per-security feed/day-view window equality",
+      "invocation": "cd /c/tmp/ao2-pin (detached at 19cb3df089) && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c12 --where deployed; echo \"exit=$?\"",
+      "output_evidence": "PASS C2 BA_US_Equity names {'overlay': 'The Boeing Co', 'ranking': 'The Boeing Co', 'chatter': 'The Boeing Co', 'peers': 'The Boeing Co'}; AMD_US_Equity all four 'Advanced Micro Devices Inc'; VLO_US_Equity all four 'Valero Energy Corp'. PASS C1 feed holds every day-view article: BA days 20 day-view 69 feed 69 missing 0; AMD days 9 13/13 missing 0; VLO days 3 3/3 missing 0. R64 C12 SERVED: YES. exit=0. Every figure identical to the pre-apply base capture.",
+      "status": "PASS"
+    }
+  ],
+  "regression_reads": {
+    "verdicts": "c9, c10, c11, c13 and c14 all SERVED YES on the deployed function, exit=0 each; ZERO FAIL lines across the whole run.",
+    "detail": "c9: 4 window variants, status 200, rows 95, bad 0 each (default/30 at window_days 30; 90 at 2026-07-05; 365 clamped to 2026-01-01 with note True). c10: 8 of 8 on both movements -- trending and breakout default/30 serve 94 rows, days 90 and 365 serve 0 rows with the 'not produced yet' reason. c11: markers cover every event on 3 names, absent-with-reason True. c13: 94 of 94 chatter places_moved labeled; overlay provenance names bloomberg, filings and harvested_news with nothing missing-or-bare on 3 names. c14: BP/_LN_Equity resolves Energy from opal_classification.sub_asset_class, NG/_LN_Equity null with a TRUE reason by design, ASML management text carries no raw code, 3 source stamps, and the encoded key BP-SLASH-_LN_Equity reaches overlay/thesis/peers/coverage at 200.",
+    "strength_of_the_read": "This is UNCHANGED, not merely PASSING: every printed figure, window, count and reason string in the after-run is identical to the base capture taken on the same deployed function before the apply. The only values that moved are c17's two all-caps counts (55 -> 0 and 56 -> 0) and the MUFG name, which is exactly the served effect the halves predicted for ao-1."
+  },
+  "publication_gold_served_effect_confirmed": {
+    "claim_under_test": "Both halves claim the publication_gold.py change has NO served effect through this function because the ak-4 readers are all builders and no route-reached function calls them.",
+    "measured": "The act shipped the mechanism's full DELETION, not merely an emptied map, so the claim is strictly easier to satisfy: the readers no longer exist. The one behavioural substitution in the diff (daily_rows grading over ENABLED_PUBLISHERS instead of GRADED_PUBLISHERS) is provably equal while QUARANTINED_PUBLISHERS is empty, which it was at the pin. Served confirmation: c9, c10, c11, c13 and c14 all read identically to base, and c12's feed/day-view equality holds on all 3 names -- the chatter and timeline surfaces that read publication_gold at request time did not move.",
+    "status": "CONFIRMED"
+  },
+  "compiler_tools": [
+    {"tool": "build-and-upload-scoped-amgt.sh --build-only", "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only <zip>", "result": "PASS, run TWICE. At the then-HEAD it read 355/352/3 and CAUGHT THE STOP (finbert_sentiment.py off-list). At the pin in a detached worktree it read 355/352/3 with the amended list, file for file, plus the size line."},
+    {"tool": "build-and-upload-scoped-amgt.sh (real)", "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh", "result": "PASS. Reproduced the build-only content diff AND size exactly; VERIFY 75 of 75 modules packaged, cold-start FATAL [], request-time break [], VERIFY-DATA 15 of 15 and 8 of 8, ISOLATED 3 of 3 arms; upload read back with matching content-sha256."},
+    {"tool": "terraform plan / show -json / safe-apply / plan -detailed-exitcode", "invocation": "terraform plan -out; terraform show -json; .tools/safe-apply.sh -chdir=... apply; terraform plan -detailed-exitcode", "result": "PASS. 49 resource_changes, 1 non-no-op, 3 attributes, memory_size 1769 -> 1769; 0-diff re-plan with exitcode 0. SAFE_APPLY_TERRAFORM had to be set because .tools/terraform.exe is absent on site Z."},
+    {"tool": ".tools/deploy_ledger.py", "invocation": "open / close-leg x3 / close", "result": "PASS. Entry opened AND COMMITTED (4922fbb96f) before the upload, so the sentinel landed; closed with 3 of 3 legs proven."},
+    {"tool": "r65_served.py c17 / r64_served.py c12 c9 c10 c11 c13 c14", "invocation": "--where deployed from the pin checkout, and --where local as a pre-flight", "result": "PASS. Pre-flight c17 --where local read YES before any upload, so the artifact was known to carry a working fix. Base and after arms both captured on the deployed function."},
+    {"tool": "comp-find / comp-read", "invocation": "comp-find -i 'quarantin' --files; comp-read --enumerate on the CTO half and the surprise channel", "result": "PASS. Denominators printed (4802 hits / 109620 files repo-wide; 101 / 416 on this seat's surfaces). comp-read --enumerate on the CTO half is what showed AMENDMENT 1 present in the file while git showed it UNCOMMITTED."},
+    {"tool": "git worktree + sparse-checkout", "invocation": "git worktree add --no-checkout -b ao2-pin-build /c/tmp/ao2-pin 19cb3df089; sparse-checkout set lib infra org tests .tools", "result": "PASS. A sparse cone avoided the full-checkout memory risk on this device and gave an exact-pin build root while the shared tree advanced past it."}
+  ],
+  "forward_notes": [
+    "lib/research/api/rolling_windows.py (c20fd8cc98) is deployed-stale by one commit and rides the next act, per GO 28969.",
+    "The ak-4 mechanism is now gone from the deployed artifact, not merely inert, so ANDREW-DIRECT ~18:xxZ is satisfied on this function's served bytes.",
+    "Row Z-S342 stands for 2.0.0_SA_COO~Z: if r65_served.py is kept as a round-65 instrument, moving the acronym read behind the --where branch would make its base arm reproducible."
+  ],
+  "session_log": "0.7.0_AE_CloudOps~A, site-z, session 87228929. First act of the session. Push state at close: LOCAL on this device; origin/CLOUD read by git ls-remote.",
+  "status": "COMPLETE -- AC1 and AC2 PASS, 5 of 5 regression cells unchanged and YES, rollback NOT taken, NEVER-2 entry CLOSED."
+}
