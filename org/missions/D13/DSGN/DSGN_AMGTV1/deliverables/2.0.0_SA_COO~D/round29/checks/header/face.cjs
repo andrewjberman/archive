@@ -24,10 +24,19 @@
  *   LIGHT own ground bg-white[/N] | bg-[hsl(var(--bg-surface|palette-white|bg-page|card|background))] | bg-card | bg-background
  *   band        a DARK own-ground element that is not a GraphicPanel, not a button and not inside another dark element
  *   lightOnDark a LIGHT own-ground element whose nearest grounded ancestor is DARK
- *   lightInk    an element carrying text-white[/N] | text-[hsl(var(--palette-white|palette-mediumGray))] with visible text, whose
- *               effective ground (own, else nearest ancestor, else the light page canvas) is LIGHT
+ *   lightInk    an element painting WHITE (or palette-mediumGray) ink, however it is spelled -- text-white[/N], text-[<v>] or an
+ *               inline style color:<v> where <v> is hsl(var(--palette-white|palette-mediumGray)), var(--palette-white), hsl(<any>
+ *               <any> 100%) in any separator, #fff | #ffff | #ffffff[aa], white or rgb(255 255 255) -- with visible text, whose
+ *               INK GROUND (own, else nearest ancestor, else the light page canvas; a primary fill is a ground of its own) is LIGHT
+ *               or the canvas. White ink on the primary fill (the estate's canvas primary button, #5F3BE3) is legal.
  *   primaryOnDark an element filled bg-[hsl(var(--semantic-action-primary|primary))] | bg-[#5F3BE3] | bg-primary whose nearest
  *               grounded ancestor is DARK
+ * AMENDMENT (round 30, AV-zh-2 REPAIRS, issuer 2.0.0_SA_COO~D; row DSGN_AMGTV1-Z-W81-S1): arm 1 read the estate's canonical
+ *   primary button (buttonClass('primary', 'canvas', ...): text-white on the purple fill) as white-on-white, because the
+ *   primary fill was not a ground; the worker re-spelled the ink hsl(0 0% 100%) to pass. Now a primary's ink is judged against
+ *   its own fill, and white ink is caught in every spelling (lightInk above). A class token's variant prefix is a colon BEFORE
+ *   any '[' (so text-[color:#fff] is read, hover:text-white is not). Bands, lightOnDark and primaryOnDark are unchanged. Arm 4
+ *   gains 4 white-ink plants and 2 primary-button faces that must be accepted.
  * AT REST = not inside a closed native <details> (its <summary> excepted), not inside [role=tooltip], not inside class `hidden`.
  * Inputs: round15/fixtures/r15c.overlay.{BA_US,VLO_US,6501_JP}_Equity.json (BA with the served display_name "The Boeing Company", as
  *   round20 namecard.cjs); round14/fixtures/thesisBundle.{BA_US,VLO_US}_Equity.json and round15/fixtures/
@@ -47,9 +56,11 @@
  *      [data-axis-footnote] show the served as_of_date in words and no other day; the header says no "today" and no absence word
  *      (not served / unsupported / ABSENT / REFUSED). 6501 (breakout truly absent): the cell prints no number and carries the
  *      served absent_reason's words.
- *   4  PLANTED: the arm 1-3 predicates reject a white card on a band, a primary on a band, white ink on white, a posture line at
+ *   4  PLANTED: the arm 1-3 predicates reject a white card on a band, a primary on a band, white ink on white (as palette-white,
+ *      hsl(0_0%_100%), #fff on the canvas, an inline color:#ffffff, and text-white on a white-filled button), a posture line at
  *      rest, the timeline above the news, an open <details>, a stray line at rest, a breakout x100 and a dropped places-moved;
- *      they accept a correct synthetic face.
+ *      they accept a correct synthetic face, including the canonical primary Refresh (white ink on its own fill, on the class or
+ *      on a child).
  * Prints one line per arm and "THE HEADER IS ONE LIGHT FACE, AT REST IN THE BOOK ORDER: <k> of 4 arms"; exit 0 only at 4 of 4.
  */
 const fs = require('fs');
@@ -91,13 +102,22 @@ const textOf = (node) => norm(textNodes(node).map((t) => t.text).join(' '));
 const ownText = (node) => norm((node.children || []).filter((c) => !c.tag).map((c) => c.text).join(' '));
 const ancestors = (n) => { const out = []; for (let p = n.parent; p; p = p.parent) out.push(p); return out; };
 const has = (n, attr, val) => n.attrs && Object.prototype.hasOwnProperty.call(n.attrs, attr) && (val === undefined || n.attrs[attr] === val);
-const tokens = (n) => String((n.attrs && n.attrs.class) || '').split(/\s+/).filter((t) => t && !t.includes(':'));
+// AMENDMENT (round 30): a variant prefix is a colon BEFORE any '[' -- text-[color:#fff] is a token, hover:text-white is not.
+const tokens = (n) => String((n.attrs && n.attrs.class) || '').split(/\s+/).filter((t) => t && !/^[^[]*:/.test(t));
 const isTooltip = (n) => n.attrs && n.attrs.role === 'tooltip';
 const inTooltip = (n) => [n, ...ancestors(n)].some((x) => x.attrs && isTooltip(x));
 
 const DARK_TOK = [/^dark-band$/, /^bg-\[hsl\(var\(--(bg-band|bg-header|palette-navy|palette-indigo)\)\)\]$/, /^bg-\[hsl\(224_58%_20%\)\]$/, /^bg-black$/, /^bg-(zinc|slate|gray|neutral)-(800|900)$/];
 const LIGHT_TOK = [/^bg-white(\/\d+)?$/, /^bg-\[hsl\(var\(--(bg-surface|palette-white|bg-page|card|background)\)\)\]$/, /^bg-card$/, /^bg-background$/];
-const INK_TOK = [/^text-white(\/\d+)?$/, /^text-\[hsl\(var\(--(palette-white|palette-mediumGray)\)\)\]$/];
+// AMENDMENT (round 30): white (or palette-mediumGray) ink in ANY spelling -- a text-* token or an inline style color.
+const WHITE_VALUE = /^(?:#fff(?:f|fff(?:[0-9a-f]{2})?)?|white|rgba?\(\s*255[\s,]+255[\s,]+255\b[^)]*\)|hsla?\(\s*[\d.]+(?:deg)?[\s,]+[\d.]+%[\s,]+100%[^)]*\)|(?:hsla?\()?var\(--palette-(?:white|mediumGray)\)(?:[^)]*\))?)$/i;
+function inkValueOfToken(t) {
+  if (/^text-white(\/\d+)?$/.test(t)) return 'white';
+  const m = /^text-\[(?:color:)?(.+)\](?:\/\d+)?$/.exec(t);
+  return m ? m[1].replace(/_/g, ' ').trim() : null;
+}
+const styleInk = (n) => { const m = /(?:^|;)\s*color\s*:\s*([^;]+)/i.exec((n.attrs && n.attrs.style) || ''); return m ? m[1].trim() : null; };
+const isLightInk = (n) => tokens(n).some((t) => { const v = inkValueOfToken(t); return v !== null && WHITE_VALUE.test(v); }) || (styleInk(n) !== null && WHITE_VALUE.test(styleInk(n)));
 const PRIMARY_TOK = [/^bg-\[hsl\(var\(--(semantic-action-primary|primary)\)\)\]$/, /^bg-\[#5F3BE3\]$/i, /^bg-primary$/];
 const anyTok = (n, set) => tokens(n).some((t) => set.some((re) => re.test(t)));
 function ownGround(n) {
@@ -109,6 +129,17 @@ function ownGround(n) {
 }
 function nearestAncestorGround(n) { for (const p of ancestors(n)) { const g = ownGround(p); if (g) return g; } return 'canvas'; }
 const effGround = (n) => ownGround(n) || nearestAncestorGround(n);
+/** AMENDMENT (round 30): the ground an element's INK is read against -- its own, else the nearest ancestor's, where a primary fill
+ * (PRIMARY_TOK) is a ground of its own ('primary'); else the light page canvas. Used by lightInk only. */
+function inkGround(n) {
+  for (const x of [n, ...ancestors(n)]) {
+    if (!x.attrs) continue;
+    const g = ownGround(x);
+    if (g) return g;
+    if (anyTok(x, PRIMARY_TOK)) return 'primary';
+  }
+  return 'canvas';
+}
 
 /** Arm 1's predicate over one rendered header. */
 function lightCensus(html) {
@@ -119,7 +150,7 @@ function lightCensus(html) {
     const g = ownGround(n);
     if (g === 'dark' && n.attrs['data-stub'] !== 'GraphicPanel' && n.tag !== 'button' && !ancestors(n).some((p) => ownGround(p) === 'dark')) note('bands', n);
     if (g === 'light' && nearestAncestorGround(n) === 'dark') note('lightOnDark', n);
-    if (anyTok(n, INK_TOK) && textOf(n) && (g || nearestAncestorGround(n)) !== 'dark') note('lightInk', n);
+    if (isLightInk(n) && textOf(n) && ['light', 'canvas'].includes(inkGround(n))) note('lightInk', n);
     if (anyTok(n, PRIMARY_TOK) && nearestAncestorGround(n) === 'dark') note('primaryOnDark', n);
   }
   return c;
@@ -339,11 +370,25 @@ const arms = [];
   const BAND = '<div class="w-full dark-band bg-[hsl(var(--bg-band))]">';
   const goodLight = '<div class="w-full border border-[hsl(var(--hairline))] bg-[hsl(var(--bg-surface))]"><div data-identity-card="" class="border border-black bg-white"><div data-stub="GraphicPanel"><span class="text-white">BA US</span></div><div class="text-black">Industrials</div></div><button data-header-action="refresh" class="border bg-[hsl(var(--bg-surface))] text-[hsl(var(--foreground))]">Refresh</button></div>';
   if (lightBad(lightCensus(goodLight))) f.push('a correct light face is rejected');
+  // AMENDMENT (round 30): the canonical primary Refresh -- white ink on its own fill -- is a correct face, on the class or on a child.
+  let PRIMARY_CLS = 'inline-flex border font-bold h-7 px-3 text-xs bg-[hsl(var(--semantic-action-primary))] border-[hsl(var(--semantic-action-primary))] text-white';
+  try { PRIMARY_CLS = L.source('src/ui/components/Controls.tsx').buttonClass('primary', 'canvas', 'sm'); } catch (e) { /* the literal above is the BASE class */ }
+  const goodPrimary = goodLight.replace(/<button data-header-action="refresh"[^>]*>/, `<button data-header-action="refresh" class="${PRIMARY_CLS}">`);
+  const goodPrimaryChild = goodLight.replace(/<button data-header-action="refresh"[^>]*>Refresh/, '<button data-header-action="refresh" class="border bg-[hsl(var(--semantic-action-primary))]"><span class="text-white">Refresh</span>');
+  for (const [n, html] of [['the canonical primary Refresh on a white panel', goodPrimary], ['a primary Refresh with white ink on its child', goodPrimaryChild]]) {
+    if (html === goodLight) f.push(`"${n}": the plant did not apply`);
+    else if (lightBad(lightCensus(html))) f.push(`"${n}" is rejected (${lightCensus(html).first.join('; ')})`);
+  }
   const LM = [
     ['a white card on a band', BAND + '<div class="bg-white">BA US</div></div>', 'lightOnDark'],
     ['a primary on a band', BAND + '<button class="bg-[hsl(var(--semantic-action-primary))] text-white">Refresh</button></div>', 'primaryOnDark'],
     ['white ink on white', '<div class="bg-white"><div class="text-[hsl(var(--palette-white))]">The Boeing Company</div></div>', 'lightInk'],
     ['a band header', BAND + '<span>BA US</span></div>', 'bands'],
+    // AMENDMENT (round 30): white ink in other spellings, and white ink on a button whose own fill is white.
+    ['white ink spelled hsl(0_0%_100%) on white', '<div class="bg-white"><button class="border text-[hsl(0_0%_100%)]">Refresh</button></div>', 'lightInk'],
+    ['white ink spelled #fff on the bare canvas', '<div><span class="text-[#fff]">The Boeing Company</span></div>', 'lightInk'],
+    ['white ink as an inline color:#ffffff on white', '<div class="bg-[hsl(var(--bg-surface))]"><span style="color:#ffffff">The Boeing Company</span></div>', 'lightInk'],
+    ['text-white on a white-filled button', '<div class="bg-white"><button class="bg-white text-white">Refresh</button></div>', 'lightInk'],
   ];
   for (const [n, html, k] of LM) { if (lightCensus(html)[k] > 0) caught.push(n); else f.push(`"${n}" not caught as ${k}`); }
   const DET = '<details><summary>Details</summary><p data-header-posture="SERVED">Posture: HOLD</p><div data-header-reading="chatter"><div>Chatter</div><div>Collected this month: 20</div></div><div><div>Breakout (price)</div><div>#4 | +6.65%, up 3 places</div></div><div data-axis-footnote="">Readings of September 30th, 2026.</div></details>';
@@ -370,8 +415,8 @@ const arms = [];
     const r = breakoutFaults('planted', synth(cell), BA);
     if (r.some((x) => want.test(x))) caught.push(n); else f.push(`"${n}" not rejected (${r[0] || 'no fault'})`);
   }
-  arms.push(['PLANTED: white-on-band, primary-on-band, white-on-white, a band, posture at rest, timeline above news, open details, a stray line, a repeat, x100 and dropped places are rejected; correct faces pass', f.length === 0,
-    f.length === 0 ? `${caught.length} of 11 plants rejected; 3 correct synthetic faces accepted` : f.join(' | ')]);
+  arms.push(['PLANTED: white-on-band, primary-on-band, white-on-white (any spelling), a band, posture at rest, timeline above news, open details, a stray line, a repeat, x100 and dropped places are rejected; correct faces, the canonical primary among them, pass', f.length === 0,
+    f.length === 0 ? `${caught.length} of ${LM.length + RM.length + 2} plants rejected; 5 correct synthetic faces accepted` : f.join(' | ')]);
 }
 
 let pass = 0;

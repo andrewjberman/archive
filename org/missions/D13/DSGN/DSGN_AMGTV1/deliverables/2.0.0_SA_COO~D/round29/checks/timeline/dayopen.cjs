@@ -33,10 +33,19 @@
  *      <details> or drawn only after pressing [data-article-more=<article_key>]; and no element painted a status colour holds
  *      text -- at rest, in BA's dialog (a DENIED day) or in 992 HK's (a PARTIAL day).
  *   3  HEADER BRIEF AND WORDS: HeaderBrief alone mounts no timeline; a planted postureLine prop renders nothing; [data-header-feed]
- *      renders once; [data-header-description] sits inside a closed <details> whose <summary> has words and no code; in the overlay
- *      the news card comes before the one [data-timeline-panel] and neither holds the other; no visible "day(s) rendered" / "no
- *      gap" / "most-discussed" / "Social:" / "no source measured" / "not measured" / "press one to open" at rest (BA, 992 HK).
- *   4  PLANTED (control): the row, status-text, order and description predicates reject known-bad markup and accept known-good.
+ *      renders once; [data-header-description] sits inside a closed <details> whose <summary> has words and no code; each served
+ *      feed item's [data-feed-item] carries an <a href="<url>"> ONLY where a url is served (a null url renders its title as plain
+ *      text) and the card holds no <a> without an href; in the overlay the news card comes before the one [data-timeline-panel]
+ *      and neither holds the other; no visible "day(s) rendered" / "no gap" / "most-discussed" / "Social:" / "no source
+ *      measured" / "not measured" / "press one to open" at rest (BA, 992 HK).
+ *   4  PLANTED (control): the row, status-text, order, description and feed-link predicates reject known-bad markup and accept
+ *      known-good.
+ * AMENDMENT (round 30, AV-zh-2 REPAIRS, issuer 2.0.0_SA_COO~D; COO~Z msg 28802, RESAPP row Z-W212-S2): after RESAPP's next
+ *   redeploy the overlay feed serves `url: null` (harvested gold carries no url), and an <a href={item.url}> around a null url
+ *   is an anchor with no href. The round-29 order's words "an `href` on each item" (TO-AV-zg-1 line 66; this check never graded
+ *   them) become: an href ONLY where a url is served, and no <a> without an href. Arm 3 grades the clause on the served BA item
+ *   (url served; BASE e370eb7c passes); the url-null render is graded by round30/checks/repairs/served.cjs. Arm 4 gains 4
+ *   feed-link plants and 1 good list.
  * Prints one line per arm and "THE DAY OPENS IN THE HERO DIALOG AND THE HEADER BRIEF IS THE NEWS CARD ABOVE THE ONE TIMELINE:
  * <k> of 4 arms"; exit 0 only at 4 of 4.
  */
@@ -164,6 +173,25 @@ function descriptionFaults(tree) {
   if (CODE.test(words)) return [`CODE in the description's <summary>: "${words.match(CODE)[0]}"`];
   return [];
 }
+/** AMENDMENT (round 30): a feed item carries an <a href="<url>"> ONLY where a url is served; a null url renders its title as plain
+ * text; the card holds no <a> without an href. `items` are the served feed items. */
+function feedLinkFaults(tree, items) {
+  const f = [];
+  const bare = all(tree, (n) => n.tag === 'a' && !String(n.attrs.href || '').trim());
+  if (bare.length) f.push(`${bare.length} <a> without an href ("${visible(bare[0]).slice(0, 50)}")`);
+  for (const it of items || []) {
+    const k = String(it.article_key).slice(0, 28);
+    const row = byAttr(tree, 'data-feed-item', it.article_key)[0];
+    if (!row) { f.push(`no [data-feed-item] for ${k}`); continue; }
+    const links = all(row, (n) => n.tag === 'a');
+    const served = typeof it.url === 'string' && it.url.trim() !== '';
+    if (served && !links.some((a) => a.attrs.href === it.url)) f.push(`${k}: a url is served and the row has no <a href="<url>"> (${links.length} link(s))`);
+    if (!served && links.length) f.push(`${k}: no url is served and the row draws ${links.length} <a>`);
+    const title = norm(it.title || '');
+    if (title && !visible(row).includes(title)) f.push(`${k}: the title is not in the row`);
+  }
+  return f;
+}
 const WORDS = /day\(s\) rendered|\bno gap\b|rendered count|most-discussed|\bsocial\s*:|no source measured|not measured|press one to open/i;
 
 const arms = [];
@@ -211,12 +239,13 @@ const sHKopen = pressDay(sHK, '2026-08-13');
   const feeds = byAttr(hb.tree, 'data-header-feed').length;
   if (feeds !== 1) f.push(`HeaderBrief: ${feeds} [data-header-feed] (the one recent-news card wanted)`);
   f.push(...descriptionFaults(hb.tree).map((x) => `HeaderBrief: ${x}`));
+  f.push(...feedLinkFaults(hb.tree, (FX.overlayBA.feed && FX.overlayBA.feed.items) || []).map((x) => `HeaderBrief feed: ${x}`));
   f.push(...orderFaults(sBA.tree).map((x) => `overlay BA: ${x}`));
   for (const [name, s] of [['BA', sBA], ['992 HK', sHK]]) {
     const m = visible(s.tree).match(WORDS);
     if (m) f.push(`${name} at rest: "${m[0]}"`);
   }
-  arms.push(['HEADER BRIEF AND WORDS: no own timeline, no posture slot, description behind a closed summary, news card above the one timeline, no system line', f.length === 0, f.length === 0 ? 'HeaderBrief alone, with a planted postureLine, and in the overlay (BA, 992 HK)' : f.slice(0, 6).join(' | ')]);
+  arms.push(['HEADER BRIEF AND WORDS: no own timeline, no posture slot, description behind a closed summary, a link only where a url is served, news card above the one timeline, no system line', f.length === 0, f.length === 0 ? 'HeaderBrief alone, with a planted postureLine, and in the overlay (BA, 992 HK); served items linked, 0 bare <a>' : f.slice(0, 6).join(' | ')]);
 }
 // ---- arm 4: planted controls ---------------------------------------------------------------------------------------------
 {
@@ -239,7 +268,17 @@ const sHKopen = pressDay(sHK, '2026-08-13');
   if (orderFaults(parse('<div><div data-header-feed="SERVED"></div><div data-timeline-panel="SERVED"></div></div>')).length) f.push('order: news above the one timeline rejected');
   if (!descriptionFaults(parse('<div><p data-header-description="SERVED">The Boeing Company operates as an aerospace company.</p></div>')).length) f.push('description: at rest accepted');
   if (descriptionFaults(parse('<details><summary>About the company</summary><p data-header-description="SERVED">The Boeing Company.</p></details>')).length) f.push('description: closed details with a summary rejected');
-  arms.push(['PLANTED (control): row, status-text, order and description predicates reject bad markup and accept good markup', f.length === 0, f.length === 0 ? '7 of 7 rejected, 4 of 4 accepted' : f.join(' | ')]);
+  // AMENDMENT (round 30): the feed-link predicate -- a link only where a url is served, no <a> without an href.
+  const ITEMS = [{ article_key: 'k:served', url: 'https://example.com/a?x=1&y=2', title: 'Served headline' }, { article_key: 'k:null', url: null, title: 'Harvested headline' }];
+  const feedList = (rowServed, rowNull) => parse(`<div data-header-feed="SERVED"><ul><li data-feed-item="k:served">${rowServed}</li><li data-feed-item="k:null">${rowNull}</li></ul></div>`);
+  const LINKED = '<a href="https://example.com/a?x=1&amp;y=2" target="_blank" rel="noreferrer">Served headline</a><div>Reuters -- September 24th, 2026</div>';
+  const PLAIN = '<span>Harvested headline</span><div>Reuters -- September 29th, 2026</div>';
+  if (feedLinkFaults(feedList(LINKED, PLAIN), ITEMS).length) f.push('feed: a correct mixed list rejected');
+  if (!feedLinkFaults(feedList(LINKED, '<a target="_blank" rel="noreferrer">Harvested headline</a>'), ITEMS).length) f.push('feed: a null url drawn as an <a> with no href accepted');
+  if (!feedLinkFaults(feedList(LINKED, '<a href="">Harvested headline</a>'), ITEMS).length) f.push('feed: a null url drawn as <a href=""> accepted');
+  if (!feedLinkFaults(feedList('<span>Served headline</span>', PLAIN), ITEMS).length) f.push('feed: a served url with its link dropped accepted');
+  if (!feedLinkFaults(feedList(LINKED, '<span></span><div>Reuters</div>'), ITEMS).length) f.push('feed: a null-url row with its title dropped accepted');
+  arms.push(['PLANTED (control): row, status-text, order, description and feed-link predicates reject bad markup and accept good markup', f.length === 0, f.length === 0 ? '11 of 11 rejected, 5 of 5 accepted' : f.join(' | ')]);
 }
 
 let pass = 0;
