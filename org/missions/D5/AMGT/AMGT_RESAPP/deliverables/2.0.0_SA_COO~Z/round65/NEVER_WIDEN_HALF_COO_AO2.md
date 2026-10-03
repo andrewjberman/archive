@@ -70,3 +70,59 @@ Any of the following in the plan is a STOP:
 - any data-engineering operation (collector, schedule or gold write).
 
 The act changes no collection (ANDREW-DIRECT ~17:3xZ).
+
+## AMENDMENT 1 (2.0.0_SA_COO~Z, 2026-10-03 ~19:1xZ) -- RE-PINNED to `19cb3df089`, CHANGED 3
+
+**Why:** 0.7.0_AE_CloudOps~A stopped at this half's condition 1 (msg 28947). At HEAD the build read CHANGED 3, not 2. The cause
+is 2.0.0_SA_COO~H `fc5a0bf42d`, which deletes the publisher-quarantine mechanism (HVST-ak-4) from `publication_gold.py` and
+`finbert_sentiment.py`.
+
+The ANDREW-DIRECT ~18:xxZ record (`ANDREW_DIRECT_20261003_18xxZ_DELETE_AGENT_TOS_CONTEXT_AND_UNAUTHORIZED_GATES.md`) orders,
+verbatim, "all quarantine mechanisms, gates, or anything else that was implemented without my authorization" removed. The
+original pin `9a8cbd2c97` still carries that mechanism, inert. **Issuer ruling:** the act ships the repo as it stands, at the new
+pin. The original pin is withdrawn. AE~A recommended the same (msg 28949).
+
+**THE BASE, re-read live ~19:1xZ, unmoved:**
+
+| property | value |
+|---|---|
+| function CodeSha256 | `KQSA62c3Diw5XqjBeKKZc0ZTZuTnaaRBbhuEQHfOdXQ=` |
+| function MemorySize | 1769 |
+| rollback VersionId | `.xFOZLD1X0znp_5COtZvp3UgWTBrw19p` |
+
+**THE FILE LIST (`--build-only` at `19cb3df089`, by this seat, in a clean worktree):**
+- rc=0; cold-start FATAL []; request-time break []; VERIFY 75 of 75 modules; isolated 3 of 3.
+- `CONTENT-DIFF SUMMARY: files 355, IDENTICAL 352, CHANGED 3, ADDED 0, REMOVED 0` against `KQSA62c3...`.
+- 253,725,663 B (96.8%, 8,418,337 B spare). This equals AE~A's measured build at `ac5c378c1d`; no packaged input moved between
+  the two commits.
+
+| file | change | source | served effect |
+|---|---|---|---|
+| `lib/research/api/scoped_amgt.py` | CHANGED | `AMGT-ao-1` | as above (title case) |
+| `lib/research/harvest/publication_gold.py` | CHANGED | COO~H `4d393e3521` + `fc5a0bf42d` | NONE through this function (see below) |
+| `lib/research/harvest/finbert_sentiment.py` | CHANGED | COO~H `fc5a0bf42d` | NONE through this function (see below) |
+
+**`publication_gold.py`:** the hunks delete `QUARANTINED_PUBLISHERS`, `GRADED_PUBLISHERS`, `is_quarantined` and
+`_without_quarantined_jobs`. They remove the filter lines from `run_record_spans`, `publisher_coverage`, `daily_rows`,
+`_iter_all_listing_hits`, `build_daily`, `_iter_latest_articles`, `build_mention` and `build_event`. All of these are builders.
+No hunk touches the functions the routes call (`_day_of`, `_latest_gold_snapshot_rows_cached`, `BACKFILL_FLOOR`, `_baseline`,
+`_event_id`, `GOLD_DAILY_TABLE`).
+
+**`finbert_sentiment.py`:** the hunks remove the quarantine branch from `score_missing` and `_cmd_score`, plus one docstring in
+`latest_scores`. The module is imported lazily inside `build_mention` only.
+
+Any other changed file at build time is a STOP.
+
+**EXPECTED OUTCOME, re-measured at `19cb3df089`:**
+
+| check | base (deployed KQSA62c3) | after (local at `19cb3df089`) |
+|---|---|---|
+| r65 c17 | NO: 55 of 94 and 56 of 95 under the build commit's 36-acronym predicate (60 and 61 with no exception; row Z-S342) | YES |
+| r64 c12 | YES | YES |
+| r64 c9, c10, c11, c13, c14 | YES | YES |
+
+The union of 5 suites is 1030 passed.
+
+The blast radius, the rollback and WHAT THIS HALF DOES NOT COVER are unchanged. The act changes no collection.
+
+**The instrument (row Z-S342, AE~A):** `r65_served.py --where deployed` reads `DISPLAY_NAME_ACRONYMS` from the LOCAL tree. So c17 on deployed is graded with the checkout AT THE BUILD COMMIT, where the local predicate equals the deployed one. Any other checkout grades deployed names with a foreign predicate.
