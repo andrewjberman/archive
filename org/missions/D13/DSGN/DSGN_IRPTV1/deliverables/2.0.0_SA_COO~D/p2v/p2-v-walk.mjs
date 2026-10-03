@@ -8,7 +8,8 @@
  * the password read in-process, never printed). The network guard admits the walker's own POSTs plus ONE
  * POST .../investor-reporting/export; every other write is aborted and logged.
  *
- * Usage: node <this file> --client "<search text>" [--base http://localhost:5174] [--headed]
+ * Usage: node <this file> --client "<search text>" [--no-export] [--base http://localhost:5174] [--headed]
+ * `--no-export` stops after the print preview: no write is sent at all.
  * Output: <repo>/tmp/p2-v/<stamp>/ (gitignored): packet.json, netlog.tsv, guard.tsv, shots/. Client data stays local.
  */
 import { createRequire } from 'node:module'
@@ -25,11 +26,12 @@ const ACCOUNT = path.join(ROOT, '.claude', 'skills', 'ui-walk', 'ui_walker_accou
 const EMAIL = 'opal-ui-walker@opal.test'
 
 const argv = process.argv.slice(2)
-const opt = { base: 'http://localhost:5174', client: null, headed: false }
+const opt = { base: 'http://localhost:5174', client: null, headed: false, noExport: false }
 for (let i = 0; i < argv.length; i++) {
   if (argv[i] === '--client') opt.client = argv[++i]
   else if (argv[i] === '--base') opt.base = argv[++i]
   else if (argv[i] === '--headed') opt.headed = true
+  else if (argv[i] === '--no-export') opt.noExport = true
 }
 if (!opt.client) { console.error('--client "<search text>" is required'); process.exit(2) }
 if (!/^http:\/\/localhost:\d+$/.test(opt.base)) { console.error('REFUSED: --base must be http://localhost:<port>'); process.exit(2) }
@@ -85,7 +87,7 @@ try {
     const req = route.request(); const m = req.method(); const p = pathOnly(req.url())
     if (m === 'GET' || m === 'HEAD' || m === 'OPTIONS') return route.continue()
     if (ADMITTED_POST.some((re) => re.test(p))) return route.continue()
-    if (m === 'POST' && EXPORT.test(p) && exportPosts === 0) { exportPosts += 1; return route.continue() }
+    if (m === 'POST' && EXPORT.test(p) && exportPosts === 0 && !opt.noExport) { exportPosts += 1; return route.continue() }
     if (/\/analytics\/ingest$/.test(p)) return route.fulfill({ status: 204, body: '' })
     guard.push([new Date().toISOString(), m, p].join('\t'))
     return route.abort('blockedbyclient')
@@ -139,7 +141,9 @@ try {
 
   // 3. ONE export; the receipt names the frozen as_of
   const submit = page.locator('[data-slot="submit-export"]').first()
-  if (await submit.count()) {
+  if (opt.noExport) {
+    packet.export = { skipped: '--no-export' }
+  } else if (await submit.count()) {
     await submit.click()
     const exStart = Date.now()
     let asOf = null
