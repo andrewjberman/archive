@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ap-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6527a03cc1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "6527a03cc1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ap-1.word-cloud-producer.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~217",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "0f17592996",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new WORD_CLOUD_MAX_TERMS (40), WORD_CLOUD_STOP_WORDS (158 words), WORD_CLOUD_STOP_WORDS_SOURCE, _WORD_CLOUD_TOKEN, _WORD_CLOUD_POSSESSIVE, _word_cloud_tokens, _word_cloud_block; changed _serve_timeline_body (passes word_cloud_builder to get_timeline). The order deploys nothing.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/timeline_api.py",
+      "kind": "script",
+      "commit_or_etag": "0f17592996",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "get_timeline gains optional word_cloud_builder=None; adds the word_cloud key only when a builder is passed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_word_cloud.py",
+      "kind": "test",
+      "commit_or_etag": "0f17592996",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 offline plant tests through scoped_amgt.handler with _timeline_snapshot_rows and _display_name_for patched.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_timeline_routes.py",
+      "kind": "test",
+      "commit_or_etag": "0f17592996",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one assertion: the range route's gold read set now includes article_security_mention.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every plant case passes (declared top terms and counts; no stop word or company-name word; cut to 40; empty window with a reason); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_word_cloud.py; echo \"exit=$?\"",
+      "output_evidence": "collected 9 items ... test_declares_stop_words_source_and_cap PASSED; test_serves_the_declared_top_terms_with_counts PASSED; test_no_stop_word_and_no_company_name_word_is_served PASSED; test_more_than_forty_distinct_terms_are_cut_to_forty PASSED; test_an_empty_window_serves_an_empty_list_with_a_reason PASSED; test_a_window_before_the_floor_is_empty_with_a_reason PASSED; test_a_window_of_only_filtered_words_says_so PASSED; test_the_existing_range_fields_are_unchanged PASSED; test_the_day_route_carries_no_word_cloud PASSED; 9 passed in 1.88s; exit=0",
+      "denominator": "9 of 9 tests passed; the four named plant cases (declared top terms and counts; no stop or name word; cut to 40; empty window with reason) all present",
+      "status": "PASS",
+      "status_reason": "output matches the expectation, exit 0",
+      "expect": "exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "declared stop words over 0 with a source; C1 PASS for BA, AMD and VLO; C2 PASS (empty window, empty list, a reason); R66 C18 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round66/checks/r66_served.py --cell c18 --where local; echo \"exit=$?\"",
+      "output_evidence": "declared stop words: 158; source: standard English function-word list (the NLTK / scikit-learn english stop-word tradition), transcribed by hand into this module, plus news-headline filler words and corporate suffixes declared by AMGT-ap-1; cap 40\nPASS C1 BA_US_Equity ... terms 40 top [('max', 17), ('jet', 11), ('order', 9), ('software', 9), ('jets', 7)] bad 0 ordered True stop-hits [] name-hits []\nPASS C1 AMD_US_Equity ... terms 40 top [('market', 5), ('explain', 4), ('chip', 3), ('meta', 3), ('micron', 2)] ...\nPASS C1 VLO_US_Equity ... terms 22 top [('aerospace', 1), ('applied', 1), ('asks', 1), ('axon', 1), ('ban', 1)] ...\nPASS C2 BA with no headlines in the window serves an empty list with a reason status 200 word_cloud {\"terms\": [], \"window\": {\"from\": \"2026-01-01\", \"to\": \"2025-06-30\"}, \"reason\": \"no coverage headlines in this window\"}\nR66 C18 SERVED: YES\nexit=0",
+      "denominator": "3 of 3 covered names C1 PASS; C2 1 of 1 PASS; 4 of 4 clauses PASS; stop words 158 over 0",
+      "status": "PASS",
+      "status_reason": "output matches the expectation, exit 0",
+      "expect": "exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "R64 C11 SERVED: YES (the timeline's markers unchanged); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c11 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 BA_US_Equity serves markers for every event plus the earnings kind status 200 markers 1 events 1 ...\nPASS C1 AMD_US_Equity ... markers 0 events 0 ...\nPASS C1 VLO_US_Equity ... markers 0 events 0 ...\nR64 C11 SERVED: YES\nexit=0",
+      "denominator": "3 of 3 clauses PASS (BA, AMD, VLO)",
+      "status": "PASS",
+      "status_reason": "output matches the expectation, exit 0",
+      "expect": "exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC2 and AC3 read live gold through the local handler; the plant test is offline",
+      "observed": "9 passed on three runs; c18 YES and c11 YES",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "_word_cloud_block's stop-word set emptied (skip = frozenset() | name words)",
+      "expected": "the plant tests that name stop words fail",
+      "observed": "3 failed, 6 passed in test_word_cloud.py (top-terms, no-stop-word, only-filtered-words); file restored byte-identical, 9 passed",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "api suite last line, cold-read timings, build SIZE line",
+      "reason": "reported in the worker report, not criteria: 488 passed, 178 warnings in 89.92s (0:01:29); cold read serve_total 1910 ms before, 3391 ms after (BA 2026-09-01..today, local); SIZE 253729982 B of 262144000 (96.8%)"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "see AC1",
+      "result": "9 passed"
+    },
+    {
+      "tool": "r66_served.py c18",
+      "invocation": "see AC2",
+      "result": "YES"
+    },
+    {
+      "tool": "r64_served.py c11",
+      "invocation": "see AC3",
+      "result": "YES"
+    }
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~217/SESSION_LOG.txt"
+}
