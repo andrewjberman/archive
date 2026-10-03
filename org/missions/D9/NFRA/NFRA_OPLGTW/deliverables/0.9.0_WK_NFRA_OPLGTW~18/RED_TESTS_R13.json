@@ -1,0 +1,38 @@
+{
+ "tests/test_browser_oidc.py::test_oga3_ac01": {
+  "status": "PASS",
+  "reason": "Passes on CLOUD at the cut (1 passed): its live-ref failure was a tree-relative path outside a deploy-only tree; the test is unchanged."
+ },
+ "tests/test_browser_oidc.py::test_oga3_ac07": {
+  "status": "PASS",
+  "reason": "Repaired in the test: _declared_routes resolved only oauth_as/browser_oidc attributes and list-literal methods, so the later released route cells (TX-g-1 taxsma_workbook, OG-hr-1 transcript_route, OG-hr-2/OG-hl-1 mail_route, the /hx/teams routes db92656c72) raised KeyError (first 'taxsma_workbook', then 'transcript_route' once reached). It now resolves any app module attribute and list(module.TUPLE) methods; assertions unchanged (27 of 27 base routes still served in order, 49 served now)."
+ },
+ "tests/test_principal_cutover.py::test_oga2_ac04": {
+  "status": "PASS",
+  "reason": "Repaired in the test: ROUTE_CLASS lacked the 17 routes added by released cells after the test was cut (OG-hr-1 /hx/transcripts x2, OG-hr-2 + OG-hl-1 /hx/mail x4, /hx/teams x4 at db92656c72, /rivalfunds x4, and the MP-t-1/MP-t-4 owner-gated '/', '/assets/{path:path}', '/api/admin'). Added with classes static (own bearer) / access-layer; the three new bearers (TRANSCRIPT_BEARER, MAIL_BEARER, TEAMS_BEARER) are configured so their own 401 gate answers, not a 503; _probe substitutes concrete path params and probes the /api/admin mount at /whoami. Every added route rejects the legacy token 401."
+ },
+ "tests/test_data_entitlement_guard.py::test_ogz1_ac05": {
+  "status": "PASS",
+  "reason": "Repaired in the test: NFRA_MCPINDEX MX-c-4 (119a49eef0) moved the refusal of a tool classified by neither the spec nor app/data_entitlement.py to registry composed_path_refused (the tool is stripped from the report's tools), so the later 'unclassified' report key is absent for that tool. Expectation now asserts composed_path_refused == ['fresh_unclassified'], tools == [], and no 'unclassified' key. Refusal is stronger, not weaker; no product defect."
+ },
+ "tests/test_data_entitlement_guard.py::test_ogz1_ac08": {
+  "status": "PASS",
+  "reason": "Repaired in the test: same stale route set as test_oga2_ac04 (it imports ROUTE_CLASS from test_principal_cutover, now 49 of 49 routes classed), plus the three /hx bearers configured in its monkeypatch so each /hx route's own 401 answers (first run read 503 mail_route_not_configured). The restricted profile's token is 401 on all 12 static routes, 0 data reads."
+ },
+ "tests/test_entitlement_admin.py::test_ogz2_ac06": {
+  "status": "PASS",
+  "reason": "Repaired in the test: ops/schwab_entitlement_admin.activate() adds one email_deny put per candidate email alias in the same transaction (row W3-S22, NFRA_OPLGTW.TO-OG-e-1, 3e936f77bd; the fixture candidate carries an email), so the transaction holds 4 puts, not 3, and the email_deny item lives in its own hash partition. Test now expects profile + grant + operator_audit + 1 email_deny and keeps the 3-item shared-POLICY-partition assertion for the principal's own items."
+ },
+ "tests/test_schwab_audit.py::test_ogo1_ac07": {
+  "status": "PASS",
+  "reason": "Passes on CLOUD at the cut (1 passed): its live-ref failure was a tree-relative path outside a deploy-only tree; unchanged."
+ },
+ "tests/test_schwab_engine.py::test_ogq1_ac07": {
+  "status": "PASS",
+  "reason": "Passes on CLOUD at the cut (1 passed): its live-ref failure was a tree-relative path outside a deploy-only tree; unchanged."
+ },
+ "tests/test_schwab_export_stream.py::test_ogx4_ac03": {
+  "status": "NAMED",
+  "reason": "ENVIRONMENT, measured: not host memory (31228 MiB of 64978 MiB physical available) but the engine's own per-job child RSS cap (ExecutionEngine limits.job_memory_bytes = 268435456 = 256.0 MiB, app/integrations/schwab/engine.py:180/1306) against this Windows device's spawned-child working set. Probe (.scratch/rss_probe.py, real engine, same test helpers): narrow columns child peak 228.5 MiB at 200 rows, 246.6 at 10k, 238.6 at 100k; the 11-column export 249.8 / 249.3 MiB at 200 / 10k rows and 256.6 MiB at 100k rows, over the cap, so the job returns ServiceError LIMIT_EXCEEDED 'memory'. The interpreter+pyarrow+duckdb baseline alone is ~229 MiB here, leaving ~27 MiB headroom. The same test's narrow sibling test_ogx2_ac01 passes (2 of 3 in the file). No product defect found (the cap is the product's deliberate limit); not repairable in the test without changing the limit or the proof's contract. Needs a Linux Gateway-host run (CTO ruling msg 26488 (3) names full width) to grade the 1.2x flatness claim."
+ }
+}
