@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-r-4",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "544b8e2466",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-r-4.capacity-remeasure-live.md"
+  },
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "544b8e2466"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~16",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~16/CAPACITY_R4.json",
+      "kind": "doc",
+      "commit_or_etag": "dd8c698da3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The on-host measurement record: onhost_bench.py --scale full on i-07dccb1615503ac99, 2026-10-03T00:35:12Z..00:35:50Z, served release 4231bd2ddc6fd975304ed5a2c097473bdd5b41a5, verdict SUFFICIENT. Nothing deployed; host scratch removed (SSM 875613bf-5015-4f34-85de-e43f19c89cbf).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~16/onhost_run_r4_full.json",
+      "kind": "doc",
+      "commit_or_etag": "dd8c698da3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The host run's JSON fetched verbatim over SSM d62320e6-761e-4481-874c-23efac4d0871 (md5 10585c395c3608b64aed872a0d48018a on host and locally).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~16/probes/assemble_capacity_r4.py",
+      "kind": "script",
+      "commit_or_etag": "dd8c698da3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Assembler for CAPACITY_R4.json (CloudWatch and ALB reads only); a re-run reproduced the record except assembled_utc.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "export peak RSS flat across 25k/125k/250k rows at 11 columns.",
+      "method": "command",
+      "invocation": "XF_CAPACITY=org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~16/CAPACITY_R4.json bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/xf.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "rows=25000 columns=11 ok=True peak=170782720 ratio_to_25k=1.0000 within\nrows=125000 columns=11 ok=True peak=182689792 ratio_to_25k=1.0697 within\nrows=250000 columns=11 ok=True peak=184119296 ratio_to_25k=1.0781 within\nbound = 1.10 x 25k peak = 187860992; export sizes graded 3 of 3\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 export sizes graded (25,000 / 125,000 / 250,000 rows x 11 columns), all ok, max ratio 1.0781 vs bound 1.10; one graded host run at 4231bd2ddc",
+      "status": "PASS",
+      "expect": "(?s)RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the maximal query stays under 80% of the job cap.",
+      "method": "command",
+      "invocation": "XF_CAPACITY=org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~16/CAPACITY_R4.json bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/xf.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "maximal query peak=157331456 limit(80% of 268435456)=214748364 ok=True code=None\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 maximal query graded (peak 157,331,456 = 58.6 percent of the 268,435,456 cap); the two concurrent jobs peaked 149,417,984 / 149,159,936",
+      "status": "PASS",
+      "expect": "(?s)RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the record was measured against the served release, on the host install, writing nothing.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r14/checks/r4.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "served_release equals deployed_commit: True\nengine_md5_equal: True\nran_against_host_install: True\nstate_store_written false: True\nsynthetic_principals: True\nstarted after deployed_at: True\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 checks True; host schwab/* md5 11 of 11 equal to 4231bd2ddc6fd975304ed5a2c097473bdd5b41a5 before the run and the aggregate md5 equal again after it",
+      "status": "PASS",
+      "expect": "(?s)served_release equals deployed_commit: True.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy of CAPACITY_R4.json with the 250,000-row peak raised to 1.2 x the 25,000-row peak and the maximal peak set to 230,000,000 (read through XF_CAPACITY), and a copy with served_release set to 63264dfb22cf6e6b6acdab30d7086736686e1be9 (read by r4.AC3.sh via a temporary path-swapped copy of the check, removed).",
+      "expected": "xf.AC1 FAIL and xf.AC2 FAIL on the first copy; r4.AC3 FAIL on 'served_release equals deployed_commit' on the second.",
+      "observed": "xf.AC1 RESULT: FAIL (exit 1, bound 187860992); xf.AC2 RESULT: FAIL (maximal 230000000 > 214748364, exit 1); r4.AC3 'served_release equals deployed_commit: False', RESULT: FAIL (exit 1). Temporary files removed; git status clean.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "xf.AC1 and xf.AC2 run twice on the recorded JSON and the outputs diffed; the host bench itself ran once as graded (the first attempt failed at the contract read, row W16-S4, and is not used).",
+      "observed": "The two check runs are IDENTICAL. The host measurement has ONE graded run: 125,000-row ratio 1.0697 and 250,000-row 1.0781 against a 1.10 bound; OG-x-4's two host runs spanned 1.0528 to 1.0960 (not re-run here, a FAIL is a result and a pass is not re-run).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "CAPACITY_R4.json ac4 post-release regression",
+      "reason": "No OG-r-4 criterion grades ac4. The post-4231bd2ddc window is 5 hours (546 requests); its p95 reads 0.955 s, +72.5 percent against the reference, recorded in the file and filed as row Z-W16-S5."
+    },
+    {
+      "item": "A second host run",
+      "reason": "The order grades one record; a FAIL is not re-run to pass and a pass is not re-run."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W16-S4: running step 2 as written fails at the contract read (rc=1); the contract copy and --contract were added in the same scratch dir",
+    "NFRA_OPLGTW-Z-W16-S5: ac4 post-release p95 +72.5 percent over a 5-hour window, ungraded"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~16/onhost_run_r4_full.json",
+  "compiler_tools": [
+    {
+      "tool": "onhost_bench.py --scale full (SSM AWS-RunShellScript)",
+      "invocation": "/opt/opal-gateway/.venv/bin/python onhost_bench.py --scale full --contract /tmp/og-r4-bench/NFRA_OPLGTW_CONTRACT.json --out /tmp/og-r4-bench/CAPACITY_R4_raw.json (SSM 23310e7d-9a59-42fa-8c2a-85b33173fcba)",
+      "result": "rc=0, 2026-10-03T00:35:11Z..00:35:50Z, verdict SUFFICIENT; tenth/half/full 170,782,720 / 182,689,792 / 184,119,296; maximal 157,331,456"
+    }
+  ]
+}
