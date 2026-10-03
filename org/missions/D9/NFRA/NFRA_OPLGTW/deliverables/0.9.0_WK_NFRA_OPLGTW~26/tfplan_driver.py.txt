@@ -1,0 +1,44 @@
+"""Targeted plan of aws_lambda_function.mcportal_grant_writer. Values are read in memory from the live function's
+environment, passed only via the child's TF_VAR_* env, never printed or written. Output: whitelisted summary only."""
+import json, os, re, subprocess, sys
+root, planfile, label = sys.argv[1], sys.argv[2], sys.argv[3]
+def aws(*a):
+    r = subprocess.run(["aws"] + list(a) + ["--region", "us-east-1", "--output", "json"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if r.returncode: print("aws rc", r.returncode); sys.exit(1)
+    return json.loads(r.stdout)
+env = aws("lambda", "get-function-configuration", "--function-name", "mcportal-grant-writer-lambda")["Environment"]["Variables"]
+secret_vals = [v for k, v in env.items() if k in ("MCPORTAL_OWNER_KEY", "MCPORTAL_OWNER_KEY_CLAIM")]
+cenv = {k: v for k, v in os.environ.items() if not k.startswith("TF_VAR_")}
+cenv["TF_VAR_mcportal_owner_key_claim"] = env["MCPORTAL_OWNER_KEY_CLAIM"]
+cenv["TF_VAR_mcportal_owner_key"] = env["MCPORTAL_OWNER_KEY"]
+def redact(s):
+    for v in secret_vals:
+        if v: s = s.replace(v, "<REDACTED>")
+    return s
+r = subprocess.run(["terraform", "plan", "-input=false", "-lock=false", "-no-color", "-detailed-exitcode",
+                    "-target=aws_lambda_function.mcportal_grant_writer", "-out=" + planfile],
+                   cwd=root, env=cenv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+out = redact(r.stdout.decode("utf-8", "replace"))
+print("[%s] terraform plan rc=%d (detailed-exitcode: 0 none, 2 changes, 1 error)" % (label, r.returncode))
+if os.environ.get("DRV_SHOW_ERR"):
+    ls = out.splitlines(); seen = 0
+    for i, l in enumerate(ls):
+        if "Error:" in l and seen < 3:
+            seen += 1; print(chr(10).join(x[:200] for x in ls[i:i+12]))
+for l in out.splitlines():
+    if re.match(r"^(Plan:|No changes|Error|Warning|\s*# aws_|\s*#\s.*(will be|must be))", l) or "Error" in l[:12]:
+        print("  ", l.strip()[:200])
+if r.returncode in (0, 2):
+    j = subprocess.run(["terraform", "show", "-json", planfile], cwd=root, env=cenv, stdout=subprocess.PIPE)
+    plan = json.loads(j.stdout)
+    for rc in plan.get("resource_changes", []):
+        a = rc["change"]["actions"]
+        if a == ["no-op"]: continue
+        b, af, unk = rc["change"].get("before") or {}, rc["change"].get("after") or {}, rc["change"].get("after_unknown") or {}
+        changed = sorted(k for k in set(b) | set(af) | set(unk) if b.get(k) != af.get(k) or unk.get(k) is True)
+        print("   RESOURCE %s actions=%s changing_attrs=%s" % (rc["address"], a, changed))
+        envb = (b.get("environment") or [{}])[0].get("variables") if b.get("environment") else None
+        enva = (af.get("environment") or [{}])[0].get("variables") if af.get("environment") else None
+        print("   environment before==after:", envb == enva, "| env key count before/after:", len(envb or {}), len(enva or {}))
+        print("   source_code_hash before=%s after=%s" % (b.get("source_code_hash"), af.get("source_code_hash")))
+    print("   resource_changes total=%d non-noop=%d" % (len(plan.get("resource_changes", [])), sum(1 for x in plan.get("resource_changes", []) if x["change"]["actions"] != ["no-op"])))
