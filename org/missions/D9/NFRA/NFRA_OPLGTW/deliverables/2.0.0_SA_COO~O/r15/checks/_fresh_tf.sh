@@ -8,10 +8,10 @@ fresh_plan() {
   label="$1"; shift
   base="${TMP:-/tmp}/og_r15_fresh_$$_${label}"
   rm -rf "$base" 2>/dev/null
-  # SPARSE cone (disk at limit, 0.0.0_AB_MSTR~Z msg 28166): infra/aws (the whole root and every lambda/module path it
+  # SPARSE cone (disk at limit, 0.0.0_AB_MSTR~Z msg 28166): infra/aws + infra/logic (row Z-W26-S2: the naming registry is read at plan time) (the whole root and every lambda/module path it
   # references), org/standards, lib. The root itself is complete -- not a pruned copy.
   git worktree add --no-checkout --detach "$base" HEAD >/dev/null 2>&1 || { echo "fresh worktree add failed"; PLAN_RC=99; return; }
-  git -C "$base" sparse-checkout set --cone infra/aws org/standards lib >/dev/null 2>&1 && git -C "$base" read-tree -mu HEAD >/dev/null 2>&1 \
+  git -C "$base" sparse-checkout set --cone infra/aws infra/logic org/standards lib >/dev/null 2>&1 && git -C "$base" read-tree -mu HEAD >/dev/null 2>&1 \
     || { echo "sparse checkout failed"; git worktree remove --force "$base" >/dev/null 2>&1; PLAN_RC=99; return; }
   echo "fresh worktree $base at $(git -C "$base" rev-parse --short HEAD) (untracked files in the root: $(git -C "$base" status --porcelain -- "$TF_ROOT_REL" | grep -c .))"
   out="${base}.plan.out"
