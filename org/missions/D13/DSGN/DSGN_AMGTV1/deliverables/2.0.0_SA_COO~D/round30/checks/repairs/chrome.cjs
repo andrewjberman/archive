@@ -23,8 +23,14 @@
  * Arms:
  *   1  NO-TONE TOKEN (FWD-23): ChatterBubbles.tsx holds 0 colour literals in code (hex #rgb/#rrggbb/#rrggbbaa, or rgb()/hsl() with
  *      numeric channels, in any string, template or JSX text; comments are not code) and imports from lib/chartColors;
- *      lib/chartColors.ts keeps all 44 BASE exports unchanged and adds exactly ONE new top-level export; every no-tone bubble's
- *      fill is that new export's value, and the tone legend carries the same value as its no-tone swatch; and the round-29
+ *      lib/chartColors.ts keeps all 44 BASE exports (none removed, none changing kind) and holds the no-tone token
+ *      CHATTER_NO_TONE_FILL; every no-tone bubble's fill is that token's value, and the tone legend carries the same value as its
+ *      no-tone swatch; and the round-29
+ *      ISSUER AMENDMENT 1 (round 31, 2026-10-03): this arm graded "BASE exports value-identical + exactly ONE new export". That
+ *      was the round-30 cell's own diff, graded 4/4 at its drain (@8b73dd0f5b). On a later candidate merged with remote DEV,
+ *      other projects' landed edits are legitimate (DSGN_REBRND's PALETTE.pink400 and getAssetClassInkOnDark). So a BASE value
+ *      changed by other work is now a printed NOTE, not a fault. A removed BASE export, a changed kind, or a missing token is
+ *      still a fault.
  *      collage checks over the same file still exit 0 (round29/checks/collage/tone.cjs, collage.cjs -- battery29.sh runs neither).
  *   2  CANONICAL PRIMARY (Z-W81-S1): the loaded header's [data-header-action="refresh"] wears buttonClass('primary', 'canvas',
  *      'sm' | 'md') -- every token of it, and no other paint token (text-/bg-/border-/fill-/stroke-, variant prefixes ignored);
@@ -37,7 +43,7 @@
  *      (control); no string literal in renderCheck.tsx reads "Back to universe"; the live header renders exactly one
  *      [data-header-action="back"] whose text is "Back to all names" (control).
  *   4  PLANTED: each predicate rejects its known-bad inputs and accepts a known-good one (colour literal x5 / clean source;
- *      chartColors census x3 / one added export; no-tone fill x2 / matching; primary class x2 / canonical x2; readRoute x2 /
+ *      chartColors census x3 / two good (AMENDMENT 1: token added; token + other landed work); no-tone fill x2 / matching; primary class x2 / canonical x2; readRoute x2 /
  *      hook-based).
  * Prints one line per arm and "THE PAGE WEARS THE ESTATE'S OWN TOKENS AND CONTROLS: <k> of 4 arms"; exit 0 only at 4 of 4.
  */
@@ -116,14 +122,19 @@ function exportCensus(text, mod) {
   }
   return out;
 }
-/** Additive only: every BASE export unchanged and exactly one new export. Returns { faults, added }. */
+const NO_TONE_TOKEN = 'CHATTER_NO_TONE_FILL';
+/** AMENDMENT 1: no BASE export removed or changing kind, and the no-tone token present. A BASE value changed by other landed work
+ * is listed in `changedElsewhere` (a note, not a fault). Returns { faults, added, changedElsewhere }. */
 function censusFaults(base, cand) {
   const f = [];
-  const changed = Object.keys(base).filter((k) => !cand[k] || cand[k].kind !== base[k].kind || cand[k].sha256 !== base[k].sha256);
+  const removed = Object.keys(base).filter((k) => !cand[k]);
+  const rekinded = Object.keys(base).filter((k) => cand[k] && cand[k].kind !== base[k].kind);
+  const changedElsewhere = Object.keys(base).filter((k) => cand[k] && cand[k].kind === base[k].kind && cand[k].sha256 !== base[k].sha256);
   const added = Object.keys(cand).filter((k) => !base[k]);
-  if (changed.length) f.push(`CHARTCOLORS: ${changed.length} BASE export(s) changed or removed (${changed.slice(0, 4).join(', ')}); the change must be additive`);
-  if (added.length !== 1) f.push(`CHARTCOLORS: ${added.length} new export(s) (${added.join(', ') || 'none'}); want exactly 1, the no-tone fill token`);
-  return { faults: f, added };
+  if (removed.length) f.push(`CHARTCOLORS: ${removed.length} BASE export(s) removed (${removed.slice(0, 4).join(', ')})`);
+  if (rekinded.length) f.push(`CHARTCOLORS: ${rekinded.length} BASE export(s) changed kind (${rekinded.slice(0, 4).join(', ')})`);
+  if (!added.includes(NO_TONE_TOKEN)) f.push(`CHARTCOLORS: no ${NO_TONE_TOKEN} export (new exports: ${added.join(', ') || 'none'})`);
+  return { faults: f, added, changedElsewhere };
 }
 const leaves = (v, out = []) => { if (typeof v === 'string') out.push(v.toLowerCase()); else if (v && typeof v === 'object') Object.values(v).forEach((x) => leaves(x, out)); return out; };
 /** The no-tone bubbles' fill is the new token's value, and the legend carries it. */
@@ -274,6 +285,7 @@ const arms = [];
     if (!IMPORTS_CHART_COLORS.test(cb)) f.push('IMPORT: ChatterBubbles.tsx imports nothing from lib/chartColors');
   }
   let added = [];
+  let elsewhere = [];
   let ccMod = null;
   try { ccMod = L.source(CC); } catch (e) { f.push('CHARTCOLORS LOAD: ' + first(e)); }
   if (ccText !== null && ccMod) {
@@ -281,12 +293,13 @@ const arms = [];
     const r = censusFaults(base, exportCensus(ccText, ccMod));
     f.push(...r.faults);
     added = r.added;
+    elsewhere = r.changedElsewhere;
   }
-  if (added.length === 1 && ccMod) {
+  if (added.includes(NO_TONE_TOKEN) && ccMod) {
     try {
       const m = chatterModel();
-      f.push(...fillFaults(m.fills, m.legendHtml, ccMod[added[0]]));
-      note = `0 colour literals; chartColors 44 BASE exports unchanged + "${added[0]}"; ${m.fills.length} no-tone bubbles and the legend swatch wear it`;
+      f.push(...fillFaults(m.fills, m.legendHtml, ccMod[NO_TONE_TOKEN]));
+      note = `0 colour literals; chartColors 44 BASE exports kept (${elsewhere.length} value(s) changed by other landed work${elsewhere.length ? ': ' + elsewhere.join(', ') : ''}; other new exports: ${added.filter((k) => k !== NO_TONE_TOKEN).join(', ') || 'none'}) + "${NO_TONE_TOKEN}"; ${m.fills.length} no-tone bubbles and the legend swatch wear it`;
     } catch (e) { f.push('CHATTER RENDER: ' + first(e)); }
   }
   f.push(...keepsPassing(['round29/checks/collage/tone.cjs', 'round29/checks/collage/collage.cjs']));
@@ -348,10 +361,12 @@ const arms = [];
   acc('a clean source', colourLiterals("import { CHATTER_NO_TONE_FILL } from '../../../lib/chartColors'\n// was '#cbd5e1'\nconst INK = 'fill-[hsl(var(--palette-navy))]'\nconst C = () => <p>#4 in the ranks</p>\n"));
   // chartColors census
   const B = { A: { kind: 'value', sha256: 'a' }, F: { kind: 'function', sha256: 'f' } };
-  rej('no new export', censusFaults(B, { ...B }).faults);
-  rej('a BASE export modified', censusFaults(B, { ...B, A: { kind: 'value', sha256: 'a2' }, N: { kind: 'value', sha256: 'n' } }).faults);
-  rej('two new exports', censusFaults(B, { ...B, N: { kind: 'value', sha256: 'n' }, M: { kind: 'value', sha256: 'm' } }).faults);
-  acc('one added export', censusFaults(B, { ...B, N: { kind: 'value', sha256: 'n' } }).faults);
+  const T = { [NO_TONE_TOKEN]: { kind: 'value', sha256: 't' } };
+  rej('no token', censusFaults(B, { ...B }).faults);
+  rej('a BASE export removed', censusFaults(B, { F: B.F, ...T }).faults);
+  rej('a BASE export changing kind', censusFaults(B, { ...B, A: { kind: 'function', sha256: 'a' }, ...T }).faults);
+  acc('the token added', censusFaults(B, { ...B, ...T }).faults);
+  acc('the token + another landed export + a value changed elsewhere (AMENDMENT 1)', censusFaults(B, { ...B, A: { kind: 'value', sha256: 'a2' }, M: { kind: 'function', sha256: 'm' }, ...T }).faults);
   // no-tone fill
   const LEG = (x) => `<span>no clear tone</span><span style="background-color:${x}"></span>`;
   rej('a fill that is not the token', fillFaults(['#cbd5e1', '#cbd5e1'], LEG('#cbd5e1'), '#d1d5db'));
