@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-307",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "6850506b19"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "6850506b19",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-307.authorizer-reporting-series-render-route.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~110",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "ee822c425f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git commit ee822c425f on wk-IRPT_BCKEND-110 (LOCAL); render branch only; no AWS call, no deploy (the deploy is the issuer's, under its own never-widen half)",
+      "artifact_covered_by": [
+        "IB42-1-AC1",
+        "IB42-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/users/lambda/portal-authorizer/tests/test_render_reporting_series.mjs",
+      "kind": "test",
+      "commit_or_etag": "ee822c425f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git commit ee822c425f on wk-IRPT_BCKEND-110 (LOCAL); 9 node:test tests",
+      "artifact_covered_by": [
+        "IB42-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB42-1-AC1",
+      "criterion_verbatim": "RENDER_ROUTE_CLAIMS (read from the source) holds the reporting route beside the three existing routes, and the new test file names the four words and passes at least 6 tests with 0 failed.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r42/p42_authorizer_reporting_series.py\" . IB42-1-AC1",
+      "output_evidence": "OK: RENDER_ROUTE_CLAIMS ['GET /api/scoped/investor-reporting/performance/{accountSetId}', 'GET /api/scoped/investor-reporting/analysis/{jobId}/sections', 'GET /api/scoped/investor-reporting/narrative/{reportId}', 'GET /api/scoped/investor-reporting/reporting/{account_id}/{which}']; 9 tests passed, 0 failed | IB42-1-AC1 PASS (rc=0)",
+      "denominator": "9 of 9 tests passed, 0 failed (floor 6); 4 of 4 routes present",
+      "status": "PASS",
+      "expect": "IB42-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB42-1-AC2",
+      "criterion_verbatim": "a GUARD: index.mjs outside the render branch is byte-unchanged against 3376d7b446, so the human token path does not move.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r42/p42_authorizer_reporting_series.py\" . IB42-1-AC2",
+      "output_evidence": "OK: index.mjs outside the render branch is byte-unchanged against 3376d7b446 | IB42-1-AC2 PASS (rc=0)",
+      "denominator": "1 of 1 guard comparisons: head and tail of index.mjs identical to base",
+      "status": "PASS",
+      "expect": "IB42-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base state is the mutant: before the edit the RENDER_ROUTE_CLAIMS block holds three routes and no test file exists, so IB42-1-AC1 base is FAIL (issuer dry-run). The test file's own manifest, foreign-account, summary and forbidden-claim arms are the negative arms of the new entry.",
+      "expected": "IB42-1-AC1 FAIL at base, PASS after; the which=manifest, foreign accountSetId, summary and tier internal tests deny.",
+      "observed": "After the edit IB42-1-AC1 PASS with 9 tests passed, 0 failed (the 4 deny arms and the 2 regression arms among them).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "IB42-1-AC1 and IB42-1-AC2 run twice (before and after the commit) with identical results.",
+      "observed": "Both runs: AC1 9 passed 0 failed, AC2 byte-unchanged outside the render branch.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the handler-level origin gate and a live API Gateway invocation",
+      "reason": "BOUNDS: no AWS call; the tests call the exported authorizeRenderToken (the render branch itself). The deploy is the issuer's, under its own never-widen half."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W110-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "node --test (via the issuer's check script)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r42/p42_authorizer_reporting_series.py\" . IB42-1-AC1",
+      "result": "9 tests passed, 0 failed; IB42-1-AC1 PASS"
+    },
+    {
+      "tool": "bun build (inside the test, to a temp file the test deletes)",
+      "invocation": "bun build index.mjs --format=esm --target=node --external @aws-sdk/*",
+      "result": "bundle imported by the test, deleted in the after hook; tests/ holds only the committed test file"
+    }
+  ],
+  "session_log": "git log wk-IRPT_BCKEND-110 (commit ee822c425f); no separate session log was kept"
+}
