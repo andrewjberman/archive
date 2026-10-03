@@ -1,0 +1,73 @@
+{
+  "guard_verdict": "EVALUATES",
+  "code_citations": [
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/tier.py",
+      "line": 114,
+      "why": "resolve_tier maps a WRITE_CAPABLE_PRINCIPALS key to Tier.STANDARD_EMPLOYEE (returned at line 115); the tier is only an enum result"
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/tools.py",
+      "line": 132,
+      "why": "_run resolves the tier once (_tier_val) ... "
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/tools.py",
+      "line": 136,
+      "why": "... but calls data_entitlement.tool_denial(tool) with NO tier argument: the tier never reaches the entitlement guard"
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/integrations/base.py",
+      "line": 144,
+      "why": "run_integration_tool (the Schwab chokepoint) resolves the tier here ..."
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/integrations/base.py",
+      "line": 149,
+      "why": "... and calls tool_denial(tool) with no tier argument; the tier is used only for audit and for guard.enforce_min_tier at line 163"
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py",
+      "line": 83,
+      "why": "Schwab spec min_tier is read_only, so the tier floor passes every tier and distinguishes none"
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "line": 337,
+      "why": "current_access reads the principal's profile/grant from the store keyed tid/oid; the only input besides the store is the principal"
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "line": 377,
+      "why": "decide: a principal with a profile is restricted; a restricted principal is served only a tool in its grant's allowed tools (line 378)"
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "line": 381,
+      "why": "decide: with no profile a Schwab-class tool is denied (entitlement_denied) whatever the tier; no tier branch exists in the module"
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py",
+      "line": 260,
+      "why": "SchwabService._grant requires access.grant and the tool in access.tools, else ENTITLEMENT_DENIED; no tier input"
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py",
+      "line": 566,
+      "why": "schwab_query calls _scope(scope, {operation, master, dataset}) against the grant (de.check_scope)"
+    },
+    {
+      "path": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "line": 496,
+      "why": "check_scope refuses a master not in scope.masters (dimension masters), which surfaces as scope_denied:masters"
+    }
+  ],
+  "probe": {
+    "principal_tier": "WRITE_CAPABLE",
+    "granted_master": "08242234",
+    "asked_master": "08335338",
+    "outcome": "REFUSED",
+    "envelope_code": "ENTITLEMENT_DENIED"
+  },
+  "note": "At 4231bd2ddc the token WRITE_CAPABLE appears in app/ only in config.py, tier.py, token_broker.py, identity_scope.py and the ycharts integration (none in data_entitlement.py or app/integrations/schwab/), and the tier value (STANDARD_EMPLOYEE for a WRITE_CAPABLE_PRINCIPALS key) is never an input to data_entitlement.py or SchwabService: tools._run and base.run_integration_tool resolve it only for audit and min_tier (Schwab min_tier is read_only), then call tool_denial(tool) which decides from the principal's stored profile and grant alone. So a WRITE_CAPABLE principal is EVALUATED against its data grant. One probe on the real in-process gateway app of tests/acceptance (moto DynamoDB/S3/STS, synthetic random principal key on WRITE_CAPABLE_PRINCIPALS, resolve_tier read STANDARD_EMPLOYEE, audit tier recorded 'standard', AUDIT_PATH in tmp_path) granted master 08242234 only: schwab_query for 08242234 was SERVED (control), schwab_query for 08335338 was REFUSED with envelope code ENTITLEMENT_DENIED, reason scope_denied:masters; a WRITE_CAPABLE principal holding no profile at all was refused by the pre-dispatch guard (ENTITLEMENT_DENIED, entitlement_denied), so the tier opens nothing either way. Probe and its raw output: probes/test_g2_probe.py, probes/g2_probe_output.txt."
+}

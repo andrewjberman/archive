@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-g-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "544b8e2466",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-g-2.write-capable-guard-and-pilot-identity.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fea5fbcdbf"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~23",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~23/WRITE_CAPABLE_GUARD.json",
+      "kind": "doc",
+      "commit_or_etag": "ea4a0d1144",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A measurement record; nothing served changed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~23/IDENTITY_PILOT.json",
+      "kind": "doc",
+      "commit_or_etag": "ea4a0d1144",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A hash-only identity record; nothing served changed.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~23/probes/test_g2_probe.py",
+      "kind": "script",
+      "commit_or_etag": "ea4a0d1144",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline probe run in a scratch checkout of 4231bd2ddc (moto), removed after; output in probes/g2_probe_output.txt.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "verdict (EVALUATES|BYPASSES); probe tier WRITE_CAPABLE ... verdict and probe agree True ... RESULT: PASS ... exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r14/checks/g2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "verdict EVALUATES; probe tier WRITE_CAPABLE outcome REFUSED; citations resolving at 4231bd2ddc 12 of 12; verdict and probe agree True\nRESULT: PASS\nexit=0",
+      "denominator": "12 of 12 citations resolve at 4231bd2ddc; 1 probe",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "tid equals tenant True ... equal True; recorded MATCH; other GUIDs 0; emails 0 ... RESULT: PASS ... exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r14/checks/g2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "tid equals tenant True; instrument named True; hashes well-formed True; equal True; recorded MATCH; other GUIDs 0; emails 0\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 2 write_capable roster entries matched the tenant oid hash",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The probe carries two arms beside the question: a granted-master ask (SERVED) and a WRITE_CAPABLE principal with no profile (refused by the pre-dispatch guard).",
+      "expected": "granted master SERVED; ungranted master REFUSED; no-grant principal REFUSED",
+      "observed": "arm1 is_error=False; arm2 ENTITLEMENT_DENIED scope_denied:masters; arm3 ENTITLEMENT_DENIED entitlement_denied",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "One probe run, re-run once for the saved output; both read the same outcomes.",
+      "observed": "REFUSED both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~23/probes/g2_probe_output.txt",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (probe) on a scratch worktree of 4231bd2ddc",
+      "invocation": "pytest tests/acceptance/test_g2_probe.py -s",
+      "result": "1 passed; arm2 REFUSED ENTITLEMENT_DENIED"
+    },
+    {
+      "tool": "az ad user show / aws secretsmanager get-secret-value",
+      "invocation": "in-memory read, sha256 compare, nothing printed",
+      "result": "MATCH (1 of 2 write_capable entries)"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2",
+      "result": "rc=0 VALID"
+    }
+  ]
+}
