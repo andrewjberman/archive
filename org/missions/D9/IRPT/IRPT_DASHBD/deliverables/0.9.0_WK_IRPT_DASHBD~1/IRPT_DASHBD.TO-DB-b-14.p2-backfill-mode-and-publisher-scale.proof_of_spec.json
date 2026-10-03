@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-14",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "aabc054e89"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "42d7a63a6f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-14.p2-backfill-mode-and-publisher-scale.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~1",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/IRPT_DASHBD.TO-DB-b-14.p2-backfill-mode-and-publisher-scale.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "kind": "script",
+      "commit_or_etag": "829e46ed7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "backfill_days() and run_backfill(): event {backfill:{start,end}, accounts:'population'|[ids]} rewrites the trading days in [start,end] through compute() and ard.emit_day(); MAX_BACKFILL_DAYS=25; refuses by name on a missing backfill key, a range over 25 trading days, a range past the newest landed day, an empty or reversed range, an undeclared account set, and a day with no rows (nothing written). run() enters it only when the event carries a backfill key or a string accounts value. Not packaged, re-pinned or invoked.",
+      "artifact_covered_by": [
+        "DB7-1-AC1",
+        "DB7-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_backfill_mode.py",
+      "kind": "test",
+      "commit_or_etag": "829e46ed7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 tests with stubs: range is exactly the trading days; chunk bound 25 holds and 26 refuses; past-newest refuses; malformed and empty ranges refuse; compute and emit_day called for exactly the range and population-union set; no backfill key refuses before any compute; undeclared account set refuses; a day with no rows writes nothing; dry_run writes nothing; the scheduled event never enters the backfill path.",
+      "artifact_covered_by": [
+        "DB7-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py",
+      "kind": "script",
+      "commit_or_etag": "829e46ed7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_union_accounts(): with no account named, the set is the union of account_id across every gold partition (run() and the scheduled fan-out count both use it); named accounts still override. Not packaged or deployed.",
+      "artifact_covered_by": [
+        "DB7-1-AC2",
+        "DB7-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_publisher_account_union.py",
+      "kind": "test",
+      "commit_or_etag": "829e46ed7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 tests with a stub S3: union covers accounts absent from the newest partition; union is sorted and de-duplicated; run publishes the union; a named account set overrides the union.",
+      "artifact_covered_by": [
+        "DB7-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-publish/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "829e46ed7f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "statement InvokeOwnFunctionForShardFanOut: lambda:InvokeFunction on arn:aws:lambda:us-east-1:${account_id}:function:${module.irpt_reporting_publish_lambda_name.name} only. No plan, no apply.",
+      "artifact_covered_by": [
+        "DB7-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB7-1-AC1",
+      "criterion_verbatim": "DB7-1-AC1 -- the backfill mode tests pass (at least 4). Base: FAIL (no file).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r7/p7_1_ac1_backfill_mode_tests.py\" .",
+      "output_evidence": "OK: 10 passed, 0 failed\nDB7-1-AC1 PASS rc=0",
+      "denominator": "10 of 10 tests passed (4 required)",
+      "status": "PASS",
+      "expect": "DB7-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB7-1-AC2",
+      "criterion_verbatim": "DB7-1-AC2 -- the union tests pass (at least 2), and iam.tf grants InvokeFunction on the publish function itself only. Base: FAIL (no file).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r7/p7_1_ac2_publisher_union_and_selfinvoke.py\" .",
+      "output_evidence": "OK: 4 union tests; InvokeFunction scoped to the publish function itself (1 statement(s))\nDB7-1-AC2 PASS rc=0",
+      "denominator": "4 of 4 union tests passed (2 required); 1 of 1 InvokeFunction statements scoped to the publish function",
+      "status": "PASS",
+      "expect": "DB7-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB7-1-AC3",
+      "criterion_verbatim": "DB7-1-AC3 -- reporting-gold and reporting-publish suites pass unchanged. Base: PASS (a regression guard).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r5/p5_ac3_suites_unchanged.py\" . DB7-1-AC3",
+      "output_evidence": "OK: reporting-gold 24 passed; reporting-publish 25 passed\nDB7-1-AC3 PASS rc=0",
+      "denominator": "reporting-gold 24 of 24 (14 pre-existing + 10 new), reporting-publish 25 of 25 (21 pre-existing + 4 new), 0 failed in each, each suite in its own pytest process; no pre-existing test file edited",
+      "status": "PASS",
+      "expect": "DB7-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2 run with the InvokeFunction resource mutated to \"*\"; AC1 run with MAX_BACKFILL_DAYS mutated from 25 to 26. Both mutants restored to the committed bytes afterwards (git diff HEAD on infra is empty).",
+      "expected": "DB7-1-AC2 FAIL (wildcarded) and DB7-1-AC1 FAIL (chunk-bound test fails)",
+      "observed": "'FAIL: an InvokeFunction statement is wildcarded' / DB7-1-AC2 FAIL; 'FAIL: pytest: 1 failed' / DB7-1-AC1 FAIL; the committed tree PASSes all three.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 run twice on the committed tree (before and after the mutant controls).",
+      "observed": "DB7-1-AC1 PASS, DB7-1-AC2 PASS, DB7-1-AC3 PASS each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, upload, Terraform plan or apply, packaging, re-pin, backfill run, publisher run or Lambda invoke",
+      "reason": "Outside the order (bounds: AWS none); the backfill run and the deploys are the issuer's packet. Tests use stubs."
+    },
+    {
+      "item": "Timeout or memory change for the publish function",
+      "reason": "The measured numbers in P2_SCALE_R5.json need none; the build found nothing that says otherwise."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <the four edited .py files>",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s) (py_compile, ds-precommit, ruff py39); 0 surprise rows filed"
+    }
+  ]
+}
