@@ -1,0 +1,37 @@
+# NFRA_OPLGTW OG-gr-2 (round 15) measurement script. READ-ONLY: S3 GetObject by VersionId into the outside-repo work cache,
+# counts only (no key value printed or written). Run from the worktree root after .scratch/list.py wrote .scratch/markers.json.
+import sys, json
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
+import pyarrow.parquet as pq
+sys.path.insert(0, "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~10")
+import og_v6_common as C
+lm = json.load(open(".scratch/markers.json"))
+R13 = ("account_id", "cusip", "l_s", "quantity_settled_unsettled")   # the OG-v-6 / OG-gr-1 candidate for dim_position
+GRAIN = {"dim_position": R13 + ("accounting_rule_code",), "dim_asset": ("cusip", "security_description_line_1")}
+ADDED = {"dim_position": "accounting_rule_code", "dim_asset": "security_description_line_1"}
+def blank(v): return v is None or (isinstance(v, str) and v.strip() == "")
+jobs = []
+for m in C.MASTERS:
+    for date, row in sorted(lm[m].items()):
+        cl = C.get_marker(m, date, row["version_id"]).get("closure")
+        if not cl or cl.get("status") != "qualified": continue
+        for ds in ("dim_position", "dim_asset"):
+            o = cl["tables"][ds]; assert o["disposition"] == "PRESENT"
+            jobs.append((m, ds, date, o["object"]["key"], o["object"]["version_id"]))
+print("jobs", len(jobs), flush=True)
+def work(j):
+    m, ds, date, key, vid = j
+    p = C.fetch_silver(key, vid, f"{m}_{ds}_{date}_{vid}.parquet")
+    g = GRAIN[ds]; t = pq.read_table(p, columns=sorted(set(g)))
+    cols = {c: t.column(c).to_pylist() for c in t.column_names}; n = t.num_rows
+    cnt = Counter(zip(*[cols[c] for c in g]))
+    coll = [k for k, v in cnt.items() if v > 1]
+    r = {"master": m, "dataset": ds, "date": date, "unique": len(coll) == 0,
+         "added_blank": sum(1 for v in cols[ADDED[ds]] if blank(v)), "rows": n, "colliding_keys": len(coll)}
+    if ds == "dim_position":
+        r["added_distinct_values"] = sorted(set(str(v) for v in cols[ADDED[ds]]))
+    return r
+with ThreadPoolExecutor(4) as ex: out = list(ex.map(work, jobs))
+json.dump(out, open(".scratch/results_r15.json", "w"), indent=1)
+print("done", len(out))

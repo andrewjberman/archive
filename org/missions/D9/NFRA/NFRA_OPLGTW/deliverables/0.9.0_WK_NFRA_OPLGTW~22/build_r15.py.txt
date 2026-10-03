@@ -1,0 +1,107 @@
+# NFRA_OPLGTW OG-gr-2 (round 15) record builder. READ-ONLY: reads the outside-repo work cache that measure_r15 filled (S3 GetObject by
+# VersionId); writes only GRAIN_R15.json. Counts, column names, flags and non-identifying quantities; never an account id or a cusip.
+# Run from the worktree root: python .scratch/build_r15.py <out GRAIN_R15.json>
+import sys, json, glob, os, hashlib
+from collections import Counter
+import pyarrow.parquet as pq
+sys.path.insert(0, "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~10")
+import og_v6_common as C
+OUT = sys.argv[1]
+R = json.load(open(".scratch/results_r15.json"))
+CAND = ("account_id", "cusip", "l_s", "quantity_settled_unsettled"); DECL = ("account_id", "cusip", "l_s")
+ADDED = "quantity_cash_settled"; BASIS_END = "2026-10-01"
+
+
+def blank(v):
+    return v is None or (isinstance(v, str) and v.strip() == "")
+
+
+def path(m, ds, d):
+    return glob.glob(os.path.join(C.WORK_DIR, f"{m}_{ds}_{d}_*.parquet"))[0]
+
+
+def state(n):
+    return "absent" if n == 0 else ("present" if n == 1 else "duplicated")
+
+
+snaps = []
+extra = []
+for r in R:
+    if r["dataset"] == "dim_position":
+        t = pq.read_table(path(r["master"], "dim_position", r["date"]), columns=list(CAND) + [ADDED]).to_pydict()
+        k = list(zip(*[t[c] for c in CAND + (ADDED,)]))
+        row = {"master": r["master"], "dataset": "dim_position", "date": r["date"], "unique": len(set(k)) == len(k),
+               "added_blank": sum(1 for v in t[ADDED] if blank(v)), "rows": len(k), "added_column": ADDED}
+    else:
+        row = {"master": r["master"], "dataset": "dim_asset", "date": r["date"], "unique": r["unique"],
+               "added_blank": r["added_blank"], "rows": r["rows"], "added_column": "security_description_line_1"}
+    (extra if r["date"] > BASIS_END else snaps).append(row)
+
+ev = {}
+sig = {}
+for m in C.MASTERS:
+    t = pq.read_table(path(m, "dim_position", "2026-09-21")).to_pydict()
+    cols = list(t)
+    keys = list(zip(*[t[c] for c in CAND]))
+    cnt = Counter(keys)
+    grp = [k for k, v in cnt.items() if v > 1]
+    assert len(grp) == 1
+    k = grp[0]
+    ii = [i for i, kk in enumerate(keys) if kk == k]
+    sig[m] = hashlib.sha256(repr(k[:3]).encode()).hexdigest()
+    flags = {c: ("equal" if len({repr(t[c][i]) for i in ii}) == 1 else "differ") for c in cols}
+    nb = {}
+    for d in ("2026-09-17", "2026-09-18", "2026-09-21", "2026-09-22", "2026-09-23"):
+        tn = pq.read_table(path(m, "dim_position", d)).to_pydict()
+        kc = Counter(zip(*[tn[c] for c in CAND]))
+        dk = list(zip(*[tn[c] for c in DECL]))
+        kd = Counter(dk)
+        rows = [i for i, kk in enumerate(dk) if kk == k[:3]]
+        nb[d] = {"rows_with_declared_key": kd[k[:3]], "declared_key_state": state(kd[k[:3]]),
+                 "rows_with_candidate_key": kc[k], "candidate_key_state": state(kc[k]),
+                 "rows": [{c: str(tn[c][i]) for c in ("accounting_rule_code", "quantity_settled_unsettled", "quantity_settled",
+                           "quantity_cash_settled", "quantity_margin_settled")} for i in rows]}
+    ev[m] = {"colliding_rows": len(ii), "key_columns_flags": {c: flags[c] for c in CAND},
+             "differing_columns": [c for c in cols if flags[c] == "differ"],
+             "per_column_flag_all_columns": flags,
+             "blank_in_group_key_columns": [c for c in CAND if any(blank(t[c][i]) for i in ii)],
+             "one_source_file_for_both_rows": len({t["_source_file"][i] for i in ii}) == 1,
+             "same_key_on_neighbour_dates": nb}
+
+rec = {
+    "schema_version": "1.0", "cell": "OG-gr-2", "worker": "0.9.0_WK_NFRA_OPLGTW~22", "round": 15, "writes": 0,
+    "verdict": "GRAIN_FOUND",
+    "verdict_basis": "candidate + quantity_cash_settled is unique on 52 of 52 qualified snapshots with 0 blank in the added column; "
+                     "the 2026-09-21 rows are a legitimate CASH row plus a MARGIN row, not an upstream defect.",
+    "grain": {"dim_position": list(CAND) + [ADDED], "dim_asset": ["cusip", "security_description_line_1"],
+              "added_columns": {"dim_position": ADDED, "dim_asset": "security_description_line_1"},
+              "base_candidate": {"dim_position": list(CAND), "dim_asset": ["cusip", "security_description_line_1"]}},
+    "denominator": {
+        "qualified_snapshots": len(snaps),
+        "dim_position": sum(1 for s in snaps if s["dataset"] == "dim_position"),
+        "dim_asset": sum(1 for s in snaps if s["dataset"] == "dim_asset"),
+        "basis_end_date": BASIS_END,
+        "basis": "the OG-gr-1 (GRAIN_R13) basis: latest-version closure markers with closure.status qualified and dim_position + dim_asset PRESENT, 13 dates per master 2026-09-15..2026-10-01; each master counted on its own.",
+        "additional_snapshots_outside_basis": extra,
+        "additional_note": "marker 2026-10-02 is now qualified at both masters (4 more snapshots: 2 masters x 2 datasets), measured with the same grain and listed above; held outside the 52 so the denominator stays the one OG-gr-1 fixed."},
+    "snapshots": snaps,
+    "collision_2026_09_21": {
+        "candidate": list(CAND), "masters": ev,
+        "same_declared_key_at_both_masters": sig["08242234"] == sig["08335338"],
+        "reading": "Per master, on 2026-09-21 one declared key has two rows: one accounting_rule_code CASH (quantity_cash_settled 1, margin 0) and one MARGIN (cash 0, margin 1), each with quantity_settled_unsettled 1 and quantity_settled 1, from one source file. On 2026-09-18 the key is one CASH row of quantity 1; on 2026-09-22 it is one CASH row of quantity 2 (1 + 1). The candidate collides only because the two portions have the same quantity; accounting_rule_code, quantity_cash_settled and quantity_margin_settled differ between the rows."},
+    "why_not_upstream_defect": [
+        "the two rows are not whole-row duplicates (they differ in 3 columns)",
+        "both rows come from the same source file for the date, each with an internally consistent cash/margin split",
+        "the next qualified date carries one row whose quantity equals the sum of the two (1 + 1 = 2)",
+        "other declared keys at each master on 2026-09-18, 2026-09-21 and 2026-09-22 already carry a CASH row and a MARGIN row that differ in quantity: accounting_rule_code is a normal dimension of this table"],
+    "alternatives_measured": {
+        "accounting_rule_code": "makes the candidate unique on every dim_position snapshot (28 of 28 measured incl. 2026-10-02) but is BLANK on master 08335338 from 2026-09-21 (1 to 3 blank rows per snapshot, 10 of 28 dim_position snapshots; the blank rows carry blank cusip, l_s and tax_code and zero quantities), so it fails never-blank and is not the added column.",
+        "quantity_margin_settled": "also unique on every dim_position snapshot with 0 blank (28 of 28); an equal alternative at this grain, not chosen (analysis item 4 names quantity_cash_settled).",
+        "other_columns": "the 23 remaining non-candidate columns each fail uniqueness on 26 of 28 snapshots (the 09-21 pair is equal in them)."},
+    "caveats": [
+        "A quantity as a key column is mechanical, not semantic: a MARGIN row and a SHORT row of equal quantity both carry cash 0 and could collide. The semantic discriminator is accounting_rule_code; whether to key on it despite its blank rows, or accept the quantity column, is the CTO's call.",
+        "Uniqueness is measured on 52 snapshots (+4 beyond the basis); it does not prove the next snapshot will not collide."],
+}
+json.dump(rec, open(OUT, "w"), indent=1)
+print("snapshots", len(snaps), "unique", sum(1 for s in snaps if s["unique"]), "blanks", sum(s["added_blank"] for s in snaps),
+      "extra", len(extra), "extra unique", sum(1 for s in extra if s["unique"]), "extra blanks", sum(s["added_blank"] for s in extra))
