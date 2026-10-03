@@ -41,9 +41,9 @@
 1. **Two QUALIFIED WAITS are served as their interim branches. They are not the paths, and they are not graded as the paths:**
    - FWD-36's 90/365-day price windows wait on Andrew's PX_LAST history-pull word.
    - FWD-37's earnings markers wait on the CORPUS Model-block pull.
-2. **FWD-36's tone and voters serve null with a reason.** HARVST FWD-16/17 are HELD on the publisher-terms card.
+2. **FWD-36's tone and voters serve null with a reason.**
 3. **The feed's `url` is null.** Gold carries no url. DSGN round 30 renders a plain title (COO~D msg 28803); a url source is a round-65 item.
-4. **The publisher-terms note holds.** No round-64 cell processes publisher text. FinBERT ships in the package, and the import graph
+4. **No round-64 cell processes publisher text.** FinBERT ships in the package, and the import graph
    (proved twice, from both leg artifacts) shows no route reaches it.
 
 ## Rows (all OBSERVATION, INERT)
