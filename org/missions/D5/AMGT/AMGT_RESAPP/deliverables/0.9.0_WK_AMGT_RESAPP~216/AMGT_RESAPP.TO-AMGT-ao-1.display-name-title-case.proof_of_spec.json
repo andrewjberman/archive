@@ -1,0 +1,139 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ao-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3fde70ec2b"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "3fde70ec2b",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ao-1.display-name-title-case.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~216",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "d72eed67f7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "functions changed: _clean_display_name (re-case + all-caps tail + cut-name map); new _title_word, _title_case_display_name; new constants DISPLAY_NAME_ACRONYMS, DISPLAY_NAME_ACRONYMS_SOURCE, DISPLAY_NAME_SUFFIX_CASE, DISPLAY_NAME_LOWER_WORDS, DISPLAY_NAME_CUT_WIDTH, DISPLAY_NAME_CUT_FULL, _SHARE_CLASS_TAIL_CAPS, _CASE_WORD. The order deploys nothing (ao-2 does).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_display_name_case.py",
+   "kind": "test",
+   "commit_or_etag": "d72eed67f7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "18 tests: 15 seam cases (the six named, SHOPIFY INC - CLASS A, one mixed-case name unchanged, McDonald's, and others) + share-class sweep + acronym source + route-chain test through _overlay_name, _with_display_name and _display_names.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_model_block_names.py",
+   "kind": "test",
+   "commit_or_etag": "d72eed67f7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "two assertions that pinned the all-caps display_name now read 'Hermes International' and 'Costco Wholesale Corp' (row AMGT_RESAPP-Z-W216-S1).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~216/CUT_NAMES.md",
+   "kind": "doc",
+   "commit_or_etag": "d72eed67f7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "width 28; 7 of 67 named crosswalk records at the width; 5 cut names declared with sources; residue listed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "at least 8 cases pass, among them the six named names, each reading its declared served string; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_display_name_case.py; echo \"exit=$?\"",
+   "output_evidence": "collected 18 items ... test_the_seam_serves_title_case[SYNOPSYS INC-Synopsys Inc] PASSED; [CADENCE DESIGN SYS INC-Cadence Design Sys Inc] PASSED; [BP PLC-BP PLC] PASSED; [ASML HOLDING NV-ASML Holding NV] PASSED; [AIA GROUP LTD-AIA Group Ltd] PASSED; [MITSUBISHI UFJ FINANCIAL GRO-Mitsubishi UFJ Financial Group] PASSED; 18 passed in 0.62s; exit=0",
+   "denominator": "18 of 18 tests passed (15 parametrized seam cases, 3 further)",
+   "status": "PASS",
+   "status_reason": "all passed, the six named cases present, exit 0",
+   "expect": "exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "declared acronyms over 0 with a source; C1 PASS on both routes (0 all-caps names, acronym-only excepted); C2 PASS on both routes; R65 C17 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round65/checks/r65_served.py --cell c17 --where local; echo \"exit=$?\"",
+   "output_evidence": "declared acronyms: 36; source: initialisms the estate already holds in upper case ...; PASS C1 breakout/price serves 0 all-caps names (acronym-only excepted) status 200 names 94 all-caps 0; PASS C2 price serves Mitsubishi UFJ Financial Group whole; PASS C1 collected/chatter serves 0 all-caps names names 95 all-caps 0; PASS C2 chatter serves Mitsubishi UFJ Financial Group whole; R65 C17 SERVED: YES; exit=0",
+   "denominator": "94 price names and 95 chatter names read, 0 all-caps on each (base: 60 and 61)",
+   "status": "PASS",
+   "status_reason": "four PASS lines, SERVED: YES, exit 0",
+   "expect": "R65 C17 SERVED: YES; exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "R64 C12 SERVED: YES (one display name per security, unchanged); and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c12 --where local; echo \"exit=$?\"",
+   "output_evidence": "PASS C2 BA_US_Equity serves one display name, cased (The Boeing Co x4); PASS C2 AMD_US_Equity (Advanced Micro Devices Inc x4); PASS C2 VLO_US_Equity (Valero Energy Corp x4); R64 C12 SERVED: YES; exit=0",
+   "denominator": "3 of 3 securities (BA, AMD, VLO) PASS C1 and C2",
+   "status": "PASS",
+   "status_reason": "R64 C12 SERVED: YES, exit 0",
+   "expect": "R64 C12 SERVED: YES; exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "_clean_display_name's all-caps gate disabled (caps = False), re-case switched off",
+   "expected": "the case tests fail",
+   "observed": "12 failed, 6 passed in test_display_name_case.py (e.g. 'SYNOPSYS INC' == 'Synopsys Inc' fails); file restored byte-identical, 18 passed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC2 and AC3 read live local stores; the plant test is offline and was run three times",
+   "observed": "18 passed each run; c17 YES and c12 YES on the runs made at build and at close",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "api suite last line",
+   "reason": "reported in the worker report, not a criterion: 479 passed, 178 warnings in 75.48s (0:01:15)"
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W216-S1"
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~216/CUT_NAMES.md",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "see AC1",
+   "result": "18 passed"
+  },
+  {
+   "tool": "r65_served.py c17",
+   "invocation": "see AC2",
+   "result": "YES"
+  },
+  {
+   "tool": "r64_served.py c12",
+   "invocation": "see AC3",
+   "result": "YES"
+  }
+ ]
+}
