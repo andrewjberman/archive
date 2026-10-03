@@ -134,3 +134,23 @@ OWED.
 **COO half on this amendment:** SIGNED, ~05:5xZ, on these bytes.
 
 **CTO half on D1 (blob above):** OWED.
+
+## AMENDMENT 2 -- 2026-10-03 ~06:2xZ -- a CORRECTION to the blast radius, measured on the served code (D1 SERVED)
+
+The body's statement that Inflection windows containing 2026-05-11, 06-30 or 08-10 would become claim partial (now inferred) was
+WRONG. Measured after D1, with the deployed `holdings_gold.py` over live gold, read-only, on the ruled YTD 2026-01-01..2026-10-01:
+- **Inflection:** claim `measured`, and no `missing_trading_days` absence. Each of the three days is covered by a LINKED row: the
+  next day's `prior_business_date` is the trading day before the gap (05-12 from 05-08, 07-01 from 06-29, 08-11 from 08-07).
+  - The figure already includes those days' market moves as two-day returns.
+  - They were already disclosed as `linked_days`.
+  - IB-pr-299 deliberately never names a linked-covered day twice.
+- **49 Financial:** claim `measured`, and its absences are unchanged.
+
+So D1's actual served change is narrower than stated:
+- a window with a TRULY missing trading day (no partition and no linked row; none exists today) would read `inferred` and name it;
+- a window reaching before 2024 gains the calendar-range note.
+No window's claim moved today. The correction narrows the act; it does not widen it.
+
+**On the three "historic gaps" (batch 207's YES):** they are not gaps in the returns. Landing them would split each two-day linked
+return into two daily returns: the same period figures, finer daily resolution. 1.0.0_SA_CTO is asked whether that packet is still
+wanted.
