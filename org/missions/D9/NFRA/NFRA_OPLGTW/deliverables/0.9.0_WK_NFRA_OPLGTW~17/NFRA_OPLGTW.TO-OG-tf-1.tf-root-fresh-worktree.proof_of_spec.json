@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-tf-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "544b8e2466"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "544b8e2466",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-tf-1.tf-root-fresh-worktree.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~17",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~17/TF_ROOT_FIX.md",
+   "kind": "doc",
+   "commit_or_etag": "d61c50cbc2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "S25 content classification (CONTENT-DIFF) and the stop; no fix written.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/.gitignore",
+   "kind": "config_data",
+   "commit_or_etag": "d61c50cbc2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Ignore lines for saved plans and the stray org/ tree; with commit 8312f095d1 (7 untracked files).",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "d61c50cbc2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Append-only channel: rows NFRA_OPLGTW-Z-W17-S2 (BLOCKING, ARMED) and -S3.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: a fresh worktree of HEAD plans the committed root with zero errors and no missing variable.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r14/checks/tf.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "fresh worktree at 8312f095d1 (untracked files in the root: 0)\nplan rc=1; errors 2; missing required variables 2; (no plan summary line)\nRESULT: FAIL\nexit=1",
+   "denominator": "2 errors, 2 missing variables of 2 (mcportal_owner_key_claim, mcportal_owner_key); fix not written, order stopped at step 4 (row Z-W17-S2)",
+   "status": "FAIL",
+   "expect": "(?s)plan rc=[02]; errors 0; missing required variables 0.*RESULT: PASS.*exit=0",
+   "status_reason": "Root fix not written: order step 4 stop on CONTENT-DIFF (row NFRA_OPLGTW-Z-W17-S2); the 2 missing-variable errors the cut measured remain."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the fix changes nothing live (targeted grant-writer plan: No changes).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r14/checks/tf.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "fresh worktree at 8312f095d1 (untracked files in the root: 0)\nplan rc=1; errors 2; missing required variables 2; (no plan summary line)\ntargeted grant-writer plan reads No changes: no\nRESULT: FAIL\nexit=1",
+   "denominator": "plan did not reach resource planning (same 2 missing variables); and S25 CONTENT-DIFF in 3 of 11 files means no archive of HEAD can read No changes",
+   "status": "FAIL",
+   "expect": "(?s)targeted grant-writer plan reads No changes: yes.*RESULT: PASS.*exit=0",
+   "status_reason": "Plan stops at the same 2 missing variables, and the S25 CONTENT-DIFF (3 of 11 files) means no archive of HEAD reads No changes without an apply (barred); row NFRA_OPLGTW-Z-W17-S2."
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: no saved plan and no stray telemetry tracked in the root.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r14/checks/tf.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "tracked under infra/aws/terraform/opal-gateway: 36 files; saved plans 0; stray org/ files 0\nRESULT: PASS\nexit=0",
+   "denominator": "saved plans 0 of 36 tracked files; stray org/ files 0 of 36",
+   "status": "PASS",
+   "expect": "(?s)saved plans 0; stray org/ files 0.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Not run: the order stopped at the content classification; no fix exists to mutate.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "Not repeated: AC1 and AC2 read the same 2 errors on two fresh worktrees at the same HEAD.",
+   "observed": "identical",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Items 1 and 3 of the cell (the root fix and the untargeted plan summary)",
+   "reason": "Order step 4: CONTENT-DIFF stop; AC2 cannot pass without an apply this cell may not make."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W17-S2",
+  "NFRA_OPLGTW-Z-W17-S3"
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~17/TF_ROOT_FIX.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "none",
+   "result": "Not run: the worker face named every path."
+  }
+ ]
+}
