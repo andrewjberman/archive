@@ -104,17 +104,20 @@ def main():
                    f"status {st} window_days {b.get('window_days')} start {b.get('window_start')} requested {b.get('window_start_requested')}"
                    f" end {end} note {bool(b.get('window_note'))} rows {len(rows)} bad {len(bad)}")
     elif a.cell == "c10":
-        for d in (None, 30):
-            st, b = call(PREFIX + "/lead-panel/rankings/breakout/price", {"days": str(d)} if d else None)
-            rows = (b or {}).get("rows") or []
-            clause(f"C1 price days={d or 'default'} serves rows at window_days 30", st == 200 and rows
-                   and all(r.get("window_days") == 30 for r in rows), f"status {st} rows {len(rows)}")
-        for d in (90, 365):
-            st, b = call(PREFIX + "/lead-panel/rankings/breakout/price", {"days": str(d)})
-            b = b or {}
-            text = " ".join(str(b.get(k) or "") for k in ("window_reason", "ranking_reason", "reason"))
-            clause(f"C2 price days={d} serves no rows and 'not produced yet'", st == 200 and not (b.get("rows") or [])
-                   and "not produced yet" in text, f"status {st} rows {len(b.get('rows') or [])} reason {text[:90]!r}")
+        # both price rankings: the Price face reads TRENDING by default (COO~D msg 28857), BREAKOUT is the other control
+        for mv in ("trending", "breakout"):
+            for d in (None, 30):
+                st, b = call(f"{PREFIX}/lead-panel/rankings/{mv}/price", {"days": str(d)} if d else None)
+                rows = (b or {}).get("rows") or []
+                clause(f"C1 {mv} price days={d or 'default'} serves rows at window_days 30", st == 200 and rows
+                       and all(r.get("window_days") == 30 for r in rows), f"status {st} rows {len(rows)}")
+            for d in (90, 365):
+                st, b = call(f"{PREFIX}/lead-panel/rankings/{mv}/price", {"days": str(d)})
+                b = b or {}
+                text = " ".join(str(b.get(k) or "") for k in ("window_reason", "ranking_reason", "reason"))
+                clause(f"C2 {mv} price days={d} serves no rows and 'not produced yet'", st == 200
+                       and not (b.get("rows") or []) and "not produced yet" in text,
+                       f"status {st} rows {len(b.get('rows') or [])} reason {text[:90]!r}")
     elif a.cell == "c11":
         for key in NAMES:
             st, tl = call(f"{PREFIX}/security/{key}/timeline", {"from": "2026-09-01", "to": today.isoformat()})
