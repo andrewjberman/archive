@@ -1,8 +1,9 @@
 """DB5-AC3 -- the reporting gold and publisher are served: their existing suites pass unchanged (shared by DB-b-11 and DB-b-12).
 
-Runs each suite in its OWN pytest process, bounded at 110 s. Baselines at CLOUD 2026-10-02 ~18:2xZ: reporting-gold/tests 9 passed,
-reporting-publish/tests 13 passed, 0 failed. Grades: 0 failed or errored, and at least the baseline count passing. Base: PASS (a
-regression guard). Usage: python <this file> <repo_root>
+Runs each suite in its OWN pytest process, bounded at 110 s. Baselines: at CLOUD 2026-10-02 ~18:2xZ reporting-gold/tests 9 passed and
+reporting-publish/tests 13; RAISED by the issuer at the DB-b-14 drain (@f26fa5fb4d, 2026-10-03) to 24 and 25, the counts every suite
+passes there, so a deleted test cannot hide under a stale floor (DB-b-14's worker report). Grades: 0 failed or errored, and at least
+the baseline count passing. Base: PASS (a regression guard). Usage: python <this file> <repo_root> [criterion id]
 """
 import re
 import subprocess
@@ -10,7 +11,7 @@ import sys
 from pathlib import Path
 
 B = "infra/aws/lambda/investor-reporting/"
-SUITES = ((B + "reporting-gold/tests", 9), (B + "reporting-publish/tests", 13))
+SUITES = ((B + "reporting-gold/tests", 24), (B + "reporting-publish/tests", 25))
 
 
 def fail(msg, cid):
