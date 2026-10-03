@@ -61,3 +61,18 @@ CONTINGENCY (named now, measured at the plan): the resource was created by a Ter
 in state; removing a managed resource from config plans a DESTROY of layer version 1 -- a change that cannot be removed
 without an apply or a `removed`/`moved` block (both barred by the order). If the untargeted plan shows that destroy, this is a
 BLOCKING row naming it, per the order, and the layer part is reported as not met rather than worked around.
+
+## 4. Outcome at the plan (amendments to sections 1-3; rows Z-W17-S4, S5, S6)
+
+Measured in this worktree after the secret write (L1 of the ledger, hashes equal; see the proof):
+
+- Archive: `data "external"` over `build_gw_stage.py` works as chosen. The plan's `source_code_hash` for the function reads no
+  change against the live function (it equals `af2d762970`'s closure, OG-gw-2). The mechanism is as section 2.
+- Owner keys: as section 1, with ONE amendment. The local is `nonsensitive(jsondecode(...))`. With `sensitive(...)` the plan read
+  an in-place update on the function (a marks-only diff, "The value is unchanged"), which only an apply clears; the old variables were
+  unmarked, so `nonsensitive` is parity. Row S5.
+- Layer: the CONTINGENCY of section 3 FIRED. Deleting the `aws_lambda_layer_version` block planned `1 to destroy` (layer version 1,
+  in state from the 2026-09-29 apply). The destroy is not removable without an apply or a `removed` block (barred), so the resource
+  block is RETAINED and made build-free: `source_code_hash = data.aws_lambda_layer_version...code_sha256` (the deployed version's own
+  hash), `filename` unchanged but never read at plan time; the function's `layers` reads the DATA SOURCE arn. Plan: `No changes`.
+  Row S4. Not met as ruled ("a data source replaces the resource"); met in effect (no rebuild, no PyPI, no plan change).
