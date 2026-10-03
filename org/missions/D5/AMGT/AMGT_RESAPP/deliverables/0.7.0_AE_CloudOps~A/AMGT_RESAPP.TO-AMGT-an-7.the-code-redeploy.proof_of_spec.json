@@ -3,7 +3,7 @@
   "to_id": "AMGT_RESAPP.TO-AMGT-an-7",
   "firm": "FABRIC",
   "phase": "BUILD-GENERAL",
-  "scope": "sections 1 and 6 (AMENDMENT 1 -- the 500 attribution and its census, folded in from the round-63 analysis @8642d76ceb)",
+  "scope": "sections 1, 6 (AMENDMENT 1 -- the 500 attribution and its census) and 7 (AMENDMENT 2, leg 2 -- the trending-price ?days widening)",
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-7.the-code-redeploy.md",
     "round": 64
@@ -17,7 +17,11 @@
     "coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/NEVER_WIDEN_HALF_COO_AN7.md@3576faa349",
     "cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND64_AN7_CTO_HALF.md@e1c310a414",
     "never_2_entry": "org/critical_paths/change_management/20261003T0008Z_amgt-resapp-r64-an7-code-redeploy-20261003_deploy_completion.md",
-    "never_2_state": "CLOSED, 3 of 3 legs proven; sentinel committed at open (5ddb2d4808), so the full open-then-close lifecycle is on record"
+    "never_2_state": "CLOSED, 3 of 3 legs proven; sentinel committed at open (5ddb2d4808), so the full open-then-close lifecycle is on record",
+    "leg2_coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/NEVER_WIDEN_HALF_COO_AN7_LEG2.md@e25430f320",
+    "leg2_cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND64_AN7_LEG2_CTO_HALF.md@5e62e3e420",
+    "leg2_never_2_entry": "org/critical_paths/change_management/20261003T0147Z_amgt-resapp-r64-an7-leg2-trending-days-20261003_deploy_completion.md",
+    "leg2_never_2_state": "CLOSED, 3 of 3 legs proven; sentinel committed at open (8b01f68bba), full lifecycle on record"
   },
   "assignee": "0.7.0_AE_CloudOps~A",
   "risk_class": "WORLD",
@@ -124,6 +128,16 @@
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" &&  PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c15 --where deployed; echo \"exit=$?\"",
       "output_evidence": "exit=0, R64 C15 SERVED: YES. 'PASS C1 3 of 3 COLD ... 3 of 3' and 'PASS C2 every run's log carries AMGT_SEGMENT timings 3 of 3'. Durations 1893.8 / 2307.13 / 2294.41 ms, each cold=True with Init Duration 193.49 / 170.70 / 171.56 ms, each 200 with 6 of 6 headlines. THE FIRST c15 PASS OF THE PROJECT: round 63 read 11.5-12.8 s cold at three memory values on a flat curve, so ruling 3 cut the cold read instead of raising memory. Segments corroborate the mechanism -- identity 504-649, import 761-1027, gold_chatter_daily 366-419 (list 43-59, get 28-69, decode 185-256), and NO article_security_mention segment on any cold run, against the CTO's base profile of 3.55 s of 4.4 s in two WHOLE gold snapshot reads for one security-day. See controls.cold_sample_method for all three attempts and all 9 runs.",
       "status": "PASS"
+    },
+    {
+      "criterion_id": "c10 both movements (leg 2, CTO condition 3)",
+      "cell_refs": "AMGT-an-7",
+      "method": "command",
+      "criterion_verbatim": "c10 printed for both rankings with the row counts at 30/90/365",
+      "denominator": "8 clauses: 2 movements x (default, 30, 90, 365)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c10 --where deployed; echo \"exit=$?\"",
+      "output_evidence": "exit=0, R64 C10 SERVED: YES, 8 of 8. trending default 94 rows, 30 94 rows, 90 0 rows with the not-produced-yet reason, 365 the same; breakout identical. Base measured by this seat: 6 of 8 passing with exactly trending 90 and 365 failing at 94 rows and an empty reason. The same 2 clauses moved and the other 6 did not.",
+      "status": "PASS"
     }
   ],
   "regression_reads_r63": {
@@ -214,5 +228,51 @@
       "invocation": "not run by this seat",
       "result": "DECLARED-NOT-APPLICABLE by the order's preflight -- no cron, alarm, monitor or cadence, and 0 new actions on a code-only act. The preflight also declares the IAM read BLIND, with the served criteria as the live oracle; they passed."
     }
-  ]
+  ],
+  "leg2": {
+    "go_message": "28867 from 2.0.0_SA_COO~Z, acked READ; sequenced after leg 1's V1 closed",
+    "the_repair": "A one-word widening at scoped_amgt.py:5317 so the price-window branch matches breakout OR trending. ?days=30 (DEFAULT_DAYS) falls through to read_rankings unchanged; any other valid value returns price_window_not_produced (0 rows and a reason); a bad value answers 400.",
+    "act_a": {
+      "build_commit": "43711514cc",
+      "content_diff": "files 355, IDENTICAL 352, CHANGED 3, ADDED 0, REMOVED 0 against kSeyeO0v -- the three files the condition names: scoped_amgt.py, publication_gold.py, finbert_sentiment.py. Zero outside. window_tone.py and lib/opal_data_harvest/* changed between the pins but are not in the 355-file package and correctly never appear.",
+      "size": "253724309 B of 262144000, 96.8%, 8419691 B spare -- 2898 B less than leg 1, so the widening cost almost nothing",
+      "artifact": {
+        "version_id": ".xFOZLD1X0znp_5COtZvp3UgWTBrw19p",
+        "content_sha256": "KQSA62c3Diw5XqjBeKKZc0ZTZuTnaaRBbhuEQHfOdXQ=",
+        "content_length": 41149311,
+        "readback": "matched"
+      },
+      "rollback_target": "VersionId 40smkxDeOsBar9woKz_p5ICvkoUonv9y / kSeyeO0v -- not used",
+      "plan": "49 resource_changes, 1 non-no-op, exactly 3 attributes; memory_size before=1769 after=1769 UNCHANGED; 0 delete/create/iam/route/apigateway/integration/permission changing. No tf file edited.",
+      "post_apply": {
+        "code_sha256": "KQSA62c3Diw5XqjBeKKZc0ZTZuTnaaRBbhuEQHfOdXQ=",
+        "moved_off_base": true,
+        "memory_size": 1769,
+        "code_size": 41149311,
+        "last_update_status": "Successful",
+        "last_modified": "2026-10-03T01:52:29Z",
+        "replan": "-detailed-exitcode 0"
+      },
+      "status": "LANDED"
+    },
+    "c10_both_movements": {
+      "after": "exit=0, R64 C10 SERVED: YES, 8 of 8 clauses. trending default/30 serve 94 rows at window_days 30; trending 90 and 365 serve 0 rows with the not-produced-yet reason. breakout the same on all four.",
+      "base_measured_by_this_seat": "SERVED NO with exactly 6 of 8 passing and exactly 2 failing, both trending: days=90 and days=365 each answered 200 with 94 ROWS and an EMPTY reason, i.e. trending ignored ?days. Breakout's four already passed.",
+      "why_that_is_the_strong_read": "The same 2 clauses moved to PASS and the other 6 are unchanged, so the one-word widening moved precisely the two readings it was signed to move and nothing else -- a stronger statement than the verdict merely flipping NO to YES.",
+      "status": "PASS"
+    },
+    "import_proof_re_run_not_inherited": {
+      "why": "The CTO half says leg 2 ships the same file so the leg-1 proof carries over. But BOTH ends of the reachability claim changed in this diff: finbert_sentiment.py is the target and publication_gold.py is the importer holding build_mention, whose keyword the half itself records changing. A reachability proof is not transitive across a change to the importer, so inheriting it would have been an assumption dressed as evidence.",
+      "result": "Re-run on the leg-2 zip; both arms PASS with findings identical to leg 1 -- 0 of 20 module-scope reach; 0 module-scope import sites and exactly 1 function-scope site (publication_gold inside build_mention); 0 of 8 route modules name build_mention; routes touch 2 of publication_gold's 62 functions. Negative controls held on both arms. The half's carry-over claim is TRUE -- now measured on the bytes that shipped.",
+      "status": "STABLE"
+    },
+    "no_regression": {
+      "round_64": "c9, c11, c12, c13, c14 all SERVED YES, unchanged.",
+      "round_63": "c3, c4, c5, c7, c8 all SERVED YES. c8 reads 93 served / 1 null / 0 wrong of 94 -- the same 93/1 leg 1 produced when c14 resolved BP, so this leg moved nothing there.",
+      "covered_keys": "8 of 8 routes answered 200 with 0 non-200 (BA and VLO overlay/thesis/peers, BA /timeline, collected/chatter), body bytes printed. The half's non-200 rollback limb was NOT triggered.",
+      "on_body_sizes": "These are LARGER than the round-63 readings (BA overlay was 101996 B, chatter 67005 B) because an-1..an-6 add served fields -- markers, windows, provenance, the feed. Leg 2's limb is 200, NOT byte-identity, which is the right test here; byte-identity was the right test for the round-63 memory-only act, where no served value was supposed to move. Applying that earlier standard to this act would have manufactured a failure."
+    },
+    "a_note_on_leg_1s_c10": "Leg 1's c10 printed only FOUR clauses with no movement prefix and passed. The cell was WIDENED to both movements at commit 43711514cc -- leg 2's own build pin -- so leg 1 exercised the breakout axis only and the trending defect was never in its denominator. Leg 1's PASS was correct for the cell as it then stood. The check script lives under org/missions/.../checks/ and is not in the 355-file package, so its change does not touch any content diff.",
+    "status": "COMPLETE -- c10 PASS on both movements, no regression, rollback not taken"
+  }
 }
