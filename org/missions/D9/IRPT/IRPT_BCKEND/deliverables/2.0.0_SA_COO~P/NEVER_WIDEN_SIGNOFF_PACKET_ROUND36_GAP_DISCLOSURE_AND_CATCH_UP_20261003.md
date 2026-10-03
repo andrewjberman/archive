@@ -104,3 +104,33 @@ SIGNED, 2026-10-03 ~05:2xZ, on this packet's bytes at the commit that carries it
 ## CTO half
 
 OWED.
+
+## AMENDMENT 1 -- 2026-10-03 ~05:5xZ -- D1 re-cut (CTO batch 207, CTO half @d9f15bc006)
+
+**D2 is SERVED** (ledger irpt-round36-gap-catchup-20261003, legs C1 D2 V2 closed @7924f2237a). D1 was re-cut because claim
+`"partial"` grows the measured/inferred/held/absent vocabulary.
+- **Source:** IB-pr-303 (merged @b72601ad47). `CLAIM_INFERRED = "inferred"` is set on `value_facts["claim"]` and on the result's
+  `"claim"` for a window with a missing trading day.
+- **Kept:** the PARTIAL `missing_trading_days` absence naming the days, and `value_facts["missing_trading_days"]`.
+- **Issuer ruling, row W106-S1:** the absence's reason sentence ("the figure is partial, not measured") stays. It describes the
+  PARTIAL absence class, which batch 207 keeps.
+
+**The new D1 artifact:** `U+miRkw3iYiKTvTH1d+fYiI+AqmFb1O5mQ0SZdknRUM=`, S3 `iw5pK0BhA.pa.gPg2vhISL19hxhgGyWT`, @c110361afb (re-pin
+@168bbdcc6a). It supersedes `8G3gsraj`, which is never applied.
+- Against the DEPLOYED bytes it moves exactly `holdings_gold.py` (70 of 71 members byte-equal).
+- The map hash equals the S3 content-sha256 and the zip's sha256. The zip carries `CLAIM_INFERRED = "inferred"` and no
+  `CLAIM_PARTIAL`.
+- **Plan** (`performance` root, ~05:5xZ): 0 to add, 1 to change, 0 to destroy. `s3_object_version` moves 7GwiGHEP -> iw5pK0Bh and
+  `source_code_hash` moves /K1eLPuP -> U+miRkw3, and nothing else.
+
+**Blast radius, the same as the body with one word changed.**
+- 49 Financial: no window changes.
+- Inflection windows containing 2026-05-11, 06-30 or 08-10: claim `inferred`, with the PARTIAL absence naming the days.
+- Inflection windows reaching before 2024: the calendar-range note.
+- No figure moves.
+
+**Rollback:** D1 back to `7GwiGHEPjUOSh894mVi3Jn8i9QmzJbxF`.
+
+**COO half on this amendment:** SIGNED, ~05:5xZ, on these bytes.
+
+**CTO half on D1 (blob above):** OWED.
