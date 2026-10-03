@@ -1,0 +1,84 @@
+/**
+ * DSGN_REBRND E1 (row DSGN_REBRND-S3; FWD-3; CTO RULINGS batch 165) -- the Global RSI bands are the one ordered-scale ramp.
+ * RSI is an ORDERED quantity (0-100); RB-s-4's rule is that a non-canon ordered scale is a single-hue ramp, the one the
+ * Fear & Greed arc on the same panel already uses (`--ramp-1` lightest ... `--ramp-5` darkest).
+ *
+ *   (a) THE MODAL: `getRSIColor` maps its five bands, in order, onto ramp steps 1..5, keeping the band edges; the zones and
+ *       guide lines use the same steps; none of the five old hues remains in the band code;
+ *   (b) THE BARS: each bar's gradient is two neighbouring ramp steps, rising with the value; no `--perf-*` hue remains;
+ *   (c) THE GROUND: the modal declares the band (`dark-band`), so the ramp takes its band range there;
+ *   (d) THE RAMP: both ranges (canvas, band) are one hue and monotonic in lightness, and the lightest canvas step and the
+ *       darkest band step each clear 3:1 against their ground (the extremes the ramp's own comments state).
+ *
+ * NO BROWSER. Prints `VERDICT: RSI-RAMP-OK`.
+ */
+
+import { describe, expect, test } from 'bun:test'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { RSI_BAND_COLORS, getRSIColor } from '../RSIModal'
+
+const read = (rel: string) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), 'utf8')
+const OLD_HUES = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e']
+
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  const a = s * Math.min(l, 1 - l)
+  const f = (n: number) => { const k = (n + h / 30) % 12; return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)) }
+  return [f(0), f(8), f(4)]
+}
+const lum = ([r, g, b]: [number, number, number]) => {
+  const c = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
+  return 0.2126 * c(r) + 0.7152 * c(g) + 0.0722 * c(b)
+}
+const hex = (h: string): [number, number, number] => [0, 2, 4].map((i) => parseInt(h.slice(1 + i, 3 + i), 16) / 255) as [number, number, number]
+const contrast = (a: [number, number, number], b: [number, number, number]) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05) }
+
+describe('DSGN_REBRND E1 -- the Global RSI bands are the one ordered-scale ramp', () => {
+  test('every arm holds', () => {
+    const failures: string[] = []
+    const modal = read('../RSIModal.tsx')
+    const bars = read('../RSIBars.tsx')
+    const css = read('../../../index.css')
+
+    // ARM (a) -- the modal.
+    const mapped = [10, 40, 50, 60, 85].map(getRSIColor)
+    console.log(`ARM(a) bands -> ${mapped.join(' | ')}`)
+    if (JSON.stringify(mapped) !== JSON.stringify([...RSI_BAND_COLORS]) || RSI_BAND_COLORS.some((c, i) => c !== `hsl(var(--ramp-${i + 1}))`)) failures.push('ARM(a): the bands are not ramp steps 1..5 in order')
+    if (getRSIColor(29.9) !== RSI_BAND_COLORS[0] || getRSIColor(30) !== RSI_BAND_COLORS[1] || getRSIColor(55) !== RSI_BAND_COLORS[2] || getRSIColor(70) !== RSI_BAND_COLORS[3] || getRSIColor(70.1) !== RSI_BAND_COLORS[4]) failures.push('ARM(a): a band edge moved')
+    const bandCode = modal.slice(modal.indexOf('export const RSI_BAND_COLORS'), modal.indexOf('// RSI status label')) + modal.slice(modal.indexOf('{/* RSI zones as background */}'), modal.indexOf('{/* Zone reference lines */}') + 900)
+    const left = OLD_HUES.filter((h) => bandCode.toLowerCase().includes(h))
+    console.log(`ARM(a) old hues left in the band code: ${JSON.stringify(left)}`)
+    if (left.length > 0) failures.push(`ARM(a): old hues remain: ${left.join(',')}`)
+
+    // ARM (b) -- the bars.
+    const gradient = bars.slice(bars.indexOf('const getGradientColors'), bars.indexOf('// Map period to human-readable label'))
+    const steps = [...gradient.matchAll(/--ramp-(\d)/g)].map((m) => Number(m[1]))
+    console.log(`ARM(b) gradient steps ${JSON.stringify(steps)}; --perf- left ${gradient.includes('--perf-')}`)
+    if (gradient.includes('--perf-') || JSON.stringify(steps) !== JSON.stringify([1, 2, 2, 3, 3, 4, 4, 5])) failures.push('ARM(b): the bar gradients are not neighbouring ramp steps rising with the value')
+
+    // ARM (c) -- the ground.
+    if (!/className="dark-band bg-\[hsl\(var\(--bg-card\)\)\]/.test(modal)) failures.push('ARM(c): the modal does not declare the band')
+
+    // ARM (d) -- the ramp in both ranges.
+    const ranges: Record<string, [number, number, number][]> = {}
+    for (const [name, block] of [['canvas', css.slice(css.indexOf('--ramp-1: 221 48%'))], ['band', css.slice(css.indexOf('.dark-band,\n  html.dark-mode {') >= 0 ? css.indexOf('.dark-band,\n  html.dark-mode {') : css.indexOf('--ramp-1: 221 42%'))]] as const) {
+      ranges[name] = [1, 2, 3, 4, 5].map((i) => {
+        const m = new RegExp(`--ramp-${i}: (\\d+) (\\d+)% (\\d+)%`).exec(block)
+        return m ? [Number(m[1]), Number(m[2]) / 100, Number(m[3]) / 100] : [NaN, NaN, NaN]
+      })
+    }
+    const canvas = hex('#F4F6FA')
+    const band = hex('#0A1733')
+    const lightestOnCanvas = contrast(hslToRgb(ranges.canvas[0][0], ranges.canvas[0][1], ranges.canvas[0][2]), canvas)
+    const darkestOnBand = contrast(hslToRgb(ranges.band[4][0], ranges.band[4][1], ranges.band[4][2]), band)
+    console.log(`ARM(d) canvas L ${ranges.canvas.map((s) => s[2]).join('>')}, band L ${ranges.band.map((s) => s[2]).join('>')}; lightest on canvas ${lightestOnCanvas.toFixed(2)}:1, darkest on band ${darkestOnBand.toFixed(2)}:1`)
+    for (const [name, steps2] of Object.entries(ranges)) {
+      if (new Set(steps2.map((s) => s[0])).size !== 1) failures.push(`ARM(d): the ${name} ramp is not one hue`)
+      if (steps2.some((s, i) => i > 0 && !(s[2] < steps2[i - 1][2]))) failures.push(`ARM(d): the ${name} ramp is not monotonic`)
+    }
+    if (lightestOnCanvas < 3 || darkestOnBand < 3) failures.push('ARM(d): a ramp extreme is under 3:1 on its ground')
+
+    console.log(failures.length === 0 ? 'VERDICT: RSI-RAMP-OK' : `VERDICT: RSI-RAMP-FAIL ${failures.join('; ')}`)
+    expect(failures).toEqual([])
+  })
+})

@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-308",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "dd4e8b5873"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "dd4e8b5873",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-308.render-host-print-query-keys.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~111",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-export/render_export.cjs",
+      "kind": "script",
+      "commit_or_etag": "be6911d715",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git commit be6911d715 on wk-IRPT_BCKEND-111 (LOCAL); one line changed (PRINT_QUERY_KEYS); no AWS call, no upload (the deploy is the issuer's, under its own never-widen half)",
+      "artifact_covered_by": ["IB43-1-AC1", "IB43-1-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-export/tests/test_print_query.cjs",
+      "kind": "test",
+      "commit_or_etag": "be6911d715",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git commit be6911d715 on wk-IRPT_BCKEND-111 (LOCAL); 6 node:test tests, no network, no browser",
+      "artifact_covered_by": ["IB43-1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB43-1-AC1",
+      "criterion_verbatim": "PRINT_QUERY_KEYS (read from the source) holds the seven keys plus account, version and request; the test names the four words and passes at least 4 tests, 0 failed.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r43/p43_render_print_query_keys.py\" . IB43-1-AC1",
+      "output_evidence": "OK: PRINT_QUERY_KEYS ['bundle', 'tenant', 'revision', 'kind', 'selection', 'start', 'end', 'account', 'version', 'request']; 6 tests passed, 0 failed | IB43-1-AC1 PASS (rc=0)",
+      "denominator": "6 of 6 tests passed, 0 failed (floor 4); 10 of 10 keys present",
+      "status": "PASS",
+      "expect": "IB43-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB43-1-AC2",
+      "criterion_verbatim": "a GUARD: only the PRINT_QUERY_KEYS line of the base file changes, lines may only be appended after it, and node --check passes.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r43/p43_render_print_query_keys.py\" . IB43-1-AC2",
+      "output_evidence": "OK: only PRINT_QUERY_KEYS changed (plus 0 appended line(s)); node --check passes | IB43-1-AC2 PASS (rc=0)",
+      "denominator": "1 of 1 guard comparisons: 306 of 306 lines equal to base cd24c46d57 except the PRINT_QUERY_KEYS line",
+      "status": "PASS",
+      "expect": "IB43-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base state is the mutant: before the edit PRINT_QUERY_KEYS holds seven keys and no test exists, so IB43-1-AC1 base is FAIL (issuer dry-run). The test's unlisted-key arm (token, redirect, next) is the negative arm.",
+      "expected": "IB43-1-AC1 FAIL at base, PASS after; token, redirect and next are dropped.",
+      "observed": "After the edit IB43-1-AC1 PASS with 6 tests passed, 0 failed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "IB43-1-AC1 and IB43-1-AC2 run twice (before and after the commit) with identical results.",
+      "observed": "Both runs: AC1 6 passed 0 failed, AC2 PASS.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "requiring render_export.cjs itself from the test",
+      "reason": "main() runs unconditionally at the file's last statement, and a guard would change an original line; the order's fallback was used: the test copies the two pure definitions and asserts each equals the file's text."
+    },
+    {
+      "item": "deploy of render_export.cjs to the render host",
+      "reason": "BOUNDS: no AWS call; the deploy is the issuer's, under its own never-widen half."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "node --test (via the issuer's check script)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r43/p43_render_print_query_keys.py\" . IB43-1-AC1",
+      "result": "6 tests passed, 0 failed; IB43-1-AC1 PASS"
+    }
+  ],
+  "session_log": "git log wk-IRPT_BCKEND-111 (commit be6911d715); no separate session log was kept"
+}

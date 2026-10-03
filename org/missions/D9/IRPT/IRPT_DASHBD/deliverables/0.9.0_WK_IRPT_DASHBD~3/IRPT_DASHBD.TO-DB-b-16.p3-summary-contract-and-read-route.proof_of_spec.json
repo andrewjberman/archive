@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-16",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "aabc054e89"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "713110dbeb",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-16.p3-summary-contract-and-read-route.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~3",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~3/IRPT_DASHBD.TO-DB-b-16.p3-summary-contract-and-read-route.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_CLIENT_SUMMARY_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "2fe9a88a47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "contract 0.1.0: 8 required summary keys, the per-account entry, the address platinum/reporting/client=<client_id>/summary.json, window_status values MEASURED/NOT_SPANNED/BREAK with its four-postulate record and token census (denominator 54654 tracked files).",
+      "artifact_covered_by": [
+        "DB9-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting/entry.py",
+      "kind": "script",
+      "commit_or_etag": "2fe9a88a47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ROUTES gains the summary route mapped to reporting-summary-read; serve_summary() refuses OBJECT_NOT_COVERED unless the scope covers every accounts[].account_id and unpublished_account_ids. Not packaged or deployed.",
+      "artifact_covered_by": [
+        "DB9-1-AC2",
+        "DB9-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting/tests/test_reporting_summary.py",
+      "kind": "test",
+      "commit_or_etag": "2fe9a88a47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 tests with stubbed S3 and scope: route declared, full coverage served, partial refused, empty scope refused before storage, another firm's document refused, another client's document refused, non-issued client id refused, malformed account entry refused, missing summary NOT_READY, browser-supplied scope refused.",
+      "artifact_covered_by": [
+        "DB9-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-read/api.tf",
+      "kind": "terraform",
+      "commit_or_etag": "2fe9a88a47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "aws_apigatewayv2_route.irpt_reporting_read_summary on the same integration and authorizer as the account route (key from locals.tf irpt_rr_summary_route_key). Text only; no plan, no apply.",
+      "artifact_covered_by": [
+        "DB9-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting/tests/test_reporting_entry.py",
+      "kind": "test",
+      "commit_or_etag": "5fcfa8d63c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One assertion replaced under the issuer's grant (ruling on W3-S1): len(entry.ROUTES) == 1 became the exact two-route set. 1 insertion, 1 deletion.",
+      "artifact_covered_by": [
+        "DB9-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB9-1-AC1",
+      "criterion_verbatim": "DB9-1-AC1 -- the contract is 0.1.0 and states the address. window_status carries its record and census, and the builder's document carries every required key and no undeclared one. Base: FAIL (no contract).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r9/p9_1_ac1_summary_contract_matches_builder.py\" .",
+      "output_evidence": "OK: contract 0.1.0, 8 required keys, window_status 3 values with its record and census; the builder's document carries every required key and no undeclared one\nDB9-1-AC1 PASS rc=0",
+      "denominator": "8 of 8 builder top-level keys declared; 3 window_status values",
+      "status": "PASS",
+      "expect": "DB9-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB9-1-AC2",
+      "criterion_verbatim": "DB9-1-AC2 -- the read route suite passes with the summary arms: at least 14 tests (11 at the base), 0 failed. Base: FAIL (no file).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r9/p9_1_ac2_read_route_summary_tests.py\" .",
+      "output_evidence": "OK: read route suite 21 passed, 0 failed\nDB9-1-AC2 PASS rc=0. Context: the issuer ruled on W3-S1 (amendment f1acd596eb) granting test_reporting_entry.py for one assertion; test_one_route_and_function_name now asserts entry.ROUTES == {entry.ROUTE_KEY: entry.OPERATION, entry.SUMMARY_ROUTE_KEY: \"reporting-summary-read\"} (commit 5fcfa8d63c); no other line of the file changed.",
+      "denominator": "21 of 21 tests passed (10 of 10 new, 11 of 11 existing); 14 required",
+      "status": "PASS",
+      "expect": "DB9-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB9-1-AC3",
+      "criterion_verbatim": "DB9-1-AC3 -- one summary route is in ROUTES, mapped to an ENTRY operation and declared in the reporting-read Terraform. The account route is unchanged. Base: FAIL (0 summary routes).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r9/p9_1_ac3_summary_route_declared.py\" .",
+      "output_evidence": "OK: 'GET /api/scoped/investor-reporting/reporting/client/{client_id}/summary' -> reporting-summary-read, declared in Terraform; the account route unchanged\nDB9-1-AC3 PASS rc=0",
+      "denominator": "1 of 1 summary route in ROUTES, declared in Terraform",
+      "status": "PASS",
+      "expect": "DB9-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1, AC2 and AC3 run after the grant edit.",
+      "observed": "AC1 PASS, AC2 PASS (21 passed), AC3 PASS.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "AC1 run with the contract's window_status.four_postulate_record.iv emptied. The committed bytes were restored afterwards (git status of org/standards is clean).",
+      "expected": "DB9-1-AC1 FAIL",
+      "observed": "'FAIL: window_status.four_postulate_record lacks a non-empty i, ii, iii or iv' / DB9-1-AC1 FAIL; the committed tree PASSes.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 read or write, Terraform plan or apply, packaging, deploy or Lambda invoke",
+      "reason": "Outside the order (bounds: AWS none); tests use stubs; the deploy and the first served summary are the issuer's P-2 packet."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W3-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/reporting/entry.py infra/aws/lambda/investor-reporting/reporting/tests/test_reporting_summary.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    }
+  ]
+}
