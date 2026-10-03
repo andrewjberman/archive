@@ -20,8 +20,8 @@ fresh_plan() {
     terraform init -input=false -no-color >"${base}.init.out" 2>&1 || { echo "INIT_FAILED"; tail -5 "${base}.init.out" | grep -E "Error" ; exit 97; }
     terraform plan -input=false -lock=false -no-color -detailed-exitcode "$@" >"$out" 2>&1
   ); PLAN_RC=$?
-  PLAN_ERRORS=$(grep -c "^Error:\|│ Error:" "$out" 2>/dev/null || echo 0)
-  PLAN_NOVALUE=$(grep -c "No value for required variable" "$out" 2>/dev/null || echo 0)
+  PLAN_ERRORS=$(grep -c "^Error:\|│ Error:" "$out" 2>/dev/null || true)
+  PLAN_NOVALUE=$(grep -c "No value for required variable" "$out" 2>/dev/null || true)
   PLAN_SUMMARY=$(grep -E "^Plan: |No changes\." "$out" 2>/dev/null | head -1)
   [ -n "$PLAN_SUMMARY" ] || PLAN_SUMMARY="(no plan summary line)"
   git worktree remove --force "$base" >/dev/null 2>&1; rm -f "${base}.init.out"
