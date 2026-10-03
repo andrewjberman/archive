@@ -1,0 +1,43 @@
+import pickle, json
+from collections import Counter, defaultdict
+D=pickle.load(open(".scratch/data.pkl","rb"))
+CAND=("account_id","cusip","l_s","quantity_settled_unsettled")
+DECL=("account_id","cusip","l_s")
+def blank(v): return v is None or (isinstance(v,str) and v.strip()=="")
+def rowsof(t):
+    cols=list(t); n=len(t[cols[0]])
+    return cols,n
+res={}
+for m in ("08242234","08335338"):
+    t=D[(m,"2026-09-21")][0]; cols,n=rowsof(t)
+    print("MASTER",m[-3:],"cols:",cols)
+    keys=list(zip(*[t[c] for c in CAND])); cnt=Counter(keys)
+    coll=[k for k,v in cnt.items() if v>1]
+    print(" candidate colliding groups",len(coll),"rows",sum(cnt[k] for k in coll))
+    idx=defaultdict(list)
+    for i,k in enumerate(keys):
+        if cnt[k]>1: idx[k].append(i)
+    for k,ii in idx.items():
+        print(" group rows",len(ii))
+        print("  key col equal flags:",{c:True for c in CAND})
+        flags={c:(len({repr(t[c][i]) for i in ii})==1) for c in cols}
+        print("  differ cols:",[c for c,v in flags.items() if not v])
+        print("  equal cols:",[c for c,v in flags.items() if v])
+        print("  blank in key:",[c for c in CAND if any(blank(t[c][i]) for i in ii)])
+        # types of differing col values (no values for identifiers)
+        for c in cols:
+            if not flags[c] and c not in CAND:
+                vals=[t[c][i] for i in ii]
+                if c in ("account_id","cusip","symbol"): continue
+                print("   ",c,vals)
+        # neighbors
+        for d in ("2026-09-17","2026-09-18","2026-09-22","2026-09-23"):
+            tn=D[(m,d)][0]
+            kn=Counter(zip(*[tn[c] for c in CAND])); dn=Counter(zip(*[tn[c] for c in DECL]))
+            print("  ",d,"cand-key rows:",kn.get(k,0),"| declared-key rows:",dn.get(k[:3],0))
+        # also within 09-21 declared key count
+        dk=Counter(zip(*[t[c] for c in DECL])); print("   09-21 declared-key rows:",dk[k[:3]])
+    # whole-snapshot declared colliding counts per date
+    for d in ("2026-09-17","2026-09-18","2026-09-21","2026-09-22","2026-09-23"):
+        tn=D[(m,d)][0]; c=Counter(zip(*[tn[x] for x in DECL])); cc=Counter(zip(*[tn[x] for x in CAND]))
+        print("  ",d,"rows",len(tn[cols[0]]),"declared coll keys",sum(1 for v in c.values() if v>1),"cand coll keys",sum(1 for v in cc.values() if v>1))
