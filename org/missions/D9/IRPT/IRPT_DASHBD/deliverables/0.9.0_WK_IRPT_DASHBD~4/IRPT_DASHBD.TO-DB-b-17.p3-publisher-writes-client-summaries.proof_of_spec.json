@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-17",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "aabc054e89"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "42d7a63a6f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-17.p3-publisher-writes-client-summaries.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~4",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~4/IRPT_DASHBD.TO-DB-b-17.p3-publisher-writes-client-summaries.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py",
+      "kind": "script",
+      "commit_or_etag": "dc3a630391",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run_summaries(): event {summaries:true} (boolean only; accounts cannot ride with it; clients, if given, a non-empty list of cli_ ids; shard and shards together and in range) reads the directory through latest.json, lists the published account= prefixes once, mints raw keys to opaque ids through ids.py, and builds and writes one client at a time from all its published accounts at publisher.summary_address; dry_run builds and writes nothing; a client with no published account gets no summary and is counted; a client refused (missing object, contract refusal) is named by id and does not stop the others. Sharded by crc32 of the client id (SUMMARY_SHARD_CLIENTS=300), reusing fan_out (default arguments unchanged). A fire without the summaries key reaches the same run() call with the same arguments as before. Not packaged or deployed.",
+      "artifact_covered_by": [
+        "DB9-2-AC1",
+        "DB9-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_publisher_summaries.py",
+      "kind": "test",
+      "commit_or_etag": "dc3a630391",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 tests over a stubbed S3 and directory: two published accounts -> one summary naming both; one published and one unpublished -> the unpublished listed; none published -> no summary and counted; the write lands at the builder address; dry_run writes nothing; a client entered twice is built once from the union; sharding builds each client whole in exactly one of 3 shards (12 clients); a named client must exist; a missing series refuses that client by id only; a fire without the key (absent, false, null) calls run() with the unchanged arguments and never the summaries pass; non-boolean summaries, summaries with accounts, bad clients and half a shard refuse; the whole-population fire fans out by client.",
+      "artifact_covered_by": [
+        "DB9-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-publish/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "dc3a630391",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two statements and a locals block, text only, terraform fmt -check rc 0, no plan, no apply: ListThePlatinumReportingPrefixForSummaries (s3:ListBucket on the firm bucket, StringLike s3:prefix irpt/<firm>/platinum/reporting/*) and ReadTheFirmDirectoryObjectsOnly (s3:GetObject on arn:aws:s3:::<directory bucket>/investor-reporting/directory/*, the bucket derived from data/firm_registry.json for the publish firm). The summary put and the series/manifest reads ride the existing platinum prefix grants.",
+      "artifact_covered_by": [
+        "DB9-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~4/READ_COST_R9.json",
+      "kind": "doc",
+      "commit_or_etag": "dc3a630391",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "S3 reads only, 6 published accounts, from the laptop: per-account read cost, directory size and read time, listing time; the projection and its basis are row IRPT_DASHBD-W4-S2.",
+      "artifact_covered_by": [
+        "DB9-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB9-2-AC1",
+      "criterion_verbatim": "DB9-2-AC1 -- the summaries pass tests pass (at least 4). Base: FAIL (no file).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r9/p9_2_ac1_publisher_writes_summaries_tests.py\" .",
+      "output_evidence": "OK: 12 passed, 0 failed\nDB9-2-AC1 PASS rc=0",
+      "denominator": "12 of 12 tests passed (4 required); the file names summary, directory, unpublished and address",
+      "status": "PASS",
+      "expect": "DB9-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB9-2-AC2",
+      "criterion_verbatim": "DB9-2-AC2 -- reporting-gold and reporting-publish suites pass with nothing removed (floors 24 and 25). Base: PASS (a regression guard).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r5/p5_ac3_suites_unchanged.py\" . DB9-2-AC2",
+      "output_evidence": "OK: reporting-gold 24 passed; reporting-publish 37 passed\nDB9-2-AC2 PASS rc=0",
+      "denominator": "reporting-gold 24 of 24, reporting-publish 37 of 37 (25 pre-existing + 12 new), 0 failed in each, each suite in its own pytest process; no pre-existing test file edited",
+      "status": "PASS",
+      "expect": "DB9-2-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "handler.py _summarize_client mutated so the write branch runs on dry_run (if upload: -> if True:); AC1 run; the line then restored by re-edit (git diff on handler.py empty afterwards).",
+      "expected": "DB9-2-AC1 FAIL (the dry_run-writes-nothing test fails)",
+      "observed": "FAIL: pytest: 1 failed / DB9-2-AC1 FAIL; after the restore: OK: 12 passed, 0 failed / DB9-2-AC1 PASS.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 run three times on the working tree and twice more on the committed tree dc3a630391.",
+      "observed": "DB9-2-AC1 PASS and DB9-2-AC2 PASS each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, upload, Terraform plan or apply, packaging, deploy, trigger, schedule or Lambda invoke",
+      "reason": "Outside the order (bounds: AWS S3 reads only); the deploy, the first summaries pass and its trigger are the issuer's P-2 packet. Tests use stubs; the live check was a local dry run that read the directory and the 6 published accounts and wrote nothing (6 summaries built, 4,614 clients without a published account, 0 refused)."
+    },
+    {
+      "item": "Packaging of ids.py, raw_keys.json and the firm registry into the publish zip, the directory-bucket environment variable, and the function timeout",
+      "reason": "lambda-source-map.json and lambda.tf are outside this order's paths; filed as IRPT_DASHBD-W4-S1 and IRPT_DASHBD-W4-S2."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W4-S1",
+    "IRPT_DASHBD-W4-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/safe-commit.sh (runs .tools/commit-gate.sh on the staged .py files)",
+      "result": "OK: pre-commit gate clean for handler.py, test_publisher_summaries.py and measure_read_cost.py (py_compile, ds-precommit, ruff py39); 2 surprise rows filed"
+    }
+  ]
+}
