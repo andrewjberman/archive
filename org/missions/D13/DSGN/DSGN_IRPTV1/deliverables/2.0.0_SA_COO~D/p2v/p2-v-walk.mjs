@@ -26,12 +26,13 @@ const ACCOUNT = path.join(ROOT, '.claude', 'skills', 'ui-walk', 'ui_walker_accou
 const EMAIL = 'opal-ui-walker@opal.test'
 
 const argv = process.argv.slice(2)
-const opt = { base: 'http://localhost:5174', client: null, headed: false, noExport: false }
+const opt = { base: 'http://localhost:5174', client: null, headed: false, noExport: false, tabOnly: false }
 for (let i = 0; i < argv.length; i++) {
   if (argv[i] === '--client') opt.client = argv[++i]
   else if (argv[i] === '--base') opt.base = argv[++i]
   else if (argv[i] === '--headed') opt.headed = true
   else if (argv[i] === '--no-export') opt.noExport = true
+  else if (argv[i] === '--tab-only') { opt.tabOnly = true; opt.noExport = true }
 }
 if (!opt.client) { console.error('--client "<search text>" is required'); process.exit(2) }
 if (!/^http:\/\/localhost:\d+$/.test(opt.base)) { console.error('REFUSED: --base must be http://localhost:<port>'); process.exit(2) }
@@ -69,6 +70,12 @@ try {
   const page = await context.newPage()
   context.on('page', (p) => log('POPUP', pathOnly(p.url())))
 
+  // Send times too: the netlog's own time is the ANSWER's arrival, so a request that left before another answer
+  // can read as after it.
+  page.on('request', (req) => {
+    const p = pathOnly(req.url())
+    if (IR.test(p)) netlog.push([new Date().toISOString(), 'SENT ' + req.method(), p, '', '', '', '', ''].join('	'))
+  })
   page.on('response', async (res) => {
     const p = pathOnly(res.url())
     if (!IR.test(p)) return
@@ -79,6 +86,13 @@ try {
       state = j?.status?.state ?? j?.data?.state ?? ''
       reason = j?.status?.public_reason_code ?? j?.public_reason_code ?? ''
       phases = JSON.stringify(j?.status?.phases ?? j?.phases ?? '').slice(0, 300)
+      // The export's own id (the receipt id), from the submit answer or a receipt read: an id, never a body.
+      if (/\/export(\/[^/]+)?$/.test(p)) {
+        const id = j?.data?.export_ref?.export_id ?? (j?.status?.state === 'QUEUED' || j?.status?.state === 'RUNNING' ? j?.status?.operation?.revision : null)
+        if (id) packet.export_id = id
+        if (j?.data?.facts?.frozen_as_of) packet.receipt_frozen_as_of = j.data.facts.frozen_as_of
+        if (j?.data?.job_state) packet.receipt_job_state = j.data.job_state
+      }
     } catch { /* not JSON */ }
     const keys = [...new URL(res.url()).searchParams.keys()].join(',')
     netlog.push([new Date().toISOString(), req.method(), p, keys, res.status(), state, reason, phases].join('\t'))
@@ -124,6 +138,7 @@ try {
   await shot(page, 'performance-tab')
   log('tab', JSON.stringify(packet.tab))
 
+  if (opt.tabOnly) throw Object.assign(new Error('tab-only'), { tabOnly: true })
   // 2. the print: the export modal's preview renders the print document
   await page.locator('[data-slot="export-button-control"]').first().click()
   const pvStart = Date.now()
@@ -167,8 +182,10 @@ try {
   await shot(page, 'export-receipt')
   log('export', JSON.stringify(packet.export))
 } catch (e) {
+  if (e && e.tabOnly) { packet.stopped = '--tab-only' } else {
   packet.error = String(e && e.message ? e.message : e).slice(0, 400)
   log('ERROR', packet.error)
+  }
 } finally {
   if (browser) await browser.close().catch(() => {})
   if (armed) {
