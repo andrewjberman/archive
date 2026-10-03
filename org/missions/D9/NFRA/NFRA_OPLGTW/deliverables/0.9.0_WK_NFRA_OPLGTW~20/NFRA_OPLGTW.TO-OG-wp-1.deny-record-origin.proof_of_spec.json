@@ -1,0 +1,66 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-wp-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~20",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "544b8e2466"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "544b8e2466",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-wp-1.deny-record-origin.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~20/DENY_RECORD_ORIGIN.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A read-only record; nothing deployed or written to live state.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the record holds a strong-read census, the deny record's origin, a disposition proposal and the fixtures, with no personal identifier.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r14/checks/wp.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "census real 1 synthetic 3 email_deny_active 1 items 366; disposition KEEP_WITH_REASON; missing/invalid 0 []; email/GUID strings 0\r\nRESULT: PASS\r\nexit=0",
+   "denominator": "366 items scanned (strong read); 1 real partition, 3 synthetic, 1 active email_deny",
+   "status": "PASS",
+   "status_reason": "Output matches the expected pattern: missing/invalid 0, email/GUID strings 0, RESULT: PASS, exit=0."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Not run: the order is a read-only record and its check is a fixed validator script; no mutant was constructed.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "Not re-run; the table was read once with a consistent scan.",
+   "observed": "n/a",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W20-S1"
+ ],
+ "session_log": "Read-only: dynamodb describe-table and one consistent-read scan of gateway-access-state-table; no write.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/aws",
+   "invocation": "aws dynamodb scan --table-name gateway-access-state-table --consistent-read; describe-table",
+   "result": "rc 0; 366 items, no LastEvaluatedKey; describe-table ItemCount 364"
+  }
+ ]
+}
