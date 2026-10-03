@@ -50,6 +50,9 @@ const CASES = {
   // on the page. Live once Y-5 serves; on the fixture plane the first answer offers NAME_PROXY and the re-post with
   // corrections answers NORMALIZED naming them.
   Dproxy: { sha256: 'f0d344fa967504bd', variant: 'overview', comparisons: [], proxies: { QKZAQ: 'SGOV', QBNYQ: 'SGOV', QUSBQ: 'SGOV', QBOKQ: 'SGOV' }, expect: 'READY', note: 'Stevens with user-named proxies (Y-5)' },
+  // Y-5 V1 (2.0.0_SA_COO~Y 104651, ledger irpt-y5-20261003): the easy file's untracked TIMXX (row 100,
+  // TICKER_DATA_NOT_ENTITLED) named SGOV on the page, like Dproxy; the re-post resolves NORMALIZED and the Overview READY.
+  Aproxy: { sha256: '500837992a3b9caa', variant: 'overview', comparisons: [], proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'easy file with TIMXX named SGOV (Y-5 V1)' },
   B: { sha256: '500837992a3b9caa', variant: 'comparison', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }], expect: 'READY', note: 'easy file vs Opal Ultra Long-Term, Comparison (Y-2)' },
   C: { sha256: '500837992a3b9caa', variant: 'multicomp', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }, { kind: 'etf', key: 'IWM' }], expect: 'READY', blocked: 'brief 2 item 2.3: a ticker admitted as a comparison (CTO batch 178 ruling 4) is 2.0.0_SA_COO~Y\'s half' },
 }
