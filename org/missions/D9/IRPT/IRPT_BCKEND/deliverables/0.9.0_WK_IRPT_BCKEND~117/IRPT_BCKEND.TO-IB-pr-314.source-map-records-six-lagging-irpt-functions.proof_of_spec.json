@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-314",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "2ba6a4c27a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "2ba6a4c27a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-314.source-map-records-six-lagging-irpt-functions.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~117",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "7e242b3a10",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "six recorder commits 92bfc4bbc9, d165f160d4, 1bb4d91fa7, 16f16a59ef, ee5c6780f8, 7e242b3a10, LOCAL on wk-IRPT_BCKEND-117; AWS reads only",
+      "artifact_covered_by": [
+        "IB47-2-AC1",
+        "IB47-2-AC2",
+        "IB47-2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB47-2-AC1",
+      "criterion_verbatim": "the six rows each carry deployed_code_sha256 = the live CodeSha256, read when the check runs.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r47/p47_e3_recorder.py\" . IB47-2-AC1",
+      "output_evidence": "OK: irpt-directory-refresh = live DXuzx9jp | OK: irpt-directory-search = live AVSIaHEh | OK: irpt-export-render = live WDAv+kWK | OK: irpt-holdings-refresh-lambda = live SGwrvwLH | OK: irpt-intake-poller = live YpE2MyUw | OK: irpt-narrative = live es/S9azu | IB47-2-AC1 PASS (rc=0)",
+      "denominator": "6 of 6 rows verified against live",
+      "status": "PASS",
+      "expect": "IB47-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB47-2-AC2",
+      "criterion_verbatim": "a GUARD: against base 2fd59da001, no row outside the six changes (irpt-ycharts-generate excepted), and none is added or removed.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r47/p47_e3_recorder.py\" . IB47-2-AC2",
+      "output_evidence": "OK: 228 rows; only the six (and ~Y's moving row) may differ | IB47-2-AC2 PASS (rc=0)",
+      "denominator": "228 of 228 rows compared against base 2fd59da001",
+      "status": "PASS",
+      "expect": "IB47-2-AC2 PASS"
+    },
+    {
+      "criterion_id": "IB47-2-AC3",
+      "criterion_verbatim": "a GUARD: comp-lambdamap check reports no finding beyond the 14 at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r47/p47_e3_recorder.py\" . IB47-2-AC3",
+      "output_evidence": "OK: 14 finding(s), all present at the base (14) | IB47-2-AC3 PASS (rc=0)",
+      "denominator": "14 of 14 findings present at the base",
+      "status": "PASS",
+      "expect": "IB47-2-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base state is the mutant: IB47-2-AC1 fails at base (six rows lag live), per the issuer's dry run at 2fd59da001.",
+      "expected": "IB47-2-AC1 FAIL at base, PASS after the six recorder runs.",
+      "observed": "PASS at HEAD 7e242b3a10.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each live CodeSha256 was read immediately before its recorder run.",
+      "observed": "The six hashes read before the runs equal the hashes the AC1 check read afterwards (6 of 6 OK lines).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "source-map-reconcile-audit.jsonl (five of six runs)",
+      "reason": "irpt-directory-refresh wrote a reconcile audit line; for the other five the recorder reported 0 reconciled, 0 HELD, 1 already-in-parity and wrote no audit line"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "record-terraform-deploy.sh investor-reporting --function <fn> --code-sha256 <live>",
+      "invocation": "six runs, one per function, sequential",
+      "result": "each Resolved deployment set named exactly that one function; reconcile OK; no HALF-LANDED; each run's own commit landed and git status --porcelain was empty after each"
+    }
+  ],
+  "session_log": "git log wk-IRPT_BCKEND-117; .scratch/rec_<fn>.log (untracked)"
+}
