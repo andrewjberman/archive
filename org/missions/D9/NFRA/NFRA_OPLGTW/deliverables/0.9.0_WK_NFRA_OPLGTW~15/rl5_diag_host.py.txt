@@ -1,0 +1,24 @@
+# OG-rl-5 step 4b diagnostic: WHY does the census read every date as legacy_marker / rejected? Counts/classes/details only.
+def main():
+    service, catalog, store, contract = build()
+    allow = lambda: True  # noqa: E731
+    for master in sorted(contract.masters):
+        listed = sorted(catalog.list_dates(master, allow))
+        print("MASTER", master, "contract_bucket", contract.bucket, "listed", len(listed))
+        for date in listed[-3:] + listed[:1]:
+            res = catalog.snapshot(master, date, allow)
+            print("  DATE", date, "status", res.status, "result", res.result, "classes", list(res.classes()))
+            if res.result == "rejected":
+                key = catalog.marker_key(master, date)
+                marker, ver = catalog._read_marker(key, allow)
+                closure = marker.get("closure") if isinstance(marker, dict) else None
+                print("   marker_keys", sorted(marker)[:20], "master", marker.get("master"), "date", marker.get("date"),
+                      "bucket", marker.get("bucket"))
+                if isinstance(closure, dict):
+                    print("   closure_keys", sorted(closure)[:20], "cmaster", closure.get("master"), "cdate", closure.get("date"))
+                from app.integrations.schwab import catalog as cat
+                f = cat.membership_findings(marker, closure, master, date, contract)
+                for x in f[:6]:
+                    print("   FINDING", x["class"], x["subject"], x["detail"][:200])
+                print("   findings_total", len(f))
+main()
