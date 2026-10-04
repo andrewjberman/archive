@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-lg-1.bloomberg-leg-control-sized-gate-split",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "5f6b2a22d7",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-lg-1.bloomberg-leg-control-sized-gate-split.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4cc8e40575"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/collector_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "f8124d0969",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; checks run offline with a fake pywin32",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/universe.py",
+      "kind": "script",
+      "commit_or_etag": "f8124d0969",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; checks run offline with a fake pywin32",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r8lg1_leg.py",
+      "kind": "script",
+      "commit_or_etag": "f8124d0969",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; checks run offline with a fake pywin32",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r5l1_leg_inert.py",
+      "kind": "script",
+      "commit_or_etag": "f8124d0969",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; checks run offline with a fake pywin32",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "lg-1.AC1 and AC2 run on the branch; rivalfunds package suite once from data/etfs/scripts.",
+      "observed": "AC1 and AC2 PASS 0 failures; package suite 603 passed, 2 skipped, 0 failed.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The spec names no mutant for this order.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "Deploy, S3 write, vendor call, gate flips, backfill",
+      "reason": "Order section 3: NEVER; the issuer owns them."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W4-S18"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~4 <0.9.0_WK_ETFS_RIVALS~4@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "f8124d0969"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a 2,300-row control beside two rivals lands whole, queried on its own; a 50,000-row overflow is a per-name PARTIAL with the fund named and the others landed; two rivals alone still land OK -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round8/checks/lg-1.AC1.py",
+      "output_evidence": "[a] error=None status=OK landed={'ACWI': 2300, 'BIDD': 40, 'TXUE': 40} formulas=2\nOK:   (a) a 2,300-row control beside two rivals: no exception; TXUE 40, BIDD 40, ACWI 2,300 rows land\nOK:   (b) the control is queried on its own (1 BQL naming ACWI; none names another fund)\n[c] error=None status=PARTIAL landed={'BIDD': 40, 'TXUE': 40} formulas=2\nOK:   (c) a 50,000-row overflow is a per-name partial: PARTIAL, TXUE/BIDD land 40 each, IWM named, no OK IWM capture\n[d] error=None status=OK landed={'BIDD': 40, 'TXUE': 40} formulas=1\nOK:   (d) control: two rivals alone land OK, 40 rows each\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK; run under a 120 s bound (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "RIVALFUNDS_LEG_D12 and RIVALFUNDS_LEG_D13 switch the home funds' source and the benchmarks independently; all unset reads today's map; RIVALFUNDS_LEG_ENABLE=1 turns both on -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round8/checks/lg-1.AC2.py",
+      "output_evidence": "{'RIVALFUNDS_LEG_D13': '1'} {'funds_has_acwi': True, 'funds_has_iwm': True, 'idvz': 'home_producer', 'pfoe': 'home_producer', 'schy': 'rival', 'acwi': 'index_control'}\nOK:   (a) D13 alone: ACWI/IWM join as controls, SCHY reads rival, IDVZ stays home_producer\n{'RIVALFUNDS_LEG_D12': '1'} {'funds_has_acwi': False, 'funds_has_iwm': False, 'idvz': 'bloomberg_primary', 'pfoe': 'bloomberg_primary', 'schy': 'index_control', 'acwi': None}\nOK:   (b) D12 alone: IDVZ/PFOE read bloomberg_primary, no ACWI, SCHY stays index_control\nall unset {'funds_has_acwi': False, 'funds_has_iwm': False, 'idvz': 'home_producer', 'pfoe': 'home_producer', 'schy': 'index_control', 'acwi': None}\n{'RIVALFUNDS_LEG_ENABLE': '1'} {'funds_has_acwi': True, 'funds_has_iwm': True, 'idvz': 'bloomberg_primary', 'pfoe': 'bloomberg_primary', 'schy': 'rival', 'acwi': 'index_control'}\nOK:   (c) control: all unset reads today's map; RIVALFUNDS_LEG_ENABLE=1 turns both on\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK; run under a 120 s bound (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ]
+}
