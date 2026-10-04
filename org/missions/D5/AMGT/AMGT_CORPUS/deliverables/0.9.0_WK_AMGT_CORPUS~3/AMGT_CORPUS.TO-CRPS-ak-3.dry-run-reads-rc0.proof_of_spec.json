@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-ak-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ak-3.dry-run-reads-rc0.md",
+    "group": "OTHER",
+    "vintage_commit": "4116180c1a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "4116180c1a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ak-3.dry-run-reads-rc0.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/induction_scheduled.py",
+      "kind": "script",
+      "commit_or_etag": "WORKTREE",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "restore_poison_sites() context manager captures boto3.client, subprocess.run, socket.create_connection and add_security._load_blp_client before step 1 and restores them in a finally block; main wraps only the induction_run step with it.",
+      "introduces": [
+        "restore_poison_sites"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_induction_schedule.py",
+      "kind": "test",
+      "commit_or_etag": "WORKTREE",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_ak3_poison_restored_after_step_one asserts the four originals are back at step 2 and after main, on the normal and the raising path.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python ak3_check.py -- expect (?m)^ak3 build 2/2 control 1/1$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round35/ak3_check.py\"",
+      "output_evidence": "ARM b1 PASS admit=[induction_scheduled step model_block_admit rc 0] refresh=[induction_scheduled step model_block_refresh rc 0] closing_rc=[0]\nARM b2 PASS admit_plan=[admit population registered 96 without_block 0] refresh_last=[refresh population registered 96 with_block 96 already_current 0 pulled 0 bloomberg_calls 0]\nARM c1 PASS aws_writes_attempted 0 []\nak3 build 2/2 control 1/1",
+      "denominator": "2 of 2 build arms, 1 of 1 control arm; rc 0",
+      "expect": "(?m)^ak3 build 2/2 control 1/1$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest test_induction_schedule.py -- expect (?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_induction_schedule.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "3 passed in 0.84s",
+      "denominator": "3 of 3 tests passed (2 existing + 1 new), 0 failed",
+      "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "ak3_check control arm c1 counts AWS writes at botocore's call point during the real dry run.",
+      "expected": "aws_writes_attempted 0",
+      "observed": "aws_writes_attempted 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "single run each",
+      "observed": "AC1 rc 0, AC2 3 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "--mode fire and any Bloomberg call or AWS write",
+      "reason": "BOUNDS: only dry-run and offline tests were run."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ak3_check.py / pytest",
+      "invocation": "see AC1, AC2",
+      "result": "rc 0 both"
+    }
+  ]
+}
