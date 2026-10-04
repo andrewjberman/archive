@@ -9,9 +9,10 @@ MTD/QTD/YTD: the period's first trading day, clipped to the fund's first report 
 `n_trading_days` for that window; a period with no trade for the fund writes no line rows for it (as YTD does today). The YTD
 rows are today's rows.
 Fixture: day 2026-10-02; fund TXUE (reports 2026-01-02 and 2026-10-01); three trades: AAA add ending 2026-03-02 (YTD only),
-BBB add ending 2026-09-10 (YTD, QTD, R30), CCC trim ending 2026-10-02 (every period).
+BBB add ending 2026-09-10 (YTD, R30), CCC trim ending 2026-10-02 (every period). 2026-10-02 is in Q4, so QTD starts
+2026-10-01 and equals MTD (issuer amendment, row Z-W7-S1: the cut wrongly expected a Q3 start).
   - (a) the rows carry a `period` column holding R30, MTD, QTD and YTD;
-  - (b) each period's security lines are exactly its trades' securities: R30 {BBB, CCC}, MTD {CCC}, QTD {BBB, CCC}, and its
+  - (b) each period's security lines are exactly its trades' securities: R30 {BBB, CCC}, MTD {CCC}, QTD {CCC}, and its
         window_start is that period's start (R30 = the 30th trading day ending 2026-10-02);
   - (c) control: the YTD security lines are {AAA, BBB, CCC} with window_start 2026-01-02, as today.
 FAIL at base: (a) and (b) FAIL; (c) PASSES (rows with no `period` column are read as YTD)."""
@@ -62,7 +63,7 @@ def run(v):
         return {str(r["bucket"]).split("_")[0] for r in sel}, sorted({str(r.get("window_start"))[:10] for r in sel})
 
     r30_start = tc.trading_days_between(dt.date(2026, 7, 1), dt.date.fromisoformat(DAY))[-30].isoformat()
-    want = {"R30": ({"BBB", "CCC"}, [r30_start]), "MTD": ({"CCC"}, ["2026-10-01"]), "QTD": ({"BBB", "CCC"}, ["2026-07-01"])}
+    want = {"R30": ({"BBB", "CCC"}, [r30_start]), "MTD": ({"CCC"}, ["2026-10-01"]), "QTD": ({"CCC"}, ["2026-10-01"])}
     got = {p: sec(p) for p in want}
     print("got:", got, "| want:", want)
     v.check(has and all(got[p][0] == want[p][0] and got[p][1] == want[p][1] for p in want),
