@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-aq-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aq-4.covered-no-block-designed-reason.md",
+    "group": "OTHER",
+    "vintage_commit": "e410b00b278ffe4380b3ebdd90b38104a67657c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "e410b00b278ffe4380b3ebdd90b38104a67657c2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aq-4.covered-no-block-designed-reason.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~222",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/coverage/covered_no_block.py",
+      "kind": "script",
+      "commit_or_etag": "2719915e9c6a07834515765ce48478728e3bbd92",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "New module: the declared covered-without-a-model-block universe (Security Scanner sp500 universe_data.json, s3://opal-data-portal-v2/json/security_scanner/latest/universes/sp500/universe_data.json), US-root join only, a failed read raises.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "2719915e9c6a07834515765ce48478728e3bbd92",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "handler: per-security 404 gate answers thesis and peers 200 for a covered-without-block key; added _covered_no_block_record, _covered_no_block_answer, _COVERED_NO_BLOCK_LEAVES. No deploy (redeploy is aq-5).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_covered_no_block.py",
+      "kind": "test",
+      "commit_or_etag": "2719915e9c6a07834515765ce48478728e3bbd92",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "7 plant cases, offline.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/conftest.py",
+      "kind": "test",
+      "commit_or_etag": "2719915e9c6a07834515765ce48478728e3bbd92",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "autouse fixture keeps the covered-without-block read hermetic for every other api test.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every plant case passes (a covered key with no block: 200 with its reason on thesis and peers; an uncovered key: 404); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_covered_no_block.py; echo \"exit=$?\"",
+      "output_evidence": "test_a_covered_key_with_no_block_answers_200_with_its_reason[thesis] PASSED; [peers] PASSED; test_an_uncovered_key_still_answers_404[thesis] PASSED; [peers] PASSED; test_the_other_leaves_keep_their_404_for_a_covered_no_block_key PASSED; test_a_non_us_key_never_joins_by_root PASSED; test_a_failed_universe_read_is_a_502_never_a_404 PASSED; 7 passed, 2 warnings in 3.62s (re-run by ~222); exit=0\n\ndeciding line (criterion text: every plant case passes (a covered key with no block: 200 with its reason on thesis and peers; an uncovered key: 404); and exit=0): TRUE",
+      "denominator": "7 of 7 plant cases passed, exit=0",
+      "status": "PASS",
+      "expect": "7 passed.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "C1 PASS on thesis and peers for DE_US_Equity; C2 PASS (ZZZZ_US_Equity 404); R67 C26 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round67/checks/r67_served.py --cell c26 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 DE_US_Equity thesis answers 200 with a plain reason status 200\nPASS C1 DE_US_Equity peers answers 200 with a plain reason status 200 reason 'Deere & Company (DE) is a covered name (Security Scanner S&P 500 universe, as of 2026-10-02) and has'\nPASS C2 the control ZZZZ_US_Equity thesis still answers 404 status 404\nR67 C26 SERVED: YES\nexit=0\n\ndeciding line (criterion text: C1 PASS on thesis and peers for DE_US_Equity; C2 PASS (ZZZZ_US_Equity 404); R67 C26 SERVED: YES; and exit=0): TRUE",
+      "denominator": "3 of 3 clauses PASS (C1 x2 routes, C2), exit=0",
+      "status": "PASS",
+      "expect": "C1 DE_US_Equity thesis answers 200.*C1 DE_US_Equity peers answers 200.*C2 the control ZZZZ_US_Equity thesis still answers 404.*R67 C26 SERVED: YES.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "R64 C14 SERVED: YES (the repairs' reasons and keys unchanged); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c14 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 BP/_LN_Equity ...; PASS C1 NG/_LN_Equity ...; PASS C2 ASML_NA ...; PASS C3 x3; PASS C4 x4 (BP-SLASH-_LN_Equity reaches overlay, thesis, peers, coverage); R64 C14 SERVED: YES; exit=0\n\ndeciding line (criterion text: R64 C14 SERVED: YES (the repairs' reasons and keys unchanged); and exit=0): TRUE",
+      "denominator": "10 of 10 clauses PASS, exit=0",
+      "status": "PASS",
+      "expect": "R64 C14 SERVED: YES.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Emptied _COVERED_NO_BLOCK_LEAVES in scoped_amgt.py (the leaves that serve the designed answer), then ran the plant test file.",
+      "expected": "the covered-key cases fail (404 instead of 200)",
+      "observed": "3 failed, 4 passed: covered thesis, covered peers and the 502 case failed with statusCode 404; file restored, 7 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "plant test file and c26 run twice on the same tree",
+      "observed": "7 passed both times; c26 SERVED: YES both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy, store write, schedule, vendor or model call, portal write",
+      "reason": "Task order bounds 1; the redeploy is cell aq-5. The scanner universe is read only (one S3 GetObject)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/",
+      "result": "506 passed, 193 warnings in 83.27s (re-run by ~222)"
+    }
+  ]
+}
