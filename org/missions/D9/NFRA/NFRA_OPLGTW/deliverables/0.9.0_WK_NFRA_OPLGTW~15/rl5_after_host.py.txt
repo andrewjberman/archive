@@ -45,6 +45,30 @@ def after_run():
         cleanup()
     granted = sorted({a for a, _c in rows if a})[:ACCOUNTS]
     held = {c for a, c in rows if a in set(granted) and c}
+    # A5 (CVO Q2): the distinct dim_asset CUSIPs of the same snapshot, read directly (the discriminator for the held check)
+    a_entries = [dict(f) for f in res.snapshot["files"] if f.get("dataset") == "dim_asset"]
+    a_sources, a_cleanup = served._fetch(a_entries, allow)
+    try:
+        asset_universe = set()
+        for src in a_sources:
+            asset_universe.update(c for c in pq.read_table(src.path, columns=["cusip"]).column("cusip").to_pylist() if c)
+    finally:
+        a_cleanup()
+    # A4 (CTO C1): servable dim_balance / dim_transaction snapshots per master (a marker date is servable for a dataset when its
+    # catalog snapshot is complete and its file list names that dataset)
+    other = {"dim_balance": {}, "dim_transaction": {}}
+    for m in sorted(contract.masters):
+        for ds in other:
+            other[ds][m] = 0
+        for d in sorted(catalog.list_dates(m, allow)):
+            rr = catalog.snapshot(m, d, allow)
+            if rr.status != "complete" or not rr.snapshot:
+                continue
+            names = {f.get("dataset") for f in rr.snapshot.get("files") or []}
+            for ds in other:
+                if ds in names:
+                    other[ds][m] += 1
+    census_after_other = {"dim_balance": other["dim_balance"], "dim_transaction": other["dim_transaction"]}
     fields = contract.raw["fields"]
     tid, oid = str(uuid.uuid4()), str(uuid.uuid4())
     scope = {"masters": [MASTER], "datasets": ["dim_position", "dim_asset"], "accounts": {MASTER: granted},
@@ -83,16 +107,22 @@ def after_run():
         q = dict(q, cursor=doc["cursor"])
     unheld = [c for c in returned if c not in held]
     held_check = {"returned": len(returned), "unheld_returned": len(unheld), "pages": pages, "distinct_returned": len(set(returned)),
-                  "held_cusips_in_dim_position": len(held), "error": last_err}
+                  "held_cusips_in_dim_position": len(held), "asset_universe_cusips": len(asset_universe), "error": last_err}
 
     # 5. the download control: dim_asset prepare_download keeps its guard
     dl = {"master": MASTER, "dataset": "dim_asset", "business_date": DATE, "mode": "rows", "columns": ["cusip"]}
     download = refused_or_ok(asyncio.run(svc.prepare_download(principal, query=dl)))
 
+    # 6. A4 control: the synthetic principal's grant names only dim_position and dim_asset, so a dim_balance / dim_transaction read must be refused
+    ungranted = {}
+    for ds in ("dim_balance", "dim_transaction"):
+        qq = {"master": MASTER, "dataset": ds, "business_date": DATE, "mode": "rows", "columns": list(fields[ds][:2]), "page_size": 5}
+        ungranted[ds] = refused_or_ok(asyncio.run(svc.query(principal, qq)))
+
     out = {"master": MASTER, "date": DATE, "page_size": PAGE, "granted_accounts": len(granted),
            "after": {"dim_position": refused_or_ok(r_pos), "dim_asset": refused_or_ok(r_ast)},
            "after_detail": {"dim_position": outcome(r_pos), "dim_asset": outcome(r_ast)},
-           "census_after": census_after, "dim_asset_held_check": held_check, "after_dim_asset_download": download,
+           "census_after": census_after, "census_after_other": census_after_other, "ungranted_reads": ungranted, "dim_asset_held_check": held_check, "after_dim_asset_download": download,
            "synthetic_principal": True, "grants_written": 0, "state_store_written": False,
            "memstore_put_runtime_calls": st.put_runtime_calls}
     print("AFTER_RESULT " + json.dumps(out, sort_keys=True))
