@@ -53,6 +53,10 @@ const CASES = {
   // Y-5 V1 (2.0.0_SA_COO~Y 104651, ledger irpt-y5-20261003): the easy file's untracked TIMXX (row 100,
   // TICKER_DATA_NOT_ENTITLED) named SGOV on the page, like Dproxy; the re-post resolves NORMALIZED and the Overview READY.
   Aproxy: { sha256: '500837992a3b9caa', variant: 'overview', comparisons: [], proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'easy file with TIMXX named SGOV (Y-5 V1)' },
+  // Y-4 V1 (2.0.0_SA_COO~Y 104883, ledger irpt-y4-20261003): the typo file's APPL (row 2, TICKER_NOT_FOUND) carries a
+  // provider-verified suggestion AAPL; the page's "Use AAPL" fills that correction, TIMXX is named SGOV, and the re-post
+  // resolves NORMALIZED and the Overview READY. `accept` maps the file's ticker to the suggestion the case expects.
+  typoAccept: { sha256: '87afdc7db1c58b38', variant: 'overview', comparisons: [], accept: { APPL: 'AAPL' }, proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'typo file: accept AAPL for APPL, name SGOV for TIMXX (Y-4 V1)' },
   B: { sha256: '500837992a3b9caa', variant: 'comparison', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }], expect: 'READY', note: 'easy file vs Opal Ultra Long-Term, Comparison (Y-2)' },
   C: { sha256: '500837992a3b9caa', variant: 'multicomp', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }, { kind: 'etf', key: 'IWM' }], expect: 'READY', blocked: 'brief 2 item 2.3: a ticker admitted as a comparison (CTO batch 178 ruling 4) is 2.0.0_SA_COO~Y\'s half' },
 }
@@ -128,12 +132,15 @@ function fixturePlane() {
   const request = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'AnalysisRequest.valid.json'), 'utf8')).instance
   const status = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'StatusEnvelope.valid.json'), 'utf8')).instance
   const firmId = smoke[`${BASE_API}/directory/resolve`].firm_id
-  const upload = kase.expect === 'NEEDS_CORRECTION' || kase.proxies ? producer.correction.response : producer.normalized.response
+  const upload = kase.expect === 'NEEDS_CORRECTION' || kase.proxies || kase.accept ? producer.correction.response : producer.normalized.response
   // Y-5 fixture: the first answer offers NAME_PROXY for each proxied ticker; the re-post with corrections answers the
   // producer's NORMALIZED record, its disclosures naming each proxy the page sent.
-  const proxyFirst = kase.proxies ? { ...upload, data: { ...upload.data, state: 'NEEDS_CORRECTION', findings: Object.keys(kase.proxies).map((t, i) => ({
+  // Y-4 fixture: an accepted ticker's finding is TICKER_NOT_FOUND with the provider-verified suggestion, ACCEPT_SUGGESTION first.
+  const suggested = Object.entries(kase.accept ?? {}).map(([t, symbol], i) => ({ code: 'TICKER_NOT_FOUND', severity: 'ERROR', row: 2 + i, column: 'A',
+    value: t, actions: ['ACCEPT_SUGGESTION', 'REPLACE_FILE', 'NAME_PROXY'], suggestion: { symbol, source: 'KIMI_CHECK_PROVIDER_VERIFIED', provider_receipt_sha256: 'f'.repeat(64) } }))
+  const proxyFirst = kase.proxies || kase.accept ? { ...upload, data: { ...upload.data, state: 'NEEDS_CORRECTION', findings: [...suggested, ...Object.keys(kase.proxies ?? {}).map((t, i) => ({
     code: 'TICKER_DATA_NOT_ENTITLED', severity: 'ERROR', row: 14 + i, column: 'A', value: t, actions: ['NAME_PROXY'],
-    description: `${t} is a real fund our data provider does not cover. Name a proxy to analyse it as.` })) } } : null
+    description: `${t} is a real fund our data provider does not cover. Name a proxy to analyse it as.` }))] } } : null
   const proxyAnswer = (corrections) => ({ ...producer.normalized.response, firm_id: producer.normalized.response.firm_id ?? firmId,
     data: { ...producer.normalized.response.data, portfolio: { ...producer.normalized.response.data.portfolio, disclosures: { corrections } } } })
   const submission = { contract_version: 'v1', operation: 'analysis-requests', firm_id: firmId,
@@ -278,10 +285,21 @@ try {
   packet.upload_alert = (await page.locator('[data-slot="prospect-composer"] [role=alert]').first().innerText().catch(() => null)) || null
   packet.upload_findings = await page.locator('[data-slot="upload-findings"] li').allInnerTexts().catch(() => [])
   await shot(page, `upload-${uploadState ?? 'no-state'}`)
-  if (kase.proxies && uploadState === 'NEEDS_CORRECTION') {
+  if ((kase.proxies || kase.accept) && uploadState === 'NEEDS_CORRECTION') {
+    // Y-4: press the page's "Use <suggestion>" for each ticker the case accepts, and record what it filled.
+    const accepted = []
+    for (const [ticker, symbol] of Object.entries(kase.accept ?? {})) {
+      const use = page.locator(`[data-slot="upload-accept-suggestion"][data-suggestion-for="${ticker}"]`)
+      if (await use.count()) {
+        await use.click()
+        const filled = await page.locator(`[data-slot="upload-proxy-row"][data-proxy-for="${ticker}"] input`).inputValue().catch(() => null)
+        accepted.push({ ticker, offered: symbol, filled })
+      } else accepted.push({ ticker, offered: symbol, filled: null, missing: true })
+    }
+    packet.suggestions_accepted = accepted
     // Y-5: name each proxy the case states, then re-post with them through the page's own button.
     const named = []
-    for (const [ticker, proxy] of Object.entries(kase.proxies)) {
+    for (const [ticker, proxy] of Object.entries(kase.proxies ?? {})) {
       const row = page.locator(`[data-slot="upload-proxy-row"][data-proxy-for="${ticker}"] input`)
       if (await row.count()) { await row.fill(proxy); named.push(ticker) }
     }
