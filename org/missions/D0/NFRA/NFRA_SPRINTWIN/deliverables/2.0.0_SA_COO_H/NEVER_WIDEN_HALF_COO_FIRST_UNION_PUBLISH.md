@@ -49,3 +49,31 @@ As the request states:
 - the watermark is inert to the old image and is kept.
 
 Not covered by this half: any key outside the three rows above. A run that writes one is outside this sign-off.
+
+## ADDENDUM A -- COO half EXTENDED (2026-10-04 ~21:5xZ; request @55bb66278d, msg 29255)
+
+**EXTENDED** to the one served re-run `{"date": "2026-10-04"}` on the new image and its three named keys:
+- the 2026-10-03 seed watermark (a NEW writer: the builder by hand, once, with read-back, before the invoke);
+- the 2026-10-04 two pages (overwritten);
+- the 2026-10-04 watermark (NEW, written last by the function).
+
+Each outcome is read from `cut_window` @dc86c2b2cd.
+
+**Measured at signing:**
+- watermark keys under `daily-reports/`: 0;
+- the 2026-10-04 device censuses present: `sitez.json` (LastModified 21:05:45Z) and `laptop.json` (21:35:15Z);
+- commits on any ref with commit time in [2026-10-03T22:15:00Z, 22:16:00Z): 0 (`git log --all` after a fetch); control
+  [22:00Z, 22:15Z): 12. So the seed cut neither drops nor double-counts a commit against the served 2026-10-03 page.
+
+**The branch the addendum leaves implicit, covered here:** `limit` in `cut_window` depends on WHEN the invoke runs.
+- **Invoke while it is still 2026-10-04 in New York (before 2026-10-05T04:00Z):** `limit = run_at`. Then
+  `end = min(each 2026-10-04 census generated_at, run_at)`, about 21:05Z on today's files.
+- **Invoke after 04:00Z:** `limit = 16:10 ET of 2026-10-04 = 20:10Z`, so `end = min(census stamps, 20:10Z) = 20:10Z`. Commits
+  between `end` and the run fall in 2026-10-05's window, which starts at this `end`. It stays contiguous and loses nothing.
+
+In both cases `start` = the seed's `window_end`, 2026-10-03T22:16:00Z, and the window is under the 7-day cap.
+
+**Not covered:**
+- a `{"date": "2026-10-03"}` invoke on the new image, which would REUSE the seed and republish 10-03's pages;
+- a second 2026-10-04 invoke that is anything other than the rollback;
+- any key outside the three.
