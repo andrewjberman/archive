@@ -1,0 +1,25 @@
+import sys, json, hashlib
+root = sys.argv[1]
+sys.path.insert(0, root + "/infra/aws/ec2/opal-gateway"); sys.path.insert(0, root)
+import lambda_function  # noqa
+from ops import schwab_entitlement_admin as admin
+from app import data_entitlement as de
+import app.config as cfgmod
+c = admin.load_contract()
+print("closure", hashlib.sha256(open(de.__file__,'rb').read()).hexdigest()[:12], "admin.CandidateRejected subclass of AdminRefused:", issubclass(admin.CandidateRejected, admin.AdminRefused))
+print("Config attrs MAIL_BEARER present:", hasattr(cfgmod.Config, "MAIL_BEARER"), "TEAMS_BEARER present:", hasattr(cfgmod.Config, "TEAMS_BEARER"))
+G1, G2 = "11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222"
+def cand(dataset, cols):
+    return {"tid": G1, "oid": G2, "email": "probe@example.invalid", "scope": {"masters": ["08242234"], "datasets": [dataset], "accounts": {"08242234": ["A1"]},
+            "dates": {"mode": "rolling_complete_window"}, "columns": {dataset: cols}, "operations": ["list", "describe", "query"]}}
+tx = c.get("fields", {}).get("dim_transaction", [])
+for name, cd in (("dim_position/account_ref", cand("dim_position", ["account_ref"])),
+                 ("dim_transaction/cusip", cand("dim_transaction", ["cusip"])),
+                 ("dim_transaction/15 listed cols", cand("dim_transaction", ["account_ref","business_date","trade_date","settlmnt_date","tr_cd","sb_cd","transaction_category","tran_srcde","debit_credit","cusip","ticker_symbol","quantity","price","gross_amount","net_amount"])),
+                 ("dim_transaction/gross_amount+bogus", cand("dim_transaction", ["gross_amount", "bogus_col"]))):
+    try:
+        admin.validate_candidate(cd, c, catalog_channels=frozenset())
+        print("  %-36s ADMITTED" % name)
+    except admin.CandidateRejected as e:
+        print("  %-36s REFUSED: %s" % (name, str(e)[:110]))
+print("contract fields.dim_transaction columns:", len(tx), "| account_ref in dim_position fields:", "account_ref" in c["fields"]["dim_position"])

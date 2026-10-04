@@ -1,0 +1,278 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-an-7",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "scope": "sections 1, 6 (AMENDMENT 1 -- the 500 attribution and its census) and 7 (AMENDMENT 2, leg 2 -- the trending-price ?days widening)",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-an-7.the-code-redeploy.md",
+    "round": 64
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "owned_cells": "AMGT-an-7",
+    "section": "s.72"
+  },
+  "never_widen_pair": {
+    "coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/NEVER_WIDEN_HALF_COO_AN7.md@3576faa349",
+    "cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND64_AN7_CTO_HALF.md@e1c310a414",
+    "never_2_entry": "org/critical_paths/change_management/20261003T0008Z_amgt-resapp-r64-an7-code-redeploy-20261003_deploy_completion.md",
+    "never_2_state": "CLOSED, 3 of 3 legs proven; sentinel committed at open (5ddb2d4808), so the full open-then-close lifecycle is on record",
+    "leg2_coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/NEVER_WIDEN_HALF_COO_AN7_LEG2.md@e25430f320",
+    "leg2_cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND64_AN7_LEG2_CTO_HALF.md@5e62e3e420",
+    "leg2_never_2_entry": "org/critical_paths/change_management/20261003T0147Z_amgt-resapp-r64-an7-leg2-trending-days-20261003_deploy_completion.md",
+    "leg2_never_2_state": "CLOSED, 3 of 3 legs proven; sentinel committed at open (8b01f68bba), full lifecycle on record"
+  },
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "risk_class": "WORLD",
+  "go_message": "28826 from 2.0.0_SA_COO~Z, acked READ",
+  "carries": "an-1..an-6 -- FWD-36/37/38, the cold read, the repairs, and the 500 attribution",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "version_id": "40smkxDeOsBar9woKz_p5ICvkoUonv9y",
+      "content_sha256": "kSeyeO0vk9xQo0zrfNfSxqmt4vwxnNWilXalzTgP8CM=",
+      "content_length": 41148515,
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Uploaded with content-sha256 metadata and read back by the uploader (metadata equals the locally computed sha256). The live function's CodeSha256 after the apply equals this value.",
+      "rollback_target": "prior VersionId VjnAGYKkemkivjQlxH7k9PpvBlhNnFvt / 31UL+7/shJz1oKH1fc/5lb3vGLqlIDk+HgjLoGxe05w=, confirmed live before the build"
+    },
+    {
+      "path_or_key": "lambda:opal-amgt-scoped-api",
+      "kind": "lambda_function",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "POST-APPLY live read: CodeSha256 kSeyeO0vk9xQo0zrfNfSxqmt4vwxnNWilXalzTgP8CM= (moved OFF the 31UL+7/s base, equal to the uploaded artifact), MemorySize 1769, CodeSize 41148515, LastUpdateStatus Successful, LastModified 2026-10-03T00:16:16Z. Re-plan 0-diff by -detailed-exitcode 0."
+    }
+  ],
+  "controls": {
+    "content_diff_graded_file_for_file": {
+      "description": "CTO condition 1 requires the diff to EQUAL the half's table. Matching only the five counts would pass a diff that swapped one file for another.",
+      "observed": "files 355, IDENTICAL 349, CHANGED 4, ADDED 2, REMOVED 0 against 31UL+7/s -- equal to the half's 355/349/4/2/0. The 6 non-identical rows are the table's 6 BY NAME: CHANGED lib/research/api/monthly_chatter.py, lib/research/api/scoped_amgt.py, lib/research/harvest/publication_gold.py, lib/research/harvest/timeline_api.py; ADDED lib/research/api/rolling_windows.py, lib/research/harvest/finbert_sentiment.py. Zero files outside the table. Reproduced identically by the real build, so the diff graded pre-upload is the diff that shipped.",
+      "status": "STABLE"
+    },
+    "ceiling_limb": {
+      "description": "The order makes a build over the 262,144,000 B ceiling a STOP, and this artifact had 8.47 MB spare before the act.",
+      "observed": "253721411 B total (package 131977778 B over 355 entries plus layer 121743633 B), 96.8% used, 8422589 B spare -- equal to the half's own predicted spare TO THE BYTE, so the artifact grew exactly as signed and the ceiling is not crossed.",
+      "status": "STABLE"
+    },
+    "import_graph_proof_both_arms": {
+      "description": "CTO condition 3. finbert_sentiment ships while FWD-16 is HELD, acceptable only because no route reaches it, and the half requires this PROVED from the packaged artifact rather than taken from its own prose. A module-scope census alone does not settle it, because routes DO reach publication_gold at request time.",
+      "arm_1_cold_start": "The module-scope import closure from the 8 packaged route entry points (lambda_function plus lib.research.api.* with tests excluded) reaches 20 modules; 0 of 20 reach finbert_sentiment, so it is not loaded at cold start.",
+      "arm_2_request_time": "finbert_sentiment has 0 MODULE-scope import sites anywhere in the package and exactly 1 FUNCTION-scope site: lib.research.harvest.publication_gold imports it inside build_mention(). And 0 of the 8 route modules name build_mention at ANY scope, so that lazy import cannot fire on a request. With its denominator: publication_gold defines 62 functions and the route modules name exactly 2 of them, _day_of and _latest_gold_snapshot_rows_cached, with build_mention NOT among them.",
+      "negative_controls": "The module walk finds lib.research.api.scoped_amgt and lib.research.api.monthly_chatter in the closure; the request-time scan finds the 2 real publication_gold call sites. Neither zero is a scan that resolved nothing.",
+      "status": "STABLE -- stronger than the half's claim that the import is merely lazy: no route reaches it at cold start OR at request time"
+    },
+    "mutant": {
+      "description": "Base arms measured by this seat on the DEPLOYED function before the apply, as a sample rather than all six cells.",
+      "observed": "c9 FAIL on all four window variants (window_days None, start None, 95 rows with 95 bad) -> SERVED NO. c14 FAIL on all four clauses, including NG/_LN still serving the false reason 'the classifications table holds no classification for this ticker' and all three management names at source_stamp None / object_as_of None / date-only as_of -- i.e. the two defects this seat surfaced in round 63, still present at the base. 2 of 6 cells measured here; the issuer's comp-adversary read covers c9-c14 failing at the base locally.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "cold_sample_method": {
+      "description": "c15 needs 3 FRESH execution environments. The method is 3 concurrent invokes, which buys a fresh environment with high probability, not certainty -- as this seat recorded in round 63 leg 2.",
+      "observed": "Three attempts. Attempt 1 (immediately post-apply): 2 of 3 cold, FAILED on the COUNT not on speed, its cold runs already 2022.92 and 2322.81 ms. Attempt 2 (immediately after): 0 of 3 cold -- the environments created moments earlier were reused. Attempt 3 (after 780 s of deliberate idleness with no intervening invoke of any kind): 3 of 3 cold. ACROSS 9 RUNS: 5 cold at 1893.8 / 2022.92 / 2294.41 / 2307.13 / 2322.81 ms, every one under 5,000 ms with no exception, and 4 warm at 238.58 / 254.12 / 255.36 / 266.36 ms. The latency reading never varied; only the coldness count did.",
+      "why_the_wait_was_the_discriminator": "An apply recycles environments, so the first run after an apply has the best cold odds and an immediate re-run guarantees warm reuse. The r63 regression set, the planted fault and the census were therefore sequenced BEFORE the idle wait so none of them would warm an environment inside it. Running during the wait would have destroyed the discriminator.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any memory change",
+      "reason": "BOUNDS 1 and the halves: memory stays 1769. Graded from the plan's own before/after (1769 -> 1769), not from intent."
+    },
+    {
+      "item": "Any store write, S3 delete, vendor call, shared-branch push or portal promote",
+      "reason": "BOUNDS 1. The build's pip download of its PINNED wheels is the EGRESS CLASS the order's preflight declares."
+    },
+    {
+      "item": "Any destroy, IAM, route or gateway change",
+      "reason": "The order makes each a STOP. Graded from the JSON plan across all 49 resource_changes, every one of those classes reading 0 changing."
+    },
+    {
+      "item": "Any alarm, notification or monitor for the 500 attribution",
+      "reason": "Round-63 ruling 3 and the half's STOP list. The record is a log line only; 0 lines in the invoke's log tail mention sns, alarm, notify or publish."
+    },
+    {
+      "item": "Raising memory in response to a c15 miss",
+      "reason": "The issuer's note and the round-63 flat curve. It did not arise: c15 PASSED."
+    }
+  ],
+  "surprises": [],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "cell_refs": "AMGT-an-7",
+      "method": "command",
+      "criterion_verbatim": "R64 C9, C10 and C11 SERVED: YES on the deployed function -- and exit=0",
+      "denominator": "3 cells; c9 over 4 window variants x 95 rows, c10 over 4 variants, c11 over 3 names",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for c in c9 c10 c11; do PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell $c --where deployed || exit 1; done; echo \"exit=$?\"",
+      "output_evidence": "exit=0. c9 SERVED YES -- default and 30 at window_days 30 start 2026-09-03 end 2026-10-02, 95 rows 0 bad; 90 at window_days 90 start 2026-07-05; 365 at window_days 365 start 2026-01-01 with requested 2025-10-03 and note True (the short-store note as designed). c10 SERVED YES -- default and 30 serve 94 rows; 90 and 365 serve 0 rows with 'not produced yet', the QUALIFIED WAIT answered as such. c11 SERVED YES -- BA 1 marker for 1 event, AMD and VLO 0 events with missing [], earnings absent-with-reason True on all three. The for-loop's '|| exit 1' means a failure never reaches the echo, so a printed exit=0 IS the three-cell pass.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "cell_refs": "AMGT-an-7",
+      "method": "command",
+      "criterion_verbatim": "R64 C12, C13 and C14 SERVED: YES on the deployed function -- and exit=0",
+      "denominator": "3 cells; c12 over 3 names, c13 over 94 chatter rows + 3 overlays, c14 over 4 clauses",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for c in c12 c13 c14; do PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell $c --where deployed || exit 1; done; echo \"exit=$?\"",
+      "output_evidence": "exit=0. c12 SERVED YES -- feed holds every day-view article in window, BA 69 of 69, AMD 13 of 13, VLO 3 of 3, missing 0; one display name per security across overlay/ranking/chatter/peers, cased, no share-class code. c13 SERVED YES -- 94 of 94 places_moved name axis and window; all three overlays name bloomberg, filings and harvested_news with none missing-or-bare. c14 SERVED YES -- BP/_LN resolves sector Energy from opal_classification.sub_asset_class; NG/_LN serves a TRUE reason instead of the false 'holds no classification'; ASML_NA reader text raw {}; all three management names serve object_as_of 2026-10-02T1840Z from the key; the encoded key BP-SLASH-_LN_Equity reaches overlay/thesis/peers/coverage 4 of 4 resolving BP/_LN_Equity. c14 closes BOTH defects this seat surfaced in round 63.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "cell_refs": "AMGT-an-7",
+      "method": "command",
+      "criterion_verbatim": "C1 3 of 3 COLD BA Sept 8 invokes under 5,000 ms with every headline (Init Duration present); C2 AMGT_SEGMENT lines in every log; R64 C15 SERVED: YES -- and exit=0",
+      "denominator": "3 cold invokes",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &&  PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c15 --where deployed; echo \"exit=$?\"",
+      "output_evidence": "exit=0, R64 C15 SERVED: YES. 'PASS C1 3 of 3 COLD ... 3 of 3' and 'PASS C2 every run's log carries AMGT_SEGMENT timings 3 of 3'. Durations 1893.8 / 2307.13 / 2294.41 ms, each cold=True with Init Duration 193.49 / 170.70 / 171.56 ms, each 200 with 6 of 6 headlines. THE FIRST c15 PASS OF THE PROJECT: round 63 read 11.5-12.8 s cold at three memory values on a flat curve, so ruling 3 cut the cold read instead of raising memory. Segments corroborate the mechanism -- identity 504-649, import 761-1027, gold_chatter_daily 366-419 (list 43-59, get 28-69, decode 185-256), and NO article_security_mention segment on any cold run, against the CTO's base profile of 3.55 s of 4.4 s in two WHOLE gold snapshot reads for one security-day. See controls.cold_sample_method for all three attempts and all 9 runs.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "c10 both movements (leg 2, CTO condition 3)",
+      "cell_refs": "AMGT-an-7",
+      "method": "command",
+      "criterion_verbatim": "c10 printed for both rankings with the row counts at 30/90/365",
+      "denominator": "8 clauses: 2 movements x (default, 30, 90, 365)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c10 --where deployed; echo \"exit=$?\"",
+      "output_evidence": "exit=0, R64 C10 SERVED: YES, 8 of 8. trending default 94 rows, 30 94 rows, 90 0 rows with the not-produced-yet reason, 365 the same; breakout identical. Base measured by this seat: 6 of 8 passing with exactly trending 90 and 365 failing at 94 rows and an empty reason. The same 2 clauses moved and the other 6 did not.",
+      "status": "PASS"
+    }
+  ],
+  "regression_reads_r63": {
+    "verdicts": "c3, c4, c5, c7 and c8 all SERVED YES on the deployed function",
+    "detail": "c3 95 of 95 and 95 of 95, VLO 13 == 13, ROG_SW reason; c4 BA 12 of 12 and VLO 12 of 12 with the same five classes; c5 fabricated key 404 beside covered 200; c7 0 false of 94 with 94 correct 0 wrong; c8 AMD Information Technology with its source, 0 wrong of 94.",
+    "the_one_count_that_moved": "c8 read 92 served / 2 null-with-reason in round 63 and now reads 93 served / 1 null-with-reason, still 0 wrong of 94. The cause is this act's own repair: c14 resolved BP/_LN's sector, so BP left null-with-reason and NG/_LN is the only remaining null. Verdict unchanged (YES) and the movement is in the intended direction -- named here because a reader checking 'unchanged' literally would find 93 against 92 and wonder."
+  },
+  "attribution_read": {
+    "method": "CTO condition 3 on the DEPLOYED function. c16 plants by monkeypatch and is local-only, so the sanctioned read-only direct invoke with a malformed event was used: queryStringParameters sent as a LIST where a mapping or None is expected, chosen so the fault arises INSIDE the handler AFTER route attribution -- a pre-handler crash would prove nothing.",
+    "result": "statusCode 500 with FunctionError None (answered, not escaped). EXACTLY ONE AMGT_500 line in the invoke's own log tail: request_id d8737bd9-9df3-454b-9fc1-dba6cc1af44c, route /security/{security_key}/overlay, security_key BA_US_Equity, exception_class AttributeError, message \"'list' object has no attribute 'get'\". 0 lines mentioning sns, alarm, notify or publish.",
+    "correction_to_my_own_check": "My predicate first read NOT SATISFIED because it required the log's request_id to equal the requestContext.requestId I supplied. The function attributes by the LAMBDA request id instead, which is the correct and more traceable identifier, and the decisive join holds: the request_id in the 500 RESPONSE BODY equals the request_id in the LOG LINE. My assertion was wrong, not the function.",
+    "status": "SATISFIED"
+  },
+  "census_500": {
+    "invocation": "PYTHONPATH=$(pwd) python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~215/census_500.py --days 7",
+    "read": "read-only filter_log_events over /aws/lambda/opal-amgt-scoped-api, 21725 matching events in 65 pages",
+    "denominator": "6 500s across 21724 invocations in 7 days (0.028%)",
+    "signatures": "2 distinct: 5 unattributed 'REPORT Status: timeout'; 1 AttributeError on /security/{security_key}/overlay, which is this seat's own planted fault with its request id",
+    "two_readings_for_the_issuer": [
+      "The planted fault is the ONLY attributed 500 in seven days, which is itself evidence the attribution line is newly live rather than previously silent.",
+      "The 5 unattributed 500s are TIMEOUTS, and a timeout is STRUCTURALLY unattributable -- the process is killed before the handler's except arm can write AMGT_500, so no change to the attribution path can capture that class. AMENDMENT 1 says an unattributable 500 is reported, not alarmed. They also belong to the pre-an-7 slow cold path against the 29 s gateway ceiling, which this act cut by 5-6x, so the class should stop recurring -- a prediction the next census can falsify."
+    ]
+  },
+  "forward_notes": [
+    "DSGN round 30's FWD-26 presets cell can cut after this act (CTO condition 5; 2.0.0_SA_COO~D msg 28819) -- the windows were not served before.",
+    "Package watch: 8422589 B spare at 96.8%. Any later cell adding to this artifact measures at cut time; crossing the 262,144,000 B ceiling is a deploy STOP.",
+    "NG/_LN_Equity still has no confirmable classification row and now says so truthfully. Whoever owns the classifications table may want the row; the served behaviour is correct either way."
+  ],
+  "session_log": "0.7.0_AE_CloudOps~A, site-z, session 58a967cb. Seventh act of the session and the first of round 64, after six round-63 acts.",
+  "compiler_tools": [
+    {
+      "tool": "build-and-upload-scoped-amgt.sh --build-only",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only <zip>",
+      "result": "PASS. The pre-upload STOP gate: 355/349/4/2/0 and the size line. content_diff is a REPORT that exits 0 on a mismatch, so the grading is the seat's."
+    },
+    {
+      "tool": "build-and-upload-scoped-amgt.sh",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh",
+      "result": "PASS. Reproduced the build-only diff and size exactly; upload read back and matched."
+    },
+    {
+      "tool": "terraform plan / show -json",
+      "invocation": "-chdir=infra/aws/terraform/harvest",
+      "result": "PASS. 49 resource_changes, 1 non-no-op, 3 attributes, memory_size 1769 -> 1769, every STOP class 0."
+    },
+    {
+      "tool": ".tools/safe-apply.sh (Rule 18)",
+      "invocation": "-chdir=... apply an7.tfplan",
+      "result": "PASS. 0 added, 1 changed, 0 destroyed. comp-tagauthz and tombstone gates clean."
+    },
+    {
+      "tool": "terraform plan -detailed-exitcode",
+      "invocation": "post-apply",
+      "result": "PASS. exit 0 = no changes, a machine oracle rather than a prose read."
+    },
+    {
+      "tool": "r64_served.py c9-c15 --where deployed",
+      "invocation": "the order's literal invocations",
+      "result": "PASS. AC1, AC2 and AC3 all exit=0; c15 is the project's first pass."
+    },
+    {
+      "tool": "r63_served.py c3/c4/c5/c7/c8 --where deployed",
+      "invocation": "regression set",
+      "result": "PASS, all five YES; one c8 count moved by design and is named."
+    },
+    {
+      "tool": "a static import-graph census over the BUILT ZIP (this seat's own, written for condition 3)",
+      "invocation": "python <script> <built zip>",
+      "result": "PASS on both arms with negative controls. 0 of 20 module-scope reach; 0 of 8 route modules name build_mention; routes touch 2 of publication_gold's 62 functions."
+    },
+    {
+      "tool": "a read-only planted-fault invoke + log read (this seat's own, written for condition 3)",
+      "invocation": "boto3 lambda.invoke with LogType=Tail and a malformed event",
+      "result": "PASS. 500 without escape, exactly one AMGT_500 line with all four fields, 0 alarm lines. Found a defect in MY predicate, not the function."
+    },
+    {
+      "tool": "census_500.py --days 7 (AMENDMENT 1)",
+      "invocation": "PYTHONPATH=$(pwd) python .../census_500.py --days 7",
+      "result": "PASS. 6 of 21724 in 7 days, 2 signatures; the 5 timeouts are structurally unattributable and reported, not alarmed."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "open / close-leg B0,A1,V1 / close",
+      "result": "PASS. Opened and COMMITTED before the upload (5ddb2d4808), so the sentinel landed; closed with 3 of 3 legs proven."
+    },
+    {
+      "tool": "comp-schedule / comp-iam",
+      "invocation": "not run by this seat",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight -- no cron, alarm, monitor or cadence, and 0 new actions on a code-only act. The preflight also declares the IAM read BLIND, with the served criteria as the live oracle; they passed."
+    }
+  ],
+  "leg2": {
+    "go_message": "28867 from 2.0.0_SA_COO~Z, acked READ; sequenced after leg 1's V1 closed",
+    "the_repair": "A one-word widening at scoped_amgt.py:5317 so the price-window branch matches breakout OR trending. ?days=30 (DEFAULT_DAYS) falls through to read_rankings unchanged; any other valid value returns price_window_not_produced (0 rows and a reason); a bad value answers 400.",
+    "act_a": {
+      "build_commit": "43711514cc",
+      "content_diff": "files 355, IDENTICAL 352, CHANGED 3, ADDED 0, REMOVED 0 against kSeyeO0v -- the three files the condition names: scoped_amgt.py, publication_gold.py, finbert_sentiment.py. Zero outside. window_tone.py and lib/opal_data_harvest/* changed between the pins but are not in the 355-file package and correctly never appear.",
+      "size": "253724309 B of 262144000, 96.8%, 8419691 B spare -- 2898 B less than leg 1, so the widening cost almost nothing",
+      "artifact": {
+        "version_id": ".xFOZLD1X0znp_5COtZvp3UgWTBrw19p",
+        "content_sha256": "KQSA62c3Diw5XqjBeKKZc0ZTZuTnaaRBbhuEQHfOdXQ=",
+        "content_length": 41149311,
+        "readback": "matched"
+      },
+      "rollback_target": "VersionId 40smkxDeOsBar9woKz_p5ICvkoUonv9y / kSeyeO0v -- not used",
+      "plan": "49 resource_changes, 1 non-no-op, exactly 3 attributes; memory_size before=1769 after=1769 UNCHANGED; 0 delete/create/iam/route/apigateway/integration/permission changing. No tf file edited.",
+      "post_apply": {
+        "code_sha256": "KQSA62c3Diw5XqjBeKKZc0ZTZuTnaaRBbhuEQHfOdXQ=",
+        "moved_off_base": true,
+        "memory_size": 1769,
+        "code_size": 41149311,
+        "last_update_status": "Successful",
+        "last_modified": "2026-10-03T01:52:29Z",
+        "replan": "-detailed-exitcode 0"
+      },
+      "status": "LANDED"
+    },
+    "c10_both_movements": {
+      "after": "exit=0, R64 C10 SERVED: YES, 8 of 8 clauses. trending default/30 serve 94 rows at window_days 30; trending 90 and 365 serve 0 rows with the not-produced-yet reason. breakout the same on all four.",
+      "base_measured_by_this_seat": "SERVED NO with exactly 6 of 8 passing and exactly 2 failing, both trending: days=90 and days=365 each answered 200 with 94 ROWS and an EMPTY reason, i.e. trending ignored ?days. Breakout's four already passed.",
+      "why_that_is_the_strong_read": "The same 2 clauses moved to PASS and the other 6 are unchanged, so the one-word widening moved precisely the two readings it was signed to move and nothing else -- a stronger statement than the verdict merely flipping NO to YES.",
+      "status": "PASS"
+    },
+    "import_proof_re_run_not_inherited": {
+      "why": "The CTO half says leg 2 ships the same file so the leg-1 proof carries over. But BOTH ends of the reachability claim changed in this diff: finbert_sentiment.py is the target and publication_gold.py is the importer holding build_mention, whose keyword the half itself records changing. A reachability proof is not transitive across a change to the importer, so inheriting it would have been an assumption dressed as evidence.",
+      "result": "Re-run on the leg-2 zip; both arms PASS with findings identical to leg 1 -- 0 of 20 module-scope reach; 0 module-scope import sites and exactly 1 function-scope site (publication_gold inside build_mention); 0 of 8 route modules name build_mention; routes touch 2 of publication_gold's 62 functions. Negative controls held on both arms. The half's carry-over claim is TRUE -- now measured on the bytes that shipped.",
+      "status": "STABLE"
+    },
+    "no_regression": {
+      "round_64": "c9, c11, c12, c13, c14 all SERVED YES, unchanged.",
+      "round_63": "c3, c4, c5, c7, c8 all SERVED YES. c8 reads 93 served / 1 null / 0 wrong of 94 -- the same 93/1 leg 1 produced when c14 resolved BP, so this leg moved nothing there.",
+      "covered_keys": "8 of 8 routes answered 200 with 0 non-200 (BA and VLO overlay/thesis/peers, BA /timeline, collected/chatter), body bytes printed. The half's non-200 rollback limb was NOT triggered.",
+      "on_body_sizes": "These are LARGER than the round-63 readings (BA overlay was 101996 B, chatter 67005 B) because an-1..an-6 add served fields -- markers, windows, provenance, the feed. Leg 2's limb is 200, NOT byte-identity, which is the right test here; byte-identity was the right test for the round-63 memory-only act, where no served value was supposed to move. Applying that earlier standard to this act would have manufactured a failure."
+    },
+    "a_note_on_leg_1s_c10": "Leg 1's c10 printed only FOUR clauses with no movement prefix and passed. The cell was WIDENED to both movements at commit 43711514cc -- leg 2's own build pin -- so leg 1 exercised the breakout axis only and the trending defect was never in its denominator. Leg 1's PASS was correct for the cell as it then stood. The check script lives under org/missions/.../checks/ and is not in the 355-file package, so its change does not touch any content diff.",
+    "status": "COMPLETE -- c10 PASS on both movements, no regression, rollback not taken"
+  }
+}

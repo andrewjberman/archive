@@ -1,0 +1,102 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-gw-2",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "d4d682f0d1",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gw-2.grant-writer-catchup-apply.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "fea5fbcdbf"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~26",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/mcportal_grant_writer.tf",
+   "kind": "terraform",
+   "commit_or_etag": "c12cf3f6cb",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Resource applied: aws_lambda_function.mcportal_grant_writer (mcportal-grant-writer-lambda), code only, config file itself unchanged. Targeted safe-apply 2026-10-03T20:07Z: Apply complete! Resources: 0 added, 1 changed, 0 destroyed; CodeSha256 nhz+dwJs... -> ZyYCPPyP...; State/LastUpdateStatus Active/Successful; gw2.AC1 11 of 11 files same. Deployed CodeSha256 now ZyYCPPyP5CV53eZP+UJHIgAjq834J4OsvePgmS6k8rI=; commit c12cf3f6cb carries the ledger close with the proof.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261003T1955Z_nfra-oplgtw-grant-writer-catchup_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "c12cf3f6cb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEVER-2 ledger, CLOSED, 3 of 3 legs proven, sentinel removed at c12cf3f6cb.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~26/GW2_BEHAVIOUR_DIFF.md",
+   "kind": "doc",
+   "commit_or_etag": "61d075735d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "PHASE A record, written before the act; graded by the CVO (signed @0cfe31652e).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the deployed grant writer equals, file by file, the closure of the released gateway ref.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r15/checks/gw2.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "files deployed 11 staged 11 same 11 diff 0 only-deployed 0 only-staged 0\nRESULT: PASS\nexit=0",
+   "denominator": "11 of 11 files (deployed zip read in memory vs build_package.py stage from manifest deployed_commit af2d762970)",
+   "status": "PASS",
+   "expect": "(?s)diff 0 only-deployed 0 only-staged 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: NEVER-2 closed, and the function's environment unchanged by the act.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r15/checks/gw2.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "entry files at HEAD=1; sentinel at HEAD=no\nenv keys before 3 now 3; value hashes equal 3\nRESULT: PASS\nexit=0",
+   "denominator": "1 ledger entry file; 3 of 3 environment keys hash-equal to GW2_ENV_BEFORE.json",
+   "status": "PASS",
+   "expect": "(?s)entry files at HEAD=[1-9]\\d*; sentinel at HEAD=no.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The spec names no mutant control.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "One-shot apply; the checks are read-only comparisons and were run twice (step 11 and section 4) with identical results.",
+   "observed": "AC1 PASS both runs; AC2 PASS at section 4 (entry/sentinel state exists only after the close commit).",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W26-S1",
+  "NFRA_OPLGTW-Z-W26-S2",
+  "NFRA_OPLGTW-Z-W26-S3",
+  "NFRA_OPLGTW-Z-W26-S4",
+  "NFRA_OPLGTW-Z-W26-S5",
+  "NFRA_OPLGTW-Z-W26-S6"
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "tfplan_driver / safe_apply_driver (TF_VAR_* read in memory from the live function environment, child env only, output redacted; copies kept as *.py.txt)",
+   "invocation": "python tfplan_driver.py <root> <planfile> <label>; python safe_apply_driver.py <worktree> -chdir=... apply <planfile>",
+   "result": "plan rc=2, one in-place update; safe-apply rc=0"
+  }
+ ]
+}

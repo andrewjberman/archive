@@ -1,0 +1,22 @@
+import hashlib
+import os
+os.chdir("/opt/opal-gateway")
+MD5 = """@@MD5@@"""
+want = [ln.split("  ", 1) for ln in MD5.strip().split("\n") if ln.strip()]
+bad = []
+for h, f in want:
+    try:
+        got = hashlib.md5(open(f, "rb").read()).hexdigest()
+    except OSError:
+        got = "ABSENT"
+    if got != h:
+        bad.append(f)
+print("MD5 listed %d identical %d mismatch %d %s" % (len(want), len(want) - len(bad), len(bad), bad))
+extra = []
+for root, ds, fs in os.walk("."):
+    ds[:] = [d for d in ds if d not in (".venv", "__pycache__", "node_modules")]
+    for f in fs:
+        p = os.path.join(root, f)[2:]
+        if (p.startswith("app/") or p.startswith("deploy/")) and not p.endswith(".pyc") and p not in [x[1] for x in want]:
+            extra.append(p)
+print("HOST_ONLY_FILES_UNDER_app_deploy %d %s" % (len(extra), sorted(extra)[:10]))

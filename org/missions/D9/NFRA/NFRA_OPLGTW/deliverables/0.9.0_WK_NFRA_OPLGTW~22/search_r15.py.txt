@@ -1,0 +1,36 @@
+# NFRA_OPLGTW OG-gr-2 (round 15): which single extra column c makes [account_id,cusip,l_s,quantity_settled_unsettled,c] unique on every
+# qualified dim_position snapshot with c never blank; plus the profile of the blank accounting_rule_code rows. Counts only.
+import sys, json, glob, os
+from collections import Counter
+import pyarrow.parquet as pq
+sys.path.insert(0, "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~10")
+import og_v6_common as C
+R=json.load(open(".scratch/results_r15.json"))
+lm=json.load(open(".scratch/markers.json"))
+CAND=("account_id","cusip","l_s","quantity_settled_unsettled")
+def blank(v): return v is None or (isinstance(v,str) and v.strip()=="")
+snaps=[(x["master"],x["date"]) for x in R if x["dataset"]=="dim_position"]
+paths={}
+for m,d in snaps:
+    g=glob.glob(os.path.join(C.WORK_DIR,f"{m}_dim_position_{d}_*.parquet")); assert len(g)>=1,(m,d); paths[(m,d)]=g[0]
+t0=pq.read_table(paths[snaps[0]]); others=[c for c in t0.column_names if c not in CAND]
+ok={c:{"snap":0,"unique":0,"blank_rows":0} for c in others}
+for m,d in snaps:
+    t=pq.read_table(paths[(m,d)]).to_pydict()
+    base=list(zip(*[t[c] for c in CAND]))
+    for c in others:
+        k=list(zip(base,t[c])); ok[c]["snap"]+=1
+        ok[c]["unique"]+= (len(set(k))==len(k)); ok[c]["blank_rows"]+=sum(1 for v in t[c] if blank(v))
+print("snapshots",len(snaps))
+res={c:v for c,v in ok.items() if v["unique"]==v["snap"]}
+print("extra columns unique on every snapshot:",{c:v["blank_rows"] for c,v in res.items()})
+print("of those, never blank:",[c for c,v in res.items() if v["blank_rows"]==0])
+print("not unique on all (first 20):",{c:v["unique"] for c,v in list(ok.items()) if v["unique"]!=v["snap"]})
+# blank accounting_rule_code profile at 338 on 2026-10-01
+m,d="08335338","2026-10-01"; t=pq.read_table(paths[(m,d)]).to_pydict(); n=len(t["cusip"])
+bi=[i for i in range(n) if blank(t["accounting_rule_code"][i])]
+print("blank rule rows",len(bi),"l_s",Counter(t["l_s"][i] for i in bi),"tax_code",Counter(t["tax_code"][i] for i in bi),
+      "qty_settled_unsettled==0",sum(1 for i in bi if t["quantity_settled_unsettled"][i]==0),"cusip blank",sum(1 for i in bi if blank(t["cusip"][i])))
+rc=Counter(t["accounting_rule_code"]); print("rule-code distribution on that snapshot (denominator %d):"%n,dict(rc))
+for c in ("quantity_cash_settled","quantity_margin_settled","quantity_short_settled"):
+    print(c,"values on blank-rule rows (non-identifying):",Counter(str(t[c][i]) for i in bi))

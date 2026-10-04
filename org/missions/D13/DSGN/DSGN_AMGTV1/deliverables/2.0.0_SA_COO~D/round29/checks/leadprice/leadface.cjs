@@ -18,8 +18,8 @@
  *     SmartPanelFooter, DarkCard, NestedCard or SectionCard inside it. Light ink (`text-white*`, `text-[hsl(var(--palette-white))]`,
  *     `text-[hsl(var(--palette-mediumGray))]`, `text-[#E8ECF5]`, `text-[#A8B0C0]`, `text-<colour>-50..300`, `bg-white/N`, any
  *     `hover:`/`focus:`/`placeholder:` form of these) appears ONLY inside the GraphicCard's navy GraphicPanel, and no white fill sits
- *     inside that navy panel. The Chatter face still mounts ChatterBubbles with a month and an onMonthChange function (the month
- *     cursor stays).
+ *     inside that navy panel. The Chatter face mounts ChatterBubbles and hands it NO onMonthChange (ISSUER AMENDMENT 1, round 31:
+ *     PRD FWD-26 replaces the month cursor with the 30D / 90D / 365D presets; round31/checks/presets/presets.cjs grades them).
  *   - READER WORDS: the page header's description (SecurityAnalysis.tsx, PageHeaderCleanBadge `description`) is at least three words
  *     and carries none of: "universe", "discovery", "server-side", "per-name", a " / " list, a code-shaped token. The Price face keeps
  *     ONE element carrying data-source-caption="detail" (the Details disclosure); its visible text and titles carry no generation id
@@ -29,13 +29,14 @@
  *     source as "Bloomberg". data-* attributes may keep the machine values (data-generation-id stays).
  * Inputs: round29/fixtures/leadprice/rankings.trending.price.live.json (the served route, 94 rows, generation
  *   20261002T111010Z-a89fcf3c5f42, as_of_date 2026-10-01); a planted copy with ranking_status SHORT_READ; round16/fixtures/
- *   r16g.collected.chatter.json (the Chatter face).
+ *   r16g.collected.chatter.json until round 31; since AMENDMENT 1 the Chatter face reads round31/fixtures/windows.chatter.30.json
+ *   (the served 30-day window).
  * Render: ./_render.cjs (round15/_load.cjs over the real sources, with the REAL Panel / PanelContent / band-valued panel primitives
  *   and the REAL GraphicCard, so a band renders its own class). SecurityAnalysis is rendered with its tabs, LeadPanel, IdentityHeader,
  *   PrintExportAction, PageThemeProvider and useTabNavigation stubbed, and PageHeaderCleanBadge stubbed to print its `description`.
  * Arms:
  *   1  LIGHT CARD: Price and Chatter faces each have a white bordered root, 0 band tokens, 0 light-ink tokens outside the navy
- *      GraphicPanel, 0 white fills inside it; the Chatter face still hands ChatterBubbles its month cursor.
+ *      GraphicPanel, 0 white fills inside it; the Chatter face mounts ChatterBubbles with no month cursor (AMENDMENT 1).
  *   2  READER WORDS: the page description is reader words; the Price face's Details disclosure states the date and source in words
  *      with no generation id or system token, on the served payload and on a planted SHORT_READ payload.
  *   3  PLANTED: the predicates accept a reference light card, a reader subtitle and a reader Details line, and reject the base shape
@@ -52,7 +53,8 @@ const T0 = Date.now();
 const L = R.L;
 const ce = R.origCreateElement;
 const LIVE = R.loadFixture('live');
-const CHAT = R.loadFixture('chatter');
+// ISSUER AMENDMENT 1 (round 31, FWD-26): the Chatter face reads the served 30-day window, not the round-16 monthly payload.
+const CHAT = (() => { const d = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', '..', '..', 'round31', 'fixtures', 'windows.chatter.30.json'), 'utf8')); return d.payload; })();
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const unesc = (s) => String(s).replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
@@ -196,10 +198,10 @@ const arms = [];
     const fc = lightFaults(chat);
     f.push(...fc.map((x) => `chatter: ${x}`));
     if (!/data-stub="ChatterBubbles"/.test(chat)) f.push('chatter: CURSOR: ChatterBubbles is not mounted');
-    else if (typeof R.bubbleSeen.month !== 'string' || R.bubbleSeen.onMonthChange !== 'function') f.push(`chatter: CURSOR: ChatterBubbles got month ${R.bubbleSeen.month} and onMonthChange ${R.bubbleSeen.onMonthChange} (the month cursor must stay)`);
-    tally.push(`chatter ${fc.length} fault(s), month cursor ${R.bubbleSeen.onMonthChange === 'function' ? 'kept' : 'LOST'}`);
+    else if (R.bubbleSeen.onMonthChange === 'function') f.push('chatter: CURSOR: ChatterBubbles still gets an onMonthChange function (FWD-26 retires the month cursor)');
+    tally.push(`chatter ${fc.length} fault(s), month cursor ${R.bubbleSeen.onMonthChange === 'function' ? 'STILL HANDED' : 'retired'}`);
   } catch (e) { f.push('RENDER: ' + String(e.message).split('\n')[0]); }
-  arms.push(['LIGHT CARD: a white bordered root, 0 band classes, 0 light ink outside the navy GraphicPanel, 0 white fills inside it; the month cursor stays',
+  arms.push(['LIGHT CARD: a white bordered root, 0 band classes, 0 light ink outside the navy GraphicPanel, 0 white fills inside it; no month cursor (FWD-26)',
     f.length === 0, f.length === 0 ? tally.join('; ') : f.slice(0, 5).join(' | ')]);
 }
 // ---------------- arm 2: reader words ----------------

@@ -39,5 +39,15 @@ echo "$(printf '%s\n' "$out" | tail -1)   [rc=$rc]"
 ( cd portal && timeout 900 node node_modules/typescript/bin/tsc -b --noEmit ); rc=$?
 echo "tsc -b --noEmit rc=$rc"
 [ "$rc" -eq 0 ] || fail=1
+# ISSUER AMENDMENT 1 (round 33, 2026-10-03): the CI's "Run ESLint" step, errors only (warnings do not fail CI), over this project's
+# paths. DEV 49c6e94a0f passed this battery and tsc, then failed CI on one ESLint error (WhatChangedPanel.tsx:395, MSTR~Z msg 29015).
+# eslint exits 0 clean, 1 on an error, 2 when it cannot run; anything but 0 fails the battery.
+if is_skipped eslint; then echo "SKIPPED eslint"; skipped=$((skipped+1)); else
+  out="$( cd portal && timeout 600 node node_modules/eslint/bin/eslint.js --quiet --no-color src/pages/SecurityAnalysis \
+    src/api/endpoints/amgt-lead-panel.ts src/lib/chartColors.ts src/lib/sentimentColor.ts src/components/market-performance/TopicCloud.tsx 2>&1 )"; rc=$?
+  [ "$rc" -eq 0 ] || printf '%s\n' "$out" | grep -E "error|problem" | tail -6
+  echo "eslint --quiet (SecurityAnalysis + the lead-panel endpoint + chart libs) rc=$rc"
+  [ "$rc" -eq 0 ] || fail=1
+fi
 if [ "$fail" -eq 0 ]; then echo "BATTERY29: ALL PASS ($skipped skipped)"; else echo "BATTERY29: FAIL ($skipped skipped)"; fi
 exit "$fail"

@@ -104,17 +104,17 @@ def main():
                    f"status {st} window_days {b.get('window_days')} start {b.get('window_start')} requested {b.get('window_start_requested')}"
                    f" end {end} note {bool(b.get('window_note'))} rows {len(rows)} bad {len(bad)}")
     elif a.cell == "c10":
-        for d in (None, 30):
-            st, b = call(PREFIX + "/lead-panel/rankings/breakout/price", {"days": str(d)} if d else None)
-            rows = (b or {}).get("rows") or []
-            clause(f"C1 price days={d or 'default'} serves rows at window_days 30", st == 200 and rows
-                   and all(r.get("window_days") == 30 for r in rows), f"status {st} rows {len(rows)}")
-        for d in (90, 365):
-            st, b = call(PREFIX + "/lead-panel/rankings/breakout/price", {"days": str(d)})
-            b = b or {}
-            text = " ".join(str(b.get(k) or "") for k in ("window_reason", "ranking_reason", "reason"))
-            clause(f"C2 price days={d} serves no rows and 'not produced yet'", st == 200 and not (b.get("rows") or [])
-                   and "not produced yet" in text, f"status {st} rows {len(b.get('rows') or [])} reason {text[:90]!r}")
+        # both price rankings: the Price face reads TRENDING by default (COO~D msg 28857), BREAKOUT is the other control
+        for mv in ("trending", "breakout"):
+            for d in (None, 30):
+                st, b = call(f"{PREFIX}/lead-panel/rankings/{mv}/price", {"days": str(d)} if d else None)
+                rows = (b or {}).get("rows") or []
+                clause(f"C1 {mv} price days={d or 'default'} serves rows at window_days 30", st == 200 and rows
+                       and all(r.get("window_days") == 30 for r in rows), f"status {st} rows {len(rows)}")
+            # C2 (90/365 "not produced yet") was the QUALIFIED-WAIT branch. It is RETIRED at round 66: the wait was lifted
+            # (ADDENDA 1-2 @1162e9be0e/@205bd13011), ap-3 landed the 90/365 generations, and r66_served c22 grades those
+            # windows. Two checks graded opposite answers on the same bytes (row Z-S344), so c10 keeps its 30-day clauses only.
+            print(f"SKIP C2 {mv} price days=90/365: retired, graded by round66/checks/r66_served.py --cell c22 (row Z-S344)")
     elif a.cell == "c11":
         for key in NAMES:
             st, tl = call(f"{PREFIX}/security/{key}/timeline", {"from": "2026-09-01", "to": today.isoformat()})

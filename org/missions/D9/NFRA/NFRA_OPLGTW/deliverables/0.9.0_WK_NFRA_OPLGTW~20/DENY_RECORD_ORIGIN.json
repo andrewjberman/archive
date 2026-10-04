@@ -1,0 +1,20 @@
+{
+ "census": {
+  "strong_read": true,
+  "items_total": 366,
+  "partitions_real": 1,
+  "partitions_synthetic": 3,
+  "email_deny_active": 1,
+  "note": "Strong (ConsistentRead) full scan of gateway-access-state-table, 366 items, no LastEvaluatedKey; DescribeTable ItemCount read 364 (lagging estimate). Real POLICY principal partition 1 (profile, 2 data_entitlement, 2 operator_audit); email_deny record sits in its own EMAILDENY partition (1, status active, tid/oid match the real principal's partition); RUNTIME: 6 oauth_client, 346 oauth_refresh_family, 1 probe item (og-i5, 2026-09-17)."
+ },
+ "deny_record": {
+  "writer": "ABSENT: the email_deny item holds only tid, oid, status=active, record_type (no writer/time field). Two designed writers exist (deny-backfill, and activate which puts the deny record in the same transaction as its audit); no operator_audit summary names a deny write. Only post-design audit is the 2026-09-30T19:15:29Z activate of the portal grantee's Schwab grant, so activate is the likely path (inferred, not recorded).",
+  "approver": "ABSENT: the deny item carries no approver. Both audits in the real partition record the principal-owner role (owner) as approver, but neither names the deny write.",
+  "written_utc": "ABSENT: the deny item has no timestamp. Bounded between the R2-k ruling 2026-09-27 ~13:5xZ (design date) and this read 2026-10-02; candidate 2026-09-30T19:15:29Z (audit 'at', inferred).",
+  "source_authorization": "ABSENT: the deny item carries none. The 2026-09-30 audit cites the owner-direct 2026-09-30 18xxZ MX-r-6 v3 GO and grant-scope file and the owner-direct 2026-09-30 14xxZ agreed-push and Schwab-grant file (grant authorization; covers the grant, not the deny explicitly)."
+ },
+ "deny_disposition": "KEEP_WITH_REASON",
+ "deny_reason": "CTO ruling R2-k call 1 (2026-09-27): a restricted principal keeps the deny record, a lift is a separate operator act with its own record; the record is the designed pairing of the portal-only restricted profile (active, 2 entitlement revisions). Its origin is undocumented (all four origin fields ABSENT), and the owner's open card on whether the portal-only grant should restrict the grantee's own GUI sign-in (/login, /sprint*) is not answered in the data read; a revoke would need its own never-widen halves and the owner's word, so none is proposed here.",
+ "synthetic_partitions": "FIXTURE_RECORDED",
+ "synthetic_note": "3 POLICY partitions with key prefix 'POLICY#probe-og-i1-' dated 2026-09-16 (000402Z, 000658Z race, 000705Z ttl); each holds a PROFILE (2 pending, 1 revoked) and AUDIT#0001 (one also AUDIT#0002), all tagged probe=og-i1. One further RUNTIME fixture 'probe-og-i5-20260917T140533Z' (AC9) exists. Nothing deleted."
+}
