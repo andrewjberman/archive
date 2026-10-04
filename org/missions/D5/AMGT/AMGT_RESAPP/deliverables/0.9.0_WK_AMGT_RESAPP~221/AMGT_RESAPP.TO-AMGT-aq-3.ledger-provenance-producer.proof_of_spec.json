@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-aq-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "720f78e6f619a51e77257a857e72b7f203726b04",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aq-3.ledger-provenance-producer.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "720f78e6f619a51e77257a857e72b7f203726b04"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~221",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Request-time code only; no deploy in this order (the redeploy is aq-5). New: _compose_ledger_provenance, read_input_ledger_served; the /ledger leaf now calls read_input_ledger_served. read_input_ledger is unchanged.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_ledger_provenance.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 plant tests, hermetic.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every plant case passes (every class sourced or reasoned; news run equals the overlay's; the denominator right); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_ledger_provenance.py; echo \"exit=$?\"",
+      "output_evidence": "6 passed in 0.18s; exit=0 (test_every_class_is_sourced_or_reasoned, test_the_news_run_equals_the_overlays, test_news_with_no_harvested_run_names_why_and_serves_no_run, test_the_denominator_counts_the_classes_with_a_served_run, test_the_composer_writes_nothing_and_does_not_mutate_its_input, test_an_absent_ledger_still_serves_reasons_and_the_news_run all PASSED)",
+      "denominator": "6 of 6 tests passed",
+      "status": "PASS",
+      "status_reason": "all three plant cases named by the criterion pass; exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "C1, C2 and C3 PASS on BA, AMD and VLO; R67 C25 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round67/checks/r67_served.py --cell c25 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 BA_US_Equity every class names a source or a source_reason status 200 classes 6 unsourced []\nPASS C2 BA_US_Equity the news class's run equals the overlay's harvested_news last_run ledger news stamp 2026-10-01T05:03:53Z overlay last_run 2026-10-01T05:03:53Z\nPASS C3 BA_US_Equity classes_with_a_run equals the served runs classes_with_a_run 2 served runs 2\nPASS C1/C2/C3 AMD_US_Equity (news stamp 2026-10-01T06:34:21Z = overlay; classes_with_a_run 2 = served runs 2; unsourced [])\nPASS C1/C2/C3 VLO_US_Equity (news stamp 2026-09-25T20:20:25Z = overlay; classes_with_a_run 2 = served runs 2; unsourced [])\nR67 C25 SERVED: YES\nexit=0",
+      "denominator": "9 of 9 clauses PASS (3 clauses x 3 names)",
+      "status": "PASS",
+      "status_reason": "R67 C25 SERVED: YES, exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "R64 C13 SERVED: YES (move labels and the overlay provenance block unchanged); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c13 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 every chatter places_moved names its axis and window 94 of 94 labeled; PASS C2 BA/AMD/VLO overlay provenance names filings, harvested news and Bloomberg with a last run or reason; R64 C13 SERVED: YES; exit=0",
+      "denominator": "4 of 4 clauses PASS (C1 over 94 chatter rows; C2 on 3 names)",
+      "status": "PASS",
+      "status_reason": "R64 C13 SERVED: YES, exit=0",
+      "judgment": false
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "No deploy of the route change to the deployed Lambda.",
+      "reason": "Bound 1 of the order; the redeploy is aq-5."
+    }
+  ],
+  "surprises": [],
+  "controls": {
+    "mutant": {
+      "description": "Mutant: route the /ledger leaf back to the unchanged read_input_ledger (monkeypatched read_input_ledger_served) and run r67_served c25 local.",
+      "expected": "c25 FAILS at the base: C1 and C2 FAIL on BA, AMD, VLO (filings/news/social/web unsourced; news has no run).",
+      "observed": "FAIL C1 on all 3 names (unsourced ['filings','news','social','web']); FAIL C2 on all 3 (ledger news stamp None vs the overlay's); R67 C25 SERVED: NO; exit 1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_ledger_provenance.py run twice in succession against the same tree",
+      "observed": "6 passed both runs; c25 stamps equal the overlay's on every run (composed from the same read)",
+      "status": "STABLE"
+    }
+  },
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~221/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3",
+      "result": "run at commit time, rc 0 expected"
+    }
+  ]
+}
