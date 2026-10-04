@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-aq-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "e410b00b278ffe4380b3ebdd90b38104a67657c2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aq-2.window-tone-from-chatter-window.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "49aedcf88be8f29903a716218a83031c468d0b88"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~220",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/monthly_chatter.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local worktree change only; the redeploy is cell AMGT-aq-5 (AE~A, staged).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every plant case passes (tone and voters from the table; 0 voters 'no clear tone'; a missing row with its reason); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_window_tone_route.py; echo \"exit=$?\"",
+      "output_evidence": "test_a_planted_window_serves_its_tone_and_voters_per_window PASSED; test_the_window_table_is_read_once_through_the_gold_seam_with_columns PASSED; test_zero_voters_reads_no_clear_tone PASSED; test_a_missing_row_serves_its_reason_and_the_old_reason_is_gone PASSED; test_an_unreadable_window_table_serves_a_reason_not_a_crash PASSED; 5 passed in 0.22s; exit=0",
+      "denominator": "5 of 5 plant cases in test_window_tone_route.py",
+      "status": "PASS",
+      "status_reason": "all 5 pass, exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "C1 PASS on days=30, 90 and 365 (0 mismatches, 0 old reasons, 0 rows without a table row); R67 C24 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round67/checks/r67_served.py --cell c24 --where local; echo \"exit=$?\"",
+      "output_evidence": "chatter_window rows read: 636\nFAIL C1 days=30 ... status 200 rows 95 mismatches 0 e.g. [] old-reason 0 no-table-row 21\nFAIL C1 days=90 ... rows 95 mismatches 0 e.g. [] old-reason 0 no-table-row 21\nFAIL C1 days=365 ... rows 95 mismatches 0 e.g. [] old-reason 0 no-table-row 21\nR67 C24 SERVED: NO\nexit=1",
+      "denominator": "3 of 3 windows FAIL on the no-table-row clause only; per window 95 rows served, 74 equal the table (0 mismatches), 21 covered names have no row in the 636-row (212 securities x 3 windows) chatter_window; 0 old reasons",
+      "status": "FAIL",
+      "status_reason": "The route change is complete (mismatches 0, old-reason 0) but the clause 'no-table-row 0' cannot be met by the route: the HARVEST chatter_window build holds 212 securities and omits 21 of the 95 covered names. Filed as AMGT_RESAPP-Z-W220-S1. Order left open.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "R64 C9 SERVED: YES (the chatter windows otherwise unchanged); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round64/checks/r64_served.py --cell c9 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 days=default ... rows 95 bad 0\nPASS C1 days=30 ... rows 95 bad 0\nPASS C1 days=90 ... rows 95 bad 0\nPASS C1 days=365 ... rows 95 bad 0\nR64 C9 SERVED: YES\nexit=0",
+      "denominator": "4 of 4 clauses PASS, 95 rows each",
+      "status": "PASS",
+      "status_reason": "R64 C9 SERVED: YES, exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; none was run by this worker.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1's plant file was run twice in this session (quiet, then verbose); AC2 and AC3 once each against the same live gold read",
+      "observed": "AC1: 5 passed both times. AC2 and AC3 not repeated.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "AMGT_RESAPP-Z-W220-S1"
+  ],
+  "session_log": "none: worker reports in its final message; git history on wk-AMGT_RESAPP-220 is the log",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest lib/research/api/tests/ (full api suite)",
+      "invocation": "cd /c/tmp/r67-220 && PYTHONPATH=$(pwd) python -m pytest -q -p no:cacheprovider lib/research/api/tests/",
+      "result": "504 passed, 191 warnings in 131.42s (0:02:11)"
+    }
+  ]
+}
