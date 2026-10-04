@@ -18,7 +18,10 @@ after-mode checks (host reads by SSM AWS-RunShellScript):
   6. the served census (census_after {servable_by_master, lacking_or_blank}): servable at BOTH masters, 0 lacking or blank an R9 column;
   7. the asset held-check (dim_asset_held_check {returned, unheld_returned}): returned > 0 and unheld_returned == 0;
   8. the download control (after_dim_asset_download): REFUSED UNAVAILABLE asset_policy_selection_unavailable;
-  9. synthetic principal, grants_written 0, state_store_written False.
+  9. synthetic principal, grants_written 0, state_store_written False;
+  A4 (CTO C1) 10. census_after_other {dim_balance, dim_transaction}: servable per master == 14 (above: roll back; below: surprise row);
+     a principal whose grant omits those datasets is REFUSED reading them;
+  A5 (CVO Q2) 11. the held check counts only when returned > 0 AND held_cusips_in_dim_position < asset_universe_cusips.
 RL5_PAGING.json is written to --out (default: beside this file). The floor (rl4.AC1.sh, ht.AC2.sh) is run by rl5_verify.sh.
 """
 import argparse
@@ -32,6 +35,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INST = "i-07dccb1615503ac99"
+OTHER_EXPECTED = 14   # A4 (CTO C1): servable dim_balance / dim_transaction snapshots per master
 BEFORE_RESULT = {"dim_position": "REFUSED INCOMPLETE_SNAPSHOT snapshot_incomplete",
                  "dim_asset": "REFUSED UNAVAILABLE asset_policy_selection_unavailable"}
 HOST_PROG = r'''
@@ -196,11 +200,24 @@ def main():
     hc = A["dim_asset_held_check"]
     chk("dim_asset held-only: returned > 0, unheld_returned 0", hc["returned"] > 0 and hc["unheld_returned"] == 0 and not hc["error"],
         "returned %s unheld_returned %s over %s page(s); error %s" % (hc["returned"], hc["unheld_returned"], hc["pages"], hc["error"]))
+    chk("held check GRADED (A5/Q2): held_cusips_in_dim_position < asset_universe_cusips", hc["held_cusips_in_dim_position"] < hc["asset_universe_cusips"],
+        "held %s of asset universe %s (if held reaches the universe the held check is UNGRADED: re-run with fewer accounts before closing)"
+        % (hc["held_cusips_in_dim_position"], hc["asset_universe_cusips"]))
+    co = A["census_after_other"]
+    for ds in ("dim_balance", "dim_transaction"):
+        vals = co[ds]
+        above = {m: n for m, n in vals.items() if n > OTHER_EXPECTED}
+        below = {m: n for m, n in vals.items() if n < OTHER_EXPECTED}
+        chk("%s servable per master == %d (C1; above -> roll back)" % (ds, OTHER_EXPECTED), not above and len(vals) == 2, "servable_by_master %s" % vals)
+        if below:
+            print("NOTE %s servable BELOW %d at %s: a SURPRISE ROW, not a rollback (C1)" % (ds, OTHER_EXPECTED, below))
+    chk("ungranted dim_balance / dim_transaction reads REFUSED (C1)", all(str(v).startswith("REFUSED") for v in A["ungranted_reads"].values()),
+        "ungranted_reads %s" % A["ungranted_reads"])
     chk("dim_asset prepare_download still REFUSED asset_policy_selection_unavailable", A["after_dim_asset_download"] == "REFUSED UNAVAILABLE asset_policy_selection_unavailable",
         A["after_dim_asset_download"])
     chk("synthetic principal, grants_written 0, state_store_written False", A["synthetic_principal"] is True and A["grants_written"] == 0 and A["state_store_written"] is False,
         "synthetic %s grants_written %s state_store_written %s" % (A["synthetic_principal"], A["grants_written"], A["state_store_written"]))
-    doc = {"served_release": a.served_release, "before": BEFORE_RESULT, "after": A["after"], "census_after": ca, "dim_asset_held_check": hc,
+    doc = {"served_release": a.served_release, "before": BEFORE_RESULT, "after": A["after"], "census_after": ca, "census_after_other": co, "ungranted_reads": A["ungranted_reads"], "dim_asset_held_check": hc,
            "after_dim_asset_download": A["after_dim_asset_download"], "synthetic_principal": A["synthetic_principal"],
            "grants_written": A["grants_written"], "state_store_written": A["state_store_written"],
            "master": A["master"], "date": A["date"], "page_size": A["page_size"], "after_detail": A["after_detail"]}
