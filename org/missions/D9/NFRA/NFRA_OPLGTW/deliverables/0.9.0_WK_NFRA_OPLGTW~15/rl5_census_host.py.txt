@@ -1,0 +1,80 @@
+# OG-rl-5 step 4b: the R9 grain-column census over EVERY snapshot the gateway can serve for dim_position and dim_asset.
+# Runs on the host through the installed code (prelude: real catalog + roles, in-memory store). Read-only: S3 list/head/get
+# by the catalog and data roles; parquet scratch under OG_RL5_SCRATCH, removed per snapshot and again by the runner.
+# Prints counts, masters, dates and column names only.
+import pyarrow.parquet as pq
+
+R9 = {"dim_position": ("quantity_settled_unsettled", "quantity_cash_settled"),
+      "dim_asset": ("security_description_line_1",)}
+GRAIN = {"dim_position": ("account_id", "cusip", "l_s", "quantity_settled_unsettled", "quantity_cash_settled"),
+         "dim_asset": ("cusip", "security_description_line_1")}
+
+
+def census(label, counterfactual):
+    service, catalog, store, contract = build(counterfactual=counterfactual)
+    allow = lambda: True  # noqa: E731 -- the census is the operator's read; no principal, no grant
+    rows_out, denom, lacking = [], {}, []
+    for master in sorted(contract.masters):
+        listed = catalog.list_dates(master, allow)
+        quals = {"dim_position": [], "dim_asset": []}
+        other = {}
+        for date in sorted(listed):
+            res = catalog.snapshot(master, date, allow)
+            snap = res.snapshot
+            if res.status != "complete" or not snap:
+                other[res.result] = other.get(res.result, 0) + 1
+                continue
+            for ds in quals:
+                if any(f.get("dataset") == ds for f in snap.get("files") or []):
+                    quals[ds].append((date, [dict(f) for f in snap["files"] if f.get("dataset") == ds]))
+        denom[master] = {"marker_dates_listed": len(listed), "non_qualified_by_result": other,
+                         "servable_dim_position": len(quals["dim_position"]),
+                         "servable_dim_asset": len(quals["dim_asset"]),
+                         "first_date": min(listed) if listed else None, "last_date": max(listed) if listed else None}
+        for ds, items in quals.items():
+            for date, entries in items:
+                sources, cleanup = service._fetch(entries, allow)
+                try:
+                    rows, present, blanks = 0, None, {c: 0 for c in R9[ds]}
+                    for src in sources:
+                        pf = pq.ParquetFile(src.path)
+                        names = set(pf.schema_arrow.names)
+                        here = {c: (c in names) for c in GRAIN[ds]}
+                        present = here if present is None else {c: present[c] and here[c] for c in here}
+                        rows += pf.metadata.num_rows
+                        need = [c for c in R9[ds] if c in names]
+                        if need:
+                            tbl = pq.read_table(src.path, columns=need)
+                            for c in need:
+                                blanks[c] += blank_count(tbl.column(c))
+                    missing = [c for c in R9[ds] if not (present or {}).get(c)]
+                    entry = {"m": master, "ds": ds, "date": date, "files": len(sources), "rows": rows,
+                             "missing_r9_cols": missing,
+                             "blank": {c: (None if c in missing else blanks[c]) for c in R9[ds]}}
+                    rows_out.append(entry)
+                    if missing or any(v for c, v in entry["blank"].items() if v):
+                        lacking.append({"m": master, "ds": ds, "date": date, "missing": missing,
+                                        "blank": entry["blank"]})
+                finally:
+                    cleanup()
+    total = len(rows_out)
+    summary = {"label": label, "denominator": denom, "snapshots_censused": total,
+               "dim_position": sum(1 for r in rows_out if r["ds"] == "dim_position"),
+               "dim_asset": sum(1 for r in rows_out if r["ds"] == "dim_asset"),
+               "lacking_or_blank": len(lacking), "lacking_detail": lacking,
+               "state_store_put_runtime_calls_on_real_store": 0,
+               "memstore_catalog_snapshot_puts": store.put_runtime_calls}
+    print("CENSUS_SUMMARY " + json.dumps(summary, sort_keys=True))
+    for r in rows_out:
+        print("CENSUS_ROW " + label + " " + json.dumps(r, sort_keys=True, separators=(",", ":")))
+
+
+def main():
+    # SERVED: the live contract exactly as the service reads it. COUNTERFACTUAL: the same code with an in-memory contract copy that
+    # also carries the dim_transaction data prefixes -- reported separately, never as the served state.
+    census("SERVED", False)
+    census("COUNTERFACTUAL_dim_transaction_prefix_in_memory", True)
+
+
+if __name__ == "__main__":
+    main()

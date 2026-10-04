@@ -1,0 +1,14 @@
+import os,hashlib
+def tree(root):
+    d={}
+    for r,_,fs in os.walk(root):
+        for f in fs:
+            p=os.path.join(r,f); d[os.path.relpath(p,root).replace(chr(92),'/')]=hashlib.md5(open(p,'rb').read()).hexdigest()
+    return d
+a=tree('rb_x'); b=tree('s3n')
+print('rb_x files',len(a),'s3n files',len(b),'identical',sum(1 for k in a if b.get(k)==a[k]),'only_a',[k for k in a if k not in b],'only_b',[k for k in b if k not in a])
+g=tree('C:/tmp/og-rb10/infra/aws/ec2/opal-gateway')
+nd=[k for k in a if not k.startswith('dashboard/')]
+print('rb_x non-dashboard',len(nd),'equal to rb10 git tree',sum(1 for k in nd if g.get(k)==a[k]),'not equal',[k for k in nd if g.get(k)!=a[k]][:5])
+live=dict((l.strip().split('  ',1)[1],l.split()[0]) for l in open('rl5_live_md5.txt') if l.strip())
+print('rl5_live_md5 entries',len(live),'equal to s3n',sum(1 for k,v in live.items() if b.get(k)==v),'mismatch',[k for k,v in live.items() if b.get(k)!=v][:5])

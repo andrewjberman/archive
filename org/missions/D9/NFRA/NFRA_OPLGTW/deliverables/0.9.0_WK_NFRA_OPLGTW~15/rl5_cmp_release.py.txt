@@ -1,0 +1,34 @@
+import subprocess,hashlib,sys
+P='infra/aws/ec2/opal-gateway/'
+def git(repo,*a):
+    return subprocess.run(['git','-C',repo]+list(a),capture_output=True).stdout
+W='C:/tmp/wk-oplgtw-15-r16'; R='C:/tmp/og-rel10'
+def body(d):
+    return [l for l in d.decode('utf-8').splitlines() if (l.startswith('+') or l.startswith('-')) and not l.startswith('+++') and not l.startswith('---')]
+files=['app/integrations/schwab/query.py','app/integrations/schwab/datasets.json','tests/test_schwab_grain_r9.py','tests/test_schwab_semantics.py','tests/test_schwab_transactions.py']
+for f in files:
+    cloud=git(W,'show','HEAD:'+P+f); rel=git(R,'show','HEAD:'+P+f)
+    print('WHOLE',f,'cloud==release',cloud==rel,hashlib.md5(rel).hexdigest()[:10])
+# pre-gr-3 parent on CLOUD: last version of file before 95ac7823d2's gr-3 content = version at 0c3d545002 for integration.py
+for f,pre in (('app/integrations/schwab/integration.py','0c3d545002'),):
+    pass
+def versions(f):
+    return git(W,'log','--format=%h','--',P+f).decode().split()
+for f in ['app/integrations/schwab/integration.py','tests/test_schwab_query.py','app/integrations/schwab/query.py','tests/test_schwab_semantics.py','tests/test_schwab_transactions.py','app/integrations/schwab/datasets.json']:
+    print(f,'log',versions(f)[:4])
+print('--- pre-gr-3 CLOUD parent == live (af2d762970)?')
+live_rb='C:/tmp/og-rb10'
+for f in ['app/integrations/schwab/query.py','app/integrations/schwab/datasets.json','tests/test_schwab_semantics.py','tests/test_schwab_transactions.py']:
+    pre=git(W,'show','95ac7823d2~1:'+P+f); live=git(live_rb,'show','HEAD:'+P+f)
+    print(f,'gr3-parent==live',pre==live,len(pre),len(live))
+for f,pre_c in (('app/integrations/schwab/integration.py','95ac7823d2~1'),('tests/test_schwab_query.py','95ac7823d2~1')):
+    g3=git(W,'diff','-U0',pre_c,'HEAD','--',P+f)       # gr-3's own diff of the file on CLOUD
+    rl=git(R,'diff','-U0','af2d762970','HEAD','--',P+f)  # release vs live
+    b3,br=body(g3),body(rl)
+    print(f,'gr3 own changed lines',len(b3),'release vs live',len(br),'EQUAL',b3==br,'hunkmd5',hashlib.md5('\n'.join(b3).encode()).hexdigest()[:10],hashlib.md5('\n'.join(br).encode()).hexdigest()[:10])
+    if b3!=br:
+        print(' only in gr3', [l for l in b3 if l not in br][:5]); print(' only in rel', [l for l in br if l not in b3][:5])
+# the live aws_roles line preserved in release integration.py
+rel=git(R,'show','HEAD:'+P+'app/integrations/schwab/integration.py').decode()
+cl=git(W,'show','HEAD:'+P+'app/integrations/schwab/integration.py').decode()
+print('release carries environ_with_external_ids:', 'environ_with_external_ids' in rel, ' CLOUD copy carries it:', 'environ_with_external_ids' in cl)
