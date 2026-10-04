@@ -47,29 +47,72 @@
     "AC1",
     "AC2"
    ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_query.py",
+   "kind": "test",
+   "commit_or_etag": "00d891039a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Local commit on branch wk-NFRA_OPLGTW-22-r16; fixture-only edit under A1; deploy is OG-rl-5.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_semantics.py",
+   "kind": "test",
+   "commit_or_etag": "00d891039a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Local commit on branch wk-NFRA_OPLGTW-22-r16; fixture-only edit under A1; deploy is OG-rl-5.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_transactions.py",
+   "kind": "test",
+   "commit_or_etag": "00d891039a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Local commit on branch wk-NFRA_OPLGTW-22-r16; fixture-only edit under A1; deploy is OG-rl-5.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~22/GR3_TEST_EDITS.md",
+   "kind": "doc",
+   "commit_or_etag": "00d891039a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Local commit on branch wk-NFRA_OPLGTW-22-r16.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
   }
  ],
  "acceptance": [
   {
    "criterion_id": "AC1",
-   "criterion_verbatim": "AC1: the three named tests in tests/test_schwab_grain_r9.py pass, and the existing grain/semantics suites stay green (semantics+query suites rc=0).",
+   "criterion_verbatim": "AC1 (amended A1): the three named tests pass, and `tests -k schwab` adds NO failure or error beyond the 12-id baseline, with at least 130 collected.",
    "method": "command",
    "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r16/checks/gr3.AC1.sh; echo \"exit=$?\"",
-   "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nsemantics+query suites rc=1 (23 failed, 18 passed, 8 warnings in 7.40s)\nRESULT: FAIL\nexit=1",
-   "denominator": "3 of 3 named tests pass; 18 of 41 semantics+query tests pass (23 failed: 22 in test_schwab_query.py, 1 in test_schwab_semantics.py -- their fixtures encode the old grain and are outside this order's <paths>)",
+   "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nschwab suite: collected (passed+failed+errors) 130; failing now 11; NEW beyond baseline 1 ['tests/test_schwab_query.py::test_ogq2_ac20']; baseline fixed 2\nRESULT: FAIL\nexit=1",
+   "denominator": "3 of 3 named tests pass; 130 collected (>=130); 11 failing now, 10 of them baseline ids and 1 NEW (test_ogq2_ac20); 2 baseline ids now pass",
    "status": "FAIL",
-   "expect": "(?s)named tests passed 3 of 3; failed/error lines 0.*semantics\\+query suites rc=0.*RESULT: PASS.*exit=0",
-   "status_reason": "The 3 named tests pass, but 23 existing tests in test_schwab_query.py (22) and test_schwab_semantics.py (1) fail under the R9 grain: their fixtures encode the old grain and sit outside this order's <paths>. Filed as NFRA_OPLGTW-Z-W22-S3; the order stays open for the issuer to re-hand."
+   "expect": "(?s)named tests passed 3 of 3; failed/error lines 0.*NEW beyond baseline 0 .*RESULT: PASS.*exit=0",
+   "status_reason": "One new failure beyond the baseline: tests/test_schwab_query.py::test_ogq2_ac20. It asserts a one-page duplicate-grain request is refused duplicate_source_grain; under R9 the fifth grain column quantity_cash_settled is not a served field, so the R24 row check (integration.py:697-705, only when the request carries every grain column) cannot fire. Not fixable by a fixture edit; the worker did not change the product. Filed as NFRA_OPLGTW-Z-W22-S4. Order stays open."
   },
   {
    "criterion_id": "AC2",
-   "criterion_verbatim": "AC2: every gateway file the cell's commits touched is one of query.py, datasets.json, tests/test_schwab_grain_r9.py.",
+   "criterion_verbatim": "AC2 (amended A1): every gateway file the cell's commits touched is query.py, datasets.json or a tests/test_schwab_*.py file, and GR3_TEST_EDITS.md names every existing test file edited.",
    "method": "command",
    "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r16/checks/gr3.AC2.sh; echo \"exit=$?\"",
-   "output_evidence": "gateway files touched by the cell's commits since the issuance: 3; outside the allowed three: 0\nRESULT: PASS\nexit=0",
-   "denominator": "3 files touched; 0 outside the allowed three",
+   "output_evidence": "gateway files touched by the cell's commits since the issuance: 6; outside the allowed set: 0; edited existing test files 3, not listed in GR3_TEST_EDITS.md 0\nRESULT: PASS\nexit=0",
+   "denominator": "6 files touched; 0 outside the allowed set; 3 edited existing test files, 0 unlisted",
    "status": "PASS",
-   "expect": "(?s)outside the allowed three: 0.*RESULT: PASS.*exit=0"
+   "expect": "(?s)outside the allowed set: 0; edited existing test files \\d+, not listed in GR3_TEST_EDITS.md 0.*RESULT: PASS.*exit=0"
   }
  ],
  "controls": {
@@ -87,14 +130,15 @@
  },
  "declared_exclusions": [],
  "surprises": [
-  "NFRA_OPLGTW-Z-W22-S3"
+  "NFRA_OPLGTW-Z-W22-S3",
+  "NFRA_OPLGTW-Z-W22-S4"
  ],
  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
  "compiler_tools": [
   {
-   "tool": "pytest (bash gr3.AC1.sh)",
+   "tool": "pytest (bash gr3.AC1.sh, gr3.AC2.sh)",
    "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r16/checks/gr3.AC1.sh",
-   "result": "named 3 of 3 pass; semantics+query suites rc=1 (23 failed, 18 passed)"
+   "result": "named 3 of 3 pass; 130 collected; 1 NEW failure beyond baseline (test_ogq2_ac20); AC2 PASS"
   }
  ]
 }
