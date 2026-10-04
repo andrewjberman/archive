@@ -72,3 +72,19 @@ L9 read of the PNGs:
 - its DEV push on Andrew's word (card at MSTR~Z);
 - the 84 of 95 names with no M-1 management object (RESAPP upstream, observation);
 - SAUX-25's provenance lines (RESAPP FWD-38(d), COO~Z).
+
+## 5. CTO REVIEW CONDITION 1 (review @720f78e6f6, msg 29124): BUBBLES MINUS LABELS, PER WINDOW, ON THE SERVED WALK
+
+The CTO's point: labels34 counts collisions and never compares labels to bubbles, so a collage that dropped every hard label would
+still read 0 collisions. Measured on the candidate's close walk `walk/read-20261004T014957Z` (055ba370, live data). The bubbles are
+the face's own count line, "<k> of 95 covered names have collected articles in this window", which counts the bubbles drawn. The
+labels are the distinct label keys in `0{2,4,5}-fwd21-labels-<w>.json`:
+
+| window | bubbles | labels (distinct keys) | bubbles minus labels |
+|---|---|---|---|
+| 30D | 57 | 57 | **0** |
+| 90D | 67 | 67 | **0** |
+| 365D | 70 | 70 | **0** |
+
+No label is dropped at any window, so condition 1 is met. Condition 2, the DEV push on Andrew's word, is carded at MSTR~Z.
+
