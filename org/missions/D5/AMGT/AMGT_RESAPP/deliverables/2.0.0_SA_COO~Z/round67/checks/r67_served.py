@@ -141,6 +141,12 @@ def main():
             clause(f"C1 days={d} every row's tone and voters equal chatter_window, 0 voters read 'no clear tone'",
                    st == 200 and rows and not bad and old == 0 and missing == 0,
                    f"status {st} rows {len(rows)} mismatches {len(bad)} e.g. {bad[:3]} old-reason {old} no-table-row {missing}")
+            # aq-6 (row Z-S346): C1 skips a row the CHECK's index lacks, so a function that cannot read the table is
+            # invisible on those rows. C2 counts the unreadable-table reason over EVERY served row.
+            unreadable = [r.get("security_key") for r in rows if "could not be read" in str(r.get("tone_reason") or "")]
+            clause(f"C2 days={d} 0 rows serve the unreadable-table reason",
+                   st == 200 and bool(rows) and not unreadable,
+                   f"status {st} rows {len(rows)} unreadable {len(unreadable)} e.g. {unreadable[:3]}")
     elif a.cell == "c25":
         for key in NAMES:
             st_l, led = call(f"{PREFIX}/security/{key}/ledger")
