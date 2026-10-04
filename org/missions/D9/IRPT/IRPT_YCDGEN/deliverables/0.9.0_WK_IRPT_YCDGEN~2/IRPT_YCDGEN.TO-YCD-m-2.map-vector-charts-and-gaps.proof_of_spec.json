@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-m-2.map-vector-charts-and-gaps",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/prd/IRPT_YCDGEN_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f65ec43d8c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R2.md",
+    "vintage_commit": "4182c82353",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-m-2.map-vector-charts-and-gaps.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/map_pdf.py",
+      "kind": "script",
+      "commit_or_etag": "2d19b24f0badbb96c8ce449ae4d05ec369914979",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Vector-chart detection plus two column fixes; local on worktree branch wk-ycdgen-r2-2; reads a PDF in memory, prints labels and positions only.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_map_pdf.py",
+      "kind": "test",
+      "commit_or_etag": "2d19b24f0badbb96c8ce449ae4d05ec369914979",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 offline tests over PDFs built in memory (4 named vector); 13 passed. Local on the worktree branch.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/overview_map.json",
+      "kind": "config_data",
+      "commit_or_etag": "2d19b24f0badbb96c8ce449ae4d05ec369914979",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "249 -> 253 elements: p3.e24 Stock Style Exposure chart, p3.e25 Market Classification chart, p3.e26 Region chart, p5.e34 Stock Sector Exposure chart; p13.e04 and p14.e03 notes carry the full columns; 249 of 249 round-1 sources unchanged. Local on the worktree branch.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- the map carries chart elements for p3 Stock Style Exposure, p3 Market Classification, p3 Region and p5 Stock Sector Exposure (org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round2/checks/m-2.AC1.py)",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round2/checks/m-2.AC1.py",
+      "output_evidence": "m-2.AC1 RESULT: PASS chart elements missing: [] (charts on p3/p5: 6)\nrc=0",
+      "denominator": "4 of 4 required chart elements found (p3 x3, p5 x1); 6 chart elements on p3 and p5 in all",
+      "expect": "m-2.AC1 RESULT: PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- vector-chart detection is tested (tests -k vector in test_map_pdf.py, >= 1) (org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round2/checks/m-2.AC2.py)",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round2/checks/m-2.AC2.py",
+      "output_evidence": "m-2.AC2 RESULT: PASS 4 passed, 0 failed (need >= 1, -k 'vector'): 4 passed, 9 deselected in 0.26s\nrc=0",
+      "denominator": "4 vector tests passed of 13 in the file (need >= 1)",
+      "expect": "m-2.AC2 RESULT: PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- control: every round-1 element id keeps its source, except p13.e04 and p14.e03 (PASS at the base and after) (org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round2/checks/m-2.AC3.py)",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round2/checks/m-2.AC3.py",
+      "output_evidence": "m-2.AC3 RESULT: PASS round-1 ids kept with their sources: 249 of 249; moved or gone: []\nrc=0",
+      "denominator": "249 of 249 round-1 ids kept with their sources",
+      "expect": "m-2.AC3 RESULT: PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 (judgment) -- every number, table and chart on the source Overview PDF is listed as an element (m-1.AC2 re-graded by 3.0.0_SA_CVO against the PDF)",
+      "method": "manual_read_with_citation",
+      "invocation": "map_pdf.map_pdf(<the retained 23-page Overview, read from S3 into OS temp, deleted after>) compared with the first run; vector regions read from pdfplumber rects, curves and lines on all 23 pages",
+      "output_evidence": "Skeleton elements 283 -> 287 over 23 pages. The only elements new or changed against the first run: p3 'Stock Style Exposure chart' bbox [45,248,566,268], p3 'Market Classification chart' [45,402,296,422], p3 'Region chart' [316,402,567,422], p5 'Stock Sector Exposure chart' [207,98,458,323] (all kind chart, drawn vector), p13.e04 columns gain 'Prosp', p14.e03 columns grow from 'Name Inception Date' to 'Rebalance | Name Inception Date Type Frequency Start As Of' (six columns). No vector region found on any other page; the p5 Bond Credit Quality outline (two hairlines, no bar) is the no-data message already element p5.e33. Pale table shading (p7, p12), section bands and 6-point legend dots are excluded as not chart ink.",
+      "denominator": "4 of 4 named vector charts listed; 23 of 23 pages scanned; 0 further vector regions",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: 3.0.0_SA_CVO at L9 grades the map against the PDF; the worker records the output and no verdict."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A scratch copy of the committed map with the p3.e26 Region chart element removed (committed file untouched), run through m-2.AC1.py from that copy's root.",
+      "expected": "AC1 flips to FAIL naming the missing p3 region chart; a check that passes the mutant is vacuous.",
+      "observed": "m-2.AC1 RESULT: FAIL chart elements missing: [(3, 'region')] (charts on p3/p5: 5) rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "base map ids vs the updated map, read by the order's m-2.AC3 check",
+      "observed": "249 of 249 round-1 ids and sources unchanged; the control is the same check run at the base (round-1 map) and after",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A YCharts call, an S3 or DynamoDB write, a deploy, or saving the PDF in the repo",
+      "reason": "Forbidden by the order. The one PDF was copied read-only from S3 into the OS temp directory and deleted after the run."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (test_map_pdf.py)",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_map_pdf.py -q -p no:cacheprovider",
+      "result": "13 passed in 0.30s"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 infra/aws/lambda/investor-reporting/ycharts/research",
+      "result": "All checks passed!"
+    }
+  ]
+}
