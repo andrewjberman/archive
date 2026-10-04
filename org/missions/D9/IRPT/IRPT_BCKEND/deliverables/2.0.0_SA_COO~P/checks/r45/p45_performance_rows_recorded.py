@@ -7,6 +7,9 @@ Usage: python <this file> <repo_root> <criterion_id>
               irpt-performance-adapter, irpt-holdings-performance-lambda and irpt-inf-holdings-performance-lambda each carry
               deployed_code_sha256 = the live CodeSha256 and iam_role = the live role name; the Inflection row's
               tf_resource is module.irpt_holdings_performance_inf.aws_lambda_function.this. Base: FAIL.
+  IB45-1-AC1R the AMENDED build criterion (amendment 1, row W114-S1: the naming limb in ENFORCE refuses the iam_role
+              correction and the Inflection row): irpt-performance-adapter and irpt-holdings-performance-lambda each carry
+              deployed_code_sha256 = the live CodeSha256. Base: FAIL (the adapter holds the 09-24 value).
   IB45-1-AC2  a GUARD: against base ad781b948a, no function row outside those three changes, and the only row added is
               irpt-inf-holdings-performance-lambda. Base: PASS.
   IB45-1-AC3  a GUARD: `.tools/comp-lambdamap check` reports no finding beyond the 14 it reports at the base (listed
@@ -61,6 +64,15 @@ def main():
             print("OK: %s = live (%s, %s)" % (fn, live_sha[:8], live_role))
         if now[NEW].get("tf_resource") != INF_TF:
             fail("%s tf_resource is %r" % (NEW, now[NEW].get("tf_resource")))
+    elif cid == "IB45-1-AC1R":
+        import boto3
+        lam = boto3.client("lambda", region_name="us-east-1")
+        for fn in ROWS[:2]:
+            live_sha = lam.get_function_configuration(FunctionName=fn)["CodeSha256"]
+            got = (now.get(fn) or {}).get("deployed_code_sha256")
+            if got != live_sha:
+                fail("%s deployed_code_sha256 %s != live %s" % (fn, got, live_sha))
+            print("OK: %s deployed_code_sha256 = live %s" % (fn, live_sha[:8]))
     elif cid == "IB45-1-AC2":
         r = subprocess.run(["git", "show", "%s:%s" % (BASE, MAP)], cwd=str(root), capture_output=True)
         if r.returncode or not r.stdout:
