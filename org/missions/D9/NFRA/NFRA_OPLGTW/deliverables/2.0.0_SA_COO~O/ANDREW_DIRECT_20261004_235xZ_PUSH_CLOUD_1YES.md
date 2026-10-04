@@ -1,7 +1,7 @@
-# ANDREW-DIRECT 2026-10-04 ~23:5xZ -- push site-Z CLOUD to origin ("1yes")
+# ANDREW-DIRECT 2026-10-04 ~23:3xZ -- push site-Z CLOUD to origin ("1yes")
 
 - **Channel:** the site-Z terminal of `2.0.0_SA_COO~O` (session 9fb0a7b4-77bd-4ec0-9da1-1ddb651dbc19), typed by Andrew.
-- **Time:** 2026-10-04 ~23:5xZ (19:5x ET).
+- **Time:** 2026-10-04 ~23:3xZ (19:3x ET). Corrected from ~23:5xZ: the record commit b641e1aeae is 23:37:12Z (0.0.0_AB_MSTR~Z msg 29320). The file name keeps the original label.
 - **Recorded by:** `2.0.0_SA_COO~O`, same turn.
 
 ## The call he answered
@@ -12,6 +12,8 @@ The ONE-WORD FORM offered was "1yes, go".
 ## Verbatim
 
 Andrew: "1yes"
+
+Outcome: 0.0.0_AB_MSTR~Z pushed; origin CLOUD 5468d18362 -> 7cb2cf5ccc (ls-remote read, msg 29320), carrying b91a1a44cf, 1d2af57547 and b641e1aeae.
 
 ## Scope as read (surfaced, not adjudicated)
 
