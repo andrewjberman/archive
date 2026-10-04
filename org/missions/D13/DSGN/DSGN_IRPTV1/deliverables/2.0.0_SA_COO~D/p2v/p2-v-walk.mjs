@@ -128,6 +128,16 @@ try {
   log('client picked')
 
   if (opt.failHoldings) {
+    // The identity card and the Performance tab first: the failed snapshot must be said there too.
+    await page.locator('[data-slot="identity-snapshot-failed"], [data-slot="reporting-accounts-failed"]').first().waitFor({ timeout: 30000 }).catch(() => {})
+    packet.snapshot_failed = {
+      card_how_much: (await page.locator('[data-slot="identity-how-much"]').innerText().catch(() => '')).replace(/\s+/g, ' ').trim(),
+      card_error: await page.locator('[data-slot="identity-snapshot-failed"]').count() > 0,
+      performance_error: await page.locator('[data-slot="reporting-accounts-failed"]').count() > 0,
+      performance_loading_panel: await page.locator('[data-slot="status-panel"][data-tab="reporting"]').count() > 0,
+    }
+    await shot(page, 'performance-snapshot-failed')
+    log('snapshot', JSON.stringify(packet.snapshot_failed))
     await page.getByRole('button', { name: 'Holdings', exact: true }).or(page.getByRole('tab', { name: 'Holdings' })).first().click().catch(() => {})
     const panel = page.locator('[data-slot="status-panel"][data-tab="holdings"]').first()
     await panel.waitFor({ timeout: 30000 }).catch(() => {})
