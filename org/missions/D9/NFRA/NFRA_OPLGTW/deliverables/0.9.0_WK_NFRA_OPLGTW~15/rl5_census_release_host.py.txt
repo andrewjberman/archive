@@ -1,0 +1,141 @@
+# OG-rl-5 step 4c census with the RELEASE contract (generated: this header + rl5_census_host.py.txt with main() replaced).
+# The release contract (md5 0514b37eb0198d4f6b114117fc12a5f5, the byte copy at /c/tmp/og-rel10 org/standards and deploy/) is carried as compressed base64 and
+# parsed IN MEMORY on the host; cat.load_contract is pointed at it for this process only. Nothing on the host is written.
+import base64
+import hashlib
+import zlib
+
+from app.integrations.schwab import catalog as cat
+
+_REL_B64Z = (
+    "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"
+    "9vgq"
+)
+_REL_BYTES = zlib.decompress(base64.b64decode(_REL_B64Z))
+assert hashlib.md5(_REL_BYTES).hexdigest() == "0514b37eb0198d4f6b114117fc12a5f5", "release contract bytes corrupted in transit"
+print("RELEASE_CONTRACT_MD5 %s bytes=%d prefixes_dim_transaction=%d" % (
+    hashlib.md5(_REL_BYTES).hexdigest(), len(_REL_BYTES), sum(1 for p in json.loads(_REL_BYTES.decode("utf-8"))["data_prefixes"] if "dim_transaction" in p)))
+_REL = cat.parse_contract(json.loads(_REL_BYTES.decode("utf-8")), "<memory: release contract>")
+cat.load_contract = lambda *a, **k: _REL
+
+# OG-rl-5 step 4b: the R9 grain-column census over EVERY snapshot the gateway can serve for dim_position and dim_asset.
+# Runs on the host through the installed code (prelude: real catalog + roles, in-memory store). Read-only: S3 list/head/get
+# by the catalog and data roles; parquet scratch under OG_RL5_SCRATCH, removed per snapshot and again by the runner.
+# Prints counts, masters, dates and column names only.
+import pyarrow.parquet as pq
+
+R9 = {"dim_position": ("quantity_settled_unsettled", "quantity_cash_settled"),
+      "dim_asset": ("security_description_line_1",)}
+GRAIN = {"dim_position": ("account_id", "cusip", "l_s", "quantity_settled_unsettled", "quantity_cash_settled"),
+         "dim_asset": ("cusip", "security_description_line_1")}
+
+
+def census(label, counterfactual):
+    service, catalog, store, contract = build(counterfactual=counterfactual)
+    allow = lambda: True  # noqa: E731 -- the census is the operator's read; no principal, no grant
+    rows_out, denom, lacking = [], {}, []
+    for master in sorted(contract.masters):
+        listed = catalog.list_dates(master, allow)
+        quals = {"dim_position": [], "dim_asset": []}
+        other = {}
+        for date in sorted(listed):
+            res = catalog.snapshot(master, date, allow)
+            snap = res.snapshot
+            if res.status != "complete" or not snap:
+                other[res.result] = other.get(res.result, 0) + 1
+                continue
+            for ds in quals:
+                if any(f.get("dataset") == ds for f in snap.get("files") or []):
+                    quals[ds].append((date, [dict(f) for f in snap["files"] if f.get("dataset") == ds]))
+        denom[master] = {"marker_dates_listed": len(listed), "non_qualified_by_result": other,
+                         "servable_dim_position": len(quals["dim_position"]),
+                         "servable_dim_asset": len(quals["dim_asset"]),
+                         "first_date": min(listed) if listed else None, "last_date": max(listed) if listed else None}
+        for ds, items in quals.items():
+            for date, entries in items:
+                sources, cleanup = service._fetch(entries, allow)
+                try:
+                    rows, present, blanks = 0, None, {c: 0 for c in R9[ds]}
+                    for src in sources:
+                        pf = pq.ParquetFile(src.path)
+                        names = set(pf.schema_arrow.names)
+                        here = {c: (c in names) for c in GRAIN[ds]}
+                        present = here if present is None else {c: present[c] and here[c] for c in here}
+                        rows += pf.metadata.num_rows
+                        need = [c for c in R9[ds] if c in names]
+                        if need:
+                            tbl = pq.read_table(src.path, columns=need)
+                            for c in need:
+                                blanks[c] += blank_count(tbl.column(c))
+                    missing = [c for c in R9[ds] if not (present or {}).get(c)]
+                    entry = {"m": master, "ds": ds, "date": date, "files": len(sources), "rows": rows,
+                             "missing_r9_cols": missing,
+                             "blank": {c: (None if c in missing else blanks[c]) for c in R9[ds]}}
+                    rows_out.append(entry)
+                    if missing or any(v for c, v in entry["blank"].items() if v):
+                        lacking.append({"m": master, "ds": ds, "date": date, "missing": missing,
+                                        "blank": entry["blank"]})
+                finally:
+                    cleanup()
+    total = len(rows_out)
+    summary = {"label": label, "denominator": denom, "snapshots_censused": total,
+               "dim_position": sum(1 for r in rows_out if r["ds"] == "dim_position"),
+               "dim_asset": sum(1 for r in rows_out if r["ds"] == "dim_asset"),
+               "lacking_or_blank": len(lacking), "lacking_detail": lacking,
+               "state_store_put_runtime_calls_on_real_store": 0,
+               "memstore_catalog_snapshot_puts": store.put_runtime_calls}
+    print("CENSUS_SUMMARY " + json.dumps(summary, sort_keys=True))
+    for r in rows_out:
+        print("CENSUS_ROW " + label + " " + json.dumps(r, sort_keys=True, separators=(",", ":")))
+
+
+def main():
+    census("RELEASE_CONTRACT_IN_MEMORY", False)
+
+
+if __name__ == "__main__":
+    main()

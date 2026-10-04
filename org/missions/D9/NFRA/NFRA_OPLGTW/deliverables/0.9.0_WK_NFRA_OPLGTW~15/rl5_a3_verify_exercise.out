@@ -1,0 +1,59 @@
+== rl5_verify.sh before (SSM a42a2ffe)
+MainPID 608118 env names 50 tools 65 health 200 md5 90/94 vs release list
+== after-program dry-run on live code + release contract in memory
+ssm 9aaa299b-538e-447f-9ebd-502cdc27a40c status=Success
+tmpfs           924M   12M  912M   2% /tmp
+RELEASE_CONTRACT_MD5 0514b37eb0198d4f6b114117fc12a5f5 bytes=9283 prefixes_dim_transaction=2
+CENSUS_SUMMARY {"denominator": {"08242234": {"first_date": "2026-08-31", "last_date": "2026-10-02", "marker_dates_listed": 24, "non_qualified_by_result": {"legacy_marker": 10}, "servable_dim_asset": 14, "servable_dim_position": 14}, "08335338": {"first_date": "2026-08-31", "last_date": "2026-10-02", "marker_dates_listed": 24, "non_qualified_by_result": {"legacy_marker": 10}, "servable_dim_asset": 14, "servable_dim_position": 14}}, "dim_asset": 28, "dim_position": 28, "label": "SERVED", "lacking_detail": [], "lacking_or_blank": 0, "memstore_catalog_snapshot_puts": 28, "snapshots_censused": 56, "state_store_put_runtime_calls_on_real_store": 0}
+RELEASE_CONTRACT_MD5 0514b37eb0198d4f6b114117fc12a5f5 bytes=9283 prefixes_dim_transaction=2
+RELEASE_CONTRACT_MD5 0514b37eb0198d4f6b114117fc12a5f5 bytes=9283 prefixes_dim_transaction=2
+AFTER_RESULT {"after": {"dim_asset": "REFUSED UNAVAILABLE asset_policy_selection_unavailable", "dim_position": "REFUSED INVALID_REQUEST paging_refused_no_unique_grain"}, "after_detail": {"dim_asset": {"code": "UNAVAILABLE", "reason": "asset_policy_selection_unavailable", "status": "REFUSED"}, "dim_position": {"code": "INVALID_REQUEST", "reason": "paging_refused_no_unique_grain", "status": "REFUSED"}}, "after_dim_asset_download": "REFUSED UNAVAILABLE asset_policy_selection_unavailable", "census_after": {"dim_asset": 28, "dim_position": 28, "lacking_or_blank": 0, "marker_dates_by_master": {"08242234": 24, "08335338": 24}, "servable_by_master": {"08242234": 28, "08335338": 28}, "snapshots_censused": 56}, "date": "2026-10-01", "dim_asset_held_check": {"distinct_returned": 0, "error": "REFUSED UNAVAILABLE asset_policy_selection_unavailable", "held_cusips_in_dim_position": 49, "pages": 1, "returned": 0, "unheld_returned": 0}, "granted_accounts": 10, "grants_written": 0, "master": "08242234", "memstore_put_runtime_calls": 1, "page_size": 5, "state_store_written": false, "synthetic_principal": true}
+RUN_RC=0
+SCRATCH_REMOVED=yes
+HOST_TMP_og_rl5_LEFTOVER=0
+
+== rl5_verify.sh after, NEGATIVE CONTROL on the undeployed host
+ssm 4ad1cc51-656c-4b60-aa11-cb799c6e5ece status=Success
+PASS host /health 200: health 200, service active, MainPID 608118 (before 608118)
+FAIL shipped md5 = release bytes (incl. deploy/NFRA_OPLGTW_CONTRACT.json): 90 of 94 identical; not-ok ['app/integrations/schwab/datasets.json', 'app/integrations/schwab/integration.py', 'app/integrations/schwab/query.py', 'deploy/NFRA_OPLGTW_CONTRACT.json']
+PASS tool list unchanged: before 65 after 65 tools
+PASS .env key names unchanged (50): names 50 vs before 50; added [] removed []
+ssm 4f9e1b28-8c7f-45d3-b833-31bb96d718a9 status=Success
+tmpfs           924M   12M  912M   2% /tmp
+CENSUS_SUMMARY {"denominator": {"08242234": {"first_date": "2026-08-31", "last_date": "2026-10-02", "marker_dates_listed": 24, "non_qualified_by_result": {"legacy_marker": 10, "rejected": 14}, "servable_dim_asset": 0, "servable_dim_position": 0}, "08335338": {"first_date": "2026-08-31", "last_date":
+RUN_RC=1
+SCRATCH_REMOVED=yes
+HOST_TMP_og_rl5_LEFTOVER=0
+
+
+STDERR_TAIL: Traceback (most recent call last):
+  File "/tmp/og_rl5_run/run.py", line 294, in <module>
+    after_run()
+  File "/tmp/og_rl5_run/run.py", line 228, in after_run
+    assert res.status == "complete" and res.snapshot, ("snapshot not servable after the release", res.result)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('snapshot not servable after the release', 'rejected')
+
+
+AFTER RUN FAILED (no AFTER_RESULT line)
+--- rl4.AC1.sh ---
+ssm 6b6abcd9-1339-4b7c-aaff-f257ab1c3ae3 status=Success
+ssm 730b452f-3050-485d-9b7a-e89c523802cf status=Success
+arm 1 key names equal the before-set (50): OK
+arm 2 systemd and bash parses agree on every value: OK
+arm 3 host contract a86f7e667cfc vs c69968aa7f70: FAIL
+arm 4 Tax keys present and non-empty: OK
+RELEASE READ-BACK ARMS 3 of 4
+RESULT: FAIL
+--- ht.AC2.sh ---
+ssm 4fbd56ce-e88c-4d59-b0f7-81b27f2f67a1 status=Success
+HOST teams_route_sha256 f470540078a23b8a874e0bebd2fa67cad7e23a82c1aa513c6f904e012ae87337
+HOST taxsma_workbook_sha256 56d4f49017e4c17f721c8613e57195cfe341b7b6e0e1f96bc3524999a65f83a7
+HOST env_keys 50 teams_bearer_present True teams_bearer_empty False teams_labels_ok True tax_nonempty True
+arm 1 host teams_route.py = db92656c72 (f470540078a2): OK
+arm 2 .env 50 keys, TEAMS_BEARER non-empty, label teamsassist, Tax keys intact: OK
+arm 3 /hx/teams/x no bearer -> 404 (app refusal, no redirect): OK
+arm 4 / -> 302 (sign-in intact): OK
+SERVED ARMS 4 of 4
+RESULT: PASS
+rl5_verify: host + AFTER checks rc=2; rl4.AC1 rc=1; ht.AC2 rc=0

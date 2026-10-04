@@ -1,0 +1,102 @@
+# OG-rl-5 step 5, the AFTER run's on-host part. NOT run alone: rl5_verify.py composes
+#   rl5_host_prelude.py.txt + (rl5_census_host.py.txt up to its main()) + (rl5_paging_host.py.txt up to its main()) + this file
+# and ships it through rl5_ssm.py. Read-only on the host: the REAL (deployed) service construction, the real contract file, an IN-MEMORY
+# state store holding one SYNTHETIC grant, an in-memory audit sink. Prints counts, codes and booleans only; account ids and CUSIPs are
+# never printed.
+import contextlib
+import io
+
+
+def refused_or_ok(result):
+    o = outcome(result)
+    return "OK" if o["status"] == "OK" else "REFUSED %s %s" % (o.get("code"), o.get("reason"))
+
+
+def after_run():
+    import pyarrow.parquet as pq
+    from app import data_entitlement as de
+    from app.context import Principal
+
+    allow = lambda: True  # noqa: E731
+    # 1. the SERVED census (the deployed contract file, no in-memory edit): every snapshot the gateway can serve for the two datasets
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        census("SERVED", False)
+    text = buf.getvalue()
+    print(text, end="")
+    summary = json.loads([ln for ln in text.splitlines() if ln.startswith("CENSUS_SUMMARY ")][0][len("CENSUS_SUMMARY "):])
+    servable = {m: v["servable_dim_position"] + v["servable_dim_asset"] for m, v in summary["denominator"].items()}
+    census_after = {"servable_by_master": servable, "lacking_or_blank": summary["lacking_or_blank"],
+                    "snapshots_censused": summary["snapshots_censused"], "dim_position": summary["dim_position"],
+                    "dim_asset": summary["dim_asset"], "marker_dates_by_master": {m: v["marker_dates_listed"] for m, v in summary["denominator"].items()}}
+
+    # 2. the synthetic principal and grant, in memory only (the OG-r-4 / onhost_bench mechanism)
+    served, catalog, _store, contract = build()
+    res = catalog.snapshot(MASTER, DATE, allow)
+    assert res.status == "complete" and res.snapshot, ("snapshot not servable after the release", res.result)
+    entries = [dict(f) for f in res.snapshot["files"] if f.get("dataset") == "dim_position"]
+    sources, cleanup = served._fetch(entries, allow)
+    try:
+        rows = []
+        for src in sources:
+            tbl = pq.read_table(src.path, columns=["account_id", "cusip"])
+            rows.extend(zip(tbl.column("account_id").to_pylist(), tbl.column("cusip").to_pylist()))
+    finally:
+        cleanup()
+    granted = sorted({a for a, _c in rows if a})[:ACCOUNTS]
+    held = {c for a, c in rows if a in set(granted) and c}
+    fields = contract.raw["fields"]
+    tid, oid = str(uuid.uuid4()), str(uuid.uuid4())
+    scope = {"masters": [MASTER], "datasets": ["dim_position", "dim_asset"], "accounts": {MASTER: granted},
+             "dates": {"mode": "fixed_dates", "dates": [DATE]},
+             "columns": {"dim_position": list(fields["dim_position"]), "dim_asset": list(fields["dim_asset"])},
+             "operations": list(de.OPERATIONS)}
+    g = de.grant_item(tid, oid, 1, "active", scope)
+    pr = de.profile_item(tid, oid, "active", 1, grant_revision=1)
+    svc, _cat, st, _c = build()
+    st.items.update({(de.grant_key(tid, oid, 1).pk, de.grant_key(tid, oid, 1).sk): g,
+                     (de.profile_key(tid, oid).pk, de.profile_key(tid, oid).sk): pr})
+    principal = Principal(tid, oid, "rl5-synthetic@opalinvest.invalid")
+
+    # 3. the paging pages of step 4, now AFTER the release
+    qpos = {"master": MASTER, "dataset": "dim_position", "business_date": DATE, "mode": "rows",
+            "columns": ["account_ref", "cusip", "l_s", "quantity_settled_unsettled"], "page_size": PAGE}
+    qast = {"master": MASTER, "dataset": "dim_asset", "business_date": DATE, "mode": "rows",
+            "columns": ["cusip", "security_description_line_1"], "page_size": PAGE}
+    r_pos = asyncio.run(svc.query(principal, qpos))
+    r_ast = asyncio.run(svc.query(principal, qast))
+
+    # 4. the held check: page every dim_asset row of the grant's view (cursor-followed, 100 per page) and compare each CUSIP to the CUSIPs
+    #    the grant's accounts hold in dim_position on the same master/date
+    returned, pages, last_err = [], 0, None
+    q = {"master": MASTER, "dataset": "dim_asset", "business_date": DATE, "mode": "rows", "columns": ["cusip"], "page_size": 100}
+    while pages < 200:
+        r = asyncio.run(svc.query(principal, q))
+        pages += 1
+        if r.isError:
+            last_err = refused_or_ok(r)
+            break
+        doc = r.structuredContent or {}
+        returned.extend(row[0] for row in (doc.get("rows") or []))
+        if not doc.get("cursor"):
+            break
+        q = dict(q, cursor=doc["cursor"])
+    unheld = [c for c in returned if c not in held]
+    held_check = {"returned": len(returned), "unheld_returned": len(unheld), "pages": pages, "distinct_returned": len(set(returned)),
+                  "held_cusips_in_dim_position": len(held), "error": last_err}
+
+    # 5. the download control: dim_asset prepare_download keeps its guard
+    dl = {"master": MASTER, "dataset": "dim_asset", "business_date": DATE, "mode": "rows", "columns": ["cusip"]}
+    download = refused_or_ok(asyncio.run(svc.prepare_download(principal, query=dl)))
+
+    out = {"master": MASTER, "date": DATE, "page_size": PAGE, "granted_accounts": len(granted),
+           "after": {"dim_position": refused_or_ok(r_pos), "dim_asset": refused_or_ok(r_ast)},
+           "after_detail": {"dim_position": outcome(r_pos), "dim_asset": outcome(r_ast)},
+           "census_after": census_after, "dim_asset_held_check": held_check, "after_dim_asset_download": download,
+           "synthetic_principal": True, "grants_written": 0, "state_store_written": False,
+           "memstore_put_runtime_calls": st.put_runtime_calls}
+    print("AFTER_RESULT " + json.dumps(out, sort_keys=True))
+
+
+if __name__ == "__main__":
+    after_run()
