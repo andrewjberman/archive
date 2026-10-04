@@ -1,0 +1,39 @@
+# OG-rl-5 step 4b diagnostic 2: (a) the service process's contract-path variable (ONE key read from /proc, not .env);
+# (b) the dim_transaction key shape in each rejected closure; (c) the rejected-date tally by finding signature.
+import subprocess
+def main():
+    pid = subprocess.run(["systemctl", "show", "opal-gateway", "-p", "MainPID", "--value"], capture_output=True, text=True).stdout.strip()
+    val = None
+    if pid.isdigit() and pid != "0":
+        raw = open("/proc/%s/environ" % pid, "rb").read().split(b"\0")
+        for kv in raw:
+            if kv.startswith(b"NFRA_OPLGTW_CONTRACT_PATH="):
+                val = kv.split(b"=", 1)[1].decode()
+    print("SERVICE_MAINPID_PRESENT", bool(pid.isdigit() and pid != "0"), "NFRA_OPLGTW_CONTRACT_PATH_in_process", val)
+    service, catalog, store, contract = build()
+    allow = lambda: True  # noqa: E731
+    from app.integrations.schwab import catalog as cat
+    print("CONTRACT datasets", list(contract.datasets), "data_prefixes", list(contract.data_prefixes))
+    for master in sorted(contract.masters):
+        sig = {}
+        samples = {}
+        for date in sorted(catalog.list_dates(master, allow)):
+            res = catalog.snapshot(master, date, allow)
+            marker, _v = catalog._read_marker(catalog.marker_key(master, date), allow)
+            closure = marker.get("closure") if isinstance(marker, dict) else None
+            if not isinstance(closure, dict):
+                s = "legacy"
+            else:
+                f = cat.membership_findings(marker, closure, master, date, contract)
+                tabs = sorted((closure.get("tables") or {}).keys())
+                s = "closure status=%s result=%s findings=%s tables=%s" % (
+                    closure.get("status"), res.result, sorted(set((x["class"], x["subject"]) for x in f)), tabs)
+                for table, obj, where in cat.named_objects(closure):
+                    if table == "dim_transaction" and master not in samples:
+                        k = str(obj.get("key"))
+                        samples[master] = k.replace(date, "<DATE>")[:160]
+            sig.setdefault(s, []).append(date)
+        for s, ds in sig.items():
+            print("SIG", master, len(ds), ds[0], "..", ds[-1], s)
+        print("DIM_TRANSACTION_KEY_SHAPE", master, samples.get(master))
+main()

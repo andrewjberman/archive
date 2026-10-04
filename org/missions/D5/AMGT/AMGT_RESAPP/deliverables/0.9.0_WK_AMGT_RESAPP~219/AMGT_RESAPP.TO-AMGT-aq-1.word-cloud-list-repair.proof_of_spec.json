@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-aq-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aq-1.word-cloud-list-repair.md",
+    "group": "C",
+    "vintage_commit": "e410b00b27"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "e410b00b27",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aq-1.word-cloud-list-repair.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~219",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "52898635f976c0fe286344b6fb20123f6d1bb10b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local worktree commit only; no deploy in this cell's bounds (the redeploy is aq-5). Changed: _word_cloud_own_words (new), _word_cloud_block, WORD_CLOUD_STOP_WORDS (158 -> 165, +7), WORD_CLOUD_STOP_WORDS_SOURCE.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_word_cloud_repair.py",
+      "kind": "test",
+      "commit_or_etag": "52898635f976c0fe286344b6fb20123f6d1bb10b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "18 plant cases, offline; 13 fail and 5 pass against the base scoped_amgt.py.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every plant case passes (no ticker, short-name, long-name or boilerplate word served; inverted window with its reason and no inverted pair); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_word_cloud_repair.py; echo \"exit=$?\"",
+      "output_evidence": "============================= 18 passed in 0.60s ==============================\nexit=0",
+      "denominator": "18 of 18 plant cases passed (13 of 18 fail with the fix removed)",
+      "status": "PASS",
+      "expect": "18 passed.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "C1 PASS (0 clouds carry their own ticker root or a served short-name word, over every name on both the default range and 2026-09-01..today); C2 PASS (0 clouds carry an extended-list word); C3 PASS; R67 C23 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round67/checks/r67_served.py --cell c23 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 0 clouds carry their own ticker root or a served short-name word names 95 payloads 190 non-empty 128 offenders 0 e.g. []\nPASS C2 0 clouds carry a word on the extended list payloads 190 offenders 0 e.g. []\nPASS C3 an inverted window serves its reason and no inverted from/to pair status 200 window {} reason 'the requested window ends before the first day of the store (2026-01-01): no hea'\nR67 C23 SERVED: YES\nexit=0",
+      "denominator": "95 names x 2 ranges = 190 payloads, 128 non-empty, 0 offenders on C1 and C2",
+      "status": "PASS",
+      "expect": "PASS C1.*PASS C2.*PASS C3.*R67 C23 SERVED: YES.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "R66 C18 SERVED: YES (the cloud still serves counted, ordered terms on BA, AMD and VLO); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round66/checks/r66_served.py --cell c18 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 VLO_US_Equity serves 1..40 terms, counted, ordered, no stop word, no name word status 200 terms 40 top [('ban', 3), ('diesel', 3), ('export', 3), ('oil', 2), ('sector', 2)] bad 0 ordered True stop-hits [] name-hits []\nPASS C2 BA with no headlines in the window serves an empty list with a reason status 200\nR66 C18 SERVED: YES\nexit=0",
+      "denominator": "3 names (BA, AMD, VLO); clauses C1 and C2 PASS",
+      "status": "PASS",
+      "expect": "R66 C18 SERVED: YES.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "scoped_amgt.py restored to HEAD~ (the fix removed) and test_word_cloud_repair.py run, then the fixed file restored.",
+      "expected": "the plant cases fail without the fix",
+      "observed": "13 failed, 5 passed with the fix removed; after restore 18 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 file run three times (once with test_word_cloud.py, once after the mutant restore, once in the literal -v form), no code change between runs; AC2 and AC3 run once against the same local stored gold.",
+      "observed": "AC1 reads 18 passed every run. AC2 and AC3 are one run each (their inputs are the stored local snapshot, not re-run for determinism).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No deploy, no push, no portal write.",
+      "reason": "BOUNDS 1 of this cell; the redeploy is cell aq-5."
+    }
+  ],
+  "surprises": [],
+  "session_log": "N/A -- no session-log path in this worker's <paths>. Worktree C:/tmp/r67-219 on wk-AMGT_RESAPP-219; code commit 52898635f976c0fe286344b6fb20123f6d1bb10b LOCAL, never pushed. lib/research/api/tests/ full suite: 517 passed in 135.57s.",
+  "compiler_tools": [
+    {
+      "tool": "pytest lib/research/api/tests/",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/",
+      "result": "517 passed, 191 warnings in 135.57s (0:02:15)"
+    }
+  ]
+}

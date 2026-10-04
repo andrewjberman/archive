@@ -1,0 +1,91 @@
+# OG-rl-5 host prelude (shipped to the host by rl5_ssm.py, concatenated BEFORE a program; never run alone).
+# Builds the SERVED SchwabService classes with: the REAL catalog, roles, S3 fetcher and ExecutionEngine of the installed
+# release, and an IN-MEMORY state store / audit sink / keyring / ticket issuer. Nothing is written to DynamoDB, the audit
+# bucket or any host path outside OG_RL5_SCRATCH. No .env is read or sourced: the four NON-SECRET configuration values
+# below are the ones the committed deploy template renders; the ExternalIds are read by the service's own
+# aws_roles.environ_with_external_ids from the Secrets Manager secret and are never printed.
+import asyncio
+import json
+import os
+import sys
+import uuid
+
+sys.path.insert(0, "/opt/opal-gateway")
+SCRATCH = os.environ["OG_RL5_SCRATCH"]
+os.environ.update({
+    "NFRA_OPLGTW_CONTRACT_PATH": "/opt/opal-gateway/deploy/NFRA_OPLGTW_CONTRACT.json",
+    "SCHWAB_READER_ROLE_ARN": "arn:aws:iam::313476888478:role/gateway-schwab-read-role",
+    "SCHWAB_CATALOG_ROLE_ARN": "arn:aws:iam::313476888478:role/gateway-schwab-catalog-read-role",
+    "SCHWAB_EXTERNAL_IDS_SECRET_ID": "opal/mcp/opal-gateway-schwab-reader-external-ids",
+})
+
+
+class MemStore:
+    """The two AccessState calls the catalog, entitlement guard and reference resolver make, over a dict."""
+
+    def __init__(self):
+        self.items = {}
+        self.put_runtime_calls = 0
+
+    def get(self, key):
+        item = self.items.get((key.pk, key.sk))
+        return json.loads(json.dumps(item, default=str)) if item is not None else None
+
+    def put_runtime(self, key, item, condition, names=None, values=None):
+        from app import access_state as acs
+        self.put_runtime_calls += 1
+        if (key.pk, key.sk) in self.items:
+            raise acs.ConditionFailed("exists")
+        self.items[(key.pk, key.sk)] = json.loads(json.dumps(item, default=str))
+
+
+class AuditSink:
+    def __init__(self):
+        self.puts = 0
+
+    def put_object(self, Bucket, Key, Body, ContentType):
+        self.puts += 1
+        return {"ResponseMetadata": {"HTTPStatusCode": 200, "RequestId": "rl5"}, "ETag": '"rl5"'}
+
+
+def build(asset_policy=None, counterfactual=False):
+    """Returns (service, catalog, store, contract). asset_policy=None, counterfactual=False is the SERVED construction.
+    counterfactual=True parses an IN-MEMORY copy of the contract with the two dim_transaction data prefixes added (the file on
+    the host is untouched): it answers what the catalog would serve if the contract carried them, and is never the served state."""
+    from app import account_ref as aref
+    from app.integrations.schwab import aws_roles
+    from app.integrations.schwab import catalog as cat
+    from app.integrations.schwab import integration as integ
+    from app.integrations.schwab.engine import ExecutionEngine
+
+    contract = cat.load_contract()
+    if counterfactual:
+        raw = json.loads(json.dumps(contract.raw))
+        raw["data_prefixes"] = list(raw["data_prefixes"]) + ["schwab/%s/silver/dim_transaction/" % m for m in sorted(contract.masters)]
+        contract = cat.parse_contract(raw, "<memory: counterfactual>")
+    configs = aws_roles.role_configs(contract.raw, aws_roles.environ_with_external_ids(os.environ))
+    data_role = aws_roles.AssumedRole(configs[aws_roles.READER])
+    catalog_role = aws_roles.AssumedRole(configs[aws_roles.CATALOG])
+    store = MemStore()
+    catalog = cat.Catalog(contract=contract, catalog_role=catalog_role, data_role=data_role, store=store)
+    os.makedirs(os.path.join(SCRATCH, "src"), exist_ok=True)
+    fetch = integ.S3SourceFetcher(data_role, contract, temp_root=os.path.join(SCRATCH, "src"))
+    engine = ExecutionEngine(temp_root=os.path.join(SCRATCH, "engine"))
+    keyring = aref.Keyring("v1", b"\x07" * 32)
+    service = integ.SchwabService(
+        contract_raw=contract.raw, catalog=catalog, engine=engine, fetch_sources=fetch, store=store,
+        audit_client=AuditSink(), audit_bucket="opal-mcp-audit", keyring_provider=lambda: keyring,
+        ticket_issuer=lambda request: {"url": "https://rl5.invalid/x#t"}, asset_policy=asset_policy,
+        reference_key=b"\x05" * 32)
+    return service, catalog, store, contract
+
+
+def blank_count(column):
+    """Null or all-whitespace string cells in a pyarrow ChunkedArray."""
+    import pyarrow as pa
+    import pyarrow.compute as pc
+    n = column.null_count
+    if pa.types.is_string(column.type) or pa.types.is_large_string(column.type):
+        trimmed = pc.utf8_trim_whitespace(column)
+        n += pc.sum(pc.fill_null(pc.equal(trimmed, ""), False).cast(pa.int64())).as_py() or 0
+    return int(n)

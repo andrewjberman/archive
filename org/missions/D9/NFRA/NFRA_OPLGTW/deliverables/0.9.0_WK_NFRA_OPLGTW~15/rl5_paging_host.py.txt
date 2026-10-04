@@ -1,0 +1,77 @@
+# OG-rl-5 steps 4 / 5 (BEFORE and AFTER): one rows-mode PAGE of dim_position and one of dim_asset on ONE qualified snapshot
+# (master 08242234, business date 2026-10-01 = the newest date the OG-gr-1/2 measured basis covers), run by a SYNTHETIC
+# principal (random GUIDs) holding a SYNTHETIC grant that lives only in this process's in-memory store (rl5_host_prelude.py).
+# Three constructions are measured: SERVED (the live contract file, as the service reads it), and COUNTERFACTUAL (the same installed code with
+# an in-memory contract copy that also carries the dim_transaction data prefixes -- needed because the served catalog rejects every day, row
+# Z-W15-S33; the file on the host is untouched). The page size (5) is below the matched row count, so the request pages: it must pass the snapshot grain check.
+# Real data accounts are read from the snapshot to scope the grant and are never printed. Prints outcomes and counts only.
+import uuid
+
+MASTER = "08242234"
+DATE = "2026-10-01"
+PAGE = 5
+ACCOUNTS = 10
+
+
+def outcome(result):
+    doc = result.structuredContent or {}
+    if result.isError:
+        err = doc.get("error") or {}
+        return {"status": "REFUSED", "code": err.get("code"), "reason": err.get("reason")}
+    return {"status": "OK", "returned_count": doc.get("returned_count"), "matched_row_count": doc.get("matched_row_count"),
+            "truncated": doc.get("truncated"), "has_cursor": bool(doc.get("cursor"))}
+
+
+def main():
+    import pyarrow.parquet as pq
+    from app import data_entitlement as de
+    from app.context import Principal
+
+    allow = lambda: True  # noqa: E731
+    cf_served, cf_catalog, cf_store, contract = build(counterfactual=True)
+    res = cf_catalog.snapshot(MASTER, DATE, allow)
+    assert res.status == "complete" and res.snapshot, ("snapshot not servable even counterfactually", res.result)
+    entries = [dict(f) for f in res.snapshot["files"] if f.get("dataset") == "dim_position"]
+    sources, cleanup = cf_served._fetch(entries, allow)
+    try:
+        accts = set()
+        for src in sources:
+            accts.update(pq.read_table(src.path, columns=["account_id"]).column("account_id").to_pylist())
+    finally:
+        cleanup()
+    granted = sorted(a for a in accts if a)[:ACCOUNTS]
+    fields = contract.raw["fields"]
+    tid, oid = str(uuid.uuid4()), str(uuid.uuid4())
+    scope = {"masters": [MASTER], "datasets": ["dim_position", "dim_asset"], "accounts": {MASTER: granted},
+             "dates": {"mode": "fixed_dates", "dates": [DATE]},
+             "columns": {"dim_position": list(fields["dim_position"]), "dim_asset": list(fields["dim_asset"])},
+             "operations": list(de.OPERATIONS)}
+    g = de.grant_item(tid, oid, 1, "active", scope)
+    pr = de.profile_item(tid, oid, "active", 1, grant_revision=1)
+    grant_items = {(de.grant_key(tid, oid, 1).pk, de.grant_key(tid, oid, 1).sk): g,
+                   (de.profile_key(tid, oid).pk, de.profile_key(tid, oid).sk): pr}
+    principal = Principal(tid, oid, "rl5-synthetic@opalinvest.invalid")
+
+    def fresh(counterfactual, seam):
+        svc, _cat, st, _c = build(asset_policy=object() if seam else None, counterfactual=counterfactual)
+        st.items.update(grant_items)
+        return svc, st
+
+    qpos = {"master": MASTER, "dataset": "dim_position", "business_date": DATE, "mode": "rows",
+            "columns": ["account_ref", "cusip", "l_s", "quantity_settled_unsettled"], "page_size": PAGE}
+    qast = {"master": MASTER, "dataset": "dim_asset", "business_date": DATE, "mode": "rows",
+            "columns": ["cusip", "security_description_line_1"], "page_size": PAGE}
+    out = {"master": MASTER, "date": DATE, "page_size": PAGE, "granted_accounts": len(granted),
+           "synthetic_principal": True, "grants_written": 0, "state_store_written": False, "real_store_touched": False}
+    puts = 0
+    for label, cf, seam in (("served", False, False), ("counterfactual_served", True, False), ("counterfactual_seam", True, True)):
+        svc, st = fresh(cf, seam)
+        out[label] = {"dim_position": outcome(asyncio.run(svc.query(principal, qpos))),
+                      "dim_asset": outcome(asyncio.run(svc.query(principal, qast)))}
+        puts += st.put_runtime_calls
+    out["memstore_catalog_snapshot_puts"] = puts
+    print("PAGING_RESULT " + json.dumps(out, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()
