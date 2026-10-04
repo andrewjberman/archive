@@ -11,7 +11,7 @@ There is NO code change.
 
 | property | value |
 |---|---|
-| function CodeSha256 | `aoQ+WrefJ+JjQcymqyrt2c7MEIlTPmvjJEv8sqZ6M98=` (aq-5's code leg, LastModified 2026-10-04T21:41:09Z) |
+| function CodeSha256 | `aoQ+WrefJ+JjQcymqyrt2c7MEIlTPmvjJEv8sqZ6M98=` (aq-5's code leg, LastModified 2026-10-04T21:41:09Z), OR the build AMGT_CORPUS al-5 lands at `288de3d95d` (entry `amgt-corpus-r36-al5`; it carries round 67, since `d8bafe6896` is its ancestor). Leg 3 runs after that entry closes and does not move the code |
 | function MemorySize | 1769 |
 | role policy `opal-amgt-scoped-api-grants` | the aq-5 grant leg @f61711ef2b: the pool prefixes WITHOUT `chatter_window/`, plus the scanner object |
 | simulate GetObject `opal-data-harvest/amgt/harvest/gold/chatter_window/date=2026-10-01/part-0.json` | implicitDeny |
