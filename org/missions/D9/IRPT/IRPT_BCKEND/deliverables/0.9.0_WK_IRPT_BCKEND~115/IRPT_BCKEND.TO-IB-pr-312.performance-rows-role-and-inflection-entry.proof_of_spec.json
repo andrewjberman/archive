@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-312",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "2ba6a4c27a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "2ba6a4c27a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-312.performance-rows-role-and-inflection-entry.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~115",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "ecba9b57e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bb620b6df5 (49F iam_role + Inflection row, naming limb 'NAMING-GATE: PASS 0 graded') and ecba9b57e5 (recorder stamp, naming PASS 0 graded), LOCAL on wk-IRPT_BCKEND-115; AWS reads only",
+      "artifact_covered_by": [
+        "IB46-1-AC1",
+        "IB46-1-AC2",
+        "IB46-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB46-1-AC1",
+      "criterion_verbatim": "the adapter, the 49F producer and the Inflection producer rows each carry deployed_code_sha256 and iam_role equal to live; the Inflection row's tf_resource is its module address and its tf_file equals the 49F row's.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r46/p46_performance_rows_complete.py\" . IB46-1-AC1",
+      "output_evidence": "OK: irpt-performance-adapter = live (NU6YVERL, irpt-performance-adapter-role) | OK: irpt-holdings-performance-lambda = live (0PuFBxdJ, irpt-49f-holdings-performance-role) | OK: irpt-inf-holdings-performance-lambda = live (0PuFBxdJ, irpt-inf-holdings-performance-role) | IB46-1-AC1 PASS (rc=0)",
+      "denominator": "3 of 3 rows verified against live",
+      "status": "PASS",
+      "expect": "IB46-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB46-1-AC2",
+      "criterion_verbatim": "a GUARD: against base 7de9db9085, no row other than the 49F and Inflection rows changes, and the only row added is the Inflection one.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r46/p46_performance_rows_complete.py\" . IB46-1-AC2",
+      "output_evidence": "OK: 228 rows; added ['irpt-inf-holdings-performance-lambda']; only the named rows may differ | IB46-1-AC2 PASS (rc=0)",
+      "denominator": "228 of 228 rows compared against base 7de9db9085",
+      "status": "PASS",
+      "expect": "IB46-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "IB46-1-AC3",
+      "criterion_verbatim": "a GUARD: comp-lambdamap check reports no finding beyond the 14 at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r46/p46_performance_rows_complete.py\" . IB46-1-AC3",
+      "output_evidence": "OK: 14 finding(s), all present at the base (14) | IB46-1-AC3 PASS (rc=0)",
+      "denominator": "14 of 14 findings present at the base",
+      "status": "PASS",
+      "expect": "IB46-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base state is the mutant: IB46-1-AC1 fails at base (49F iam_role != live; Inflection row absent), per the issuer's dry run at 7de9db9085.",
+      "expected": "IB46-1-AC1 FAIL at base, PASS after the edit and the recorder stamp.",
+      "observed": "PASS at HEAD ecba9b57e5.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The live Inflection CodeSha256 was read before the recorder run.",
+      "observed": "0PuFBxdJSbFHNJ9+Z3weyzLvXyZhgZFk2dkGAbIYb/0= equals the hash the check read afterwards.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "source-map-reconcile-audit.jsonl",
+      "reason": "the recorder's reconcile reported 0 reconciled, 0 HELD, 1 already-in-parity, so no audit line was written"
+    },
+    {
+      "item": "infra/aws/terraform/investor-reporting/CHANGELOG.json",
+      "reason": "the recorder's entry untagged-bb620b6d is not committed: the naming limb refused it (row IRPT_BCKEND-W115-S1)"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W114-S1",
+    "IRPT_BCKEND-W115-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "record-terraform-deploy.sh investor-reporting --function irpt-inf-holdings-performance-lambda --code-sha256 <live>",
+      "invocation": "one run",
+      "result": "Resolved deployment set named exactly irpt-inf-holdings-performance-lambda; reconcile OK (1 already-in-parity); no HALF-LANDED; its own commit refused by the naming limb"
+    }
+  ],
+  "session_log": "git log wk-IRPT_BCKEND-115; .scratch/rec.out (untracked)"
+}

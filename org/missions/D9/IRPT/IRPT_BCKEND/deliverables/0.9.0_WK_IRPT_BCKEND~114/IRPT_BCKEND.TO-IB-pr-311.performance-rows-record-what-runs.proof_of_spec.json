@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-311",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "2ba6a4c27a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "2ba6a4c27a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-311.performance-rows-record-what-runs.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~114",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "37090d00b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two recorder commits on wk-IRPT_BCKEND-114 (LOCAL): c64bd53784 irpt-performance-adapter, 37090d00b1 irpt-holdings-performance-lambda; AWS reads only; the iam_role correction and Inflection row are removed from the order by amendment 1 (854da61b49) and carried on row IRPT_BCKEND-W114-S1",
+      "artifact_covered_by": [
+        "IB45-1-AC1R",
+        "IB45-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/CHANGELOG.json",
+      "kind": "config_data",
+      "commit_or_etag": "37090d00b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "written by the recorder in the same two commits",
+      "artifact_covered_by": [
+        "IB45-1-AC1R"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB45-1-AC1R",
+      "criterion_verbatim": "irpt-performance-adapter and irpt-holdings-performance-lambda each carry deployed_code_sha256 = the live CodeSha256.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r45/p45_performance_rows_recorded.py\" . IB45-1-AC1R",
+      "output_evidence": "OK: irpt-performance-adapter deployed_code_sha256 = live NU6YVERL | OK: irpt-holdings-performance-lambda deployed_code_sha256 = live 0PuFBxdJ | IB45-1-AC1R PASS (rc=0)",
+      "denominator": "2 of 2 rows verified against the live CodeSha256",
+      "status": "PASS",
+      "expect": "IB45-1-AC1R PASS"
+    },
+    {
+      "criterion_id": "IB45-1-AC2",
+      "criterion_verbatim": "a GUARD: against base ad781b948a, no other row changes, and the only row added is the Inflection one.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r45/p45_performance_rows_recorded.py\" . IB45-1-AC2",
+      "output_evidence": "OK: 227 rows; added []; only the named rows may differ | IB45-1-AC2 PASS (rc=0)",
+      "denominator": "227 of 227 rows compared against base ad781b948a; no row added (Inflection row omitted by amendment 1)",
+      "status": "PASS",
+      "expect": "IB45-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "IB45-1-AC3",
+      "criterion_verbatim": "a GUARD: .tools/comp-lambdamap check reports no finding beyond the 14 at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r45/p45_performance_rows_recorded.py\" . IB45-1-AC3",
+      "output_evidence": "OK: 14 finding(s), all present at the base (14) | IB45-1-AC3 PASS (rc=0)",
+      "denominator": "14 of 14 findings present at the base",
+      "status": "PASS",
+      "expect": "IB45-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base state is the mutant: IB45-1-AC1R fails at base on the adapter's 09-24 hash and the 49F row's missing hash.",
+      "expected": "IB45-1-AC1R FAIL at base, PASS after the two recorder runs.",
+      "observed": "After the two recorder runs (c64bd53784, 37090d00b1) both hashes equal the live CodeSha256 and IB45-1-AC1R PASSes.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each recorder run read its own live hash first.",
+      "observed": "Live hashes read before the runs equal those the check read afterwards (2 of 2).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "source-map-reconcile-audit.jsonl",
+      "reason": "each recorder run reported reconcile-deployed 0 reconciled, 0 HELD, 1 already-in-parity, so no audit line was written"
+    },
+    {
+      "item": "irpt-inf-holdings-performance-lambda recorder run",
+      "reason": "removed from the order by amendment 1 (854da61b49); carried on row IRPT_BCKEND-W114-S1, not resolved here"
+    },
+    {
+      "item": "49F iam_role correction",
+      "reason": "removed from the order by amendment 1 (854da61b49); carried on row IRPT_BCKEND-W114-S1, not resolved here"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W114-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "record-terraform-deploy.sh investor-reporting --function <fn> --code-sha256 <live>",
+      "invocation": "two runs, one per function (adapter, 49F); Resolved deployment set named exactly one function each time",
+      "result": "c64bd53784 irpt-performance-adapter; 37090d00b1 irpt-holdings-performance-lambda; no HALF-LANDED"
+    }
+  ],
+  "session_log": "git log wk-IRPT_BCKEND-114; .scratch/rec49.log (untracked)"
+}
