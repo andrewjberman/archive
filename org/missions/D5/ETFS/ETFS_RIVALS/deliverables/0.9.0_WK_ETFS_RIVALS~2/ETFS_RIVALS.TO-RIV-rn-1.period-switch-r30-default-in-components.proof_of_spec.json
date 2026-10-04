@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "to_id": "ETFS_RIVALS.TO-RIV-rn-1.period-switch-r30-default-in-components",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "5f6b2a22d7",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-rn-1.period-switch-r30-default-in-components.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f6b2a22d7"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/render.py",
+      "kind": "script",
+      "commit_or_etag": "f853bed481",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "J1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r8rn1_period_switch.py",
+      "kind": "test",
+      "commit_or_etag": "f853bed481",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "four rf-period radios with R30 checked; the top switch reads R30, a divider, MTD, QTD, YTD; the rankings component and every trend card hold labels for all four; no script -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round8/checks/rn-1.AC1.py",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "output_evidence": "rf-period radios: ['rf-period-MTD', 'rf-period-QTD', 'rf-period-R30', 'rf-period-YTD'] | checked: ['rf-period-R30']\nOK:   (a) four period radios; R30 is the checked one\ntop switch order: ['R30', '|', 'MTD', 'QTD', 'YTD']\nOK:   (b) the top switch reads R30, a divider, then MTD, QTD, YTD\nrankings components: 2 [['MTD', 'QTD', 'R30', 'YTD'], ['MTD', 'QTD', 'R30', 'YTD']] | trend cards: 2 [['MTD', 'QTD', 'R30', 'YTD'], ['MTD', 'QTD', 'R30', 'YTD']] | <script: False\nOK:   (c) the rankings component and every trend card hold labels for all four periods; no script\nrank panels: [('IDVZ', 'MTD'), ('IDVZ', 'QTD'), ('IDVZ', 'R30'), ('IDVZ', 'YTD'), ('TXUE', 'MTD'), ('TXUE', 'QTD'), ('TXUE', 'R30'), ('TXUE', 'YTD')]\nOK:   (d) control: a rank panel per fund for each period the page renders\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 OK lines (a-d) under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "every rank and trend panel states its period, first and last date and trading days; a clipped YTD reads 'Since first report' and never 'Year to date'; R30 reads 'Last 30 trading days' -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round8/checks/rn-1.AC2.py",
+      "expect": "AC2 RESULT: PASS 0 failures",
+      "output_evidence": "rank panels: 8 | without a full window line: []\nOK:   (a) every rank panel states its period, its two dates and its trading days\nIDVZ YTD window: Since first report, 2026-08-21 to 2026-10-01, 20 trading days. | R30 windows: ['Last 30 trading days, 2026-08-20 to 2026-10-01, 20 trading days.', 'Last 30 trading days, 2026-08-20 to 2026-10-01, 20 trading days.']\nOK:   (b) IDVZ's clipped YTD reads 'Since first report', never 'Year to date'; R30 reads 'Last 30 trading days'\ntrend cards: 2 | each with four windowed period panels: [True, True]\nOK:   (c) every trend card holds a windowed panel per period\nOK:   (d) control: TXUE's unclipped YTD still reads 'Year to date'\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 OK lines (a-d) under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "the served page after the deploy opens on the last 30 trading days, the switch inside both components moves them together, and no window is mislabelled; positive control: the served 2026-10-02 page (YTD default; IDVZ 'Year to date (2026), 2026-08-21 to 2026-10-01')",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "none: judgment criterion on the SERVED page after the deploy; nothing in round 8 deploys from a worker",
+      "output_evidence": "Worker-side only: rn-1.AC1 and rn-1.AC2 render the fixture page offline and read PASS 0 failures; an-1.AC1 and rw-1.AC1..AC3 still PASS; full package suite 608 passed, 2 skipped, 0 failed. No served page was read by this worker.",
+      "denominator": "N/A -- judgment criterion; the served page of the first publish after the deploy is the object",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion graded by 3.0.0_SA_CVO~RV at L9 on the served page after the deploy; the worker records output and no verdict."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "none run: the order names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "rivalfunds package suite (python -m pytest rivalfunds -q from data/etfs/scripts) with the render.py change and the new test file.",
+      "observed": "608 passed, 2 skipped, 0 failed (run after the final render.py edit).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~2 <0.9.0_WK_ETFS_RIVALS~2@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "f853bed481"
+    }
+  ]
+}
