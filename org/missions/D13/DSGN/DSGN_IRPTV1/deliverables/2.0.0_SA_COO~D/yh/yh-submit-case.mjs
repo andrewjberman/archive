@@ -338,10 +338,15 @@ try {
           await page.getByRole('option', { name: new RegExp(client.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') }).first().click({ timeout: 30000 }).catch(() => {})
         }
         await page.getByRole('button', { name: 'Analysis', exact: true }).or(page.getByRole('tab', { name: 'Analysis' })).first().click().catch(() => {})
-        await page.waitForTimeout(3000)
-        state = await row().getAttribute('data-state').catch(() => null)
+        // The row reads "loading" until its own status read answers: wait for that answer (up to 30 s), not a flat 3 s.
+        for (const t0 = Date.now(); Date.now() - t0 < 30000;) {
+          state = await row().getAttribute('data-state').catch(() => null)
+          if (state && state !== 'loading') break
+          await page.waitForTimeout(500)
+        }
         log('ROW STATE', state)
-        if (state === 'READY' || state === 'NEEDS_CORRECTION' || state === 'FAILED') break
+        // Terminal for this driver: the request's own end states, or the row's status read refused ('unavailable').
+        if (['READY', 'NEEDS_CORRECTION', 'FAILED', 'ATTENTION', 'unavailable'].includes(state)) break
       }
       packet.final_state = state
       if (state === 'READY') {
