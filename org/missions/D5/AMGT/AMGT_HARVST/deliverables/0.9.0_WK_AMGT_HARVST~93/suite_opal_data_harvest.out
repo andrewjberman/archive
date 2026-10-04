@@ -1,0 +1,63 @@
+........................................................................ [ 11%]
+........................................................................ [ 22%]
+........................................................................ [ 33%]
+........................................................................ [ 45%]
+..ss....F............................................................... [ 56%]
+........................................................................ [ 67%]
+........................................................................ [ 78%]
+..................................................F..................... [ 90%]
+.........................................s.....................    [100%]
+================================== FAILURES ===================================
+_ test_ii_json_controls_are_byte_identical_to_the_base_rows[barrons_json-barrons-fixture2] _
+
+name = 'barrons_json', publisher = 'barrons'
+fixture = {'isServerUnlockedArticle': True, 'isSubscriber': True, 'articleData': {'id': 'b1', 'headline': 'Barrons Headline', 'p...aragraph', 'content': [{'text': 'Barrons body words here for the floor check nicely padded out for testing today.'}]}]}
+
+    @pytest.mark.parametrize("name,publisher,fixture", [
+        ("bbg_json", "bbg", base_tests.BBG_FIXTURE),
+        ("sa_json", "sa", base_tests.SA_FIXTURE),
+        ("barrons_json", "barrons", base_tests.BARRONS_FIXTURE),
+    ])
+    def test_ii_json_controls_are_byte_identical_to_the_base_rows(name, publisher, fixture):
+        golden = json.loads((FIXTURES / "json_control.expected.json").read_text(encoding="utf-8"))[name]
+        row = sfb.article_rows(publisher, json.dumps(fixture).encode("utf-8"), "as_received", "k/x.json",
+                               FETCHED_AT, "live", RUN_STAMP)
+>       assert json.dumps(row, sort_keys=True, default=repr) == golden
+E       assert '{"articleTra...ns Headline"}' == '{"articleTra...ns Headline"}'
+E         
+E         Skipping 439 identical leading characters in diff, use -v to show
+E         - ": "b1", "publishedDateTimeUtc": "datetime.datetime(2026, 9, 14, 0, 0, tzinfo=datetime.timezone.utc)", "published_date_utc": "datetime.date(2026, 9, 14)", "published_offset_min": 0, "published_precision": "instant", "published_utc": "datetime.datetime(2026, 9, 14, 0, 0, tzinfo=datetime.timezone.utc)", "publisher": "barrons", "retrieval_mode": "live", "retrieval_rung": null, "run_stamp": "20260921T120000Z", "search_page": null, "search_query": null, "search_rank": null, "text_blocks": ["Barrons body words...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+lib\opal_data_harvest\test_ai4_bbg_html_silver.py:83: AssertionError
+________ test_every_other_form_is_byte_identical_to_the_base[barrons] _________
+
+name = 'barrons'
+
+    @pytest.mark.parametrize("name", sorted(GOLDEN))
+    def test_every_other_form_is_byte_identical_to_the_base(name):
+        publisher, body, form, golden = GOLDEN[name]
+        row = sfb.article_rows(publisher, body(), form, "x/%s.json" % name, FETCHED_AT, "live", RUN_STAMP)
+>       assert hashlib.sha256(json.dumps(row, sort_keys=True, default=str).encode()).hexdigest() == golden
+E       AssertionError: assert 'dbab293b26c7...8499e071d49da' == 'b6da43de797c...7328d817813f0'
+E         
+E         - b6da43de797c5dfaabcf354a39526360a7c71d21984cde5c5c57328d817813f0
+E         + dbab293b26c7ab6858d9ceef7e52ef0012caf400823b3a0158c8499e071d49da
+
+lib\opal_data_harvest\test_q2_bbg_as_received.py:103: AssertionError
+============================== warnings summary ===============================
+lib/opal_data_harvest/test_ah1_fixture_solve.py::test_fixture_solve[bbg]
+lib/opal_data_harvest/test_ah1_fixture_solve.py::test_fixture_solve[bbg]
+  C:\Users\Opal Bloomberg\Desktop\wk-hvst-r45-93\org\tier1_exec\4.0.0_SA_CRO\scripts\press_and_hold_lib.py:83: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    baseline_full = list(Image.open(io.BytesIO(baseline_png)).convert("L").resize((32, 32)).getdata())
+
+lib/opal_data_harvest/test_ah1_fixture_solve.py: 110 warnings
+  C:\Users\Opal Bloomberg\Desktop\wk-hvst-r45-93\org\tier1_exec\4.0.0_SA_CRO\scripts\press_and_hold_lib.py:55: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    px = list(Image.open(io.BytesIO(png)).convert("L").resize((32, 32)).getdata())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED lib/opal_data_harvest/test_ai4_bbg_html_silver.py::test_ii_json_controls_are_byte_identical_to_the_base_rows[barrons_json-barrons-fixture2]
+FAILED lib/opal_data_harvest/test_q2_bbg_as_received.py::test_every_other_form_is_byte_identical_to_the_base[barrons]
+2 failed, 634 passed, 3 skipped, 112 warnings, 6 subtests passed in 97.67s (0:01:37)
