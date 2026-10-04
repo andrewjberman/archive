@@ -111,13 +111,10 @@ def main():
                 rows = (b or {}).get("rows") or []
                 clause(f"C1 {mv} price days={d or 'default'} serves rows at window_days 30", st == 200 and rows
                        and all(r.get("window_days") == 30 for r in rows), f"status {st} rows {len(rows)}")
-            for d in (90, 365):
-                st, b = call(f"{PREFIX}/lead-panel/rankings/{mv}/price", {"days": str(d)})
-                b = b or {}
-                text = " ".join(str(b.get(k) or "") for k in ("window_reason", "ranking_reason", "reason"))
-                clause(f"C2 {mv} price days={d} serves no rows and 'not produced yet'", st == 200
-                       and not (b.get("rows") or []) and "not produced yet" in text,
-                       f"status {st} rows {len(b.get('rows') or [])} reason {text[:90]!r}")
+            # C2 (90/365 "not produced yet") was the QUALIFIED-WAIT branch. It is RETIRED at round 66: the wait was lifted
+            # (ADDENDA 1-2 @1162e9be0e/@205bd13011), ap-3 landed the 90/365 generations, and r66_served c22 grades those
+            # windows. Two checks graded opposite answers on the same bytes (row Z-S344), so c10 keeps its 30-day clauses only.
+            print(f"SKIP C2 {mv} price days=90/365: retired, graded by round66/checks/r66_served.py --cell c22 (row Z-S344)")
     elif a.cell == "c11":
         for key in NAMES:
             st, tl = call(f"{PREFIX}/security/{key}/timeline", {"from": "2026-09-01", "to": today.isoformat()})
