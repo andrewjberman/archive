@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-310",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "2ba6a4c27a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "2ba6a4c27a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-310.source-map-records-three-functions.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~113",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "d7788267d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three recorder commits on wk-IRPT_BCKEND-113 (LOCAL): fb8653e0e3 irpt-ycharts-generate, a3f4b095ba irpt-holdings, d7788267d3 irpt-status; AWS reads only, no deploy",
+      "artifact_covered_by": [
+        "IB44-2-AC1",
+        "IB44-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/CHANGELOG.json",
+      "kind": "config_data",
+      "commit_or_etag": "d7788267d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "written by the recorder in the same three commits",
+      "artifact_covered_by": [
+        "IB44-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB44-2-AC1",
+      "criterion_verbatim": "each of the three rows' deployed_code_sha256 equals the function's live CodeSha256, read when the check runs.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r44/p44_record_three_functions.py\" . IB44-2-AC1",
+      "output_evidence": "OK: irpt-ycharts-generate deployed_code_sha256 = live jKsI7pZWzjaTub83yRvk1tass0oiVZkp9jmvr1v9ezQ= | OK: irpt-holdings deployed_code_sha256 = live tS/APci3Mz/YRDP7pJboAVqKabShek9jYUqvQDIYwwE= | OK: irpt-status deployed_code_sha256 = live hC6PramtsshP40jo3OJ91k4qxlHndylJWxHLIjIdw/E= | IB44-2-AC1 PASS (rc=0)",
+      "denominator": "3 of 3 rows equal live CodeSha256",
+      "status": "PASS",
+      "expect": "IB44-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB44-2-AC2",
+      "criterion_verbatim": "a GUARD: against base 80ba60328c, no other function row changes, and no row is added or removed.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r44/p44_record_three_functions.py\" . IB44-2-AC2",
+      "output_evidence": "OK: 227 rows; only the three named rows may differ | IB44-2-AC2 PASS (rc=0)",
+      "denominator": "227 of 227 rows compared against base 80ba60328c; only the 3 named rows differ",
+      "status": "PASS",
+      "expect": "IB44-2-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base state is the mutant: at base the three rows record the 2026-09-24 hashes, so IB44-2-AC1 is FAIL (issuer dry-run); the first row's old value LdjdnnLh5Rqff4VV/tWXS7HY/xKU05+i2uV5gpTIw8Y= differed from live.",
+      "expected": "IB44-2-AC1 FAIL at base, PASS after the three recorder runs.",
+      "observed": "After the three runs IB44-2-AC1 PASS 3 of 3.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each recorder run read its own live hash first; the criteria read live at check time.",
+      "observed": "Live hashes read before the runs equal those the check read afterwards (3 of 3).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "source-map-reconcile-audit.jsonl",
+      "reason": "each recorder run reported reconcile-deployed 0 reconciled, 0 HELD, 1 already-in-parity, so no audit line was written and the file is unchanged"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W113-S1: the first recorder run hit timeout 300 (rc=124) after staging; the identical re-run completed and committed"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "record-terraform-deploy.sh investor-reporting --function <fn> --code-sha256 <live>",
+      "invocation": "three runs, one per function; Resolved deployment set named exactly one function each time",
+      "result": "fb8653e0e3 irpt-ycharts-generate; a3f4b095ba irpt-holdings; d7788267d3 irpt-status; reconcile: OK (deployed set in parity) x3; no HALF-LANDED"
+    }
+  ],
+  "session_log": "git log wk-IRPT_BCKEND-113; recorder logs in .scratch/rec1.log rec2.log rec3.log (untracked)"
+}
