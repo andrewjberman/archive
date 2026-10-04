@@ -58,3 +58,12 @@ DISARMED 21:31:59Z; a login after the disarm was REFUSED. Both notices went to M
 **Elsewhere:** the CTO's product-file review of d60a0f90, then its DEV push (CLAUDE.md Portal); the 7 reopened outcomes of round 34
 (FWD-12, 18, 21, 23, 25, 26, 27) are now on DEV 2c792c27 for grading; RESAPP aq-1 (a company's own words in its cloud, e.g. "amd") is
 upstream at COO~Z.
+
+## 5. CTO REVIEW (@98209ce86a, msg 29256): APPROVED FOR DEV UNDER 4 CONDITIONS -- CONDITION 1 MET
+
+- **(1) Re-merge onto current DEV and re-run:** remote DEV aa373a83 merged into the candidate as **portal 35a723bf** (0 SecurityAnalysis
+  files on the DEV side). Against DEV it is still 12 files, +200/-31. battery29 ALL PASS (0 skipped); changed35 5/5, payload35 4/4,
+  cloud35 5/5, labels34 4/4, repairs34 4/4, peername34 4/4. **The push candidate is 35a723bf.**
+- (2) The DEV push takes Andrew's word; the CTO is asking him. MSTR~Z's act.
+- (3) PROD waits for RESAPP aq-5 to deploy, so no company's own ticker shows in its own cloud (COO~Z's round 67).
+- (4) The round-36 list in section 4 stands.
