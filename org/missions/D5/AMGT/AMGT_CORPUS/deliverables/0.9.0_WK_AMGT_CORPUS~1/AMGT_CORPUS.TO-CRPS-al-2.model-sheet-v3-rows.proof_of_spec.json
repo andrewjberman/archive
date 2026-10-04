@@ -1,0 +1,115 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_CORPUS.TO-CRPS-al-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-al-2.model-sheet-v3-rows.md",
+  "group": "OTHER",
+  "vintage_commit": "7a45b2e373"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+  "vintage_commit": "7a45b2e373",
+  "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-al-2.model-sheet-v3-rows.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/modelSheet.ts",
+   "kind": "script",
+   "commit_or_etag": "fb1f3cbb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed in the nested portal repo, branch wk-AMGT_CORPUS-1-portal, commit fb1f3cbb (a portal commit, not an outer one). V3_LINES_TITLE group, V3_LINE_ROWS (45), V3_HEADER_LABELS (4), typeFromUnit, reasonInWords, v3Facts; no push, no deploy.",
+   "introduces": [
+    "V3_LINES_TITLE",
+    "v3Facts"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx",
+   "kind": "script",
+   "commit_or_etag": "fb1f3cbb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal commit fb1f3cbb on wk-AMGT_CORPUS-1-portal. Passes model.fiscal_unresolved and header_figures; renders the V3 group, one facts line, each absent-line reason once.",
+   "artifact_covered_by": [
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/types.ts",
+   "kind": "script",
+   "commit_or_etag": "fb1f3cbb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal commit fb1f3cbb on wk-AMGT_CORPUS-1-portal. fiscal_unresolved typed on ThesisModelBlock; bun run typecheck rc 0.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round36/al2_check.cjs\" portal -- expect (?m)^al2 build 3/3 control 1/1$",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round36/al2_check.cjs\" portal",
+   "output_evidence": "al2 build 3/3 control 1/1",
+   "denominator": "2 names (BA_US_Equity, 1299_HK_Equity) x 45 V3 rows once each (45 of 45); BA 1 and 1299 HK 11 fully-absent V3 rows, 0 of 12 unreasoned, 0 with internal words; 4 of 4 header facts; 17 of 17 existing rows unchanged on both names; rc 0",
+   "expect": "(?m)^al2 build 3/3 control 1/1$",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/modelPattern.harness.cjs -- expect (?m)^CHECKS-OK ([0-9]+) of \\1$",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/modelPattern.harness.cjs",
+   "output_evidence": "CHECKS-OK 12 of 12",
+   "denominator": "12 of 12 harness checks on the rendered ModelTab (react-dom/server); the fixture predates the V3 lines so all 45 V3 rows are fully absent there and fold into the one footnote (rows_total 62, rows_visible 12, rows_absent 50); harness unedited; rc 0",
+   "expect": "(?m)^CHECKS-OK ([0-9]+) of \\1$",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 (JUDGMENT, graded by the CVO at L9 on the running page): a PM reads the V3 lines on BA's and 1299 HK's Model tab, and each reason reads as plain words.",
+   "method": "manual_read_with_citation",
+   "invocation": "node .scratch/render_v3.cjs (the real ModelTab rendered on the captured BA and 1299 HK payloads; the running page is the CVO's)",
+   "output_evidence": "BA: 'Lines with no figure: Bloomberg returned no value for this line for this company.' 1299 HK: the same line (its 11 fully-absent V3 rows carry no served reason). Header facts line: 'Company short name: AIA; Country: HONG KONG; Average daily value traded (three months): 2,079,092,000; Market capitalisation: 715,988 million.' The fiscal-year-end wording is exercised on a synthetic entry: 'The price-dated range is not reported at this company's fiscal year end, because its fiscal year does not end in December.'",
+   "denominator": "2 of 2 names rendered; no verdict recorded",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Judgment criterion: the substitute oracle is 3.0.0_SA_CVO~Z reading the V3 lines on the running Model tab of BA and 1299 HK at L9; no verdict is recorded here.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three mutants of a scratch copy of modelSheet.ts run through al2_check.cjs: (M1) the V3 group append removed; (M2) a V3 row keeps the generic mnemonic-bearing absent reason; (M3) an existing row label changed ('Revenue/Sh' to 'Revenue per share').",
+   "expected": "M1 fails b1 and b2; M2 fails b2; M3 fails c1; unmutated copy passes 3/3 and 1/1.",
+   "observed": "M0 'al2 build 3/3 control 1/1'; M1 'al2 build 1/3 control 1/1' (b1, b2 FAIL); M2 'al2 build 2/3 control 1/1' (b2 FAIL, e.g. 'the block carries no ARD_GOODWLL figure in these years'); M3 'al2 build 3/3 control 0/1' (c1 MOVED on both names).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "al2_check.cjs and the Model harness are pure (a fixture and a server render, no clock, no network); typecheck run once after the final edit.",
+   "observed": "bun run typecheck: '$ tsc -b --noEmit', rc 0.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "al2_check.cjs (AC1)",
+   "invocation": "node al2_check.cjs portal",
+   "result": "rc 0; al2 build 3/3 control 1/1"
+  },
+  {
+   "tool": "modelPattern.harness.cjs (AC2)",
+   "invocation": "node src/pages/SecurityAnalysis/__harness__/modelPattern.harness.cjs",
+   "result": "rc 0; CHECKS-OK 12 of 12"
+  }
+ ]
+}
