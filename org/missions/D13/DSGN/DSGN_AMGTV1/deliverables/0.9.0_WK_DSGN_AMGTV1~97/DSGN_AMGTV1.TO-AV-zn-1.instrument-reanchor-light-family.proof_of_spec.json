@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_AMGTV1.TO-AV-zn-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_AMGTV1/decompositions/DSGN_AMGTV1_DECOMP.md",
+    "vintage_commit": "70d41165c1",
+    "to_ref": "org/missions/D13/DSGN/DSGN_AMGTV1/task-orders/DSGN_AMGTV1.TO-AV-zn-1.instrument-reanchor-light-family.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_AMGTV1/prd/DSGN_AMGTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ff31355b93"
+  },
+  "assignee": "0.9.0_WK_DSGN_AMGTV1~97",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/scripts/ui-contract-check.mjs",
+      "kind": "frontend_component",
+      "artifact_covered_by": ["AC1"],
+      "commit_or_etag": "b811f94f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL portal branch dsgn-r36-zn1; no deploy per BOUNDS 1."
+    },
+    {
+      "path_or_key": "portal/scripts/ui-measure.mjs",
+      "kind": "frontend_component",
+      "artifact_covered_by": ["AC1"],
+      "commit_or_etag": "b811f94f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL portal branch dsgn-r36-zn1; no deploy per BOUNDS 1."
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/tests/uiContractFixtures.json",
+      "kind": "config_data",
+      "artifact_covered_by": ["AC1"],
+      "commit_or_etag": "b811f94f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL portal branch dsgn-r36-zn1; no deploy per BOUNDS 1."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE INSTRUMENT GRADES THE REDESIGN AND CAN FAIL: 4 of 4 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && R35_SCRATCH=\"C:/tmp/r36-scratch-wk97\" DIST_8FA7ABDE=\"C:/tmp/r35-scratch-c/dist-8fa7abde\" node \"org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/2.0.0_SA_COO~D/round35/checks/instrument/instrument35.cjs\"; echo \"exit=$?\"",
+      "output_evidence": "ARM 2: PASS -- 6 re-anchored band-clause FAIL(s) on portal 8fa7abde; first: list.lightOnDark FAIL (measured bandContainersTopLevel=1 lightOnDark=5)\nARM 3: PASS -- two bands -> FAIL yes; light card + light ink on a band -> FAIL yes; clean control (one empty band) -> PASS yes\n  faces.price: PASS visible 19 expected(instrument) 19; page rule: 9 gainers, 23 losers -> rest 19\n  faces.chatter: PASS visible 55 expected(instrument) 55; fixture WINDOWED, 55 rows with articles_total > 0\n  candidate result tally: {\"PASS\":74,\"FAIL\":2,\"NOT_EXERCISED\":0,\"N/A\":1}\nARM 1: PASS -- band clause PASS on 6 of 6 states with bandContainersTopLevel <= 1 and lightOnDark == 0 measured; faces price + chatter PASS at the page's rule\nARM 4: PASS -- 0 stale-anchor FAILs (darkContainers / bandIsIdentityHeader no longer graded)\nRUNTIME: 854.4s total\nTHE INSTRUMENT GRADES THE REDESIGN AND CAN FAIL: 4 of 4 arms\nexit=0",
+      "denominator": "4 of 4 arms; six of six states graded; exit=0",
+      "status": "PASS",
+      "expect": "THE INSTRUMENT GRADES THE REDESIGN AND CAN FAIL: 4 of 4 arms.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "BATTERY29: ALL PASS (0 skipped) -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/2.0.0_SA_COO~D/round29/checks/battery29.sh\" \"$(git rev-parse --show-toplevel)\"; echo \"exit=$?\"",
+      "output_evidence": "ALL BOUND: 14 of 14 harnesses green   [rc=0]\ntsc -b --noEmit rc=0\neslint --quiet (SecurityAnalysis + the lead-panel endpoint + chart libs) rc=0\nBATTERY29: ALL PASS (0 skipped)\nexit=0",
+      "denominator": "14 of 14 harnesses green; every battery item rc=0",
+      "status": "PASS",
+      "expect": "BATTERY29: ALL PASS \\(0 skipped\\).*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 arms 2 and 3 are the instrument's own can-fail controls: the real pre-redesign page (portal 8fa7abde) and planted pages (two dark bands; a white card and light ink on one band) beside a clean one-band control.",
+      "expected": "8fa7abde FAILs a re-anchored band clause; two bands FAIL; the light card FAILs; the control PASSes",
+      "observed": "8fa7abde: 6 re-anchored FAILs (lightOnDark 5 to 59, bandContainersTopLevel=1); two-bands: bandContainersTopLevel=2 FAIL; light-on-dark: lightOnDark=2 FAIL; control: bandContainersTopLevel=1 lightOnDark=0 both PASS",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the redesign was graded on six states by a direct instrument run before AC1 and again inside AC1's candidate run.",
+      "result": "same band-clause verdicts (6 of 6 PASS, bandContainersTopLevel 0, lightOnDark 0)",
+      "observed": "direct run: bandContainersTopLevel and lightOnDark PASS on 6 of 6; AC1 arm 1: PASS on 6 of 6",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The list state's sizes and radii cells (2 FAIL in the 74/2/0/1 tally)",
+      "reason": "They are the page's bubble labels (8, 9, 10 px) and corner radii (2px, 5px), exposed once the chatter face draws its bubbles on the windowed fixture; the cell fixes no page defect and AC1 does not read them. Filed as DSGN_AMGTV1-Z-W97-S1."
+    }
+  ],
+  "surprises": ["DSGN_AMGTV1-Z-W97-S1"],
+  "session_log": "none",
+  "compiler_tools": [
+    {
+      "tool": "instrument35.cjs and battery29.sh (issuer checks)",
+      "invocation": "see AC1-AC2",
+      "result": "AC1 4 of 4 arms exit=0; AC2 ALL PASS exit=0"
+    }
+  ]
+}
