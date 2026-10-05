@@ -81,6 +81,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (a === '--ready-ceiling-min') opt.readyCeilingMin = Number(argv[++i])
   else if (a === '--base') opt.base = argv[++i]
   else if (a === '--headed') opt.headed = true
+  else if (a === '--replay-normalized') opt.replayNormalized = argv[++i]
   else { console.error(`unknown argument ${a}`); process.exit(2) }
 }
 const kase = CASES[opt.case]
@@ -127,6 +128,16 @@ const pathOnly = (u) => { try { return new URL(u).pathname } catch { return u } 
 const py = (cmd, extraEnv = {}, ...args) => execFileSync('python', [ACCOUNT, cmd, ...args], { encoding: 'utf8', env: { ...process.env, ...extraEnv }, stdio: ['ignore', 'pipe', 'pipe'] })
 
 // ---- the fixture plane (offline drive; the committed producer records) --------------------------------------------
+/** --replay-normalized <page.har>: the LAST NORMALIZED answer a live run's upload received, replayed whole (the served
+ * producer record, e.g. its irpt-normalized-portfolio.v2 rows). The HAR stays local; nothing from it is written. */
+function replayedNormalized(har) {
+  const entries = JSON.parse(readFileSync(har, 'utf8')).log.entries
+  const answers = entries.filter((e) => e.request.method === 'POST' && INPUTS.test(pathOnly(e.request.url)))
+    .map((e) => { try { return JSON.parse(e.response.content.text) } catch { return null } })
+    .filter((j) => j?.data?.state === 'NORMALIZED')
+  if (!answers.length) { console.error(`REFUSED: ${har} holds no NORMALIZED upload answer`); process.exit(2) }
+  return answers[answers.length - 1]
+}
 const WIRE = path.join(ROOT, 'portal', 'src', 'pages', 'InvestorReporting', 'fixtures')
 function fixturePlane() {
   const smoke = JSON.parse(readFileSync(path.join(WIRE, 'smoke', 'dsgn-irptv1-cottonwood.json'), 'utf8'))
@@ -134,7 +145,8 @@ function fixturePlane() {
   const request = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'AnalysisRequest.valid.json'), 'utf8')).instance
   const status = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'StatusEnvelope.valid.json'), 'utf8')).instance
   const firmId = smoke[`${BASE_API}/directory/resolve`].firm_id
-  const upload = kase.expect === 'NEEDS_CORRECTION' || kase.proxies || kase.accept ? producer.correction.response : producer.normalized.response
+  const upload = kase.expect === 'NEEDS_CORRECTION' || kase.proxies || kase.accept ? producer.correction.response
+    : opt.replayNormalized ? replayedNormalized(opt.replayNormalized) : producer.normalized.response
   // Y-5 fixture: the first answer offers NAME_PROXY for each proxied ticker; the re-post with corrections answers the
   // producer's NORMALIZED record, its disclosures naming each proxy the page sent.
   // Y-4 fixture: an accepted ticker's finding is TICKER_NOT_FOUND with the provider-verified suggestion, ACCEPT_SUGGESTION first.
