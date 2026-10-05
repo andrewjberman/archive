@@ -1,23 +1,33 @@
 """OG-rl-6 PHASE C verify (A1 steps 16 and 20), extended from rl6_verify.py. WRITTEN at Phase C-A; the Phase C-A worker runs `before` and a
 NEGATIVE CONTROL of `after` against the UNDEPLOYED host, never `after` against a deploy.
 
+RE-CUT at PHASE C-A2 (A3/A4, CTO R15 @16f729348e, Andrew-direct record @121b7b016e): /yearinreview is OWNER-ONLY through its own fail-closed roster
+key YEARINREVIEW_VIEW_ALLOWED_EMAILS. Release r17c. Differences from the r17b version: the `.env` check expects 51 key names (the 50 before plus exactly
+YEARINREVIEW_VIEW_ALLOWED_EMAILS) and compares that key's VALUE, read ON THE HOST AS A sha256 ONLY, to sha256("andrew@opalinvest.com"); a host-local request
+carrying a PLANTED, non-ALB-signed identity header (a well-formed ES256-shaped JWT naming the owner, with an unknown kid, plus plain X-User-Email style
+headers) must get 401, because identity is verified by signature (app/identity.py _alb_oidc_identity); the host scratch is /tmp/og_rl6c2_run through
+rl6c2_ssm.py; rl7_release_md5.txt now lists the r17c bytes (app/config.py and app/yearinreview_view.py changed; the shipped set is still 96 files).
+The floor in rl7_verify.sh runs rl4.AC1.sh with RL4_ENV_KEYS_BASELINE set to the 51-name r17/ENV_KEYS_R17B.txt.
+
 usage:  python rl7_verify.py before <state.json>
         python rl7_verify.py after  <state.json> --served-release <full deployed sha> [--out RL6_DOWNLOAD.json]
 
 `before` saves the host's reads (MainPID, tool list, .env key NAMES; never a value) AND runs the on-host program (rl6_host.py.txt, mode after: synthetic
 principal, in-memory grant) on the LIVE release e91819e281, so the r17 download behaviour is on record BEFORE the act. `after` exits 0 only if all hold:
   1. host /health 200, service active;  2. shipped md5 = release bytes (rl7_release_md5.txt: 96 files = the 94 live + app/yearinreview_view.py +
-     app/static/yearinreview/index.html, app/server.py replaced);  3. tool list unchanged (65);  4. .env key NAMES unchanged (50);
-  5. host-local GET http://localhost:8080/yearinreview with NO identity -> 401 (404 before);
+     app/static/yearinreview/index.html, app/server.py replaced);  3. tool list unchanged (65);  4. .env key NAMES = the 50 before + exactly YEARINREVIEW_VIEW_ALLOWED_EMAILS (51), its value's sha256 =
+     sha256("andrew@opalinvest.com");
+  5. host-local GET http://localhost:8080/yearinreview with NO identity -> 401 (404 before), and with a PLANTED non-ALB-signed identity -> 401;
   6. public unauthenticated GET https://mcp.opalinvest.dev/yearinreview -> 302 to login.microsoftonline.com (ALB wall; not followed);
   7. the r17 download behaviour RE-READ through the deployed code: download OK, held-only (unheld 0, graded when held < universe), empty-holdings
      REFUSED asset_read_denied_unqualified, query OK with the same held set, and each equal to the pre-act read; synthetic, grants_written 0.
 RL6_DOWNLOAD.json is rewritten ONLY when every check passes (so rl6.AC1.sh, anchored to the manifest's deployed_commit, can read served_release = the
 new sha): `before` is CARRIED from the r17 file (RL6_DOWNLOAD.r17.json, copied from RL6_DOWNLOAD.json first), because the pre-r17 REFUSED is the only
-'before' that exists for that outcome; `after` is the fresh re-read. A failing run writes RL6_DOWNLOAD.r17b_failed.json beside it instead.
+'before' that exists for that outcome; `after` is the fresh re-read. A failing run writes RL6_DOWNLOAD.r17c_failed.json beside it instead.
 The floor (rl6.AC1.sh, rl4.AC1.sh, ht.AC2.sh) is run by rl7_verify.sh. Never printed: any .env value, bearer, account id or CUSIP.
 """
 import argparse
+import hashlib
 import base64
 import json
 import os
@@ -51,6 +61,12 @@ for line in open(".env", encoding="utf-8"):
     if m:
         keys.append(m.group(1))
 R["env_keys"] = sorted(keys)
+yv = None
+for line in open(".env", encoding="utf-8"):
+    m = re.match(r"^YEARINREVIEW_VIEW_ALLOWED_EMAILS=(.*)$", line.rstrip(chr(10)).rstrip(chr(13)))
+    if m:
+        yv = hashlib.sha256(m.group(1).encode("utf-8")).hexdigest()   # the value is NEVER printed or stored; only its digest leaves the host
+R["yir_roster_sha256"] = yv
 tool_src = """
 import asyncio, os, sys
 sys.path.insert(0, "/opt/opal-gateway")
@@ -81,6 +97,18 @@ except urllib.error.HTTPError as e:
     R["yir_local"] = e.code
 except Exception as e:
     R["yir_local"] = "ERR:" + type(e).__name__
+import base64 as _b64
+def _b(d):
+    return _b64.urlsafe_b64encode(json.dumps(d).encode()).decode().rstrip("=")
+_planted = _b({"alg": "ES256", "typ": "JWT", "kid": "00000000-0000-0000-0000-og-planted", "signer": "arn:aws:elasticloadbalancing:planted"}) + "." + _b({"email": "andrew@opalinvest.com", "sub": "planted"}) + "." + _b64.urlsafe_b64encode(bytes(64)).decode().rstrip("=")
+try:
+    _rq = urllib.request.Request("http://localhost:8080/yearinreview", headers={"x-amzn-oidc-data": _planted, "x-amzn-oidc-identity": "andrew@opalinvest.com", "X-User-Email": "andrew@opalinvest.com", "X-Forwarded-Email": "andrew@opalinvest.com"})
+    urllib.request.build_opener(_NoRedirect).open(_rq, timeout=25)
+    R["yir_planted"] = 200
+except urllib.error.HTTPError as e:
+    R["yir_planted"] = e.code
+except Exception as e:
+    R["yir_planted"] = "ERR:" + type(e).__name__
 try:
     R["health"] = urllib.request.urlopen("http://localhost:8080/health", timeout=15).status
 except urllib.error.HTTPError as e:
@@ -123,8 +151,8 @@ def host_read():
     md5 = open(os.path.join(HERE, "rl7_release_md5.txt"), encoding="utf-8").read().replace("\r", "")
     prog = HOST_PROG.replace("@@MD5@@", md5)
     b64 = base64.b64encode(prog.encode("utf-8")).decode("ascii")
-    st, out = ssm_run(["echo %s | base64 -d > /tmp/og_rl6c_verify.py" % b64, "/opt/opal-gateway/.venv/bin/python /tmp/og_rl6c_verify.py",
-                       "rm -f /tmp/og_rl6c_verify.py"], "OG-rl-6 PhaseC verify host read")
+    st, out = ssm_run(["echo %s | base64 -d > /tmp/og_rl6c2_verify.py" % b64, "/opt/opal-gateway/.venv/bin/python /tmp/og_rl6c2_verify.py",
+                       "rm -f /tmp/og_rl6c2_verify.py"], "OG-rl-6 PhaseC-A2 verify host read")
     line = [x for x in out.split("\n") if x.startswith("HOSTJSON ")]
     if st != "Success" or not line:
         print("HOST READ FAILED")
@@ -147,21 +175,21 @@ def after_run():
     scratch = tempfile.mkdtemp(prefix="og_rl6c_after_")   # local only; holds the program output (counts, codes, booleans)
     outf = os.path.join(scratch, "rl6_after.out")
     env = dict(os.environ, OG_RL6_MODE="after")
-    r = subprocess.run([sys.executable, os.path.join(HERE, "rl6c_ssm.py"), os.path.join(HERE, "rl6_host.py.txt"), outf], capture_output=True, text=True,
+    r = subprocess.run([sys.executable, os.path.join(HERE, "rl6c2_ssm.py"), os.path.join(HERE, "rl6_host.py.txt"), outf], capture_output=True, text=True,
                        encoding="utf-8", errors="replace", env=env)
     sys.stdout.write(r.stdout[-3000:])
     line = [x for x in r.stdout.split("\n") if x.startswith("RL6_RESULT ")]
     if not line:
         print("AFTER RUN FAILED (no RL6_RESULT line)")
         sys.exit(2)
-    scratch_removed = "SCRATCH_REMOVED=yes" in r.stdout and "HOST_TMP_og_rl6c_LEFTOVER=0" in r.stdout
+    scratch_removed = "SCRATCH_REMOVED=yes" in r.stdout and "HOST_TMP_og_rl6c2_LEFTOVER=0" in r.stdout
     return json.loads(line[0][len("RL6_RESULT "):]), scratch_removed
 
 
 def before_run():
     outf = os.path.join(tempfile.mkdtemp(prefix="og_rl6c_before_"), "rl6_before.out")
     env = dict(os.environ, OG_RL6_MODE="after")
-    r = subprocess.run([sys.executable, os.path.join(HERE, "rl6c_ssm.py"), os.path.join(HERE, "rl6_host.py.txt"), outf], capture_output=True, text=True,
+    r = subprocess.run([sys.executable, os.path.join(HERE, "rl6c2_ssm.py"), os.path.join(HERE, "rl6_host.py.txt"), outf], capture_output=True, text=True,
                        encoding="utf-8", errors="replace", env=env)
     sys.stdout.write(r.stdout[-2000:])
     line = [x for x in r.stdout.split("\n") if x.startswith("RL6_RESULT ")]
@@ -198,11 +226,20 @@ def main():
     chk("host /health 200", R["health"] == 200 and R["active"] == "active", "health %s, service %s, MainPID %s (before %s)" % (R["health"], R["active"], R["mainpid"], B["mainpid"]))
     chk("shipped md5 = release bytes", R["md5_ok"] == R["md5_listed"] and R["md5_listed"] > 0, "%d of %d identical; not-ok %s" % (R["md5_ok"], R["md5_listed"], R["md5_bad"]))
     chk("tool list unchanged", R["tools"] is not None and R["tools"] == B["tools"], "before %d after %d tools" % (len(B["tools"] or []), len(R["tools"] or [])))
-    chk(".env key names unchanged (50)", R["env_keys"] == B["env_keys"] and len(R["env_keys"]) == 50,
-        "names %d vs before %d; added %s removed %s" % (len(R["env_keys"]), len(B["env_keys"]), sorted(set(R["env_keys"]) - set(B["env_keys"])), sorted(set(B["env_keys"]) - set(R["env_keys"]))))
+    NEWKEY = "YEARINREVIEW_VIEW_ALLOWED_EMAILS"
+    added = sorted(set(R["env_keys"]) - set(B["env_keys"]))
+    removed = sorted(set(B["env_keys"]) - set(R["env_keys"]))
+    chk(".env key names = the 50 before + exactly YEARINREVIEW_VIEW_ALLOWED_EMAILS (51)",
+        len(B["env_keys"]) == 50 and added == [NEWKEY] and removed == [] and len(R["env_keys"]) == 51 and len(set(R["env_keys"])) == 51,
+        "names %d vs before %d; added %s removed %s" % (len(R["env_keys"]), len(B["env_keys"]), added, removed))
+    want_sha = hashlib.sha256(b"andrew@opalinvest.com").hexdigest()
+    chk("%s value sha256 = sha256('andrew@opalinvest.com') (value never read as text)" % NEWKEY, R.get("yir_roster_sha256") == want_sha,
+        "host digest %s vs expected %s (None = key absent)" % ((R.get("yir_roster_sha256") or "None")[:12], want_sha[:12]))
     A, scratch_removed = after_run()
     chk("host scratch removed", scratch_removed, "SCRATCH_REMOVED=yes and 0 leftovers" if scratch_removed else "see the SSM output above")
     chk("host-local GET /yearinreview with no identity is 401", R["yir_local"] == 401, "host-local code %s (before %s)" % (R["yir_local"], B.get("yir_local")))
+    chk("host-local GET /yearinreview with a PLANTED non-ALB-signed identity header is 401 (identity is verified by signature)", R.get("yir_planted") == 401,
+        "host-local code %s (planted: ES256-shaped JWT naming the owner, unknown kid, plus X-User-Email style headers)" % R.get("yir_planted"))
     pc, loc = public_get()
     chk("public unauthenticated GET is 302 to login.microsoftonline.com", pc == 302 and "login.microsoftonline.com" in loc,
         "code %s, Location host %s" % (pc, loc.split("/")[2] if loc.count("/") >= 2 else loc[:40]))
@@ -236,7 +273,7 @@ def main():
             import shutil
             shutil.copyfile(a.out, r17)
     elif os.path.basename(a.out) == "RL6_DOWNLOAD.json":
-        out = os.path.join(os.path.dirname(os.path.abspath(a.out)), "RL6_DOWNLOAD.r17b_failed.json")
+        out = os.path.join(os.path.dirname(os.path.abspath(a.out)), "RL6_DOWNLOAD.r17c_failed.json")
     with open(out, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(doc, fh, indent=1, sort_keys=True)
         fh.write("\n")
