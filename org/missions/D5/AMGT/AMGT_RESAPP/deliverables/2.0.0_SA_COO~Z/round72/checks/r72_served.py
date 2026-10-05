@@ -57,6 +57,8 @@ def main():
     ap.add_argument("--cell", choices=("c39", "c41", "c42", "c43", "c44", "c45", "c46", "c47"), required=True)
     ap.add_argument("--where", choices=("local", "deployed"), required=True)
     ap.add_argument("--c46-route", choices=("rankings", "chatter"), default="")
+    # AMENDMENT 1 to av-6 (issuer): the bar is a parameter; 15 was unreachable without a producer (row Z-W242-S1)
+    ap.add_argument("--bar", type=int, default=15)
     a = ap.parse_args()
     ok = []
 
@@ -91,7 +93,7 @@ def main():
             m = re.search(r"C46CALLS (\d+)", p.stdout.decode("utf-8", errors="replace"))
             res[label] = int(m.group(1)) if m else 10**9
         print(f"   first-request AWS calls (one fresh process per route): {res}")
-        clause("C1 each first read makes <= 15 AWS calls", all(v <= 15 for v in res.values()), str(res))
+        clause(f"C1 each first read makes <= {a.bar} AWS calls", all(v <= a.bar for v in res.values()), str(res))
     elif a.cell == "c47":
         today = datetime.date.today().isoformat()
         p = subprocess.run([sys.executable, "-m", "lib.research.identity.build_universe", "--as-of", today, "--dry-run"],
