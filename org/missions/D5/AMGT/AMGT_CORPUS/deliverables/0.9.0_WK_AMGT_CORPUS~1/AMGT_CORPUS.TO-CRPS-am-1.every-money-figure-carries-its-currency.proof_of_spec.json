@@ -42,11 +42,10 @@
       "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round37/am1_check.py\"",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round37/am1_check.py\"",
-      "output_evidence": "CAPTURED puts (never sent): 4\nARM b1 FAIL unlabelled money figures before 913 after 8 ['TSM_US_Equity raw 20261004T130954Z unlabelled money before 168 after 2', '1299_HK_Equity raw 20261004T130004Z unlabelled money before 218 after 2', 'SAP_GY_Equity raw 20261004T130908Z unlabelled money before 263 after 2', 'BA_US_Equity raw 20261004T130233Z unlabelled money before 264 after 2']\nARM c1 PASS values moved 0 []\nARM c2 PASS labelled currencies changed 0 []\nam1 build 0/1 control 2/2",
-      "denominator": "4 names (TSM, 1299 HK, SAP, BA) re-derived in memory on each served block's own raw stamp; 4 puts captured and never sent; unlabelled money figures 913 before, 8 after (2 per name: EQY_SH_OUT_REAL and VOLUME_AVG_30D, unit 'ABSOLUTE (share count)', which the check's is_money counts as money while order item 3 keeps share counts invariant, row Z-W1-S33); control arms c1 and c2 pass 2/2. rc 0.",
+      "output_evidence": "CAPTURED puts (never sent): 4\nARM b1 PASS unlabelled money figures before 905 after 0 ['TSM_US_Equity raw 20261004T130954Z unlabelled money before 166 after 0', '1299_HK_Equity raw 20261004T130004Z unlabelled money before 216 after 0', 'SAP_GY_Equity raw 20261004T130908Z unlabelled money before 261 after 0', 'BA_US_Equity raw 20261004T130233Z unlabelled money before 262 after 0']\nARM c1 PASS values moved 0 []\nARM c2 PASS labelled currencies changed 0 []\nam1 build 1/1 control 2/2",
+      "denominator": "4 names (TSM, 1299 HK, SAP, BA) re-derived in memory on each served block's own raw stamp; 4 puts captured and never sent; unlabelled money figures 905 before, 0 after; control arms c1 and c2 pass 2/2. Run on the issuer's amended am1_check.py (amendment 5a02ae8e98, on this branch as fe9cd2d6fa: a '(share count)' unit is never money), which disarmed row AMGT_CORPUS-Z-W1-S33. rc 0.",
       "expect": "(?m)^am1 build 1/1 control 2/2$",
-      "status": "FAIL",
-      "status_reason": "The check's build arm reads 0/1 because its is_money predicate counts the 8 share-count figures EQY_SH_OUT_REAL and VOLUME_AVG_30D (unit 'ABSOLUTE (share count)') as money; order item 3 keeps share counts invariant. Every other money figure is labelled (913 -> 8). Cleared by an issuer-side fix to the check's predicate (row AMGT_CORPUS-Z-W1-S33, disarm_owner 2.0.0_SA_COO~X)."
+      "status": "PASS"
     },
     {
       "criterion_id": "AC2",
@@ -73,7 +72,7 @@
   "controls": {
     "determinism": {
       "method": "am1_check.py (AC1) and the AC2 pytest file each run twice on the final tree (landed raw and served blocks unchanged between runs).",
-      "observed": "Both AC1 runs read identical lines (before 913 after 8, values moved 0, labelled currencies changed 0, 4 puts captured); both AC2 runs read 10 passed.",
+      "observed": "AC1 re-run on the amended check reads build 1/1 control 2/2 (before 905 after 0, values moved 0, labelled currencies changed 0, 4 puts captured); AC2 reads 10 passed on both runs.",
       "status": "STABLE"
     },
     "mutant": {
@@ -93,16 +92,16 @@
       "reason": "AC1 re-derives four names. The side of each mnemonic was decided from FIELD_BASIS and checked over all 96 served blocks by the read-only probes, but the 96-block census of the re-derived result is the issuer's am-2 control."
     },
     {
-      "item": "The 8 share-count figures AC1 still counts",
-      "reason": "EQY_SH_OUT_REAL and VOLUME_AVG_30D are share counts; order item 3 keeps them invariant. Left invariant and recorded in row Z-W1-S33 against the check's money predicate."
-    },
-    {
       "item": "The labelling of IS_SH_FOR_DILUTED_EPS",
       "reason": "A share count already labelled with the reporting currency by the older rule; order item 4 keeps an existing currency. Row Z-W1-S35."
     },
     {
       "item": "The three granted existing tests (test_currency_labels.py, test_figure_currency_round25.py, test_figure_currency_round26.py)",
       "reason": "Run against the new rule and all pass unchanged at ece32e98a6: no assertion in them pins None / 'invariant' on a MONEY figure of its fixtures (the old-rule arm asserts invariant only for PE_RATIO, NAME and CRNCY-class fixtures), so no AMENDMENT was needed and none was made."
+    },
+    {
+      "item": "Share-count figures in AC1",
+      "reason": "EQY_SH_OUT_REAL and VOLUME_AVG_30D are share counts, kept invariant by order item 3; the issuer's amendment 5a02ae8e98 (fe9cd2d6fa) stopped the check counting them as money (row Z-W1-S33 disarmed)."
     }
   ],
   "surprises": [
@@ -115,7 +114,7 @@
     {
       "tool": "am1_check.py in-memory stage_derive over TSM, 1299 HK, SAP, BA (AC1)",
       "invocation": "PYTHONPATH=. python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round37/am1_check.py",
-      "result": "rc 0; am1 build 0/1 control 2/2 (8 share-count figures left, row Z-W1-S33)"
+      "result": "rc 0; am1 build 1/1 control 2/2"
     },
     {
       "tool": "pytest over the new offline test (AC2)",
