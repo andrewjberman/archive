@@ -18,7 +18,18 @@
     {
       "path_or_key": "data/etfs/scripts/rivalfunds/gold_holding_contribution.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "8b18b8f639",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 8 worker cell; nothing deploys from a worker; LOCAL worktree commit",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r8hc1_r30_trading_days.py",
+      "kind": "script",
+      "commit_or_etag": "aeb0b29c8c",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "round 8 worker cell; nothing deploys from a worker; LOCAL worktree commit",
       "artifact_covered_by": [
@@ -26,13 +37,13 @@
       ]
     },
     {
-      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r8hc1_r30_trading_days.py",
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r8hc1_g4_tri_percent.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "8b18b8f639",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "round 8 worker cell; nothing deploys from a worker; LOCAL worktree commit",
       "artifact_covered_by": [
-        "AC1"
+        "AC2"
       ]
     }
   ],
@@ -46,18 +57,28 @@
       "output_evidence": "R30 start: 2026-08-20 | 30th trading day ending 2026-10-01: 2026-08-20\nOK:   (a) R30 starts on the 30th trading day ending on the as-of date\nPFOE (period, start, nominal, clipped): [('YTD', '2026-09-30', '2026-01-01', True), ('MTD', '2026-10-01', '2026-10-01', False)]\nOK:   (b) PFOE's YTD rows name the nominal start 2026-01-01, the clipped start 2026-09-30, and period_clipped True\nOK:   (c) control: PFOE's MTD rows start 2026-10-01 and are not clipped\nAC1 RESULT: PASS 0 failures\nrc=0",
       "denominator": "3 of 3 checks OK (0 FAIL)",
       "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a G4 total-return day is the day's own percent return / 100, never a ratio of two days; a security with no total return keeps its px_close ratio -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round8/checks/hc-1.AC2.py",
+      "expect": "AC2 RESULT: PASS 0 failures",
+      "output_evidence": "status: OK {'rows': 16, 'funds': 2, 'as_of': '2026-10-02', 'g1_dates': 2, 'g4_dates': 2, 'price_source': {'g4_tri': 4, 'g4_close': 4}, 'refused': {}} | MTD buckets: ['AAA_US_Equity', 'BBB_US_Equity'] | refused: []\nAAA: 0.0018447738000000003 g4_tri | BBB: 0.0020000000000000018 g4_close\nOK:   (a) AAA's MTD contribution is 0.2 x its 10-02 percent return / 100, sourced g4_tri; PFOE is not refused\nOK:   (b) control: PCLG's BBB (no total return) takes its px_close ratio, sourced g4_close\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "2 of 2 checks OK (0 FAIL)",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "The spec names no mutant control; the ui-5 checks were run at base before the change and read FAIL 3, FAIL 2 and FAIL 3.",
+      "description": "The spec names no mutant control; AC2 at base reads FAIL on (a) per the check's own docstring (not re-run by this worker).",
       "expected": "N/A",
-      "observed": "After the change: ui-5 AC1-AC3 PASS 0 failures; ui-1..ui-4 AC1-AC3 PASS; package suite 450 passed, 2 skipped, 0 failed.",
+      "observed": "After the change: AC1 and AC2 PASS 0 failures; package suite 652 passed, 2 skipped, 0 failed.",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
       "method": "Each AC run after the change; package suite run after the change.",
-      "observed": "PASS 0 failures each time; 450 passed, 2 skipped, 0 failed.",
+      "observed": "PASS 0 failures each time; 652 passed, 2 skipped, 0 failed.",
       "status": "STABLE"
     }
   },
@@ -65,6 +86,10 @@
     {
       "item": "Flipping the task order's <status> to complete",
       "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "Changing an existing test assertion",
+      "reason": "No existing test asserted the old g4_tri ratio (every existing G4 fixture carries a null total_return_index); none changed. New test: test_r8hc1_g4_tri_percent.py."
     }
   ],
   "surprises": [],
@@ -73,7 +98,7 @@
     {
       "tool": ".tools/safe-commit.sh",
       "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~6 <0.9.0_WK_ETFS_RIVALS~6@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "6ef19142e6"
+      "result": "8b18b8f639"
     }
   ]
 }
