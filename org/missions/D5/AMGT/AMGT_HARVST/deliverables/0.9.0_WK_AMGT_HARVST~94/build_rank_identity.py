@@ -10,6 +10,7 @@ sa_symbol rules, in order (the first that fires wins; nothing is guessed silentl
   R1 the cleaned pool name equals (case/punctuation-folded) the cleaned company of one 89-file folder -> that symbol.
   R2 the pool ticker is a US listing (`<SYMBOL> US` / `<SYMBOL> US Equity`, SYMBOL = 1-5 capital letters) -> the
      SYMBOL is its own SA symbol, status DERIVED (not probed against Seeking Alpha).
+  R2b an ISSUER ruling for a named key (ISSUER_RULED below), status ISSUER, its ruling quoted as evidence.
   R3 otherwise UNRESOLVED (value null).
 """
 
@@ -32,6 +33,9 @@ CONFIG = os.path.join(ROOT, "lib", "opal_data_harvest", "config.json")
 RESOLVED = os.path.join(ROOT, "org", "tier1_exec", "2.0.0_SA_COO", "deliverables", "AMGT_HARVST",
                         "SA_SYMBOLS_MERGED_89_20260927.json")
 US_TICKER = re.compile(r"^([A-Z]{1,5}) US( Equity)?$")
+# Issuer ruling on row AMGT_HARVST-Z-W94-S1 (2.0.0_SA_COO~H, 2026-10-05): TPG Inc trades on Nasdaq as TPG; the pool's Bloomberg
+# ticker '2602335D US Equity' is a placeholder. Not probed: the run's own sa job confirms or refutes it.
+ISSUER_RULED = {"2602335D_US_Equity": "TPG"}
 
 
 def fold(text):
@@ -120,7 +124,11 @@ def main():
                 cell = {"value": src["value"], "status": src["status"], "evidence": "R1: cleaned name equals 89-file folder %r company (%s)" % (hits[0], src["status"])}
         if cell is None:
             m = US_TICKER.match(ticker or "")
-            if m:
+            if entry["security_key"] in ISSUER_RULED:
+                cell = {"value": ISSUER_RULED[entry["security_key"]], "status": "ISSUER",
+                        "evidence": "R2b: issuer ruling on row Z-W94-S1 (TPG Inc trades on Nasdaq as TPG; %r is a Bloomberg "
+                                    "placeholder); not probed, the run's sa job confirms it" % ticker}
+            elif m:
                 cell = {"value": m.group(1), "status": "DERIVED",
                         "evidence": "R2: US-listed Bloomberg ticker %r used as its own SA symbol; not probed against Seeking Alpha" % ticker}
             else:
