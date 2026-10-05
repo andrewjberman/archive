@@ -17,8 +17,13 @@ RIVALFUNDS_LEG_ENABLE=1 so the v0.8 controls are in the universe.
   - (b) the BQL that names ACWI names no other fund, and no other BQL names ACWI;
   - (c) TXUE 40 + BIDD 40 + IWM 50,000: no exception; status PARTIAL; TXUE and BIDD land 40 each; IWM is named in detail
         and no OK sidecar carries IWM;
-  - (d) control: TXUE 40 + BIDD 40 alone lands both in OK captures, status OK.
-FAIL at base: (a), (b), (c) FAIL (the 2,000-row single query raises); (d) PASSES."""
+  - (d) control: TXUE 40 + BIDD 40 alone lands both in OK captures, status OK;
+  - (e) AMENDED 2026-10-05 (rows Z-S21/Z-S22, measured on the real Terminal: Range.Value overflowed on one IWM cell for
+        2026-01-16 while Range.Value2 read every row and returned dates as Excel serials): with a sheet whose `Value` raises
+        com_error and whose `Value2` returns the date columns as Excel serials, TXUE 40 + BIDD 40 still land whole, in OK
+        captures (their DATES / REPORT_DATE read back as ISO dates), with no exception.
+FAIL at base: (a), (b), (c), (e) FAIL; (d) PASSES. At the lg-1 build 481d101ab1: (e) FAILS (it reads Range.Value)."""
+import datetime as dt
 import json
 import os
 import pathlib
@@ -32,6 +37,7 @@ import _common as c  # noqa: E402
 DAY, REPORT = "2026-10-02", "2026-10-01"
 HDR = ["ID", "ORIG_IDS", "REPORT_DATE", "DATES", "name()"]
 FORMULAS: list[str] = []
+BAD_VALUE: set = set()  # funds whose sheet makes Range.Value raise (a cell the COM conversion overflows on)
 
 
 def rows_for(fund: str, n: int) -> list[list]:
@@ -76,13 +82,30 @@ def install_fake_com(plant: dict[str, int]) -> None:
 
         Formula = property(_get_formula, _set_formula)
 
-        @property
-        def Value(self):
+        def _rows(self):
             m = re.match(r"^A1:[A-Z]+(\d+)$", self.addr)
             n = int(m.group(1)) if m else 1
             got = [tuple(r) for r in self.sh.data[:n]]
             width = len(HDR)
-            return tuple(got + [(None,) * width] * (n - len(got)))
+            return got + [(None,) * width] * (n - len(got))
+
+        @property
+        def Value(self):
+            if BAD_VALUE and any(str(r[1]).split()[0] in BAD_VALUE for r in self.sh.data[1:]):
+                err = ComError("Exception occurred.")
+                err.hresult = -2147352567
+                raise err
+            return tuple(self._rows())
+
+        @property
+        def Value2(self):
+            def serial(v):
+                try:
+                    return float((dt.date.fromisoformat(str(v)[:10]) - dt.date(1899, 12, 30)).days)
+                except ValueError:
+                    return v
+            return tuple(tuple(serial(v) if i in (2, 3) and r[0] != "ID" and v is not None else v
+                               for i, v in enumerate(r)) for r in self._rows())
 
     class _Cells:
         def __init__(self, sh):
@@ -213,6 +236,13 @@ def run(v):
     got = landed([sc for sc in scs if sc.get("status") == "OK"])
     v.check(err is None and res.get("status") == "OK" and got == {"TXUE": 40, "BIDD": 40},
             "(d) control: two rivals alone land OK, 40 rows each")
+
+    BAD_VALUE.add("BIDD")
+    res, err, scs, _ = fire({"TXUE": 40, "BIDD": 40}, ["TXUE", "BIDD"], "e")
+    BAD_VALUE.clear()
+    got = landed([sc for sc in scs if sc.get("status") == "OK"])
+    v.check(err is None and res is not None and res.get("status") == "OK" and got == {"TXUE": 40, "BIDD": 40},
+            "(e) a sheet whose Range.Value overflows still lands whole through Value2, dates read back as ISO (OK captures)")
 
 
 failures = c.guarded("AC1", run)
