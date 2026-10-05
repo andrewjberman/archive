@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-22",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "ca6ba8a72f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-22.bd-population-concurrent-completion.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~8",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~8/BD_POPULATION_CONCURRENT_PLAN_E3.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~8/bd_population_concurrent_e3.py",
+      "kind": "script",
+      "commit_or_etag": "7bac3dd6a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Imports the DB-b-21 script by path (and through it the DB-b-20 script). plan is offline (S3 list reads, DRY_RUN=1). run and sweep refuse without --go, without the plan, and without the ruling object; run also refuses a plan not re-derived identically. One coordinator mints the shared bearer; 2 then 6 workers on one queue and one rate limiter; one retry per call; FAILED recorded; abort rules per batches 249/250. run and sweep were never run.",
+      "artifact_covered_by": [
+        "DB14-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~8/tests/test_bd_population_concurrent_e3.py",
+      "kind": "test",
+      "commit_or_etag": "7bac3dd6a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 offline pytest tests (stub boto3, helpers, clock and sleep): shared bearer minted by the coordinator alone, ramp 2 to 6, 429 halving and one retry after backoff, FAILED recorded and run continues, 3 consecutive abort, FAILED above failed_cap aborts, 401 fresh stops and 401 older re-mints, landed never requested and none twice, checkpoint cadence, other 4xx and landing failure abort, run and sweep refuse without --go, sweep set refusal, plan ruling and denominators.",
+      "artifact_covered_by": [
+        "DB14-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~8/BD_POPULATION_CONCURRENT_PLAN_E3.json",
+      "kind": "doc",
+      "commit_or_etag": "7bac3dd6a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built by plan under DRY_RUN=1 from S3 list reads: planned 5252 = landed 144 + complement 5108, vendor_calls 0, 0 landed keys outside the plan, ruling object with the batch 249/250 values.",
+      "artifact_covered_by": [
+        "DB14-1-AC2",
+        "DB14-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB14-1-AC1",
+      "criterion_verbatim": "DB14-1-AC1 -- the concurrent-completion tests pass, at least 8, naming the eight words. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r14/p14_concurrent_completion.py\" . DB14-1-AC1",
+      "output_evidence": "OK: 14 concurrent-completion tests passed\nDB14-1-AC1 PASS rc=0",
+      "denominator": "14 of 14 tests passed (8 required); the file names shared bearer, ramp, 429, FAILED, sweep, consecutive, --go, denominators",
+      "status": "PASS",
+      "expect": "DB14-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB14-1-AC2",
+      "criterion_verbatim": "DB14-1-AC2 -- the offline plan is the run's whole input: it reconciles (planned 5252 = landed + complement, landed at least 144, no overlap), and its `ruling` carries the batch 249/250 values. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r14/p14_concurrent_completion.py\" . DB14-1-AC2",
+      "output_evidence": "OK: planned 5252 = landed 144 + complement 5108; dry, 0 vendor calls; ruling parameters match\nDB14-1-AC2 PASS rc=0",
+      "denominator": "5252 planned = 144 landed + 5108 complement; 5108 of 5108 complement accounts listed; 0 overlap with the 144 landed; 0 landed keys outside the plan",
+      "status": "PASS",
+      "expect": "DB14-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB14-1-AC3",
+      "criterion_verbatim": "DB14-1-AC3 -- a GUARD: your commits touch only IRPT_DASHBD paths. Base: PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r14/p14_concurrent_completion.py\" . DB14-1-AC3",
+      "output_evidence": "OK: 3 changed path(s), all inside IRPT_DASHBD\nDB14-1-AC3 PASS rc=0",
+      "denominator": "3 of 3 changed paths inside org/missions/D9/IRPT/IRPT_DASHBD/ (measured before this proof's own commit)",
+      "status": "PASS",
+      "expect": "DB14-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each abort and refusal test is its own negative arm: run and sweep without --go, without the plan, without the ruling (boto3 tripwire); 3 consecutive failures; FAILED above the cap with no 3 in a row; a 401 on a fresh bearer; another 4xx; a landing failure.",
+      "expected": "SystemExit with the named refusal before any network layer; an abort naming its rule; the record left behind by the finally",
+      "observed": "14 of 14 passed; the boto3 tripwire never fired.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pytest run 25 times in a row (threaded workers on a shared fake clock) plus once through DB14-1-AC1; the plan built once.",
+      "observed": "14 passed on all 26 runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any run, sweep, token mint, Secrets Manager read, or Black Diamond call",
+      "reason": "Outside the order: the issuer runs the completion; vendor_calls is 0 and DRY_RUN stayed 1."
+    },
+    {
+      "item": "Live exercise of run --go and sweep --go",
+      "reason": "Needs a live bearer; the tests stub the helpers, the clock and boto3. The script does not read E3_SHAPE_RULING.json: the ruling object in the plan carries the batch 249/250 values."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~8/",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile bd_population_concurrent_e3.py tests/test_bd_population_concurrent_e3.py",
+      "result": "compiled"
+    }
+  ]
+}
