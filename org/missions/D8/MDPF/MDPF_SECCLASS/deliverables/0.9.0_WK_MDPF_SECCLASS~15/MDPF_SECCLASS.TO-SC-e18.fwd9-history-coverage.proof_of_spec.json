@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e18",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9c38ea37043c383130d7ce0216eec5e099f120d6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R7.md",
+    "vintage_commit": "7d6cace9b2cc0b2f77db1c39ece852730edd93ea",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e18.fwd9-history-coverage.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~15",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd9_history_coverage.py",
+      "kind": "script",
+      "commit_or_etag": "a746bd5652",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only check; commit-gate clean 1 of 1. Reads canonical_shape and security_market on S3; writes only the JSON below.",
+      "artifact_covered_by": [
+        "SC7-e18-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_FWD9_HISTORY_COVERAGE_20261005.json",
+      "kind": "doc",
+      "commit_or_etag": "a746bd5652",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Per-stock {security_bloomberg, first, last, status, joined_by} for 781 stocks plus the security_market partition census.",
+      "artifact_covered_by": [
+        "SC7-e18-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC7-e18-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd9_history_coverage.py -- expect: FWD9-HISTORY-COVERAGE stocks=",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd9_history_coverage.py",
+      "expect": "FWD9-HISTORY-COVERAGE stocks=",
+      "output_evidence": "FWD9-HISTORY-COVERAGE stocks=781 covered_3y=0 starts_late=497 no_series=284 beyond_cap=0 security_market_partitions=3 first_partition=2026-09-29 (rc=0)",
+      "denominator": "781 of 781 stocks given one status each (0 covered_3y + 497 starts_late + 284 no_series + 0 beyond_cap); universe from 504 canonical_shape days (1169 files, newest revision per day); security_market 4 files in 3 partitions (2026-09-29, 2026-10-01, 2026-10-02), 1239 rows. The order expected 805 stocks; see row W15-S1",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the invocation run twice, the second from the per-file cache of the first",
+      "observed": "Identical coverage line both runs, rc=0",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Window mutant: the check run with --run-day 2029-10-05, which puts the three-year cap at 2026-10-05, after every series start.",
+      "expected": "every one of the 497 series reclassifies from STARTS_LATE to BEYOND_CAP; the 284 NO_SERIES stay; starts_late=0",
+      "observed": "FWD9-HISTORY-COVERAGE stocks=781 covered_3y=0 starts_late=0 no_series=284 beyond_cap=497 (then the real run restored the committed JSON byte-identical, git status clean)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reads through pyarrow.fs.S3FileSystem",
+      "reason": "pyarrow's S3 reader failed with NETWORK_CONNECTION on this link in 3 full runs; the check reads through boto3 with timeouts and 12 retries per object (row W15-S1 evidence); the data read is the same objects."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W15-S1",
+    "MDPF_SECCLASS-W15-S2"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd9_history_coverage.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh r7_fwd9_history_coverage.py",
+      "result": "pre-commit gate clean for 1 of 1 file(s)"
+    }
+  ]
+}
