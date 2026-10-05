@@ -3,7 +3,7 @@
 For TSM_US_Equity (quote USD, reporting TWD), 1299_HK_Equity (quote HKD, reporting USD), SAP_GY_Equity (EUR) and BA_US_Equity
 (USD), it re-derives each block IN MEMORY through the REAL `stage_derive` on the raw stamp the served newest block used, with
 `sa_fallback=False`. The S3 client is wrapped: reads go through, and every put_object is CAPTURED and never sent, so nothing is
-written. A MONEY figure has a unit beginning MILLIONS (but not "MILLIONS (share count)"), ABSOLUTE or PER SHARE.
+written. A MONEY figure has a unit beginning MILLIONS, ABSOLUTE or PER SHARE (but not a "(share count)" unit; amended 2026-10-05, row Z-W1-S33).
 Prints one line per arm, then `am1 build <p>/1 control <q>/2`.
   b1  over the 4 derived blocks, money figures with currency null AND a basis that does not begin UNMEASURED/UNSTATED read 0
       (the before-count on the served blocks is printed beside it).
@@ -43,7 +43,7 @@ class CapturingS3:
 
 def is_money(unit):
     u = str(unit or "")
-    if u.startswith("MILLIONS (share count)"):
+    if "(share count)" in u:
         return False
     return u.startswith("MILLIONS") or u.startswith("ABSOLUTE") or u.startswith("PER SHARE")
 

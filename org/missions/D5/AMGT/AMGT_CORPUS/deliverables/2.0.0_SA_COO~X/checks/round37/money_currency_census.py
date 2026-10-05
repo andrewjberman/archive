@@ -1,7 +1,8 @@
 """AMGT_CORPUS round 37 -- the money-currency census over the served newest model blocks. Issuer's file. Read-only.
 
   python money_currency_census.py [--keys K1,K2,...] [--cutoff <stamp prefix>]
-A MONEY figure is one whose served `unit` begins MILLIONS (but not "MILLIONS (share count)"), ABSOLUTE, or PER SHARE.
+A MONEY figure is one whose served `unit` begins MILLIONS, ABSOLUTE, or PER SHARE
+(but not a "(share count)" unit; amended 2026-10-05, row Z-W1-S33).
 Over every scope (header, fiscal_year_line_item, forecast) of each name's newest block (or, with --cutoff, only names whose
 newest block stamp >= cutoff), it counts:
   money            money figures
@@ -24,7 +25,7 @@ from lib.research.api import scoped_amgt  # noqa: E402
 
 def is_money(unit):
     u = str(unit or "")
-    if u.startswith("MILLIONS (share count)"):
+    if "(share count)" in u:
         return False
     return u.startswith("MILLIONS") or u.startswith("ABSOLUTE") or u.startswith("PER SHARE")
 
