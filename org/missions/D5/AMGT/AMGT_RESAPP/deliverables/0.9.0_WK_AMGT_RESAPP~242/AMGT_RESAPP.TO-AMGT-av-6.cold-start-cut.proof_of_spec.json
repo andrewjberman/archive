@@ -1,0 +1,138 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-av-6",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-av-6.cold-start-cut.md",
+  "group": "OTHER",
+  "vintage_commit": "21918948a7"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "21918948a7",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-av-6.cold-start-cut.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~242",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_prefetch_classifications (one BatchGetItem, 100 keys a call, answers shaped by the new _classification_from_item and held as before), _batch_get takes a table name, _slash_row_unconfirmed asks the crosswalk name before the model block, _dynamodb() is called at module init. Not deployed (bounds). New AWS action: dynamodb:BatchGetItem on etf-classifications.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/monthly_chatter.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_classifications prefetches its distinct tickers in one batch before the per-ticker reads.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/conftest.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "autouse fixture makes the classification prefetch a no-op so existing single-key tests stay hermetic.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_av6_cold_start.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "7 tests: one batch call and no single reads; batch equals single-key answers; unprocessed key re-asked; key unprocessed after every attempt read singly; failed batch falls back; slash row skips the block read when the crosswalk name matches, asks it when not.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~242/capture15.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "captured the 15 before bodies (9 Lead Panel reads, BA/AMD/ASML_NA overlay and peers) via the local handler.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~242/after_equal.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC2 comparator: 15 local handler reads vs before/*.json, generated_at dropped at any depth, prints EQUAL n of 15.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "each route's first request makes 15 AWS calls or fewer; C1 PASS; R72 C46 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round72/checks/r72_served.py\" --cell c46 --where local; echo \"exit=$?\"",
+   "output_evidence": "   first-request AWS calls (one fresh process per route): {'rankings': 60, 'chatter': 72}\nFAIL C1 each first read makes <= 15 AWS calls {'rankings': 60, 'chatter': 72}\nR72 C46 SERVED: NO\nexit=1",
+   "denominator": "2 routes, each in its own fresh process: rankings 60 and chatter 72 against the bar of 15 (before the cuts: 153 and 167); 0 of 2 within the bar. 23 distinct names read from model blocks (about 48 to 50 calls a route) are held in no other store.",
+   "expect": "each route's first request makes 15 AWS calls or fewer; C1 PASS; R72 C46 SERVED: YES; and exit=0",
+   "status": "FAIL",
+   "status_reason": "Not met: rankings 60 and chatter 72 first-request calls against the bar of 15 (before: 153 and 167). 23 distinct names are held only in their model blocks (a listing and a GET each, about 48 to 50 calls a route); the crosswalk holds none of them, so the order's 'use the crosswalk name it already holds' does not reach them. Row AMGT_RESAPP-Z-W242-S1 (BLOCKING, INERT, disarm owner 2.0.0_SA_COO~Z)."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "EQUAL 15 of 15; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~242/after_equal.py\"; echo \"exit=$?\"",
+   "output_evidence": "EQ   lead-panel_timeseries_collected_chatter_days30.json status=200\nEQ   lead-panel_timeseries_collected_chatter_days90.json status=200\nEQ   lead-panel_timeseries_collected_chatter_days365.json status=200\nEQ   lead-panel_rankings_trending_price_default.json status=200\nEQ   lead-panel_rankings_trending_price_days90.json status=200\nEQ   lead-panel_rankings_trending_price_days365.json status=200\nEQ   lead-panel_rankings_breakout_price_default.json status=200\nEQ   lead-panel_rankings_breakout_price_days90.json status=200\nEQ   lead-panel_rankings_breakout_price_days365.json status=200\nEQ   security_BA_US_Equity_overlay_default.json status=200\nEQ   security_BA_US_Equity_peers_default.json status=200\nEQ   security_AMD_US_Equity_overlay_default.json status=200\nEQ   security_AMD_US_Equity_peers_default.json status=200\nEQ   security_ASML_NA_Equity_overlay_default.json status=200\nEQ   security_ASML_NA_Equity_peers_default.json status=200\nEQUAL 15 of 15\nexit=0",
+   "denominator": "15 of 15 bodies equal their before/ body with every generated_at dropped (9 Lead Panel reads plus BA, AMD, ASML_NA overlay and peers)",
+   "expect": "EQUAL 15 of 15\\s*exit=0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "after_equal.py run twice after the last code edit (once before the new tests were added, once at the proof run); AC1 run twice.",
+   "observed": "EQUAL 15 of 15 both times; AC1 read rankings 60 / chatter 72 both times.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "AC2's comparator on a before body with ONE ranked row's name changed to MUTANT, and on a body differing only in generated_at.",
+   "expected": "the comparator names the changed field as a difference; the generated_at-only difference reads equal.",
+   "observed": "first_diff: $.rows[3].name: 'ASML Holding NV' vs 'MUTANT'; generated_at-only: None (equal).",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The 23 names held only in model blocks",
+   "reason": "no source other than the model block holds them; the order's cut ('the crosswalk name it already holds') does not reach them. Filed as AMGT_RESAPP-Z-W242-S1; a registration write or a changed bar is the issuer's call."
+  },
+  {
+   "item": "Deploy, and any measurement of the deployed function",
+   "reason": "BOUNDS 1: no deploy; AC1 is the issuer's literal --where local."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W242-S1"
+ ],
+ "session_log": "N/A -- no session-log path in this worker's paths. Worktree C:/tmp/r72-242 on wk-AMGT_RESAPP-242 cut from the issuance commit. Scratch: C:/tmp/r72-242/.scratch (uncommitted).",
+ "compiler_tools": [
+  {
+   "tool": "capture15.py (this worker's capture tool)",
+   "invocation": "PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~242/capture15.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~242/before",
+   "result": "15 bodies, all status 200, written to before/ prior to any edit."
+  }
+ ]
+}
