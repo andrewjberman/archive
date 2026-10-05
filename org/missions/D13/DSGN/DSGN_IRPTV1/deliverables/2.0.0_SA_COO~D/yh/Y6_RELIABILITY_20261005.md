@@ -25,12 +25,16 @@ cases A, B, C, D and the typo file APPROVED, one at a time with the queue empty)
 | 4 | Bproxy #2 | 0edab95f | REQ-1352d8c1e0641711d9285688 | 08:23:36 | 08:46:03 | 22.4 min (upper bound; one poll lost to a slow load) | 13.8 s | 85 | READY | tmp/yh-submit/20261005T081924Z-Bproxy |
 | 5 | Cproxy #1 | d1c7485b | REQ-e7af8e8ad6eed3757c2ddee3 | 09:21:57 | 09:41:24 | 19.5 min | 20.8 s | 104 | READY (multicomp, keys [opal_ultra_long_term, IWM]) | tmp/yh-submit/20261005T091821Z-Cproxy |
 | 6 | Cproxy #2 | d1c7485b | REQ-01c903660d7ab222cd08b2ff | 09:49:05 | 10:07:47 | 18.7 min | 10.3 s | 104 | READY | tmp/yh-submit/20261005T094603Z-Cproxy |
-| 7 | Dproxy #1 | 31510397 | none yet | -- | -- | -- | -- | -- | three attempts, no submission (below); retry after ~Y's FWD-2 slot | tmp/yh-submit/20261005T104149Z-, T105652Z-, T115118Z-Dproxy |
+| 7 | Dproxy #1 | 481b3bcc (attempt 5) | REQ-6eaec4e9e48b4d4f409148b6 | 14:40:59 | not reached: the page read UNAVAILABLE at 14:59:15 | -- | -- | -- | ATTENTION at 14:56:22 (backend, ~Y 105312): SESSION_REFRESH_ALREADY_USED; the YCharts session was evicted at 14:41:07 and again at 14:56:09, which points to another live login on the account | tmp/yh-submit/20261005T143... -Dproxy (attempt 5) |
+
+**Runs 8-10 are HELD (~Y 105312)** until the YCharts session is proven live again. Run 7's attempt 5 also saw the page list fail to draw within 120 s at 15:05:00 (`list-loading`).
 
 **Run 7's attempts (no job was created in any of them):**
 - 10:41Z: the upload's third POST hung 53.5 s and answered 500 through the local dev proxy (no x-cache header). ~Y's log shows the POST never reached the Lambda (105247).
 - 10:56Z: the upload reached NEEDS_CORRECTION, but today's gate flags the Stevens file's FBIFX, FDGFX, FHTKX and SPAXX (rows 3, 4, 5 and 19), not the Y-5-era QKZAQ, QBNYQ, QUSBQ and QBOKQ the case named. Nothing was filled, and the page's proxy button stayed disabled. Fix: the case now names SGOV for EVERY offered row (`'*'`).
 - 11:51Z, after restarting the dev server (it had run since 10-03 08:38): the client search stayed disabled for 30 s on the cold first load. The dev server has since been warmed.
+- 14:04Z: the Stevens file resolved for about 4.5 minutes, past the driver's 4-minute wait; the waits are now 8 minutes (CLOUD b36feb2f7a).
+- 14:34Z (attempt 5): submitted. The page offered 8 proxy rows (FBIFX, FDGFX, FHTKX, SPAXX and the four untracked QKZAQ, QBNYQ, QUSBQ, QBOKQ), each named SGOV; NORMALIZED.
 
 **Run 3's page run was killed:**
 - The background limit was 30 minutes, and the run can take about 31, so the walker's own finally-disarm never ran. The walker was disarmed by hand at 07:53:14Z, with a refused login (MSTR told).
