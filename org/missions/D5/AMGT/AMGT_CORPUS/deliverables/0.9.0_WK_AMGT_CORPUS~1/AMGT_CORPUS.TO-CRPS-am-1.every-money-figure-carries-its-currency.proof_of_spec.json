@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-am-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-am-1.every-money-figure-carries-its-currency.md",
+    "group": "OTHER",
+    "vintage_commit": "ece32e98a6f0be07656bea82158f1312a447f7f0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "ece32e98a6f0be07656bea82158f1312a447f7f0",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-am-1.every-money-figure-carries-its-currency.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "2ff61a4d6d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_figure_currency gains three tables: _MONEY_REPORTING_FIELDS (statement lines, per-share statement values, the BEST_* consensus of a reported line, HISTORICAL_MARKET_CAP), _MONEY_QUOTE_FIELDS (AVG_DAILY_VALUE_TRADED_3M) and _MONEY_FOLLOWS_CUR_MKT_CAP (CRNCY_ADJ_MKT_CAP is classified as CUR_MKT_CAP, per security). The signature, the round-25/26 tables and the UNSTATED / UNMEASURED nulls are untouched. No value, unit, field list or fetch path changed; no S3 write, no vendor call.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_figure_currency_round37.py",
+      "kind": "test",
+      "commit_or_etag": "2ff61a4d6d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file, 10 offline tests calling _figure_currency directly: reported -> reporting, market value -> quote, CRNCY_ADJ_MKT_CAP follows CUR_MKT_CAP, the TSM mixed block, absent reporting and absent quote currency -> UNSTATED nulls, census held-out figure -> UNMEASURED unchanged, already-labelled figures unchanged, ratio / percent / share count / text -> invariant, and a completeness arm over every FIELD_BASIS mnemonic that says 'millions of the reporting currency' (denominator >= 25).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round37/am1_check.py\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round37/am1_check.py\"",
+      "output_evidence": "CAPTURED puts (never sent): 4\nARM b1 PASS unlabelled money figures before 905 after 0 ['TSM_US_Equity raw 20261004T130954Z unlabelled money before 166 after 0', '1299_HK_Equity raw 20261004T130004Z unlabelled money before 216 after 0', 'SAP_GY_Equity raw 20261004T130908Z unlabelled money before 261 after 0', 'BA_US_Equity raw 20261004T130233Z unlabelled money before 262 after 0']\nARM c1 PASS values moved 0 []\nARM c2 PASS labelled currencies changed 0 []\nam1 build 1/1 control 2/2",
+      "denominator": "4 names (TSM, 1299 HK, SAP, BA) re-derived in memory on each served block's own raw stamp; 4 puts captured and never sent; unlabelled money figures 905 before, 0 after; control arms c1 and c2 pass 2/2. Run on the issuer's amended am1_check.py (amendment 5a02ae8e98, on this branch as fe9cd2d6fa: a '(share count)' unit is never money), which disarmed row AMGT_CORPUS-Z-W1-S33. rc 0.",
+      "expect": "(?m)^am1 build 1/1 control 2/2$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest integrations/bloomberg/research/tests/test_figure_currency_round37.py -q -p no:cacheprovider --color=no",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest integrations/bloomberg/research/tests/test_figure_currency_round37.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "..........                                                               [100%]\n10 passed in 0.35s",
+      "denominator": "10 of 10 tests in test_figure_currency_round37.py pass. Wider run: 65 passed over that file plus test_currency_labels.py, test_figure_currency_round25.py, test_figure_currency_round26.py and the 7 test_model_block_*.py files. rc 0.",
+      "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 (JUDGMENT, graded by the CVO at L9): each money field's side (reporting or quote) is right by Bloomberg's definition.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment row, graded by 3.0.0_SA_CVO~Z at L9, never self-graded",
+      "output_evidence": "SIDES GIVEN (model_block_pull.py _MONEY_REPORTING_FIELDS / _MONEY_QUOTE_FIELDS / _MONEY_FOLLOWS_CUR_MKT_CAP, commit 2ff61a4d6d). REPORTING: statement lines ARD_GOODWLL, ARD_OTHER_INTANGIBLE_ASSET, ARD_TOTAL_CURRENT_LIABILITIES, ARD_TOT_ASSETS, BS_CASH_NEAR_CASH_ITEM, BS_TOTAL_LIABILITIES, CAPEX_ABSOLUTE_VALUE, CASH_AND_MARKETABLE_SECURITIES, CF_CASH_FROM_OPER, EARN_FOR_COMMON, IS_ADJUSTED_GROSS_PROFIT, IS_ADJUSTED_OPERATING_INCOME, MINORITY_NONCONTROLLING_INTEREST, NET_INCOME, SHORT_AND_LONG_TERM_DEBT, TOTAL_EQUITY (FIELD_BASIS: 'millions of the reporting currency'); per-share statement values EQY_DPS (landed == IS_DIV_PER_SHR), FREE_CASH_FLOW_PER_SH, IS_COMP_EPS_ADJUSTED, IS_DIL_EPS_CONT_OPS (~IS_EPS), REVENUE_PER_SH, TANG_BOOK_VAL_PER_SH (~BOOK_VAL_PER_SH); BEST_BPS, BEST_CAPEX, BEST_CPS, BEST_DPS, BEST_EBIT, BEST_EBITDA, BEST_EPS, BEST_ESTIMATE_FCF, BEST_NET_INCOME, BEST_SALES (landed first forecast vs latest actual sibling, ratios 0.5-1.8 on BABA CNY, 1299 HK USD, ICT PM USD, TSM TWD, JD CNY); HISTORICAL_MARKET_CAP (AGAINST its FIELD_BASIS text 'trading currency': latest-FY value x 1e6 / CUR_MKT_CAP reads 7.89 BABA, 7.81 JD, 0.1506 1299 HK, 0.034 992 HK, 0.011 ICT PM, so the series is in the reporting currency; row Z-W1-S34). QUOTE: AVG_DAILY_VALUE_TRADED_3M (price x volume; on the 11 GBp names it is 0.84-1.24 x PX_LAST x VOLUME_AVG_30D, i.e. in the price unit GBp, never the 0.01 of GBP). FOLLOWS CUR_MKT_CAP: CRNCY_ADJ_MKT_CAP (CRNCY_ADJ_MKT_CAP x 1e6 / CUR_MKT_CAP = 1 on 96 of 96 blocks, so it takes CUR_MKT_CAP's per-security class: quote on the 12 census names, UNMEASURED on the held-out ones, reporting otherwise, so a GBp name never prints the pence label on a GBP value). STAY INVARIANT: ratios, percents, EQY_SH_OUT_REAL, VOLUME_AVG_30D, ARD_SHARES_OUTSTANDING, text, dates, years. PRE-EXISTING and kept (rule 4): IS_SH_FOR_DILUTED_EPS, a share count, carries the reporting currency (row Z-W1-S35).",
+      "denominator": "N/A -- judgment row",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L9: a judgment criterion is graded by 3.0.0_SA_CVO~Z at adjudication, never self-graded by the worker that produced it."
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "am1_check.py (AC1) and the AC2 pytest file each run twice on the final tree (landed raw and served blocks unchanged between runs).",
+      "observed": "AC1 re-run on the amended check reads build 1/1 control 2/2 (before 905 after 0, values moved 0, labelled currencies changed 0, 4 puts captured); AC2 reads 10 passed on both runs.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The producer as at the base (git show HEAD:integrations/bloomberg/research/model_block_pull.py at ece32e98a6) run through the same two instruments: (a) am1_check.py before the edit, (b) the new test file copied beside a copy of the base module and run under pytest.",
+      "expected": "(a) the build arm cannot move: 913 unlabelled before and after; (b) the arms that pin the new rule fail on the base.",
+      "observed": "(a) ARM b1 FAIL unlabelled money figures before 913 after 913; am1 build 0/1 control 2/2 (the first run, before any edit). (b) 7 failed, 3 passed against the base producer (the 3 that pass are the unchanged arms: held-out UNMEASURED, already-labelled, ratio / share count / text invariant); 10 passed against the new one.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any served write, re-derive that lands, and the daily task's re-pin",
+      "reason": "The served move is the issuer's paired act CRPS-am-2; this order re-derived in memory with every put captured."
+    },
+    {
+      "item": "Names beyond TSM, 1299 HK, SAP and BA",
+      "reason": "AC1 re-derives four names. The side of each mnemonic was decided from FIELD_BASIS and checked over all 96 served blocks by the read-only probes, but the 96-block census of the re-derived result is the issuer's am-2 control."
+    },
+    {
+      "item": "The labelling of IS_SH_FOR_DILUTED_EPS",
+      "reason": "A share count already labelled with the reporting currency by the older rule; order item 4 keeps an existing currency. Row Z-W1-S35."
+    },
+    {
+      "item": "The three granted existing tests (test_currency_labels.py, test_figure_currency_round25.py, test_figure_currency_round26.py)",
+      "reason": "Run against the new rule and all pass unchanged at ece32e98a6: no assertion in them pins None / 'invariant' on a MONEY figure of its fixtures (the old-rule arm asserts invariant only for PE_RATIO, NAME and CRNCY-class fixtures), so no AMENDMENT was needed and none was made."
+    },
+    {
+      "item": "Share-count figures in AC1",
+      "reason": "EQY_SH_OUT_REAL and VOLUME_AVG_30D are share counts, kept invariant by order item 3; the issuer's amendment 5a02ae8e98 (fe9cd2d6fa) stopped the check counting them as money (row Z-W1-S33 disarmed)."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W1-S33",
+    "AMGT_CORPUS-Z-W1-S34",
+    "AMGT_CORPUS-Z-W1-S35"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "am1_check.py in-memory stage_derive over TSM, 1299 HK, SAP, BA (AC1)",
+      "invocation": "PYTHONPATH=. python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round37/am1_check.py",
+      "result": "rc 0; am1 build 1/1 control 2/2"
+    },
+    {
+      "tool": "pytest over the new offline test (AC2)",
+      "invocation": "PYTHONPATH=. python -m pytest integrations/bloomberg/research/tests/test_figure_currency_round37.py -q -p no:cacheprovider --color=no",
+      "result": "rc 0; 10 passed"
+    }
+  ]
+}
