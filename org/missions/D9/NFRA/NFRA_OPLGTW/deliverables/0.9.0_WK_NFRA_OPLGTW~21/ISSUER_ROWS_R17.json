@@ -1,0 +1,73 @@
+{
+  "schema": "ISSUER_ROWS_R17 v1",
+  "project": "NFRA_OPLGTW",
+  "task_order": "NFRA_OPLGTW.TO-OG-ar-2",
+  "author": "0.9.0_WK_NFRA_OPLGTW~21",
+  "pin": "4e84fd3f2e",
+  "note": "No remediation row was edited. Seven rows, each with exactly one of moves_when / remediated_by / closure.",
+  "rows": [
+    {
+      "id": "NFRA_OPLGTW-W6-S2",
+      "owner": "1.0.0_SA_CTO",
+      "mechanism_one_line": "No carrier declared the unique grain of the datasets; the real 2026-09-15 dim_position snapshot collided on (account_id, cusip, l_s).",
+      "moves_when": {
+        "condition": "NARROWED to dim_balance. R9's grain for dim_position and dim_asset is remediated: OG-gr-3 (complete; commits ebf2435300, 518ff0c51a) put it in query.py DATASET_GRAINS and datasets.json, and OG-rl-5 (complete; ledger nfra-oplgtw-gateway-release-r16 CLOSED, VERIFY PASS 15 of 15, served 4b6b823fae) is live. Residual: dim_balance pages on (ACCOUNT_SOURCE,) (query.py:160) and that grain's uniqueness is unmeasured until OG-gr-4 lands GR4_BALANCE_GRAIN.json (not in the tree at the pin). Moves when GR4 reports 0 duplicate keys on every served dim_balance snapshot (row closes), or, if any snapshot has duplicates, when the CTO rules a grain as R9 did.",
+        "actor": "2.0.0_SA_COO~O (drains OG-gr-4 and closes on a zero); 1.0.0_SA_CTO~O (L4 ruling only if GR4 finds duplicates)"
+      }
+    },
+    {
+      "id": "NFRA_OPLGTW-W1-S9",
+      "owner": "2.0.0_SA_COO~O",
+      "mechanism_one_line": "The naming limb REFUSEs the PRD-fixed role names opal-mcp-schwab-catalog-read, opal-mcp-emp-menachem-schwab-read, opal-gateway-assume-schwab-readers (WARN then, exit 7 under ENFORCE).",
+      "moves_when": {
+        "condition": "A registry row (infra/logic/registry) or an R20 register entry that Andrew acknowledges for the three names; it only fires on a plan that adds or replaces one of them. Re-measured now: org/mcp/naming-gate.enforce exists (ENFORCE on); git ls-tree of infra/logic at HEAD holds 0 files naming any of the three. Nothing adds them today.",
+        "actor": "1.0.0_SA_CTO~O (L4 ruling / R20 entry with Andrew's acknowledgement, with the LGIC naming-gate owner)"
+      }
+    },
+    {
+      "id": "NFRA_OPLGTW-W2-S6",
+      "owner": "2.0.0_SA_COO~O",
+      "mechanism_one_line": "8 synthetic probe items (probe-og-i1 x3 partitions, probe-og-i5 x1) sit in the production gateway-access-state-table.",
+      "moves_when": {
+        "condition": "Andrew's word to delete the 8 items on CARD_W2-S6_PROBE_FIXTURES.md (per-key deletes prepared, none run), plus a TTL for future probes; or a CTO ruling to keep them as recorded fixtures. Re-measured read-only 2026-10-04: dynamodb scan of gateway-access-state-table with a pk contains(probe-og-i) filter, Count 8 of ScannedCount 386, no LastEvaluatedKey; the 8 keys match the card (POLICY probe-og-i1 x7 items across 3 partitions, RUNTIME#probe-og-i5-20260917T140533Z sk AC9). Nothing deleted. Same act as S36.",
+        "actor": "1.0.0_SA_CTO~O relays Andrew's word; a CloudOps lane runs the per-key deletes"
+      }
+    },
+    {
+      "id": "NFRA_OPLGTW-Z-W13-S5",
+      "owner": "2.0.0_SA_COO~O",
+      "mechanism_one_line": "DATA_CATALOG.yaml's line-ending renormalization never landed; the naming limb refused the renorm commit.",
+      "moves_when": {
+        "condition": "MDPF_CANON's remediation of the 16 out-of-pattern S3 key lines in DATA_CATALOG.yaml lands, after which one commit runs git add --renormalize on that one path. Hazard disarmed by fd841cd02b (-text, ships as it is). Re-measured now: git ls-files --eol infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml reads i/crlf w/crlf attr/-text.",
+        "actor": "MDPF_CANON owner lands the key-line fix; 2.0.0_SA_COO~O runs the renormalize commit"
+      }
+    },
+    {
+      "id": "NFRA_OPLGTW-Z-W12-S7",
+      "owner": "2.0.0_SA_COO~O",
+      "mechanism_one_line": "The operator's upload client has no live refresh family and reads EXPIRED under OG-u-2's idle lifetime from about 2026-10-18.",
+      "moves_when": {
+        "condition": "DATED ACT: the operator (Andrew) re-authorizes the upload client through the interactive authorization-code exchange before ~2026-10-18 (hard stop; aim for 2026-10-15 for a 3-day margin). 2.0.0_SA_COO~O names the session and records the new expiry. No record of the exchange exists in the tree at the pin.",
+        "actor": "Andrew (the operator) performs the exchange; 2.0.0_SA_COO~O records it"
+      }
+    },
+    {
+      "id": "NFRA_OPLGTW-S63",
+      "owner": "2.0.0_SA_COO~O",
+      "mechanism_one_line": "Phase 1's committed seal lost its salt; a re-verification minted a fresh salt and rewrote SEALED_EXPECTED.json uncommitted.",
+      "moves_when": {
+        "condition": "The pilot-walkthrough grading cell re-enters as a NEW cell in the round where G-E stands (after Menachem's tid/oid grant; CTO round-14 R6). At that cut the issuer records which seal is of record and marks the AC8 probe MUTATING so a verifier re-runs only a read-back. The consuming cells (OG-v-4, OG-v-7, OG-v-8) are superseded or cancelled, so nothing acts before then.",
+        "actor": "2.0.0_SA_COO~O"
+      }
+    },
+    {
+      "id": "NFRA_OPLGTW-Z-W15-S31",
+      "owner": "2.0.0_SA_COO~O",
+      "mechanism_one_line": "trnspt/checks/tr.AC1.sh arm 4 expects '.env 48 keys' while the host holds 50, so the check reads FAIL on a correct host.",
+      "moves_when": {
+        "condition": "The next order that touches trnspt/checks/tr.AC1.sh rewrites arm 4 to the live 50-key count (CTO round-14 R4). Re-measured now: deliverables/2.0.0_SA_COO~O/trnspt/checks/tr.AC1.sh still carries '48 keys' at line 7 (comment) and line 32 (the grep regex HOST env_keys 48).",
+        "actor": "2.0.0_SA_COO~O (owns the check)"
+      }
+    }
+  ]
+}
