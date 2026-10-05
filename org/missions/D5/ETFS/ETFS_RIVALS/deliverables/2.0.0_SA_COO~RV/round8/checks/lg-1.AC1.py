@@ -22,7 +22,12 @@ RIVALFUNDS_LEG_ENABLE=1 so the v0.8 controls are in the universe.
         2026-01-16 while Range.Value2 read every row and returned dates as Excel serials): with a sheet whose `Value` raises
         com_error and whose `Value2` returns the date columns as Excel serials, TXUE 40 + BIDD 40 still land whole, in OK
         captures (their DATES / REPORT_DATE read back as ISO dates), with no exception.
-FAIL at base: (a), (b), (c), (e) FAIL; (d) PASSES. At the lg-1 build 481d101ab1: (e) FAILS (it reads Range.Value)."""
+  - (f) AMENDED 2026-10-05 (row Z-S23, measured on the real Terminal: for 2026-01-16 Bloomberg returned IWM's columns in a
+        different order from ACWI's -- `id().DATE` at column 1, not 7 -- and the merge kept only the first part's header, so
+        every IWM row read as off the requested date): with ACWI's sheet in the usual column order and IWM's in a permuted
+        order, both controls land whole in an OK capture, status OK.
+FAIL at base: (a), (b), (c), (e) FAIL; (d) and (f) PASS (one query, one header). At the amend-2 build 5bb37fb4e0: (f) FAILS
+(two queries, two headers, and the merge keeps the first)."""
 import datetime as dt
 import json
 import os
@@ -38,6 +43,7 @@ DAY, REPORT = "2026-10-02", "2026-10-01"
 HDR = ["ID", "ORIG_IDS", "REPORT_DATE", "DATES", "name()"]
 FORMULAS: list[str] = []
 BAD_VALUE: set = set()  # funds whose sheet makes Range.Value raise (a cell the COM conversion overflows on)
+PERMUTE: set = set()  # funds whose sheet comes back with its columns in another order (DATES moved to column 1)
 
 
 def rows_for(fund: str, n: int) -> list[list]:
@@ -104,8 +110,11 @@ def install_fake_com(plant: dict[str, int]) -> None:
                     return float((dt.date.fromisoformat(str(v)[:10]) - dt.date(1899, 12, 30)).days)
                 except ValueError:
                     return v
-            return tuple(tuple(serial(v) if i in (2, 3) and r[0] != "ID" and v is not None else v
-                               for i, v in enumerate(r)) for r in self._rows())
+            rows = self._rows()
+            hdr = rows[0] if rows else ()
+            dcols = {i for i, h in enumerate(hdr) if h in ("REPORT_DATE", "DATES")}
+            return tuple(tuple(serial(v) if i in dcols and r[0] != "ID" and v is not None else v
+                               for i, v in enumerate(r)) for r in rows)
 
     class _Cells:
         def __init__(self, sh):
@@ -130,6 +139,9 @@ def install_fake_com(plant: dict[str, int]) -> None:
             data = [list(HDR)]
             for fd in funds:
                 data += rows_for(fd, plant.get(fd, 0))
+            if any(fd in PERMUTE for fd in funds):  # Bloomberg's column order differs per query: DATES moves to column 1
+                order = [0, 3, 1, 2, 4]
+                data = [[r[i] for i in order] for r in data]
             self.data = data
 
     class _Sheets:
@@ -243,6 +255,14 @@ def run(v):
     got = landed([sc for sc in scs if sc.get("status") == "OK"])
     v.check(err is None and res is not None and res.get("status") == "OK" and got == {"TXUE": 40, "BIDD": 40},
             "(e) a sheet whose Range.Value overflows still lands whole through Value2, dates read back as ISO (OK captures)")
+
+    PERMUTE.add("IWM")
+    res, err, scs, _ = fire({"ACWI": 300, "IWM": 200}, ["ACWI", "IWM"], "f")
+    PERMUTE.clear()
+    got = landed([sc for sc in scs if sc.get("status") == "OK"])
+    print("[f] statuses:", [sc.get("status") for sc in scs])
+    v.check(err is None and res is not None and res.get("status") == "OK" and got == {"ACWI": 300, "IWM": 200},
+            "(f) two controls whose sheets come back in different column orders both land whole in an OK capture")
 
 
 failures = c.guarded("AC1", run)
