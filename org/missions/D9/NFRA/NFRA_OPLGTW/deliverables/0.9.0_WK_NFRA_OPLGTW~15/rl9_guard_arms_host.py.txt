@@ -1,0 +1,115 @@
+"""OG-rl-6 PHASE C-B, CVO GUARD T2 (i): the GuardMiddleware stack of the DEPLOYED code, driven on the HOST in a SEPARATE process (never the running service),
+with the identity verifier's ELB public key swapped for a LOCAL test ES256 key (the rl8_guard_arms.py mechanism). Name it honestly: "deployed bytes, test signing key".
+
+usage (on the host, in the venv, env -i):  python run.py owner|empty|missing|preflight
+  owner      /yearinreview, YEARINREVIEW_VIEW_ALLOWED_EMAILS=andrew@opalinvest.com: owner (test-signed) 200 + page bytes; a verified non-owner 403 and no page bytes,
+             audited DENIED/roster; a PLANTED non-signed identity 401; no identity 401.
+  empty      /yearinreview, the key set to "": the verified owner 403 (fail closed), a verified non-owner 403, no identity 401.
+  missing    /yearinreview, the key absent: the same as empty.
+  preflight  READ-ONLY EXERCISE OF THIS HARNESS ON THE PRE-ACT LIVE CODE (e91819e281, which has no /yearinreview): the SAME mechanism driven at /sprint with
+             SPRINT_VIEW_ALLOWED_EMAILS=owner: owner passes the guard and the roster (the day listing is stubbed empty, so 404 'No Daily Sprint published', no S3 read),
+             a verified non-owner 403, a planted identity 401, no identity 401.
+Never read: /opt/opal-gateway/.env (python-dotenv's load_dotenv is replaced by a no-op BEFORE app.config imports, so the roster key is exactly what this process sets),
+never a value printed. The real ELB key is never used and no audit is written (audit.log_call replaced); nothing is written to the host.
+"""
+import base64
+import hashlib
+import json
+import os
+import sys
+
+mode = sys.argv[1]
+gw = "/opt/opal-gateway"
+sys.path.insert(0, gw)
+os.environ["MOCK_GRAPH"] = "1"
+os.environ["IDENTITY_PROVIDER"] = "alb_oidc"
+os.environ["RATE_LIMIT_ENABLED"] = "0"
+for k in ("YEARINREVIEW_VIEW_ALLOWED_EMAILS", "SPRINT_VIEW_ALLOWED_EMAILS"):
+    os.environ.pop(k, None)
+if mode in ("owner",):
+    os.environ["YEARINREVIEW_VIEW_ALLOWED_EMAILS"] = "andrew@opalinvest.com"
+elif mode == "empty":
+    os.environ["YEARINREVIEW_VIEW_ALLOWED_EMAILS"] = ""
+elif mode == "preflight":
+    os.environ["SPRINT_VIEW_ALLOWED_EMAILS"] = "andrew@opalinvest.com"
+elif mode != "missing":
+    raise SystemExit("mode must be owner|empty|missing|preflight")
+
+import dotenv  # noqa: E402
+dotenv.load_dotenv = lambda *a, **k: False           # the host .env is never read by this process
+
+import jwt                                                       # noqa: E402
+from cryptography.hazmat.primitives import serialization        # noqa: E402
+from cryptography.hazmat.primitives.asymmetric import ec        # noqa: E402
+from starlette.testclient import TestClient                      # noqa: E402
+
+from app import identity, server                                 # noqa: E402
+
+print("DEPLOYED_FILE server.py=%s md5 %s" % (server.__file__, hashlib.md5(open(server.__file__, "rb").read()).hexdigest()))
+if mode != "preflight":
+    from app import yearinreview_view                            # noqa: E402
+    print("DEPLOYED_FILE yearinreview_view.py=%s md5 %s" % (yearinreview_view.__file__, hashlib.md5(open(yearinreview_view.__file__, "rb").read()).hexdigest()))
+    print("DEPLOYED_FILE config.py md5 %s" % hashlib.md5(open(os.path.join(gw, "app/config.py"), "rb").read()).hexdigest())
+
+key = ec.generate_private_key(ec.SECP256R1())
+pub_pem = key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+priv_pem = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
+identity._fetch_elb_public_key = lambda kid: pub_pem            # the swapped-in "ELB" key: a LOCAL TEST key
+
+
+async def _no_deny(email):
+    return None
+
+
+server._email_denied = _no_deny
+audit_lines = []
+if mode == "preflight":
+    from app import sprint_view
+    sprint_view.audit.log_call = lambda *a, **k: audit_lines.append((a, k))
+    sprint_view._cached = lambda k, f: []                         # the day listing is empty: no S3 read
+    PATH, PAGE = "/sprint", b"No Daily Sprint published"
+else:
+    yearinreview_view.audit.log_call = lambda *a, **k: audit_lines.append((a, k))
+    PATH, PAGE = "/yearinreview", b"Opal Year One Review"
+
+
+def signed(email):
+    return jwt.encode({"email": email, "sub": "local"}, priv_pem, algorithm="ES256", headers={"kid": "local-kid"})
+
+
+def planted(email):
+    def b(d):
+        return base64.urlsafe_b64encode(json.dumps(d).encode()).decode().rstrip("=")
+    return b({"alg": "ES256", "typ": "JWT", "kid": "local-kid"}) + "." + b({"email": email, "sub": "planted"}) + "." + base64.urlsafe_b64encode(bytes(64)).decode().rstrip("=")
+
+
+client = TestClient(server.app, raise_server_exceptions=False)
+rows = []
+
+
+def arm(name, headers, want_code, page_expected):
+    r = client.get(PATH, headers=headers, follow_redirects=False)
+    has_page = PAGE in r.content
+    ok = r.status_code == want_code and has_page == page_expected
+    rows.append(ok)
+    print("%s %s: code %s (want %s), page bytes %s (want %s), body bytes %d" % ("PASS" if ok else "FAIL", name, r.status_code, want_code, has_page, page_expected, len(r.content)))
+
+
+OWNER, OTHER = "andrew@opalinvest.com", "viewer@opalinvest.com"
+if mode in ("owner", "preflight"):
+    owner_code, owner_page = (200, True) if mode == "owner" else (404, True)
+    arm("owner, test-signed, on the roster", {"x-amzn-oidc-data": signed(OWNER)}, owner_code, owner_page)
+    n = len(audit_lines)
+    arm("verified non-owner, not on the roster", {"x-amzn-oidc-data": signed(OTHER)}, 403, False)
+    want = ("denied", "roster")
+    denied = len(audit_lines) > n and tuple(audit_lines[n][0][-2:]) == want
+    rows.append(bool(denied))
+    print("%s non-owner denial is audit-logged DENIED / roster (logger stubbed): %s" % ("PASS" if denied else "FAIL", denied))
+    arm("planted non-signed identity naming the owner (+ X-User-Email)", {"x-amzn-oidc-data": planted(OWNER), "X-User-Email": OWNER}, 401, False)
+    arm("no identity", {}, 401, False)
+else:
+    arm("verified OWNER with the roster %s" % mode, {"x-amzn-oidc-data": signed(OWNER)}, 403, False)
+    arm("verified non-owner with the roster %s" % mode, {"x-amzn-oidc-data": signed(OTHER)}, 403, False)
+    arm("no identity", {}, 401, False)
+print("T2_ARMS %s path %s: %d of %d  RESULT: %s" % (mode, PATH, sum(rows), len(rows), "PASS" if all(rows) else "FAIL"))
+sys.exit(0 if all(rows) else 1)
