@@ -6,8 +6,8 @@ Usage: python <this file> <repo_root> <criterion_id>
               - `versioning`, a non-empty value read from get_bucket_versioning;
               - `perfrp_keys`, a non-empty list where each entry has key, etag, size, last_modified, writer and
                 carries_20250110, plus `perfrp_keys_denominator` equal to its length;
-              - `withdrawal_set`, a non-empty subset of those keys that includes the 49F account leaf, every member
-                measured carries_20250110 true;
+              - `withdrawal_set`, a non-empty subset of those keys that includes the 49F account leaf (in by ruling, batch
+                251; amendment 1, row W122-S1), every OTHER member measured carries_20250110 true;
               - `rollback`, one entry per withdrawal key;
               - `stop_rule`, naming the ETag;
               - `after_read`, naming PROD and a 49F login.
@@ -55,7 +55,9 @@ def main():
     for k in ws_keys:
         if k not in by_key:
             fail("withdrawal key %r is not among the listed perfrp keys" % k)
-        if by_key[k]["carries_20250110"] is not True:
+        # Amendment 1 (row W122-S1): the 49F account leaf is in the set BY RULING (batch 251), since its since-inception window
+        # returns span 2025-01-10 without naming the date. Every OTHER member must be a measured carrier.
+        if not k.endswith(LEAF) and by_key[k]["carries_20250110"] is not True:
             fail("withdrawal key %r is not measured to carry 2025-01-10" % k)
     rb = c["rollback"]
     rb_keys = set(rb) if isinstance(rb, dict) else {r.get("key") for r in rb}
