@@ -1,0 +1,136 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-au-6",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-au-6.lead-panel-load.md",
+  "group": "OTHER",
+  "vintage_commit": "86b1cd2e86"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "86b1cd2e86",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-au-6.lead-panel-load.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~236",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/served_cache.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New per-container memo (version-keyed or TTL, deep-copied, failed reads never stored). Not deployed: the issuer's bounds forbid a deploy; verified by running the local handler against the live stores.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read_generation_pointer, read_generation_rows, _classification_for_ticker, _join_classification (parallel misses), _model_block_name and _dynamodb now hold what the stores returned. No new S3 or DynamoDB read path (same tables, same prefixes, same actions).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/conftest.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "autouse fixture clears served_cache around every test; with test_generation_and_pool_routes.py's _use() clearing it when a test swaps the store: api suite 599 passed, 1 failed (test_model_words node/portal, fails identically at the issuance commit).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~236/after_equal.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC2 comparator: nine local handler reads vs before/*.json, generated_at dropped at any depth, prints EQUAL n of 9.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~236/PROFILE.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Per-phase profile and per-route BEFORE/AFTER table, cold and warm, boto calls by operation.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every one of the 9 reads prints status [200] and a worst warm time under 6000 ms; C1 PASS; R71 C38 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round71/checks/r71_latency.py\" --where local --bar-ms 6000; echo \"exit=$?\"",
+   "output_evidence": "/lead-panel/timeseries/collected/chatter?{\"days\": \"30\"}: min 870 ms max 913 ms status [200]\n   /lead-panel/timeseries/collected/chatter?{\"days\": \"90\"}: min 856 ms max 884 ms status [200]\n   /lead-panel/timeseries/collected/chatter?{\"days\": \"365\"}: min 882 ms max 1031 ms status [200]\n   /lead-panel/rankings/trending/price: min 275 ms max 297 ms status [200]\n   /lead-panel/rankings/trending/price?{\"days\": \"90\"}: min 143 ms max 298 ms status [200]\n   /lead-panel/rankings/trending/price?{\"days\": \"365\"}: min 144 ms max 150 ms status [200]\n   /lead-panel/rankings/breakout/price: min 280 ms max 378 ms status [200]\n   /lead-panel/rankings/breakout/price?{\"days\": \"90\"}: min 138 ms max 146 ms status [200]\n   /lead-panel/rankings/breakout/price?{\"days\": \"365\"}: min 142 ms max 144 ms status [200]\nPASS C1 every Lead Panel read is under 6000 ms warm reads 9 over-bar 0 e.g. []\nR71 C38 SERVED: YES\nexit=0",
+   "denominator": "9 of 9 Lead Panel reads status [200], worst warm 1031 ms (chatter days=365) against the 6000 ms bar; 0 over-bar; 3 timed warm calls per read after one priming call",
+   "expect": "(?s)(status \\[200\\].*){9}PASS C1.*R71 C38 SERVED: YES.*exit=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "EQUAL 9 of 9; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~236/after_equal.py\"; echo \"exit=$?\"",
+   "output_evidence": "EQ  lead-panel_timeseries_collected_chatter_days30.json status=200 rows=95\nEQ  lead-panel_timeseries_collected_chatter_days90.json status=200 rows=95\nEQ  lead-panel_timeseries_collected_chatter_days365.json status=200 rows=95\nEQ  lead-panel_rankings_trending_price_default.json status=200 rows=94\nEQ  lead-panel_rankings_trending_price_days90.json status=200 rows=94\nEQ  lead-panel_rankings_trending_price_days365.json status=200 rows=95\nEQ  lead-panel_rankings_breakout_price_default.json status=200 rows=94\nEQ  lead-panel_rankings_breakout_price_days90.json status=200 rows=94\nEQ  lead-panel_rankings_breakout_price_days365.json status=200 rows=95\nEQUAL 9 of 9\nexit=0",
+   "denominator": "9 of 9 bodies equal their before/ body with every generated_at dropped (rows: chatter 95/95/95, trending 94/94/95, breakout 94/94/95)",
+   "expect": "EQUAL 9 of 9\\s*exit=0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC2's comparator on a before body with ONE ranked row's `name` changed to MUTANT; and AC1's checker with the bar cut from 6000 to 100 ms.",
+   "expected": "the comparator names the changed field as a difference; the 100 ms bar run prints FAIL C1, R71 C38 SERVED: NO and exit=1.",
+   "observed": "first_diff: $.rows[3].name: 'ASML Holding NV' vs 'MUTANT'; a body differing only in generated_at: None (equal). Bar 100 ms: 'FAIL C1 every Lead Panel read is under 100 ms warm reads 9 over-bar 9 ... R71 C38 SERVED: NO exit=1'.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "after_equal.py run twice against the live stores (once after the last code edit before the proof, once at the proof); r71_latency.py run three times after the last code change.",
+   "observed": "after_equal: EQUAL 9 of 9 exit=0 both times; r71_latency: PASS C1 exit=0 all three times (worst warm 1.9 s, 1.0 s, 1.0 s). An EARLIER r71_latency run, before the _dynamodb() single-resource change, read 2 of 9 over bar (a 20-21 s call on trending default and chatter days=30); not reproduced in 4 runs since.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Deploy, and any measurement of the deployed function",
+   "reason": "BOUNDS 1: no deploy; AC1 is the issuer's literal --where local, which reads the live stores from this device (about 150-250 ms per boto call), so the deployed-function times are unmeasured here."
+  },
+  {
+   "item": "A stored per-name roster / new producer for the first read of a COLD container",
+   "reason": "BOUNDS 1 and item 2: a new producer is a row, not a build; filed as AMGT_RESAPP-Z-W236-S1 with the measured cold times."
+  },
+  {
+   "item": "The covered-universe listing and the gold-snapshot listings (1-8 S3 lists per warm request)",
+   "reason": "the covered universe is read fresh on every call by its own contract (lib/research/coverage/covered_universe.py, outside this order's paths) and the snapshot listing is what selects the newest gold object; warm worst is 1.0 s against a 6 s bar."
+  },
+  {
+   "item": "test_model_words.py::test_formula_words_equals_the_pages_own_function_run_in_node",
+   "reason": "reads a portal function absent at this worktree's portal ref; fails identically on the issuance commit (git archive of HEAD run in .scratch/base); no row, per the order."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W236-S1: AMGT-au-6 serves the Lead Panel warm from per-container memos (0.15-0.97 s against 17-64 s), but a COLD container's first read still makes about 100 classification GetItems and 23-57 model-block reads; removing that needs a NEW producer (a stored per-name roster), not built here. INERT, disarm owner 2.0.0_SA_COO~Z."
+ ],
+ "session_log": "N/A -- no session-log path in this worker's paths; PROFILE.md in the deliverables folder carries the profile and the fix table. Worktree C:/tmp/r71-236 on wk-AMGT_RESAPP-236 cut from the issuance commit. Scratch: C:/tmp/r71-236/.scratch (uncommitted).",
+ "compiler_tools": [
+  {
+   "tool": "capture9.py / profile9.py / profile_table.py (this worker's capture and profile tools)",
+   "invocation": "PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~236/profile_table.py all after",
+   "result": "9 routes, fresh process each: warm 146-969 ms, 0 classification GetItems warm (before 99-289); see PROFILE.md section 3."
+  }
+ ]
+}
