@@ -21,3 +21,20 @@ checkpoint (CTO condition 1): `--clear-stop ft` on a new invocation of the same 
 
 **Report (CTO condition 4):** per leg, concluded jobs out of 191, plus `publisher_universe_verdicts` over the window's run
 records, at each drive tick and at close.
+
+## UPDATE 2026-10-05 ~01:5xZ: the ft hand sign-in ask is WITHDRAWN (issuer)
+
+MSTR~Z (msg 29383) asked for Andrew's exact sign-in steps. Read first, the record answers that a hand sign-in cannot carry this
+leg:
+- **The evidence** (round 37 `HVST-aj-4`, row Z-W92-S20, `task-orders/AMGT_HARVST.TO-HVST-aj-4.ft-keepalive-run.md` record face):
+  two hand-solved ft sessions died at about 75 min and at 24 min. The second got a 401 `sign_in_refused` 24m04s after the
+  sign-in, despite keep-alive page loads every ~3.3 min, all logged in.
+- **What the leg needs:** a 191-name ft leg runs for hours, so it would need repeated hand sign-ins. Each resume after a fresh
+  sign-in would stretch condition 1's "same run". The unattended re-sign-in depends on an hCaptcha solver: the NopeCHA Token API
+  is discontinued (row Z-W92-S18), and any other solver is a vendor use needing Andrew's word.
+- **FWD-7 does not need ft:** its declared set needs to be NON-EMPTY, so ONE publisher whose concluded jobs cover all 191 names
+  is enough.
+
+**Ruling:** the ft leg of this run stays at its `sign_in_refused` stop (0 of 191 concluded) and is reported as such (CTO
+condition 4). No hand sign-in is asked. Whether ft is collected at all, and by what sign-in route, is Andrew's call for a
+later word.
