@@ -1,0 +1,87 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_CORPUS.TO-CRPS-al-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-al-1.model-slice-serves-fiscal-reasons.md",
+  "group": "OTHER",
+  "vintage_commit": "f61711ef2b"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+  "vintage_commit": "f61711ef2b",
+  "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-al-1.model-slice-serves-fiscal-reasons.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "b1b78d3812",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read_model returns fiscal_unresolved on the unconditional return literal; no deploy (CRPS-al-5 is the issuer's act).",
+   "introduces": [
+    "fiscal_unresolved"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_read_model_fiscal_unresolved.py",
+   "kind": "test",
+   "commit_or_etag": "b1b78d3812",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "3 offline tests: two fiscal entries only, none, no block and no security_key.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round36/al1_check.py\" -- expect (?m)^al1 build 1/1 control 1/1$",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round36/al1_check.py\"",
+   "output_evidence": "al1 build 1/1 control 1/1",
+   "denominator": "2 names (1299_HK_Equity served 97 of block 97; BA_US_Equity 0 of 0); fiscal_year_figures 543/543 and 686/686; rc 0",
+   "expect": "(?m)^al1 build 1/1 control 1/1$",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest lib/research/api/tests/test_read_model_fiscal_unresolved.py -q -p no:cacheprovider --color=no -- expect (?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+   "method": "test_suite",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest lib/research/api/tests/test_read_model_fiscal_unresolved.py -q -p no:cacheprovider --color=no",
+   "output_evidence": "3 passed, 3 warnings in 6.41s",
+   "denominator": "3 of 3 tests passed; rc 0 (the three sibling model test files: 19 passed)",
+   "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "fiscal scope filter in read_model forced to a never-matching scope; new test file run.",
+   "expected": "the two-fiscal-entries test fails.",
+   "observed": "1 failed, 2 passed; file restored, 3 passed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "al1_check.py control arm compares fiscal_year_figures length to the block's fiscal-scope figure count on both names.",
+   "observed": "543 = 543 and 686 = 686.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "al1_check.py (AC1)",
+   "invocation": "PYTHONPATH=. python al1_check.py",
+   "result": "rc 0; al1 build 1/1 control 1/1"
+  }
+ ]
+}

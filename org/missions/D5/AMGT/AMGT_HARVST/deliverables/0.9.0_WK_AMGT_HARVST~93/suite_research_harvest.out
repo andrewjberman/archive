@@ -1,0 +1,75 @@
+........................................................................ [ 21%]
+.....................................................F.....F............ [ 42%]
+........................................................................ [ 64%]
+........................................................................ [ 85%]
+................................................                         [100%]
+================================== FAILURES ===================================
+_______________ test_import_identity_no_bare_vs_qualified_split _______________
+
+    def test_import_identity_no_bare_vs_qualified_split():
+        """W85-S1's hazard (CTO msg 24119, ADJUDICATION_v23): a module imported two ways (bare vs
+        qualified) becomes TWO objects when its package has no `__init__.py`. Every producer this
+        move switches imports `lib.research.harvest.bloomberg`/`store` by the QUALIFIED name only.
+    
+        TWO instruments: (a) an `is` identity arm against `add_security.py` and
+        `bloomberg_fallback.py` (both import through packages carrying `__init__.py` at every level,
+        so the qualified import is stable under any test-collection order); (b) a SOURCE check for
+        `model_block_pull.py` and `pull_baba_daily_px.py` -- `integrations/bloomberg/research/` (and
+        its parents) carries NO `__init__.py`, and sibling test files in this same suite insert that
+        directory onto `sys.path` for their OWN bare `import model_block_pull`, which makes a runtime
+        `is` check against the fully-qualified `integrations.bloomberg.research.model_block_pull`
+        ORDER-DEPENDENT (observed: passes alone, fails once `test_price_axis_pull.py` -- a sibling,
+        not in this order's <paths> -- has run first in the same session). The source check proves
+        the same property (qualified import, never bare) without depending on collection order."""
+        import re
+    
+        for path in (
+            "integrations/bloomberg/research/model_block_pull.py",
+            "integrations/bloomberg/research/pull_baba_daily_px.py",
+        ):
+>           src = open(path, encoding="utf-8").read()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           FileNotFoundError: [Errno 2] No such file or directory: 'integrations/bloomberg/research/model_block_pull.py'
+
+lib\research\harvest\tests\test_m1_move.py:257: FileNotFoundError
+_______________ test_import_identity_no_bare_vs_qualified_split _______________
+
+    def test_import_identity_no_bare_vs_qualified_split():
+        """W85-S1's hazard (CTO msg 24119, ADJUDICATION_v23): a module imported two ways (bare vs
+        qualified) becomes TWO objects when its package has no `__init__.py`. TWO instruments: (a) an
+        `is` identity arm -- `lib/research/harvest/` (and every package above it) carries
+        `__init__.py` at every level, so re-importing the QUALIFIED dotted path always resolves to
+        the SAME module object; (b) a SOURCE check that every producer/reader this move switched
+        imports `lib.research.harvest.filings`/`store` by the QUALIFIED name only, never a bare
+        `import filings`/`import store`."""
+        import importlib
+    
+        import lib.research.harvest.filings as filings_a
+        import lib.research.harvest.store as store_a
+    
+        filings_b = importlib.import_module("lib.research.harvest.filings")
+        store_b = importlib.import_module("lib.research.harvest.store")
+        assert filings_b is filings_a, "lib.research.harvest.filings must resolve to ONE module object"
+        assert store_b is store_a, "lib.research.harvest.store must resolve to ONE module object"
+    
+        import re
+    
+        for path in (
+            "lib/research/filings/fetch.py",
+            "lib/research/filings/batch.py",
+            "lib/research/filings/battery.py",
+            "lib/research/filings/analyze.py",
+            "lib/research/management/roster.py",
+            "lib/research/management/batch.py",
+            "lib/research/api/scoped_amgt.py",
+            "integrations/bloomberg/research/management_posture_batch.py",
+        ):
+>           src = open(path, encoding="utf-8").read()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           FileNotFoundError: [Errno 2] No such file or directory: 'integrations/bloomberg/research/management_posture_batch.py'
+
+lib\research\harvest\tests\test_m2_move.py:268: FileNotFoundError
+=========================== short test summary info ===========================
+FAILED lib/research/harvest/tests/test_m1_move.py::test_import_identity_no_bare_vs_qualified_split
+FAILED lib/research/harvest/tests/test_m2_move.py::test_import_identity_no_bare_vs_qualified_split
+2 failed, 334 passed in 7.03s
