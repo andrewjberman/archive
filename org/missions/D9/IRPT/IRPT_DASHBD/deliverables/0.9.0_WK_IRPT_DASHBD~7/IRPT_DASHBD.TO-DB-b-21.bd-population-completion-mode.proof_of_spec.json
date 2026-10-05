@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-21",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "0dc80bec30",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-21.bd-population-completion-mode.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~7",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~7/BD_POPULATION_COMPLETION_PLAN_E3.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~7/bd_population_complete_e3.py",
+      "kind": "script",
+      "commit_or_etag": "f2c90e47a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Imports the DB-b-20 script by path; plan is offline (S3 list reads, DRY_RUN=1); run refuses without --go, without the completion plan re-derived identically, and without E3_SHAPE_RULING.json; requests only the complement, re-mints every 10 calls. run was never run.",
+      "artifact_covered_by": [
+        "DB13-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~7/tests/test_bd_population_complete_e3.py",
+      "kind": "test",
+      "commit_or_etag": "f2c90e47a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 offline pytest tests (stub boto3 and helpers): complement excludes landed, landed never requested, re-mint every 10 calls, denominators printed, run refuses without --go, plan/ruling refusals, 401 after fresh mint stops, one transient retry.",
+      "artifact_covered_by": [
+        "DB13-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~7/BD_POPULATION_COMPLETION_PLAN_E3.json",
+      "kind": "doc",
+      "commit_or_etag": "f2c90e47a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built by plan under DRY_RUN=1 from S3 list reads: planned 5252 = landed 19 + complement 5233, vendor_calls 0, 0 landed keys outside the plan.",
+      "artifact_covered_by": [
+        "DB13-1-AC2",
+        "DB13-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB13-1-AC1",
+      "criterion_verbatim": "DB13-1-AC1 -- the completion tests pass, at least 5, naming the five words. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r13/p13_completion_mode.py\" . DB13-1-AC1",
+      "output_evidence": "OK: 8 completion tests passed\nDB13-1-AC1 PASS rc=0",
+      "denominator": "8 of 8 tests passed (5 required); the file names complement, landed, re-mint, denominators, --go",
+      "status": "PASS",
+      "expect": "DB13-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB13-1-AC2",
+      "criterion_verbatim": "DB13-1-AC2 -- the offline completion plan reconciles: planned 5252 = landed + complement, landed of at least 19, and no overlap. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r13/p13_completion_mode.py\" . DB13-1-AC2",
+      "output_evidence": "OK: planned 5252 = landed 19 + complement 5233; dry, 0 vendor calls\nDB13-1-AC2 PASS rc=0",
+      "denominator": "5252 planned = 19 landed + 5233 complement; 5233 of 5233 complement accounts listed; 0 overlap with the 19 landed",
+      "status": "PASS",
+      "expect": "DB13-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB13-1-AC3",
+      "criterion_verbatim": "DB13-1-AC3 -- a GUARD: your commits touch only IRPT_DASHBD paths. Base: PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r13/p13_completion_mode.py\" . DB13-1-AC3",
+      "output_evidence": "OK: 4 changed path(s), all inside IRPT_DASHBD\nDB13-1-AC3 PASS rc=0",
+      "denominator": "4 of 4 changed paths inside org/missions/D9/IRPT/IRPT_DASHBD/ (measured before this proof's own commit)",
+      "status": "PASS",
+      "expect": "DB13-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each refusal and cadence test is its own negative arm: run without --go, without the plan, without the ruling; a 401 on the first call after a mint; a 503 twice.",
+      "expected": "SystemExit with the named refusal before any network layer; an abort on the first non-transient error",
+      "observed": "8 of 8 passed; the tripwire on boto3 and bd_adapter never fired.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pytest run twice (once directly, once through DB13-1-AC1); the plan built once.",
+      "observed": "8 passed both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any run, token mint, Secrets Manager read, or Black Diamond call",
+      "reason": "Outside the order: the issuer runs the completion; vendor_calls is 0 and DRY_RUN stayed 1."
+    },
+    {
+      "item": "Live exercise of run --go",
+      "reason": "Needs E3_SHAPE_RULING.json (untracked in the base checkout, absent here; row IRPT_DASHBD-W7-S1) and a live bearer; the tests stub both."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W7-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~7/",
+      "result": "All checks passed!"
+    }
+  ]
+}
