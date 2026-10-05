@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-23",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "9e1d65bc19",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-23.routes-json-reporting-routes.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~9",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "docs/contracts/investor-reporting/v1/routes.json",
+      "kind": "doc",
+      "commit_or_etag": "4c19675284",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Contract inventory only, 0 served bytes move, no AWS call. Two route rows appended (21 routes); _denominator declared/total 21, functions_targeted 8.",
+      "artifact_covered_by": [
+        "DB15-1-AC1",
+        "DB15-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB15-1-AC1",
+      "criterion_verbatim": "DB15-1-AC1 -- both reporting routes are declared on irpt-49f-reporting-read-lambda, and `_denominator` names the new count. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r15/p15_cells.py\" . DB15-1-AC1",
+      "output_evidence": "OK: both reporting routes declared; 21 routes\nDB15-1-AC1 PASS",
+      "denominator": "2 of 2 reporting routes declared on irpt-49f-reporting-read-lambda; 21 routes in the file; _denominator declared/total 21",
+      "status": "PASS",
+      "expect": "DB15-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB15-1-AC2",
+      "criterion_verbatim": "DB15-1-AC2 -- the census that reads the file passes with 0 failed. Base: PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r15/p15_cells.py\" . DB15-1-AC2",
+      "output_evidence": "FAIL: census: 2 failed, 7 passed in 2.31s\nDB15-1-AC2 FAIL",
+      "denominator": "7 of 9 census tests passed; 2 failed on the test's literal IN_LANE_FUNCTIONS set, not on an unguarded route (both new routes carry the guard mark: True; 'WHOLE FILE: OK: every route is guarded'); see IRPT_DASHBD-W9-S1",
+      "status": "FAIL",
+      "expect": "DB15-1-AC2 PASS",
+      "status_reason": "The census's own literal IN_LANE_FUNCTIONS (test_unguarded_census.py:60-72) does not name irpt-49f-reporting-read-lambda, so test_zero_of_n_over_the_routes_this_order_may_open and test_the_whole_file_census_is_zero fail; both routes read as guarded. Editing the census is outside the grant (refusal clause): row IRPT_DASHBD-W9-S1."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base negative arm: at base 53acc6abb8 the two routes are absent, so AC1 fails; the census passes with 19 routes.",
+      "expected": "AC1 FAIL at base, PASS after the edit",
+      "observed": "AC1 PASS after the edit; AC2 flips to FAIL on the lane literal.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "census run twice (once via the criterion, once directly with pytest).",
+      "observed": "2 failed, 7 passed both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Edits to test_unguarded_census.py, test_seam_paired.py, response schemas, api/routes.tf",
+      "reason": "Outside the grant; the order's refusal clause says file a row (IRPT_DASHBD-W9-S1, -S2)."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W9-S1",
+    "IRPT_DASHBD-W9-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "json.load",
+      "invocation": "python -c json.load routes.json (21 routes parsed)",
+      "result": "OK"
+    }
+  ]
+}
