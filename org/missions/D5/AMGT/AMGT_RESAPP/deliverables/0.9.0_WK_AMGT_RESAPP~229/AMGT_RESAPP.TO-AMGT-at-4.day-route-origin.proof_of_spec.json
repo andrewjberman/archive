@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-at-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-at-4.day-route-origin.md",
+    "group": "OTHER",
+    "vintage_commit": "5f4fb67e1a93634bd5c18394d3dad4605b734eff"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "5f4fb67e1a93634bd5c18394d3dad4605b734eff",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-at-4.day-route-origin.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~229",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "507af39d49a82d186baf697bce96ef9f4dc9057d",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Added DAY_OWN_PUBLISHERS (empty), DAY_OWN_PUBLISHERS_SOURCE and _day_origin_applied(), applied in _serve_timeline_body on the day branch. No deploy (the redeploy is a later cell). No new S3 read path.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_day_origin.py",
+      "kind": "test",
+      "commit_or_etag": "507af39d49a82d186baf697bce96ef9f4dc9057d",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "3 plant cases, offline.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every plant case passes; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_day_origin.py; echo \"exit=$?\"",
+      "output_evidence": "test_every_row_serves_external_when_no_own_publisher_is_declared PASSED; test_planted_own_row_is_served_first_with_origin_own PASSED; test_error_envelope_is_unchanged PASSED; 3 passed in 1.19s; exit=0\n\ndeciding line (criterion text: every plant case passes; and exit=0): TRUE",
+      "denominator": "3 of 3 plant cases passed, exit=0",
+      "status": "PASS",
+      "expect": "3 passed.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "C1 PASS 0 rows failing and C2 PASS 0 out of order; R70 C33 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round70/checks/r70_served.py\" --cell c33 --where local; echo \"exit=$?\"",
+      "output_evidence": "population: probes 5 rows 8 non-200 0 e.g. []\nPASS C1 every day-route row serves origin in {own, external} rows failing 0 e.g. []\nPASS C2 no own-publication row follows an external row rows out of order 0\nR70 C33 SERVED: YES\nexit=0\n\ndeciding line (criterion text: C1 PASS 0 rows failing and C2 PASS 0 out of order; R70 C33 SERVED: YES; and exit=0): TRUE",
+      "denominator": "8 rows over 5 probes, 0 failing origin, 0 out of order, exit=0",
+      "status": "PASS",
+      "expect": "PASS C1.*rows failing 0.*PASS C2.*rows out of order 0.*R70 C33 SERVED: YES.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Replaced the call _day_origin_applied(body) with pass in scoped_amgt.py, then ran the plant test file.",
+      "expected": "the origin cases fail",
+      "observed": "2 failed, 1 passed: KeyError 'origin' and own row not first; file restored, 3 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "plant test file and c33 run twice on the same tree",
+      "observed": "3 passed both times; c33 SERVED: YES both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy, store write, schedule, vendor or model call, portal write",
+      "reason": "Task order bound 1; the redeploy is a separate cell. No new S3 read path."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/",
+      "result": "1 failed, 570 passed, 205 warnings in 123.37s; the one failure is test_model_words.py::test_formula_words_equals_the_pages_own_function_run_in_node (reads a portal function absent at this worktree's portal ref; no row filed per the order)"
+    }
+  ]
+}
