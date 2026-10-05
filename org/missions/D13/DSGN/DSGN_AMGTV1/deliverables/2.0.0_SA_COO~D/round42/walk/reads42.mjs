@@ -902,8 +902,26 @@ async function sidebarRead(page, asFirm) {
   } finally { if (asFirm) await page.unroute(match, handler).catch(() => {}) }
 }
 
+async function rogHeaderRead(page, name) {
+  await page.goto(`${opt.base}/security-analysis`, { waitUntil: 'domcontentloaded', timeout: 30000 }); await settle(page, 3000)
+  await openName(page, name)
+  await page.waitForSelector('[data-key-figures]', { timeout: 30000 })
+  const tiles = await page.evaluate(() => Array.from(document.querySelectorAll('[data-key-figures] [data-card-figure]')).map((t) => ({
+    key: t.getAttribute('data-card-figure'), state: t.getAttribute('data-card-figure-state'),
+    text: (t.innerText || '').replace(/\s+/g, ' ').trim(),
+    tooltip: (t.querySelector('[role=tooltip]') || {}).textContent || null })))
+  await page.locator('[data-key-figures]').first().screenshot({ path: png('rog-header.png') }).catch(() => {})
+  const absent = tiles.filter((t) => t.state === 'ABSENT')
+  const faults = []
+  if (tiles.length < 7) faults.push(`${tiles.length} tiles (7 wanted)`)
+  if (absent.some((t) => /\d{2,}/.test(t.text.replace(/\b(19|20)\d\d\b/g, '')))) faults.push('a number in an absent tile')
+  return { verdict: faults.length ? 'FAIL' : 'PASS',
+    detail: `${name}: ${tiles.length} tiles, ${absent.length} with a served reason: ${absent.map((t) => t.text).join(' / ')}${faults.length ? ' -- ' + faults.join(' | ') : ''}`,
+    data: { tiles, png: 'rog-header.png' } }
+}
+
 // ---- the walk ----
-const PLANNED = ['sidebar-opal-control', 'sidebar-non-opal']
+const PLANNED = ['rog-header', 'sidebar-opal-control', 'sidebar-non-opal']
 let holder = null; let armed = false; let browser; let fatal = null; let disarmOut = null; let loginRefused = null
 try {
   let armOut
@@ -953,6 +971,7 @@ try {
   await page.goto(opt.base + '/security-analysis', { waitUntil: 'domcontentloaded', timeout: 30000 }); await settle(page, 3000)
 
   // Round 42: the sidebar, as the walker (control) and then as a simulated partner-firm viewer.
+  await read('rog-header', () => rogHeaderRead(page, 'ROG SW'))
   await read('sidebar-opal-control', () => sidebarRead(page, null))
   await read('sidebar-non-opal', () => sidebarRead(page, 'inflection'))
 } catch (e) {
