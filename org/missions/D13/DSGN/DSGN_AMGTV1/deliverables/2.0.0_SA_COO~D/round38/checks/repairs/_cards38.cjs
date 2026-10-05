@@ -26,7 +26,8 @@
  *                    formatPanelTimestamp + " | " + content).
  *   SmartPanelFooter <div data-check-shared="SmartPanelFooter" ...> -- it stamps the DATA MANIFEST's time (useDataFreshness), never a
  *                    field this page serves, so it is always a fault here.
- *   PageEnd          <div data-check-shared="PageEnd" data-check-props="{pageName, dataAsOf}"> around the REAL PageEnd markup.
+ *   PageEnd          <div data-check-shared="PageEnd" data-check-props="{pageName, dataAsOf, ...every other prop handed over}"> around
+ *                    the REAL PageEnd markup (its printed date is graded in words, round 39 row S3: endDateFaults).
  * Writes no file; no network, no AWS.
  */
 const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\s+/g, ' ').trim();
@@ -269,7 +270,56 @@ function nextText(tree, x) {
   return '';
 }
 
-/** Grade the page end. dates = served page dates ([] = none served); returns {printed, faults}. */
+// ---- the end line's date in words (round 39, row S3) ------------------------------------------------------------------------------
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const ordinal = (n) => { const t = n % 100; if (t >= 11 && t <= 13) return 'th'; return ({ 1: 'st', 2: 'nd', 3: 'rd' })[n % 10] || 'th'; };
+/** A YYYY-MM-DD day as the house reads it: "October 2nd, 2026" (computed here, not by the portal's formatter). */
+function dayWords(day) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(day || ''));
+  if (!m) return null;
+  const d = Number(m[3]);
+  return `${MONTHS[Number(m[2]) - 1]} ${d}${ordinal(d)}, ${m[1]}`;
+}
+/** A moment's ET day (YYYY-MM-DD) and ET clock ("3:56p"), from Intl (America/New_York), never from the portal. */
+function etParts(ms) {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: '2-digit', hour12: true }).formatToParts(new Date(ms));
+  const get = (t) => (parts.find((x) => x.type === t) || {}).value || '';
+  return { day: `${get('year')}-${get('month')}-${get('day')}`, clock: `${get('hour')}:${get('minute')}${get('dayPeriod').toLowerCase().charAt(0)}` };
+}
+const END_WORDS = /^([A-Z][a-z]+) (\d{1,2})(st|nd|rd|th), (\d{4})(?:, (\d{1,2}:\d{2}[ap]) ET)?$/;
+/** Faults of the end line's printed date `words` against the served value(s) it names: the page's `dataAsOf` when handed over,
+ * else every served date of the page. The printed DAY must be the day of a named value (a bare day's own day; a moment's ET or
+ * UTC day). A printed TIME OF DAY must be the ET clock of a named served MOMENT on that day: after a bare served day, any clock
+ * is invented (the shared default's "5:00p ET"). */
+function endDateFaults(words, named, label) {
+  const m = END_WORDS.exec(words);
+  if (!m) return [`${label}: the end line's date "${words}" does not read as a day in words ("October 2nd, 2026") or a served moment in words ("October 2nd, 2026, 3:56p ET")`];
+  const mi = MONTHS.indexOf(m[1]);
+  const day = mi < 0 ? null : `${m[4]}-${String(mi + 1).padStart(2, '0')}-${String(Number(m[2])).padStart(2, '0')}`;
+  const f = [];
+  if (!day || dayWords(day) !== `${m[1]} ${m[2]}${m[3]}, ${m[4]}`) f.push(`${label}: the end line's day "${m[1]} ${m[2]}${m[3]}, ${m[4]}" is not a day in the house words (want e.g. "${dayWords(day) || 'October 2nd, 2026'}")`);
+  const reads = named.map((v) => { const t = timeOf(v); const et = !t.dayOnly && t.ms !== null ? etParts(t.ms) : null; return { v: String(v), t, et }; }).filter((r) => r.t.day);
+  const sameDay = reads.filter((r) => r.t.day === day || (r.et && r.et.day === day));
+  if (!sameDay.length) {
+    f.push(`${label}: the end line prints the day "${m[1]} ${m[2]}${m[3]}, ${m[4]}" -- not the day of the served value it names (${reads.map((r) => r.v).slice(0, 4).join(', ') || 'none'})`);
+    return f;
+  }
+  if (m[5]) {
+    const clock = `${m[5]} ET`;
+    const moments = sameDay.filter((r) => r.et);
+    if (!moments.length) {
+      const bare = sameDay[0].v;
+      f.push(`${label}: the end line prints the time of day "${clock}" ("${words}") but the served value it names is the bare day "${bare}" -- an invented clock; a bare served day prints as "${dayWords(bare)}", no time of day`);
+    } else if (!moments.some((r) => r.et.clock === m[5] && r.et.day === day)) {
+      f.push(`${label}: the end line prints the time of day "${clock}" ("${words}"), which is not the served moment's time (${moments.map((r) => `"${r.v}" = ${r.et.clock} ET on ${r.et.day}`).slice(0, 3).join(', ')})`);
+    }
+  }
+  return f;
+}
+
+/** Grade the page end. dates = served page dates ([] = none served); returns {printed, faults}. Round 39 (row S3): the printed
+ * text is the REAL PageEnd's own (the marker's children; a marker with no [data-page-end] inside is a fault), and its date is
+ * graded in words by endDateFaults -- a bare served day prints with NO time of day. */
 function gradePageEnd(tree, dates, label) {
   const f = [];
   const ends = find(tree, (x) => has(x, 'data-check-shared', 'PageEnd'));
@@ -282,10 +332,15 @@ function gradePageEnd(tree, dates, label) {
     const p = propsOf(node);
     const text = textOf(node);
     if (p.pageName !== 'Security Analysis') f.push(`${label}: the end line names the page "${p.pageName}"`);
+    if (!find(tree, (x) => x.i > node.i && x.i <= node.end && has(x, 'data-page-end')).length) f.push(`${label}: the end line is not the shared PageEnd's own markup (no [data-page-end] inside the marker)`);
     const m = /^End of Security Analysis\.(?: Data as of (.+)\.)?$/.exec(text);
     if (!m) f.push(`${label}: the end line reads "${text.slice(0, 100)}"`);
     else if (!m[1]) { if (dates.length) f.push(`${label}: the end line prints no date though the page serves one (${dates.slice(0, 3).join(', ')})`); }
-    else if (!p.dataAsOf || !timeIsServed(p.dataAsOf, dates)) f.push(`${label}: the end line's date "${p.dataAsOf}" (${m[1]}) is not a served date of the page (served: ${dates.slice(0, 4).join(', ') || 'none'})`);
+    else {
+      const handed = p.dataAsOf !== undefined && p.dataAsOf !== null && p.dataAsOf !== '';
+      if (handed && !timeIsServed(p.dataAsOf, dates)) f.push(`${label}: the end line's date "${p.dataAsOf}" (${m[1]}) is not a served date of the page (served: ${dates.slice(0, 4).join(', ') || 'none'})`);
+      else f.push(...endDateFaults(m[1], handed ? [p.dataAsOf] : dates, label));
+    }
     const after = tree.all.filter((x) => x.text !== undefined && x.i > node.end && norm(x.text));
     if (after.length) f.push(`${label}: the end line is not at the end -- "${norm(after.map((x) => x.text).join(' ')).slice(0, 80)}" follows it`);
   }
@@ -293,4 +348,4 @@ function gradePageEnd(tree, dates, label) {
 }
 
 module.exports = { CARDS, PAGE_TIMES, cardFields, pageDates, served, pathValues, timeOf, timeIsServed, effectiveTime, sourceNames, sourceFaults, isMachineCode,
-  parse, textOf, cardRegions, gradeCard, gradePageEnd, DEFAULT_PUBLISHERS, norm };
+  parse, textOf, cardRegions, gradeCard, gradePageEnd, endDateFaults, dayWords, etParts, DEFAULT_PUBLISHERS, norm };

@@ -47,6 +47,16 @@
  *     Analysis." plus " Data as of <words>." whose `dataAsOf` is a served date of the page (_cards38.cjs PAGE_TIMES); no visible
  *     text after it; no hand-rolled "End of Security Analysis". A date is REQUIRED where the page serves one in Security mode;
  *     in Universe mode a printed date must be served but none is required (blind spot below).
+ *     ROUND 39 (row DSGN_AMGTV1-Z-W100-S3; ledger/CTO_LIST_ROUND39.md @222ecd916c item 2 -- at 5fe58e89 the page ended "End of
+ *     Security Analysis. Data as of October 2nd, 2026, 5:00p ET.", the shared PageEnd formatting the overlay's BARE served day
+ *     with an invented clock): the printed text graded is the REAL PageEnd's own markup (the marker's children, rendered from
+ *     src/ui/components/PageEnd.tsx or its CHECK_SRC_OVERRIDE; a marker with no [data-page-end] inside is a fault), and its date
+ *     is graded IN WORDS against the value it names (the handed `dataAsOf`, else the page's served dates): the day must be that
+ *     value's day in the house words ("October 2nd, 2026", computed by the grader, not the portal); after a BARE served day NO
+ *     time of day may print (a "5:00p ET" is named as the invented clock); after a served MOMENT a printed time must be that
+ *     moment's own ET time. And the SHARED DEFAULT is unchanged: the REAL PageEnd rendered directly as every other page calls it
+ *     (pageName + dataAsOf '2026-10-02', and dataAsOf null; _render38.cjs END_DEFAULTS) prints exactly what it printed at
+ *     5fe58e89 ("... Data as of October 2nd, 2026, 5:00p ET." / "End of Market Overview.").
  * Arms:
  *   1  WHAT CHANGED USES THE SHARED STATES (FWD-19): LOADING renders PanelLoading and no SKELETON; ERROR and ERROR REMOUNTED render
  *      PanelError, no PanelLoading and no SKELETON; SERVED still renders the [data-what-changed-table] and neither state.
@@ -54,7 +64,7 @@
  *      on the Thesis render of each name); every expected card is located (K/N/T where the /overlay is served, the tab card in
  *      every render, W on BA Model, LEAD in Universe mode); at least one card wants a footer and at least one does not (else
  *      NOT_EXERCISED). The per-card table prints.
- *   3  THE PAGE ENDS ON THE SHARED END LINE: every one of the 17 page renders.
+ *   3  THE PAGE ENDS ON THE SHARED END LINE: every one of the 17 page renders, plus the 2 shared-default renders (round 39).
  *   4  AN UNKNOWN SOURCE READS THE FIXED PHRASE (FWD-11; the CTO's review of 75f9f477, ledger/CTO_REVIEW_PORTAL_75f9f477_ROUND38.md
  *      @2e225582da: CardFooter.tsx sourceWords()'s last fallback printed an unknown long code with its punctuation turned to spaces,
  *      "a raw code in words"): the child's footer mode renders the REAL components/CardFooter.tsx once per served source code with
@@ -70,7 +80,9 @@
  *      code, a missing footer, a footer that is not last, a hand-rolled time|source line, a placeholder footer on a card that serves
  *      no source and a SmartPanelFooter, and accepts a good card and a footerless card that serves nothing; arm 3's grader flags a
  *      missing end line, two end lines, an end line that is not last, an invented date and a dateless end line on a dated page,
- *      and accepts the good end line; arm 4's grader flags an unknown code printed de-punctuated (twice), printed raw, half-named
+ *      and (round 39) an invented "5:00p ET" after a bare served day, words naming another day, a date not in words, an end line
+ *      that is not PageEnd's own markup, a served moment printed with another time and a moved shared default, and accepts the
+ *      good day-only end line, a served moment with its own time and the unchanged shared default; arm 4's grader flags an unknown code printed de-punctuated (twice), printed raw, half-named
  *      by its own tokens or rendered with no footer, and the known code printed de-punctuated, and accepts the fixed phrase and
  *      "Bloomberg".
  * Blind spots: the header cards are graded on one tab render per name (the header is the same element on every tab); the source
@@ -80,6 +92,9 @@
  *   window); BA has no /overlay or /peers capture, so its header and Peers card read as serving nothing; the walk's retry window
  *   (react-query retry 2, ~3 s pending before the settled error) is not modelled -- the identity header has the same window and
  *   was graded DESIGNED; the PanelFooter is the dark band component -- its colour on a light card is FWD-12's read, not graded.
+ *   Round 39: no route serves a MOMENT into the end line (SecurityAnalysis.tsx servedPageDate reads price.as_of_date /
+ *   axis_reads[].as_of_date, both bare days in every capture), so the served-moment branch is graded by planted shapes only; the
+ *   shared default is graded on one served day and on null, not on the monthly/annual paths of formatPanelTimestamp.
  * Prints INFO lines, the CENSUS, one line per arm and "WHAT CHANGED USES THE SHARED STATES, EVERY CARD ENDS IN THE SHARED FOOTER,
  * THE PAGE ENDS ON THE SHARED END LINE: <k> of 6 arms"; exit 0 only at 6 of 6. Static renders only; no network, no AWS, writes no
  * file.
@@ -174,6 +189,20 @@ function unnamedFaults(c) {
     if (hit.length) f.push(`${label}: the footer prints the code's token(s) ${hit.map((t) => `"${t}"`).join(', ')} ("${w}")`);
   }
   return [...new Set(f)];
+}
+
+// ==== arm 3's shared-default grader (round 39, row S3) =============================================================================
+/** e = {label, props, want, html, stop}: the REAL PageEnd rendered directly the way every other page calls it. It must print
+ * exactly what it printed at candidate 5fe58e89 (`want`): a fix for the Security Analysis line never moves another page's. */
+function endDefaultFaults(e) {
+  const label = `the shared PageEnd default (${e.label})`;
+  if (e.stop) return [`${label}: ${e.stop}`];
+  const tree = X.parse(e.html || '');
+  const f = [];
+  if (!tree.all.some((x) => x.tag && x.attrs && x.attrs['data-page-end'] !== undefined)) f.push(`${label}: renders no [data-page-end]`);
+  const text = X.textOf(tree);
+  if (text !== e.want) f.push(`${label}: prints "${text.slice(0, 100)}" -- the shared default for every other page must still print "${e.want}"`);
+  return f;
 }
 
 function keepsPassing(rels) {
@@ -281,8 +310,13 @@ const CENSUS = [];
     f.push(...res.faults);
     if (r.tab === 'thesis') shown.push(`${r.label}: "${(res.printed[0] || 'none').slice(0, 70)}"`);
   }
-  arms.push(['THE PAGE ENDS ON THE SHARED END LINE: one shared PageEnd, last on the page, "End of Security Analysis. Data as of <served date in words>."', f.length === 0,
-    (f.length ? `${f.length} fault(s): ${f.slice(0, 12).join(' | ')}${f.length > 12 ? ` | ... (${f.length - 12} more)` : ''}` : `${renders.length} of ${renders.length} renders`) + ` [${shown.join('; ')}]`]);
+  // Round 39 (row S3): the shared default of the REAL PageEnd, as every other page calls it, is unchanged.
+  const ends = PG.ends || [];
+  if (!PG.error && ends.length !== 2) f.push(`NOT_EXERCISED: ${ends.length} of 2 shared-default PageEnd renders`);
+  for (const e of ends) f.push(...endDefaultFaults(e));
+  for (const e of ends) shown.push(`default ${e.label}: "${e.html ? X.textOf(X.parse(e.html)).slice(0, 70) : 'none'}"`);
+  arms.push(['THE PAGE ENDS ON THE SHARED END LINE: one shared PageEnd (its REAL markup), last on the page, "End of Security Analysis. Data as of <served date in words>." -- a bare served day with NO time of day, a served moment with its own time only; the shared default every other page prints is unchanged', f.length === 0,
+    (f.length ? `${f.length} fault(s): ${f.slice(0, 12).join(' | ')}${f.length > 12 ? ` | ... (${f.length - 12} more)` : ''}` : `${renders.length} of ${renders.length} renders, ${ends.length} of ${ends.length} shared defaults`) + ` [${shown.join('; ')}]`]);
 }
 // ---- arm 4: AN UNKNOWN SOURCE ----
 {
@@ -346,14 +380,25 @@ const CENSUS = [];
   R('a placeholder footer on a card serving no source', gj(footer({ content: 'Source: not stated.', dataAsOf: '2026-10-03' }, 'October 3rd, 2026, 5:00p ET'), NONE), /prints a footer .* though the card serves no source/);
   R('a SmartPanelFooter', gj(`<div data-check-shared="SmartPanelFooter" data-check-props="{}"><div>x | Source: Bloomberg.</div></div>`), /SmartPanelFooter stamps the data manifest/);
   // arm 3's grader
-  const END = (asOf, words) => `<div data-check-shared="PageEnd" data-check-props="${esc(JSON.stringify({ pageName: 'Security Analysis', dataAsOf: asOf }))}"><div data-page-end="">End of Security Analysis.${words ? ` Data as of ${words}.` : ''}</div></div>`;
+  const END = (asOf, words, inner) => `<div data-check-shared="PageEnd" data-check-props="${esc(JSON.stringify({ pageName: 'Security Analysis', dataAsOf: asOf }))}"><div ${inner === undefined ? 'data-page-end=""' : inner}>End of Security Analysis.${words ? ` Data as of ${words}.` : ''}</div></div>`;
   const pj = (body, dates) => X.gradePageEnd(X.parse(`<div><div data-stub="TabNavigation"></div><div><p>tab</p></div>${body}</div>`), dates || ['2026-10-02'], 'planted').faults;
-  A('the good end line', pj(END('2026-10-02', 'October 2nd, 2026, 5:00p ET')));
+  A('the good end line: a bare served day printed as a day, no time of day', pj(END('2026-10-02', 'October 2nd, 2026')));
   R('a missing end line', pj(''), /renders 0 times/);
-  R('two end lines', pj(END('2026-10-02', 'October 2nd, 2026, 5:00p ET') + END('2026-10-02', 'October 2nd, 2026, 5:00p ET')), /renders 2 times/);
-  R('an end line that is not last', pj(END('2026-10-02', 'October 2nd, 2026, 5:00p ET') + '<p>More</p>'), /is not at the end -- "More"/);
-  R('an end line with an invented date', pj(END('2026-10-05', 'October 5th, 2026, 5:00p ET')), /date "2026-10-05" .* is not a served date/);
+  R('two end lines', pj(END('2026-10-02', 'October 2nd, 2026') + END('2026-10-02', 'October 2nd, 2026')), /renders 2 times/);
+  R('an end line that is not last', pj(END('2026-10-02', 'October 2nd, 2026') + '<p>More</p>'), /is not at the end -- "More"/);
+  R('an end line with an invented date', pj(END('2026-10-05', 'October 5th, 2026')), /date "2026-10-05" .* is not a served date/);
   R('a dateless end line on a dated page', pj(END(null, null)), /prints no date though the page serves one/);
+  // Round 39 (row S3): the end line's date in words.
+  R('an invented 5:00p ET after a bare served day (the shared default\'s clock)', pj(END('2026-10-02', 'October 2nd, 2026, 5:00p ET')), /prints the time of day "5:00p ET" .* bare day "2026-10-02" -- an invented clock/);
+  R('an end line whose words name another day than the served value', pj(END('2026-10-02', 'October 3rd, 2026')), /prints the day "October 3rd, 2026" -- not the day of the served value/);
+  R('an end line whose date is not in words', pj(END('2026-10-02', '2026-10-02')), /does not read as a day in words/);
+  R('an end line that is not the shared PageEnd\'s own markup', pj(END('2026-10-02', 'October 2nd, 2026', 'data-x=""')), /not the shared PageEnd's own markup/);
+  A('a served moment printed with its own time', pj(END('2026-10-02T19:56:35Z', 'October 2nd, 2026, 3:56p ET'), ['2026-10-02T19:56:35Z']));
+  R('a served moment printed with another time', pj(END('2026-10-02T19:56:35Z', 'October 2nd, 2026, 5:00p ET'), ['2026-10-02T19:56:35Z']), /time of day "5:00p ET" .* not the served moment's time/);
+  // arm 3's shared-default grader
+  const DEF = { label: 'planted', props: {}, want: 'End of Market Overview. Data as of October 2nd, 2026, 5:00p ET.' };
+  A('the shared default unchanged', endDefaultFaults(Object.assign({}, DEF, { stop: null, html: '<div data-page-end="">End of Market Overview. Data as of October 2nd, 2026, 5:00p ET.</div>' })));
+  R('a shared default that drops another page\'s clock', endDefaultFaults(Object.assign({}, DEF, { stop: null, html: '<div data-page-end="">End of Market Overview. Data as of October 2nd, 2026.</div>' })), /the shared default for every other page must still print/);
   // arm 4's grader (one rendered CardFooter per served code)
   const uj = (code, known, content) => unnamedFaults({ code, known, stop: null, html: content === null ? '' : footer({ content, timestamp: '2026-10-04T19:56:35Z' }) });
   A('an unknown long code reading the fixed phrase', uj('vendor_feed/raw:alpha-source', null, `Source: ${UNNAMED}.`));
@@ -364,7 +409,7 @@ const CENSUS = [];
   R('an unknown code half-named ("estimate rollup")', uj('quarterly_estimate_rollup', null, 'Source: estimate rollup.'), /prints the code's token\(s\) "estimate", "rollup"/);
   R('an unknown code with no footer', uj('quarterly_estimate_rollup', null, null), /0 shared footers rendered/);
   R('the known code printed de-punctuated', uj('bloomberg-dapi', 'Bloomberg', 'Source: bloomberg dapi.'), /a known code must read "Source: Bloomberg\."/);
-  arms.push(['PLANTED: the four graders flag their planted faults (skeleton on error, skeleton beside the error, hand-rolled loading, error without PanelError; invented date, invented source, raw code, missing footer, footer not last, hand-rolled line, placeholder footer, SmartPanelFooter; missing, doubled, not-last, invented-date and dateless end line; an unknown code de-punctuated, raw, half-named or footerless, a known code de-punctuated) and accept the good shapes', f.length === 0,
+  arms.push(['PLANTED: the four graders flag their planted faults (skeleton on error, skeleton beside the error, hand-rolled loading, error without PanelError; invented date, invented source, raw code, missing footer, footer not last, hand-rolled line, placeholder footer, SmartPanelFooter; missing, doubled, not-last, invented-date and dateless end line, an invented 5:00p ET after a bare day, another day, a date not in words, a non-PageEnd line, a moment with another time, a moved shared default; an unknown code de-punctuated, raw, half-named or footerless, a known code de-punctuated) and accept the good shapes', f.length === 0,
     f.length ? f.join(' | ') : `${rej} of ${bad} planted faults flagged for their reason; ${acc} of ${good} good shapes accepted`]);
 }
 

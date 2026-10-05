@@ -261,8 +261,9 @@ function STATE_PROBE(scope) {
     el = hit ? hit.parentElement : null
     attr = document.querySelector('[data-identity-card]') ? 'LOADED' : hit ? hit.getAttribute('data-panel-state') : null
   } else if (scope === 'what-changed') {
-    el = document.querySelector('[data-what-changed-probing]') || document.querySelector('section[data-what-changed]')
-    attr = el ? (el.hasAttribute('data-what-changed-probing') ? 'PROBING' : 'PAIR') : null
+    // round 39 (CTO list @222ecd916c item 3): round 38 renders a failed probe as its own section[data-what-changed-failed]
+    el = document.querySelector('[data-what-changed-probing]') || document.querySelector('section[data-what-changed-failed]') || document.querySelector('section[data-what-changed]')
+    attr = el ? (el.hasAttribute('data-what-changed-probing') ? 'PROBING' : el.hasAttribute('data-what-changed-failed') ? 'FAILED' : 'PAIR') : null
   } else if (scope === 'no-permission') {
     el = document.querySelector('[data-slot="route-no-permission"]'); attr = el ? 'route-no-permission' : null
   }
@@ -738,7 +739,7 @@ async function captureState(page, name, panel, mode) {
     const h = (await page.evaluateHandle((scope) => {
       if (scope === 'timeline') return document.querySelector('[data-timeline-panel]')
       if (scope === 'identity') { const x = [...document.querySelectorAll('[data-panel-state]')].find((e) => /identity header/i.test(`${e.getAttribute('aria-label') || ''} ${e.innerText || ''}`)); return x ? x.parentElement : null }
-      return document.querySelector('[data-what-changed-probing]') || document.querySelector('section[data-what-changed]')
+      return document.querySelector('[data-what-changed-probing]') || document.querySelector('section[data-what-changed-failed]') || document.querySelector('section[data-what-changed]')
     }, panel.scope)).asElement()
     let pngPanel = null
     if (h) { pngPanel = `${shot}-panel.png`; await h.screenshot({ path: png(pngPanel) }).catch(() => { pngPanel = null }) }

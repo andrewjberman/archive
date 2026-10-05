@@ -36,6 +36,9 @@
  *                                                       MARKERS described in _cards38.cjs around the REAL PanelFooter / PageEnd;
  *                                                       every other panels export is the loader's stub (data-stub="<name>").
  *            Returns per render: the markup, the served fields of every card (_cards38.cjs CARDS) and the page's served dates.
+ *            Round 39 (row S3): the PageEnd marker records every prop the page hands it; and `ends` -- the REAL PageEnd rendered
+ *            directly with the shared default call of every other page (END_DEFAULTS: pageName + dataAsOf, no optional prop), with
+ *            the text it printed at candidate 5fe58e89.
  * Honours the loader's CHECK_SRC_OVERRIDE. No network, no AWS, writes no file.
  */
 const fs = require('fs');
@@ -127,14 +130,27 @@ function installSharedMarkers() {
   const realEnd = L.source('src/ui/components/PageEnd.tsx').PageEnd;
   const PanelFooter = (p) => h('div', { 'data-check-shared': 'PanelFooter', 'data-check-props': markProps(p || {}, ['content', 'timestamp', 'dataAsOf', 'frequency']) }, h(realFooter, p));
   const SmartPanelFooter = (p) => h('div', { 'data-check-shared': 'SmartPanelFooter', 'data-check-props': markProps(p || {}, ['content', 'sourceKey']) }, h('div', null, `<the data manifest's time> | ${p && p.content}`));
-  const PageEnd = (p) => h('div', { 'data-check-shared': 'PageEnd', 'data-check-props': markProps(p || {}, ['pageName', 'dataAsOf']) }, h(realEnd, p));
+  // Round 39 (row S3): the end line's marker records EVERY prop the page hands the shared PageEnd (an optional prop included), and
+  // its children are the REAL PageEnd's own markup (L.source reads src/ui/components/PageEnd.tsx -- or its CHECK_SRC_OVERRIDE --
+  // directly; its own import of @/lib/dateUtils is the real formatter, not a stub).
+  const endKeys = (p) => Object.keys(p).filter((k) => k !== 'children' && (p[k] === null || ['string', 'number', 'boolean'].includes(typeof p[k])));
+  const PageEnd = (p) => h('div', { 'data-check-shared': 'PageEnd', 'data-check-props': markProps(p || {}, endKeys(p || {})) }, h(realEnd, p));
   const panels = stubProxy({ PanelFooter, SmartPanelFooter });
   for (const s of ['index.ts', 'index']) L.stubSource('src/ui/components/panels/' + s, panels);
   L.stubSource('src/ui/components/panels/PanelFooter.tsx', { __esModule: true, PanelFooter });
   L.stubSource('src/ui/components/panels/SmartPanelFooter.tsx', { __esModule: true, SmartPanelFooter });
   L.stubSource('src/ui/components/PageEnd.tsx', { __esModule: true, PageEnd });
   L.stubSource('src/pages/Positioning/shared/PageEnd.tsx', { __esModule: true, PageEnd });
+  return { realEnd };
 }
+
+/** Round 39 (row S3): the SHARED DEFAULT of the real PageEnd, rendered directly the way every other page calls it (pageName +
+ * dataAsOf only, no optional prop): what it must still print is its output at candidate 5fe58e89 (measured there), so a fix
+ * that changes the shared default -- every other page's end line -- is seen. */
+const END_DEFAULTS = [
+  { label: 'another page, a served day', props: { pageName: 'Market Overview', dataAsOf: '2026-10-02' }, want: 'End of Market Overview. Data as of October 2nd, 2026, 5:00p ET.' },
+  { label: 'another page, no as-of', props: { pageName: 'Market Overview', dataAsOf: null }, want: 'End of Market Overview.' },
+];
 
 /** The footer mode's served source codes (one card per code; the served time is one ISO stamp). The three UNKNOWN LONG codes carry
  * '_', ':', '/' and '-' and no family word the page maps by design (no 'harvest', no 'scanner'); 'bloomberg-dapi' is the KNOWN
@@ -188,11 +204,17 @@ if (mode === 'footer') {
   out({ mode, error, cases });
 } else if (mode === 'page') {
   const renders = [];
+  const ends = [];
   let error = null;
   let pubs = X.DEFAULT_PUBLISHERS;
   try {
     // ---- stubs ----
-    installSharedMarkers();
+    const { realEnd } = installSharedMarkers();
+    for (const d of END_DEFAULTS) {
+      const rec = { label: d.label, props: d.props, want: d.want, html: null, stop: null };
+      try { rec.html = L.render(realEnd, d.props); } catch (e) { rec.stop = 'RENDER FAILED: ' + first(e); }
+      ends.push(rec);
+    }
     L.stubSource(SA + 'hooks/useSecurityAnalysisState.ts', { __esModule: true, useSecurityAnalysisState: () => Q.state });
     L.stubSource('src/hooks/useTabNavigation.ts', { __esModule: true, useTabNavigation: () => ({ activeTab: Q.tab, handleTabChange: () => {}, tabContentRef: { current: null } }) });
     L.stubSource('src/hooks/useAuth.ts', { __esModule: true, useAuth: () => ({ claims: { firmId: 'opal' }, user: null, isAuthenticated: true }) });
@@ -262,7 +284,7 @@ if (mode === 'footer') {
       renders.push(doRender(`universe ${subject}`, { mode: 'universe', key: null, tab: 'thesis', subject, fields, dates: X.pageDates('universe', subject === 'PRICE' ? { rankings } : { chatter }).values, served: [subject === 'PRICE' ? 'rankings' : 'chatter'] }));
     }
   } catch (e) { error = 'LOAD FAILED: ' + first(e); }
-  out({ mode, error, renders, pubs });
+  out({ mode, error, renders, pubs, ends });
 } else {
   out({ mode, error: 'unknown mode (footer | changed | page)' });
   process.exitCode = 2;
