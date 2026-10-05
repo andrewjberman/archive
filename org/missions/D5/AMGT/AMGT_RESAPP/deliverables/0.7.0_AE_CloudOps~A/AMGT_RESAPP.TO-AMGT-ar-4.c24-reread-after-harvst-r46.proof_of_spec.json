@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ar-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ar-4.c24-reread-after-harvst-r46.md",
+    "group": "OTHER",
+    "vintage_commit": "3f3a481ae3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ar-4.c24-reread-after-harvst-r46.md",
+    "vintage_commit": "3f3a481ae3"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "on each of days=30, 90 and 365: C1 PASS with mismatches 0, old-reason 0 and no-table-row 0, and C2 PASS with unreadable 0; R67 C24 SERVED: YES; and exit=0",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round67/checks/r67_served.py\" --cell c24 --where deployed; echo \"exit=$?\"",
+      "method": "live_read",
+      "denominator": "95 served rows per window x days 30/90/365 = 6 clauses; the chatter_window table read 699 rows (233 names x 3)",
+      "output_evidence": "Cell AMGT-ar-4. The literal invocation, run ONCE on the deployed function as section 1 requires, from the shared tree at HEAD -- the check carrying c24's C2 clause lives at HEAD, not at any build pin, and this act builds and deploys nothing.\n\n   chatter_window rows read: 699\nPASS C1 days=30 every row's tone and voters equal chatter_window, 0 voters read 'no clear tone' status 200 rows 95 mismatches 0 e.g. [] old-reason 0 no-table-row 0\nPASS C2 days=30 0 rows serve the unreadable-table reason status 200 rows 95 unreadable 0 e.g. []\nPASS C1 days=90 every row's tone and voters equal chatter_window, 0 voters read 'no clear tone' status 200 rows 95 mismatches 0 e.g. [] old-reason 0 no-table-row 0\nPASS C2 days=90 0 rows serve the unreadable-table reason status 200 rows 95 unreadable 0 e.g. []\nPASS C1 days=365 every row's tone and voters equal chatter_window, 0 voters read 'no clear tone' status 200 rows 95 mismatches 0 e.g. [] old-reason 0 no-table-row 0\nPASS C2 days=365 0 rows serve the unreadable-table reason status 200 rows 95 unreadable 0 e.g. []\nR67 C24 SERVED: YES\nexit=0\n\nSIX OF SIX CLAUSES PASS, and the clause that had never passed is no-table-row: 21 -> 0.\n\nDEPLOYED CodeSha256 read beside the criterion (section 5): 2rFeF57lMh8MkU6WRgZyImZt7RMlW14BdxmUjIBvSSQ=, MemorySize 1769, LastModified 2026-10-04T22:42:11Z, State Active -- al-5's code, unchanged by this act and identical to the sha aq-5 leg 3 ran against. Nothing was deployed, which is BOUNDS 1.\n\nTHE UPSTREAM PRECONDITIONS, verified rather than taken from the GO:\n- HARVST round 46 as-2's deploy entry org/critical_paths/change_management/20261005T0117Z_amgt-harvst-r46-as2-window-union-20261005_deploy_completion.md reads '**Status:** CLOSED -- nothing stranded -- closed 20261005T012107Z', and no sentinel for that slug remains in org/critical_paths/.open_deploys/.\n- The new part is published: head-object on s3://opal-data-harvest/amgt/harvest/gold/chatter_window/date=2026-10-04/part-20261005T011931Z.parquet returns ContentLength 13054, LastModified 2026-10-05T01:19:35Z, ETag e573a1f3e22b1c8ea3e7be2f655b3769.\n\nWHY THE NUMBER MOVED, stated so the PASS is not mistaken for this seat's work: the table went 636 -> 699 rows (212 -> 233 names x 3 windows) because AMGT_HARVST round 46 widened window_tone.build_window's name set to the rank universe UNION RESAPP's covered set, so the 21 covered names that had no row now carry FWD-17's explicit zero row. That cure was the PRODUCER's, upstream. This seat's contribution to c24 was aq-5 leg 3's read grant @768731795b, which moved unreadable 95 -> 0; the no-table-row 21 -> 0 is round 46's.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A passing assertion never mutated has never been tested, and c24 now reads PASS on all six clauses -- so the live question is whether its comparison is real or vacuous. A sealed mutant was planted on a SCRATCH COPY of the check: after the chatter_window index is built, every table tone is shifted by +1.0, so the served value cannot match, and a live C1 must FAIL. It was run against --where local, NOT --where deployed, because section 1 constrains the deployed read to ONE invocation and a mutant run there would breach it; the clause machinery is identical in both arms and only the source of the served payload differs. The planting script asserts its anchor count is exactly 1 before replacing, then greps the written copy for the mutation marker, because a str.replace on a mangled anchor silently no-ops and the only symptom would be a check that still passes.",
+      "expected": "C1 FAILS on all three windows with mismatches > 0, and C2 is untouched, since a tone shift cannot create an unreadable-table reason",
+      "observed": "FIRED. 'MUTANT ACTIVE: every table tone shifted by +1.0'; C1 FAIL on days 30/90/365 with mismatches 51, 62 and 69, each example showing the served tone exactly 1.0 below the perturbed table value (e.g. 2317_TT_Equity 0.3099108735720317/3 vs 1.3099108735720317/3); R67 C24 SERVED: NO. C2 stayed PASS at unreadable 0 on all three windows, so the mutant hit ONLY the clause it should -- a specificity result as well as a sensitivity one. The counts are 51/62/69 rather than 95 because the tone comparison reaches only rows with voters > 0 and a non-null tone; a 0-voter row takes the 'no clear tone' branch, which a tone shift cannot move. That partition is explainable and expected, not a shortfall.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A. Two same-input runs of the GRADED read would mean invoking the deployed function twice, and section 1 says to read c24 on the deployed function ONCE. A second deployed invocation is therefore not available to this instance, and substituting two LOCAL-arm runs would be a different population -- it would measure the local handler's stability and say nothing about the deployed read being certified.",
+      "observed": "Not measured, and deliberately not inferred. What IS known about the read's inputs is bounded rather than proven stable: the check resolves the LATEST chatter_window part, pinned in practice by the head-object on part-20261005T011931Z.parquet (13054 B, ETag e573a1f3e22b1c8ea3e7be2f655b3769) taken immediately before the read, and the deployed CodeSha256 was identical before and after. Those bound the inputs; they do not establish run-to-run determinism, and are not reported as if they did.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No deploy, no IAM change, no store write, no S3 delete and no vendor call",
+      "reason": "BOUNDS 1 makes this a read and nothing else. Proven rather than asserted: the deployed CodeSha256 is 2rFeF57lMh8MkU6WRgZyImZt7RMlW14BdxmUjIBvSSQ= with LastModified 2026-10-04T22:42:11Z, al-5's code untouched by this act, and no NEVER-2 entry was opened because nothing was deployed."
+    },
+    {
+      "item": "The graded read was NOT repeated",
+      "reason": "Section 1 says to read c24 once, which is why controls.determinism is N/A-WITH-REASON rather than STABLE."
+    },
+    {
+      "item": "No surprise row was filed",
+      "reason": "Section 5 makes a row owed only if the no-table-row count is not 0. It is 0 on all three windows, so none is owed. Row AMGT_RESAPP-Z-W220-S1's substance is discharged by HARVST round 46; row AMGT_RESAPP-Z-S346's hazard was cured by aq-5 leg 3, and disarming that row is 2.0.0_SA_COO~Z's act, not this seat's."
+    },
+    {
+      "item": "The r64/r65/r66 regression set and the cold reads were not run",
+      "reason": "Section 4 names exactly one criterion and section 1 says change nothing. Recorded so their absence reads as scope discipline rather than omission."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "comp-schedule",
+      "invocation": "comp-schedule (declared by the issuer at the cut)",
+      "result": "DECLARED-NOT-APPLICABLE -- no cron, alarm, monitor or cadence; one read after a named upstream event."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam (declared by the issuer at the cut)",
+      "result": "DECLARED-NOT-APPLICABLE -- a read through the deployed function; the role has read chatter_window since aq-5 leg 3 @768731795b. Independently consistent with this run: unreadable 0 of 95 on every window, where the pre-grant reading was 95 of 95."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "the rail refused a directory-scoped grep for the order's <risk> and <proof_genre> tags and routed it to comp-find",
+      "result": "WARN, correctly. Re-run as a pipe RECEIVER (cat <file> | grep), which Rule 21 admits, to read the two tags from the single named order file. The order declares <risk>LOCAL</risk> and NO <proof_genre>, which is why this instance is BUILD genre and carries {mutant, determinism} rather than DEPLOY's named discriminating controls."
+    }
+  ],
+  "session_log": "0.7.0_AE_CloudOps~A, 2026-10-05Z session, AMGT_RESAPP round 68 AMGT-ar-4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~A/AMGT_RESAPP.TO-AMGT-ar-4.c24-reread-after-harvst-r46.proof_of_spec.json",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC1"],
+      "deploy_evidence": "This instance is the whole of the act's output: ar-4 is a READ (risk LOCAL) and produces no deployed artifact. The function it read is unchanged at CodeSha256 2rFeF57lMh8MkU6WRgZyImZt7RMlW14BdxmUjIBvSSQ=."
+    }
+  ]
+}
