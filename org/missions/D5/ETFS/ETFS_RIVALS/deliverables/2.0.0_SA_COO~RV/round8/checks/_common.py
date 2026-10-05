@@ -5,8 +5,10 @@ vendor call."""
 from __future__ import annotations
 
 import importlib.util
+import os
 import pathlib
 import sys
+import tempfile
 import types
 
 _R6 = pathlib.Path(__file__).resolve().parents[2] / "round6" / "checks" / "_common.py"
@@ -20,6 +22,10 @@ page_fixture, ai2_tables, ai2_readings, ai2_reply, StubClient, AI_DAY = (
 contribution_rows = _r6.contribution_rows
 
 ROOT = pathlib.Path(__file__).resolve().parents[9]  # the tree this check file lives in
+
+# Round 9 RIV-cb-1: a check never writes the terminal machine's real Bloomberg budget ledger -- every check process gets its
+# own temporary ledger dir unless the caller set one (the collector records every capture, fake ones included).
+os.environ.setdefault("RIVALFUNDS_BBG_BUDGET_DIR", tempfile.mkdtemp(prefix="rv_bbg_budget_"))
 
 
 def offline_guards() -> None:
