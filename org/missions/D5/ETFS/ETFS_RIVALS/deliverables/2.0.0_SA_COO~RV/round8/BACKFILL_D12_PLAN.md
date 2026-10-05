@@ -43,5 +43,5 @@ original backfill ... go pick up ad hoc"); 3-year cap @357e681ddf. Traced read-o
 - The captures to import at Step B: `C:/bbg_backfill/idvz_pfoe/opal-data-etfs/bloomberg/etfs/bronze/holdings/**/*.json`
   (not `*.sidecar.json`). IDVZ history therefore exists from 2026-01-02, not only from 2026-08-21.
 
-Not measured:  whether any day returns no rows for IDVZ or PFOE (a no-rows day withholds the
-batch marker, `:534-535`).
+Measured at Step A: no day returned zero rows for IDVZ or PFOE (a no-rows day would have withheld the batch marker,
+`:534-535`). Not measured: how the import mode treats a local capture's `at` timestamp (it sets the bronze partition day).
