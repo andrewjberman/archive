@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e16",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9c38ea37043c383130d7ce0216eec5e099f120d6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R7.md",
+    "vintage_commit": "7d6cace9b2cc0b2f77db1c39ece852730edd93ea",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e16.bbg-namespace-reader-census.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~13",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_bbg_reader_census.py",
+      "kind": "script",
+      "commit_or_etag": "8f547ee6f5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A local census check (LOCAL build + record bound): exercises 34 readers and reads 11 more with the table stubbed, makes no AWS call and writes only the census JSON; not deployed anywhere.",
+      "artifact_covered_by": [
+        "SC7-e16-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_BBG_READER_CENSUS_20261005.json",
+      "kind": "doc",
+      "commit_or_etag": "8f547ee6f5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The check's record artifact: {readers[path,function,verdict,evidence], denominator, search}; byte-identical across back-to-back runs (md5 compared).",
+      "artifact_covered_by": [
+        "SC7-e16-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "8f547ee6f5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows MDPF_SECCLASS-W13-S1 through W13-S5 (OBSERVATION; S1 and S2 ARMED with a disarm owner) appended; no existing row edited; surprise-row-gate OK (5 new rows of 59)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC7-e16-AC1",
+      "criterion_verbatim": "the census of every reader of the table on a BLOOMBERG row exists, one verdict each.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_bbg_reader_census.py",
+      "expect": "BBG-READER-CENSUS readers=",
+      "output_evidence": "rc=0 under timeout 120. Deciding lines:\nBBG-READER-CENSUS readers=45 tolerates=34 read_only=11 crashes=0 refuses=0 miskeys=0 fails_contract=0\nBBG-READER-TOLERATED",
+      "denominator": "45 readers exercised or read, one verdict each: 34 TOLERATES, 11 READ-ONLY, 0 CRASHES, 0 REFUSES, 0 MISKEYS, 0 FAILS-CONTRACT; 0 UNCENSUSED of 92 tracked code files naming the table, the namespace, classified_by or lib.etf_classifier (37 tests, 18 declared not-readers); round 6 had 34 readers, 11 are new; comp-find at build: etf-classifications 6849 hits in 53766 files, etf_classifications_dynamodb 612 in 53767, identifier_namespace 926 in 53768",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The census must refuse a reader that mis-keys, crashes on, or declines the BLOOMBERG row: three mutants of the BD library's _normalize_ticker / classify were loaded in place of the real file.",
+      "expected": "MISKEYS when the key is reduced to the bare ticker REL; CRASHES when the reader asserts on ':'; REFUSES when it answers '' for the present row",
+      "observed": "MISKEYS 'classify returned the bare US `REL` control's class 'fixed_income' for BBG:REL:LN'; CRASHES 'AssertionError at _r7_mutant_etf_classifier.py:170'; REFUSES 'classify answered '' for the present row BBG:REL:LN'. The holdings exercise also carries an in-check negative control: a node leaking security_bloomberg IS refused by the closed Holdings validator.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python r7_bbg_reader_census.py run twice back to back; md5 of the JSON and diff of stdout compared.",
+      "observed": "JSON md5 4688fe1a332f0eb0c62cab817c455188 both runs (equal to the committed JSON); stdout diff empty (outputs-identical).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to etf-classifications, and the R7 rows ACT.",
+      "reason": "BOUNDS: LOCAL build + record; the table is stubbed and no AWS call is made; the ACT is the issuer's, under its own half, after this census reads tolerated."
+    },
+    {
+      "item": "Changing any reader (the catalogue filter, the scheduled write() field list).",
+      "reason": "Outside the order's paths; the order says record the verdict, file a row, report. Rows W13-S1 and W13-S2 name the two findings."
+    },
+    {
+      "item": "A live read of the table.",
+      "reason": "Not needed: every reader is exercised on the order's synthetic row against an in-memory double; no live row exists for the BLOOMBERG namespace yet."
+    },
+    {
+      "item": "The portal TypeScript readers and the portal submodule's own files.",
+      "reason": "The submodule is not checked out in the worktree and is not in git ls-files; three portal readers are listed by hand as READ-ONLY with their deciding lines, read from the portal working copy on 2026-10-05 (gitlink pin ec65c5d63769)."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W13-S1",
+    "MDPF_SECCLASS-W13-S2",
+    "MDPF_SECCLASS-W13-S3",
+    "MDPF_SECCLASS-W13-S4",
+    "MDPF_SECCLASS-W13-S5"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_bbg_reader_census.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_bbg_reader_census.py",
+      "result": "pre-commit gate clean 1 of 1 file(s)"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "run by safe-commit on INVESTIGATION_v1.md",
+      "result": "5 new row(s) of 59 total checked (54 pre-existing, NOT re-graded); OK"
+    }
+  ]
+}
