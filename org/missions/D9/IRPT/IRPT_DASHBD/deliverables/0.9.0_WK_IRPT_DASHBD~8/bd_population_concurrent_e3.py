@@ -41,6 +41,7 @@ SWEEP_NAME = "BD_POPULATION_CONCURRENT_SWEEP_E3.json"
 PULL_DATE = "20261004"  # the ONE pull's partition, as in DB-b-21
 CHECKPOINT_EVERY = 50
 BACKOFF_DEFAULT_S = 30.0
+MINT_RETRY_BACKOFF_S = 5.0  # DB-b-25: one retry of a mint that hit a transport error
 SWEEPABLE = ("transport", "5xx", "429")
 RULING = {
     "ruling_ids": ["1.0.0_SA_CTO RULINGS batch 249", "1.0.0_SA_CTO RULINGS batch 250"],
@@ -84,18 +85,33 @@ def _class_of(status):
     return None
 
 
+class MintFailed(Exception):
+    """DB-b-25: the coordinator's mint failed twice on transport; the run aborts with this reason."""
+
+
 class Bearer:
     """The ONE coordinator of the shared bearer: a mint happens here, one at a time under a lock, never per worker."""
 
-    def __init__(self, h, clock, mint_interval_s, fresh_mint_s):
-        self.h, self.clock = h, clock
+    def __init__(self, h, clock, mint_interval_s, fresh_mint_s, sleep=time.sleep):
+        self.h, self.clock, self.sleep = h, clock, sleep
         self.mint_interval_s, self.fresh_mint_s = mint_interval_s, fresh_mint_s
         self.lock = threading.Lock()
         self.token, self.gen, self.mints = None, 0, 0
         self.minted = {}
 
     def _mint(self):
-        self.token = self.h.get_clientview_token(self.h.load_bd_session())
+        # DB-b-25: a transport error on the mint (a vendor disconnect) is retried ONCE, still under the coordinator's lock, so
+        # there is never a second concurrent mint; a second failure raises MintFailed and the run aborts. It never kills a
+        # worker thread silently (relaunch 2, 2026-10-05 ~10:27Z).
+        try:
+            token = self.h.get_clientview_token(self.h.load_bd_session())
+        except (urllib.error.URLError, OSError, TimeoutError):
+            self.sleep(MINT_RETRY_BACKOFF_S)
+            try:
+                token = self.h.get_clientview_token(self.h.load_bd_session())
+            except (urllib.error.URLError, OSError, TimeoutError) as second:
+                raise MintFailed("mint failed twice: %s" % type(second).__name__) from None
+        self.token = token
         self.gen += 1
         self.mints += 1
         self.minted[self.gen] = self.clock()
@@ -140,7 +156,7 @@ class Run:
     def __init__(self, todo, path, h, s3, on, b20, ruling, clock, sleep, checkpoint=None):
         self.todo, self.path, self.h, self.s3, self.on, self.b20 = todo, path, h, s3, on, b20
         self.ruling, self.clock, self.sleep, self.checkpoint = ruling, clock, sleep, checkpoint
-        self.bearer = Bearer(h, clock, ruling["mint_interval_s"], ruling["fresh_mint_s"])
+        self.bearer = Bearer(h, clock, ruling["mint_interval_s"], ruling["fresh_mint_s"], sleep)
         self.pacer = Pacer(ruling["aggregate_rps"], clock, sleep)
         self.q = queue.Queue()
         for r in todo:
@@ -181,7 +197,8 @@ class Run:
                       for r in recs if r["status"] == "FAILED"]
             return {"ruling": self.ruling, "vendor_calls": self.vendor_calls, "bearer_mints": self.bearer.mints,
                     "calls_recorded": len(recs), "landed_this_run": sum(1 for r in recs if r["landed"]),
-                    "failed_count": len(failed), "failed": failed, "aborted": self.abort_reason, "complete": final,
+                    "failed_count": len(failed), "failed": failed, "aborted": self.abort_reason,
+                    "complete": bool(final and self.abort_reason is None and self.q.qsize() == 0 and self.in_flight == 0),
                     "not_requested": self.q.qsize(), "workers_target": self.target, "ramped": self.ramped,
                     "peak_in_flight": self.peak, "peak_in_flight_before_ramp": self.peak_before_ramp,
                     "events": list(self.events), "started_at": self.started_at,
@@ -226,7 +243,17 @@ class Run:
                 with self.lock:
                     self.active -= 1
                 return
-            self._call(idx, r)
+            try:
+                self._call(idx, r)
+            except BaseException as exc:  # DB-b-25: a worker never dies silently -- record the account and abort the run
+                reason = str(exc) if isinstance(exc, MintFailed) else "worker crash: %s" % type(exc).__name__
+                self._finish({"account": r["account"], "bd_account": str(r["bd_account"]), "worker": idx,
+                              "ranges": len(r["segments"]), "bearer_generation": None, "status": "STOPPED", "http_status": None,
+                              "class": reason, "retried": False, "landed": None}, False)
+                self._abort(reason)
+                with self.lock:
+                    self.active -= 1
+                return
 
     def _halve(self):
         with self.lock:

@@ -165,7 +165,9 @@ def test_three_consecutive_failures_abort_and_the_record_is_left_behind():
     snaps = []
     rec, _h, _s3, _ft = _go(10, _ruling(workers_start=1, workers_max=1), script, checkpoint=snaps.append)
     assert "3 consecutive" in rec["aborted"] and rec["failed_count"] == 3 and rec["not_requested"] == 7
-    assert snaps and snaps[-1]["complete"] and snaps[-1]["aborted"] == rec["aborted"]  # the finally wrote it
+    # the finally wrote the final snapshot; since DB-b-25 an aborted run is never "complete"
+    assert snaps and snaps[-1]["calls_recorded"] == len(rec["records"]) and snaps[-1]["aborted"] == rec["aborted"]
+    assert snaps[-1]["complete"] is False
 
 
 def test_FAILED_above_failed_cap_aborts():
@@ -257,3 +259,57 @@ def test_the_plan_carries_the_ruling_and_prints_both_denominators(capsys):
             plan["ruling"]["mint_interval_s"], plan["ruling"]["fresh_mint_s"]) == (1, 3, 105, 120, 30)
     M.print_denominators(c21, plan)
     assert "denominators: planned 10 = landed 3 + complement 7" in capsys.readouterr().out
+
+
+# --- DB-b-25: the runner never stops silently (relaunch 2, 2026-10-05 ~10:27Z: workers died on a mint-path RemoteDisconnected
+# and the record read complete with aborted null while 2,384 accounts were never requested).
+
+
+class FlakyMintHelpers(StubHelpers):
+    """The first `fails` mints raise ConnectionResetError (what http.client.RemoteDisconnected is)."""
+
+    def __init__(self, ft, fails, script=None):
+        super().__init__(ft, script)
+        self.fails = fails
+
+    def get_clientview_token(self, cookie):
+        with self.lock:
+            if self.fails > 0:
+                self.fails -= 1
+                raise ConnectionResetError("Remote end closed connection without response")
+        return super().get_clientview_token(cookie)
+
+
+def _go_with(h, n, ruling=None):
+    rec = M.run_concurrent(_reqs(n), "/p", h, StubS3(), StubOn, StubB20, ruling or _ruling(), clock=h.ft.clock, sleep=h.ft.sleep)
+    return rec
+
+
+def test_a_mint_transport_error_is_retried_once_and_the_run_completes():
+    h = FlakyMintHelpers(FakeTime(), fails=1)
+    rec = _go_with(h, 20)
+    assert rec["aborted"] is None and rec["landed_this_run"] == 20 and rec["complete"] is True
+    assert M.MINT_RETRY_BACKOFF_S in h.ft.sleeps  # the retry waited its backoff
+
+
+def test_a_mint_failing_twice_aborts_with_the_mint_reason_and_is_not_complete():
+    h = FlakyMintHelpers(FakeTime(), fails=2)
+    rec = _go_with(h, 20, _ruling(workers_start=1, workers_max=1))
+    assert rec["aborted"] == "mint failed twice: ConnectionResetError"
+    assert rec["complete"] is False and rec["landed_this_run"] == 0
+    assert any(r["status"] == "STOPPED" and r["class"].startswith("mint failed twice") for r in rec["records"])
+
+
+def test_a_worker_crash_aborts_the_run_and_records_the_account_STOPPED():
+    # KeyError is neither the HTTP RuntimeError nor a transport error, so _attempts does not handle it
+    rec, _h, _s3, _ft = _go(20, script={("3", 1): KeyError("boom")})
+    assert rec["aborted"] == "worker crash: KeyError" and rec["complete"] is False
+    stopped = [r for r in rec["records"] if r["status"] == "STOPPED"]
+    assert [r["bd_account"] for r in stopped] == ["3"] and stopped[0]["class"] == "worker crash: KeyError"
+
+
+def test_complete_is_true_only_when_the_queue_is_empty_and_nothing_aborted():
+    rec, _h, _s3, _ft = _go(30)
+    assert rec["complete"] is True and rec["not_requested"] == 0
+    rec2, _h2, _s2, _f2 = _go(30, _ruling(workers_start=1, workers_max=1), script={("0", 1): RuntimeError("HTTP 400: bad request")})
+    assert rec2["complete"] is False and rec2["not_requested"] > 0
