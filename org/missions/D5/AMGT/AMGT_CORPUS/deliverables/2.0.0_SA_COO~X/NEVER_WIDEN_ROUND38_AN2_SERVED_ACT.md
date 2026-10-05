@@ -12,12 +12,14 @@ and `<p>` carry two producer-side changes:
    @`08580b1fd6` + addendum @`ff4e31bcd0`.
 
 **What at-4 does to THIS function's path, measured:**
-- `induction_scheduled`'s import closure does not load the modules that call `silver_append` (`lib/research/corpus/substrate.py`,
-  `typed.py`). The probe at the cut found 0 of them loaded.
+- CORRECTED (1.0.0_SA_CTO~Z, msg 29637; re-measured by the issuer): `induction_scheduled`'s import closure DOES load a
+  `silver_append` caller, `lib.research.harvest.bloomberg` (1 of 18 `lib.`/`integrations.` modules loaded). My first probe checked
+  only two named modules (`substrate`, `typed`) and read their absence as the closure's.
 - The fire's model-block writes go through `stage_pull` / `stage_derive`, which use only `store.table_prefix` and
   `entity_partition`. at-4 does not touch either.
 
-So at-4 rides in the pin without entering the fire's model-block write path.
+So at-4 rides in the pin and IS reachable from the fire through `harvest.bloomberg`. The CTO accepted it on the HARVST evidence
+(corpus 475 and the mixed-schema plant pass); the first fire on `<p>` is read as a served census (CTO condition 3).
 
 ## TIMING: the legs run AFTER CRPS-an-3 has read the 2026-10-06 13:00Z fire, and after CRPS-an-5 has run or been struck
 
