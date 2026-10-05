@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-su-1.security-universe-list",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "1e8515aa01",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-su-1.security-universe-list.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1e8515aa01"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_security_universe.py",
+      "kind": "script",
+      "commit_or_etag": "299aea2fa5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write (local sink), no vendor call",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r8su1_universe.py",
+      "kind": "script",
+      "commit_or_etag": "299aea2fa5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write (local sink), no vendor call",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round8/checks/su-1.AC1.py -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round8/checks/su-1.AC1.py",
+      "output_evidence": "status: OK | object: s3://opal-data-etfs/rivalfunds/etfs/gold/security_universe/date=2026-10-01/universe-20261005T040714Z-89272a26a8d2.parquet | securities: ['AAA', 'BBB', 'CCC']\nOK:   (a)\nAAA: first_seen 2025-03-03, last_seen 2026-09-30, funds IDVZ,TXUE, n_report_dates 2\nOK:   (b)\nOK:   (c)\nOK:   (d) control\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "package suite once, AC1 once",
+      "observed": "598 passed, 2 skipped, 0 failed; AC1 PASS",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Mutant: LOOKBACK_YEARS 3 -> 1 in gold_security_universe.py, then su-1.AC1.",
+      "expected": "a security first seen before the 1-year floor drops (AAA first_seen 2025-03-03 moves): AC1 FAILS.",
+      "observed": "AC1 RESULT: FAIL 1 failures; file restored byte-identical (git status clean).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order status to complete",
+      "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "publish_page.produce_a1 wiring (A1_PRODUCED)",
+      "reason": "shared file, issuer adds it at the merge"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~8 <0.9.0_WK_ETFS_RIVALS~8@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "299aea2fa5"
+    }
+  ]
+}
