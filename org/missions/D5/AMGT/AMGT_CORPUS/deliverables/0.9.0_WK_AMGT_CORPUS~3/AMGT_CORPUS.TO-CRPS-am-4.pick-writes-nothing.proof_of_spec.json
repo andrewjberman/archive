@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-am-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-am-4.pick-writes-nothing.md",
+    "group": "OTHER",
+    "vintage_commit": "ece32e98a6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "ece32e98a6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-am-4.pick-writes-nothing.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/induction_request.py",
+      "kind": "script",
+      "commit_or_etag": "see git log",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run() writes the request document only when --write <path> is given; the hard-coded worker folder default is removed.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_induction_request_pick_writes_nothing.py",
+      "kind": "test",
+      "commit_or_etag": "see git log",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 tests: pre-existing file bytes unchanged, no file or directory created, --write writes to that path only.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "am4_check.sh -- expect (?m)^am4 build 1/1 control 1/1$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round37/am4_check.sh\"",
+      "output_evidence": "am4 build 1/1 control 1/1",
+      "denominator": "build 1 of 1 arm, control 1 of 1 arm",
+      "expect": "(?m)^am4 build 1/1 control 1/1$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest test_induction_request_pick_writes_nothing.py -- expect (?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest lib/research/corpus/tests/test_induction_request_pick_writes_nothing.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "3 passed in 0.45s",
+      "denominator": "3 of 3 tests passed",
+      "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pre-change induction_request.py (git show HEAD, base ece32e98a6) swapped in and am4_check.sh run against it; the new file restored afterwards.",
+      "expected": "build arm FAILS (file rewritten by --pick), control arm still passes.",
+      "observed": "ARM b1 FAIL file REWRITTEN by --pick; ARM c1 PASS; am4 build 0/1 control 1/1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "am4_check.sh and the AC2 pytest run each twice.",
+      "observed": "am4 build 1/1 control 1/1 both runs; 3 passed both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": ["AMGT_CORPUS-Z-W3-S12"],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "am4_check.sh (AC1)",
+      "invocation": "bash am4_check.sh",
+      "result": "am4 build 1/1 control 1/1"
+    },
+    {
+      "tool": "pytest (AC2)",
+      "invocation": "python -m pytest test_induction_request_pick_writes_nothing.py",
+      "result": "3 passed"
+    }
+  ]
+}
