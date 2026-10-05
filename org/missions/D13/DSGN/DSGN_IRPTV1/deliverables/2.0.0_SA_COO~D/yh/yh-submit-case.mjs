@@ -49,7 +49,7 @@ const CASES = {
   // Y-5 (2.0.0_SA_COO~Y 104499): Stevens' four untracked rows answered with the proxy Alyssa Keith chose (SGOV), named
   // on the page. Live once Y-5 serves; on the fixture plane the first answer offers NAME_PROXY and the re-post with
   // corrections answers NORMALIZED naming them.
-  Dproxy: { sha256: 'f0d344fa967504bd', variant: 'overview', comparisons: [], proxies: { QKZAQ: 'SGOV', QBNYQ: 'SGOV', QUSBQ: 'SGOV', QBOKQ: 'SGOV' }, expect: 'READY', note: 'Stevens with user-named proxies (Y-5)' },
+  Dproxy: { sha256: 'f0d344fa967504bd', variant: 'overview', comparisons: [], proxies: { '*': 'SGOV' }, expect: 'READY', note: 'Stevens with user-named proxies (Y-5)' },
   // Y-5 V1 (2.0.0_SA_COO~Y 104651, ledger irpt-y5-20261003): the easy file's untracked TIMXX (row 100,
   // TICKER_DATA_NOT_ENTITLED) named SGOV on the page, like Dproxy; the re-post resolves NORMALIZED and the Overview READY.
   Aproxy: { sha256: '500837992a3b9caa', variant: 'overview', comparisons: [], proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'easy file with TIMXX named SGOV (Y-5 V1)' },
@@ -316,7 +316,17 @@ try {
     packet.suggestions_accepted = accepted
     // Y-5: name each proxy the case states, then re-post with them through the page's own button.
     const named = []
+    // `'*': <proxy>` names that proxy for EVERY row the page offers (Y-6: today's gates flag the Stevens file's FBIFX,
+    // FDGFX, FHTKX and SPAXX, not the Y-5-era tickers the case first named); a ticker key names only its own row.
+    if (kase.proxies?.['*']) {
+      const rows = page.locator('[data-slot="upload-proxy-row"]')
+      for (let i = 0; i < await rows.count(); i++) {
+        const r = rows.nth(i); await r.locator('input').fill(kase.proxies['*'])
+        named.push(await r.getAttribute('data-proxy-for').catch(() => `row ${i + 1}`))
+      }
+    }
     for (const [ticker, proxy] of Object.entries(kase.proxies ?? {})) {
+      if (ticker === '*') continue
       const row = page.locator(`[data-slot="upload-proxy-row"][data-proxy-for="${ticker}"] input`)
       if (await row.count()) { await row.fill(proxy); named.push(ticker) }
     }

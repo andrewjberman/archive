@@ -23,7 +23,14 @@ cases A, B, C, D and the typo file APPROVED, one at a time with the queue empty)
 | 2 | Aproxy #2 | 99c6ae08 | REQ-14fe69cf6ead8a9436379dc2 | 06:40:55 | 06:58:51 | 17.9 min | 1.4 s | 60 | READY | tmp/yh-submit/20261005T063830Z-Aproxy |
 | 3 | Bproxy #1 | 0edab95f | REQ-724a493ee6ab676814d0ddf1 | 07:19:34 | not read (backend READY 07:38:14, ~Y 105214) | 18.7 min (backend) | not measured | -- | READY (backend); page run KILLED at the 30-min limit | tmp/yh-submit/20261005T071535Z-Bproxy (no packet) |
 | 4 | Bproxy #2 | 0edab95f | REQ-1352d8c1e0641711d9285688 | 08:23:36 | 08:46:03 | 22.4 min (upper bound; one poll lost to a slow load) | 13.8 s | 85 | READY | tmp/yh-submit/20261005T081924Z-Bproxy |
-| 5 | Cproxy #1 | d1c7485b | REQ-e7af8e8ad6eed3757c2ddee3 | 09:21:56 | | | | | in flight | |
+| 5 | Cproxy #1 | d1c7485b | REQ-e7af8e8ad6eed3757c2ddee3 | 09:21:57 | 09:41:24 | 19.5 min | 20.8 s | 104 | READY (multicomp, keys [opal_ultra_long_term, IWM]) | tmp/yh-submit/20261005T091821Z-Cproxy |
+| 6 | Cproxy #2 | d1c7485b | REQ-01c903660d7ab222cd08b2ff | 09:49:05 | 10:07:47 | 18.7 min | 10.3 s | 104 | READY | tmp/yh-submit/20261005T094603Z-Cproxy |
+| 7 | Dproxy #1 | 31510397 | none yet | -- | -- | -- | -- | -- | three attempts, no submission (below); retry after ~Y's FWD-2 slot | tmp/yh-submit/20261005T104149Z-, T105652Z-, T115118Z-Dproxy |
+
+**Run 7's attempts (no job was created in any of them):**
+- 10:41Z: the upload's third POST hung 53.5 s and answered 500 through the local dev proxy (no x-cache header). ~Y's log shows the POST never reached the Lambda (105247).
+- 10:56Z: the upload reached NEEDS_CORRECTION, but today's gate flags the Stevens file's FBIFX, FDGFX, FHTKX and SPAXX (rows 3, 4, 5 and 19), not the Y-5-era QKZAQ, QBNYQ, QUSBQ and QBOKQ the case named. Nothing was filled, and the page's proxy button stayed disabled. Fix: the case now names SGOV for EVERY offered row (`'*'`).
+- 11:51Z, after restarting the dev server (it had run since 10-03 08:38): the client search stayed disabled for 30 s on the cold first load. The dev server has since been warmed.
 
 **Run 3's page run was killed:**
 - The background limit was 30 minutes, and the run can take about 31, so the walker's own finally-disarm never ran. The walker was disarmed by hand at 07:53:14Z, with a refused login (MSTR told).
