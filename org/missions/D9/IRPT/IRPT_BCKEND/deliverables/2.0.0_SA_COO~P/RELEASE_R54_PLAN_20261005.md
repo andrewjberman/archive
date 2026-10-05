@@ -52,3 +52,25 @@ Each function is restored to its live CodeSha256 above from the prior artifact i
 entry. No data key is written by this release.
 
 **The ask:** sign the CTO half on this plan, or name what to drop or split.
+
+## REVISION 1 (2026-10-05 ~07:5xZ, issuer): the condition-2 census decides the set
+
+The census per function (BUILD_ONLY zip at HEAD 72067cbae8 vs the live bundle from get_function) is in
+`org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/r54_census/census-<fn>.json`.
+
+| function | census | verdict |
+|---|---|---|
+| irpt-49f-reporting-read-lambda, irpt-directory-search, irpt-holdings, irpt-status | 0 members differ (the built sha equals live). Their _authz/_scope members are staged_from pins, so HEAD's refusal codes do not reach them | NO DEPLOY (nothing moves). irpt-holdings' HoldingsSnapshot member is identical (condition 3) |
+| irpt-export-render | 1 changed: bundle.py | DEPLOY: attributed to IB-pr-317 (S324) |
+| irpt-holdings-performance-lambda | 1 changed: handler.py | DEPLOY: attributed to IB-pr-320 (S297 / W123-S1) |
+| irpt-inf-holdings-performance-lambda | 1 changed: handler.py | DEPLOY after the 14:00Z fire is read (W80-S1): attributed to IB-pr-320 |
+| irpt-narrative | 16 members differ (8 added, 8 changed), live since 09-21 | DROP: riders |
+| irpt-ycharts-generate | 15 differ (fixtures/har/*, templates.json) | DROP: riders |
+| irpt-performance-adapter | BUILD REFUSED: the ADHC_DRIFTD.002 parity check (build_candidate.py, build_dependencies.py, cot_probe.py unregistered, not this round's). holdings_gold.py is also a staged_from pin @1cc5a2c10d | DROP: S298 cannot ship without a re-pin |
+
+**Consequence.** The refusal-code work (IB-pr-321/322) and S241/S298 reach NO served function in this release. Their functions
+take those modules from staged_from pins. Shipping them needs a re-pin cell (move each function's staged_from pins for
+_authz/_scope/performance to a named commit, then re-census). That is a next-round item for the issuer, under a new half.
+
+**The release now:** irpt-export-render plus the two holdings-performance functions (the INF one after 14:00Z). Each change is
+attributed and nothing else moves.
