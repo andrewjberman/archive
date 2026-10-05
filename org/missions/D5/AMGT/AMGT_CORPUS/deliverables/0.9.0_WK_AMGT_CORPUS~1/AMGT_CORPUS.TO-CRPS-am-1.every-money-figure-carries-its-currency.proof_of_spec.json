@@ -20,7 +20,10 @@
       "commit_or_etag": "2ff61a4d6d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "_figure_currency gains three tables: _MONEY_REPORTING_FIELDS (statement lines, per-share statement values, the BEST_* consensus of a reported line, HISTORICAL_MARKET_CAP), _MONEY_QUOTE_FIELDS (AVG_DAILY_VALUE_TRADED_3M) and _MONEY_FOLLOWS_CUR_MKT_CAP (CRNCY_ADJ_MKT_CAP is classified as CUR_MKT_CAP, per security). The signature, the round-25/26 tables and the UNSTATED / UNMEASURED nulls are untouched. No value, unit, field list or fetch path changed; no S3 write, no vendor call.",
-      "artifact_covered_by": ["AC1", "AC2"]
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
     },
     {
       "path_or_key": "integrations/bloomberg/research/tests/test_figure_currency_round37.py",
@@ -28,15 +31,9 @@
       "commit_or_etag": "2ff61a4d6d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "NEW file, 10 offline tests calling _figure_currency directly: reported -> reporting, market value -> quote, CRNCY_ADJ_MKT_CAP follows CUR_MKT_CAP, the TSM mixed block, absent reporting and absent quote currency -> UNSTATED nulls, census held-out figure -> UNMEASURED unchanged, already-labelled figures unchanged, ratio / percent / share count / text -> invariant, and a completeness arm over every FIELD_BASIS mnemonic that says 'millions of the reporting currency' (denominator >= 25).",
-      "artifact_covered_by": ["AC2"]
-    },
-    {
-      "path_or_key": "integrations/bloomberg/research/tests/test_currency_labels.py, test_figure_currency_round25.py, test_figure_currency_round26.py",
-      "kind": "test",
-      "commit_or_etag": "ece32e98a6 (unchanged)",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The three granted existing tests were run against the new rule and all pass unchanged: no assertion in them pins None / 'invariant' on a MONEY figure of its fixtures (the old-rule arm in test_currency_labels.py asserts invariant only for PE_RATIO, NAME and CRNCY-class fixtures), so no AMENDMENT was needed and none was made.",
-      "artifact_covered_by": ["AC2"]
+      "artifact_covered_by": [
+        "AC2"
+      ]
     }
   ],
   "acceptance": [
@@ -48,7 +45,8 @@
       "output_evidence": "CAPTURED puts (never sent): 4\nARM b1 FAIL unlabelled money figures before 913 after 8 ['TSM_US_Equity raw 20261004T130954Z unlabelled money before 168 after 2', '1299_HK_Equity raw 20261004T130004Z unlabelled money before 218 after 2', 'SAP_GY_Equity raw 20261004T130908Z unlabelled money before 263 after 2', 'BA_US_Equity raw 20261004T130233Z unlabelled money before 264 after 2']\nARM c1 PASS values moved 0 []\nARM c2 PASS labelled currencies changed 0 []\nam1 build 0/1 control 2/2",
       "denominator": "4 names (TSM, 1299 HK, SAP, BA) re-derived in memory on each served block's own raw stamp; 4 puts captured and never sent; unlabelled money figures 913 before, 8 after (2 per name: EQY_SH_OUT_REAL and VOLUME_AVG_30D, unit 'ABSOLUTE (share count)', which the check's is_money counts as money while order item 3 keeps share counts invariant, row Z-W1-S33); control arms c1 and c2 pass 2/2. rc 0.",
       "expect": "(?m)^am1 build 1/1 control 2/2$",
-      "status": "FAIL"
+      "status": "FAIL",
+      "status_reason": "The check's build arm reads 0/1 because its is_money predicate counts the 8 share-count figures EQY_SH_OUT_REAL and VOLUME_AVG_30D (unit 'ABSOLUTE (share count)') as money; order item 3 keeps share counts invariant. Every other money figure is labelled (913 -> 8). Cleared by an issuer-side fix to the check's predicate (row AMGT_CORPUS-Z-W1-S33, disarm_owner 2.0.0_SA_COO~X)."
     },
     {
       "criterion_id": "AC2",
@@ -101,9 +99,17 @@
     {
       "item": "The labelling of IS_SH_FOR_DILUTED_EPS",
       "reason": "A share count already labelled with the reporting currency by the older rule; order item 4 keeps an existing currency. Row Z-W1-S35."
+    },
+    {
+      "item": "The three granted existing tests (test_currency_labels.py, test_figure_currency_round25.py, test_figure_currency_round26.py)",
+      "reason": "Run against the new rule and all pass unchanged at ece32e98a6: no assertion in them pins None / 'invariant' on a MONEY figure of its fixtures (the old-rule arm asserts invariant only for PE_RATIO, NAME and CRNCY-class fixtures), so no AMENDMENT was needed and none was made."
     }
   ],
-  "surprises": ["AMGT_CORPUS-Z-W1-S33", "AMGT_CORPUS-Z-W1-S34", "AMGT_CORPUS-Z-W1-S35"],
+  "surprises": [
+    "AMGT_CORPUS-Z-W1-S33",
+    "AMGT_CORPUS-Z-W1-S34",
+    "AMGT_CORPUS-Z-W1-S35"
+  ],
   "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
