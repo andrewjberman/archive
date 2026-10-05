@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e17",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9c38ea37043c383130d7ce0216eec5e099f120d6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R7.md",
+    "vintage_commit": "7d6cace9b2cc0b2f77db1c39ece852730edd93ea",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e17.fwd9-rows-mapping-and-dry-run.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/rivalfunds_classification.py",
+      "kind": "script",
+      "commit_or_etag": "f989dbf39a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure classify_canonical_row(row) -> dict|None: Q4 domain, Q1 key, Q3 sub-class; EXCHANGE_COUNTRY and COUNTRY_REGION (MSCI developed/emerging) tables as module data; no I/O; ASCII.",
+      "artifact_covered_by": [
+        "SC7-e17-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_rivalfunds_classification.py",
+      "kind": "script",
+      "commit_or_etag": "f989dbf39a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 tests: US ticker, non-US key without whitespace, Index future None, cash line None, GICS over country, unresolved developed -> Developed, unresolved US -> low_confidence, plus EM, Gulf codes, unknown exchange, Real Estate fall-through, table consistency.",
+      "artifact_covered_by": [
+        "SC7-e17-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd9_row_set.py",
+      "kind": "script",
+      "commit_or_etag": "b726f7c26a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Reads canonical_shape (504 days, newest revision per day, column-pruned, 16 threads, retries) and each key with a consistent get_item; writes only the local set file; prints the FWD9-ROW-SET line.",
+      "artifact_covered_by": [
+        "SC7-e17-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/FWD9_ROW_SET_20261005.tsv",
+      "kind": "doc",
+      "commit_or_etag": "b726f7c26a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1051 lines: WRITE 664, PRESENT-SAME 11, PRESENT-DIFFERS 106, OUT 270; action, key, security_bloomberg, name, item JSON.",
+      "artifact_covered_by": [
+        "SC7-e17-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd9_write.py",
+      "kind": "script",
+      "commit_or_etag": "b726f7c26a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Dry run by default through etf_classification_scheduled.write(); --write refuses unless census clean, contract lists BLOOMBERG, and the half's CTO section reads SIGNED. Dry run printed plan=664 and all three preconditions NOT MET; no put was made.",
+      "artifact_covered_by": [
+        "SC7-e17-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_FWD9_ROWS_20261005.md",
+      "kind": "doc",
+      "commit_or_etag": "b726f7c26a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Write set and counts, writers counted (both branches), rollback per key, three refusal preconditions, local candidate diff, COO and CTO sections left UNSIGNED.",
+      "artifact_covered_by": [
+        "SC7-e17-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC7-e17-AC1",
+      "criterion_verbatim": "python -m pytest -q infra/aws/lambda/v2_portal/_shared/tests/test_rivalfunds_classification.py -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest -q infra/aws/lambda/v2_portal/_shared/tests/test_rivalfunds_classification.py",
+      "expect": "passed",
+      "output_evidence": "14 passed in 0.13s (rc=0)",
+      "denominator": "14 of 14 tests passed, 0 failed, 0 skipped",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC7-e17-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd9_row_set.py -- expect: FWD9-ROW-SET securities=",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd9_row_set.py",
+      "expect": "FWD9-ROW-SET securities=",
+      "output_evidence": "FWD9-ROW-SET securities=1051 write=664 present_same=11 present_differs=106 out=270 (rc=0). Run without a 120 s bound: the live S3 read of 504 partitions took about 60 minutes on a congested laptop link (earlier runs took 3 to 6 minutes; two attempts stopped on network errors before the retry wrapper was added). An identical result came from a cached copy of the same read.",
+      "denominator": "504 of 504 day partitions read (newest revision each); 1051 distinct securities; 781 keys read by consistent get_item; lines in set file 1051 of 1051",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC7-e17-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_FWD9_ROWS_20261005.md -- expect: HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_FWD9_ROWS_20261005.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_FWD9_ROWS_20261005.md (rc=0)",
+      "denominator": "1 of 1 half files read",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Refusal control: run the writer with --write against the unsigned half while the census is absent and the contract lacks BLOOMBERG.",
+      "expected": "REFUSED, rc=4, nothing written",
+      "observed": "REFUSED: --write needs all three preconditions; nothing written. rc=4",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "r7_fwd9_row_set.py run live on 2026-10-05 and once more against a cached copy of an earlier read of the same 504 partitions.",
+      "observed": "Identical FWD9-ROW-SET line and PRESENT-DIFFERS key list both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to etf-classifications or S3, and the FWD-9 row act itself.",
+      "reason": "BOUNDS: no table write in this cell; the write is the issuer's act under the signed half, and the writer refuses until three preconditions hold."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W14-S1",
+    "MDPF_SECCLASS-W14-S2",
+    "MDPF_SECCLASS-W14-S3"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd9_row_set.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on each .py)",
+      "result": "pre-commit gate clean for the 4 python files; ruff py39 clean"
+    }
+  ]
+}
