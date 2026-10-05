@@ -30,7 +30,7 @@
       "kind": "config_data",
       "commit_or_etag": "73d0bbc37b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-IRPT_BCKEND-120; the docs copy docs/contracts/investor-reporting/v1/ExportBundle.schema.json is outside the grant and NOT updated (row W120-S1)",
+      "deploy_evidence": "LOCAL on wk-IRPT_BCKEND-120; the docs copy is byte-equal to it as of the amendment-1 commit (row W120-S1 resolved by amendment 1)",
       "artifact_covered_by": [
         "IB49-1-AC1",
         "IB49-1-AC2"
@@ -45,6 +45,26 @@
       "artifact_covered_by": [
         "IB49-1-AC1"
       ]
+    },
+    {
+      "path_or_key": "docs/contracts/investor-reporting/v1/ExportBundle.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "239b895bc7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; copied byte-for-byte from the packaged schema (granted by amendment 1, 3081d0cda5)",
+      "artifact_covered_by": [
+        "IB49-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/tests/test_export_path_b.py",
+      "kind": "test",
+      "commit_or_etag": "239b895bc7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; the top-level key-set assertion now admits narrative_state and narrative_reason (granted by amendment 1, row W120-S2 resolved)",
+      "artifact_covered_by": [
+        "IB49-1-AC2"
+      ]
     }
   ],
   "acceptance": [
@@ -53,7 +73,7 @@
       "criterion_verbatim": "the new tests pass, at least 3, naming NOT_ATTACHED.",
       "method": "command",
       "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r49/p49_cells.py\" . IB49-1-AC1",
-      "output_evidence": "OK: 4 tests passed | IB49-1-AC1 PASS (rc=0)",
+      "output_evidence": "OK: 4 tests passed | IB49-1-AC1 PASS (rc=0), re-run after amendment 1",
       "denominator": "4 of 4 new tests passed (minimum 3)",
       "status": "PASS",
       "expect": "IB49-1-AC1 PASS"
@@ -63,11 +83,10 @@
       "criterion_verbatim": "regression: test_bundle_report_ref.py, test_export_path_b.py and test_packaged_contracts_match_docs.py pass, 0 failed.",
       "method": "command",
       "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r49/p49_cells.py\" . IB49-1-AC2",
-      "output_evidence": "FAIL: 2 failed, 20 passed -- test_packaged_contracts_match_docs[ExportBundle.schema.json] (docs copy outside the grant, row IRPT_BCKEND-W120-S1) and test_export_path_b old six-key assertion (file outside the grant, row IRPT_BCKEND-W120-S2) | IB49-1-AC2 FAIL (rc=1)",
-      "denominator": "20 of 22 passed, 2 failed",
-      "status": "FAIL",
-      "expect": "IB49-1-AC2 PASS",
-      "status_reason": "The packaged ExportBundle schema was changed as ordered, so the byte-equality test against docs/contracts/investor-reporting/v1/ExportBundle.schema.json fails (docs path not in the order's paths, row IRPT_BCKEND-W120-S1); and test_export_path_b.py asserts the old six-key top-level set (file not in paths, row IRPT_BCKEND-W120-S2). The order stays open for the issuer to grant those two paths."
+      "output_evidence": "OK: 22 regression tests passed, 0 failed | IB49-1-AC2 PASS (rc=0)",
+      "denominator": "22 of 22 passed, 0 failed",
+      "status": "PASS",
+      "expect": "IB49-1-AC2 PASS"
     }
   ],
   "controls": {
@@ -79,14 +98,14 @@
     },
     "determinism": {
       "method": "pure local pytest, no network, no AWS",
-      "observed": "AC1 and the AC2 failures reproduced on a second run of test_export_path_b.py",
+      "observed": "AC1 and AC2 each PASS on the post-amendment run",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "docs/contracts/investor-reporting/v1/ExportBundle.schema.json and export/tests/test_export_path_b.py",
-      "reason": "outside the order's paths block; filed as BLOCKING rows IRPT_BCKEND-W120-S1 and S2 rather than edited"
+      "item": "docs ExportBundle schema copy and test_export_path_b.py",
+      "reason": "were outside the original paths; rows IRPT_BCKEND-W120-S1 and IRPT_BCKEND-W120-S2 are RESOLVED by amendment 1 (3081d0cda5), which granted both; both now edited"
     }
   ],
   "surprises": [
@@ -98,7 +117,7 @@
     {
       "tool": "python p49_cells.py (the order's own checker)",
       "invocation": "one run per criterion",
-      "result": "AC1 PASS rc=0, AC2 FAIL rc=1"
+      "result": "AC1 PASS rc=0, AC2 PASS rc=0"
     }
   ]
 }
