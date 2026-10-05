@@ -17,7 +17,7 @@ nship=$(printf '%s\n' "$shipped" | grep -c .)
 nf=$(printf '%s\n' "$shipped" | grep . | grep -vxE "$GW/app/server\.py|$GW/app/yearinreview_view\.py|$GW/app/static/yearinreview/index\.html|$GW/tests/test_yearinreview_view\.py|$GW/app/config\.py|$GW/deploy-to-ec2\.sh" | grep -c .)
 echo "entry files at HEAD=$entry; sentinel at HEAD=$sent; deployed=${c:0:10} descends from e91819e281=$desc; gateway files shipped $nship, outside the kit set $nf"
 f1=no; RL4_ENV_KEYS_BASELINE="$(cd "$(dirname "$0")/.." && pwd)/ENV_KEYS_R17B.txt" bash "$D/r14/checks/rl4.AC1.sh" >/dev/null 2>&1 && f1=yes
-f2=no; bash "$D/hxteams/checks/ht.AC2.sh" >/dev/null 2>&1 && f2=yes
+f2=no; HT_ENV_KEYS_COUNT=51 bash "$D/hxteams/checks/ht.AC2.sh" >/dev/null 2>&1 && f2=yes
 echo "floor: rl4.AC1 $f1; ht.AC2 $f2"
 [ "$entry" -ge 1 ] && [ "$sent" = no ] && [ "$desc" = yes ] && [ "$nship" = 6 ] && [ "$nf" = 0 ] && [ "$f1" = yes ] && [ "$f2" = yes ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
