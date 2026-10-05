@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-24",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "53acc6abb8",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-24.commit-e3-ruling-and-pull-record.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~10",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/E3_SHAPE_RULING.json",
+      "kind": "config_data",
+      "commit_or_etag": "f2a2751f0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Bearer line corrected to name batch 248 and batch 249; every other byte identical to the shared-checkout file (git diff --no-index: 1 line changed).",
+      "artifact_covered_by": [
+        "DB15-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/BD_POPULATION_PULL_E3.json",
+      "kind": "config_data",
+      "commit_or_etag": "f2a2751f0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed unchanged; cmp against the shared-checkout file reports identical.",
+      "artifact_covered_by": [
+        "DB15-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB15-2-AC1",
+      "criterion_verbatim": "DB15-2-AC1 -- both files are tracked in the DB-b-20 folder and parse, and the ruling names batches 248 and 249 and no longer says \"minted once\". Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r15/p15_cells.py\" . DB15-2-AC1",
+      "output_evidence": "OK: both files tracked; ruling names batches 248 and 249\nDB15-2-AC1 PASS rc=0",
+      "denominator": "2 of 2 files tracked and parsed; batches 248 and 249 both named; 0 occurrences of 'minted once'",
+      "status": "PASS",
+      "expect": "DB15-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB15-2-AC2",
+      "criterion_verbatim": "DB15-2-AC2 -- a GUARD: your commits touch only your grant. Base: PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r15/p15_cells.py\" . DB-GUARD",
+      "output_evidence": "OK: all worker paths inside their grants\nDB-GUARD PASS rc=0",
+      "denominator": "all paths of the worker's commits inside the order's <paths> grant",
+      "status": "PASS",
+      "expect": "DB-GUARD PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative arm: DB15-2-AC1 run in this worktree after the files were copied but before they were committed.",
+      "expected": "FAIL, files untracked",
+      "observed": "FAIL: E3_SHAPE_RULING.json is not tracked / DB15-2-AC1 FAIL",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both checks ran once after the commit f2a2751f0c; the checker reads only tracked files and the ruling bytes.",
+      "observed": "AC1 PASS, DB-GUARD PASS.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any AWS or vendor call",
+      "reason": "Outside the order: none made."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W10-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "credential scan",
+      "invocation": "python regex over both files for token/bearer/password/secret/authorization values and eyJ.../Bearer <20 chars> patterns",
+      "result": "0 credential values in 2 of 2 files (the only key match is the prose 'bearer' policy line)"
+    }
+  ]
+}
