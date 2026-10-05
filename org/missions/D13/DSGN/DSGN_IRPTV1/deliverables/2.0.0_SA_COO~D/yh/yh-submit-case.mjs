@@ -58,6 +58,8 @@ const CASES = {
   // resolves NORMALIZED and the Overview READY. `accept` maps the file's ticker to the suggestion the case expects.
   typoAccept: { sha256: '87afdc7db1c58b38', variant: 'overview', comparisons: [], accept: { APPL: 'AAPL' }, proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'typo file: accept AAPL for APPL, name SGOV for TIMXX (Y-4 V1)' },
   B: { sha256: '500837992a3b9caa', variant: 'comparison', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }], expect: 'READY', note: 'easy file vs Opal Ultra Long-Term, Comparison (Y-2)' },
+  // Y-2 fold-in Case B (2.0.0_SA_COO~Y 105051): case B with TIMXX named SGOV, as in Aproxy; one comparison.
+  Bproxy: { sha256: '500837992a3b9caa', variant: 'comparison', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }], proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'easy file, TIMXX named SGOV, vs Opal Ultra Long-Term, Comparison (Y-2 fold-in Case B)' },
   C: { sha256: '500837992a3b9caa', variant: 'multicomp', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }, { kind: 'etf', key: 'IWM' }], expect: 'READY', blocked: 'brief 2 item 2.3: a ticker admitted as a comparison (CTO batch 178 ruling 4) is 2.0.0_SA_COO~Y\'s half' },
 }
 
@@ -79,6 +81,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (a === '--ready-ceiling-min') opt.readyCeilingMin = Number(argv[++i])
   else if (a === '--base') opt.base = argv[++i]
   else if (a === '--headed') opt.headed = true
+  else if (a === '--replay-normalized') opt.replayNormalized = argv[++i]
   else { console.error(`unknown argument ${a}`); process.exit(2) }
 }
 const kase = CASES[opt.case]
@@ -125,6 +128,16 @@ const pathOnly = (u) => { try { return new URL(u).pathname } catch { return u } 
 const py = (cmd, extraEnv = {}, ...args) => execFileSync('python', [ACCOUNT, cmd, ...args], { encoding: 'utf8', env: { ...process.env, ...extraEnv }, stdio: ['ignore', 'pipe', 'pipe'] })
 
 // ---- the fixture plane (offline drive; the committed producer records) --------------------------------------------
+/** --replay-normalized <page.har>: the LAST NORMALIZED answer a live run's upload received, replayed whole (the served
+ * producer record, e.g. its irpt-normalized-portfolio.v2 rows). The HAR stays local; nothing from it is written. */
+function replayedNormalized(har) {
+  const entries = JSON.parse(readFileSync(har, 'utf8')).log.entries
+  const answers = entries.filter((e) => e.request.method === 'POST' && INPUTS.test(pathOnly(e.request.url)))
+    .map((e) => { try { return JSON.parse(e.response.content.text) } catch { return null } })
+    .filter((j) => j?.data?.state === 'NORMALIZED')
+  if (!answers.length) { console.error(`REFUSED: ${har} holds no NORMALIZED upload answer`); process.exit(2) }
+  return answers[answers.length - 1]
+}
 const WIRE = path.join(ROOT, 'portal', 'src', 'pages', 'InvestorReporting', 'fixtures')
 function fixturePlane() {
   const smoke = JSON.parse(readFileSync(path.join(WIRE, 'smoke', 'dsgn-irptv1-cottonwood.json'), 'utf8'))
@@ -132,7 +145,8 @@ function fixturePlane() {
   const request = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'AnalysisRequest.valid.json'), 'utf8')).instance
   const status = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'StatusEnvelope.valid.json'), 'utf8')).instance
   const firmId = smoke[`${BASE_API}/directory/resolve`].firm_id
-  const upload = kase.expect === 'NEEDS_CORRECTION' || kase.proxies || kase.accept ? producer.correction.response : producer.normalized.response
+  const upload = kase.expect === 'NEEDS_CORRECTION' || kase.proxies || kase.accept ? producer.correction.response
+    : opt.replayNormalized ? replayedNormalized(opt.replayNormalized) : producer.normalized.response
   // Y-5 fixture: the first answer offers NAME_PROXY for each proxied ticker; the re-post with corrections answers the
   // producer's NORMALIZED record, its disclosures naming each proxy the page sent.
   // Y-4 fixture: an accepted ticker's finding is TICKER_NOT_FOUND with the provider-verified suggestion, ACCEPT_SUGGESTION first.
@@ -325,7 +339,21 @@ try {
     const prospect = page.locator('[data-slot="prospect-composer"]')
     if (kase.comparisons.length > 0) {
       await prospect.locator(`[data-slot="variant-card"][data-variant="${kase.variant}"]`).click()
-      await page.locator('[data-slot="comparison-picker"]').waitFor({ state: 'visible', timeout: 30000 })
+      // A card selects at once when the catalogue is read; otherwise it opens its explanation, whose one button selects.
+      const explain = page.getByRole('dialog').getByRole('button', { name: 'Select this analysis' })
+      if (await explain.isVisible().catch(() => false)) { packet.variant_selected_via = 'explanation'; await explain.click() } else packet.variant_selected_via = 'card'
+      // The picker opens only on a read catalogue; otherwise record what the page shows in its place, then fail.
+      const picker = await page.locator('[data-slot="comparison-picker"]').waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false)
+      if (!picker) {
+        packet.picker_missing = {
+          variant_card_selected: await prospect.locator(`[data-slot="variant-card"][data-variant="${kase.variant}"] [data-slot="variant-card-selected"]`).count(),
+          unavailable_words: await prospect.locator('[data-slot="prospect-variant-unavailable"]').textContent().catch(() => null),
+          open_picker_button: await prospect.locator('[data-slot="open-comparison-picker"]').count(),
+          dialogs: await page.getByRole('dialog').count(),
+        }
+        await shot(page, 'picker-missing')
+        throw new Error(`comparison picker did not open: ${JSON.stringify(packet.picker_missing)}`)
+      }
       for (const pick of kase.comparisons) {
         if (pick.kind === 'etf') await page.locator('[data-slot="picker-search"]').fill(pick.key)
         await page.locator(`[data-slot="picker-${pick.kind === 'etf' ? 'etf' : 'model'}"][data-key="${pick.key}"]`).click()
