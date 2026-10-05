@@ -8,8 +8,8 @@ Usage: python <this file> <repo_root> <criterion_id>
   DB15-1-AC2  the census that reads the file, investor-reporting _authz/tests/test_unguarded_census.py, passes with 0 failed.
               Base: PASS (regression).
   DB15-1-AC3  (amendment 1) the two reporting routes carry status ROUTED_ELSEWHERE with a non-empty `routed_by` (so the api root's
-              routes.tf, which routes only status DECLARED, never sees them), and _contracts/tests/test_seam_paired.py passes with 0
-              failed. Base: FAIL.
+              routes.tf, which routes only status DECLARED, never sees them), and _contracts/tests/test_seam_paired.py plus (amendment 2,
+              row W9-S3) _contracts/test_owned_request_contracts.py and _contracts/test_upload_contract.py pass with 0 failed. Base: FAIL.
   DB15-2-AC1  E3_SHAPE_RULING.json and BD_POPULATION_PULL_E3.json are TRACKED in the DB-b-20 folder, parse as JSON, and the
               ruling names batches 248 and 249 and no longer says the bearer is minted once. Base: FAIL (untracked).
   DB-GUARD    the commits of 0.9.0_WK_IRPT_DASHBD~9 and ~10 since base touch only their grants. Base: PASS.
@@ -26,7 +26,8 @@ ROUTES = "docs/contracts/investor-reporting/v1/routes.json"
 IR = "infra/aws/lambda/investor-reporting"
 B20 = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/"
 GRANTS = {
-    "0.9.0_WK_IRPT_DASHBD~9": (ROUTES, IR + "/_authz/tests/test_unguarded_census.py", "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~9/",
+    "0.9.0_WK_IRPT_DASHBD~9": (ROUTES, IR + "/_authz/tests/test_unguarded_census.py", IR + "/_contracts/test_owned_request_contracts.py",
+                               IR + "/_contracts/test_upload_contract.py", "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~9/",
                                "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
                                "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-23."),
     "0.9.0_WK_IRPT_DASHBD~10": (B20 + "E3_SHAPE_RULING.json", B20 + "BD_POPULATION_PULL_E3.json",
@@ -74,7 +75,8 @@ def main():
         for r in rep:
             if r.get("status") != "ROUTED_ELSEWHERE" or not r.get("routed_by"):
                 fail("%s: status %r routed_by %r" % (r.get("route_key"), r.get("status"), r.get("routed_by")))
-        r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "_contracts/tests/test_seam_paired.py"],
+        r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "_contracts/tests/test_seam_paired.py",
+                            "_contracts/test_owned_request_contracts.py", "_contracts/test_upload_contract.py"],
                            cwd=str(root / IR), capture_output=True, text=True, timeout=900)
         out = re.sub(r"\x1b\[[0-9;]*m", "", (r.stdout or "") + (r.stderr or ""))
         last = ([ln for ln in out.splitlines() if ln.strip()] or ["(no output)"])[-1]
