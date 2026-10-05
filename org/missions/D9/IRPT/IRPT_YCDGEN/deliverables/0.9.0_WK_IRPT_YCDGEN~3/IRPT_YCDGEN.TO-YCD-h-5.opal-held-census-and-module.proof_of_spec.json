@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-h-5.opal-held-census-and-module",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-h-5.opal-held-census-and-module.md",
+    "group": "OTHER",
+    "vintage_commit": "2f901c0a21"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R5.md",
+    "vintage_commit": "2f901c0a21",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-h-5.opal-held-census-and-module.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/held_data.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "census(tickers, sources, groups) and value_of(group, field, holdings, held_rows) with NotHeld(reason); no store read, no vendor call; local on worktree branch wk-ycdgen-r5-3.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_held_data.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "seven tests named test_held_*; 7 passed in the file, 111 of 111 in the research tests.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/fixtures/held/held_fixture.json",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "made-up tickers (AAA, BBB, CCC, DDD) and numbers only.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/overview_coverage.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "158 HELD_DATA rows: 86 OPAL_HELD (table, field, key, method, group) and 72 NOT_HELD (reason, group); counts only, no ticker or amount.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_YCDGEN-W3-S7 appended.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- every HELD_DATA row carries a 5.2 feed: OPAL_HELD with table, field, key and method, or NOT_HELD with a reason (org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round5/checks/h-5.AC1.py)",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round5/checks/h-5.AC1.py",
+      "output_evidence": "h-5.AC1 RESULT: PASS held=158 feeds={'OPAL_HELD': 86, 'NOT_HELD': 72} not 5.2-shaped=0 []\nrc=0",
+      "denominator": "158 of 158 HELD_DATA rows 5.2-shaped (86 OPAL_HELD + 72 NOT_HELD); 153 groups, 83 FED and 70 NOT_HELD, over Y-5's 99 holdings (counts only)",
+      "expect": "h-5.AC1 RESULT: PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- held_data computes a renormalized weighted group value with its method and reads NotHeld with a reason (tests -k held in test_held_data.py, >= 3) (org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round5/checks/h-5.AC2.py)",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round5/checks/h-5.AC2.py",
+      "output_evidence": "h-5.AC2 RESULT: PASS 7 passed, 0 failed (need >= 3, -k 'held'): 7 passed in 0.05s\nrc=0",
+      "denominator": "7 of 7 tests selected by -k held passed (need >= 3); 111 of 111 in the research tests passed",
+      "expect": "h-5.AC2 RESULT: PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A scratch copy of overview_coverage.json with the first HELD_DATA row's feed put back to YCHARTS_SECURITY, run through h-5.AC1.py from the copy root (committed file untouched; copy deleted).",
+      "expected": "AC1 flips to FAIL on that row.",
+      "observed": "h-5.AC1 RESULT: FAIL held=158 feeds={'YCHARTS_SECURITY': 1, 'NOT_HELD': 71, 'OPAL_HELD': 86} not 5.2-shaped=1 ['p12.e04'] rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- the feeds are rewritten once from a read-only census",
+      "observed": "single run",
+      "status": "N/A-WITH-REASON",
+      "reason": "the sources are read-only stores at one moment; the module's tests are deterministic fixtures"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A YCharts or other vendor call, an S3 or DynamoDB write, a deploy",
+      "reason": "Forbidden by the order. The census read Y-5's frozen input and Opal's tables read-only through the main tree aws shim, in memory and OS temp, counts only; the temp copies were deleted."
+    }
+  ],
+  "surprises": [
+    "IRPT_YCDGEN-W3-S7"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "h-5.AC1.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round5/checks/h-5.AC1.py",
+      "result": "h-5.AC1 RESULT: PASS"
+    },
+    {
+      "tool": "h-5.AC2.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round5/checks/h-5.AC2.py",
+      "result": "h-5.AC2 RESULT: PASS"
+    }
+  ]
+}
