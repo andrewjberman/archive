@@ -1,7 +1,7 @@
 {
  "schema": "irpt-ycdgen-coverage-v1",
  "run": "YCD-R1-20261004T1944Z",
- "basis": "one class per element; reasons and via carry endpoint paths, column ids and field paths only, no figure value; column ids are inferred from printed labels (round-1 map claim). Round 3: class OWN_SERIES added (row IRPT_YCDGEN-W3-S2); the elements computable from the portfolio's own kept level series moved to it.",
+ "basis": "one class per element; reasons and via carry endpoint paths, column ids and field paths only, no figure value; column ids are inferred from printed labels (round-1 map claim). Round 3: class OWN_SERIES added (row IRPT_YCDGEN-W3-S2); the elements computable from the portfolio's own kept level series moved to it. Round 4 (YCD-o-4): each HELD_DATA row gains `feed` (contract 4.2); measured by schema reads, no Opal table found holds any held-data column as the same per-holding figure (row IRPT_YCDGEN-W2-S6), so every feed is YCHARTS_SECURITY through feed_probe_map.json; `metrics` lists the metric ids the call asks for, inferred from the table_data column ids.",
  "elements": [
   {
    "id": "p12.e04",
@@ -23,6 +23,12 @@
     "field": "$.chart_data[0][0].raw_data",
     "weighting": "buy-and-hold: portfolio value path V(t) = sum_i quantity_i x series_i(t) over the frozen upload's rows; the element is computed locally from V(t) (cross-check: the kept step-02 portfolio level series)",
     "inception_field": "$[0].inception_date (kept step 01)"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_level_series",
+    "field": "$.chart_data[0][0].raw_data",
+    "note": "per holding; Opal holds no per-holding price series for the upload's tickers (opal-harvest-security-metrics keys axis_date+ticker holds only px_start/px_end for a ranked subset)"
    }
   },
   {
@@ -59,6 +65,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "net_expense_ratio"
+    ],
+    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet FUND_EXPENSE_RATIO (key `security`, '<TICKER> US Equity'; a Bloomberg universe of 114 securities, not the holdings)"
    }
   },
   {
@@ -76,6 +91,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "distribution_yield"
+    ],
+    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet EQY_DVD_YLD_IND_NET (114 securities)"
    }
   },
   {
@@ -93,6 +117,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "beta_5y"
+    ]
    }
   },
   {
@@ -110,6 +142,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "cash_net_allocation"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -162,6 +203,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "alpha_5y"
+    ]
    }
   },
   {
@@ -184,6 +233,20 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "asset_allocation_cash",
+     "asset_allocation_convertible",
+     "asset_allocation_stock",
+     "asset_allocation_preferred",
+     "asset_allocation_bond",
+     "asset_allocation_other"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -201,6 +264,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "asset_allocation_cash"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -218,6 +290,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "asset_allocation_convertible"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -235,6 +316,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "asset_allocation_stock"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -252,6 +342,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "asset_allocation_preferred"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -269,6 +368,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "asset_allocation_bond"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -286,6 +394,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "asset_allocation_other"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -307,6 +424,19 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "market_cap_giant",
+     "market_cap_small",
+     "market_cap_large",
+     "market_cap_micro",
+     "market_cap_med"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -324,6 +454,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "market_cap_giant"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -341,6 +480,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "market_cap_small"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -358,6 +506,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "market_cap_large"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -375,6 +532,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "market_cap_micro"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -392,6 +558,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "market_cap_med"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -409,6 +584,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_style_lg_cap_value"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -426,6 +610,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_style_mid_cap_value"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -443,6 +636,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_style_sm_cap_value"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -460,6 +662,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_style_lg_cap_blend"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -477,6 +688,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_style_mid_cap_blend"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -494,6 +714,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_style_sm_cap_blend"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -511,6 +740,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_style_lg_cap_growth"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -528,6 +766,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_style_mid_cap_growth"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -545,6 +792,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_style_sm_cap_growth"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -562,6 +818,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_developed_markets"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -579,6 +844,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_americas"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -596,6 +870,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_emerging_markets"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -613,6 +896,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_greater_europe"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -630,6 +922,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_greater_asia"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -647,6 +948,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_americas"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -664,6 +974,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_greater_europe"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -681,6 +1000,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_greater_asia"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -698,6 +1026,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_north_america"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -715,6 +1052,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_united_kingdom"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -732,6 +1078,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_switzerland"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -749,6 +1104,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_japan"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -766,6 +1130,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_canada"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -783,6 +1156,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_europe_developed"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -800,6 +1182,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_europe_emerging"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -817,6 +1208,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_australasia"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -834,6 +1234,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_united_states"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -851,6 +1260,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_austria"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -868,6 +1286,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_czech_republic"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -885,6 +1312,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_asia_developed"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -902,6 +1338,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_latin_america"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -919,6 +1364,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_belgium"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -936,6 +1390,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_poland"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -953,6 +1416,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_hong_kong"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -970,6 +1442,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_argentina"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -987,6 +1468,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_denmark"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1004,6 +1494,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_russia"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1021,6 +1520,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_singapore"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1038,6 +1546,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_brazil"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1055,6 +1572,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_finland"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1072,6 +1598,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_turkey"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1089,6 +1624,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_south_korea"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1106,6 +1650,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_chile"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1123,6 +1676,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_france"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1140,6 +1702,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_africa_and_middle_east"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1157,6 +1728,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_taiwan"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1174,6 +1754,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_colombia"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1191,6 +1780,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_germany"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1208,6 +1806,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_algeria"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1225,6 +1832,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_asia_emerging"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1242,6 +1858,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_mexico"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1259,6 +1884,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_greece"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1276,6 +1910,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_egypt"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1293,6 +1936,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_china"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1310,6 +1962,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_peru"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1327,6 +1988,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_ireland"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1344,6 +2014,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_iran"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1361,6 +2040,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_india"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1378,6 +2066,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_venezuela"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1395,6 +2092,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_italy"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1412,6 +2118,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_israel"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1429,6 +2144,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_indonesia"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1446,6 +2170,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_netherlands"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1463,6 +2196,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_nigeria"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1480,6 +2222,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_kazakhstan"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1497,6 +2248,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_norway"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1514,6 +2274,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_qatar"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1531,6 +2300,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_malaysia"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1548,6 +2326,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_portugal"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1565,6 +2352,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_saudi_arabia"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1582,6 +2378,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_pakistan"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1599,6 +2404,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_spain"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1616,6 +2430,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_south_africa"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1633,6 +2456,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_philippines"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1650,6 +2482,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_sweden"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1667,6 +2508,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_united_arab_emirates"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1684,6 +2534,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "region_exposure_thailand"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1701,6 +2560,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_cyclical"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1718,6 +2586,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_basic_materials"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1735,6 +2612,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_consumer_cyclical"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1752,6 +2638,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_financial_services"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1769,6 +2664,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_real_estate"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1786,6 +2690,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_sensitive"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1803,6 +2716,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_comm_services"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1820,6 +2742,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_energy"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1837,6 +2768,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_industrials"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1854,6 +2794,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_technology"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1871,6 +2820,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_defensive"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1888,6 +2846,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_consumer_defensive"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1905,6 +2872,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_healthcare"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1922,6 +2898,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "stock_sector_utilities"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1944,6 +2929,20 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_sector_cash",
+     "bond_sector_government",
+     "bond_sector_corporate",
+     "bond_sector_municipal",
+     "bond_sector_derivative",
+     "bond_sector_securitized"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1961,6 +2960,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_sector_cash"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1978,6 +2986,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_sector_government"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -1995,6 +3012,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_sector_corporate"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2012,6 +3038,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_sector_municipal"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2029,6 +3064,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_sector_derivative"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2046,6 +3090,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_sector_securitized"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2063,6 +3116,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_credit_quality_aaa"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2080,6 +3142,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_credit_quality_bbb"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2097,6 +3168,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_credit_quality_below_b"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2114,6 +3194,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_credit_quality_aa"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2131,6 +3220,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_credit_quality_bb"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2148,6 +3246,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_credit_quality_not_rated"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2165,6 +3272,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_credit_quality_a"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2182,6 +3298,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_credit_quality_b"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2214,6 +3339,30 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_short_term",
+     "bond_maturity_intermediate",
+     "bond_maturity_1_to_7_days",
+     "bond_maturity_1_to_3_years",
+     "bond_maturity_8_to_30_days",
+     "bond_maturity_3_to_5_years",
+     "bond_maturity_31_to_90_days",
+     "bond_maturity_5_to_7_years",
+     "bond_maturity_91_to_182_days",
+     "bond_maturity_7_to_10_years",
+     "bond_maturity_183_to_364_days",
+     "bond_maturity_long_term",
+     "bond_maturity_10_to_15_years",
+     "bond_maturity_15_to_20_years",
+     "bond_maturity_20_to_30_years",
+     "bond_maturity_over_30_years"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2231,6 +3380,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_short_term"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2248,6 +3406,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_intermediate"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2265,6 +3432,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_1_to_7_days"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2282,6 +3458,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_1_to_3_years"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2299,6 +3484,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_8_to_30_days"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2316,6 +3510,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_3_to_5_years"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2333,6 +3536,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_31_to_90_days"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2350,6 +3562,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_5_to_7_years"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2367,6 +3588,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_91_to_182_days"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2384,6 +3614,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_7_to_10_years"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2401,6 +3640,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_183_to_364_days"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2418,6 +3666,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_long_term"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2435,6 +3692,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_10_to_15_years"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2452,6 +3718,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_15_to_20_years"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2469,6 +3744,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_20_to_30_years"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2486,6 +3770,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_region_maturity",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "bond_maturity_over_30_years"
+    ],
+    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
    }
   },
   {
@@ -2723,6 +4016,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "dividend_yield"
+    ],
+    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet EQY_DVD_YLD_IND_NET (114 securities)"
    }
   },
   {
@@ -2740,6 +4042,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "net_expense_ratio"
+    ],
+    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet FUND_EXPENSE_RATIO (key `security`, '<TICKER> US Equity'; a Bloomberg universe of 114 securities, not the holdings)"
    }
   },
   {
@@ -2757,6 +4068,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "distribution_yield"
+    ],
+    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet EQY_DVD_YLD_IND_NET (114 securities)"
    }
   },
   {
@@ -2774,6 +4094,15 @@
     "weighting": "none: the sum over holdings of each holding's own count column (or the upload's row count where YCharts counts positions; unresolved, inferred)",
     "aggregation": "sum_i value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "number_of_holdings"
+    ],
+    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet TOTAL_NUMBER_OF_HOLDINGS_IN_PORT (114 securities)"
    }
   },
   {
@@ -2791,6 +4120,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "harmonic weighted mean: 1 / sum_i (w_i / value_i)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "weighted_avg_pe"
+    ]
    }
   },
   {
@@ -2813,6 +4150,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "harmonic weighted mean: 1 / sum_i (w_i / value_i)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "weighted_avg_p_s"
+    ]
    }
   },
   {
@@ -2830,6 +4175,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "weighted_avg_market_cap"
+    ]
    }
   },
   {
@@ -2847,6 +4200,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "harmonic weighted mean: 1 / sum_i (w_i / value_i)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "weighted_avg_p_b"
+    ]
    }
   },
   {
@@ -2864,6 +4225,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "weighted_avg_d_c"
+    ]
    }
   },
   {
@@ -2886,6 +4255,14 @@
     "weighting": "none: the sum over holdings of each holding's own count column (or the upload's row count where YCharts counts positions; unresolved, inferred)",
     "aggregation": "sum_i value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "of_stock_holdings"
+    ]
    }
   },
   {
@@ -2903,6 +4280,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "current_yield"
+    ]
    }
   },
   {
@@ -2920,6 +4305,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "avg_credit_qual_scr"
+    ]
    }
   },
   {
@@ -2937,6 +4330,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "yield_to_maturity"
+    ]
    }
   },
   {
@@ -2954,6 +4355,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "average_price"
+    ]
    }
   },
   {
@@ -2971,6 +4380,15 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "effective_duration"
+    ],
+    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet HB_OAS_EFF_DURTN (114 securities)"
    }
   },
   {
@@ -2988,6 +4406,14 @@
     "weighting": "none: the sum over holdings of each holding's own count column (or the upload's row count where YCharts counts positions; unresolved, inferred)",
     "aggregation": "sum_i value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "of_bond_holdings"
+    ]
    }
   },
   {
@@ -3005,6 +4431,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "YCHARTS_SECURITY",
+    "call": "held_metrics_exposure_fundamentals",
+    "field": "$.chart_data[*]",
+    "metrics": [
+     "average_coupon"
+    ]
    }
   }
  ]
