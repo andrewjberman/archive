@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-319",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "0c93476d47"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "0c93476d47",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-319.w100-s2-withdrawal-packet.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~122",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~122/W100S2_WITHDRAWAL_PACKET.json",
+      "kind": "config_data",
+      "commit_or_etag": "3187d58a92",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-IRPT_BCKEND-122; a read-only packet, AWS reads only (get_bucket_versioning, list_objects_v2, get_object, head_object, list_object_versions), no write",
+      "artifact_covered_by": [
+        "IB50-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~122/W100S2_WITHDRAWAL_PACKET.md",
+      "kind": "config_data",
+      "commit_or_etag": "3187d58a92",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-IRPT_BCKEND-122; the one-page record for the CTO half and Andrew's word, both unsigned",
+      "artifact_covered_by": [
+        "IB50-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "3187d58a92",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-IRPT_BCKEND-122; append-only, one row IRPT_BCKEND-W122-S1 (BLOCKING / INERT), RESOLVED by amendment 1 (960db69a15); the row is not edited",
+      "artifact_covered_by": [
+        "IB50-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB50-1-AC1",
+      "criterion_verbatim": "the packet carries the six parts batch 251 names: versioning, every perfrp key with its writer and its 2025-01-10 measurement plus the denominator, a withdrawal set holding the account leaf and only measured carriers, rollback per withdrawal key, a stop rule naming the ETag, and an after-read naming PROD and a 49F login.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r50/p50_withdrawal_packet.py\" . IB50-1-AC1",
+      "output_evidence": "OK: versioning 'Enabled'; 4 perfrp keys; withdrawal set 1; rollback 1 | IB50-1-AC1 PASS (rc=0), run after merging amendment 1 (960db69a15)",
+      "denominator": "6 of 6 parts present; 4 of 4 perfrp keys listed with writer and measurement (19 objects under platinum/advi/); withdrawal set 1 key = the 49F account leaf, admitted by ruling (CTO batch 251) per amendment 1; every other withdrawal member must still be a measured carrier (0 others); the leaf's own measurement stands as read: 0 hits of 2025-01-10 in 1,923,593 bytes",
+      "status": "PASS",
+      "status_reason": "Amendment 1 (960db69a15) admits the 49F account leaf by ruling (batch 251); the packet and its measurements are unchanged from the first run.",
+      "expect": "IB50-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base 7c1f637ac6 is the mutant: the packet does not exist there, so the checker fails with 'no ...W100S2_WITHDRAWAL_PACKET.json'.",
+      "expected": "IB50-1-AC1 FAIL at base, PASS once the packet is complete and the account leaf is admitted by ruling.",
+      "observed": "FAIL at the worktree before amendment 1 (the leaf measured carries_20250110 false, row IRPT_BCKEND-W122-S1); PASS after merging amendment 1 (960db69a15) with the packet unchanged.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The packet rests on live reads at 2026-10-04: bucket versioning, the platinum/advi/ listing, get_object of the performance leaf; the checker is a pure function of the committed packet.",
+      "observed": "ETag 9873b72ef5da73fc0399d2905d4f7821 and VersionId E78kI4KB4KsZhdwsAFzfSvkI.kn5Snim read twice (listing, head_object) with the same values.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the upstream canonical/twr_daily date=2025-01-10 partition and a recompute of the leaf's SI window_return",
+      "reason": "The order's reads 1-4 do not include it; row IRPT_BCKEND-W122-S1 is RESOLVED by amendment 1 (960db69a15), which admits the account leaf by ruling (batch 251) and leaves the SI-contamination question outside this order."
+    },
+    {
+      "item": "the content of the three non-performance perfrp keys",
+      "reason": "The order says they are not read; they carry carries_20250110 false with 'not read: not a performance leaf'."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W122-S1"
+  ],
+  "session_log": "git log wk-IRPT_BCKEND-122; .scratch/ (untracked) holds read.py, reads.json, mk.py",
+  "compiler_tools": [
+    {
+      "tool": "python p50_withdrawal_packet.py (the order's own checker)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r50/p50_withdrawal_packet.py\" . IB50-1-AC1",
+      "result": "IB50-1-AC1 PASS, rc=0 (after amendment 1); rc=1 before it"
+    }
+  ]
+}

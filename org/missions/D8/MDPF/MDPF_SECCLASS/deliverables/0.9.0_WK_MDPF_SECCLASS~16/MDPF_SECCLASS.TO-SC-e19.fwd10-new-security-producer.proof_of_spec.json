@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e19",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9c38ea37043c383130d7ce0216eec5e099f120d6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R7.md",
+    "vintage_commit": "7d6cace9b2cc0b2f77db1c39ece852730edd93ea",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e19.fwd10-new-security-producer.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~16",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-secclass/new-security-classifier/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "34109e0b4e",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The scheduled producer: new = in today's holdings and not the previous day's, from the canonical_shape plus the Opal silver holdings for the Opal funds the canonical_shape lacks; plans through classify_canonical_row(); consistent get skips present keys; writes only on {\"write\": true} through write(); puts the day's list at the address() output. Dry run is the default. Not packaged or uploaded: the artifact build and apply are the issuer's act. Amendment 1 (CTO batch 263 condition 2): a new US bare-ticker item (identifier_namespace absent or TICKER) with no sub_asset_class, read from the planned item, is state unresolved in the day's list and never passed to write(), in a dry or a writing run; BLOOMBERG items unchanged; summary counts unresolved.",
+      "artifact_covered_by": [
+        "SC7-e19-AC1",
+        "SC7-e19-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-secclass/new-security-classifier/tests/test_new_security_classifier.py",
+      "kind": "script",
+      "commit_or_etag": "34109e0b4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "24 tests (19 + 5 for amendment 1: unresolved US key lists and puts nothing in dry and writing runs, Opal-silver US ticker unresolved, US key with GICS sub-class written, BBG key with no sub-class written; put attempts counted).",
+      "artifact_covered_by": [
+        "SC7-e19-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd10_dry_run.py",
+      "kind": "script",
+      "commit_or_etag": "34109e0b4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Assembles the handler plus the transitive _shared closure (4 modules) into a temp dir, imports from it with the repo _shared off sys.path, runs the handler in dry run against the live inputs with a client wrapper that refuses every write. Amendment 1: the FWD10-DRY-RUN line appends unresolved=<n> after present=<n>.",
+      "artifact_covered_by": [
+        "SC7-e19-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/mdpf-secclass/new-security-classifier/",
+      "kind": "terraform",
+      "commit_or_etag": "3e1f135388",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "main.tf, lambda.tf, iam.tf, schedule.tf: yang-lambda module from the S3 artifact, one role (Get/List on two prefixes, Get and Put on etf-classifications, Put on the list's one address), Scheduler Mon-Fri 10:00 America/New_York. Names are name() output through the opal_name module (plan of the locals alone returned mdpf-secclass-new-security-{lambda,role,policy,daily,scheduler-role,scheduler-policy}); prefixes equal address() output. No registry row was needed. NOT applied.",
+      "artifact_covered_by": [
+        "SC7-e19-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC7-e19-AC1",
+      "criterion_verbatim": "python -m pytest -q infra/aws/lambda/mdpf-secclass/new-security-classifier/tests/test_new_security_classifier.py -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest -q infra/aws/lambda/mdpf-secclass/new-security-classifier/tests/test_new_security_classifier.py",
+      "expect": "passed",
+      "output_evidence": "24 passed in 0.98s (rc=0)",
+      "denominator": "24 of 24 tests passed, 0 failed, 0 skipped",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC7-e19-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd10_dry_run.py --packaged -- expect: FWD10-DRY-RUN day=",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd10_dry_run.py --packaged",
+      "expect": "FWD10-DRY-RUN day=",
+      "output_evidence": "FWD10-IMPORT all 5 modules loaded from the package dir; FWD10-DRY-RUN day=2026-10-02 previous=2026-10-01 sources=2 new_stocks=0 planned_writes=0 present=0 unresolved=0 (rc=0). Latest day is a partial landing (row MDPF_SECCLASS-W16-S4), so 0 is the real answer for it.",
+      "denominator": "5 of 5 packaged modules imported from the temp dir; canonical_shape 2 of 2 days read (2026-10-02, 2026-10-01); Opal silver 2 of 2 days read; 0 of 0 new stocks consulted in the table",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC7-e19-AC3",
+      "criterion_verbatim": "terraform -chdir=infra/aws/terraform/mdpf-secclass/new-security-classifier validate -no-color -- expect: The configuration is valid",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/mdpf-secclass/new-security-classifier validate -no-color",
+      "expect": "The configuration is valid",
+      "output_evidence": "Success! The configuration is valid. (rc=0), terraform v1.15.8 on PATH, after init -backend=false -plugin-dir=C:/Users/AndrewBerman/.terraform.d/plugin-cache run with TF_PLUGIN_CACHE_DIR unset and an empty TF_CLI_CONFIG_FILE (the user CLI config sets plugin_cache_dir to the same dir; row MDPF_SECCLASS-W16-S3). A first plain init timed out at 120s (rc 124) and was retried once as described. The provider copy under .terraform was removed after the run.",
+      "denominator": "1 of 1 root validated (4 .tf files, 7 module instances)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Drop the producer's own present-key check (plan and put every new stock). With the first 18 tests this passed all of them, because write() refuses a present key by itself; the stub then counted put attempts. AMENDMENT 1 mutant: Replace the producer's unresolved test with False (every new US key is planned and written, as before the amendment).",
+      "expected": "the present-key tests fail",
+      "observed": "2 failed, 17 passed with the mutant; 19 passed on the real code; amendment 1 mutant: 3 failed, 21 passed with the mutant; 24 passed on the real code",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "r7_fwd10_dry_run.py --packaged run twice on 2026-10-05 against the same live inputs (the client wrapper also refuses every write).",
+      "observed": "Identical FWD10-SPLIT and FWD10-DRY-RUN lines both times (day=2026-10-02 previous=2026-10-01 sources=2 new_stocks=0 planned_writes=0 present=0); no write was attempted.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform apply, the artifact build and upload, the lambda-source-map row, the first real fire, any table or S3 write.",
+      "reason": "BOUNDS: the apply, the upload and the first fire are the issuer's act under its own half."
+    },
+    {
+      "item": "Any vendor or model call, and any price series.",
+      "reason": "Andrew's word is required for a vendor or model; history is site Z's input (Q2)."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W16-S1",
+    "MDPF_SECCLASS-W16-S2",
+    "MDPF_SECCLASS-W16-S3",
+    "MDPF_SECCLASS-W16-S4"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R7_CHECKS/r7_fwd10_dry_run.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on each .py; naming-gate on the .tf files)",
+      "result": "commit-gate clean for the python files; the naming gate first refused hand-kept etfs, mdpf and silver/holdings literals in main.tf, then passed after the registry-fed lookups and var.silver_prefix"
+    }
+  ]
+}

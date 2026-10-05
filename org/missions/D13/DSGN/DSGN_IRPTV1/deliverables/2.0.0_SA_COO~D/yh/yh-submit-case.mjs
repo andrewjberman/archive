@@ -49,7 +49,7 @@ const CASES = {
   // Y-5 (2.0.0_SA_COO~Y 104499): Stevens' four untracked rows answered with the proxy Alyssa Keith chose (SGOV), named
   // on the page. Live once Y-5 serves; on the fixture plane the first answer offers NAME_PROXY and the re-post with
   // corrections answers NORMALIZED naming them.
-  Dproxy: { sha256: 'f0d344fa967504bd', variant: 'overview', comparisons: [], proxies: { QKZAQ: 'SGOV', QBNYQ: 'SGOV', QUSBQ: 'SGOV', QBOKQ: 'SGOV' }, expect: 'READY', note: 'Stevens with user-named proxies (Y-5)' },
+  Dproxy: { sha256: 'f0d344fa967504bd', variant: 'overview', comparisons: [], proxies: { '*': 'SGOV' }, expect: 'READY', note: 'Stevens with user-named proxies (Y-5)' },
   // Y-5 V1 (2.0.0_SA_COO~Y 104651, ledger irpt-y5-20261003): the easy file's untracked TIMXX (row 100,
   // TICKER_DATA_NOT_ENTITLED) named SGOV on the page, like Dproxy; the re-post resolves NORMALIZED and the Overview READY.
   Aproxy: { sha256: '500837992a3b9caa', variant: 'overview', comparisons: [], proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'easy file with TIMXX named SGOV (Y-5 V1)' },
@@ -58,7 +58,12 @@ const CASES = {
   // resolves NORMALIZED and the Overview READY. `accept` maps the file's ticker to the suggestion the case expects.
   typoAccept: { sha256: '87afdc7db1c58b38', variant: 'overview', comparisons: [], accept: { APPL: 'AAPL' }, proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'typo file: accept AAPL for APPL, name SGOV for TIMXX (Y-4 V1)' },
   B: { sha256: '500837992a3b9caa', variant: 'comparison', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }], expect: 'READY', note: 'easy file vs Opal Ultra Long-Term, Comparison (Y-2)' },
+  // Y-2 fold-in Case B (2.0.0_SA_COO~Y 105051): case B with TIMXX named SGOV, as in Aproxy; one comparison.
+  Bproxy: { sha256: '500837992a3b9caa', variant: 'comparison', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }], proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'easy file, TIMXX named SGOV, vs Opal Ultra Long-Term, Comparison (Y-2 fold-in Case B)' },
   C: { sha256: '500837992a3b9caa', variant: 'multicomp', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }, { kind: 'etf', key: 'IWM' }], expect: 'READY', blocked: 'brief 2 item 2.3: a ticker admitted as a comparison (CTO batch 178 ruling 4) is 2.0.0_SA_COO~Y\'s half' },
+  // Y-6 (2.0.0_SA_COO~Y 105158; CTO fold-in Y-6 'each case twice'): case C with TIMXX named SGOV. Its comparison half (a ticker
+  // admitted as a comparison) is ~Y's and is live (Y-3 READY on a CSV, ~Y 105051), so this case carries no block.
+  Cproxy: { sha256: '500837992a3b9caa', variant: 'multicomp', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }, { kind: 'etf', key: 'IWM' }], proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'easy file, TIMXX named SGOV, vs Opal Ultra Long-Term and IWM, Multi-Comp (Y-6 case C)' },
 }
 
 // ---- args ---------------------------------------------------------------------------------------------------------
@@ -79,6 +84,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (a === '--ready-ceiling-min') opt.readyCeilingMin = Number(argv[++i])
   else if (a === '--base') opt.base = argv[++i]
   else if (a === '--headed') opt.headed = true
+  else if (a === '--replay-normalized') opt.replayNormalized = argv[++i]
   else { console.error(`unknown argument ${a}`); process.exit(2) }
 }
 const kase = CASES[opt.case]
@@ -121,10 +127,23 @@ async function shot(page, label) {
   const name = `${String(shotN).padStart(3, '0')}-${label.replace(/[^A-Za-z0-9_-]+/g, '-').slice(0, 60)}.png`
   await page.screenshot({ path: path.join(OUT, 'shots', name), fullPage: true }).catch((e) => log('shot failed', e.message))
 }
+// Y-6 run 7: the Stevens file's resolve ran ~4.5 min (14:06-14:10Z); the upload's first answer and the proxy re-post each
+// wait up to 8 minutes for the page's own state.
+const UPLOAD_ANSWER_CEILING_MS = 480000
 const pathOnly = (u) => { try { return new URL(u).pathname } catch { return u } }
 const py = (cmd, extraEnv = {}, ...args) => execFileSync('python', [ACCOUNT, cmd, ...args], { encoding: 'utf8', env: { ...process.env, ...extraEnv }, stdio: ['ignore', 'pipe', 'pipe'] })
 
 // ---- the fixture plane (offline drive; the committed producer records) --------------------------------------------
+/** --replay-normalized <page.har>: the LAST NORMALIZED answer a live run's upload received, replayed whole (the served
+ * producer record, e.g. its irpt-normalized-portfolio.v2 rows). The HAR stays local; nothing from it is written. */
+function replayedNormalized(har) {
+  const entries = JSON.parse(readFileSync(har, 'utf8')).log.entries
+  const answers = entries.filter((e) => e.request.method === 'POST' && INPUTS.test(pathOnly(e.request.url)))
+    .map((e) => { try { return JSON.parse(e.response.content.text) } catch { return null } })
+    .filter((j) => j?.data?.state === 'NORMALIZED')
+  if (!answers.length) { console.error(`REFUSED: ${har} holds no NORMALIZED upload answer`); process.exit(2) }
+  return answers[answers.length - 1]
+}
 const WIRE = path.join(ROOT, 'portal', 'src', 'pages', 'InvestorReporting', 'fixtures')
 function fixturePlane() {
   const smoke = JSON.parse(readFileSync(path.join(WIRE, 'smoke', 'dsgn-irptv1-cottonwood.json'), 'utf8'))
@@ -132,7 +151,8 @@ function fixturePlane() {
   const request = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'AnalysisRequest.valid.json'), 'utf8')).instance
   const status = JSON.parse(readFileSync(path.join(WIRE, 'wire', 'StatusEnvelope.valid.json'), 'utf8')).instance
   const firmId = smoke[`${BASE_API}/directory/resolve`].firm_id
-  const upload = kase.expect === 'NEEDS_CORRECTION' || kase.proxies || kase.accept ? producer.correction.response : producer.normalized.response
+  const upload = kase.expect === 'NEEDS_CORRECTION' || kase.proxies || kase.accept ? producer.correction.response
+    : opt.replayNormalized ? replayedNormalized(opt.replayNormalized) : producer.normalized.response
   // Y-5 fixture: the first answer offers NAME_PROXY for each proxied ticker; the re-post with corrections answers the
   // producer's NORMALIZED record, its disclosures naming each proxy the page sent.
   // Y-4 fixture: an accepted ticker's finding is TICKER_NOT_FOUND with the provider-verified suggestion, ACCEPT_SUGGESTION first.
@@ -274,7 +294,7 @@ try {
   mark('upload_pressed')
   await page.locator('[data-slot="prospect-composer"]').getByRole('button', { name: /Review portfolio/ }).click()
   let uploadState = null
-  for (const start = Date.now(); Date.now() - start < 240000;) {
+  for (const start = Date.now(); Date.now() - start < UPLOAD_ANSWER_CEILING_MS;) {
     uploadState = await page.locator('[data-slot="upload-state"]').getAttribute('data-state').catch(() => null)
     if (uploadState === 'NORMALIZED' || uploadState === 'NEEDS_CORRECTION') break
     if (await page.locator('[data-slot="prospect-composer"] [role=alert]').count()) break
@@ -299,14 +319,24 @@ try {
     packet.suggestions_accepted = accepted
     // Y-5: name each proxy the case states, then re-post with them through the page's own button.
     const named = []
+    // `'*': <proxy>` names that proxy for EVERY row the page offers (Y-6: today's gates flag the Stevens file's FBIFX,
+    // FDGFX, FHTKX and SPAXX, not the Y-5-era tickers the case first named); a ticker key names only its own row.
+    if (kase.proxies?.['*']) {
+      const rows = page.locator('[data-slot="upload-proxy-row"]')
+      for (let i = 0; i < await rows.count(); i++) {
+        const r = rows.nth(i); await r.locator('input').fill(kase.proxies['*'])
+        named.push(await r.getAttribute('data-proxy-for').catch(() => `row ${i + 1}`))
+      }
+    }
     for (const [ticker, proxy] of Object.entries(kase.proxies ?? {})) {
+      if (ticker === '*') continue
       const row = page.locator(`[data-slot="upload-proxy-row"][data-proxy-for="${ticker}"] input`)
       if (await row.count()) { await row.fill(proxy); named.push(ticker) }
     }
     packet.proxies_named = named
     mark('proxies_pressed')
     await page.locator('[data-slot="upload-proxy-submit"]').click().catch(() => {})
-    for (const start = Date.now(); Date.now() - start < 240000;) {
+    for (const start = Date.now(); Date.now() - start < UPLOAD_ANSWER_CEILING_MS;) {
       uploadState = await page.locator('[data-slot="upload-state"]').getAttribute('data-state').catch(() => null)
       if (uploadState === 'NORMALIZED' || (uploadState === 'NEEDS_CORRECTION' && Date.now() - start > 5000)) break
       await page.waitForTimeout(500)
@@ -325,7 +355,21 @@ try {
     const prospect = page.locator('[data-slot="prospect-composer"]')
     if (kase.comparisons.length > 0) {
       await prospect.locator(`[data-slot="variant-card"][data-variant="${kase.variant}"]`).click()
-      await page.locator('[data-slot="comparison-picker"]').waitFor({ state: 'visible', timeout: 30000 })
+      // A card selects at once when the catalogue is read; otherwise it opens its explanation, whose one button selects.
+      const explain = page.getByRole('dialog').getByRole('button', { name: 'Select this analysis' })
+      if (await explain.isVisible().catch(() => false)) { packet.variant_selected_via = 'explanation'; await explain.click() } else packet.variant_selected_via = 'card'
+      // The picker opens only on a read catalogue; otherwise record what the page shows in its place, then fail.
+      const picker = await page.locator('[data-slot="comparison-picker"]').waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false)
+      if (!picker) {
+        packet.picker_missing = {
+          variant_card_selected: await prospect.locator(`[data-slot="variant-card"][data-variant="${kase.variant}"] [data-slot="variant-card-selected"]`).count(),
+          unavailable_words: await prospect.locator('[data-slot="prospect-variant-unavailable"]').textContent().catch(() => null),
+          open_picker_button: await prospect.locator('[data-slot="open-comparison-picker"]').count(),
+          dialogs: await page.getByRole('dialog').count(),
+        }
+        await shot(page, 'picker-missing')
+        throw new Error(`comparison picker did not open: ${JSON.stringify(packet.picker_missing)}`)
+      }
       for (const pick of kase.comparisons) {
         if (pick.kind === 'etf') await page.locator('[data-slot="picker-search"]').fill(pick.key)
         await page.locator(`[data-slot="picker-${pick.kind === 'etf' ? 'etf' : 'model'}"][data-key="${pick.key}"]`).click()
@@ -347,6 +391,10 @@ try {
       // READY is read from the page's own owned-request history row, re-read once a minute up to the ceiling.
       const row = () => page.locator(`[data-row="owned-analysis-request"][data-request-id="${ids.request_id}"] [data-slot="owned-request-state"]`).first()
       let state = null
+      // A run killed mid-poll still leaves its ids and marks (Y-6 run 3 left none): the packet is written now and per poll.
+      const savePacket = () => { try { writeFileSync(path.join(OUT, 'packet.json'), JSON.stringify({ ...packet, marks, ids, partial: true }, null, 1)) } catch { /* the final write follows */ } }
+      savePacket()
+      let missingShot = false
       for (const start = Date.now(); Date.now() - start < opt.readyCeilingMin * 60000;) {
         await page.waitForTimeout(60000)
         await page.reload({ waitUntil: 'networkidle', timeout: 45000 }).catch(() => {})
@@ -356,13 +404,31 @@ try {
           await page.getByRole('option', { name: new RegExp(client.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') }).first().click({ timeout: 30000 }).catch(() => {})
         }
         await page.getByRole('button', { name: 'Analysis', exact: true }).or(page.getByRole('tab', { name: 'Analysis' })).first().click().catch(() => {})
+        // Wait for the LIST to draw before reading the row (Y-6 runs 3-4: 30 s after a reload the list was still a skeleton,
+        // 0 rows, and a flat wait read that as a missing row). Up to 120 s; a list that never draws reads 'list-loading'.
+        let drawn = false
+        for (const t0 = Date.now(); Date.now() - t0 < 120000;) {
+          if (await page.locator('[data-row="owned-analysis-request"]').count().catch(() => 0)) { drawn = true; break }
+          await page.waitForTimeout(500)
+        }
         // The row reads "loading" until its own status read answers: wait for that answer (up to 30 s), not a flat 3 s.
-        for (const t0 = Date.now(); Date.now() - t0 < 30000;) {
+        for (const t0 = Date.now(); drawn && Date.now() - t0 < 30000;) {
           state = await row().getAttribute('data-state').catch(() => null)
           if (state && state !== 'loading') break
           await page.waitForTimeout(500)
         }
+        if (!drawn) state = 'list-loading'
         log('ROW STATE', state)
+        if (state === null && !missingShot) {
+          // Y-6 run 3: the row went missing after it had read LOADING. Record what the page lists instead (ids only).
+          missingShot = true
+          const listed = await page.evaluate(() => [...document.querySelectorAll('[data-row="owned-analysis-request"]')].map((r) => r.getAttribute('data-request-id')))
+          const selected = await page.getByRole('combobox', { name: 'Client search' }).inputValue().catch(() => null)
+          packet.row_missing = { at: new Date().toISOString(), listed: listed.length, first_ids: listed.slice(0, 3), client_box_holds_text: Boolean(selected) }
+          log('ROW MISSING', JSON.stringify(packet.row_missing))
+          await shot(page, 'row-missing')
+        }
+        savePacket()
         // Terminal for this driver: the request's own end states, or the row's status read refused ('unavailable').
         if (['READY', 'NEEDS_CORRECTION', 'FAILED', 'ATTENTION', 'unavailable'].includes(state)) break
       }

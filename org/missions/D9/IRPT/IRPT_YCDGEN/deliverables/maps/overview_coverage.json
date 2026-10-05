@@ -1,7 +1,7 @@
 {
  "schema": "irpt-ycdgen-coverage-v1",
  "run": "YCD-R1-20261004T1944Z",
- "basis": "one class per element; reasons and via carry endpoint paths, column ids and field paths only, no figure value; column ids are inferred from printed labels (round-1 map claim). Round 3: class OWN_SERIES added (row IRPT_YCDGEN-W3-S2); the elements computable from the portfolio's own kept level series moved to it.",
+ "basis": "one class per element; reasons and via carry endpoint paths, column ids and field paths only, no figure value; column ids are inferred from printed labels (round-1 map claim). Round 3: class OWN_SERIES added (row IRPT_YCDGEN-W3-S2); the elements computable from the portfolio's own kept level series moved to it. Round 4 (YCD-o-4): each HELD_DATA row gains `feed` (contract 4.2); measured by schema reads, no Opal table found holds any held-data column as the same per-holding figure (row IRPT_YCDGEN-W2-S6), so every feed is YCHARTS_SECURITY through feed_probe_map.json; `metrics` lists the metric ids the call asks for, inferred from the table_data column ids. Round 5 (YCD-h-5): each HELD_DATA row's `feed` is rewritten by held_data.census over Y-5's 99 holdings: OPAL_HELD (table, field, key, method, and the group id) or NOT_HELD (reason); the held figures are label-grain or field-grain values from Opal's own tables, never a vendor look-through, and a vendor call is no longer the feed.",
  "elements": [
   {
    "id": "p12.e04",
@@ -23,6 +23,11 @@
     "field": "$.chart_data[0][0].raw_data",
     "weighting": "buy-and-hold: portfolio value path V(t) = sum_i quantity_i x series_i(t) over the frozen upload's rows; the element is computed locally from V(t) (cross-check: the kept step-02 portfolio level series)",
     "inception_field": "$[0].inception_date (kept step 01)"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "price history is held for only part of the holdings (a series for the whole portfolio is not buildable)",
+    "group": "level_series"
    }
   },
   {
@@ -59,6 +64,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "opal-data-etfs/bbg/<date>/characteristics.parquet.FUND_EXPENSE_RATIO is empty for all 99 holdings",
+    "group": "net_expense_ratio"
    }
   },
   {
@@ -76,6 +86,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "distribution yield is a fund measure; the held field is a stock's indicated dividend yield",
+    "group": "distribution_yield"
    }
   },
   {
@@ -93,6 +108,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "the held beta is Bloomberg's adjusted beta (BETA_ADJ_OVERRIDABLE), not the 5-year beta",
+    "group": "beta_5y"
    }
   },
   {
@@ -110,6 +130,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "net cash allocation (cash net of shorts) is not held; the asset-class label carries no cash",
+    "group": "cash_net_allocation"
    }
   },
   {
@@ -162,6 +187,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds a per-holding alpha",
+    "group": "alpha_5y"
    }
   },
   {
@@ -184,6 +214,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "a multi-column group needs every column held, and not every column is",
+    "group": "asset_allocation_cash+asset_allocation_convertible+asset_allocation_stock+asset_allocation_preferred+asset_allocation_bond+asset_allocation_other"
    }
   },
   {
@@ -201,6 +236,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no asset-class label means cash; a zero cannot be told from an unlabelled holding",
+    "group": "asset_allocation_cash"
    }
   },
   {
@@ -218,6 +258,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no asset-class label means convertible",
+    "group": "asset_allocation_convertible"
    }
   },
   {
@@ -235,6 +280,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "etf-classifications",
+    "field": "asset_class",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its asset-class label (no cash or other look-through; a multi-asset or structured label is not held), amount-weighted, renormalized over the holdings whose label decides",
+    "group": "asset_allocation_stock"
    }
   },
   {
@@ -252,6 +305,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no asset-class label means preferred",
+    "group": "asset_allocation_preferred"
    }
   },
   {
@@ -269,6 +327,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "etf-classifications",
+    "field": "asset_class",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its asset-class label (no cash or other look-through; a multi-asset or structured label is not held), amount-weighted, renormalized over the holdings whose label decides",
+    "group": "asset_allocation_bond"
    }
   },
   {
@@ -286,6 +352,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "etf-classifications",
+    "field": "asset_class",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its asset-class label (no cash or other look-through; a multi-asset or structured label is not held), amount-weighted, renormalized over the holdings whose label decides",
+    "group": "asset_allocation_other"
    }
   },
   {
@@ -307,6 +381,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "a multi-column group needs every column held, and not every column is",
+    "group": "market_cap_giant+market_cap_small+market_cap_large+market_cap_micro+market_cap_med"
    }
   },
   {
@@ -324,6 +403,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "market_cap_giant"
    }
   },
   {
@@ -341,6 +425,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "market_cap_small"
    }
   },
   {
@@ -358,6 +447,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "market_cap_large"
    }
   },
   {
@@ -375,6 +469,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "market_cap_micro"
    }
   },
   {
@@ -392,6 +491,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "market_cap_med"
    }
   },
   {
@@ -409,6 +513,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_lg_cap_value"
    }
   },
   {
@@ -426,6 +535,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_mid_cap_value"
    }
   },
   {
@@ -443,6 +557,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_sm_cap_value"
    }
   },
   {
@@ -460,6 +579,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_lg_cap_blend"
    }
   },
   {
@@ -477,6 +601,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_mid_cap_blend"
    }
   },
   {
@@ -494,6 +623,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_sm_cap_blend"
    }
   },
   {
@@ -511,6 +645,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_lg_cap_growth"
    }
   },
   {
@@ -528,6 +667,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_mid_cap_growth"
    }
   },
   {
@@ -545,6 +689,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_sm_cap_growth"
    }
   },
   {
@@ -562,6 +711,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_developed_markets"
    }
   },
   {
@@ -579,6 +736,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_americas"
    }
   },
   {
@@ -596,6 +761,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_emerging_markets"
    }
   },
   {
@@ -613,6 +786,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_greater_europe"
    }
   },
   {
@@ -630,6 +811,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_greater_asia"
    }
   },
   {
@@ -647,6 +836,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_americas"
    }
   },
   {
@@ -664,6 +861,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_greater_europe"
    }
   },
   {
@@ -681,6 +886,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_greater_asia"
    }
   },
   {
@@ -698,6 +911,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_north_america"
    }
   },
   {
@@ -715,6 +936,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_united_kingdom"
    }
   },
   {
@@ -732,6 +961,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_switzerland"
    }
   },
   {
@@ -749,6 +986,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_japan"
    }
   },
   {
@@ -766,6 +1011,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_canada"
    }
   },
   {
@@ -783,6 +1036,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_europe_developed"
    }
   },
   {
@@ -800,6 +1061,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_europe_emerging"
    }
   },
   {
@@ -817,6 +1086,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_australasia"
    }
   },
   {
@@ -834,6 +1111,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_united_states"
    }
   },
   {
@@ -851,6 +1136,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_austria"
    }
   },
   {
@@ -868,6 +1161,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_czech_republic"
    }
   },
   {
@@ -885,6 +1186,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_asia_developed"
    }
   },
   {
@@ -902,6 +1211,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_latin_america"
    }
   },
   {
@@ -919,6 +1236,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_belgium"
    }
   },
   {
@@ -936,6 +1261,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_poland"
    }
   },
   {
@@ -953,6 +1286,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_hong_kong"
    }
   },
   {
@@ -970,6 +1311,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_argentina"
    }
   },
   {
@@ -987,6 +1336,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_denmark"
    }
   },
   {
@@ -1004,6 +1361,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_russia"
    }
   },
   {
@@ -1021,6 +1386,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_singapore"
    }
   },
   {
@@ -1038,6 +1411,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_brazil"
    }
   },
   {
@@ -1055,6 +1436,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_finland"
    }
   },
   {
@@ -1072,6 +1461,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_turkey"
    }
   },
   {
@@ -1089,6 +1486,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_south_korea"
    }
   },
   {
@@ -1106,6 +1511,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_chile"
    }
   },
   {
@@ -1123,6 +1536,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_france"
    }
   },
   {
@@ -1140,6 +1561,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_africa_and_middle_east"
    }
   },
   {
@@ -1157,6 +1586,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_taiwan"
    }
   },
   {
@@ -1174,6 +1611,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_colombia"
    }
   },
   {
@@ -1191,6 +1636,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_germany"
    }
   },
   {
@@ -1208,6 +1661,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_algeria"
    }
   },
   {
@@ -1225,6 +1686,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_asia_emerging"
    }
   },
   {
@@ -1242,6 +1711,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_mexico"
    }
   },
   {
@@ -1259,6 +1736,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_greece"
    }
   },
   {
@@ -1276,6 +1761,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_egypt"
    }
   },
   {
@@ -1293,6 +1786,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_china"
    }
   },
   {
@@ -1310,6 +1811,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_peru"
    }
   },
   {
@@ -1327,6 +1836,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_ireland"
    }
   },
   {
@@ -1344,6 +1861,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_iran"
    }
   },
   {
@@ -1361,6 +1886,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_india"
    }
   },
   {
@@ -1378,6 +1911,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_venezuela"
    }
   },
   {
@@ -1395,6 +1936,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_italy"
    }
   },
   {
@@ -1412,6 +1961,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_israel"
    }
   },
   {
@@ -1429,6 +1986,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_indonesia"
    }
   },
   {
@@ -1446,6 +2011,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_netherlands"
    }
   },
   {
@@ -1463,6 +2036,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_nigeria"
    }
   },
   {
@@ -1480,6 +2061,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_kazakhstan"
    }
   },
   {
@@ -1497,6 +2086,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_norway"
    }
   },
   {
@@ -1514,6 +2111,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_qatar"
    }
   },
   {
@@ -1531,6 +2136,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_malaysia"
    }
   },
   {
@@ -1548,6 +2161,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_portugal"
    }
   },
   {
@@ -1565,6 +2186,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_saudi_arabia"
    }
   },
   {
@@ -1582,6 +2211,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_pakistan"
    }
   },
   {
@@ -1599,6 +2236,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_spain"
    }
   },
   {
@@ -1616,6 +2261,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_south_africa"
    }
   },
   {
@@ -1633,6 +2286,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_philippines"
    }
   },
   {
@@ -1650,6 +2311,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_sweden"
    }
   },
   {
@@ -1667,6 +2336,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_united_arab_emirates"
    }
   },
   {
@@ -1684,6 +2361,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_thailand"
    }
   },
   {
@@ -1701,6 +2386,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is one of ['Materials', 'Consumer Discretionary', 'Financials', 'Real Estate'], else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_cyclical"
    }
   },
   {
@@ -1718,6 +2411,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Materials', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_basic_materials"
    }
   },
   {
@@ -1735,6 +2436,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Consumer Discretionary', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_consumer_cyclical"
    }
   },
   {
@@ -1752,6 +2461,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Financials', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_financial_services"
    }
   },
   {
@@ -1769,6 +2486,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Real Estate', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_real_estate"
    }
   },
   {
@@ -1786,6 +2511,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is one of ['Communication Services', 'Energy', 'Industrials', 'Information Technology'], else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_sensitive"
    }
   },
   {
@@ -1803,6 +2536,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Communication Services', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_comm_services"
    }
   },
   {
@@ -1820,6 +2561,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Energy', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_energy"
    }
   },
   {
@@ -1837,6 +2586,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Industrials', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_industrials"
    }
   },
   {
@@ -1854,6 +2611,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Information Technology', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_technology"
    }
   },
   {
@@ -1871,6 +2636,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is one of ['Consumer Staples', 'Health Care', 'Utilities'], else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_defensive"
    }
   },
   {
@@ -1888,6 +2661,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Consumer Staples', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_consumer_defensive"
    }
   },
   {
@@ -1905,6 +2686,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Health Care', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_healthcare"
    }
   },
   {
@@ -1922,6 +2711,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (stock sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Utilities', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_utilities"
    }
   },
   {
@@ -1944,6 +2741,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "a multi-column group needs every column held, and not every column is",
+    "group": "bond_sector_cash+bond_sector_government+bond_sector_corporate+bond_sector_municipal+bond_sector_derivative+bond_sector_securitized"
    }
   },
   {
@@ -1961,6 +2763,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_cash"
    }
   },
   {
@@ -1978,6 +2785,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_government"
    }
   },
   {
@@ -1995,6 +2807,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_corporate"
    }
   },
   {
@@ -2012,6 +2829,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_municipal"
    }
   },
   {
@@ -2029,6 +2851,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_derivative"
    }
   },
   {
@@ -2046,6 +2873,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_securitized"
    }
   },
   {
@@ -2063,6 +2895,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_aaa"
    }
   },
   {
@@ -2080,6 +2917,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_bbb"
    }
   },
   {
@@ -2097,6 +2939,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_below_b"
    }
   },
   {
@@ -2114,6 +2961,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_aa"
    }
   },
   {
@@ -2131,6 +2983,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_bb"
    }
   },
   {
@@ -2148,6 +3005,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_not_rated"
    }
   },
   {
@@ -2165,6 +3027,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_a"
    }
   },
   {
@@ -2182,6 +3049,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_b"
    }
   },
   {
@@ -2214,6 +3086,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "a multi-column group needs every column held, and not every column is",
+    "group": "bond_maturity_short_term+bond_maturity_intermediate+bond_maturity_1_to_7_days+bond_maturity_1_to_3_years+bond_maturity_8_to_30_days+bond_maturity_3_to_5_years+bond_maturity_31_to_90_days+bond_maturity_5_to_7_years+bond_maturity_91_to_182_days+bond_maturity_7_to_10_years+bond_maturity_183_to_364_days+bond_maturity_long_term+bond_maturity_10_to_15_years+bond_maturity_15_to_20_years+bond_maturity_20_to_30_years+bond_maturity_over_30_years"
    }
   },
   {
@@ -2231,6 +3108,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_short_term"
    }
   },
   {
@@ -2248,6 +3130,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_intermediate"
    }
   },
   {
@@ -2265,6 +3152,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_1_to_7_days"
    }
   },
   {
@@ -2282,6 +3174,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_1_to_3_years"
    }
   },
   {
@@ -2299,6 +3196,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_8_to_30_days"
    }
   },
   {
@@ -2316,6 +3218,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_3_to_5_years"
    }
   },
   {
@@ -2333,6 +3240,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_31_to_90_days"
    }
   },
   {
@@ -2350,6 +3262,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_5_to_7_years"
    }
   },
   {
@@ -2367,6 +3284,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_91_to_182_days"
    }
   },
   {
@@ -2384,6 +3306,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_7_to_10_years"
    }
   },
   {
@@ -2401,6 +3328,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_183_to_364_days"
    }
   },
   {
@@ -2418,6 +3350,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_long_term"
    }
   },
   {
@@ -2435,6 +3372,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_10_to_15_years"
    }
   },
   {
@@ -2452,6 +3394,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_15_to_20_years"
    }
   },
   {
@@ -2469,6 +3416,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_20_to_30_years"
    }
   },
   {
@@ -2486,6 +3438,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_over_30_years"
    }
   },
   {
@@ -2723,6 +3680,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "EQY_DVD_YLD_IND_NET",
+    "key": "ticker",
+    "method": "amount-weighted mean of the held indicated net dividend yield (percent), renormalized over the holdings that carry it",
+    "group": "dividend_yield"
    }
   },
   {
@@ -2740,6 +3705,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "opal-data-etfs/bbg/<date>/characteristics.parquet.FUND_EXPENSE_RATIO is empty for all 99 holdings",
+    "group": "net_expense_ratio"
    }
   },
   {
@@ -2757,6 +3727,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point)",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "distribution yield is a fund measure; the held field is a stock's indicated dividend yield",
+    "group": "distribution_yield"
    }
   },
   {
@@ -2774,6 +3749,11 @@
     "weighting": "none: the sum over holdings of each holding's own count column (or the upload's row count where YCharts counts positions; unresolved, inferred)",
     "aggregation": "sum_i value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "the held count (TOTAL_NUMBER_OF_HOLDINGS_IN_PORT) is a fund's own count, not the portfolio's look-through count",
+    "group": "number_of_holdings"
    }
   },
   {
@@ -2791,6 +3771,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "harmonic weighted mean: 1 / sum_i (w_i / value_i)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "weighted_avg_pe"
    }
   },
   {
@@ -2813,6 +3798,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "harmonic weighted mean: 1 / sum_i (w_i / value_i)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "weighted_avg_p_s"
    }
   },
   {
@@ -2830,6 +3820,14 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CUR_MKT_CAP",
+    "key": "ticker",
+    "method": "amount-weighted ARITHMETIC mean of the held current market cap, renormalized over the holdings that carry it (a vendor's own average may be a different mean)",
+    "group": "weighted_avg_market_cap"
    }
   },
   {
@@ -2847,6 +3845,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "harmonic weighted mean: 1 / sum_i (w_i / value_i)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "weighted_avg_p_b"
    }
   },
   {
@@ -2864,6 +3867,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the stock sleeve (w_i x holding i's stock allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "weighted_avg_d_c"
    }
   },
   {
@@ -2886,6 +3894,11 @@
     "weighting": "none: the sum over holdings of each holding's own count column (or the upload's row count where YCharts counts positions; unresolved, inferred)",
     "aggregation": "sum_i value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "of_stock_holdings"
    }
   },
   {
@@ -2903,6 +3916,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "current_yield"
    }
   },
   {
@@ -2920,6 +3938,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "avg_credit_qual_scr"
    }
   },
   {
@@ -2937,6 +3960,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "yield_to_maturity"
    }
   },
   {
@@ -2954,6 +3982,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "average_price"
    }
   },
   {
@@ -2971,6 +4004,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve figure; the held duration field (HB_OAS_EFF_DURTN) is empty for every holding the upload's census found, and the sleeve weights need a look-through bond share Opal does not hold",
+    "group": "effective_duration"
    }
   },
   {
@@ -2988,6 +4026,11 @@
     "weighting": "none: the sum over holdings of each holding's own count column (or the upload's row count where YCharts counts positions; unresolved, inferred)",
     "aggregation": "sum_i value_i",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "of_bond_holdings"
    }
   },
   {
@@ -3005,6 +4048,11 @@
     "weighting": "value weight w_i = quantity_i x latest price_i / sum over all rows of the frozen upload (quantity from the normalized portfolio's rows; price from each holding's /charts/fund_data.json level series, last point); renormalised over the bond sleeve (w_i x holding i's bond allocation share) so the sleeve sums to 1",
     "aggregation": "sum_i w_i x value_i (bond sleeve)",
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
+   },
+   "feed": {
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "average_coupon"
    }
   }
  ]

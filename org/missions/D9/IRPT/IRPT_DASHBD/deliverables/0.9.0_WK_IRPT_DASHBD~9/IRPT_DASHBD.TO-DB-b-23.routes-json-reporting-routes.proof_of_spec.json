@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-23",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "9e1d65bc19",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-23.routes-json-reporting-routes.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~9",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "docs/contracts/investor-reporting/v1/routes.json",
+      "kind": "doc",
+      "commit_or_etag": "a414382a19",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Contract inventory only, 0 served bytes move, no AWS call, no terraform run. AMENDMENT 1 (2.0.0_SA_COO~P, CLOUD @9aa48a52f2): two reporting rows ROUTED_ELSEWHERE with routed_by infra/aws/terraform/investor-reporting/reporting-read; _denominator declared 19 + routed_elsewhere 2 = total 21.",
+      "artifact_covered_by": [
+        "DB15-1-AC1",
+        "DB15-1-AC2",
+        "DB15-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/test_owned_request_contracts.py",
+      "kind": "test",
+      "commit_or_etag": "bcb0d79942",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 2 (2.0.0_SA_COO~P, CLOUD @bf68fca0ed, row W9-S3): no_handler_at_head == total - declared - routed_elsewhere, routed_elsewhere read from routes.json rows (and checked against _denominator.routed_elsewhere), never typed. Test files only, 0 served bytes move.",
+      "artifact_covered_by": [
+        "DB15-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/test_upload_contract.py",
+      "kind": "test",
+      "commit_or_etag": "bcb0d79942",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 2 (2.0.0_SA_COO~P, CLOUD @bf68fca0ed, row W9-S3): no_handler_at_head == total - declared - routed_elsewhere, routed_elsewhere read from routes.json rows (and checked against _denominator.routed_elsewhere), never typed. Test files only, 0 served bytes move.",
+      "artifact_covered_by": [
+        "DB15-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_unguarded_census.py",
+      "kind": "test",
+      "commit_or_etag": "a414382a19",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only. IN_LANE_FUNCTIONS derived from the DECLARED rows' handlers (amendment 1, row W9-S1 resolved); mutant arm kept (3 parametrized cases); skipped set asserted equal to the ROUTED_ELSEWHERE rows.",
+      "artifact_covered_by": [
+        "DB15-1-AC2",
+        "DB15-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB15-1-AC1",
+      "criterion_verbatim": "DB15-1-AC1 -- both reporting routes are declared on irpt-49f-reporting-read-lambda, and `_denominator` names the new count. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r15/p15_cells.py\" . DB15-1-AC1",
+      "output_evidence": "OK: both reporting routes declared; 21 routes\nDB15-1-AC1 PASS",
+      "denominator": "2 of 2 reporting routes declared on irpt-49f-reporting-read-lambda; 21 routes in the file; _denominator names 21 (declared 19 + routed_elsewhere 2)",
+      "status": "PASS",
+      "expect": "DB15-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB15-1-AC2",
+      "criterion_verbatim": "DB15-1-AC2 -- the census that reads the file passes with 0 failed. Base: PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r15/p15_cells.py\" . DB15-1-AC2",
+      "output_evidence": "OK: census 9 passed in 2.91s\nDB15-1-AC2 PASS",
+      "denominator": "9 of 9 census tests passed (6 + 3 mutant-arm cases); 19 DECLARED routes in the census table; the 2 ROUTED_ELSEWHERE rows are the named skipped set",
+      "status": "PASS",
+      "expect": "DB15-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB15-1-AC3",
+      "criterion_verbatim": "DB15-1-AC3 -- both reporting routes are ROUTED_ELSEWHERE with `routed_by`, and the seam test passes with 0 failed. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r15/p15_cells.py\" . DB15-1-AC3",
+      "output_evidence": "OK: both reporting routes ROUTED_ELSEWHERE; seam 74 passed in 2.31s\nDB15-1-AC3 PASS",
+      "denominator": "2 of 2 reporting rows ROUTED_ELSEWHERE with routed_by infra/aws/terraform/investor-reporting/reporting-read; seam test 74 of 74 passed (AMENDMENT 2 adds test_owned_request_contracts.py and test_upload_contract.py to the run, 0 failed)",
+      "status": "PASS",
+      "expect": "DB15-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Census mutant arm kept: test_the_census_fires_when_one_handler_is_unregistered (victims 0, 3, 7) replaces one table entry with an unmarked handler and requires verdict 1 of N. Base: AC1 and AC3 FAIL (routes absent / DECLARED-less).",
+      "expected": "census fires on an unguarded route; AC1/AC3 FAIL at base",
+      "observed": "3 of 3 mutant cases pass inside the 9 passed census run; AC1, AC2, AC3 PASS after the edit.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "census run twice (once via the criterion, once directly with pytest).",
+      "observed": "9 passed both times (after amendment 2 and row W9-S3).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Edits to test_seam_paired.py, response schemas, api/routes.tf",
+      "reason": "Outside the grant; the seam test passes unedited. The cross-suite ImportError LiveTransport when _authz and _contracts run in one process is a test-isolation observation ruled out of scope by amendment 2; row W9-S3 left open."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W9-S1",
+    "IRPT_DASHBD-W9-S2",
+    "IRPT_DASHBD-W9-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "json.load",
+      "invocation": "python -c json.load routes.json (21 routes parsed)",
+      "result": "OK"
+    }
+  ]
+}

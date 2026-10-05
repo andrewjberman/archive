@@ -1,0 +1,81 @@
+{
+ "packet": "S335_SECOND_FIRE_PACKET",
+ "order": "IRPT_BCKEND.TO-IB-pr-325",
+ "row": "IRPT_BCKEND-S335",
+ "ruling": "1.0.0_SA_CTO RULINGS batch 264 @f49b5958b0",
+ "measured_at": "2026-10-05",
+ "method": "aws s3api head-object and get-object --version-id on each latest.json key (reads only)",
+ "firms": [
+  {
+   "firm": "49financial",
+   "bucket": "opal-data-bd",
+   "key": "investor-reporting/directory/latest.json",
+   "version_id": "dJypVohmPy.Q5ziZJr077Dp4qXPlvyfH",
+   "last_modified": "2026-09-25T13:30:51Z",
+   "content_length_bytes": 272,
+   "entry_count": 4620,
+   "entry_count_field": "entry_count (the pointer's own field in latest.json, written by directory_runner.land from payload['entry_count']); latest.json is a pointer object with no entries array, the count is not recomputed from the dated artifact",
+   "pointer_as_of_business_date": "2026-09-24",
+   "rollback": "aws s3api copy-object --bucket opal-data-bd --key investor-reporting/directory/latest.json --copy-source 'opal-data-bd/investor-reporting/directory/latest.json?versionId=dJypVohmPy.Q5ziZJr077Dp4qXPlvyfH' (copies version dJypVohmPy.Q5ziZJr077Dp4qXPlvyfH back over the key as the new current version)"
+  },
+  {
+   "firm": "inflection",
+   "bucket": "opal-data-inf",
+   "key": "investor-reporting/directory/latest.json",
+   "version_id": "6wQPRO8ju8fwL8aZuDzStumCvAhjOk.J",
+   "last_modified": "2026-09-25T13:30:49Z",
+   "content_length_bytes": 270,
+   "entry_count": 292,
+   "entry_count_field": "entry_count (the pointer's own field in latest.json, written by directory_runner.land from payload['entry_count']); latest.json is a pointer object with no entries array, the count is not recomputed from the dated artifact",
+   "pointer_as_of_business_date": "2026-09-25",
+   "rollback": "aws s3api copy-object --bucket opal-data-inf --key investor-reporting/directory/latest.json --copy-source 'opal-data-inf/investor-reporting/directory/latest.json?versionId=6wQPRO8ju8fwL8aZuDzStumCvAhjOk.J' (copies version 6wQPRO8ju8fwL8aZuDzStumCvAhjOk.J back over the key as the new current version)"
+  },
+  {
+   "firm": "cottonwood",
+   "bucket": "opal-data-cot",
+   "key": "investor-reporting/directory/latest.json",
+   "version_id": "Hw0c7gywQ4giKV0htJ7tzqb3cebd4HJ_",
+   "last_modified": "2026-09-25T13:30:45Z",
+   "content_length_bytes": 270,
+   "entry_count": 258,
+   "entry_count_field": "entry_count (the pointer's own field in latest.json, written by directory_runner.land from payload['entry_count']); latest.json is a pointer object with no entries array, the count is not recomputed from the dated artifact",
+   "pointer_as_of_business_date": "2026-09-22",
+   "rollback": "aws s3api copy-object --bucket opal-data-cot --key investor-reporting/directory/latest.json --copy-source 'opal-data-cot/investor-reporting/directory/latest.json?versionId=Hw0c7gywQ4giKV0htJ7tzqb3cebd4HJ_' (copies version Hw0c7gywQ4giKV0htJ7tzqb3cebd4HJ_ back over the key as the new current version)"
+  }
+ ],
+ "writer": {
+  "who": "the runner script on the host: directory_runner.py land(), invoked as `python3 $R/directory_runner.py --firms <firm> --upload` from the SSM script that refresh.py builds",
+  "latest_json_put": "data/assets/scripts/gold/investor_reporting/directory_runner.py:902-903 (s3.put_object Key=latest_key, built at :876 and :880-885), called from :952",
+  "invocation_line": "infra/aws/lambda/investor-reporting/directory/refresh.py:611 (runner_script)",
+  "refresh_does_not_write_latest": "refresh.py only READS latest.json (SsmBuildDispatcher.pointer, :647-658); its one put_object is put_manifest (:164-170), the manifest, not latest.json"
+ },
+ "branches": [
+  {
+   "branch": 1,
+   "condition": "the host is Online at the 09:40 ET retry (or the 09:30 fire's start has registered)",
+   "outcome": "the build runs on the host and latest.json is REPLACED at each of the three firms (a new version id on the key; the dated directory.json is also written)",
+   "verification": "the issuer reads, after the first successful fire, per firm: head-object VersionId/LastModified and the pointer's entry_count, against the before values in `firms`; rollback per key is the copy-object in `firms`.",
+   "before": {
+    "49financial": {
+     "version_id": "dJypVohmPy.Q5ziZJr077Dp4qXPlvyfH",
+     "entry_count": 4620
+    },
+    "inflection": {
+     "version_id": "6wQPRO8ju8fwL8aZuDzStumCvAhjOk.J",
+     "entry_count": 292
+    },
+    "cottonwood": {
+     "version_id": "Hw0c7gywQ4giKV0htJ7tzqb3cebd4HJ_",
+     "entry_count": 258
+    }
+   },
+   "after": "READ BY THE ISSUER AFTER the fire; not known at packet time"
+  },
+  {
+   "branch": 2,
+   "condition": "the host is still not Online at the retry",
+   "outcome": "nothing is written to latest.json (refresh.py issues one more start and ends HAND_OVER_RUNNER_OFFLINE, refresh.py:696-705), the three versions above stay current, and the manifest reads OFFLINE again"
+  }
+ ],
+ "note": "The 12:52Z start by mdpf-feeder-trigger (infra/aws/terraform/investor-reporting/directory/schedule.tf:381-387 comment) did not happen on 2026-10-05: the host's LaunchTime was 13:30:36Z, started by the refresh itself. That is the MDPF chain's lane; the retry does not depend on it."
+}

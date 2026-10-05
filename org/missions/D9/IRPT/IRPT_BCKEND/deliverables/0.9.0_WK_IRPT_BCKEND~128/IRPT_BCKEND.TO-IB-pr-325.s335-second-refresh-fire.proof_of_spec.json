@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-325",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-325.s335-second-refresh-fire.md",
+    "group": "OTHER",
+    "vintage_commit": "e0f7126735"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "e0f7126735",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-325.s335-second-refresh-fire.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~128",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/directory/schedule.tf",
+      "kind": "config_data",
+      "commit_or_etag": "b716c2098d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "aws_scheduler_schedule.irpt_directory_refresh_retry added with name irpt-directory-refresh-retry-daily per issuer amendment 1 (2.0.0_SA_COO~P, 1b30e3b6d6); row IRPT_BCKEND-W128-S1 (naming gate refusal of the bare name) RESOLVED by that amendment, gate verdict on the commit: NAMING CONFORMANT schedule.tf:424 irpt-directory-refresh-retry-daily, NAMING-GATE: PASS 1 graded; terraform fmt clean; no plan, no apply (the apply is the issuer's)",
+      "artifact_covered_by": [
+        "IB57-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~128/S335_SECOND_FIRE_PACKET.json",
+      "kind": "config_data",
+      "commit_or_etag": "5468ff320d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three latest.json versions read by s3api head-object/get-object; no write",
+      "artifact_covered_by": [
+        "IB57-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB57-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r57/p57_second_fire.py\" . IB57-1-AC1 -> IB57-1-AC1 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r57/p57_second_fire.py\" . IB57-1-AC1",
+      "output_evidence": "IB57-1-AC1 PASS | OK: two refresh schedules (09:30 and 09:40 ET), both ENABLED; fmt clean | rc=0",
+      "denominator": "2 of 2 aws_scheduler_schedule blocks targeting module.irpt_directory_refresh.function_arn; expressions cron(30 9 ? * MON-FRI *) and cron(40 9 ? * MON-FRI *)",
+      "expect": "^IB57-1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB57-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r57/p57_second_fire.py\" . IB57-1-AC2 -> IB57-1-AC2 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r57/p57_second_fire.py\" . IB57-1-AC2",
+      "output_evidence": "IB57-1-AC2 PASS | OK: packet covers 3 firms with version ids, counts and rollback | rc=0",
+      "denominator": "3 of 3 firms (49financial 4620 dJypVohmPy.Q5ziZJr077Dp4qXPlvyfH; inflection 292 6wQPRO8ju8fwL8aZuDzStumCvAhjOk.J; cottonwood 258 Hw0c7gywQ4giKV0htJ7tzqb3cebd4HJ_); writer and 2 branches present",
+      "expect": "^IB57-1-AC2 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base e0f7126735: one refresh schedule, no packet.",
+      "expected": "AC1, AC2 FAIL at base",
+      "observed": "issuer's dry run at base 795a128808 recorded both FAIL; the worker took no pre-edit run",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each check run twice on the same tree",
+      "observed": "rc 0 and identical last lines",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W128-S1",
+    "IRPT_BCKEND-W128-S2"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> IB57-1-AC1,IB57-1-AC2",
+      "result": "rc=0 (see commit)"
+    }
+  ]
+}

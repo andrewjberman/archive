@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-l-4.layout-six-statistics",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/prd/IRPT_YCDGEN_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f867ec3bca"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R4.md",
+    "vintage_commit": "f867ec3bca",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-l-4.layout-six-statistics.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+      "kind": "script",
+      "commit_or_etag": "529db3db38ff72736de87dde292fdffee70672c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local on worktree branch wk-ycdgen-r4-3; adds _risk_stat, _month_returns, _percentile and the benchmark/risk_free named inputs of statistic_of, compute_element and compute_all. No deploy in this order.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_overview.py",
+      "kind": "test",
+      "commit_or_etag": "529db3db38ff72736de87dde292fdffee70672c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 new test_six_statistic_* tests on synthetic hand-checked series; 21 passed in all (14 at the base). Local on the worktree branch.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "529db3db38ff72736de87dde292fdffee70672c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows IRPT_YCDGEN-W3-S5 and IRPT_YCDGEN-W3-S6 (2 new rows, the row gate passed at commit). Local on the worktree branch.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- each of the six statistics computes a hand-checked value and reads NOT_AVAILABLE with its missing input named (tests -k six_statistic, >= 6) (org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round4/checks/l-4.AC1.py)",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round4/checks/l-4.AC1.py",
+      "output_evidence": "l-4.AC1 RESULT: PASS 7 passed, 0 failed (need >= 6, -k 'six_statistic'): 7 passed, 14 deselected in 0.24s\nrc=0",
+      "denominator": "7 of 7 test_six_statistic_* tests passed (need >= 6): beta, alpha, Sharpe, Sortino, monthly VaR, max_drawdown_15y, and the trace-keys test; 21 of 21 tests in test_layout_overview.py pass",
+      "expect": "l-4.AC1 RESULT: PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A scratch copy of the research directory (the committed file untouched) with Sharpe's annualization changed from mean*sqrt(12)/sd to mean*12/sd, run through l-4.AC1.py from that copy's root.",
+      "expected": "AC1 flips to FAIL naming one failed test; a check that passes the mutant is vacuous.",
+      "observed": "l-4.AC1 RESULT: FAIL 6 passed, 1 failed (need >= 6, -k 'six_statistic'): 1 failed, 6 passed, 14 deselected in 0.51s; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the whole test_layout_overview.py run twice on the same tree",
+      "observed": "21 passed in 8.62s; 21 passed in 8.07s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A YCharts call, an S3 or DynamoDB write, a deploy, or any figure value from a client file or vendor answer",
+      "reason": "Forbidden by the order's SURFACES AND BOUNDS; every number is a synthetic hand-checked fixture."
+    },
+    {
+      "item": "Map wiring that names the benchmark and risk-free inputs per element",
+      "reason": "A later cell's work (order section 3); here they are optional named inputs and absent reads NOT_AVAILABLE."
+    }
+  ],
+  "surprises": [
+    "IRPT_YCDGEN-W3-S5: the base's test_computed_own_series_statistics asserted beta_1y is STATISTIC_UNKNOWN, which contract 4.3 contradicts; retargeted to kurtosis_1y.",
+    "IRPT_YCDGEN-W3-S6: contract 4.3 does not state the risk-free series' form (level or rate) or the input signature; built as optional level series with the stated conventions."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (test_layout_overview.py)",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_overview.py -q -p no:cacheprovider",
+      "result": "21 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 infra/aws/lambda/investor-reporting/ycharts/research",
+      "result": "All checks passed!"
+    }
+  ]
+}
