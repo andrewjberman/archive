@@ -1,0 +1,105 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_CORPUS.TO-CRPS-am-3",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-am-3.model-sheet-gap-reasons-and-currency.md",
+  "group": "OTHER",
+  "vintage_commit": "ece32e98a6"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+  "vintage_commit": "ece32e98a6",
+  "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-am-3.model-sheet-gap-reasons-and-currency.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/modelSheet.ts",
+   "kind": "script",
+   "commit_or_etag": "4fddccd0",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed in the nested portal repo, branch wk-AMGT_CORPUS-2-portal, commit 4fddccd0 (a portal commit, not an outer one). ModelSheetRow gains cellReasons, currency, moneyCurrencies; helpers isMoneyUnit, figureCurrency, rowCurrency. No push, no deploy.",
+   "introduces": [
+    "cellReasons",
+    "rowCurrency"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx",
+   "kind": "script",
+   "commit_or_etag": "4fddccd0",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal commit 4fddccd0 on wk-AMGT_CORPUS-2-portal. A gap cell with a served reason carries a hover title and a footnote mark; each distinct reason is listed once under the table; a money row prints its currency beside its unit words. bun run typecheck rc 0.",
+   "artifact_covered_by": [
+    "AC2",
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round37/am3_check.cjs\" portal -- expect (?m)^am3 build 2/2 control 2/2$",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round37/am3_check.cjs\" portal",
+   "output_evidence": "am3 build 2/2 control 2/2",
+   "denominator": "ARM b1 1299_HK gap cells 92, reasoned in words 92 (92 of 92); ARM b2 TSM money rows 13, carrying a currency 1, wrong 0 (13 of 13 graded); ARM c1 TSM and 1299 HK 17 rows + V3 row list unchanged (2 of 2 names); ARM c2 round36 al2_check 'al2 build 3/3 control 1/1'; rc 0",
+   "expect": "(?m)^am3 build 2/2 control 2/2$",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/modelPattern.harness.cjs -- expect (?m)^CHECKS-OK ([0-9]+) of \u0001$",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/modelPattern.harness.cjs",
+   "output_evidence": "CHECKS-OK 12 of 12",
+   "denominator": "12 of 12 harness checks on the rendered ModelTab (react-dom/server); harness unedited; rc 0. tabs.harness.cjs also run: CHECKS-OK 20 of 20",
+   "expect": "(?m)^CHECKS-OK ([0-9]+) of \u0001$",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 (JUDGMENT, graded by the CVO at L9 on the running page): a PM sees why each gap is empty, and each money row's currency.",
+   "method": "manual_read_with_citation",
+   "invocation": "node .scratch/render_am3.cjs portal org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round37/am3_fixture.json (the real ModelTab rendered on the captured 1299 HK and TSM payloads; the running page is the CVO's)",
+   "output_evidence": "1299_HK_Equity: 92 gap cells with a hover title, 92 footnote marks, 1 note under the table: \"1 The price-dated range is not reported at this company's fiscal year end, because its fiscal year does not end in December.\" TSM_US_Equity: 0 gap cells with a served reason; row labels read 'EBITDA (adjusted) (millions, TWD)' where the row's money figures carry TWD and 'EBITDA (millions)*' where they carry none, with the one footnote 'currency not stated by the source for marked rows'.",
+   "denominator": "2 of 2 captured names rendered; no verdict recorded",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Judgment criterion: the substitute oracle is 3.0.0_SA_CVO~Z reading the running Model tab at L9; no verdict is recorded here.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three mutants of a scratch copy of modelSheet.ts (.scratch/mut/M1..M3, each run through am3_check.cjs): (M1) cellReasons forced to null for every cell; (M2) currency forced to null on every row; (M3) the row label 'Revenue/Sh' changed to 'Revenue per share'.",
+   "expected": "M0 (unmutated copy) passes 2/2 and 2/2; M1 fails b1; M2 fails b2; M3 fails c1 (and c2).",
+   "observed": "M0 'am3 build 2/2 control 2/2'; M1 'am3 build 1/2 control 2/2' (b1 FAIL: reasoned in words 0 of 92); M2 'am3 build 1/2 control 2/2' (b2 FAIL: EBITDA_ADJUSTED want TWD got null); M3 'am3 build 2/2 control 0/2' (c1 MOVED on both names, c2 al2 control 0/1).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "am3_check.cjs and the Model harness are pure (a fixture, a transpile, a server render; no clock, no network); typecheck run once after the final edit.",
+   "observed": "bun run typecheck: '$ tsc -b --noEmit', rc 0.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "am3_check.cjs (AC1)",
+   "invocation": "node am3_check.cjs portal",
+   "result": "rc 0; am3 build 2/2 control 2/2"
+  },
+  {
+   "tool": "modelPattern.harness.cjs (AC2)",
+   "invocation": "node src/pages/SecurityAnalysis/__harness__/modelPattern.harness.cjs",
+   "result": "rc 0; CHECKS-OK 12 of 12"
+  }
+ ]
+}
