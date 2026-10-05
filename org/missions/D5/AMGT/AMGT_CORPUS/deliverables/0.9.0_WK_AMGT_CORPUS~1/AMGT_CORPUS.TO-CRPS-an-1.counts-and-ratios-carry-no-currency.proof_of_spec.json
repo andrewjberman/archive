@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-an-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-an-1.counts-and-ratios-carry-no-currency.md",
+    "group": "OTHER",
+    "vintage_commit": "fcbe7aa0dc0997436de3d6e8d25bfb0b03e70d52"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "fcbe7aa0dc",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-an-1.counts-and-ratios-carry-no-currency.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "see git log of branch wk-AMGT_CORPUS-1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New frozenset _COUNT_RATIO_NO_CURRENCY_FIELDS = {IS_SH_FOR_DILUTED_EPS}, consulted first in _figure_currency: returns (None, 'invariant'). The only count/ratio member of the currency sets. Served move is the issuer's CRPS-an-2.",
+      "introduces": ["_COUNT_RATIO_NO_CURRENCY_FIELDS"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_figure_currency_round38.py",
+      "kind": "test",
+      "commit_or_etag": "see git log of branch wk-AMGT_CORPUS-1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 offline tests calling _figure_currency directly.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "count_ratio_currency.py --derive BA_US_Equity,SAP_GY_Equity,BABA_US_Equity,TSM_US_Equity -- expect (?m)^crc derive build 1/1 control 2/2$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round38/count_ratio_currency.py\" --derive BA_US_Equity,SAP_GY_Equity,BABA_US_Equity,TSM_US_Equity",
+      "output_evidence": "derive puts_captured 4 (none sent)\nderive count_ratio 1253 with_currency 0 []\nderive money 1324 unlabelled 0 values_moved 0 money_labels_changed 0\ncrc derive build 1/1 control 2/2",
+      "denominator": "4 names; 1253 count/ratio figures, 0 with a currency; 1324 money figures, 0 unlabelled, 0 values moved, 0 labels changed",
+      "expect": "(?m)^crc derive build 1/1 control 2/2$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest test_figure_currency_round38.py -- expect (?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest integrations/bloomberg/research/tests/test_figure_currency_round38.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "....                                                                     [100%]\n4 passed in 0.41s",
+      "denominator": "4 of 4 tests passed; plus 69 of 69 passed across all currency and model_block test files (granted currency tests needed no edit)",
+      "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-process mutant: _COUNT_RATIO_NO_CURRENCY_FIELDS emptied (the pre-fix behaviour) via .scratch/mutant.py, nothing committed.",
+      "expected": "IS_SH_FOR_DILUTED_EPS returns ('CNY', 'reporting (EQY_FUND_CRNCY)') under the mutant, (None, 'invariant') fixed.",
+      "observed": "fixed  : (None, 'invariant'); mutant : ('CNY', 'reporting (EQY_FUND_CRNCY)')",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice-equivalent (once standalone, once within the full currency suite); the issuer's check is deterministic on fixtures.",
+      "observed": "AC1 crc derive build 1/1 control 2/2; AC2 4 passed; suite 69 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No S3 write / served move; no Bloomberg call",
+      "reason": "Order bounds item 1; the served move is the issuer's CRPS-an-2."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "count_ratio_currency.py --derive (issuer's check, AC1)",
+      "invocation": "see AC1",
+      "result": "rc 0; build 1/1 control 2/2"
+    }
+  ]
+}
