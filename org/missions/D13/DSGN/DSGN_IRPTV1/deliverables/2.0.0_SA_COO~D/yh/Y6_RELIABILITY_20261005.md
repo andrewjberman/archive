@@ -20,3 +20,6 @@ cases A, B, C, D and the typo file APPROVED, one at a time with the queue empty)
 | Run | Case | Portal | REQ | Submitted (Z) | Page READY (Z) | Submit to READY | Open to sections | Section cards | Outcome | Packet (local) |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Aproxy #1 | 3e1aa46f | REQ-777d75467393aafe6f351cc5 | 05:01:19 | 05:19:30 | 18.2 min | 2.0 s | 60 | READY | tmp/yh-submit/20261005T045848Z-Aproxy |
+| 2 | Aproxy #2 | 99c6ae08 | REQ-14fe69cf6ead8a9436379dc2 | 06:40:55 | 06:58:51 | 17.9 min | 1.4 s | 60 | READY | tmp/yh-submit/20261005T063830Z-Aproxy |
+
+Between runs: site Z held the walker 05:27-05:48Z (MSTR 105172). ~Y's YCharts research held the session 05:40-06:32Z (105181, 105190) and 07:05-07:09Z (105195, 105202).
