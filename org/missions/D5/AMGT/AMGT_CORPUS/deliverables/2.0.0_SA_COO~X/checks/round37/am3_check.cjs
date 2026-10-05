@@ -14,7 +14,7 @@
  *   b1  1299 HK: every GAP cell (empty, in a row with >= 1 figure, in a history year, with a served reason for that
  *       mnemonic and year) carries a non-empty cellReasons entry in words (none of ABSENT / REFUSED / "not read" /
  *       "mnemonic" / fye_join / HELD_OFF / an UPPER_SNAKE token); the gap count must be > 0.
- *   b2  TSM: every money row (a figure unit beginning MILLIONS but not "MILLIONS (share count)", ABSOLUTE or PER SHARE)
+ *   b2  TSM: every money row (a figure unit beginning MILLIONS, ABSOLUTE or PER SHARE, never a "(share count)" unit -- amended 2026-10-05, row Z-W1-S33)
  *       whose figures all carry ONE currency C exposes currency === C; a money row whose figures carry none exposes null.
  *       At least one row must carry a currency, so the arm discriminates.
  *   c1  the first two groups (17 rows) and the V3 group's row list are unchanged against am3_base_snapshot.json.
@@ -57,7 +57,7 @@ const fixture = JSON.parse(fs.readFileSync(path.join(HERE, 'am3_fixture.json'), 
 const INTERNAL = /ABSENT|REFUSED|not read|mnemonic|fye_join|HELD_OFF|\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/
 const isMoney = (u) => {
   const s = String(u || '')
-  if (s.startsWith('MILLIONS (share count)')) return false
+  if (s.includes('(share count)')) return false
   return s.startsWith('MILLIONS') || s.startsWith('ABSOLUTE') || s.startsWith('PER SHARE')
 }
 
