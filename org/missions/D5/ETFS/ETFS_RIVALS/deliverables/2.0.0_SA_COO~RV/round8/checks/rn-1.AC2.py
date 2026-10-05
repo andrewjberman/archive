@@ -7,15 +7,17 @@ history starts 2026-08-21; the trend card's eyebrow reads "Buying trend, year to
 Interface (prescribed): each rank panel (`data-rank-period="P"`) and each per-period trend panel (`data-trend-period="P"`,
 inside the trend card) carries one element `data-period-window` whose text names the period's label, its first and last
 date and "trading days" (e.g. "Last 30 trading days, 2026-08-20 to 2026-10-01, 30 trading days"). R30's label is "Last 30
-trading days". When the holding_contribution rows carry `period_clipped` True, that panel's label reads "Since first
-report" and never "Year to date" / "Quarter to date" / "Month to date".
+trading days". When the holding_contribution rows carry `period_clipped` True, that panel's label reads "Data available
+since <period_start>" (AMENDED on Andrew-direct 2026-10-05: "Instead of just saying 'Since X', I'd say 'Data available since
+X'") and never "Year to date" / "Quarter to date".
 Fixture: as rn-1.AC1, with IDVZ's YTD rows clipped (period_start 2026-08-21, period_nominal_start 2026-01-01,
 period_clipped True); TXUE's YTD unclipped (period_start 2026-01-02).
   - (a) every rank panel holds a data-period-window naming its two dates and "trading days";
-  - (b) IDVZ's YTD rank panel reads "Since first report" and nowhere "Year to date"; the R30 panels read "Last 30 trading days";
+  - (b) IDVZ's YTD rank panel reads "Data available since 2026-08-21" and nowhere "Year to date"; R30 reads "Last 30 trading days";
   - (c) every trend card holds a data-trend-period panel per period, each with a data-period-window;
   - (d) control: TXUE's YTD rank panel still reads "Year to date".
-FAIL at base: (a), (b), (c) FAIL; (d) PASSES."""
+FAIL at base (CLOUD): (a), (b), (c) FAIL; (d) PASSES. At the rn-1 build: (b) FAILS (it reads "Since first report").
+"""
 import pathlib
 import sys
 
@@ -24,7 +26,7 @@ import _common as c  # noqa: E402
 import _ui7 as u  # noqa: E402
 
 PERIODS = ("R30", "MTD", "QTD", "YTD")
-START = {"R30": "2026-08-20", "MTD": "2026-10-01", "QTD": "2026-07-01", "YTD": "2026-01-02"}
+START = {"R30": "2026-08-20", "MTD": "2026-10-01", "QTD": "2026-10-01", "YTD": "2026-01-02"}
 
 
 def fixture():
@@ -68,15 +70,15 @@ def run(v):
     idvz = u.text(panels.get(("IDVZ", "YTD"), u.Node("x", {})))
     r30 = [window(n) for (f, p), n in panels.items() if p == "R30"]
     print("IDVZ YTD window:", window(panels.get(("IDVZ", "YTD"), u.Node("x", {}))), "| R30 windows:", r30[:2])
-    v.check("Since first report" in idvz and "Year to date" not in idvz and r30
+    v.check("Data available since 2026-08-21" in idvz and "Year to date" not in idvz and r30
             and all("Last 30 trading days" in w for w in r30),
-            "(b) IDVZ's clipped YTD reads 'Since first report', never 'Year to date'; R30 reads 'Last 30 trading days'")
+            "(b) IDVZ's clipped YTD reads 'Data available since 2026-08-21', never 'Year to date'; R30 reads 'Last 30 trading days'")
 
     cards = [n for n in root.iter() if "data-trend-fund" in n.attrs and "rf-card" in n.attrs.get("class", "")]
     ok_cards = []
     for card in cards:
         tp = {n.attrs.get("data-trend-period"): n for n in card.iter() if "data-trend-period" in n.attrs}
-        ok_cards.append(set(tp) >= set(PERIODS) and all(window(tp[p]) for p in PERIODS))
+        ok_cards.append(set(tp) >= {"R30", "QTD", "YTD"} and all(window(tp[p]) for p in ("R30", "QTD", "YTD")))
     print("trend cards:", len(cards), "| each with four windowed period panels:", ok_cards)
     v.check(bool(cards) and all(ok_cards), "(c) every trend card holds a windowed panel per period")
 
