@@ -1,0 +1,126 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-av-7",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-av-7.pool-universe-and-plain-names.md",
+  "group": "OTHER",
+  "vintage_commit": "e7d7ec3cf2"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "e7d7ec3cf2",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-av-7.pool-universe-and-plain-names.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~243",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/identity/build_universe.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "load_sec_cache reads the newest stored object under the company_tickers prefix, projects the SEC raw list in memory when no projection is stored, prints the partition date to stderr. No deploy, no store write.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "/peers subject and every member serve display_name via _clean_display_name (+ _peer_plain_name for initialism + legal form). Not deployed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/identity/tests/test_union_universe.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "two new load_sec_cache arms (newest object + date disclosed; projection preferred); refusal arm moved to the paginator.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_peers_plain_names_av7.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "5 tests: plain subject and member names, stored name untouched, ticker fallback, initialism arm, kept display_name.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_generation_and_pool_routes.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "member key set now includes display_name.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "build_universe --dry-run rc 0; covered named 95 of 95; C1 PASS; R72 C47 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round72/checks/r72_served.py\" --cell c47 --where local; echo \"exit=$?\"",
+   "output_evidence": "build_universe --dry-run rc 0; covered named 95 of 95 []\nPASS C1 the union universe dry-run succeeds and names every covered key missing 0\nR72 C47 SERVED: YES\nexit=0",
+   "denominator": "95 of 95 covered keys named in the dry-run stdout; SEC cache partition date=2026-09-22 (raw list projected in memory)",
+   "expect": "(?s)rc 0; covered named 95 of 95.*PASS C1.*R72 C47 SERVED: YES.*exit=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "population names 95 with non-200 0; C1 PASS failing 0; R72 C45 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round72/checks/r72_served.py\" --cell c45 --where local; echo \"exit=$?\"",
+   "output_evidence": "population: names 95 objects read 735 non-200 0\nPASS C1 every peers subject and member serves a display_name that is not all capitals failing 0 e.g. []\nR72 C45 SERVED: YES\nexit=0",
+   "denominator": "95 names, 735 peers objects (subjects + members) read, 0 non-200, 0 failing",
+   "expect": "(?s)names 95 .*non-200 0.*PASS C1.*failing 0.*R72 C45 SERVED: YES.*exit=0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC2 with _with_member_display_names removed from read_peer_set; AC1 with the stored-object filter changed to .jsonx (no object found).",
+   "expected": "AC2 prints FAIL C1 and R72 C45 SERVED: NO exit=1; AC1 prints rc 1, covered named 0 of 95, R72 C47 SERVED: NO exit=1.",
+   "observed": "AC2 mutant: 'FAIL C1 ... failing 680 e.g. 2317_TT_Equity/member:<none>' R72 C45 SERVED: NO exit=1; AC1 mutant: 'dry-run rc 1; covered named 0 of 95' FAIL C1 R72 C47 SERVED: NO exit=1. Files restored from copies; the final runs above are post-restore.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "c45 run three times (after the shared rule, after the initialism arm, post-mutant restore) and c47 twice against the live stores.",
+   "observed": "c47 PASS twice (95 of 95); c45 PASS on both runs after the last code edit; before the initialism arm it read failing 8 of 735.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "lib/research/api/tests/test_model_words.py::test_formula_words_equals_the_pages_own_function_run_in_node",
+   "reason": "reads a portal function (formulaInWords in tabs/ModelTab.tsx) absent at this worktree's portal ref; the only failure in the api suite (616 passed, 1 failed); no row, per the order."
+  },
+  {
+   "item": "--write-pool and any store write; the SEC projection with EDGAR history",
+   "reason": "BOUNDS 1-2 and the egress class NONE: av-8's leg; see row S1."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W243-S1",
+  "AMGT_RESAPP-Z-W243-S2"
+ ],
+ "session_log": "N/A -- no session-log path in this worker's paths. Worktree C:/tmp/r72-243 on wk-AMGT_RESAPP-243 cut from the issuance commit; scratch C:/tmp/r72-243/.scratch (uncommitted).",
+ "compiler_tools": [
+  {
+   "tool": "r72_served.py (the issuer's checker) and pytest",
+   "invocation": "python -m pytest lib/research/api/tests -q ; python -m pytest lib/research/identity/tests -q",
+   "result": "api: 1 failed (portal, named), 616 passed; identity: 213 passed"
+  }
+ ]
+}
