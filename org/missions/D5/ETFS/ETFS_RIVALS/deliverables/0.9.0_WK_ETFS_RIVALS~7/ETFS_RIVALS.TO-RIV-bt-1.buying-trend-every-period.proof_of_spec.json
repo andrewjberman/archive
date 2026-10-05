@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-bt-1.buying-trend-every-period",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "c222ecc8fa",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-bt-1.buying-trend-every-period.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4cc8e40575"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_buying_trend.py",
+      "kind": "script",
+      "commit_or_etag": "388b924b8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 8 code cell; no S3 write, no deploy; tests and the check run against fixtures and a local sink",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r8bt1_periods.py",
+      "kind": "script",
+      "commit_or_etag": "388b924b8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 unit tests, local sink only",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_a1tb_trend.py",
+      "kind": "script",
+      "commit_or_etag": "388b924b8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one assertion block reads the YTD block of the per-period table",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "buying_trend rows carry a period column with R30, MTD, QTD, YTD; each period's lines are its own trades' securities with its own window_start; YTD is unchanged -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round8/checks/bt-1.AC1.py",
+      "output_evidence": "columns has period: True | periods: ['MTD', 'QTD', 'R30', 'YTD']\nOK:   (a) the rows carry a period column with R30, MTD, QTD, YTD\ngot: {'R30': ({'CCC', 'BBB'}, ['2026-08-21']), 'MTD': ({'CCC'}, ['2026-10-01']), 'QTD': ({'CCC'}, ['2026-10-01'])} | want: {'R30': ({'CCC', 'BBB'}, ['2026-08-21']), 'MTD': ({'CCC'}, ['2026-10-01']), 'QTD': ({'CCC', 'BBB'}, ['2026-07-01'])}\nFAIL: (b) each period's lines are its own trades' securities, with its own window_start\nYTD: ({'CCC', 'BBB', 'AAA'}, ['2026-01-02'])\nOK:   (c) control: YTD holds AAA, BBB, CCC from 2026-01-02, as today\nAC1 RESULT: FAIL 1 failures\nexit=1\n",
+      "denominator": "2 of 3 checks OK ((a) and (c)); (b) FAILS on QTD only -- R30 and MTD match; the check expects QTD to start 2026-07-01 at day 2026-10-02, which is in Q4 (row ETFS_RIVALS-Z-W7-S1)",
+      "status": "FAIL",
+      "status_reason": "Check (b) expects QTD at day 2026-10-02 to start 2026-07-01 and hold the 2026-09-10 trade; 2026-10-02 is in Q4 (calendar quarter start 2026-10-01, the rule hc-1 and WORKSTREAM_B_INPUTS.md:27 use), so the build writes QTD = MTD. Row ETFS_RIVALS-Z-W7-S1; the remedy (move the fixture day into Q3) is the issuer's."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted: the check carries its own control arm (c) and the base state fails (a) and (b) by its docstring.",
+      "expected": "(a) and (b) FAIL at base; (c) PASSES.",
+      "observed": "with the build: (a) PASS, (c) PASS, (b) FAIL on QTD only; the package suite reads 601 passed, 2 skipped, 0 failed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the check was run twice (before and after the YTD filter in test_a1tb_trend); the five new unit tests once.",
+      "observed": "same verdict lines both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "AC1 FAILS on the check's own QTD expectation; the flip is the issuer's."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W7-S1"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~7 <0.9.0_WK_ETFS_RIVALS~7@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "388b924b8f (the surprise-row gate refused once: the id lacked the Z- infix for a site-z row; renamed, then landed)"
+    }
+  ]
+}
