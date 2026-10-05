@@ -30,6 +30,7 @@
  *            first observer of a pair reads the settled error, a later observer of the same pair reads pending) and SERVED.
  *   page     the REAL SecurityAnalysis.tsx: Security mode, MSFT / AMD / BA x the five tabs (15 renders), and Universe mode, the
  *            Price and the Chatter face (2 renders).
+ *   footer   the REAL components/CardFooter.tsx, one card per served source code (arm 4; _render38.cjs FOOTER_CODES).
  * Definitions:
  *   SKELETON (arm 1): markup a shared state never emits in this render (the loader stubs PanelLoading / PanelError to
  *     data-stub="<name>"): [data-panel-state], aria-busy="true", or a h-4 w-full rounded-[2px] bar.
@@ -54,14 +55,24 @@
  *      every render, W on BA Model, LEAD in Universe mode); at least one card wants a footer and at least one does not (else
  *      NOT_EXERCISED). The per-card table prints.
  *   3  THE PAGE ENDS ON THE SHARED END LINE: every one of the 17 page renders.
- *   4  KEEP: round37 repairs37.cjs; round36 repairs36.cjs; round35 changed35.cjs, cloud35.cjs, payload35.cjs; round34 labels34.cjs,
+ *   4  AN UNKNOWN SOURCE READS THE FIXED PHRASE (FWD-11; the CTO's review of 75f9f477, ledger/CTO_REVIEW_PORTAL_75f9f477_ROUND38.md
+ *      @2e225582da: CardFooter.tsx sourceWords()'s last fallback printed an unknown long code with its punctuation turned to spaces,
+ *      "a raw code in words"): the child's footer mode renders the REAL components/CardFooter.tsx once per served source code with
+ *      one served time -- three UNKNOWN LONG codes ('vendor_feed/raw:alpha-source', 'issuer_site_silver/filing:source',
+ *      'quarterly_estimate_rollup'; no 'harvest' or 'scanner', which the page maps by design) and the KNOWN 'bloomberg-dapi'. An
+ *      unknown code's footer (its `content` and its printed text after "Source:") reads exactly "Source: a source this page has no
+ *      name for yet." -- no '_', ':' or '/', not the code de-punctuated, no token of the code (3+ letters) outside the fixed phrase;
+ *      the known code reads "Source: Bloomberg.". NOT_EXERCISED below 3 unknown + 1 known renders.
+ *   5  KEEP: round37 repairs37.cjs; round36 repairs36.cjs; round35 changed35.cjs, cloud35.cjs, payload35.cjs; round34 labels34.cjs,
  *      repairs34.cjs, peername34.cjs; round29 timeline/chart.cjs exit 0 on the same tree.
- *   5  PLANTED: arm 1's grader flags a skeleton on error, a skeleton beside PanelError, a hand-rolled loading and an error with no
+ *   6  PLANTED: arm 1's grader flags a skeleton on error, a skeleton beside PanelError, a hand-rolled loading and an error with no
  *      PanelError, and accepts the shared states; arm 2's grader flags a footer with an invented date, an invented source, a raw
  *      code, a missing footer, a footer that is not last, a hand-rolled time|source line, a placeholder footer on a card that serves
  *      no source and a SmartPanelFooter, and accepts a good card and a footerless card that serves nothing; arm 3's grader flags a
  *      missing end line, two end lines, an end line that is not last, an invented date and a dateless end line on a dated page,
- *      and accepts the good end line.
+ *      and accepts the good end line; arm 4's grader flags an unknown code printed de-punctuated (twice), printed raw, half-named
+ *      by its own tokens or rendered with no footer, and the known code printed de-punctuated, and accepts the fixed phrase and
+ *      "Bloomberg".
  * Blind spots: the header cards are graded on one tab render per name (the header is the same element on every tab); the source
  *   words are graded for NAMING the served source, not for their prose; the time is graded as one of the card's served times, not
  *   the newest; the timeline serves no source field and What changed's sources are the /thesis figures' sources (the /compare
@@ -70,7 +81,7 @@
  *   (react-query retry 2, ~3 s pending before the settled error) is not modelled -- the identity header has the same window and
  *   was graded DESIGNED; the PanelFooter is the dark band component -- its colour on a light card is FWD-12's read, not graded.
  * Prints INFO lines, the CENSUS, one line per arm and "WHAT CHANGED USES THE SHARED STATES, EVERY CARD ENDS IN THE SHARED FOOTER,
- * THE PAGE ENDS ON THE SHARED END LINE: <k> of 5 arms"; exit 0 only at 5 of 5. Static renders only; no network, no AWS, writes no
+ * THE PAGE ENDS ON THE SHARED END LINE: <k> of 6 arms"; exit 0 only at 6 of 6. Static renders only; no network, no AWS, writes no
  * file.
  */
 const fs = require('fs');
@@ -126,6 +137,45 @@ function changedFaults(c) {
   return f;
 }
 
+// ==== arm 4 grader ================================================================================================================
+const UNNAMED = 'a source this page has no name for yet';
+const UNNAMED_WORDS = new Set(UNNAMED.split(' '));
+/** c = {code, known, html, stop}: one CardFooter render serving one source code. An UNKNOWN code (known null) must read exactly
+ * "Source: <UNNAMED>." and print no '_', ':' or '/', not the code de-punctuated and no token of the code (3+ letters) outside the
+ * fixed phrase; a KNOWN code must read "Source: <known>.". Both the footer's `content` and its printed text after "Source:" are read. */
+function unnamedFaults(c) {
+  const label = `source "${c.code}"`;
+  if (c.stop) return [`${label}: ${c.stop}`];
+  const tree = X.parse(c.html || '');
+  const footers = tree.all.filter((x) => x.tag && x.attrs && x.attrs['data-check-shared'] === 'PanelFooter');
+  if (footers.length !== 1) return [`${label}: ${footers.length} shared footers rendered (want exactly 1; the card serves a time and a source)`];
+  let props = {};
+  try { props = JSON.parse(footers[0].attrs['data-check-props'] || '{}'); } catch (e) { /* read as no content */ }
+  const content = String(props.content || '');
+  const printedAll = X.textOf(footers[0]);
+  const mc = /^\s*Source:\s*([\s\S]*?)\.?\s*$/.exec(content);
+  const mp = /Source:\s*([\s\S]*?)\.?\s*$/.exec(printedAll);
+  const f = [];
+  if (!mc) f.push(`${label}: the footer's content does not read "Source: ..." ("${content.slice(0, 80)}")`);
+  if (!mp) f.push(`${label}: the printed footer has no "Source:" ("${printedAll.slice(0, 100)}")`);
+  const words = [mc ? norm(mc[1]) : null, mp ? norm(mp[1]) : null].filter((x) => x !== null);
+  if (c.known) {
+    for (const w of words) if (w !== c.known) f.push(`${label}: the footer reads "Source: ${w}." -- a known code must read "Source: ${c.known}."`);
+    return f;
+  }
+  const dep = norm(String(c.code).toLowerCase().replace(/[_:\/-]+/g, ' '));
+  const toks = String(c.code).toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length >= 3 && !UNNAMED_WORDS.has(t));
+  for (const w of words) {
+    const low = w.toLowerCase();
+    if (w !== UNNAMED) f.push(`${label}: the footer reads "Source: ${w}." -- an unknown code must read the fixed phrase "${UNNAMED}"`);
+    if (/[_:\/]/.test(w)) f.push(`${label}: the footer prints a raw code character ("${w}")`);
+    if (low.includes(dep)) f.push(`${label}: the footer prints the code de-punctuated ("${w}")`);
+    const hit = toks.filter((t) => new RegExp(`\\b${t}\\b`).test(low));
+    if (hit.length) f.push(`${label}: the footer prints the code's token(s) ${hit.map((t) => `"${t}"`).join(', ')} ("${w}")`);
+  }
+  return [...new Set(f)];
+}
+
 function keepsPassing(rels) {
   const faults = [];
   for (const rel of rels) {
@@ -139,6 +189,7 @@ function keepsPassing(rels) {
 // ==== renders =====================================================================================================================
 const CH = child('changed');
 const PG = child('page');
+const FT = child('footer');
 const PUBS = (PG && PG.pubs) || X.DEFAULT_PUBLISHERS;
 
 // ---- INFO: the base fault sites (not graded) ----
@@ -233,7 +284,26 @@ const CENSUS = [];
   arms.push(['THE PAGE ENDS ON THE SHARED END LINE: one shared PageEnd, last on the page, "End of Security Analysis. Data as of <served date in words>."', f.length === 0,
     (f.length ? `${f.length} fault(s): ${f.slice(0, 12).join(' | ')}${f.length > 12 ? ` | ... (${f.length - 12} more)` : ''}` : `${renders.length} of ${renders.length} renders`) + ` [${shown.join('; ')}]`]);
 }
-// ---- arm 4: KEEP ----
+// ---- arm 4: AN UNKNOWN SOURCE ----
+{
+  const f = [];
+  if (FT.error) f.push(FT.error);
+  const cases = FT.cases || [];
+  const unknownN = cases.filter((c) => !c.known).length;
+  const knownN = cases.filter((c) => c.known).length;
+  if (!FT.error && (unknownN < 3 || knownN < 1)) f.push(`NOT_EXERCISED: ${unknownN} unknown long code(s) and ${knownN} known code(s) rendered (want 3 and 1)`);
+  for (const c of cases) f.push(...unnamedFaults(c));
+  const read = cases.map((c) => {
+    const t = c.html ? X.parse(c.html) : null;
+    const node = t ? t.all.find((x) => x.tag && x.attrs && x.attrs['data-check-shared'] === 'PanelFooter') : null;
+    let content = 'no footer';
+    if (node) { try { content = JSON.parse(node.attrs['data-check-props'] || '{}').content || 'no content'; } catch (e) { content = 'unreadable props'; } }
+    return `"${c.code}" -> "${content}"`;
+  });
+  arms.push(['AN UNKNOWN SOURCE READS THE FIXED PHRASE (FWD-11): a card footer serving an unknown long source code reads "Source: a source this page has no name for yet." and prints no raw code, de-punctuated or not; a known code still reads its name', f.length === 0,
+    (f.length ? `${f.length} fault(s): ${f.join(' | ')}` : `${cases.length} of ${cases.length} footers`) + ` [${read.join('; ')}]`]);
+}
+// ---- arm 5: KEEP ----
 {
   const KEEP = ['round37/checks/repairs/repairs37.cjs', 'round36/checks/repairs/repairs36.cjs', 'round35/checks/changed/changed35.cjs', 'round35/checks/cloud/cloud35.cjs',
     'round35/checks/words/payload35.cjs', 'round34/checks/collage/labels34.cjs', 'round34/checks/repairs/repairs34.cjs',
@@ -242,7 +312,7 @@ const CENSUS = [];
   arms.push(['KEEP: round37 repairs37, round36 repairs36, round35 changed35/cloud35/payload35, round34 labels34/repairs34/peername34 and round29 timeline/chart.cjs exit 0 on the same tree', f.length === 0,
     f.length ? f.join(' | ') : `${KEEP.length} of ${KEEP.length} exit 0`]);
 }
-// ---- arm 5: PLANTED ----
+// ---- arm 6: PLANTED ----
 {
   const f = [];
   let bad = 0; let rej = 0; let good = 0; let acc = 0;
@@ -284,7 +354,17 @@ const CENSUS = [];
   R('an end line that is not last', pj(END('2026-10-02', 'October 2nd, 2026, 5:00p ET') + '<p>More</p>'), /is not at the end -- "More"/);
   R('an end line with an invented date', pj(END('2026-10-05', 'October 5th, 2026, 5:00p ET')), /date "2026-10-05" .* is not a served date/);
   R('a dateless end line on a dated page', pj(END(null, null)), /prints no date though the page serves one/);
-  arms.push(['PLANTED: the three graders flag their planted faults (skeleton on error, skeleton beside the error, hand-rolled loading, error without PanelError; invented date, invented source, raw code, missing footer, footer not last, hand-rolled line, placeholder footer, SmartPanelFooter; missing, doubled, not-last, invented-date and dateless end line) and accept the good shapes', f.length === 0,
+  // arm 4's grader (one rendered CardFooter per served code)
+  const uj = (code, known, content) => unnamedFaults({ code, known, stop: null, html: content === null ? '' : footer({ content, timestamp: '2026-10-04T19:56:35Z' }) });
+  A('an unknown long code reading the fixed phrase', uj('vendor_feed/raw:alpha-source', null, `Source: ${UNNAMED}.`));
+  A('the known code reading "Bloomberg"', uj('bloomberg-dapi', 'Bloomberg', 'Source: Bloomberg.'));
+  R('an unknown long code printed de-punctuated', uj('issuer_site_silver/filing:source', null, 'Source: issuer site silver filing source.'), /prints the code de-punctuated/);
+  R('an unknown snake_case word printed de-punctuated', uj('quarterly_estimate_rollup', null, 'Source: quarterly estimate rollup.'), /prints the code de-punctuated/);
+  R('an unknown long code printed raw', uj('vendor_feed/raw:alpha-source', null, 'Source: vendor_feed/raw:alpha-source.'), /prints a raw code character/);
+  R('an unknown code half-named ("estimate rollup")', uj('quarterly_estimate_rollup', null, 'Source: estimate rollup.'), /prints the code's token\(s\) "estimate", "rollup"/);
+  R('an unknown code with no footer', uj('quarterly_estimate_rollup', null, null), /0 shared footers rendered/);
+  R('the known code printed de-punctuated', uj('bloomberg-dapi', 'Bloomberg', 'Source: bloomberg dapi.'), /a known code must read "Source: Bloomberg\."/);
+  arms.push(['PLANTED: the four graders flag their planted faults (skeleton on error, skeleton beside the error, hand-rolled loading, error without PanelError; invented date, invented source, raw code, missing footer, footer not last, hand-rolled line, placeholder footer, SmartPanelFooter; missing, doubled, not-last, invented-date and dateless end line; an unknown code de-punctuated, raw, half-named or footerless, a known code de-punctuated) and accept the good shapes', f.length === 0,
     f.length ? f.join(' | ') : `${rej} of ${bad} planted faults flagged for their reason; ${acc} of ${good} good shapes accepted`]);
 }
 

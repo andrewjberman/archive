@@ -2,7 +2,10 @@
  * _render38.cjs -- the render child of repairs38.cjs, DSGN_AMGTV1 round 38 (issuer 2.0.0_SA_COO~D). NOT a check: it grades
  * nothing and prints ONE JSON line on stdout. repairs38.cjs spawns it once per mode (each mode installs its own process-wide stubs).
  *
- * Usage (cwd = the directory whose portal/ is the checkout under test): node _render38.cjs changed|page
+ * Usage (cwd = the directory whose portal/ is the checkout under test): node _render38.cjs footer|changed|page
+ *   footer   the REAL components/CardFooter.tsx (its real dateWords.ts / publisherNames.ts; the shared PanelFooter is the marker
+ *            below around the REAL PanelFooter), one card per served source code of FOOTER_CODES (three UNKNOWN LONG codes and the
+ *            known 'bloomberg-dapi'), each with one served time FOOTER_TIME. Returns per code: the markup.
  *   changed  round15/checks/_load.cjs: the REAL components/model/WhatChangedPanel.tsx, with the props tabs/ModelTab.tsx's
  *            ModelVersions hands it (securityKey, stamps = the served /versions stamps newest LAST, data = the served /thesis,
  *            latestAbsent = model_status !== 'SERVED') over round35/fixtures/{versions,thesis}.BA_US_Equity.json, and the page hook
@@ -117,7 +120,48 @@ const stubProxy = (overrides) => new Proxy({}, {
   },
 });
 
-if (mode === 'changed') {
+// The shared-piece MARKERS (_cards38.cjs) around the REAL PanelFooter / PageEnd; every other panels export is the loader's stub.
+function installSharedMarkers() {
+  const markProps = (p, keys) => { const o = {}; for (const k of keys) if (p[k] !== undefined) o[k] = p[k]; return JSON.stringify(o); };
+  const realFooter = L.source('src/ui/components/panels/PanelFooter.tsx').PanelFooter;
+  const realEnd = L.source('src/ui/components/PageEnd.tsx').PageEnd;
+  const PanelFooter = (p) => h('div', { 'data-check-shared': 'PanelFooter', 'data-check-props': markProps(p || {}, ['content', 'timestamp', 'dataAsOf', 'frequency']) }, h(realFooter, p));
+  const SmartPanelFooter = (p) => h('div', { 'data-check-shared': 'SmartPanelFooter', 'data-check-props': markProps(p || {}, ['content', 'sourceKey']) }, h('div', null, `<the data manifest's time> | ${p && p.content}`));
+  const PageEnd = (p) => h('div', { 'data-check-shared': 'PageEnd', 'data-check-props': markProps(p || {}, ['pageName', 'dataAsOf']) }, h(realEnd, p));
+  const panels = stubProxy({ PanelFooter, SmartPanelFooter });
+  for (const s of ['index.ts', 'index']) L.stubSource('src/ui/components/panels/' + s, panels);
+  L.stubSource('src/ui/components/panels/PanelFooter.tsx', { __esModule: true, PanelFooter });
+  L.stubSource('src/ui/components/panels/SmartPanelFooter.tsx', { __esModule: true, SmartPanelFooter });
+  L.stubSource('src/ui/components/PageEnd.tsx', { __esModule: true, PageEnd });
+  L.stubSource('src/pages/Positioning/shared/PageEnd.tsx', { __esModule: true, PageEnd });
+}
+
+/** The footer mode's served source codes (one card per code; the served time is one ISO stamp). The three UNKNOWN LONG codes carry
+ * '_', ':', '/' and '-' and no family word the page maps by design (no 'harvest', no 'scanner'); 'bloomberg-dapi' is the KNOWN
+ * control. repairs38.cjs reads the same list back from the child's JSON. */
+const FOOTER_TIME = '2026-10-04T19:56:35Z';
+const FOOTER_CODES = [
+  { code: 'vendor_feed/raw:alpha-source', known: null },
+  { code: 'issuer_site_silver/filing:source', known: null },
+  { code: 'quarterly_estimate_rollup', known: null },
+  { code: 'bloomberg-dapi', known: 'Bloomberg' },
+];
+
+if (mode === 'footer') {
+  const cases = [];
+  let error = null;
+  try {
+    installSharedMarkers();
+    const CardFooter = L.source(SA + 'components/CardFooter.tsx').CardFooter;
+    if (typeof CardFooter !== 'function') throw new Error('CardFooter.tsx exports no CardFooter');
+    for (const c of FOOTER_CODES) {
+      const rec = { code: c.code, known: c.known, time: FOOTER_TIME, html: null, stop: null };
+      try { rec.html = L.render(CardFooter, { times: [FOOTER_TIME], sources: [c.code] }); } catch (e) { rec.stop = 'RENDER FAILED: ' + first(e); }
+      cases.push(rec);
+    }
+  } catch (e) { error = 'LOAD FAILED: ' + first(e); }
+  out({ mode, error, cases });
+} else if (mode === 'changed') {
   const cases = [];
   let error = null;
   try {
@@ -148,18 +192,7 @@ if (mode === 'changed') {
   let pubs = X.DEFAULT_PUBLISHERS;
   try {
     // ---- stubs ----
-    const markProps = (p, keys) => { const o = {}; for (const k of keys) if (p[k] !== undefined) o[k] = p[k]; return JSON.stringify(o); };
-    const realFooter = L.source('src/ui/components/panels/PanelFooter.tsx').PanelFooter;
-    const realEnd = L.source('src/ui/components/PageEnd.tsx').PageEnd;
-    const PanelFooter = (p) => h('div', { 'data-check-shared': 'PanelFooter', 'data-check-props': markProps(p || {}, ['content', 'timestamp', 'dataAsOf', 'frequency']) }, h(realFooter, p));
-    const SmartPanelFooter = (p) => h('div', { 'data-check-shared': 'SmartPanelFooter', 'data-check-props': markProps(p || {}, ['content', 'sourceKey']) }, h('div', null, `<the data manifest's time> | ${p && p.content}`));
-    const PageEnd = (p) => h('div', { 'data-check-shared': 'PageEnd', 'data-check-props': markProps(p || {}, ['pageName', 'dataAsOf']) }, h(realEnd, p));
-    const panels = stubProxy({ PanelFooter, SmartPanelFooter });
-    for (const s of ['index.ts', 'index']) L.stubSource('src/ui/components/panels/' + s, panels);
-    L.stubSource('src/ui/components/panels/PanelFooter.tsx', { __esModule: true, PanelFooter });
-    L.stubSource('src/ui/components/panels/SmartPanelFooter.tsx', { __esModule: true, SmartPanelFooter });
-    L.stubSource('src/ui/components/PageEnd.tsx', { __esModule: true, PageEnd });
-    L.stubSource('src/pages/Positioning/shared/PageEnd.tsx', { __esModule: true, PageEnd });
+    installSharedMarkers();
     L.stubSource(SA + 'hooks/useSecurityAnalysisState.ts', { __esModule: true, useSecurityAnalysisState: () => Q.state });
     L.stubSource('src/hooks/useTabNavigation.ts', { __esModule: true, useTabNavigation: () => ({ activeTab: Q.tab, handleTabChange: () => {}, tabContentRef: { current: null } }) });
     L.stubSource('src/hooks/useAuth.ts', { __esModule: true, useAuth: () => ({ claims: { firmId: 'opal' }, user: null, isAuthenticated: true }) });
@@ -231,6 +264,6 @@ if (mode === 'changed') {
   } catch (e) { error = 'LOAD FAILED: ' + first(e); }
   out({ mode, error, renders, pubs });
 } else {
-  out({ mode, error: 'unknown mode (changed | page)' });
+  out({ mode, error: 'unknown mode (footer | changed | page)' });
   process.exitCode = 2;
 }
