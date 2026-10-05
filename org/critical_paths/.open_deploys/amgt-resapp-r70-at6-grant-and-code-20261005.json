@@ -12,16 +12,16 @@
       "kind": "activation",
       "target": "aws_iam_role_policy.scoped_amgt_api_grants -- add exactly one prefix issuer-site/harvest/silver/filing_source/",
       "proof_required": "the targeted plan is ONE in-place update of the grants policy and nothing else, proven from a FULL show -json (0 destroy/create/replace, 0 other non-no-op resources); the added strings are exactly opal-data-harvest/issuer-site/harvest/silver/filing_source/* in the GetObject Resource list and issuer-site/harvest/silver/filing_source/* in the ListBucket s3:prefix condition; BEFORE/AFTER simulate pair on the new prefix (implicitDeny -> allowed on both limbs) AND issuer-site/harvest/bronze/ still implicitDeny after, each call one --resource-arns with an isolated control",
-      "proof": null,
-      "closed_at": null
+      "proof": "APPLIED through .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply on a plan targeted at aws_iam_role_policy.scoped_amgt_api_grants. FULL show -json over the saved targeted plan: 4 resource_changes, 3 no-op and exactly 1 update, that one being aws_iam_role_policy.scoped_amgt_api_grants; 0 delete-or-create actions. The policy document delta, parsed rather than eyeballed: statements 6 before and 6 after (no new statement), 68 distinct resource/condition strings before and 70 after, ADDED exactly 2 -- arn:aws:s3:::opal-data-harvest/issuer-site/harvest/silver/filing_source/* in [ReadThePoolPrefixesTheAdapterReads] Resource and issuer-site/harvest/silver/filing_source/* in [ListOnlyThePoolPrefixesTheAdapterReads] StringLike/s3:prefix -- and REMOVED 0. Apply output: aws_iam_role_policy.scoped_amgt_api_grants Modifications complete after 0s; Apply complete! Resources: 0 added, 1 changed, 0 destroyed. BEFORE/AFTER simulate pair on the new prefix, one --resource-arns per call: GetObject implicitDeny -> allowed and ListBucket with s3:prefix implicitDeny -> allowed. NEGATIVE CONTROLS AFTER, all still implicitDeny: issuer-site/harvest/bronze/ GetObject and ListBucket (the CTO half's named control), plus two width probes this seat added -- issuer-site/x.parquet and issuer-site/harvest/silver/x.parquet -- so the grant is that ONE prefix and not issuer-site/*, not issuer-site/harvest/silver/*. The allowed flip on a byte-identical ARN shape is itself the grain control, so those denies are real denies and not a wrong-grain instrument artefact. Rule 30: the prefix is BUILDER OUTPUT, not typed -- lib/opal_naming.py key('issuer-site','harvest','silver','filing_source',<part>) returns issuer-site/harvest/silver/filing_source/<part>.",
+      "closed_at": "20261005T081120Z"
     },
     {
       "id": "L2",
       "kind": "verify",
       "target": "AC4 r70_grant_at6.sh on the APPLIED plane, before the code leg",
       "proof_required": "both controls allowed and C1 GetObject + C2 ListBucket allowed on issuer-site/harvest/silver/filing_source/; R70 AT6 GRANT: YES; exit=0. The BEFORE run of the same script is the negative arm and must have read NO",
-      "proof": null,
-      "closed_at": null
+      "proof": "AC4 on the APPLIED plane, run BEFORE the code leg as CTO condition 1 and AMENDMENT 1 require. AFTER: 'PASS control GetObject sec/harvest/silver/filing_source/ -> allowed' / 'PASS control ListBucket prefix sec/harvest/silver/filing_source/ -> allowed' / 'PASS C1 GetObject issuer-site/harvest/silver/filing_source/ -> allowed' / 'PASS C2 ListBucket prefix issuer-site/harvest/silver/filing_source/ -> allowed' / 'R70 AT6 GRANT: YES' / exit=0. BEFORE, the negative arm of the same script: the two controls read allowed while C1 and C2 both read implicitDeny, 'R70 AT6 GRANT: NO', exit=1 -- so the script discriminates and the YES is not a tautology. The four simulate false-deny modes are discharged rather than assumed: ONE --resource-arns per call; --context-entries passed for the conditioned ListBucket; and the controls read ALLOWED under the same action names and the same ARN grain, which is what rules out a typo'd action name and a wrong-grain resource ARN, both of which also return implicitDeny.",
+      "closed_at": "20261005T081121Z"
     },
     {
       "id": "L3",
@@ -49,7 +49,9 @@
     }
   ],
   "log": [
-    "20261005T080518Z OPENED by 0.7.0_AE_CloudOps~A with 5 leg(s)"
+    "20261005T080518Z OPENED by 0.7.0_AE_CloudOps~A with 5 leg(s)",
+    "20261005T081120Z LEG L1 closed: APPLIED through .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply on a plan targeted at aws_iam_role_policy.",
+    "20261005T081121Z LEG L2 closed: AC4 on the APPLIED plane, run BEFORE the code leg as CTO condition 1 and AMENDMENT 1 require. AFTER: 'PASS control GetOb"
   ],
   "last_red_at": null
 }
