@@ -61,6 +61,12 @@ for line in open(".env", encoding="utf-8"):
     if m:
         keys.append(m.group(1))
 R["env_keys"] = sorted(keys)
+hashes = {}
+for line in open(".env", encoding="utf-8"):
+    m = re.match(r"^([A-Z0-9_]+)=(.*)$", line.rstrip(chr(10)).rstrip(chr(13)))
+    if m:
+        hashes[m.group(1)] = hashlib.sha256(m.group(2).encode("utf-8")).hexdigest()   # CVO T2 (ii): only the digest leaves the host; no value is printed or stored
+R["env_hashes"] = hashes
 yv = None
 for line in open(".env", encoding="utf-8"):
     m = re.match(r"^YEARINREVIEW_VIEW_ALLOWED_EMAILS=(.*)$", line.rstrip(chr(10)).rstrip(chr(13)))
@@ -186,6 +192,15 @@ def after_run():
     return json.loads(line[0][len("RL6_RESULT "):]), scratch_removed
 
 
+def t2_guard_arms():
+    """CVO GUARD T2 (i): the 403 arm and its three siblings ON THE DEPLOYED HOST, through the installed code in its venv, in a separate process, with a LOCAL TEST ES256 key
+    swapped in for the ELB public key. Honest name: 'deployed bytes, test signing key'. Returns (ok, output)."""
+    outf = os.path.join(tempfile.mkdtemp(prefix="og_rl9_t2_"), "t2.out")
+    r = subprocess.run([sys.executable, os.path.join(HERE, "rl9_guard_ssm.py"), outf, "owner", "empty", "missing"], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace")
+    return r.returncode, r.stdout
+
+
 def before_run():
     outf = os.path.join(tempfile.mkdtemp(prefix="og_rl6c_before_"), "rl6_before.out")
     env = dict(os.environ, OG_RL6_MODE="after")
@@ -210,8 +225,8 @@ def main():
     if a.mode == "before":
         R["before_run"] = before_run()
         json.dump(R, open(a.state, "w", encoding="utf-8"), indent=1)
-        print("BEFORE saved: MainPID %s, env key names %d, tools %d, /health %s, host-local /yearinreview %s; dim_asset download %s; dim_asset query %s" % (
-            R["mainpid"], len(R["env_keys"]), len(R["tools"] or []), R["health"], R["yir_local"], R["before_run"]["dim_asset_download"], R["before_run"]["dim_asset_query"]))
+        print("BEFORE saved: MainPID %s, env value sha256 saved %d (hash only), env key names %d, tools %d, /health %s, host-local /yearinreview %s; dim_asset download %s; dim_asset query %s" % (
+            R["mainpid"], len(R["env_hashes"]), len(R["env_keys"]), len(R["tools"] or []), R["health"], R["yir_local"], R["before_run"]["dim_asset_download"], R["before_run"]["dim_asset_query"]))
         return 0
     if not a.served_release or len(a.served_release) != 40:
         print("after needs --served-release <the 40-hex deployed sha>")
@@ -235,6 +250,21 @@ def main():
     want_sha = hashlib.sha256(b"andrew@opalinvest.com").hexdigest()
     chk("%s value sha256 = sha256('andrew@opalinvest.com') (value never read as text)" % NEWKEY, R.get("yir_roster_sha256") == want_sha,
         "host digest %s vs expected %s (None = key absent)" % ((R.get("yir_roster_sha256") or "None")[:12], want_sha[:12]))
+    BH, AH = B.get("env_hashes") or {}, R.get("env_hashes") or {}
+    changed = sorted(k for k in BH if AH.get(k) != BH[k])
+    chk("CVO T2 (ii): every one of the 50 prior .env values has the SAME sha256 before and after (hash only; changed names listed)", len(BH) == 50 and not changed,
+        "before hashes %d, after hashes %d, equal %d of %d, changed %s" % (len(BH), len(AH), len(BH) - len(changed), len(BH), changed))
+    t2rc, t2out = t2_guard_arms()
+    sys.stdout.write(t2out[-3500:])
+    t2_pass = (t2rc == 0 and all(("T2_ARMS %s path /yearinreview: " % m) in t2out for m in ("owner", "empty", "missing")) and "RESULT: FAIL" not in t2out
+               and t2out.count("RESULT: PASS") == 3)
+    _md5lines = [ln for ln in open(os.path.join(HERE, "rl7_release_md5.txt"), encoding="utf-8").read().replace(chr(13), "").split(chr(10)) if ln.strip()]
+    rel_md5 = {f: h for h, f in (ln.split("  ", 1) for ln in _md5lines)}
+    loaded_ok = ("yearinreview_view.py md5 " + rel_md5["app/yearinreview_view.py"]) in t2out and ("config.py md5 " + rel_md5["app/config.py"]) in t2out and ("server.py=/opt/opal-gateway/app/server.py md5 " + rel_md5["app/server.py"]) in t2out
+    chk("CVO T2 (i): the 4 arms on the DEPLOYED host (installed code, venv, separate process, test ES256 key swapped for the ELB key = 'deployed bytes, test signing key'): "
+        "verified non-owner 403 no page bytes; owner 200; no identity 401; forged 401; empty and missing roster fail closed (11 arms)", t2_pass and loaded_ok,
+        "ssm rc %s; 3 modes PASS %s; loaded files equal the release md5 %s" % (t2rc, t2out.count("RESULT: PASS"), loaded_ok))
+    print("NOTE: the owner's REAL signed-in 200 at Andrew's browser is UNEXERCISED until he opens the page; T2 (i)'s owner 200 is a TEST-SIGNED identity, not PASS of the real arm.")
     A, scratch_removed = after_run()
     chk("host scratch removed", scratch_removed, "SCRATCH_REMOVED=yes and 0 leftovers" if scratch_removed else "see the SSM output above")
     chk("host-local GET /yearinreview with no identity is 401", R["yir_local"] == 401, "host-local code %s (before %s)" % (R["yir_local"], B.get("yir_local")))
