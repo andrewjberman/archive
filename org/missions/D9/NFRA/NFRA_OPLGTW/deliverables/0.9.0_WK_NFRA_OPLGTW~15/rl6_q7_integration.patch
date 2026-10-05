@@ -1,0 +1,159 @@
+diff --git a/infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py b/infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py
+index 668ed07602..96004ee2b7 100644
+--- a/infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py
++++ b/infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py
+@@ -311,6 +311,39 @@ class SchwabService:
+             raise ServiceError(UNAVAILABLE, "date_not_available")
+         return entries
+ 
++    async def _asset_holdings(self, principal: Principal, scope: de.Scope, master: str, date: str, operation: str,
++                              check: Callable[[], Any], cache: dict) -> Tuple[list, frozenset, Callable[[], Any]]:
++        """PRD C3 (":330-360" semantics.qualify_asset_plan's input): the CUSIPs a qualified POSITION snapshot for the same
++        master/date holds for the grant's authorized accounts, read solely for policy selection -- never a user-facing
++        join. ONE read for the query path and both download paths (prepare_download, export_query); each of the three
++        then calls sem.qualify_asset_plan itself. The position read reuses the caller's already-authorized `check` (the
++        dim_asset request already in flight), since the grant may carry no separate authorization for dim_position at all
++        (a partial-account dim_asset grant is not a dim_position grant). Returns (pos_sources, position_cusips,
++        pos_cleanup); the caller owns `pos_cleanup`."""
++        from .engine import PolicyFilter, QueryPlan
++        pos_entries = await self._entries(principal, master, sem.POSITION_DATASET, date, operation, cache)
++        pos_sources, pos_cleanup = self._fetch(pos_entries, check)
++        try:
++            if len(pos_sources) != len(pos_entries):
++                raise ServiceError(INCOMPLETE_SNAPSHOT, "scan_incomplete")
++            pos_accounts = tuple(sorted(scope.accounts.get(master, ())))
++            pos_plan = QueryPlan(mode="rows",
++                                 allowed_columns=(qry.ACCOUNT_SOURCE, sem.ASSET_QUALIFYING_FIELD),
++                                 columns=(sem.ASSET_QUALIFYING_FIELD,),
++                                 policy_filters=(PolicyFilter(qry.ACCOUNT_SOURCE, pos_accounts),))
++            self.jobs_run += 1
++            pos_job = await self._engine.run_query(principal.key, pos_plan, pos_sources)
++            if not pos_job.ok:
++                raise ServiceError(pos_job.code or INTERNAL_ERROR,
++                                   pos_job.reason or "asset_policy_selection_failed",
++                                   suggestion=pos_job.suggestion)
++            pos_rows = (pos_job.value or {}).get("rows") or []
++            position_cusips = frozenset(row[0] for row in pos_rows)
++        except BaseException:
++            pos_cleanup()
++            raise
++        return list(pos_sources), position_cusips, pos_cleanup
++
+     @staticmethod
+     def _versions(entries: Sequence[Mapping[str, Any]]) -> List[str]:
+         return sorted("%s@%s" % (e.get("file_id"), e.get("version_id")) for e in entries)
+@@ -618,34 +651,12 @@ class SchwabService:
+                         raise ServiceError(INCOMPLETE_SNAPSHOT, "scan_incomplete")
+                     run_plan = plan
+                     if q.dataset == sem.ASSET_DATASET:
+-                        # PRD C3 / semantics.qualify_asset_plan (":330-360"): restrict dim_asset's CUSIPs to
+-                        # holdings of the grant's authorized accounts, using a qualified POSITION snapshot for
+-                        # the same master/date solely for policy selection -- never a user-facing join. This is
+-                        # HALF ONE of NFRA_OPLGTW.TO-OG-q-5 (row NFRA_OPLGTW-W6-S8); the position read reuses
+-                        # this same authorized `check` (the dim_asset request already in flight), since the
+-                        # grant may carry no separate authorization for dim_position at all (a partial-account
+-                        # dim_asset grant is not a dim_position grant).
+-                        from .engine import PolicyFilter, QueryPlan
+-                        pos_entries = await self._entries(principal, q.master, sem.POSITION_DATASET,
+-                                                          q.business_date, "query", catalog_cache)
+-                        pos_sources, pos_cleanup = self._fetch(pos_entries, check)
++                        # PRD C3: the holdings restriction (HALF ONE of NFRA_OPLGTW.TO-OG-q-5, row
++                        # NFRA_OPLGTW-W6-S8) -- one helper shared with prepare_download and export_query (OG-q-7).
++                        pos_sources, position_cusips, pos_cleanup = await self._asset_holdings(
++                            principal, scope, q.master, q.business_date, "query", check, catalog_cache)
+                         base_cleanup = cleanup
+                         cleanup = lambda _b=base_cleanup, _p=pos_cleanup: (_p(), _b())  # noqa: E731
+-                        if len(pos_sources) != len(pos_entries):
+-                            raise ServiceError(INCOMPLETE_SNAPSHOT, "scan_incomplete")
+-                        pos_accounts = tuple(sorted(scope.accounts.get(q.master, ())))
+-                        pos_plan = QueryPlan(mode="rows",
+-                                             allowed_columns=(qry.ACCOUNT_SOURCE, sem.ASSET_QUALIFYING_FIELD),
+-                                             columns=(sem.ASSET_QUALIFYING_FIELD,),
+-                                             policy_filters=(PolicyFilter(qry.ACCOUNT_SOURCE, pos_accounts),))
+-                        self.jobs_run += 1
+-                        pos_job = await self._engine.run_query(principal.key, pos_plan, pos_sources)
+-                        if not pos_job.ok:
+-                            raise ServiceError(pos_job.code or INTERNAL_ERROR,
+-                                               pos_job.reason or "asset_policy_selection_failed",
+-                                               suggestion=pos_job.suggestion)
+-                        pos_rows = (pos_job.value or {}).get("rows") or []
+-                        position_cusips = frozenset(row[0] for row in pos_rows)
+                         try:
+                             run_plan, policy_sources = sem.qualify_asset_plan(plan, pos_sources, position_cusips)
+                         except sem.SemanticError as exc:
+@@ -813,12 +824,27 @@ class SchwabService:
+                 projection = {"query": q.definition()}
+             fields.update(master=master, dataset=dataset, date=date)
+             self._scope(scope, {"operation": "download_filtered", "master": master, "dataset": dataset})
+-            if dataset == "dim_asset" and self._asset_policy is None:
+-                raise ServiceError(UNAVAILABLE, "asset_policy_selection_unavailable")
+             self._date_servable(scope, avail, "download_filtered", master, dataset, date)
+             entries = await self._entries(principal, master, dataset, date, "download_filtered", cache)
+             versions = self._versions(entries)
+             now = int(self._clock())
++            if dataset == sem.ASSET_DATASET:
++                # PRD C3 (OG-q-7): the same holdings restriction as the query path, applied at prepare time so an
++                # unqualified grant is refused here (asset_read_denied_unqualified), not at redemption.
++                from .engine import QueryPlan
++                _stub = QueryPlan(mode="rows", allowed_columns=(sem.ASSET_QUALIFYING_FIELD,),
++                                  columns=(sem.ASSET_QUALIFYING_FIELD,))
++                _chk = self._policy_check(principal, {"operation": "download_filtered", "master": master,
++                                                      "dataset": dataset, "dates": [date],
++                                                      "latest_complete": avail.get("latest_qualified_date")})
++                _pos_sources, _held, _pos_cleanup = await self._asset_holdings(principal, scope, master, date,
++                                                                               "download_filtered", _chk, cache)
++                try:
++                    sem.qualify_asset_plan(_stub, _pos_sources, _held)
++                except sem.SemanticError as exc:
++                    raise ServiceError(exc.code, exc.reason, exc.where) from None
++                finally:
++                    _pos_cleanup()
+             ticket_key = cur.bind_key("ticket", principal=principal.key, revision=revision, master=master,
+                                       dataset=dataset, dates=[date], projection=projection, source_versions=versions)
+             request = {"ticket_key": ticket_key, "tid": principal.tid, "oid": principal.oid, "revision": revision,
+@@ -890,8 +916,6 @@ class SchwabService:
+         else:
+             q = qry.parse_query(dict(projection["query"]), self.rules)
+             qry.check_against_grant(q, granted, self.rules)
+-        if q.dataset == "dim_asset" and self._asset_policy is None:
+-            raise ServiceError(UNAVAILABLE, "asset_policy_selection_unavailable")
+         refs = qry.account_refs_in(q)
+         resolved: Dict[str, str] = {}
+         if refs:
+@@ -906,13 +930,35 @@ class SchwabService:
+                               limit=cap + 1, offset=0, tie_break=grain)
+         check = self._policy_check(principal, {"operation": "download_filtered", "master": master, "dataset": dataset})
+         sources, cleanup = self._fetch(entries, check)
++        n_policy = 0   # position sources appended for the C3 restriction (not part of the pinned snapshot's entries)
++        if dataset == sem.ASSET_DATASET:
++            # PRD C3 (OG-q-7): the redeemed file carries only CUSIPs held by the grant's accounts -- the query
++            # path's mechanism, one helper. Position sources join the SAME sources list (identical caps).
++            base_cleanup = cleanup
++            try:
++                pos_sources, position_cusips, pos_cleanup = await self._asset_holdings(
++                    principal, scope, master, date, "download_filtered", check, cache)
++            except BaseException:
++                base_cleanup()
++                raise
++            cleanup = lambda _b=base_cleanup, _p=pos_cleanup: (_p(), _b())  # noqa: E731
++            try:
++                plan, policy_sources = sem.qualify_asset_plan(plan, pos_sources, position_cusips)
++            except sem.SemanticError as exc:
++                cleanup()
++                raise ServiceError(exc.code, exc.reason, exc.where) from None
++            if len(sources) != len(entries):
++                cleanup()
++                raise ServiceError(INCOMPLETE_SNAPSHOT, "scan_incomplete")
++            sources = list(sources) + list(policy_sources)
++            n_policy = len(policy_sources)
+         export_dir = directory
+         if export_dir is None:
+             from . import export as _export   # local import: OG-x-1's module is not needed until an export runs
+             export_dir = _export.default_export_dir()
+         export_path: Optional[str] = None
+         try:
+-            if len(sources) != len(entries):
++            if len(sources) - n_policy != len(entries):
+                 raise ServiceError(INCOMPLETE_SNAPSHOT, "scan_incomplete")
+             self.jobs_run += 1
+             job = await self._engine.run_export(principal.key, plan, sources, row_cap=cap, export_dir=export_dir)
