@@ -1,0 +1,124 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-at-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-at-2.exec-roster-chain.md",
+  "group": "OTHER",
+  "vintage_commit": "5f4fb67e1a93634bd5c18394d3dad4605b734eff"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "5f4fb67e1a93634bd5c18394d3dad4605b734eff",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-at-2.exec-roster-chain.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~227",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/management/exec_roster_chain.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "New: run_chain, the filing / research notes / stored Bloomberg legs over stored objects only. No deploy.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "Changed: read_management (new dossier_read arg, chain call), new _empty_management_block, _with_exec_roster_chain, _serve_management_document (the serve body, moved unchanged); read_thesis_bundle passes its stored notes read. No deploy.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_exec_roster_chain.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "6 plant cases, offline.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_fallback_roster_served.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "test_zero_officer_block_is_unchanged now excludes the two chain keys (chain_tried, reason) from the byte comparison with the pinned block.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every plant case passes; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_exec_roster_chain.py; echo \"exit=$?\"",
+   "output_evidence": "lib/research/api/tests/test_exec_roster_chain.py::test_a_name_with_an_object_is_unchanged PASSED [ 16%]\nlib/research/api/tests/test_exec_roster_chain.py::test_a_name_whose_filing_yields_officers_serves_them_with_the_source_named PASSED [ 33%]\nlib/research/api/tests/test_exec_roster_chain.py::test_a_name_with_nothing_serves_chain_tried_and_a_plain_reason PASSED [ 50%]\nlib/research/api/tests/test_exec_roster_chain.py::test_the_research_notes_leg_reports_prose_without_taking_names_from_it PASSED [ 66%]\nlib/research/api/tests/test_exec_roster_chain.py::test_a_stored_bloomberg_officer_list_serves_after_the_other_legs_say_why_not PASSED [ 83%]\nlib/research/api/tests/test_exec_roster_chain.py::test_a_zero_officer_object_runs_the_chain_too PASSED [100%]\n============================== 6 passed in 1.45s ==============================\nexit=0\n\ndeciding line (every plant case passes; and exit=0): TRUE",
+   "denominator": "6 of 6 plant cases passed, exit=0",
+   "status": "PASS",
+   "expect": "6 passed.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "population names 95 with 0 non-200; C1 PASS 0 names failing; R70 C31 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round70/checks/r70_served.py\" --cell c31 --where local; echo \"exit=$?\"",
+   "output_evidence": "population: names 95 served 11 non-200 0 e.g. []\nPASS C1 every name serves sourced officers, or the chain it tried with a reason names failing 0 e.g. []\nR70 C31 SERVED: YES\nexit=0\n\ndeciding line (criterion text above): TRUE",
+   "denominator": "95 of 95 names answer 200; 0 failing; 11 served from an M-1 object, 84 serve chain_tried and a reason",
+   "status": "PASS",
+   "expect": "R70 C31 SERVED: YES.*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "R67 C26 SERVED: YES (DE 200 on thesis and peers; ZZZZ 404); and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round67/checks/r67_served.py\" --cell c26 --where local; echo \"exit=$?\"",
+   "output_evidence": "PASS C1 DE_US_Equity thesis answers 200 with a plain reason status 200 reason \"Deere & Company's research pack is not in yet, so nothing is shown here for drafted notes. Deere & C\"\nPASS C1 DE_US_Equity peers answers 200 with a plain reason status 200 reason 'Deere & Company (DE) is a covered name (Security Scanner S&P 500 universe, as of 2026-10-02), and it'\nPASS C2 the control ZZZZ_US_Equity thesis still answers 404 status 404\nR67 C26 SERVED: YES\nexit=0\n\ndeciding line (criterion text above): TRUE",
+   "denominator": "3 of 3 clauses PASS, exit=0",
+   "status": "PASS",
+   "expect": "R67 C26 SERVED: YES.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Made _with_exec_roster_chain return its block at once (the chain never runs), ran the plant file, restored from a byte copy.",
+   "expected": "the five chain cases fail, the unchanged-object case passes",
+   "observed": "5 failed, 1 passed; restored, 6 passed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "plant file run three times on the same tree",
+   "observed": "6 passed each time",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "deploy, store write, schedule, vendor or model call, portal write",
+   "reason": "Task order bound 1; the redeploy is a later cell. The Bloomberg leg reads only stored responses; for 84 names none is stored, so it is reported not tried (row AMGT_RESAPP-Z-W227-S1)."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W227-S1"
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest -q -p no:cacheprovider lib/research/api/tests/",
+   "result": "1 failed, 573 passed, 205 warnings in 101.75s (the one failure is test_model_words.py::test_formula_words_equals_the_pages_own_function_run_in_node, the portal function absent at the pinned portal ref; named in the report, no row per the order)"
+  }
+ ]
+}
