@@ -1,0 +1,18 @@
+OG-q-7 NEGATIVE CONTROL (worker ~22). Method: with the finished integration.py in the worktree, ONE line pair re-added to
+prepare_download after self._scope(...) -- the retired guard
+    if dataset == "dim_asset" and self._asset_policy is None:
+        raise ServiceError(UNAVAILABLE, "asset_policy_selection_unavailable")
+then `python -m pytest tests/test_schwab_q7_asset_download.py -v` from infra/aws/ec2/opal-gateway; then integration.py restored
+byte-for-byte from the pre-control copy (git diff --stat after restore matches the pre-control stat).
+
+OGQ7 AC01 download (served construction): is_error=True cusips=None
+FAILED            [ 25%]
+OGQ7 AC02: narrow=None wide=None unheld SYN000003 absent_from_narrow=True
+FAILED            [ 50%]
+OGQ7 AC03: is_error=True payload={'error': {'code': 'UNAVAILABLE', 'reason': 'asset_policy_selection_unavailable'}, ...}
+FAILED            [ 75%]
+OGQ7 AC04: query=['SYN000001', 'SYN000002'] download=None
+FAILED            [100%]
+======================== 4 failed, 1 warning in 6.55s =========================
+
+Restored (guard absent) run, same command: 4 passed in 5.95s (test_ogq7_ac01..ac04 PASSED).
