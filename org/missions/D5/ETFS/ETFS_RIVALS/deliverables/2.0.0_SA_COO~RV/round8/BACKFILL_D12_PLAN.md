@@ -33,5 +33,15 @@ original backfill ... go pick up ad hoc"); 3-year cap @357e681ddf. Traced read-o
 - The ACWI/IWM (D13) backfill follows the same two steps after the D13 flip, inside CTO~Z's budget ruling (msg 29445: 1M rows,
   per date, stop on first failure, cost measured first).
 
-Not measured: the local sink's on-disk layout; whether any day returns no rows for IDVZ or PFOE (a no-rows day withholds the
+## Step A RAN (2026-10-05 05:3x-05:44:13Z, 2.0.0_SA_COO~RV)
+
+- `handler_entry` backfill, funds IDVZ + PFOE, 2026-01-02..2026-10-02, sink `local:C:/bbg_backfill/idvz_pfoe`, batch
+  `backfill-d12-idvz-pfoe`, interpreter the vehicle's (`Python311`), Terminal health OK first.
+- Result: status OK, 189 captures OK, 0 failures; IDVZ 8,569 rows (~45/day), PFOE 4,251 rows (~22/day); 0 no-row days, so the
+  batch marker was written -- LOCALLY only: `s3://.../state/fetch_bloomberg/date=2026-10-02/backfill-d12-idvz-pfoe.json` is
+  ABSENT on S3 (ls rc=1; positive control: the 10-01 partition lists `batch-20261002T111011Z.json`). Nothing served moved.
+- The captures to import at Step B: `C:/bbg_backfill/idvz_pfoe/opal-data-etfs/bloomberg/etfs/bronze/holdings/**/*.json`
+  (not `*.sidecar.json`). IDVZ history therefore exists from 2026-01-02, not only from 2026-08-21.
+
+Not measured:  whether any day returns no rows for IDVZ or PFOE (a no-rows day withholds the
 batch marker, `:534-535`).
