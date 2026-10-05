@@ -74,3 +74,12 @@ _authz/_scope/performance to a named commit, then re-census). That is a next-rou
 
 **The release now:** irpt-export-render plus the two holdings-performance functions (the INF one after 14:00Z). Each change is
 attributed and nothing else moves.
+
+### Revision 1a (~08:0xZ): irpt-export-render DROPS too
+
+Read inside the BUILD_ONLY zip: `irpt_contracts/ExportBundle.schema.json` is a staged_from pin. It does NOT carry
+`narrative_state` and it sets `additionalProperties`, while the new `bundle.py` validates the frozen bundle against that schema. Shipping
+bundle.py alone would make every PATH B performance export fail validation. S324 ships only with the schema member re-pinned in
+the same build, which is the same re-pin cell as above.
+
+**The release now: the two holdings-performance functions only** (handler.py, IB-pr-320). The INF one goes after its 14:00Z fire.
