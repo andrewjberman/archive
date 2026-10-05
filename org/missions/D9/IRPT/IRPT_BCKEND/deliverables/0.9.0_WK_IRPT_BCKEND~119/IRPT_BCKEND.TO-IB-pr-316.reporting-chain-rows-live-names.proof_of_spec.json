@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-316",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "b67da247a7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "b67da247a7",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-316.reporting-chain-rows-live-names.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~119",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "abade931af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "re-key commit 6f98301fb7 (naming gate PASS 0 graded), then three recorder commits 6fb76119b3 (gold), f2a7a922d0 (publish), abade931af (read), LOCAL on wk-IRPT_BCKEND-119; AWS reads only",
+      "artifact_covered_by": [
+        "IB48-2-AC1",
+        "IB48-2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB48-2-AC1",
+      "criterion_verbatim": "the three live-named rows equal live code and role; the three stale keys are gone.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r48/p48_e2_cells.py\" . IB48-2-AC1",
+      "output_evidence": "OK: irpt-49f-reporting-gold-lambda = live | OK: irpt-49f-reporting-publish-lambda = live | OK: irpt-49f-reporting-read-lambda = live | IB48-2-AC1 PASS (rc=0)",
+      "denominator": "3 of 3 rows verified against live (code sha and role); 3 of 3 stale keys absent",
+      "status": "PASS",
+      "expect": "IB48-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB48-2-AC2",
+      "criterion_verbatim": "a GUARD: no other row changes against base 123258bd51 (irpt-ycharts-generate excepted), and comp-lambdamap adds no finding.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r48/p48_e2_cells.py\" . IB48-2-AC2",
+      "output_evidence": "OK: only the six keys moved; comp-lambdamap adds no finding | IB48-2-AC2 PASS (rc=0)",
+      "denominator": "all rows compared against base 123258bd51; findings checked against the 14 base findings",
+      "status": "PASS",
+      "expect": "IB48-2-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base state is the mutant: IB48-2-AC1 fails at base (no rows under the live names), per the issuer.",
+      "expected": "IB48-2-AC1 FAIL at base, PASS after re-key and three recorder runs.",
+      "observed": "PASS at HEAD abade931af.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each live CodeSha256 and role was read immediately before its recorder run, and again by the AC1 check.",
+      "observed": "The three hashes read before the runs equal those the AC1 check read afterwards (3 of 3 OK lines).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "tf_file / tf_resource correction",
+      "reason": "all three rows already named the declaring modules (reporting-gold, reporting-publish, reporting-read lambda.tf, module.irpt_reporting_<x>); left unchanged"
+    },
+    {
+      "item": "artifact_s3_key and _build_note text",
+      "reason": "the artifact keys investor-reporting/irpt-reporting-<x>-lambda.zip name the real S3 objects; only the map key and iam_role were in scope"
+    },
+    {
+      "item": "source-map-reconcile-audit.jsonl",
+      "reason": "each recorder reported 0 reconciled, 0 HELD, 1 already-in-parity and wrote no audit line"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "record-terraform-deploy.sh investor-reporting --function <fn> --code-sha256 <live>",
+      "invocation": "three runs, one per function, sequential, timeout 900",
+      "result": "each Resolved deployment set named exactly that one function; reconcile OK (deployed set in parity); no HALF-LANDED; each run's own commit landed and nothing was left staged"
+    }
+  ],
+  "session_log": "git log wk-IRPT_BCKEND-119; .scratch/rec_<fn>.log (untracked)"
+}
