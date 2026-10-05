@@ -127,6 +127,9 @@ async function shot(page, label) {
   const name = `${String(shotN).padStart(3, '0')}-${label.replace(/[^A-Za-z0-9_-]+/g, '-').slice(0, 60)}.png`
   await page.screenshot({ path: path.join(OUT, 'shots', name), fullPage: true }).catch((e) => log('shot failed', e.message))
 }
+// Y-6 run 7: the Stevens file's resolve ran ~4.5 min (14:06-14:10Z); the upload's first answer and the proxy re-post each
+// wait up to 8 minutes for the page's own state.
+const UPLOAD_ANSWER_CEILING_MS = 480000
 const pathOnly = (u) => { try { return new URL(u).pathname } catch { return u } }
 const py = (cmd, extraEnv = {}, ...args) => execFileSync('python', [ACCOUNT, cmd, ...args], { encoding: 'utf8', env: { ...process.env, ...extraEnv }, stdio: ['ignore', 'pipe', 'pipe'] })
 
@@ -291,7 +294,7 @@ try {
   mark('upload_pressed')
   await page.locator('[data-slot="prospect-composer"]').getByRole('button', { name: /Review portfolio/ }).click()
   let uploadState = null
-  for (const start = Date.now(); Date.now() - start < 240000;) {
+  for (const start = Date.now(); Date.now() - start < UPLOAD_ANSWER_CEILING_MS;) {
     uploadState = await page.locator('[data-slot="upload-state"]').getAttribute('data-state').catch(() => null)
     if (uploadState === 'NORMALIZED' || uploadState === 'NEEDS_CORRECTION') break
     if (await page.locator('[data-slot="prospect-composer"] [role=alert]').count()) break
@@ -333,7 +336,7 @@ try {
     packet.proxies_named = named
     mark('proxies_pressed')
     await page.locator('[data-slot="upload-proxy-submit"]').click().catch(() => {})
-    for (const start = Date.now(); Date.now() - start < 240000;) {
+    for (const start = Date.now(); Date.now() - start < UPLOAD_ANSWER_CEILING_MS;) {
       uploadState = await page.locator('[data-slot="upload-state"]').getAttribute('data-state').catch(() => null)
       if (uploadState === 'NORMALIZED' || (uploadState === 'NEEDS_CORRECTION' && Date.now() - start > 5000)) break
       await page.waitForTimeout(500)
