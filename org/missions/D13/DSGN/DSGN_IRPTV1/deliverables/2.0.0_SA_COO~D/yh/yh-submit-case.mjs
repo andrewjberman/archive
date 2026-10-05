@@ -378,6 +378,10 @@ try {
       // READY is read from the page's own owned-request history row, re-read once a minute up to the ceiling.
       const row = () => page.locator(`[data-row="owned-analysis-request"][data-request-id="${ids.request_id}"] [data-slot="owned-request-state"]`).first()
       let state = null
+      // A run killed mid-poll still leaves its ids and marks (Y-6 run 3 left none): the packet is written now and per poll.
+      const savePacket = () => { try { writeFileSync(path.join(OUT, 'packet.json'), JSON.stringify({ ...packet, marks, ids, partial: true }, null, 1)) } catch { /* the final write follows */ } }
+      savePacket()
+      let missingShot = false
       for (const start = Date.now(); Date.now() - start < opt.readyCeilingMin * 60000;) {
         await page.waitForTimeout(60000)
         await page.reload({ waitUntil: 'networkidle', timeout: 45000 }).catch(() => {})
@@ -387,13 +391,31 @@ try {
           await page.getByRole('option', { name: new RegExp(client.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') }).first().click({ timeout: 30000 }).catch(() => {})
         }
         await page.getByRole('button', { name: 'Analysis', exact: true }).or(page.getByRole('tab', { name: 'Analysis' })).first().click().catch(() => {})
+        // Wait for the LIST to draw before reading the row (Y-6 runs 3-4: 30 s after a reload the list was still a skeleton,
+        // 0 rows, and a flat wait read that as a missing row). Up to 120 s; a list that never draws reads 'list-loading'.
+        let drawn = false
+        for (const t0 = Date.now(); Date.now() - t0 < 120000;) {
+          if (await page.locator('[data-row="owned-analysis-request"]').count().catch(() => 0)) { drawn = true; break }
+          await page.waitForTimeout(500)
+        }
         // The row reads "loading" until its own status read answers: wait for that answer (up to 30 s), not a flat 3 s.
-        for (const t0 = Date.now(); Date.now() - t0 < 30000;) {
+        for (const t0 = Date.now(); drawn && Date.now() - t0 < 30000;) {
           state = await row().getAttribute('data-state').catch(() => null)
           if (state && state !== 'loading') break
           await page.waitForTimeout(500)
         }
+        if (!drawn) state = 'list-loading'
         log('ROW STATE', state)
+        if (state === null && !missingShot) {
+          // Y-6 run 3: the row went missing after it had read LOADING. Record what the page lists instead (ids only).
+          missingShot = true
+          const listed = await page.evaluate(() => [...document.querySelectorAll('[data-row="owned-analysis-request"]')].map((r) => r.getAttribute('data-request-id')))
+          const selected = await page.getByRole('combobox', { name: 'Client search' }).inputValue().catch(() => null)
+          packet.row_missing = { at: new Date().toISOString(), listed: listed.length, first_ids: listed.slice(0, 3), client_box_holds_text: Boolean(selected) }
+          log('ROW MISSING', JSON.stringify(packet.row_missing))
+          await shot(page, 'row-missing')
+        }
+        savePacket()
         // Terminal for this driver: the request's own end states, or the row's status read refused ('unavailable').
         if (['READY', 'NEEDS_CORRECTION', 'FAILED', 'ATTENTION', 'unavailable'].includes(state)) break
       }
