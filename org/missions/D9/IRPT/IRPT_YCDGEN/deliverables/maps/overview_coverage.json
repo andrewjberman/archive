@@ -1,7 +1,7 @@
 {
  "schema": "irpt-ycdgen-coverage-v1",
  "run": "YCD-R1-20261004T1944Z",
- "basis": "one class per element; reasons and via carry endpoint paths, column ids and field paths only, no figure value; column ids are inferred from printed labels (round-1 map claim). Round 3: class OWN_SERIES added (row IRPT_YCDGEN-W3-S2); the elements computable from the portfolio's own kept level series moved to it. Round 4 (YCD-o-4): each HELD_DATA row gains `feed` (contract 4.2); measured by schema reads, no Opal table found holds any held-data column as the same per-holding figure (row IRPT_YCDGEN-W2-S6), so every feed is YCHARTS_SECURITY through feed_probe_map.json; `metrics` lists the metric ids the call asks for, inferred from the table_data column ids.",
+ "basis": "one class per element; reasons and via carry endpoint paths, column ids and field paths only, no figure value; column ids are inferred from printed labels (round-1 map claim). Round 3: class OWN_SERIES added (row IRPT_YCDGEN-W3-S2); the elements computable from the portfolio's own kept level series moved to it. Round 4 (YCD-o-4): each HELD_DATA row gains `feed` (contract 4.2); measured by schema reads, no Opal table found holds any held-data column as the same per-holding figure (row IRPT_YCDGEN-W2-S6), so every feed is YCHARTS_SECURITY through feed_probe_map.json; `metrics` lists the metric ids the call asks for, inferred from the table_data column ids. Round 5 (YCD-h-5): each HELD_DATA row's `feed` is rewritten by held_data.census over Y-5's 99 holdings: OPAL_HELD (table, field, key, method, and the group id) or NOT_HELD (reason); the held figures are label-grain or field-grain values from Opal's own tables, never a vendor look-through, and a vendor call is no longer the feed.",
  "elements": [
   {
    "id": "p12.e04",
@@ -25,10 +25,9 @@
     "inception_field": "$[0].inception_date (kept step 01)"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_level_series",
-    "field": "$.chart_data[0][0].raw_data",
-    "note": "per holding; Opal holds no per-holding price series for the upload's tickers (opal-harvest-security-metrics keys axis_date+ticker holds only px_start/px_end for a ranked subset)"
+    "source": "NOT_HELD",
+    "reason": "price history is held for only part of the holdings (a series for the whole portfolio is not buildable)",
+    "group": "level_series"
    }
   },
   {
@@ -67,13 +66,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "net_expense_ratio"
-    ],
-    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet FUND_EXPENSE_RATIO (key `security`, '<TICKER> US Equity'; a Bloomberg universe of 114 securities, not the holdings)"
+    "source": "NOT_HELD",
+    "reason": "opal-data-etfs/bbg/<date>/characteristics.parquet.FUND_EXPENSE_RATIO is empty for all 99 holdings",
+    "group": "net_expense_ratio"
    }
   },
   {
@@ -93,13 +88,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "distribution_yield"
-    ],
-    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet EQY_DVD_YLD_IND_NET (114 securities)"
+    "source": "NOT_HELD",
+    "reason": "distribution yield is a fund measure; the held field is a stock's indicated dividend yield",
+    "group": "distribution_yield"
    }
   },
   {
@@ -119,12 +110,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "beta_5y"
-    ]
+    "source": "NOT_HELD",
+    "reason": "the held beta is Bloomberg's adjusted beta (BETA_ADJ_OVERRIDABLE), not the 5-year beta",
+    "group": "beta_5y"
    }
   },
   {
@@ -144,13 +132,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "cash_net_allocation"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "net cash allocation (cash net of shorts) is not held; the asset-class label carries no cash",
+    "group": "cash_net_allocation"
    }
   },
   {
@@ -205,12 +189,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "alpha_5y"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds a per-holding alpha",
+    "group": "alpha_5y"
    }
   },
   {
@@ -235,18 +216,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "asset_allocation_cash",
-     "asset_allocation_convertible",
-     "asset_allocation_stock",
-     "asset_allocation_preferred",
-     "asset_allocation_bond",
-     "asset_allocation_other"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "a multi-column group needs every column held, and not every column is",
+    "group": "asset_allocation_cash+asset_allocation_convertible+asset_allocation_stock+asset_allocation_preferred+asset_allocation_bond+asset_allocation_other"
    }
   },
   {
@@ -266,13 +238,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "asset_allocation_cash"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "no asset-class label means cash; a zero cannot be told from an unlabelled holding",
+    "group": "asset_allocation_cash"
    }
   },
   {
@@ -292,13 +260,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "asset_allocation_convertible"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "no asset-class label means convertible",
+    "group": "asset_allocation_convertible"
    }
   },
   {
@@ -318,13 +282,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "asset_allocation_stock"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "etf-classifications",
+    "field": "asset_class",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its asset-class label (no cash or other look-through; a multi-asset or structured label is not held), amount-weighted, renormalized over the holdings whose label decides",
+    "group": "asset_allocation_stock"
    }
   },
   {
@@ -344,13 +307,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "asset_allocation_preferred"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "no asset-class label means preferred",
+    "group": "asset_allocation_preferred"
    }
   },
   {
@@ -370,13 +329,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "asset_allocation_bond"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "etf-classifications",
+    "field": "asset_class",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its asset-class label (no cash or other look-through; a multi-asset or structured label is not held), amount-weighted, renormalized over the holdings whose label decides",
+    "group": "asset_allocation_bond"
    }
   },
   {
@@ -396,13 +354,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "asset_allocation_other"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "etf-classifications",
+    "field": "asset_class",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its asset-class label (no cash or other look-through; a multi-asset or structured label is not held), amount-weighted, renormalized over the holdings whose label decides",
+    "group": "asset_allocation_other"
    }
   },
   {
@@ -426,17 +383,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "market_cap_giant",
-     "market_cap_small",
-     "market_cap_large",
-     "market_cap_micro",
-     "market_cap_med"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "a multi-column group needs every column held, and not every column is",
+    "group": "market_cap_giant+market_cap_small+market_cap_large+market_cap_micro+market_cap_med"
    }
   },
   {
@@ -456,13 +405,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "market_cap_giant"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "market_cap_giant"
    }
   },
   {
@@ -482,13 +427,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "market_cap_small"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "market_cap_small"
    }
   },
   {
@@ -508,13 +449,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "market_cap_large"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "market_cap_large"
    }
   },
   {
@@ -534,13 +471,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "market_cap_micro"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "market_cap_micro"
    }
   },
   {
@@ -560,13 +493,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "market_cap_med"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "market_cap_med"
    }
   },
   {
@@ -586,13 +515,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_style_lg_cap_value"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_lg_cap_value"
    }
   },
   {
@@ -612,13 +537,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_style_mid_cap_value"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_mid_cap_value"
    }
   },
   {
@@ -638,13 +559,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_style_sm_cap_value"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_sm_cap_value"
    }
   },
   {
@@ -664,13 +581,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_style_lg_cap_blend"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_lg_cap_blend"
    }
   },
   {
@@ -690,13 +603,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_style_mid_cap_blend"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_mid_cap_blend"
    }
   },
   {
@@ -716,13 +625,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_style_sm_cap_blend"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_sm_cap_blend"
    }
   },
   {
@@ -742,13 +647,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_style_lg_cap_growth"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_lg_cap_growth"
    }
   },
   {
@@ -768,13 +669,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_style_mid_cap_growth"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_mid_cap_growth"
    }
   },
   {
@@ -794,13 +691,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_style_sm_cap_growth"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "market-cap bucket and style-box shares are vendor-defined look-throughs; Opal holds a market cap and no bucket",
+    "group": "stock_style_sm_cap_growth"
    }
   },
   {
@@ -820,13 +713,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_developed_markets"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_developed_markets"
    }
   },
   {
@@ -846,13 +738,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_americas"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_americas"
    }
   },
   {
@@ -872,13 +763,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_emerging_markets"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_emerging_markets"
    }
   },
   {
@@ -898,13 +788,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_greater_europe"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_greater_europe"
    }
   },
   {
@@ -924,13 +813,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_greater_asia"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_greater_asia"
    }
   },
   {
@@ -950,13 +838,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_americas"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_americas"
    }
   },
   {
@@ -976,13 +863,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_greater_europe"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_greater_europe"
    }
   },
   {
@@ -1002,13 +888,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_greater_asia"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_greater_asia"
    }
   },
   {
@@ -1028,13 +913,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_north_america"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_north_america"
    }
   },
   {
@@ -1054,13 +938,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_united_kingdom"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_united_kingdom"
    }
   },
   {
@@ -1080,13 +963,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_switzerland"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_switzerland"
    }
   },
   {
@@ -1106,13 +988,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_japan"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_japan"
    }
   },
   {
@@ -1132,13 +1013,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_canada"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_canada"
    }
   },
   {
@@ -1158,13 +1038,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_europe_developed"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_europe_developed"
    }
   },
   {
@@ -1184,13 +1063,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_europe_emerging"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_europe_emerging"
    }
   },
   {
@@ -1210,13 +1088,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_australasia"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_australasia"
    }
   },
   {
@@ -1236,13 +1113,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_united_states"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_united_states"
    }
   },
   {
@@ -1262,13 +1138,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_austria"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_austria"
    }
   },
   {
@@ -1288,13 +1163,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_czech_republic"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_czech_republic"
    }
   },
   {
@@ -1314,13 +1188,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_asia_developed"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_asia_developed"
    }
   },
   {
@@ -1340,13 +1213,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_latin_america"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_latin_america"
    }
   },
   {
@@ -1366,13 +1238,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_belgium"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_belgium"
    }
   },
   {
@@ -1392,13 +1263,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_poland"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_poland"
    }
   },
   {
@@ -1418,13 +1288,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_hong_kong"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_hong_kong"
    }
   },
   {
@@ -1444,13 +1313,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_argentina"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_argentina"
    }
   },
   {
@@ -1470,13 +1338,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_denmark"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_denmark"
    }
   },
   {
@@ -1496,13 +1363,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_russia"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_russia"
    }
   },
   {
@@ -1522,13 +1388,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_singapore"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_singapore"
    }
   },
   {
@@ -1548,13 +1413,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_brazil"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_brazil"
    }
   },
   {
@@ -1574,13 +1438,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_finland"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_finland"
    }
   },
   {
@@ -1600,13 +1463,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_turkey"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_turkey"
    }
   },
   {
@@ -1626,13 +1488,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_south_korea"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_south_korea"
    }
   },
   {
@@ -1652,13 +1513,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_chile"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_chile"
    }
   },
   {
@@ -1678,13 +1538,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_france"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_france"
    }
   },
   {
@@ -1704,13 +1563,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_africa_and_middle_east"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_africa_and_middle_east"
    }
   },
   {
@@ -1730,13 +1588,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_taiwan"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_taiwan"
    }
   },
   {
@@ -1756,13 +1613,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_colombia"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_colombia"
    }
   },
   {
@@ -1782,13 +1638,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_germany"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_germany"
    }
   },
   {
@@ -1808,13 +1663,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_algeria"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_algeria"
    }
   },
   {
@@ -1834,13 +1688,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_asia_emerging"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_asia_emerging"
    }
   },
   {
@@ -1860,13 +1713,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_mexico"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_mexico"
    }
   },
   {
@@ -1886,13 +1738,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_greece"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_greece"
    }
   },
   {
@@ -1912,13 +1763,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_egypt"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_egypt"
    }
   },
   {
@@ -1938,13 +1788,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_china"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_china"
    }
   },
   {
@@ -1964,13 +1813,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_peru"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_peru"
    }
   },
   {
@@ -1990,13 +1838,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_ireland"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_ireland"
    }
   },
   {
@@ -2016,13 +1863,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_iran"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_iran"
    }
   },
   {
@@ -2042,13 +1888,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_india"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_india"
    }
   },
   {
@@ -2068,13 +1913,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_venezuela"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_venezuela"
    }
   },
   {
@@ -2094,13 +1938,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_italy"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_italy"
    }
   },
   {
@@ -2120,13 +1963,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_israel"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_israel"
    }
   },
   {
@@ -2146,13 +1988,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_indonesia"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_indonesia"
    }
   },
   {
@@ -2172,13 +2013,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_netherlands"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_netherlands"
    }
   },
   {
@@ -2198,13 +2038,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_nigeria"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_nigeria"
    }
   },
   {
@@ -2224,13 +2063,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_kazakhstan"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_kazakhstan"
    }
   },
   {
@@ -2250,13 +2088,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_norway"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_norway"
    }
   },
   {
@@ -2276,13 +2113,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_qatar"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_qatar"
    }
   },
   {
@@ -2302,13 +2138,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_malaysia"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_malaysia"
    }
   },
   {
@@ -2328,13 +2163,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_portugal"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_portugal"
    }
   },
   {
@@ -2354,13 +2188,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_saudi_arabia"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_saudi_arabia"
    }
   },
   {
@@ -2380,13 +2213,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_pakistan"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_pakistan"
    }
   },
   {
@@ -2406,13 +2238,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_spain"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_spain"
    }
   },
   {
@@ -2432,13 +2263,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_south_africa"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_south_africa"
    }
   },
   {
@@ -2458,13 +2288,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_philippines"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_philippines"
    }
   },
   {
@@ -2484,13 +2313,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_sweden"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_sweden"
    }
   },
   {
@@ -2510,13 +2338,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_united_arab_emirates"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_united_arab_emirates"
    }
   },
   {
@@ -2536,13 +2363,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "region_exposure_thailand"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CNTRY_OF_DOMICILE",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its country of domicile's regions (100 when CNTRY_OF_DOMICILE is in the group, 0 for another of the countries the rule decides), amount-weighted, renormalized over the holdings whose country is decided",
+    "group": "region_exposure_thailand"
    }
   },
   {
@@ -2562,13 +2388,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_cyclical"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is one of ['Materials', 'Consumer Discretionary', 'Financials', 'Real Estate'], else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_cyclical"
    }
   },
   {
@@ -2588,13 +2413,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_basic_materials"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Materials', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_basic_materials"
    }
   },
   {
@@ -2614,13 +2438,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_consumer_cyclical"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Consumer Discretionary', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_consumer_cyclical"
    }
   },
   {
@@ -2640,13 +2463,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_financial_services"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Financials', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_financial_services"
    }
   },
   {
@@ -2666,13 +2488,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_real_estate"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Real Estate', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_real_estate"
    }
   },
   {
@@ -2692,13 +2513,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_sensitive"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is one of ['Communication Services', 'Energy', 'Industrials', 'Information Technology'], else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_sensitive"
    }
   },
   {
@@ -2718,13 +2538,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_comm_services"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Communication Services', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_comm_services"
    }
   },
   {
@@ -2744,13 +2563,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_energy"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Energy', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_energy"
    }
   },
   {
@@ -2770,13 +2588,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_industrials"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Industrials', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_industrials"
    }
   },
   {
@@ -2796,13 +2613,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_technology"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Information Technology', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_technology"
    }
   },
   {
@@ -2822,13 +2638,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_defensive"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is one of ['Consumer Staples', 'Health Care', 'Utilities'], else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_defensive"
    }
   },
   {
@@ -2848,13 +2663,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_consumer_defensive"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Consumer Staples', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_consumer_defensive"
    }
   },
   {
@@ -2874,13 +2688,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_healthcare"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Health Care', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_healthcare"
    }
   },
   {
@@ -2900,13 +2713,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "stock_sector_utilities"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "GICS_SECTOR_NAME",
+    "key": "ticker",
+    "method": "label share: the holding is placed whole in its GICS sector (100 when GICS_SECTOR_NAME is 'Utilities', else 0), amount-weighted, renormalized over the holdings that carry a sector label",
+    "group": "stock_sector_utilities"
    }
   },
   {
@@ -2931,18 +2743,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_sector_cash",
-     "bond_sector_government",
-     "bond_sector_corporate",
-     "bond_sector_municipal",
-     "bond_sector_derivative",
-     "bond_sector_securitized"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "a multi-column group needs every column held, and not every column is",
+    "group": "bond_sector_cash+bond_sector_government+bond_sector_corporate+bond_sector_municipal+bond_sector_derivative+bond_sector_securitized"
    }
   },
   {
@@ -2962,13 +2765,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_sector_cash"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_cash"
    }
   },
   {
@@ -2988,13 +2787,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_sector_government"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_government"
    }
   },
   {
@@ -3014,13 +2809,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_sector_corporate"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_corporate"
    }
   },
   {
@@ -3040,13 +2831,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_sector_municipal"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_municipal"
    }
   },
   {
@@ -3066,13 +2853,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_sector_derivative"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_derivative"
    }
   },
   {
@@ -3092,13 +2875,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_sector_securitized"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_sector_securitized"
    }
   },
   {
@@ -3118,13 +2897,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_credit_quality_aaa"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_aaa"
    }
   },
   {
@@ -3144,13 +2919,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_credit_quality_bbb"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_bbb"
    }
   },
   {
@@ -3170,13 +2941,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_credit_quality_below_b"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_below_b"
    }
   },
   {
@@ -3196,13 +2963,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_credit_quality_aa"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_aa"
    }
   },
   {
@@ -3222,13 +2985,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_credit_quality_bb"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_bb"
    }
   },
   {
@@ -3248,13 +3007,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_credit_quality_not_rated"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_not_rated"
    }
   },
   {
@@ -3274,13 +3029,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_credit_quality_a"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_a"
    }
   },
   {
@@ -3300,13 +3051,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_credit_quality_b"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_credit_quality_b"
    }
   },
   {
@@ -3341,28 +3088,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_short_term",
-     "bond_maturity_intermediate",
-     "bond_maturity_1_to_7_days",
-     "bond_maturity_1_to_3_years",
-     "bond_maturity_8_to_30_days",
-     "bond_maturity_3_to_5_years",
-     "bond_maturity_31_to_90_days",
-     "bond_maturity_5_to_7_years",
-     "bond_maturity_91_to_182_days",
-     "bond_maturity_7_to_10_years",
-     "bond_maturity_183_to_364_days",
-     "bond_maturity_long_term",
-     "bond_maturity_10_to_15_years",
-     "bond_maturity_15_to_20_years",
-     "bond_maturity_20_to_30_years",
-     "bond_maturity_over_30_years"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "a multi-column group needs every column held, and not every column is",
+    "group": "bond_maturity_short_term+bond_maturity_intermediate+bond_maturity_1_to_7_days+bond_maturity_1_to_3_years+bond_maturity_8_to_30_days+bond_maturity_3_to_5_years+bond_maturity_31_to_90_days+bond_maturity_5_to_7_years+bond_maturity_91_to_182_days+bond_maturity_7_to_10_years+bond_maturity_183_to_364_days+bond_maturity_long_term+bond_maturity_10_to_15_years+bond_maturity_15_to_20_years+bond_maturity_20_to_30_years+bond_maturity_over_30_years"
    }
   },
   {
@@ -3382,13 +3110,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_short_term"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_short_term"
    }
   },
   {
@@ -3408,13 +3132,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_intermediate"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_intermediate"
    }
   },
   {
@@ -3434,13 +3154,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_1_to_7_days"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_1_to_7_days"
    }
   },
   {
@@ -3460,13 +3176,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_1_to_3_years"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_1_to_3_years"
    }
   },
   {
@@ -3486,13 +3198,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_8_to_30_days"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_8_to_30_days"
    }
   },
   {
@@ -3512,13 +3220,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_3_to_5_years"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_3_to_5_years"
    }
   },
   {
@@ -3538,13 +3242,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_31_to_90_days"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_31_to_90_days"
    }
   },
   {
@@ -3564,13 +3264,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_5_to_7_years"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_5_to_7_years"
    }
   },
   {
@@ -3590,13 +3286,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_91_to_182_days"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_91_to_182_days"
    }
   },
   {
@@ -3616,13 +3308,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_7_to_10_years"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_7_to_10_years"
    }
   },
   {
@@ -3642,13 +3330,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_183_to_364_days"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_183_to_364_days"
    }
   },
   {
@@ -3668,13 +3352,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_long_term"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_long_term"
    }
   },
   {
@@ -3694,13 +3374,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_10_to_15_years"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_10_to_15_years"
    }
   },
   {
@@ -3720,13 +3396,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_15_to_20_years"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_15_to_20_years"
    }
   },
   {
@@ -3746,13 +3418,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_20_to_30_years"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_20_to_30_years"
    }
   },
   {
@@ -3772,13 +3440,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_region_maturity",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "bond_maturity_over_30_years"
-    ],
-    "note": "Opal holds only a class label per ticker (etf-classifications / bd-securities asset_class, sub_asset_class; key ticker), not a look-through share, so it is not this figure"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve look-through share; no Opal table holds it per holding",
+    "group": "bond_maturity_over_30_years"
    }
   },
   {
@@ -4018,13 +3682,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "dividend_yield"
-    ],
-    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet EQY_DVD_YLD_IND_NET (114 securities)"
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "EQY_DVD_YLD_IND_NET",
+    "key": "ticker",
+    "method": "amount-weighted mean of the held indicated net dividend yield (percent), renormalized over the holdings that carry it",
+    "group": "dividend_yield"
    }
   },
   {
@@ -4044,13 +3707,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "net_expense_ratio"
-    ],
-    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet FUND_EXPENSE_RATIO (key `security`, '<TICKER> US Equity'; a Bloomberg universe of 114 securities, not the holdings)"
+    "source": "NOT_HELD",
+    "reason": "opal-data-etfs/bbg/<date>/characteristics.parquet.FUND_EXPENSE_RATIO is empty for all 99 holdings",
+    "group": "net_expense_ratio"
    }
   },
   {
@@ -4070,13 +3729,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "distribution_yield"
-    ],
-    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet EQY_DVD_YLD_IND_NET (114 securities)"
+    "source": "NOT_HELD",
+    "reason": "distribution yield is a fund measure; the held field is a stock's indicated dividend yield",
+    "group": "distribution_yield"
    }
   },
   {
@@ -4096,13 +3751,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "number_of_holdings"
-    ],
-    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet TOTAL_NUMBER_OF_HOLDINGS_IN_PORT (114 securities)"
+    "source": "NOT_HELD",
+    "reason": "the held count (TOTAL_NUMBER_OF_HOLDINGS_IN_PORT) is a fund's own count, not the portfolio's look-through count",
+    "group": "number_of_holdings"
    }
   },
   {
@@ -4122,12 +3773,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "weighted_avg_pe"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "weighted_avg_pe"
    }
   },
   {
@@ -4152,12 +3800,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "weighted_avg_p_s"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "weighted_avg_p_s"
    }
   },
   {
@@ -4177,12 +3822,12 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "weighted_avg_market_cap"
-    ]
+    "source": "OPAL_HELD",
+    "table": "opal-data-etfs/bbg/<date>/characteristics.parquet",
+    "field": "CUR_MKT_CAP",
+    "key": "ticker",
+    "method": "amount-weighted ARITHMETIC mean of the held current market cap, renormalized over the holdings that carry it (a vendor's own average may be a different mean)",
+    "group": "weighted_avg_market_cap"
    }
   },
   {
@@ -4202,12 +3847,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "weighted_avg_p_b"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "weighted_avg_p_b"
    }
   },
   {
@@ -4227,12 +3869,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "weighted_avg_d_c"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "weighted_avg_d_c"
    }
   },
   {
@@ -4257,12 +3896,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "of_stock_holdings"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "of_stock_holdings"
    }
   },
   {
@@ -4282,12 +3918,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "current_yield"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "current_yield"
    }
   },
   {
@@ -4307,12 +3940,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "avg_credit_qual_scr"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "avg_credit_qual_scr"
    }
   },
   {
@@ -4332,12 +3962,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "yield_to_maturity"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "yield_to_maturity"
    }
   },
   {
@@ -4357,12 +3984,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "average_price"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "average_price"
    }
   },
   {
@@ -4382,13 +4006,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "effective_duration"
-    ],
-    "note": "partial Opal source, not the feed: opal-data-etfs bbg/<date>/characteristics.parquet HB_OAS_EFF_DURTN (114 securities)"
+    "source": "NOT_HELD",
+    "reason": "bond-sleeve figure; the held duration field (HB_OAS_EFF_DURTN) is empty for every holding the upload's census found, and the sleeve weights need a look-through bond share Opal does not hold",
+    "group": "effective_duration"
    }
   },
   {
@@ -4408,12 +4028,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "of_bond_holdings"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "of_bond_holdings"
    }
   },
   {
@@ -4433,12 +4050,9 @@
     "column_ids": "inferred from printed labels (map claim); verified by the issuer's first live holding query"
    },
    "feed": {
-    "source": "YCHARTS_SECURITY",
-    "call": "held_metrics_exposure_fundamentals",
-    "field": "$.chart_data[*]",
-    "metrics": [
-     "average_coupon"
-    ]
+    "source": "NOT_HELD",
+    "reason": "no Opal table holds this figure per holding",
+    "group": "average_coupon"
    }
   }
  ]
