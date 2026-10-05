@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-au-1.score-unit",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "46bc7b252ac96e5a008e3d768804dce701406328"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "46bc7b252ac96e5a008e3d768804dce701406328",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-au-1.score-unit.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~231",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "0438934c1e8d784c3322a07dd5a374c82c87be83",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: _serve_percent adds score_unit 'percent' when a PRICE row carries score; read_rank_series copies score_unit onto the point. No deploy in this order.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_score_unit.py",
+      "kind": "test",
+      "commit_or_etag": "0438934c1e8d784c3322a07dd5a374c82c87be83",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 5 tests (ranking row, timeseries point, overlay blocks).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every plant case passes; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_score_unit.py; echo \"exit=$?\"",
+      "output_evidence": "5 passed, 4 warnings in 0.87s\nexit=0",
+      "denominator": "5 of 5 plant cases",
+      "status": "PASS",
+      "expect": "5 passed.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "population reads 11 with non-200 0; C1 PASS objects failing 0; R71 C34 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round71/checks/r71_served.py\" --cell c34 --where local; echo \"exit=$?\"",
+      "output_evidence": "   population: reads 11 objects carrying score 572 non-200 0 e.g. []\nPASS C1 every served score carries score_unit percent objects failing 0 e.g. []\nR71 C34 SERVED: YES\nexit=0  (first run under timeout 120 returned rc 124; retry once under timeout 590 returned exit 0)",
+      "denominator": "0 failing of 572 objects over 11 reads",
+      "status": "PASS",
+      "expect": "reads 11.*non-200 0.*PASS C1.*failing 0.*R71 C34 SERVED: YES",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base (before the edit) is the mutant: the issuer's preflight measured r71_served c34 FAILING at the base, 572 of 572 score-carrying objects without score_unit.",
+      "expected": "c34 fails at base; passes after the edit.",
+      "observed": "Not re-run by this worker at the base (issuer-measured at the cut); after the edit c34 reads 0 failing of 572.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_score_unit.py ran twice (inside the full api suite and alone); r71_served c34 ran twice (first rc 124 at the 120s bound, retry rc 0).",
+      "expected": "identical results across runs",
+      "observed": "5 passed both times; c34 YES on the completed run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "none",
+  "compiler_tools": [
+    {
+      "tool": "api suite",
+      "invocation": "PYTHONPATH=$(pwd) python -m pytest -q -p no:cacheprovider lib/research/api/tests/",
+      "result": "1 failed, 604 passed in 118.46s; the one failure test_model_words.py::test_formula_words_equals_the_pages_own_function_run_in_node reads a portal function absent at this worktree's portal ref (re.search returned None)"
+    }
+  ]
+}
