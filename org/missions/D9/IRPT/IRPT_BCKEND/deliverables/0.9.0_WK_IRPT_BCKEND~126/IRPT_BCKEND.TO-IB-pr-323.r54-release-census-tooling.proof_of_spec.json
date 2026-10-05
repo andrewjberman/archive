@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-323",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-323.r54-release-census-tooling.md",
+    "group": "OTHER",
+    "vintage_commit": "6e051fd773"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "6e051fd773",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-323.r54-release-census-tooling.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~126",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/build-and-upload.sh",
+      "kind": "script",
+      "commit_or_etag": "8a418b8657",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "opt-in BUILD_ONLY=1 branch; default path unchanged; no S3 upload, no lambda update, no terraform, no source-map change",
+      "artifact_covered_by": ["IB54-1-AC1", "IB54-1-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/tests/test_build_only.sh",
+      "kind": "test",
+      "commit_or_etag": "8a418b8657",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline test, stub aws and aws.cmd first on PATH, fixture pipeline",
+      "artifact_covered_by": ["IB54-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~126/release_census.py",
+      "kind": "script",
+      "commit_or_etag": "8a418b8657",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "census + fetch-live (one get_function read exercised on irpt-narrative; URL never printed)",
+      "artifact_covered_by": ["IB54-1-AC2", "IB54-1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~126/tests/test_release_census.py",
+      "kind": "test",
+      "commit_or_etag": "8a418b8657",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 offline pytest tests on synthetic zips",
+      "artifact_covered_by": ["IB54-1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB54-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r54/p54_release_census.py\" . IB54-1-AC1 -> IB54-1-AC1 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r54/p54_release_census.py\" . IB54-1-AC1",
+      "output_evidence": "IB54-1-AC1 PASS | OK: 6 PASS lines | rc=0 (rerun identical)",
+      "denominator": "6 of 6 PASS arms (stub-aws-logs-and-fails, zip-built-and-kept, build-only-line-matches-zip-sha, no-aws-call-made, fixture-source-map-byte-identical, real-lambda-source-map-byte-identical); 0 FAIL",
+      "expect": "^IB54-1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB54-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r54/p54_release_census.py\" . IB54-1-AC2 -> IB54-1-AC2 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r54/p54_release_census.py\" . IB54-1-AC2",
+      "output_evidence": "IB54-1-AC2 PASS | OK: 7 census tests passed | rc=0 (rerun identical)",
+      "denominator": "7 of 7 pytest tests passed; the test file names RIDER, attributed, added, removed, changed (5 of 5 words)",
+      "expect": "^IB54-1-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB54-1-AC3",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r54/p54_release_census.py\" . IB54-1-AC3 -> IB54-1-AC3 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r54/p54_release_census.py\" . IB54-1-AC3",
+      "output_evidence": "IB54-1-AC3 PASS | OK: 4 changed path(s), all inside the grant | rc=0 (measured at 8a418b8657, before the proof commit)",
+      "denominator": "4 of 4 changed paths inside the grant; 0 under infra/aws/terraform/; 0 lambda-source-map.json",
+      "expect": "^IB54-1-AC3 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base state f58728dde1: test_build_only.sh, release_census.py and the census tests are absent.",
+      "expected": "AC1 and AC2 FAIL at base; AC3 PASS (guard)",
+      "observed": "issuer's dry run at base f58728dde1 recorded AC1 FAIL, AC2 FAIL, AC3 PASS; in this session the test's own stub-aws control confirms the stub logs and returns rc 97, so an empty log means 'not called'",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each check run twice in this session on the same tree",
+      "observed": "rc 0 and identical last lines both times for AC1, AC2, AC3",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> IB54-1-AC1,IB54-1-AC2,IB54-1-AC3",
+      "result": "see final report"
+    }
+  ]
+}
