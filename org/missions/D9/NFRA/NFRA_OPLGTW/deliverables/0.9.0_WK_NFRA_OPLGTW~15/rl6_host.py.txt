@@ -1,0 +1,126 @@
+# OG-rl-6 on-host program (shipped by rl6_ssm.py behind rl6_host_prelude.py.txt; OG_RL6_MODE = before | after).
+# Read-only on the host: the REAL (installed) service construction, the real contract file, an IN-MEMORY state store holding SYNTHETIC grants,
+# an in-memory audit sink and ticket store. The raw .env is never read. Prints counts, codes and booleans only: no account id and no CUSIP.
+#   before: dim_asset prepare_download REFUSED (expected asset_policy_selection_unavailable) + the dim_asset query OK, held-only.
+#   after : the dim_asset download is OK and its redeemed CSV holds only held CUSIPs (discriminated: held < asset universe); an
+#           empty-holdings grant's download is REFUSED asset_read_denied_unqualified; the query is OK and its held set equals the download's.
+import csv
+import tempfile
+
+MASTER = "08242234"
+DATE = "2026-10-01"
+ACCOUNTS = 10
+EMPTY_ACCOUNT = "RL6-NO-SUCH-ACCOUNT"   # a synthetic account id that holds no dim_position row at (MASTER, DATE)
+
+
+def outcome(result):
+    doc = result.structuredContent or {}
+    if result.isError:
+        err = doc.get("error") or {}
+        return {"status": "REFUSED", "code": err.get("code"), "reason": err.get("reason")}
+    return {"status": "OK", "returned_count": doc.get("returned_count"), "has_cursor": bool(doc.get("cursor"))}
+
+
+def refused_or_ok(result):
+    o = outcome(result)
+    return "OK" if o["status"] == "OK" else "REFUSED %s %s" % (o.get("code"), o.get("reason"))
+
+
+def run():
+    import pyarrow.parquet as pq
+    from app import data_entitlement as de
+    from app.context import Principal
+    from app.integrations.schwab import export as sexport
+
+    mode = os.environ.get("OG_RL6_MODE", "after")
+    allow = lambda: True  # noqa: E731
+    served, catalog, _store, contract = build()
+    res = catalog.snapshot(MASTER, DATE, allow)
+    assert res.status == "complete" and res.snapshot, ("snapshot not servable", res.result)
+    entries = [dict(f) for f in res.snapshot["files"] if f.get("dataset") == "dim_position"]
+    sources, cleanup = served._fetch(entries, allow)
+    try:
+        rows = []
+        for src in sources:
+            tbl = pq.read_table(src.path, columns=["account_id", "cusip"])
+            rows.extend(zip(tbl.column("account_id").to_pylist(), tbl.column("cusip").to_pylist()))
+    finally:
+        cleanup()
+    granted = sorted({a for a, _c in rows if a})[:ACCOUNTS]
+    gset = set(granted)
+    held = {c for a, c in rows if a in gset and c}
+    a_entries = [dict(f) for f in res.snapshot["files"] if f.get("dataset") == "dim_asset"]
+    a_sources, a_cleanup = served._fetch(a_entries, allow)
+    try:
+        asset_universe = set()
+        for src in a_sources:
+            asset_universe.update(c for c in pq.read_table(src.path, columns=["cusip"]).column("cusip").to_pylist() if c)
+    finally:
+        a_cleanup()
+    fields = contract.raw["fields"]
+
+    def principal_with(accounts):
+        tid, oid = str(uuid.uuid4()), str(uuid.uuid4())
+        scope = {"masters": [MASTER], "datasets": ["dim_position", "dim_asset"], "accounts": {MASTER: list(accounts)},
+                 "dates": {"mode": "fixed_dates", "dates": [DATE]},
+                 "columns": {"dim_position": list(fields["dim_position"]), "dim_asset": list(fields["dim_asset"])},
+                 "operations": list(de.OPERATIONS)}
+        g = de.grant_item(tid, oid, 1, "active", scope)
+        pr = de.profile_item(tid, oid, "active", 1, grant_revision=1)
+        svc, _cat, st, _c = build()
+        st.items.update({(de.grant_key(tid, oid, 1).pk, de.grant_key(tid, oid, 1).sk): g,
+                         (de.profile_key(tid, oid).pk, de.profile_key(tid, oid).sk): pr})
+        return svc, st, Principal(tid, oid, "rl6-synthetic@opalinvest.invalid")
+
+    qdl = {"master": MASTER, "dataset": "dim_asset", "business_date": DATE, "mode": "rows", "columns": ["cusip"]}
+
+    def page_all(svc, principal):
+        """The dim_asset QUERY, cursor-followed at 100 per page: (cusips, pages, error)."""
+        out, pages, err = [], 0, None
+        q = dict(qdl, page_size=100)
+        while pages < 200:
+            r = asyncio.run(svc.query(principal, q))
+            pages += 1
+            if r.isError:
+                err = refused_or_ok(r)
+                break
+            doc = r.structuredContent or {}
+            out.extend(row[0] for row in (doc.get("rows") or []))
+            if not doc.get("cursor"):
+                break
+            q = dict(q, cursor=doc["cursor"])
+        return out, pages, err
+
+    svc, st, principal = principal_with(granted)
+    dl_result = asyncio.run(svc.prepare_download(principal, query=dict(qdl)))
+    download = refused_or_ok(dl_result)
+    q_cusips, q_pages, q_err = page_all(svc, principal)
+    out = {"mode": mode, "master": MASTER, "date": DATE, "granted_accounts": len(granted),
+           "dim_asset_download": download, "dim_asset_query": q_err or "OK",
+           "query_returned": len(q_cusips), "query_unheld": len([c for c in q_cusips if c not in held]), "query_pages": q_pages,
+           "synthetic_principal": True, "grants_written": 0, "state_store_written": False}
+    if mode == "after":
+        d_cusips = None
+        if download == "OK":
+            secret = dl_result.structuredContent["download_url"].split("#", 1)[1]
+            ticket = st.get(sexport._key(secret))
+            scratch_exports = tempfile.mkdtemp(prefix="exports_", dir=SCRATCH)
+            path, _size, _n, _info = asyncio.run(sexport.generate_csv(principal, ticket, service=svc, directory=scratch_exports))
+            with open(path, newline="", encoding="utf-8") as fh:
+                crow = list(csv.reader(fh))
+            assert crow and crow[0][0].startswith("cusip"), "csv header"
+            d_cusips = [r[0] for r in crow[1:]]
+        hc = {"returned": len(d_cusips or []), "unheld_returned": len([c for c in (d_cusips or []) if c not in held]),
+              "held_cusips_in_dim_position": len(held), "asset_universe_cusips": len(asset_universe),
+              "distinct_returned": len(set(d_cusips or []))}
+        out["held_check"] = hc
+        out["query_held_equal_download_held"] = bool(d_cusips is not None and q_err is None and sorted(d_cusips) == sorted(q_cusips))
+        # the empty-holdings grant: its download is REFUSED asset_read_denied_unqualified, never 'all cusips'
+        esvc, _est, eprincipal = principal_with([EMPTY_ACCOUNT])
+        out["empty_holdings_download"] = refused_or_ok(asyncio.run(esvc.prepare_download(eprincipal, query=dict(qdl))))
+        out["memstore_put_runtime_calls"] = st.put_runtime_calls
+    print("RL6_RESULT " + json.dumps(out, sort_keys=True))
+
+
+if __name__ == "__main__":
+    run()

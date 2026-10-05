@@ -21,8 +21,10 @@ c14 (repairs): BP/_LN and NG/_LN classification resolves through the slash ticke
     reaches overlay, thesis, peers and coverage.
 c16 (500 attribution, local): a planted fault on the overlay answers 500 and writes ONE structured AMGT_500 line
     {request_id, route, security_key, exception_class}; no alarm, no notification, no monitor.
-c15 (cold read, deployed only): 3 COLD BA 2026-09-08 invokes, each under 5,000 ms with every headline (Init Duration proves cold),
-    and the log tail carries AMGT_SEGMENT timing lines.
+c15 (latency read, deployed only): 3 BA 2026-09-08 invokes, EACH under 5,000 ms with every headline, and the log tail carries
+    AMGT_SEGMENT timing lines. AMENDED round 69 (CTO ruling on row Z-S349, msg 29487): the cold count (Init Duration present) is
+    RECORDED, not required -- no seat can induce a cold start on demand without a served change, so 'cold' is not a regression
+    signal; the 5 s bar grades every invoke, warm or cold.
 Verdict: R64 <CELL> SERVED: YES|NO.
 """
 from __future__ import annotations
@@ -275,9 +277,11 @@ def main():
             runs = list(pool.map(one, range(3)))
         for i, r in enumerate(runs):
             print(f"   run {i + 1}: {r}")
-        good = [r for r in runs if r["status"] == 200 and r["cold"] and r["duration_ms"] is not None and r["duration_ms"] < 5000
+        good = [r for r in runs if r["status"] == 200 and r["duration_ms"] is not None and r["duration_ms"] < 5000
                 and r["articles"] and r["headlines"] == r["articles"]]
-        clause("C1 3 of 3 COLD BA Sept 8 invokes under 5 s with every headline", len(good) == 3, f"{len(good)} of 3")
+        cold = sum(1 for r in runs if r["cold"])
+        clause("C1 3 of 3 BA Sept 8 invokes under 5 s with every headline (cold count recorded, not required)", len(good) == 3,
+               f"{len(good)} of 3; cold {cold} of 3")
         clause("C2 every run's log carries AMGT_SEGMENT timings", all(r["segments"] for r in runs),
                f"{sum(1 for r in runs if r['segments'])} of 3")
     print(f"R64 {a.cell.upper()} SERVED: {'YES' if all(ok) else 'NO'}")

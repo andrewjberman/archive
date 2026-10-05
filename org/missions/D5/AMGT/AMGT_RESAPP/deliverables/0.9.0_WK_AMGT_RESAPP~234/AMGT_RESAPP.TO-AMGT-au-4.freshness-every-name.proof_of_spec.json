@@ -1,0 +1,83 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-au-4",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-au-4.freshness-every-name.md",
+  "group": "C",
+  "vintage_commit": "3ad8c92242b060faf9ea72bb69c34b0e3e2788ef"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "3ad8c92242b060faf9ea72bb69c34b0e3e2788ef",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-au-4.freshness-every-name.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~234",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "local commit on worker branch; deploy is another cell",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_freshness_covered.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "test file, not deployed",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every plant case passes; and exit=0",
+   "method": "test_suite",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_freshness_covered.py; echo \"exit=$?\"",
+   "output_evidence": "lib/research/api/tests/test_freshness_covered.py::test_covered_name_absent_from_universe_gets_a_row PASSED [ 33%]\nlib/research/api/tests/test_freshness_covered.py::test_absent_covered_name_with_a_stored_read_serves_its_date PASSED [ 66%]\nlib/research/api/tests/test_freshness_covered.py::test_existing_covered_row_dates_unchanged PASSED [100%]\n======================== 3 passed, 6 warnings in 0.90s ========================\nexit=0",
+   "denominator": "3 of 3 plant cases",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "population covered 95 with status 200; C1 PASS missing 0; R71 C36 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round71/checks/r71_served.py\" --cell c36 --where local; echo \"exit=$?\"",
+   "output_evidence": "   population: covered 95 rows 292 status 200\nPASS C1 /freshness carries a row for every covered name missing 0 e.g. []\nR71 C36 SERVED: YES\nexit=0\n",
+   "denominator": "95 of 95 covered names have a row",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Run the AC1 test file against the base scoped_amgt.py (git show HEAD:path) in place of the change, then restore.",
+   "expected": "the plant cases fail at the base",
+   "observed": "3 failed against the base (ADBE_US_Equity absent from rows; KeyError covered); file restored, cmp identical",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2 run against a stubbed pool and the local covered set; no clock enters the graded fields.",
+   "observed": "AC1 run twice with the same 3 passed; AC2 verdict stable",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~234/SESSION_LOG.md",
+ "compiler_tools": [
+  {
+   "tool": "pytest + r71_served.py c36",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_freshness_covered.py; echo \"exit=$?\" ; cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round71/checks/r71_served.py\" --cell c36 --where local; echo \"exit=$?\"",
+   "result": "AC1 3 passed exit=0; AC2 R71 C36 SERVED: YES exit=0"
+  }
+ ]
+}

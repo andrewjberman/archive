@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-at-1.batched-listing-upload",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-at-1.batched-listing-upload.md",
+    "group": "OTHER",
+    "vintage_commit": "c9b2e03ed2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "c9b2e03ed2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-at-1.batched-listing-upload.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~95",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~95 on branch wk-AMGT_HARVST-95-r47a at c9b2e03ed2 (sparse cone). HarvestUploader._run_listings: one silver_append per source per pass at the batch's greatest run_stamp; local isolation of untableable pages (SilverRowError); a failed append pends the batch. Found that pa.Table.from_pylist takes columns from the first row only, so added _listing_key_rounds (rows Z-W95-S1, Z-W95-S2). Stub S3 client and temp sqlite only: no network, no S3, no collector run, no upload-harvest, no .runtime touched.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "7d2166a18031a08bf33f56ed4f44433934238a8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_run_listings batched per source; _isolate_bad_silver_rows takes page items; _listing_key_rounds",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_at1_batched_listing_upload.py",
+      "kind": "test",
+      "commit_or_etag": "7d2166a18031a08bf33f56ed4f44433934238a8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 plants (i)-(v) plus the column-loss plant; carries the old per-group path as a test/control copy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~95/at-1.timing_control.py",
+      "kind": "script",
+      "commit_or_etag": "7d2166a18031a08bf33f56ed4f44433934238a8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "100 pages, 1,000 preloaded parts, old against new; prints reads, wall, rows identical, AC2 RESULT",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_at1_batched_listing_upload.py -rA --tb=line -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_at1_batched_listing_upload.py -rA --tb=line",
+      "output_evidence": "rc 0. '8 passed in 1.02s'. Full output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~95/AC1.out",
+      "denominator": "8 of 8 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round47/checks/at-1.AC2.py -- expect: AC2 RESULT: PASS",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/2.0.0_SA_COO_H/round47/checks/at-1.AC2.py",
+      "output_evidence": "rc 0. silver prefix reads: old 100 new 1; wall seconds: old 84.04 new 0.91; rows identical: True (rows 200 old, 200 new; new parquet objects 3 vs old 100); AC2 RESULT: PASS. Full output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~95/AC2.out",
+      "denominator": "100 of 100 planted pages uploaded on each path; 1 source; 200 of 200 silver rows equal old against new",
+      "status": "PASS",
+      "expect": "AC2 RESULT: PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "per-group appends restored by mutating the grouping lines of uploads.py (groups keyed (source, run_stamp))",
+      "expected": "silver prefix reads = one per page, so the once-per-source check (ii) fails on it",
+      "observed": "test_mutant_per_group_appends_fails_the_once_per_source_check passed: mutant reads [seeking-alpha] x 10 against 10 pages",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times and AC2 twice (planted data is deterministic; only wall seconds differ)",
+      "observed": "AC1 8 passed each time; AC2 reads old 100 new 1, rows identical True each time (wall old 90.45 then 84.04)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "HarvestUploader._run_articles",
+      "reason": "outside the order's paths; same first-row-columns exposure filed as AMGT_HARVST-Z-W95-S2 for the issuer"
+    },
+    {
+      "item": "order status flip",
+      "reason": "the order reserves the flip to the issuer"
+    },
+    {
+      "item": "collector suite count",
+      "reason": "python -m pytest lib/opal_data_harvest -q: 655 passed, 3 skipped (run before the commit and re-run after; see suite_opal_data_harvest.out)"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W95-S1",
+    "AMGT_HARVST-Z-W95-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "run at commit time; see the commit"
+    }
+  ]
+}

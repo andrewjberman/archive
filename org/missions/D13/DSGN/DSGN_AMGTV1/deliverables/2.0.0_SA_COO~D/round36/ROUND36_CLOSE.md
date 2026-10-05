@@ -60,3 +60,12 @@ ARMED 23:20:09Z and DISARMED 23:31:15Z, and a login after the disarm was REFUSED
   mounted on the list state) and the shared PanelContent `rounded-b-lg` (8px; the estate's component). Both are the CTO's call
   whether to cut.
 - The 7 outcomes the round-34 review reopened, and the round 35-36 outcomes, are graded on the served build after the DEV push.
+
+## 5. CTO REVIEW (@1de7e46895, msg 29321): APPROVED FOR DEV
+
+- **Re-merge onto current DEV and re-run:** remote DEV 3173c186 merged into the candidate as **portal c66d08f3** (no SecurityAnalysis or
+  scripts overlap). Against DEV it is still 6 files, +295/-1394. battery29 ALL PASS (0 skipped); repairs36 5/5, changed35 5/5,
+  payload35 4/4, cloud35 5/5, labels34 4/4, repairs34 4/4, peername34 4/4. **The push candidate is c66d08f3.**
+- The DEV push takes Andrew's word; the CTO is asking him. MSTR~Z's act.
+- Round-35 condition 3 is MET in substance (the CTO's read: aq-5's code is live, and AMD's cloud has no "amd").
+- Round 37 cuts no new page cells; the census items stay uncut. The grading is on the served build after the push.

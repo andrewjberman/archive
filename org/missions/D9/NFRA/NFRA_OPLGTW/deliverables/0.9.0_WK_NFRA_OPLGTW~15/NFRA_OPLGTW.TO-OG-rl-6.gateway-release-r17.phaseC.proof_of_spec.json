@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-rl-6",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~15",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "36ae4e822d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "565223dd62",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rl-6.gateway-release-r17.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-37be3485db.tar.gz (+ opal-gateway-latest.tar.gz)",
+      "kind": "s3_object",
+      "commit_or_etag": "ETag 4f2054e2337c552e15f6a16f7d716734, 497941 bytes, git-ref 37be3485db9a00522c55a260666f708336c918f3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "wrapper SSM deploy 1af86a41-9355-4bb0-b470-d745c57046bf Success 2026-10-05T14:22Z; rl9_phaseB_verify_after.out (rl7_verify.sh after, 14:23-14:24Z, VERIFY PASS 19 of 19 host+AFTER checks); ledger nfra-oplgtw-gateway-release-r17b CLOSED 8bb3522009; the release branch rel-nfra-oplgtw-r17c is local and never merged",
+      "artifact_covered_by": [
+        "AC3",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "ab3d9965f2",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "opal-gateway deployed_commit 37be3485db previous e91819e281, hand edit committed ab3d9965f2 (the wrapper's own commit a21a1146a2 is on the release branch only); yr.AC4 reads deployed=37be3485db descends from e91819e281=yes",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~15/rl7_verify.py",
+      "kind": "script",
+      "commit_or_etag": "9d21870994",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the verify tooling (CVO guard T2 extension, committed before the act and exercised read-only on live first: rl9_preflight_live.out 5 of 5 at /sprint, rl9_negative_control.out VERIFY FAIL 13 of 19); it runs from the worktree, nothing of it ships to the host (the harness is shipped per run to a scratch dir and removed: SCRATCH_REMOVED=yes, 0 leftovers)",
+      "artifact_covered_by": [
+        "AC3",
+        "AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 (cell OG-rl-6): /yearinreview is SERVED on the deployed release: the host's four shipped kit files (app/server.py, app/yearinreview_view.py, app/static/yearinreview/index.html, app/config.py) equal the manifest's deployed_commit bytes; an UNAUTHENTICATED public GET https://mcp.opalinvest.dev/yearinreview is redirected (302) to login.microsoftonline.com; a host-local GET with NO identity header is refused 401. The signed-in 200 is Andrew's act and is not graded.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r17/checks/yr.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "deployed_commit 37be3485db; host kit files equal the release bytes: 4 of 4; public unauthenticated GET: 302 to login.microsoftonline.com=yes; host-local no-identity GET: 401\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 shipped kit files equal; 1 of 1 public GET 302 to login.microsoftonline.com; host-local no-identity GET 401; run at HEAD 8bb3522009 (after the ledger-close commit) under timeout 120 against the served host; the order's <expect> regex re.search = MATCH (re-checked by the worker in Python). Beside it, from the AFTER read: the real service's host-local forged-header GET = 401; and on the DEPLOYED host (installed code, venv, separate process, a LOCAL TEST ES256 key swapped for the ELB key: 'deployed bytes, test signing key') 11 of 11 arms across owner/empty/missing: verified non-owner 403 with no page bytes, owner 200, no identity 401, forged 401, empty and missing roster owner 403 (CVO guard T2 (i)). The owner's REAL signed-in 200 at Andrew's browser is UNEXERCISED until he opens the page; it is not claimed as PASS.",
+      "status": "PASS",
+      "expect": "(?s)host kit files equal the release bytes: 4 of 4; public unauthenticated GET: 302 to login.microsoftonline.com=yes; host-local no-identity GET: 401.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 (cell OG-rl-6): NEVER-2 is closed (entry present, sentinel absent at HEAD), the deployed commit descends from e91819e281, the release ships only the kit's files (6), and the floor checks rl4.AC1 (against r17/ENV_KEYS_R17B.txt) and ht.AC2 pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r17/checks/yr.AC4.sh; echo \"exit=$?\"",
+      "output_evidence": "entry files at HEAD=1; sentinel at HEAD=no; deployed=37be3485db descends from e91819e281=yes; gateway files shipped 6, outside the kit set 0\nfloor: rl4.AC1 yes; ht.AC2 no\nRESULT: FAIL\nexit=1",
+      "denominator": "1 ledger entry at HEAD, sentinel absent; deployed 37be3485db descends from e91819e281; 6 gateway files shipped, 0 outside the kit set; floor rl4.AC1 yes (4 of 4 with the R17B baseline), ht.AC2 NO: ht.AC2.sh arm 2 hard-codes `HOST env_keys 50` and the signed release's .env is 51 names (host read: `HOST env_keys 51 teams_bearer_present True teams_bearer_empty False teams_labels_ok True tax_nonempty True`), so it reads 3 of 4. Run at HEAD 8bb3522009 under timeout 120; the order's <expect> regex re.search = NO MATCH (ht.AC2 yes / RESULT: PASS absent). The criterion cannot be met as written on any correct r17c deploy (row Z-W15-S50, BLOCKING); the same ht.AC2.sh with that one constant changed to 51 reads 4 of 4 PASS (rl9_ht_AC2_env51_equivalent.out, SSM 4b31d3bf) -- recorded as evidence, NOT as a PASS of AC4. No roll-back was run (stated in S50).",
+      "status": "FAIL",
+      "expect": "(?s)sentinel at HEAD=no;.*descends from e91819e281=yes; gateway files shipped 6, outside the kit set 0.*floor: rl4.AC1 yes; ht.AC2 yes.*RESULT: PASS.*exit=0",
+      "status_reason": "ht.AC2.sh (issuer's check, outside this worker's <paths>) hard-codes `HOST env_keys 50` in arm 2; the signed r17c release's .env is 51 names by design, so `floor: ht.AC2 yes` cannot be produced on a correct deploy. Every other AC4 conjunct holds (entry 1, sentinel no, descends yes, 6 shipped, 0 outside, rl4.AC1 yes). Row NFRA_OPLGTW-Z-W15-S50 (BLOCKING). Fix owner 2.0.0_SA_COO~O (amend ht.AC2 arm 2 to 51 or a baseline override); the order stays pending."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "rl7_verify.py after, extended with CVO guard T2 (i)/(ii), run read-only against the live UNDEPLOYED host e91819e281 (rl9_negative_control.out) as the unmutated-world control.",
+      "expected": "FAIL on the undeployed host: md5 92 of 96, .env 50 not 51, roster digest None, T2 (i) deployed-host arms FAIL (no yearinreview_view module), host-local 404 not 401.",
+      "observed": "VERIFY FAIL 13 of 19 (6 FAIL as expected incl. the new T2 (i) arm; T2 (ii) PASS 50 of 50 because nothing changed); after the act VERIFY PASS 19 of 19.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "rl4.AC1 (R17B baseline) run twice on the same live state: inside rl7_verify.sh after (14:24Z) and inside yr.AC4.sh (after the ledger close); the host kit files read by the verify's md5 check and by yr.AC3",
+      "observed": "rl4.AC1 4 of 4 PASS both times; host kit files equal in both reads",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The owner's real signed-in 200 at /yearinreview",
+      "reason": "UNEXERCISED until Andrew opens the page (his act; the order does not grade it, CVO half T2). The T2 owner 200 used a test-signed identity on the deployed bytes; it is a different claim."
+    },
+    {
+      "item": "AC1 and AC2 of this order",
+      "reason": "Graded at the r17 deploy (proof @2994d320b4); the order's A1 states they are not re-run after Phase C. rl6.AC1 was re-read as the floor and PASSED (rl9_rl6.AC1_after_manifest.out)."
+    },
+    {
+      "item": "The rollback re-deploy",
+      "reason": "Not run. Every host and T2 check PASSED; the only floor failure is ht.AC2's hard-coded 50 (row Z-W15-S50 states the judgment); the S3 rollback artifact opal-gateway-e91819e281.tar.gz is intact (ETag 69bd2701, git-ref e91819e281) and /c/tmp/og-rb12 is 94 of 94 equal; one command re-deploys it."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W15-S47",
+    "NFRA_OPLGTW-Z-W15-S48",
+    "NFRA_OPLGTW-Z-W15-S49",
+    "NFRA_OPLGTW-Z-W15-S50",
+    "NFRA_OPLGTW-Z-W15-S51"
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail: 9d21870994 (T2 extension committed before the act); 60f31e384f (ledger + sentinel before the act, live re-read 94 of 94 SSM e839b93f); the deploy 14:22:36Z (SSM 1af86a41); ab3d9965f2 (manifest, RL6_DOWNLOAD.json, rows S50 S51); 8bb3522009 (ledger CLOSED, sentinel removed); and the proof commit.",
+  "compiler_tools": [
+    {
+      "tool": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r17/checks/yr.AC{3,4}.sh",
+      "invocation": "each under timeout 120 from the worktree root after the ledger-close commit 8bb3522009",
+      "result": "AC3 exit=0 RESULT: PASS, expect matches; AC4 exit=1 RESULT: FAIL (ht.AC2 no), expect does NOT match"
+    },
+    {
+      "tool": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~15/rl7_verify.sh",
+      "invocation": "before (14:2xZ, saved 50 value sha256) then after .scratch/rl9_before.json 37be3485db9a00522c55a260666f708336c918f3",
+      "result": "host+AFTER 19 of 19 PASS; rl4.AC1 PASS; rl6.AC1 and ht.AC2 floor reads FAIL inside the script (rows S51, S50)"
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "open, close-leg x4, close",
+      "result": "CLOSED, all 4 legs proven, sentinel removed"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "--author 0.9.0_WK_NFRA_OPLGTW~15 -F <msgfile> -- <paths>",
+      "result": "msg-verify MATCH"
+    }
+  ]
+}

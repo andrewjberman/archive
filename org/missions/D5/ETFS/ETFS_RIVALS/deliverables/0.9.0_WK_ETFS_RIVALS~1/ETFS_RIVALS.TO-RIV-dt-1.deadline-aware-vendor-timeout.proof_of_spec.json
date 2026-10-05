@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-dt-1.deadline-aware-vendor-timeout",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "5f6b2a22d7",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-dt-1.deadline-aware-vendor-timeout.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4cc8e40575"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/ai_client.py",
+      "kind": "script",
+      "commit_or_etag": "d5b57f9b50",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; check runs offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/ai_stage.py",
+      "kind": "script",
+      "commit_or_etag": "d5b57f9b50",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; check runs offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/sweep.py",
+      "kind": "script",
+      "commit_or_etag": "d5b57f9b50",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; check runs offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r8dt1_deadline_timeout.py",
+      "kind": "script",
+      "commit_or_etag": "d5b57f9b50",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; check runs offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r7sa1_sweep_ai_step.py",
+      "kind": "script",
+      "commit_or_etag": "d5b57f9b50",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; check runs offline with stubbed transport",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a planted slow vendor at the deadline is handed a timeout that leaves the republish reserve; the page still republishes with the account FAILED; far from the deadline no call gets less than the vendor's own timeout -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round8/checks/dt-1.AC1.py",
+      "output_evidence": "sweep.REPUBLISH_RESERVE_S: 95.0\nOK:   sweep.REPUBLISH_RESERVE_S exists and covers the measured ~88 s in-sweep republish\nARM A: sweep OK | ai {'status': 'FAILED', 'reason': 'the AI step passed its deadline of 4.881 s (before a vendor call); nothing was written'} | republish OK | manifest batch ai-2026-09-30-8cc54324 | revisions 1\nARM A vendor calls: [{'timeout': 4.780545099998562, 'left_at_start': 4.78, 'ran_s': 4.78, 'end_vs_deadline': 0.0}]\nOK:   every vendor call is handed a timeout\nOK:   no call's timeout is longer than the time left to the AI deadline at its start\nOK:   no vendor call ends after the AI deadline\nOK:   the AI step reads FAILED with the deadline reason\nOK:   the page is republished: a new batch with ONE kept revision\nARM B: sweep OK | ai OK | accounts 1 | calls 4 | timeouts handed [120.0]\nOK:   control: with ample time the step is OK, writes one account and republishes\nOK:   control: far from the deadline no call is handed a timeout shorter than the vendor's own\nAC1 RESULT: PASS 0 failures\nrc=0\n",
+      "denominator": "8 of 8 checks OK; run under a 120 s bound (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "dt-1.AC1 run once on the branch after the commit; rivalfunds package suite once.",
+      "observed": "AC1 PASS 0 failures; suite 602 passed, 2 skipped, 0 failed.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The spec names no mutant for this order.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "Deploy, S3 write, vendor call",
+      "reason": "Order section 3: NEVER."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "d5b57f9b50"
+    }
+  ]
+}
