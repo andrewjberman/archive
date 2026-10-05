@@ -61,6 +61,9 @@ const CASES = {
   // Y-2 fold-in Case B (2.0.0_SA_COO~Y 105051): case B with TIMXX named SGOV, as in Aproxy; one comparison.
   Bproxy: { sha256: '500837992a3b9caa', variant: 'comparison', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }], proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'easy file, TIMXX named SGOV, vs Opal Ultra Long-Term, Comparison (Y-2 fold-in Case B)' },
   C: { sha256: '500837992a3b9caa', variant: 'multicomp', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }, { kind: 'etf', key: 'IWM' }], expect: 'READY', blocked: 'brief 2 item 2.3: a ticker admitted as a comparison (CTO batch 178 ruling 4) is 2.0.0_SA_COO~Y\'s half' },
+  // Y-6 (2.0.0_SA_COO~Y 105158; CTO fold-in Y-6 'each case twice'): case C with TIMXX named SGOV. Its comparison half (a ticker
+  // admitted as a comparison) is ~Y's and is live (Y-3 READY on a CSV, ~Y 105051), so this case carries no block.
+  Cproxy: { sha256: '500837992a3b9caa', variant: 'multicomp', comparisons: [{ kind: 'model', key: 'opal_ultra_long_term' }, { kind: 'etf', key: 'IWM' }], proxies: { TIMXX: 'SGOV' }, expect: 'READY', note: 'easy file, TIMXX named SGOV, vs Opal Ultra Long-Term and IWM, Multi-Comp (Y-6 case C)' },
 }
 
 // ---- args ---------------------------------------------------------------------------------------------------------
