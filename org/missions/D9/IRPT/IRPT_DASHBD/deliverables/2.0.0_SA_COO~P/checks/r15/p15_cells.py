@@ -7,6 +7,9 @@ Usage: python <this file> <repo_root> <criterion_id>
               its `_denominator` names the new route count. Base: FAIL.
   DB15-1-AC2  the census that reads the file, investor-reporting _authz/tests/test_unguarded_census.py, passes with 0 failed.
               Base: PASS (regression).
+  DB15-1-AC3  (amendment 1) the two reporting routes carry status ROUTED_ELSEWHERE with a non-empty `routed_by` (so the api root's
+              routes.tf, which routes only status DECLARED, never sees them), and _contracts/tests/test_seam_paired.py passes with 0
+              failed. Base: FAIL.
   DB15-2-AC1  E3_SHAPE_RULING.json and BD_POPULATION_PULL_E3.json are TRACKED in the DB-b-20 folder, parse as JSON, and the
               ruling names batches 248 and 249 and no longer says the bearer is minted once. Base: FAIL (untracked).
   DB-GUARD    the commits of 0.9.0_WK_IRPT_DASHBD~9 and ~10 since base touch only their grants. Base: PASS.
@@ -23,7 +26,7 @@ ROUTES = "docs/contracts/investor-reporting/v1/routes.json"
 IR = "infra/aws/lambda/investor-reporting"
 B20 = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/"
 GRANTS = {
-    "0.9.0_WK_IRPT_DASHBD~9": (ROUTES, "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~9/",
+    "0.9.0_WK_IRPT_DASHBD~9": (ROUTES, IR + "/_authz/tests/test_unguarded_census.py", "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~9/",
                                "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
                                "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-23."),
     "0.9.0_WK_IRPT_DASHBD~10": (B20 + "E3_SHAPE_RULING.json", B20 + "BD_POPULATION_PULL_E3.json",
@@ -63,6 +66,21 @@ def main():
         if r.returncode or re.search(r"\d+ (failed|error)", last):
             fail("census: %s" % last)
         print("OK: census %s" % last)
+    elif cid == "DB15-1-AC3":
+        d = json.loads((root / ROUTES).read_bytes().decode("utf-8"))
+        rep = [r for r in d.get("routes") or [] if "/reporting/" in str(r.get("route_key", ""))]
+        if len(rep) < 2:
+            fail("fewer than 2 reporting routes declared")
+        for r in rep:
+            if r.get("status") != "ROUTED_ELSEWHERE" or not r.get("routed_by"):
+                fail("%s: status %r routed_by %r" % (r.get("route_key"), r.get("status"), r.get("routed_by")))
+        r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "_contracts/tests/test_seam_paired.py"],
+                           cwd=str(root / IR), capture_output=True, text=True, timeout=900)
+        out = re.sub(r"\x1b\[[0-9;]*m", "", (r.stdout or "") + (r.stderr or ""))
+        last = ([ln for ln in out.splitlines() if ln.strip()] or ["(no output)"])[-1]
+        if r.returncode or re.search(r"\d+ (failed|error)", last):
+            fail("seam test: %s" % last)
+        print("OK: both reporting routes ROUTED_ELSEWHERE; seam %s" % last)
     elif cid == "DB15-2-AC1":
         tracked = subprocess.run(["git", "ls-files", B20], cwd=str(root), capture_output=True).stdout.decode("utf-8").split()
         for name in ("E3_SHAPE_RULING.json", "BD_POPULATION_PULL_E3.json"):
