@@ -8,7 +8,7 @@
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 . "$(dirname "$0")/_ssm.sh"
 H="$(cd "$(dirname "$0")" && pwd)"
-B="$H/../RL4_ENV_KEYS_BEFORE.txt"; n=0
+B="${RL4_ENV_KEYS_BASELINE:-$H/../RL4_ENV_KEYS_BEFORE.txt}"; n=0   # override: a release that ADDS a ruled key points this at its own set (r17/ENV_KEYS_R17B.txt, R15)
 want_c=$(git show "HEAD:org/standards/NFRA_OPLGTW_CONTRACT.json" | sha256sum | cut -d' ' -f1)
 ssm_run "$(python "$(native "$H/_env_shape_host.py")" | tr -d '\r')"; o1="$SSM_OUT"; echo "ssm $SSM_ID status=$SSM_STATUS"
 ssm_run "$(python "$(native "$H/../../trnspt/checks/_tr_host.py")" | tr -d '\r')"; o2="$SSM_OUT"; echo "ssm $SSM_ID status=$SSM_STATUS"
