@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-20",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "0c3438b096",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-20.bd-population-pull-plan.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~6",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/BD_POPULATION_PLAN_E3.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/bd_population_pull_e3.py",
+      "kind": "script",
+      "commit_or_etag": "bfafc70d0f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Fork of bd_likeday_pull_r4.py: population is every account in the served account_return_daily gold; mapping is the resolver's tier-1 xref rule; pull refuses without --go, on a plan hash mismatch, on a second pull record, and without E3_SHAPE_RULING.json; lands at the builder's 49financial address. pull was never run.",
+      "artifact_covered_by": [
+        "DB12-1-AC1",
+        "DB12-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/tests/test_bd_population_pull_e3.py",
+      "kind": "test",
+      "commit_or_etag": "bfafc70d0f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 offline pytest tests (no network, boto3 and bd_adapter replaced by tripwires): no --go, plan hash differs, second pull, no ruling file, ruling file without a pace.",
+      "artifact_covered_by": [
+        "DB12-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/BD_POPULATION_PLAN_E3.json",
+      "kind": "doc",
+      "commit_or_etag": "bfafc70d0f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built by plan under DRY_RUN=1 from S3 reads only: 562 gold partitions 2024-07-08..2026-10-01, xref partition date=2026-09-28; accounts_total 6863, mapped 5273, unmapped 1590 (each with a reason), requests 5252, vendor_calls 0, request_bodies_sha256 a62aa176e4199de19e9249bdd7e9102c8b3539974df2fd45d4a6aa21537b0f3a. No credential in the file.",
+      "artifact_covered_by": [
+        "DB12-1-AC1",
+        "DB12-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB12-1-AC1",
+      "criterion_verbatim": "DB12-1-AC1 -- the plan exists, was built with DRY_RUN=1 and vendor_calls 0, and names the word. Its population equals mapped plus unmapped, every unmapped account has a reason, and requests is between 1 and mapped. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r12/p12_population_plan.py\" . DB12-1-AC1",
+      "output_evidence": "OK: population 6863, mapped 5273, unmapped 1590 (each with a reason), requests 5252, vendor_calls 0\nDB12-1-AC1 PASS rc=0",
+      "denominator": "6863 gold accounts = 5273 mapped + 1590 unmapped; 1590 of 1590 unmapped carry a reason; 5252 requests of 5273 mapped (21 mapped accounts have no gap-free segment of 5 or more trading days)",
+      "status": "PASS",
+      "expect": "DB12-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB12-1-AC2",
+      "criterion_verbatim": "DB12-1-AC2 -- the refusal tests pass, at least 4, naming --go, hash, second and ruling. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r12/p12_population_plan.py\" . DB12-1-AC2",
+      "output_evidence": "OK: 5 refusal tests passed\nDB12-1-AC2 PASS rc=0",
+      "denominator": "5 of 5 tests passed (4 required); the file names --go, hash, second and ruling",
+      "status": "PASS",
+      "expect": "DB12-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB12-1-AC3",
+      "criterion_verbatim": "DB12-1-AC3 -- a GUARD: your commits touch only IRPT_DASHBD paths, and no REMEDIATION file. Base: PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r12/p12_population_plan.py\" . DB12-1-AC3",
+      "output_evidence": "OK: 3 changed path(s), all inside IRPT_DASHBD\nDB12-1-AC3 PASS rc=0",
+      "denominator": "3 of 3 changed paths inside org/missions/D9/IRPT/IRPT_DASHBD/, 0 under surprise-channel/remediations/ (measured before this proof's own commit)",
+      "status": "PASS",
+      "expect": "DB12-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each refusal test is its own negative arm: pull is called with exactly one precondition missing and every network layer (boto3, bd_adapter) replaced by a tripwire that raises if reached.",
+      "expected": "pull exits with the named refusal and never touches the network layer",
+      "observed": "5 of 5 refusals raised SystemExit with the expected message; no tripwire fired.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The plan was built once (the first two attempts hit S3 read timeouts and wrote nothing; the script then retried body reads), and AC1, AC2, AC3 ran on the committed tree.",
+      "observed": "All three PASS.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any pull run, token mint, Secrets Manager read, or Black Diamond call",
+      "reason": "Outside the order: this cell builds the script and the offline plan; vendor_calls is 0 and DRY_RUN stayed 1."
+    },
+    {
+      "item": "E3_SHAPE_RULING.json",
+      "reason": "The issuer writes that file when the ruling lands; pull refuses without it."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/bd_population_pull_e3.py org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~6/tests/test_bd_population_pull_e3.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s) (py_compile, ds-precommit, ruff py39)"
+    }
+  ]
+}

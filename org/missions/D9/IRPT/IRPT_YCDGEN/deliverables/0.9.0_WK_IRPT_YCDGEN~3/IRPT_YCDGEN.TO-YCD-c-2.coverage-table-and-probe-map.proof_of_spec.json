@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-c-2.coverage-table-and-probe-map",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-c-2.coverage-table-and-probe-map.md",
+    "group": "OTHER",
+    "vintage_commit": "7d3fac3bc7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R2.md",
+    "vintage_commit": "7d3fac3bc7",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-c-2.coverage-table-and-probe-map.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/overview_coverage.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worktree file; no deploy, no vendor call, no store write",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/coverage_probe_map.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worktree file; no deploy, no vendor call, no store write",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "worktree file; rows IRPT_YCDGEN-W3-S2 and IRPT_YCDGEN-W3-S3 appended",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the coverage table classifies exactly the 176 ids, one class each from HELD_DATA / OTHER_ENDPOINT / BUILDER_ONLY with a reason, every OTHER_ENDPOINT naming a probe call",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round2/checks/c-2.AC1.py",
+      "output_evidence": "c-2.AC1 RESULT: PASS schema=irpt-ycdgen-coverage-v1 ids=176/176 exact=True bad=[] dangling=[] | rc=0",
+      "denominator": "176 of 176 ids classified (167 HELD_DATA, 7 OTHER_ENDPOINT, 2 BUILDER_ONLY); 7 of 7 OTHER_ENDPOINT name a probe call present in coverage_probe_map.json",
+      "expect": "c-2.AC1 RESULT: PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the probe map plans through runner.plan_calls without a refusal (GET or the admitted POST)",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/2.0.0_SA_COO~Y/round2/checks/c-2.AC2.py",
+      "output_evidence": "c-2.AC2 RESULT: PASS schema=irpt-ycdgen-map-v1 planned=2 (GET or the admitted POST only) | rc=0",
+      "denominator": "2 of 2 probe calls planned (1 GET, 1 POST to /charts/scatter_plot_data.json)",
+      "expect": "c-2.AC2 RESULT: PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "no figure value from a client file or vendor answer is in either file (C-FIRM), graded by 3.0.0_SA_CVO",
+      "method": "manual_read_with_citation",
+      "invocation": "python -c \"import json;d=json.load(open('org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/overview_coverage.json'));print(len(d['elements']))\" (the two files carry endpoint paths, column ids, field paths, metric ids and reasons only; the six kept answers were read for field names and shapes only, into OS temp, and the copy was deleted)",
+      "output_evidence": "176",
+      "denominator": "2 files: overview_coverage.json (176 elements), coverage_probe_map.json (2 calls)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded by 3.0.0_SA_CVO at L9; the worker records output and no verdict",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Both checks run from an empty directory (no maps files), which stands for the base state where neither file existed.",
+      "expected": "AC1 and AC2 FAIL via their absent branch",
+      "observed": "c-2.AC1 RESULT: FAIL absent: .../maps/overview_coverage.json (rc=1); c-2.AC2 RESULT: FAIL absent: .../maps/coverage_probe_map.json (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the generator output was written once and both checks run against the committed bytes",
+      "observed": "AC1 and AC2 PASS on the written files",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_YCDGEN-W3-S2",
+    "IRPT_YCDGEN-W3-S3"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2,AC3",
+      "result": "see final report"
+    }
+  ]
+}

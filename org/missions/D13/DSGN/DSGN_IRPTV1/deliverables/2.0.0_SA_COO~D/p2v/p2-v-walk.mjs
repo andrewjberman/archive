@@ -26,13 +26,16 @@ const ACCOUNT = path.join(ROOT, '.claude', 'skills', 'ui-walk', 'ui_walker_accou
 const EMAIL = 'opal-ui-walker@opal.test'
 
 const argv = process.argv.slice(2)
-const opt = { base: 'http://localhost:5174', client: null, headed: false, noExport: false, tabOnly: false }
+const opt = { base: 'http://localhost:5174', client: null, headed: false, noExport: false, tabOnly: false, failHoldings: false }
 for (let i = 0; i < argv.length; i++) {
   if (argv[i] === '--client') opt.client = argv[++i]
   else if (argv[i] === '--base') opt.base = argv[++i]
   else if (argv[i] === '--headed') opt.headed = true
   else if (argv[i] === '--no-export') opt.noExport = true
   else if (argv[i] === '--tab-only') { opt.tabOnly = true; opt.noExport = true }
+  // CTO batch 238's real run: the holdings read answered locally with a bare 503, then the Holdings tab looked at. No
+  // request leaves for that read; nothing is written.
+  else if (argv[i] === '--fail-holdings') { opt.failHoldings = true; opt.noExport = true }
 }
 if (!opt.client) { console.error('--client "<search text>" is required'); process.exit(2) }
 if (!/^http:\/\/localhost:\d+$/.test(opt.base)) { console.error('REFUSED: --base must be http://localhost:<port>'); process.exit(2) }
@@ -99,6 +102,7 @@ try {
   })
   await page.route('**/*', (route) => {
     const req = route.request(); const m = req.method(); const p = pathOnly(req.url())
+    if (opt.failHoldings && m === 'GET' && /\/investor-reporting\/holdings\//.test(p)) return route.fulfill({ status: 503, body: '' })
     if (m === 'GET' || m === 'HEAD' || m === 'OPTIONS') return route.continue()
     if (ADMITTED_POST.some((re) => re.test(p))) return route.continue()
     if (m === 'POST' && EXPORT.test(p) && exportPosts === 0 && !opt.noExport) { exportPosts += 1; return route.continue() }
@@ -123,6 +127,34 @@ try {
   await option.click()
   log('client picked')
 
+  if (opt.failHoldings) {
+    // The identity card and the Performance tab first: the failed snapshot must be said there too.
+    await page.locator('[data-slot="identity-snapshot-failed"], [data-slot="reporting-accounts-failed"]').first().waitFor({ timeout: 30000 }).catch(() => {})
+    packet.snapshot_failed = {
+      card_how_much: (await page.locator('[data-slot="identity-how-much"]').innerText().catch(() => '')).replace(/\s+/g, ' ').trim(),
+      card_error: await page.locator('[data-slot="identity-snapshot-failed"]').count() > 0,
+      performance_error: await page.locator('[data-slot="reporting-accounts-failed"]').count() > 0,
+      performance_loading_panel: await page.locator('[data-slot="status-panel"][data-tab="reporting"]').count() > 0,
+    }
+    await shot(page, 'performance-snapshot-failed')
+    log('snapshot', JSON.stringify(packet.snapshot_failed))
+    await page.getByRole('button', { name: 'Holdings', exact: true }).or(page.getByRole('tab', { name: 'Holdings' })).first().click().catch(() => {})
+    const panel = page.locator('[data-slot="status-panel"][data-tab="holdings"]').first()
+    await panel.waitFor({ timeout: 30000 }).catch(() => {})
+    packet.holdings_failed = {
+      drawn: await panel.count() > 0,
+      reason_code_attr: await panel.getAttribute('data-reason-code').catch(() => null),
+      face_text: (await panel.evaluate((el) => { const c = el.cloneNode(true); c.querySelectorAll('details').forEach((d) => d.remove()); return c.textContent })
+        .catch(() => '')).replace(/\s+/g, ' ').trim(),
+      details_closed: await panel.locator('details').evaluate((d) => !d.open).catch(() => null),
+    }
+    await shot(page, 'holdings-failed')
+    await panel.locator('details summary').click().catch(() => {})
+    packet.holdings_failed.details_text = (await panel.locator('details').innerText().catch(() => '')).replace(/\s+/g, ' ').trim()
+    await shot(page, 'holdings-failed-details-open')
+    log('holdings', JSON.stringify(packet.holdings_failed))
+    throw Object.assign(new Error('fail-holdings'), { tabOnly: true })
+  }
   // 1. the Performance tab, waited on its own state
   const perf = page.getByRole('tab', { name: /performance/i }).first()
   if (await perf.count()) await perf.click().catch(() => {})
