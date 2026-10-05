@@ -1,0 +1,115 @@
+# OG-gr-4 host program (concatenated AFTER rl5_host_prelude.py.txt by gr4_ssm.py; never run alone).
+# Step 1: census every servable dim_balance snapshot of both masters through the SERVED construction (real catalog, roles, fetcher).
+# Step 2: for each, read the grain column (the engine's own grain field, query.DATASET_GRAINS["dim_balance"]) across ALL of the snapshot's
+#         source files and count rows, null grain cells, and DUPLICATE keys (keys appearing more than once, nulls grouped as the engine's
+#         group-by groups them). Example duplicate keys are printed REDACTED to their last 4 characters only.
+# Step 3: one rows page (page_size 5) on the newest servable snapshot, synthetic principal, in-memory grant naming dim_balance.
+# Prints counts, masters, dates, column names and redacted examples only. Nothing is written outside OG_RL5_SCRATCH.
+import pyarrow as pa
+import pyarrow.compute as pc
+import pyarrow.parquet as pq
+
+DS = "dim_balance"
+PAGE = 5
+ACCOUNTS = 10
+
+
+def outcome(result):
+    doc = result.structuredContent or {}
+    if result.isError:
+        err = doc.get("error") or {}
+        return {"status": "REFUSED", "code": err.get("code"), "reason": err.get("reason")}
+    return {"status": "OK", "returned_count": doc.get("returned_count"), "matched_row_count": doc.get("matched_row_count"),
+            "truncated": doc.get("truncated"), "has_cursor": bool(doc.get("cursor"))}
+
+
+def main():
+    from app import data_entitlement as de
+    from app.context import Principal
+    from app.integrations.schwab import query as qry
+
+    grain = qry.DATASET_GRAINS[DS]
+    assert len(grain) == 1, grain
+    gfield = grain[0]
+    service, catalog, store, contract = build()
+    allow = lambda: True  # noqa: E731 -- the operator's read; no principal, no grant
+    census_by_master, other_by_master, rows_out, entries_by_snap = {}, {}, [], {}
+    for master in sorted(contract.masters):
+        listed = catalog.list_dates(master, allow)
+        other, serv = {}, []
+        for date in sorted(listed):
+            res = catalog.snapshot(master, date, allow)
+            snap = res.snapshot
+            if res.status != "complete" or not snap:
+                other[res.result] = other.get(res.result, 0) + 1
+                continue
+            ents = [dict(f) for f in snap["files"] if f.get("dataset") == DS]
+            if ents:
+                serv.append((date, ents))
+        census_by_master[master] = {"marker_dates_listed": len(listed), "servable_dim_balance": len(serv),
+                                    "non_qualified_by_result": other,
+                                    "first_date": min(listed) if listed else None, "last_date": max(listed) if listed else None}
+        for date, ents in serv:
+            entries_by_snap[(master, date)] = ents
+            sources, cleanup = service._fetch(ents, allow)
+            try:
+                tables, rows, have = [], 0, True
+                for src in sources:
+                    pf = pq.ParquetFile(src.path)
+                    rows += pf.metadata.num_rows
+                    if gfield not in pf.schema_arrow.names:
+                        have = False
+                        continue
+                    tables.append(pq.read_table(src.path, columns=[gfield]).column(gfield))
+                entry = {"master": master, "date": date, "files": len(sources), "rows": rows, "grain_field": gfield,
+                         "grain_field_present": have}
+                if have and tables:
+                    col = pa.chunked_array([c for t in tables for c in t.chunks], type=tables[0].type)
+                    vc = pc.value_counts(col)
+                    counts = vc.field("counts").to_pylist()
+                    values = vc.field("values").to_pylist()
+                    dups = [(v, n) for v, n in zip(values, counts) if n > 1]
+                    entry.update(distinct_keys=len(values), null_grain_cells=int(col.null_count),
+                                 duplicate_keys=len(dups), rows_in_duplicate_keys=sum(n for _v, n in dups),
+                                 examples_redacted=["*" * 4 + (str(v)[-4:] if v is not None else "None") for v, _n in dups[:2]])
+                else:
+                    entry.update(duplicate_keys=None)
+                rows_out.append(entry)
+            finally:
+                cleanup()
+    print("GR4_CENSUS " + json.dumps({"served_snapshot_census": len(rows_out), "by_master": census_by_master}, sort_keys=True))
+    for r in rows_out:
+        print("GR4_ROW " + json.dumps(r, sort_keys=True, separators=(",", ":")))
+    # step 3: one page on the newest servable snapshot (newest date; ties go to the first master in sorted order)
+    newest = sorted(entries_by_snap, key=lambda k: (k[1], [-ord(c) for c in k[0]]))[-1]
+    master, date = newest
+    sources, cleanup = service._fetch(entries_by_snap[newest], allow)
+    try:
+        accts = set()
+        for src in sources:
+            accts.update(pq.read_table(src.path, columns=[gfield]).column(gfield).to_pylist())
+    finally:
+        cleanup()
+    granted = sorted(a for a in accts if a)[:ACCOUNTS]
+    fields = contract.raw["fields"]
+    tid, oid = str(uuid.uuid4()), str(uuid.uuid4())
+    scope = {"masters": [master], "datasets": [DS], "accounts": {master: granted},
+             "dates": {"mode": "fixed_dates", "dates": [date]},
+             "columns": {DS: list(fields[DS])}, "operations": list(de.OPERATIONS)}
+    g = de.grant_item(tid, oid, 1, "active", scope)
+    pr = de.profile_item(tid, oid, "active", 1, grant_revision=1)
+    svc, _cat, st, _c = build()
+    st.items.update({(de.grant_key(tid, oid, 1).pk, de.grant_key(tid, oid, 1).sk): g,
+                     (de.profile_key(tid, oid).pk, de.profile_key(tid, oid).sk): pr})
+    principal = Principal(tid, oid, "gr4-synthetic@opalinvest.invalid")
+    q = {"master": master, "dataset": DS, "business_date": date, "mode": "rows",
+         "columns": ["account_ref", "business_date", "net_mv_plus_cash"], "page_size": PAGE}
+    page = outcome(asyncio.run(svc.query(principal, q)))
+    out = {"master": master, "date": date, "page_size": PAGE, "granted_accounts": len(granted), "page": page,
+           "synthetic_principal": True, "grants_written": 0, "state_store_written": False, "real_store_touched": False,
+           "memstore_catalog_snapshot_puts": st.put_runtime_calls}
+    print("GR4_PAGE " + json.dumps(out, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()
