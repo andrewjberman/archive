@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-313",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "2ba6a4c27a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "2ba6a4c27a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-313.reconcile-42-not-closed-rows.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~116",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~116/E1_RECONCILE_ROUNDS_42_46.json",
+      "kind": "config_data",
+      "commit_or_etag": "e3d6e92791",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-IRPT_BCKEND-116; a read-only reconciliation record, AWS reads only, no deploy",
+      "artifact_covered_by": [
+        "IB47-1-AC1",
+        "IB47-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "e3d6e92791",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-IRPT_BCKEND-116; append-only, 14 rows (W116-S1 surprise, W116-S2..S14 closing rows), surprise-row-gate OK at commit",
+      "artifact_covered_by": [
+        "IB47-1-AC2",
+        "IB47-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB47-1-AC1",
+      "criterion_verbatim": "The reconciliation file holds exactly the 42 census ids, each with verdict HOLDS or LIVE and a non-empty close_condition and read.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r47/p47_e1_reconcile.py\" . IB47-1-AC1",
+      "output_evidence": "OK: 42 of 42 rows reconciled (17 HOLDS, 25 LIVE) | IB47-1-AC1 PASS (rc=0)",
+      "denominator": "42 of 42 census ids reconciled",
+      "status": "PASS",
+      "expect": "IB47-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB47-1-AC2",
+      "criterion_verbatim": "Every HOLDS row has a DISMISSED_WITH_REASON row appended to the channel since base 2fd59da001 that names its id.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r47/p47_e1_reconcile.py\" . IB47-1-AC2",
+      "output_evidence": "OK: 17 HOLDS rows, each closed by a DISMISSED_WITH_REASON row added since base | IB47-1-AC2 PASS (rc=0)",
+      "denominator": "17 of 17 HOLDS rows closed",
+      "status": "PASS",
+      "expect": "IB47-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "IB47-1-AC3",
+      "criterion_verbatim": "A guard: the worker's commits touch no REMEDIATION file and nothing outside IRPT_BCKEND.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r47/p47_e1_reconcile.py\" . IB47-1-AC3",
+      "output_evidence": "OK: 2 changed path(s), all inside IRPT_BCKEND and none in remediations/ | IB47-1-AC3 PASS (rc=0)",
+      "denominator": "2 of 2 changed paths inside IRPT_BCKEND, 0 in remediations/ (before the proof commit; the proof instance and order file add 2 more inside IRPT_BCKEND)",
+      "status": "PASS",
+      "expect": "IB47-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base 2fd59da001 is the mutant: the reconciliation file does not exist there, so IB47-1-AC1 and IB47-1-AC2 fail ('no E1_RECONCILE_ROUNDS_42_46.json').",
+      "expected": "IB47-1-AC1 FAIL at base, PASS after the file; IB47-1-AC2 FAIL at base, PASS after the closing rows.",
+      "observed": "AC1 PASS and AC2 PASS at HEAD e3d6e92791 (the checker's own recon() fail() path names the missing file at base).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Verdicts rest on live reads at 2026-10-04 ~22:00-23:10Z; the reads that carry the verdict (lambda CodeSha256s, S3 LastModified, CloudWatch maxima) are recorded verbatim in each row's read.",
+      "observed": "live irpt-export-render WDAv+kWKG.. and irpt-performance-adapter NU6YVERL.. matched the source map when read; the check is a pure function of the committed files.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "live foreign-firm call (S238), live empty-reason stop (W86-S2), first Inflection scheduled fire (S245, W80-S1)",
+      "reason": "AWS reads only: no invoke; the first Inflection fire is Mon 2026-10-05 14:00Z. Each HOLDS read states its limit in the row."
+    },
+    {
+      "item": "REMEDIATION files",
+      "reason": "REMEDIATION rows stay the CVO's; the closing rows are what the CVO reads (the order's refusal clause)."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W116-S1"
+  ],
+  "session_log": "git log wk-IRPT_BCKEND-116; .scratch/ (untracked) holds the build scripts and the census dump",
+  "compiler_tools": [
+    {
+      "tool": "python p47_e1_reconcile.py (the order's own checker)",
+      "invocation": "three runs, one per criterion",
+      "result": "AC1 PASS, AC2 PASS, AC3 PASS, each rc=0"
+    }
+  ]
+}

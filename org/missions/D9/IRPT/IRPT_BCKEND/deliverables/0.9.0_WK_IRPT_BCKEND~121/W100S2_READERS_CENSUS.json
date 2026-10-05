@@ -1,0 +1,65 @@
+{
+  "task_order": "IRPT_BCKEND.TO-IB-pr-318",
+  "surfaced_by": "0.9.0_WK_IRPT_BCKEND~121",
+  "read_at": "2026-10-04",
+  "mode": "READ-ONLY (no AWS write of any kind)",
+  "leaf": "s3://opal-data-portal-v2/platinum/advi/49financial/perfrp_performance_account.json",
+  "leaf_measured": "head_object 2026-10-04: LastModified 2026-09-01T03:16:07Z, ContentLength 1923593 (matches the task order)",
+  "surfaces": [
+    {
+      "name": "CloudFront distributions (opalinvest.dev + portal origin)",
+      "searched": "boto3 cloudfront list_distributions (paginated) + get_distribution_config for each; every cache behavior path pattern, target origin, origin path, and Lambda@Edge association read",
+      "denominator": "2 distributions; 1 serves opalinvest.dev (EVTSA9VEHNZVH, 30 behaviors incl. default); the other (E1DHJH4Y1W8YC2, 1 default behavior, origin opalinvest.com) has no alias and no S3 origin",
+      "readers": [
+        "EVTSA9VEHNZVH behavior /api/scoped/advisor-intelligence/*.json -> origin S3-opal-data-bd (OAI E139998VWH0PD), viewer-request auth-validator-edge:22, origin-request shared-advisor-router:26, origin-response shared-advisor-router-response:5. The router rewrites the origin to opal-data-portal-v2 for the suffix platinum/advi/{firm}/ (see surface 2). THIS BEHAVIOR CAN SERVE the leaf.",
+        "EVTSA9VEHNZVH behaviors /api/general/*, /api/general/json-tiered/*, /json-tiered/* -> origin opal-data-portal-v2 (OAC): CANNOT serve the leaf. public-data-router:7 (read from the deployed zip) rewrites /api/general/* to /json/, /json-tiered/, /platinum/mdpf/ and /platinum/etfs/ only; the OAC bucket-policy grant (statement AllowCloudFrontOACPublicData) covers json/*, json-tiered/*, platinum/mdpf/*, platinum/etfs/* only."
+      ]
+    },
+    {
+      "name": "API routes / Lambdas (repo source + deployed Lambda@Edge + Lambda environments)",
+      "searched": "native Grep for 'perfrp_performance_account|platinum/advi/' over infra/aws/lambda, infra/aws/terraform, org/modules/graph, and the key literal over all of infra; deployed code of shared-advisor-router:26, public-data-router:7, auth-validator-edge:22 downloaded and read; boto3 lambda list_functions (paginated) + get_function_configuration for names containing perf or advi; every function environment scanned for the key / platinum/advi",
+      "denominator": "files: infra/aws/lambda 7091, infra/aws/terraform 673, org/modules/graph 408, infra/aws/lambda-edge 23 tracked files. Lambdas: 231 listed, 9 named perf/advi read in full, 231 environments scanned",
+      "readers": [
+        "infra/aws/lambda: 0 hits on the key literal or 'platinum/advi/' (the only platinum/adv* hits are platinum/advisors/..., a different prefix). infra: 0 files contain perfrp_performance_account. org/modules/graph: 0 hits.",
+        "infra/aws/terraform: platinum/advi/ appears in 8 files, all IAM/OAI grants or comments (bd-pipeline/iam.tf:1270 publisher write grant, shared-infra/s3-portal-v2-import.tf:180 and portal-auth/firm-bucket-cross-ref.tf OAI GetObject grant on platinum/advi/*, portal-auth/cloudfront-distribution.tf:145, opal-assets/advi_49f_publisher.tf:70, etfs-positioning/main.tf:88): grants, not readers of this key.",
+        "Lambda environments: 0 of 231 reference the key or platinum/advi.",
+        "READER: shared-advisor-router:26 (deployed, CodeSha256 ZnPN8IRdjoq+qmWI7soWuSYLYTdqylYAEINfFj7I6D0=, 2026-09-14) contains PLATINUM_ADVI_PREFIX platinum/advi/ and CANONICAL_PLATINUM_BUCKET opal-data-portal-v2. For GET /api/scoped/advisor-intelligence/platinum/advi/49financial/perfrp_performance_account.json with a 49financial or mockadv token (both map to bucket opal-data-bd, so the tenant assertion passes), it sets the uri to /platinum/advi/49financial/perfrp_performance_account.json and the origin to opal-data-portal-v2.s3.us-east-1.amazonaws.com. The router has no perfrp carve-out and no exclusion of this leaf.",
+        "Bucket policy opal-data-portal-v2 statement AllowAdvisorRouterOAIPlatinumAdvi: Allow s3:GetObject on platinum/advi/* to OAI E139998VWH0PD, the same OAI that is on the S3-opal-data-bd origin, so the read is authorized end to end."
+      ]
+    },
+    {
+      "name": "Portal code at PROD (c69b4747)",
+      "searched": "git -C portal grep -n -e perfrp_performance_account -e platinum/advi c69b4747 -- src, then git grep -n -i perfrp, then the callers of each getPerfrp*Leaf getter and the importers of AdvisorBookView and AdvisorPublicProfile; confirmed c69b4747 equals origin/PROD",
+      "denominator": "1346 files under src at c69b4747; 4 files match the pattern (adviKeyRepoint.ts 8 lines, advisor-intelligence.ts 8, AdvisorPublicProfile.tsx 2, types.ts 3; many platinum/advi hits are the prefix of platinum/advisors/); the literal key perfrp_performance_account appears in 0 src files (it is built as perfrp_performance_${level}.json)",
+      "readers": [
+        "READER: src/api/endpoints/advisor-intelligence.ts getPerfrpPerformanceLeaf('account', ...) builds perfrpLeafBase('perfrp_performance_account.json') = /api/scoped/advisor-intelligence/platinum/advi/{firm}/perfrp_performance_account.json and fetches it with the bearer token (lines ~1634-1670).",
+        "CALLER: src/pages/AdvisorIntelligence/_shared/AdvisorBookView.tsx:479 useQuery(['perfrp-performance-leaf','account',...]) enabled when advisorId is set, staleTime 5 min, so it fires on every mount of the book view.",
+        "PAGE: AdvisorBookView is mounted by _shared/AdvisorPublicProfile.tsx:1400, which is mounted by src/pages/AdvisorIntelligence/_partners/49financial/index.tsx:124 (and the demo and inflection partner pages, AdvisorsTab, ClientsTab). The 49financial Advisor Intelligence partner page loads the leaf."
+      ]
+    },
+    {
+      "name": "Recent reads (S3 server access logs, CloudTrail data events)",
+      "searched": "s3 get_bucket_logging(opal-data-portal-v2); cloudtrail describe_trails + get_event_selectors for each trail",
+      "denominator": "1 bucket; 2 trails (opal-organization-trail, opal-served-key-write-trail)",
+      "readers": [
+        "S3 server access logging on opal-data-portal-v2: NONE (no LoggingEnabled).",
+        "CloudTrail data events: opal-organization-trail records S3 object ReadOnly events only for opal-data-49financial, opal-data-bd, opal-data-cot, opal-data-inf; opal-served-key-write-trail records writes only under */platinum/firm/. opal-data-portal-v2 is covered by neither, so no log can show whether the leaf was read. Not a reader; an instrument gap."
+      ]
+    }
+  ],
+  "verdict": "LIVE_READER",
+  "evidence": [
+    "Portal PROD c69b4747 (equals origin/PROD) AdvisorBookView.tsx:479 queries getPerfrpPerformanceLeaf('account') on every book-view mount; the 49financial partner page (_partners/49financial/index.tsx:124 -> AdvisorPublicProfile.tsx:1400 -> AdvisorBookView) mounts it.",
+    "The request path /api/scoped/advisor-intelligence/platinum/advi/49financial/perfrp_performance_account.json matches CloudFront behavior /api/scoped/advisor-intelligence/*.json (origin S3-opal-data-bd, OAI E139998VWH0PD, router shared-advisor-router:26).",
+    "Deployed shared-advisor-router:26 rewrites that suffix to origin opal-data-portal-v2, uri /platinum/advi/49financial/perfrp_performance_account.json (bundle read: prefix platinum/advi/, canonical bucket opal-data-portal-v2, tenant assertion bucket(firm)==callerBucket passes for 49financial).",
+    "Bucket policy AllowAdvisorRouterOAIPlatinumAdvi grants OAI E139998VWH0PD GetObject on platinum/advi/*; the leaf exists (1,923,593 bytes, LastModified 2026-09-01T03:16:07Z).",
+    "PATH B serves 49F on the investor-reporting pages; that is a different surface. The leaf has a second, independent reader: the Advisor Intelligence book view."
+  ],
+  "uncertainty": "The chain is READ in code and config, not exercised: no authenticated request was made (no token, and a request is outside a config census), and no access log exists on opal-data-portal-v2 to show actual reads. The portal also fetches the relationship leaf and four other perfrp leaves on the same mount; those were not censused. A re-point or withdrawal of the leaf is not read-only and is not done here.",
+  "cloudfront_behaviors_serving_bucket": [
+    "/api/general/json-tiered/*",
+    "/json-tiered/*",
+    "/api/general/* (these three: origin opal-data-portal-v2, none can reach platinum/advi/)",
+    "/api/scoped/advisor-intelligence/*.json (opal-data-bd origin, rewritten to opal-data-portal-v2 by the router for platinum/advi/{firm}/)"
+  ]
+}

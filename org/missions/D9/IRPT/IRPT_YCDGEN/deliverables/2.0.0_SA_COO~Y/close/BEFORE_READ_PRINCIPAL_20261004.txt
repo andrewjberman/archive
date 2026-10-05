@@ -1,0 +1,10 @@
+IRPT_YCDGEN close -- before-read for the Cottonwood research principal (2.0.0_SA_COO~Y, 2026-10-04 ~18:5xZ, read only)
+
+1. s3api get-bucket-policy opal-data-cottonwood: Sid DenyForeignFirmPrincipals, Deny s3:* on arn:aws:s3:::opal-data-cottonwood
+   and /*, Principal *, Condition ArnNotLike aws:PrincipalArn [role/*-cot-*, user/Andrew_Berman, user/Andrew_Berman_Console,
+   user/Opal_Terminal, role/irpt-holdings-role]. The policy is not changed by this act.
+2. iam simulate-principal-policy, source role/irpt-ycharts-runner-role, s3:PutObject on
+   opal-data-cottonwood/irpt/cottonwood/state/ycharts_runs/request=X/run.json, --resource-policy (the bucket policy above),
+   context aws:PrincipalArn = that role:  s3:PutObject  explicitDeny
+   (the batch-237 after-read passed no resource policy and so read allowed; the run's AccessDenied at 18:42:52Z matches this)
+3. iam get-role irpt-cot-ycharts-research-role:  NoSuchEntity (the role does not exist)

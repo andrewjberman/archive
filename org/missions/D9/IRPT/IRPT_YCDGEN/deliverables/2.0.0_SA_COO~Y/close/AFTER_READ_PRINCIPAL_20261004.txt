@@ -1,0 +1,15 @@
+IRPT_YCDGEN close -- D1 after-read (2.0.0_SA_COO~Y, 2026-10-04T19:22:34Z; CTO half batch 239 on blob 97578e0eda)
+1. get-role irpt-cot-ycharts-research-role trust:
+    AssumedOnlyByTheResidentRunner Allow sts:AssumeRole {'AWS': 'arn:aws:iam::313476888478:role/irpt-ycharts-runner-role'}
+2. get-role-policy irpt-cot-ycharts-research-policy:
+    KeepYChartsResearchAnswersAndRunRecords Allow ['s3:PutObject', 's3:GetObject'] ['arn:aws:s3:::opal-data-cottonwood/irpt/cottonwood/state/ycharts_responses/*', 'arn:aws:s3:::opal-data-cottonwood/irpt/cottonwood/state/ycharts_runs/*']
+3. host role statement:
+    AssumeTheFirmResearchPrincipal ['sts:AssumeRole'] ['arn:aws:iam::313476888478:role/irpt-cot-ycharts-research-role']
+4. simulate-principal-policy, source the new role, WITH opal-data-cottonwood's bucket policy and aws:PrincipalArn = the new role:
+   opal-data-cottonwood/irpt/cottonwood/state/ycharts_responses/request=X/x.json: s3:PutObject:allowed  s3:GetObject:allowed  
+   opal-data-cottonwood/irpt/cottonwood/state/ycharts_runs/request=X/run.json: s3:PutObject:allowed  s3:GetObject:allowed  
+   opal-data-cottonwood/irpt/cottonwood/state/ycharts_opal_reports/request=X/x.pdf: s3:PutObject:implicitDeny  s3:GetObject:implicitDeny  
+5. the same, WITH opal-data-49financial's bucket policy:
+   opal-data-49financial/irpt/49financial/state/ycharts_runs/request=X/run.json: s3:PutObject:explicitDeny  s3:GetObject:explicitDeny  
+6. simulate the runner role's sts:AssumeRole on the new role, WITH its trust policy:
+   sts:AssumeRole:allowed  
