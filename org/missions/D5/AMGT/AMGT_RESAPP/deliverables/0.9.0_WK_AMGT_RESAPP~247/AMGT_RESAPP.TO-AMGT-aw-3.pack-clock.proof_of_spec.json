@@ -1,0 +1,85 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-aw-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aw-3.pack-clock.md",
+  "group": "OTHER",
+  "vintage_commit": "2b122457e3"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "2b122457e3",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aw-3.pack-clock.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~247",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "384aef91eb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "_pool_keys keeps LastModified; _pack_clocks decodes slash-safe folders and takes the newest date; ledger's own newest entry stamp read when present. Not deployed.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_pack_clock.py",
+   "kind": "test",
+   "commit_or_etag": "384aef91eb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "3 plant tests.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every plant case passes; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_pack_clock.py; echo \"exit=$?\"",
+   "output_evidence": "test_encoded_folder_decodes PASSED\ntest_ledger_only_pack_yields_a_date_from_the_listing PASSED\ntest_ledger_own_date_wins_when_newer_and_no_pack_is_never PASSED\n3 passed\nexit=0",
+   "denominator": "3 of 3 plant tests",
+   "expect": "(?s)3 passed.*exit=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "population covered rows 95 status 200; C1 PASS NEVER 0; R73 C49 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round73/checks/r73_served.py\" --cell c49 --where local; echo \"exit=$?\"",
+   "output_evidence": "   population: covered rows 95 status 200\nPASS C1 every covered row's pack clock is a date NEVER 0 e.g. []\nR73 C49 SERVED: YES\nexit=0",
+   "denominator": "95 of 95 covered rows carry a pack date",
+   "expect": "(?s)covered rows 95 status 200.*PASS C1.*NEVER 0.*R73 C49 SERVED: YES.*exit=0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC2 with folder decoding removed (name = parts[0]).",
+   "expected": "FAIL C1, R73 C49 SERVED: NO, exit=1.",
+   "observed": "FAIL C1 NEVER 2 e.g. ['BP/_LN_Equity','NG/_LN_Equity']; R73 C49 SERVED: NO; exit=1. File restored.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "c49 run three times against the live stores (before, mutant, after restore) and a fourth for exit code.",
+   "observed": "PASS on every unmutated run, 95 of 95.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "N/A -- no session-log path in this worker's paths.",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "python -m pytest -q lib/research/api/tests/",
+   "result": "651 passed"
+  }
+ ]
+}
