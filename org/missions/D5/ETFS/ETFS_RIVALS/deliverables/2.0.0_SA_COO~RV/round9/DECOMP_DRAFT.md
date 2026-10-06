@@ -46,6 +46,24 @@
 - Check: a prior universe + one new G1 date -> the new object adds the new securities, keeps first_seen of the old ones,
   advances last_seen; it reads exactly 1 G1 object (counted); control: `seed` over 3 dates equals the incremental result.
 
+## Round-8 analysis (CTO~Z msg 29706, 16:42Z; file lands after PARITY CLOSED): 8 items
+
+1. G5 named-fund rebuild, then Step B under its pair -> `RIV-nf-1` (above).
+2. The IDVZ/PFOE gate file -> `RIV-gf-1` (above).
+3. security_universe incremental -> `RIV-su-2` (above).
+4. C-S35, AI-text links within the 2 MB cap -> `RIV-ln-1`. Measured on the captured 10-05 render context: 428 of 860 page
+   names are carried by more than one KEY FORM of a security (CUSIP, `ENEL_IM_Equity`, `ENEL IM Equity`), and
+   `render._render_page` keeps a name only when ONE key carries it (render.py:1769) -- every such name renders plain
+   ('Enel SpA' 3 keys: plain; 'E.On Se' 1 key: linked). Check ln-1.AC1 base: FAIL as expected ((a) FAIL, control PASS).
+5. C-S36, the 22 ticker-form names -> `RIV-nm-3`, chained after item 6. Measured: 135 keys in the 10-05 name map carry a
+   ticker-form name; 0 sit in any fund's latest holdings (they are past holdings the trade log and rankings still show);
+   128 were never in any G4 date and 7 are in G4 with no name. G4 enrichment asks only for current holdings, so the cause is
+   the name map's KEY SPACE, not today's capacity block. Remedy: one bounded name pull (LONG_COMP_NAME) for the page keys
+   with no name, inside item 6's budget, persisted so it is asked once.
+6. S24, a measured capacity budget, no backfill until it exists -> `RIV-cb-1`.
+7. Classify the G5 history drift (176 dates), read only, no replay -> `RIV-gd-1` (LOCAL; a report from a script).
+8. Triage the 8 stale OPEN rows -> issuer act, not a cell.
+
 ## Not cells
 
 - D12 Step B (the import) is an act after `RIV-nf-1` deploys, under its own pair; its proof is the per-date census.

@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-gd-1.g5-history-drift-classification",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "7ed4580858",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-gd-1.g5-history-drift-classification.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7ed4580858"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tools/g5_drift.py",
+      "kind": "script",
+      "commit_or_etag": "2a8977343b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; a one-off read (live S3 get/list only, every build into a local sink); no deploy, no S3 write, no vendor call",
+      "artifact_covered_by": ["AC1", "J1"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r9gd1_g5_drift.py",
+      "kind": "test",
+      "commit_or_etag": "2a8977343b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; offline tests on a local sink standing in for S3",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~6/g5_drift.json",
+      "kind": "doc",
+      "commit_or_etag": "2a8977343b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the drift report the check reads: dates 189, rows_compared 9477, unclassified_rows 0, 7 classes",
+      "artifact_covered_by": ["AC1", "J1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~6/G5_DRIFT.md",
+      "kind": "doc",
+      "commit_or_etag": "2a8977343b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the one-page reading of g5_drift.json for the CTO's ruling on the history",
+      "artifact_covered_by": ["J1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the drift report covers 189 dates with 0 unclassified rows; every class names a real cause commit and a cell and the classes cover every differing row; each measured drifting column sits in a class",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round9/checks/gd-1.AC1.py",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "output_evidence": "report: C:\\tmp\\wk-riv-r9-6\\org\\missions\\D5\\ETFS\\ETFS_RIVALS\\deliverables\\0.9.0_WK_ETFS_RIVALS~6\\g5_drift.json exists\nOK:   (a) the drift report exists, covers 189 dates and leaves 0 rows unclassified\nclasses: 7 | with a real cause commit + cell: 7 | n_rows sum 10810 | rows_differing 9477\nOK:   (b) every class names a real cause commit and a cell, and the classes cover every differing row\nOK:   (c) control: each measured drifting column sits in a class\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "3 of 3 checks OK (a, b, c); under `timeout 120` (rc 0, not 124); report: 189 dates, 9,477 rows compared, 9,477 rows differing (1,344 in trade facts, 8,133 in G3 revision labels only), 7 of 7 classes with a real cause commit and a cell, 0 unclassified rows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "the classes are right: each class's cause commit is the change that moves those columns, and reader_visible is true exactly for the columns the page shows",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D5/ETFS/ETFS_RIVALS/deliverables/0.9.0_WK_ETFS_RIVALS~6/G5_DRIFT.md and g5_drift.json (each class carries `confirmed_by` and `columns_shown_on_page` / `columns_not_shown`; the page's reads are render.py _trace_panel/_flags/trade rows and gold_buying_trend/ai_accounts est_notional_base)",
+      "output_evidence": "7 classes, cause commit : cell : rows : reproduced at the commit -- key_resolution_out_of_confidence b723f89d22 RIV-h-6 1040 51/51; full_exit_priced ab0a58eaa4 RIV-x-1 266 39/39; own_prior_pairing 5cd27dc0d2 RIV-t-5 7 7/7; implausible_window_refused b137069123 RIV-h-5 10 10/10; g3_currency_in_income_conversion 2a655a0180 RIV-e-2 7 7/7; g3_minor_unit_dividend_currency 0b2981d770 RIV-e-2 13 13/13; g3_latest_pull_supersession 4fa3e25f5e RIV-g-4 9467 (data class, by construction: pinned vs current build differ only in the G3 objects). Not shown on the page: residual_pct_prior, est_price_source (full_exit_priced); corporate_action_ref and the three G3 label columns (g3_latest_pull_supersession). The G3 data and its two RIV-e-2 effects are separated from the code classes by building G3 pinned to the live object's recorded revisions (row ETFS_RIVALS-Z-W6-S1).",
+      "denominator": "7 classes; 0 of 9,477 rows unclassified; reproduction samples 2 dates per code class (51+39+7+10 rows) and all 27 income_funded flips (7 + 13 + 7) built at each commit from RIV-e-2 on",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the oracle is 3.0.0_SA_CVO~RV at L9; this worker records the output and gives no verdict",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "g5_drift.py run in full once, then once more with --reuse over the same staged inputs and builds; AC1 run twice; package suite once",
+      "observed": "both runs wrote the same classes and counts (7 classes, 9477 rows, 0 unclassified); AC1 PASS both times; package suite 667 passed, 2 skipped, 0 failed (15 new tests)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Mutant: in tools/g5_drift.py classify(), the full-exit rule's test `L.action == \"trim\"` changed to `== \"add\"`, then python -m pytest rivalfunds/tests/test_r9gd1_g5_drift.py.",
+      "expected": "the full-exit class no longer places a trim that became a priced exit: the two class-rule tests FAIL.",
+      "observed": "2 failed, 13 passed (test_a_trim_become_a_priced_exit_is_the_full_exit_class_and_covers_its_columns, test_unresolved_to_clean_is_the_key_resolution_class_and_an_exit_that_was_unresolved_sits_in_two); file restored byte-identical (cmp), 15 passed after.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order status to complete",
+      "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "Any S3 write, replay, deploy, Bloomberg or OpenAI call",
+      "reason": "Forbidden by the face: the only S3 calls are get and list; every build writes into a local scratch sink."
+    },
+    {
+      "item": "Whether a class is a defect in the old values",
+      "reason": "A replay is cut later under its own pair, only for a cause the classification shows to be a defect (round-8 analysis ruling 5); that is the CTO's call."
+    }
+  ],
+  "surprises": ["ETFS_RIVALS-Z-W6-S1", "ETFS_RIVALS-Z-W6-S2"],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~6 <0.9.0_WK_ETFS_RIVALS~6@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "2a8977343b"
+    }
+  ]
+}
