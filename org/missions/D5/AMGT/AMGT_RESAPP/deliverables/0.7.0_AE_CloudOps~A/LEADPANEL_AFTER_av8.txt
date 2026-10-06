@@ -1,0 +1,47 @@
+LEADPANEL after: CodeSha256 2lUlZomoyb2ttLBaQTg6l3ysfw2aEjZGD7mInm8J/WQ= at 2026-10-05T23:41:18Z
+   /lead-panel/timeseries/collected/chatter?days=30: cold(init+duration) n 6 min 6998 max 8638 | warm(duration) n 3 min 566 max 625 | status [200]
+   /lead-panel/timeseries/collected/chatter?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 532 max 677 | status [200]
+   /lead-panel/timeseries/collected/chatter?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 548 max 682 | status [200]
+   /lead-panel/rankings/trending/price: cold(init+duration) n 0 | warm(duration) n 9 min 115 max 126 | status [200]
+   /lead-panel/rankings/trending/price?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 61 max 168 | status [200]
+   /lead-panel/rankings/trending/price?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 67 max 195 | status [200]
+   /lead-panel/rankings/breakout/price: cold(init+duration) n 0 | warm(duration) n 9 min 104 max 297 | status [200]
+   /lead-panel/rankings/breakout/price?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 65 max 172 | status [200]
+   /lead-panel/rankings/breakout/price?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 68 max 217 | status [200]
+
+-- PROVENANCE ------------------------------------------------------------------
+Produced by: deliverables/2.0.0_SA_COO~Z/round71/checks/leadpanel_cold_warm.py --label after
+Run by:      0.7.0_AE_CloudOps~A, AMGT_RESAPP.TO-AMGT-av-8, round 72 code leg
+Run at:      2026-10-05T23:41:18Z, exit=0
+Sequencing:  fired 10 s after the apply completed (function LastModified 23:41:08Z) and BEFORE AC1,
+             AC2 or AC3 touched the function. The cold column is perishable; the apply and this
+             measurement were issued in the same call to keep the window as tight as possible.
+Pinning:     the script self-reports the CodeSha256 it measured, so this output is pinned to the
+             round-72 build rather than relying on the run order alone.
+
+-- READ THIS BEFORE QUOTING THE COLD NUMBER ------------------------------------
+The COO half expected the cold first read to come down. IT DID NOT CLEARLY DO SO.
+
+  cold chatter, this run (round 72, 2lUlZomo) : 6998 - 8638 ms   (n 6)
+  cold chatter, round 71 au-7 (wbIT0PHv)      : 7306 - 7777 ms   (n 6)
+  the COO half's stated before-band           : 5.3 - 10.0 s
+
+The round-72 min is lower and the max is HIGHER: the band widened rather than moved down, and it
+sits inside the half's stated before-band rather than below it. On two runs of n 6 that is not a
+distinguishable improvement in either direction, and no improvement is claimed here. The half marks
+the cold read REPORT-ONLY and expressly not a rollback trigger, since av-6 changes no value.
+
+What IS unambiguous is the warm column, which is where round 71's served_cache work landed and
+where this round holds it: warm chatter 532-682 ms and warm price 61-297 ms, against the 9.2-12.3 s
+and 3.9-5.2 s measured on the round-70 base before au-7. All 9 routes answer 200 on both columns.
+
+-- WHAT REMAINS SLOW -----------------------------------------------------------
+The cold start, still about 7-8.6 s on the first chatter read. A per-container memo is empty on a
+cold container, so neither au-7's served_cache nor this round's cut can reach it. Reported, not
+fixed, and not a rollback trigger. If Andrew's speed question is not settled by the warm numbers,
+this is the remaining item and it is a design call, not a redeploy.
+
+-- CAVEAT ----------------------------------------------------------------------
+Same script, same 9 routes, same request counts (n 9 warm / n 6 cold per route as the script sets
+them). Still single runs against live data, not a controlled benchmark; no claim is made about
+variance beyond the printed min and max.
