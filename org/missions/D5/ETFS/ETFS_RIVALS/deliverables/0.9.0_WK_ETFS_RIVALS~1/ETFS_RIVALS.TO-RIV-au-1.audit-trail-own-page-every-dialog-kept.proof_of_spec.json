@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-au-1.audit-trail-own-page-every-dialog-kept",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "6697de57c2",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-au-1.audit-trail-own-page-every-dialog-kept.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6697de57c2"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/render.py",
+      "kind": "script",
+      "commit_or_etag": "2c157500c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 12 build cell; no deploy, no S3 access; checks run against a local sink",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/publish_page.py",
+      "kind": "script",
+      "commit_or_etag": "2c157500c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 12 build cell; no deploy, no S3 access; checks run against a local sink",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r12au1_audit_page.py",
+      "kind": "test",
+      "commit_or_etag": "2c157500c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unit tests, offline",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the main page carries no audit trail and no audit link yet; render_audit_page returns a whole audit document with its own resolving dialogs (Apple linked in its trade log); control: every button resolves in its own document -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round12/checks/au-1.AC1.py",
+      "output_evidence": "main bytes: 53733 | audit block in main: False | links to audit: 0\nOK:   (a) the main page carries no audit trail and no /rivalfunds/2026-10-02/audit link yet\naudit bytes: 26289 | traces: 1 of 1 | buttons: 1 | dialogs: 1 | Apple linked in trade log: True\nOK:   (b) the audit page is whole, carries trades and holdings once, one trace per trade, Apple linked in the trade log\nmain buttons: 26 | main dialogs: 2 | Apple in rankings: True\nOK:   (c) control: every data-sec button resolves in its own document, no key repeats, rank panels per fund, no script\nAC1 RESULT: PASS 0 failures\nAC1 rc=0",
+      "denominator": "3 of 3 arms OK ((a) main page, (b) audit page, (c) control); package suite 746 passed, 2 skipped, 0 failed",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the publisher writes audit.html beside index.html and names it in the manifest; over the cap the day publishes with holding_dialogs: \"off\" in the manifest and detail and a FAIL: holding dialogs off stdout line; control: a normal publish prints no FAIL line -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round12/checks/au-1.AC2.py",
+      "output_evidence": "normal run: OK | audit.html: True 81649 B | manifest audit_uri: s3://opal-data-etfs/rivalfunds/etfs/platinum/page/date=2026-09-30/audit.html | holding_dialogs: on\nOK:   (a) index.html and audit.html written; the manifest names audit.html with its sha; dialogs on; index has no audit, no link\nover-cap run: OK | manifest holding_dialogs: off | detail holding_dialogs: off | FAIL line: True\nOK:   (b) over the cap the day still publishes and says so: manifest + detail read off, stdout carries the FAIL line\nOK:   (c) control: the normal publish is OK/PARTIAL and prints no FAIL line\nAC2 RESULT: PASS 0 failures\nAC2 rc=0",
+      "denominator": "3 of 3 arms OK ((a) normal publish, (b) over-cap publish, (c) control); package suite 746 passed, 2 skipped, 0 failed",
+      "expect": "AC2 RESULT: PASS 0 failures",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "every ticker mention on the main page opens that security's modal for the fund's engagement with it, and the page reads whole without the audit trail (graded by 3.0.0_SA_CVO~RV at L9 on the issuer's real 10-06 render)",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment criterion: no invocation; graded at L9 on the issuer's real 2026-10-06 render",
+      "output_evidence": "offline fixture only (AC1 (c)): main buttons 26, main dialogs 2, every data-sec button resolves to a data-sec-dialog in the same document; Apple linked in the rankings. The real 10-06 render was not produced by this worker (no S3 read, no deploy).",
+      "denominator": "N/A -- judgment criterion, no verdict given",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the oracle is 3.0.0_SA_CVO~RV at L9 on the issuer's real 10-06 render"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (before and after the commit) and the package suite three times",
+      "observed": "AC1 PASS, AC2 PASS both times; suite 746 passed 2 skipped 0 failed",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "none run: the check docstrings state the base result (AC1 (a),(b) FAIL; AC2 (a),(b) FAIL)",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S48"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "2c157500c4"
+    }
+  ]
+}
