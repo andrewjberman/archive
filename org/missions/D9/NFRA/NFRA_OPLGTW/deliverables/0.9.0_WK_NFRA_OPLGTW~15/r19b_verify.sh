@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# OG-rl-7 r19b PHASE B verify (form step 6 / 11; R22: no /login arm, sender arm kept), written at Phase A2, never run against a deploy by the Phase A worker.
+# usage:  r19b_verify.sh before <state.json>
+#         r19b_verify.sh after  <state.json> <40-hex deployed sha>
+# `before` saves the host's BEFORE reads (MainPID, tool list, .env key NAMES and per-key value sha256 digests; no value is ever read as text or stored) -- keep the state file OUT of
+# the repository (e.g. <worktree>/.scratch/r19_before.json). `after` (run IMMEDIATELY after safe-ec2-deploy.sh returns) runs the host checks and the AFTER arms, writes
+# RL7_SENDER.json beside this file on a full pass, then runs the floor: rl4.AC1.sh (51-name baseline r17/ENV_KEYS_R17B.txt) and ht.AC2.sh (51 keys).
+# Any FAIL: roll back (ANNOUNCE_OG-rl-7-B.md), re-verify, close ROLLED BACK.
+HERE="$(cd "$(dirname "$0")" && pwd)"
+export OPAL_AGENT_SERIAL="${OPAL_AGENT_SERIAL:-0.9.0_WK_NFRA_OPLGTW~15}"
+PYF="$(command -v cygpath >/dev/null 2>&1 && cygpath -w "$HERE/r19b_verify.py" || echo "$HERE/r19b_verify.py")"
+case "$1" in
+  before) python "$PYF" before "$2"; exit $? ;;
+  after) ;;
+  *) echo "usage: r19b_verify.sh before <state.json> | after <state.json> <deployed sha>"; exit 2 ;;
+esac
+[ -n "$3" ] || { echo "after needs the 40-hex deployed sha as the third argument"; exit 2; }
+python "$PYF" after "$2" --served-release "$3"; rc=$?
+ROOT="$(cd "$HERE" && git rev-parse --show-toplevel)"
+cd "$ROOT" || exit 9
+C="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O"
+echo "--- rl4.AC1.sh (baseline r17/ENV_KEYS_R17B.txt) ---"; out1=$(RL4_ENV_KEYS_BASELINE="$C/r17/ENV_KEYS_R17B.txt" bash "$C/r14/checks/rl4.AC1.sh" 2>&1); rc1=$?; printf '%s\n' "$out1"
+echo "--- ht.AC2.sh (51 keys) ---"; out2=$(HT_ENV_KEYS_COUNT=51 bash "$C/hxteams/checks/ht.AC2.sh" 2>&1); rc2=$?; printf '%s\n' "$out2"
+echo "r19_verify: host + AFTER checks rc=$rc; rl4.AC1 rc=$rc1; ht.AC2 rc=$rc2"
+[ "$rc" = 0 ] && [ "$rc1" = 0 ] && [ "$rc2" = 0 ]
