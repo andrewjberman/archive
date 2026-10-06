@@ -38,6 +38,12 @@ def statements(src):
     return blocks
 
 
+def actions(block, service):
+    """The `service:Name` strings inside the statement's `Action = [...]` list only (never a Condition key like s3:prefix)."""
+    m = re.search(r"Action\s*=\s*\[(.*?)\]", block, re.S)
+    return re.findall(r'"(%s:[A-Za-z]+)"' % service, m.group(1)) if m else []
+
+
 def fail(name, why):
     print("f-6.%s RESULT: FAIL %s" % (name, why))
     sys.exit(1)
@@ -67,7 +73,7 @@ def main():
         if re.search(r"opal-data-[a-z]+|irpt/cottonwood|ycharts_opal_reports", body):
             fail(name, "a bucket, firm or table name is typed in the prefix local")
         s = st.get("RetainTheOpalReportPdf", "")
-        acts = re.findall(r'"(s3:[A-Za-z]+)"', s)
+        acts = actions(s, "s3")
         if sorted(acts) != ["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject"] or "local.ycdgen_opal_report_prefixes" not in s:
             fail(name, "statement RetainTheOpalReportPdf missing or its actions/resource are wrong: %s" % acts)
         ok(name)
@@ -79,7 +85,7 @@ def main():
         ok(name)
     elif name == "AC4":  # one GetItem, one table
         s = st.get("ReadTheCanonicalClassificationTable", "")
-        acts = re.findall(r'"(dynamodb:[A-Za-z]+)"', s)
+        acts = actions(s, "dynamodb")
         if acts != ["dynamodb:GetItem"]:
             fail(name, "actions %s" % acts)
         if not re.search(r"table/etf-classifications\"?\s*\]", s) or s.count("arn:aws:dynamodb") != 1:
@@ -88,9 +94,9 @@ def main():
     elif name == "AC5":  # the held fund data: get on bbg/*, list on the bucket cut to bbg/
         g = st.get("ReadTheHeldFundCharacteristics", "")
         lst = st.get("ListTheHeldFundCharacteristicsFolder", "")
-        if re.findall(r'"(s3:[A-Za-z]+)"', g) != ["s3:GetObject"] or "arn:aws:s3:::opal-data-etfs/bbg/*" not in g:
+        if actions(g, "s3") != ["s3:GetObject"] or "arn:aws:s3:::opal-data-etfs/bbg/*" not in g:
             fail(name, "get statement missing or wrong")
-        if re.findall(r'"(s3:[A-Za-z]+)"', lst) != ["s3:ListBucket"] or '"arn:aws:s3:::opal-data-etfs"' not in lst \
+        if actions(lst, "s3") != ["s3:ListBucket"] or '"arn:aws:s3:::opal-data-etfs"' not in lst \
                 or "s3:prefix" not in lst or "bbg/" not in lst:
             fail(name, "list statement missing, wrong, or not cut to the bbg/ prefix")
         ok(name)
