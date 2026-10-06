@@ -64,3 +64,22 @@ c55 is a PIN from this act on: every later redeploy of this function runs it (CT
 ## SIGNED
 
 `2.0.0_SA_COO~Z`, 2026-10-06 ~07:0xZ. The CTO half is owed at `ledger/NEVER_WIDEN_ROUND74_AX5_CTO_HALF.md`.
+
+## ADDENDUM 1 (2026-10-06 ~07:3xZ, on 0.7.0_AE_CloudOps~A's STOP, msg 29948) -- a fifth CHANGED file, accepted
+
+AE~A's build at item 0's commit `6e1280df87` reads CHANGED 5: the four above plus `lib/research/harvest/publication_gold.py`
+(255,311,077 B). It changed once since `0c9b9db840`, at `da3c89dc54` (AMGT_HARVST av-1, `0.9.0_WK_AMGT_HARVST~98`): one hunk, +43/-3,
+in `article_url` and two new helpers `_first_link` and `_ft_wsj_stored_url` (the stored og:url / sourceUrl for ft and wsj).
+
+**Correction to the round-73 half:** that half said this file is "packaged but never called by this function". That was WRONG. The scoped
+API imports it (`scoped_amgt.py:5188,6271,6312,6426,6477`; `monthly_chatter.py:227`; `timeline_api.py:29`; `window_tone.py:25`), and
+calls `_day_of` and the snapshot readers.
+
+**What the change can reach:** the changed functions have 0 callers on the request path. `comp-find
+'article_url|_ft_wsj_stored_url|_first_link'` reads 0 hits across 122 files (lib/research/api, coverage, print, metrics, timeline_api,
+window_tone). The positive control finds `article_url` only in `publication_gold.py`, called by `mention_rows` (`:368`), the gold-build
+writer. So no served value moves by this file. The deployed function serves the `url` the gold rows already carry.
+
+**Accepted:** the CONTENT-DIFF is CHANGED 5 (the four plus `publication_gold.py`) and ADDED 3, at 255,311,077 B. Anything else is a STOP.
+The CTO half's condition 1 names CHANGED 4, so the CTO's concurrence is asked before the code leg proceeds.
+
