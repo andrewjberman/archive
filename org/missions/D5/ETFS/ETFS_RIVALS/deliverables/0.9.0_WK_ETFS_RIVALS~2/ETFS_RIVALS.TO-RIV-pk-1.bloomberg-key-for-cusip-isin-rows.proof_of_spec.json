@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "to_id": "ETFS_RIVALS.TO-RIV-pk-1.bloomberg-key-for-cusip-isin-rows",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "e9a0f5b32e",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-pk-1.bloomberg-key-for-cusip-isin-rows.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e9a0f5b32e"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "1f94c90c4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_holding_contribution.py",
+      "kind": "script",
+      "commit_or_etag": "1f94c90c4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "1f94c90c4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r12pk1_parsekey_join.py",
+      "kind": "test",
+      "commit_or_etag": "1f94c90c4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pk-1.AC1.py -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round12/checks/pk-1.AC1.py",
+      "output_evidence": "G4 2026-10-01 OK | parsekey: {'999999999': 'ZZZ US Equity', 'N97284108': 'NBIS US Equity', 'NBIS_US_Equity': nan}\r\nG4 2026-10-02 OK | parsekey: {'999999999': 'ZZZ US Equity', 'N97284108': 'NBIS US Equity', 'NBIS_US_Equity': nan}\r\nasked PARSEKYABLE_DES for: ['/cusip/999999999', '/cusip/N97284108']\r\nFAIL: (a) the G4 reference request asks PARSEKYABLE_DES for exactly the identifier-keyed securities and stores it\r\nholding_contribution OK | (fund, bucket): [('GQGU', '999999999'), ('GQGU', 'NBIS_US_Equity'), ('WCMG', 'NBIS_US_Equity')]\r\nOK:   (b) GQGU's CUSIP-only Nebius row joins WCMG's NBIS_US_Equity through G4's parsekey\r\nOK:   (c) control: a CUSIP whose parsekey names a key no row carries keeps its CUSIP\r\nAC1 RESULT: FAIL 1 failures\r\nrc=1",
+      "denominator": "2 of 3 arms OK ((b), (c)); arm (a) FAIL on its `not pk.get(\"NBIS_US_Equity\")` conjunct (a null reads NaN on pandas 3.0.3, truthy); every other conjunct of (a) holds. Row ETFS_RIVALS-Z-W2-S14. Run under `timeout 120` (rc 1, not 124)",
+      "status": "FAIL",
+      "status_reason": "Arm (a) fails only on the check's `not pk.get(\"NBIS_US_Equity\")` conjunct: a null security_parsekey reads back as NaN (truthy) on pandas 3.0.3. The ask (exactly the two identifier keys) and both stored parsekeys are correct; arms (b) and (c) pass. Row ETFS_RIVALS-Z-W2-S14 names the one-line check amendment."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "none run: the order names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "rivalfunds package suite run after the new test file.",
+      "observed": "766 passed, 2 skipped, 0 failed (164s).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer; and AC1 is FAIL on arm (a) pending the check amendment named in row ETFS_RIVALS-Z-W2-S14."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W2-S14"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~2 <0.9.0_WK_ETFS_RIVALS~2@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "1f94c90c4f"
+    }
+  ]
+}
