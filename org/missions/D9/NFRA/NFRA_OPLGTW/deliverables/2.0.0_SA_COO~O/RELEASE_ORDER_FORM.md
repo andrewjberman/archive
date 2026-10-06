@@ -26,6 +26,9 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
    - Run it again on any amendment, any `.env`-shape change, or any step-order change.
    - Check every criterion's literal output against the order's `<expect>` with `re.search`. A check whose output
      cannot match its expect is fixed BEFORE GO (rows S38, S42, S50).
+7a. **ROUTE INVENTORY (R21, row Z-W22-S10).** A release that ADDS or REMOVES a route runs
+    `tests/test_principal_cutover.py`'s ROUTE_CLASS inventory and `tests/test_data_entitlement_guard.py`'s route census
+    on the release tree, each in its own process. Both must be green before GO.
 8. **ANNOUNCE** with the blast radius, written for three halves: what moves, each property's writers counted, both
    branches, and the rollback per key.
 
