@@ -24,3 +24,13 @@ Carried for the CVO, not this cell's: ASML's row label "Minority (non-controllin
 NOT driven by these walks (still owed under ao-5): the FWD-10 pillar opener, FWD-11 ABSENT name and roster count, FWD-12 template
 comparison, FWD-15 posture citation and byte compare, FWD-16 docx before/after, FWD-18 term filter. `--deep` pressed the page
 chrome only (Print, Refresh, the tab buttons); a pillar opener and a term filter need named presses.
+
+## Slot 2, 21:02Z-21:09Z -- the amended candidate (portal `f8d92450`)
+
+Walk `tmp/ui-walk/20261006T210244Z` (TSM US, 1299 HK, ASML NA; 88 shots; walk void: no; DISARM proof REFUSED).
+- `tsm_header_amended.png` -- Net debt now reads "Not shown: Bloomberg does not confirm this figure's currency"; Enterprise value
+  reads "Not shown: Bloomberg's figure does not say whether it is in units or millions". Neither tile shows a number (CTO review
+  @`1a9f406750`, ao-3 AMENDMENT 1 @`85547630d1`).
+- `1299hk_exec_management.png`, `asml_exec_management.png`, `asml_exec_roster.png` -- FWD-11's two limbs (see `../r39_ao5_limbs.md`).
+
+The six limbs are no longer owed by a walk: `../r39_ao5_limbs.md` records each as driven, read, or having no control.
