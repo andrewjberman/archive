@@ -1,0 +1,92 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-aw-6.keep-prior-pool-universe",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aw-6.keep-prior-pool-universe.md",
+  "group": "C",
+  "vintage_commit": "1f36246bd33f12c9ac9caaa733a4bc08a83e9e09"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "1f36246bd33f12c9ac9caaa733a4bc08a83e9e09",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aw-6.keep-prior-pool-universe.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~250",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/identity/build_universe.py",
+   "kind": "script",
+   "commit_or_etag": "d3d9277e1e9d585ff39a1dab604525ec268f2d52",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: load_prior_pool, keep_prior_filing_form, build_union(prior_pool=) and union_main read the newest prior universe/v1 object; no write-pool run, no store write.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/identity/tests/test_keep_prior_form.py",
+   "kind": "test",
+   "commit_or_etag": "d3d9277e1e9d585ff39a1dab604525ec268f2d52",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: 3 plant tests (prior 10-K with undecided new read keeps 10-K; new decided value wins; prior none stays none).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "dry-run rc 0; covered named 95 of 95; prior decided forms 13; C1 PASS; C2 PASS regressions 0; R73 C52 SERVED: YES; exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round73/checks/r73_served.py\" --cell c52 --where local; echo \"exit=$?\"",
+   "output_evidence": "   dry-run rc 0; covered named 95 of 95; prior decided forms 13; rows parsed 302\nPASS C1 the dry-run succeeds and names every covered key missing 0\nPASS C2 no prior decided form_expected regresses regressions 0 e.g. []\nR73 C52 SERVED: YES\nexit=0",
+   "denominator": "95 of 95 covered keys named; 13 of 13 prior decided forms kept; 0 regressions",
+   "status": "PASS",
+   "expect": "dry-run rc 0; covered named 95 of 95; prior decided forms 13.*PASS C1.*PASS C2.*regressions 0.*R73 C52 SERVED: YES\\nexit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "every plant case passes; exit=0",
+   "method": "test_suite",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/identity; echo \"exit=$?\"",
+   "output_evidence": "216 passed, 47 warnings, 2 subtests passed in 4.96s\nexit=0",
+   "denominator": "216 of 216 passed incl. 3 of 3 plant cases in test_keep_prior_form.py",
+   "status": "PASS",
+   "expect": "\\d+ passed.*\\nexit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Plant: prior 10-K name with undecided new read.",
+   "expected": "keeps 10-K, cik, source edgar",
+   "observed": "test_prior_10k_undecided_new_keeps_10k passed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "pytest run once; c52 run once",
+   "observed": "single run each",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "--write-pool",
+   "reason": "Out of bounds; aw-7's leg under a pair. A write would land on s3://opal-data-harvest/universe/v1/<as-of date>.json."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~250/AMGT_RESAPP.TO-AMGT-aw-6.SESSION_LOG.md",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest",
+   "invocation": "python -m pytest -p no:cacheprovider lib/research/identity",
+   "result": "216 passed"
+  }
+ ]
+}
