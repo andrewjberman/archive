@@ -1,0 +1,104 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ga-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~28",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "36ae4e822d"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "2142d5b0b3",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ga-1.dim-asset-download-grant.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~28/GA1_WRITE.md",
+   "kind": "doc",
+   "commit_or_etag": "84d78d06f9",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "record of the live store write: ACTIVATED profile_revision=3 grant_revision=3 (gateway-access-state-table, the one dim_asset holder); ga1.AC1.sh RESULT: PASS",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~28/GA1_DOWNLOAD.json",
+   "kind": "config_data",
+   "commit_or_etag": "84d78d06f9",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "ssm dca27ce0-6fdf-4304-bf61-44c74f5e69a3 Success on i-07dccb1615503ac99",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 (cell OG-ga-1): the store holds the one grant with download_filtered at a new revision, and nothing else moved.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r22/checks/ga1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "items scanned 445 (pages 1, consistent); active profiles 1; in-force active dim_asset grants 1; of them carrying download_filtered 1\nholder in force: yes; revision advanced True; operations ['describe', 'download_filtered', 'list', 'query'] (want ['describe', 'download_filtered', 'list', 'query']); other dimensions unchanged True; other principals unchanged True\nRESULT: PASS\nexit=0",
+   "denominator": "1 of 1 in-force dim_asset grants carries download_filtered (revision 2 -> 3); 0 other principals in force, unchanged",
+   "status": "PASS",
+   "expect": "(?s)in-force active dim_asset grants 1; of them carrying download_filtered 1.*revision advanced True.*other dimensions unchanged True; other principals unchanged True.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 (cell OG-ga-1): a real download as the holder returned held CUSIPs only, attested by the host's own SSM output.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r22/checks/ga1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "body fields held-only real-holder download: no; ssm status Success; digest in host output: yes\nRESULT: FAIL\nexit=1",
+   "denominator": "GA1_DOWNLOAD.json held_check: returned 2173, distinct 2151, held 2150, unheld_returned 23 (all 23 are blank-cusip rows; 0 of 2173 non-blank rows unheld); ssm dca27ce0 Success; digest found in host output",
+   "status": "FAIL",
+   "expect": "(?s)held-only real-holder download: yes; ssm status Success; digest in host output: yes.*RESULT: PASS.*exit=0",
+   "status_reason": "Criterion cannot be met as written: the real holder's download is OK and returns every held CUSIP but also 23 dim_asset rows with a blank cusip, so held_check.unheld_returned is 23, not 0 (0 non-blank unheld rows). Filed BLOCKING row NFRA_OPLGTW-Z-W28-S1; the grant stays in force (AC1 PASS)."
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 (cell OG-ga-1): the ledger is closed.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r22/checks/ga1.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "entry files at HEAD=1; sentinel at HEAD=no\nRESULT: PASS\nexit=0",
+   "denominator": "entry files at HEAD 1, sentinel at HEAD no",
+   "status": "PASS",
+   "expect": "(?s)entry files at HEAD=[1-9]\\d*; sentinel at HEAD=no.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "Rollback of the grant (X/rollback.json)",
+   "reason": "Not executed: step 7 triggers rollback only on an AC1 FAIL; AC1 PASSED. The rollback file stays off-repo in X."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W28-S1",
+  "NFRA_OPLGTW-Z-W28-S2",
+  "NFRA_OPLGTW-Z-W28-S3"
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail: 9eb4600645 (Phase A + ledger open), 84d78d06f9 (write, read-back, download, ledger close, rows).",
+ "compiler_tools": [
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open, close-leg x3, close",
+   "result": "CLOSED, all 3 legs proven, sentinel removed"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Pre-write control: the same real-holder probe run BEFORE the write.",
+   "expected": "REFUSED ENTITLEMENT_DENIED entitlement_denied",
+   "observed": "dim_asset_download: REFUSED ENTITLEMENT_DENIED entitlement_denied (ssm 4a44eb6d-be2e-43e8-96f6-075aa94303a4); after the write: OK (ssm dca27ce0)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The after-probe was run twice on the same grant revision (ssm d69a0e43, dca27ce0).",
+   "observed": "identical GA1_DIGEST 78ce93ed...22db1 both times (returned 2173, unheld 23)",
+   "status": "STABLE"
+  }
+ }
+}
