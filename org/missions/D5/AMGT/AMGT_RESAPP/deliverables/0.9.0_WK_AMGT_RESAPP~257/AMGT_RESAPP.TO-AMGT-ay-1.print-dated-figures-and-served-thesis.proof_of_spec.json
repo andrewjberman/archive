@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ay-1.print-dated-figures-and-served-thesis",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ay-1.print-dated-figures-and-served-thesis.md",
+    "group": "C",
+    "vintage_commit": "cecef87d4a1b0a29dbe41a17cbdde096d355076c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "cecef87d4a1b0a29dbe41a17cbdde096d355076c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ay-1.print-dated-figures-and-served-thesis.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~257",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "ef4391421acb6a84ad86969a9da8fa5b6c550f59",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: _figure_date_text (a fiscal-year line carries no date, a forecast reads 'period ending <date>', a numeric header figure reads its own quote date or 'date not stored with this figure'); build_pack(run_date=) prints 'Printed YYYY-MM-DD' once on page 1; _drafted_for_print/_print_drafted read scoped_amgt.read_drafted_sections (or the caller's bundle) and print each served sentence in Recommendation, Company description, Investment thesis, Risks; Paginator._text escapes '$'. No deploy in this cell; lib/research/api/ untouched.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/print/tests/test_ay1_dated_figures_and_served_thesis.py",
+      "kind": "test",
+      "commit_or_etag": "ef4391421acb6a84ad86969a9da8fa5b6c550f59",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 15 offline plant tests (fiscal-year, forecast, quote-date, no-date, text-figure lines; run date once on page 1; every served sentence printed; not-written only where none served; failed reader; reader call; company description faces; two dollar amounts). conftest.py plants an offline reader for the suite; three assertions in test_av2/test_aw2/test_build_rich_text updated to the new line form.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "0 fiscal-year lines stamped with the run date and the run date once, on page 1, on 3 of 3 prints; C1 and C2 PASS; R75 C57 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round75/checks/r75_served.py\" --cell c57 --where local; echo \"exit=$?\"",
+      "output_evidence": "   BA_US_Equity: fiscal-year lines stamped 2026-10-06: 0; run date occurrences 1; on page 1 True\n   AMD_US_Equity: fiscal-year lines stamped 2026-10-06: 0; run date occurrences 1; on page 1 True\n   ASML_NA_Equity: fiscal-year lines stamped 2026-10-06: 0; run date occurrences 1; on page 1 True\nPASS C1 no fiscal-year figure is stamped with the run date {'BA_US_Equity': 0, 'AMD_US_Equity': 0, 'ASML_NA_Equity': 0}\nPASS C2 the run date appears once, on page 1 {'BA_US_Equity': (1, True), 'AMD_US_Equity': (1, True), 'ASML_NA_Equity': (1, True)}\nR75 C57 SERVED: YES\nexit=0",
+      "denominator": "3 of 3 prints (BA, AMD, ASML_NA): 0 fiscal-year lines with the run date (before 368/491/396); run date occurrences 1/1/1 (before 743/820/856)",
+      "status": "PASS",
+      "expect": "fiscal-year lines stamped 2026-10-06: 0.*PASS C1.*PASS C2.*R75 C57 SERVED: YES\nexit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the BA print carries 17 of 17 served sentences (or every sentence served at run time) and no 'not written' line for a served section; C1 and C2 PASS; R75 C58 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round75/checks/r75_served.py\" --cell c58 --where local; echo \"exit=$?\"",
+      "output_evidence": "   BA: served sentences 17; in the print 17; e.g. missing []\nPASS C1 the BA print carries every served thesis sentence 17 of 17\nPASS C2 no 'not written' line for a section the route serves []\nR75 C58 SERVED: YES\nexit=0",
+      "denominator": "17 of 17 served BA sentences in the print (before 0 of 17); 3 of 3 prints with no 'not written' line for a served section",
+      "status": "PASS",
+      "expect": "served sentences 17; in the print 17.*PASS C1.*PASS C2.*R75 C58 SERVED: YES\nexit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "every plant case passes; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/print; echo \"exit=$?\"",
+      "output_evidence": "lib/research/print/tests/test_posture_markdown.py::test_read_failed_is_unaffected PASSED [100%]\n\n============================ 105 passed in 12.43s =============================\nexit=0",
+      "denominator": "105 of 105 passed (15 of 15 new plant cases in test_ay1_dated_figures_and_served_thesis.py)",
+      "status": "PASS",
+      "expect": "\\d+ passed.*\nexit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before-state: the same c57 and c58 checks run on the base code before any edit.",
+      "expected": "FAIL C1 and C2 on both cells",
+      "observed": "c57 368/491/396 fiscal-year lines with the run date, 743/820/856 occurrences; c58 BA 0 of 17 served sentences and 'No investment thesis has been written' on BA",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "c57, c58 and the print suite each run twice in the worktree",
+      "observed": "same verdicts both times; one combined run of two lib/research/api tests failed a sha equality once and passed on 5 reruns (row AMGT_RESAPP-Z-W257-S2)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy of the print and the deployed walk",
+      "reason": "bounds 1: no deploy; ay-5 stages the redeploy"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W257-S1",
+    "AMGT_RESAPP-Z-W257-S2"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~257",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -p no:cacheprovider lib/research/print",
+      "result": "105 passed"
+    }
+  ]
+}
