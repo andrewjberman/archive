@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# STAND-IN for `aws` in the step-7 exercise ONLY (OG-rl-8, form step 7): answers the SSM calls rl8.AC1.sh's ssm_run makes with what the host prints AFTER the deploy
+# (the md5 lines of the release bytes of the shipped files, from $FAKE_MD5_LIST). Any other aws call falls through to the real shim.
+case "$*" in
+  *"ssm send-command"*) echo "fake-command-id"; exit 0 ;;
+  *"get-command-invocation"*"--query Status"*) echo "Success"; exit 0 ;;
+  *"get-command-invocation"*"StandardOutputContent"*)
+    for f in app/server.py app/audit.py app/integrations/schwab/engine.py; do grep "  $f\$" "$FAKE_MD5_LIST"; done
+    exit 0 ;;
+esac
+exec "$(dirname "$0")/../../.tools/aws" "$@"

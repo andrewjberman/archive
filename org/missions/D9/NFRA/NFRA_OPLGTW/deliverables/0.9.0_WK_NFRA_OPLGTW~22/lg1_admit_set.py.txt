@@ -1,0 +1,73 @@
+"""OG-lg-1 -- compute the /login admit set BEFORE and AFTER over a principal population (for OG-rl-8, Phase A).
+
+Save as lg1_admit_set.py (outside the repo tree, or under the release worker's own deliverables) and run from the
+gateway directory of the release branch:
+
+    cd infra/aws/ec2/opal-gateway
+    python lg1_admit_set.py population.json > admit_set.json
+
+READ-ONLY by construction: it imports the gateway's own decision function and reads one JSON file. It writes no
+grant, no state-store record, no cache; it calls no network service (MOCK_GRAPH=1). It never prints an email: every
+principal is named by `audit.email_digest(email)`, the same digest the /login audit record carries.
+
+population.json is a list of objects, one per principal, exported READ-ONLY from the access state (see
+LG1_ADMIT_SET.md section 2):
+    {"tid": "...", "oid": "...", "email": "x@y",
+     "profile": false,        # a principal_profile record exists (any status) -> RESTRICTED
+     "email_denied": false,   # an email_deny record exists for the email (what a restricted activate writes)
+     "blocked": false}        # the email is on the blocklist / kill switch (blocklist.enforce refuses)
+Server-held identities are added with "tid"/"oid" null.
+
+Settings the AFTER rule reads (non-secret) must be exported into the environment BEFORE the run, from the release's
+own non-secret source (never by sourcing /opt/opal-gateway/.env): OTP_MAILBOX, MS_INGEST_IDENTITY,
+MASTER_ADMIN_PRINCIPALS, WRITE_CAPABLE_PRINCIPALS, ENABLED_INTEGRATIONS, IDENTITY_PROVIDER (alb_oidc).
+"""
+import json
+import os
+import sys
+
+os.environ.setdefault("MOCK_GRAPH", "1")
+sys.path.insert(0, os.getcwd())
+
+from app import audit, server  # noqa: E402
+
+
+def main(path):
+    with open(path, encoding="utf-8") as fh:
+        population = json.load(fh)
+    held = server._server_held_identities()
+    rows = []
+    for p in population:
+        email = (p.get("email") or "").strip().lower()
+        restricted = bool(p.get("profile") or p.get("email_denied"))
+        # BEFORE: the live rule admits any identity the access layer, the blocklist and the deny list let through
+        before = not (p.get("blocked") or p.get("email_denied"))
+        # AFTER: the same pre-checks (GuardMiddleware, unchanged), then the R24 rule exactly as /login runs it
+        # (the GUI path carries no principal, so principal=None)
+        if p.get("blocked") or p.get("email_denied"):
+            after, reason = False, "blocked_or_denied_before_the_rule"
+        else:
+            d = server.login_admit_decision(email, None)
+            after, reason = d.admit, d.reason
+        rows.append({"digest": audit.email_digest(email), "server_held": email in held, "restricted": restricted,
+                     "before": before, "after": after, "after_reason": reason,
+                     "profile_without_deny": bool(p.get("profile") and not p.get("email_denied"))})
+    lost = [r for r in rows if r["before"] and not r["after"]]
+    out = {
+        "population": len(rows),
+        "admit_before": sorted(r["digest"] for r in rows if r["before"]),
+        "admit_after": sorted(r["digest"] for r in rows if r["after"]),
+        "lost": sorted((r["digest"], r["after_reason"], r["restricted"]) for r in lost),
+        "lost_nonrestricted": sorted((r["digest"], r["after_reason"]) for r in lost if not r["restricted"]),
+        # a restricted profile whose email has NO deny record is ADMITTED by /login today (it cannot see a profile
+        # from an email): any entry here is a finding for the release's halves, not a pass
+        "restricted_not_denied": sorted(r["digest"] for r in rows if r["profile_without_deny"] and r["after"]),
+        "graph_using_tools": len(server._graph_using_tools()),
+    }
+    json.dump(out, sys.stdout, indent=2, sort_keys=True)
+    sys.stdout.write("\n")
+    return 1 if out["lost_nonrestricted"] else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1]))

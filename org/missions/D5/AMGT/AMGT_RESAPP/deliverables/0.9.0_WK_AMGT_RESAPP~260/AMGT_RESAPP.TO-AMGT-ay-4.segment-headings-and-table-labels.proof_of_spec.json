@@ -1,0 +1,121 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ay-4",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+  "group": "C",
+  "vintage_commit": "d7b07c5a85"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "cecef87d4a",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ay-4.segment-headings-and-table-labels.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~260",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/segment_labels.py",
+   "kind": "script",
+   "commit_or_etag": "34e64fc16c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: abbreviation_map, segment_names, recover_table, filing_text_for, table_fields; reads stored text only, no SEC or vendor call.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "34e64fc16c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: one import line, _segment_rows (one segment name per row; segment_reason on Other rows), _point_passage (passage_table or passage_table_reason on table runs). No /freshness function touched.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_segment_labels.py",
+   "kind": "test",
+   "commit_or_etag": "34e64fc16c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: 15 plant cases, offline (abbreviations, filing-section headings, sentence-as-heading, Other with reason, two segments, table labels, wrapped rows, null with reason x2, prose passage, table-run test).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "34e64fc16c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "APPENDED rows AMGT_RESAPP-Z-W260-S1, S2, S3 (OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~Z).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "0 filing-section or figure headings across the covered names, BA's headings 3 or fewer segment names, and every table passage labelled; C1 and C2 PASS; R75 C61 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round75/checks/r75_served.py\" --cell c61 --where local; echo \"exit=$?\"",
+   "output_evidence": "names 95; bad segment headings 0 e.g. []; BA headings ['Commercial Airplanes', 'Defense, Space & Security', 'Global Services']\n   table passages 3; without labels 0 e.g. []\nPASS C1 every segment row is headed by one segment name bad 0; BA 3 headings\nPASS C2 every table passage serves its row and column labels 0 of 3\nR75 C61 SERVED: YES\nexit=0",
+   "denominator": "95 of 95 covered names read on the local plane (stored pool objects) at commit 34e64fc16c; 3 of 3 table passages (all BA)",
+   "status": "PASS",
+   "expect": "(?s)bad segment headings 0 .*without labels 0.*PASS C1.*PASS C2.*R75 C61 SERVED: YES\\s+exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "every plant case passes; and exit=0",
+   "method": "test_suite",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_segment_labels.py; echo \"exit=$?\"",
+   "output_evidence": "lib/research/api/tests/test_segment_labels.py::test_a_defined_abbreviation_takes_the_segments_full_name PASSED [  6%]\nlib/research/api/tests/test_segment_labels.py::test_no_row_is_headed_by_a_filing_section_or_a_figure PASSED [ 13%]\nlib/research/api/tests/test_segment_labels.py::test_a_filing_section_heading_takes_the_segment_the_sentence_is_about PASSED [ 20%]\nlib/research/api/tests/test_segment_labels.py::test_a_sentence_used_as_a_heading_gives_only_the_segment_name PASSED [ 26%]\nlib/research/api/tests/test_segment_labels.py::test_a_row_whose_segment_cannot_be_named_is_served_under_other_with_a_reason PASSED [ 33%]\nlib/research/api/tests/test_segment_labels.py::test_a_sentence_about_two_segments_is_other_with_a_reason_not_one_of_them PASSED [ 40%]\nlib/research/api/tests/test_segment_labels.py::test_a_named_row_keeps_its_three_keys_and_every_figure_sentence_is_unchanged PASSED [ 46%]\nlib/research/api/tests/test_segment_labels.py::test_the_route_serves_the_named_headings PASSED [ 53%]\nlib/research/api/tests/test_segment_labels.py::test_a_table_passage_serves_its_column_and_row_labels PASSED [ 60%]\nlib/research/api/tests/test_segment_labels.py::test_rows_that_do_not_match_the_column_count_say_so_in_plain_words PASSED [ 66%]\nlib/research/api/tests/test_segment_labels.py::test_a_figure_row_wrapped_over_lines_is_one_row PASSED [ 73%]\nlib/research/api/tests/test_segment_labels.py::test_a_table_whose_labels_are_not_in_stored_text_is_null_with_a_plain_reason PASSED [ 80%]\nlib/research/api/tests/test_segment_labels.py::test_a_table_with_no_header_line_above_it_is_null_with_a_plain_reason PASSED [ 86%]\nlib/research/api/tests/test_segment_labels.py::test_a_prose_passage_carries_no_table_keys PASSED [ 93%]\nlib/research/api/tests/test_segment_labels.py::test_the_table_run_test_is_half_or_more_numeric_tokens PASSED [100%]\n============================= 15 passed in 0.26s ==============================\nexit=0",
+   "denominator": "15 of 15 plant cases in test_segment_labels.py pass at commit 34e64fc16c",
+   "status": "PASS",
+   "expect": "(?s)15 passed.*exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Run the same c61 check against the unmodified tree (the issuance commit cecef87d4a, before any edit).",
+   "expected": "R75 C61 SERVED: NO on C1 and C2.",
+   "observed": "FIRED-AS-EXPECTED. Before any edit: 'names 95; bad segment headings 36 ... BA headings [BCA, BCA backlog, BDS backlog, BGS earnings, ..., ITEM 7. MANAGEMENT'S DISCUSSION AND ANALYSIS]; table passages 3; without labels 3', FAIL C1, FAIL C2, 'R75 C61 SERVED: NO'. After: bad 0, BA 3 names, unlabelled 0 of 3, YES.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Ran the 12 stored analyses through _segment_rows twice and the BA /thesis driver chart and segment block twice; compared md5 of the printed output.",
+   "observed": "segment rows md5 ac99448d26ec799f5b8f49923f39047d both runs; BA table/segment output md5 b31c4e88f28442ebf36d91c915471e85 both runs.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Column alignment of rows whose figure count differs from the column count (BA Deliveries rows).",
+   "reason": "The filing's blank cells are not in the stored text; the route serves figures in printed order with a plain note (row AMGT_RESAPP-Z-W260-S2)."
+  },
+  {
+   "item": "Two api tests in test_scoped_amgt_mount.py fail (terraform mounts 19 routes, handler serves 18).",
+   "reason": "Unrelated to ay-4: neither the terraform route list nor the handler's routes were edited (row AMGT_RESAPP-Z-W260-S3). api suite: 679 passed, 2 failed."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W260-S1: the passage map carries no pool key for the filing text, so table labels find it by listing the filings prefix (held 300 s). OBSERVATION, INERT.",
+  "AMGT_RESAPP-Z-W260-S2: BA Deliveries rows hold 5 to 8 figures against 6 columns; served in printed order with a plain note. OBSERVATION, INERT.",
+  "AMGT_RESAPP-Z-W260-S3: two test_scoped_amgt_mount tests fail independent of ay-4 (19 mounted routes vs 18 handled). OBSERVATION, INERT."
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~260/SESSION_LOG.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~260 <0.9.0_WK_AMGT_RESAPP~260@opal.agent>\" -F .scratch/msg1.txt -- <4 paths>",
+   "result": "committed 34e64fc16c on wk-AMGT_RESAPP-260"
+  }
+ ]
+}

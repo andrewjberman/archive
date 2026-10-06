@@ -1,0 +1,262 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ay-5",
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ay-5.the-code-redeploy-and-snapshot-write.md",
+  "vintage_commit": "20f03d3013"
+ },
+ "assignee": "0.7.0_AE_CloudOps~A",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "genre": "DEPLOY",
+ "risk_class": "WORLD",
+ "scope": "One redeploy plus TWO new WORLD legs. CODE: one artifact built in a DETACHED worktree at EXACTLY ab28d0ba01 (never 'at or after'), carrying ay-1..ay-4, one code-only safe-apply, then leadpanel_cold_warm.py --label after; memory_size stays 1769. GRANT: one statement added to aws_iam_role_policy.scoped_amgt_api_grants giving s3:GetObject + s3:PutObject on the ONE key amgt/harvest/state/freshness_snapshot/current/snapshot.json. SCHEDULE (AMENDMENT 1, carrying CTO ROUND_ANALYSIS.round74.md ADDENDUM 1 @82afef1fd8 option (b)): ONE aws_scheduler_schedule named by lib/opal_naming.py name(), cron(30 12 ? * MON-FRI *) UTC, targeting the EXISTING opal-amgt-scoped-api with input exactly {\"amgt_scheduled_action\": \"refresh_freshness_snapshot\"}, with its own scheduler role holding lambda:InvokeFunction on that one function. Then the FIRST FIRE and the plant test.",
+ "status": "COMPLETE -- AC1 (c57/c58/c59/c61) and AC2 (seven regression items) all PASS at exit=0, against the same deployed code D29LJCXh. No rollback trigger fired and no S3 delete was taken in any branch. TWO clauses had to be resolved first and NEITHER was a fault in the act: c59 C1 first read 0 of 302 because its deployed arm compared a Lambda-built snapshot against a locally computed baseline on a field that resolves per environment (escalated as msg 30010, ruled (a) in 30011, check re-cut @bf909b6665); then C2 failed VACUOUSLY on an empty cold-invoke list because this seat's own AC batteries had warmed the function, which an 11-minute idle window fixed. The headline is that /freshness now serves warm in 564-617 ms against round 73's 10,300-11,800 ms, closing this seat's own row Z-S356 at roughly 19x.",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ay-5.the-code-redeploy-and-snapshot-write.md",
+  "group": "OTHER",
+  "vintage_commit": "20f03d3013"
+ },
+ "go_message": "msg 29998 from 2.0.0_SA_COO~Z, acked READ. The CTO's half-signature notice (msg 29997) was acked separately and NOT treated as a GO -- the same discipline as ax-5. Also part of the record and acked: msg 30011, ruling (a) on this seat's STOP 30010, which re-cut c59 @bf909b6665. One msg-id in an earlier round was guessed and refused as already-acked, so every id here was read off the '**Msg-ID:**' line of the file itself.",
+ "never_widen_pair": {
+  "coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round75/NEVER_WIDEN_HALF_COO_AY5.md @265f85f8fe, read whole at that pin before the first act",
+  "cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND75_AY5_CTO_HALF.md @452acb4e68, conditions 1-7, read whole at that pin before the first act",
+  "condition_1_build_at_exactly_the_pin": "MET. Built in a detached worktree at exactly ab28d0ba0112e85d291f197c7d393be10e8b695c with porcelain 0. The CONTENT-DIFF matched the halves ON THE FIRST BUILD -- files 371, IDENTICAL 365, CHANGED 3 (monthly_chatter.py, scoped_amgt.py, render_pack.py), ADDED 3 (names_read.py, segment_labels.py, lib/research/freshness/snapshot.py), REMOVED 0, against base 0MZWPl7n. 'EXACTLY, never at or after' is in this spec because round 74's ax-5 stopped on a fifth file another project changed after the pin; at an exact pin that class cannot arise.",
+  "condition_2_untargeted_plan_showing_only_the_named_items": "MET, and graded on an UNTARGETED plan because round 74's row Z-S357 showed -target removes preconditions on other resources from the graph. 53 resource_changes -> 48 no-op + 3 create + 2 update = 5 non-no-op, 0 deletes, which is exactly condition 2's four named items (the scheduler role's policy belongs to its role). terraform_data.scoped_amgt_route_count_check WAS present in this graph -- the guard a targeted plan structurally could not show. The grants-policy delta was READ rather than inferred from the word 'update': statements 6 -> 7, ADDED exactly ['ReadAndWriteTheFreshnessSnapshotObjectOnly'], REMOVED [] and CHANGED [].",
+  "condition_3_the_grant_is_one_object_and_the_control_pair_discriminates": "MET. Action ['s3:GetObject','s3:PutObject'] on ONE object ARN with no wildcard, interpolated from aws_s3_bucket.harvest.arn rather than typed. The pair DISCRIMINATES: snapshot key PutObject implicitDeny -> allowed and GetObject implicitDeny -> allowed, while PutObject on a REAL sibling key under amgt/harvest/state/ STAYED implicitDeny. Each arm used ONE --resource-arns per call and the positive control ran in its own separate invocation, per the four documented false-deny modes.",
+  "condition_4_the_schedule_name_is_builder_output": "MET, confirmed THREE independent ways: name('amgt','global','freshness-snapshot','daily') -> amgt-global-freshness-snapshot-daily; grade() CONFORMANT on it and on both IAM names; and the commit-time naming gate printed 'NAMING-GATE: PASS 3 graded'. Three refusals taught the slot -- scope 'resapp' has no scopes.json row, scope 'harvest' is a PRODUCT scope, and kind 'SCHEDULE' is refused because NAMING_SCHEMA.json's resource.last_slot reads {\"default\": \"kind\", \"EVENT_RULE\": \"cadence\", \"SCHEDULE\": \"cadence\"}, so for a schedule the LAST slot is the CADENCE. The sibling chatter-axis-schedule.tf was NOT the template: its name uses the very scope name() refuses.",
+  "condition_5_the_plant_test": "MET and WIDENED to three arms: a plain HTTP GET (200, no write); an HTTP GET carrying the action as a QUERY PARAMETER (200, no write); and an unknown scheduled action (400, no write). ETag and VersionId byte-identical before and after all three. Provisioned concurrency stays on Andrew's list: cold chatter 3,339-3,774 ms is still above about 2 s, now within roughly 1.7x.",
+  "condition_6_no_s3_delete_in_any_branch": "MET. The only S3 writes are the new artifact version and the first snapshot PUT. The snapshot rollback is a re-put of a computed view or the route's own fallback; the plan showed 0 deletes.",
+  "condition_7_one_never_2_entry_read_across_every_worktree": "MET. Entry amgt-resapp-r75-ay5 opened @d02825e9e3 BEFORE the first apply, 7 legs, closed 7/7. The union read 66 live worktrees, 66 of 66 resolved, 1,517 entry-rows. Three trees name this function and were resolved CASE BY CASE: two are this seat's own and closed in shared HEAD, while amgt-corpus-r36-al5 was NEVER merged, so absence from shared HEAD proves nothing about it -- a first pass asserted 'closed' for all three on that test and was wrong for exactly that one."
+ },
+ "rollback": "NAMED PER KEY AND NOT TAKEN. CODE: prior artifact version eUmaUfS9YOo2kJvvQErQsjn6cDPFQmeK, one code-only safe-apply, restores 0MZWPl7nGZzFI53w+vsKdS7hQpcxu4Mrd5wEMWWZQpA=. GRANT: the reverse plan removing the one added statement; the six pre-existing statements are untouched in both directions, which the 6 -> 7 ADDED/REMOVED/CHANGED read shows. SCHEDULE: the reverse plan destroying the schedule, its role and its policy, none of which existed before this act. SNAPSHOT OBJECT: a re-put of a computed view, or the route's own 24-hour-age fallback, NEVER an S3 delete. Nothing triggered a rollback. When c59 C1 failed, the COO half's own FAIL branch prescribed reversing the grant and schedule legs -- that reversal was NOT taken, because neither named fault was present and the cause was measured to be the check's oracle; the issuer then ruled (a): 'Row Z-S359 is the check's fault, not the act's. No reversal.'",
+ "controls": {
+  "the_c59_failure_was_escalated_not_adjudicated": {
+   "description": "The single most consequential control in this act. c59 C1 read 0 of 302 and the COO half's FAIL branch prescribed reversing the grant and schedule legs. Three options were priced to the issuer with a recommendation and no local judgement.",
+   "expected_landed": "the executor reports the failing clause with its cause measured and leaves the disposition to the issuer, applying no reversal",
+   "expected_not_landed": "the executor either reverses correct work to satisfy the literal FAIL branch, or declares the criterion passed because it believes the producer is fine",
+   "observed": "ESCALATED as msg 30010 with three options priced, recommending (a), and NEITHER reversing nor self-passing. The legs were left LANDED and leg L6 left OPEN, with the entry's state stated plainly as a grading question rather than a stranded deploy. Ruled (a) in msg 30011: 'Row Z-S359 is the check's fault, not the act's. No reversal.' Had the reversal been taken, a correct narrow grant, a conformant schedule and a valid snapshot would all have been destroyed on the strength of a cross-environment oracle.",
+   "status": "PASS"
+  },
+  "zero_of_302_was_diagnosed_rather_than_believed": {
+   "description": "0 of 302 matching is the signature of a comparison that CANNOT match, not of 302 wrong values. The distinction decides whether the act or the check is at fault.",
+   "expected_landed": "the executor diffs at field level and reports which field differs and in how many rows, before drawing any conclusion",
+   "expected_not_landed": "0 of 302 read as a total data fault, or waved away as 'probably the check'",
+   "observed": "Diffed at field level: same 302 keys both sides, same 10 fields, 0 only-in-served, 0 only-in-computed, exactly ONE differing field (rot) in all 302 rows, and 302 of 302 equal ignoring it. Each side carried ONE uniform rot value, which is one environment difference replicated 302 times rather than a per-row fault.",
+   "status": "PASS"
+  },
+  "the_discriminator_was_already_in_the_check_and_cost_nothing": {
+   "description": "c59 --where local compares build_freshness_snapshot() against read_coverage_freshness() BOTH in one environment, which separates 'the producer is wrong' from 'the comparison crosses environments'.",
+   "expected_landed": "the same-environment arm is run before any conclusion about the producer",
+   "expected_not_landed": "the cross-environment arm's 0 taken as the producer's verdict, with no same-environment read",
+   "observed": "Ran it: '302 of 302; e.g. differing []', C1 PASS, SERVED: YES. That localised the failure to crossing environments and needed no new instrument.",
+   "status": "PASS"
+  },
+  "the_richer_value_was_not_assumed_to_be_the_correct_one": {
+   "description": "The Lambda's rot is the richer computed signal and the local one is the 'no signal' fallback, so the tempting read was 'the Lambda is right, therefore the snapshot is right'.",
+   "expected_landed": "the row states the question and declines to settle which value belongs in the object, naming the opposite reading explicitly",
+   "expected_not_landed": "the executor concluding the deployed value is correct because it is richer, which would also have been the convenient conclusion",
+   "observed": "Row Z-S359 states that nothing measured establishes the richer value as the correct one to STORE, and that the opposite reading -- a stale 2026-09-10 review date where 'none at this vintage' is right -- is excluded by nothing. Before theorising, the sources were checked: list-objects-v2 --prefix lists returned None and the built zip carries no rot_signal.json. The issuer then ruled the deployed value correct, for a reason this seat had not established: the package carries the list register and the local tree does not.",
+   "status": "PASS"
+  },
+  "the_re_cut_check_was_verified_byte_identical_before_being_run": {
+   "description": "The ruling named r75_served.py @bf909b6665 as LOCAL, so whether this tree held those exact bytes was an open question.",
+   "expected_landed": "the blob is compared before the re-run",
+   "expected_not_landed": "the working-tree copy assumed to be the ruled bytes",
+   "observed": "Working tree, bf909b6665 and HEAD all read blob 3f92e60b436f3cc1421bda211da0ae1162219aa0. The ruled bytes were run, not a near-copy.",
+   "status": "PASS"
+  },
+  "c2s_second_failure_was_read_as_vacuous_rather_than_as_a_regression": {
+   "description": "At the re-cut, C2 failed on 'cold invokes 0 []'. The clause is 'cold and all(...)', so an EMPTY list fails for want of a measurement, not because an invoke was slow.",
+   "expected_landed": "the empty denominator is identified as the cause and the precondition restored, rather than the failure reported as a latency regression",
+   "expected_not_landed": "'C2 FAIL' reported as a cold-start regression against the act, or the clause declared satisfied because no cold invoke exceeded the bar",
+   "observed": "Read as vacuous: the same clause had passed earlier in this round at 'cold invokes 2 [(200, 881), (200, 858)]' and the issuer's own run read 900/924 ms. An empty list cannot distinguish 'fast' from 'unmeasured', and reporting either verdict would have been false. The precondition was restored instead.",
+   "status": "PASS"
+  },
+  "the_wait_for_a_cold_container_was_named_not_defaulted": {
+   "description": "CLAUDE.md forbids waiting as a default; a wait must name the evidence it is the only way to obtain.",
+   "expected_landed": "the wait is justified by naming what produces the measurement and why the alternatives do not",
+   "expected_not_landed": "an unexplained pause, or forcing containers by a configuration touch outside the signed plan",
+   "observed": "The cause was this seat's own instrumentation -- AC1 and AC2 invoke the function dozens of times, so the warm pool absorbed all six concurrent invokes. A larger burst would only widen the pool, and forcing new containers via a config change would be outside the signed plan, so idleness was the only honest lever. 65 s is demonstrably insufficient: C3's post-hold read came back at Duration 234 ms, warm. After an 11-minute window with no invocations: 'cold invokes 1 [(200, 1087)]', PASS at 1,087 ms against the 2,000 ms bar.",
+   "status": "PASS"
+  },
+  "ac2s_last_item_was_run_verbatim_after_a_paraphrase_misfired": {
+   "description": "An internal note read 'r71 c38' and was resolved to r71_served.py --cell c38. That script defines only c34/c35/c36.",
+   "expected_landed": "the order's INVOCATION is run verbatim and the apparent failure is traced before being reported",
+   "expected_not_landed": "'6 pass, 1 fail' reported as a regression in the product",
+   "observed": "The script answered 'invalid choice: c38', which a loop scored as a FAIL and produced a false regression. The order's invocation names r71_latency.py --where deployed with no --cell at all; only its expectation text says 'R71 C38'. Run verbatim, AC2 is exit=0 with all seven SERVED: YES. A paraphrased criterion redirects its only oracle, and here the paraphrase was this seat's own.",
+   "status": "PASS"
+  },
+  "a_fallback_echo_reported_a_clean_verdict_on_a_failed_read": {
+   "description": "Checking the delivered STOP for stray tags, a 'grep -c ... || echo \"0 -- clean\"' printed clean.",
+   "expected_landed": "the reassuring branch is not trusted and the read is repeated at a verified path",
+   "expected_not_landed": "'0 -- clean' banked as a verdict",
+   "observed": "grep could not open the file at all -- the path was wrong, and the || branch fired on the error rather than on a zero count. Re-read at the right path the count is 1: the delivered body does carry a stray closing tag from this seat's own parameter. The substance of msg 30010 is complete and legible, so no second message was sent about two tag lines, which would be the FYI-to-an-inbox Rule 31 forbids. Never put a reassuring fallback on the failure branch of a read whose emptiness carries the verdict.",
+   "status": "PASS"
+  },
+  "the_first_fire_was_proved_on_two_planes_against_a_measured_absence": {
+   "description": "A first mint must be shown to be a first mint, and the writer's self-report is not evidence.",
+   "expected_landed": "BEFORE is a measured 404 with a positive control, and AFTER is confirmed by an instrument other than the producer",
+   "expected_not_landed": "the function's own 200 and self-reported etag taken as proof the object is right",
+   "observed": "BEFORE: head-object 404 with a positive control on its prefix tree (amgt/harvest/state/ does hold filing_attempt keys), so a real absence and not a wrong bucket or prefix. AFTER: the function's self-reported etag \"cd40eb2d2ad71f765537c037d753c9a1\" equals an independent head-object read, which also gave VersionId MWfKsTyq1Yi4JOWms7F4eSBCWTRbu17o and ContentLength 2850172 B -- the ~2.85 MB object the COO half predicts.",
+   "status": "PASS"
+  },
+  "the_plant_test_was_widened_past_the_one_arm_asked_for": {
+   "description": "Condition 5 asks that an HTTP GET never writes. One arm leaves the obvious attempt untested.",
+   "expected_landed": "the writer is shown unreachable by the paths an attacker or a bug would actually use",
+   "expected_not_landed": "a single plain GET accepted as proof of one writer",
+   "observed": "Three arms: a plain GET (200, no write); a GET carrying the action as a QUERY PARAMETER (200, no write); an unknown scheduled action (400, no write). ETag and VersionId byte-identical across all three, so refresh_freshness_snapshot() is reachable ONLY by the scheduled direct-invoke event and NEVER-1's 'one writer' is measured rather than asserted.",
+   "status": "PASS"
+  },
+  "a_rail_denial_aborted_a_whole_call_and_the_earlier_segments_were_re_run": {
+   "description": "A 'comp-find | head' segment was denied by the comp-tool rail, which aborts the entire Bash call and silently no-ops every earlier segment.",
+   "expected_landed": "the earlier segments are re-run rather than assumed to have executed",
+   "expected_not_landed": "the c38 investigation in that call treated as having happened",
+   "observed": "Re-ran it without the pipe. The rail's own rule is that a denial aborts the whole call, so every later segment is a silent no-op -- and here the segments that mattered came BEFORE the denied one, which is the easier case to miss.",
+   "status": "PASS"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Provisioned concurrency for the cold path",
+   "reason": "Condition 5's disposition keeps it on Andrew's list while cold chatter sits above about 2 s. Measured 3,339-3,774 ms this round, so it stays excluded -- but the gap is now a factor of roughly 1.7, from about 4 three rounds ago."
+  },
+  {
+   "item": "Any alert, alarm, SNS or SES send, notification, freshness-checker or monitor",
+   "reason": "Standing moratorium; Andrew's explicit word not given and not sought. The schedule added here is a scheduled PRODUCER -- nothing watches, nothing notifies, and it computes a snapshot an already-served route reads. The same distinction is drawn in the same words at the top of chatter-axis-schedule.tf in this root, so the reading is local precedent rather than this seat's construction, and it is written into the new file and the commit message rather than assumed in silence."
+  },
+  {
+   "item": "Migrating the sibling schedule's non-conformant name",
+   "reason": "chatter-axis-schedule.tf's 'amgt-resapp-chatter-axis-daily' is non-conformant pre-LGIC, but rule 30's non-application says an existing resource reaches conformance through its own migration project, never as a rider on this act."
+  },
+  {
+   "item": "Resolving whether the stored rot value should be the register's or 'none at this vintage'",
+   "reason": "Row Z-S359 raised it and the issuer ruled it in msg 30011. Not this seat's call and not re-litigated here."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-S359"
+ ],
+ "session_log": "0.7.0_AE_CloudOps~A, 2026-10-06Z session, AMGT_RESAPP round 75 AMGT-ay-5 -- the snapshot grant, the name()-derived schedule, the first fire, and a STOP on an oracle that crosses environments.",
+ "carries": "ay-1 through ay-4, drained and closed before the cut, plus AMENDMENT 1's scheduled writer. ay-2 built the 24-hour age check and the snapshot_fallback that makes this grant safe to land; the schedule is the CTO's option (b) remedy for this seat's own round-73 row Z-S356. r74 c55 (the slash keys) is pinned on this redeploy and passes.",
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "R75 C57, C58, C59 (C1-C3) and C61 SERVED: YES on the deployed function; and exit=0",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for c in c57 c58 c59 c61; do PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round75/checks/r75_served.py\" --cell $c --where deployed || exit 1; done; echo \"exit=$?\"",
+   "method": "command",
+   "denominator": "4 cells, 9 clauses: c57 C1-C2, c58 C1-C2, c59 C1-C3, c61 C1-C2. c59 C1's own denominator is 302 rows.",
+   "output_evidence": "R75 C57 SERVED: YES (0 fiscal-year lines stamped with the run date across all three names; run date once, on page 1). R75 C58 SERVED: YES (17 of 17 served thesis sentences in the BA print, no 'not written' line). R75 C59 SERVED: YES -- C1 'served from snapshot: True ... age_hours 0.8; rows EQUAL (all fields but rot) 302 of 302' with rot equal to the deployed register's, C2 'burst of 6: cold invokes 1 [(200, 1087)]' PASS against the 2000 ms bar, C3 'after 65 s idle: 830 ms end to end, status 200' PASS. R75 C61 SERVED: YES (0 bad segment headings, 0 of 3 table passages unlabelled). exit=0. BASE ARM, captured before the act, had all four cells FAILING at the halves' before-figures: c57 368/491/396 fiscal-year lines, c58 0 of 17, c59 cold 8,318/8,028 ms and post-hold 7,159 ms, c61 36 bad headings and 3 of 3 tables unlabelled.",
+   "status": "PASS",
+   "status_reason": "Passed after two check-side resolutions, neither of which was a fault in the act. c59 C1's deployed arm compared a Lambda-built snapshot against a locally computed baseline on a field (rot) that resolves per environment; escalated rather than adjudicated, ruled (a), check re-cut @bf909b6665. c59 C2 then failed vacuously on an empty cold-invoke list caused by this seat's own AC batteries warming the function; an 11-minute idle window restored the precondition and it passed at 1,087 ms."
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "R74 C53/C55/C56, R73 C48-C50 and R71 C38 SERVED: YES on the deployed function (no regression); and exit=0",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for c in c53 c55 c56; do PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round74/checks/r74_served.py\" --cell $c --where deployed || exit 1; done && for c in c48 c49 c50; do PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round73/checks/r73_served.py\" --cell $c --where deployed || exit 1; done && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round71/checks/r71_latency.py\" --where deployed; echo \"exit=$?\"",
+   "method": "command",
+   "denominator": "7 items across 3 rounds: r74 c53/c55/c56, r73 c48/c49/c50, r71 latency (reported as C38).",
+   "output_evidence": "R74 C53 SERVED: YES -- /freshness warm min 564 max 617 ms, 95 covered rows, against round 73's 10,300-11,800 ms. R74 C55 SERVED: YES -- 113 gateway routes, 11 security GET routes, one greedy key, both slash keys 200 on all 4 routes raw and %2F. R74 C56 SERVED: YES -- lato-share 1.00 on all three names, 0 internal markers, the c48 floor holding. R73 C48 SERVED: YES -- 0 unit-codes, 0 long decimals, 0 reprs, 0 clipped spans across 22/24/24 pages. R73 C49 SERVED: YES -- every covered row's pack clock a date, 0 NEVER. R73 C50 SERVED: YES -- 383 names read, 0 all-capitals. R71 C38 SERVED: YES -- 9 Lead Panel reads, 0 over the 2000 ms bar. exit=0.",
+   "status": "PASS",
+   "status_reason": "No regression. The one apparent failure was this seat's own wrong-object reconstruction of the last item -- 'r71 c38' resolved to r71_served.py, which defines only c34/c35/c36 -- not a defect in the product. Run verbatim, all seven items read SERVED: YES at exit=0."
+  }
+ ],
+ "cold_reads": {
+  "sequencing": "leadpanel_cold_warm.py --label after ran 1 s after the code apply, in the SAME tool call, before AC1 or AC2 touched the function, and it self-reports the CodeSha256 it measured (D29LJCXh) so the reading cannot be attributed to the wrong bytes.",
+  "lead_panel_after": "Cold chatter (init+duration) 3,339-3,774 ms over n=6; warm chatter 490-574 ms; warm price 62-240 ms; all 9 routes 200.",
+  "the_band_narrowed_as_much_as_the_median_fell": "3,339-3,774 is a 435 ms band against round 74's 1,061 ms (3,668-4,729). The sequence is 6,998-8,638 (r72) -> 6,381-7,786 (r73) -> 3,668-4,729 (r74) -> 3,339-3,774 (r75), so this round's gain is modest in the median and large in the spread -- worth stating separately, because a narrower band is what makes the number predictable enough to reason about.",
+  "condition_5_disposition": "Provisioned concurrency STAYS on Andrew's list: cold is still above about 2 s. The gap is now roughly 1.7x, from about 4x three rounds ago.",
+  "the_freshness_loop_this_closes": "Row Z-S356 measured /freshness serving warm in 10.3-11.8 s because aw-3 made it read about 105 ledgers per request, and the issuer HELD Andrew's DEV push on that number. r74's caching took it to 525-550 ms; this round's snapshot has it at 564-617 ms warm, cold at 881-1,087 ms and post-hold at 744-830 ms, all inside the 2,000 ms bar. The loop opened by this seat's own row is closed at roughly 19x.",
+  "what_the_cold_read_cost_to_obtain": "C2's cold measurement is only available when a container has to be created, and this seat's own AC batteries destroy that precondition. The honest fix was to stop invoking for 11 minutes; the dishonest ones available were a larger burst (which widens the warm pool) or a configuration touch to force new containers (outside the signed plan)."
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+   "kind": "s3_object",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "commit_or_etag": "D29LJCXhOStZ51JD4TTt2Jk0QUVDUbXDouXRTUS1ULI=",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ],
+   "deploy_evidence": "built in a detached worktree at exactly ab28d0ba01; CONTENT-DIFF files 371 / IDENTICAL 365 / CHANGED 3 / ADDED 3 / REMOVED 0, reproduced on the uploading pass. VersionId UvQ9tuNULwnl6bUSLq8uUB0Fg91.MuJC, ContentLength 41960001, confirmed by an independent head-object agreeing with upload_verified's read-back; live CodeSha256 equals this content-sha256; prior version eUmaUfS9YOo2kJvvQErQsjn6cDPFQmeK retained as the named code rollback"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/harvest/scoped-amgt-api.tf",
+   "kind": "iam",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "commit_or_etag": "598b791b19",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "deploy_evidence": "one statement, ReadAndWriteTheFreshnessSnapshotObjectOnly, on ONE object ARN interpolated from aws_s3_bucket.harvest.arn. untargeted plan showed the policy update among exactly 5 non-no-op changes; the delta read 6 -> 7 statements with REMOVED [] and CHANGED []; the simulate control pair discriminates (snapshot key moved implicitDeny -> allowed on both actions, a sibling key stayed implicitDeny)",
+   "introduces": [
+    "ReadAndWriteTheFreshnessSnapshotObjectOnly"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/harvest/freshness-snapshot-schedule.tf",
+   "kind": "schedule",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "commit_or_etag": "598b791b19",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "deploy_evidence": "AMENDMENT 1, carrying CTO ROUND_ANALYSIS.round74.md ADDENDUM 1 @82afef1fd8 option (b). 'Apply complete! Resources: 3 added, 1 changed, 0 destroyed.' Read live: name amgt-global-freshness-snapshot-daily, State ENABLED, cron(30 12 ? * MON-FRI *), tz UTC, TargetArn the existing opal-amgt-scoped-api, Input exactly {\"amgt_scheduled_action\":\"refresh_freshness_snapshot\"}, RoleArn the name()-derived scheduler role. Commit-time naming gate: PASS 3 graded, all CONFORMANT.",
+   "introduces": [
+    "amgt-global-freshness-snapshot-daily",
+    "freshness_snapshot_scheduler"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-data-harvest/amgt/harvest/state/freshness_snapshot/current/snapshot.json",
+   "kind": "s3_object",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "commit_or_etag": "cd40eb2d2ad71f765537c037d753c9a1",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "deploy_evidence": "the first fire, one direct invoke with the schedule's own event. BEFORE: head-object 404 with a positive control on its prefix tree, so a measured absence rather than a wrong bucket. AFTER: VersionId MWfKsTyq1Yi4JOWms7F4eSBCWTRbu17o, 2850172 B, generated_at 2026-10-06T11:32Z, 302 rows, and the function's self-reported etag equals an independent head-object. ONE WRITER proven by a three-arm plant test leaving ETag and VersionId byte-identical."
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "comp-schedule",
+   "invocation": "comp-schedule (full run, then resumed from its cursor)",
+   "result": "Run because the preflight's 'DECLARED-NOT-APPLICABLE -- no cron, alarm, monitor or cadence' predates AMENDMENT 1, which ADDS a cron schedule, so that declaration no longer described the act. The first pass hit its 90 s budget and returned a PREFIX (1 of 6 carriers, C2 scanned 0 of 28) with answer-state PARTIAL_OR_BLIND, which the tool itself says 'must be rerun, never read as zero or complete' -- so it was resumed rather than read as clean. Resumed: 6 of 6 carriers, 57.2 s, GATES ARMED 0. Nothing blocked the act."
+  },
+  {
+   "tool": "lib/opal_naming.py name() and grade()",
+   "invocation": "name('amgt','global','freshness-snapshot','daily'); grade() on all three resource names",
+   "result": "name() -> amgt-global-freshness-snapshot-daily after three instructive refusals (scope 'resapp' has no scopes.json row; scope 'harvest' is a PRODUCT scope; kind 'SCHEDULE' is refused because resource.last_slot makes a schedule's last slot the CADENCE). grade() CONFORMANT on the schedule and, since name() has no IAM last slot, on amgt-global-freshness-snapshot-scheduler-role and -scheduler-policy. The commit-time gate independently agreed: PASS 3 graded."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'rot_signal' --name; comp-find 'ay-5' --name",
+   "result": "Used to establish that the repo's only rot_signal.json sits in a worker deliverable directory, and to locate the task order after a guessed path returned nothing. One earlier invocation piped into head and was denied by the rail, which aborts the whole Bash call -- the earlier segments in that call were re-run rather than assumed to have executed."
+  }
+ ],
+ "forward_notes": [
+  {
+   "note": "A deployed-arm check that compares a Lambda-built artifact against a locally computed baseline is only sound on fields that resolve identically in both environments. r75 c59 C1 crossed that line on rot and read 0 of 302 while the producer was correct on 302 of 302. The re-cut @bf909b6665 fixes this cell; the general shape is worth carrying into how later deployed arms are written, because the failure mode reads exactly like a total data fault.",
+   "owner": "2.0.0_SA_COO~Z"
+  },
+  {
+   "note": "r75 c59 C2 cannot be measured by a battery that has already warmed the function: the clause is 'cold and all(...)', so an empty cold list FAILS, and AC1 plus AC2 together invoke the function dozens of times. Today it cost an 11-minute idle window. A clause reading 'every cold invoke, if any, is within the bar' plus a separate clause requiring at least one cold sample would separate 'slow' from 'unmeasured', which are currently the same verdict.",
+   "owner": "2.0.0_SA_COO~Z"
+  },
+  {
+   "note": "AC2's expectation text names 'R71 C38' while its invocation runs r71_latency.py with no --cell. The invocation is what binds and it passes; the mismatch cost one wrong-object run here. Worth aligning the expectation's wording with the script it actually calls.",
+   "owner": "2.0.0_SA_COO~Z"
+  },
+  {
+   "note": "The snapshot now has exactly one writer and a 24-hour age check, so a schedule failure degrades to the pre-round compute path rather than serving stale data. Nothing watches that degradation, by design and under the moratorium; if Andrew ever wants it surfaced, it is his word to give, and the hook already exists in the served body's snapshot.age_hours.",
+   "owner": "0.7.0_AE_CloudOps~A"
+  },
+  {
+   "note": "chatter-axis-schedule.tf's schedule name is non-conformant pre-LGIC ('resapp' is a scope name() refuses). Rule 30's non-application keeps it out of this act; it needs its own migration row rather than a rider.",
+   "owner": "1.0.0_SA_CTO"
+  }
+ ]
+}

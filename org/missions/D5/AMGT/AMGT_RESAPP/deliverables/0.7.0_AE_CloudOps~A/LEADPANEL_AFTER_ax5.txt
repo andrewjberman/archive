@@ -1,0 +1,68 @@
+LEADPANEL after: CodeSha256 0MZWPl7nGZzFI53w+vsKdS7hQpcxu4Mrd5wEMWWZQpA= at 2026-10-06T08:00:52Z
+   /lead-panel/timeseries/collected/chatter?days=30: cold(init+duration) n 6 min 3668 max 4729 | warm(duration) n 3 min 551 max 595 | status [200]
+   /lead-panel/timeseries/collected/chatter?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 483 max 598 | status [200]
+   /lead-panel/timeseries/collected/chatter?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 509 max 668 | status [200]
+   /lead-panel/rankings/trending/price: cold(init+duration) n 0 | warm(duration) n 9 min 109 max 146 | status [200]
+   /lead-panel/rankings/trending/price?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 61 max 194 | status [200]
+   /lead-panel/rankings/trending/price?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 64 max 277 | status [200]
+   /lead-panel/rankings/breakout/price: cold(init+duration) n 0 | warm(duration) n 9 min 121 max 224 | status [200]
+   /lead-panel/rankings/breakout/price?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 71 max 261 | status [200]
+   /lead-panel/rankings/breakout/price?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 67 max 234 | status [200]
+
+-- PROVENANCE ------------------------------------------------------------------
+Produced by: deliverables/2.0.0_SA_COO~Z/round71/checks/leadpanel_cold_warm.py --label after
+Run by:      0.7.0_AE_CloudOps~A, AMGT_RESAPP.TO-AMGT-ax-5, round 74 code leg (CTO condition 5)
+Run at:      2026-10-06T08:00:52Z, 9 s after the apply completed (LastModified 08:00:43Z), in the SAME
+             tool call as the apply and before AC1 or AC2 touched the function.
+Pinning:     the script self-reports the CodeSha256 it measured, so these figures are pinned to the
+             round-74 build rather than resting on run order.
+
+-- THE COLD READ: THE LARGEST SINGLE-ROUND IMPROVEMENT IN THIS SEQUENCE ---------
+  cold chatter, round 74 (0MZWPl7n) : 3668 - 4729 ms   (n 6)
+  cold chatter, round 73 (satkY3HX) : 6381 - 7786 ms   (n 6)
+  cold chatter, round 72 (2lUlZomo) : 6998 - 8638 ms   (n 6)
+  cold chatter, round 71 (wbIT0PHv) : 7306 - 7777 ms   (n 6)
+
+Both ends down about 2.7-3.1 s against round 73. Still single runs of n 6, so no claim beyond the
+printed min and max -- but unlike round 72's overlapping bands, this one does not overlap round 73's.
+
+-- CTO CONDITION 5: THE PHASE TABLE --------------------------------------------
+From the function's own AMGT_PHASE log lines over this measurement's window.
+DENOMINATOR: 684 lines emitted, 684 parsed (no parse loss).
+
+READ THE COLUMNS CORRECTLY: each route/phase pair is invoked both cold and warm in this window, so
+min is a WARM invoke and max is the COLD one. These are NOT cold ranges; the cold cost is the max.
+
+  route / phase                         n    min(warm)   max(cold)
+  chatter / names                      40          10        1220   <-- now the largest cold phase
+  chatter / generation read            40          63         923
+  rankings TRENDING/PRICE / names      80           3         784
+  chatter / compute                    80         162         367
+  chatter / mentions decode            40          17         278   <-- was up to 3720 in round 73
+  rankings breakout/price / compute    14          55         218
+  rankings TRENDING/PRICE / classif.   80           5         181
+  rankings TRENDING/PRICE / compute    54          47         142
+  rankings TRENDING/PRICE / gen read   54           2          64
+  rankings breakout/price / gen read   14           2          51
+  rankings breakout/price / classif.   40           5          16
+  chatter / classification             40           5          16
+  rankings breakout/price / names      40           3           4
+  serialize (all three routes)         68           1           2
+
+THE ATTRIBUTABLE WIN, and it closes a loop from last round. In round 73 the dominant cold phase was
+"mentions decode" at up to 3,720 ms, about half the cold chatter read, and the aw-7 report named it as
+the place to look next rather than names. aw-1 targeted it: it is now 278 ms, roughly 13x, and that
+accounts for most of the ~2.7-3.1 s the cold total fell.
+
+The new top cold phase is "chatter / names" at 1,220 ms -- essentially unchanged from round 73's
+1,175 ms. If the cold read is pursued further, names is now the place, and generation read (923 ms)
+behind it.
+
+-- CTO CONDITION 5's DISPOSITION -----------------------------------------------
+The condition: provisioned concurrency comes off Andrew's list only if the cold read falls under about
+2 s. At 3.7-4.7 s it STAYS ON -- but it is now within a factor of two of coming off, where three
+rounds ago it was within a factor of four.
+
+-- CAVEAT ----------------------------------------------------------------------
+Same script, same 9 routes, same request counts (n 9 warm / n 6 cold per route as the script sets
+them). Single runs against live data, not a controlled benchmark.
