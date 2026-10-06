@@ -1,0 +1,151 @@
+data.terraform_remote_state.core: Reading...
+data.aws_lambda_layer_version.irpt_common: Reading...
+module.irpt_ycharts_generate.data.aws_s3_object.artifact: Reading...
+aws_cloudwatch_log_group.research_probe: Refreshing state... [id=/aws/lambda/irpt-ycharts-research-20260911]
+module.irpt_ycharts_generate.aws_cloudwatch_log_group.lambda: Refreshing state... [id=/aws/lambda/irpt-ycharts-generate]
+aws_secretsmanager_secret.research_session: Refreshing state... [id=arn:aws:secretsmanager:us-east-1:313476888478:secret:ycharts/session/research-20260911-FQCIve]
+data.aws_dynamodb_table.users: Reading...
+aws_security_group.runner: Refreshing state... [id=sg-0f643b4963ad6ff15]
+aws_iam_role.generate: Refreshing state... [id=irpt-ycharts-generate-role]
+aws_ssm_document.run: Refreshing state... [id=irpt-ycharts-run]
+aws_ssm_document.deploy: Refreshing state... [id=irpt-ycharts-deploy]
+module.irpt_ycharts_generate.data.aws_s3_object.artifact: Read complete after 0s [id=opal-313476888478-lambda-artifacts/investor-reporting/irpt-ycharts-generate.zip]
+data.aws_ssm_parameter.al2023: Reading...
+data.terraform_remote_state.core: Read complete after 0s
+data.aws_caller_identity.current: Reading...
+data.aws_lambda_layer_version.irpt_common: Read complete after 0s [id=arn:aws:lambda:us-east-1:313476888478:layer:irpt-common:5]
+aws_iam_role.runner: Refreshing state... [id=irpt-ycharts-runner-role]
+data.aws_caller_identity.current: Read complete after 0s [id=313476888478]
+data.aws_dynamodb_table.users: Read complete after 0s [id=opal-users-v2]
+data.aws_ssm_parameter.al2023: Read complete after 0s [id=/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64]
+aws_iam_role_policy.generate_directory_read: Refreshing state... [id=irpt-ycharts-generate-role:irpt-ycharts-generate-directory-read-policy]
+aws_iam_role_policy.generate_ownership_map: Refreshing state... [id=irpt-ycharts-generate-role:irpt-ycharts-generate-ownership-map-read-policy]
+aws_iam_role_policy.generate: Refreshing state... [id=irpt-ycharts-generate-role:irpt-ycharts-generate]
+module.irpt_ycharts_generate.aws_lambda_function.this: Refreshing state... [id=irpt-ycharts-generate]
+aws_iam_role_policy_attachment.runner_ssm: Refreshing state... [id=irpt-ycharts-runner-role-20260911000549354900000001]
+aws_iam_instance_profile.runner: Refreshing state... [id=irpt-ycharts-runner-profile]
+aws_iam_role_policy.runner: Refreshing state... [id=irpt-ycharts-runner-role:irpt-ycharts-runner]
+data.aws_iam_policy_document.ycdgen_research_trust: Reading...
+aws_iam_role_policy.runner_resident: Refreshing state... [id=irpt-ycharts-runner-role:irpt-ycharts-runner-resident-policy]
+data.aws_iam_policy_document.ycdgen_research_trust: Read complete after 0s [id=2350337169]
+aws_iam_role.ycdgen_research["cottonwood"]: Refreshing state... [id=irpt-cot-ycharts-research-role]
+aws_instance.runner: Refreshing state... [id=i-0167fd745ad906a66]
+aws_iam_role_policy.ycdgen_research["cottonwood"]: Refreshing state... [id=irpt-cot-ycharts-research-role:irpt-cot-ycharts-research-policy]
+aws_ec2_instance_state.runner: Refreshing state... [id=i-0167fd745ad906a66]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_iam_role_policy.runner_resident will be updated in-place
+  ~ resource "aws_iam_role_policy" "runner_resident" {
+        id          = "irpt-ycharts-runner-role:irpt-ycharts-runner-resident-policy"
+        name        = "irpt-ycharts-runner-resident-policy"
+      ~ policy      = jsonencode(
+          ~ {
+              ~ Statement = [
+                    # (5 unchanged elements hidden)
+                    {
+                        Action   = [
+                            "s3:GetObject",
+                            "s3:GetObjectVersion",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/request_compositions/*",
+                            "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/original_holdings/*",
+                            "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/request_compositions/*",
+                            "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/original_holdings/*",
+                            "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/request_compositions/*",
+                            "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/original_holdings/*",
+                        ]
+                        Sid      = "ReadFrozenCompositionAndNormalizedInput"
+                    },
+                  + {
+                      + Action   = [
+                          + "s3:PutObject",
+                          + "s3:GetObject",
+                          + "s3:GetObjectVersion",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/ycharts_opal_reports/*",
+                        ]
+                      + Sid      = "RetainTheOpalReportPdf"
+                    },
+                  + {
+                      + Action   = [
+                          + "dynamodb:GetItem",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:dynamodb:us-east-1:313476888478:table/etf-classifications",
+                        ]
+                      + Sid      = "ReadTheCanonicalClassificationTable"
+                    },
+                  + {
+                      + Action   = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-etfs/bbg/*",
+                        ]
+                      + Sid      = "ReadTheHeldFundCharacteristics"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:ListBucket",
+                        ]
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = [
+                                  + "bbg/",
+                                  + "bbg/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-etfs",
+                        ]
+                      + Sid       = "ListTheHeldFundCharacteristicsFolder"
+                    },
+                    {
+                        Action   = [
+                            "secretsmanager:GetSecretValue",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "arn:aws:secretsmanager:us-east-1:313476888478:secret:astn/kimi/api-key-??????",
+                        ]
+                        Sid      = "ReadTheEstateKimiKey"
+                    },
+                  ~ {
+                      ~ Condition = {
+                          ~ StringLike   = {
+                              ~ "kms:EncryptionContext:aws:s3:arn" = [
+                                    # (17 unchanged elements hidden)
+                                    "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/original_holdings/*",
+                                  + "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/ycharts_opal_reports/*",
+                                ]
+                            }
+                            # (1 unchanged attribute hidden)
+                        }
+                        # (4 unchanged attributes hidden)
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (2 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
