@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-m-2",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "361b186c92"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "9108f11494",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-m-2.platform-census-orion-eclipse-smartx.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~26/PLATFORM_CENSUS_round7.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census; nothing deployed. orion 24 datasets, eclipse 8, smartx 13; catalog_row false for all 45.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows NFRA_MCPINDEX-Z-W26-S1 and -S2 (OBSERVATION, INERT).",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "OK: orion, OK: eclipse, OK: smartx, each with datasets == denominator and every dataset carrying key/newest_partition/as_of/rows/catalog_row -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round7/checks/m2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "OK: orion: datasets=24 denominator=24\nOK: eclipse: datasets=8 denominator=8\nOK: smartx: datasets=13 denominator=13\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 platforms; datasets 24 + 8 + 13 = 45, each equal to its printed denominator",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Census with no planted mutant; the order names none and the check reads a record, not code.",
+      "expected": "N/A for this worker: no mutant planted.",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "not rerun: the census reads live S3 (partitions advance), so two runs differ by construction",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Bronze/raw/meta tiers and non-Orion/Eclipse/SmartX silver prefixes",
+      "reason": "Listed per platform under `excluded` in the record; the order asks for served silver datasets only."
+    },
+    {
+      "item": "Task order <status> flip to complete",
+      "reason": "The order file is outside this worker's <paths>; the issuer flips it."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W26-S1",
+    "NFRA_MCPINDEX-Z-W26-S2"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-m-2.platform-census-orion-eclipse-smartx.md",
+  "compiler_tools": [
+    {
+      "tool": "boto3 + pyarrow census",
+      "invocation": "python .scratch/census.py (list-objects-v2 paginated client-side; parquet footer num_rows; max of the first date column present)",
+      "result": "orion 24, eclipse 8, smartx 13 datasets; WROTE PLATFORM_CENSUS_round7.json"
+    }
+  ]
+}
