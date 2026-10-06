@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-au-1.upload-timeout-caught",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-au-1.upload-timeout-caught.md",
+    "group": "OTHER",
+    "vintage_commit": "982e914b1d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "982e914b1d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-au-1.upload-timeout-caught.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~96",
+  "session_log": "Worker ~96 on wk-AMGT_HARVST-96 from 982e914b1d. Collector.upload catches TimeoutExpired and returns UPLOAD_TIMEOUT; drive() maps it to stop status upload_timeout (STOP_STATUSES + TRANSIENT_STOPS), auto-resumes within budget, else checkpoints the stop and ends with SUMMARY. Stub _spawn only: no network, no S3, no collector run, no .runtime. AC2 FAILS: adding upload_timeout to STOP_STATUSES (as ordered) turns test_ae4_backfill_driver.py::test_stop_set_is_exactly_the_ruled_set red, and that file is outside <paths> (row Z-W96-S1); two test_as1 failures predate this order (row Z-W96-S2).",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/backfill_driver.py",
+      "kind": "script",
+      "commit_or_etag": "0e52b3639b2cdf460127f888e5a55db76492f742",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "UPLOAD_TIMEOUT sentinel; upload() catch; drive() upload_timeout mapping",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_au1_upload_timeout.py",
+      "kind": "test",
+      "commit_or_etag": "0e52b3639b2cdf460127f888e5a55db76492f742",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 plants (i)-(iv)",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0e52b3639b2cdf460127f888e5a55db76492f742",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows AMGT_HARVST-Z-W96-S1, -S2",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_au1_upload_timeout.py -rA --tb=line -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_au1_upload_timeout.py -rA --tb=line",
+      "output_evidence": "rc 0. '4 passed in 16.21s'. Full output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~96/AC1.out",
+      "denominator": "4 of 4 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider",
+      "output_evidence": "3 failed, 656 passed, 3 skipped. Failures: test_ae4_backfill_driver.py::test_stop_set_is_exactly_the_ruled_set (caused by the ordered STOP_STATUSES addition; file outside paths, row Z-W96-S1); test_as1_rank_universe.py two plants, 234 == 191 (not caused by this order, row Z-W96-S2). Full output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~96/AC2.out",
+      "denominator": "656 of 662 collected tests passed or skipped-free; 3 failed, 3 skipped",
+      "status": "FAIL",
+      "expect": "passed",
+      "status_reason": "The word 'passed' appears because 656 tests passed, but 3 failed. test_ae4 stop-set plant pins the old STOP_STATUSES that the order itself changes and lies outside <paths> (row AMGT_HARVST-Z-W96-S1, BLOCKING); two test_as1 plants fail 234 == 191 independent of this order (row AMGT_HARVST-Z-W96-S2)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Collector.upload patched to the uncaught form (no TimeoutExpired catch)",
+      "expected": "drive() raises TimeoutExpired in plant (i) conditions",
+      "observed": "test_iv_mutant_without_catch_raises passed: the mutant raised subprocess.TimeoutExpired",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times",
+      "observed": "4 passed each time",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "order status flip",
+      "reason": "reserved to the issuer; order stays open on AC2 FAIL"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W96-S1",
+    "AMGT_HARVST-Z-W96-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "commit 0e52b3639b clean"
+    }
+  ]
+}
