@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-au-2.soft-block-status",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-au-2.soft-block-status.md",
+    "group": "OTHER",
+    "vintage_commit": "829ba218dd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "829ba218dd",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-au-2.soft-block-status.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~97",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~97 on wk-AMGT_HARVST-97. worker.py: empty-200 with previously_stored>0 reads soft_block. Fake clients and temp dirs only; no network, no S3, no collector run, no .runtime touched.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/worker.py",
+      "kind": "script",
+      "commit_or_etag": "5235d0ba0f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5-line soft_block rewrite after the listing_empty_200 rewrite",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_au2_soft_block.py",
+      "kind": "test",
+      "commit_or_etag": "5235d0ba0f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 plants (i)-(v), including a source mutant",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_au2_soft_block.py -rA --tb=line -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_au2_soft_block.py -rA --tb=line",
+      "output_evidence": "rc 0. '5 passed in 7.97s'. Full output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~97/AC1.out",
+      "denominator": "5 of 5 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider",
+      "output_evidence": "rc 1. '2 failed, 658 passed, 3 skipped, 6 subtests passed in 126.48s'. The 2 failures are test_as1_rank_universe.py (234 == 191 keys) and fail identically with worker.py read back from HEAD (row AMGT_HARVST-Z-W97-S1). Full output: org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~97/AC2.out",
+      "denominator": "658 of 663 passed (2 failed, 3 skipped); 0 failures attributable to au-2",
+      "status": "FAIL",
+      "expect": "passed",
+      "status_reason": "Suite exits rc 1: 2 failed in test_as1_rank_universe.py, which fail identically with worker.py read back from HEAD (pre-existing, outside the write set); the word 'passed' appears in the summary but the suite is not green."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "worker.py with the previously_stored test replaced by 'if True:'",
+      "expected": "soft_block with 0 stored, so plant (ii) fails on it",
+      "observed": "test_v passed: mutant reads soft_block with previously_stored 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice (5 passed each); AC2 run twice (2 failed, 658 passed each)",
+      "observed": "stable",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "order status flip",
+      "reason": "issuer flips; AC2 is FAIL on 2 pre-existing failures outside the write set"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W97-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "rc 0 at 5235d0ba0f"
+    }
+  ]
+}
