@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-ao-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ao-4.sheet-fits-fy3-at-1440.md",
+    "group": "OTHER",
+    "vintage_commit": "969cdbff2fdea17d4f7d6c2ec256a9ed6d8b8eea"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "969cdbff2f",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ao-4.sheet-fits-fy3-at-1440.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx",
+      "kind": "script",
+      "commit_or_etag": "90816273",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit 90816273 on branch wk-AMGT_CORPUS-2-portal, never pushed. The sheet's label column loses whitespace-nowrap and takes min-w-[9rem] max-w-[14rem] (and data-model-label-col), so a long label wraps inside its own cell. Layout only: figure cells, data-model-cell and data-full-value are untouched. modelSheet.ts is unchanged.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ao4_check.cjs portal -- expect (?m)^ao4 control 2/2$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round39/ao4_check.cjs\" portal",
+      "output_evidence": "ARM c1 PASS history sheet changed on []\nARM c2 PASS full sheet changed on []\nao4 control 2/2",
+      "denominator": "history sheet and full sheet unchanged on 3 of 3 names (TSM, BA, ASML)",
+      "expect": "(?m)^ao4 control 2/2$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "JUDGMENT (graded by the CVO at L9 on the issuer's real 1440 px walk of TSM and ASML): 2028E is visible, unclipped, with the history beside it. Recorded with NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment row, graded by 3.0.0_SA_CVO~Z at L9, never self-graded",
+      "output_evidence": "WHAT CHANGED, for the CVO's read. Layout only: the label column (ModelTab.tsx, the first td of each sheet row) no longer holds its label on one line; it wraps inside min 9rem / max 14rem. Measured (not a verdict) in Edge headless on the real ModelTab markup and the real compiled portal CSS, in a 1092 px card (1440 px window, 224 px sidebar, 64 px main padding, 60 px panel padding): TSM, ASML and BA tables measure scrollWidth 1092 = clientWidth 1092 (no horizontal scroll), last header 2028E; before the change the same render measured scrollWidth 1244 (TSM), 1293 (ASML), 1122 (BA) over the same 1092. The tables still fit at 1060 and 1020 px card widths. The render is a worker-side stand-in, not the issuer's real walk.",
+      "denominator": "N/A -- judgment row",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L9: a judgment criterion is graded by 3.0.0_SA_CVO~Z at adjudication, never self-graded by the worker that produced it."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy of portal modelSheet.ts under .scratch/mutant4 with the forecast years filtered to y < 2028 (a dropped column), graded by the same ao4_check.cjs; nothing committed.",
+      "expected": "c2 FAILs (the full sheet changes), so ao4 control reads 1/2 on the mutant and 2/2 on the real file.",
+      "observed": "ARM c1 PASS; ARM c2 FAIL full sheet changed on [TSM, BA, ASML]; ao4 control 1/2",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "ao4_check on the real file read 2/2; portal typecheck, modelPattern harness and the three ao3_check arms run beside.",
+      "observed": "bun run typecheck rc=0 (tsc -b --noEmit, no diagnostics); modelPattern.harness.cjs CHECKS-OK 12 of 12; ao3 currency build 1/1 control 1/1; ao3 marks build 1/1 control 1/1; ao3 words build 1/1 control 1/1.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No push of any portal branch, no deploy, no AWS call",
+      "reason": "Order bound 1; the DEV landing follows the CTO's render review."
+    },
+    {
+      "item": "The issuer's walker",
+      "reason": "Order bound 1: the account is shared and its slot is the issuer's; AC2 is the CVO's judgment on the issuer's real 1440 px walk."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ao4_check.cjs (issuer's check, AC1)",
+      "invocation": "see AC1",
+      "result": "rc 0; ao4 control 2/2"
+    }
+  ]
+}
