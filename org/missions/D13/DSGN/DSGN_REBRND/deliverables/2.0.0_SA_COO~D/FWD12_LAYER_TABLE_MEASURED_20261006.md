@@ -73,3 +73,18 @@ Instrument: `node scripts/layer-table.mjs --containers` (read-only). **DENOMINAT
 - **NEIGHBOURING ROLES sharing a value: `--bg-hover-light` (a hover) = `--bg-surface` (a panel body) = `--card`, all #1E2D4D.** A hover that resolves to the surface it sits on is invisible; `--bg-hover-light` has 2 var() uses, `--bg-surface` 13: those 2 sites need a look. This is the one real violation of "zero neighbouring roles sharing a value" the census found.
 
 **LIGHT world: not measurable by this instrument for most tokens.** A token declared once (the root default is the dark/band value) reads identically in both columns, so the "light" column for `--bg-header`, `--bg-card`, `--layer-*` is the band value, not a light-world rung. Only `--bg-page` (#F4F6FA) and `--bg-surface` (#FFFFFF) carry a light declaration; `--layer-light-strip` and `--layer-light-tile` do not exist (printed MISSING by the table above). So the PRD's "each role has an opaque rung in the light world" is NOT met for strip, tile, hover or selected: the light world has 2 of its 6 roles. That is the defect list FWD-12 still owes.
+
+## LIGHT-WORLD RUNGS DECLARED -- portal DEV f93820fe (2026-10-06 ~05:0xZ), CTO batch 279 (msg 105530)
+
+Rulings applied: (1) equal ratio per neighbouring pair, capped at 1.9:1 by C5.5; (2) the light strip is a LIGHT rung (DESIGN.md C3: the band is one per page, navy is never a container fill). Four new tokens in `src/index.css` (root/light scope, after `--bg-surface`), hue 218 navy-tinted, opaque, chain panel body #FFFFFF > strip > tile > hover > selected:
+
+| role | token | hex | pair ratio (prev -> this) | band world's ratio |
+|---|---|---|---|---|
+| strip | `--layer-light-strip` | #EAECF1 | 1.18 (from #FFFFFF) | 1.18 |
+| tile | `--layer-light-tile` | #D1D7E1 | 1.22 | 1.22 |
+| hover | `--layer-light-hover` | #B9C2D1 | 1.24 | 1.24 |
+| selected | `--layer-light-selected` | #A8B3C6 | 1.18 | 1.18 |
+
+`node scripts/layer-table.mjs`: light world 6 roles, **5 of 5 pairs measured**, "LIGHT ROLES WITHOUT A DECLARED RUNG: none". No pair is near the 1.9:1 cap, so none is "capped by C5.5". Sunken `#E8EBF0` (measured first, as the CTO said) is within 0.01 of the strip pair, but the strip is derived from the ratio chain, so it is `#EAECF1`, not `#E8EBF0`; the two are a visual match. Pin: `src/lib/__tests__/layerLight.test.ts` (ratios within 0.01, cap, strict darkening, navy ink `#163372` 4.5:1 on all four), bun 10 pass with deltaScale, tsc rc=0.
+
+**Limits.** (a) TOKENS ONLY: no surface consumes the four rungs; `--bg-header` still resolves to the dark band in the root scope (408 var() uses), so a light page's strips are still navy. Mapping each surface to a rung is the per-page delivery, with a before/after render (none here). (b) The old `--state-hover-light` #E6EBF4 / `--state-selected-light` #D3DBEE tokens are NOT removed or re-pointed (FWD-13's state table; 3 live uses); they now sit beside `--layer-light-hover/selected` as a second hover and selected: a duplicate to reconcile. (c) The page/panel pair (1.08) has no band counterpart; the band's first pair is tooltip/strip (1.06), which the light chain does not include.
