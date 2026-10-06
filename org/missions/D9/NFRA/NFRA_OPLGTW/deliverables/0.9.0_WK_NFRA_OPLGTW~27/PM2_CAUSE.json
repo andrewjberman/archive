@@ -1,0 +1,1362 @@
+{
+ "instrument": {
+  "name": "ALB access logs of the gateway load balancer (access_logs.s3.enabled=true, s3://opal-data-security/waf-logs/alb-opal-gateway/), per-request target_processing_time and request path; caller identity for the one steady caller taken from the gateway audit lake (bucket opal-mcp-audit, audit/dt=<day>/) `detail` label, which carries NO latency",
+  "cannot_see": [
+   "requests the ALB itself answers (301/302 redirects, 403, 400): they have no target and no target latency (903 of 4231 rows on 2026-10-05; 1573 of 4083 on 2026-09-30) and are outside RequestCount",
+   "the MCP tool inside POST /mcp: one route carries every tool call, so there is no per-tool latency; the audit lake names the tool but has no latency field",
+   "caller identity beyond source IP and User-Agent (the ALB log has no principal); the hx_teams caller used 14 distinct source IPs on 2026-10-05",
+   "requests with no target response (target_processing_time -1; 2 on 2026-10-05, 81 on 2026-09-30): counted as requests, null in latency",
+   "health-check traffic (health_check_logs disabled and outside RequestCount) and on-host time spent before or after the ALB",
+   "request bodies, headers, cookies, bearers and query strings (ALB logs carry none; the query string is also dropped at parse time)",
+   "an exact CloudWatch p95: the log order-statistic p95 is within 0.012 s of CloudWatch's on 2026-10-05 (0.9358 vs 0.9473)"
+  ]
+ },
+ "route_set_at_ogp1": {
+  "source": "Gateway source at commit 7bd89b5d71 (infra/aws/ec2/opal-gateway/app/server.py Route/Mount paths): the commit OG-p-1 OGP1-AC1 digest-compared the running host against, 50 of 50 per-file sha256 equal (deliverables/0.9.0_WK_NFRA_OPLGTW~2/BASELINE.json OGP1-AC1, 2026-09-15T10:53Z); ALB rules at that time from OGP1-AC3 (priorities 10, 20, 30-33, default OIDC)",
+  "paths": [
+   "/mcp",
+   "/mcp/*",
+   "/authorize",
+   "/register",
+   "/token",
+   "/login",
+   "/callback",
+   "/health",
+   "/.well-known/*",
+   "/otp/token",
+   "/otp/fetch",
+   "/otp/health",
+   "/ms/sites",
+   "/ms/site_children",
+   "/ms/onedrive_children",
+   "/ms/search",
+   "/ms/token",
+   "/ms/health",
+   "/graph/cypher",
+   "/graph/health",
+   "/query/v0",
+   "/teams/poll",
+   "/sprint",
+   "/sprint/",
+   "/sprint/archive",
+   "/sprint/{day}"
+  ],
+  "note": "a path outside this set is at_ogp1 false: new routes (/hx/*, /ms/taxsma-workbook, /rivalfunds, /yearinreview, /, /assets/*) and 404 probe paths (/favicon.ico, /hx/teams/x)"
+ },
+ "days": {
+  "2026-10-05": {
+   "routes": [
+    {
+     "route": "GET /hx/teams/chats",
+     "at_ogp1": false,
+     "requests": 1440,
+     "timed_requests": 1440,
+     "p95_seconds": 1.018,
+     "target_status": {
+      "200": 1440
+     }
+    },
+    {
+     "route": "GET /ms/site_children",
+     "at_ogp1": true,
+     "requests": 1261,
+     "timed_requests": 1261,
+     "p95_seconds": 0.524,
+     "target_status": {
+      "200": 1261
+     }
+    },
+    {
+     "route": "POST /mcp",
+     "at_ogp1": true,
+     "requests": 224,
+     "timed_requests": 224,
+     "p95_seconds": 0.0767,
+     "target_status": {
+      "200": 159,
+      "202": 36,
+      "400": 28,
+      "401": 1
+     }
+    },
+    {
+     "route": "GET /hx/teams/chats/{id}/messages",
+     "at_ogp1": false,
+     "requests": 87,
+     "timed_requests": 87,
+     "p95_seconds": 0.9019,
+     "target_status": {
+      "200": 87
+     }
+    },
+    {
+     "route": "GET /mcp",
+     "at_ogp1": true,
+     "requests": 79,
+     "timed_requests": 79,
+     "p95_seconds": 0.0262,
+     "target_status": {
+      "200": 78,
+      "401": 1
+     }
+    },
+    {
+     "route": "POST /token",
+     "at_ogp1": true,
+     "requests": 40,
+     "timed_requests": 39,
+     "p95_seconds": 0.396,
+     "target_status": {
+      "200": 29,
+      "400": 10,
+      "-": 1
+     }
+    },
+    {
+     "route": "GET /.well-known/oauth-authorization-server",
+     "at_ogp1": true,
+     "requests": 36,
+     "timed_requests": 35,
+     "p95_seconds": 0.0013,
+     "target_status": {
+      "200": 35,
+      "-": 1
+     }
+    },
+    {
+     "route": "POST /mcp/",
+     "at_ogp1": true,
+     "requests": 21,
+     "timed_requests": 21,
+     "p95_seconds": 0.025,
+     "target_status": {
+      "200": 12,
+      "400": 3,
+      "202": 3,
+      "401": 3
+     }
+    },
+    {
+     "route": "GET /.well-known/oauth-protected-resource",
+     "at_ogp1": true,
+     "requests": 18,
+     "timed_requests": 18,
+     "p95_seconds": 0.001,
+     "target_status": {
+      "200": 18
+     }
+    },
+    {
+     "route": "GET /hx/teams/x",
+     "at_ogp1": false,
+     "requests": 16,
+     "timed_requests": 16,
+     "p95_seconds": 0.001,
+     "target_status": {
+      "404": 16
+     }
+    },
+    {
+     "route": "GET /hx/mail/messages/{id}/attachments",
+     "at_ogp1": false,
+     "requests": 13,
+     "timed_requests": 13,
+     "p95_seconds": 0.8638,
+     "target_status": {
+      "200": 13
+     }
+    },
+    {
+     "route": "GET /hx/mail/messages/{id}",
+     "at_ogp1": false,
+     "requests": 13,
+     "timed_requests": 13,
+     "p95_seconds": 0.7758,
+     "target_status": {
+      "200": 13
+     }
+    },
+    {
+     "route": "GET /favicon.ico",
+     "at_ogp1": false,
+     "requests": 10,
+     "timed_requests": 10,
+     "p95_seconds": 0.001,
+     "target_status": {
+      "404": 10
+     }
+    },
+    {
+     "route": "GET /authorize",
+     "at_ogp1": true,
+     "requests": 7,
+     "timed_requests": 7,
+     "p95_seconds": 0.2893,
+     "target_status": {
+      "307": 5,
+      "400": 2
+     }
+    },
+    {
+     "route": "GET /yearinreview",
+     "at_ogp1": false,
+     "requests": 7,
+     "timed_requests": 7,
+     "p95_seconds": 0.0983,
+     "target_status": {
+      "404": 5,
+      "200": 2
+     }
+    },
+    {
+     "route": "GET /sprint/{id}",
+     "at_ogp1": true,
+     "requests": 7,
+     "timed_requests": 7,
+     "p95_seconds": 0.2165,
+     "target_status": {
+      "200": 7
+     }
+    },
+    {
+     "route": "GET /mcp/",
+     "at_ogp1": true,
+     "requests": 7,
+     "timed_requests": 7,
+     "p95_seconds": 0.0087,
+     "target_status": {
+      "200": 5,
+      "401": 2
+     }
+    },
+    {
+     "route": "GET /callback",
+     "at_ogp1": true,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.7574,
+     "target_status": {
+      "302": 4
+     }
+    },
+    {
+     "route": "GET /rivalfunds",
+     "at_ogp1": false,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.3221,
+     "target_status": {
+      "200": 4
+     }
+    },
+    {
+     "route": "GET /sprint",
+     "at_ogp1": true,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.2966,
+     "target_status": {
+      "200": 4
+     }
+    },
+    {
+     "route": "POST /ms/token",
+     "at_ogp1": true,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.279,
+     "target_status": {
+      "200": 4
+     }
+    },
+    {
+     "route": "GET /ms/health",
+     "at_ogp1": true,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.2681,
+     "target_status": {
+      "200": 4
+     }
+    },
+    {
+     "route": "POST /otp/token",
+     "at_ogp1": true,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.2917,
+     "target_status": {
+      "200": 4
+     }
+    },
+    {
+     "route": "GET /otp/health",
+     "at_ogp1": true,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.3139,
+     "target_status": {
+      "200": 4
+     }
+    },
+    {
+     "route": "POST /graph/cypher",
+     "at_ogp1": true,
+     "requests": 2,
+     "timed_requests": 2,
+     "p95_seconds": 0.0097,
+     "target_status": {
+      "200": 2
+     }
+    },
+    {
+     "route": "GET /assets/{file}",
+     "at_ogp1": false,
+     "requests": 2,
+     "timed_requests": 2,
+     "p95_seconds": 0.004,
+     "target_status": {
+      "200": 2
+     }
+    },
+    {
+     "route": "GET /sprint/archive",
+     "at_ogp1": true,
+     "requests": 2,
+     "timed_requests": 2,
+     "p95_seconds": 0.1207,
+     "target_status": {
+      "200": 2
+     }
+    },
+    {
+     "route": "GET /hx/mail/messages",
+     "at_ogp1": false,
+     "requests": 2,
+     "timed_requests": 2,
+     "p95_seconds": 0.6103,
+     "target_status": {
+      "200": 2
+     }
+    },
+    {
+     "route": "GET /",
+     "at_ogp1": false,
+     "requests": 1,
+     "timed_requests": 1,
+     "p95_seconds": 0.002,
+     "target_status": {
+      "200": 1
+     }
+    },
+    {
+     "route": "GET /ms/taxsma-workbook",
+     "at_ogp1": false,
+     "requests": 1,
+     "timed_requests": 1,
+     "p95_seconds": 7.966,
+     "target_status": {
+      "200": 1
+     }
+    },
+    {
+     "route": "POST /register",
+     "at_ogp1": true,
+     "requests": 1,
+     "timed_requests": 1,
+     "p95_seconds": 0.061,
+     "target_status": {
+      "201": 1
+     }
+    },
+    {
+     "route": "GET /hx/teams/channels/{id}/{id}/messages/{id}/replies",
+     "at_ogp1": false,
+     "requests": 1,
+     "timed_requests": 1,
+     "p95_seconds": 2.635,
+     "target_status": {
+      "200": 1
+     }
+    },
+    {
+     "route": "POST /hx/teams/channels/{id}/{id}/messages/{id}/replies",
+     "at_ogp1": false,
+     "requests": 1,
+     "timed_requests": 1,
+     "p95_seconds": 0.89,
+     "target_status": {
+      "200": 1
+     }
+    },
+    {
+     "route": "POST /hx/teams/chats/{id}/messages",
+     "at_ogp1": false,
+     "requests": 1,
+     "timed_requests": 1,
+     "p95_seconds": 0.487,
+     "target_status": {
+      "200": 1
+     }
+    }
+   ],
+   "covered_requests": 3328,
+   "alb_requests": 3328,
+   "timed_requests": 3326,
+   "alb_sample_count": 3326.0,
+   "alb_cloudwatch_p95_seconds": 0.9473001317200503,
+   "log_p95_seconds": 0.9358,
+   "log_rows_total": 4231,
+   "log_rows_answered_by_alb_itself": 903,
+   "split": {
+    "at_ogp1_routes": {
+     "requests": 1729,
+     "timed": 1727,
+     "p95_seconds": 0.5147
+    },
+    "added_since": {
+     "requests": 1599,
+     "timed": 1599,
+     "p95_seconds": 1.0142
+    },
+    "hx_teams_chats_exact": {
+     "requests": 1440,
+     "timed": 1440,
+     "p95_seconds": 1.018
+    },
+    "hx_teams_all": {
+     "requests": 1546,
+     "timed": 1546,
+     "p95_seconds": 1.0155
+    },
+    "ms_site_children": {
+     "requests": 1261,
+     "timed": 1261,
+     "p95_seconds": 0.524
+    },
+    "all_but_02Z": {
+     "requests": 1972,
+     "timed": 1971,
+     "p95_seconds": 0.98
+    },
+    "all_but_02Z_and_hx_teams": {
+     "requests": 490,
+     "timed": 489,
+     "p95_seconds": 0.4738
+    },
+    "at_ogp1_all_but_02Z": {
+     "requests": 446,
+     "timed": 445,
+     "p95_seconds": 0.2896
+    },
+    "at_ogp1_excl_site_children": {
+     "requests": 468,
+     "timed": 466,
+     "p95_seconds": 0.2915
+    }
+   },
+   "hourly_forwarded": [
+    92,
+    62,
+    1356,
+    67,
+    68,
+    60,
+    60,
+    60,
+    64,
+    73,
+    60,
+    60,
+    142,
+    84,
+    113,
+    96,
+    66,
+    114,
+    92,
+    151,
+    89,
+    93,
+    102,
+    104
+   ],
+   "hourly_p95_with_and_without_hx_teams_chats": [
+    {
+     "hour": 0,
+     "n": 92,
+     "p95": 0.991,
+     "n_without_hx_teams_chats": 32,
+     "p95_without_hx_teams_chats": 0.303
+    },
+    {
+     "hour": 1,
+     "n": 62,
+     "p95": 0.935,
+     "n_without_hx_teams_chats": 2,
+     "p95_without_hx_teams_chats": 0.001
+    },
+    {
+     "hour": 2,
+     "n": 1355,
+     "p95": 0.657,
+     "n_without_hx_teams_chats": 1295,
+     "p95_without_hx_teams_chats": 0.524
+    },
+    {
+     "hour": 3,
+     "n": 67,
+     "p95": 0.972,
+     "n_without_hx_teams_chats": 7,
+     "p95_without_hx_teams_chats": 0.216
+    },
+    {
+     "hour": 4,
+     "n": 68,
+     "p95": 1.007,
+     "n_without_hx_teams_chats": 8,
+     "p95_without_hx_teams_chats": 0.224
+    },
+    {
+     "hour": 5,
+     "n": 60,
+     "p95": 1.005,
+     "n_without_hx_teams_chats": 0,
+     "p95_without_hx_teams_chats": null
+    },
+    {
+     "hour": 6,
+     "n": 60,
+     "p95": 1.055,
+     "n_without_hx_teams_chats": 0,
+     "p95_without_hx_teams_chats": null
+    },
+    {
+     "hour": 7,
+     "n": 60,
+     "p95": 0.94,
+     "n_without_hx_teams_chats": 0,
+     "p95_without_hx_teams_chats": null
+    },
+    {
+     "hour": 8,
+     "n": 64,
+     "p95": 0.952,
+     "n_without_hx_teams_chats": 4,
+     "p95_without_hx_teams_chats": 0.312
+    },
+    {
+     "hour": 9,
+     "n": 73,
+     "p95": 0.941,
+     "n_without_hx_teams_chats": 13,
+     "p95_without_hx_teams_chats": 0.009
+    },
+    {
+     "hour": 10,
+     "n": 60,
+     "p95": 1.037,
+     "n_without_hx_teams_chats": 0,
+     "p95_without_hx_teams_chats": null
+    },
+    {
+     "hour": 11,
+     "n": 60,
+     "p95": 1.017,
+     "n_without_hx_teams_chats": 0,
+     "p95_without_hx_teams_chats": null
+    },
+    {
+     "hour": 12,
+     "n": 142,
+     "p95": 0.938,
+     "n_without_hx_teams_chats": 82,
+     "p95_without_hx_teams_chats": 0.224
+    },
+    {
+     "hour": 13,
+     "n": 84,
+     "p95": 1.039,
+     "n_without_hx_teams_chats": 24,
+     "p95_without_hx_teams_chats": 0.651
+    },
+    {
+     "hour": 14,
+     "n": 112,
+     "p95": 0.994,
+     "n_without_hx_teams_chats": 52,
+     "p95_without_hx_teams_chats": 0.847
+    },
+    {
+     "hour": 15,
+     "n": 96,
+     "p95": 0.98,
+     "n_without_hx_teams_chats": 36,
+     "p95_without_hx_teams_chats": 0.758
+    },
+    {
+     "hour": 16,
+     "n": 66,
+     "p95": 0.992,
+     "n_without_hx_teams_chats": 6,
+     "p95_without_hx_teams_chats": 0.613
+    },
+    {
+     "hour": 17,
+     "n": 114,
+     "p95": 0.922,
+     "n_without_hx_teams_chats": 54,
+     "p95_without_hx_teams_chats": 0.702
+    },
+    {
+     "hour": 18,
+     "n": 92,
+     "p95": 1.003,
+     "n_without_hx_teams_chats": 32,
+     "p95_without_hx_teams_chats": 0.578
+    },
+    {
+     "hour": 19,
+     "n": 151,
+     "p95": 0.889,
+     "n_without_hx_teams_chats": 91,
+     "p95_without_hx_teams_chats": 0.346
+    },
+    {
+     "hour": 20,
+     "n": 89,
+     "p95": 0.884,
+     "n_without_hx_teams_chats": 29,
+     "p95_without_hx_teams_chats": 0.716
+    },
+    {
+     "hour": 21,
+     "n": 93,
+     "p95": 0.94,
+     "n_without_hx_teams_chats": 33,
+     "p95_without_hx_teams_chats": 0.624
+    },
+    {
+     "hour": 22,
+     "n": 102,
+     "p95": 0.878,
+     "n_without_hx_teams_chats": 42,
+     "p95_without_hx_teams_chats": 0.274
+    },
+    {
+     "hour": 23,
+     "n": 104,
+     "p95": 0.993,
+     "n_without_hx_teams_chats": 44,
+     "p95_without_hx_teams_chats": 0.857
+    }
+   ],
+   "audit_objects": 4135,
+   "audit_read_errors": 0
+  },
+  "2026-09-30": {
+   "routes": [
+    {
+     "route": "GET /ms/site_children",
+     "at_ogp1": true,
+     "requests": 1247,
+     "timed_requests": 1247,
+     "p95_seconds": 0.5807,
+     "target_status": {
+      "200": 1247
+     }
+    },
+    {
+     "route": "POST /mcp",
+     "at_ogp1": true,
+     "requests": 963,
+     "timed_requests": 903,
+     "p95_seconds": 0.1088,
+     "target_status": {
+      "200": 780,
+      "202": 63,
+      "-": 60,
+      "400": 59
+     }
+    },
+    {
+     "route": "GET /mcp",
+     "at_ogp1": true,
+     "requests": 165,
+     "timed_requests": 151,
+     "p95_seconds": 0.1235,
+     "target_status": {
+      "200": 149,
+      "-": 14,
+      "401": 2
+     }
+    },
+    {
+     "route": "POST /token",
+     "at_ogp1": true,
+     "requests": 58,
+     "timed_requests": 56,
+     "p95_seconds": 0.5525,
+     "target_status": {
+      "200": 56,
+      "-": 2
+     }
+    },
+    {
+     "route": "GET /.well-known/oauth-authorization-server",
+     "at_ogp1": true,
+     "requests": 38,
+     "timed_requests": 33,
+     "p95_seconds": 0.0014,
+     "target_status": {
+      "200": 33,
+      "-": 5
+     }
+    },
+    {
+     "route": "POST /graph/cypher",
+     "at_ogp1": true,
+     "requests": 5,
+     "timed_requests": 5,
+     "p95_seconds": 0.0538,
+     "target_status": {
+      "200": 5
+     }
+    },
+    {
+     "route": "GET /sprint",
+     "at_ogp1": true,
+     "requests": 5,
+     "timed_requests": 5,
+     "p95_seconds": 0.382,
+     "target_status": {
+      "200": 5
+     }
+    },
+    {
+     "route": "GET /.well-known/oauth-protected-resource",
+     "at_ogp1": true,
+     "requests": 5,
+     "timed_requests": 5,
+     "p95_seconds": 0.1986,
+     "target_status": {
+      "200": 5
+     }
+    },
+    {
+     "route": "POST /otp/token",
+     "at_ogp1": true,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.2979,
+     "target_status": {
+      "200": 4
+     }
+    },
+    {
+     "route": "GET /otp/health",
+     "at_ogp1": true,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.2875,
+     "target_status": {
+      "200": 4
+     }
+    },
+    {
+     "route": "GET /ms/health",
+     "at_ogp1": true,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.4645,
+     "target_status": {
+      "200": 4
+     }
+    },
+    {
+     "route": "POST /ms/token",
+     "at_ogp1": true,
+     "requests": 4,
+     "timed_requests": 4,
+     "p95_seconds": 0.2977,
+     "target_status": {
+      "200": 4
+     }
+    },
+    {
+     "route": "GET /assets/{file}",
+     "at_ogp1": false,
+     "requests": 2,
+     "timed_requests": 2,
+     "p95_seconds": 0.003,
+     "target_status": {
+      "200": 2
+     }
+    },
+    {
+     "route": "GET /favicon.ico",
+     "at_ogp1": false,
+     "requests": 2,
+     "timed_requests": 2,
+     "p95_seconds": 0.001,
+     "target_status": {
+      "404": 2
+     }
+    },
+    {
+     "route": "GET /",
+     "at_ogp1": false,
+     "requests": 1,
+     "timed_requests": 1,
+     "p95_seconds": 0.002,
+     "target_status": {
+      "200": 1
+     }
+    },
+    {
+     "route": "POST /register",
+     "at_ogp1": true,
+     "requests": 1,
+     "timed_requests": 1,
+     "p95_seconds": 0.058,
+     "target_status": {
+      "201": 1
+     }
+    },
+    {
+     "route": "GET /authorize",
+     "at_ogp1": true,
+     "requests": 1,
+     "timed_requests": 1,
+     "p95_seconds": 0.277,
+     "target_status": {
+      "307": 1
+     }
+    },
+    {
+     "route": "GET /callback",
+     "at_ogp1": true,
+     "requests": 1,
+     "timed_requests": 1,
+     "p95_seconds": 0.794,
+     "target_status": {
+      "302": 1
+     }
+    }
+   ],
+   "covered_requests": 2510,
+   "alb_requests": 2510,
+   "timed_requests": 2429,
+   "alb_sample_count": 2429.0,
+   "alb_cloudwatch_p95_seconds": 0.5446180939766326,
+   "log_p95_seconds": 0.538,
+   "log_rows_total": 4083,
+   "log_rows_answered_by_alb_itself": 1573,
+   "split": {
+    "at_ogp1_routes": {
+     "requests": 2505,
+     "timed": 2424,
+     "p95_seconds": 0.538
+    },
+    "added_since": {
+     "requests": 5,
+     "timed": 5,
+     "p95_seconds": 0.003
+    },
+    "hx_teams_chats_exact": {
+     "requests": 0,
+     "timed": 0,
+     "p95_seconds": null
+    },
+    "hx_teams_all": {
+     "requests": 0,
+     "timed": 0,
+     "p95_seconds": null
+    },
+    "ms_site_children": {
+     "requests": 1247,
+     "timed": 1247,
+     "p95_seconds": 0.5807
+    },
+    "all_but_02Z": {
+     "requests": 1194,
+     "timed": 1113,
+     "p95_seconds": 0.3062
+    },
+    "all_but_02Z_and_hx_teams": {
+     "requests": 1194,
+     "timed": 1113,
+     "p95_seconds": 0.3062
+    },
+    "at_ogp1_all_but_02Z": {
+     "requests": 1189,
+     "timed": 1108,
+     "p95_seconds": 0.3082
+    },
+    "at_ogp1_excl_site_children": {
+     "requests": 1258,
+     "timed": 1177,
+     "p95_seconds": 0.326
+    }
+   },
+   "hourly_forwarded": [
+    18,
+    69,
+    1316,
+    37,
+    358,
+    8,
+    15,
+    36,
+    4,
+    0,
+    8,
+    17,
+    8,
+    73,
+    194,
+    80,
+    12,
+    17,
+    178,
+    29,
+    13,
+    7,
+    9,
+    4
+   ],
+   "hourly_p95_with_and_without_hx_teams_chats": [
+    {
+     "hour": 0,
+     "n": 18,
+     "p95": 0.324,
+     "n_without_hx_teams_chats": 18,
+     "p95_without_hx_teams_chats": 0.324
+    },
+    {
+     "hour": 1,
+     "n": 69,
+     "p95": 0.066,
+     "n_without_hx_teams_chats": 69,
+     "p95_without_hx_teams_chats": 0.066
+    },
+    {
+     "hour": 2,
+     "n": 1316,
+     "p95": 0.578,
+     "n_without_hx_teams_chats": 1316,
+     "p95_without_hx_teams_chats": 0.578
+    },
+    {
+     "hour": 3,
+     "n": 37,
+     "p95": 0.108,
+     "n_without_hx_teams_chats": 37,
+     "p95_without_hx_teams_chats": 0.108
+    },
+    {
+     "hour": 4,
+     "n": 358,
+     "p95": 0.028,
+     "n_without_hx_teams_chats": 358,
+     "p95_without_hx_teams_chats": 0.028
+    },
+    {
+     "hour": 5,
+     "n": 8,
+     "p95": 0.222,
+     "n_without_hx_teams_chats": 8,
+     "p95_without_hx_teams_chats": 0.222
+    },
+    {
+     "hour": 6,
+     "n": 15,
+     "p95": 0.279,
+     "n_without_hx_teams_chats": 15,
+     "p95_without_hx_teams_chats": 0.279
+    },
+    {
+     "hour": 7,
+     "n": 36,
+     "p95": 0.334,
+     "n_without_hx_teams_chats": 36,
+     "p95_without_hx_teams_chats": 0.334
+    },
+    {
+     "hour": 8,
+     "n": 4,
+     "p95": 0.3,
+     "n_without_hx_teams_chats": 4,
+     "p95_without_hx_teams_chats": 0.3
+    },
+    {
+     "hour": 9,
+     "n": 0,
+     "p95": null,
+     "n_without_hx_teams_chats": 0,
+     "p95_without_hx_teams_chats": null
+    },
+    {
+     "hour": 10,
+     "n": 8,
+     "p95": 0.243,
+     "n_without_hx_teams_chats": 8,
+     "p95_without_hx_teams_chats": 0.243
+    },
+    {
+     "hour": 11,
+     "n": 16,
+     "p95": 0.172,
+     "n_without_hx_teams_chats": 16,
+     "p95_without_hx_teams_chats": 0.172
+    },
+    {
+     "hour": 12,
+     "n": 8,
+     "p95": 0.224,
+     "n_without_hx_teams_chats": 8,
+     "p95_without_hx_teams_chats": 0.224
+    },
+    {
+     "hour": 13,
+     "n": 73,
+     "p95": 0.174,
+     "n_without_hx_teams_chats": 73,
+     "p95_without_hx_teams_chats": 0.174
+    },
+    {
+     "hour": 14,
+     "n": 147,
+     "p95": 0.264,
+     "n_without_hx_teams_chats": 147,
+     "p95_without_hx_teams_chats": 0.264
+    },
+    {
+     "hour": 15,
+     "n": 78,
+     "p95": 0.471,
+     "n_without_hx_teams_chats": 78,
+     "p95_without_hx_teams_chats": 0.471
+    },
+    {
+     "hour": 16,
+     "n": 12,
+     "p95": 0.336,
+     "n_without_hx_teams_chats": 12,
+     "p95_without_hx_teams_chats": 0.336
+    },
+    {
+     "hour": 17,
+     "n": 17,
+     "p95": 0.127,
+     "n_without_hx_teams_chats": 17,
+     "p95_without_hx_teams_chats": 0.127
+    },
+    {
+     "hour": 18,
+     "n": 147,
+     "p95": 0.247,
+     "n_without_hx_teams_chats": 147,
+     "p95_without_hx_teams_chats": 0.247
+    },
+    {
+     "hour": 19,
+     "n": 29,
+     "p95": 0.312,
+     "n_without_hx_teams_chats": 29,
+     "p95_without_hx_teams_chats": 0.312
+    },
+    {
+     "hour": 20,
+     "n": 13,
+     "p95": 0.312,
+     "n_without_hx_teams_chats": 13,
+     "p95_without_hx_teams_chats": 0.312
+    },
+    {
+     "hour": 21,
+     "n": 7,
+     "p95": 0.377,
+     "n_without_hx_teams_chats": 7,
+     "p95_without_hx_teams_chats": 0.377
+    },
+    {
+     "hour": 22,
+     "n": 9,
+     "p95": 0.342,
+     "n_without_hx_teams_chats": 9,
+     "p95_without_hx_teams_chats": 0.342
+    },
+    {
+     "hour": 23,
+     "n": 4,
+     "p95": 0.281,
+     "n_without_hx_teams_chats": 4,
+     "p95_without_hx_teams_chats": 0.281
+    }
+   ],
+   "audit_objects": 3041,
+   "audit_read_errors": 0
+  }
+ },
+ "hypothesis_i": {
+  "steady_caller_found": true,
+  "route": "GET /hx/teams/chats",
+  "caller": "audit label teamsassist (tool hx_teams, one audit user for all 1530 hx_teams records on 2026-10-05; User-Agent Python-urllib/3.12 in 1440 of 1440 ALB rows; 14 distinct source IPs)",
+  "hourly_rate": 60,
+  "p95_seconds": 1.018,
+  "requests_2026_10_05": 1440,
+  "hourly_counts_2026_10_05": [
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60,
+   60
+  ],
+  "share_of_quiet_hour_requests_2026_10_05": 0.6998,
+  "quiet_hours_definition": "the 23 UTC hours other than 02Z (1,972 forwarded requests; 1,380 of them are this poller)",
+  "first_seen_utc": "2026-10-02T19:18:18.315666Z",
+  "daily": {
+   "2026-09-30": {
+    "requests": 0,
+    "p95_seconds": null
+   },
+   "2026-10-01": {
+    "requests": 0,
+    "p95_seconds": null
+   },
+   "2026-10-02": {
+    "requests": 287,
+    "p95_seconds": 1.0227
+   },
+   "2026-10-03": {
+    "requests": 1440,
+    "p95_seconds": 1.8525
+   },
+   "2026-10-04": {
+    "requests": 1440,
+    "p95_seconds": 1.0062
+   },
+   "2026-10-05": {
+    "requests": 1440,
+    "p95_seconds": 1.018
+   }
+  }
+ },
+ "slowdown_test": {
+  "at_ogp1_routes_p95_2026_10_05": 0.5147,
+  "at_ogp1_routes_p95_2026_09_30": 0.538,
+  "at_ogp1_quiet_hour_p95_2026_10_05": 0.2896,
+  "at_ogp1_quiet_hour_p95_2026_09_30": 0.3082,
+  "same_route_p95": {
+   "POST /mcp": {
+    "2026-10-05": [
+     0.0767,
+     224
+    ],
+    "2026-09-30": [
+     0.1088,
+     903
+    ]
+   },
+   "POST /token": {
+    "2026-10-05": [
+     0.396,
+     39
+    ],
+    "2026-09-30": [
+     0.5525,
+     56
+    ]
+   },
+   "GET /ms/site_children": {
+    "2026-10-05": [
+     0.524,
+     1261
+    ],
+    "2026-09-30": [
+     0.5807,
+     1247
+    ]
+   }
+  },
+  "cap_seconds": 0.6642,
+  "slowdown_if": "at-OG-p-1 routes p95 above the cap or more than 1.2x their 2026-09-30 value"
+ },
+ "context_days": {
+  "2026-09-30": {
+   "forwarded": 2510,
+   "cw_request_count": 2510,
+   "p95_all": 0.538,
+   "at_ogp1_requests": 2424,
+   "at_ogp1_p95": 0.538,
+   "added_requests": 5,
+   "added_p95": 0.003,
+   "hx_teams_chats_requests": 0,
+   "hx_teams_chats_p95": null,
+   "hx_teams_chats_first": null,
+   "p95 POST /mcp": [
+    0.1088,
+    903
+   ],
+   "p95 POST /token": [
+    0.5525,
+    56
+   ],
+   "p95 GET /ms/site_children": [
+    0.5807,
+    1247
+   ]
+  },
+  "2026-10-01": {
+   "forwarded": 2458,
+   "cw_request_count": 2458,
+   "p95_all": 0.599,
+   "at_ogp1_requests": 2180,
+   "at_ogp1_p95": 0.564,
+   "added_requests": 248,
+   "added_p95": 1.4256,
+   "hx_teams_chats_requests": 0,
+   "hx_teams_chats_p95": null,
+   "hx_teams_chats_first": null,
+   "p95 POST /mcp": [
+    0.057,
+    496
+   ],
+   "p95 POST /token": [
+    0.487,
+    46
+   ],
+   "p95 GET /ms/site_children": [
+    0.6026,
+    1249
+   ]
+  },
+  "2026-10-02": {
+   "forwarded": 2405,
+   "cw_request_count": 2405,
+   "p95_all": 0.8988,
+   "at_ogp1_requests": 1918,
+   "at_ogp1_p95": 0.7011,
+   "added_requests": 486,
+   "added_p95": 1.0938,
+   "hx_teams_chats_requests": 287,
+   "hx_teams_chats_p95": 1.0227,
+   "hx_teams_chats_first": "2026-10-02T19:18:18.315666Z",
+   "p95 POST /mcp": [
+    0.0429,
+    228
+   ],
+   "p95 POST /token": [
+    0.4258,
+    33
+   ],
+   "p95 GET /ms/site_children": [
+    0.803,
+    1232
+   ]
+  },
+  "2026-10-03": {
+   "forwarded": 3003,
+   "cw_request_count": 3003,
+   "p95_all": 1.6322,
+   "at_ogp1_requests": 1479,
+   "at_ogp1_p95": 0.6171,
+   "added_requests": 1517,
+   "added_p95": 1.8898,
+   "hx_teams_chats_requests": 1440,
+   "hx_teams_chats_p95": 1.8525,
+   "hx_teams_chats_first": "2026-10-03T00:00:18.915465Z",
+   "p95 POST /mcp": [
+    0.0485,
+    119
+   ],
+   "p95 POST /token": [
+    0.4578,
+    7
+   ],
+   "p95 GET /ms/site_children": [
+    0.625,
+    1261
+   ]
+  },
+  "2026-10-04": {
+   "forwarded": 2923,
+   "cw_request_count": 2923,
+   "p95_all": 0.958,
+   "at_ogp1_requests": 1446,
+   "at_ogp1_p95": 0.557,
+   "added_requests": 1476,
+   "added_p95": 1.01,
+   "hx_teams_chats_requests": 1440,
+   "hx_teams_chats_p95": 1.0062,
+   "hx_teams_chats_first": "2026-10-04T00:00:18.655722Z",
+   "p95 POST /mcp": [
+    0.0298,
+    84
+   ],
+   "p95 POST /token": [
+    0.4035,
+    11
+   ],
+   "p95 GET /ms/site_children": [
+    0.561,
+    1261
+   ]
+  },
+  "2026-10-05": {
+   "forwarded": 3328,
+   "cw_request_count": 3328,
+   "p95_all": 0.9358,
+   "at_ogp1_requests": 1727,
+   "at_ogp1_p95": 0.5147,
+   "added_requests": 1599,
+   "added_p95": 1.0142,
+   "hx_teams_chats_requests": 1440,
+   "hx_teams_chats_p95": 1.018,
+   "hx_teams_chats_first": "2026-10-05T00:00:18.982683Z",
+   "p95 POST /mcp": [
+    0.0767,
+    224
+   ],
+   "p95 POST /token": [
+    0.396,
+    39
+   ],
+   "p95 GET /ms/site_children": [
+    0.524,
+    1261
+   ]
+  }
+ },
+ "finding": "MIX",
+ "finding_numbers": {
+  "full_day_p95_2026_10_05_cloudwatch": 0.9473001317200503,
+  "routes_at_ogp1_only_p95": 0.5147,
+  "routes_added_since_p95": 1.0142,
+  "added_since_requests": 1599,
+  "at_ogp1_requests": 1729,
+  "hx_teams_chats_share_of_added_since_requests": 0.9006,
+  "cap_seconds": 0.6642
+ },
+ "writes": 0
+}
