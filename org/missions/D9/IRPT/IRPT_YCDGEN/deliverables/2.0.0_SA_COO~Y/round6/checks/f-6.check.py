@@ -113,7 +113,7 @@ def main():
         full = sh("git", "rev-parse", base)[1].strip()
         # before the worker commits, HEAD is the base and its edits are in the worktree; after, they are in HEAD
         files = (sh("git", "diff", "--name-only", base)[1] if head == full else sh("git", "diff", "--name-only", base, "HEAD")[1]).split()
-        extra = [f for f in files if f != TF and "deliverables/0.9.0_WK_IRPT_YCDGEN" not in f and not f.endswith("INVESTIGATION_v1.md")]
+        extra = [f for f in files if f not in (TF, "portal") and "deliverables/0.9.0_WK_IRPT_YCDGEN" not in f and not f.endswith("INVESTIGATION_v1.md")]  # `portal` is the submodule pointer provisioning moves
         if extra:
             fail(name, "other files changed: %s" % extra[:3])
         if not added:
