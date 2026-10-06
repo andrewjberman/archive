@@ -1,0 +1,123 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ax-3.mentions-decode-cut",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ax-3.mentions-decode-cut.md",
+  "group": "C",
+  "vintage_commit": "495d89da628ddc7a1746d36fadff5fbef23fd71a"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "495d89da628ddc7a1746d36fadff5fbef23fd71a",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ax-3.mentions-decode-cut.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~254",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/coverage/pool_reader.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: the snapshot read fetches only the named columns' byte ranges (footer, then the chunks, in parallel) and keeps an arrow table; whole-object read stays as the fallback; row read unchanged in result. No deploy.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/monthly_chatter.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: per-publisher counts by column (filter to covered names, first row per article+name, window months) in place of the per-row dict loop; phase line unchanged. No deploy.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_ax3_mentions_decode.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: 5 tests (column count equals the row loop incl. order, ranged read equals whole read and fetches less, no-Range store falls back, row read unchanged).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/conftest.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: autouse fixture so tests that stub the row read feed the route's arrow read.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~254/after_equal.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: prints EQUAL n of 3 (new route vs the replaced row loop on pinned snapshots; recorded before-bodies compared too).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "fresh-process mentions decode under 500 ms; C1 PASS; R74 C54 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round74/checks/r74_served.py\" --cell c54 --where local; echo \"exit=$?\"",
+   "output_evidence": "   fresh-process mentions decode: 322 ms (bar 500)\nPASS C1 the first chatter request decodes mentions within the bar 322\nR74 C54 SERVED: YES\nexit=0",
+   "denominator": "1 of 1 fresh-process runs under the bar in the recorded run (322 ms); base 1,149 ms; 8 further fresh runs 326-1155 ms, 7 of 8 under 500 ms (one network outlier)",
+   "status": "PASS",
+   "expect": "fresh-process mentions decode: \\d+ ms.*PASS C1.*R74 C54 SERVED: YES\nexit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "EQUAL 3 of 3; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~254/after_equal.py\"; echo \"exit=$?\"",
+   "output_evidence": "days 30: EQUAL  bytes 87958  [recorded before-body differs: DRIFT (snapshots landed since capture)]\ndays 90: EQUAL  bytes 88050  [recorded before-body byte-equal]\ndays 365: EQUAL  bytes 88272  [recorded before-body byte-equal]\nEQUAL 3 of 3\nexit=0",
+   "denominator": "3 of 3 day windows (30/90/365) byte-equal to the replaced row loop on the same snapshots; recorded before-bodies byte-equal for 90 and 365, days 30 DRIFT (the daily snapshot landed mid-capture)",
+   "status": "PASS",
+   "expect": "EQUAL 3 of 3\nexit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Plant: later duplicate row with a different publisher/month, null/empty publisher, null date, uncovered key (test_ax3_mentions_decode).",
+   "expected": "column count equals the per-row loop, same publisher order",
+   "observed": "test_the_column_count_equals_the_row_loop_and_keeps_publisher_order passed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "c54 run 9 times in fresh processes; after_equal run 3 times",
+   "observed": "322-507 ms typical, 2 network outliers (678, 1155 ms); after_equal EQUAL 3 of 3 each run",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "deploy / deployed timing",
+   "reason": "Out of bounds (no deploy, no store write); the deployed read is the issuer's ax-5 leg."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~254/capture.py",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest",
+   "invocation": "python -m pytest lib/research/api/tests/",
+   "result": "661 passed, 229 warnings in 37.32s"
+  }
+ ]
+}
