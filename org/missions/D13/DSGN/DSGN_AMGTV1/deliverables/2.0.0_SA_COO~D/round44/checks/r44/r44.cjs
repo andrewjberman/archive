@@ -126,7 +126,16 @@ const p0 = BA.thesis_driver_chart.points[0];
 {
   const f = [];
   const tab = src('src/pages/SecurityAnalysis/tabs/ThesisTab.tsx');
-  if (!/<SegmentBreakdown[^>]*breakdown=\{data\.segment_breakdown\}/.test(tab)) f.push('ThesisTab does not mount <SegmentBreakdown breakdown={data.segment_breakdown}>');
+  const tabLines = tab.split(/\r?\n/);
+  const mountAt = tabLines.findIndex((l) => /<SegmentBreakdown[^>]*breakdown=\{data\.segment_breakdown\}/.test(l));
+  if (mountAt < 0) f.push('ThesisTab does not mount <SegmentBreakdown breakdown={data.segment_breakdown}>');
+  else {
+    // AMENDMENT 2: the segments are not part of the drafted thesis -- the mount must not sit under the `served` (drafting_status
+    // SERVED) branch, or a name with no drafted thesis (MSFT) never shows its served segment reason.
+    let gate = '';
+    for (let i = mountAt; i >= 0; i -= 1) { if (/\{!isLoading && !isError && data\b/.test(tabLines[i]) || /\{\s*data\s*&&/.test(tabLines[i])) { gate = tabLines[i]; break; } }
+    if (/served\s*&&/.test(gate) || /&&\s*served\b/.test(gate)) f.push('the SegmentBreakdown mount sits under the drafted-thesis (served) branch');
+  }
   const ev = (BA.drafted_sections || []).flatMap((s) => (s.sentences || []).flatMap((x) => x.evidence || []))[0];
   if (ev) {
     const pt = { period: '2099', value: 1, unit: p0.unit, passage_id: ev.id };
