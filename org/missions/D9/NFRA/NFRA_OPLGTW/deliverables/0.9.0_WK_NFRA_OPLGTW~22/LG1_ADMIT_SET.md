@@ -18,7 +18,6 @@ unchanged. Then, in order:
 | email in `{OTP_MAILBOX, MS_INGEST_IDENTITY}` | | `server_held` |
 | a principal is known and `data_entitlement.current_access(principal).restricted` | `restricted_profile` (`restricted_unreadable` if the store cannot be read) | |
 | identity provider not signature-verified, or `tier.resolve_tier` raises | `tier_unresolvable` | |
-| email is a key of `identity_scope._load_scopes()` (a scoped service identity) | `scoped_service_identity` | |
 | the resolved tier carries no Graph-using tool | `no_graph_tool_at_tier` | |
 | otherwise | | `tier_graph_tools` |
 
@@ -32,7 +31,7 @@ new integration changes the set with no edit here.
 
 **What the rule can and cannot see.** The `/login` request carries the access-layer EMAIL and no principal
 (`context.py`, `set_current_email`). So on today's GUI path `resolve_tier(None, cfg)` answers the READ_ONLY floor,
-which carries the read tools: the tier clause admits every verified, non-restricted, non-scoped identity. A
+which carries the read tools: the tier clause admits every verified, non-restricted identity (R25: the rule in effect is "admit every verified, non-email-denied tenant identity"; the tier clause is a fail-closed backstop). A
 restricted profile is refused through its email's deny record (written by the restricted `activate` and the
 deny-backfill, `access_state.py:458`), which GuardMiddleware checks before the rule runs. The principal branch of
 the rule exists for a future path that carries a principal. See row `NFRA_OPLGTW-Z-W22-S11`.
@@ -77,11 +76,11 @@ empty. `RL8_LOGIN.json`'s `admit_before`, `admit_after` and `lost_nonrestricted`
 
 - A principal in `lost` that is `restricted: true` is expected (and was already refused today by the deny list
   unless `before` is true because no deny record exists -- then it is the profile-without-deny case below).
-- **The Analyst's service identity (`opalbloomberg@opalinvest.com`, the one key of `identity_scope._SEED`) WILL
-  appear in `lost_nonrestricted` with reason `scoped_service_identity` when it has signed in.** That is R22/R24's
-  ruled refusal ("the Analyst's service identity stays REFUSED"), not a stranded person. The release halves should
-  name it by digest and record it as ruled; see row `NFRA_OPLGTW-Z-W22-S12`.
-- Any OTHER digest in `lost_nonrestricted` is the blocking case of OG-rl-8: file the BLOCKING row and stop. The
+- **The Analyst's / Teams concierge service identity (`opalbloomberg@opalinvest.com`, the one key of
+  `identity_scope._SEED`) is ADMITTED (A1, CTO R25.1; the `scoped_service_identity` refusal is struck).** Its Graph
+  allowlist is enforced at dispatch by `identity_scope.check`, not at `/login`. It must NOT appear in
+  `lost_nonrestricted`; if it does, that is the blocking case below.
+- Any digest in `lost_nonrestricted` is the blocking case of OG-rl-8: file the BLOCKING row and stop. The
   reasons that can produce one are `tier_unresolvable` (the provider is not signature-verified -- a configuration
   fault, every person is refused) and `no_graph_tool_at_tier` (the registry yields no Graph-using tool the tier
   carries -- e.g. an unreadable registry).
