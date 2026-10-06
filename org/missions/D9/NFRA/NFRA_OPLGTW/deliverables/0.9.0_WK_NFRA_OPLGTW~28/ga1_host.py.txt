@@ -65,6 +65,11 @@ def run():
             crow = list(csv.reader(fh))
         assert crow and crow[0][0].startswith("cusip"), "csv header"
         d_cusips = [r[0] for r in crow[1:]]
+    blank = len([c for c in d_cusips if not c or not c.strip()])
+    nb_unheld = len([c for c in d_cusips if c and c.strip() and c not in held])
+    dup = len(d_cusips) - len(set(d_cusips))
+    print("GA1_DIAG returned=%d blank_cusip_rows=%d nonblank_unheld_rows=%d duplicate_rows=%d held_cusips_missing_from_download=%d"
+          % (len(d_cusips), blank, nb_unheld, dup, len([c for c in held if c not in set(d_cusips)])))
     body = {"synthetic_principal": False, "grant_source": "store", "grants_written": 0,
             "dim_asset_download": download,
             "held_check": {"returned": len(d_cusips), "distinct_returned": len(set(d_cusips)),
