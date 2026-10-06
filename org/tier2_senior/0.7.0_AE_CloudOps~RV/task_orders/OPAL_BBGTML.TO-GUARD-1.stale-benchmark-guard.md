@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~RV</issued_to>
     <date>2026-10-06</date>
-    <status>pending</status>
+    <status>complete -- issuer-verified 2026-10-06 ~16:3xZ: live CodeSha256 FLFjTpvI... (= artifact from 513b25f522); served comprehensive key VersionId Qbef40yV... reads 273 null / 27 number of 300 benchmark cells (27 = INT etf); record @49103d5f96; NEVER-2 closed</status>
     <project_code>OPAL_BBGTML</project_code>
   </metadata>
 <risk>WORLD</risk>
