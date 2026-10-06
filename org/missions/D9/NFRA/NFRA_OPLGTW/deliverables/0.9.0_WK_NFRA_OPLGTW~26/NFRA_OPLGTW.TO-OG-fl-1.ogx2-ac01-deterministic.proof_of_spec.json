@@ -1,0 +1,86 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-fl-1",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "679190d095",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-fl-1.ogx2-ac01-deterministic.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "679190d095"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~26",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~26/FL1_CAUSE.md",
+   "kind": "doc",
+   "commit_or_etag": "cc44859ac0",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Cause record; no deploy.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/engine.py",
+   "kind": "script",
+   "commit_or_etag": "b065029296",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Product fix (Windows RSS poll caches kernel32 and the Structure class); local tests only; rides the next gateway release, not deployed here.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_rss_poll.py",
+   "kind": "test",
+   "commit_or_etag": "cc44859ac0",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Regression test; fails on the HEAD engine bytes (4,934,319 B grown), passes on the fix.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: test_ogx2_ac01 passed 20 of 20 own-process runs; FL1_CAUSE.md names the cause and the fix commit: yes.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r20/checks/fl1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "test_ogx2_ac01 passed 20 of 20 own-process runs; FL1_CAUSE.md names the cause and the fix commit: yes\nRESULT: PASS\nexit=0",
+   "denominator": "20 of 20 own-process runs of tests/test_schwab_export_stream.py::test_ogx2_ac01 (was 16 of 20 at the pre-cut; 8 of 12 under concurrent load before the fix, 12 of 12 after)",
+   "status": "PASS",
+   "expect": "(?s)test_ogx2_ac01 passed 20 of 20 own-process runs; FL1_CAUSE.md names the cause and the fix commit: yes.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The regression test run against the HEAD (pre-fix) engine.py bytes.",
+   "expected": "FAIL",
+   "observed": "FAIL: AssertionError 4934319 (600 polls grew the traced heap by 4.9 MB); on the fix it passes (< 32 KB).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "12 own-process runs started at once on a 20-core device, before and after the fix.",
+   "observed": "before: 4 of 12 failed (parent ratio 1.21-1.29); after: 12 of 12 passed, parent ratio 1.004 in all 12.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W26-S7"
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest (tests/test_schwab_export_stream.py::test_ogx2_ac01, tests/test_schwab_rss_poll.py, tests/test_schwab_engine.py)",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r20/checks/fl1.AC1.sh",
+   "result": "20 of 20 own-process runs pass; rss-poll test passes on the fix and fails on the HEAD bytes; engine tests 14 passed"
+  }
+ ]
+}
