@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-26",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "c0eafe56ba",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-26.tieout-49f-bd-population.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~12",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~12/TIEOUT_49F_BD_POPULATION_E2.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~12/tieout_e2.py",
+      "kind": "script",
+      "commit_or_etag": "284c3c587f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Reads the plan, 5,252 bronze objects and 563 served gold partitions (S3 GET/LIST only), links the served daily returns over each segment, grades against 0.35 pp, assigns a reason only on named evidence, writes the record. 0 vendor calls.",
+      "artifact_covered_by": [
+        "DB17-1-AC1",
+        "DB17-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~12/tests/test_tieout_e2.py",
+      "kind": "test",
+      "commit_or_etag": "284c3c587f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 offline pytest tests on synthetic inputs: within tolerance, outside with reason (COVERAGE_DAYS, UNEXPLAINED, MISSING_PRICE), not_gradable with a why, counts reconcile, BD point reader.",
+      "artifact_covered_by": [
+        "DB17-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~12/TIEOUT_49F_BD_POPULATION_E2.json",
+      "kind": "config_data",
+      "commit_or_etag": "284c3c587f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Per-segment record: 9,082 planned = 9,078 graded + 4 not gradable; 2,103 within, 6,975 outside (FLOW_TIMING 150, MISSING_PRICE 2, INCOME_DATE 568, COVERAGE_DAYS 5, UNEXPLAINED 6,250). Carries client figures; stays in the deliverables folder.",
+      "artifact_covered_by": [
+        "DB17-1-AC1",
+        "DB17-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~12/TIEOUT_49F_BD_POPULATION_E2.md",
+      "kind": "doc",
+      "commit_or_etag": "284c3c587f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only summary, no client figure.",
+      "artifact_covered_by": [
+        "DB17-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB17-1-AC1",
+      "criterion_verbatim": "DB17-1-AC1 -- the record reconciles: planned = graded + not gradable, graded = within + outside, every outside row has a reason from the closed set, every not-gradable row has a why, and 0 vendor calls. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r17/p17_tieout.py\" . DB17-1-AC1",
+      "output_evidence": "OK: 9082 planned = 9078 graded + 4 not gradable; 2103 within, 6975 outside 0.35 pp\nDB17-1-AC1 PASS rc=0",
+      "denominator": "9,082 of 9,082 planned segments graded or not gradable; 6,975 of 6,975 outside rows carry a closed-set reason; 4 of 4 not-gradable rows carry a why",
+      "status": "PASS",
+      "expect": "DB17-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB17-1-AC2",
+      "criterion_verbatim": "DB17-1-AC2 -- the inputs are named with their denominators (5,252 bronze objects, the served series and its account count), and the tests pass (at least 4). Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r17/p17_tieout.py\" . DB17-1-AC2",
+      "output_evidence": "OK: inputs named; 7 tests passed\nDB17-1-AC2 PASS rc=0",
+      "denominator": "5,252 of 5,252 bronze objects; served series 563 partitions, 6,869 accounts; 7 of 7 tests passed (4 required)",
+      "status": "PASS",
+      "expect": "DB17-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB17-1-AC3",
+      "criterion_verbatim": "DB17-1-AC3 -- a GUARD: your commits touch only your grant. Base: PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~P/checks/r17/p17_tieout.py\" . DB17-1-AC3",
+      "output_evidence": "OK: 5 changed path(s), all inside the grant\nDB17-1-AC3 PASS rc=0",
+      "denominator": "5 of 5 changed paths inside the grant (measured before this proof's own commit)",
+      "status": "PASS",
+      "expect": "DB17-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The synthetic tests are each other's negative arms: an in-tolerance segment must not carry a reason, an OUTSIDE segment with no evidence must be UNEXPLAINED, a missing account / missing BD value / missing BD response must be NOT_GRADABLE with a why.",
+      "expected": "WITHIN carries no reason; OUTSIDE carries a closed-set reason and evidence; NOT_GRADABLE carries a why; counts reconcile",
+      "observed": "7 of 7 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The re-linked served return was compared with the plan's own opal_twr on every segment.",
+      "observed": "0 of 9,082 segments differ by more than 1e-9",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any Black Diamond or other vendor call, and any S3 write",
+      "reason": "Outside the order: vendor_calls is 0; S3 was read only."
+    },
+    {
+      "item": "A reason class for BD fees",
+      "reason": "The closed reason set has no fee class; 4,905 of the 6,250 UNEXPLAINED rows carry an OBSERVATION BD_FEES clause instead and are named in row IRPT_DASHBD-W12-S1."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W12-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~12/",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~12/tests/test_tieout_e2.py",
+      "result": "7 passed"
+    }
+  ]
+}

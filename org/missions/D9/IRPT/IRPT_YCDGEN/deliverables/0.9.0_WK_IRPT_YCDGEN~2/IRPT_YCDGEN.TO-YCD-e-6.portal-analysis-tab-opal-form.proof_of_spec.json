@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-e-6.portal-analysis-tab-opal-form",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-e-6.portal-analysis-tab-opal-form.md",
+    "group": "OTHER",
+    "vintage_commit": "5c20f8c76d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6.md",
+    "vintage_commit": "5c20f8c76d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-e-6.portal-analysis-tab-opal-form.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/contracts/wire/AnalysisReport.ts",
+      "kind": "script",
+      "commit_or_etag": "81bbeba2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AnalysisReportOpalWire and the AnalysisReportAnyWire union added; v1 interface gains only optional provider. Commit 81bbeba2 is in the PORTAL repo on branch wk-IRPT_YCDGEN-67-portal (a nested git repo), not in the workspace repo. Local.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/contracts/adapt.ts",
+      "kind": "script",
+      "commit_or_etag": "81bbeba2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "adaptAnalysisReport and adaptAnalysisReportSlice branch on provider; OpalReportSection; the Opal branch reads no vendor member. Commit 81bbeba2 is in the PORTAL repo on branch wk-IRPT_YCDGEN-67-portal (a nested git repo), not in the workspace repo. Local.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/scripts/adapt-analysis-report-opal-exercise.mjs",
+      "kind": "script",
+      "commit_or_etag": "81bbeba2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new; arguments opal, v1, typecheck, one RESULT line each. Commit 81bbeba2 is in the PORTAL repo on branch wk-IRPT_YCDGEN-67-portal (a nested git repo), not in the workspace repo. Local.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_YCDGEN-W2-S14 and IRPT_YCDGEN-W2-S15 appended",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- the exercise script reads an OPAL_ENGINE document through the adapter without touching vendor_artifact",
+      "method": "command",
+      "invocation": "bun portal/scripts/adapt-analysis-report-opal-exercise.mjs opal",
+      "output_evidence": "legs: 25 of 25 held\nRESULT: opal PASS\nrc=0",
+      "denominator": "25 of 25 legs held (vendor members poisoned; poison proven live by leg O0, 3 of 3 reads throw)",
+      "expect": "^RESULT: opal PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the exercise script reads a v1 document through the adapter unchanged",
+      "method": "command",
+      "invocation": "bun portal/scripts/adapt-analysis-report-opal-exercise.mjs v1",
+      "output_evidence": "legs: 13 of 13 held\nRESULT: v1 PASS\nrc=0",
+      "denominator": "13 of 13 legs held (v1 fixture and the same document marked provider YCHARTS read identically)",
+      "expect": "^RESULT: v1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- the portal typechecks with zero errors, run through the exercise script",
+      "method": "command",
+      "invocation": "bun portal/scripts/adapt-analysis-report-opal-exercise.mjs typecheck",
+      "output_evidence": "tsc exit status: 0\nlegs: 1 of 1 held\nRESULT: typecheck PASS\nrc=0",
+      "denominator": "1 of 1 legs held (tsc -b --noEmit exit status 0)",
+      "expect": "^RESULT: typecheck PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Opal arm: the invented OPAL_ENGINE document carries throwing getters on vendor_artifact, extraction_validation, extraction_coverage and effective_inputs.read_back; leg O0 proves all three reads throw, so a PASS on O1-O8 means the adapter never read them. Leg O8 feeds a FAILED computation_validation and requires validated=false with reason code FAILED.",
+      "expected": "adapter completes without a throw; FAILED is not read as certified",
+      "observed": "opal 25 of 25 legs held",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- pure functions over invented documents and a committed fixture",
+      "observed": "single run per criterion",
+      "status": "N/A-WITH-REASON",
+      "reason": "no clock, network or randomness is read"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "NativeSections.tsx, contracts/index.ts, wire/index.ts, wire/consumed.ts, wire/responses.ts and api/endpoints/investor-reporting.ts",
+      "reason": "Outside the order's paths; see row IRPT_YCDGEN-W2-S14."
+    },
+    {
+      "item": "The fe-s-13 test folder (11 of 51 tests red on routes, envelope and pins)",
+      "reason": "Not a criterion of this order; see row IRPT_YCDGEN-W2-S15."
+    }
+  ],
+  "surprises": [
+    "IRPT_YCDGEN-W2-S14",
+    "IRPT_YCDGEN-W2-S15"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "tsc",
+      "invocation": "bun portal/scripts/adapt-analysis-report-opal-exercise.mjs typecheck",
+      "result": "exit status 0"
+    }
+  ]
+}

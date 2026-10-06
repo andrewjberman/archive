@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-i-6.opal-artifacts-registered-and-checkpoint-spill",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-i-6.opal-artifacts-registered-and-checkpoint-spill.md",
+    "group": "OTHER",
+    "vintage_commit": "c77f3229ac"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6B.md",
+    "vintage_commit": "c77f3229ac",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-i-6.opal-artifacts-registered-and-checkpoint-spill.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/reporting_policies.json",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "family OPAL_REPORT_PDF (tier state, table opal_report_documents, extension pdf, 30 / 2555 days as ORIGINAL_VENDOR_PDF) under irpt-x10-v1; the refusing validator accepts it and reporting_destination returns the cottonwood address",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_irpt_destination.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "FAMILIES holds OPAL_REPORT_PDF; state-tier count 12; ACTIVE_ROW_SHA re-pinned (row IRPT_YCDGEN-W3-S14); a test of the new family and its address",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "with stores['artifacts'] the PDF is retained through put as OPAL_REPORT_PDF and the run record (run.json and the return value) carries artifact_ref; without it the S3 write is as before",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a fake put that refuses a family the policy does not register; retained-ref test and legacy-path test",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/publisher.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "retain_document and read_document retain and read back an OPAL_ENGINE document as an EXTRACTION_EVIDENCE artifact, digest-checked; the publish entry points are unchanged",
+      "artifact_covered_by": [
+        "AC3",
+        "AC5",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/publication_worker.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "an Opal checkpoint is {pdf_ref, census, metadata_ref, metadata_sha256}; finish reads the document back, verifies and promotes it; the vendor path is unchanged",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publisher.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "over-limit document retained, read back and persisted; reference refused on wrong digest, family or owner binding",
+      "artifact_covered_by": [
+        "AC3",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publication_worker.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opal checkpoint is a reference and finish publishes the document; a reference naming other bytes publishes nothing",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- the registry holds family OPAL_REPORT_PDF and the repository put of that family succeeds (tests -k opal_report_pdf_family, >= 1 passed)",
+      "method": "command",
+      "invocation": "python -m pytest lib/tests/test_irpt_destination.py -q -p no:cacheprovider -k opal_report_pdf_family",
+      "output_evidence": "1 passed, 75 deselected in 0.03s\nrc=0",
+      "denominator": "1 passed of 1 selected (75 deselected); the file's 76 tests all pass",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the producer retains the PDF through put and returns its artifact_ref (tests -k retains_pdf_artifact, >= 1 passed)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py -q -p no:cacheprovider -k retains_pdf_artifact",
+      "output_evidence": "1 passed, 13 deselected in 0.34s\nrc=0",
+      "denominator": "1 passed of 1 selected (13 deselected)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- a document larger than the checkpoint limit is persisted and its checkpoint stays within the limit (tests -k opal_document_over_checkpoint_limit, >= 1 passed)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publisher.py -q -p no:cacheprovider -k opal_document_over_checkpoint_limit",
+      "output_evidence": "1 passed, 24 deselected in 0.63s\nrc=0",
+      "denominator": "1 passed of 1 selected (24 deselected)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 -- the Opal checkpoint carries an artifact ref and a sha256 and not the document (tests -k opal_checkpoint_is_a_reference, >= 1 passed)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publication_worker.py -q -p no:cacheprovider -k opal_checkpoint_is_a_reference",
+      "output_evidence": "1 passed, 10 deselected in 0.77s\nrc=0",
+      "denominator": "1 passed of 1 selected (10 deselected)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "AC5 -- a v1 document persists byte-equal to what the unchanged publisher persisted (tests -k v1_document_persists_byte_equal, >= 1 passed)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publisher.py -q -p no:cacheprovider -k v1_document_persists_byte_equal",
+      "output_evidence": "1 passed, 24 deselected in 0.57s\nrc=0",
+      "denominator": "1 passed of 1 selected (24 deselected)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "AC6 -- the whole publisher test file passes (tests, all, no failure)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publisher.py -q -p no:cacheprovider",
+      "output_evidence": "25 passed in 6.14s\nrc=0",
+      "denominator": "25 passed of 25 in the file",
+      "expect": "^[0-9]+ passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative arms run inside the tests: a put of a family the policy does not register is refused by the fake put (naming builder); a checkpoint reference with a wrong digest, a wrong family or a changed ref is refused and publishes nothing; an inline-size document would exceed CHECKPOINT_BYTES (asserted before the spill). No source mutation was run.",
+      "expected": "each raises a refusal and persists nothing",
+      "observed": "the tests pass, so every negative arm raised",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion run once under timeout 120; the whole generate and research test directories (576 passed, 30 skipped) and reports retention and generate_installed tests (31 passed) were also run once",
+      "observed": "all pass; the v1 byte-equal digest test passes against the unchanged vendor branch",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any vendor call, AWS call, S3 or DynamoDB write, deploy; the caller wiring of artifacts into produce and of the retained ref into the checkpoint (resident_worker, cell d-6); the live registry deploy and its effect on retention rows stored under the old policy digest",
+      "reason": "Forbidden or outside the order's paths; filed as rows IRPT_YCDGEN-W3-S14 and S15."
+    }
+  ],
+  "surprises": [
+    "IRPT_YCDGEN-W3-S13",
+    "IRPT_YCDGEN-W3-S14",
+    "IRPT_YCDGEN-W3-S15",
+    "IRPT_YCDGEN-W3-S16"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests infra/aws/lambda/investor-reporting/ycharts/research/tests -q -p no:cacheprovider",
+      "result": "576 passed, 30 skipped"
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-g-6.persist-path-for-opal-form",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-g-6.persist-path-for-opal-form.md",
+    "group": "OTHER",
+    "vintage_commit": "596f2b575b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6A.md",
+    "vintage_commit": "596f2b575b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-g-6.persist-path-for-opal-form.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ReportValidator routes a document with a provider member to AnalysisReport.v2.schema.json (the package _contracts/ copy unless the schema directory holds one) and refuses an OPAL_ENGINE document carrying a vendor member; a document with no provider stays on v1.",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/publisher.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "metadata_kind tells the vendor key set from the Opal key set and refuses both on one request; _publish_opal persists an OPAL_ENGINE document with a retained PDF of family OPAL_REPORT_PDF; the vendor branch is untouched.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC5",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/publication_worker.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "checkpoint_pdf and finish accept either key set (never both), the Opal one from RECEIVED/CLAIMED/CERTIFYING, so an Opal job goes RECEIVED -> CERTIFYING -> READY.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_installed.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three resident_validator_v2 tests",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publisher.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opal assembly, opal_engine_publication_ready, an invalid-publication matrix, v1_publication_unchanged, v1_document_persists_byte_equal (digest pinned from the publisher at HEAD, proven there)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC5",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publication_worker.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opal worker path to READY and mixed_key_sets_refused",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- an OPAL_ENGINE document with its artifact is persisted and its job reaches READY (tests -k opal_engine_publication_ready, >= 1 passed)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publisher.py -q -p no:cacheprovider -k opal_engine_publication_ready",
+      "output_evidence": "1 passed, 22 deselected in 0.56s\nrc=0",
+      "denominator": "1 passed of 1 selected in the file (22 deselected)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the YCharts metadata path still requires its vendor_artifact (tests -k v1_publication_unchanged, >= 1 passed)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publisher.py -q -p no:cacheprovider -k v1_publication_unchanged",
+      "output_evidence": "1 passed, 22 deselected in 0.60s\nrc=0",
+      "denominator": "1 passed of 1 selected in the file (22 deselected)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- the publication worker refuses a document that mixes the Opal and vendor key sets (tests -k mixed_key_sets_refused, >= 1 passed)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publication_worker.py -q -p no:cacheprovider -k mixed_key_sets_refused",
+      "output_evidence": "1 passed, 8 deselected in 0.46s\nrc=0",
+      "denominator": "1 passed of 1 selected in the file (8 deselected)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 -- the resident validator accepts an OPAL_ENGINE document and refuses one carrying a vendor member (tests -k resident_validator_v2, >= 1 passed)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/reports/tests/test_resident_installed.py -q -p no:cacheprovider -k resident_validator_v2",
+      "output_evidence": "3 passed, 11 deselected in 0.21s\nrc=0",
+      "denominator": "3 passed of 3 selected in the file (11 deselected)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "AC6 -- a v1 document persists byte-equal to what the unchanged publisher persisted (tests -k v1_document_persists_byte_equal, >= 1 passed)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publisher.py -q -p no:cacheprovider -k v1_document_persists_byte_equal",
+      "output_evidence": "1 passed, 22 deselected in 0.69s\nrc=0",
+      "denominator": "1 passed of 1 selected in the file (22 deselected)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "AC5 -- the whole publisher test file passes (tests, all, no failure)",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publisher.py -q -p no:cacheprovider",
+      "output_evidence": "23 passed in 4.46s\nrc=0",
+      "denominator": "23 passed of 23 selected in the file (0 deselected)",
+      "expect": "^[0-9]+ passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The negative arms run inside the tests: a vendor member on an OPAL_ENGINE document, a wrong Opal sha256, a vendor-family PDF under the Opal key set, a census on an Opal request, an invalid section status, a wrong revision, a vendor-state job, a missing vendor_artifact on the v1 path, an Opal member on the v1 path, the Opal PDF family on the v1 path, and key sets mixed at the top level and inside effective_inputs.",
+      "expected": "each raises a refusal and persists nothing (no Dynamo transaction, no S3 put)",
+      "observed": "the tests pass, so every negative arm raised",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each criterion run once; the v1 byte-equal digest was read on 3 separate runs and its one varying member (the specimen PDF's own sha256, which carries a creation stamp) is fixed before pinning; the unchanged HEAD publisher was run against the same test and passed",
+      "observed": "stable digest 3ceb223e... over 3 runs; HEAD publisher (md5 equal to git HEAD) passes the byte-equal test",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any vendor call, AWS call, S3 or DynamoDB write, deploy, registry row or grant; the repository's real policy registration of OPAL_REPORT_PDF; the resident worker's READY reopen for an Opal report; a document larger than the 32 KiB checkpoint",
+      "reason": "Forbidden or outside the order's paths; filed as rows IRPT_YCDGEN-W3-S8, S9 and S11."
+    }
+  ],
+  "surprises": [
+    "IRPT_YCDGEN-W3-S8",
+    "IRPT_YCDGEN-W3-S9",
+    "IRPT_YCDGEN-W3-S10",
+    "IRPT_YCDGEN-W3-S11",
+    "IRPT_YCDGEN-W3-S12"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_publication_worker.py -q -p no:cacheprovider",
+      "result": "9 passed"
+    }
+  ]
+}

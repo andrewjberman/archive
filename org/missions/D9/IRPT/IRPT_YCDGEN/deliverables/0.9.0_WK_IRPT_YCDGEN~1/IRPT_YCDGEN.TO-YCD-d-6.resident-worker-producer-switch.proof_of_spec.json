@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-d-6.resident-worker-producer-switch",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-d-6.resident-worker-producer-switch.md",
+    "group": "OTHER",
+    "vintage_commit": "c77f3229ac"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6.md",
+    "vintage_commit": "c77f3229ac",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-d-6.resident-worker-producer-switch.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "R6 switch in ResidentAssembly.execute: producer_for(record) against OPAL_PRODUCER_PRINCIPALS (one inert placeholder); a listed principal runs ResidentGenerationWorker.run_opal, every other principal run() unchanged; READY reopen reads provenance by provider (row W3-S9). No deploy.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 new tests on the existing offline harness with an invented allow list and a fake producer; negative control: with the OPAL reopen branch disabled the redelivered_ready_opal_job test fails with KeyError",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_YCDGEN-W1-S11 and IRPT_YCDGEN-W1-S12 appended",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5",
+        "AC6"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a principal on the allow list is served by the Opal producer (tests -k allow_listed_principal_opal_producer, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py -q -p no:cacheprovider -k allow_listed_principal_opal_producer",
+      "output_evidence": "1 passed, 60 deselected in 0.75s (rc=0; FORCE_COLOR unset)",
+      "denominator": "1 passed of 1 selected (61 tests in the file)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a principal off the list is served by the YCharts path unchanged (tests -k other_principal_ycharts_path, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py -q -p no:cacheprovider -k other_principal_ycharts_path",
+      "output_evidence": "1 passed, 60 deselected in 1.39s (rc=0; FORCE_COLOR unset)",
+      "denominator": "1 passed of 1 selected (61 tests in the file)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a client-sent flag does not change the producer (tests -k client_flag_never_selects, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py -q -p no:cacheprovider -k client_flag_never_selects",
+      "output_evidence": "1 passed, 60 deselected in 1.53s (rc=0; FORCE_COLOR unset)",
+      "denominator": "1 passed of 1 selected (61 tests in the file)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "one request never runs both producers (tests -k one_producer_per_request, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py -q -p no:cacheprovider -k one_producer_per_request",
+      "output_evidence": "4 passed, 57 deselected in 1.88s (rc=0; FORCE_COLOR unset)",
+      "denominator": "4 passed of 4 selected (61 tests in the file)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the whole test file passes (tests, all, no failure)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py -q -p no:cacheprovider",
+      "output_evidence": "53 passed, 8 skipped in 26.87s (rc=0; FORCE_COLOR unset); the 8 skips are the file's own, 43 passed and 8 skipped before this cell",
+      "denominator": "53 passed + 8 skipped = 61 collected; 0 failed",
+      "expect": "^[0-9]+ passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "a redelivered message for a READY Opal job is acknowledged without a KeyError (tests -k redelivered_ready_opal_job, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py -q -p no:cacheprovider -k redelivered_ready_opal_job",
+      "output_evidence": "1 passed, 60 deselected in 1.58s (rc=0; FORCE_COLOR unset)",
+      "denominator": "1 passed of 1 selected (61 tests in the file)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "None named by the spec; the worker disabled the Opal branch of the READY reopen once.",
+      "expected": "the redelivered_ready_opal_job test fails",
+      "observed": "1 failed, KeyError at the extraction_evidence_ref read",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline doubles, fixed inputs",
+      "observed": "single run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_YCDGEN-W1-S11",
+    "IRPT_YCDGEN-W1-S12"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py -q -p no:cacheprovider",
+      "result": "53 passed, 8 skipped in 26.87s"
+    }
+  ]
+}

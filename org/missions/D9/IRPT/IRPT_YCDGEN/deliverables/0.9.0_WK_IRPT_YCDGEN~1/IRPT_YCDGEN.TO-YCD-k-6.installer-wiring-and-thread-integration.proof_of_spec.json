@@ -1,0 +1,204 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-k-6.installer-wiring-and-thread-integration",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-k-6.installer-wiring-and-thread-integration.md",
+    "group": "OTHER",
+    "vintage_commit": "de34372fc9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6C.md",
+    "vintage_commit": "de34372fc9",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-k-6.installer-wiring-and-thread-integration.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "make_opal_stores (allow-list gated, builds the producer's stores per job), optional pinned opal_map binding, repositories built with additional_policy_revisions=(irpt-ycdgen-research-v1,), opal_stores passed to ResidentAssembly. No deploy.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC8"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_installed.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 new tests over fake clients with counting openers; ycharts/extract added to the test path (whole file passes alone).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC8"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run_opal checkpoints the artifact_ref produce returns; OPAL_PDF_FAMILY renamed YCHARTS_OPAL_REPORT. No deploy.",
+      "artifact_covered_by": [
+        "AC3",
+        "AC4",
+        "AC7"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fixture registers YCHARTS_OPAL_REPORT in place of OPAL_REPORT_PDF; the four red tests green.",
+      "artifact_covered_by": [
+        "AC7"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_opal_thread_integration.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 tests: real producer behind the real worker switch with fake clients, a socket guard, a research-revision registry; negative control: with the worker ignoring artifact_ref the two Opal tests fail with ATTENTION OPAL_PRODUCER_OUTPUT.",
+      "artifact_covered_by": [
+        "AC3",
+        "AC4",
+        "AC5",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_YCDGEN-W1-S13 and IRPT_YCDGEN-W1-S14 appended",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5",
+        "AC6",
+        "AC7",
+        "AC8"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the installer passes an opal_stores factory to ResidentAssembly (tests -k installer_supplies_opal_stores, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/reports/tests/test_resident_installed.py -q -p no:cacheprovider -k installer_supplies_opal_stores",
+      "output_evidence": "2 passed, 17 deselected in 0.59s (rc=0; FORCE_COLOR unset; run from the worktree root)",
+      "denominator": "2 passed; 2 passed, 17 deselected in 0.59s",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a principal off the allow list builds none of the Opal stores or clients (tests -k unlisted_principal_builds_no_opal_stores, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/reports/tests/test_resident_installed.py -q -p no:cacheprovider -k unlisted_principal_builds_no_opal_stores",
+      "output_evidence": "2 passed, 17 deselected in 0.57s (rc=0; FORCE_COLOR unset; run from the worktree root)",
+      "denominator": "2 passed; 2 passed, 17 deselected in 0.57s",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a listed principal's request reaches READY with a retained PDF and its report reads back through sections (tests -k opal_thread_ready_end_to_end, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_opal_thread_integration.py -q -p no:cacheprovider -k opal_thread_ready_end_to_end",
+      "output_evidence": "1 passed, 2 deselected in 1.10s (rc=0; FORCE_COLOR unset; run from the worktree root)",
+      "denominator": "1 passed; 1 passed, 2 deselected in 1.10s",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the retained artifact_ref reaches the checkpoint (tests -k opal_artifact_ref_reaches_checkpoint, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_opal_thread_integration.py -q -p no:cacheprovider -k opal_artifact_ref_reaches_checkpoint",
+      "output_evidence": "1 passed, 2 deselected in 1.19s (rc=0; FORCE_COLOR unset; run from the worktree root)",
+      "denominator": "1 passed; 1 passed, 2 deselected in 1.19s",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the same request from an unlisted principal takes the YCharts path (tests -k unlisted_principal_takes_ycharts_path, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_opal_thread_integration.py -q -p no:cacheprovider -k unlisted_principal_takes_ycharts_path",
+      "output_evidence": "1 passed, 2 deselected in 1.25s (rc=0; FORCE_COLOR unset; run from the worktree root)",
+      "denominator": "1 passed; 1 passed, 2 deselected in 1.25s",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "the whole integration test file passes (tests, all, no failure)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_opal_thread_integration.py -q -p no:cacheprovider",
+      "output_evidence": "3 passed in 1.94s (rc=0; FORCE_COLOR unset; run from the worktree root)",
+      "denominator": "3 passed; 3 passed in 1.94s",
+      "expect": "^[0-9]+ passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "the whole resident worker test file passes again, the four red tests green (tests, all, no failure)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py -q -p no:cacheprovider",
+      "output_evidence": "53 passed, 8 skipped in 29.04s (rc=0; FORCE_COLOR unset; run from the worktree root)",
+      "denominator": "53 passed; 53 passed, 8 skipped in 29.04s",
+      "expect": "^[0-9]+ passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC8",
+      "criterion_verbatim": "the installer builds the repositories with the research policy revision (tests -k installer_wires_ycdgen_research_revision, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/reports/tests/test_resident_installed.py -q -p no:cacheprovider -k installer_wires_ycdgen_research_revision",
+      "output_evidence": "1 passed, 18 deselected in 0.54s (rc=0; FORCE_COLOR unset; run from the worktree root)",
+      "denominator": "1 passed; 1 passed, 18 deselected in 0.54s",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "None named by the spec; the worker made the worker ignore the returned artifact_ref once.",
+      "expected": "the two Opal thread tests fail",
+      "observed": "2 failed, 1 passed; ATTENTION code=OPAL_PRODUCER_OUTPUT",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes, fixed inputs",
+      "observed": "single run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_YCDGEN-W1-S13",
+    "IRPT_YCDGEN-W1-S14",
+    "IRPT_YCDGEN-W3-S17"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py -q -p no:cacheprovider",
+      "result": "53 passed, 8 skipped in 29.04s (rc=0; FORCE_COLOR unset; run from the worktree root)"
+    }
+  ]
+}
