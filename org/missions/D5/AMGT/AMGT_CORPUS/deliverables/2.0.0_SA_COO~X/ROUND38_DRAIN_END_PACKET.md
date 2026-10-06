@@ -1,6 +1,6 @@
 # AMGT_CORPUS round 38 -- drain-end packet (L8 input) to `3.0.0_SA_CVO~Z`
 
-**STATUS: DRAFT -- CRPS-an-3 (the 2026-10-06 13:00Z fire, the first on the new pin) is pending. Not delivered.**
+**STATUS: COMPLETE (7 of 7 cells terminal). HELD, not delivered: Andrew-direct 2026-10-06 ~13:4xZ (msg 30061, record @`f42219ebfe`) made the Bloomberg index-benchmark issue the singular priority for site Z. The packet goes to `3.0.0_SA_CVO~Z` when that priority lifts.**
 
 | | |
 |---|---|
@@ -14,7 +14,7 @@
 |---|---|---|---|
 | `CRPS-an-1` count and ratio fields carry no currency (producer) | LOCAL | DONE, drained @`6f6e472641` | AC1 `crc derive build 1/1 control 2/2` (4 names: 1,253 count/ratio, 0 with a currency; money 1,324, unlabelled 0; values moved 0); AC2 4 passed; 69 currency/model_block tests passed; proof VALID. `IS_SH_FOR_DILUTED_EPS` -> `(None, "invariant")` via `_COUNT_RATIO_NO_CURRENCY_FIELDS` |
 | `CRPS-an-2` re-derive the 96 + re-pin | SERVED | DONE, ledger `amgt-corpus-r38-an2` CLOSED @`d1b66b2562` (Branch A); pair COO @`fd7950348f` (corrected @`96be925c0f`) / CTO @`9b10587d25` + AMENDMENT 1 @`dc3aa39ada` | section 2 |
-| `CRPS-an-3` the 2026-10-06 13:00Z fire, the first on `6f6e472641` | LOCAL (read) | PENDING | section 3 |
+| `CRPS-an-3` the 2026-10-06 13:00Z fire, the first on `6f6e472641` | LOCAL (read) + one same-day pull | READ: the fire pulled 0 (Z-S88); the same-day pull on CTO ruling (a) landed 96/96, ledger `amgt-corpus-r38-an3-pull` CLOSED | section 3 |
 | `CRPS-an-4` the /ui-walk walker closes the timeline day | LOCAL | DONE, drained @`54b6c70647` | AC1 `an4 build 1/1 control 1/1`; proof VALID; confirmed on 2 real walks (no day dialog over any tab shot) |
 | `CRPS-an-5` today's recovery run of the refused 10-05 fire | LOCAL | STRUCK by `1.0.0_SA_CTO~Z` (msg 29870, AMENDMENT 1) | no MSTR~Z recovery line arrived; the 10-06 fire supersedes it (round-37 ruling 3) |
 | `CRPS-an-6` FWD-20's currency limb on the page | LOCAL (read) | READ @`68a16106a0` | section 4 |
@@ -31,14 +31,29 @@
 
 The served move disarms row `Z-W1-S35`.
 
-## 3. CRPS-an-3 -- PENDING (the 2026-10-06 13:00Z fire)
+## 3. CRPS-an-3 -- the 2026-10-06 fire and the same-day pull
 
-This read is also CTO condition 3: the first fire on `<p>` is read as a served census. Measures:
-- count/ratio with a currency 0;
-- money unlabelled 0;
-- values moved 0 against the prior block;
-- rc 0;
-- 0 pointer units.
+**The 13:00Z fire on `6f6e472641` pulled nothing** (`evidence/r38_an3_fire_20261006.txt`, row `Z-S88` @`8aa3ea928f`):
+- It returned rc 0 in 28 s, with all 96 names `already_current` and `bloomberg_calls 0`.
+- The cause: `cmd_refresh` skips any name whose latest DERIVED stamp is today's UTC date, and an-2's re-derive at 03:20Z wrote
+  exactly such stamps.
+
+**The same-day pull** ran on CTO ruling (a), an-2 half AMENDMENT 2 @`80b915d9b5` (ledger `amgt-corpus-r38-an3-pull` CLOSED):
+- Driver: `checks/round38/an3_same_day_pull.py`, run from the pinned checkout on Python311. The skip was bypassed run-scoped,
+  with no code edit, and the run would have stopped on a -4001/LIMIT error.
+- Probe: `health ok True` on `127.0.0.1:8194` (`r38_an3_probe.txt`).
+- Pull: `already_current 0 pulled 96 bloomberg_calls 768`, rc 0, 0 failed, no STOP (`r38_an3_pull.txt`).
+- Verification (`r38_an3_leg_v.txt`):
+  - `crc served build 1/1 control 1/1`: count/ratio figures with a currency 0, money unlabelled 0;
+  - pointer units 0;
+  - `al5 deployed 1/1 + 1/1`.
+- **Values moved: 2,276**, not the 0 in condition 3. That 0 was written for a re-derive from the same raw; this is a new pull.
+  - 1,706 are forecast consensus (BEST_*).
+  - 569 are header market fields (price, volume, market cap, beta, EV).
+  - **1 is history: ORA FP FY2024 `IS_COMP_EPS_ADJUSTED` 0.82 -> 0.9613**, a Bloomberg revision.
+
+**Round-39 cell (CTO, msg 30045):** the skip must key on the PULL date, not the derive stamp. The proof is a 03:00Z re-derive
+plant after which the 13:00Z fire still pulls.
 
 ## 4. CRPS-an-6 -- `evidence/r38_an6_page_read.md`
 
@@ -72,7 +87,7 @@ exercised" names a limb the reads did not drive.
 
 ## 6. Rows
 
-No row was filed this round (0 rows surfaced after 2026-10-05T14:50Z of 164 in the channel).
+One row was filed this round, `Z-S88`, the issuer's own: an-2's early re-derive tripped the same-day skip of the 10-06 fire. The same-day pull restored the data, and the round-39 cell keys the skip on the pull date.
 
 | row | change |
 |---|---|
