@@ -1,0 +1,127 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-az-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-az-1.freshness-render-for-review.md",
+  "group": "OTHER",
+  "vintage_commit": "111e312e46"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "111e312e46",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-az-1.freshness-render-for-review.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~262",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~262/captures/",
+   "kind": "config_data",
+   "commit_or_etag": "d15153edd5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "8 PNG captures of /freshness at portal 6de76f0509 served from the worker worktree, plus first-paint-time.json and contrast-readings.json; 0 guard aborts.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~262/RENDER_FRESHNESS.md",
+   "kind": "doc",
+   "commit_or_etag": "d15153edd5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one line per capture (file, what it shows, the time); first paint 288 ms, table rows 3010 ms.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~262/instrument/freshness_render.mjs",
+   "kind": "script",
+   "commit_or_etag": "d15153edd5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one-pass driver (arm, secret, disarm through ui_walker_account.py; walker's read-only guard); localhost dev build only.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "d15153edd5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "APPENDED rows AMGT_RESAPP-Z-W262-S1 and -S2 (OBSERVATION, INERT).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "a count of 7 or more; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && ls \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~262/captures/\" | grep -c \"\\.png$\"; echo \"exit=$?\"",
+   "output_evidence": "8\nexit=0",
+   "denominator": "8 PNG captures in captures/ (7 required)",
+   "status": "PASS",
+   "expect": "(?s)^([7-9]|[1-9][0-9]+)\\s+exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the account reads disarmed; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .claude/skills/ui-walk/ui_walker_account.py status; echo \"exit=$?\"",
+   "output_evidence": "STATUS: row PRESENT opal-ui-walker@opal.test status=disabled role=admin userType=Dev armed=no armedBy=none; SSM ABSENT\nexit=0",
+   "denominator": "1 of 1 walker account row (read after the run's DISARM refused-login proof, 2026-10-06 ~17:57Z)",
+   "status": "PASS",
+   "expect": "(?s)status=disabled .*armed=no.*SSM ABSENT\\s+exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The walker's own disarm proof: a login with the walk password after DISARM.",
+   "expected": "refused",
+   "observed": "HTTP 401 Invalid email or password -> REFUSED",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "captures 01 and 02 (default sort vs stalest pressed) compared byte for byte",
+   "observed": "identical (cmp rc 0)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Role-gated differences",
+   "reason": "the walker account is role admin; nothing here covers another role."
+  },
+  {
+   "item": "Any verdict on the page",
+   "reason": "the CTO reviews the captures; the worker records them (order section 1)."
+  },
+  {
+   "item": "Flipping the task order's <status>",
+   "reason": "the issuer's flip (order section 5)."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W262-S1",
+  "AMGT_RESAPP-Z-W262-S2"
+ ],
+ "session_log": "N/A -- no session-log path in this worker's paths. Worktree C:/tmp/r76-262 on wk-AMGT_RESAPP-262. Dev server on 5174 started by this worker from the worktree portal and stopped at the end. One walker run, ARMED and DISARMED by the driver.",
+ "compiler_tools": [
+  {
+   "tool": "freshness_render.mjs",
+   "invocation": "node .scratch/freshness_render.mjs",
+   "result": "8 captures, 0 guard aborts, DISARM refused-login proof"
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~262 <0.9.0_WK_AMGT_RESAPP~262@opal.agent>\" -F .scratch/msg1.txt -- <deliverables> <investigation file>",
+   "result": "d15153edd5"
+  }
+ ]
+}
