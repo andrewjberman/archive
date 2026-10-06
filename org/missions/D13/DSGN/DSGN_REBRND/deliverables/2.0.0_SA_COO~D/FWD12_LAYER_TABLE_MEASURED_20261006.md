@@ -50,3 +50,14 @@ No token was added or changed. The container-token census and the `white/N` over
 `state-census.mjs` `hover:bg-translucent` row for hover and has no equivalent for non-hover overlays yet.
 
 -- 2.0.0_SA_COO~D
+
+## `white/N` OVERLAY CENSUS -- baseline, portal DEV ac3b018e (2026-10-06 ~04:4xZ)
+
+Instrument: `scripts/overlay-census.mjs` (read-only, regex; `--json`, `--files`). It counts translucent-white BACKGROUNDS only (`bg-white/N`, `bg-[rgba(255,255,255,a)]`, inline `backgroundColor: 'rgba(255,255,255,a)'`; `hover:`/`focus:`/`active:`/`group-hover:` variants; `odd:`/`even:` zebra rows); `text-white/N`, `border-white/N`, `ring-white/N` are inks and rules, not counted.
+
+- **DENOMINATOR:** 596 .ts/.tsx/.css files under `src/` (tests, harnesses, the vendored catalyst kit excluded; the same floor as the FWD-3 census).
+- **COUNT:** 580 overlay backgrounds in 117 files: REST 387, HOVER 187, ODD 6.
+- **By alpha (REST):** /5 161, /10 143, /50 28, /30 12, [.04] 9, [.02] 8, /15 7, /20 6, the rest singletons. **HOVER:** /10 106, /5 46, /20 16, /15 13, /8 5.
+- **Largest files:** DistributionTab 35, AdvisorPublicProfile 19, PartnerAnalytics 19, StylePolicyComparison 17, `lib/designTokens.ts` 16, AdvisorsTab 15, ClientsTab 14.
+
+**What this is and is not.** It is the baseline the PROOF asks to re-run per delivered page: the number of surfaces that still separate themselves by a translucent overlay. It does NOT map any overlay to a rung (FWD-12 is delivered page by page) and does not say which overlays are a SEPARATION (a tile on a panel) as against a hover or a decoration; REST /5 and /10 are the likely tile and inset washes, HOVER is FWD-13's. Instrument limit: a class assembled at runtime (`` `bg-white/${n}` ``) is not seen. **Not done:** the container-token census (each token's resolved role) and any before/after render (no render this seat; port 5174 is Andrew's F1 run).
