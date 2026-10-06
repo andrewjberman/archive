@@ -191,10 +191,23 @@ def main():
         else:
             code, served = body(f"{PREFIX}/freshness")
             src = served.get("snapshot") or {}
-            same, n, diff = equal(served.get("rows"))
-            print(f"   served from snapshot: {bool(src)} {json.dumps(src)[:160]}; rows EQUAL {same} of {n}; e.g. {diff}")
-            clause("C1 the route serves the snapshot and its rows equal the computed view", bool(src) and same == n and n > 0,
-                   f"{same} of {n}")
+            # ISSUER AMENDMENT (row Z-S359, AE~A STOP 30010): `rot` is rendered from the list register, which the Lambda
+            # package carries and a local tree does not, so a local baseline cannot judge it. Rows are compared on every
+            # OTHER field against the local view; `rot` is compared within ONE environment, against the deployed /lists.
+            for r in list(crow.values()):
+                r.pop("rot", None)
+            rows_wo = [{k: v for k, v in (r or {}).items() if k != "rot"} for r in served.get("rows") or []]
+            same, n, diff = equal(rows_wo)
+            print(f"   served from snapshot: {bool(src)} {json.dumps(src)[:160]}; rows EQUAL (all fields but rot) {same} of {n}; "
+                  f"e.g. {diff}")
+            from lib.research.freshness.build_view import render_rot_signal
+
+            lcode, lists = body(f"{PREFIX}/lists")
+            want_rot = render_rot_signal({"lists": lists.get("lists")} if lists.get("lists") else None)
+            rots = {json.dumps(r.get("rot")) for r in served.get("rows") or []}
+            print(f"   rot: served {sorted(rots)[:1]}; rendered from the deployed /lists {json.dumps(want_rot)[:120]}")
+            clause("C1 the route serves the snapshot; rows equal the computed view, rot equal to the deployed register's",
+                   bool(src) and same == n and n > 0 and rots == {json.dumps(want_rot)}, f"{same} of {n}")
             with concurrent.futures.ThreadPoolExecutor(6) as ex:
                 res = list(ex.map(lambda _: invoke(f"{PREFIX}/freshness", tail=True), range(6)))
             cold = []
