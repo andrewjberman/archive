@@ -1,0 +1,125 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ay-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ay-2.freshness-snapshot.md",
+  "group": "OTHER",
+  "vintage_commit": "cecef87d4a"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "cecef87d4a",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ay-2.freshness-snapshot.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~258",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/freshness/snapshot.py",
+   "kind": "script",
+   "commit_or_etag": "ff67a11fb7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "build_freshness_snapshot, write_freshness_snapshot, read_freshness_snapshot; address from lib.opal_naming.address(): s3://opal-data-harvest/amgt/harvest/state/freshness_snapshot/current/snapshot.json. Library code; writes no store object.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "ff67a11fb7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "serve_coverage_freshness reads the snapshot with one GET and adds snapshot{object,generated_at}; absent or unreadable falls back with snapshot_fallback in plain words; 60 s hold kept; refresh_freshness_snapshot(client) writes once. Not deployed (ay-5).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_freshness_snapshot.py",
+   "kind": "script",
+   "commit_or_etag": "ff67a11fb7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "9 plant cases: address, builder equality, one GET and no listing, absent, unreadable, read refused, refresh writes once, incomplete view not written, failed write returned.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "ff67a11fb7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "APPENDED rows AMGT_RESAPP-Z-W258-S1 (ARMED, disarm_owner 2.0.0_SA_COO~Z) and -S2 (INERT).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the snapshot builder's rows EQUAL the computed view on every row; C1 PASS; R75 C59 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round75/checks/r75_served.py\" --cell c59 --where local; echo \"exit=$?\"",
+   "output_evidence": "   snapshot rows EQUAL 302 of 302; e.g. differing []\nPASS C1 the snapshot builder's rows equal the computed view 302 of 302\nR75 C59 SERVED: YES\nexit=0",
+   "denominator": "302 of 302 rows equal",
+   "status": "PASS",
+   "expect": "(?s)EQUAL 302 of 302.*PASS C1.*R75 C59 SERVED: YES\\s+exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "every plant case passes; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_freshness_snapshot.py; echo \"exit=$?\"",
+   "output_evidence": "9 passed, 22 warnings in 1.04s\nexit=0",
+   "denominator": "9 of 9 plant cases passed",
+   "status": "PASS",
+   "expect": "(?s)9 passed.*exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Planted: the route with no snapshot object stored (absent arm) and with a corrupt object (unreadable arm), against the arm with a stored snapshot.",
+   "expected": "the stored arm shows 0 listings and 1 get; the absent and corrupt arms list the stores and carry snapshot_fallback",
+   "observed": "test_the_route_serves_the_snapshot_with_one_get_and_no_listing, test_an_absent_snapshot_falls_back_and_says_so and test_an_unreadable_snapshot_falls_back_and_never_answers_500 all pass",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the c59 local check run twice (before and after the commit)",
+   "observed": "302 of 302 both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Flipping the task order's <status>",
+   "reason": "the issuer's flip (order section 5)."
+  },
+  {
+   "item": "A deployed read or write of the snapshot",
+   "reason": "this order writes no store object and deploys nothing; the first write and any grant are ay-5's."
+  },
+  {
+   "item": "Wiring refresh_freshness_snapshot to a caller",
+   "reason": "no ledger-writing refresh step exists in scoped_amgt.py; filed as AMGT_RESAPP-Z-W258-S1."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W258-S1",
+  "AMGT_RESAPP-Z-W258-S2"
+ ],
+ "session_log": "N/A -- no session-log path in this worker's paths. Worktree C:/tmp/r75-258 on wk-AMGT_RESAPP-258; scratch C:/tmp/r75-258/.scratch (uncommitted).",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~258 <0.9.0_WK_AMGT_RESAPP~258@opal.agent>\" -F .scratch/msg1.txt -- <paths>",
+   "result": "committed ff67a11fb7 on wk-AMGT_RESAPP-258"
+  }
+ ]
+}
