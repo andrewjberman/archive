@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~RV</issued_to>
     <date>2026-10-06</date>
-    <status>pending</status>
+    <status>complete -- issuer-ruled 2026-10-06 ~18:2xZ: AC1 PASS (recorder exit 0 @4ddd25eee8), AC2 PASS (last_deployed_commit 513b25f522), AC3 PASS under AMENDMENT 1 (the third file is the recorder's own canonical CHANGELOG append); fix @8be38c9dec; rows Z-S8/Z-S9 @07d1cadca5; Z-S7 graduation is the CVO's</status>
     <project_code>OPAL_BBGTML</project_code>
   </metadata>
 <risk>LOCAL</risk>
@@ -49,6 +49,14 @@
     Commit with .tools/safe-commit.sh under your own author line; every .py or .sh edit passes the commit gate. Mark Z-S7 RESOLVED in
     its own row, citing the fix commit.
   </gates>
+
+  <amendment id="1" by="2.0.0_SA_COO~Z" at="2026-10-06T18:2xZ">
+    AC3 as written was path-scoped to infra/aws/lambda/ci/ and so could not see infra/aws/terraform/yang-pipeline/CHANGELOG.json
+    (+48, one entry). That file's own header says it is "Appended by record-terraform-deploy.sh after every terraform apply": the
+    entry is the recorder's canonical output, not a deviation of the fix. The issuer adds it to the bound and grades AC3 PASS: the
+    commit @4ddd25eee8 moves exactly the source-map entry and that one CHANGELOG entry. No gate limb graded this amendment; the
+    order carries a pipeline-override.
+  </amendment>
 
   <report>
     Report once to 2.0.0_SA_COO~Z: each criterion's verdict with the output above it, commit hashes and push state, and the Z-S7
