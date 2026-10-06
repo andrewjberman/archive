@@ -1,0 +1,35 @@
+LEADPANEL after: CodeSha256 wbIT0PHvxKIgJvgVy+u0XhLuSXFK5dUE/wypJPDcf8o= at 2026-10-05T19:16:24Z
+   /lead-panel/timeseries/collected/chatter?days=30: cold(init+duration) n 6 min 7306 max 7777 | warm(duration) n 3 min 572 max 615 | status [200]
+   /lead-panel/timeseries/collected/chatter?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 555 max 624 | status [200]
+   /lead-panel/timeseries/collected/chatter?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 566 max 647 | status [200]
+   /lead-panel/rankings/trending/price: cold(init+duration) n 0 | warm(duration) n 9 min 113 max 174 | status [200]
+   /lead-panel/rankings/trending/price?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 61 max 238 | status [200]
+   /lead-panel/rankings/trending/price?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 61 max 180 | status [200]
+   /lead-panel/rankings/breakout/price: cold(init+duration) n 0 | warm(duration) n 9 min 118 max 218 | status [200]
+   /lead-panel/rankings/breakout/price?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 68 max 177 | status [200]
+   /lead-panel/rankings/breakout/price?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 63 max 172 | status [200]
+
+-- PROVENANCE ------------------------------------------------------------------
+Produced by: org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round71/checks/leadpanel_cold_warm.py --label after
+Run by:      0.7.0_AE_CloudOps~A, AMGT_RESAPP.TO-AMGT-au-7, CTO half condition 3
+Run at:      2026-10-05T19:16:24Z, exit=0
+Sequencing:  fired 92 s after the apply completed (function LastModified 19:14:52Z) and BEFORE AC1, AC2 or
+             AC3 touched the function. The cold column is perishable: any other check first would have
+             warmed every container and made it unmeasurable.
+Pairs with:  deliverables/2.0.0_SA_COO~Z/round71/LEADPANEL_BEFORE_au7.txt (the issuer's BEFORE, taken
+             18:25:49Z on the base GS//XHnVd4+bBIg1VU++r1fp9v495pi6jKFat9KbEYE=)
+
+-- THE DELTA, SAME SCRIPT, SAME 9 ROUTES, 51 MINUTES APART ----------------------
+warm chatter          9.2-12.3 s  ->  0.56-0.65 s   about 17x
+warm price rankings   3.9-5.2 s   ->  0.06-0.24 s   about 30x
+cold chatter          14.4-19.2 s ->  7.3-7.8 s     about 2.4x
+All 9 routes are faster on both columns and all 9 still answer 200.
+
+-- WHAT REMAINS SLOW -----------------------------------------------------------
+The cold start, at 7.3-7.8 s on the first chatter read. served_cache.py cannot reach it by construction:
+a per-container memo is empty on a cold container. Reported, not fixed here, and not a rollback trigger.
+
+-- CAVEAT ON THE COMPARISON ----------------------------------------------------
+Like-for-like in shape (same script, same routes, same request counts: n9 warm / n6 cold per route as the
+script sets them), but these are two single runs against live data, not a controlled benchmark. No claim
+is made about variance beyond the printed min and max.

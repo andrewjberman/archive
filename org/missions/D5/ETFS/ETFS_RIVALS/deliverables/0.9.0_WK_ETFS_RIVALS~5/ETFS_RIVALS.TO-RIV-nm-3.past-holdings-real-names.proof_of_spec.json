@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-nm-3.past-holdings-real-names",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "7ed4580858",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-nm-3.past-holdings-real-names.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7ed4580858"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/security_names.py",
+      "kind": "script",
+      "commit_or_etag": "7947e6fef5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; checks run offline with a stubbed fetch",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_holding_contribution.py",
+      "kind": "script",
+      "commit_or_etag": "7947e6fef5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; checks run offline with a stubbed fetch",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "7947e6fef5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; checks run offline with a stubbed fetch",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r9nm3_security_names.py",
+      "kind": "script",
+      "commit_or_etag": "7947e6fef5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call; checks run offline with a stubbed fetch",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the names stage asks for exactly the ticker-named key, holding_contribution then names it, a second run asks for nothing, and a key with a G4 name is never asked -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round9/checks/nm-3.AC1.py",
+      "output_evidence": "before: {'AAA_US_Equity': 'Aaa Corp', 'BBB_US_Equity': 'BBB US Equity'}\nnames stage 1: OK | asked [['BBB_US_Equity']]\nOK:   (a) the names stage asks Bloomberg for exactly the ticker-named key\nafter: {'AAA_US_Equity': 'Aaa Corp', 'BBB_US_Equity': 'Bbb Holdings Inc'}\nOK:   (b) holding_contribution names BBB from the stored name\nnames stage 2: OK | asks since stage 1 []\nOK:   (c) a second run asks for nothing\nOK:   (d) control: AAA keeps its G4 name and is never asked\nAC1 RESULT: PASS 0 failures\nrc=0\n",
+      "denominator": "4 of 4 arms OK ((a) asks exactly BBB_US_Equity, (b) holding_contribution names it, (c) second run asks nothing, (d) AAA control never asked); run under a 120 s bound (rc 0, not 124), RIVALFUNDS_BBG_BUDGET_DIR a fresh temp dir",
+      "status": "PASS",
+      "expect": "AC1 RESULT: PASS 0 failures"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "on the served page after the deploy and one vehicle run, holdings named by a '<id> XX Equity' form read 0, or each remaining one is named with its reason; positive control: the served 10-05 page (22 reader-visible ticker forms)",
+      "method": "manual_read_with_citation",
+      "invocation": "none (judgment, graded by 3.0.0_SA_CVO~RV at L9 on the served page)",
+      "output_evidence": "No deploy and no vehicle run exist: nothing deploys from a worker and no vendor call was made. Nothing to read.",
+      "denominator": "0 of 0",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded by 3.0.0_SA_CVO~RV at L9 on the served page after the deploy and one vehicle run; no served page carries this code yet",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "nm-3.AC1 run twice on the branch (before and after the commit); rivalfunds package suite run before the commit.",
+      "observed": "AC1 PASS 0 failures both runs; suite 673 passed, 2 skipped, 0 failed (baseline 661 passed, 2 skipped; +12 new tests).",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The spec names no mutant for this order.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "Deploy, S3 write, vendor call",
+      "reason": "Order section 3: NEVER."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W5-S34"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~5 <0.9.0_WK_ETFS_RIVALS~5@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "7947e6fef5"
+    }
+  ]
+}

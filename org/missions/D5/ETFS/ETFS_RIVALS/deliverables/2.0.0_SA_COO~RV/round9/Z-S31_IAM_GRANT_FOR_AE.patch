@@ -1,0 +1,107 @@
+diff --git a/infra/aws/terraform/etfs-rivalfunds/gen_policies.py b/infra/aws/terraform/etfs-rivalfunds/gen_policies.py
+index 66095dd96f..e5787cb4fe 100644
+--- a/infra/aws/terraform/etfs-rivalfunds/gen_policies.py
++++ b/infra/aws/terraform/etfs-rivalfunds/gen_policies.py
+@@ -147,7 +147,11 @@ def spec():
+                 "holding_contribution": _prefix("rivalfunds", "gold", "holding_contribution")[1],
+                 "buying_trend": _prefix("rivalfunds", "gold", "buying_trend")[1],
+                 "input_census": _prefix("rivalfunds", "gold", "input_census")[1],
+-                "research_hypotheses": _prefix("rivalfunds", "gold", "research_hypotheses")[1]}
++                "research_hypotheses": _prefix("rivalfunds", "gold", "research_hypotheses")[1],
++                # round 9 (row Z-S31): the stored names holding_contribution reads (RIV-nm-3; written by the terminal machine)
++                # and the security list the sweep extends after the page (RIV-su-2)
++                "security_names": _prefix("rivalfunds", "gold", "security_names")[1],
++                "security_universe": _prefix("rivalfunds", "gold", "security_universe")[1]}
+     state = {}
+     for stage in STAGES:
+         b, k = _prefix("rivalfunds", "state", _state_table(stage))
+@@ -160,7 +164,8 @@ def spec():
+                                 ("gold", "corporate_actions", "rivalfunds"), ("gold", "flow_reconciliation", "rivalfunds"),
+                                 ("gold", "security_market", "rivalfunds"), ("gold", "holding_contribution", "rivalfunds"),
+                                 ("gold", "buying_trend", "rivalfunds"), ("gold", "input_census", "rivalfunds"),
+-                                ("gold", "research_hypotheses", "rivalfunds")):
++                                ("gold", "research_hypotheses", "rivalfunds"), ("gold", "security_names", "rivalfunds"),
++                                ("gold", "security_universe", "rivalfunds")):
+         assert _prefix(source, tier, table)[0] == bucket, (tier, table)
+     xw_bucket, xw_prefix = _crosswalk()
+     # round 3 (RIV-d-4, never-widen key 2): the Positioning pull's home landing, READ only (GetObject on the one table per
+@@ -183,7 +188,9 @@ def spec():
+                                   state["build-coverage"], state["build-flow-reconciliation"]],
+         "publish-page": [prefixes["page"], state["publish-page"],
+                          # A1: the publish stage runs the rk-1 / tb-1 / ic-1 producers before it loads them
+-                         prefixes["holding_contribution"], prefixes["buying_trend"], prefixes["input_census"]],
++                         prefixes["holding_contribution"], prefixes["buying_trend"], prefixes["input_census"],
++                         # round 9 (row Z-S31): the sweep's incremental security list (RIV-su-2) runs in the same process
++                         prefixes["security_universe"]],
+     }
+     get_only = {
+         "fetch-holdings": [],
+@@ -197,7 +204,9 @@ def spec():
+                          prefixes["security_market"], prefixes["research_hypotheses"],
+                          # the page's trace panels read each landed file's bronze sidecar (source URL, capture detail);
+                          # without these the marker-driven publish shows "source URL unavailable" (2026-10-02 audit)
+-                         prefixes["bronze"], prefixes["bbg_bronze"]],
++                         prefixes["bronze"], prefixes["bbg_bronze"],
++                         # round 9 (row Z-S31): holding_contribution names a key from the stored names when G4 has none
++                         prefixes["security_names"]],
+     }
+     crosswalk_readers = {"build-canonical-shape", "sweep"}
+     # A1 (ic-1 census): the market readings, READ ONLY, at the reader's own constants (market_context.py; never typed here)
+diff --git a/infra/aws/terraform/etfs-rivalfunds/policies/etfs-rivalfunds-daily-lambda.json b/infra/aws/terraform/etfs-rivalfunds/policies/etfs-rivalfunds-daily-lambda.json
+index b33dd2c486..0b63b13d62 100644
+--- a/infra/aws/terraform/etfs-rivalfunds/policies/etfs-rivalfunds-daily-lambda.json
++++ b/infra/aws/terraform/etfs-rivalfunds/policies/etfs-rivalfunds-daily-lambda.json
+@@ -18,6 +18,7 @@
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/input_census/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/peer_group_map/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/research_hypotheses/*",
++        "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/security_universe/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/trade_schedule/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/platinum/page/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/state/build_bloomberg_silver/*",
+@@ -41,6 +42,7 @@
+         "arn:aws:s3:::opal-data-etfs/bloomberg/etfs/bronze/holdings/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/corporate_actions/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/security_market/*",
++        "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/security_names/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/state/fetch_bloomberg/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/state/pull_enrichment/*"
+       ],
+@@ -67,6 +69,8 @@
+             "rivalfunds/etfs/gold/peer_group_map/*",
+             "rivalfunds/etfs/gold/research_hypotheses/*",
+             "rivalfunds/etfs/gold/security_market/*",
++            "rivalfunds/etfs/gold/security_names/*",
++            "rivalfunds/etfs/gold/security_universe/*",
+             "rivalfunds/etfs/gold/trade_schedule/*",
+             "rivalfunds/etfs/platinum/page/*",
+             "rivalfunds/etfs/state/build_bloomberg_silver/*",
+diff --git a/infra/aws/terraform/etfs-rivalfunds/policies/rivalfunds-publish-page-lambda.json b/infra/aws/terraform/etfs-rivalfunds/policies/rivalfunds-publish-page-lambda.json
+index 536a113d7a..917247b8c4 100644
+--- a/infra/aws/terraform/etfs-rivalfunds/policies/rivalfunds-publish-page-lambda.json
++++ b/infra/aws/terraform/etfs-rivalfunds/policies/rivalfunds-publish-page-lambda.json
+@@ -10,6 +10,7 @@
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/buying_trend/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/holding_contribution/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/input_census/*",
++        "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/security_universe/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/platinum/page/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/state/publish_page/*"
+       ],
+@@ -29,6 +30,7 @@
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/peer_group_map/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/research_hypotheses/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/security_market/*",
++        "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/security_names/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/trade_schedule/*",
+         "arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/state/build_trade_schedule/*"
+       ],
+@@ -52,6 +54,8 @@
+             "rivalfunds/etfs/gold/peer_group_map/*",
+             "rivalfunds/etfs/gold/research_hypotheses/*",
+             "rivalfunds/etfs/gold/security_market/*",
++            "rivalfunds/etfs/gold/security_names/*",
++            "rivalfunds/etfs/gold/security_universe/*",
+             "rivalfunds/etfs/gold/trade_schedule/*",
+             "rivalfunds/etfs/platinum/page/*",
+             "rivalfunds/etfs/state/build_trade_schedule/*",

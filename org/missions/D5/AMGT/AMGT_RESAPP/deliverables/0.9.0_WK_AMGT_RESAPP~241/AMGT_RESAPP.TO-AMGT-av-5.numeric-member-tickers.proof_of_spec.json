@@ -1,0 +1,126 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-av-5",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-av-5.numeric-member-tickers.md",
+  "group": "OTHER",
+  "vintage_commit": "21918948a7"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "21918948a7",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-av-5.numeric-member-tickers.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~241",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/peers/numeric_tickers.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New pure module: Japanese code forms, name token, matched or plain-reason fields. Not deployed (bounds).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read_peer_set serves security_key (and identity) or ticker_reason on every all-digit member via _with_numeric_tickers; name list held SLOW_TTL. Not deployed (bounds).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/peers/tests/test_numeric_tickers.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "7 plant tests on the pure module.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_numeric_member_tickers.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "4 plant tests on the route transform.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~241/f6_served.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "F6 measure on served /peers members; writes f6_served.json; prints F6 WRONG n of N.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "population names 95 with non-200 0; C1 PASS failing 0; R72 C44 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round72/checks/r72_served.py\" --cell c44 --where local; echo \"exit=$?\"",
+   "output_evidence": "population: names 95 objects read 94 non-200 0\nPASS C1 every numeric-ticker member resolves or carries a plain ticker_reason failing 0 e.g. []\nR72 C44 SERVED: YES\nexit=0",
+   "denominator": "95 covered names read, 0 non-200; 94 numeric-ticker members over 24 names: 21 serve a security_key, 73 serve a ticker_reason, 0 neither",
+   "expect": "(?s)names 95 .*non-200 0.*PASS C1.*failing 0.*R72 C44 SERVED: YES.*exit=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "a line `F6 WRONG n of N` with N the covered names that serve members; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~241/f6_served.py\"; echo \"exit=$?\"",
+   "output_evidence": "covered names 95; serving members 57; serving none 38; non-200 0; max overlap 0 (threshold 6)\nF6 WRONG 0 of 57\nexit=0",
+   "denominator": "N=57 of 95 covered names serve members (38 serve none); n=0 wrong, max overlap 0 against threshold 6",
+   "expect": "(?s)F6 WRONG \\d+ of \\d+.*exit=0",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1: the same checker with _with_numeric_tickers absent (the state before this order). AC2: the scorer fed one name whose served members are the 12-name KPN set.",
+   "expected": "AC1 prints FAIL C1 failing 94 and R72 C44 SERVED: NO exit=1; AC2 prints F6 WRONG 1 of 95.",
+   "observed": "AC1 before the change: 'FAIL C1 every numeric-ticker member resolves or carries a plain ticker_reason failing 94 e.g. [2317_TT_Equity/688910, ...]; R72 C44 SERVED: NO; exit=1'. AC2 mutant: 'F6 WRONG 1 of 95' with max overlap 11 (12 entries, the two T entries scored by one member).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and the 21/73 split read twice (a direct read_peer_set census and the checker); AC2 run twice (once as mutant harness, once real).",
+   "observed": "21 resolved + 73 reasoned = 94 both times; AC2 F6 WRONG 0 of 57 both real runs.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "lib/research/api/tests/test_model_words.py::test_formula_words_equals_the_pages_own_function_run_in_node",
+   "reason": "reads a portal function (formulaInWords) absent at this worktree's portal ref; no row, per the order. api suite: 1 failed, 615 passed."
+  },
+  {
+   "item": "Removing a member that is the subject itself",
+   "reason": "BOUNDS 2: no member is removed; 4 self-members now serve their own key; filed as AMGT_RESAPP-Z-W241-S2."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W241-S1: the order's '<code> JT' form matches 0 of 9; the held list is written '<code> JP'; both forms are now tried. INERT.",
+  "AMGT_RESAPP-Z-W241-S2: 4 covered names list themselves among their own peers under a scanner id. INERT."
+ ],
+ "session_log": "N/A -- no session-log path in this worker's paths. Worktree C:/tmp/r72-241 on wk-AMGT_RESAPP-241; scratch C:/tmp/r72-241/.scratch (uncommitted).",
+ "compiler_tools": [
+  {
+   "tool": "f6_served.py",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~241/f6_served.py\"; echo \"exit=$?\"",
+   "result": "F6 WRONG 0 of 57"
+  }
+ ]
+}

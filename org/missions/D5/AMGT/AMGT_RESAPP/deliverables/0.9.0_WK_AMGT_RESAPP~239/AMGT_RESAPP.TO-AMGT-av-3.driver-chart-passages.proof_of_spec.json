@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-av-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-av-3.driver-chart-passages.md",
+    "group": "OTHER",
+    "vintage_commit": "e7d7ec3cf21b42e2eea44ab7d6149691adbf5de1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "e7d7ec3cf21b42e2eea44ab7d6149691adbf5de1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-av-3.driver-chart-passages.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~239",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/drafting_build.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: evidence_records_for adds each thesis_driver.points[].passage_id passage (same record shape and source stamp) after the existing records; no other record changes. Library code; no deploy, no store write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: read_drafted_sections carries thesis_driver_passages (text + cite per point id, read off evidence_records); thesis_driver_chart takes it as an optional third argument and serves passage_text/passage_cite or a plain passage_reason on each filing point; read_thesis_bundle pops the map so it is not served twice. Request-time code; no deploy.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/test_driver_point_passages.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 4 producer plant tests.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_driver_chart_passage.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 5 route plant tests (text+cite served; missing passage serves plain reason; no passage id; two-argument call; bundle pop).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~239/dry_build_passages.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: in-memory dry build of BA and ASML_NA drafting documents; nothing written to any store.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/filings/test_driver_point_passages.py lib/research/api/tests/test_driver_chart_passage.py; echo \"exit=$?\"",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/filings/test_driver_point_passages.py lib/research/api/tests/test_driver_chart_passage.py; echo \"exit=$?\"",
+      "output_evidence": "VERBATIM (capture org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~239/av-3.AC1.out.txt):\n============================== 9 passed in 0.82s ==============================\nexit=0",
+      "denominator": "9 of 9 plant cases pass (4 producer + 5 route)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && cat \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~239/dry_build_passages.txt\"; echo \"exit=$?\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && cat \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~239/dry_build_passages.txt\"; echo \"exit=$?\"",
+      "output_evidence": "VERBATIM (capture org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~239/av-3.AC2.out.txt):\nBA_US_Equity: points 3 resolved 3 evidence_records 89 (86 without the producer, +3); served validator ok=True; store key s3://opal-data-harvest/drafting/v1/BA_US_Equity.json\nASML_NA_Equity: points 3 resolved 3 evidence_records 12 (11 without, +1); served validator ok=True; store key s3://opal-data-harvest/drafting/v1/ASML_NA_Equity.json\nexit=0",
+      "denominator": "BA 3 of 3 points resolved; ASML_NA 3 of 3 points resolved (P0086 x3); 2 of 2 names",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The producer plant test builds records from an analysis whose points cite passages the base records did not hold; without the producer change those ids are absent from evidence_records.",
+      "expected": "records for the 3 uncited passages present with text only after the change",
+      "observed": "4 of 4 producer cases pass with the change; the BA dry build adds 3 records and ASML_NA adds 1 over the unchanged producer's 86 and 11.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pure transform over the stored analysis; no model call",
+      "observed": "same analysis builds the same records",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The drafting rebuild (store write)",
+      "reason": "Order bound 2: no store write; the rebuild is av-8's pair."
+    }
+  ],
+  "surprises": [],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface.",
+  "compiler_tools": [
+    {
+      "tool": "python + pytest",
+      "invocation": "see AC1, AC2",
+      "result": "AC1 9 passed exit=0; AC2 exit=0; api suite 616 passed 1 failed (portal-absent); filings suite 150 passed"
+    }
+  ]
+}

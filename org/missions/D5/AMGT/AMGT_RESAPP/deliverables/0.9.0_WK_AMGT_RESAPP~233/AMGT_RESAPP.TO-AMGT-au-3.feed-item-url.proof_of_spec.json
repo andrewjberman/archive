@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-au-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "46bc7b252a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-au-3.feed-item-url.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-au-3.feed-item-url.md",
+    "group": "OTHER",
+    "vintage_commit": "46bc7b252a"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~233",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/publication_gold.py",
+      "kind": "script",
+      "commit_or_etag": "07d85dd504",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local code and tests only; no gold or silver write, no deploy (the rebuild is au-7's).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "07d85dd504",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local code only; the redeploy is au-7's.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/test_mention_url.py",
+      "kind": "test",
+      "commit_or_etag": "07d85dd504",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "plant tests",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_feed_url.py",
+      "kind": "test",
+      "commit_or_etag": "07d85dd504",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "plant tests",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~233/dry_build_urls.txt",
+      "kind": "doc",
+      "commit_or_etag": "07d85dd504",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only dry build over the newest stored silver; write_gold never called.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/harvest/test_mention_url.py lib/research/api/tests/test_feed_url.py; echo \"exit=$?\"  expect: every plant case passes; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/harvest/test_mention_url.py lib/research/api/tests/test_feed_url.py; echo \"exit=$?\"",
+      "output_evidence": "15 passed in 2.03s (11 in test_mention_url.py, 4 in test_feed_url.py)\nexit=0",
+      "denominator": "15 of 15 plant cases passed",
+      "status": "PASS",
+      "expect": "(?s)15 passed.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && cat \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~233/dry_build_urls.txt\"; echo \"exit=$?\"  expect: one line per source bbg, barrons, sa, ft, wsj with rows and rows-with-url; bbg, barrons and sa have url on every row; ft and wsj on none; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && cat \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~233/dry_build_urls.txt\"; echo \"exit=$?\"",
+      "output_evidence": "dry build, no write_gold call; covered names: 95 (universe securities carrying a key: 191, matched to covered: 53)\nbbg: articles_read=1733 rows=1376 rows_with_url=1376\nbarrons: articles_read=170 rows=162 rows_with_url=162\nsa: articles_read=11429 rows=10220 rows_with_url=10220\nft: articles_read=185 rows=316 rows_with_url=0\nwsj: articles_read=454 rows=406 rows_with_url=0\nexit=0",
+      "denominator": "mention rows over 53 of the 95 covered names (the producer's universe reader holds 53; row AMGT_RESAPP-Z-W233-S2): bbg 1376 of 1376, barrons 162 of 162, sa 10220 of 10220, ft 0 of 316, wsj 0 of 406",
+      "status": "PASS",
+      "expect": "(?s)bbg: articles_read=\\d+ rows=(\\d+) rows_with_url=\\1\\n.*barrons: articles_read=\\d+ rows=(\\d+) rows_with_url=\\2\\n.*sa: articles_read=\\d+ rows=(\\d+) rows_with_url=\\3\\n.*ft: articles_read=\\d+ rows=\\d+ rows_with_url=0\\n.*wsj: articles_read=\\d+ rows=\\d+ rows_with_url=0\\n.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "article_url patched to return None, then the bbg, barrons and sa plant cases run.",
+      "expected": "each of the three cases fails.",
+      "observed": "test_sa_relative_path_made_absolute, test_bbg_url, test_barrons_canonical_url: FAILED-AS-EXPECTED",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_same_silver_gives_same_rows: the same silver article through mention_rows twice, rows compared equal.",
+      "observed": "passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "gold rebuild, deploy, any S3 write",
+      "reason": "BOUNDS: no gold or silver write; the rebuild is au-7's under a pair."
+    },
+    {
+      "item": "lib/research/api/tests/test_model_words.py::test_formula_words_equals_the_pages_own_function_run_in_node",
+      "reason": "fails at this worktree: it reads a portal page function absent at this worktree's portal ref (order says name it, no row). Suite last line: 1 failed, 603 passed."
+    },
+    {
+      "item": "lib/research/harvest/test_aj7_gold_title_precision.py::test_iv_pre_existing_fields_byte_identical",
+      "reason": "fails because mention_rows gains the url key; the file is outside this order's paths (row AMGT_RESAPP-Z-W233-S3). Harvest last line: 1 failed, 352 passed."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W233-S1",
+    "AMGT_RESAPP-Z-W233-S2",
+    "AMGT_RESAPP-Z-W233-S3"
+  ],
+  "session_log": "N/A -- no session-log path in this worker's paths. Worktree C:/tmp/r71-233 on wk-AMGT_RESAPP-233 cut from 46bc7b252a. Scratch: C:/tmp/r71-233/.scratch (uncommitted).",
+  "compiler_tools": [
+    {
+      "tool": "dry build (scratch script, not committed): covered_security_keys, universe_securities.build, publication_gold._iter_latest_articles, mention_rows",
+      "invocation": "PYTHONPATH=<worktree> python .scratch/dry_build.py > dry_build_urls.txt",
+      "result": "6 lines; per-source rows and rows-with-url as saved; write_gold never called"
+    }
+  ]
+}
