@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-aw-1.origin-load-wait",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-aw-1.origin-load-wait.md",
+    "group": "OTHER",
+    "vintage_commit": "40e9fdb0a9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "40e9fdb0a9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-aw-1.origin-load-wait.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~99",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~99 on wk-AMGT_HARVST-99. Local 127.0.0.1 server plants only; no publisher contact.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/tab_transport.py",
+      "kind": "script",
+      "commit_or_etag": "3f0b71a74f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "goto(origin, wait_until=domcontentloaded, timeout=ORIGIN_TIMEOUT_MS=60000); PlaywrightTimeoutError -> OriginLoadTimeout (HVST-aw-1)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_aw1_origin_load_wait.py",
+      "kind": "test",
+      "commit_or_etag": "3f0b71a74f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three plants: load never fires, document never arrives, load-wait mutant",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_aw1_origin_load_wait.py -rA --tb=line -p no:cacheprovider -- expect: 3 passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_aw1_origin_load_wait.py -rA --tb=line -p no:cacheprovider",
+      "output_evidence": "rc 0. '3 passed in 13.95s'",
+      "denominator": "3 of 3 tests passed",
+      "status": "PASS",
+      "expect": "3 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider",
+      "output_evidence": "rc 0. '668 passed, 3 skipped, 6 subtests passed in 113.64s'",
+      "denominator": "668 passed of 671 collected, 3 skipped, 0 failed",
+      "status": "PASS",
+      "expect": "passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "page.goto forced to wait_until=load with the same 5000 ms bound",
+      "expected": "plant (i) origin raises OriginLoadTimeout",
+      "observed": "test_mutant_waiting_for_load_raises passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run once",
+      "observed": "3 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "order status flip",
+      "reason": "issuer flips; the order forbids the worker editing it"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "rc 0 at 3f0b71a74f"
+    }
+  ]
+}
