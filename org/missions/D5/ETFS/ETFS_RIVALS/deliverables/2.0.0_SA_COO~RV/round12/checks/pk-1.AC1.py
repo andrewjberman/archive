@@ -56,6 +56,11 @@ def g1_rows(d, i):
                  market_value=mv)]
 
 
+def _null(x):
+    """A stored null reads back as None or NaN depending on the pandas/pyarrow version (row Z-W2-S14): both mean not asked."""
+    return x is None or (isinstance(x, float) and x != x)
+
+
 def run(v):
     c.setup_path()
     c.offline_guards()
@@ -97,7 +102,7 @@ def run(v):
     pk = {} if df is None or "security_parsekey" not in df.columns else dict(zip(df["security_id"].astype(str), df["security_parsekey"]))
     print("asked PARSEKYABLE_DES for:", sorted(asked))
     v.check(asked == {"/cusip/N97284108", "/cusip/999999999"} and pk.get("N97284108") == "NBIS US Equity"
-            and pk.get("999999999") == "ZZZ US Equity" and not pk.get("NBIS_US_Equity"),
+            and pk.get("999999999") == "ZZZ US Equity" and _null(pk.get("NBIS_US_Equity")),
             "(a) the G4 reference request asks PARSEKYABLE_DES for exactly the identifier-keyed securities and stores it")
 
     for i, d in enumerate(DAYS):
