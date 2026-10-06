@@ -3,7 +3,8 @@
 # six named tests in tests/test_login_admit_r24.py: (01) a non-restricted principal completes NeedsLogin -> /login ->
 # consent and its principal-keyed cache is written; (02) a restricted principal is refused 403 and the refusal is
 # audited; (03) the server-held identity (OTP_MAILBOX / MS_INGEST_IDENTITY) is admitted as before; (04) empty settings
-# with an unresolvable tier admit nobody (fail closed); (05) the Analyst's service identity is refused by the tier rule;
+# with an unresolvable tier admit nobody (fail closed); (05, A1/R25.1) opalbloomberg@ is ADMITTED and its allowlist
+# still denies an out-of-scope tool;
 # (06) every /login request writes exactly one audit record carrying outcome, principal key/email digest and reason.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 export AUDIT_PATH="${TMP:-/tmp}/og_r20_lg1_audit_$$.jsonl"
