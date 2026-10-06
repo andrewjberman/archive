@@ -1,0 +1,104 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ts-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "d933ca8280"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "d933ca8280",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ts-2.route-inventory-and-host-inputs.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~25",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py",
+   "kind": "test",
+   "commit_or_etag": "ba9a6db154",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ROUTE_CLASS classes /yearinreview and /yearinreview/ as access-layer; 11 passed own process.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_host_inputs.py",
+   "kind": "test",
+   "commit_or_etag": "ba9a6db154",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "51 keys; build_package call on CLOUD _Source signature; 9 passed own process.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/conftest.py",
+   "kind": "test",
+   "commit_or_etag": "ba9a6db154",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Per-process og_test_proc_<pid> temp root installed before any app import.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_export.py",
+   "kind": "test",
+   "commit_or_etag": "ba9a6db154",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "test_ogts2_export_dir_per_process added; 1 of 1 passed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: each of the three files runs green in its own process (route census, 51 keys, CLOUD build_package signature).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r19/checks/ts2.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "own-process runs: test_principal_cutover.py rc=0 [11 passed, 1 warning in 9.35s]; test_data_entitlement_guard.py rc=0 [12 passed, 1 warning in 10.87s]; test_schwab_host_inputs.py rc=0 [9 passed in 5.07s];\nRESULT: PASS\nexit=0",
+   "denominator": "3 of 3 files rc=0 (11 + 12 + 9 tests passed)",
+   "status": "PASS",
+   "expect": "(?s)test_principal_cutover.py rc=0 .*test_data_entitlement_guard.py rc=0 .*test_schwab_host_inputs.py rc=0 .*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the named per-process export-dir test passes and two concurrent schwab export runs finish with no new failure and no FileNotFoundError.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r19/checks/ts2.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 1 of 1; failed/error lines 0\nconcurrent export runs: passed 30; failures beyond baseline 0 []; FileNotFoundError 0\nRESULT: PASS\nexit=0",
+   "denominator": "1 of 1 named test; 30 tests passed across 2 concurrent processes; 0 failures beyond baseline; 0 FileNotFoundError",
+   "status": "PASS",
+   "expect": "(?s)named tests passed 1 of 1; failed/error lines 0.*concurrent export runs: passed [1-9]\\d*; failures beyond baseline 0 \\[\\]; FileNotFoundError 0.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "Whole schwab set run in one process twice (before and after fixing the conftest base-dir bug): the second run reads 146 collected, 145 passed, 1 failed (baseline test_ogx4_ac03), 0 errors.",
+   "observed": "stable after the fix",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "conftest's `tempfile.tempdir = root` line replaced by `pass` (the old shared-temp behaviour), then test_ogts2_export_dir_per_process run; the edit was reverted (git status clean on conftest).",
+   "expected": "the named test fails: the export dir is the shared <temp>/opal-gateway-schwab-export",
+   "observed": "1 failed: AssertionError (c:\\...\temp\\opal-gateway-schwab-export, c:\\...\temp\\og_test_proc_54800)",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "none: the worker's report is its final message",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "none",
+   "result": "Not run: the worker face named every path."
+  }
+ ]
+}
