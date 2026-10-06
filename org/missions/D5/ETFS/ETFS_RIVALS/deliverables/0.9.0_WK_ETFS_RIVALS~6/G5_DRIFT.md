@@ -13,7 +13,7 @@ A read: live newest G5 vs a G5 built by the current code (local sink), 13 funds 
 | implausible_window_refused | `b137069123` | RIV-h-5 | row_presence | 2 | 10 | yes: row_presence | 10 of 10 |
 | g3_currency_in_income_conversion | `2a655a0180` | RIV-e-2 | income_funded | 1 | 7 | yes: income_funded | 7 of 7 |
 | g3_minor_unit_dividend_currency | `0b2981d770` | RIV-e-2 | income_funded | 4 | 13 | yes: income_funded | 13 of 13 |
-| g3_latest_pull_supersession | `4fa3e25f5e` | RIV-g-4 | corporate_action_ref, corporate_actions_applied, dividends_applied, corporate_actions_revision, income_funded | 189 | 9467 | yes: income_funded | 9467 of 9467 |
+| g3_latest_pull_supersession | data arrival (later G3 pulls) | RIV-g-4 | corporate_action_ref, corporate_actions_applied, dividends_applied, corporate_actions_revision, income_funded | 189 | 9467 | yes: income_funded | 9467 of 9467 |
 
 ## What each class is
 
