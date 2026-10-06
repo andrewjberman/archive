@@ -1,0 +1,98 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-dc-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~21",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f0aa50dbc0"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "8768f46770",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-dc-1.m365-kit-hosted-reconnect.md"
+ },
+ "controls": {
+  "mutant": {
+   "description": "Two instruments had to be able to go either way, and both did. (1) The approval guard judge() in og_i1_act.py, fed the real plan text and three mutants: an extra '- addresses' line in the v6 block, a 'must be replaced' header on an existing role, and an update on an unadmitted WAF set. (2) AC11, which refuses when the bracketed apply did not complete -- and DID refuse on the first run's record (rc 3, no Apply complete line), then passed on this run's.",
+   "expected": "(1) yes on the real plan, no on each mutant with its reason; (2) FAIL on the first run's record, PASS on this run's completed apply.",
+   "observed": "(1) 'REAL ok=True reasons=[] creates=4 updates=2'; 'MUT-A ... ok=False ... changes ['- addresses', '+ description'], not description only'; 'MUT-B ... ok=False ... destroy/replace/other: ['aws_iam_role.gw must be replaced']'; 'MUT-C ... ok=False ... update outside the admitted WAF pair'. In the live run the same function judged the plan terraform printed and recorded ok=true with the four creates and the two admitted updates. (2) On the refused run: 'NOT the bracketed apply completed ... {\"rc\": 3}', VERDICT FAIL; on this run: 'OK the bracketed apply completed (rc 0 and an Apply complete line)', VERDICT PASS.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "og_i1.py AC1 and AC10 run three times on the same saved plan (2026-09-15T21:45:24Z, 22:08Z and 2026-09-16T00:08Z), outputs compared excluding the PROBE run-time line. The live arms AC2-AC9, AC11 and AC12 were each run once against the applied world and their runs are recorded verbatim.",
+   "observed": "AC1 identical across all three except the run-time line. AC10 identical except the run-time line and its SUPPLEMENTARY line, which reads evidence/apply.json and therefore changed as that record changed (absent, then the refused run, then the completed run). AC12 moved from 'Plan: 4 to add, 2 to change, 0 to destroy.' before the apply to 'No changes.' after it -- the arm's whole point, and the discriminator that it is not a constant.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Seeding an address into either WAF IP set so that OGI1-AC11's comparison would bite on a non-empty list.",
+   "reason": "Both regional blocked-IP sets hold 0 addresses live and held 0 in the plan's prior state, so the before/after comparison compares two empty lists (row NFRA_OPLGTW-W1-S5). Writing an address would be a WAF write this order does not grant. The lock-token rotation on both sets is printed beside the comparison as the evidence that the reads bracket a real UpdateIPSet."
+  },
+  {
+   "item": "Any write to org/mcp/sessions/, and any HALT-GATE override.",
+   "reason": "The session serial file that resolves this worker's identity to the halt gate was provisioned by the issuer (rows S18 and S19 on CLOUD) and is gitignored; this worker neither wrote nor committed it. The gate itself was run, not overridden: rc 1 on 14 ROUTINE messages (never rc 2), then rc 0 under HALT_ACK=1 (row NFRA_OPLGTW-W1-S7)."
+  },
+  {
+   "item": "Any record in the table beyond isolated probe keys.",
+   "reason": "Only RUNTIME#probe-og-i1-* and POLICY#probe-og-i1-* items were written, all tagged probe=og-i1. No profile, grant, approval or client record for any real person."
+  }
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the result file, evidence/, the seven W1 rows and branch wk-nfra_oplgtw-1-1b. AWS calls this run: wafv2 list-ip-sets + get-ip-set at 23:27:50Z and 23:32:30Z; the ONE safe-apply run 23:27:50Z..23:32:28Z (terraform plan + apply, 4 created, 2 modified, 0 destroyed); then the grading reads 2026-09-16T00:00:32Z..00:08:59Z -- dynamodb describe-table / describe-continuous-backups / describe-time-to-live, iam get-role / get-role-policy / list-role-policies / list-attached-role-policies / get-policy / get-policy-version and 13 simulate-principal-policy calls, sts assume-role on the operator role, dynamodb transact-write-items / update-item / get-item on isolated probe keys, one ssm send-command (cc2eaf68-8ce4-4c2a-a6c6-d221a91fb9ed) on i-07dccb1615503ac99, and a read-only terraform plan at 00:08:48Z. No secret value entered any committed file; the apply log's output VALUES are redacted.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/halt-gate-check.sh",
+   "invocation": "bash .tools/halt-gate-check.sh in this worktree, with HALT_GATE_INBOX_ROOT set, twice",
+   "result": "rc 1 after 120 s without HALT_ACK -- 'worker 0.9.0_WK_NFRA_OPLGTW~1 has no inbox; scanning its issuer 2.0.0_SA_COO~O', '14 pending message(s) -- review before proceeding (unspecified)'; NOT rc 2, so no STOP-class message. rc 0 after 120 s with HALT_ACK=1 -- 'HALT_ACK set -- messages acknowledged. Proceeding.'"
+  },
+  {
+   "tool": ".tools/safe-apply.sh (via probes/og_i1_act.py apply)",
+   "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-gateway apply -no-color, stdin a pipe",
+   "result": "rc 0, 2026-09-15T23:27:50.539654Z..23:32:28.811293Z: 'Apply complete! Resources: 4 added, 2 changed, 0 destroyed.' One run carried both the plan and the apply; the approval prompt was answered yes by the in-run guard at 23:32:13.259168Z; no WAFOptimisticLockException."
+  },
+  {
+   "tool": ".tools/terraform.exe v1.9.8",
+   "invocation": "-chdir=infra/aws/terraform/opal-gateway init -input=false; plan -input=false -no-color -out=.scratch/og_i1.tfplan; show -json (redacted into og_i1.plan.json); and AC12's post-apply plan -lock=false -detailed-exitcode",
+   "result": "init rc 0 (lock file unchanged); pre-apply plan rc 0 'Plan: 4 to add, 2 to change, 0 to destroy.'; post-apply plan detailed-exitcode 0 'No changes. Your infrastructure matches the configuration.'"
+  },
+  {
+   "tool": "py -3.12 .tools/deploy_ledger.py",
+   "invocation": "close-leg L1..L5 --slug nfra-oplgtw-og-i-1-access-state, then close --slug nfra-oplgtw-og-i-1-access-state",
+   "result": "rc 0 on each: 'OK: leg L<n> closed', then 'OK: CLOSED deploy ledger ... all 5 legs proven; sentinel removed'. Committed @b17f9b05cb before the grading reads."
+  },
+  {
+   "tool": ".tools/comp-iam",
+   "invocation": "comp-iam service opal-gateway (2026-09-16T00:1xZ, AFTER the apply)",
+   "result": "rc 0, PLANE DESIRED (Terraform, does not read live AWS), 3 trees / 473 .tf files; 27 operations for opal-gateway-role. See the result file; the APPLIED and EXERCISED planes are AC5-AC9."
+  }
+ ],
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/m365-mcp-kit/README.md",
+   "kind": "doc",
+   "commit_or_etag": "9086c6d6a6",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Documentation only; committed locally on the worker branch.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- kit carries the hosted command, old entry marker absent, README names work-account sign-in",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r18/checks/dc1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "kit files carrying the hosted command 1; old entry marker 'Lokka-Microsoft' present in 0 file(s); README names the work-account sign-in 1\nRESULT: PASS\nexit=0",
+   "denominator": "1 of 1 kit files carry the command; 0 of 1 carry the marker",
+   "status": "PASS",
+   "status_reason": "Check printed RESULT: PASS, exit 0.",
+   "expect": "(?s)kit files carrying the hosted command [1-9]\\d*; old entry marker '[^']+' present in 0 file\\(s\\); README names the work-account sign-in 1.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "surprises": []
+}
