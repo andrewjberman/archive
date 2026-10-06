@@ -1,0 +1,139 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ETFS_RIVALS.TO-RIV-iam-1.round9-table-grants",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-iam-1.round9-table-grants.md",
+  "group": "RIV-iam-1",
+  "vintage_commit": "2553a624f7"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+  "vintage_commit": "2553a624f7",
+  "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-iam-1.round9-table-grants.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~RV",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/etfs-rivalfunds/",
+   "kind": "terraform",
+   "commit_or_etag": "762a984992",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "deploy_evidence": "ONE safe-apply, and THE APPLIED PLAN WAS THE SIGNED PLAN: the plan was written to C:/tmp/rv-iam1.tfplan, graded, signed by both halves against that file, and then that same file was applied -- so what landed cannot differ from what was read. The patch Z-S31_IAM_GRANT_FOR_AE.patch was applied at HEAD after confirming all three blob ids at HEAD equal the patch's own index lines (66095dd96f gen_policies.py, b33dd2c486 daily policy, 536a113d7a publish policy), then gen_policies.py was re-run with --out: the regenerated policy files are BYTE-EQUAL to the patch's, and generated.auto.tfvars.json regenerates byte-identical to HEAD, so this act does not move it. THE PLAN WAS STAGED AT THE DEPLOYED PIN b8b47bb8e7 per the issuer amendment acc8246c10, because CLOUD carries round-10 code (eg-1, ok-1) that must not deploy before the issuer's G5 replay, and lambdas.tf hashes a package staged under the tree root. THE PIN WAS RESOLVED BY CONTENT, NOT BY ANCESTRY: all 10 files of infra/aws/terraform/etfs-rivalfunds/ are blob-identical between CLOUD d5114d3367 and b8b47bb8e7, so the bytes planned at the pin are the bytes committed here (the ancestry read was run too and says ancestor, but it is not what the claim rests on). PLAN BEFORE, UNTARGETED: 'Plan: 0 to add, 2 to change, 0 to destroy'. APPLY: comp-tagauthz GATE PASSED (0 of 0 candidates carry a tag the tree's default_tags would overwrite; the sweep states what it did NOT sweep), tombstone-gate CLEAN (0 creates against 7 tombstones), then 'Apply complete! Resources: 0 added, 2 changed, 0 destroyed.' POST-APPLY RE-PLAN: 'No changes. Your infrastructure matches the configuration', -detailed-exitcode 0. Every verdict read by TOKEN, never from a positional slice or a wrapper rc. Terraform resolved device-agnostically to PATH, since site Z has no .tools/terraform.exe. No HALTGT pass is cited as evidence of anything. Covered by the NEVER-2 entry org/critical_paths/change_management/20261005T2322Z_etfs-rivalfunds-iam-1_deploy_completion.md, legs L1-L3, CLOSED."
+  },
+  {
+   "path_or_key": "arn:aws:iam::313476888478:role/etfs-rivalfunds-daily-role (inline policy etfs-rivalfunds-daily-policy)",
+   "kind": "iam_inline_policy",
+   "commit_or_etag": "live readback equals RIV-iam-1.LIVE_AFTER.etfs-rivalfunds-daily-role.json (8411 B)",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "deploy_evidence": "Statement count unchanged, 10 -> 10. ADDED 4, REMOVED 0, computed by flattening every (Sid, Resource) and (Sid, s3:prefix) pair on both sides rather than by eyeballing a diff: GetUpstreamPrefixes + arn:aws:s3:::opal-data-etfs/rivalfunds/etfs/gold/security_names/*; PutGetOwnPrefixes + .../gold/security_universe/*; ListOwnAndUpstreamPrefixes + the two matching s3:prefix values. The live document after the apply equals the AFTER document key-sorted. Rollback is RIV-iam-1.BEFORE.etfs-rivalfunds-daily-role.json (8101 B), captured live BEFORE the act and re-read as equal to live by 1.0.0_SA_CTO~Z at signing, so the rollback document was the world at that moment and not a stale capture."
+  },
+  {
+   "path_or_key": "arn:aws:iam::313476888478:role/rivalfunds-publish-page-role (inline policy rivalfunds-publish-page-policy)",
+   "kind": "iam_inline_policy",
+   "commit_or_etag": "live readback equals RIV-iam-1.LIVE_AFTER.rivalfunds-publish-page-role.json (4690 B)",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "deploy_evidence": "Statement count unchanged, 5 -> 5. ADDED 4, REMOVED 0, the same four entries as the daily role and by the same flattening method. The live document after the apply equals the AFTER document key-sorted. Rollback is RIV-iam-1.BEFORE.rivalfunds-publish-page-role.json (4380 B). Nothing grants s3:PutObject on security_names (read-only, as ordered), there is no DeleteObject anywhere in either document's added set, no third role moved, and no trust policy, bucket policy or KMS key policy was touched -- the untargeted plan's 2-of-45 moving set is what carries that claim, not an assertion."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Every verdict in this cell is a STRING from the IAM policy simulator ('allowed' / 'implicitDeny') or a FINDING COUNT from accessanalyzer. Both read identically to an instrument looking at the wrong object: the cloud-ops profile records four independent false-deny modes for simulate-principal-policy, of which mode 3 (a typo'd action returns implicitDeny, indistinguishable from a missing grant) and mode 4 (a resource ARN at the wrong grain returns implicitDeny even for an admin principal) are the two that would make this cell's base FAIL meaningless. A zero-findings read from validate-policy has the same shape.",
+   "expected": "validate-policy returning 0 findings on a live document must return INVALID_ACTION when a bogus action name is planted inside that same document. And the simulator's pre-act implicitDeny on a given ARN must be shown to be the WORLD rather than the grain, by the same call at the same grain for the same principal reading 'allowed' after the act.",
+   "observed": "BOTH FIRED. (1) validate-policy reads findings=0 on each live after document; with s3:ZzzNoSuchActionName9999 planted into the first statement of the daily document, the same call returns INVALID_ACTION, rc=0 -- so the 0 is a real read and every one of the four added entries uses a real action name. (2) Mode 4 is EXCLUDED BY CONSTRUCTION, not by argument: the four calls that read implicitDeny before the apply are byte-identical in principal, action, resource ARN and context entries to the four that read 'allowed' after it, so a wrong-grain ARN cannot explain the base FAIL. The check also runs ONE --resource-arns per call (mode 1), passes --context-entries for the s3:prefix-conditioned ListBucket statement (mode 2), and runs its (d) positive control as a SEPARATE invocation, which is the only form in which a positive control is a control. (3) The (c) negative controls are live in BOTH directions: a security_names PUT and a sibling security_namesX GET read implicitDeny before AND after, so the widen is narrow and the instrument still says no when the answer is no.",
+   "status": "FIRED-AS-EXPECTED",
+   "method": "command"
+  },
+  "determinism": {
+   "description": "Two things had to be stable for this cell's evidence to mean anything: the plan between signing and applying, and the live simulator plane across the readback interval.",
+   "expected": "(a) A re-plan immediately before the apply must carry the same moving set as the plan the halves signed. (b) A second AC1 run against the unchanged live plane must give the same verdicts.",
+   "observed": "(a) IDENTICAL: the re-plan's non-no-op set is exactly the same two addresses and actions as the signed plan's, 45 resource_changes on both, compared as sorted (address, actions) tuples from the two plans' JSON rather than from their prose. The CTO half's condition 1 ('if a re-plan shows anything beyond these 2 updates, STOP') therefore did not fire. (b) STABLE: the second AC1 run returned ('allowed','allowed') / ('allowed','allowed') / ('implicitDeny','implicitDeny') on both roles and 'allowed' on both positive controls -- identical to the first, so PASS 0 failures is not a flake on a live plane.",
+   "status": "STABLE",
+   "method": "command"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Whether the grant actually serves data -- i.e. whether holding_contribution's stored-names read (RIV-nm-3) and the sweep's security_universe write (RIV-su-2) now succeed end to end.",
+   "reason": "NOT PROVEN HERE and deliberately so. This cell grants CAPABILITY; AC1's oracle is the policy simulator, which evaluates authorization and touches no object. The CTO half condition 6 places that read at tomorrow's vehicle, graded under round-9 ruling 6 with the other first-run reads. Reporting AC1 PASS as 'the 2026-10-05 D12 Step B failure is fixed' would be the ABSENT-equals-EXERCISED-AGAINST error."
+  },
+  {
+   "item": "Any re-publish or refresh of the 10-05 holding_contribution output that failed on this IAM gap.",
+   "reason": "An issuer act, explicitly out of this cell's bounds (section 3: NEVER any S3 write). The COO half adds that the fail-soft repair already serves holding_contribution OK, so the republish may not be wanted at all -- that call is 2.0.0_SA_COO~RV's, not mine."
+  },
+  {
+   "item": "comp-iam gaps as evidence that this change is correct or complete.",
+   "reason": "It was run (the AE minimum after a policy change) and names ZERO rivalfunds rows, but that zero is NOT a pass and is not reported as one. comp-iam models (action), never (action, resource) -- the profile's own words: it FAILS GREEN -- and its own output declares 266 calls in 26 role-UNMAPPED services not resource-checked, so a zero here cannot distinguish 'no gap' from 'these roles were never verdicted'. The oracle for this cell is simulate-principal-policy on the live roles. comp-iam's estate-wide findings (37 missing, 3 resource-mismatch on etfs-reports-reporter and opal-gateway) are pre-existing, touch neither role this act changed, and are not this cell's to move."
+  },
+  {
+   "item": "The package built at the pin as evidence about the round-10 code on CLOUD.",
+   "reason": "The build at b8b47bb8e7 exists ONLY to make the untargeted plan honest about code: it proves the five live CodeSha256 values (daily CGLr1BNO, fetch nhBoabXY, canonical wLYfa47Z, silver CTEET1+c, publish RBRmqCj9) match the pinned source, so all 5 of 5 aws_lambda_function entries read no-op. It says nothing about whether the round-10 code on CLOUD is correct or ready, and nothing in this act deployed it."
+  },
+  {
+   "item": "Push state of every commit named here.",
+   "reason": "LOCAL. Measured, not defaulted: at 2026-10-05T23:4xZ git ls-remote origin CLOUD read 01a47ac2e7, and merge-base --is-ancestor says neither 762a984992 nor 5dc2e64de2 is an ancestor of it. Under the shared-branch law the push is 0.0.0_AB_MSTR's on Andrew's word; this seat commits and drains, and never pushes."
+  }
+ ],
+ "surprises": [
+  "ETFS_RIVALS-Z-S40 (filed @5dc2e64de2, class BLOCKING, hazard_standing INERT, disarm_owner 2.0.0_SA_COO~RV): the order's section 5 directed the proof_of_spec instance to deliverables/0.9.0_WK_ETFS_RIVALS~RV/, which owned-paths clause 4 (ADHC_OWNPTH.004) refuses to this serial -- safe-commit rejected 3 of 3 files with 'agent=0.7.0_AE_CloudOps~RV not in permitted_agents' -- because the cell went to an AE lane rather than a worker slot, so the granted folder was unwritable by its own assignee. DISARMED by the issuer at 2553a624f7 (cited by row ETFS_RIVALS-Z-S41): <paths> gains deliverables/0.7.0_AE_CloudOps~RV/ and sections 3 and 5 name it. This instance and the evidence packet are written there, and the amended order bytes were brought onto this branch (merge fec8fb400b) because the lane gate reads <paths> from the order file on the branch where the commit lands. It never held the apply."
+ ],
+ "session_log": "The durable record of this cell is the NEVER-2 deploy-completion entry org/critical_paths/change_management/20261005T2322Z_etfs-rivalfunds-iam-1_deploy_completion.md -- THREE legs, each carrying its own proof, CLOSED after the readbacks per the CTO half condition 4. The entry was OPENED BEFORE the act and its sentinel committed in the same commit as the code (762a984992), as the ledger tool requires; a cross-tree read confirmed the expected NEVER-2 shape, namely that the sentinel sits on branch ae-rv10-iam1 and is therefore invisible to a shared-tree deploy_ledger list, which 1.0.0_SA_CTO~Z recorded at signing rather than treating as a missing entry. Before opening it I checked the shared tree's .open_deploys/ with ls -a (not ls -1, which hides .unindexed_red_state.json) over a printed denominator of 29 entries: no etfs or rivalfunds entry existed, so this was a first open and not a re-execution. BOTH NEVER-WIDEN HALVES WERE READ IN FULL, NOT JUST THEIR VERDICT LINES: the COO half @1c714fe3e2 (org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round10/NEVER_WIDEN_HALF_COO_RIV_IAM_1.md, 2483 B) imposes no condition on this seat; the CTO half @4e9b59ea50 (org/missions/D5/ETFS/ETFS_RIVALS/ledger/NEVER_WIDEN_ROUND10_IAM1_CTO_HALF.md) carries conditions 1-6, and 1 through 4 are discharged in this instance while 5 is the issuer's and 6 is tomorrow's vehicle read. Commits authored by this cell: 762a984992 (code + sentinel, pre-apply), 5dc2e64de2 (surprise row Z-S40, appended IN THE SHARED TREE because rule 14b inverts for an append-only shared channel), fec8fb400b (CLOUD merged in for the order amendment), and the closing commit carrying the closed entry, this instance and the evidence packet. Work was done in a hand-cut linked worktree per rule 14b, with a SECOND detached worktree at the deployed pin for the plan; the full checkout was chosen over a sparse cone on a MEASUREMENT, not a memory -- 25.07 GB of 63.46 GB free RAM and 28.1 h uptime, where the banked OOM was measured at 0.2-4.6 GB free.",
+ "compiler_tools": [
+  {
+   "tool": "deploy_ledger.py (NEVER-2, the change-management contract)",
+   "invocation": "python .tools/deploy_ledger.py open|close-leg|close --slug etfs-rivalfunds-iam-1",
+   "result": "OPENED with 3 legs before the act, sentinel committed with the code at 762a984992. CLOSED after the readbacks: 'OK: CLOSED deploy ledger etfs-rivalfunds-iam-1 -- all 3 legs proven; sentinel removed'. The pre-open sweep of the shared tree's .open_deploys/ (29 entries, ls -a) found no etfs or rivalfunds entry."
+  },
+  {
+   "tool": "comp-iam gaps (the AE minimum after a policy change)",
+   "invocation": "comp-iam gaps",
+   "result": "Ran. Estate-wide: 37 missing | 294 deny-present | 1 coverage-unknown | 3 resource-mismatch across 33 services; resource plane 877 calls across 104 mapped roles. ZERO rows name either role this act changed. Treated as a FLOOR and NOT as a pass -- see declared_exclusions; the tool's own output declares 266 calls in 26 role-UNMAPPED services not resource-checked, so the zero cannot distinguish absence of gap from absence of coverage."
+  },
+  {
+   "tool": "terraform (device-agnostic resolve) and .tools/safe-apply.sh",
+   "invocation": "terraform init; terraform plan -out=<file>; terraform show -json <file>; .tools/safe-apply.sh apply -input=false -no-color <file>; terraform plan -detailed-exitcode",
+   "result": "Resolved on PATH (no .tools/terraform.exe on site Z). PRE: 0 add / 2 change / 0 destroy. The plan was graded from its JSON, not its prose: 45 resource_changes, 2 non-no-op, 0 source_code_hash or filename on any moving change, 5 of 5 aws_lambda_function no-op. APPLY via safe-apply: tagauthz GATE PASSED, tombstone-gate CLEAN, 'Apply complete! Resources: 0 added, 2 changed, 0 destroyed.' POST: 'No changes', -detailed-exitcode 0."
+  },
+  {
+   "tool": "aws accessanalyzer validate-policy (the instrument simulate-principal-policy cannot replace)",
+   "invocation": "bash .tools/aws accessanalyzer validate-policy --policy-type IDENTITY_POLICY --policy-document file://<live after doc> --query 'length(findings)'",
+   "result": "findings=0 on both live after documents; the planted-bogus-action mutant returned INVALID_ACTION. NOTE the instrument trap met here: the first attempt at the mutant control ran the shim from a python subprocess and exited rc=3221225477 (0xC0000005, an MSYS-spawn access violation) with EMPTY stdout, which reads exactly like 'no findings'. It was re-run through bash, where it fired. The crash was not accepted as a verdict."
+  },
+  {
+   "tool": "comp-find (the writers census behind the never-widen half)",
+   "invocation": "comp-find 'etfs-rivalfunds-daily-policy|rivalfunds-publish-page-policy' --all --files",
+   "result": "DENOMINATOR 19 hits across 121,213 files scanned, bands HEAD=3 SURFACED=3 CONFIG=3 DOC=10. The only non-doc, non-log carriers are this root's generated.auto.tfvars.json and one round-4 evidence JSON -- so N=1 writer of the property, and one rule (gen_policies.py spec()) was read rather than N assumed to be 1."
+  },
+  {
+   "tool": "comp-read (the row schema, before writing the surprise row)",
+   "invocation": "comp-read org/surprise_channel/schemas/investigation_item.schema.json --for '<question>'; comp-read <channel> --enumerate 'Z-S[0-9]+'",
+   "result": "Corrected a real error before it landed: the row was first written hazard_standing=BLOCKING and the gate refused it ('not in the ratified enum [ARMED, INERT]'). The schema says class is the INTERRUPTION RIGHT (OBSERVATION|BLOCKING) and hazard_standing is future-operation harm (ARMED|INERT); the row is class BLOCKING / hazard INERT. The id came from a census of the channel (39 ids present, max 39) rather than from the file's tail."
+  },
+  {
+   "tool": "safe-commit.sh, commit-gate.sh and the commit-time gates",
+   "invocation": ".tools/commit-gate.sh <py>; .tools/safe-commit.sh --author '0.7.0_AE_CloudOps~RV <...>' -F <msgfile> -- <paths>",
+   "result": "commit-gate clean for 1 of 1 file (py_compile + ds-precommit + ruff py39). Every commit message written by a non-shell writer and passed with -F. NAMING-GATE: PASS 4 graded, all four new S3 keys CONFORMANT, denominator 4 paths with 1 excluded as org/. surprise-row-gate OK on the new row. Push state read from git ls-remote, never defaulted."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the live daily and publish-page roles may list/get gold/security_names and put/get gold/security_universe; put on security_names and a sibling prefix stay denied; an already-granted prefix reads allowed",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round10/checks/iam-1.AC1.py",
+   "output_evidence": "etfs-rivalfunds-daily-role | names list/get ('allowed', 'allowed') | universe put/get ('allowed', 'allowed') | control names put / sibling get ('implicitDeny', 'implicitDeny') / positive control holding_contribution get allowed / rivalfunds-publish-page-role | names list/get ('allowed', 'allowed') | universe put/get ('allowed', 'allowed') | control names put / sibling get ('implicitDeny', 'implicitDeny') / positive control holding_contribution get allowed / AC1 RESULT: PASS 0 failures",
+   "denominator": "2 live roles x 7 simulate-principal-policy calls = 14 calls, one --resource-arns per call, the positive control a separate invocation. 8 of 8 graded clauses OK (4 per role: a, b, c, d). THE BASE READ IS MINE, NOT ADOPTED FROM THE ISSUANCE: before the apply the same script read FAIL 4 -- (a) and (b) implicitDeny on both roles, (c) and (d) PASS -- so the four verdicts that flipped are the four the act targeted, on byte-identical calls. Run twice after the apply with identical verdicts.",
+   "status": "PASS"
+  }
+ ]
+}
