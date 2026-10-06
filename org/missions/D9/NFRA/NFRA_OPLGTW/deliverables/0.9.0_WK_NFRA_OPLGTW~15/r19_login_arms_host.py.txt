@@ -1,0 +1,118 @@
+"""OG-rl-7 (OA-e-10): the /login admit arms, driven through the GuardMiddleware stack of the INSTALLED code on the HOST in a SEPARATE process (never the running
+service, never /opt/opal-gateway/.env: python-dotenv's load_dotenv is a no-op BEFORE app.config imports, so the configured-identity settings are exactly what this process sets).
+The ELB public key the identity verifier fetches is swapped for a LOCAL test ES256 key: "installed bytes, test signing key". The consent URL and the sign-in state are stubbed
+with counters (no Microsoft egress: msal would reach login.microsoftonline.com for authority discovery), so ADMITTED means "the handler reached make_state and
+build_consent_url" (a 307 redirect to the stub URL) and REFUSED means "403 and neither was reached". Synthetic identities only; nothing is written; no secret is read.
+
+usage (on the host, in the venv, env -i):  python run.py <mode> <expect>
+  mode    configured : OTP_MAILBOX = MS_INGEST_IDENTITY = andrew@opalinvest.com (the value the committed template renders; its host digest is checked by the verify script)
+          empty      : both unset (the fail-closed branch)
+  expect  before     : the live (pre-act) code: /login admits ANY verified identity
+          after      : the release: only the configured identities
+Prints one line per arm, then  LOGIN_ARMS <mode> <expect>: n of m  RESULT: PASS|FAIL  and a LOGIN_JSON line (codes and booleans only).
+"""
+import base64
+import hashlib
+import json
+import os
+import sys
+
+mode, expect = sys.argv[1], sys.argv[2]
+gw = "/opt/opal-gateway"
+if os.environ.get("OG_GW_DIR"):                      # a scratch/test tree (never the host in the normal run)
+    gw = os.environ["OG_GW_DIR"]
+sys.path.insert(0, gw)
+os.environ["MOCK_GRAPH"] = "1"
+os.environ["IDENTITY_PROVIDER"] = "alb_oidc"
+os.environ["RATE_LIMIT_ENABLED"] = "0"
+for k in ("OTP_MAILBOX", "MS_INGEST_IDENTITY"):
+    os.environ.pop(k, None)
+CONFIGURED = "andrew@opalinvest.com"
+UNCONFIGURED = "viewer@opalinvest.com"
+if mode == "configured":
+    os.environ["OTP_MAILBOX"] = CONFIGURED
+    os.environ["MS_INGEST_IDENTITY"] = CONFIGURED
+elif mode != "empty":
+    raise SystemExit("mode must be configured|empty")
+
+import dotenv  # noqa: E402
+dotenv.load_dotenv = lambda *a, **k: False
+
+import jwt                                                       # noqa: E402
+from cryptography.hazmat.primitives import serialization        # noqa: E402
+from cryptography.hazmat.primitives.asymmetric import ec        # noqa: E402
+from starlette.testclient import TestClient                      # noqa: E402
+
+from app import identity, server, token_broker                   # noqa: E402
+
+print("INSTALLED_FILE server.py=%s md5 %s" % (server.__file__, hashlib.md5(open(server.__file__, "rb").read()).hexdigest()))
+key = ec.generate_private_key(ec.SECP256R1())
+pub_pem = key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+priv_pem = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
+identity._fetch_elb_public_key = lambda kid: pub_pem
+
+
+async def _no_deny(email):
+    return None
+
+
+server._email_denied = _no_deny
+calls = {"make_state": 0, "build_consent_url": 0}
+
+
+def _make_state(email):
+    calls["make_state"] += 1
+    return "stub-state"
+
+
+def _build(state):
+    calls["build_consent_url"] += 1
+    return "https://consent.invalid/stub?state=" + state
+
+
+token_broker.make_state = _make_state
+token_broker.build_consent_url = _build
+
+
+def signed(email):
+    return jwt.encode({"email": email, "sub": "local"}, priv_pem, algorithm="ES256", headers={"kid": "local-kid"})
+
+
+def planted(email):
+    def b(d):
+        return base64.urlsafe_b64encode(json.dumps(d).encode()).decode().rstrip("=")
+    return b({"alg": "ES256", "typ": "JWT", "kid": "local-kid"}) + "." + b({"email": email, "sub": "planted"}) + "." + base64.urlsafe_b64encode(bytes(64)).decode().rstrip("=")
+
+
+client = TestClient(server.app, raise_server_exceptions=False)
+rows, res = [], {}
+
+
+def arm(name, headers, want_code, want_reached):
+    before = calls["make_state"] + calls["build_consent_url"]
+    r = client.get("/login", headers=headers, follow_redirects=False)
+    reached = (calls["make_state"] + calls["build_consent_url"]) > before
+    ok = r.status_code == want_code and reached == want_reached
+    rows.append(ok)
+    print("%s %s: code %s (want %s), consent reached %s (want %s)" % ("PASS" if ok else "FAIL", name, r.status_code, want_code, reached, want_reached))
+    return r.status_code, reached
+
+
+admitted = (307, True)
+refused = (403, False)
+if mode == "configured":
+    c_want = admitted
+    u_want = admitted if expect == "before" else refused
+else:
+    c_want = admitted if expect == "before" else refused
+    u_want = c_want
+c = arm("configured identity (test-signed) %s" % ("admitted" if c_want == admitted else "refused"), {"x-amzn-oidc-data": signed(CONFIGURED)}, *c_want)
+u = arm("unconfigured verified identity (test-signed) %s" % ("admitted" if u_want == admitted else "refused"), {"x-amzn-oidc-data": signed(UNCONFIGURED)}, *u_want)
+p = arm("planted non-signed identity naming the configured one", {"x-amzn-oidc-data": planted(CONFIGURED), "X-User-Email": CONFIGURED}, 401, False)
+n = arm("no identity", {}, 401, False)
+d = dict(mode=mode, expect=expect, configured="ADMITTED" if c == admitted else "REFUSED %s" % c[0],
+         unconfigured="ADMITTED" if u == admitted else "REFUSED %s" % u[0], planted=p[0], no_identity=n[0],
+         make_state_calls=calls["make_state"], build_consent_url_calls=calls["build_consent_url"], grants_written=0, synthetic=True)
+print("LOGIN_JSON " + json.dumps(d))
+print("LOGIN_ARMS %s %s: %d of %d  RESULT: %s" % (mode, expect, sum(rows), len(rows), "PASS" if all(rows) else "FAIL"))
+sys.exit(0 if all(rows) else 1)
