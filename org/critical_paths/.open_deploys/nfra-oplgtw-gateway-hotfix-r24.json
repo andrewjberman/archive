@@ -1,0 +1,55 @@
+{
+  "slug": "nfra-oplgtw-gateway-hotfix-r24",
+  "title": "NFRA_OPLGTW OG-rl-10 PHASE B: opal-gateway HOTFIX release 2c27f3a795 -> rel-nfra-oplgtw-r24 9d3e2eb3fc (CTO R32: the opal_portal service login moves from the raw API Gateway host to the front door www.opalinvest.dev; ONE shipped file app/integrations/opal_portal/integration.py, +6/-6) via safe-ec2-deploy.sh from /c/tmp/og-rel18; never-widen COO 86dae82982 CTO d274986e8d CVO 49470c5691 SIGNED",
+  "author": "0.9.0_WK_NFRA_OPLGTW~28",
+  "status": "OPEN",
+  "opened_at": "2026-10-06T23:54:51.931165+00:00",
+  "window_hours": 4.0,
+  "entry_path": "org/critical_paths/change_management/20261006T2354Z_nfra-oplgtw-gateway-hotfix-r24_deploy_completion.md",
+  "legs": [
+    {
+      "id": "upload",
+      "kind": "s3-prefix",
+      "target": "opal-gateway-latest.tar.gz and opal-gateway-<release sha>.tar.gz in the gateway artifact bucket",
+      "proof_required": "deploy wrapper output line with git-ref <release sha>; base guard declared 2c27f3a795 == live at both reads",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "install-verify",
+      "kind": "ec2-baked-asset",
+      "target": "opal-gateway host /opt/opal-gateway running path + .env 51 keys",
+      "proof_required": "r24_verify.sh after: md5 96 of 96 = release bytes (1 differs from live: opal_portal/integration.py), health 200, 65 tools, 51 names with every value sha256 equal, installed integration is the release file and its login is OK through www.opalinvest.dev, floor rl4.AC1 + ht.AC2",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "installed-login",
+      "kind": "verify",
+      "target": "installed opal_portal integration's own _PortalSession.token() on the host with the real service secret, in process",
+      "proof_required": "RL10_LOGIN.json body login OK auth_host www.opalinvest.dev installed_code true served_release <release sha> grants_written 0 and the host RL10_DIGEST; a login that is not OK rolls back",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "manifest",
+      "kind": "git",
+      "target": "infra/aws/ec2/EC2_MANIFEST.json services.opal-gateway deployed_commit <release sha> previous 2c27f3a795",
+      "proof_required": "committed hash",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "rollback-proven",
+      "kind": "verify",
+      "target": "rollback tree /c/tmp/og-rb17 at 2c27f3a795 equal to the live artifact, command recorded",
+      "proof_required": "diff 96 of 96 equal and verify PASS, or rolled back and re-verified",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261006T235451Z OPENED by 0.9.0_WK_NFRA_OPLGTW~28 with 5 leg(s)"
+  ],
+  "last_red_at": null
+}
