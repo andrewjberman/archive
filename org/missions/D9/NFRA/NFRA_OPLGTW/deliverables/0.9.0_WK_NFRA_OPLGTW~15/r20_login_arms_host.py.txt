@@ -1,0 +1,179 @@
+"""OG-rl-8: the /login arms, driven through the GuardMiddleware stack of the INSTALLED code on the HOST in a SEPARATE process (never the running service, never /opt/opal-gateway/.env:
+python-dotenv's load_dotenv is a no-op BEFORE app.config imports, and the process runs under `env -i`, so the settings are exactly what this process sets).
+The ELB public key the identity verifier fetches is swapped for a LOCAL test ES256 key ("installed bytes, test signing key"). The consent URL and the sign-in state are stubbed with counters
+(no Microsoft egress), so ADMITTED = the handler reached make_state + build_consent_url (307 to the stub) and REFUSED = 403 with neither reached. The email-deny read is stubbed (no state store):
+a SYNTHETIC restricted address answers 403 exactly as an email_deny record would. The audit sink is a SCRATCH jsonl (AUDIT_PATH under $R20_SCRATCH) and AUDIT_S3_BUCKET is asserted empty, so nothing
+reaches the S3 lake. Synthetic identities only; nothing is written to any grant or state store; no secret is read.
+
+usage (on the host, in the venv, env -i):  python run.py <expect>
+  expect  before : the live (pre-act) code (cf4b036e62): /login admits ANY verified identity; it writes NO gw_login record
+          after  : the release: non-restricted ADMITTED, the Analyst service identity ADMITTED (R25.1), restricted REFUSED 403, server-held ADMITTED, an unresolvable tier REFUSED 403 (fail closed),
+                   and exactly ONE gw_login audit record per /login request
+Prints one line per arm, then LOGIN_JSON {...} and LOGIN_ARMS <expect>: n of m  RESULT: PASS|FAIL.
+"""
+import base64
+import hashlib
+import json
+import os
+import sys
+
+expect = sys.argv[1]
+gw = os.environ.get("OG_GW_DIR") or "/opt/opal-gateway"
+sys.path.insert(0, gw)
+scratch = os.environ.get("R20_SCRATCH") or "/tmp"
+audit_path = os.path.join(scratch, "r20_login_audit.jsonl")
+os.environ["MOCK_GRAPH"] = "1"
+os.environ["IDENTITY_PROVIDER"] = "alb_oidc"
+os.environ["RATE_LIMIT_ENABLED"] = "0"
+os.environ["AUDIT_PATH"] = audit_path
+os.environ.pop("AUDIT_S3_BUCKET", None)
+SERVER_HELD = "andrew@opalinvest.com"           # what the committed template renders for OTP_MAILBOX and MS_INGEST_IDENTITY
+os.environ["OTP_MAILBOX"] = SERVER_HELD
+os.environ["MS_INGEST_IDENTITY"] = SERVER_HELD
+os.environ["ENABLED_INTEGRATIONS"] = "ycharts opal_portal globgrph opal_discover portal_index schwab blackdiamond"
+PERSON = "synthetic.person@opalinvest.test"       # a non-restricted verified tenant identity
+ANALYST = "opalbloomberg@opalinvest.com"          # the Analyst's service identity (identity_scope._SEED's key): ADMITTED under R25.1
+RESTRICTED = "synthetic.restricted@opalinvest.test"
+
+import dotenv  # noqa: E402
+dotenv.load_dotenv = lambda *a, **k: False
+
+import jwt                                                       # noqa: E402
+from cryptography.hazmat.primitives import serialization        # noqa: E402
+from cryptography.hazmat.primitives.asymmetric import ec        # noqa: E402
+from starlette.testclient import TestClient                      # noqa: E402
+
+from app import audit, identity, server, token_broker            # noqa: E402
+
+assert not audit._cfg.AUDIT_S3_BUCKET, "AUDIT_S3_BUCKET must be empty: the arms must not reach the lake"
+assert audit._cfg.AUDIT_PATH == audit_path, audit._cfg.AUDIT_PATH
+if os.path.exists(audit_path):
+    os.remove(audit_path)
+has_rule = hasattr(server, "login_admit_decision")
+print("INSTALLED_FILES server.py md5 %s audit.py md5 %s login_admit_decision present %s log_login present %s" % (
+    hashlib.md5(open(server.__file__, "rb").read()).hexdigest(), hashlib.md5(open(audit.__file__, "rb").read()).hexdigest(), has_rule, hasattr(audit, "log_login")))
+key = ec.generate_private_key(ec.SECP256R1())
+pub_pem = key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+priv_pem = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
+identity._fetch_elb_public_key = lambda kid: pub_pem
+
+
+async def _deny(email):
+    return 403 if (email or "").strip().lower() == RESTRICTED else None   # what an email_deny record answers; the real store is never read
+
+
+server._email_denied = _deny
+calls = {"make_state": 0, "build_consent_url": 0}
+
+
+def _make_state(email):
+    calls["make_state"] += 1
+    return "stub-state"
+
+
+def _build(state):
+    calls["build_consent_url"] += 1
+    return "https://consent.invalid/stub?state=" + state
+
+
+token_broker.make_state = _make_state
+token_broker.build_consent_url = _build
+
+
+def signed(email):
+    return jwt.encode({"email": email, "sub": "local"}, priv_pem, algorithm="ES256", headers={"kid": "local-kid"})
+
+
+def planted(email):
+    def b(d):
+        return base64.urlsafe_b64encode(json.dumps(d).encode()).decode().rstrip("=")
+    return b({"alg": "ES256", "typ": "JWT", "kid": "local-kid"}) + "." + b({"email": email, "sub": "planted"}) + "." + base64.urlsafe_b64encode(bytes(64)).decode().rstrip("=")
+
+
+def records():
+    if not os.path.exists(audit_path):
+        return []
+    out = []
+    for ln in open(audit_path, encoding="utf-8"):
+        ln = ln.strip()
+        if ln:
+            try:
+                d = json.loads(ln)
+            except ValueError:
+                continue
+            if d.get("event") == "gw_login":
+                out.append(d)
+    return out
+
+
+client = TestClient(server.app, raise_server_exceptions=False)
+rows = []
+requests = 0
+results = {}
+
+
+def arm(label, headers, want_code, want_reached, want_outcome=None, want_reason=None):
+    """one /login request; checks the status, whether the consent was reached, and (after) that exactly ONE new gw_login record was written for it"""
+    global requests
+    requests += 1
+    before_calls = calls["make_state"] + calls["build_consent_url"]
+    before_recs = len(records())
+    r = client.get("/login", headers=headers, follow_redirects=False)
+    reached = (calls["make_state"] + calls["build_consent_url"]) > before_calls
+    new = records()[before_recs:]
+    ok = r.status_code == want_code and reached == want_reached
+    want_n = 1 if expect == "after" else 0
+    ok = ok and len(new) == want_n
+    if expect == "after" and new:
+        rec = new[0]
+        ok = ok and rec.get("outcome") == want_outcome and rec.get("reason") == want_reason
+        ok = ok and set(rec) <= {"ts", "event", "route", "outcome", "reason", "email_digest", "tier", "principal"}
+    rows.append(ok)
+    print("%s %s: code %s (want %s), consent reached %s (want %s), gw_login records %d (want %d)%s" % (
+        "PASS" if ok else "FAIL", label, r.status_code, want_code, reached, want_reached, len(new), want_n,
+        (" outcome=%s reason=%s" % (new[0].get("outcome"), new[0].get("reason"))) if new else ""))
+    return r.status_code, reached
+
+
+admitted = (307, True)
+refused = (403, False)
+if expect == "before":
+    p = arm("non-restricted verified identity (live: admitted)", {"x-amzn-oidc-data": signed(PERSON)}, *admitted)
+    a = arm("Analyst service identity (live: admitted)", {"x-amzn-oidc-data": signed(ANALYST)}, *admitted)
+    r_ = arm("restricted identity, email-deny record (live: refused 403 by the deny guard)", {"x-amzn-oidc-data": signed(RESTRICTED)}, *refused)
+    s = arm("server-held identity (live: admitted)", {"x-amzn-oidc-data": signed(SERVER_HELD)}, *admitted)
+    pl = arm("planted non-signed identity", {"x-amzn-oidc-data": planted(SERVER_HELD), "X-User-Email": SERVER_HELD}, 401, False)
+    n = arm("no identity", {}, 401, False)
+else:
+    p = arm("non-restricted verified identity ADMITTED", {"x-amzn-oidc-data": signed(PERSON)}, *admitted, "admitted", "tier_graph_tools")
+    a = arm("Analyst service identity ADMITTED (R25.1)", {"x-amzn-oidc-data": signed(ANALYST)}, *admitted, "admitted", "tier_graph_tools")
+    r_ = arm("restricted identity (email-deny record) REFUSED", {"x-amzn-oidc-data": signed(RESTRICTED)}, *refused, "refused", "deny_list")
+    s = arm("server-held identity ADMITTED", {"x-amzn-oidc-data": signed(SERVER_HELD)}, *admitted, "admitted", "server_held")
+    pl = arm("planted non-signed identity REFUSED 401", {"x-amzn-oidc-data": planted(SERVER_HELD), "X-User-Email": SERVER_HELD}, 401, False, "refused", "no_verified_identity")
+    n = arm("no identity REFUSED 401", {}, 401, False, "refused", "no_verified_identity")
+    # the fail-closed backstop: an unverifiable identity provider resolves no tier, so a non-server-held caller is refused 403 and the server-held one is still admitted
+    real = server._tier_mod._provider_is_verified
+    server._tier_mod._provider_is_verified = lambda cfg: False
+    try:
+        t = arm("tier clause fail-closed (provider not verified): person REFUSED", {"x-amzn-oidc-data": signed(PERSON)}, *refused, "refused", "tier_unresolvable")
+        ts = arm("tier clause fail-closed (provider not verified): server-held still ADMITTED", {"x-amzn-oidc-data": signed(SERVER_HELD)}, *admitted, "admitted", "server_held")
+    finally:
+        server._tier_mod._provider_is_verified = real
+recs = records()
+txt = open(audit_path, encoding="utf-8").read() if os.path.exists(audit_path) else ""
+leak = [w for w in ("stub-state", "consent.invalid", PERSON, ANALYST, RESTRICTED, SERVER_HELD, "eyJ") if w in txt]
+ok_leak = not leak
+rows.append(ok_leak)
+print("%s no address, token or state in any audit record: leaked tokens %s" % ("PASS" if ok_leak else "FAIL", leak))
+total_ok = len(recs) == (requests if expect == "after" else 0)
+rows.append(total_ok)
+print("%s gw_login records in the sink %d vs /login requests %d (want %s)" % ("PASS" if total_ok else "FAIL", len(recs), requests, "equal" if expect == "after" else "0 (live writes none)"))
+d = dict(expect=expect, nonrestricted="ADMITTED" if p == admitted else "REFUSED %s" % p[0], analyst="ADMITTED" if a == admitted else "REFUSED %s" % a[0],
+         restricted="REFUSED %s" % r_[0] if r_ == refused else "ADMITTED", server_held="ADMITTED" if s == admitted else "REFUSED %s" % s[0],
+         planted=pl[0], no_identity=n[0], requests=requests, audit_records=len(recs),
+         make_state_calls=calls["make_state"], build_consent_url_calls=calls["build_consent_url"], grants_written=0, synthetic=True)
+print("LOGIN_JSON " + json.dumps(d))
+print("LOGIN_ARMS %s: %d of %d  RESULT: %s" % (expect, sum(rows), len(rows), "PASS" if all(rows) else "FAIL"))
+if os.path.exists(audit_path):
+    os.remove(audit_path)
+sys.exit(0 if all(rows) else 1)

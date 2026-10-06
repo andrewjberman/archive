@@ -1,0 +1,51 @@
+"""OG-rl-8: engine.py RSS-poll sanity on the HOST (Linux), through the INSTALLED (or staged) code in a SEPARATE process (env -i; no .env, no store, no network).
+engine.process_rss_bytes / pid_alive take the /proc branch on Linux; the OG-fl-1 change is in the Windows branch only, so on the host the observable property is "no change":
+the poll of this very process returns a positive int in the range of the kernel's own VmRSS read, a child's poll equals the same /proc read, pid_alive is True for a live pid and False for a dead one.
+usage: python run.py <label>      prints  ENGINE_JSON {...}  and  ENGINE_ARMS <label>: n of m  RESULT: PASS|FAIL"""
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+
+label = sys.argv[1]
+gw = os.environ.get("OG_GW_DIR") or "/opt/opal-gateway"
+sys.path.insert(0, gw)
+os.environ["MOCK_GRAPH"] = "1"
+from app.integrations.schwab import engine  # noqa: E402
+
+print("INSTALLED_FILE engine.py md5 %s; cached-kernel32 helpers present %s" % (hashlib.md5(open(engine.__file__, "rb").read()).hexdigest(), hasattr(engine, "_kernel32")))
+rows = []
+
+
+def vmrss(pid):
+    for ln in open("/proc/%d/status" % pid):
+        if ln.startswith("VmRSS:"):
+            return int(ln.split()[1]) * 1024
+    return None
+
+
+me = engine.process_rss_bytes(os.getpid())
+ref = vmrss(os.getpid())
+ok1 = isinstance(me, int) and me > 0 and ref is not None and abs(me - ref) <= max(ref // 10, 4 * 1024 * 1024)
+rows.append(ok1)
+print("%s own-process poll is a positive int within 10%% (or 4 MiB) of /proc VmRSS: poll %s MiB, /proc %s MiB" % ("PASS" if ok1 else "FAIL", round((me or 0) / 1048576, 1), round((ref or 0) / 1048576, 1)))
+p = subprocess.Popen([sys.executable, "-c", "import time; x = bytearray(40 * 1024 * 1024); time.sleep(30)"])
+time.sleep(1.5)
+a = engine.process_rss_bytes(p.pid)
+b = engine.process_rss_bytes(p.pid)
+c = vmrss(p.pid)
+ok2 = a is not None and a == b == c
+rows.append(ok2)
+print("%s a child's poll, twice, equals the /proc read: %s %s %s bytes" % ("PASS" if ok2 else "FAIL", a, b, c))
+alive = engine.pid_alive(p.pid)
+p.kill()
+p.wait()
+dead = engine.pid_alive(p.pid)
+ok3 = alive is True and dead is False
+rows.append(ok3)
+print("%s pid_alive: live child True, killed child False -> %s %s" % ("PASS" if ok3 else "FAIL", alive, dead))
+print("ENGINE_JSON " + json.dumps({"label": label, "own_poll_ok": ok1, "child_poll_equal": ok2, "pid_alive_ok": ok3}))
+print("ENGINE_ARMS %s: %d of %d  RESULT: %s" % (label, sum(rows), len(rows), "PASS" if all(rows) else "FAIL"))
+sys.exit(0 if all(rows) else 1)
