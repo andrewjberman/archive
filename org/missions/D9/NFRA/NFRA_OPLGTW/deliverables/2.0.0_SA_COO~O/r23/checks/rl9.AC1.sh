@@ -2,14 +2,14 @@
 # OPLGTW OG-rl-9 AC1 (R30.2: RELEASE + NEVER-2 + DRAIN-BACK + FLOOR): the host's shipped files equal the release bytes;
 # the ledger entry for nfra-oplgtw-gateway-release-r23 is committed and its sentinel gone; the manifest's deployed_commit
 # descends from 2c27f3a795; after the drain-back CLOUD equals live for the gateway tree except the listed CLOUD-only
-# runbooks/SCHWAB_PILOT_RUNBOOK.md; the floor holds -- rl4.AC1 (r17 key baseline) and ht.AC2 (51 keys).
+# runbooks/SCHWAB_PILOT_RUNBOOK.md (the top-level tests/ files are source-only and are not on the host: row Z-W28-S4); the floor holds -- rl4.AC1 (r17 key baseline) and ht.AC2 (51 keys).
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 . "$(dirname "$0")/../../r14/checks/_ssm.sh"
 SLUG="nfra-oplgtw-gateway-release-r23"; LIVE0="2c27f3a7958de0aa644374cdd08fc188a27e9e3f"
 D="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O"
 c=$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;print(json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'].get('deployed_commit','NONE'))" | tr -d '\r')
 desc=no; [ "$c" != "$LIVE0" ] && git merge-base --is-ancestor "$LIVE0" "$c" 2>/dev/null && desc=yes
-L=$( [ "$desc" = yes ] && git diff --name-only "$LIVE0" "$c" -- "$GW" | sed "s#^$GW/##" | grep -v '^runbooks/' | tr '\n' ' ')
+L=$( [ "$desc" = yes ] && git diff --name-only "$LIVE0" "$c" -- "$GW" | sed "s#^$GW/##" | grep -v '^runbooks/' | grep -v '^tests/' | tr '\n' ' ')
 n=0; eq=0
 if [ -n "$L" ]; then
   cmd=$(python -c "import json,sys;print(json.dumps({'commands':['cd /opt/opal-gateway && md5sum '+sys.argv[1]]}))" "$L" | tr -d '\r')
