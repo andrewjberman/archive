@@ -1,0 +1,111 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ay-3.names-phase-cut",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ay-3.names-phase-cut.md",
+  "group": "C",
+  "vintage_commit": "cecef87d4a1b0a29dbe41a17cbdde096d355076c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "cecef87d4a1b0a29dbe41a17cbdde096d355076c",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ay-3.names-phase-cut.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~259",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/monthly_chatter.py",
+   "kind": "script",
+   "commit_or_etag": "cbaaee679d39b38dd6af80f6a117d9660fb06095",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MODIFIED: read_monthly_chatter starts the names read right after the covered keys and waits for it at the names phase; _display_names delegates to names_read.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/names_read.py",
+   "kind": "script",
+   "commit_or_etag": "cbaaee679d39b38dd6af80f6a117d9660fb06095",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: display_names (the same chain), pending_names (stored-name reads in chunks at once), start (a thread).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_ay3_names_read.py",
+   "kind": "test",
+   "commit_or_etag": "cbaaee679d39b38dd6af80f6a117d9660fb06095",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: 3 tests (chunks run at once, start returns answer and error, chatter waits for the started names).",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~259/after_equal.py",
+   "kind": "script",
+   "commit_or_etag": "cbaaee679d39b38dd6af80f6a117d9660fb06095",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "NEW: compares the served chatter body at days 30/90/365 with the before/ snapshots.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "fresh-process names phase within 300 ms; C1 PASS; R75 C60 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round75/checks/r75_served.py\" --cell c60 --where local; echo \"exit=$?\"",
+   "output_evidence": "fresh-process names phase: 0 ms (bar 300)\nPASS C1 the first chatter request resolves names within the bar 0\nR75 C60 SERVED: YES\nexit=0",
+   "denominator": "1 of 1 fresh-process runs within the 300 ms bar (0 ms; before the edit 1,395 ms). The 0 is overlap with the gold reads: see row AMGT_RESAPP-Z-W259-S1.",
+   "status": "PASS",
+   "expect": "fresh-process names phase.*PASS C1.*R75 C60 SERVED: YES\nexit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "EQUAL 3 of 3; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~259/after_equal.py\"; echo \"exit=$?\"",
+   "output_evidence": "days 30: EQUAL (95 rows)\ndays 90: EQUAL (95 rows)\ndays 365: EQUAL (95 rows)\nEQUAL 3 of 3\nexit=0",
+   "denominator": "3 of 3 windows EQUAL (95 rows each)",
+   "status": "PASS",
+   "expect": "EQUAL 3 of 3\nexit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Original order: names read after compute, stored names at 8 at a time.",
+   "expected": "names phase over the bar",
+   "observed": "names phase 1,395-1,619 ms in 4 fresh runs before the edit",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "c60 run 3 times, after_equal run 3 times",
+   "observed": "0 ms and EQUAL 3 of 3 each time",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "AMGT_RESAPP-Z-W259-S1",
+  "AMGT_RESAPP-Z-W259-S2"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest",
+   "invocation": "python -m pytest -p no:cacheprovider lib/research/api/tests",
+   "result": "2 failed, 667 passed (the 2 are test_scoped_amgt_mount.py, row AMGT_RESAPP-Z-W259-S2)"
+  }
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~259/AMGT_RESAPP.TO-AMGT-ay-3.SESSION_LOG.md"
+}
