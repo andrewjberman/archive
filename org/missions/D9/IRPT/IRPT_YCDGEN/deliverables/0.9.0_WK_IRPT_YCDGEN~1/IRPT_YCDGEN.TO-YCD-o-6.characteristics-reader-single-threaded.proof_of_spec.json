@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-o-6.characteristics-reader-single-threaded",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-o-6.characteristics-reader-single-threaded.md",
+    "group": "OTHER",
+    "vintage_commit": "94eb6e01ab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6H.md",
+    "vintage_commit": "94eb6e01ab",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-o-6.characteristics-reader-single-threaded.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "R16: _read_characteristics passes use_threads=False to pq.read_table; no other line changed; no live call by the worker",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_overview.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "2 new tests (characteristics_read_is_single_threaded, characteristics_rows_unchanged) over a small in-memory parquet; 41 prior kept passing",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the characteristics read passes use_threads=False to pyarrow (tests -k characteristics_read_is_single_threaded, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_overview.py -q -p no:cacheprovider -k characteristics_read_is_single_threaded",
+      "output_evidence": "1 passed, 42 deselected in 1.13s (rc=0)",
+      "denominator": "1 of 1 selected tests (43 in file)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the rows returned for a small real parquet are unchanged (tests -k characteristics_rows_unchanged, >= 1 passed)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_overview.py -q -p no:cacheprovider -k characteristics_rows_unchanged",
+      "output_evidence": "1 passed, 42 deselected in 0.75s (rc=0)",
+      "denominator": "1 of 1 selected tests (43 in file)",
+      "expect": "^[1-9][0-9]* passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the whole test file passes (tests, all, no failure)",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_overview.py -q -p no:cacheprovider",
+      "output_evidence": "43 passed in 10.52s (rc=0)",
+      "denominator": "43 of 43 tests in test_layout_overview.py",
+      "expect": "^[0-9]+ passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "None named by the spec.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- in-memory parquet on fixed inputs",
+      "observed": "single run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_overview.py -q -p no:cacheprovider",
+      "result": "43 passed"
+    }
+  ]
+}
