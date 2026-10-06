@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-a-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-a-2.silver-transactions.md",
+    "group": "OTHER",
+    "vintage_commit": "9180968a4c"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~2",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.md",
+    "vintage_commit": "9180968a4c",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-a-2.silver-transactions.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_transactions.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo code only; DS-lane candidate (rule 13), no safe-deploy; the --apply run is the issuer's act"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_transactions.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo tests only"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB2-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_transactions.py expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_transactions.py",
+      "output_evidence": "12 passed in 1.01s (rc 0, run under timeout 120); includes test_sample_verification_catches_a_tampered_line (difference control: tampered member, ok=4 of n=5)",
+      "denominator": "12 of 12 tests passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB2-AC2",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_transactions.py --source \"$HOME/Downloads/Files.zip\" --outer-member \"Cottonwood Capital Advisors_Portfolio_Accounting_Performance_ClientDelivery.zip\" --data-date 2026-06-23 --out .scratch/advi_cotbkf/silver --verify-sample 50 expect: unexplained=0 accounts=1533 columns=24 min_trade=2013-04-03 max_trade=2026-06-22 lineage_sample=50/50",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_transactions.py --source \"$HOME/Downloads/Files.zip\" --outer-member \"Cottonwood Capital Advisors_Portfolio_Accounting_Performance_ClientDelivery.zip\" --data-date 2026-06-23 --out .scratch/advi_cotbkf/silver --verify-sample 50",
+      "output_evidence": "rc 0 in 19.8s (run under timeout 120); last line: SILVER-TRANSACTIONS lines=1416501 rows_out=1415137 dropped_dup=1360 blank=0 unexplained=0 accounts=1533 columns=24 min_trade=2013-04-03 max_trade=2026-06-22 lineage_sample=50/50; line accounting: header=1 record_first_lines=1416497 continuation_lines=3 blank=0 unexplained=0",
+      "denominator": "1416501 of 1416501 physical lines accounted; 1533 accounts; 50 of 50 sampled rows traced to their raw line",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant control named by the order",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the real-file run was executed twice (seeded sample, fixed input): identical SILVER-TRANSACTIONS line both times",
+      "observed": "identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "--apply (S3 write) run",
+      "reason": "the issuer's act under a ledger entry; the worker writes nothing to S3 (order BOUNDS); apply_to_s3 is unit-tested against a stub client"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-W2-S1: the 3 extra physical lines are CRLFs inside quoted fields; 1,360 exact-duplicate records dropped (rows_out 1,415,137)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~2/ADVI_COTBKF.TO-CB-a-2.silver-transactions.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_transactions.py",
+      "result": "12 passed"
+    }
+  ]
+}
