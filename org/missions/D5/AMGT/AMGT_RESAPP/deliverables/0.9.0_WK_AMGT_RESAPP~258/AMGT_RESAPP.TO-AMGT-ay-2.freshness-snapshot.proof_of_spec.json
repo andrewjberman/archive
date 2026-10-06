@@ -18,9 +18,9 @@
   {
    "path_or_key": "lib/research/freshness/snapshot.py",
    "kind": "script",
-   "commit_or_etag": "b45344d6c0",
+   "commit_or_etag": "810df9297f",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "build_freshness_snapshot, write_freshness_snapshot, read_freshness_snapshot; address from lib.opal_naming.address(): s3://opal-data-harvest/amgt/harvest/state/freshness_snapshot/current/snapshot.json. Library code; writes no store object. AMENDMENT 1: snapshot_age_hours(); a snapshot older than 24 h, or with an unreadable generated_at, is treated as absent.",
+   "deploy_evidence": "build_freshness_snapshot, write_freshness_snapshot, read_freshness_snapshot; address from lib.opal_naming.address(): s3://opal-data-harvest/amgt/harvest/state/freshness_snapshot/current/snapshot.json. Library code; writes no store object. AMENDMENT 1: snapshot_age_hours(); a snapshot older than 24 h, or with an unreadable generated_at, is treated as absent. AMENDMENT 2: write_freshness_snapshot returns the put response ETag.",
    "artifact_covered_by": [
     "AC1",
     "AC2"
@@ -29,9 +29,9 @@
   {
    "path_or_key": "lib/research/api/scoped_amgt.py",
    "kind": "script",
-   "commit_or_etag": "b45344d6c0",
+   "commit_or_etag": "810df9297f",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "serve_coverage_freshness reads the snapshot with one GET and adds snapshot{object,generated_at,age_hours}; absent, unreadable or older than 24 h falls back with snapshot_fallback in plain words; 60 s hold kept; refresh_freshness_snapshot(client) writes once. Not deployed (ay-5).",
+   "deploy_evidence": "serve_coverage_freshness reads the snapshot with one GET and adds snapshot{object,generated_at,age_hours}; absent, unreadable or older than 24 h falls back with snapshot_fallback in plain words; 60 s hold kept; refresh_freshness_snapshot(client) writes once. Not deployed (ay-5). AMENDMENT 2: handler recognises the direct-invoke event {\"amgt_scheduled_action\": \"refresh_freshness_snapshot\"} before HTTP path parsing (_scheduled_action_response): 200 {object, generated_at, rows, etag}; unknown action 400; failed build or write 500 with a plain reason; nothing written on 400/500.",
    "artifact_covered_by": [
     "AC1",
     "AC2"
@@ -40,9 +40,9 @@
   {
    "path_or_key": "lib/research/api/tests/test_freshness_snapshot.py",
    "kind": "script",
-   "commit_or_etag": "b45344d6c0",
+   "commit_or_etag": "810df9297f",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "13 plant cases: address, builder equality, one GET and no listing, absent, unreadable, read refused, refresh writes once, incomplete view not written, failed write returned, aged 30 h falls back, fresh 23 h served with age, unreadable time falls back, age arithmetic.",
+   "deploy_evidence": "18 plant cases: address, builder equality, one GET and no listing, absent, unreadable, read refused, refresh writes once, incomplete view not written, failed write returned, aged 30 h falls back, fresh 23 h served with age, unreadable time falls back, age arithmetic; AMENDMENT 2: scheduled event writes once, unknown action 400 writes nothing, failed write 500, unfinished build 500, HTTP GET never writes.",
    "artifact_covered_by": [
     "AC2"
    ]
@@ -52,7 +52,7 @@
    "kind": "script",
    "commit_or_etag": "b45344d6c0",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "Row Z-W258-S2 fix: non-greedy keys compared for equality, at most one greedy key and it under /api/scoped/amgt/security/. 6 passed. Full lib/research/api/tests: 680 passed, 0 failed.",
+   "deploy_evidence": "Row Z-W258-S2 fix: non-greedy keys compared for equality, at most one greedy key and it under /api/scoped/amgt/security/. 6 passed. Full lib/research/api/tests: 685 passed (after AMENDMENT 2), 0 failed.",
    "artifact_covered_by": [
     "AC2"
    ]
@@ -86,22 +86,22 @@
    "criterion_verbatim": "every plant case passes; and exit=0",
    "method": "command",
    "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python -m pytest -v -p no:cacheprovider lib/research/api/tests/test_freshness_snapshot.py; echo \"exit=$?\"",
-   "output_evidence": "13 passed, 39 warnings in 0.16s\nexit=0",
-   "denominator": "13 of 13 plant cases passed",
+   "output_evidence": "18 passed, 52 warnings in 0.49s\nexit=0",
+   "denominator": "18 of 18 plant cases passed",
    "status": "PASS",
-   "expect": "(?s)13 passed.*exit=0",
+   "expect": "(?s)18 passed.*exit=0",
    "judgment": false
   }
  ],
  "controls": {
   "mutant": {
-   "description": "Planted: the route with no snapshot object stored (absent arm) and with a corrupt object (unreadable arm), against the arm with a stored snapshot. AMENDMENT 1: the stored snapshot aged to 30 h (falls back) and to 23 h (served with age_hours).",
+   "description": "Planted: the route with no snapshot object stored (absent arm) and with a corrupt object (unreadable arm), against the arm with a stored snapshot. AMENDMENT 1: the stored snapshot aged to 30 h (falls back) and to 23 h (served with age_hours). AMENDMENT 2: the scheduled event planted with an unknown action (400), a refused put (500) and an unfinished build (500), each with zero puts; an HTTP GET planted over both snapshot-present and snapshot-absent arms with zero puts.",
    "expected": "the stored arm shows 0 listings and 1 get; the absent and corrupt arms list the stores and carry snapshot_fallback",
-   "observed": "test_the_route_serves_the_snapshot_with_one_get_and_no_listing, test_an_absent_snapshot_falls_back_and_says_so and test_an_unreadable_snapshot_falls_back_and_never_answers_500 all pass; test_an_aged_snapshot_falls_back_and_says_so and test_a_snapshot_just_inside_the_limit_is_served_with_its_age pass",
+   "observed": "test_the_route_serves_the_snapshot_with_one_get_and_no_listing, test_an_absent_snapshot_falls_back_and_says_so and test_an_unreadable_snapshot_falls_back_and_never_answers_500 all pass; test_an_aged_snapshot_falls_back_and_says_so and test_a_snapshot_just_inside_the_limit_is_served_with_its_age pass; the five AMENDMENT 2 plant tests pass",
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
-   "method": "the c59 local check run before the first commit, after it, and after AMENDMENT 1",
+   "method": "the c59 local check run before the first commit, after it, and after AMENDMENT 1, and after AMENDMENT 2",
    "observed": "302 of 302 on every run",
    "status": "STABLE"
   }
