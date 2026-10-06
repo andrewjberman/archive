@@ -61,3 +61,15 @@ Instrument: `scripts/overlay-census.mjs` (read-only, regex; `--json`, `--files`)
 - **Largest files:** DistributionTab 35, AdvisorPublicProfile 19, PartnerAnalytics 19, StylePolicyComparison 17, `lib/designTokens.ts` 16, AdvisorsTab 15, ClientsTab 14.
 
 **What this is and is not.** It is the baseline the PROOF asks to re-run per delivered page: the number of surfaces that still separate themselves by a translucent overlay. It does NOT map any overlay to a rung (FWD-12 is delivered page by page) and does not say which overlays are a SEPARATION (a tile on a panel) as against a hover or a decoration; REST /5 and /10 are the likely tile and inset washes, HOVER is FWD-13's. Instrument limit: a class assembled at runtime (`` `bg-white/${n}` ``) is not seen. **Not done:** the container-token census (each token's resolved role) and any before/after render (no render this seat; port 5174 is Andrew's F1 run).
+
+## CONTAINER-TOKEN CENSUS -- portal DEV 79bad192 (2026-10-06 ~04:5xZ)
+
+Instrument: `node scripts/layer-table.mjs --containers` (read-only). **DENOMINATOR:** 24 tokens whose names match `bg|layer|card|panel|surface|container|state-hover|state-selected` declared in `src/index.css` plus the root theme (`card-foreground` excluded as an ink); consumers = `var(--token)` occurrences over 597 src files. 0 tokens unresolved.
+
+**Heaviest use:** `--bg-header` 408 var() uses (the section strip), `--bg-card` 31, `--state-hover-band` 24, `--layer-tile` 22, `--bg-page` 16. Zero uses: `--bg-medium-alt`, `--bg-tooltip-alt`, `--card`.
+
+**Values shared by two or more tokens, BAND world (the finding the PROOF asks for):**
+- Same role, legacy alias of the named layer (no defect): `--bg-header = --layer-strip = --bg-dark` #0A1733; `--bg-card = --layer-body` #192643; `--bg-medium = --bg-medium-alt = --layer-tile` #253456; `--bg-tooltip = --bg-tooltip-alt = --layer-tooltip` #081126; `--layer-hover = --state-hover-band` #2F426A; `--layer-selected = --state-selected-band` #344C7F; `--bg-page = --bg-band` #0B111D.
+- **NEIGHBOURING ROLES sharing a value: `--bg-hover-light` (a hover) = `--bg-surface` (a panel body) = `--card`, all #1E2D4D.** A hover that resolves to the surface it sits on is invisible; `--bg-hover-light` has 2 var() uses, `--bg-surface` 13: those 2 sites need a look. This is the one real violation of "zero neighbouring roles sharing a value" the census found.
+
+**LIGHT world: not measurable by this instrument for most tokens.** A token declared once (the root default is the dark/band value) reads identically in both columns, so the "light" column for `--bg-header`, `--bg-card`, `--layer-*` is the band value, not a light-world rung. Only `--bg-page` (#F4F6FA) and `--bg-surface` (#FFFFFF) carry a light declaration; `--layer-light-strip` and `--layer-light-tile` do not exist (printed MISSING by the table above). So the PRD's "each role has an opaque rung in the light world" is NOT met for strip, tile, hover or selected: the light world has 2 of its 6 roles. That is the defect list FWD-12 still owes.
