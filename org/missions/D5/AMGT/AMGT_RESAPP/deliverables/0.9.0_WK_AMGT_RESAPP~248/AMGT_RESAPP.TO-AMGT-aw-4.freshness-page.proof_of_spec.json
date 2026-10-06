@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-aw-4.freshness-page",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "11f3af83c1957fbd1954e918647ab590009e465e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "11f3af83c1957fbd1954e918647ab590009e465e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-aw-4.freshness-page.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~248",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/Freshness/Freshness.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "8adcf3f7280c15956055afb0009f482f415230d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW, in the nested portal repo on branch wk-AMGT_RESAPP-248-portal (from 2146031c), not pushed. FreshnessView (pure over rows + today) and the Freshness page (React Query hook over getCoverageFreshness, header, summary, sortable table, page end). Route and nav entry in App.tsx are the issuer's.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/Freshness/freshnessRows.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "8adcf3f7280c15956055afb0009f482f415230d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW. The stale rule: older than 7 trading days (the estate's generated NYSE calendar), or NEVER / no stored read; sort by staleness or name.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/api/endpoints/amgt-lead-panel.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "8adcf3f7280c15956055afb0009f482f415230d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, add-only: CoverageFreshnessRow, CoverageFreshnessSet and getCoverageFreshness() calling GET /api/scoped/amgt/freshness through apiRequest.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/Freshness/Freshness.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "8adcf3f7280c15956055afb0009f482f415230d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 6 tests -- stale input flagged with its day, all-fresh name not flagged, NEVER reads stale, the 7/8 trading-day line, a non-covered row hidden, sort by staleness and name.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)/portal\" && bun test src/pages/Freshness/Freshness.test.tsx; echo \"exit=$?\" -- every case passes; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && bun test src/pages/Freshness/Freshness.test.tsx; echo \"exit=$?\"",
+      "output_evidence": "bun test v1.3.14 (0d9b296a)\n\n 6 pass\n 0 fail\n 25 expect() calls\nRan 6 tests across 1 file. [142.00ms]\nexit=0",
+      "denominator": "6 of 6 tests pass, 0 fail, exit=0",
+      "status": "PASS",
+      "expect": "6 pass.*0 fail.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- judgment criterion carried on the worker face with no text; output recorded, no verdict (graded at L9)",
+      "method": "manual_read_with_citation",
+      "invocation": "open portal/src/pages/Freshness/Freshness.tsx (FreshnessView) and Freshness.test.tsx; the rendered markup in the tests is the page's output",
+      "output_evidence": "Rendered by renderToStaticMarkup over a fixed day 2026-10-05: summary \"1 of 1 covered companies have an input that is stale (older than 7 trading days, or never read).\"; stale flag text \"Seeking Alpha last read 2026-09-11\"; a NEVER input reads \"Web search has never been read\"; an all-fresh name reads \"All inputs current\"; columns Company, Last refreshed, Bloomberg, Seeking Alpha, Web search, Research pack, Stale; sort buttons Stalest first / Freshest first / Company name. Note: the served pack clock reads NEVER for the covered rows on the deployed build (existing row in INVESTIGATION_v1.md), so every covered name shows a Research pack flag until that is fixed.",
+      "denominator": "N/A -- judgment criterion, no count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: output recorded, graded at L9 by the CVO, not self-graded",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted discriminator: STALE_AFTER_TRADING_DAYS 7 changed to 99 in freshnessRows.ts, then bun test run.",
+      "expected": "the stale-flag tests fail",
+      "observed": "4 pass, 2 fail with the threshold at 99; the file was restored to the committed bytes and the suite read 6 pass, 0 fail.",
+      "method": "command",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "The suite run twice on the same bytes (rows and day are fixed arguments, no clock read in the logic).",
+      "expected": "same result both runs",
+      "observed": "6 pass, 0 fail on both runs (exit=0).",
+      "method": "command",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The route and nav entry in portal/src/App.tsx",
+      "reason": "Shared file, outside this order's paths; the issuer adds it at the merge (lines named in the report)."
+    },
+    {
+      "item": "A push of the portal branch",
+      "reason": "Out of bounds; the DEV push is Andrew's word through the integrator."
+    },
+    {
+      "item": "A live read of /api/scoped/amgt/freshness",
+      "reason": "Not requested by a criterion; the page is exercised over fixed rows shaped from read_coverage_freshness."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~248/AMGT_RESAPP.TO-AMGT-aw-4.freshness-page.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "tsc --noEmit -p tsconfig.app.json",
+      "invocation": "cd portal && node_modules/.bin/tsc --noEmit -p tsconfig.app.json | grep -i 'Freshness\\|amgt-lead-panel'",
+      "result": "0 lines naming the touched files"
+    }
+  ]
+}
