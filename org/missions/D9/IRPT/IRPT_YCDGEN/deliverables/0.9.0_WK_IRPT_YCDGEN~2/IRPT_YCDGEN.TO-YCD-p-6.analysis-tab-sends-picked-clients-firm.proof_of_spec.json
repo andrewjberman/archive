@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-p-6.analysis-tab-sends-picked-clients-firm",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-p-6.analysis-tab-sends-picked-clients-firm.md",
+    "group": "OTHER",
+    "vintage_commit": "f265582ccc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6I.md",
+    "vintage_commit": "f265582ccc",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-p-6.analysis-tab-sends-picked-clients-firm.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/index.tsx",
+      "kind": "script",
+      "commit_or_etag": "e107538d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "selectedTenantFor: the global firm context's tenant for the picked row's firm, fallback registryTenant; selectedScopeRef.selectedTenant takes it. Commit e107538d is in the PORTAL repo on branch wk-IRPT_YCDGEN-81-portal (a nested git repo), not in the workspace repo. Local.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/analysis/GenerateComposer.tsx",
+      "kind": "script",
+      "commit_or_etag": "e107538d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "readCatalogueFor / submitWithTenant / tenantMissingFor: no read and a refused submit with no tenant for a Global scope; plain-words line on the page. Commit e107538d is in the PORTAL repo on branch wk-IRPT_YCDGEN-81-portal (a nested git repo), not in the workspace repo. Local.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/scripts/global-tenant-exercise.mjs",
+      "kind": "script",
+      "commit_or_etag": "e107538d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new; arguments global, refuse, typecheck, one RESULT line each. Commit e107538d is in the PORTAL repo on branch wk-IRPT_YCDGEN-81-portal (a nested git repo), not in the workspace repo. Local.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_YCDGEN-W2-S16 appended",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- `bun portal/scripts/global-tenant-exercise.mjs global` must print a line matching `^RESULT: global PASS`",
+      "method": "command",
+      "invocation": "bun portal/scripts/global-tenant-exercise.mjs global",
+      "output_evidence": "MEASURE: selectedScope.registryTenant=\"cottonwood\" globalFirm.tenant=\"cottonwood\" verifiedRequestFirm.tenant=\"cottonwood\" principalClass=global\nOK: catalogue read carries the firm: /api/scoped/investor-reporting/analysis/comparisons?selected_tenant=cottonwood\nOK: submit carries the firm: selectedTenant=\"cottonwood\"\nRESULT: global PASS\nrc=0",
+      "denominator": "11 of 11 checks held",
+      "expect": "^RESULT: global PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- `bun portal/scripts/global-tenant-exercise.mjs refuse` must print a line matching `^RESULT: refuse PASS`",
+      "method": "command",
+      "invocation": "bun portal/scripts/global-tenant-exercise.mjs refuse",
+      "output_evidence": "OK: no tenant: no catalogue read made (reads=0, answer=skipped)\nOK: no tenant: submit refused before any send (sends=0, code=no-firm-for-client)\nOK: page text says why\nRESULT: refuse PASS\nrc=0",
+      "denominator": "6 of 6 checks held (includes the with-tenant and single-firm negative controls)",
+      "expect": "^RESULT: refuse PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- `bun portal/scripts/global-tenant-exercise.mjs typecheck` must print a line matching `^RESULT: typecheck PASS`",
+      "method": "command",
+      "invocation": "bun portal/scripts/global-tenant-exercise.mjs typecheck",
+      "output_evidence": "tsc exit code: 0\nOK: tsc -b --noEmit exit 0\nRESULT: typecheck PASS\nrc=0",
+      "denominator": "1 of 1 (tsc -b --noEmit exit 0)",
+      "expect": "^RESULT: typecheck PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The refuse arm runs the same composer with the firm held (message must be absent) and with a single-firm scope and no tenant (read and send must go ahead); the global arm sends a second firm's client and requires its own firm, not the first.",
+      "expected": "message absent with the firm held; single-firm read and send both made; second firm carries its own tenant",
+      "observed": "all three held (refuse 6 of 6, global 11 of 11)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- stubbed fetch and submitter over a committed wire fixture",
+      "observed": "single run per criterion",
+      "status": "N/A-WITH-REASON",
+      "reason": "no clock, network or randomness is read"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "bun test src/pages/InvestorReporting/__tests__/fe-s-13 src/pages/InvestorReporting/tabs/analysis: 40 pass, 11 fail after the edit, the same 11 route/envelope/pin tests the order names as baseline",
+      "reason": "Baseline carried by the order; not a criterion."
+    }
+  ],
+  "surprises": [
+    "IRPT_YCDGEN-W2-S16"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "tsc",
+      "invocation": "bun portal/scripts/global-tenant-exercise.mjs typecheck",
+      "result": "exit status 0"
+    }
+  ]
+}
