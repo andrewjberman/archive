@@ -1,0 +1,85 @@
+"""OG-rl-7 PHASE A (the OA-e-10 admit-list precondition), HOST SIDE, READ-ONLY.  Run by r19_ssm_prog.py (arg: window start day, e.g. 2026-09-05).
+The gateway audit lake carries NO /login record (the handler writes none; r19_lake_census.json), so the plane that does see the route is the service journal's
+uvicorn access log, read here for the window.  Prints COUNTS and day/method/status only: no client address, no query string, no email, no .env value.
+  1. journal coverage in the window (first and last entry, total access-log lines = the denominator);
+  2. every bare /login request in the window: day, method, status;  and the substring count for /login (every route containing it) beside it;
+  3. the configured server-held identities, as booleans: .env OTP_MAILBOX and MS_INGEST_IDENTITY digests equal sha256 of the template's value (the value is never printed);
+  4. the email-keyed token-cache census (the only thing /login's consent mints): file count, files modified in the window, whether the configured identity's file exists.
+"""
+import collections
+import datetime
+import hashlib
+import os
+import re
+import subprocess
+import sys
+
+since = sys.argv[1]
+print("HOST_DATE", datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ"), "TZ", subprocess.run(["date", "+%Z"], capture_output=True, text=True).stdout.strip())
+JC = ["journalctl", "--no-pager", "-o", "short-iso", "--since", since + " 00:00:00", "_COMM=uvicorn"]
+p = subprocess.run(JC, capture_output=True, text=True, errors="replace")
+lines = p.stdout.split("\n")
+acc = [ln for ln in lines if '"' in ln and " HTTP/" in ln]
+print("JOURNAL_RC", p.returncode, "lines", len(lines), "access-log lines", len(acc))
+dates = [ln[:10] for ln in acc if re.match(r"\d{4}-\d\d-\d\d", ln)]
+print("JOURNAL_COVERS first", min(dates) if dates else None, "last", max(dates) if dates else None, "distinct days", len(set(dates)))
+# also the units present (the rename m365-mcp-gateway -> opal-gateway)
+units = collections.Counter()
+for ln in acc:
+    m = re.match(r"\S+ \S+ (\S+?)\[", ln)
+    units[m.group(1) if m else "?"] += 1
+print("UNIT_HOSTS", dict(units))
+bare = re.compile(r'"(GET|POST|HEAD|PUT|DELETE|OPTIONS) /login([? ]| HTTP)[^"]*" (\d{3})')
+sub = re.compile(r'"[A-Z]+ [^"]*/login[^"]*" (\d{3})')
+bare_hits = []
+sub_hits = collections.Counter()
+for ln in acc:
+    m = bare.search(ln)
+    if m:
+        bare_hits.append((ln[:10], m.group(1), m.group(3)))
+    ms = sub.search(ln)
+    if ms:
+        path = re.search(r'"[A-Z]+ (\S+)', ln).group(1).split("?")[0]
+        sub_hits[(path, ms.group(1))] += 1
+print("LOGIN_BARE_COUNT", len(bare_hits))
+for d, meth, code in bare_hits[:40]:
+    print("LOGIN_BARE", d, meth, code)
+print("LOGIN_SUBSTRING_COUNT", sum(sub_hits.values()), dict((("%s %s" % k), v) for k, v in sub_hits.items()))
+# 3. the configured identities (digest comparison only)
+want = hashlib.sha256(b"andrew@opalinvest.com").hexdigest()
+vals = {}
+tcd = None
+for line in open("/opt/opal-gateway/.env", encoding="utf-8"):
+    m = re.match(r"^([A-Z0-9_]+)=(.*)$", line.rstrip("\n").rstrip("\r"))
+    if m and m.group(1) in ("OTP_MAILBOX", "MS_INGEST_IDENTITY", "TOKEN_CACHE_DIR"):
+        if m.group(1) == "TOKEN_CACHE_DIR":
+            tcd = m.group(2).strip().strip('"')
+        else:
+            vals[m.group(1)] = hashlib.sha256(m.group(2).strip().strip('"').lower().encode("utf-8")).hexdigest()
+for k in ("OTP_MAILBOX", "MS_INGEST_IDENTITY"):
+    print("CONFIGURED", k, "present", k in vals, "digest equals sha256(andrew@opalinvest.com)", vals.get(k) == want)
+print("CONFIGURED_SET_SIZE", len(set(v for v in vals.values())), "distinct digest(s) among the two keys")
+# 4. the email-keyed token cache
+cache = tcd or "/opt/opal-gateway/.token_cache"
+if not os.path.isabs(cache):
+    cache = os.path.join("/opt/opal-gateway", cache)
+print("TOKEN_CACHE_DIR_SET_IN_ENV", tcd is not None, "exists", os.path.isdir(cache))
+cand = {"andrew@opalinvest.com": "configured", "alyssa@opalinvest.com": "alyssa", "opalbloomberg@opalinvest.com": "opalbloomberg"}
+byhash = dict((hashlib.sha256(e.encode()).hexdigest(), lab) for e, lab in cand.items())
+since_ts = datetime.datetime.strptime(since, "%Y-%m-%d").timestamp()
+n = 0
+inwin = 0
+rows = []
+if os.path.isdir(cache):
+    for f in sorted(os.listdir(cache)):
+        if not f.endswith(".bin"):
+            continue
+        n += 1
+        mt = os.path.getmtime(os.path.join(cache, f))
+        w = mt >= since_ts
+        inwin += 1 if w else 0
+        rows.append((f[:8], byhash.get(f[:-4], "unattributed"), w, datetime.datetime.utcfromtimestamp(mt).strftime("%Y-%m-%d")))
+print("TOKEN_CACHE files", n, "modified in window", inwin)
+for r in rows:
+    print("TOKEN_CACHE_FILE", r[0], r[1], "in_window" if r[2] else "older", "mtime", r[3])
+print("LOGIN_HOST_DONE RESULT: PASS")
