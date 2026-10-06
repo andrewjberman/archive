@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ax-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "d7b07c5a859a47af56491e697107ceb8d6fe1607"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "495d89da628ddc7a1746d36fadff5fbef23fd71a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ax-1.freshness-fast.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~252",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "242d94c616dd6df4838d677d1a6fee1e40922e48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: new _ledger_dates (each pack ledger read once, 16 at a time), serve_coverage_freshness (60 s hold, served_cache key freshness/view, stored only when every read completed), the /freshness route calls serve_coverage_freshness. read_coverage_freshness returns the same values. No deploy in this order.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_freshness_fast.py",
+      "kind": "test",
+      "commit_or_etag": "242d94c616dd6df4838d677d1a6fee1e40922e48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 5 tests on a counting stub pool -- warm call makes 0 store reads and rows equal; hold expires at 60 s and a later stored date then shows; a view over a failed read is not held; route answer equals the unheld read; ledgers read once each with dates equal to the one-by-one read. 5 passed; 2 fail with the route on the unheld read.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~252/after_equal.py",
+      "kind": "script",
+      "commit_or_etag": "242d94c616dd6df4838d677d1a6fee1e40922e48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: compares every row of a cold and a warm /freshness answer with before.json (generated_at and timing fields ignored); prints EQUAL n of n rows.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~252/before.json",
+      "kind": "config_data",
+      "commit_or_etag": "242d94c616dd6df4838d677d1a6fee1e40922e48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: /freshness body captured through the route handler before any edit, 302 rows.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "/freshness warm worst under 2000 ms with status [200] and covered rows 95; C1 PASS; R74 C53 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round74/checks/r74_served.py\" --cell c53 --where local; echo \"exit=$?\"",
+      "output_evidence": "/freshness warm: min 14 ms max 14 ms status [200] covered rows 95\nPASS C1 /freshness answers warm within the bar worst 14 ms bar 2000\nR74 C53 SERVED: YES\nexit=0",
+      "denominator": "3 of 3 timed warm calls answered 200; covered rows 95 of 95 expected; worst 14 ms of a 2000 ms bar",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "EQUAL n of n rows with n the rows served (292 at the cut); and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~252/after_equal.py\"; echo \"exit=$?\"",
+      "output_evidence": "cold: 302 rows served, 302 rows before, 0 differing\nwarm: 302 rows served, 302 rows before, 0 differing\nEQUAL 302 of 302 rows\nexit=0",
+      "denominator": "302 of 302 rows equal, cold and warm (302 rows served at this worktree; the order named 292 at the cut)",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The plant test with the /freshness route pointed back at the unheld read_coverage_freshness.",
+      "expected": "test_warm_call_does_not_reach_the_store_and_every_row_is_equal and test_the_hold_expires_and_a_later_stored_date_then_shows fail.",
+      "observed": "2 failed, 3 passed with the route on the unheld read; 5 passed with the change.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the plant test and the c53 check each run more than once in this session",
+      "observed": "5 passed every run; c53 warm 14-15 ms every run; after_equal EQUAL 302 of 302 every run (live store unchanged between runs)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy of the change to the live function",
+      "reason": "Out of bounds for this order (no deploy); the redeploy is AMGT-ax-5."
+    },
+    {
+      "item": "Cold-miss time on the deployed function",
+      "reason": "Only the warm answer is the criterion; the ledger reads on a miss are 16-wide but a miss was not timed on the deployed plane."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~252/AMGT_RESAPP.TO-AMGT-ax-1.freshness-fast.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest lib/research/api/tests/",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/api/tests/ -p no:cacheprovider -q",
+      "result": "661 passed, 245 warnings in 47.08s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh, code commit 242d94c616)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- lib/research/api/scoped_amgt.py lib/research/api/tests/test_freshness_fast.py ...",
+      "result": "committed 242d94c616, msg-verify MATCH"
+    }
+  ]
+}
