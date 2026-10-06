@@ -1,0 +1,117 @@
+"""OG-rl-7 r19b (CVO guard V2): RECORD the INSTALLED server.py's /login responses -- no identity, a synthetic verified identity (test-signed, ES256 test key swapped for the ELB key),
+a planted unsigned identity -- in a SEPARATE host process (env -i; never the running service for the signed arm; never /opt/opal-gateway/.env), plus the REAL running service's host-local
+/login with no identity and with a planted header (a GET that returns 401 before any consent or state work). The record is lines of codes, Location values, body sha256 and booleans;
+no identity value and no secret is printed. Run once BEFORE and once AFTER the deploy; the two LOGIN_REC sets must be EQUAL (server.py is byte-equal to live, R22).
+usage: python run.py <mode: configured|empty> record
+"""
+import base64
+import hashlib
+import json
+import os
+import sys
+
+mode, expect = sys.argv[1], sys.argv[2]
+gw = "/opt/opal-gateway"
+if os.environ.get("OG_GW_DIR"):                      # a scratch/test tree (never the host in the normal run)
+    gw = os.environ["OG_GW_DIR"]
+sys.path.insert(0, gw)
+os.environ["MOCK_GRAPH"] = "1"
+os.environ["IDENTITY_PROVIDER"] = "alb_oidc"
+os.environ["RATE_LIMIT_ENABLED"] = "0"
+for k in ("OTP_MAILBOX", "MS_INGEST_IDENTITY"):
+    os.environ.pop(k, None)
+CONFIGURED = "andrew@opalinvest.com"
+UNCONFIGURED = "viewer@opalinvest.com"
+if mode == "configured":
+    os.environ["OTP_MAILBOX"] = CONFIGURED
+    os.environ["MS_INGEST_IDENTITY"] = CONFIGURED
+elif mode != "empty":
+    raise SystemExit("mode must be configured|empty")
+
+import dotenv  # noqa: E402
+dotenv.load_dotenv = lambda *a, **k: False
+
+import jwt                                                       # noqa: E402
+from cryptography.hazmat.primitives import serialization        # noqa: E402
+from cryptography.hazmat.primitives.asymmetric import ec        # noqa: E402
+from starlette.testclient import TestClient                      # noqa: E402
+
+from app import identity, server, token_broker                   # noqa: E402
+
+print("INSTALLED_FILE server.py=%s md5 %s" % (server.__file__, hashlib.md5(open(server.__file__, "rb").read()).hexdigest()))
+key = ec.generate_private_key(ec.SECP256R1())
+pub_pem = key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+priv_pem = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
+identity._fetch_elb_public_key = lambda kid: pub_pem
+
+
+async def _no_deny(email):
+    return None
+
+
+server._email_denied = _no_deny
+calls = {"make_state": 0, "build_consent_url": 0}
+
+
+def _make_state(email):
+    calls["make_state"] += 1
+    return "stub-state"
+
+
+def _build(state):
+    calls["build_consent_url"] += 1
+    return "https://consent.invalid/stub?state=" + state
+
+
+token_broker.make_state = _make_state
+token_broker.build_consent_url = _build
+
+
+def signed(email):
+    return jwt.encode({"email": email, "sub": "local"}, priv_pem, algorithm="ES256", headers={"kid": "local-kid"})
+
+
+def planted(email):
+    def b(d):
+        return base64.urlsafe_b64encode(json.dumps(d).encode()).decode().rstrip("=")
+    return b({"alg": "ES256", "typ": "JWT", "kid": "local-kid"}) + "." + b({"email": email, "sub": "planted"}) + "." + base64.urlsafe_b64encode(bytes(64)).decode().rstrip("=")
+
+
+client = TestClient(server.app, raise_server_exceptions=False)
+recs = []
+
+
+def rec(name, headers):
+    before = calls["make_state"] + calls["build_consent_url"]
+    r = client.get("/login", headers=headers, follow_redirects=False)
+    reached = (calls["make_state"] + calls["build_consent_url"]) > before
+    d = dict(arm=name, code=r.status_code, location=r.headers.get("location", ""), body_sha256=hashlib.sha256(r.content).hexdigest()[:16], consent_reached=reached)
+    recs.append(d)
+    print("LOGIN_REC " + json.dumps(d, sort_keys=True))
+
+
+rec("installed: no identity", {})
+rec("installed: synthetic verified identity (test-signed, configured)", {"x-amzn-oidc-data": signed(CONFIGURED)})
+rec("installed: synthetic verified identity (test-signed, other)", {"x-amzn-oidc-data": signed(UNCONFIGURED)})
+rec("installed: planted unsigned identity", {"x-amzn-oidc-data": planted(CONFIGURED), "X-User-Email": CONFIGURED})
+import urllib.request, urllib.error  # noqa: E402
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **k):
+        return None
+
+
+op = urllib.request.build_opener(_NoRedirect)
+for name, hdr in (("running service host-local: no identity", {}), ("running service host-local: planted header", {"x-amzn-oidc-data": planted(CONFIGURED), "X-User-Email": CONFIGURED})):
+    try:
+        resp = op.open(urllib.request.Request("http://localhost:8080/login", headers=hdr), timeout=15)
+        code, loc = resp.status, resp.headers.get("location", "")
+    except urllib.error.HTTPError as e:
+        code, loc = e.code, e.headers.get("location", "")
+    except Exception as e:
+        code, loc = "ERR:" + type(e).__name__, ""
+    d = dict(arm=name, code=code, location=loc[:60], body_sha256="-", consent_reached="-")
+    print("LOGIN_REC " + json.dumps(d, sort_keys=True))
+print("LOGIN_RECORD %s: %d arms, grants_written 0, synthetic" % (mode, len(recs) + 2))
+sys.exit(0)
