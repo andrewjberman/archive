@@ -1,4 +1,4 @@
-# ANDREW-DIRECT 2026-10-05 00:03Z -- the AI classifier runs on the full old table
+# ANDREW-DIRECT 2026-10-06 00:03Z (8:03 PM Eastern, 2026-10-05) -- the AI classifier runs on the full old table
 
 **Channel:** typed at the `1.0.0_SA_CTO` terminal (laptop). Clock read at recording: 00:03Z. **Recorded by:**
 `1.0.0_SA_CTO`, same turn.
