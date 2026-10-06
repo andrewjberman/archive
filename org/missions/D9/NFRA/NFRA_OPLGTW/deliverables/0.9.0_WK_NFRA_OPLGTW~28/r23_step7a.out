@@ -1,0 +1,15 @@
+### step 7a (R21): release tree ba27a07439, each in its own process; the release ADDS one route: Route("/rivalfunds/{day}/audit") (1 line in app/server.py), ROUTE_CLASS declares it (tests/test_principal_cutover.py)
++        Route("/rivalfunds/{day}/audit", rivalfunds_view.rivalfunds_audit, methods=["GET"]),
+== tests/test_principal_cutover.py
+OGA2-AC10: 3 routes x 6 arms = 18 requests; missing/Basic -> 401 + 'Bearer resource_metadata=<http://localhost:8080/.well-known/oauth-protected-resource>'; garbage/expired -> 401 + that challenge with error=invalid_token; valid token of scope 'mcp.read' where 'mcp' is required -> 403 insufficient_scope with scope="mcp"; full token -> 200, no challenge; advertised resource http://localhost:8080/mcp
+OGA2-AC11: policy denial (read-only -> send_email) x2 -> HTTP 200, no WWW-Authenticate, tool result guard_denied code=read_only_denied, no needs_login/login_url, identical both times (MCP isError=False); Graph 403 -> HTTP 200, tool error 'Graph 403 ErrorAccessDenied: A' (isError=False); /teams/poll Graph 403 -> 502, no challenge; the same token then whoami -> 200
+11 passed, 1 warning in 6.44s
+== tests/test_data_entitlement_guard.py
+OGZ1-AC7: registered tools 56 = Schwab 5 allowed + 51 others (native 42, integration 9: graph_cypher, graph_status, opal_data_refresh_upload, ycharts_freshness, ycharts_fund_series, ycharts_risk_return_scatter, ycharts_search, ycharts_snapshot_metrics, ycharts_time_series); tools/call of the 51 others as the restricted profile -> entitlement_denied 51 of 51; the chokepoints with the MCP layer bypassed (tools._run 42, run_integration_tool 9) -> entitlement_denied 51 of 51; credential fetches (delegated Graph token, silent MSAL, integration credential providers), Graph calls and tool bodies during those 102 calls: 0; control: schwab_query served with 1 credential fetch
+12 passed, 1 warning in 12.34s
+
+### step 7a NEGATIVE CONTROL: a scratch copy of the release gateway tree whose tests/test_principal_cutover.py is the LIVE one (ROUTE_CLASS without the new route) -> the inventory must FAIL
+E       AssertionError: ['/rivalfunds/{day}/audit']
+E         '/rivalfunds/{day}/audit'
+FAILED tests\test_principal_cutover.py::test_oga2_ac04 - AssertionError: ['/r...
+1 failed, 10 passed, 1 warning in 7.01s
