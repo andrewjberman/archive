@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e53",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "90f99888cd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "5d70aab6c9",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e53.attribution-etf-categories-two-group.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~37",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/Attribution/constants/etf-categories.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "4cc41317",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Portal commit 4cc41317 on branch wk-MDPF_SECCLASS-37-portal (stacked on e73c493e), not pushed. assetClass type is Fixed Income | Equity; ASSET_CLASS_ORDER is Fixed Income, Equity; CASH_USD is Fixed Income / Cash (the only ticker whose class changed, was Cash); SEGMENT_ORDER drops the Cash and Hedge keys and lists the Cash segment first under Fixed Income. Reader as read: holdings-shared.tsx getSubAssetClass uses getETFCategory(ticker).segment only, never assetClass, so no rendered value changes (CASH_USD segment stays Cash). ASSET_CLASS_ORDER and SEGMENT_ORDER from this file have no importer anywhere in portal/src (git grep); Positioning and HoldingsTreemapChart carry their own."
+    },
+    {
+      "path_or_key": "portal/src/pages/Attribution/__tests__/mdpf-secclass/etf-categories-two-group.test.ts",
+      "kind": "test",
+      "commit_or_etag": "4cc41317",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New, 4 tests, every name carries two_group: order is two groups; every entry class is one of the two; CASH_USD reads Fixed Income / Cash; every segment is listed under its class."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC9-e53-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py src/pages/Attribution/__tests__/mdpf-secclass/etf-categories-two-group.test.ts two_group -- expect: PORTAL-TESTS ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py src/pages/Attribution/__tests__/mdpf-secclass/etf-categories-two-group.test.ts two_group",
+      "output_evidence": "PORTAL-TESTS ok=True pass=4 fail=0 rc=0 file=src/pages/Attribution/__tests__/mdpf-secclass/etf-categories-two-group.test.ts filter=two_group",
+      "denominator": "4 of 4 two_group tests passed, 0 failed; ETF_CATEGORIZATION entries checked: all (loop over every entry).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Set CASH_USD assetClass to Equity, rerun AC1, then restore.",
+      "expected": "AC1 fails",
+      "observed": "PORTAL-TESTS ok=False pass=2 fail=2 rc=1; restored, ok=True pass=4 fail=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "portal_named_tests.py run twice on the committed tree (first run and after mutant restore).",
+      "observed": "PORTAL-TESTS ok=True pass=4 fail=0 rc=0 each time (first run and after mutant restore).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Wider suites, lint, push to portal DEV (typecheck on Attribution files printed no errors).",
+      "reason": "BOUNDS: drain checks and the issuer's landing; not in the criterion."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py",
+  "compiler_tools": [
+    {
+      "tool": "git commit (portal worktree)",
+      "invocation": "git commit --author 0.9.0_WK_MDPF_SECCLASS~37 -F <msgfile> in portal/ on branch wk-MDPF_SECCLASS-37-portal",
+      "result": "commit 4cc41317; plain git commit used in the nested portal worktree, not safe-commit.sh"
+    }
+  ]
+}
