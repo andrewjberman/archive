@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-d-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-4.deploy-readback.md",
+    "group": "OTHER",
+    "vintage_commit": "9c9bd29d67"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~7",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round4.md",
+    "vintage_commit": "9c9bd29d67",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-4.deploy-readback.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/deploy_readback_check.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "CT4d4-AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed"
+    },
+    {
+      "path_or_key": "org/devices/test_deploy_readback.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "CT4d4-AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT4d4-AC1",
+      "criterion_verbatim": "python org/devices/test_deploy_readback.py expect: DEPLOY-READBACK-SELFTEST cases=6/6 ok=True",
+      "method": "command",
+      "invocation": "python org/devices/test_deploy_readback.py",
+      "output_evidence": "PASS case_happy: DEPLOY-READBACK commit=2792f2b738fbc180ace50a76636f40891185fbf1 device=dell1 admitted=True on_trunk=False objects_equal=2/2 ledger=closed-named ok=True failed=none | no-object control: DEPLOY-READBACK commit=2792f2b738fbc180ace50a76636f40891185fbf1 device=dell1 admitted=True on_trunk=False objects_equal=0/0 ledger=closed-named ok=False failed=objects_equal\nPASS case_one_byte: DEPLOY-READBACK commit=d751b6f990f156a2fc92c6263040bd61b3b9349a device=dell1 admitted=True on_trunk=False objects_equal=0/1 ledger=closed-named ok=False failed=objects_equal | lambda control: DEPLOY-READBACK commit=d751b6f990f156a2fc92c6263040bd61b3b9349a device=dell1 admitted=True on_trunk=False objects_equal=1/2 ledger=closed-named ok=False failed=objects_equal\nPASS case_on_trunk: DEPLOY-READBACK commit=c572c4b8ccae3d67c1882651dc6bc204e09e5abf device=dell1 admitted=True on_trunk=True objects_equal=1/1 ledger=closed-named ok=False failed=on_trunk\nPASS case_other_commit: DEPLOY-READBACK commit=e888e8d0ab17d2cf7e15f2c5536280b24321b44f device=dell1 admitted=True on_trunk=False objects_equal=1/1 ledger=other-commit ok=False failed=ledger | missing control: DEPLOY-READBACK commit=e888e8d0ab17d2cf7e15f2c5536280b24321b44f device=dell1 admitted=True on_trunk=False objects_equal=1/1 ledger=missing ok=False failed=ledger\nPASS case_open: DEPLOY-READBACK commit=9b4a653caaeb87afadafbcc92631a73ffcdd9d4a device=dell1 admitted=True on_trunk=False objects_equal=1/1 ledger=open ok=False failed=ledger\nPASS case_unpublished: DEPLOY-READBACK commit=339d25ae4434e51ab1005a0650735e65bd104382 device=dell1 admitted=False on_trunk=Unknown objects_equal=0/1 ledger=missing ok=False failed=admitted\nDEPLOY-READBACK-SELFTEST cases=6/6 ok=True\nrc=0",
+      "denominator": "6 of 6 cases (1 happy 2/2 ok=True; 2 one byte flipped, same length 0/1; 3 commit merged to origin/CLOUD on_trunk=True; 4 ledger names another commit; 5 ledger still open; 6 commit unpublished admitted=False)",
+      "status": "PASS",
+      "expect": "DEPLOY-READBACK-SELFTEST cases=6/6 ok=True"
+    },
+    {
+      "criterion_id": "CT4d4-AC2",
+      "criterion_verbatim": "python .tools/tests/test_named_commit_deploy.py expect: NAMED-COMMIT-TEST cases=8/8 ok=True",
+      "method": "command",
+      "invocation": "python .tools/tests/test_named_commit_deploy.py",
+      "output_evidence": "fixture: trunk=a602d6145f3b off_trunk_published=83087b76655d unpublished=5112db94915b\nPASS case 1: dell1, a commit on origin/CLOUD -> ADMITTED, ON-TRUNK | rc=0 NAMED-COMMIT ADMITTED commit=a602d6145f3bc32fbe1dcbba5c59b0002bcdeb5d device=dell1 role=execution trunk=ON-TRUNK branch=- reason=ancestor of origin/CLOUD\nPASS case 2: dell1, off the trunk, pushed to origin/q/dell1/X/round1 -> ADMITTED, OFF-TRUNK, branch printed | rc=0 NAMED-COMMIT ADMITTED commit=83087b76655de3ff7c4f8266680013d4c8660b96 device=dell1 role=execution trunk=OFF-TRUNK branch=q/dell1/X/round1 reason=published on origin/q/dell1/X/round1\nPASS case 3: dell1, off the trunk and NOT pushed -> REFUSED, not published | rc=1 NAMED-COMMIT REFUSED commit=5112db94915b58b51a0a26f416796f523df1623e device=dell1 role=execution trunk=OFF-TRUNK branch=- reason=not published: no other box can read the deployed bytes\nPASS case 4: dell1, the case-2 commit by its 7-character short hash -> REFUSED | rc=1 NAMED-COMMIT REFUSED commit=83087b7 device=dell1 role=- trunk=- branch=- reason=the commit must be a full 40-character lowercase hex hash; a short or symbolic name moves\nPASS case 5: laptop (control-plane), the case-2 commit -> UNCHANGED (the wrappers never refused it), admitted | rc=0 NAMED-COMMIT UNCHANGED commit=83087b76655de3ff7c4f8266680013d4c8660b96 device=laptop role=control-plane trunk=OFF-TRUNK branch=- reason=role control-plane: the wrappers never refused an off-trunk commit and this check does not start\nPASS case 6: device unset -> REFUSED | rc=1 NAMED-COMMIT REFUSED commit=83087b76655de3ff7c4f8266680013d4c8660b96 device=- role=- trunk=- branch=- reason=device unset: pass --device or set AGENTBUS_DEVICE\nPASS case 7: origin unreachable -> REFUSED, never OFF-TRUNK | rc=1 NAMED-COMMIT REFUSED commit=83087b76655de3ff7c4f8266680013d4c8660b96 device=dell1 role=execution trunk=- branch=- reason=git fetch origin failed rc=128: fatal: 'C:\\Users\\ANDREW~1\\AppData\\Local\\Temp\\named_commit_yxrzo7sw\\nowhere.git' does not appear to be a git repository fatal: Could not read from remote reposit (a failed fetch is never read as off-trunk)\nPASS case 8: the wrappers, on case 2 with an open sentinel, leave named_commit=<hash> in the ledger entry | safe-deploy.sh: rc=0 carried=True survives_rerender=True unpublished_rc=1 no_sentinel_rc=1; safe-apply.sh: rc=0 carried=True survives_rerender=True unpublished_rc=8 no_sentinel_rc=8\nNAMED-COMMIT-TEST cases=8/8 ok=True\nrc=0",
+      "denominator": "8 of 8 cases of the CT-d-3 control, run beside the new script",
+      "status": "PASS",
+      "expect": "NAMED-COMMIT-TEST cases=8/8 ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "each failure arm turns exactly its own field false: case 2 failed=objects_equal, case 3 failed=on_trunk, cases 4 and 5 failed=ledger, case 6 failed=admitted; case 1 also runs a no-object control (0/0) that cannot pass",
+      "expected": "5 of 5 failure arms ok=False, each naming its own field",
+      "observed": "5 of 5 failure arms ok=False, each naming its own field",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: each case builds a fresh temporary repository; hashes differ per run, the verdicts do not",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live read-back on a Dell (a real deploy, real S3 reads, the real ledger)",
+      "reason": "not this order's: it builds the instrument and proves it on stand-ins; the live run is the issuer's after this order"
+    },
+    {
+      "item": "comparing a Lambda's built package to a repo path (a --lambda option)",
+      "reason": "a Lambda package is built (zipped, timestamped) so its bytes cannot be compared to a repo path without a build step; --lambda-sha256 <function>=<expected CodeSha256> compares the deployed CodeSha256 to the digest the build recorded"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W7-S3"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~7/NFRA_CTLPLN.TO-CT-d-4.deploy-readback.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/devices/test_deploy_readback.py",
+      "result": "DEPLOY-READBACK-SELFTEST cases=6/6 ok=True"
+    }
+  ]
+}
