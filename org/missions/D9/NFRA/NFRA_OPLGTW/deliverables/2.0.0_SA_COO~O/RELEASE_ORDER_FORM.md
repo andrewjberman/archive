@@ -18,6 +18,9 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
 4. **Rollback.** A worktree at the live sha, equal file by file to the live S3 artifact.
 5. **BEFORE run.** On the host through the installed engine, with a synthetic principal and an in-memory grant: never a
    real identity, never a state-store write. Remove every host scratch copy.
+   - **The rehearsal stages EVERY file of the release that ships to the host (row Z-W28-S14).** That includes a file
+     at the gateway root, such as `identity_tool_allowlist.txt`, not only files under `app/`. Print the staged list
+     beside the release's shipped list; the two must be equal before the rehearsal's reads count.
    - **One host run at a time, each in its own scratch directory (row Z-W28-S9).** Name the scratch per run, for
      example `/tmp/og_<release>_<run id>`. Two runs sharing one scratch directory corrupt each other.
 6. **Verify script.** Host `/health`, shipped md5 against the release list, the tool count, the `.env` key NAMES (and
@@ -72,6 +75,11 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
 
 - Never source `/opt/opal-gateway/.env` (row Z-S32).
 - Never write a grant.
+- **The identifier bound (R39, `ledger/ROUND_ANALYSIS.round26.md` @c474e2d3f3).** An order's "never print or commit an
+  account id" means a client, custody or brokerage account identifier. An AWS account id inside a bucket name or a
+  resource address is outside it, and deploy output is not redacted for it.
+- **The manifest note (row Z-W28-S19).** `release_note` holds the current release's note only. Earlier notes live in
+  the ledger entries.
 - **Operator-command output (row Z-W28-S2).** An order that runs `ops/schwab_entitlement_admin.py` redirects the
   output of `prepare()` and `activate` to the off-repo directory and prints only the operations line. The scope diff
   prints master account ids as dictionary keys. The order also names how it resolves the holder's pk: a read-only scan
