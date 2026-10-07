@@ -1,0 +1,79 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-lk-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~34",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "36ae4e822d"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "d32e40998d",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-lk-1.audit-lake-key-stamp.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/audit.py",
+   "kind": "script",
+   "commit_or_etag": "c379d059eb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "built and held on the worker branch; the order bounds forbid a release or host act",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_audit_lake_key_stamp.py",
+   "kind": "test",
+   "commit_or_etag": "c379d059eb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "offline test on the worker branch; no deploy by the order's bounds",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: a record without a time gets a stamped key; a record with one keeps its key; the old builder shows the defect.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r28/checks/lk1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "named tests passed 3 of 3; failed/error lines 0",
+   "status": "PASS",
+   "expect": "(?s)named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "Release of the change to the host and a live lake write",
+   "reason": "The order says this cell is built and held; it ships in a later release."
+  }
+ ],
+ "surprises": [],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail: c379d059eb.",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest",
+   "invocation": "python -m pytest tests/test_audit_lake_key_stamp.py -q -p no:cacheprovider",
+   "result": "6 passed (3 named tests; ac01 has 4 parameters), rc=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The usable-time test in _lake_key replaced by `if False:` (the stamp never fires).",
+   "expected": "test_oglk1_ac01 FAILS",
+   "observed": "4 failed (all four parameters of test_oglk1_ac01, e.g. key audit/dt=/-<id>.jsonl), 2 passed; the line was restored afterwards",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The tests ran once directly and once through lk1.AC1.sh.",
+   "observed": "PASS each run",
+   "status": "STABLE"
+  }
+ }
+}

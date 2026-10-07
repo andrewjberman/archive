@@ -1,0 +1,300 @@
+"""OG-rl-13 host program: the two round-27 cells read through the code in OG_GW_DIR (default the INSTALLED /opt/opal-gateway), as SEPARATE processes (never the running service).
+Run by r27_ssm_prog.py under `env -i` from a per-run scratch directory that is removed in the same command list. Modes (argv[1]): before (installed live code) | rehearsal (staged
+release bytes, installed tree untouched) | after (installed release code) | probe (only the principal derivation; NO tool call). argv[2] = the served release sha.
+
+Two children, one body:
+  PAGE section  (OG-au-2). The GuardMiddleware stack of the code in OG_GW_DIR with a SYNTHETIC signed-in viewer (ES256 with a LOCAL test key replacing the ELB key fetch), REAL read-only S3
+                GETs by the instance role, a SCRATCH audit sink (AUDIT_PATH in the scratch dir; AUDIT_S3_BUCKET asserted empty). GETs the NEWEST published day's page and audit page, a chart
+                for a fund with no chart object, the archive, and a day with no page; reads the scratch audit records those requests wrote and reports their kept arg KEYS and bytes.
+  WRAPPER section (OG-sd-1, row Z-W28-S13). The status tool called ONCE through the dispatch wrapper the MCP surface uses (app.integrations.base.run_integration_tool: entitlement lookup,
+                identity-scope allowlist, tier gate, audit), IN-PROCESS, with the scoped concierge as the principal (set with context.set_current_principal; NO /login, NO token acquired for
+                that identity, NO Graph call; MOCK_GRAPH=1). The concierge's principal key (tid, oid) is passed in as two SSM parameters read from the issuer's off-repo file (AMENDMENT A3); the gateway's encrypted sign-in cache is NEVER opened (the former method C is removed).
+                The status tool's own code does the portal service-account login POST and two GETs (status, served manifest) for the known execution (env R27_EXEC_ID, an SSM parameter
+                the runner redacts; never printed). The served manifest is then read ONCE more, independently, with the same bearer header the tool sent, for its generated_at.
+/opt/opal-gateway/.env is NEVER sourced: in the WRAPPER child it is parsed AS TEXT to populate the process environment (the same keys the service's EnvironmentFile feeds it), because the
+tier gate reads the principal rosters from configuration. No value is printed. Nothing is written to any grant, state store, lake or .env; no secret is printed.
+Prints booleans, status words, counts, sorted arg-key lists and the manifest's generated_at timestamp; never an id, token, address or credential."""
+import asyncio
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+
+SECTION = os.environ.get("R27_SECTION", "")
+GW = os.environ.get("OG_GW_DIR") or "/opt/opal-gateway"
+staged = GW != "/opt/opal-gateway"
+mode = sys.argv[1] if len(sys.argv) > 1 else "before"
+served = sys.argv[2] if len(sys.argv) > 2 else ""
+SCR = os.environ["R27_SCRATCH"]
+STATUS = "opal_data_refresh_status"
+KEPT_OK = {"day", "route", "fund"}
+
+
+def sha16(b):
+    return hashlib.sha256(b).hexdigest()[:16]
+
+
+def emit(tag, obj):
+    print(tag + " " + json.dumps(obj, sort_keys=True))
+
+
+def page_section():
+    sys.path.insert(0, GW)
+    audit_path = os.path.join(SCR, "r27_page_audit.jsonl")
+    os.environ.update({"MOCK_GRAPH": "1", "IDENTITY_PROVIDER": "alb_oidc", "RATE_LIMIT_ENABLED": "0", "AUDIT_PATH": audit_path, "AWS_DEFAULT_REGION": "us-east-1",
+                       "ENABLED_INTEGRATIONS": "ycharts opal_portal globgrph opal_discover portal_index schwab blackdiamond"})
+    os.environ.pop("AUDIT_S3_BUCKET", None)
+    import dotenv
+    dotenv.load_dotenv = lambda *a, **k: False
+    import jwt
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from starlette.testclient import TestClient
+    from app import audit, identity, rivalfunds_view as rv, server
+    assert not audit._cfg.AUDIT_S3_BUCKET, "AUDIT_S3_BUCKET must be empty"
+    assert os.path.abspath(audit._cfg.AUDIT_PATH) == os.path.abspath(audit_path), "the audit sink is not the scratch file"
+    print("R27_PAGE_CODE audit.py md5 %s rivalfunds_view.py md5 %s integration source=%s" % (
+        hashlib.md5(open(audit.__file__, "rb").read()).hexdigest()[:8], hashlib.md5(open(rv.__file__, "rb").read()).hexdigest()[:8], "stage" if staged else "installed"))
+    key = ec.generate_private_key(ec.SECP256R1())
+    pub_pem = key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+    priv_pem = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
+    identity._fetch_elb_public_key = lambda kid: pub_pem
+
+    async def _deny(email):
+        return None
+
+    server._email_denied = _deny
+    H = {"x-amzn-oidc-data": jwt.encode({"email": "synthetic.person@opalinvest.test", "sub": "local"}, priv_pem, algorithm="ES256", headers={"kid": "local-kid"})}
+    client = TestClient(server.app, raise_server_exceptions=False)
+    days = rv._list_days()
+    newest = rv.latest_day(days)
+    assert newest, "no published day"
+
+    def recs():
+        if not os.path.exists(audit_path):
+            return []
+        return [r for r in (json.loads(x) for x in open(audit_path, encoding="utf-8") if x.strip()) if r.get("tool") == "rivalfunds_view"]
+
+    out = {"newest_day": newest, "days_published": len(days), "requests": {}}
+
+    def req(label, url):
+        n0 = len(recs())
+        r = client.get(url, headers=H, follow_redirects=False)
+        new = recs()[n0:]
+        rec = new[-1] if new else {}
+        a = rec.get("args", {})
+        out["requests"][label] = {"status": r.status_code, "bytes": len(r.content), "sha16": sha16(r.content), "records_written": len(new), "outcome": rec.get("outcome"),
+                                  "args_keys": sorted(a), "omitted": "_omitted" in a, "record_bytes": rec.get("bytes"), "verdict_in_args": "verdict" in a, "days_in_args": "days" in a}
+        return r
+
+    req("page", "/rivalfunds/%s" % newest)
+    req("audit_page", "/rivalfunds/%s/audit" % newest)
+    req("chart_404", "/rivalfunds/%s/chart/ABC" % newest)
+    req("archive", "/rivalfunds/archive")
+    req("page_missing", "/rivalfunds/2000-01-01")
+    allr = recs()
+    kept = [k for r in allr for k in (r.get("args") or {}) if k != "_omitted"]
+    out["records_total"] = len(allr)
+    out["omitted_records"] = sum(1 for r in allr if "_omitted" in (r.get("args") or {}))
+    out["other_args_kept"] = sum(1 for k in kept if k not in KEPT_OK)
+    out["verdict_or_days_kept"] = sum(1 for k in kept if k in ("verdict", "days"))
+    out["bytes_on_every_ok_record"] = all("bytes" in r for r in allr if r.get("outcome") == "ok")
+    bf = json.loads(os.environ.get("R27_BEFORE_PAGE") or "null")
+    if bf:
+        p, a = out["requests"]["page"], out["requests"]["audit_page"]
+        out["page_unchanged"] = bf.get("newest_day") == newest and (p["status"], p["bytes"], p["sha16"]) == (bf["page_status"], bf["page_bytes"], bf["page_sha16"])
+        out["audit_page_unchanged"] = bf.get("newest_day") == newest and (a["status"], a["bytes"], a["sha16"]) == (bf["audit_status"], bf["audit_bytes"], bf["audit_sha16"])
+    emit("R27_PAGE_JSON", out)
+
+
+def wrapper_section():
+    ENVD = {}
+    for line in open("/opt/opal-gateway/.env", encoding="utf-8"):
+        m = re.match(r"^([A-Za-z0-9_]+)=(.*)$", line.rstrip("\r\n"))
+        if m:
+            v = m.group(2)
+            if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+                v = v[1:-1]
+            ENVD[m.group(1)] = v
+    os.environ.update(ENVD)
+    sys.path.insert(0, GW)
+    pid = subprocess.check_output(["systemctl", "show", "opal-gateway", "-p", "MainPID", "--value"]).decode().strip()
+    enabled = ""
+    for kv in open("/proc/%s/environ" % pid, "rb").read().split(bytes([0])):
+        if kv.startswith(b"ENABLED_INTEGRATIONS="):
+            enabled = kv.split(b"=", 1)[1].decode("utf-8", "replace")
+    audit_path = os.path.join(SCR, "r27_wrap_audit.jsonl")
+    os.environ.update({"ENABLED_INTEGRATIONS": enabled, "MOCK_GRAPH": "1", "AUDIT_PATH": audit_path, "RATE_LIMIT_ENABLED": "0",
+                       "TOKEN_CACHE_DIR": os.path.join(SCR, "tokcache"), "IDENTITY_TOOL_ALLOWLIST_PATH": os.path.join(GW, "identity_tool_allowlist.txt")})
+    os.makedirs(os.environ["TOKEN_CACHE_DIR"], exist_ok=True)
+    os.environ.pop("AUDIT_S3_BUCKET", None)
+    import dotenv
+    dotenv.load_dotenv = lambda *a, **k: False       # the environment is already populated from the .env TEXT above; config must not re-read the file
+    from mcp.server.fastmcp import FastMCP
+    from app import audit, identity_scope, token_broker, tools, integrations, tier as tiermod, access_state as acs
+    from app.config import get_config
+    from app.context import make_principal, set_current_principal, canonical_guid, MOCK_TENANT_ID
+    from app.integrations.opal_portal import integration as portal
+    import urllib.parse
+    cfg = get_config()
+    assert not audit._cfg.AUDIT_S3_BUCKET, "AUDIT_S3_BUCKET must be empty"
+    assert os.path.abspath(audit._cfg.AUDIT_PATH) == os.path.abspath(audit_path), "the audit sink is not the scratch file"
+    SC = sorted(identity_scope._SEED)[0]            # the scoped concierge; held in a variable, never printed
+    print("R27_WRAP_CODE integration.py md5 %s identity_scope.md5 %s source=%s provider_verified=%s"
+          % (hashlib.md5(open(portal.__file__, "rb").read()).hexdigest()[:8], hashlib.md5(open(identity_scope.__file__, "rb").read()).hexdigest()[:8],
+             "stage" if staged else "installed", tiermod._provider_is_verified(cfg)))
+    integrations.register_enabled(tools.mcp, enabled.split())
+    names = sorted(t.name for t in asyncio.run(FastMCP.list_tools(tools.mcp)))
+    q = urllib.parse.parse_qs(urllib.parse.urlparse(token_broker.build_consent_url(token_broker.make_state(SC))).query)
+    consent = sorted(set(" ".join(q.get("scope", [])).split()) - {"openid", "profile", "offline_access"})
+    print("R27_WRAP_TOOLS count=%d has_status=%s scoped_concierge_consent_scopes=%d" % (len(names), STATUS in names, len(consent)))
+
+    # ---- the concierge's principal, derived read-only ----
+    masters, writers = tiermod._roster_keys(cfg, "MASTER_ADMIN_PRINCIPALS"), tiermod._roster_keys(cfg, "WRITE_CAPABLE_PRINCIPALS")
+    # AMENDMENT A3: the gateway's encrypted sign-in cache is NEVER opened (method C is REMOVED from this program). The concierge's principal key (tid, oid) arrives ONLY as two SSM parameters
+    # (R27_TID, R27_OID) from the issuer's off-repo file; they are never printed (the runner redacts them), never stored, never written.
+    ptid, poid = os.environ.get("R27_TID", ""), os.environ.get("R27_OID", "")
+    if not (ptid and poid):
+        print("R27_PRINCIPAL source=ABSENT")
+        sys.exit(3)
+    source, ambiguous = "issuer-off-repo-file", False
+    print("R27_PRINCIPAL_SOURCE roster_keys=%d (master %d, write_capable %d) tid_and_oid_params_present=%s" % (len(masters | writers), len(masters), len(writers), bool(ptid and poid)))
+    principal = make_principal(ptid, poid, SC)
+    tier = tiermod.resolve_tier(principal, cfg)
+    pinfo = {"source": source, "ambiguous": ambiguous, "in_master_roster": principal.key in masters, "in_write_capable_roster": principal.key in writers, "tier": tier.value,
+             "status_tool_min_tier": portal.SPEC.min_tier}
+    print("R27_PRINCIPAL source=%s ambiguous=%s in_master=%s in_write_capable=%s resolved_tier=%s status_tool_min_tier=%s"
+          % (source, ambiguous, pinfo["in_master_roster"], pinfo["in_write_capable_roster"], tier.value, portal.SPEC.min_tier))
+    out = {"tools": len(names), "scoped_scope_count": len(consent), "principal": pinfo, "has_status": STATUS in names}
+    if mode == "probe":
+        emit("R27_WRAP_JSON", out)
+        return
+
+    # ---- THE WRAPPER EXERCISE: the status tool, ONCE, through run_integration_tool, as the scoped concierge ----
+    seen_hdr, tool_view = {}, {}
+    _get = portal.httpx.get
+
+    def _cget(url, *a, **k):
+        r = _get(url, *a, **k)
+        if str(url).endswith(portal.MANIFEST_PATH):
+            seen_hdr["h"] = dict(k.get("headers") or {})
+            try:
+                tool_view["manifest_generated_at"] = r.json().get("generated_at")
+            except Exception:  # noqa: BLE001
+                tool_view["manifest_generated_at"] = None
+        return r
+
+    portal.httpx.get = _cget
+    set_current_principal(principal, "")
+    try:
+        res = asyncio.run(tools.mcp.call_tool(STATUS, {"execution_id": os.environ["R27_EXEC_ID"]}))
+    except Exception as exc:  # noqa: BLE001 -- the type name only (a message could carry the id)
+        res = {"raised": type(exc).__name__}
+    portal.httpx.get = _get
+    doc = None
+    if isinstance(res, tuple) and len(res) == 2 and isinstance(res[1], dict):
+        doc = res[1]
+    elif isinstance(res, dict):
+        doc = res
+    else:
+        for b in (res if isinstance(res, (list, tuple)) else getattr(res, "content", [])):
+            t = getattr(b, "text", None)
+            if t:
+                try:
+                    doc = json.loads(t)
+                    break
+                except Exception:  # noqa: BLE001
+                    pass
+    if isinstance(doc, dict) and isinstance(doc.get("result"), dict) and "status" not in doc and "error" not in doc:
+        doc = doc["result"]
+    doc = doc if isinstance(doc, dict) else {"unparsed": True}
+    if doc.get("guard_denied") or doc.get("error") or "raised" in doc or "unparsed" in doc:
+        outcome = str(doc.get("code") or doc.get("raised") or ("unparsed" if "unparsed" in doc else "error")).replace(" ", "_")
+        admitted = None if ("raised" in doc or "unparsed" in doc) else (not doc.get("guard_denied"))
+    else:
+        outcome, admitted = "OK", True
+    status_value = doc.get("status") if isinstance(doc.get("status"), str) else None
+    displayed_date = doc.get("displayed_date") if isinstance(doc.get("displayed_date"), str) else None
+    # one independent read of the served manifest (a GET), with the bearer header the tool itself sent
+    mg = None
+    if seen_hdr.get("h"):
+        try:
+            mr = _get(portal.PORTAL_FRONT_DOOR + portal.MANIFEST_PATH, headers=seen_hdr["h"], timeout=30)
+            mg = mr.json().get("generated_at") if mr.status_code == 200 else None
+        except Exception:  # noqa: BLE001
+            mg = None
+    wrecs = [json.loads(x) for x in open(audit_path, encoding="utf-8") if x.strip()] if os.path.exists(audit_path) else []
+    wrec = [r for r in wrecs if r.get("tool") == STATUS]
+    out.update({"wrapper_admitted": admitted, "wrapper_status_tool": outcome, "status_value": status_value, "displayed_date": displayed_date,
+                "manifest_generated_at": mg if isinstance(mg, str) else None, "manifest_generated_at_seen_by_tool": tool_view.get("manifest_generated_at") if isinstance(tool_view.get("manifest_generated_at"), str) else None,
+                "wrapper_audit_records": len(wrec), "wrapper_audit_outcome": wrec[-1].get("outcome") if wrec else None, "wrapper_audit_tier": wrec[-1].get("tier") if wrec else None,
+                "http_manifest_header_seen": bool(seen_hdr.get("h"))})
+    print("R27_WRAP status_tool=%s admitted=%s status_value=%s displayed_date=%s manifest_generated_at=%s seen_by_tool=%s audit_records=%d audit_outcome=%s audit_tier=%s"
+          % (outcome, admitted, status_value, displayed_date, out["manifest_generated_at"], out["manifest_generated_at_seen_by_tool"], len(wrec), out.get("wrapper_audit_outcome"), out.get("wrapper_audit_tier")))
+    emit("R27_WRAP_JSON", out)
+
+
+if SECTION == "page":
+    page_section()
+    sys.exit(0)
+if SECTION == "wrapper":
+    wrapper_section()
+    sys.exit(0)
+
+
+def child(section):
+    env = dict(os.environ)
+    env["R27_SECTION"] = section
+    p = subprocess.run([sys.executable, os.path.abspath(sys.argv[0])] + sys.argv[1:], env=env, capture_output=True, text=True)
+    sys.stdout.write("\n".join(l for l in p.stdout.split("\n") if not l.startswith(("R27_PAGE_JSON", "R27_WRAP_JSON"))))
+    if p.returncode != 0:
+        print("R27_CHILD_FAIL section=%s rc=%d stderr_tail=%s" % (section, p.returncode, re.sub(r"[0-9a-fA-F-]{36}", "<guid>", p.stderr[-400:]).replace("\n", " | ")))
+    tag = "R27_PAGE_JSON " if section == "page" else "R27_WRAP_JSON "
+    for l in p.stdout.split("\n"):
+        if l.startswith(tag):
+            return json.loads(l[len(tag):])
+    return None
+
+
+pg = None if mode == "probe" else child("page")
+wp = child("wrapper")
+if mode == "probe":
+    sys.exit(0 if wp else 1)
+if not pg or not wp:
+    print("RESULT: FAIL (a section did not report)")
+    sys.exit(1)
+rq = pg["requests"]
+body = {"served_release": served, "installed_code": not staged, "tools": wp["tools"], "scoped_scope_count": wp["scoped_scope_count"],
+        "wrapper_status_tool": wp.get("wrapper_status_tool"), "displayed_date": wp.get("displayed_date"), "manifest_generated_at": wp.get("manifest_generated_at"),
+        "audit_keys_page": rq["page"]["args_keys"], "audit_keys_chart_404": rq["chart_404"]["args_keys"],
+        "audit_bytes_page": rq["page"]["record_bytes"], "page_bytes_served": rq["page"]["bytes"],
+        "audit_other_args_kept": pg["other_args_kept"], "grants_written": 0}
+s = json.dumps(body, sort_keys=True)
+dig = hashlib.sha256(s.encode("utf-8")).hexdigest()
+print("R27_PAGE newest_day=%s page=%s/%s bytes/sha16 %s record_args_keys=%s record_bytes=%s | audit_page=%s/%s bytes/sha16 %s keys=%s record_bytes=%s | chart_404=%s keys=%s outcome=%s | archive keys=%s bytes_ok=%s | page_missing=%s keys=%s"
+      % (pg["newest_day"], rq["page"]["status"], rq["page"]["bytes"], rq["page"]["sha16"], rq["page"]["args_keys"], rq["page"]["record_bytes"],
+         rq["audit_page"]["status"], rq["audit_page"]["bytes"], rq["audit_page"]["sha16"], rq["audit_page"]["args_keys"], rq["audit_page"]["record_bytes"],
+         rq["chart_404"]["status"], rq["chart_404"]["args_keys"], rq["chart_404"]["outcome"], rq["archive"]["args_keys"], rq["archive"]["record_bytes"] == rq["archive"]["bytes"],
+         rq["page_missing"]["status"], rq["page_missing"]["args_keys"]))
+print("R27_PAGE_TOTALS records=%d omitted_records=%d other_args_kept=%d verdict_or_days_kept=%d bytes_on_every_ok_record=%s page_unchanged=%s audit_page_unchanged=%s"
+      % (pg["records_total"], pg["omitted_records"], pg["other_args_kept"], pg["verdict_or_days_kept"], pg["bytes_on_every_ok_record"], pg.get("page_unchanged"), pg.get("audit_page_unchanged")))
+emit("R27_BEFORE_VALUES" if mode == "before" else "R27_VALUES", {
+    "mode": mode, "newest_day": pg["newest_day"], "page_status": rq["page"]["status"], "page_bytes": rq["page"]["bytes"], "page_sha16": rq["page"]["sha16"],
+    "audit_status": rq["audit_page"]["status"], "audit_bytes": rq["audit_page"]["bytes"], "audit_sha16": rq["audit_page"]["sha16"],
+    "page_record_omitted": rq["page"]["omitted"], "chart_404_record_omitted": rq["chart_404"]["omitted"], "chart_404_status": rq["chart_404"]["status"],
+    "page_unchanged": pg.get("page_unchanged"), "audit_page_unchanged": pg.get("audit_page_unchanged"),
+    "wrapper": {k: wp.get(k) for k in ("wrapper_admitted", "wrapper_status_tool", "status_value", "wrapper_audit_outcome", "wrapper_audit_tier", "principal")}})
+if mode == "before":
+    emit("RL13_BEFORE_BODY", body)
+elif staged:
+    print("RL13_REHEARSAL_BODY " + s)
+    print("RL13_REHEARSAL_DIGEST " + dig)
+    b2 = dict(body, installed_code=True)
+    s2 = json.dumps(b2, sort_keys=True)
+    print("STEP7_STANDIN RL13_BODY " + s2)
+    print("STEP7_STANDIN RL13_DIGEST " + hashlib.sha256(s2.encode("utf-8")).hexdigest())
+else:
+    print("RL13_BODY " + s)
+    print("RL13_DIGEST " + dig)

@@ -116,3 +116,45 @@ That is a reading of the pattern, not a measurement of why; a different `PG_` me
   `Product Geographic Hierarchy Level`; some metric names carry leading non-breaking spaces as indentation; a missing period
   arrives as a value near zero (`-2.4e-14`), not as null. Which fiscal period "Period 1" is, is NOT in the response.
 - FWD-1 on AMD stays "segment reader not built" for round 77; the data it needs is now stored.
+
+---
+
+# ADDENDUM 2 (~15:0xZ) -- the third AMD probe: Period 1 is the latest fiscal YEAR, in the reporting currency; the quarter fields do not label the table
+
+The CTO's word for ONE more call (rulings file @f97be3fd6f, bb-1; GO msg 31058), on candidates from
+`org/tier1_exec/4.0.0_SA_CRO~Z/deliverables/RESAPP_BB1_PG_REVENUE_PERIOD_AND_CURRENCY_FIELDS_20261007.md` @44c6d20389 (from
+recall). `bloomberg_health` read ok first. ONE `reference_data` call on `AMD US Equity` at 2026-10-07T14:58:56Z through the
+driver's own `run()`; `pulled 1 failed 0 calls 1`. Landed as received:
+`.../bronze/segments/security_key=AMD_US_Equity/20261007T145856Z.json`, 362 B, VersionId `GqgUu55gO_yFhOo0Z3jTJDIhYRvt7M2f`.
+
+| field | served value |
+|---|---|
+| `NAME` | ADVANCED MICRO DEVICES (control) |
+| `SALES_REV_TURN` | **34639.0** |
+| `EQY_FUND_CRNCY` | USD |
+| `EQY_FISCAL_YR_END` | 12/2025 |
+| `PRIMARY_PERIODICITY` | Quarterly and Annual |
+| `LATEST_PERIOD_END_DT_FULL_RECORD` | 2026-06-27 |
+| `FISCAL_YEAR_PERIOD` | 2026 Q2 |
+| `LATEST_ANNOUNCEMENT_DT` | 2026-08-04 |
+| `CRNCY` | USD |
+
+Nine of nine served; no field error.
+
+**The comparison the CTO asked for.** The level-1 rows of the stored `PG_REVENUE` table (object `20261007T114801Z.json`), Period 1:
+Data Center 16,635 + Client & Gaming 14,550 + Embedded 3,454 = **34,639** ("All Other" carries the missing-value marker). This
+seat re-summed it from the stored object. `SALES_REV_TURN` returned **34,639.0**. They are equal.
+
+**What that measures, and what it does not:**
+- Period 1 of the bulk table is the company's latest ANNUAL period, in the units and currency of the fundamentals fields.
+  `EQY_FISCAL_YR_END` 12/2025 names its year end and `EQY_FUND_CRNCY` USD names its currency. For AMD these are measured.
+- `LATEST_PERIOD_END_DT_FULL_RECORD` (2026-06-27) and `FISCAL_YEAR_PERIOD` (2026 Q2) describe the latest QUARTER. They do NOT
+  label the table. A reader that printed either beside Period 1 would print the wrong period.
+- Periods 2 to 5 as "one fiscal year back each" is still an assumption; nothing in this call measures it.
+- This is one name. The other 84 need the same three fields (`SALES_REV_TURN`, `EQY_FISCAL_YR_END`, `EQY_FUND_CRNCY`) to carry a
+  period and a currency: 84 or 85 calls, a NEW Bloomberg pull, which is Andrew's word (the CTO's ruling says so). Not run.
+- AMD now holds 4 objects under the segments table; 2 carry the table (11:48Z probe 2, 11:51Z the pull) and 2 are probes of other
+  fields (11:32Z, 14:58Z). The newest object is NOT the table. The reader (cell bb-1) takes the newest object that carries the
+  table, which its draft already states.
+
+Calls on AMD under the segments word today: 3 probes and 1 in the pull. No further call follows from this one.
