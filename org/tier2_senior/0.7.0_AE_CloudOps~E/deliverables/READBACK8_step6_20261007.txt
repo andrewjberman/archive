@@ -1,0 +1,72 @@
+================================================================================================================
+opal-data-49financial   prefix = irpt/49financial/platinum/holdings/
+  statements 4 -> 7   sids: ['DenyForeignFirmPrincipals', 'DenyPerformanceAdapterAnyOtherAction', 'DenyPerformanceAdapterReadsOutsideTheHoldingsGold', 'DenyPerformanceAdapterListingOutsideTheHoldingsGold', 'DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ObjectsOutsidePrefix', 'DenyScopedExemption1ListingOutsidePrefix']
+================================================================================================================
+  V1 live == prior + dell1 ARN + the three statements: True   (mutant control: False, must be False)
+      prior sha256 a3edb171b9ab187337af1aa30cd2560c6aca0b49ba8bc227974c92f227417766
+  V2 ALLOWED arms
+     get UNDER the prefix           s3:GetObject             -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+     GetBucketLocation              s3:GetBucketLocation     -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+     ListBucket WITH the prefix     s3:ListBucket            -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+  V3 CONFINING arms -- full vs the same document MINUS the three statements
+     get OUTSIDE the prefix         s3:GetObject           full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+     PUT under the prefix           s3:PutObject           full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+     ListBucket with NO prefix      s3:ListBucket          full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+     GetObjectVersion under prefix  s3:GetObjectVersion    full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+  V4 other-principal arms
+     dell2 get outside prefix       s3:GetObject             -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+     unlisted opal-gateway-role     s3:GetObject             -> explicitDeny   OK        [src ['ResourcePolicy']]
+
+================================================================================================================
+opal-data-cottonwood   prefix = irpt/cottonwood/platinum/holdings/
+  statements 4 -> 7   sids: ['DenyForeignFirmPrincipals', 'DenyRestrictedReadExceptReaders', 'DenyRestrictedListExceptReaders', 'DenyRestrictedWriteExceptBreakglass', 'DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ObjectsOutsidePrefix', 'DenyScopedExemption1ListingOutsidePrefix']
+================================================================================================================
+  V1 live == prior + dell1 ARN + the three statements: True   (mutant control: False, must be False)
+      prior sha256 e73fc8922b0f2f32dac33a9100dfe856d5167d1e40892dc9a6935ed805ab03b4
+  V2 ALLOWED arms
+     get UNDER the prefix           s3:GetObject             -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+     GetBucketLocation              s3:GetBucketLocation     -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+     ListBucket WITH the prefix     s3:ListBucket            -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+  V3 CONFINING arms -- full vs the same document MINUS the three statements
+     get OUTSIDE the prefix         s3:GetObject           full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+     PUT under the prefix           s3:PutObject           full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+     ListBucket with NO prefix      s3:ListBucket          full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+     GetObjectVersion under prefix  s3:GetObjectVersion    full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+  V4 other-principal arms
+     dell2 get outside prefix       s3:GetObject             -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+     unlisted opal-gateway-role     s3:GetObject             -> explicitDeny   OK        [src ['ResourcePolicy']]
+     dell1 on the RESTRICTED prefix s3:GetObject             -> explicitDeny   OK         <- another project's statements still bind the NEW principal
+
+================================================================================================================
+opal-data-inflection   prefix = irpt/inflection/platinum/holdings/
+  statements 1 -> 4   sids: ['DenyForeignFirmPrincipals', 'DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ObjectsOutsidePrefix', 'DenyScopedExemption1ListingOutsidePrefix']
+================================================================================================================
+  V1 live == prior + dell1 ARN + the three statements: True   (mutant control: False, must be False)
+      prior sha256 a405f60f5f7622ec50abe9d2352179964d1dd18ea036df8ba8d2a5e13624f866
+  V2 ALLOWED arms
+     get UNDER the prefix           s3:GetObject             -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+     GetBucketLocation              s3:GetBucketLocation     -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+     ListBucket WITH the prefix     s3:ListBucket            -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+  V3 CONFINING arms -- full vs the same document MINUS the three statements
+     get OUTSIDE the prefix         s3:GetObject           full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+     PUT under the prefix           s3:PutObject           full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+     ListBucket with NO prefix      s3:ListBucket          full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+     GetObjectVersion under prefix  s3:GetObjectVersion    full=explicitDeny   minus=allowed        OK
+          ATTRIBUTED to the confinement by construction: True   named Sid: ['DenyForeignFirmPrincipals']
+  V4 other-principal arms
+     dell2 get outside prefix       s3:GetObject             -> allowed        OK        [src ['cloudops-dell-agent-deploy-policy']]
+     unlisted opal-gateway-role     s3:GetObject             -> explicitDeny   OK        [src ['ResourcePolicy']]
+
+================================================================================================================
+READBACK8 docs_equal=3/3 allowed=9/9 denied=12/12 attributed_by_differential=12/12 other=7/7 all_ok=True

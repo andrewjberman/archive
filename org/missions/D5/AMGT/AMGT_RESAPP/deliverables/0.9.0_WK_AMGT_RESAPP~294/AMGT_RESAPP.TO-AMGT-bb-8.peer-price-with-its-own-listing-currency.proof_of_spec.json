@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bb-8.peer-price-with-its-own-listing-currency",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "3161dbc59a6c8f951f30a95dfebba099439ec96d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "3161dbc59a6c8f951f30a95dfebba099439ec96d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bb-8.peer-price-with-its-own-listing-currency.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~294",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/peers/price_listing.py",
+      "kind": "script",
+      "commit_or_etag": "d9299642ef768efd91f26ed5f0c0b445680a560c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: record_for_price(member, resolve), stdlib only; hookup in scoped_amgt._with_price_currency is the adapter cell AMGT-bb-17's.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/peers/tests/test_price_listing.py",
+      "kind": "test",
+      "commit_or_etag": "d9299642ef768efd91f26ed5f0c0b445680a560c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 6 tests, one per rule plus BRK.B and raising resolve; peers folder 74 passed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "HD keeps own record; Taiwan row on TSM_US_Equity refused; Roche keeps Swiss record; MSFT takes MSFT US record; Samsung none, list not asked; C1-C5 PASS; SERVED: YES; exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round78/checks/r78_bb8.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1\nPASS C2\nPASS C3\nPASS C4\nPASS C5\nR78 BB8 AC1 SERVED: YES\nexit=0",
+      "denominator": "5 of 5 clauses PASS",
+      "status": "PASS",
+      "expect": "R78 BB8 AC1 SERVED: YES",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "over stored peer sets of 3 securities every row gets an answer, 688910 refused, no US record paired with a foreign row; C1-C3 PASS; SERVED: YES; exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round78/checks/r78_bb8.py\" --crit AC2 --where local; echo \"exit=$?\"",
+      "output_evidence": "rows 36; by basis {None: 20, 'us_ticker': 16}; refused [('688910', 'TSM_US_Equity')]; crossed []\nPASS C1 36 of 36\nPASS C2\nPASS C3 0 crossed\nR78 BB8 AC2 SERVED: YES\nexit=0",
+      "denominator": "36 of 36 rows answered; 3 of 3 clauses PASS",
+      "status": "PASS",
+      "expect": "R78 BB8 AC2 SERVED: YES",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the existing price-currency tests still pass; SERVED: YES; exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round78/checks/r78_bb8.py\" --crit AC3 --where local; echo \"exit=$?\"",
+      "output_evidence": "9 passed\nPASS C1 rc=0\nR78 BB8 AC3 SERVED: YES\nexit=0",
+      "denominator": "9 of 9 tests; 1 of 1 clause",
+      "status": "PASS",
+      "expect": "R78 BB8 AC3 SERVED: YES",
+      "judgment": false
+    }
+  ],
+  "surprises": [],
+  "controls": {
+    "mutant": {
+      "description": "AC2 plants the row 688910 matched to TSM_US_Equity (Taiwan) in the stored sets; rule 2 must refuse it.",
+      "expected": "A build without rule 2 would serve TSM_US_Equity for a Taiwan price and AC2 C2/C3 would fail.",
+      "observed": "AC2 C2 PASS (refused) and C3 PASS (0 crossed); at the base the module was absent so every build criterion failed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1-AC3 are pure over planted/stored inputs; no network.",
+      "observed": "identical output; no clock or randomness in the function.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Hookup in lib/research/api/scoped_amgt.py _with_price_currency",
+      "reason": "Bound 2: scoped_amgt.py is read only; the adapter cell AMGT-bb-17 makes the hookup."
+    }
+  ],
+  "session_log": "NONE-SHORT-TASK: no separate log; this instance and the commit message carry the record.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh, commit d9299642ef)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- lib/research/peers/price_listing.py lib/research/peers/tests/test_price_listing.py",
+      "result": "committed d9299642ef; msg-verify MATCH"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+ssm a3bef45d-26bf-4844-8409-dac0a4f8d8dd status=Success
+PASS host /health 200: health 200, service active, MainPID 776049 (before 776049)
+FAIL shipped md5 = release bytes: 94 of 97 identical; not-ok ['app/audit.py', 'app/integrations/opal_portal/integration.py', 'app/rivalfunds_view.py']
+PASS tool list unchanged, name for name (66 -> 66): before 66 after 66 tools; added [] removed []
+PASS .env key names unchanged (the template equals live): names 51 vs before 51; added [] removed []
+PASS every .env value has the SAME sha256 before and after (hash only; changed names listed): before hashes 51, after hashes 51, equal 51 of 51, changed []
+PASS route arms: the BEFORE neighbour values are in the state file: route_before present
+ssm 06db93d8-d151-4079-bd01-99cf072985b4 status=Success
+INSTALLED_FILES server.py md5 2dcb0a53 rivalfunds_view.py md5 b04d528a from installed
+PASS route /rivalfunds/{day}/chart/{fund} registered: registered True
+PASS chart_404: a day with no chart -> 404 with 'no chart for this fund and day': 404, named body True
+PASS chart_400: a lowercase fund -> 400, no S3 read: 400
+PASS no identity -> 401 on the chart route: 401
+PASS day_page_unchanged: /rivalfunds/<day> answers as on the installed code (status, bytes, digest): 200 1298076 bytes sha16 7b1d707a38c5936c vs before 200 1298076 7b1d707a38c5936c
+PASS audit_page_unchanged: /rivalfunds/<day>/audit answers as on the installed code (status, bytes, digest): 200 1242967 bytes sha16 46afdf5db2ebe3ed vs before 200 1242967 46afdf5db2ebe3ed
+R27_ROUTE {"audit_bytes": 1242967, "audit_page_unchanged": true, "audit_sha16": "46afdf5db2ebe3ed", "audit_status": 200, "chart_400": true, "chart_400_status": 400, "chart_404": true, "chart_404_body_named": true, "chart_404_status": 404, "chart_no_identity_status": 401, "chart_route_registered": true, "day": "2026-10-06", "day_bytes": 1298076, "day_none": "2000-01-01", "day_page_unchanged": true, "day_sha16": "7b1d707a38c5936c", "day_status": 200, "grants_written": 0, "mode": "after", "state_store_written": false, "synthetic_principal": true}
+ROUTE_ARMS after: 6 of 6  RESULT: PASS
+SCRATCH_REMOVED=yes
+HOST_TMP_og_r27_LEFTOVER=0
+PASS ROUTE ARM chart_404: /rivalfunds/2000-01-01/chart/ABC -> 404 with 'no chart for this fund and day': status 404, named body True
+PASS ROUTE ARM chart_400: /rivalfunds/2026-10-06/chart/abc -> 400: status 400
+PASS ROUTE ARM day_page_unchanged: /rivalfunds/2026-10-06 answers as before (status, bytes, digest): 200 1298076 bytes sha16 7b1d707a38c5936c
+PASS ROUTE ARM audit_page_unchanged: /rivalfunds/2026-10-06/audit answers as before (status, bytes, digest): 200 1242967 bytes sha16 46afdf5db2ebe3ed
+PASS route host scratch removed: SCRATCH_REMOVED=yes and 0 leftovers
+VERIFY FAIL: 10 of 11
+ROLL BACK: re-deploy from /c/tmp/og-rb21 (ANNOUNCE_OG-rl-13.md), re-verify, close ROLLED BACK.
+--- rl4.AC1.sh (baseline r17/ENV_KEYS_R17B.txt) ---
+ssm 9dd251fa-da02-439f-8720-2a018e420f3f status=Success
+ssm 59e53b98-c54d-43e6-86ce-a5755d545fd4 status=Success
+arm 1 key names equal the before-set (51): OK
+arm 2 systemd and bash parses agree on every value: OK
+arm 3 host deploy/ contract equals org/standards (c69968aa7f70): OK
+arm 4 Tax keys present and non-empty: OK
+RELEASE READ-BACK ARMS 4 of 4
+RESULT: PASS
+--- ht.AC2.sh (51 keys) ---
+ssm f550dc1b-6c63-4a73-8857-0c5ae54135bf status=Success
+HOST teams_route_sha256 f470540078a23b8a874e0bebd2fa67cad7e23a82c1aa513c6f904e012ae87337
+HOST taxsma_workbook_sha256 56d4f49017e4c17f721c8613e57195cfe341b7b6e0e1f96bc3524999a65f83a7
+HOST env_keys 51 teams_bearer_present True teams_bearer_empty False teams_labels_ok True tax_nonempty True
+arm 1 host teams_route.py = db92656c72 (f470540078a2): OK
+arm 2 .env 51 keys, TEAMS_BEARER non-empty, label teamsassist, Tax keys intact: OK
+arm 3 /hx/teams/x no bearer -> 404 (app refusal, no redirect): OK
+arm 4 / -> 302 (sign-in intact): OK
+SERVED ARMS 4 of 4
+RESULT: PASS
+r27_verify: host + AFTER checks rc=1; rl4.AC1 rc=0; ht.AC2 rc=0

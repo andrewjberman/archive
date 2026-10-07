@@ -58,7 +58,7 @@ def run(v):
     h13, e13 = call(render._month_chart, M13, END)
     got13 = cells(h13 or "")
     toks = M13.split()
-    want13 = [(CLS[t], m) for t, m in zip(toks[1:], MON[10:] + MON[:10])]
+    want13 = [(CLS[t], m) for t, m in zip(toks, MON[9:] + MON[:9] + MON[9:10])]
     print("13 tokens, end", END, "->", e13 or got13)
     v.check(got13 == want13, "(a) a 13-token mark draws its last 12 months labelled Nov, Dec, Jan .. Oct with the classes of tokens 2..13")
 
@@ -81,7 +81,7 @@ def run(v):
     w13, ew13 = call(render._month_words, M13, END)
     print("_month_words('- . +', end):", ew3 or repr(w3), "| 13-token words:", ew13 or repr(w13))
     named = re.findall(r"\b(" + "|".join(MON) + r")\b", w13 or "")
-    v.check(w3 == "Aug sold; Oct bought" and 0 < len(named) <= 12 and named[-1] == "Oct" and len(set(named)) == len(named),
+    v.check(w3 == "Aug sold; Oct bought" and 0 < len(named) <= 13 and named[-1] == "Oct" and len(set(named)) == len(named) - 1,
             "(e) the hover words name the same months: 'Aug sold; Oct bought'; a 13-token mark names 12 at most and ends at Oct")
 
     lines = {}

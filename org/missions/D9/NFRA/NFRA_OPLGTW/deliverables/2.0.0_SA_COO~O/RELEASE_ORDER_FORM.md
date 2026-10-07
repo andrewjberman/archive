@@ -18,6 +18,9 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
 4. **Rollback.** A worktree at the live sha, equal file by file to the live S3 artifact.
 5. **BEFORE run.** On the host through the installed engine, with a synthetic principal and an in-memory grant: never a
    real identity, never a state-store write. Remove every host scratch copy.
+   - **The rehearsal stages EVERY file of the release that ships to the host (row Z-W28-S14).** That includes a file
+     at the gateway root, such as `identity_tool_allowlist.txt`, not only files under `app/`. Print the staged list
+     beside the release's shipped list; the two must be equal before the rehearsal's reads count.
    - **One host run at a time, each in its own scratch directory (row Z-W28-S9).** Name the scratch per run, for
      example `/tmp/og_<release>_<run id>`. Two runs sharing one scratch directory corrupt each other.
 6. **Verify script.** Host `/health`, shipped md5 against the release list, the tool count, the `.env` key NAMES (and
@@ -72,6 +75,36 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
 
 - Never source `/opt/opal-gateway/.env` (row Z-S32).
 - Never write a grant.
+- **The source of a principal identifier (R41, `ledger/ROUND_ANALYSIS.round27.md` @028a074f26).** An order whose check
+  needs a principal's tenant and object ids NAMES where they come from. The source is `gateway-access-state-table`,
+  read by the issuer with its own AWS identity and handed to the worker in an off-repo file under
+  `%LOCALAPPDATA%/opal/og-salt/`. The gateway's encrypted sign-in cache is NEVER a source: no order, worker or check
+  reads, lists or decrypts it.
+- **The page-time read (R42, row Z-W28-S21).** Where a release asserts that a served page is unchanged, the BEFORE read
+  is taken immediately before the deploy and the AFTER read immediately after it, each with the S3 object's
+  `LastModified`. A difference in size or digest counts as a change ONLY if `LastModified` did not move between the
+  two reads. The record prints `LastModified` at both.
+- **What `displayed_date` is (R44).** `opal_data_refresh_status` returns the served manifest's `generated_at` in
+  `displayed_date`. That is the TIME the manifest was generated, not the data's as-of date. A re-publish of an older
+  date reads as the day of the re-publish. An order or caller text that needs the as-of date names another field.
+- **The deploy script's install lines (R39, R40).** Before an order runs `deploy-to-ec2.sh`, the issuer reads its lines
+  in `org/tier0_exec/0.0.0_AB_MSTR~Z/deliverables/SITEZ_INSTALL_DOWNLOAD_LINE_CENSUS_20261007.md`. Two terms of the
+  CTO's ruling that lifted the deploy hold (msg 31254) stand:
+  - A release whose diff touches `requirements.txt` or `bun.lock` goes to the CTO before its never-widen pair.
+  - **The fetch control (R45, `ledger/ROUND_ANALYSIS.round27.md` ADDENDUM 1 @f6fd7281cf).** Every deploy records the
+    time its deploy command starts and, after it returns, the count of bun install-cache entries (top level and one
+    level down) created or modified at or after that time. The count is 0. Above 0 is a fetch: the release stops,
+    rolls back and goes to the CTO as a BLOCKING row.
+  - Each release's ANNOUNCE states in one line that whether a frozen `bun install` with every entry cached still sends
+    a metadata request is UNDETERMINED, until it is measured. No package is fetched either way: the pre-check
+    (`ops/bun_cache_precheck.py`) stops the deploy on a cache miss, and the missing list goes to the laptop's intake.
+- **The identifier bound (R39 and ADDENDUM 1 of `ledger/ROUND_ANALYSIS.round26.md` @51572f8092).** An order's "never
+  print or commit an account id" means a CLIENT account identifier: an end client's account number. Two things are
+  outside it, and output is not redacted for them: an AWS account id inside a bucket name or a resource address, and
+  a Schwab MASTER account id, which is an estate key (census:
+  `deliverables/2.0.0_SA_COO~O/R38_WHOLE_TREE_CENSUS_20261007.md` @48e547c6f9).
+- **The manifest note (row Z-W28-S19).** `release_note` holds the current release's note only. Earlier notes live in
+  the ledger entries.
 - **Operator-command output (row Z-W28-S2).** An order that runs `ops/schwab_entitlement_admin.py` redirects the
   output of `prepare()` and `activate` to the off-repo directory and prints only the operations line. The scope diff
   prints master account ids as dictionary keys. The order also names how it resolves the holder's pk: a read-only scan
