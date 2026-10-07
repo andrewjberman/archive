@@ -31,7 +31,8 @@
   <the_act>
     0. On the laptop's CLOUD, which carries q/dell1/secclass-r12-run-e32 r3 (58843e1461) or later, read both halves. Then read the
        secret once (a describe, or the runner's own get) with no model call. A refusal there is a REPORT, not a workaround.
-    1. DRY RUN: `python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_write.py --set org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_RECLASSIFY_SET_V3_20261007.tsv`. It must read direct_keys=0 ai_keys=2291 ... off_vocab=0, and `to_model=2291` (`RECLASSIFY-DRY-RUN` with no `-BAD`). Any other count is a STOP that goes back to the signers.
+    1. DRY RUN: `python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_write.py --set org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_RECLASSIFY_SET_V3_20261007.tsv`. It must read, on its first INFO line, direct_keys=0 ai_keys=2291 ... off_vocab=0, and on the second, `to_model=2291`. Its last
+       line must be `RECLASSIFY-DRY-RUN` with no `-BAD`. That last line counts set ROWS by route (to_ai=2770 rows = 2,291 keys), not keys. Any other count is a STOP that goes back to the signers.
     2. Open ONE NEVER-2 ledger entry, slug `secclass-e32-ai-leg-i-20261007`, naming the table, the AI listing prefix, the snapshot path, and the
        rollback `old_list_reclassify_write.py --rollback --half <same> --snapshot org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/E32_AI_SNAPSHOT_20261007.json` (deletes only keys absent from that snapshot that carry this run's updated_by values).
     3. THE ACT: `python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_write.py --set org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_RECLASSIFY_SET_V3_20261007.tsv --write --half org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_OLD_LIST_RECLASSIFY_20261007.md --snapshot org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/E32_AI_SNAPSHOT_20261007.json --chunk 250`. Each chunk prints keys_sent, model_calls and landed_outside_contract. A STOP on a chunk is a rollback
@@ -74,3 +75,7 @@ Base: AC1 FAIL as expected at the cut (missing_snapshot; with the DIRECT snapsho
     - the commit hashes with their measured push state.
   </report>
 </task_order>
+
+<!-- AMENDMENT 1 (issuer 2.0.0_SA_COO~M1, 2026-10-07 ~22:5xZ): step 1 names the INFO lines as the key count. RULED CONTINUE on
+~SC's dry-run report (direct=5532 to_ai=2770 is the row summary). Independent live read at 22:36Z: ai_leg_verify e32 planned=2291
+landed=187 problems=0 multi_asset=0 listing_count=200=model_rows. -->
