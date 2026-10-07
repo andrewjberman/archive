@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-f-1",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9108f11494"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "9108f11494",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-f-1.freshness-weekly-basis-and-skip-path.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~25",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/trading_calendar.py",
+      "kind": "script",
+      "commit_or_etag": "3d7fb62105",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "weekly_production_day(on_or_before, weekday) added; a Mon-Fri NYSE holiday production day rolls back to the prior trading day, a Sat/Sun weekday is never rolled. Nothing deployed (order bound 1).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/comp-freshness",
+      "kind": "script",
+      "commit_or_etag": "3d7fb62105",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_weekly_verdict + weekly branch in _evaluate_artifact, gated on cadence weekly + freshness_basis trading-day-frontier + weekly_production_weekday; `comp-freshness self-test` still OK (105 entries swept, 0 violations). Nothing deployed; COMP_FRESHNESS_PIPELINE never set.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/gold_freshness_config.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "3d7fb62105",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bd_silver_allocations and bd_silver_unrealized -> cadence weekly, freshness_basis trading-day-frontier, weekly_production_weekday sunday (UTC). Config not deployed (order bound 1); it was edited and read as text only, never through comp-freshness.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_comp_freshness_weekly.py",
+      "kind": "test",
+      "commit_or_etag": "3d7fb62105",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "17 offline tests: fresh after the weekly run (5 days incl. the production day before its run lands), stale only past the next production day, one-week-past control, daily and weekday-less-weekly entries unchanged, holiday roll, missing-calendar refusal, temp-dir fixture config.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~25/SKIP_PATH_RECORD.json",
+      "kind": "doc",
+      "commit_or_etag": "3d7fb62105",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "skip_path not_on_path; the scheduled 2026-09-29T23:01:57Z run's own log line 'WARN: comp-freshness not found in PATH -- freshness gate skipped.' from s3://opal-data-bd/logs/gold-layer/gold_incremental_2026-09-30_20260930_011128.log; also carries the weekday measurement (sunday, UTC, 12 of 12 partitions per table).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "skip_path one of not_on_path/bypass_flag/config_skipped with code_ref, run_date and log_source printed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round7/checks/f1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "skip_path=not_on_path; code_ref=data/black_diamond/scripts/gold/gold_dispatch.sh:1349-1350; run_date=2026-09-29; log_source=s3://opal-data-bd/logs/gold-layer/gold_incremental_2026-09-30_20260930_011128.log (this run: 'BD GOLD LAYER RUNNER STARTED (mode: incremental)' 2026-09-29T23:01:57+00:00, '=== COMPLETE (exit code: 0)' 2026-09-30T01:11:28+00:00; the WARN line is line 45718 of a log whose last 6,000,000 bytes were read)\nRESULT: PASS\nexit=0",
+      "denominator": "1 scheduled run's log read (the 2026-09-29T23:01:57Z cron-window run); the same line also appears for 3 other runs in the window (09-29 09:47Z, 12:45Z; 09-30 04:00Z)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest passes with 0 failed (fresh after the weekly run; stale only past the next weekly production day; one-week-past control stale; daily unchanged) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round7/checks/f1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "PASSED .tools/tests/test_comp_freshness_weekly.py::test_weekly_entry_without_a_declared_weekday_is_unchanged\nPASSED .tools/tests/test_comp_freshness_weekly.py::test_holiday_production_day_rolls_back\nPASSED .tools/tests/test_comp_freshness_weekly.py::test_weekly_production_day_helper\nPASSED .tools/tests/test_comp_freshness_weekly.py::test_missing_calendar_refuses_rather_than_flat_verdict\nPASSED .tools/tests/test_comp_freshness_weekly.py::test_fixture_config_in_a_temp_dir_round_trips\n17 passed in 1.54s\nRESULT: PASS\nexit=0",
+      "denominator": "17 of 17 tests passed (0 failed)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "OK: bd_silver_allocations and OK: bd_silver_unrealized (basis trading-day-frontier, cadence weekly, weekday set) -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round7/checks/f1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "OK: bd_silver_allocations: basis=trading-day-frontier cadence=weekly weekday=sunday\nOK: bd_silver_unrealized: basis=trading-day-frontier cadence=weekly weekday=sunday\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 entries carry the weekly basis",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2's own positive control: a last write one week past reads STALE (test_one_week_past_control_reads_stale), and the flat-hours contrast (test_flat_hours_would_have_failed_midweek) shows the same Wednesday read FAILs under the old daily entry and PASSes under the weekly basis.",
+      "expected": "one-week-old write: FAIL; write inside the week: PASS",
+      "observed": "both asserted and passing in the 17 of 17 run",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 run twice (once before the commit, once after) with the same inputs",
+      "observed": "17 passed both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "gold_dispatch.sh, whether the gate blocks, any deploy of the config or reader, and COMP_FRESHNESS_PIPELINE",
+      "reason": "Order bounds 1 and 2. The skip path is MEASURED, not changed; the held BD config was never run through comp-freshness."
+    },
+    {
+      "item": "infra/system/06_current_state.* regeneration",
+      "reason": "Outside the order's <paths>; the commit carries an audited system-current-override line and the issuer's drain regenerates it."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W25-S1",
+    "NFRA_MCPINDEX-Z-W25-S2"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-f-1.freshness-weekly-basis-and-skip-path.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest .tools/tests/test_comp_freshness_weekly.py -q",
+      "result": "17 passed"
+    },
+    {
+      "tool": "comp-freshness self-test",
+      "invocation": "python .tools/comp-freshness self-test",
+      "result": "OK: all fail-closed-basis cases pass (pk.regression_sweep: swept=105 entries, violations=[])"
+    }
+  ]
+}

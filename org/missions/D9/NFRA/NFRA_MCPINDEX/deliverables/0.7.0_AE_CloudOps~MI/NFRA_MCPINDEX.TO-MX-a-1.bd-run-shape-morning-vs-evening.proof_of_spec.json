@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-a-1",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e91ce9a0d5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "9108f11494",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-a-1.bd-run-shape-morning-vs-evening.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~MI",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.7.0_AE_CloudOps~MI/BD_RUN_SHAPE_COMPARISON.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The machine-readable record AC1 reads. Every required key present: morning.transport / entry_point / schedule; morning.tables 4 of 4 (transactions, realized, unrealized, allocations) each with a non-empty fields list taken from the landed xlsx header row and a 3-item evidence list; morning.as_of_provenance.bd_side_present true with evidence; evening.transport / data_source / schedule; evening.fetches_from_bd false; verdict.evening_extraneous true with 7 preconditions_to_decommission. 0 non-ASCII characters.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.7.0_AE_CloudOps~MI/BD_RUN_SHAPE_COMPARISON.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one-page plain-words version for Andrew, structured on his three questions (transport, fields, BD-side as-of provenance) and then the comparison and the verdict. Every figure in it is also in the JSON with its citation; it introduces no number the JSON does not carry.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows NFRA_MCPINDEX-Z-S77..Z-S81 appended IN THE SHARED TREE, because CLAUDE.md 14b inverts for an append-only shared channel. Next free k re-read at write time both times (0 AEMI ids present at the first write, 4 at the second). The fenced json array parses after the append: 243 rows, last id NFRA_MCPINDEX-Z-S81. The id FORM departs from the order and the departure is a declared exclusion below. The channel already carried 6 non-ASCII characters at offsets 450372-450403 which are the QUOTED SUBJECT of a pre-existing row about a mojibake incident; they are the record, so they were neither stripped nor added to -- count before 6, after 6, and all appended bytes are ASCII. Reads and writes were explicit encoding=utf-8."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "morning tables: 4; every required key present with evidence; evening fetches_from_bd and verdict evening_extraneous are booleans -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round7/checks/a1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "morning tables: 4 (allocations, realized, transactions, unrealized) / evening fetches_from_bd=False; verdict evening_extraneous=True / RESULT: PASS / exit=0. Run twice from the workspace root -- once on the first write of the record and again after the S5 amendment -- PASS both times, no MISSING line either time. The exit code was read from $? directly, never through a tail pipe.",
+      "denominator": "4 of 4 tables the runner's BD_REST_TABLES declares (transactions, allocations, realized, unrealized), each with its own landed xlsx read; the check also grades 3 morning scalar keys, 2 per-table lists x 4 tables, 2 as_of_provenance keys, 3 evening scalar keys, 1 evening boolean and 2 verdict keys = 24 graded assertions, 0 failures.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "each of Andrew's three questions (transport, fields returned, BD-side as-of provenance) and the evening comparison is answered from a cited file or log, not inferred",
+      "method": "manual_read_with_citation",
+      "invocation": "JUDGMENT at L9: read BD_RUN_SHAPE_COMPARISON.md against its cited files",
+      "output_evidence": "NOT SELF-GRADED -- graded at L9 and never here (CLAUDE.md rule 27 L9). What is offered to the grader, per question: (1) TRANSPORT -- the four REST endpoints, base URL, auth and timeouts quoted from the DEPLOYED engine s3://opal-data-bd/code/bronze/cot_bronze_ingest.py (80,599 B, LastModified 2026-08-21T01:04:21Z, md5 a1d81b96e8b679142176ad827af2c00d), downloaded and read, not the repo copy, because the runner downloads that object at runtime. (2) FIELDS -- one recent bronze xlsx per table opened with openpyxl: header row, column count and data rows counted by iteration (transactions 71 cols / 5,144 rows; realized 13 / 8,530; unrealized 15 / 500,000; allocations 92 / 34,505), each with the object key, byte size and LastModified. (3) BD-SIDE AS-OF PROVENANCE -- answered PRESENT, not absent: the BD-written Timestamps worksheet in all four workbooks, values quoted per table, corroborated by the transactions Created (Eastern) stamp matching that object's sidecar landed_at to within 2 seconds; plus the 'As of Date' data column in transactions and allocations; plus what does NOT survive into silver, and the measured 0-hit census showing response HEADERS are never read. (4) THE EVENING COMPARISON -- the served SSM Default version 3 of both documents quoted for the fetch lines, 6 evening logs read, 3 EC2 instances described live, and a pyarrow column-by-column schema comparison of a morning-written against an evening-written partition on both tables.",
+      "denominator": "Andrew's verbatim word carries 3 questions plus the evening comparison = 4 items; 4 of 4 answered from a named file, log, live API read or object, 0 answered by inference. Where an inference was unavoidable it is labelled and its missing discriminator named -- the one case is the exactly-500,000 unrealized row count (row Z-S80), whose resolution needs a BD-side read this order forbids.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "UNCOMPUTABLE BY THIS PARTY BY CONSTRUCTION, not unmeasured: AC2 is judgment=\"true\" and CLAUDE.md rule 27 L9 says a JUDGMENT criterion is graded at L9 and never self-graded. The value is not PASS because this seat may not award it, and not FAIL because nothing failed; the grader at L9 replaces it. A judgment criterion is graded at L9 and never self-graded. Recorded as PENDING-L9 rather than PASS. One correction the grader should hold this record to: an earlier read of mine listed the newest transactions and allocations objects as 2026-06-18 and concluded both feeds were dead. That was wrong and is not in the record. The cause was a descending key sort: TXN_DAILY_ sorts above TRANSACTIONS_DAILY_ and ALLOC_DAILY_ above ALLOCATIONS_DAILY_, so a 4-row page of a descending listing showed only the retired names. It was caught by taking the full census and printing the pattern distribution with a denominator (202 and 132 xlsx objects, two name patterns each), which is the read the record carries."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No code was written by this cell, so a source mutant does not apply. The equivalent control for a read-only analysis is to falsify the two load-bearing claims against evidence that could have contradicted them.",
+      "expected": "If the weekly allocations/unrealized cadence were BD simply having no Friday snapshot, then a Friday as-of would never land at all. If the evening documents still called BD, a fetch line would appear in the SERVED document content, not only in the repo JSON the order already quoted.",
+      "observed": "Claim 1 FALSIFIABLE AND SURVIVED: as_of 2026-09-25 (a Friday) was REJECTED on the Saturday run and LANDED on the Sunday run -- the same as-of date, two outcomes, which separates \"BD has no Friday snapshot\" from \"we asked too early\" and leaves only the second. Claim 2 FALSIFIABLE AND SURVIVED: the served Default version 3 was fetched for both documents and its complete fetch-line set is two aws s3 commands against opal-data-bd; a census for http, https, playwright, browser and login in the served content returns 0. Claim 3, the field delta, was tested in the direction that would have DEFEATED the verdict (a field only in the evening output) and returned the empty set, while the reverse direction returned cusip.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Re-ran AC1 twice against two different states of the record (first write, then after the S5 amendment). Re-read the runner RESULT lines and the REJECTED lines as two independent CloudWatch queries. Took the bronze census as a full unpaginated listing with IsTruncated read, rather than a page.",
+      "observed": "AC1 PASS both times, exit=0 both times, identical summary lines. The REJECTED lines and the RESULT lines agree on every date they share (10-01, 10-02, 10-03, 10-06 rejected [allocations, unrealized]), two instruments and no disagreement. Listings: transactions 300 objects IsTruncated None, realized 239, unrealized 89, allocations 146 -- no page was mistaken for an answer.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any call to Black Diamond, by REST or portal or any other route",
+      "reason": "BOUNDS clause 2 and CLAUDE.md's vendor-egress rule: availability is not authorization. The whole morning shape was established from the deployed engine's code, the deployed query templates and the objects the runs already landed. One question is genuinely unresolvable without that call and is filed rather than guessed: whether the exactly-500,000 unrealized row count is a BD export cap (row Z-S80)."
+    },
+    {
+      "item": "data/cot/scripts/bronze/cot_bronze_ingest.py, the repo copy of the shared engine",
+      "reason": "BOUNDS clause 2 excludes anything under data/cot/. No evidence is lost by it: the runner downloads s3://opal-data-bd/code/bronze/cot_bronze_ingest.py at runtime, so the S3 object is the bytes that execute and is the sounder instrument regardless of the bound. The repo copy was not read and no claim here rests on it."
+    },
+    {
+      "item": "Any publish, apply, invoke, rule change, instance start or stop, or SSM send-command",
+      "reason": "BOUNDS clause 1: PHASE A is read-only. Nothing was written outside this order's <paths>. In particular the 11 sentinel-less dates were NOT repaired, the two evening rules were NOT disabled, and MX-s-18 was NOT applied -- all of that is PHASE B of a later order under never-widen halves."
+    },
+    {
+      "item": "The IAM grant that would unblock MX-s-18 (s3:GetObject on bronze/*/_BRONZE_COMPLETE.json)",
+      "reason": "Not this cell's act and not this cell's lane. It is row NFRA_MCPINDEX-Z-W24-S11 with disarm_owner 2.0.0_SA_COO~MI, and it is named as precondition P2 of the verdict rather than silently assumed away. comp-iam was DECLARED-NOT-APPLICABLE in the order preflight for exactly this reason."
+    },
+    {
+      "item": "The weekly allocations/unrealized cadence defect, and the choice between a 2-business-day lag and a later run time",
+      "reason": "Off-task relative to the cell boundary: found while establishing the morning shape, filed as row Z-S78 citing the pre-existing Z-W25-S2 rather than chased, per CLAUDE.md section 2. It is also explicitly listed in the record as NOT moved by this verdict, so the decommission is not read as fixing it."
+    },
+    {
+      "item": "The MX-a-1 cell-id collision and the missing BDOPS decomp row",
+      "reason": "Mid-round the spec AND the decomposition are FROZEN (CLAUDE.md rule 27), so neither the decomp nor this order's decomp_ref was edited. Filed as row Z-S81 for the issuer."
+    },
+    {
+      "item": "The order's prescribed surprise-row id form NFRA_MCPINDEX-Z-AEMI-S<k>",
+      "reason": "The order's prescribed surprise-row id form, `NFRA_MCPINDEX-Z-AEMI-S<k>`, is REFUSED BY BOTH GATES and was not used; the rows carry NFRA_MCPINDEX-Z-S77..Z-S81 instead. Measured: surprise-row-gate.py:105 ID_RE = ^(?P<project>[A-Z0-9_]+)-(?P<z>Z-)?(?:W(?P<w>[0-9]+)-|(?P<c>C-))?S(?P<k>[0-9]+)$ and proof-of-spec-check.py:1198 SURPRISE_ID_RE = ^\\s*([A-Z0-9_]+-(?:Z-)?(?:W[0-9]+-|C-)?S[0-9]+)\\b both admit only an optional W<n>- or C- segment, so an `AEMI-` lane segment matches neither. Denominator: of the 243 rows in the channel, the 5 AEMI-form ids were the ONLY 5 the gate's ID_RE refused; 238 use an accepted form. Consequence had they stood: 5 ENFORCE violations on the SURPRISES limb, which per CLAUDE.md section 2 blocks this tree TO's `complete` flip -- verified by running the checker, which read exactly those 5 and nothing else. The lane identity the AEMI segment was carrying is not lost: it is in each row's `surfaced_by` (0.7.0_AE_CloudOps~MI), which is where it belongs. Reported to the issuer under BOUNDS clause 3 (refuse a criterion you cannot meet as written and report it with its measurement); the id-form prescription is the issuer's to correct in the order template."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-S77: the evening SSM documents and the morning bd-silver-merge write the SAME silver keys from DIFFERENT copies of merge-daily-incremental.py -- 43,492 B @2026-06-29 against 59,820 B @2026-10-01, 695 differing lines. INERT because neither evening document invokes the allocations or unrealized merges, so the stale copy's missing guards are unreachable; arms if either is ever given --allocations, --unrealized or --all. OPEN.",
+    "NFRA_MCPINDEX-Z-S78: the measured CAUSE of the weekly allocations/unrealized cadence that Z-W25-S2 recorded without one -- the 00:00Z run plus a 1-business-day as-of lag asks BD for a snapshot about 4 hours old in US Eastern, BD returns 0 rows, and SNAPSHOT_TABLES reject it pre-write; only the Sunday run (asking for the Friday) lands. Grounded on per-run REJECTED lines in /aws/lambda/bd-49f-runner. OPEN, and not moved by this verdict.",
+    "NFRA_MCPINDEX-Z-S79: an evening-written silver/transactions partition is missing the cusip column the morning-written one carries (73 against 74), cause quoted from the evening log. INERT because NOT YET EXERCISED ON DATA -- the one measured evening partition has 0 rows; the arming condition is a sentinel-less date whose transactions tile carries rows. Retiring the evening documents retires it. OPEN.",
+    "NFRA_MCPINDEX-Z-S80: the unrealized bronze export carries exactly 500,000 data rows while its template sets isLimitSize=False. DELIBERATELY UNRESOLVED -- distinguishing a BD export cap from a true population needs vendor egress, outside this order. Recorded so the count is not later quoted as a measured population; an egress-free partial discriminator is named in the row. OPEN.",
+    "NFRA_MCPINDEX-Z-S81: two task orders carry cell id MX-a-1 and the decomp row for MX-a-1 is the PORTAL property (Black Diamond is MX-a-3); BDOPS appears nowhere in the decomp. INERT today -- the portal order is complete and to-check keys on the filename slug, returning total=1 for this lane -- but a reader keyed on the bare cell id will attribute this BD record to the portal cell and apply that cell's four-surface denominator to it. OPEN, issuer's to resolve."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~MI/logs/2026-10-06/ae_mi_mx_a_1_bd_run_shape_1955-2110Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"how do I grep the repo\" (startup PATH exercise, org/XXX.md step A.3)",
+      "result": "PATH: 104 of 104 comp-tools resolve bare; \"EXERCISE: a forwarder RAN.\" The rail is live in this session, so the gated reads below were routed deliberately."
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "n/a -- DECLARED-NOT-APPLICABLE in the order preflight",
+      "result": "Correct for PHASE A: nothing is published, applied or invoked, so there is no gate or hold for this act to trip. Recorded as declared-not-applicable, never as skipped."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "n/a -- DECLARED-NOT-APPLICABLE in the order preflight",
+      "result": "Correct: no role or policy change in PHASE A. The one IAM fact the verdict rests on is not mine -- it is the simulate-principal-policy result already recorded in ANNOUNCE_MX-s-18 as row Z-W24-S11, cited rather than re-derived."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "n/a -- DECLARED-NOT-APPLICABLE in the order preflight",
+      "result": "Correct: this is an investigation record and its answers are graded at L9 as AC2. The controls block above carries the self-falsification this cell could do on its own."
+    },
+    {
+      "tool": "NOTE (instrument trap, CLAUDE.md 22a CODE)",
+      "invocation": "aws s3 cp s3://opal-data-bd/code/bronze/cot_bronze_ingest.py (deployed) rather than reading the repo file",
+      "result": "The runner downloads the engine at RUNTIME, so the repo path is not the bytes that execute. Deployed object pinned by size, LastModified and md5 (80,599 B, 2026-08-21T01:04:21Z, a1d81b96e8b679142176ad827af2c00d). This also satisfied the order bound excluding data/cot/."
+    },
+    {
+      "tool": "NOTE (instrument trap, CLAUDE.md 22a RETRIEVAL)",
+      "invocation": "aws ssm get-document --document-version 3 after describe-document read DefaultVersion, instead of reading infra/aws/ssm/*.json",
+      "result": "describe-document first (DefaultVersion 3 == LatestVersion 3 for both), then get-document --document-version 3, so the quoted fetch lines are the SERVED content and not the repo JSON the order had already quoted. This is the limb that turned \"the repo says the portal download was removed\" into \"the running document fetches nothing from BD\"."
+    },
+    {
+      "tool": "NOTE (instrument trap, site Z)",
+      "invocation": "aws logs filter-log-events --log-group-name /aws/lambda/bd-49f-runner run from PowerShell, not Git Bash",
+      "result": "MSYS path conversion mangled the leading-slash log group name into a Windows path and the call failed InvalidParameterException. CLAUDE.md forbids bare MSYS_NO_PATHCONV=1 with aws, so the call was moved to PowerShell, which has no such conversion. Also measured: --filter-pattern '\"RESULT:\"' is refused (Invalid character(s) in term ':'); the pattern must be RESULT without the colon."
+    },
+    {
+      "tool": "NOTE (search trap, CLAUDE.md 21 -- a page is not an answer)",
+      "invocation": "aws s3api list-objects-v2 ... --query 'reverse(sort_by(Contents,&Key))[:4]' then the FULL listing with a printed pattern distribution",
+      "result": "The 4-row descending-by-key page showed TXN_DAILY_2026-06-18 and ALLOC_DAILY_2026-06-18 as newest and read as two dead feeds. Wrong object: TXN sorts above TRANSACTIONS and ALLOC_ above ALLOCATIONS, so the live names were below the page. The full census corrected it -- 202 transactions xlsx in two name patterns (105 current, 97 retired), 132 allocations xlsx in three. The verdict rests on the census, not the page."
+    }
+  ]
+}

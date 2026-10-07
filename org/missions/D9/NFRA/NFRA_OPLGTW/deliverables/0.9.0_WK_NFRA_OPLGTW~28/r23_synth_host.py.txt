@@ -1,0 +1,132 @@
+# OG-rl-9 on-host SYNTHETIC arms (shipped by r23_ssm.py behind the committed rl6_host_prelude.py.txt: in-memory store, in-memory audit sink).
+# Never a real identity, never a state-store write: every principal is a fresh uuid pair with an in-memory grant. Prints counts and codes only
+# (no account id, no CUSIP). OG_RL6_MODE = before (live code) | after_stage (a host scratch copy carrying the release integration.py).
+# Arms, each through the dim_asset QUERY (cursor-followed) and the dim_asset prepare_download -> redeemed CSV:
+#   mix        : every account holding >=1 blank-cusip position, plus 10 accounts holding none  (blank rows must leave; held non-blank must stay)
+#   only_blank : accounts whose every position is blank (up to 5)                                 (live: blank rows served; release: REFUSED asset_read_denied_unqualified)
+#   clean      : 10 accounts holding no blank position                                           (control: identical before and after)
+import csv
+import hashlib
+import tempfile
+
+MASTER = "08242234"
+DATE = "2026-10-01"
+
+
+def _blank(v):
+    return v is None or not str(v).strip()
+
+
+def _outcome(result):
+    doc = result.structuredContent or {}
+    if result.isError:
+        err = doc.get("error") or {}
+        return "REFUSED %s %s" % (err.get("code"), err.get("reason"))
+    return "OK"
+
+
+def run():
+    import pyarrow.parquet as pq
+    from app import data_entitlement as de
+    from app.context import Principal
+    from app.integrations.schwab import export as sexport
+    from app.integrations.schwab import integration as _integ
+
+    mode = os.environ.get("OG_RL6_MODE", "before")
+    allow = lambda: True  # noqa: E731
+    served, catalog, _store, contract = build()
+    with open(_integ.__file__, "rb") as fh:
+        print("R23_MODULE integration.py md5 %s staged=%s" % (hashlib.md5(fh.read()).hexdigest()[:8], bool(os.environ.get("OG_RL6_STAGE"))))
+    res = catalog.snapshot(MASTER, DATE, allow)
+    assert res.status == "complete" and res.snapshot, ("snapshot not servable", res.result)
+    entries = [dict(f) for f in res.snapshot["files"] if f.get("dataset") == "dim_position"]
+    sources, cleanup = served._fetch(entries, allow)
+    try:
+        rows = []
+        for src in sources:
+            tbl = pq.read_table(src.path, columns=["account_id", "cusip"])
+            rows.extend(zip(tbl.column("account_id").to_pylist(), tbl.column("cusip").to_pylist()))
+    finally:
+        cleanup()
+    by_acct = {}
+    for a, c in rows:
+        if a:
+            by_acct.setdefault(a, []).append(c)
+    blank_accts = sorted(a for a, cs in by_acct.items() if any(_blank(c) for c in cs))
+    only_blank = sorted(a for a, cs in by_acct.items() if all(_blank(c) for c in cs))
+    clean = sorted(a for a, cs in by_acct.items() if not any(_blank(c) for c in cs))
+    print("R23_POPULATION positions=%d accounts=%d accounts_with_blank_cusip=%d accounts_only_blank=%d accounts_clean=%d"
+          % (len(rows), len(by_acct), len(blank_accts), len(only_blank), len(clean)))
+    fields = contract.raw["fields"]
+    qdl = {"master": MASTER, "dataset": "dim_asset", "business_date": DATE, "mode": "rows", "columns": ["cusip"]}
+
+    def principal_with(accounts):
+        tid, oid = str(uuid.uuid4()), str(uuid.uuid4())
+        scope = {"masters": [MASTER], "datasets": ["dim_position", "dim_asset"], "accounts": {MASTER: list(accounts)},
+                 "dates": {"mode": "fixed_dates", "dates": [DATE]},
+                 "columns": {"dim_position": list(fields["dim_position"]), "dim_asset": list(fields["dim_asset"])},
+                 "operations": list(de.OPERATIONS)}
+        g = de.grant_item(tid, oid, 1, "active", scope)
+        pr = de.profile_item(tid, oid, "active", 1, grant_revision=1)
+        svc, _cat, st, _c = build()
+        st.items.update({(de.grant_key(tid, oid, 1).pk, de.grant_key(tid, oid, 1).sk): g,
+                         (de.profile_key(tid, oid).pk, de.profile_key(tid, oid).sk): pr})
+        return svc, st, Principal(tid, oid, "r23-synthetic@opalinvest.invalid")
+
+    def query_all(svc, principal):
+        out, pages, err = [], 0, None
+        q = dict(qdl, page_size=100)
+        while pages < 400:
+            r = asyncio.run(svc.query(principal, q))
+            pages += 1
+            if r.isError:
+                err = _outcome(r)
+                break
+            doc = r.structuredContent or {}
+            out.extend(row[0] for row in (doc.get("rows") or []))
+            if not doc.get("cursor"):
+                break
+            q = dict(q, cursor=doc["cursor"])
+        return out, pages, err
+
+    def measure(label, accounts):
+        if not accounts:
+            return {"arm": label, "accounts": 0, "note": "no such accounts in the population"}
+        held = set()
+        for a in accounts:
+            held.update(c for c in by_acct[a] if not _blank(c))
+        svc, st, principal = principal_with(accounts)
+        out = {"arm": label, "accounts": len(accounts), "held_nonblank_cusips": len(held)}
+        qc, pages, qerr = query_all(svc, principal)
+        out["query"] = qerr or "OK"
+        if qerr is None:
+            out["query_returned"] = len(qc)
+            out["query_blank_rows"] = len([c for c in qc if _blank(c)])
+            out["query_nonblank_unheld"] = len([c for c in qc if not _blank(c) and c not in held])
+            out["query_held_missing"] = len(held - set(qc))
+            out["query_duplicates"] = len(qc) - len(set(qc))
+        r = asyncio.run(svc.prepare_download(principal, query=dict(qdl)))
+        out["download"] = _outcome(r)
+        if not r.isError:
+            secret = r.structuredContent["download_url"].split("#", 1)[1]
+            ticket = st.get(sexport._key(secret))
+            path, _size, _n, _info = asyncio.run(sexport.generate_csv(principal, ticket, service=svc, directory=tempfile.mkdtemp(prefix="exports_", dir=SCRATCH)))
+            with open(path, newline="", encoding="utf-8") as fh:
+                crow = list(csv.reader(fh))
+            assert crow and crow[0][0].startswith("cusip"), "csv header"
+            dc = [x[0] for x in crow[1:]]
+            out["download_returned"] = len(dc)
+            out["download_blank_rows"] = len([c for c in dc if _blank(c)])
+            out["download_nonblank_unheld"] = len([c for c in dc if not _blank(c) and c not in held])
+            out["download_held_missing"] = len(held - set(dc))
+            out["download_duplicates"] = len(dc) - len(set(dc))
+        out["memstore_put_runtime_calls"] = st.put_runtime_calls
+        return out
+
+    arms = [measure("mix", blank_accts + clean[:10]), measure("only_blank", only_blank[:5]), measure("clean", clean[:10])]
+    print("R23_SYNTH " + json.dumps({"mode": mode, "master": MASTER, "date": DATE, "synthetic_principal": True, "grants_written": 0,
+                                    "state_store_written": False, "arms": arms}, sort_keys=True))
+
+
+if __name__ == "__main__":
+    run()

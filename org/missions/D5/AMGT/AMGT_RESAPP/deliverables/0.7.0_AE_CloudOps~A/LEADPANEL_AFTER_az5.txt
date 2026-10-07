@@ -1,0 +1,56 @@
+AMGT_RESAPP round 76 AMGT-az-5 -- leadpanel cold/warm AFTER the code redeploy
+Deployed artifact OVpDhfwDG3BzKE++wDxMlFA6JrwpTnH3FiHC+NrzsrE= (built at EXACTLY de48559928).
+Run: leadpanel_cold_warm.py --label after, 2026-10-06T20:13:11Z. CTO half condition 5: REPORT-ONLY.
+
+LEADPANEL after: CodeSha256 OVpDhfwDG3BzKE++wDxMlFA6JrwpTnH3FiHC+NrzsrE= at 2026-10-06T20:13:11Z
+   /lead-panel/timeseries/collected/chatter?days=30: cold(init+duration) n 6 min 3148 max 3887 | warm(duration) n 3 min 432 max 448 | status [200]
+   /lead-panel/timeseries/collected/chatter?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 426 max 581 | status [200]
+   /lead-panel/timeseries/collected/chatter?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 427 max 527 | status [200]
+   /lead-panel/rankings/trending/price: cold(init+duration) n 0 | warm(duration) n 9 min 63 max 91 | status [200]
+   /lead-panel/rankings/trending/price?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 69 max 178 | status [200]
+   /lead-panel/rankings/trending/price?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 117 max 217 | status [200]
+   /lead-panel/rankings/breakout/price: cold(init+duration) n 0 | warm(duration) n 9 min 75 max 214 | status [200]
+   /lead-panel/rankings/breakout/price?days=90: cold(init+duration) n 0 | warm(duration) n 9 min 74 max 193 | status [200]
+   /lead-panel/rankings/breakout/price?days=365: cold(init+duration) n 0 | warm(duration) n 9 min 120 max 263 | status [200]
+
+== Cold/warm chatter AMGT_PHASE table, deployed ==
+Source: CloudWatch Logs /aws/lambda/opal-amgt-scoped-api from 2026-10-06T20:13:00Z.
+JOIN METHOD: AMGT_PHASE lines carry NO requestId, so they are joined PER LOG STREAM in
+timestamp order -- each REPORT closes an invoke and the phase lines since the previous REPORT
+belong to it; an invoke is COLD when its REPORT carries Init Duration. CONTROL that the join
+is right: the reconstruction's Init+Duration band equals the leadpanel script's own figure.
+
+denominator: 948 log events since 2026-10-06T20:13:00Z (auto-paginated, counted client-side)
+log streams (containers) in window: 6
+chatter invokes with phase lines: 32 (cold 6, warm 26)
+
+REPORT bands, chatter route:
+  Duration (cold)                n 6  min 2580  max 3137
+  Init Duration (cold)           n 6  min 568  max 1043
+  Init + Duration (cold)         n 6  min 3148  max 3887
+  Duration (warm)                n 26  min 426  max 581
+
+| phase | cold min | cold max (n=6) | warm min | warm max (n=26) |
+|---|---|---|---|---|
+| generation read | 77 | 97 | 2 | 62 |
+| mentions decode | 58 | 320 | 0 | 21 |
+| compute | 197 | 237 | 86 | 174 |
+| names | 3 | 4 | 2 | 17 |
+| classification | 9 | 17 | 6 | 40 |
+| serialize | 2 | 2 | 2 | 2 |
+| sum of the chatter phases | 370 | 613 | - | - |
+
+Outside every chatter phase line (cold Duration minus phase sum): 1967-2628 ms over n=6
+
+== Comparison to the az-4 deployed baseline (D29LJCXh), PHASE_TABLE.md section 1 ==
+  generation read  cold 1501-1632 ms -> 77-97 ms
+  sum of phases    cold 2226-2380 ms -> 370-613 ms
+  Duration         cold 2987-3177 ms -> 2580-3137 ms
+  Init Duration    cold  633-683 ms  -> 568-1043 ms
+  outside phases   cold  761-808 ms  -> 1967-2628 ms
+
+READ WITH ROW AMGT_RESAPP-Z-S360 (@4718eab926): the in-phase saving is very nearly offset by
+out-of-phase growth, and the emitted phase LABEL SET is not the same across rounds (az-4 had
+two 'compute (...)' lines where az-5 has one 'compute'), so 'sum of the chatter phases' is NOT
+comparable across rounds without its label set beside it. Cold Duration stays above about 2 s,
+so provisioned concurrency remains on Andrew's list on its own standing disposition.

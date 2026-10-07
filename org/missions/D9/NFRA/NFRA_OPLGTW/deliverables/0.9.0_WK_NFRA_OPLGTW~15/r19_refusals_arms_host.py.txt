@@ -1,0 +1,42 @@
+"""OG-rl-7 (NFRA_MCPMSP MS-sg-1): admin_refusals._shape on SYNTHETIC audit records, in a SEPARATE process, on the INSTALLED code (never the running service, no .env, no store, no lake).
+usage (on the host, in the venv, env -i):  python run.py before|after
+  A  a refusal entry whose args carry sender_email / sender_domain:       listed as given in BOTH branches.
+  B  a refusal entry WITHOUT sender args, `user` = the calling gateway identity (a synthetic address):
+       before (live code): sender_email = user, sender_domain = user's domain   (the derive-from-user form)
+       after  (release)  : sender_email = null, sender_domain = null           (args ONLY)
+  C  an entry for another tool: not a refusal -> None in both branches.
+Prints one line per arm and  REFUSALS_ARMS <expect>: n of m  RESULT: PASS|FAIL.
+"""
+import hashlib
+import os
+import sys
+
+expect = sys.argv[1]
+gw = os.environ.get("OG_GW_DIR") or "/opt/opal-gateway"
+sys.path.insert(0, gw)
+os.environ["MOCK_GRAPH"] = "1"
+import dotenv  # noqa: E402
+dotenv.load_dotenv = lambda *a, **k: False
+from app import admin_refusals as ar  # noqa: E402
+
+print("INSTALLED_FILE admin_refusals.py=%s md5 %s" % (ar.__file__, hashlib.md5(open(ar.__file__, "rb").read()).hexdigest()))
+CALLER = "gw-caller@caller.invalid"
+A = {"ts": "t", "user": CALLER, "tool": ar.REFUSAL_TOOL, "args": {"tid": "T", "oid": "O", "sender_email": "s@ext.invalid", "sender_domain": "ext.invalid"}}
+B = {"ts": "t", "user": CALLER, "tool": ar.REFUSAL_TOOL, "args": {"tid": "T", "oid": "O"}}
+C = {"ts": "t", "user": CALLER, "tool": "read_email", "args": {}}
+rows = []
+
+
+def arm(name, ok, got):
+    rows.append(bool(ok))
+    print("%s %s: %s" % ("PASS" if ok else "FAIL", name, got))
+
+
+a = ar._shape(A)
+arm("A args-borne sender fields listed as given", a and a["sender_email"] == "s@ext.invalid" and a["sender_domain"] == "ext.invalid", (a["sender_email"], a["sender_domain"]) if a else None)
+b = ar._shape(B)
+want = (CALLER, "caller.invalid") if expect == "before" else (None, None)
+arm("B no sender args: %s" % ("derived from `user` (live)" if expect == "before" else "null (release)"), b and (b["sender_email"], b["sender_domain"]) == want, (b["sender_email"], b["sender_domain"]) if b else None)
+arm("C another tool is not a refusal entry", ar._shape(C) is None, ar._shape(C))
+print("REFUSALS_ARMS %s: %d of %d  RESULT: %s" % (expect, sum(rows), len(rows), "PASS" if all(rows) else "FAIL"))
+sys.exit(0 if all(rows) else 1)

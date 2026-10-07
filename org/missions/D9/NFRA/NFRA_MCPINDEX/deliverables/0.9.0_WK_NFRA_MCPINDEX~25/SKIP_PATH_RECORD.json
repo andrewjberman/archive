@@ -1,0 +1,30 @@
+{
+  "skip_path": "not_on_path",
+  "code_ref": "data/black_diamond/scripts/gold/gold_dispatch.sh:1349-1350",
+  "run_log_line": "  WARN: comp-freshness not found in PATH -- freshness gate skipped.",
+  "run_date": "2026-09-29",
+  "run_started_utc": "2026-09-29T23:01:57+00:00",
+  "log_source": "s3://opal-data-bd/logs/gold-layer/gold_incremental_2026-09-30_20260930_011128.log (this run: 'BD GOLD LAYER RUNNER STARTED (mode: incremental)' 2026-09-29T23:01:57+00:00, '=== COMPLETE (exit code: 0)' 2026-09-30T01:11:28+00:00; the WARN line is line 45718 of a log whose last 6,000,000 bytes were read)",
+  "how_read": "aws s3api get-object --range bytes=<size-6000000>-<size-1> on the key above, then a CR-stripped grep for the freshness, STARTED and COMPLETE lines. The log file is cumulative (/var/log/gold-layer-runner.log is appended and re-uploaded each run), so it also holds earlier runs.",
+  "why_this_run_is_scheduled": "The 2026-09-29T23:01:57Z start is the 23:00Z cron(0 23 ? * MON-SAT *) bd-gold-nightly-fallback window; mode incremental comes from run_gold_layer.sh:16-22 (delegates to gold_dispatch.sh --chain full).",
+  "arms_ruled_out": {
+    "bypass_flag": "gold_dispatch.sh:1347 takes the bypass arm only when NO_FRESHNESS_CHECK=1; run_gold_layer.sh:22 passes only '--chain full' (no --no-freshness-check), and the cumulative log window read (6,000,000 bytes, spanning the 2026-09-29 and 2026-09-30 runs) contains 0 'freshness bypass' / '--no-freshness-check' lines.",
+    "config_skipped": "The WARN above is printed by the elif at :1349-1350 (command -v comp-freshness fails) BEFORE comp-freshness is ever invoked, so no config was read to be skipped; the held-config skip at .tools/comp-freshness:70-104 lives inside the tool and never ran."
+  },
+  "same_line_other_runs_in_window": "The identical line appears at least once per run in the window: runs started 2026-09-29T09:47Z, 12:45Z, 23:01Z and 2026-09-30T04:00Z (log lines 26232, 26684, 27095, 41910 of the 06:07Z upload).",
+  "consequence": "Production's gold chain has not run comp-freshness at all; the reader and config changes of this cell cannot change what the scheduled gate does until comp-freshness is on the gold EC2's PATH. No change to whether the gate blocks, as ruled.",
+  "weekday_measurement": {
+    "clock": "UTC (S3 LastModified; comp-freshness grades UTC dates). 00:12-00:32Z Sunday is Saturday 20:12-20:32 US Eastern; the partition-key date is the preceding Friday.",
+    "bd_silver_allocations": {
+      "weekly_production_weekday": "sunday",
+      "denominator": "12 of 12 weekly partitions 2026-07-10..2026-09-25",
+      "write_times_utc": "Sun 00:12:53Z..00:31:00Z (latest 2026-09-27T00:14:56Z)"
+    },
+    "bd_silver_unrealized": {
+      "weekly_production_weekday": "sunday",
+      "denominator": "12 of 12 weekly partitions 2026-07-10..2026-09-25",
+      "write_times_utc": "Sun 00:14:11Z..00:32:14Z (latest 2026-09-27T00:16:18Z)"
+    },
+    "read_with": "aws s3api list-objects-v2 --bucket opal-data-bd --prefix silver/{allocations,unrealized}/ (read 2026-10-02T01Z). Before 2026-07-10 the partitions were daily writes (e.g. allocations 2026-07-06..09); the weekly cadence starts with 2026-07-10."
+  }
+}

@@ -1,0 +1,86 @@
+# OG-ga-1 on-host program (shipped by ga1_ssm.py behind ga1_host_prelude.py.txt). OG_GA1_MODE = before | after.
+# The REAL holder: tid/oid arrive in the process environment from SSM parameters (never printed, never in a repo file); the
+# profile and grant are read from the real state store through app.data_entitlement (HybridStore). No synthetic principal,
+# no in-memory grant, nothing written to DynamoDB. Prints counts, codes, booleans and a sha256 only.
+import csv
+import hashlib
+import tempfile
+
+MASTER = "08242234"
+DATE = "2026-10-01"
+
+
+def refused_or_ok(result):
+    doc = result.structuredContent or {}
+    if result.isError:
+        err = doc.get("error") or {}
+        return "REFUSED %s %s" % (err.get("code"), err.get("reason"))
+    return "OK"
+
+
+def run():
+    import pyarrow.parquet as pq
+    from app import data_entitlement as de
+    from app.context import Principal
+    from app.integrations.schwab import export as sexport
+
+    mode = os.environ.get("OG_GA1_MODE", "after")
+    tid, oid = os.environ["GA1_TID"], os.environ["GA1_OID"]
+    allow = lambda: True  # noqa: E731
+    svc, catalog, store, contract = build()
+    praw = store.get(de.profile_key(tid, oid))
+    assert praw is not None, "holder profile not found in the store"
+    profile = de.parse_profile(praw, tid, oid)
+    grant = de.parse_grant(store.get(de.grant_key(tid, oid, profile.grant_revision)), tid, oid, profile.grant_revision)
+    assert grant.status == "active" and "dim_asset" in grant.scope.datasets
+    principal = Principal(tid, oid, praw.get("email") or "")
+    granted = sorted(grant.scope.accounts.get(MASTER, ()))
+    gset = set(granted)
+    print("GA1_GRANT profile_revision=%s grant_revision=%s operations=%s datasets=%s policy_reads_so_far=%d"
+          % (profile.revision, grant.revision, sorted(grant.scope.operations), sorted(grant.scope.datasets), store.policy_reads))
+
+    res = catalog.snapshot(MASTER, DATE, allow)
+    assert res.status == "complete" and res.snapshot, ("snapshot not servable", res.result)
+    entries = [dict(f) for f in res.snapshot["files"] if f.get("dataset") == "dim_position"]
+    sources, cleanup = svc._fetch(entries, allow)
+    try:
+        rows = []
+        for src in sources:
+            tbl = pq.read_table(src.path, columns=["account_id", "cusip"])
+            rows.extend(zip(tbl.column("account_id").to_pylist(), tbl.column("cusip").to_pylist()))
+    finally:
+        cleanup()
+    held = {c for a, c in rows if a in gset and c}
+
+    qdl = {"master": MASTER, "dataset": "dim_asset", "business_date": DATE, "mode": "rows", "columns": ["cusip"]}
+    dl_result = asyncio.run(svc.prepare_download(principal, query=dict(qdl)))
+    download = refused_or_ok(dl_result)
+    d_cusips = []
+    if download == "OK":
+        secret = dl_result.structuredContent["download_url"].split("#", 1)[1]
+        ticket = store.get(sexport._key(secret))
+        scratch_exports = tempfile.mkdtemp(prefix="exports_", dir=SCRATCH)
+        path, _size, _n, _info = asyncio.run(sexport.generate_csv(principal, ticket, service=svc, directory=scratch_exports))
+        with open(path, newline="", encoding="utf-8") as fh:
+            crow = list(csv.reader(fh))
+        assert crow and crow[0][0].startswith("cusip"), "csv header"
+        d_cusips = [r[0] for r in crow[1:]]
+    blank = len([c for c in d_cusips if not c or not c.strip()])
+    nb_unheld = len([c for c in d_cusips if c and c.strip() and c not in held])
+    dup = len(d_cusips) - len(set(d_cusips))
+    print("GA1_DIAG returned=%d blank_cusip_rows=%d nonblank_unheld_rows=%d duplicate_rows=%d held_cusips_missing_from_download=%d"
+          % (len(d_cusips), blank, nb_unheld, dup, len([c for c in held if c not in set(d_cusips)])))
+    body = {"synthetic_principal": False, "grant_source": "store", "grants_written": 0,
+            "dim_asset_download": download,
+            "held_check": {"returned": len(d_cusips), "distinct_returned": len(set(d_cusips)),
+                           "held_cusips_in_dim_position": len(held),
+                           "unheld_returned": len([c for c in d_cusips if c not in held])},
+            "master": MASTER, "date": DATE, "granted_accounts": len(granted),
+            "served_release": os.environ["GA1_SERVED_RELEASE"]}
+    print("GA1_MODE %s policy_reads=%d put_runtime_calls_in_memory=%d" % (mode, store.policy_reads, store.put_runtime_calls))
+    print("GA1_BODY " + json.dumps(body, sort_keys=True))
+    print("GA1_DIGEST " + hashlib.sha256(json.dumps(body, sort_keys=True).encode("utf-8")).hexdigest())
+
+
+if __name__ == "__main__":
+    run()

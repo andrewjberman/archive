@@ -1,0 +1,20 @@
+"""OG-rl-8 Phase A, HOST SIDE, READ-ONLY: the gateway's blocklist file and kill switch, as DIGESTS. The service's BLOCKLIST_PATH / KILL_SWITCH_PATH are not .env names
+(the committed template writes neither), so both resolve to the config defaults './blocklist.txt' and './KILL_SWITCH' under the service's working directory /opt/opal-gateway.
+Prints: whether each file exists, the entry count, and each entry as audit.email_digest (sha256 of 'og-login-audit/v1|' + stripped lower-cased address) -- never an address.
+usage: python run.py go"""
+import hashlib
+import os
+
+os.chdir("/opt/opal-gateway")
+print("KILL_SWITCH_EXISTS", os.path.exists("./KILL_SWITCH"))
+print("BLOCKLIST_EXISTS", os.path.exists("./blocklist.txt"))
+entries = []
+if os.path.exists("./blocklist.txt"):
+    with open("./blocklist.txt", "r", encoding="utf-8") as fh:
+        for line in fh:
+            e = line.split("#", 1)[0].strip().lower()
+            if e:
+                entries.append(e)
+print("BLOCKLIST_ENTRIES", len(entries))
+for e in entries:
+    print("BLOCKED_DIGEST", hashlib.sha256(("og-login-audit/v1|" + e).encode("utf-8")).hexdigest())

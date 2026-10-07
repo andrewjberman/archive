@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-ao-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ao-1.skip-keys-on-the-pull-date.md",
+    "group": "OTHER",
+    "vintage_commit": "969cdbff2fdea17d4f7d6c2ec256a9ed6d8b8eea"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "969cdbff2fdea17d4f7d6c2ec256a9ed6d8b8eea",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ao-1.skip-keys-on-the-pull-date.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "ca74f3938c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New _pull_log_latest_stamps (one paginated listing of the pull_log table prefix, folder matched via _state_pull_log_prefix); cmd_refresh skip reads it; docstring, comment and AMENDMENT (CRPS-ao-1, round 39) naming Z-S88. No AWS or Bloomberg call.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_refresh_skip_key_round39.py",
+      "kind": "test",
+      "commit_or_etag": "ca74f3938c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 offline tests: derived today + pulled yesterday -> pulled; both today -> skipped; both yesterday -> pulled.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_model_block_round34.py",
+      "kind": "test",
+      "commit_or_etag": "ca74f3938c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_arrange plants a today pull-log stamp for each current name, with the AMENDMENT comment; no assertion changed.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "skip_key_check.py -- expect (?m)^skip build 1/1 control 2/2$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round39/skip_key_check.py\"",
+      "output_evidence": "ARM b1 PASS same-day re-derive, pulled yesterday -> pulled ['PLANT_US_Equity', 'STALE_US_Equity']\nARM c1 PASS pulled today -> skipped ['CURRENT_US_Equity']\nARM c2 PASS stale -> pulled; rc 0\nskip build 1/1 control 2/2",
+      "denominator": "3 names: 1 of 1 build arm, 2 of 2 control arms",
+      "expect": "(?m)^skip build 1/1 control 2/2$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest test_refresh_skip_key_round39.py test_model_block_round34.py -- expect (?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest integrations/bloomberg/research/tests/test_refresh_skip_key_round39.py integrations/bloomberg/research/tests/test_model_block_round34.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "15 passed, 26 warnings in 0.37s",
+      "denominator": "15 of 15 passed; 38 of 38 across all model_block and refresh test files",
+      "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-process mutant (.scratch/mutant.py, nothing committed): _pull_log_latest_stamps replaced by the derived-stamp reader (the pre-fix behaviour), issuer's check run over it.",
+      "expected": "build arm b1 FAILS: the re-derived-today name is skipped",
+      "observed": "ARM b1 FAIL ... pulled ['STALE_US_Equity']; skip build 0/1 control 2/2",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (standalone, and within the model_block/refresh suite).",
+      "observed": "AC1 build 1/1 control 2/2 both times; AC2 pass both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No S3 read or write, no Bloomberg call",
+      "reason": "Order bounds item 1; every check runs on an in-memory stub."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "skip_key_check.py (issuer's check, AC1)",
+      "invocation": "see AC1",
+      "result": "rc 0; build 1/1 control 2/2"
+    }
+  ]
+}

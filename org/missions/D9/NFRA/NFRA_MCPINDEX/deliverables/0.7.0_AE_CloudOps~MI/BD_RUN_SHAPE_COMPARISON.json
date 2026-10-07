@@ -1,0 +1,502 @@
+{
+  "record": "BD_RUN_SHAPE_COMPARISON",
+  "task_order": "NFRA_MCPINDEX.TO-MX-a-1",
+  "cell": "MX-a-1",
+  "author": "0.7.0_AE_CloudOps~MI",
+  "measured_at": "2026-10-06T20:05Z..20:45Z",
+  "phase": "A (read-only)",
+  "egress": "NONE beyond Opal AWS. No call to Black Diamond by any route.",
+  "bounds_note": "The repo copy of the shared ingest script lives under data/cot/, which BOUNDS clause 2 excludes. The DEPLOYED copy at s3://opal-data-bd/code/bronze/cot_bronze_ingest.py was read instead, which is also the authoritative instrument: the runner downloads it at runtime, so the repo copy is not what executes.",
+  "morning": {
+    "transport": "REST over HTTPS. Black Diamond DataMining REST API at https://bd3.bdreporting.com. No browser, no Playwright, no portal login. Four endpoints in order: GET /datamining/auth/token (Cookie-authorized) -> {access_token}; POST /datamining/request/v1/run {template, asOfDate} (Bearer) -> {templateId, resultGuid}; GET /datamining/request/v1/run/{runId}/status (Bearer) -> {statusMessage, isComplete}; GET /Api/DataMining/ExportResults/{resultGuid} (Cookie) -> xlsx bytes. Client is urllib.request in cot_bronze_ingest.py _request, HTTP_TIMEOUT_S=120, status poll every 5s to a 900s timeout.",
+    "auth": "A .bd.identity session cookie jar in Secrets Manager secret blackdiamond/49f/session, written by the session-fetch leg and extended by bd-49f-keepalive. The full 7-cookie jar is sent because POST v1/run needs .AspNetCore.Antiforgery and idsrv, not .bd.identity alone. A DataMining bearer is minted per run from that cookie; a 401 mid-sweep re-mints once before cookie-death is concluded, bounded by MAX_RETRIES=3.",
+    "entry_point": "Lambda bd-49f-runner (infra/aws/lambda/bd-pipeline/bd-49f-runner/lambda_function.py). It downloads the shared engine s3://opal-data-bd/code/bronze/cot_bronze_ingest.py at runtime and orchestrates per table. Terraform infra/aws/terraform/bd-pipeline/bd-49f-interim.tf.",
+    "schedule": "EventBridge rule bd-49f-session-daily cron(0 0 * * ? *) ENABLED, via bd-49f-session-trigger; the belt rule bd-49f-runner-daily cron(0 2 * * ? *) is DISABLED. Session plumbing bd-49f-keepalive on rule bd-49f-keepalive-sched rate(15 minutes) ENABLED. Measured runner start times 00:01-00:03Z.",
+    "firm_separation": "All four env vars set explicitly in the runner before the shared module imports (BD_S3_BUCKET=opal-data-bd, BD_FIRM_ID=49f, BD_SESSION_SECRET_ID=blackdiamond/49f/session, BD_BASE=https://bd3.bdreporting.com); the engine re-asserts fail-closed via _assert_firm_separation().",
+    "tables": [
+      {
+        "table": "transactions",
+        "request": "POST /datamining/request/v1/run with persisted templateId 396353 (queryTypeId 2), dateRangeType Custom, startDate/endDate stamped MM/DD/YYYY. BD_TXN_CHUNK_DAYS=3 tiles the 14-day restatement window into 5 sub-pulls newest-first, each tile landing under its own end date.",
+        "landed_key_pattern": "forwardfill_v2/transactions/TRANSACTIONS_DAILY_<as_of>.xlsx",
+        "date_window_semantics": "PERIOD table. Custom 14-day lookback ending on run_date, no snapshot as-of lag, chunked into <=3-day tiles. The Timestamps sheet of the file read echoes Start 10/2/2026 End 10/4/2026 = the newest tile.",
+        "column_count": 71,
+        "data_row_count": 5144,
+        "fields": [
+          "TransactionID",
+          "Return Date",
+          "Action",
+          "Transaction Type",
+          "Transaction Sub Type",
+          "External Flow",
+          "Description",
+          "Price",
+          "Trade Date",
+          "Entry Date",
+          "Settle Date",
+          "Relationship ID",
+          "Relationship Name",
+          "Relationship Display Name",
+          "Relationship SEC Client Type",
+          "Relationship Termination Date",
+          "Relationship Inception Date",
+          "Previous System Key",
+          "Portfolio Name",
+          "PortfolioID",
+          "Portfolio Display Name",
+          "History Start Date",
+          "Account Number",
+          "AccountID",
+          "Original Account Number",
+          "Account Display Name",
+          "Account Name",
+          "Original Account Name",
+          "Manager",
+          "Account Owner Type",
+          "Account Owner",
+          "Client Name",
+          "History Start Date",
+          "Closed Date",
+          "Account Is Open",
+          "Performance Start Date",
+          "Start Date",
+          "AssetID",
+          "Asset Name",
+          "Asset Display Name",
+          "Fund Manager",
+          "Units",
+          "Market Value",
+          "Transaction Fee",
+          "Income",
+          "Account Fee",
+          "49 House Split %",
+          "Additional Advisor",
+          "Additional Advisor Split %",
+          "Architect Split %",
+          "Consultant",
+          "Architect",
+          "Consultant Split %",
+          "Implementor Split %",
+          "Implementor",
+          "Local Ops Split %",
+          "Investment Strategy Name",
+          "Manager Strategy",
+          "Account Create Date",
+          "Managed Account Manager Name",
+          "Local Ops",
+          "Tax Status",
+          "Expense Ratio",
+          "Custodial Cost Basis Sync",
+          "Portfolio Group",
+          "Tax Status",
+          "Goal",
+          "As of Date",
+          "Client City",
+          "Client State",
+          "Client Zip Code"
+        ],
+        "silver_output": "silver/transactions/<as_of>.parquet, 74 columns (71 bronze snake_cased + _source_file + _ingested_at + cusip)",
+        "evidence": [
+          "openpyxl read_only read of s3://opal-data-bd/forwardfill_v2/transactions/TRANSACTIONS_DAILY_2026-10-04.xlsx (1415435 bytes, LastModified 2026-10-04T00:02:16+00:00) on 2026-10-06; header row = Sheet1 row 1, data rows counted by iteration",
+          "s3://opal-data-bd/code/bronze/templates/transactions.json (deployed template, downloaded 2026-10-06)",
+          "s3://opal-data-bd/code/bronze/cot_bronze_ingest.py (deployed engine, 80,599 bytes, LastModified 2026-08-21T01:04:21Z, md5 a1d81b96e8b679142176ad827af2c00d)"
+        ]
+      },
+      {
+        "table": "realized",
+        "request": "POST /datamining/request/v1/run with persisted templateId 431168 (queryTypeId 3), dateRangeType Custom, 14-day window.",
+        "landed_key_pattern": "forwardfill_v2/realized/REALIZED_DAILY_<as_of>.xlsx",
+        "date_window_semantics": "PERIOD table. Custom 14-day lookback ending on run_date, no as-of lag. Timestamps sheet echoes Start 9/22/2026 End 10/6/2026.",
+        "column_count": 13,
+        "data_row_count": 8530,
+        "fields": [
+          "Open Date",
+          "Trade Date",
+          "Unit Cost",
+          "Account Number",
+          "AccountID",
+          "Asset Name",
+          "AssetID",
+          "Symbol",
+          "Ticker",
+          "CUSIP",
+          "Asset Display Name",
+          "Original Asset Name",
+          "Last Dividend"
+        ],
+        "silver_output": "silver/realized/<as_of>.parquet, 15 columns (13 bronze snake_cased + _source_file + _ingested_at)",
+        "evidence": [
+          "openpyxl read_only read of s3://opal-data-bd/forwardfill_v2/realized/REALIZED_DAILY_2026-10-06.xlsx (510514 bytes, LastModified 2026-10-06T00:10:59+00:00) on 2026-10-06; header row = Sheet1 row 1, data rows counted by iteration",
+          "s3://opal-data-bd/code/bronze/templates/realized.json (deployed template, downloaded 2026-10-06)",
+          "s3://opal-data-bd/code/bronze/cot_bronze_ingest.py (deployed engine, 80,599 bytes, LastModified 2026-08-21T01:04:21Z, md5 a1d81b96e8b679142176ad827af2c00d)"
+        ]
+      },
+      {
+        "table": "unrealized",
+        "request": "POST /datamining/request/v1/run with persisted templateId 486228 (queryTypeId 4), dateRangeType Custom.",
+        "landed_key_pattern": "forwardfill_v2/unrealized/UNREALIZED_DAILY_<as_of>.xlsx",
+        "date_window_semantics": "POINT-IN-TIME SNAPSHOT. BD returns the END-date snapshot and the 14-day width is a holiday-gap floor, not a lookback. BD_SNAPSHOT_ASOF_LAG_BDAYS=1 shifts the as-of back one business day from run_date. Timestamps sheet echoes Start 9/18/2026 End 10/2/2026.",
+        "column_count": 15,
+        "data_row_count": 500000,
+        "fields": [
+          "Open Date",
+          "Market Value",
+          "Unit Cost",
+          "Inherited Date",
+          "Relationship ID",
+          "Account Number",
+          "AccountID",
+          "AssetID",
+          "Asset Name",
+          "Last Dividend",
+          "Original Asset Name",
+          "Asset Display Name",
+          "Symbol",
+          "Ticker",
+          "CUSIP"
+        ],
+        "silver_output": "silver/unrealized/<as_of>.parquet, 17 columns; the 2026-10-02 partition is 107,034 rows",
+        "evidence": [
+          "openpyxl read_only read of s3://opal-data-bd/forwardfill_v2/unrealized/UNREALIZED_DAILY_2026-10-02.xlsx (38627659 bytes, LastModified 2026-10-04T00:13:34+00:00) on 2026-10-06; header row = Sheet1 row 1, data rows counted by iteration",
+          "s3://opal-data-bd/code/bronze/templates/unrealized.json (deployed template, downloaded 2026-10-06)",
+          "s3://opal-data-bd/code/bronze/cot_bronze_ingest.py (deployed engine, 80,599 bytes, LastModified 2026-08-21T01:04:21Z, md5 a1d81b96e8b679142176ad827af2c00d)"
+        ]
+      },
+      {
+        "table": "allocations",
+        "request": "POST /datamining/request/v1/run with persisted templateId 390224 (queryTypeId 5), dateRangeType Custom; parent levels Relationship + Portfolio Group, child levels Portfolio + Account.",
+        "landed_key_pattern": "forwardfill_v2/allocations/ALLOCATIONS_DAILY_<as_of>.xlsx",
+        "date_window_semantics": "POINT-IN-TIME SNAPSHOT as above; as-of lag 1 business day. Timestamps sheet echoes Start 9/18/2026 End 10/2/2026.",
+        "column_count": 92,
+        "data_row_count": 34505,
+        "fields": [
+          "Portfolio Group",
+          "Original Account Number",
+          "Relationship ID",
+          "Relationship Name",
+          "Relationship Display Name",
+          "Relationship SEC Client Type",
+          "Relationship Inception Date",
+          "Relationship Termination Date",
+          "PortfolioID",
+          "Portfolio Name",
+          "Show Client",
+          "Basis Points",
+          "Portfolio Benchmark",
+          "Fee Schedule Level",
+          "Flat Fee",
+          "History Start Date",
+          "Address Source Client Name",
+          "Address Source City",
+          "Address Source State",
+          "Address Source Zip Code",
+          "Account Number",
+          "AccountID",
+          "Account Name",
+          "Flat Fee",
+          "Basis Points",
+          "Account - Billing Notes",
+          "Start Date",
+          "Performance Start Date",
+          "As of Date",
+          "Account Is Open",
+          "Closed Date",
+          "History Start Date",
+          "Client Name",
+          "Client City",
+          "Client State",
+          "Client Zip Code",
+          "49 House Split %",
+          "Additional Advisor",
+          "Additional Advisor Split %",
+          "Architect Split %",
+          "Architect",
+          "Consultant Split %",
+          "Consultant",
+          "Implementor",
+          "Local Ops",
+          "Implementor Split %",
+          "Local Ops Split %",
+          "Investment Strategy Name",
+          "Manager Strategy",
+          "Account Create Date",
+          "Account Type",
+          "Account Registration Type",
+          "Managed Account Manager Name",
+          "Fee Schedule Level",
+          "Lower Range",
+          "Upper Range",
+          "Fee Schedule Rate Type",
+          "Fee Schedule Type",
+          "Fee Schedule Description",
+          "Account Discretionary",
+          "Account Fee Schedule",
+          "Account Billable",
+          "Account Supervised",
+          "Account Benchmark",
+          "Reporting Target Description",
+          "Tax Lot Methodology",
+          "Tax Status",
+          "Account Subcategory",
+          "Account Category",
+          "Goal",
+          "Account Owner Type",
+          "Account Owner",
+          "Manager",
+          "Style",
+          "Rep Code",
+          "Account Display Name",
+          "Original Account Name",
+          "Account Display Number",
+          "Fee Schedule Rate Type",
+          "Fee Schedule Type",
+          "Upper Range",
+          "Lower Range",
+          "Fee Schedule Description",
+          "Portfolio Fee Schedule",
+          "Reporting Target Description",
+          "Portfolio Reporting Target",
+          "Portfolio Logo",
+          "Account Allocation",
+          "Account Market Value",
+          "Portfolio Group Market Value",
+          "Cash Market Value",
+          "Cash Allocation"
+        ],
+        "silver_output": "silver/allocations/<as_of>.parquet",
+        "evidence": [
+          "openpyxl read_only read of s3://opal-data-bd/forwardfill_v2/allocations/ALLOCATIONS_DAILY_2026-10-02.xlsx (13641728 bytes, LastModified 2026-10-04T00:12:07+00:00) on 2026-10-06; header row = Sheet1 row 1, data rows counted by iteration",
+          "s3://opal-data-bd/code/bronze/templates/allocations.json (deployed template, downloaded 2026-10-06)",
+          "s3://opal-data-bd/code/bronze/cot_bronze_ingest.py (deployed engine, 80,599 bytes, LastModified 2026-08-21T01:04:21Z, md5 a1d81b96e8b679142176ad827af2c00d)"
+        ]
+      }
+    ],
+    "completeness_chain": {
+      "per_table_sidecar": "forwardfill_v2/<table>/_complete/<as_of>.json carrying has_data_rows, landed_at, bytes, basis (land_time_measured or content_probe_backfill) and inferred. Read verbatim: {\"date\": \"2026-10-06\", \"table\": \"transactions\", \"has_data_rows\": 0, \"landed_at\": \"2026-10-06T00:01:37Z\", \"bytes\": 4357, \"basis\": \"land_time_measured\", \"inferred\": false}.",
+      "sentinel": "bronze/<run_date>/_BRONZE_COMPLETE.json, emitted by emit_bronze_sentinel only when every table in the run landed AND each sidecar attests >=1 data row. The S3 notification BronzeCompleteSilverMerge then fires Lambda bd-silver-merge, which runs s3://opal-data-bd/code/silver/merge-daily-incremental.py over all four tables.",
+      "measured_gap": "bronze/ census 2026-09-03..2026-10-06 = 34 dates; _BRONZE_COMPLETE present 23, ABSENT 11. The absent dates: 09-07 Mon, 09-08 Tue, 09-09 Wed, 09-14 Mon, 09-15 Tue, 09-21 Mon, 09-22 Tue, 09-28 Mon, 09-29 Tue, 10-05 Mon, 10-06 Tue. Cause on those dates: the newest transactions tile is a 4,357-byte header-only export with has_data_rows 0, so the sentinel is withheld and bd-silver-merge never fires. 10-06 is the day of measurement and its evening run (21:45Z/21:53Z) was not yet due when this was read.",
+      "partial_sentinel": "On a day where the two snapshot tables are rejected but transactions has rows, the sentinel still fires naming only the tables that landed: bronze/2026-10-03/_BRONZE_COMPLETE.json reads artifacts.count 2, tables [transactions, realized], so silver advances with allocations and unrealized unrefreshed."
+    },
+    "as_of_provenance": {
+      "bd_side_present": true,
+      "summary": "YES. BD stamps its own provenance into the landed workbook in two places, and neither is ours.",
+      "carriers": [
+        {
+          "carrier": "second worksheet named 'Timestamps', present in all four workbooks (max_row 5, max_col 2)",
+          "fields": [
+            "Created (Eastern) -- BD's own export-generation timestamp in US Eastern",
+            "Template Name",
+            "Start Date",
+            "End Date",
+            "Date Range"
+          ],
+          "read_values": {
+            "transactions TRANSACTIONS_DAILY_2026-10-04.xlsx": [
+              "Created (Eastern) = 10/3/2026 8:02:14 PM",
+              "Template Name = Transactions_OpalCapital_Daily",
+              "Start Date = 10/2/2026",
+              "End Date = 10/4/2026",
+              "Date Range = Custom"
+            ],
+            "realized REALIZED_DAILY_2026-10-06.xlsx": [
+              "Created (Eastern) = 10/5/2026 8:10:57 PM",
+              "Template Name = Realized_Template",
+              "Start Date = 9/22/2026",
+              "End Date = 10/6/2026",
+              "Date Range = Custom"
+            ],
+            "unrealized UNREALIZED_DAILY_2026-10-02.xlsx": [
+              "Created (Eastern) = 10/3/2026 8:12:56 PM",
+              "Template Name = Unrealized_Template",
+              "Start Date = 9/18/2026",
+              "End Date = 10/2/2026",
+              "Date Range = Custom"
+            ],
+            "allocations ALLOCATIONS_DAILY_2026-10-02.xlsx": [
+              "Created (Eastern) = 10/3/2026 8:11:53 PM",
+              "Template Name = Allocation_Template",
+              "Start Date = 9/18/2026",
+              "End Date = 10/2/2026",
+              "Date Range = Custom"
+            ]
+          },
+          "corroboration": "transactions 'Created (Eastern) = 10/3/2026 8:02:14 PM' equals the sidecar landed_at 2026-10-04T00:02:16Z to within 2 seconds, so the Eastern stamp is BD generation time for the same object, not a re-stamp of ours."
+        },
+        {
+          "carrier": "data column 'As of Date'",
+          "fields": [
+            "transactions: column 68 of 71; value 10/02/2026 on the first data row of the 2026-10-04 file",
+            "allocations: column 29 of 92; value 10/02/2026 on the first data row of the 2026-10-02 file"
+          ],
+          "note": "realized and unrealized carry no As of Date column; their BD-side as-of is the Timestamps End Date only."
+        }
+      ],
+      "reaches_silver": "PARTIALLY. read_timestamps_date() in BOTH merge paths reads the Timestamps sheet's End Date and uses it as the silver partition date, so BD's own window end -- not our run_date -- keys the partition. 'As of Date' survives as the as_of_date column in silver/transactions. 'Created (Eastern)' is read by NEITHER merge path and never reaches silver.",
+      "not_captured": "HTTP response HEADERS are discarded. cot_bronze_ingest.py _request is the sole HTTP path in the engine and reads only resp.read(); a census of that deployed file for resp.headers / getheader / info() / Last-Modified returns 0 hits. Any BD-stamped as-of in a response header is therefore invisible to the pipeline today. Denominator: 1 request function, the only HTTP caller in the engine.",
+      "evidence": [
+        "openpyxl read of sheet 'Timestamps' in all four bronze workbooks, 2026-10-06",
+        "openpyxl read of Sheet1 row 1 for the As of Date columns",
+        "s3://opal-data-bd/code/bronze/cot_bronze_ingest.py lines 232-256 (_request) and s3://opal-data-bd/code/silver/merge-daily-incremental.py lines 337-363 (read_timestamps_date)",
+        "forwardfill_v2/transactions/_complete/2026-10-04.json landed_at vs the Created (Eastern) stamp"
+      ]
+    },
+    "measured_cadence": {
+      "transactions": "DAILY. 105 TRANSACTIONS_DAILY_* objects; 36 as-of dates across 2026-09-01..10-06, one per calendar day. Each 00:0xZ run writes 5 tiles, so one as-of date is re-landed on several days.",
+      "realized": "DAILY. 151 REALIZED_DAILY_* objects; 36 as-of dates across 2026-09-01..10-06, one per calendar day, landed the same day 00:0x-00:12Z.",
+      "unrealized": "WEEKLY since as-of 2026-07-10. 75 objects; last daily as-of 2026-07-10, then 12 consecutive 7-day gaps to 2026-10-02. Every as-of a Friday; every land a Sunday 00:1xZ run.",
+      "allocations": "WEEKLY since as-of 2026-07-10. 28 ALLOCATIONS_DAILY_* objects; the same 12 consecutive Friday as-of dates, the same Sunday lands.",
+      "why_weekly": "MEASURED, not inferred. CloudWatch /aws/lambda/bd-49f-runner carries one 'REJECTED <table> @as_of=<date> -- empty snapshot export, nothing landed' line per weekday run for BOTH tables (read 2026-10-06 for as_of 09-22, 09-23, 09-24, 09-25 and 09-28). Mechanism: the run fires 00:00Z = the prior 20:00 US Eastern, and the as-of lag of 1 business day asks BD for a snapshot only about 4 hours old in BD's business timezone; BD returns a 0-data-row export, which SNAPSHOT_TABLES reject pre-write. Only the Sunday run, which also resolves to Friday, asks for an as-of about 28 hours old and gets rows. The runner's own RESULT lines agree: run_date 10-01, 10-02, 10-03 and 10-06 each rejected [allocations, unrealized]; 10-04 landed all four with allocations and unrealized at as_of 2026-10-02; 10-05 skipped both as already-landed.",
+      "already_recorded": "The weekly cadence itself is already on the channel as NFRA_MCPINDEX-Z-W25-S2, which also records that silver/allocations is documented FROZEN at 2026-07-10 with the feed DEPRECATED. What is new here is the measured CAUSE and the per-run reject evidence; filed as NFRA_MCPINDEX-Z-S78 citing that row rather than as a fresh observation."
+    }
+  },
+  "evening": {
+    "transport": "NONE to any vendor. Two SSM Command documents run one shell step each on an EC2 instance; every network fetch in the served Default content is from Opal S3.",
+    "fetches_from_bd": false,
+    "fetches_from_bd_evidence": "aws ssm get-document --document-version 3 for both documents (Default == Latest == 3; describe-document Hash af59a64d5ca315b04cec6d1607d4ac23994253476d05e4c8e19afe4e3a1b8987 for opal-bd-transaction-download and 570538ea79ddfe597a4bfcca1544bd90cb332a8f9f2ad7bb4fc9776e9111ab11 for opal-bd-realized-download, both Active, created 2026-09-29). The COMPLETE set of fetch lines in the served content: 'aws s3 cp s3://opal-data-bd/scripts/merge-daily-incremental.py .' in both, plus 'aws s3 sync s3://opal-data-bd/scripts/lib/ lib/' in the realized document. No http or https call, no Playwright, no browser, no portal login, no credential read. Both documents say so in a comment: 'NO PORTAL LOGIN AND NO PORTAL CREDENTIALS, BY DESIGN', the Playwright download having failed every run since BD added MFA around 2026-06-23.",
+    "data_source": "the MORNING run's own bronze under s3://opal-data-bd/forwardfill_v2/. Same source, same objects. The repo claim is confirmed on the SERVED Default version, not only in the repo JSON.",
+    "schedule": "EventBridge bd-transaction-pipeline-trigger cron(53 21 ? * MON-FRI *) ENABLED -> Lambda bd-transactions-trigger -> EC2 i-00c7568bc510f7423 + SSM opal-bd-transaction-download. bd-realized-pipeline-trigger cron(45 21 ? * MON-FRI *) ENABLED -> Lambda bd-realized-trigger -> EC2 i-0800437d1dbb0b5cc + SSM opal-bd-realized-download. Each document shuts its instance down with shutdown -h +2, armed before the failure branch.",
+    "engine": "s3://opal-data-bd/scripts/merge-daily-incremental.py -- 43,492 bytes, LastModified 2026-06-29T15:16:30Z, ETag 418d6225c30502c647b3563b20f5f7fe. This is NOT the engine the morning path runs: bd-silver-merge runs s3://opal-data-bd/code/silver/merge-daily-incremental.py -- 59,820 bytes, LastModified 2026-10-01T21:27:57Z, ETag 91eaf2486fc56ece76db2f0d862096f7. 1,149 vs 1,392 lines; 695 differing lines (226 only-in-evening, 469 only-in-morning). Both write the SAME silver keys and the SAME manifests. Filed as NFRA_MCPINDEX-Z-S77.",
+    "what_it_merges": "The transaction document runs `python3 merge-daily-incremental.py` with no flag -> incremental_merge() -> silver/transactions ONLY. The realized document runs `--realized` -> incremental_realized_merge() -> silver/realized ONLY. Neither evening document touches allocations or unrealized, so the stale copy's missing allocations stub-guard (ALLOC_MIN_ROW_FRACTION) and unrealized _EMPTY_STUB handling are UNREACHABLE on this path and are not a live hazard.",
+    "logs_read": [
+      {
+        "key": "s3://opal-data-bd/logs/transaction-download-2026-10-05.log",
+        "bytes": 1347,
+        "did": "found 1 new file; 'Data date from Timestamps sheet: 2026-10-05'; '[enrich] bd_assets_dim unavailable; skipping cusip join'; wrote silver/transactions/2026-10-05.parquet with 0 rows",
+        "rows_written": 0,
+        "merge_rc": 0
+      },
+      {
+        "key": "s3://opal-data-bd/logs/transaction-download-2026-10-02.log",
+        "bytes": 499,
+        "did": "'Previously processed: 198 files / No new files to process'",
+        "rows_written": 0,
+        "merge_rc": 0
+      },
+      {
+        "key": "s3://opal-data-bd/logs/transaction-download-2026-10-01.log",
+        "bytes": 499,
+        "did": "'Previously processed: 197 files / No new files to process'",
+        "rows_written": 0,
+        "merge_rc": 0
+      },
+      {
+        "key": "s3://opal-data-bd/logs/realized-download-2026-10-05.log",
+        "bytes": 1356,
+        "did": "found 1 new file; data date 2026-10-05; removed 544 duplicate rows; wrote silver/realized/2026-10-05.parquet, 8782 rows, 15 cols",
+        "rows_written": 8782,
+        "merge_rc": 0
+      },
+      {
+        "key": "s3://opal-data-bd/logs/realized-download-2026-10-02.log",
+        "bytes": 520,
+        "did": "'Previously processed: 147 realized files / No new realized files to process'",
+        "rows_written": 0,
+        "merge_rc": 0
+      },
+      {
+        "key": "s3://opal-data-bd/logs/realized-download-2026-10-01.log",
+        "bytes": 520,
+        "did": "'Previously processed: 146 realized files / No new realized files to process'",
+        "rows_written": 0,
+        "merge_rc": 0
+      }
+    ],
+    "no_op_rate": "On every date 2026-09-03..2026-10-06 whose _BRONZE_COMPLETE exists, the evening logs are 499 bytes (transaction) and 520 bytes (realized) = 'No new files to process': the morning bd-silver-merge got there about 22 hours earlier. The evening run does real work only on sentinel-less dates, and not even all of those -- 2026-09-29 is sentinel-less and its evening logs are 499/520 bytes, so on that date NEITHER path merged same-day.",
+    "instance_identity": [
+      {
+        "instance": "i-00c7568bc510f7423",
+        "name": "bd-transactions",
+        "type": "t3.medium",
+        "state_at_read": "stopped",
+        "last_launch": "2026-10-05T21:53:05+00:00",
+        "started_by": [
+          "bd-transactions-trigger (rule bd-transaction-pipeline-trigger, ENABLED)"
+        ],
+        "other_jobs": "NONE. No other EventBridge rule or trigger Lambda names this instance."
+      },
+      {
+        "instance": "i-0800437d1dbb0b5cc",
+        "name": "bd-allocations",
+        "type": "t3.medium",
+        "state_at_read": "stopped",
+        "last_launch": "2026-10-05T21:45:18+00:00",
+        "started_by": [
+          "bd-realized-trigger (rule bd-realized-pipeline-trigger, ENABLED)",
+          "bd-allocation-trigger (rule bd-allocation-pipeline-trigger, DISABLED)",
+          "bd-unrealized-trigger (rule bd-unrealized-pipeline-trigger, DISABLED)"
+        ],
+        "other_jobs": "Two further triggers name this instance but both their rules are DISABLED, so the realized rule is its ONLY enabled starter. Retiring that rule leaves this instance with no enabled starter: nothing live is stranded, but documents opal-bd-allocation-download (v6) and opal-bd-unrealized-download (v4) would have no path to run if their rules were ever re-enabled."
+      },
+      {
+        "instance": "i-0e6f6dc014fdcf1cd",
+        "name": "bd-assets",
+        "type": "t3.medium",
+        "state_at_read": "stopped",
+        "last_launch": "2026-10-05T22:10:20+00:00",
+        "started_by": [
+          "bd-asset-dim-trigger (rule bd-asset-dim-pipeline-trigger cron(10 22 ? * MON-FRI *), ENABLED)"
+        ],
+        "other_jobs": "opal-bd-asset-dim-download (v5) is LIVE and must keep running. It sits on a SEPARATE instance from both evening documents, so decommissioning them cannot strand it."
+      }
+    ],
+    "issuer_picture_correction": "The order described the two documents as dispatched 'onto an EC2 instance' (singular). Measured: THREE distinct t3.medium instances, one per trigger Lambda, read from each Lambda's live EC2_INSTANCE_ID env var. The realized document runs on the instance NAMED bd-allocations."
+  },
+  "compare": {
+    "same_source": true,
+    "same_source_statement": "Same source, and the evening run is not a source at all. The morning run is the only caller of Black Diamond; the evening run reads the morning run's bronze out of Opal S3.",
+    "field_delta": {
+      "method": "pyarrow schema read of one MORNING-written and one EVENING-written partition of the same silver table, attributed by LastModified against each writer known firing time (morning bd-silver-merge about 00:1xZ, evening documents 21:46Z and 21:54Z).",
+      "realized": {
+        "morning_partition": "silver/realized/2026-10-04.parquet (LastModified 2026-10-04T00:17:18Z, 7,960 rows, 15 cols)",
+        "evening_partition": "silver/realized/2026-10-05.parquet (LastModified 2026-10-05T21:46:14Z, 8,782 rows, 15 cols)",
+        "column_set_identical": true,
+        "column_order_identical": true,
+        "only_in_morning": [],
+        "only_in_evening": []
+      },
+      "transactions": {
+        "morning_partition": "silver/transactions/2026-10-04.parquet (LastModified 2026-10-04T00:16:38Z, 5,144 rows, 74 cols)",
+        "evening_partition": "silver/transactions/2026-10-05.parquet (LastModified 2026-10-05T21:53:58Z, 0 rows, 73 cols)",
+        "column_set_identical": false,
+        "column_order_identical": false,
+        "only_in_morning": [
+          "cusip"
+        ],
+        "only_in_evening": [],
+        "cause": "the evening log line '[enrich] bd_assets_dim unavailable; skipping cusip join'. The stale engine load_bd_assets_dim shells to the aws CLI where the current engine uses boto3, and silver/bd_assets_dim.parquet was not readable from that instance.",
+        "exercise_state": "LATENT. The one measured evening-written transactions partition has 0 rows, so no row has yet lost a cusip value. A sentinel-less day whose transactions tile DOES carry rows would land a cusip-less partition into silver/transactions. Filed as NFRA_MCPINDEX-Z-S79."
+      }
+    },
+    "any_field_only_in_evening": false,
+    "any_field_only_in_evening_statement": "NO. On both tables the evening path produces an identical or a NARROWER schema. Nothing is present in the evening output and absent from the morning output. The one delta runs the other way: the evening transactions partition loses the cusip column the morning partition carries.",
+    "zero_row_partition_is_not_an_evening_defect": "silver/transactions/2026-10-05.parquet has 0 rows and 73 columns, written by the evening run from the 4,357-byte empty bronze tile. This is NOT evening-specific: ANNOUNCE_MX-s-18 section 4 records that the morning path has no empty-skip on transactions either, and cites silver/transactions/2026-09-07.parquet as a 0-row, 74-column precedent. Both writers land a 0-row partition for an empty tile; only the column count differs.",
+    "richer_in_condition": "MORNING, decisively. It is the only BD caller; it covers 4 tables where the evening covers 2; it carries the completeness sidecars and the content-gated sentinel; it runs an engine 3 months newer; and its transactions schema is one column wider. The morning run has one weakness of its own, unrelated to the evening run: its two SNAPSHOT tables (allocations, unrealized) have landed only weekly since as-of 2026-07-10."
+  },
+  "verdict": {
+    "evening_extraneous": true,
+    "statement": "EXTRANEOUS AS A SOURCE AND AS A SCHEMA; NOT YET REDUNDANT AS A SCHEDULER. The evening run fetches nothing from Black Diamond, reads the morning run's own bronze, and emits no field the morning path does not already emit. Its only non-redundant function today is to merge same-day on the dates the morning sentinel is withheld -- 11 of 34 dates in 2026-09-03..2026-10-06, chiefly Mondays and Tuesdays when BD posts transactions late. Close that gap and the run has no remaining function.",
+    "preconditions_to_decommission": [
+      "P1. NFRA_MCPINDEX.TO-MX-s-18 must be LIVE -- the runner deciding completeness itself so the sentinel fires on a measured-empty transactions day and bd-silver-merge covers Mon/Tue at about 00:1xZ. Built and tested on branch wk-nfra_mcpindex-r7-24 @3709ae40d6; NOT applied.",
+      "P2. Surprise row NFRA_MCPINDEX-Z-W24-S11 must be disarmed before P1 can land: the live bd-49f-runner-role has implicitDeny on s3:GetObject for bronze/*/_BRONZE_COMPLETE.json, so MX-s-18's sentinel read-back 403s every night. Needs the issuer's decision -- a one-statement grant in bd-49f-interim.tf, or a different read-back. disarm_owner 2.0.0_SA_COO~MI.",
+      "P3. Verify the gap closed on LIVE evidence after P1: at least one Monday AND one Tuesday where bronze/<date>/_BRONZE_COMPLETE.json exists and silver/transactions/<date>.parquet plus silver/realized/<date>.parquet are written by bd-silver-merge at about 00:1xZ, BEFORE the 21:45Z/21:53Z rules are touched. One Mon and one Tue, not one day: the two differ in which tile is empty.",
+      "P4. Decommission in dependency order and at three layers, not one: DISABLE rules bd-transaction-pipeline-trigger and bd-realized-pipeline-trigger first (reversible, stops the dispatch), observe one full week, then retire Lambdas bd-transactions-trigger and bd-realized-trigger and SSM documents opal-bd-transaction-download and opal-bd-realized-download. Terminating instances i-00c7568bc510f7423 and i-0800437d1dbb0b5cc is a separate act and is NOT required by this verdict.",
+      "P5. Do NOT terminate i-0e6f6dc014fdcf1cd (bd-assets): opal-bd-asset-dim-download is live on rule bd-asset-dim-pipeline-trigger cron(10 22 ? * MON-FRI *), ENABLED. It is a different instance from both evening documents.",
+      "P6. Before retiring instance i-0800437d1dbb0b5cc, note it is also the named instance for the DISABLED allocation and unrealized triggers; confirm with the issuer that those two documents are intended to stay dark.",
+      "P7. The evening run is the last consumer of s3://opal-data-bd/scripts/merge-daily-incremental.py (the 2026-06-29 copy) and s3://opal-data-bd/scripts/lib/. Decide whether those keys are deleted with the documents or left as an orphan; leaving them is how a stale engine gets picked up again later."
+    ],
+    "supersedes": "MX-s-17 (repoint the evening documents) is answered by this verdict: the documents already read the morning bronze on their served Default version 3, so there is nothing left to repoint. Whether that retires MX-s-17 is the issuer's ruling, not this cell's.",
+    "not_moved_by_this_verdict": [
+      "The morning snapshot tables landing weekly since 2026-07-10 (allocations, unrealized). Decommissioning the evening run neither causes nor fixes it -- neither evening document touches those two tables.",
+      "The 0-row transactions partition on an empty-tile day. Both writers produce it.",
+      "The exactly-500,000 data row count on the unrealized bronze export; resolving it needs a BD-side read, which is vendor egress and outside this order.",
+      "The MX-a-1 cell-id collision with the completed portal order (row NFRA_MCPINDEX-Z-S81): the decomp row for MX-a-1 is the Portal property, Black Diamond is MX-a-3, and BDOPS appears nowhere in the decomp. A labelling matter for the issuer; the decomposition is FROZEN mid-round so this seat did not touch it."
+    ]
+  },
+  "surprise_rows_filed": [
+    "NFRA_MCPINDEX-Z-S77",
+    "NFRA_MCPINDEX-Z-S78",
+    "NFRA_MCPINDEX-Z-S79",
+    "NFRA_MCPINDEX-Z-S80",
+    "NFRA_MCPINDEX-Z-S81"
+  ],
+  "surprise_row_id_form_departure": "The order's prescribed surprise-row id form, `NFRA_MCPINDEX-Z-AEMI-S<k>`, is REFUSED BY BOTH GATES and was not used; the rows carry NFRA_MCPINDEX-Z-S77..Z-S81 instead. Measured: surprise-row-gate.py:105 ID_RE = ^(?P<project>[A-Z0-9_]+)-(?P<z>Z-)?(?:W(?P<w>[0-9]+)-|(?P<c>C-))?S(?P<k>[0-9]+)$ and proof-of-spec-check.py:1198 SURPRISE_ID_RE = ^\\s*([A-Z0-9_]+-(?:Z-)?(?:W[0-9]+-|C-)?S[0-9]+)\\b both admit only an optional W<n>- or C- segment, so an `AEMI-` lane segment matches neither. Denominator: of the 243 rows in the channel, the 5 AEMI-form ids were the ONLY 5 the gate's ID_RE refused; 238 use an accepted form. Consequence had they stood: 5 ENFORCE violations on the SURPRISES limb, which per CLAUDE.md section 2 blocks this tree TO's `complete` flip -- verified by running the checker, which read exactly those 5 and nothing else. The lane identity the AEMI segment was carrying is not lost: it is in each row's `surfaced_by` (0.7.0_AE_CloudOps~MI), which is where it belongs. Reported to the issuer under BOUNDS clause 3 (refuse a criterion you cannot meet as written and report it with its measurement); the id-form prescription is the issuer's to correct in the order template."
+}
