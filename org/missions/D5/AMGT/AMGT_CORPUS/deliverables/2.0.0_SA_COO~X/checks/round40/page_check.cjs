@@ -72,6 +72,21 @@ const stubFn = (...a) => {
 }
 const stubModule = new Proxy({}, { get: (_t, key) => (key === '__esModule' ? true : key === 'default' ? stubFn : stubFn) })
 
+const realCache = {}
+/** A page module loaded for real (transpiled, its own imports stubbed): for pure helpers the cells under test call. */
+function realModule(rel) {
+  if (realCache[rel]) return realCache[rel]
+  const file = path.join(portalRoot, 'src', 'pages', 'SecurityAnalysis', rel)
+  if (!fs.existsSync(file)) return stubModule
+  const out = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.React },
+  }).outputText
+  const mod = { exports: {} }
+  vm.runInNewContext(out, { module: mod, exports: mod.exports, require: (n) => (n === 'react' ? React : stubModule), console, React })
+  realCache[rel] = mod.exports
+  return mod.exports
+}
+
 function load(rel, names, consts) {
   const file = path.join(portalRoot, 'src', 'pages', 'SecurityAnalysis', rel)
   const src = fs.readFileSync(file, 'utf8')
@@ -83,6 +98,9 @@ function load(rel, names, consts) {
   const req = (name) => {
     if (name === 'react') return React
     if (consts && name.endsWith('/constants')) return consts
+    // AMENDMENT (row AMGT_CORPUS-Z-W5-S8): the shared locator helper is REAL code the cells' words depend on, so it is
+    // loaded, not stubbed. It is a pure module (no imports of its own that matter here).
+    if (/(^|\/)dossierLocator$/.test(name)) return realModule('dossierLocator.ts')
     return stubModule
   }
   vm.runInNewContext(out, { module: mod, exports: mod.exports, require: req, console, React })
