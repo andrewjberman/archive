@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e48",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "90f99888cd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "5d70aab6c9",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e48.clean-name-row-set-v2.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~35",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/clean_name_row_set_v2.py",
+      "kind": "script",
+      "commit_or_etag": "6234c6257c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only scan of etf-classifications plus three held parquets (producer builds, as-of 2026-10-05, inferred); writes the V2 TSV; custody name = SECURITY node display.description.",
+      "artifact_covered_by": [
+        "SC9-e48-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/CLEAN_NAME_ROW_SET_V2_20261007.tsv",
+      "kind": "config_data",
+      "commit_or_etag": "6234c6257c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1740 lines: table 883 (WRITE 492, SEED-SOURCE 13, UNCHANGED 378), custody 857 (all WRITE: 49financial 14, cottonwood 509, inflection 334); 13 model rows in no line.",
+      "artifact_covered_by": [
+        "SC9-e48-AC1",
+        "SC9-e48-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/clean_name_write_v2.py",
+      "kind": "script",
+      "commit_or_etag": "6234c6257c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "dry run by default behind a mutation counter; --write needs --half (both halves SIGNED) and --snapshot; table rows conditional on name = current, custody rows on attribute_not_exists(name); --rollback.",
+      "artifact_covered_by": [
+        "SC9-e48-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CLEAN_NAMES_V2_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "6234c6257c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "half request, COO and CTO halves UNSIGNED; supersedes round 8's clean-name half; blast radius, candidate diff, readers, rollback per key, dry-run line.",
+      "artifact_covered_by": [
+        "SC9-e48-AC1",
+        "SC9-e48-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC9-e48-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/clean_name_set_v2_check.py -- expect: CLEAN-NAME-SET-V2 ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/clean_name_set_v2_check.py",
+      "expect": "CLEAN-NAME-SET-V2 ok=True",
+      "output_evidence": "CLEAN-NAME-SET-V2 ok=True rows=1740 table=883 custody=857 write=1349 seed_source=13 unchanged=378 problems=[] (rc=0)",
+      "denominator": "1740 of 1740 set lines graded, 0 problems; 883 of 883 named live rows listed once",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC9-e48-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/clean_name_write_v2.py -- expect: puts=0",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/clean_name_write_v2.py",
+      "expect": "puts=0",
+      "output_evidence": "CLEAN-NAME-V2-DRY-RUN write=492 custody=857 seed_source=13 unchanged=378 refused_stale=0 puts=0 (rc=0)",
+      "denominator": "1349 of 1349 WRITE keys read consistently, 0 stale, 0 mutating calls",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Dry-run guard: a mutating call (update_item) through the writer's CountingClient in dry-run mode.",
+      "expected": "RuntimeError refusing the call, puts counter 1 (a real run would assert puts=0 and fail)",
+      "observed": "REFUSED: dry run: refused mutating call update_item puts= 1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice against the same set and the same live table.",
+      "observed": "Identical lines both times: ok=True 1740; write=492 custody=857 refused_stale=0 puts=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any table write; the --write path and --rollback path of the writer; the served bytes of the firm buckets; names outside the three firms' held builds.",
+      "reason": "BOUNDS: no table write; the write is the issuer's act under the signed half; firm buckets deny this principal (W25-S1), held sets are inferred."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W35-S2",
+    "MDPF_SECCLASS-W35-S3"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/clean_name_row_set_v2.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on each .py)",
+      "result": "ruff + py_compile clean 2 of 2"
+    }
+  ]
+}
