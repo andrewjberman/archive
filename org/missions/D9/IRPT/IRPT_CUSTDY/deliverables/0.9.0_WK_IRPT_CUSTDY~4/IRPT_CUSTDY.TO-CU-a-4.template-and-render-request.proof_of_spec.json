@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_CUSTDY.TO-CU-a-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-a-4.template-and-render-request.md",
+    "group": "OTHER",
+    "vintage_commit": "3d0ecacb0b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.md",
+    "vintage_commit": "3d0ecacb0b",
+    "to_ref": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-a-4.template-and-render-request.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_CUSTDY~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/report_render_request.py",
+      "kind": "script",
+      "commit_or_etag": "1400f80b65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local Python module; no deploy, no AWS call",
+      "artifact_covered_by": [
+        "CU4-AC1",
+        "CU4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_report_render_request.py",
+      "kind": "test",
+      "commit_or_etag": "1400f80b65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest file; no deploy",
+      "artifact_covered_by": [
+        "CU4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/fixtures/report_template_firm_a.json",
+      "kind": "config_data",
+      "commit_or_etag": "1400f80b65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "template fixture; the upload to its address() is the issuer's act after the drain",
+      "artifact_covered_by": [
+        "CU4-AC1",
+        "CU4-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CU4-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_report_render_request.py -> passed",
+      "method": "command",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_report_render_request.py",
+      "output_evidence": "10 passed in 0.08s | rc=0",
+      "denominator": "10 of 10 tests passed (order, periods order, NO_DATA/undescribed shown, slots, masking, second-template isolation, loader local+s3 fake, CLI, render-path line)",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU4-AC2",
+      "criterion_verbatim": "python data/assets/scripts/gold/irpt_custody/report_render_request.py --self-test -> REPORT-LAYOUT-SELFTEST layout_ok=True status_shown=True firm_isolated=True",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/report_render_request.py --self-test",
+      "output_evidence": "REPORT-LAYOUT-SELFTEST layout_ok=True status_shown=True firm_isolated=True | rc=0",
+      "denominator": "2 of 2 fixture documents laid out and rendered to HTML through the fixture template; 1 of 1 second-template difference controls (activity part dropped) differs and leaves the first output unchanged",
+      "expect": "REPORT-LAYOUT-SELFTEST layout_ok=True status_shown=True firm_isolated=True",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "both criteria run before and after the commit",
+      "observed": "PASS both times",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "copy of the module in .scratch/ with _fig() rendering a missing value as '0' (pytest) and with the non-OK status branch disabled (self-test); copies uncommitted",
+      "expected": "CU4-AC1 FAIL with the first mutant; self-test status_shown=False with the second",
+      "observed": "pytest: 1 failed, 9 passed (assert '0' == 'NO_VALUE'); self-test: REPORT-LAYOUT-SELFTEST layout_ok=True status_shown=False firm_isolated=True",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "surprises": [
+    "IRPT_CUSTDY-W4-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "the real render through irpt-export-render",
+      "reason": "the issuer's act after the drain (task order CU4-AC2 note); --render-path reports accepts_document=False, so it waits on the gap in row IRPT_CUSTDY-W4-S1"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CU4-AC1,CU4-AC2",
+      "result": "rc=0 (see commit)"
+    }
+  ]
+}
