@@ -13,3 +13,14 @@ FAILED tests\test_identity_scope_status_row.py::test_ogal2_ac01 - assert "ide...
 ```
 
 `test_ogal2_ac01` fails without the row and passes with it (4 of 4 with it).
+
+## AMENDMENT 2 negative control (send path returns UNKNOWN on a bad id)
+
+With `_read_status_once` restored to its pre-amendment body (it raises IntegrationError on a bad id; the file was
+put back to the amended bytes afterwards), `pytest tests/test_opal_portal_status_id_shape.py -k test_ogal2_ac05` read:
+
+    E   app.integrations.base.IntegrationError: execution_id must be 1-200 letters, digits, - _ or :
+    FAILED tests\test_opal_portal_status_id_shape.py::test_ogal2_ac05 - app.integ...
+    1 failed, 1 deselected in 0.77s
+
+With the amended function the same test passes (AC3: named tests passed 2 of 2).
