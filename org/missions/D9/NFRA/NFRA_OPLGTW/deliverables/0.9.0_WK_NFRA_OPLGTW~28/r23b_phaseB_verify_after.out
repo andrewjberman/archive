@@ -1,0 +1,48 @@
+ssm 93b153eb-acbc-474e-9c42-06226340050f status=Success
+PASS host /health 200: health 200, service active, MainPID 751051 (before 746072)
+PASS shipped md5 = release bytes: 96 of 96 identical; not-ok []
+PASS tool list unchanged: before 65 after 65 tools
+PASS .env key names unchanged (the template equals live): names 51 vs before 51; added [] removed []
+PASS every .env value has the SAME sha256 before and after (hash only; changed names listed): before hashes 51, after hashes 51, equal 51 of 51, changed []
+ssm e799290b-e2d4-48fd-8d7a-164e03bbc1b5 status=Success
+R23_MODULE integration.py md5 e2bf795b staged=False
+R23_POPULATION positions=104027 accounts=6337 accounts_with_blank_cusip=16 accounts_only_blank=0 accounts_clean=6321
+R23_SYNTH {"arms": [{"accounts": 26, "arm": "mix", "download": "OK", "download_blank_rows": 0, "download_duplicates": 0, "download_held_missing": 0, "download_nonblank_unheld": 0, "download_returned": 178, "held_nonblank_cusips": 178, "memstore_put_runtime_calls": 2, "query": "OK", "query_blank_rows": 0, "query_duplicates": 0, "query_held_missing": 0, "query_nonblank_unheld": 0, "query_returned": 178}, {"accounts": 0, "arm": "only_blank", "note": "no such accounts in the population"}, {"accounts": 10, "arm": "clean", "download": "OK", "download_blank_rows": 0, "download_duplicates": 0, "download_held_missing": 0, "download_nonblank_unheld": 0, "download_returned": 49, "held_nonblank_cusips": 49, "memstore_put_runtime_calls": 2, "query": "OK", "query_blank_rows": 0, "query_duplicates": 0, "query_held_missing": 0, "query_nonblank_unheld": 0, "query_returned": 49}], "date": "2026-10-01", "grants_written": 0, "master": "08242234", "mode": "after", "state_store_written": false, "synthetic_principal": true}
+PASS synthetic mix arm on the INSTALLED code: 0 blank rows, 0 duplicates, every held non-blank CUSIP, none unheld, query = download = held: query blank 0 returned 178; download blank 0 returned 178; held 178
+PASS synthetic clean arm unchanged from BEFORE: after [49, 49, 0, 0, 49, 10] before [49, 49, 0, 0, 49, 10]
+PASS the module in use on the host is the release integration.py: expected md5 prefix e2bf795b
+ssm c130f9a4-6894-4a10-9a1d-68d5e7e21114 status=Success
+INSTALLED_FILES server.py md5 2cc22c05 rivalfunds_view.py md5 65135e70 from installed
+PASS route /rivalfunds/{day}/audit registered: registered True
+PASS signed-in GET on a day whose audit.html exists -> 200 with bytes: 200, 1337761 bytes
+PASS signed-in GET on a day with no audit object -> 404 from the audit handler: 404, audit-page body True
+PASS no identity -> refused (not 200): 401
+PASS the day page route is unchanged for the control day (same status class as before): 200
+R23_ROUTE {"audit_page_404_body": true, "bytes_200": 1337761, "day_200": "2026-10-06", "day_404": "2000-01-01", "day_page_control_status": 200, "grants_written": 0, "mode": "after", "no_identity_status": 401, "route_registered": true, "state_store_written": false, "status_200": 200, "status_404": 404, "synthetic_principal": true}
+ROUTE_ARMS after: 5 of 5  RESULT: PASS
+PASS ROUTE ARM 1: signed-in GET /rivalfunds/<day>/audit on a day whose audit.html exists -> 200 with bytes: day 2026-10-06 status 200 bytes 1337761
+PASS ROUTE ARM 2: a day with no audit object -> 404 from the audit handler: day 2000-01-01 status 404
+PASS host scratch removed: SCRATCH_REMOVED=yes and 0 leftovers on both runs
+wrote RL9_ROUTE.json {'day_200': '2026-10-06', 'status_200': 200, 'bytes_200': 1337761, 'day_404': '2000-01-01', 'status_404': 404}
+VERIFY PASS: 11 of 11
+--- rl4.AC1.sh (baseline r17/ENV_KEYS_R17B.txt) ---
+ssm f68fc738-5196-4c94-829e-8cae8fdf28e5 status=Success
+ssm c175d316-138b-40e9-a2bc-171b996cd1a0 status=Success
+arm 1 key names equal the before-set (51): OK
+arm 2 systemd and bash parses agree on every value: OK
+arm 3 host deploy/ contract equals org/standards (c69968aa7f70): OK
+arm 4 Tax keys present and non-empty: OK
+RELEASE READ-BACK ARMS 4 of 4
+RESULT: PASS
+--- ht.AC2.sh (51 keys) ---
+ssm f21e0857-65f8-48e3-9231-8791de738245 status=Success
+HOST teams_route_sha256 f470540078a23b8a874e0bebd2fa67cad7e23a82c1aa513c6f904e012ae87337
+HOST taxsma_workbook_sha256 56d4f49017e4c17f721c8613e57195cfe341b7b6e0e1f96bc3524999a65f83a7
+HOST env_keys 51 teams_bearer_present True teams_bearer_empty False teams_labels_ok True tax_nonempty True
+arm 1 host teams_route.py = db92656c72 (f470540078a2): OK
+arm 2 .env 51 keys, TEAMS_BEARER non-empty, label teamsassist, Tax keys intact: OK
+arm 3 /hx/teams/x no bearer -> 404 (app refusal, no redirect): OK
+arm 4 / -> 302 (sign-in intact): OK
+SERVED ARMS 4 of 4
+RESULT: PASS
+r23b_verify: host + AFTER checks rc=0; rl4.AC1 rc=0; ht.AC2 rc=0
