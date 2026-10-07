@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e59",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9b6348f15edb1ee3ba13c5158837bf385376461e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R10.md",
+    "vintage_commit": "3a11e67c2064aca8ae0375a7f4c2d5578b22b93c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e59.bd-thread-failing-hop-fix.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~46",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/AdvisorIntelligence/_shared/lib/composition.ts",
+      "kind": "config_data",
+      "commit_or_etag": "2107b1e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal worktree branch wk-MDPF_SECCLASS-46-portal (LOCAL); platinumToComposition items now carry asset_class_canonical, sub_asset_class_canonical, class_source when served; tsc --noEmit -p tsconfig.app.json rc=0; not on DEV, laptop CTO reviews first",
+      "artifact_covered_by": [
+        "SC10-e59-AC1",
+        "SC10-e59-AC2"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/AdvisorIntelligence/__tests__/mdpf-secclass/composition-canonical-subclass.test.ts",
+      "kind": "config_data",
+      "commit_or_etag": "2107b1e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal branch wk-MDPF_SECCLASS-46-portal (LOCAL); 6 bun tests named canonical_subclass: GLD, PHYS, VXX, unchanged fields, no-canonical control, mix/other unchanged",
+      "artifact_covered_by": [
+        "SC10-e59-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC10-e59-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py src/pages/AdvisorIntelligence/__tests__/mdpf-secclass/composition-canonical-subclass.test.ts canonical_subclass -- expect: PORTAL-TESTS ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py src/pages/AdvisorIntelligence/__tests__/mdpf-secclass/composition-canonical-subclass.test.ts canonical_subclass",
+      "expect": "PORTAL-TESTS ok=True",
+      "output_evidence": "PORTAL-TESTS ok=True pass=6 fail=0 rc=0 file=src/pages/AdvisorIntelligence/__tests__/mdpf-secclass/composition-canonical-subclass.test.ts filter=canonical_subclass",
+      "denominator": "6 of 6 canonical_subclass tests pass; GLD, PHYS, VXX each asserted, plus 1 no-canonical control",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC10-e59-AC2",
+      "criterion_verbatim": "JUDGMENT (3.0.0_SA_CVO, L9): the Advisor Intelligence page, read on the laptop after review, shows GLD and PHYS as commodities (Metals) and VXX as a hedge for a real BD client (FWD-1 ACCEPT).",
+      "method": "manual_read_with_citation",
+      "invocation": "none: a judgment criterion carries no invocation",
+      "output_evidence": "No verdict recorded by the worker. Material for the judge: composition.ts now carries the sub-class onto the item the page reads, but ConsolidatedOverviewPanel.tsx:466-468 still prints display_label ?? label only, and types.ts does not declare the fields; the hookup is named in row MDPF_SECCLASS-W46-S1 for the issuer at the merge. VXX is not in z08327149's served top-10, so no VXX row appears for that client unless served.",
+      "denominator": "n/a",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: graded by 3.0.0_SA_CVO at L9, never self-graded by the worker."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Removed the sub_asset_class_canonical spread from composition.ts in the worktree, ran AC1, restored the file from a copy and re-ran.",
+      "expected": "fail on the GLD, PHYS and VXX tests, then pass after restore",
+      "observed": "PORTAL-TESTS ok=False pass=3 fail=3 rc=1; after restore ok=True pass=6 fail=0 rc=0; git status of the portal worktree clean after restore. Base dry run per the order: AC1 FAIL (absent test file).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice over the same tree",
+      "observed": "identical ok=True pass=6 fail=0 both times (the restore re-run matches the first run)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A rendered page read and any DEV landing.",
+      "reason": "No browser on this seat; BOUNDS: never land on DEV, the laptop CTO reviews the product file first."
+    },
+    {
+      "item": "types.ts and ConsolidatedOverviewPanel.tsx edits.",
+      "reason": "Outside the write set; hookup lines named in row MDPF_SECCLASS-W46-S1."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W46-S1"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <paths>",
+      "result": "see commit"
+    }
+  ]
+}
