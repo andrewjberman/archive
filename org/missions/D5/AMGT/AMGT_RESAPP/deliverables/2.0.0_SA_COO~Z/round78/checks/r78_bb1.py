@@ -125,11 +125,18 @@ def _ac1(fn, clause):
     for folder, keys in listed.items():
         name = crosswalk.security_key_from_slash_safe(folder)
         chosen, has_rows = None, False
-        for key in sorted(keys, reverse=True):
+        # AMENDMENT 1 (row Z-W289-S1): among the five newest, an object that carries a segment list wins over a newer object
+        # that carries none (a pull of other fields into the same folder); only when none carries one is the newest
+        # error-free object taken.
+        bodies = []
+        for key in sorted(keys, reverse=True)[:5]:
             response = json.loads(s3.get_object(Bucket=BUCKET, Key=key)["Body"].read().decode("utf-8")).get("response") or {}
-            if _usable(response):
-                chosen, has_rows = key, bool(response.get("PG_REVENUE"))
-                break
+            bodies.append((key, response))
+        with_table = [(k, r) for k, r in bodies if "PG_REVENUE" not in (r.get("__field_errors__") or {})
+                      and ("PG_REVENUE" in r or "PG_OPERATING_INCOME" in r)]
+        fallback = [(k, r) for k, r in bodies if _usable(r)]
+        pick = (with_table or fallback or [(None, {})])[0]
+        chosen, has_rows = pick[0], bool(pick[1].get("PG_REVENUE"))
         expect[name] = (chosen, has_rows)
 
     amd = fn("AMD_US_Equity", client=s3)
