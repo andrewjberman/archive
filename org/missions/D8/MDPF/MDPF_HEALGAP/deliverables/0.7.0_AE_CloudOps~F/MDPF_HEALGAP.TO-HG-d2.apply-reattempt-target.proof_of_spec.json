@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-d2",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-d2.apply-reattempt-target.md",
+    "group": "OTHER",
+    "vintage_commit": "dff3c744f1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "474ec88e5a",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-d2.apply-reattempt-target.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~F",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/cot_rebalancer_reattempt.tf",
+      "kind": "terraform",
+      "commit_or_etag": "3fe4a0207f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Applied with -target on exactly its two resources via .tools/safe-apply.sh at 2026-10-07T16:47:12Z-16:47:53Z, CHECKPOINT_DISABLE=1 set and MSYS_NO_PATHCONV never set. The pre-apply targeted plan read 'Plan: 2 to add, 0 to change, 0 to destroy' and listed no other resource. The apply's own resource-count line is NOT quoted anywhere in this instance: the captured stdout tail ended inside the outputs block and cut that line off, so it was never read, and an unread line is not evidence. The result is measured instead from two independent live reads: a targeted re-plan returns 'No changes. Your infrastructure matches the configuration.', and terraform state list carries both aws_cloudwatch_event_target.cot_rebalancer_reattempt and aws_lambda_permission.cot_rebalancer_reattempt. The file bytes that were applied are sha256 0105df425f85c088d9b32d7ef8260f27d74ef71d2788821c338e85d2d032922a, identical to the ratified blob at the GO commit dff3c744f1.",
+      "artifact_covered_by": [
+        "HG1-d2-AC1",
+        "HG1-d2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261007T1621Z_mdpf-healgap-hg-t2-reattempt-apply-20261007_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "a536d4b391",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 entry opened at deploy START (commit 1ad97815f3, which also carried leg L1's act-0 proof before the plan ran) naming the laptop as the box and the two resources, with 5 legs; CLOSED at a536d4b391 with all 5 legs carrying measured proof and the .open_deploys sentinel removed. Nothing stranded. Both commits used an exact two-path pathspec: 0.7.0_AE_CloudOps~S's concurrent e65 entry and sentinel were modified in the same shared working tree and were deliberately kept out of both commits, which is the shared-surface hazard row MDPF_HEALGAP-S6 names.",
+      "artifact_covered_by": [
+        "HG1-d2-AC1",
+        "HG1-d2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG1-d2-AC1",
+      "criterion_verbatim": "`cot-bronze-complete` carries one runner target with `{\"mode\":\"pull\"}` beside its unchanged silver target, and the runner's policy admits that rule.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R1_CHECKS/hg_d2_applied.py --wired",
+      "output_evidence": "WIRED-OK target=cot-rebalancer-runner-reattempt input=pull other_targets=CotSilverOnBronzeComplete policy_sid=AllowEventBridgeInvokeReattempt (rc=0). Base arm, measured by this seat on the laptop at ~16:09Z BEFORE the apply and independently stated by the order and both halves as the dell1 reading at ~14:1xZ: WIRED-BAD runner targets on cot-bronze-complete=0 (want 1); all=['CotSilverOnBronzeComplete'] -- the same script, the same rule, the same plane, before the act. The check is not a single assertion: it refuses on four separate grounds (runner target count != 1, a target input that is not exactly {\"mode\":\"pull\"}, any change to the rule's other targets away from exactly ['CotSilverOnBronzeComplete'], and a resource-policy statement count for rule/cot-bronze-complete != 1), so WIRED-OK is the conjunction of all four.",
+      "denominator": "4 of 4 grounds the check tests were satisfied; 2 of 2 targets on cot-bronze-complete were enumerated (1 runner, 1 silver) and 1 of 1 matching resource-policy statement read by lambda:GetPolicy",
+      "status": "PASS",
+      "expect": "WIRED-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "HG1-d2-AC2",
+      "criterion_verbatim": "nothing else moved: runner code, retry/age/on_success, the 06:00Z rule and its input.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R1_CHECKS/hg_d2_applied.py --unchanged",
+      "output_evidence": "UNCHANGED-OK code=HG-t-1 build retry=2 age=21600 on_success=opal-assets-silver-blackdiamond daily=cron(0 6 * * ? *) input=pull (rc=0). Corroborated by the stronger read, which bounds what the apply COULD have touched rather than sampling what survived: the targeted plan named exactly two resources and both were creates of not-yet-existing objects, so no attribute of the function, its invoke-config, the daily rule or that rule's target was ever in scope. Note the limit the order itself states: AC2 also PASSES at the base, so it is a control and cannot by itself distinguish this apply from no apply -- all of the discrimination sits in AC1.",
+      "denominator": "5 of 5 surfaces the check reads were verified after the apply (function CodeSha256, invoke-config MaximumRetryAttempts, invoke-config MaximumEventAgeInSeconds, the OnSuccess destination, and the cot-rebalancer-runner-daily rule's state plus schedule plus its single target's input)",
+      "status": "PASS",
+      "expect": "UNCHANGED-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was planted. For this cell the discriminating negative arm is the pre-apply world, and it was observed rather than constructed: the same check script against the same live rule, before the apply. A second, unconstructed negative arm also fired on the act-0 probe, described under its own heading in the ledger's leg L1.",
+      "expected": "HG1-d2-AC1 reads WIRED-BAD with runner targets=0 at the base (the order states exactly this), while HG1-d2-AC2 reads UNCHANGED-OK at the base as the order's own declared control -- so the base arm must separate the two criteria, not pass or fail them together",
+      "observed": "It separated them. At ~16:09Z, before the apply: AC1 'WIRED-BAD runner targets on cot-bronze-complete=0 (want 1); all=[CotSilverOnBronzeComplete]' and AC2 'UNCHANGED-OK' with the same six tokens it returns now. After the apply AC1 flips to WIRED-OK and AC2 is unchanged. The act-0 probe supplied the other negative arm the CTO half asked for: the guard was invoked on a day whose stamp already existed and returned SKIP-IDEMPOTENT in 94.43 ms with the bronze key count at 97 before and 97 after and the stamp's LastModified still 06:00:58Z -- so the every-normal-day branch this whole act rests on was proven on the live plane, which is the one thing the CTO half said had never been exercised.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "both criteria were invoked twice against the live plane, once immediately after the apply and once after the ledger-close commit a536d4b391, which is also the sequence the order's act 4 directs (commit before the reads); separately the 0-diff re-plan was run as its own invocation rather than inferred from the apply",
+      "observed": "run 1 and run 2 byte-identical on both criteria: the same WIRED-OK line with the same target id, input, other_targets and policy_sid, and the same UNCHANGED-OK line with the same six tokens. The re-plan returned 'No changes. Your infrastructure matches the configuration.' terraform init reported 'Using hashicorp/aws v5.100.0 from the shared cache directory', so no provider was downloaded into the worktree.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the source-map stamp and CHANGELOG entry that record-terraform-deploy.sh would normally write",
+      "reason": "act 4 directs the recorder 'as for HG-d1'. It was RUN and it REFUSED by design, rc=2, writing nothing: 'basis: plan hgd2.tfplan (0 applied aws_lambda_function address(es))', 'stamped 0 of 15 rows under opal-assets: (none)', 'ERROR: resolved deployment set is EMPTY or unparseable -- REFUSING.' This apply creates an event target and a resource-policy statement and moves no Lambda code, so the parity loop the recorder closes has nothing to close, and HG-d1 already closed it for this function (its row reads artifact_sha256 QxLvPLTMO5YSkS+vaRXEkhaA78ZAr1arTyS0ADOOMvk= equal to the live CodeSha256, last_deployed_at 2026-10-07T10:49:42Z). Forcing it with --function cot-rebalancer-runner would have overwritten a correct row with this apply's timestamp, falsely attributing the code deploy to this order, and was refused as a widening. Row owed, see session_log."
+    },
+    {
+      "item": "AC3 of both never-widen halves -- the next normal day's ~11:32Z fire read as SKIP-IDEMPOTENT with no new bronze key",
+      "reason": "it is not among this order's <expected_criteria> (HG1-d2-AC1 HG1-d2-AC2) and both halves assign it to the issuer ('read by the issuer'). It is also a future event: the rule fires once a day at 11:31-11:32Z and today's fire preceded this apply. OWNER: 2.0.0_SA_COO~G1, on 2026-10-08. The act-0 probe is the same behaviour proven by direct invocation rather than by waiting for the trigger, but it is not the same read and is not offered as AC3."
+    },
+    {
+      "item": "the FWD-1 exercise -- setting the 06:00Z target's input to {\"mode\":\"pull\",\"induce\":\"auth-lapse\"} for one morning",
+      "reason": "the COO half's 'Not signed here' names it as a separate act with its own half, and the issuer has since issued it as MDPF_HEALGAP.TO-HG-d3 (GO, status pending @14ca26c231, relayed in msg 106443). FWD-1 is therefore NOT graded REALIZED by this order: this order wires the second attempt, and d3 is what demonstrates it on a day the morning pull fails."
+    },
+    {
+      "item": "any refill of past dates (FWD-3), including the 11 missing model-detail days 2026-08-31 to 09-10",
+      "reason": "Andrew's ACT 2 answer was no (@e5fb41862f, card 3: 'approved' on the REC of no refill). No ACT 2 vendor word exists and FWD-3 as written is at 1.0.0_SA_CTO~DELL1 as row MDPF_HEALGAP-S2."
+    },
+    {
+      "item": "a full (untargeted) terraform plan of infra/aws/terraform/opal-assets",
+      "reason": "out of scope: the CTO half's condition 3 is written about the targeted plan, and a full plan would surface unrelated drift from other seats' concurrent work in the same root that this order grants no authority to read or act on."
+    },
+    {
+      "item": "IAM verification by comp-iam gaps",
+      "reason": "no iam.tf change was made and no role grant was added, so the trigger does not fire. The new aws_lambda_permission is a resource policy ON the runner, not a grant TO a role; the order's <preflight> records comp-iam service cot-rebalancer-runner RUN at L5 (2026-10-07)."
+    },
+    {
+      "item": "a HALTGT pass as evidence of not having been halted",
+      "reason": "ADHC_HALTGT / LD-0267: the checkpoint reads only unread files directly under inbox/<serial>/, so this seat's live inbox Monitor moves every message before that gate can see it, and a ~lane seat is unhaltable regardless. safe-apply ran and the gate did not block, but that fact is recorded as uninformative rather than cited as a control."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.7.0_AE_CloudOps~F/SURPRISE_ROWS_OWED_FROM_TO_HG_D2_20261007.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/terraform/opal-assets/cot_rebalancer_reattempt.tf --for \"how many resources does this declare and what are their addresses\" (satisfied by a git-blob read plus a resource-block census, the file being off-trunk at the time)",
+      "result": "precondition 2 graded from the ratified blob before the trunk merge: exactly one aws_cloudwatch_event_target and one aws_lambda_permission, both named cot_rebalancer_reattempt, at lines 22 and 29 -- which gave the two -target addresses used in the plan and the apply. Also established that the rule is attached BY NAME only and is declared in another root (cot-pipeline/eventbridge.tf, owner 0.6.2_AE_PartnerETL), which is why the R20 exception was needed at all."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg|close --slug mdpf-healgap-hg-t2-reattempt-apply-20261007",
+      "result": "5 legs opened at deploy START, each closed against its own measured proof, entry CLOSED with the sentinel removed. Confirms row MDPF_HEALGAP-S6's shared surface: `open` and `close-leg` touched only this entry, while at `close` time another seat's entry and sentinel were also modified in the shared working tree; both were kept out of both commits by exact pathspec."
+    },
+    {
+      "tool": "record-terraform-deploy.sh / record-deploy-scope.py",
+      "invocation": "bash infra/aws/lambda/ci/record-terraform-deploy.sh opal-assets --plan hgd2.tfplan",
+      "result": "rc=2, REFUSED, nothing written -- the correct outcome for an apply with no Lambda code in it. The resolver was read before it was trusted: record-deploy-scope.py applied_addresses() admits an address only when its change.actions intersect {create, update}, and terraform show -json of this plan carries module.cot_rebalancer_runner.aws_lambda_function.this with actions=no-op, so the resolved set is empty and the script fails closed. A first attempt failed differently and is recorded for the next reader: passing --plan with a path already relative to the repo root makes the scope tool resolve it under the terraform directory a second time (path doubling) and terraform show reports 'Failed to read the given file as a state or plan file'; the plan name must be relative to the terraform root."
+    },
+    {
+      "tool": "terraform (v1.15.8, resolved on PATH)",
+      "invocation": "CHECKPOINT_DISABLE=1 terraform -chdir=infra/aws/terraform/opal-assets init -input=false; then plan/show/state list with the two -targets",
+      "result": "Device-agnostic resolution mattered here: .tools/terraform.exe does NOT exist on this laptop, exactly the case cloud-ops warns about, and safe-apply's own fallback chain (override, sibling, PATH, fail loud) resolved the same binary. init reused the shared provider cache rather than downloading, which also keeps the act inside Andrew's download-tier rule."
+    }
+  ]
+}
