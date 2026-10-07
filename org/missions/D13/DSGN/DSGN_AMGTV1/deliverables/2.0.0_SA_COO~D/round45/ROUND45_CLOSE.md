@@ -41,8 +41,29 @@ the removal of the /refresh control ride round 45).
 - **ASML's opened passage** is the served text of a table with no `passage_table`, so it reads as a column of lines. Round-76 ruling 7
   refuses that chart at the producer.
 
+## AMENDMENT 1 and 2 (2026-10-07 ~03:1xZ-04:0xZ) -- the CTO's render review, NOT YET on 0aa353a6
+
+Review: `ledger/CTO_RENDER_REVIEW_ROUND45_0aa353a6.md` @e3d1e62b06 (msg 30533). Two changes, issued as amendments @3d900890f0.
+
+| change | evidence |
+|---|---|
+| **No figure under the wrong header** (`AV-zw-2`) | ~107 portal 49a9bf37 (`PassageTable.tsx` +18/-4): a row whose figure count differs from the header count is a line beneath the table, outside the grid. NEW check `round45/checks/r45b/r45b.cjs`: 2 of 4 on 0aa353a6, 4 of 4 after. On BA neither served row matches (5 and 8 figures, 6 labels), so both are lines |
+| row Z-W107-S2 | COO~Z's check clause AC2/C3 required every figure inside the table. Re-anchored in a DSGN copy `round45/checks/ba5/r45_ba5.py` @0b28e723d0 (YES on 49a9bf37, NO on 0aa353a6); AC2 re-pointed to it in the same commit as ~107's re-written proof (the gate refuses the order edit alone) |
+| **The description leads the page** (`AV-zw-1`) | ~106 portal dacc0126 (`TopBand.tsx`, `SecurityOverlay.tsx`): `CompanyLine` in the name header, under the identity card and above the key figures; `TopBand` no longer draws it. `r45.cjs` amended: 2 of 5 on 0aa353a6, 5 of 5 after |
+| drains | @cfef60d7eb (~106, 3 of 3 files), @c4da1ea85e (~107, 4 of 4 files); `--verify` dropped 0 on both |
+| **candidate** | portal **659104f4** (`dsgn-r45-onto-dev`) = DEV 34803ef6 + 4 commits (12 files, +408/-62; a fast-forward). On it: r43 5/5, r44 5/5, r45 5/5, r45b 4/4, `r45_ba5` AC1-AC3 YES, battery29 ALL PASS (14 of 14, tsc 0, eslint 0) |
+
+**The real run on 659104f4** (localhost:5174, live API; walker 03:42-04:00:15Z over two runs, DISARMED): `round45/walk/read-20261007T035152Z/`,
+6 of 6 PASS (the 03:42Z run, `read-20261007T034224Z/`, also 6 of 6; it was repeated only to take the page-top capture unscrolled).
+- **BA's page top** (`page-top-BA-US.png`): the description sits directly under the BA US name card, at 274 px, above the key figures,
+  the recent news and the timeline. MSFT shows its served reason in the same place.
+- **BA's opened passage** (`driver-once-BA-US.png`): the header row 737, 747, 767, 777, 787, Total with no row beneath it; then
+  "Cumulative deliveries 8,528 1,573 1,303 1,727 1,110" and "Deliveries 396 (9) 1 32 (14) 26 73 528" as lines; the note; the cite.
+  Nothing sits under "Total".
+- Still not established: a real news item on a page, and the y-axis by probe (read by eye: 600, 450, 300, 150, 0 on BA).
+
 ## Next
 
-**Round 45: 2 of 2 orders terminal.** The candidate goes to the CTO for review from the renders (`0.9.0_WK_DSGN_AMGTV1~106/RENDER_ZW1.md`,
+**Round 45: 2 of 2 orders terminal (after two amendments).** The candidate goes to the CTO for review from the renders (`0.9.0_WK_DSGN_AMGTV1~106/RENDER_ZW1.md`,
 `0.9.0_WK_DSGN_AMGTV1~107/RENDER_ZW2.md`) and the captures above. The DEV push is Andrew's word; PROD is his separate word.
 Backlog: row Z-S21 (case value and currency attributes on `ModelTab.tsx`).

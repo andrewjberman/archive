@@ -954,6 +954,11 @@ async function topOfPageRead(page, name) {
     const items = band ? [...band.querySelectorAll('[data-top-band-item]')] : []
     const rerun = [...document.querySelectorAll('button, [role="button"]')].filter((x) => /^\s*(refresh|re-?run)\b/i.test((x.innerText || '') + ' ' + (x.getAttribute('aria-label') || '')))
     return {
+      line: (() => { const d = document.querySelector('[data-top-band-description]'); if (!d) return null
+        const tl = [...document.querySelectorAll('h2, h3, h4, div, p, span')].find((x) => /^news timeline/i.test((x.innerText || '').trim()) && x.children.length === 0)
+        const name = document.querySelector('[data-identity-card]')
+        const before = (a, b) => (a && b ? !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) : null)
+        return { text: t(d), y: Math.round(d.getBoundingClientRect().top + window.scrollY), insideBand: !!(band && band.contains(d)), afterName: before(name, d), beforeTimeline: before(d, tl), beforeBand: before(d, band), timelineFound: !!tl } })(),
       band: band ? { description: t(band.querySelector('[data-top-band-description]')), social: t(band.querySelector('[data-top-band-social]')),
         itemsReason: t(band.querySelector('[data-top-band-items-reason]')), items: items.length, links: items.filter((x) => x.tagName === 'A' && x.getAttribute('href')).length,
         newTab: items.filter((x) => x.tagName === 'A' && x.getAttribute('target') === '_blank').length, aboveTabs: above(band) } : null,
@@ -965,15 +970,23 @@ async function topOfPageRead(page, name) {
   const slug = name.replace(/\s+/g, '-')
   await page.locator('[data-top-band]').first().screenshot({ path: png(`top-band-${slug}.png`) }).catch(() => {})
   await page.locator('[data-input-provenance]').first().screenshot({ path: png(`provenance-${slug}.png`) }).catch(() => {})
+  await page.evaluate(() => window.scrollTo(0, 0)); await settle(page, 500)
   await page.screenshot({ path: png(`page-top-${slug}.png`) }).catch(() => {})
   const f = []
   if (!got.band) f.push('no [data-top-band]')
   else {
-    if (!got.band.description) f.push('the description (or its reason) is empty')
+    if (got.band.description) f.push('the band still draws the description')
     if (!got.band.social) f.push('the social sentence is empty')
     if (got.band.items === 0 && !got.band.itemsReason) f.push('no items and no reason')
     if (got.band.items > 0 && got.band.newTab !== got.band.links) f.push(`${got.band.links} item links, ${got.band.newTab} open a new tab`)
     if (got.band.aboveTabs === false) f.push('the band is below the tabs')
+  }
+  if (!got.line) f.push('no company line ([data-top-band-description]) on the page')
+  else {
+    if (!got.line.text) f.push('the company line is empty')
+    if (got.line.afterName === false) f.push('the company line is above the name card')
+    if (got.line.beforeTimeline === false) f.push('the company line is below the news timeline')
+    if (got.line.beforeBand === false) f.push('the company line is below the news band')
   }
   if (!got.prov) f.push('no [data-input-provenance]')
   else {
@@ -984,7 +997,7 @@ async function topOfPageRead(page, name) {
     if (got.prov.aboveTabs === false) f.push('the panel is below the tabs')
   }
   if (got.rerun.length) f.push(`a re-run control is on the page: ${JSON.stringify(got.rerun)}`)
-  const d = got.band ? `band: "${(got.band.description || '').slice(0, 70)}..."; ${got.band.items} item(s)${got.band.items ? '' : `, reason "${(got.band.itemsReason || '').slice(0, 60)}..."`}; social "${got.band.social}"` : 'no band'
+  const d = got.band ? `company line at y=${got.line ? got.line.y : '?'} px (before the timeline: ${got.line ? got.line.beforeTimeline : '?'}, timeline heading found: ${got.line ? got.line.timelineFound : '?'}): "${((got.line && got.line.text) || '').slice(0, 70)}..."; band: ${got.band.items} item(s)${got.band.items ? '' : `, reason "${(got.band.itemsReason || '').slice(0, 60)}..."`}; social "${got.band.social}"` : 'no band'
   const p = got.prov ? `; provenance ${got.prov.rows.length} row(s): ${got.prov.rows.map((r) => r.slice(0, 70)).join(' / ')}` : ''
   return { verdict: f.length ? 'FAIL' : 'PASS', detail: `${name}: ${d}${p}; re-run controls ${got.rerun.length}; tablist found ${got.tablist}${f.length ? ' -- ' + f.join(' | ') : ''}`, data: { got } }
 }
@@ -996,6 +1009,8 @@ async function driverOnceRead(page, name) {
   const state = () => page.evaluate(() => ({
     open: document.querySelectorAll('[data-driver-chart-passage-source]').length,
     tables: document.querySelectorAll('table[data-driver-chart-passage-table]').length,
+    gridRows: document.querySelectorAll('table[data-driver-chart-passage-table] tbody tr').length,
+    lines: [...document.querySelectorAll('[data-driver-chart-passage-row-unaligned]')].map((x) => (x.innerText || '').replace(/\s+/g, ' ').trim()),
     ths: [...document.querySelectorAll('table[data-driver-chart-passage-table] thead th')].map((x) => (x.innerText || '').trim()),
     expanded: [...document.querySelectorAll('[data-driver-chart-passage-link]')].map((x) => x.getAttribute('aria-expanded')),
     ticks: [...document.querySelectorAll('[data-thesis-principal-chart] .recharts-yAxis .recharts-cartesian-axis-tick-value')].map((x) => (x.textContent || '').trim()),
@@ -1012,7 +1027,7 @@ async function driverOnceRead(page, name) {
   if (closed.open !== 0) f.push(`a second press left ${closed.open} open`)
   if (one.tables > 0 && one.ths.filter(Boolean).length === 0) f.push('a table passage with no column label')
   if (one.ticks.some((x) => /^0{4,}$/.test(x) || x.replace(/[^0-9]/g, '').length > 7)) f.push(`an unreadable axis tick: ${JSON.stringify(one.ticks)}`)
-  return { verdict: f.length ? 'FAIL' : 'PASS', detail: `${name}: ${n} point link(s); one press -> ${one.open} open, ${one.tables} table(s)${one.tables ? ` with columns ${JSON.stringify(one.ths)}` : ''}; another point -> ${two ? two.open : 'n/a'}; pressed again -> ${closed.open}; y ticks ${JSON.stringify(one.ticks)}${f.length ? ' -- ' + f.join(' | ') : ''}`, data: { one, two, closed, png: `driver-once-${slug}.png` } }
+  return { verdict: f.length ? 'FAIL' : 'PASS', detail: `${name}: ${n} point link(s); one press -> ${one.open} open, ${one.tables} table(s)${one.tables ? ` with columns ${JSON.stringify(one.ths)}, ${one.gridRows} row(s) in the grid, ${one.lines.length} unaligned line(s) ${JSON.stringify(one.lines)}` : ''}; another point -> ${two ? two.open : 'n/a'}; pressed again -> ${closed.open}; y ticks ${JSON.stringify(one.ticks)}${f.length ? ' -- ' + f.join(' | ') : ''}`, data: { one, two, closed, png: `driver-once-${slug}.png` } }
 }
 async function segmentsRead(page, name, want) {
   await openThesis(page, name)
