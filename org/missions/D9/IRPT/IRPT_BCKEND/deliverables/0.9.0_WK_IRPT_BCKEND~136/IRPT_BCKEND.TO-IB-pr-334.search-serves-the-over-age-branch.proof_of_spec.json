@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-334",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-334.search-serves-the-over-age-branch.md",
+    "group": "OTHER",
+    "vintage_commit": "561577da0d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "561577da0d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-334.search-serves-the-over-age-branch.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~136",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/entry.py",
+      "kind": "script",
+      "commit_or_etag": "4e29bed203",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "worker branch commit only; the targeted release of both directory functions is the issuer's after the drain",
+      "artifact_covered_by": [
+        "IB61-6-AC1",
+        "IB61-6-AC2",
+        "IB61-G-136"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/tests/test_search_overage.py",
+      "kind": "test",
+      "commit_or_etag": "4e29bed203",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "8 tests, controlled clock, 2026 dates; names MAX_AGE_TRADING_DAYS",
+      "artifact_covered_by": [
+        "IB61-6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "4e29bed203",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "irpt-directory-search files[] + expiry.py, trading_calendar.py; staged_from + lib/trading_calendar.py; no other row",
+      "artifact_covered_by": [
+        "IB61-6-AC2",
+        "IB61-G-136"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB61-6-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-6-AC1",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-6-AC1",
+      "output_evidence": "OK: new 8 passed in 0.12s; suite 181 passed in 3.69s | IB61-6-AC1 PASS (rc=0)",
+      "denominator": "8 of 8 new tests; 181 of 181 directory suite",
+      "expect": "IB61-6-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB61-6-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-6-AC2",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-6-AC2",
+      "output_evidence": "OK: expiry.py in the build (24 members) | IB61-6-AC2 PASS (rc=0)",
+      "denominator": "24 members (base 22), expiry.py present",
+      "expect": "IB61-6-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB61-G-136",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-G-136",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-G-136",
+      "output_evidence": "OK: 8 changed path(s), all inside slot ~136's grant | IB61-G-136 PASS (rc=0)",
+      "denominator": "8 changed paths of 8 inside the grant (before the proof commit)",
+      "expect": "IB61-G-136 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "entry._today and entry._CALENDAR monkeypatched; no wall clock, no AWS, no real calendar",
+      "observed": "8 passed on repeated runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Base entry.py (git show 4e29bed203~1) restored under the new tests, then the fixed file restored (git status clean).",
+      "expected": "failures",
+      "observed": "7 failed, 1 passed (the one pass is the ceiling constant); most failures are the missing _today/_CALENDAR seam, so this control shows the tests need the new branch, not that each assertion alone discriminates",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W136-S1",
+    "IRPT_BCKEND-W136-S2"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider tests/ (from infra/aws/lambda/investor-reporting/directory)",
+      "result": "181 passed in 3.54s"
+    }
+  ]
+}

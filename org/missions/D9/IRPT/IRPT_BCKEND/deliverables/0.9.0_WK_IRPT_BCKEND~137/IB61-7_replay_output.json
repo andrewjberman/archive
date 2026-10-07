@@ -1,0 +1,1579 @@
+{
+ "battery": "IB-pr-335",
+ "overall_pass": true,
+ "route_count": 21,
+ "enumeration": "`aws apigatewayv2 get-routes --api-id 7k3ed8px20` (read-only), RouteKey containing /api/scoped/investor-reporting/: 21 live routes; cross-checked against docs/contracts/investor-reporting/v1/routes.json (21 declared): live-only [], declared-only []",
+ "planes": "in-process arms: the real Entry per route, recorded storage, process NETWORK-BLOCKED (no read, no write off this box); live: route-table read + unauthenticated GET probes only; authenticated live read: GATED (production auth plane write, Andrew's to name a principal)",
+ "state_counts": {
+  "advisor_principal|DRIVEN-PASS": 6,
+  "advisor_principal|GATED": 15,
+  "negative_no_protected_field|DRIVEN-PASS": 4,
+  "negative_no_protected_field|GATED": 17,
+  "revoked_grant_warm_cache|DRIVEN-PASS": 6,
+  "revoked_grant_warm_cache|GATED": 15,
+  "service_principal|DRIVEN-PASS": 17,
+  "service_principal|GATED": 4
+ },
+ "driven_fails": [],
+ "live_boundary_defects": [],
+ "workers": [
+  {
+   "dir": "directory",
+   "function": "irpt-directory-search",
+   "routes": 4,
+   "network_connects_blocked": 0
+  },
+  {
+   "dir": "performance",
+   "function": "irpt-performance-adapter",
+   "routes": 1,
+   "network_connects_blocked": 0
+  },
+  {
+   "dir": "ycharts/generate",
+   "function": "irpt-ycharts-generate",
+   "routes": 2,
+   "network_connects_blocked": 0
+  },
+  {
+   "dir": "narrative",
+   "function": "irpt-narrative",
+   "routes": 1,
+   "network_connects_blocked": 0
+  },
+  {
+   "dir": "export",
+   "function": "irpt-export-render",
+   "routes": 3,
+   "network_connects_blocked": 0
+  },
+  {
+   "dir": "holdings",
+   "function": "irpt-holdings",
+   "routes": 1,
+   "network_connects_blocked": 0
+  },
+  {
+   "dir": "ops",
+   "function": "irpt-status",
+   "routes": 3,
+   "network_connects_blocked": 0
+  },
+  {
+   "dir": "reporting",
+   "function": "irpt-49f-reporting-read-lambda",
+   "routes": 2,
+   "network_connects_blocked": 0
+  }
+ ],
+ "routes": [
+  {
+   "route": "GET /api/scoped/investor-reporting/analysis/comparisons",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-ycharts-generate",
+   "operation": "comparison-catalogue",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer SERVED); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "SERVED",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry: authorized request SERVED; 5 of 5 non-advisor swaps refused by an authorization reason, the advisor swap served without widening; claimed-firm mismatch FIRM_BINDING; 0 protected bytes",
+    "detail": {
+     "authorized_request": "SERVED",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "SERVED",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "DRIVEN-PASS",
+    "reason": "served -> grant revoked with the shared cache never cleared -> refused, none of the first payload's ids carried -> restored -> served; the Enforcer.serve() warm-cache replay on comparison_catalogue also holds",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "comparison_catalogue",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": {
+      "served_first": true,
+      "shared_cache_entries_after_first": 1,
+      "revoked_answer": "NOT_AUTHORIZED",
+      "first_payload_ids_carried_into_revoked_answer": [],
+      "restored_answer": "SERVED"
+     }
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "the authorized and the second principal's served answers carry no principal-specific string field, so there is no protected field to look for",
+    "detail": {
+     "control_injected_value_detected": false,
+     "protected_field_paths": 0,
+     "protected_values": 0,
+     "refusals_diffed": 10,
+     "leaks": [],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/analysis/requests",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "service_principal": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/analysis/requests/{requestId}",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "service_principal": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/pdf",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "service_principal": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/analysis/{jobId}/sections",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-status",
+   "operation": "analysis-report",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer NOT_FOUND); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "NOT_FOUND",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers NOT_FOUND; refused by KeyError: \"status_loader needs a tenant (scope.verified_request_firm_id) and a job (request.object_id / params[job|job_i), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "NOT_FOUND",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "NOT_FOUND",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (NOT_FOUND; refused by KeyError: \"status_loader needs a tenant (scope.verified_request_firm_id) and a job (request.object_id / params[job|job_i), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "analysis_report",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (NOT_FOUND), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers NOT_FOUND in-process (refused by KeyError: \"status_loader needs a tenant (scope.verified_request_firm_id) and a job (request.object_id / params[job|job_i). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/directory/browse",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-directory-search",
+   "operation": "directory-browse",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer SERVED); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "SERVED",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry: authorized request SERVED; 5 of 5 non-advisor swaps refused by an authorization reason, the advisor swap served without widening; claimed-firm mismatch FIRM_BINDING; 0 protected bytes",
+    "detail": {
+     "authorized_request": "SERVED",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "SERVED",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "DRIVEN-PASS",
+    "reason": "served -> grant revoked with the shared cache never cleared -> refused, none of the first payload's ids carried -> restored -> served; the Enforcer.serve() warm-cache replay on directory_browse also holds",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "directory_browse",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": {
+      "served_first": true,
+      "shared_cache_entries_after_first": 1,
+      "revoked_answer": "NOT_AUTHORIZED",
+      "first_payload_ids_carried_into_revoked_answer": [],
+      "restored_answer": "SERVED"
+     }
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "DRIVEN-PASS",
+    "reason": "10 refused responses diffed against the authorized answer's 7 protected fields (6 values that differ per principal): none of those names or values appears in any refusal; the injected-leak control is detected by the same test",
+    "detail": {
+     "control_injected_value_detected": true,
+     "protected_field_paths": 7,
+     "protected_values": 6,
+     "refusals_diffed": 10,
+     "leaks": [],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/directory/search",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-directory-search",
+   "operation": "directory-search",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer SERVED); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "SERVED",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry: authorized request SERVED; 5 of 5 non-advisor swaps refused by an authorization reason, the advisor swap served without widening; claimed-firm mismatch FIRM_BINDING; 0 protected bytes",
+    "detail": {
+     "authorized_request": "SERVED",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "SERVED",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "DRIVEN-PASS",
+    "reason": "served -> grant revoked with the shared cache never cleared -> refused, none of the first payload's ids carried -> restored -> served; the Enforcer.serve() warm-cache replay on directory_search also holds",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "directory_search",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": {
+      "served_first": true,
+      "shared_cache_entries_after_first": 1,
+      "revoked_answer": "NOT_AUTHORIZED",
+      "first_payload_ids_carried_into_revoked_answer": [],
+      "restored_answer": "SERVED"
+     }
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "DRIVEN-PASS",
+    "reason": "10 refused responses diffed against the authorized answer's 6 protected fields (5 values that differ per principal): none of those names or values appears in any refusal; the injected-leak control is detected by the same test",
+    "detail": {
+     "control_injected_value_detected": true,
+     "protected_field_paths": 6,
+     "protected_values": 5,
+     "refusals_diffed": 10,
+     "leaks": [],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/export/{exportId}",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-export-render",
+   "operation": "export-receipt",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer SERVED); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "SERVED",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry: authorized request SERVED; 5 of 5 non-advisor swaps refused by an authorization reason, the advisor swap refused NOT_FOUND; claimed-firm mismatch FIRM_BINDING; 0 protected bytes",
+    "detail": {
+     "authorized_request": "SERVED",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "NOT_FOUND",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "DRIVEN-PASS",
+    "reason": "served -> grant revoked with the shared cache never cleared -> refused, none of the first payload's ids carried -> restored -> served; the Enforcer.serve() warm-cache replay on export_receipt also holds",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "export_receipt",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": {
+      "served_first": true,
+      "shared_cache_entries_after_first": 1,
+      "revoked_answer": "NOT_AUTHORIZED",
+      "first_payload_ids_carried_into_revoked_answer": [],
+      "restored_answer": "SERVED"
+     }
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "the authorized answer is served, but the control that separates PROTECTED fields from the response's own schema/metadata (a second authorized principal's served answer, advisor B) is not served in-process (NOT_FOUND), so which fields are principal-specific cannot be derived",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row",
+      "revoked-grant"
+     ]
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/export/{exportId}/download",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-export-render",
+   "operation": "export-download",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer NOT_FOUND); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "NOT_FOUND",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers NOT_FOUND; refused by ExportRefused: the receipt names no artifact), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "NOT_FOUND",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "NOT_FOUND",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (NOT_FOUND; refused by ExportRefused: the receipt names no artifact), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "export_download",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (NOT_FOUND), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers NOT_FOUND in-process (refused by ExportRefused: the receipt names no artifact). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/holdings/{accountSetId}",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-holdings",
+   "operation": "holdings-snapshot",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer OBJECT_NOT_COVERED); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "OBJECT_NOT_COVERED",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers OBJECT_NOT_COVERED; refused by AccountNotCovered: browser-supplied scope or snapshot is not an input), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "OBJECT_NOT_COVERED",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "OBJECT_NOT_COVERED",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (OBJECT_NOT_COVERED; refused by AccountNotCovered: browser-supplied scope or snapshot is not an input), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "holdings_snapshot",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (OBJECT_NOT_COVERED), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers OBJECT_NOT_COVERED in-process (refused by AccountNotCovered: browser-supplied scope or snapshot is not an input). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/narrative/{reportId}",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-narrative",
+   "operation": "narrative-packet",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer INVALID_INPUT); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "INVALID_INPUT",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers INVALID_INPUT; refused by SeriesRefused: BLOCKED: REFUSE_SUBSTITUTED_BASIS -- method=None is not the required 'TIME_WEIGHTED'; UNKNOWN is not a licence), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "INVALID_INPUT",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "OBJECT_NOT_COVERED",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (INVALID_INPUT; refused by SeriesRefused: BLOCKED: REFUSE_SUBSTITUTED_BASIS -- method=None is not the required 'TIME_WEIGHTED'; UNKNOWN is not a licence), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "narrative_packet",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (INVALID_INPUT), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers INVALID_INPUT in-process (refused by SeriesRefused: BLOCKED: REFUSE_SUBSTITUTED_BASIS -- method=None is not the required 'TIME_WEIGHTED'; UNKNOWN is not a licence). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/performance/{accountSetId}",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-performance-adapter",
+   "operation": "performance-report",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer INVALID_INPUT); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "INVALID_INPUT",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers INVALID_INPUT; refused by PerformanceInputRefused: explicit server-issued selection required), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "INVALID_INPUT",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "INVALID_INPUT",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (INVALID_INPUT; refused by PerformanceInputRefused: explicit server-issued selection required), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "performance_report",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (INVALID_INPUT), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers INVALID_INPUT in-process (refused by PerformanceInputRefused: explicit server-issued selection required). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/reporting/client/{client_id}/summary",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-49f-reporting-read-lambda",
+   "operation": "reporting-summary-read",
+   "status_in_routes_json": "ROUTED_ELSEWHERE",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer OBJECT_NOT_COVERED); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "OBJECT_NOT_COVERED",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers OBJECT_NOT_COVERED; refused by AccountNotCovered: browser-supplied scope or object is not an input), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "OBJECT_NOT_COVERED",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "OBJECT_NOT_COVERED",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (OBJECT_NOT_COVERED; refused by AccountNotCovered: browser-supplied scope or object is not an input), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "reporting_summary_read",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (OBJECT_NOT_COVERED), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers OBJECT_NOT_COVERED in-process (refused by AccountNotCovered: browser-supplied scope or object is not an input). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/reporting/{account_id}/{which}",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-49f-reporting-read-lambda",
+   "operation": "reporting-read",
+   "status_in_routes_json": "ROUTED_ELSEWHERE",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer OBJECT_NOT_COVERED); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "OBJECT_NOT_COVERED",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers OBJECT_NOT_COVERED; refused by AccountNotCovered: browser-supplied scope or object is not an input), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "OBJECT_NOT_COVERED",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "OBJECT_NOT_COVERED",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (OBJECT_NOT_COVERED; refused by AccountNotCovered: browser-supplied scope or object is not an input), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "reporting_read",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (OBJECT_NOT_COVERED), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers OBJECT_NOT_COVERED in-process (refused by AccountNotCovered: browser-supplied scope or object is not an input). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/status",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-status",
+   "operation": "status-summary",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer NOT_FOUND); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "NOT_FOUND",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers NOT_FOUND; refused by KeyError: \"status_loader needs a tenant (scope.verified_request_firm_id) and a job (request.object_id / params[job|job_i), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "NOT_FOUND",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "NOT_FOUND",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (NOT_FOUND; refused by KeyError: \"status_loader needs a tenant (scope.verified_request_firm_id) and a job (request.object_id / params[job|job_i), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "status_summary",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (NOT_FOUND), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers NOT_FOUND in-process (refused by KeyError: \"status_loader needs a tenant (scope.verified_request_firm_id) and a job (request.object_id / params[job|job_i). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/status/{jobId}",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_get_probe": {
+     "status": 401,
+     "refused": true,
+     "zero_protected_bytes": true
+    }
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-status",
+   "operation": "status-job",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer NOT_FOUND); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "NOT_FOUND",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers NOT_FOUND; refused by KeyError: \"status_loader needs a tenant (scope.verified_request_firm_id) and a job (request.object_id / params[job|job_i), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "NOT_FOUND",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "NOT_FOUND",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (NOT_FOUND; refused by KeyError: \"status_loader needs a tenant (scope.verified_request_firm_id) and a job (request.object_id / params[job|job_i), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "status_job",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (NOT_FOUND), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers NOT_FOUND in-process (refused by KeyError: \"status_loader needs a tenant (scope.verified_request_firm_id) and a job (request.object_id / params[job|job_i). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "POST /api/scoped/investor-reporting/analysis",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_probe": "NOT SENT: a non-GET call is outside this worker's read-only bound; the boundary is the route-table read above"
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-ycharts-generate",
+   "operation": "analysis-requests",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer INVALID_INPUT); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "INVALID_INPUT",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers INVALID_INPUT; refused by RequestRefused: OBJECT_BODY_REQUIRED), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "INVALID_INPUT",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "INVALID_INPUT",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (INVALID_INPUT; refused by RequestRefused: OBJECT_BODY_REQUIRED), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "analysis_requests",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (INVALID_INPUT), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers INVALID_INPUT in-process (refused by RequestRefused: OBJECT_BODY_REQUIRED). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "POST /api/scoped/investor-reporting/analysis/inputs",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_probe": "NOT SENT: a non-GET call is outside this worker's read-only bound; the boundary is the route-table read above"
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "service_principal": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no module-level Entry under the eight function directories' entry.py declares this route key: it is served by an INSTALLED entry (served.installed_entry), whose Entry is built at the first call from the function role's AWS clients (reports/status_installed.py build_boundary(compose_ports()), reports/generate_installed.py, performance/runtime.py) and cannot be constructed over recorded storage without a network or a fixture for every port; the same limit test_guarded_entries.py records (\"INSTALLED, battery is the installer's\")"
+   }
+  },
+  {
+   "route": "POST /api/scoped/investor-reporting/directory/resolve",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_probe": "NOT SENT: a non-GET call is outside this worker's read-only bound; the boundary is the route-table read above"
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-directory-search",
+   "operation": "resolve-scope",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer SERVED); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "SERVED",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry: authorized request SERVED; 5 of 5 non-advisor swaps refused by an authorization reason, the advisor swap served without widening; claimed-firm mismatch FIRM_BINDING; 0 protected bytes",
+    "detail": {
+     "authorized_request": "SERVED",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "SERVED",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "DRIVEN-PASS",
+    "reason": "served -> grant revoked with the shared cache never cleared -> refused, none of the first payload's ids carried -> restored -> served; the Enforcer.serve() warm-cache replay on resolve_scope also holds",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "resolve_scope",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": {
+      "served_first": true,
+      "shared_cache_entries_after_first": 1,
+      "revoked_answer": "NOT_AUTHORIZED",
+      "first_payload_ids_carried_into_revoked_answer": [],
+      "restored_answer": "SERVED"
+     }
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "DRIVEN-PASS",
+    "reason": "10 refused responses diffed against the authorized answer's 2 protected fields (2 values that differ per principal): none of those names or values appears in any refusal; the injected-leak control is detected by the same test",
+    "detail": {
+     "control_injected_value_detected": true,
+     "protected_field_paths": 2,
+     "protected_values": 2,
+     "refusals_diffed": 10,
+     "leaks": [],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "POST /api/scoped/investor-reporting/export",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_probe": "NOT SENT: a non-GET call is outside this worker's read-only bound; the boundary is the route-table read above"
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-export-render",
+   "operation": "submit-export",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer NOT_READY); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "NOT_READY",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "GATED",
+    "reason": "the generic authorized request is not SERVED in-process (answers NOT_READY; refused by _ExportNotWiredHere: submit-export is not installed on this function: missing IRPT_REQUESTS_TABLE, IRPT_EVIDENCE_BUCKET, IRPT_PORTA), so the swaps have no served control to differ from; an operation-shaped fixture for this route is not built here. Authorization-class refusals on the swaps: 5 of 5 non-advisor swaps.",
+    "detail": {
+     "authorized_request": "NOT_READY",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "NOT_READY",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "GATED",
+    "reason": "the real Enforcer.serve() warm-cache reauthorization on this route's operation key HOLDS (served, revoked refused, cache untouched, restored from the same cache), but the route's own served payload is not produced in-process by the generic request (NOT_READY; refused by _ExportNotWiredHere: submit-export is not installed on this function: missing IRPT_REQUESTS_TABLE, IRPT_EVIDENCE_BUCKET, IRPT_PORTA), so revoked-against-warm-cache is not driven through the route itself",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "submit_export",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": "NOT DRIVEN: the authorized request is not served in-process (NOT_READY), so there is no warm served payload on this route to replay a revocation against"
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "GATED",
+    "reason": "no authorized response field set to diff against: the generic authorized request answers NOT_READY in-process (refused by _ExportNotWiredHere: submit-export is not installed on this function: missing IRPT_REQUESTS_TABLE, IRPT_EVIDENCE_BUCKET, IRPT_PORTA). The 10 refused responses were still byte-censused against the fixed protected list: 0 leak(s)",
+    "detail": {
+     "refusals_checked": [
+      "swap-firm",
+      "swap-advisor",
+      "swap-account",
+      "swap-relationship",
+      "swap-report",
+      "swap-pdf",
+      "claimed-firm",
+      "service-foreign-firm",
+      "service-no-attribute",
+      "service-no-row"
+     ],
+     "fixed_list_leaks": []
+    }
+   }
+  },
+  {
+   "route": "POST /api/scoped/investor-reporting/selections",
+   "live_boundary": {
+    "api_gateway_authorization_type": "CUSTOM",
+    "authorizer": "naqxlm",
+    "unauthenticated_probe": "NOT SENT: a non-GET call is outside this worker's read-only bound; the boundary is the route-table read above"
+   },
+   "live_authenticated": "GATED: an AUTHENTICATED served read through CloudFront needs a minted principal; minting or revoking a principal or grant is a write to the production auth plane (opal-users-v2), not this worker's (RT2_test_principal_human_gated.md; CTO section 6 item 2: an advisor test principal is Andrew's to name). No non-PROD principal exists to use.",
+   "function": "irpt-directory-search",
+   "operation": "selection-create",
+   "status_in_routes_json": "DECLARED",
+   "service_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry, the SERVICE subject: the allowed firm is admitted (its artifacts were read; own answer SERVED); the foreign firm, an attribute-less row and a missing row each FIRM_BINDING with NO artifact read for the refused firm; the refused value not echoed",
+    "detail": {
+     "allowed_firm": "SERVED",
+     "allowed_firm_artifacts_read_for": [
+      "49financial"
+     ],
+     "foreign_firm": "FIRM_BINDING",
+     "foreign_firm_artifacts_read_for": [],
+     "no_allowedFirmIds_attribute": "FIRM_BINDING",
+     "no_profile_row": "FIRM_BINDING"
+    }
+   },
+   "advisor_principal": {
+    "state": "DRIVEN-PASS",
+    "reason": "in-process on the real Entry: authorized request SERVED; 5 of 5 non-advisor swaps refused by an authorization reason, the advisor swap refused OBJECT_NOT_COVERED; claimed-firm mismatch FIRM_BINDING; 0 protected bytes",
+    "detail": {
+     "authorized_request": "SERVED",
+     "swaps": {
+      "firm": "FIRM_BINDING",
+      "advisor": "OBJECT_NOT_COVERED",
+      "account": "OBJECT_NOT_COVERED",
+      "relationship": "OBJECT_NOT_COVERED",
+      "report": "OBJECT_NOT_COVERED",
+      "pdf": "OBJECT_NOT_COVERED"
+     },
+     "claimed_firm_mismatch": "FIRM_BINDING",
+     "authz_refused_swaps": 5
+    }
+   },
+   "revoked_grant_warm_cache": {
+    "state": "DRIVEN-PASS",
+    "reason": "served -> grant revoked with the shared cache never cleared -> refused, none of the first payload's ids carried -> restored -> served; the Enforcer.serve() warm-cache replay on selection_create also holds",
+    "detail": {
+     "enforcer_serve_on_operation_key": {
+      "key_operation": "selection_create",
+      "served_first": true,
+      "cache_entries_after_first": 1,
+      "revoked_refused": true,
+      "revoked_code": "EMPTY_GRANT",
+      "cache_untouched_by_refusal": true,
+      "zero_protected_bytes_in_refusal": true,
+      "restored_served_from_same_cache": true
+     },
+     "through_entry_handle": {
+      "served_first": true,
+      "shared_cache_entries_after_first": 1,
+      "revoked_answer": "NOT_AUTHORIZED",
+      "first_payload_ids_carried_into_revoked_answer": [],
+      "restored_answer": "SERVED"
+     }
+    }
+   },
+   "negative_no_protected_field": {
+    "state": "DRIVEN-PASS",
+    "reason": "11 refused responses diffed against the authorized answer's 5 protected fields (4 values that differ per principal): none of those names or values appears in any refusal; the injected-leak control is detected by the same test",
+    "detail": {
+     "control_injected_value_detected": true,
+     "protected_field_paths": 5,
+     "protected_values": 4,
+     "refusals_diffed": 11,
+     "leaks": [],
+     "fixed_list_leaks": []
+    }
+   }
+  }
+ ]
+}
