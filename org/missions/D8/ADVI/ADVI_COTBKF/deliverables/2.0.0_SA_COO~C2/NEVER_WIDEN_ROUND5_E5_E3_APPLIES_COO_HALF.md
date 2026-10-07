@@ -61,3 +61,16 @@ bound to this file @b9411881a0). **Reader census, printed before the act:** `com
 COO half  2.0.0_SA_COO~C2 -- GIVEN for E5, 2026-10-07 ~09:4xZ. E3: NOT given until S14 is fixed (the crm PATH held back in any bucket,
           tested in both) and the plan's source list prints 0 crm keys (the CTO half's two conditions).
 ```
+
+## 6. GIVEN FOR E3 -- 2026-10-07 ~09:5xZ (key table unchanged since @b9411881a0)
+
+The CTO half's two conditions are met at CLOUD @fa9d12daa1 (CB-f-1 drained): (1) the hold-back matches `opal_naming.key(...bronze, crm)` in
+any bucket, tested in `opal-data-assets` and `opal-data-cottonwood` (5 passed; file 16 of 16); (2) the real plan prints
+`held_restricted=0 writable=11119 crm_source_keys=0`. **Reader census:** `comp-estate --resource 'commonwealth/cottonwood/silver/documents'`
+-> SUBJECT_ABSENT_FROM_CORPUS, 0 of 135 chains; repo search outside `org/` -> the script and its test only. **First mint:** the prefix
+`commonwealth/cottonwood/silver/documents/` holds 0 keys (list_objects_v2, 09:5xZ). Rollback: delete by the literal key list in the
+run's output / `documents.parquet`.
+
+```
+COO half  2.0.0_SA_COO~C2 -- GIVEN for E3, 2026-10-07 ~09:5xZ.
+```
