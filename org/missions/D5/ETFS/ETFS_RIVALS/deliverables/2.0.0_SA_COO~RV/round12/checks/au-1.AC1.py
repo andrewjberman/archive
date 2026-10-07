@@ -15,7 +15,8 @@ Interface (prescribed):
     `data-sec-dialog` dialogs (from `_sec_dialogs`) for the securities it names; every `data-sec` button resolves to a
     `data-sec-dialog` element in the SAME document (popovertarget works within one document only).
 Fixture: round 8's fc-1 AC1 page (IDVZ home, TXUE rival; Apple and Microsoft ranked; one TXUE trade in Apple).
-  - (a) main page: no audit block, no trades or holdings section, no link to /rivalfunds/<day>/audit;
+  - (a) main page: no audit block, no trades or holdings section, exactly ONE link to /rivalfunds/<day>/audit (amended 2026-10-07
+    after RIV-lk-1: the gateway route serves since release r23 @7d65a28db0, row Z-W2-S15);
   - (b) audit page: whole document; trades and holdings sections once each; trace panels == the context's trade count; Apple in
     the trade log is a data-sec button resolving to Apple's dialog in the audit document;
   - (c) control: on both documents every data-sec button resolves in-document and no data-sec-dialog key repeats; the main page
@@ -61,7 +62,7 @@ def run(v):
     print("main bytes:", len(main.encode("utf-8")), "| audit block in main:", '<details id="audit"' in main,
           "| links to audit:", main.count(link))
     v.check('<details id="audit"' not in main and 'id="trades"' not in main and 'id="holdings"' not in main
-            and main.count(link) == 0, f"(a) the main page carries no audit trail and no {link} link yet")
+            and main.count(link) == 1, f"(a) the main page carries no audit trail and exactly one {link} link (lk-1, after the route served)")
 
     audit = None
     if hasattr(render, "render_audit_page"):

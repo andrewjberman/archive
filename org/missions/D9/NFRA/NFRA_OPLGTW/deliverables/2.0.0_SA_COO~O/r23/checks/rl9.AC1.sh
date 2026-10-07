@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # OPLGTW OG-rl-9 AC1 (R30.2: RELEASE + NEVER-2 + DRAIN-BACK + FLOOR): the host's shipped files equal the release bytes;
 # the ledger entry for nfra-oplgtw-gateway-release-r23 is committed and its sentinel gone; the manifest's deployed_commit
-# descends from 2c27f3a795; after the drain-back CLOUD equals live for the gateway tree except the listed CLOUD-only
+# descends from 9d3e2eb3fc; after the drain-back CLOUD equals live for the gateway tree except the listed CLOUD-only
 # runbooks/SCHWAB_PILOT_RUNBOOK.md (the top-level tests/ files are source-only and are not on the host: row Z-W28-S4); the floor holds -- rl4.AC1 (r17 key baseline) and ht.AC2 (51 keys).
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 . "$(dirname "$0")/../../r14/checks/_ssm.sh"
-SLUG="nfra-oplgtw-gateway-release-r23"; LIVE0="2c27f3a7958de0aa644374cdd08fc188a27e9e3f"
+SLUG="nfra-oplgtw-gateway-release-r23"; LIVE0="9d3e2eb3fce3ceabbf06f6c1819451894291be05"
 D="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O"
 c=$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;print(json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'].get('deployed_commit','NONE'))" | tr -d '\r')
 desc=no; [ "$c" != "$LIVE0" ] && git merge-base --is-ancestor "$LIVE0" "$c" 2>/dev/null && desc=yes
@@ -19,7 +19,7 @@ fi
 entry=$(git ls-tree -r --name-only HEAD org/critical_paths/change_management/ | grep -c "_${SLUG}_deploy_completion\.md$")
 sent=no; git cat-file -e "HEAD:org/critical_paths/.open_deploys/${SLUG}.json" 2>/dev/null && sent=yes
 ndiff=$(git diff --name-only "$c" HEAD -- "$GW" | grep -v "^$GW/runbooks/SCHWAB_PILOT_RUNBOOK\.md$" | grep -c .)
-echo "deployed=${c:0:10} descends from 2c27f3a795=$desc; host shipped files equal the release bytes: $eq of $n"
+echo "deployed=${c:0:10} descends from 9d3e2eb3fc=$desc; host shipped files equal the release bytes: $eq of $n"
 echo "entry files at HEAD=$entry; sentinel at HEAD=$sent; gateway files differing live..CLOUD after drain-back (CLOUD-only runbook excluded) $ndiff"
 f1=no; RL4_ENV_KEYS_BASELINE="$D/r17/ENV_KEYS_R17B.txt" bash "$D/r14/checks/rl4.AC1.sh" >/dev/null 2>&1 && f1=yes
 f2=no; HT_ENV_KEYS_COUNT=51 bash "$D/hxteams/checks/ht.AC2.sh" >/dev/null 2>&1 && f2=yes

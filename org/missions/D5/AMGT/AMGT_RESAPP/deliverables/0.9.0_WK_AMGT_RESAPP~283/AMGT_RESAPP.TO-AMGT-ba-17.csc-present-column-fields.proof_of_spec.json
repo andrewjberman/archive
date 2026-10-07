@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ba-17",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-17.csc-present-column-fields.md",
+    "group": "OTHER",
+    "vintage_commit": "7daf7c56779350060d9390b2f8ce471868249f66"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "7daf7c56779350060d9390b2f8ce471868249f66",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-17.csc-present-column-fields.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~283",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/peers/csc.py",
+      "kind": "script",
+      "commit_or_etag": "84a32e3221c6b179fbf36ddd99fc2d816e3137b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Each PRESENT entry of build_csc_map() gains period_or_horizon, currency (+currency_reason / currency_source) and source_field; present_line() prints them. Pure module, no read, no deploy.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/peers/tests/test_csc_present_contract.py",
+      "kind": "script",
+      "commit_or_etag": "84a32e3221c6b179fbf36ddd99fc2d816e3137b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 tests: five of five PRESENT entries carry the fields, currency vocabulary, period is the entry's own horizon, present_line, ABSENT unchanged, dropped registry code downgrades to unverified and present + absent still sums to seventeen.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "C0-C5 PASS: five of five PRESENT columns carry period_or_horizon, currency and source_field; Mkt Cap and EV state USD, the two P/E columns state none with the reason, Price states per member with its source; R77 BA17 AC1 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba17.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C0 five columns are PRESENT got 5\nPASS C1 every PRESENT column carries period_or_horizon, currency and source_field missing on []\nPASS C2 Mkt Cap and EV state USD (they are served in USD millions) not USD: []\nPASS C3 the two P/E columns state currency none, with the reason (a ratio carries no currency) wrong on []\nPASS C4 Price states that its currency is per member, and names where it is read per member\nPASS C5 source_field names the column's own scanner code or row field not naming its code: []\nR77 BA17 AC1 SERVED: YES\nexit=0",
+      "denominator": "5 of 5 PRESENT columns carry the three fields; clauses C0-C5 (6 PASS lines) of 6",
+      "status": "PASS",
+      "status_reason": "Every clause printed PASS, the verdict line reads SERVED: YES and exit=0.",
+      "judgment": false,
+      "expect": "PASS C0[\\s\\S]*PASS C1[\\s\\S]*PASS C2[\\s\\S]*PASS C3[\\s\\S]*PASS C4[\\s\\S]*PASS C5[\\s\\S]*R77 BA17 AC1 SERVED: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "C1-C3 PASS (the control): 5 present + 12 absent = the seventeen, every ABSENT column carries derivable_from and a reason and no value, no fiscal-year label; R77 BA17 AC2 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba17.py\" --crit AC2 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 the subtraction holds: 5 present + 12 absent = the seventeen \nPASS C2 every ABSENT column carries derivable_from and a reason, and NO value bad: []\nPASS C3 no PRESENT column carries a fiscal-year label over a trailing or NTM figure \nR77 BA17 AC2 SERVED: YES\nexit=0",
+      "denominator": "5 present + 12 absent = 17 of 17 columns; 12 of 12 ABSENT entries carry derivable_from and a reason; clauses C1-C3 of 3",
+      "status": "PASS",
+      "status_reason": "Every clause printed PASS, the verdict line reads SERVED: YES and exit=0.",
+      "judgment": false,
+      "expect": "PASS C1[\\s\\S]*PASS C2[\\s\\S]*PASS C3[\\s\\S]*R77 BA17 AC2 SERVED: YES[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The plant test's negative arm: a registry that drops the ev code downgrades EV to unverified, and present + absent still sums to seventeen; AC2 is the control on the ABSENT partition (passes at the base, still passes).",
+      "expected": "EV unverified, 4 present + 13 absent = 17; AC1 FAILS at the base (0 of 5 carry the fields)",
+      "observed": "The plant test passes in the pytest run; the issuer's dry-run read AC1 FAIL and AC2 PASS at the base.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice on the committed bytes and the output compared",
+      "observed": "Byte-identical output both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A per-peer value on the member rows for each PRESENT column",
+      "reason": "The peer-set producer's surface (engine.py, universe.py), outside this order's paths; the map rides in each stored peer set so the served table gains the fields when the peer sets are next built."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~283/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/peers/tests -q",
+      "result": "\u001b[33m\u001b[32m68 passed\u001b[0m, \u001b[33m\u001b[1m21 warnings\u001b[0m\u001b[33m in 0.16s\u001b[0m\u001b[0m"
+    }
+  ]
+}

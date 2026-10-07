@@ -69,15 +69,20 @@ function gradeSegments(html, block) {
   if (!/data-segment-state="SERVED"/.test(html)) f.push('state is not SERVED');
   const rows = html.split(/(?=<[a-z]+[^>]*data-segment-row)/).slice(1);
   if (rows.length !== block.rows.length) f.push(`${rows.length} rows (${block.rows.length} served)`);
+  // ROUND 45 RE-ANCHOR (AV-zw-2, CTO round-76 ruling 6): rows sit under ONE heading per segment, so a served row is matched to its
+  // drawn row by its text (not by position) and its segment name is read from a data-segment-heading.
+  const heads = (html.match(/<[a-z0-9]+[^>]*data-segment-heading[^>]*>[\s\S]*?<\/[a-z0-9]+>/g) || []).map((h) => text(h));
   block.rows.forEach((r, i) => {
-    const row = rows[i] || '';
+    const key = norm(r.text).slice(0, 50);
+    const same = rows.filter((x) => text(x.replace(/<details[\s\S]*?<\/details>/g, '')).includes(key));
+    const row = same.find((x) => text(x).includes(norm(r.cite))) || same[0] || '';   // two rows may open with the same words
     const face = text(row.replace(/<details[\s\S]*?<\/details>/g, ''));
-    if (!face.includes(r.segment)) f.push(`row ${i + 1}: segment "${r.segment}" not at rest`);
-    if (!face.includes(norm(r.text).slice(0, 50))) f.push(`row ${i + 1}: text not at rest`);
+    if (!heads.includes(norm(r.segment))) f.push(`row ${i + 1}: segment "${r.segment}" is not a heading`);
+    if (!row) f.push(`row ${i + 1}: text not at rest`);
     const det = /<details([^>]*)data-segment-cite([^>]*)>([\s\S]*?)<\/details>/.exec(row);
     if (!det) f.push(`row ${i + 1}: no details[data-segment-cite]`);
     else {
-      if (/\bopen\b/.test(det[1] + det[2])) f.push(`row ${i + 1}: cite open by default`);
+      if (/open/.test(det[1] + det[2])) f.push(`row ${i + 1}: cite open by default`);
       if (!text(det[3]).includes(norm(r.cite))) f.push(`row ${i + 1}: cite not verbatim`);
     }
     if (face.includes('(passage P')) f.push(`row ${i + 1}: a passage id on the face`);
@@ -102,7 +107,7 @@ try { SB = L.source('src/pages/SecurityAnalysis/components/SegmentBreakdown.tsx'
 const p0 = BA.thesis_driver_chart.points[0];
 {
   let f;
-  try { f = gradePassage(text(renderOpen(TDC.ThesisDriverChart, { chart: BA.thesis_driver_chart, driver: BA.thesis_driver, sections: BA.drafted_sections || [] }, p0.passage_id)), p0); }
+  try { f = gradePassage(text(renderOpen(TDC.ThesisDriverChart, { chart: BA.thesis_driver_chart, driver: BA.thesis_driver, sections: BA.drafted_sections || [] }, 0)), p0); }
   catch (e) { f = ['ThesisDriverChart threw: ' + String(e.message).split('\n')[0]]; }
   arms.push(['A CLICKED DRIVER POINT SHOWS ITS SERVED PASSAGE (FWD-18)', f.length === 0, f.length ? f.join(' | ') : `${p0.period}: served passage_text + "${p0.passage_cite.location}"`]);
 }
@@ -141,7 +146,7 @@ const p0 = BA.thesis_driver_chart.points[0];
     const pt = { period: '2099', value: 1, unit: p0.unit, passage_id: ev.id };
     const chart = Object.assign({}, BA.thesis_driver_chart, { points: [pt] });
     try {
-      const t = text(renderOpen(TDC.ThesisDriverChart, { chart, driver: BA.thesis_driver, sections: BA.drafted_sections }, ev.id));
+      const t = text(renderOpen(TDC.ThesisDriverChart, { chart, driver: BA.thesis_driver, sections: BA.drafted_sections }, 0));
       if (!t.includes(norm(ev.passage).slice(0, 40))) f.push('a point resolved through sections lost its passage');
     } catch (e) { f.push('keep render threw'); }
   }
@@ -157,7 +162,7 @@ const p0 = BA.thesis_driver_chart.points[0];
   if (!gradePassage('2023 ... The filing passage for this point is not shown on this page.', p0).length) f.push('the old sentence accepted');
   if (gradePassage(`${norm(p0.passage_text)} ${p0.passage_cite.location}`, p0).length) f.push('a served passage refused');
   const r = BA.segment_breakdown.rows[0];
-  const good = `<div data-segment-breakdown data-segment-state="SERVED"><li data-segment-row>${r.segment} ${r.text}<details data-segment-cite><summary>Source</summary>${r.cite}</details></li></div><p>10-K filed January 30th, 2026</p>`;
+  const good = `<div data-segment-breakdown data-segment-state="SERVED"><h5 data-segment-heading>${r.segment}</h5><li data-segment-row>${r.text}<details data-segment-cite><summary>Source</summary>${r.cite}</details></li></div><p>10-K filed January 30th, 2026</p>`;
   const one = { rows: [r], reason: null, source: BA.segment_breakdown.source };
   if (gradeSegments(good, one).length) f.push('a good segment row refused: ' + gradeSegments(good, one).join(';'));
   if (!gradeSegments(good.replace(/<details[\s\S]*?<\/details>/, ''), one).length) f.push('a missing cite accepted');
