@@ -1,0 +1,127 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-349",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-349.emergency-release-export-reads-fail-closed.md",
+  "group": "OTHER",
+  "vintage_commit": "ac8d39c4ac"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "ac8d39c4ac",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-349.emergency-release-export-reads-fail-closed.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~I",
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-export-render.zip",
+   "kind": "s3_object",
+   "commit_or_etag": "ZBwAzArTtDSpCIYL8CwhqqmIooS4mVPx",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "THE SERVED CHANGE: safe-apply from saved planfile ib-pr-349.tfplan -- Apply complete, 0 added, 1 changed, 0 destroyed; live CodeSha256 aRCgH9B0pglos8cPiybPhmJShzjUts/Tr5R9R/AZYJw= equals this object's content-sha256; LastModified 2026-10-07T14:38:36Z; re-plan reads No changes; the live zip's entry.py is sha256 fc241d806ecc. build-and-upload write VERIFIED, size=405052, sha256 metadata match; pre-release version MteawDsTqojjkhh4e8Xfp_u6T7F8NxX3 retained as the rollback source and re-read after the act",
+   "artifact_covered_by": [
+    "IB68-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~I/IB68-1_release_after_reads.json",
+   "kind": "doc",
+   "commit_or_etag": "bf8bb487a9",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "the graded after-reads file, amended to AMENDMENT 1's shape: three arms OPEN-BY-DESIGN plus open_leg_discharge",
+   "artifact_covered_by": [
+    "IB68-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261007T1356Z_irpt-export-render-ib-pr-349-failclosed-20261007_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "bf8bb487a9",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "NEVER-2 ledger: opened before the act with the sentinel committed @cccbd5d31d, all 4 legs closed on measured proof, entry CLOSED and sentinel removed @bf8bb487a9",
+   "artifact_covered_by": [
+    "IB68-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "5bdafc2916",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "rows S381 (build override), S382 (BLOCKING, the open arms), S383 (the fence check) and S384 (BLOCKING, the check's bash resolver) appended on CLOUD",
+   "artifact_covered_by": [
+    "IB68-1-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB68-1-AC1",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r68/p68_cells.py\" . IB68-1-AC1",
+   "method": "test_suite",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r68/p68_cells.py\" . IB68-1-AC1",
+   "output_evidence": "OK: pin b921635dad, 9 of 9 members, live CodeSha256 == built, exposure arms hold; open by design: ['new_export_ready', 'performance_ready', 'analysis_ready'] | IB68-1-AC1 PASS (exit 0). READ THIS WITH ROW S384: the check AS WRITTEN returns 'FAIL: live CodeSha256 unreadable rc 1' on this device, because at :72 it spawns bare bash from Python and Windows resolves that to the System32 WSL stub. The PASS above is the SAME UNMODIFIED check with only that argv0 routed through the repo's own .tools/git_bash_resolver.py bash_argv; no other patch, and the issuer's file was not edited. The fact the limb tests is independently true: the live CodeSha256 reads aRCgH9B0pglos8cPiybPhmJShzjUts/Tr5R9R/AZYJw= == built_sha, measured twice.",
+   "denominator": "63 built members / 63 live, 9 changed of 63, equal to both halves' nine named members; 4 ledger legs of 4 proven; 3 of 8 after-read arms OPEN-BY-DESIGN under AMENDMENT 1",
+   "expect": "IB68-1-AC1 PASS",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "A planted mutant flips the fail-closed arm: existing_export_refused true to false in a copy of the after-reads file under a scratch root.",
+   "expected": "FAIL naming that field",
+   "observed": "FAIL: existing_export_refused is False | IB68-1-AC1 FAIL, exit 1; the true article under the same harness prints PASS, exit 0. The mutant failed BEFORE the live-read line, so it corrected 0 bash calls, which is the right ordering.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "release-census at the pin, one live get-function-configuration, one live-zip download with in-place member hashing, one terraform re-plan, and the deployed-bytes decision exercise with two positive controls",
+   "observed": "census changed_members=9 agrees with the COO half's own table member for member; deployed sha == built on the post-apply read; re-plan reads No changes; live entry.py fc241d806ecc; the deployed-bytes exercise returns ok=False named=0 for both the admin and the reconstructed non-Opal principal, ok=True for the in-scope control, and the distinct counts branch for the out-of-scope control",
+   "status": "STABLE"
+  }
+ },
+ "surprises": [
+  "IRPT_BCKEND-S381",
+  "IRPT_BCKEND-S382",
+  "IRPT_BCKEND-S383",
+  "IRPT_BCKEND-S384"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~I/IB68-1_release_after_reads.json",
+ "declared_exclusions": [
+  {
+   "item": "TO-IB-pr-349 after-reads 4 and 5 (live new/performance/analysis export reaching READY with an admitted-read line)",
+   "reason": "After-reads 4 and 5 -- a NEW export, and a performance and an analysis export, reaching READY with an admitted-read line -- are OPEN-BY-DESIGN under AMENDMENT 1 @b883510cd9: no authenticated Opal principal exists that this cell may obtain, because minting one is a write to opal-users-v2 and the order's BOUNDS forbid it; the issuer's ruling is Do not mint a principal. open_leg_discharge in the after-reads file names what closes them."
+  },
+  {
+   "item": "TO-IB-pr-349 after-reads 3, 6 and 7 exercised through the API edge rather than on the deployed bytes",
+   "reason": "After-reads 3, 6 and 7 are exercised on the DEPLOYED bytes offline, IB-pr-347's method, not through the API edge, so CloudFront, the Lambda@Edge validator and the gateway authorizer are not exercised here."
+  },
+  {
+   "item": "Deployment Rule 6 tag for the investor-reporting pipeline",
+   "reason": "Deployment Rule 6 tagging is not done: zero investor-reporting-v* tags exist, so the first tag's version is a convention this cell will not mint, and a push is the integrator's act under LD-0367."
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "comp-iam simulate",
+   "invocation": "comp-iam simulate arn:aws:iam::313476888478:user/cloudops-dell2-agent-user s3:GetObject arn:aws:s3:::opal-data-cot/platinum/cottonwood/ownership_map.json",
+   "result": "decision=allowed, VERDICT ALLOWED on the APPLIED plane; paired with a head-object existence read so it is not rule 22a's false-allow mode. Fed row S383."
+  },
+  {
+   "tool": "release-census.py",
+   "invocation": "python infra/aws/lambda/ci/release-census.py irpt-export-render --pin b921635dad",
+   "result": "rc=0, built_members=63 live_members=63 changed_members=9, the nine named members with built/live hashes equal to the COO half's table"
+  },
+  {
+   "tool": ".tools/safe-apply.sh",
+   "invocation": "HALT_ACK=1 safe-apply apply <saved planfile>",
+   "result": "Apply complete, 0 added, 1 changed, 0 destroyed; comp-tagauthz gate PASSED; tombstone-gate CLEAN; naming-plan-gate WARN 17 graded, all pre-existing names"
+  },
+  {
+   "tool": "pytest (the fix's own tests plus the additive branches)",
+   "invocation": "python -m pytest tests/test_covered_account_ids.py tests/test_admitted_read_logged.py tests/test_submit_analysis_branch.py tests/test_serve_submit_analysis.py tests/test_submit_custody_report.py tests/test_retained_export_analysis.py -q",
+   "result": "49 passed in 1.01s"
+  }
+ ]
+}
