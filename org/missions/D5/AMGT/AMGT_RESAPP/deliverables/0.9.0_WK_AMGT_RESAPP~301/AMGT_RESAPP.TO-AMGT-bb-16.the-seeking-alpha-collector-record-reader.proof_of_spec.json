@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bb-16.the-seeking-alpha-collector-record-reader.md",
     "group": "OTHER",
-    "vintage_commit": "ef4bac1308698078cf97727c47161ffb93e0cd18"
+    "vintage_commit": "57b6d8934e42844593d11eebdd1431b4cb255205"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
@@ -17,19 +17,30 @@
     {
       "path_or_key": "lib/research/freshness/collector_record.py",
       "kind": "script",
-      "commit_or_etag": "ef4bac1308698078cf97727c47161ffb93e0cd18",
+      "commit_or_etag": "57b6d8934e42844593d11eebdd1431b4cb255205",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "pure stdlib module (parse_record, partition_for, seeking_alpha_state); reads no store; commit-gate clean; not wired to the served page by this cell.",
-      "introduces": ["parse_record", "partition_for", "seeking_alpha_state", "REQUIRED_FIELDS"],
-      "artifact_covered_by": ["AC1", "AC2"]
+      "introduces": [
+        "parse_record",
+        "partition_for",
+        "seeking_alpha_state",
+        "REQUIRED_FIELDS"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
     },
     {
       "path_or_key": "lib/research/freshness/tests/test_collector_record.py",
       "kind": "test",
-      "commit_or_etag": "ef4bac1308698078cf97727c47161ffb93e0cd18",
+      "commit_or_etag": "57b6d8934e42844593d11eebdd1431b4cb255205",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "python -m pytest lib/research/freshness/tests -q: 30 passed.",
-      "artifact_covered_by": ["AC1", "AC2"]
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
     }
   ],
   "acceptance": [
@@ -54,5 +65,37 @@
       "expect": "R78 BB16 AC2 SERVED: YES"
     }
   ],
-  "surprises": []
+  "surprises": [],
+  "controls": {
+    "mutant": {
+      "description": "copy of collector_record.py with the bool-is-not-a-number guard on stored removed, exec'd in memory (not committed)",
+      "expected": "REAL parse_record rejects stored=True (None); MUTANT accepts it",
+      "observed": "REAL -> None; MUTANT -> accepted (True). CONTROL FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pytest lib/research/freshness/tests run on the module; pure functions, no store",
+      "observed": "30 passed; the module has no clock, no randomness, no I/O",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Hookup to scoped_amgt.py / build_view.py",
+      "reason": "Bound 2/3: those files are READ only; another cell connects the module to the page."
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/freshness/collector_record.py lib/research/freshness/tests/test_collector_record.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/freshness/tests -q",
+      "result": "30 passed"
+    }
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md"
 }
