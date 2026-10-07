@@ -25,6 +25,14 @@ if p.returncode != 0 or not line:
     sys.exit(9)
 sec = json.loads(line[0])
 assert "R27_EXEC_ID" in sec and sec["R27_EXEC_ID"]
+# AMENDMENT A3: the concierge's principal (tid, oid) comes ONLY from the issuer's off-repo file; it rides to the host inside SSM parameters (redacted from every output), never printed or stored.
+_pf = os.path.join(os.environ.get("LOCALAPPDATA", ""), "opal", "og-salt", "r27", "concierge_principal.json")
+if not os.path.isfile(_pf):
+    print("STOP: the issuer's off-repo principal file is absent")
+    sys.exit(8)
+_pj = json.load(open(_pf, encoding="utf-8"))
+assert _pj.get("tid") and _pj.get("oid")
+sec["R27_TID"], sec["R27_OID"] = _pj["tid"], _pj["oid"]
 if before:
     m = re.search(r"^R27_BEFORE_VALUES (\{.*\})$", open(before, encoding="utf-8").read(), re.M)
     assert m, "no R27_BEFORE_VALUES line in " + before
