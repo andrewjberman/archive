@@ -38,3 +38,39 @@ enrichment list is the CTO's. Put to `1.0.0_SA_CTO~DELL2` with REC: pull cell A 
   `DAILY-HOLDINGS accounts=1533 account_days=<n> snapshot_checked=83 snapshot_equal=<k>` with `<k>` recorded, not presumed; (3) judgment
   for the CVO: one account's holdings read across its span against its transactions.
 - Write set: the script, its test, the deliverables folder, the channel. No S3 write (the apply is the issuer's act under a pair).
+
+---
+
+## UPDATE 2026-10-07 ~19:0xZ -- cut-ready for cells B-D (Andrew: "All recs aproved + Go on sequence")
+
+**What changed since the draft.**
+- Cell A is DONE: `commonwealth_daily_holdings.py` (CB-l-1 @70095e6ec6), on the one signing table (CB-m-1 @42f647fa77); 381 of 381
+  snapshot positions equal; 5 residuals explained (CB-n-1).
+- Both price sources now have Andrew's word. Yahoo: `ANDREW_DIRECT_20261007_13xxZ_EGRESS_YFINANCE_YAHOO_DELL1.md`. Bloomberg card A
+  (1,319 securities / 2,317,534 security-days): `org/tier1_exec/2.0.0_SA_COO~C2/deliverables/ANDREW_DIRECT_20261007_185xZ_COTBKF_THREE_CALLS_APPROVED.md`.
+  Both pulls are dell1's (`2.0.0_SA_COO~H1`); dell2 has no egress.
+- **The two branches collapse into one cut.** Yahoo-only and Yahoo+Bloomberg differ in COVERAGE only (how many holding-days read
+  blank), never in code or criteria. Cell B prints its coverage, so one cut serves both.
+
+**The one input still unnamed:** MDPF_SECHIST's series address (its C-NAMES: builder output printed in the order that writes it; no
+SECHIST order has written it yet). Cell B therefore reads prices through ONE loader with two legs:
+(a) the six USABLE stores `commonwealth_price_store_scan.py` found (never `opal-data-bd`: CB-j-1, barred), and
+(b) the SECHIST series at the address H1 prints, taken as `--sechist <s3 prefix>`. Leg (b) is absent until that load.
+
+### Cells as they cut
+
+| cell | build | criteria (at most three) | risk |
+|---|---|---|---|
+| **B -- daily valuation** | `data/assets/scripts/silver/commonwealth_daily_valuation.py`, read-only: daily holdings x the day's close; an unpriced holding-day stays blank (C-GAP) | (1) stub test: two securities, one priced and one not, values the first and leaves the second blank, with a control that a dropped price blanks its day; (2) real run prints `DAILY-VALUATION accounts=<n> holding_days=<h> priced=<p> blank=<b> sources=<legs>`, values recorded, not presumed | LOCAL |
+| **C -- daily return** | `commonwealth_daily_returns.py`: after-fee TWR per account per day, flows from the signed transactions taken out; a day touching a blank reads blank | (1) stub test: a known two-day path with a mid-period deposit returns the hand-computed TWR, with a control that a missing flow moves it; (2) real run prints `DAILY-RETURNS account_days=<n> computed=<c> blank=<b>` | LOCAL |
+| **D -- monthly grade** | `commonwealth_monthly_grade.py`: chain C per month and compare with silver performance (Month, net) | (1) stub test: MATCH within the tolerance, DIFF outside it, and a month with any blank day reads UNGRADABLE, never MATCH; (2) real run prints `MONTHLY-GRADE months=<m> match=<a> diff=<d> ungradable=<u> tolerance=<t>`; (3) judgment for the CVO: one account read 2013-2026 day by day with its months graded | LOCAL |
+
+**Tolerance:** fixed in D's order before any run. Proposed: 5 bps absolute on the monthly return. It is the issuer's to set and the CTO's to read.
+
+**Chains:** B -> C -> D is one chain (fan-out 1 of 1, cap 8). All three build on stubs today; only the real-run lines wait on prices.
+
+### Recommendation to `1.0.0_SA_CTO~DELL2`
+
+Pull B-D forward NOW, as round 16. The code and stub tests need no price. The real run on leg (a) alone prints today's coverage
+honestly, mostly blank, as C-GAP requires. When SECHIST's load lands, FWD-3 becomes a re-run with `--sechist`, not a build round. The
+wait shrinks from "build after prices" to "run after prices".
