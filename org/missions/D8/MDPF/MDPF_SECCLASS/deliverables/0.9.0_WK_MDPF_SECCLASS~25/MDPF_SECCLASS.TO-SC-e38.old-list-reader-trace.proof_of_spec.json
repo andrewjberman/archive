@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e38",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "87ad6d2e4c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c32",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e38.old-list-reader-trace.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~25",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reader_trace.py",
+      "kind": "script",
+      "commit_or_etag": "207490a900",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census: the CTO's git grep command (46 files after exclusions), comp-find repo denominator, comp-find --corpus aws (BLOCKED, printed), and a direct boto3 read of IAM, Lambda environments and the etf-classifications updated_by census; ruff clean.",
+      "artifact_covered_by": [
+        "SC8-e38-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_READER_TRACE_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "207490a900",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One DENOMINATOR line; 47 READER sections (46 census files + resolve_tickers.py); 11 real readers carry MISSING-ROW, SERVED-NEW and CANONICAL-PRODUCER; verdicts NEEDS-OLD-LIST 5, DEAD-READ 6, NOT-A-READER 36.",
+      "artifact_covered_by": [
+        "SC8-e38-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e38-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e38.py -- expect: SC-E38-TRACE ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e38.py",
+      "expect": "SC-E38-TRACE ok=True",
+      "output_evidence": "SC-E38-TRACE ok=True readers=47 census=46 file=OLD_LIST_READER_TRACE_20261007.md (rc=0)",
+      "denominator": "census 46 of 46 files covered by a section heading carrying the file's path (189 raw git-grep files before the CTO's exclusions); 47 of 47 sections carry one READS, EVIDENCE and VERDICT; the 11 sections whose verdict is not NOT-A-READER carry one each of MISSING-ROW, SERVED-NEW and CANONICAL-PRODUCER",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants of the trace, each written as an untracked OLD_LIST_READER_TRACE_9999999x.md beside the real file and graded by the same checker, then deleted: (1) the section for infra/aws/terraform/shared-infra/main.tf removed; (2) the SERVED-NEW line removed from the resolve_tickers.py section.",
+      "expected": "ok=False on both, naming the uncovered file and the missing line",
+      "observed": "(1) SC-E38-TRACE ok=False census=46 uncovered=1 first=['infra/aws/terraform/shared-infra/main.tf'] (rc=1); (2) SC-E38-TRACE ok=False section 'data/black_diamond/scripts/classification/resolve_tickers.py' needs exactly one SERVED-NEW: line (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "issuer_check_sc_e38.py run on the committed trace after both mutant files were deleted.",
+      "observed": "SC-E38-TRACE ok=True readers=47 census=46 (rc=0), identical to the first run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "comp-find --corpus aws 'bd-securities' (the served graph) as the live-plane census.",
+      "reason": "BLOCKED for this principal (secretsmanager:GetSecretValue on opal/mcp/graph-read-token denied); a direct read-only boto3 scan of IAM, Lambda and DynamoDB stands in (row MDPF_SECCLASS-W25-S3)."
+    },
+    {
+      "item": "The 16 data/black_diamond files that name the table, other than resolve_tickers.py.",
+      "reason": "Excluded by the CTO's census command in AMENDMENT 1 (the BD writers' tree, SC-e-35..37); named in row MDPF_SECCLASS-W25-S5."
+    },
+    {
+      "item": "Any write to bd-securities, etf-classifications or S3, any deploy, any invocation of a live function, any code edit to a reader.",
+      "reason": "BOUNDS: read-only trace cell. The firm buckets were not read (explicit deny, row MDPF_SECCLASS-W25-S1); the Cottonwood holdings_lots claim is held from E_18's docstring."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W25-S3",
+    "MDPF_SECCLASS-W25-S4",
+    "MDPF_SECCLASS-W25-S5",
+    "MDPF_SECCLASS-W25-S6"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reader_trace.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on the .py)",
+      "result": "ruff clean after fixing 2 findings; commit 207490a900 landed"
+    }
+  ]
+}
