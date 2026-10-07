@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-be-1.legal-name-always-and-ticker-forms-read",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-be-1.legal-name-always-and-ticker-forms-read.md",
+    "group": "OTHER",
+    "vintage_commit": "83b3814b0d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "83b3814b0d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-be-1.legal-name-always-and-ticker-forms-read.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~107",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~107, worktree wk-hvst-r58-107 on branch wk-AMGT_HARVST-107, TREE-OK. R1/R2/R3 landed in universe_securities.py and whole_brand_aliases.json; AC1 and AC3 pass. AC2 prints LIST FAIL: 7 identity names are dropped by the module's existing _usable_alias (row Z-W107-S1). One read-only S3 GET of the pool universe (universe/v1/2026-10-06.json), saved as be1_pool_universe.json. No gold built, no silver read, nothing written to S3. Rows filed: Z-W107-S1 (BLOCKING), Z-W107-S2.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/universe_securities.py",
+      "kind": "script",
+      "commit_or_etag": "730ba3116f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build; no gold rebuilt.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/whole_brand_aliases.json",
+      "kind": "config_data",
+      "commit_or_etag": "730ba3116f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AI added to ticker_refusals with its census.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_be1_legal_name_always.py",
+      "kind": "test",
+      "commit_or_etag": "730ba3116f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "16 plant tests, no network.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~107/be1_list_compare.py",
+      "kind": "script",
+      "commit_or_etag": "bbd6e1a1c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only list comparison.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~107/be1_list_compare.out",
+      "kind": "doc",
+      "commit_or_etag": "bbd6e1a1c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim output; last line LIST FAIL.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~107/securities.universe.r58.json",
+      "kind": "doc",
+      "commit_or_etag": "bbd6e1a1c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The after list, 242 securities.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest test_be1_legal_name_always.py expects passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_be1_legal_name_always.py -rA --tb=line -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "rc 0. 16 passed in 0.26s",
+      "denominator": "16 of 16 tests",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cat be1_list_compare.out expects LIST OK",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~107/be1_list_compare.out",
+      "expect": "LIST OK",
+      "output_evidence": "rc 0 on cat. DENOMINATOR: served 212, before 242, after 242; common with served 212. SERVED ALIAS MISSING: before 32 of 212, after 17 of 212. IDENTITY NAME NOT AMONG ALIASES: 7 of 234 (BP, BP, KPN, RWE, SAP, GSK, Nokia). Last line: LIST FAIL",
+      "denominator": "7 of 234 identity records fail the identity-name condition; 242 securities, 212 common",
+      "status": "FAIL",
+      "status_reason": "LIST FAIL: 7 of 234 securities with an identity record cannot carry the record's name among aliases because the existing _usable_alias drops a form shorter than 3 characters or equal to a ticker token (BP/_LN, BP_US, KPN_NA, RWE_GR, SAP_GY, GSK_LN, NOKIA_FH). Admitting them as case-insensitive aliases would add short names the order forbids; row AMGT_HARVST-Z-W107-S1 (BLOCKING). Every other LIST OK condition holds."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pytest lib/research/harvest and test_az1_alias_set.py expects passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest lib/opal_data_harvest/test_az1_alias_set.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "rc 0. 413 passed in 4.21s",
+      "denominator": "413 of 413 tests",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, gold or silver build, publisher or vendor host, collector or backfill_driver",
+      "reason": "Order item 6: list repair only; a gold rebuild is a later, separately authorised act."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W107-S1",
+    "AMGT_HARVST-Z-W107-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "committed 730ba3116f and bbd6e1a1c1"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Test vii: with pool_name_decoration forced to None, the Universal Music plant carries an alias containing UMG.",
+      "expected": "alias containing UMG appears",
+      "observed": "test_vii_the_mutant_with_the_decoration_rule_off_the_ticker_alias_comes_back passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "build() run twice over the same pool snapshot file (be1_list_compare.py run before and after the code commit)",
+      "observed": "be1_list_compare.out identical across runs; last line LIST FAIL both times",
+      "status": "STABLE"
+    }
+  }
+}
