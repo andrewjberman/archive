@@ -2,7 +2,9 @@
 
 Usage: python build_release_record.py <returns_before.parquet> <returns_after.parquet> <class_after.parquet> <out.json> <day>
 
-`before` is the unextended handler (git show 954983d543:<handler>); `after` is the extended handler, which also wrote the class parquet.
+`before` is the unextended handler AND the BASE source declaration (git show 954983d543:<handler>, git show 954983d543:<sources.json>;
+amendment 1: the delta covers the moved trade-leg tokens too); `after` is the extended handler with the current declaration, which also
+wrote the class parquet.
 Reads local files only. Writes the record the criterion DB22-1-AC1 reads.
 """
 import hashlib
@@ -28,6 +30,11 @@ def main(argv):
     unc = float(classes.loc[classes["asset_class"] == "unclassified", "market_value_eod"].sum())
     record = {
         "day": day,
+        "before_side": {"handler": "git show 954983d543:infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+                        "sources_json": "git show 954983d543:data/assets/scripts/gold/irpt_reporting/sources.json",
+                        "sources_json_sha256": "7ff90fef91e1cb26822443aacc39705a390e21a8cedf22a3e37eeba9d1a81e34",
+                        "declaration": "BASE (the trade-leg tokens still in the producer's own TRADE_LEG_DECLARATION block)"},
+        "after_side": {"handler": "the extended handler at this branch", "sources_json": "the declaration at this branch"},
         "returns_sha256_before": sha256_of(before),
         "returns_sha256_after": sha256_of(after),
         "returns_rows_before": int(len(pd.read_parquet(before))),

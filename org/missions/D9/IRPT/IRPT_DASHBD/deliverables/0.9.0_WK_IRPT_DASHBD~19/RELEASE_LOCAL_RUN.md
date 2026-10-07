@@ -5,8 +5,12 @@ Local runs only: S3 reads, DynamoDB `GetItem` on `etf-classifications`, nothing 
 
 ## A. The extended handler against the unextended one (`handler.py --local`, 2026-10-05, the round-21 sample's first 20 accounts)
 
-The unextended handler is `git show 954983d543:infra/aws/lambda/investor-reporting/reporting-gold/handler.py` (byte-equal to the
-handler at this cell's base). Both ran the same day over the same 20 accounts.
+The unextended side is the BASE handler AND the BASE source declaration: `git show 954983d543:infra/aws/lambda/investor-reporting/reporting-gold/handler.py`
+and `git show 954983d543:data/assets/scripts/gold/irpt_reporting/sources.json` (amendment 1 @e765698322: the before side used the base
+declaration, not the declaration at this branch, so the equality below also covers the trade-leg tokens moved into `sources.json`). The
+base declaration was written to the working path only for the duration of that one run and restored byte-for-byte after (its sha256
+matched `git show 954983d543:` at the time of the run). The extended side used the handler and the declaration at this branch. Both ran
+the same day over the same 20 accounts; the sha256 values below are the re-run's and equal the first run's.
 
 | Quantity | Count |
 |---|---|

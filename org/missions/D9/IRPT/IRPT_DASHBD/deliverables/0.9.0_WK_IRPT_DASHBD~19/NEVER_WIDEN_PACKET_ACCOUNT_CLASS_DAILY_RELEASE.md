@@ -6,13 +6,25 @@ cell. The apply and the first fire are the issuer's act under the two signed hal
 
 ## Preconditions the signed act does not cover
 
-1. **The bundle pins (row IRPT_DASHBD-W19-S2, BLOCKING).** The bundle is pinned in `infra/aws/lambda/ci/lambda-source-map.json`, entry
-   `irpt-reporting-gold-lambda`, outside this cell's grant. Before the apply the issuer adds two `staged_from` pins there, each as a
-   commit and sha256 like `account_return_daily.py`'s: `data/assets/scripts/gold/irpt_reporting/account_class_daily.py` and
-   `infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py`. It does NOT add `_shared/etf_classification.py`. It also pins
-   the new `sources.json` and rebuilds the artifact `investor-reporting/irpt-reporting-gold-lambda.zip`. Without this the function runs
-   unchanged: the handler's import of the class producer is guarded, the class stage logs `CLASS_SKIPPED <day> account_class_daily not
-   importable`, and the returns table is written as today (Branch B below).
+1. **PRECONDITION OF THE APPLY -- the bundle pins (row IRPT_DASHBD-W19-S2; ruled by `2.0.0_SA_COO~D2`, amendment 1
+   @e765698322: not this cell's act, because a pin names the commit that carries the files on CLOUD, which does not exist until
+   this branch drains; it is a release act, rule 13).** The bundle is pinned in `infra/aws/lambda/ci/lambda-source-map.json`, entry
+   `irpt-49f-reporting-gold-lambda`. This cell does NOT edit that file. Before the apply, the DEPLOYING LANE sets exactly THREE
+   `staged_from` entries there (and the matching `files` members), each `{repo_path, pin, packaged_as, sha256}`, `pin` = the drain
+   commit that carries the files on CLOUD, `sha256` = `git show <drain-commit>:<repo_path> | sha256sum`:
+
+   | # | `repo_path` | `packaged_as` | note |
+   |---|---|---|---|
+   | 1 | `data/assets/scripts/gold/irpt_reporting/account_class_daily.py` | `data/assets/scripts/gold/irpt_reporting/account_class_daily.py` | new member |
+   | 2 | `infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py` | `etf_classifications_dynamodb.py` | the class client, packaged flat |
+   | 3 | `data/assets/scripts/gold/irpt_reporting/sources.json` | `data/assets/scripts/gold/irpt_reporting/sources.json` | the existing entry RE-PINNED: the declaration changed (trade-leg tokens moved in); today's entry pins `bc50d5711e`, sha256 `7ff90fef...1e34`, which is the BASE declaration |
+
+   It does NOT add `_shared/etf_classification.py`. The deploying lane then rebuilds the artifact
+   `investor-reporting/irpt-reporting-gold-lambda.zip`. The values (drain commit, three sha256) are not known to this cell and are
+   printed by the lane at the apply, not predicted here. Without the pins the function runs unchanged: the handler's import of the
+   class producer is guarded, the class stage logs `CLASS_SKIPPED <day> account_class_daily not importable`, and the returns table is
+   written as today (Branch B below). Note the base declaration with the extended handler is NOT a supported pairing: the producer
+   reads the trade-leg tokens from the declaration, so pin 3 and pin 1 land together.
 2. **The plan.** `terraform` is not on this box, so no plan was read. The expected plan is 0 to add, 1 to change (the role policy),
    0 to destroy, plus the Lambda's code hash from the rebuilt artifact. The issuer reads the plan before the signed halves are used.
 
@@ -54,6 +66,8 @@ changes:
 - DynamoDB: `GetItem` on `etf-classifications`, one item per distinct held identifier (78 reads for the 61-account sample). The table
   is the canonical, cross-firm classification registry keyed by ticker; it carries no client data. The role gains no Scan, Query,
   index, write or Delete on it.
+- S3 reads: the role's read set gains the class prefix, which the handler lists for its newest landed day (the catch-up, row
+  IRPT_DASHBD-W19-S6); that grant was read-only and unused before the catch-up (row IRPT_DASHBD-W19-S3).
 
 **What the act may not touch.** `.../gold/dim_return_method/` (another cell's served row; not in the write set); the holdings gold
 (read only); the silver prefixes (read only); any other firm's bucket or prefix; the platinum prefix and the publisher; any other
@@ -100,9 +114,12 @@ split is the account producer's own figure and flow, imported unchanged; nothing
   `CLASS_SKIPPED <day> <reason>` and the function returns `class_failed`. Reasons that can occur: the bundle pins of precondition 1
   are absent (`account_class_daily not importable`); `etf-classifications` unreadable (`ClassTableUnreadable`, so a read failure never
   reads as every holding unclassified); a partition unreadable (`REFUSED ... could not be read`); no class rows. No class object is
-  written for that day. **The next fire does not retry it** (row IRPT_DASHBD-W19-S4, ARMED, disarm owner `2.0.0_SA_COO~D2`): the
-  scheduled path starts after the newest returns day. The disarm is the backfill event for the skipped day(s), which rewrites both
-  tables to the same returns bytes.
+  written for that day. **The next fire retries it** (row IRPT_DASHBD-W19-S4, disarmed in code by the class catch-up, row
+  IRPT_DASHBD-W19-S6): on each scheduled fire the handler lists the class prefix and emits every trading day after the class table's
+  own newest day through the newest returns day just written (at most 10 days per fire, oldest first; a day older than this fire's
+  returns days is recomputed by a read, nothing is written to the returns table for it); a day that still fails is logged by name
+  (`CLASS_SKIPPED <day>`) and the returns table is never held. No class day is ever written beyond the newest returns day. A day
+  can still be closed by hand with the backfill event, which rewrites both tables to the same returns bytes.
 
 Neither branch moves a returns key. Neither moves "Data through". The class table is not read by any served consumer today.
 
@@ -128,6 +145,8 @@ the organic fire; it writes neither table.
 
 ## Unmeasured, stated
 
+- **Duration of a catch-up fire.** A fire that owes class days older than its returns days recomputes them through the producer's
+  own pipeline (reads only), up to 10 days, inside the same 900 s ceiling; this was not measured at population scale.
 - **Duration at population scale.** The class stage reads positions, cash lines and trade legs for the run's days and one `GetItem` per
   distinct ticker. It was measured on 20 and 61 accounts only. The function's 900 s ceiling is unchanged. The returns table is written
   BEFORE the class stage, so a timeout in the class stage cannot lose a returns day, but it would skip that fire's class days
@@ -138,10 +157,10 @@ the organic fire; it writes neither table.
 
 UNSIGNED. Signing means: the blast radius above (one new prefix, the returns prefix byte-identical, one table read by key) is the whole
 act; both branches are read from the rule; the writers are counted (one rule, two paths); the rollback is per key; the preconditions
-are the issuer's and are met before the apply.
+are the deploying lane's and the issuer's and are met before the apply; a class day that fails is retried by the next fire.
 
 ## COO half -- 2.0.0_SA_COO~D2
 
-UNSIGNED. Signing means: the issuer will land the two source-map pins and rebuild the artifact (precondition 1), read the plan
-(precondition 2), apply once from the saved plan, run A1 to A5 on the first fire, and run the backfill event for any skipped day
-(row IRPT_DASHBD-W19-S4).
+UNSIGNED. Signing means: the issuer will have the deploying lane set the three `staged_from` pins and rebuild the artifact
+(precondition 1), read the plan (precondition 2), apply once from the saved plan, and run A1 to A5 on the first fire. A skipped class
+day is retried by the next fire's catch-up (rows IRPT_DASHBD-W19-S4, W19-S6), so no standing backfill is owed.
