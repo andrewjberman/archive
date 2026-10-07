@@ -52,3 +52,37 @@ not re-read by this seat.
 - Token census over `data/etfs/scripts/rivalfunds/*.py` and its tests for YTD / QTD / MTD / R30 / R90 / R365: 166 occurrences
   in 27 files (this seat's Grep; 5 product files, 22 test files). The AI accounts also name periods (`ai_accounts.py`, 6).
 - He named QTD and YTD only. MTD is not named.
+
+## 5. The size budget against `C-PAGE-CAP` (MEASURED 2026-10-07 ~05:1xZ on the served 2026-10-06 index.html, batch rv-publish-1006r14)
+
+- Page 1,279,784 B. Its dialogs block is 446,080 B: **423** security dialogs holding **671** fund sections, of which **365**
+  carry a buying line (a fund traded the security), in **276** dialogs. (The 171 in section 3 was the AUDIT page's dialog count,
+  the wrong object for this budget; corrected here.)
+- `C-PAGE-CAP` asks for 20% headroom under `DIALOG_SOFT_CAP` (1,950,000 B): a ceiling of 1,560,000 B. Room left under it:
+  **280,216 B** -- 662 B per dialog, 417 B per fund section, 767 B per traded fund section.
+- Under the cap itself (no headroom): 670,216 B -- 1,584 B per dialog.
+- Not measured: the bytes of one real curve. An inline SVG path of n points costs roughly 10 to 12 B a point before markers
+  (an estimate, not a measurement); three ranges at 21 / 63 / 52 (weekly) points is on the order of 1,500 B a curve. On that
+  estimate one curve per dialog does not fit under the 20% ceiling and barely fits under the cap with nothing else added.
+- Also unruled by Andrew at this writing: the day unit of 30d / 90d / 365d (trading or calendar); the CTO recommends calendar
+  (msg 30607) and has carded it to him.
+
+## 6. The existing Bloomberg route the backfill derives from (CODE-READ by this seat, 2026-10-07 ~05:2xZ; Andrew-direct record `cooRV_ANDREW_DIRECT_20261007_051xZ_RIVALFUNDS_BBG_BACKFILL_YES_PAGE_ONLY_HIDE_MTD.md` @96d0ab2f4b)
+
+- What exists: `enrichment_bloomberg.py` stage `pull-enrichment`, mode `market` (`_market_pull`, :600). For a PAST date it
+  already sends a `HistoricalDataRequest` (`_blp_historical_data`, :290, through `integrations/bloomberg/mcp/blp_client`) for
+  `MARKET_HIST_FIELDS`, start = end = that one date, in batches of 50 securities (`DEFAULT_BATCH`, :93), and writes the
+  `gold/security_market/date=<D>` partition with its marker. `plan-market` is the offline plan of the same.
+- So the backfill is this mode over a date RANGE instead of one date: the same client call already takes `start` and `end`.
+  Nothing under `integrations/bloomberg/` needs to change (his no-modify order stands). `READ_HERE.md` section 4 states that a
+  historical request returns a full `PX_LAST` series.
+- The securities: the page's 423 dialog securities on 2026-10-06 (MEASURED from the served index); the set a fund held at
+  any time in the range is larger and is not counted here.
+- THE HAZARD (from `bbg_budget.py`'s own header): on 2026-10-05 about 175k rows of ad hoc backfill exhausted the Terminal's
+  daily capacity and blocked the 07:00 ET production pulls. `bbg_budget.json`: ceiling 150,000 rows a day, production reserve
+  30,000. `check_backfill` guards the HOLDINGS collector only; the market pull does not call it, and whether historical
+  price points draw on the same capacity meter is NOT known to this seat.
+- Size of the pull, an estimate: 423 securities x about 252 trading days = about 107,000 price points for one year (more if
+  the unit is trading days: 365 of them reach back about 17 months).
+- Therefore: the backfill is a WORLD cell with its own budget guard, run AFTER the day's 11:00Z vehicle run and never before
+  it, split across days if the estimate does not fit under ceiling less reserve.
