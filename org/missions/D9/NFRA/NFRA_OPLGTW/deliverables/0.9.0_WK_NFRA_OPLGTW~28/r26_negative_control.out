@@ -1,15 +1,32 @@
-### r26_verify.sh after (the still-undeployed host: negative control; expect FAIL on shipped md5 only)
-ssm eec0dea8-a1b4-4f00-a993-dba5e33e0383 status=Success
+ssm a5038fee-6492-4b44-b8d2-5f3bcf886a06 status=Success
 PASS host /health 200: health 200, service active, MainPID 758081 (before 758081)
-FAIL shipped md5 = release bytes: 95 of 97 identical; not-ok ['app/integrations/opal_portal/integration.py', 'identity_tool_allowlist.txt']
+FAIL shipped md5 = release bytes: 92 of 97 identical; not-ok ['app/integrations/opal_portal/integration.py', 'app/rivalfunds_view.py', 'app/server.py', 'app/tests/test_rivalfunds_view.py', 'identity_tool_allowlist.txt']
 PASS tool list unchanged, name for name (66 -> 66): before 66 after 66 tools; added [] removed []
 PASS .env key names unchanged (the template equals live): names 51 vs before 51; added [] removed []
 PASS every .env value has the SAME sha256 before and after (hash only; changed names listed): before hashes 51, after hashes 51, equal 51 of 51, changed []
-VERIFY FAIL: 4 of 5
+PASS route arms: the BEFORE neighbour values are in the state file: route_before present
+ssm 2303377b-1eba-406a-bf60-9b6cb8144ddb status=Success
+INSTALLED_FILES server.py md5 2cc22c05 rivalfunds_view.py md5 65135e70 from installed
+FAIL route /rivalfunds/{day}/chart/{fund} registered: registered False
+FAIL chart_404: a day with no chart -> 404 with 'no chart for this fund and day': 404, named body False
+FAIL chart_400: a lowercase fund -> 400, no S3 read: 404
+PASS no identity -> 401 on the chart route: 401
+PASS day_page_unchanged: /rivalfunds/<day> answers as on the installed code (status, bytes, digest): 200 1279784 bytes sha16 ac999d182c92e212 vs before 200 1279784 ac999d182c92e212
+PASS audit_page_unchanged: /rivalfunds/<day>/audit answers as on the installed code (status, bytes, digest): 200 1381244 bytes sha16 270f6f5479ecdc32 vs before 200 1381244 270f6f5479ecdc32
+R26_ROUTE {"audit_bytes": 1381244, "audit_page_unchanged": true, "audit_sha16": "270f6f5479ecdc32", "audit_status": 200, "chart_400": false, "chart_400_status": 404, "chart_404": false, "chart_404_body_named": false, "chart_404_status": 404, "chart_no_identity_status": 401, "chart_route_registered":
+ROUTE_ARMS after: 3 of 6  RESULT: FAIL
+SCRATCH_REMOVED=yes
+HOST_TMP_og_r26_LEFTOVER=0
+FAIL ROUTE ARM chart_404: /rivalfunds/2000-01-01/chart/ABC -> 404 with 'no chart for this fund and day': status 404, named body False
+FAIL ROUTE ARM chart_400: /rivalfunds/2026-10-06/chart/abc -> 400: status 404
+PASS ROUTE ARM day_page_unchanged: /rivalfunds/2026-10-06 answers as before (status, bytes, digest): 200 1279784 bytes sha16 ac999d182c92e212
+PASS ROUTE ARM audit_page_unchanged: /rivalfunds/2026-10-06/audit answers as before (status, bytes, digest): 200 1381244 bytes sha16 270f6f5479ecdc32
+PASS route host scratch removed: SCRATCH_REMOVED=yes and 0 leftovers
+VERIFY FAIL: 8 of 11
 ROLL BACK: re-deploy from /c/tmp/og-rb20 (ANNOUNCE_OG-rl-12.md), re-verify, close ROLLED BACK.
 --- rl4.AC1.sh (baseline r17/ENV_KEYS_R17B.txt) ---
-ssm b90de1b4-8dd5-4c3d-b43f-7c8d6a11ad7f status=Success
-ssm 5a368993-2cde-4cc8-bd18-67fbcdd3f54c status=Success
+ssm 433e5e47-c412-4ce4-b360-f040c73221e4 status=Success
+ssm c957aa69-c47e-4690-b486-863b6052eaa1 status=Success
 arm 1 key names equal the before-set (51): OK
 arm 2 systemd and bash parses agree on every value: OK
 arm 3 host deploy/ contract equals org/standards (c69968aa7f70): OK
@@ -17,7 +34,7 @@ arm 4 Tax keys present and non-empty: OK
 RELEASE READ-BACK ARMS 4 of 4
 RESULT: PASS
 --- ht.AC2.sh (51 keys) ---
-ssm fd4a7fa1-7886-48ad-aeed-a71a53bf4c84 status=Success
+ssm 4346f402-8cd8-4b8e-ac2b-6547b6c9ea53 status=Success
 HOST teams_route_sha256 f470540078a23b8a874e0bebd2fa67cad7e23a82c1aa513c6f904e012ae87337
 HOST taxsma_workbook_sha256 56d4f49017e4c17f721c8613e57195cfe341b7b6e0e1f96bc3524999a65f83a7
 HOST env_keys 51 teams_bearer_present True teams_bearer_empty False teams_labels_ok True tax_nonempty True
@@ -28,4 +45,3 @@ arm 4 / -> 302 (sign-in intact): OK
 SERVED ARMS 4 of 4
 RESULT: PASS
 r26_verify: host + AFTER checks rc=1; rl4.AC1 rc=0; ht.AC2 rc=0
-rc=1

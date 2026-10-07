@@ -1,18 +1,24 @@
 """OG-rl-12 PHASE B verify (form step 6; steps 11-12), WRITTEN at Phase A, never run against a deploy by the Phase A worker.
-Release r26 = live 240ac2fe5a + 6 gateway files, TWO on the host: app/integrations/opal_portal/integration.py and identity_tool_allowlist.txt (the gateway root; the deploy
-tarball carries it to /opt/opal-gateway/identity_tool_allowlist.txt) = the two lines of `r26_release_md5.txt` that differ from `r26_live_md5.txt`; source-only: tests/test_identity_scope_status_row.py,
-tests/test_opal_portal_dedupe_content.py, tests/test_opal_portal_send_split.py, tests/test_opal_portal_status_id_shape.py. No tool is added or removed: the tool list stays 66.
+Release r26 (AMENDMENT A3 re-cut) = live 240ac2fe5a + 10 gateway files, FIVE on the host (the five lines of `r26_release_md5.txt` that differ from `r26_live_md5.txt`):
+app/integrations/opal_portal/integration.py, identity_tool_allowlist.txt (the gateway root; the deploy tarball carries it to /opt/opal-gateway/identity_tool_allowlist.txt),
+app/rivalfunds_view.py, app/server.py, app/tests/test_rivalfunds_view.py; source-only: tests/test_identity_scope_status_row.py, tests/test_opal_portal_dedupe_content.py,
+tests/test_opal_portal_send_split.py, tests/test_opal_portal_status_id_shape.py, tests/test_principal_cutover.py. No tool is added or removed: the tool list stays 66. One ROUTE is added
+(GET /rivalfunds/{day}/chart/{fund}); the AFTER arms exercise it in-process on the host (r26_route_host.py.txt through r26_ssm.py route): chart_404, chart_400, day_page_unchanged, audit_page_unchanged.
 
 usage:  python r26_verify.py before <state.json>
         python r26_verify.py after  <state.json> --served-release <full deployed sha>
 
-`before` saves the host's reads (MainPID, tool list, .env key NAMES and per-key value sha256 -- a digest only, never a value) on the installed LIVE code. Keep the state file OUT of the
+`before` saves the host's reads (MainPID, tool list, .env key NAMES and per-key value sha256 -- a digest only, never a value) on the installed LIVE code, then runs the ROUTE `before` arm
+(installed code, in-process, synthetic viewer, real S3 read) and saves the two neighbour pages' status, byte count and 16-hex body digest as state["route_before"]. Keep the state file OUT of the
 repository (e.g. <worktree>/.scratch/r26_before.json).
 `after` exits 0 only if all hold:
   1. host /health 200, service active (MainPID changes: the service restarts);
-  2. shipped md5 = release bytes (r26_release_md5.txt: 97 files, 2 differ from live);
+  2. shipped md5 = release bytes (r26_release_md5.txt: 97 files, 5 differ from live);
   3. tool list UNCHANGED, name for name (66 -> 66);
-  4. .env key NAMES unchanged (the template equals live: 51) and EVERY value's sha256 unchanged.
+  4. .env key NAMES unchanged (the template equals live: 51) and EVERY value's sha256 unchanged;
+  5. the four ROUTE arms on the INSTALLED release code (a rollback trigger each): chart_404 (/rivalfunds/2000-01-01/chart/ABC -> 404 'no chart for this fund and day'), chart_400
+     (/rivalfunds/2026-10-06/chart/abc -> 400), day_page_unchanged and audit_page_unchanged (status, bytes and digest equal to the BEFORE values in the state file).
+     The four values are written to r26_phaseB_route.json for r26_postdeploy.sh to fold into RL12_FLOOR.json.
 The post-deploy READS (RL12_ALLOW.json, RL12_FLOOR.json) are `r26_postdeploy.sh`; the floor (rl4.AC1.sh, ht.AC2.sh) is run by r26_verify.sh.
 Never printed: any .env value, bearer, token or identity."""
 import argparse
@@ -21,6 +27,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -110,6 +117,22 @@ def ssm_run(commands, comment, polls=60, wait=3):
     return st, out.replace("\r", "")
 
 
+def route_run(mode, served, before_route=None):
+    """Runs the route program on the host through r26_ssm.py (its own scratch, one host run at a time); returns (rc, stdout, R26_ROUTE dict, ssm command id)."""
+    outf = os.path.join(tempfile.mkdtemp(prefix="og_r26_route_"), "route_%s.out" % mode)
+    env = dict(os.environ)
+    if before_route:
+        env["R26_BEFORE_ROUTE"] = json.dumps(before_route)
+    else:
+        env.pop("R26_BEFORE_ROUTE", None)
+    rr = subprocess.run([sys.executable, os.path.join(HERE, "r26_ssm.py"), "route", mode, outf, served], capture_output=True, text=True, encoding="utf-8", errors="replace", env=env)
+    o = rr.stdout
+    sys.stdout.write("\n".join(x for x in o.split("\n") if x.startswith(("PASS", "FAIL", "R26_ROUTE", "ROUTE_ARMS", "INSTALLED_FILES", "ssm ", "SCRATCH_REMOVED", "HOST_TMP_og_r26")))[-2400:] + "\n")
+    rl = [x for x in o.split("\n") if x.startswith("R26_ROUTE ")]
+    cid = [x.split()[1] for x in o.split("\n") if x.startswith("ssm ")]
+    return rr.returncode, o, (json.loads(rl[0][len("R26_ROUTE "):]) if rl else {}), (cid[0] if cid else None)
+
+
 def host_read():
     md5 = open(os.path.join(HERE, "r26_release_md5.txt"), encoding="utf-8").read().replace("\r", "")
     prog = HOST_PROG.replace("@@MD5@@", md5)
@@ -132,9 +155,14 @@ def main():
     a = ap.parse_args()
     R = host_read()
     if a.mode == "before":
+        rrc, ro, RT0, _cid = route_run("before", a.served_release or "before")
+        R["route_before"] = dict((k, RT0.get(k)) for k in ("day_status", "day_bytes", "day_sha16", "audit_status", "audit_bytes", "audit_sha16"))
+        route_ok = rrc == 0 and RT0.get("chart_route_registered") is False and RT0.get("day_status") == 200 and RT0.get("audit_status") == 200 and "SCRATCH_REMOVED=yes" in ro
+        print("BEFORE route arm on the installed code: chart route registered %s, day page %s %s bytes, audit page %s %s bytes => %s" % (
+            RT0.get("chart_route_registered"), RT0.get("day_status"), RT0.get("day_bytes"), RT0.get("audit_status"), RT0.get("audit_bytes"), "PASS" if route_ok else "FAIL"))
         json.dump(R, open(a.state, "w", encoding="utf-8"), indent=1)
-        ok = R["health"] == 200 and R["active"] == "active" and len(R["tools"] or []) == 66 and STATUS_TOOL in (R["tools"] or [])
-        print("BEFORE saved: MainPID %s, env value sha256 saved %d (hash only), env key names %d, tools %d (status tool registered: %s), /health %s, shipped md5 %d of %d vs the release list (the 2 differing files: %s) => %s" % (
+        ok = route_ok and R["health"] == 200 and R["active"] == "active" and len(R["tools"] or []) == 66 and STATUS_TOOL in (R["tools"] or [])
+        print("BEFORE saved: MainPID %s, env value sha256 saved %d (hash only), env key names %d, tools %d (status tool registered: %s), /health %s, shipped md5 %d of %d vs the release list (the 5 differing files: %s) => %s" % (
             R["mainpid"], len(R["env_hashes"]), len(R["env_keys"]), len(R["tools"] or []), STATUS_TOOL in (R["tools"] or []), R["health"], R["md5_ok"], R["md5_listed"], R["md5_bad"],
             "PASS" if ok else "FAIL"))
         return 0 if ok else 1
@@ -161,6 +189,23 @@ def main():
     changed = sorted(k for k in BH if AH.get(k) != BH[k])
     chk("every .env value has the SAME sha256 before and after (hash only; changed names listed)", len(BH) > 0 and not changed,
         "before hashes %d, after hashes %d, equal %d of %d, changed %s" % (len(BH), len(AH), len(BH) - len(changed), len(BH), changed))
+    BR = B.get("route_before")
+    chk("route arms: the BEFORE neighbour values are in the state file", bool(BR) and all(k in BR for k in ("day_status", "day_bytes", "day_sha16", "audit_status", "audit_bytes", "audit_sha16")), "route_before %s" % ("present" if BR else "ABSENT"))
+    rrc, ro, RT, rcid = route_run("after", a.served_release, BR)
+    chk("ROUTE ARM chart_404: /rivalfunds/2000-01-01/chart/ABC -> 404 with 'no chart for this fund and day'", bool(RT) and RT.get("chart_404") is True and RT.get("chart_route_registered") is True,
+        "status %s, named body %s" % (RT.get("chart_404_status"), RT.get("chart_404_body_named")))
+    chk("ROUTE ARM chart_400: /rivalfunds/2026-10-06/chart/abc -> 400", bool(RT) and RT.get("chart_400") is True, "status %s" % RT.get("chart_400_status"))
+    chk("ROUTE ARM day_page_unchanged: /rivalfunds/2026-10-06 answers as before (status, bytes, digest)", bool(RT) and RT.get("day_page_unchanged") is True,
+        "%s %s bytes sha16 %s" % (RT.get("day_status"), RT.get("day_bytes"), RT.get("day_sha16")))
+    chk("ROUTE ARM audit_page_unchanged: /rivalfunds/2026-10-06/audit answers as before (status, bytes, digest)", bool(RT) and RT.get("audit_page_unchanged") is True,
+        "%s %s bytes sha16 %s" % (RT.get("audit_status"), RT.get("audit_bytes"), RT.get("audit_sha16")))
+    chk("route host scratch removed", "SCRATCH_REMOVED=yes" in ro and "HOST_TMP_og_r26_LEFTOVER=0" in ro, "SCRATCH_REMOVED=yes and 0 leftovers")
+    if RT and all(RT.get(k) is True for k in ("chart_404", "chart_400", "day_page_unchanged", "audit_page_unchanged")):   # written only when all four arms hold (a failed run leaves no record for postdeploy)
+        doc = {"body": dict((k, RT.get(k)) for k in ("chart_404", "chart_404_status", "chart_404_body_named", "chart_400", "chart_400_status", "day_page_unchanged", "day_status", "day_bytes", "day_sha16",
+                                                   "audit_page_unchanged", "audit_status", "audit_bytes", "audit_sha16", "chart_no_identity_status")), "ssm_command_id": rcid, "instance_id": INST}
+        with open(os.path.join(HERE, "r26_phaseB_route.json"), "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(doc, fh, indent=1, sort_keys=True)
+            fh.write("\n")
     ok = all(res)
     print("VERIFY %s: %d of %d" % ("PASS" if ok else "FAIL", sum(res), len(res)))
     if not ok:

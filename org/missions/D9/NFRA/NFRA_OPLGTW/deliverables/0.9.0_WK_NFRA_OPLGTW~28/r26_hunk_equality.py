@@ -13,6 +13,7 @@ LIVE = "240ac2fe5abde944f15358ab563cb4b2ab63f09f"
 REPO, REL = sys.argv[1], sys.argv[2]
 CLOUD = sys.argv[3] if len(sys.argv) > 3 else "refs/heads/CLOUD"
 AL2A, AL2B, UP2 = "82da719ba2", "d1f9077190", "a7bf684bcd"
+RIV = "f7f2cb7c2e"   # RIV-rt-1 (A3): the cell's own diff is the merge against its first parent, `git diff f7f2cb7c2e^1 f7f2cb7c2e`
 
 
 def git(*a):
@@ -40,11 +41,17 @@ FILES = [
     ("tests/test_opal_portal_status_id_shape.py", "OG-al-2 + OG-up-2 (one fake given a hash)", (AL2A, AL2B, UP2)),
     ("tests/test_opal_portal_dedupe_content.py", "OG-up-2", (UP2,)),
     ("tests/test_opal_portal_send_split.py", "OG-up-2 (fakes given a hash)", (UP2,)),
+    ("app/rivalfunds_view.py", "RIV-rt-1", (RIV,)),
+    ("app/server.py", "RIV-rt-1 (one Route line)", (RIV,)),
+    ("app/tests/test_rivalfunds_view.py", "RIV-rt-1", (RIV,)),
+    ("tests/test_principal_cutover.py", "RIV-rt-1 (ROUTE_CLASS line)", (RIV,)),
 ]
 ok = True
 for f, cell, cs in FILES:
     total = changed(git("diff", LIVE, REL, "--", G + f))
-    if len(cs) == 1:
+    if cs == (RIV,):
+        own = changed(git("diff", RIV + "^1", RIV, "--", G + f))
+    elif len(cs) == 1:
         own = commit(cs[0], f)
     else:
         touching = [x for x in git("log", "--format=%h", AL2A + "^.." + UP2, "--", G + f).split() if x]

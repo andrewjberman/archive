@@ -21,11 +21,11 @@ mkdir -p "$W/.scratch/fakeaws"
 cat > "$W/.scratch/fakeaws/aws" <<'FAKE'
 #!/usr/bin/env bash
 # STAND-IN for `aws` in the step-7 exercise ONLY: answers the SSM calls rl12.AC1.sh's ssm_run makes with what the host prints AFTER the deploy for `md5sum <files>`: the md5 line of
-# each file the HOST HAS (the release md5 list: the two shipped files). Every other aws call (the floor's reads included) falls through to the real shim.
+# each file the HOST HAS (the release md5 list: the FIVE shipped files, A3). Every other aws call (the floor's reads included) falls through to the real shim.
 case "$*" in
   *"ssm send-command"*"md5sum"*) echo "fake-command-id"; exit 0 ;;
   *"get-command-invocation"*"fake-command-id"*"--query Status"*) echo "Success"; exit 0 ;;
-  *"get-command-invocation"*"fake-command-id"*"StandardOutputContent"*) for f in app/integrations/opal_portal/integration.py identity_tool_allowlist.txt; do grep "  $f\$" "$FAKE_MD5_LIST"; done; exit 0 ;;
+  *"get-command-invocation"*"fake-command-id"*"StandardOutputContent"*) for f in app/integrations/opal_portal/integration.py app/rivalfunds_view.py app/server.py app/tests/test_rivalfunds_view.py identity_tool_allowlist.txt; do grep "  $f\$" "$FAKE_MD5_LIST"; done; exit 0 ;;
 esac
 FD="$(cd "$(dirname "$0")" && pwd)"; PATH="${PATH//$FD:/}"   # drop this fake from PATH, or the real shim finds it again and loops
 exec "$(dirname "$0")/../../.tools/aws" "$@"
@@ -50,6 +50,14 @@ print("stand-in and 3 control records written from r26_after_stage_allow.out")
 PY
 cd "$S" || exit 9
 git read-tree --reset -u "$WKHEAD" || exit 9   # the scratch tree = the CURRENT worker head (an earlier exercise may have left it on an older base)
+# A3: the POST-DRAIN-BACK stand-in. The worker head predates the RIV-rt-1 merge, so its gateway tree lacks the route's 4 files; after the real drain-back CLOUD carries every release file.
+# Overlay the release's gateway files (mode and blob from the release commit) into the INDEX only (plumbing; the commit-tree below reads the index), so `git diff <release> HEAD -- gateway`
+# is the CLOUD-only runbook alone, exactly as after the drain-back.
+G=infra/aws/ec2/opal-gateway
+for f in $(git diff --name-only 240ac2fe5abde944f15358ab563cb4b2ab63f09f "$REL" -- "$G"); do
+  e=$(git ls-tree "$REL" -- "$f"); m=${e%% *}; b=$(echo "$e" | awk '{print $3}')
+  git update-index --add --cacheinfo "$m,$b,$f" || exit 9
+done
 python - "$REL" "$W/.scratch/x26json" <<'PY'
 import re, shutil, sys
 rel, src = sys.argv[1], sys.argv[2]
@@ -74,7 +82,7 @@ echo "### rl12.AC1.sh EXPECTED-PASS FORM (the issuer's script as written, via th
 SECONDS=0; PATH="$(cygpath -u "$W")/.scratch/fakeaws:$PATH" timeout 600 bash "$C/rl12.AC1.sh"; echo "exit=$? (${SECONDS}s)"
 } > "$D/r26_rl12.AC1_expected_pass_form.out" 2>&1
 {
-echo "### rl12.AC1.sh NEGATIVE CONTROL 1: the same scratch clone against the REAL undeployed host (still serving live 240ac2fe5a: the 2 shipped files differ from the release bytes)"
+echo "### rl12.AC1.sh NEGATIVE CONTROL 1: the same scratch clone against the REAL undeployed host (still serving live 240ac2fe5a: the 5 shipped files differ from the release bytes)"
 SECONDS=0; timeout 600 bash "$C/rl12.AC1.sh"; echo "exit=$? (${SECONDS}s)"
 echo
 echo "### rl12.AC1.sh NEGATIVE CONTROL 2: the real pre-act worktree (manifest = live 240ac2fe5a; no ledger entry), real host"
@@ -105,7 +113,9 @@ cd "$W" || exit 9
 python - "$D" <<'PY'
 import re, sys
 D = sys.argv[1]
-tos = open("org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rl-12.gateway-release-r26.md", encoding="utf-8").read()
+import subprocess   # the order's text at the amendment commit c38d69aa3d (A3 binds; the worktree copy is the OLD text)
+tos = subprocess.run(["git", "show", "c38d69aa3d:org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rl-12.gateway-release-r26.md"], capture_output=True, text=True, encoding="utf-8").stdout
+assert "AMENDMENT 3" in tos or "AMENDED A3" in tos
 exp = dict(re.findall(r'<criterion id="(AC\d)"[^>]*>.*?<expect>(.*?)</expect>', tos, re.S))
 rows = [("AC1", "r26_rl12.AC1_expected_pass_form.out", True, "expected-PASS form"),
         ("AC1", "r26_rl12.AC1_negative_controls.out", False, "negative controls 1 and 2"),

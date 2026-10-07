@@ -3,7 +3,8 @@
 # usage: bash r26_postdeploy.sh <40-hex deployed sha> <state.json written by r26_verify.sh before>      (run from the release-owning worktree root; HOST RUNS ONE AT A TIME, row Z-W28-S9)
 # Writes, through the INSTALLED code (never a staged copy), in this directory:
 #   RL12_ALLOW.json  {"body", "ssm_command_id", "instance_id"}  RL12_DIGEST attested   (rl12.AC2)
-#   RL12_FLOOR.json  the standing floor re-read -- the portal login and the real holder (query + download) on the installed code -- plus status_id_refused and status_id_accepted
+#   RL12_FLOOR.json  the standing floor re-read -- the portal login and the real holder (query + download) on the installed code -- plus status_id_refused and status_id_accepted,
+#                    plus (AMENDMENT A3) chart_404, chart_400, day_page_unchanged, audit_page_unchanged: the four route arms r26_verify.sh after wrote to r26_phaseB_route.json
 # overlay_rows_before is COUNTED from the allowlist blob at the live sha (the file the host held before the deploy), by the loader's own rule (a line with >= 2 tokens before any '#').
 # The known execution id (the 2026-10-07 ~01:26Z run) is read read-only from the portal's execution table at run time and passed to the host ONLY inside the SSM parameters
 # (the runner redacts it from the output); it is never written to the repository.
@@ -31,6 +32,7 @@ import json, sys
 here, t, sha = sys.argv[1:4]
 lg = json.load(open(here + "/r26_phaseB_login_body.json", encoding="utf-8"))
 st = json.load(open(here + "/r26_phaseB_status_body.json", encoding="utf-8"))
+rt = json.load(open(here + "/r26_phaseB_route.json", encoding="utf-8"))["body"]       # written by r26_verify.sh after, from the installed release code
 dl = json.load(open(t + "/GA1_DOWNLOAD.json", encoding="utf-8"))
 qy = json.load(open(t + "/GA1_QUERY.json", encoding="utf-8"))
 def held(b, k):
@@ -40,12 +42,17 @@ body = {"served_release": sha, "installed_code": True,
         "portal_login": lg["body"]["login"], "portal_login_ssm": lg["ssm_command_id"],
         "real_holder": [held(qy, "dim_asset_query"), held(dl, "dim_asset_download")],
         "real_holder_ssm": {"query": qy["ssm_command_id"], "download": dl["ssm_command_id"]},
-        "status_id_refused": st["body"]["status_id_refused"], "status_id_accepted": st["body"]["status_id_accepted"], "status_id_ssm": st["ssm_command_id"], "grants_written": 0}
+        "status_id_refused": st["body"]["status_id_refused"], "status_id_accepted": st["body"]["status_id_accepted"], "status_id_ssm": st["ssm_command_id"], "grants_written": 0,
+        "chart_404": {"ok": rt["chart_404"], "status": rt["chart_404_status"], "body_names_no_chart": rt["chart_404_body_named"]},
+        "chart_400": {"ok": rt["chart_400"], "status": rt["chart_400_status"]},
+        "day_page_unchanged": {"ok": rt["day_page_unchanged"], "status": rt["day_status"], "bytes": rt["day_bytes"], "sha16": rt["day_sha16"]},
+        "audit_page_unchanged": {"ok": rt["audit_page_unchanged"], "status": rt["audit_status"], "bytes": rt["audit_bytes"], "sha16": rt["audit_sha16"]}}
+body["route_ok"] = all(body[k]["ok"] is True for k in ("chart_404", "chart_400", "day_page_unchanged", "audit_page_unchanged"))
 body["floor_ok"] = (body["portal_login"] == "OK" and all(r["outcome"] == "OK" and r["returned"] == r["distinct_returned"] == r["held"] and r["unheld_returned"] == 0 for r in body["real_holder"]))
 body["status_id_ok"] = (body["status_id_refused"]["outcome"] == "refused" and body["status_id_refused"]["http_requests"] == 0
                         and body["status_id_accepted"]["outcome"] == "OK" and body["status_id_accepted"]["status_value"] in ("SUCCEEDED", "FAILED", "TIMED_OUT", "ABORTED"))
 json.dump({"body": body, "instance_id": lg["instance_id"]}, open(here + "/RL12_FLOOR.json", "w", encoding="utf-8", newline="\n"), indent=1, sort_keys=True)
-print("RL12_FLOOR floor_ok=%s status_id_ok=%s portal_login=%s real_holder=%s refused=%s accepted=%s" % (body["floor_ok"], body["status_id_ok"], body["portal_login"],
+print("RL12_FLOOR route_ok=%s floor_ok=%s status_id_ok=%s portal_login=%s real_holder=%s refused=%s accepted=%s" % (body["route_ok"], body["floor_ok"], body["status_id_ok"], body["portal_login"],
       [(r["path"], r["returned"], r["distinct_returned"], r["held"], r["unheld_returned"]) for r in body["real_holder"]], body["status_id_refused"]["outcome"], body["status_id_accepted"]["outcome"]))
 PY
 echo "post-deploy reads rc: allow=$rcA status=$rcS login=$rcL real=$rcR"

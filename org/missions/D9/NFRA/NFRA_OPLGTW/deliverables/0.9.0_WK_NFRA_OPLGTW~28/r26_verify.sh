@@ -2,8 +2,8 @@
 # OG-rl-12 PHASE B verify (form step 6 / 11), written at Phase A, never run against a deploy by the Phase A worker.
 # usage:  r26_verify.sh before <state.json>
 #         r26_verify.sh after  <state.json> <40-hex deployed sha>
-# `before` saves the host's BEFORE reads (MainPID, tool list, .env key NAMES and per-key value sha256 digests; no value is ever read as text or stored) on the installed live code --
-# keep the state file OUT of the repository (e.g. <worktree>/.scratch/r26_before.json). `after` (run IMMEDIATELY after safe-ec2-deploy.sh returns) runs the host checks (health, shipped md5 (2 files differ from live), tool list unchanged at 66,
+# `before` saves the host's BEFORE reads (also the route neighbour pages' values; MainPID, tool list, .env key NAMES and per-key value sha256 digests; no value is ever read as text or stored) on the installed live code --
+# keep the state file OUT of the repository (e.g. <worktree>/.scratch/r26_before.json). `after` (run IMMEDIATELY after safe-ec2-deploy.sh returns) runs the host checks (health, shipped md5 (5 files differ from live), tool list unchanged at 66, the four ROUTE arms (chart_404, chart_400, day_page_unchanged, audit_page_unchanged),
 # .env names and value digests), then the floor: rl4.AC1.sh (51-name baseline r17/ENV_KEYS_R17B.txt)
 # and ht.AC2.sh (51 keys). The post-deploy reads (RL12_ALLOW / RL12_FLOOR) are r26_postdeploy.sh, run right after. Any FAIL: roll back (ANNOUNCE_OG-rl-12.md), re-verify, close ROLLED BACK.
 HERE="$(cd "$(dirname "$0")" && pwd)"

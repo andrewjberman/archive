@@ -4,7 +4,7 @@ usage: python r26_ssm.py <synth|real|route> <mode> <out-file> <served_release> [
   synth : r26_synth_host.py.txt behind ../0.9.0_WK_NFRA_OPLGTW~15/rl6_host_prelude.py.txt (all in memory, synthetic principals); OG_RL6_MODE=<mode>
   real  : r26_real_host.py.txt behind ./ga1_host_prelude.py.txt (HybridStore; POLICY# reads real, read-only); OG_GA1_MODE=<mode>; the holder's tid/oid are read
           from the OFF-REPO file %LOCALAPPDATA%/opal/og-salt/ga1/holder_pks.json, passed only inside the SSM parameters, and the output is redacted of them
-  route : r26_route_host.py.txt (the GuardMiddleware stack of the installed code in a separate process, env -i, synthetic signed-in identity, REAL S3 reads by the instance role); R23_ROUTE line
+  route : r26_route_host.py.txt (the GuardMiddleware stack of the installed code in a separate process, env -i, synthetic signed-in identity, REAL S3 reads by the instance role); R26_ROUTE line (A3: the chart route + its two neighbours); env R26_BEFORE_ROUTE = the BEFORE neighbour values
   --stage : REHEARSAL -- a host scratch copy of app/ + deploy/ whose shipped files that DIFFER between r26_live_md5.txt and r26_release_md5.txt are taken from the given
             release gateway dir (zlib+base64, md5 printed); the installed tree is untouched
   --json  : (real only) write <dir>/GA1_DOWNLOAD.json and <dir>/GA1_QUERY.json ({"body", "ssm_command_id", "instance_id"}) from the host's GA1_BODY / GA1Q_BODY lines
@@ -67,8 +67,11 @@ env = "PYTHONDONTWRITEBYTECODE=1 %sTMPDIR=$S OG_RL6_SCRATCH=$S OG_GA1_SCRATCH=$S
 if kind == "real":
     env += "GA1_TID='%s' GA1_OID='%s' GA1_SERVED_RELEASE='%s' " % (secrets[0], secrets[1], release)
 if kind == "route":
-    run = "cd %s && env -i HOME=/tmp PATH=/usr/local/bin:/usr/bin:/bin PYTHONDONTWRITEBYTECODE=1 TMPDIR=$S R23_SCRATCH=$S %stimeout 600 /opt/opal-gateway/.venv/bin/python $S/run.py %s 2>&1 | tail -60; echo RUN_RC=${PIPESTATUS[0]}" % (
-        "$S/gw" if stage else "/opt/opal-gateway", "OG_GW_DIR=$S/gw " if stage else "", mode)
+    bef = os.environ.get("R26_BEFORE_ROUTE")      # (A3) json of the neighbour pages' BEFORE values (status, bytes, 16-hex digest); no secret
+    if bef:
+        json.loads(bef)
+    run = "cd %s && env -i HOME=/tmp PATH=/usr/local/bin:/usr/bin:/bin PYTHONDONTWRITEBYTECODE=1 TMPDIR=$S R26_SCRATCH=$S %s%stimeout 600 /opt/opal-gateway/.venv/bin/python $S/run.py %s 2>&1 | tail -60; echo RUN_RC=${PIPESTATUS[0]}" % (
+        "$S/gw" if stage else "/opt/opal-gateway", "OG_GW_DIR=$S/gw " if stage else "", ("R26_BEFORE_ROUTE='%s' " % bef) if bef else "", mode)
 else:
     run = "cd /opt/opal-gateway && " + env + "timeout 1500 /opt/opal-gateway/.venv/bin/python $S/run.py 2>&1 | tail -60; echo RUN_RC=${PIPESTATUS[0]}"
 cmds += ["base64 -d $S/p.b64 > $S/run.py", run,
@@ -98,7 +101,8 @@ err = aws(["ssm", "get-command-invocation", "--command-id", cid, "--instance-id"
 def red(t):
     for i, s in enumerate(secrets):
         t = t.replace(s, "<tid>" if i == 0 else "<oid>")
-    return t.replace("\r", "")
+    # (row Z-W28-S17) the host body prints the Schwab "master" account id; it never reaches a saved output
+    return re.sub(r'"master": "[0-9]+"', '"master": "<master>"', t.replace("\r", ""))
 
 
 text = "ssm %s status=%s\n%s" % (cid, st, red(out))
