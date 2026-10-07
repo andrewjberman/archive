@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e28",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2e6ecff606c8719a8690641920aae52f06fa94f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e28.scheduled-sector-writer.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~24",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-secclass/sector-writer/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed: no artifact upload, no apply, no table write, no S3 write (order bounds). Dry-run only.",
+      "artifact_covered_by": [
+        "SC8-e28-AC1",
+        "SC8-e28-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-secclass/sector-writer/tests/test_sector_writer.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "20 tests; S3 and DynamoDB stubbed; write calls counted.",
+      "artifact_covered_by": [
+        "SC8-e28-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/mdpf-secclass/sector-writer/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "main.tf, lambda.tf, iam.tf, schedule.tf declared, NOT applied, NOT init-ed or validated (no provider cache; row MDPF_SECCLASS-W24-S5). terraform fmt -check rc 0. No registry rows (row MDPF_SECCLASS-W24-S8).",
+      "artifact_covered_by": [
+        "SC8-e28-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sector_writer_dry_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only wrappers refuse any put/update/delete; packaged import from a temp dir with the repo _shared off sys.path.",
+      "artifact_covered_by": [
+        "SC8-e28-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_SECTOR_ROWS_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Half request, both halves UNSIGNED.",
+      "artifact_covered_by": [
+        "SC8-e28-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e28-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/mdpf-secclass/sector-writer/tests -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/mdpf-secclass/sector-writer/tests",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=20 passed in 0.71s",
+      "denominator": "20 of 20 tests pass (was rc=4, no tests folder, at the base)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e28-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sector_writer_dry_run.py --packaged -- expect: SECTOR-WRITER-DRY-RUN partition=",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sector_writer_dry_run.py --packaged",
+      "expect": "SECTOR-WRITER-DRY-RUN partition=",
+      "output_evidence": "SECTOR-WRITER-DRY-RUN partition=2026-10-05 securities=114 planned=107 present=0 no_row=0 out_of_list=0 seed_wins=0 no_value=7 (rc=0; package files=lambda_function.py,MDPF_SECCLASS_CONTRACT.json,etf_classification.py,rivalfunds_classification.py; 'all 3 modules loaded from the package dir')",
+      "denominator": "114 of 114 characteristics securities resolved to a table key with a row (0 NO-ROW); 107 planned + 0 present + 0 no_row + 0 out_of_list + 0 seed_wins + 7 no_value = 114; the table has 3,507 rows, so 107 (3.1 percent) would be touched",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e28-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e28_tf.py -- expect: SC-E28-TF ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e28_tf.py",
+      "expect": "SC-E28-TF ok=True",
+      "output_evidence": "NOT RUN. This box has no Terraform AWS provider cache (~/.terraform.d/plugin-cache: No such file or directory; TF_PLUGIN_CACHE_DIR unset), and the checker's init without a cache would download the provider from the registry, which the order's hard bounds forbid (row MDPF_SECCLASS-W24-S5). Independently, the registry limb cannot pass: the six rows the amendment asks for were REFUSED by the registry's own validate ('already resolves mdpf from its own tokens ... redundant'; row MDPF_SECCLASS-W24-S8), and the checker's registry_check() run alone printed 'SC-E28-TF ok=False ... registry rows 0 of 5 declared names; missing=[...]' (its text carries a hard-coded 'The configuration is valid'; no init or validate ran). `terraform fmt -check -diff` on the root rc=0 (not a substitute).",
+      "denominator": "0 of 1 init+validate runs; registry limb 0 of 5 literal names registered (rows refused)",
+      "status": "FAIL",
+      "status_reason": "Two independent causes, neither fixable inside this order's paths and bounds: no provider cache without a download (S5); the registry refuses the rows the checker demands (S8)."
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "pytest run four times and the packaged dry run run three times across the lint fixes and the list-not-head change.",
+      "observed": "20 passed each time; the dry-run line was identical (partition=2026-10-05 securities=114 planned=107 present=0 no_row=0 out_of_list=0 seed_wins=0 no_value=7).",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Scratch copy of the handler with the update's ConditionExpression changed from attribute_exists(ticker) to attribute_not_exists(zzz), graded by a scratch copy of the same test file.",
+      "expected": "the condition test fails and the others pass",
+      "observed": "1 failed, 19 passed (test_update_expression_names_only_the_two_fields)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init / validate of the declared root",
+      "reason": "No provider cache on this box and no download is allowed (row MDPF_SECCLASS-W24-S5); and the registry limb cannot pass (row MDPF_SECCLASS-W24-S8). SC8-e28-AC3 is FAIL (not met)."
+    },
+    {
+      "item": "a census of the readers of etf-classifications that return a whole item",
+      "reason": "Not in this order; the half request names it as unmeasured here (SC-e-38's trace is the reader census)."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W24-S3",
+    "MDPF_SECCLASS-W24-S4",
+    "MDPF_SECCLASS-W24-S5",
+    "MDPF_SECCLASS-W24-S6",
+    "MDPF_SECCLASS-W24-S7",
+    "MDPF_SECCLASS-W24-S8"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh on the three .py files (ruff 0.15.11 gate)",
+      "result": "initially refused UP031/UP032/I001/RUF100 on the new files; fixed by ruff --fix and four hand edits (formatting only); then 'pre-commit gate clean for 3 of 3 file(s)'"
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service mdpf-secclass-sector-writer",
+      "result": "5 statements on the writer role: logs, s3:GetObject bbg/*, s3:ListBucket (s3:prefix bbg/*), dynamodb GetItem+UpdateItem on the table, s3:PutObject on the run-list address; scheduler role has lambda:InvokeFunction only"
+    }
+  ]
+}
