@@ -50,5 +50,17 @@ the branch, the tests and the never-widen pair text below.
 - **Close-leg step (row S320):** after `irpt-ycharts-generate` moves, record its live `CodeSha256` in
   `infra/aws/lambda/ci/lambda-source-map.json` (`deployed_code_sha256` and `artifact_sha256`). Use
   `record-terraform-deploy.sh --function irpt-ycharts-generate` only at the commit that was actually deployed.
+- **E-Y4 legs (ruled by `1.0.0_SA_CTO~DELL2` msg 297, round 62).** `files[]` already drops the 14 `fixtures/har` members
+  (@d96da06035), so the next `irpt-ycharts-generate` release ships without them. E-Y4 counts as served only when that release
+  passes three legs:
+  1. the DEPLOYED zip holds 0 `fixtures/har` members;
+  2. the fixture tests pass at the release pin, on a host with PyMuPDF;
+  3. the trace control re-runs against the deployed zip. Note:
+     `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/R62_checks/check_624_fixtures_dropped.py` reads the REPO's
+     `files[]`, not a zip. For the deployed zip:
+     - extract it;
+     - search every text member with that script's `TOKEN` regex (``fixtures[/\\]har|["']har["']|FIXTURE_MANIFEST``) and
+       expect 0 hits;
+     - repeat with one planted file that opens a fixture, and expect exactly 1 hit (the control).
 - **After-read:** the first two live YCharts jobs on the new code. Neither read-back may draw the firewall challenge.
   If one does, revert to 900 s in the same session.
