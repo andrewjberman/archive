@@ -1,0 +1,90 @@
+"""OG-rl-9 form step 7a / verify route arms: GET /rivalfunds/<day>/audit through the GuardMiddleware stack of the code in OG_GW_DIR (default the INSTALLED /opt/opal-gateway)
+on the HOST in a SEPARATE process (never the running service, never /opt/opal-gateway/.env: python-dotenv's load_dotenv is made a no-op BEFORE app.config imports and the process runs under env -i).
+Identity: a SYNTHETIC signed-in address, ES256-signed with a LOCAL test key that replaces the ELB public key fetch ("installed bytes, test signing key"); the email-deny read is stubbed (no state store).
+The S3 read is REAL (the instance role, read-only: the page is a GetObject of the published rivalfunds prefix); the audit sink is a SCRATCH jsonl and AUDIT_S3_BUCKET is asserted empty.
+Nothing is written to any grant, state store or the lake. Prints counts and codes only.
+
+usage: python run.py <expect>      expect = before (live code: the route does not exist) | after (the release: the route exists)
+Prints one line per arm, then R23_ROUTE {day_200, status_200, bytes_200, day_404, status_404, ...} and ROUTE_ARMS <expect>: n of m  RESULT: PASS|FAIL."""
+import hashlib
+import json
+import os
+import sys
+
+expect = sys.argv[1]
+gw = os.environ.get("OG_GW_DIR") or "/opt/opal-gateway"
+sys.path.insert(0, gw)
+scratch = os.environ.get("R23_SCRATCH") or "/tmp"
+audit_path = os.path.join(scratch, "r23b_route_audit.jsonl")
+os.environ["MOCK_GRAPH"] = "1"
+os.environ["IDENTITY_PROVIDER"] = "alb_oidc"
+os.environ["RATE_LIMIT_ENABLED"] = "0"
+os.environ["AUDIT_PATH"] = audit_path
+os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+os.environ.pop("AUDIT_S3_BUCKET", None)
+os.environ["ENABLED_INTEGRATIONS"] = "ycharts opal_portal globgrph opal_discover portal_index schwab blackdiamond"
+PERSON = "synthetic.person@opalinvest.test"
+DAY_200 = "2026-10-06"
+DAY_404 = "2000-01-01"
+
+import dotenv  # noqa: E402
+dotenv.load_dotenv = lambda *a, **k: False
+
+import jwt                                                       # noqa: E402
+from cryptography.hazmat.primitives import serialization        # noqa: E402
+from cryptography.hazmat.primitives.asymmetric import ec        # noqa: E402
+from starlette.testclient import TestClient                      # noqa: E402
+
+from app import audit, identity, rivalfunds_view, server          # noqa: E402
+
+assert not audit._cfg.AUDIT_S3_BUCKET, "AUDIT_S3_BUCKET must be empty"
+print("INSTALLED_FILES server.py md5 %s rivalfunds_view.py md5 %s from %s" % (
+    hashlib.md5(open(server.__file__, "rb").read()).hexdigest()[:8], hashlib.md5(open(rivalfunds_view.__file__, "rb").read()).hexdigest()[:8],
+    "stage" if os.environ.get("OG_GW_DIR") else "installed"))
+key = ec.generate_private_key(ec.SECP256R1())
+pub_pem = key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+priv_pem = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
+identity._fetch_elb_public_key = lambda kid: pub_pem
+
+
+async def _deny(email):
+    return None
+
+
+server._email_denied = _deny
+
+
+def signed(email):
+    return jwt.encode({"email": email, "sub": "local"}, priv_pem, algorithm="ES256", headers={"kid": "local-kid"})
+
+
+client = TestClient(server.app, raise_server_exceptions=False)
+H = {"x-amzn-oidc-data": signed(PERSON)}
+route_present = any(getattr(r, "path", None) == "/rivalfunds/{day}/audit" for r in server.app.routes)
+r200 = client.get("/rivalfunds/%s/audit" % DAY_200, headers=H, follow_redirects=False)
+r404 = client.get("/rivalfunds/%s/audit" % DAY_404, headers=H, follow_redirects=False)
+rctl = client.get("/rivalfunds/%s" % DAY_200, headers=H, follow_redirects=False)
+rnoid = client.get("/rivalfunds/%s/audit" % DAY_200, follow_redirects=False)
+out = {"mode": expect, "day_200": DAY_200, "status_200": r200.status_code, "bytes_200": len(r200.content), "day_404": DAY_404, "status_404": r404.status_code,
+       "route_registered": route_present, "audit_page_404_body": b"audit page" in r404.content, "day_page_control_status": rctl.status_code,
+       "no_identity_status": rnoid.status_code, "synthetic_principal": True, "grants_written": 0, "state_store_written": False}
+rows = []
+
+
+def chk(label, ok, detail):
+    rows.append(bool(ok))
+    print("%s %s: %s" % ("PASS" if ok else "FAIL", label, detail))
+
+
+if expect == "after":
+    chk("route /rivalfunds/{day}/audit registered", route_present, "registered %s" % route_present)
+    chk("signed-in GET on a day whose audit.html exists -> 200 with bytes", r200.status_code == 200 and len(r200.content) > 0, "%s, %d bytes" % (r200.status_code, len(r200.content)))
+    chk("signed-in GET on a day with no audit object -> 404 from the audit handler", r404.status_code == 404 and out["audit_page_404_body"], "%s, audit-page body %s" % (r404.status_code, out["audit_page_404_body"]))
+    chk("no identity -> refused (not 200)", rnoid.status_code in (401, 403), "%s" % rnoid.status_code)
+    chk("the day page route is unchanged for the control day (same status class as before)", rctl.status_code in (200, 404), "%s" % rctl.status_code)
+else:
+    chk("route /rivalfunds/{day}/audit NOT registered on live", not route_present, "registered %s" % route_present)
+    chk("the audit URL on live is not served (404)", r200.status_code == 404 and not out["audit_page_404_body"], "%s" % r200.status_code)
+print("R23_ROUTE " + json.dumps(out, sort_keys=True))
+print("ROUTE_ARMS %s: %d of %d  RESULT: %s" % (expect, sum(rows), len(rows), "PASS" if all(rows) else "FAIL"))
+sys.exit(0 if all(rows) else 1)
