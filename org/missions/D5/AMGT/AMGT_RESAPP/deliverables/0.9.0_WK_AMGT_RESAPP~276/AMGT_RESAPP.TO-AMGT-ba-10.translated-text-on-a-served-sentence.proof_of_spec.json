@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ba-10",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "7daf7c56779350060d9390b2f8ce471868249f66",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-10.translated-text-on-a-served-sentence.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b5f90bbf8d003f807db54764839a8e7095c4d32e"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~276",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/translated_text.py",
+      "kind": "script",
+      "commit_or_etag": "63f55b9962daf001476801919cf495730796f044",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure projection module; no deploy in this order. AMGT-ba-11 merges it into the served sentence.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_translated_text.py",
+      "kind": "test",
+      "commit_or_etag": "63f55b9962daf001476801919cf495730796f044",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file; not a deploy artifact.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a translated sentence serves its text, translated True and its language; an untranslated one serves None, False, None; a failed one serves False with its language; the input is unchanged; C1-C4 PASS; R77 BA10 AC1 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba10.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 a translated sentence serves the text, the flag and the language {'text_translated': 'Sales guidance in English.', 'translated': True, 'source_language': 'ja'}\nPASS C2 an untranslated sentence serves no made-up value {'text_translated': None, 'translated': False, 'source_language': None}\nPASS C3 a failed translation reads translated False with its language {'text_translated': None, 'translated': False, 'source_language': 'de'}\nPASS C4 the sentence handed in is unchanged and a new dict is returned\nR77 BA10 AC1 SERVED: YES\nexit=0",
+      "denominator": "4 of 4 clauses (C1-C4) PASS",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "every plant case in test_translated_text.py passes; R77 BA10 AC2 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba10.py\" --crit AC2 --where local; echo \"exit=$?\"",
+      "output_evidence": "   7 passed in 4.02s\nPASS C1 every plant case passes rc=0\nR77 BA10 AC2 SERVED: YES\nexit=0",
+      "denominator": "7 of 7 plant tests passed",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base-state control: at the base the module and test file were absent, so AC1 and AC2 FAIL (issuer dry-run at the cut). Within the tests, a stray text_translated beside a translation block with translated False must serve None (test_failed_block_with_stray_text_still_serves_false).",
+      "expected": "base FAIL; stray text on a failed block serves None",
+      "observed": "7 passed; the failed-block-with-stray-text case serves text_translated None, translated False, language kept",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "Pure function of its input; no clock, store or network.",
+      "expected": "same input, same output",
+      "observed": "AC1 and AC2 each run twice (once standalone, once under the full api suite) with the same result",
+      "method": "command",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No edit to lib/research/api/scoped_amgt.py and no driver projection.",
+      "reason": "The order assigns the merge to AMGT-ba-11 and bars a driver projection; the hookup and driver finding are in the worker report."
+    }
+  ],
+  "surprises": [],
+  "session_log": "Worker 0.9.0_WK_AMGT_RESAPP~276, round 77. api suite: 739 passed in 52.95s. No surprise row filed.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "run at commit time"
+    }
+  ]
+}
