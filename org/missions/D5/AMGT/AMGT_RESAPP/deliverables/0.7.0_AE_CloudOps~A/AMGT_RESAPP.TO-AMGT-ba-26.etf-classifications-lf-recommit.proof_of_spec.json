@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ba-26",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-26.etf-classifications-lf-recommit.md",
+    "vintage_commit": "7daf7c5677"
+  },
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-26.etf-classifications-lf-recommit.md",
+    "group": "OTHER",
+    "vintage_commit": "7daf7c5677"
+  },
+  "controls": {
+    "mutant": {
+      "description": "Both criteria were PLANTED AGAINST, each with its own mutation class, and each mutant's PRECONDITION was verified before its verdict was read -- because the first attempt at mutant A silently did not plant. The scratch plane was a SPARSE detached worktree (6.2 MB, not a 2.7 GB full checkout), and no mutation ever touched a branch or the shared working tree.",
+      "expected": "AC1 reads 'R77 BA26 LF: NO' at exit=1 against a blob carrying CR; AC2 reads 'R77 BA26 CONTENT: NO' at exit=1 against a blob whose CR-stripped bytes differ from the cut's; and each criterion still PASSES against the other's mutant, proving the two are independent rather than one check reported twice.",
+      "observed": "MUTANT A (endings): HEAD moved to the pre-renormalize commit 39810307ce via `git update-ref --no-deref` -- deliberately NOT `git checkout`, because the checkout FAILED on a Windows-illegal path ('OneDrive_1_2-13-2026 (1)/config1.py:Zone.Identifier') and left HEAD unmoved while my own echo labelled it as moved; the verdict read in that state would have been a false pass of the mutant. After re-planting, the precondition was MEASURED (HEAD == 39810307ce, 82 CR in the blob) and only then AC1 read 'FAIL C1 ... 82 CR in 2815 B / R77 BA26 LF: NO / exit=1'. MUTANT B (content): a blob built with plumbing (`hash-object -w`, `read-tree`, `update-index --cacheinfo`, `write-tree`, `commit-tree`) carrying ONE token changed and endings left LF -- blob 6df5ef6b5a, 2733 B, 0 CR; HEAD moved to that commit and verified equal to it; AC2 then read 'FAIL C1 only line endings moved ... / R77 BA26 CONTENT: NO / exit=1' while AC1 at the SAME mutant still read YES at exit=0. So AC1 catches endings, AC2 catches content, and neither is redundant. SEALED: the sparse worktree was removed with --force, the temp index and mutated file deleted, and the real tree re-measured afterwards -- HEAD blob still 0 CR / 2733 B with no pending change on the path. The mutant commits were never on any ref and are unreachable.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each criterion run twice on the same committed input, with the full stdout plus the exit line hashed (sha256) and the two runs' hashes compared.",
+      "observed": "lf: d0bb5e4c1c187550 on both runs; content: f530a37a588b07c2 on both runs. Byte-identical. Both criteria are pure reads of git objects (`git show HEAD:<path>`, `git check-attr`) with no clock, network or filesystem-order input, so stability is structural rather than lucky.",
+      "status": "STABLE"
+    }
+  },
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the blob at HEAD carries 0 carriage returns and the attribute still reads lf; R77 BA26 LF: YES; and exit=0",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba26.py\" --cell lf; echo \"exit=$?\"",
+      "method": "command",
+      "expect": "R77 BA26 LF: YES[\\s\\S]*exit=0",
+      "denominator": "2 clauses: C1 the blob at HEAD carries no carriage return; C2 the eol attribute still reads lf. Both graded on the committed bytes at 02a7be55d5.",
+      "output_evidence": "PASS C1 the blob at HEAD carries no carriage return 0 CR in 2733 B\nPASS C2 the eol attribute still reads lf infra/aws/terraform/yang-pipeline/etf-classifications.tf: eol: lf\nR77 BA26 LF: YES\nexit=0",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the CR-stripped bytes at HEAD equal the cut's CR-stripped bytes (only line endings moved); R77 BA26 CONTENT: YES; and exit=0",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba26.py\" --cell content; echo \"exit=$?\"",
+      "method": "command",
+      "expect": "R77 BA26 CONTENT: YES[\\s\\S]*exit=0",
+      "denominator": "1 clause (the bound): the blob at HEAD with every CR removed is byte-equal to the cut's blob d9f082f9d7 with every CR removed. The bound was ALSO measured independently before the commit: CR-stripped length 2733 B on both sides and a byte-equality test returning True.",
+      "output_evidence": "PASS C1 only line endings moved (CR-stripped bytes equal the cut's) head 2733 B, base 2815 B\nR77 BA26 CONTENT: YES\nexit=0",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/yang-pipeline/etf-classifications.tf",
+      "kind": "terraform",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "commit_or_etag": "02a7be55d5",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "deploy_evidence": "Line endings ONLY, row Z-S242, re-owned to this seat by 1.0.0_SA_CTO~Z (CTO msg 30362; adjudication section F). Blob d9f082f9d7 (2815 B, 82 CR / 82 LF / 82 CRLF pairs; ls-files i/crlf w/crlf attr/text eol=lf) -> 58f3b918bf (2733 B, 0 CR / 82 LF; ls-files i/lf w/crlf attr/text eol=lf). The 2815->2733 delta is exactly the 82 carriage returns removed; diffstat 82 insertions / 82 deletions, i.e. every line's ending and no token. Method `git add --renormalize` on that path alone -- git's own attribute machinery, never an interpreter rewriting the file, because on this device a Python text-mode write CRLF-ifies repo files and would have reintroduced the very defect. The worktree copy still reads w/crlf, which is the expected harmless end state for an eol=lf path on a device that checks out CRLF. NOT DEPLOYED AND NOT DEPLOYABLE BY THIS ACT: no terraform apply, no state operation, no AWS call; the order forbids an apply and notes a plan reads no change from this file. Rollback, named and not needed: restore blob d9f082f9d72280ed3cf145761e98973219e73d47 by one checkout-and-commit, with no AWS or state consequence."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Normalising the 45 other tracked files that carry CR under eol=lf",
+      "reason": "The order's item 3 asks for the count as a NUMBER and states that more than zero is ONE surprise row, not this order's to normalise. ANSWER: 45, from one pass over `git ls-files --eol` with the denominator printed -- 59555 tracked files listed, 11619 carrying eol=lf as the positive control, index-marker distribution i/lf 11490 / i/none 78 / i/crlf 45 / i/-text 6, no i/mixed. Concentrated in infra/aws (32) and data/smartx (13), which reads as historical imports made before the attribute was in force rather than continuing drift. This order's own file was verified OUT of the set after its renormalize (it now reads i/lf; explicit membership test False), so all 45 are OTHER files. Filed as AMGT_RESAPP-Z-S362 and left untouched. Each carries the Z-S242 property: git status judges it by the stat cache rather than content, so identical bytes read MODIFIED in one worktree and CLEAN in another."
+    },
+    {
+      "item": "AMGT-ba-20, the round-77 redeploy of opal-amgt-scoped-api",
+      "reason": "Staged for this seat in the same issuance and explicitly NOT a GO (msg 30486, acked READ): it waits for every build cell to drain and for its never-widen pair. Not begun, not prepared, no artifact built."
+    },
+    {
+      "item": "terraform plan and apply on infra/aws/terraform/yang-pipeline",
+      "reason": "The order forbids an apply and does not ask for a plan; the act is a record change and its own text notes a plan reads no change from this file. The stronger evidence that nothing deployed is that no AWS call was made at any point in this order."
+    },
+    {
+      "item": "Fixing the `git ls-files --eol` parse trap in any shared tool",
+      "reason": "No shared tool was involved -- the trap was in this seat's own one-off census parse. It is recorded in row Z-S362 and in the compiler-tools section so the next seat to normalise the 45 does not repeat it, which is the proportionate carrier for a one-off."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-S362 -- 45 OTHER tracked files carry CR in their index blob while their own eol attribute reads lf (denominator 59555 tracked, 11619 under eol=lf as the positive control; infra/aws 32, data/smartx 13). The row also carries the parse trap that produced a false zero on the first pass."
+  ],
+  "session_log": "0.7.0_AE_CloudOps~A, 2026-10-06/07Z session, AMGT_RESAPP round 77 AMGT-ba-26 -- the etf-classifications.tf LF re-commit, the repo-wide eol census, and two planted mutants. GO msg 30486 acked READ; committed @02a7be55d5.",
+  "compiler_tools": [
+    {
+      "tool": "git ls-files --eol",
+      "invocation": "one pass over the whole index, run TWICE because the first parse was wrong",
+      "result": "The order's named instrument for item 3. Final: denominator 59555 tracked files, 11619 under eol=lf, 45 offenders. GAP WORTH NAMING, and the reason the first run was discarded: the attribute field prints as 'attr/text eol=lf' WITH A SPACE, so a parse capturing it with a non-whitespace class (\\S*) takes only 'text' and reports 0 of 59555 files as eol=lf -- a clean, plausible, wholly FALSE ZERO that reads as 'no other files are affected'. It was caught only because the file being committed in this very order was known to carry eol=lf, making 0 impossible. Split on the TAB and test the whole marker string. A POSITIVE CONTROL (the eol=lf subset count) is printed beside the final number for exactly this reason."
+    },
+    {
+      "tool": "git add --renormalize",
+      "invocation": "on infra/aws/terraform/yang-pipeline/etf-classifications.tf alone",
+      "result": "The order's named method and the correct one here: the index held CRLF because the file was added before the attribute was in force, and a plain `git add` is a no-op against the stat cache. --renormalize forces the re-read. Verified by the index blob moving to 58f3b918bf with 0 CR before any commit."
+    },
+    {
+      "tool": "git worktree add --detach --no-checkout + sparse-checkout cone",
+      "invocation": "scratch plane for the two mutants",
+      "result": "6.2 MB against the ~2.7 GB a full checkout of this repo costs -- the device's known memory/disk pressure makes the sparse cone the only sane shape. GAP: `git checkout <older commit>` inside it FAILED on a Windows-illegal path ('...config1.py:Zone.Identifier') and left HEAD UNMOVED while reporting an error that is easy to scroll past. `git update-ref --no-deref HEAD <sha>` is the right primitive when the check reads only git objects and never worktree files, and the precondition must be re-measured after it either way."
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py on this instance",
+      "result": "Caught that this instance is BUILD genre, not DEPLOY. The order carries <risk>WORLD</risk> but NO <proof_genre>DEPLOY</proof_genre>, and the schema states plainly that DEPLOY is a claim the ISSUER confers -- 'the graded party cannot confer it on itself, or a build order would escape its mutant'. The first draft of this instance borrowed the previous order's DEPLOY shape (free-named controls, scope/status/rollback/forward_notes at root) and was refused on five schema violations. BUILD requires {mutant, determinism}, which is why both mutants above were actually planted rather than described."
+    },
+    {
+      "tool": "comp-schedule / comp-iam",
+      "invocation": "not run",
+      "result": "Both declared NOT-APPLICABLE by the order's preflight (no cron, alarm, monitor or cadence; no AWS call). The stronger evidence is that this act makes no AWS call and applies nothing, so neither tool has a surface to grade."
+    }
+  ]
+}
