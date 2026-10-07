@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_CUSTDY.TO-CU-d-1",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-d-1.si-anchor.md",
+    "group": "OTHER",
+    "vintage_commit": "94e67927f5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.round4.md",
+    "vintage_commit": "94e67927f5",
+    "to_ref": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-d-1.si-anchor.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_CUSTDY~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/client_report_figures.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-9; read-only AWS, --apply never run",
+      "artifact_covered_by": [
+        "CU10-AC1",
+        "CU10-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/si_anchor_probe.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-9; read-only AWS",
+      "artifact_covered_by": [
+        "CU10-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_si_anchor.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-9",
+      "artifact_covered_by": [
+        "CU10-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_client_report_figures.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-9; three assertions edited for the si_anchor key and the NO_DATA status of an unanchored SI",
+      "artifact_covered_by": [
+        "CU10-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_client_report_held_si.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-9; floor 2024 -> 2010 and HELD_CALENDAR_FIX -> NOT_AVAILABLE",
+      "artifact_covered_by": [
+        "CU10-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_CUSTDY-W9-S1, W9-S2, W9-S3 appended",
+      "artifact_covered_by": [
+        "CU10-AC1",
+        "CU10-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CU10-AC1",
+      "criterion_verbatim": "CU10-AC1 -- the ruling's three rules, the exact rule-2 label, the \"inception\" guard test, the 2010 floor, on fixtures.",
+      "method": "command",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_si_anchor.py",
+      "output_evidence": "................                                                         [100%]\n16 passed in 16.79s\nrc=0",
+      "denominator": "16 of 16 tests passed (round-2 files test_client_report_figures.py + test_client_report_held_si.py also 23 of 23)",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU10-AC2",
+      "criterion_verbatim": "CU10-AC2 -- the seam against its REAL neighbour: the chosen advisor's real accounts, Schwab silver and returns gold on dell2. The per-rule counts are reported, not graded.",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/si_anchor_probe.py --accounts-from-advisor matthew_gooch --as-of 2026-09-30",
+      "output_evidence": "[last line of 15; the 14 ACCOUNT lines above it are masked to last 4, each rule=1 si_status=NO_DATA]\nSI-ANCHOR advisor=matthew_gooch accounts=14 rule1=14 rule2=0 rule3=0 no_anchor=0 labels_ok=True\nrc=0",
+      "denominator": "14 of 14 accounts of the advisor's covered book carry an si_anchor; rule1=14 rule2=0 rule3=0 no_anchor=0 (reported, not graded); 14 of 14 SI figures NO_DATA (row IRPT_CUSTDY-W9-S2)",
+      "expect": "labels_ok=True",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "One-off mutant: LABEL_RULE2 set to 'since inception %s' in client_report_figures.py, test_si_anchor.py re-run, module restored byte-identical (cmp).",
+      "expected": "the rule-2 label tests, the inception guard, the validator test and the probe test fail",
+      "observed": "5 failed, 11 passed (rule_2_is_labelled_exactly, rule_2_account_is_never_labelled_inception, validator_rejects_..., silver_open_date_is_rule_1, probe_prints_masked_lines_and_the_counts); restored, 16 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- fixtures are generated in tmp dirs from constants and an in-memory frame; no clock or randomness is read",
+      "observed": "16 passed on each of three runs",
+      "status": "N/A-WITH-REASON",
+      "reason": "the real run reads the live silver and gold; its per-rule counts move with the data, only labels_ok is graded"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "hop3_real_run.py and test_hop3_real_run.py",
+      "reason": "Outside this order's paths and never to be edited; both assert the retired HELD_CALENDAR_FIX on a 2019 date and now fail (row IRPT_CUSTDY-W9-S3)."
+    },
+    {
+      "item": "ruff py39 lint",
+      "reason": "left to .tools/commit-gate.sh at commit"
+    }
+  ],
+  "surprises": [
+    "IRPT_CUSTDY-W9-S1",
+    "IRPT_CUSTDY-W9-S2",
+    "IRPT_CUSTDY-W9-S3"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_si_anchor.py",
+      "result": "16 passed"
+    }
+  ]
+}
