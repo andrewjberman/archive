@@ -103,7 +103,7 @@ def main():
         if hit[0].get("handler") != "irpt-export-render" or hit[0].get("operation") != OP:
             fail("routes.json row: handler %r operation %r" % (hit[0].get("handler"), hit[0].get("operation")))
         entry = (root / IR / "export/entry.py").read_text(encoding="utf-8")
-        block = entry[entry.index("ROUTES = {"):entry.index("}", entry.index("ROUTES = {"))]
+        block = entry[entry.index("ROUTES = {"):entry.index("\n}", entry.index("ROUTES = {"))]  # the dict's own close, not a {param} brace
         if ROUTE not in block or OP not in block:
             fail("export/entry.py ROUTES does not map the route to %s" % OP)
         print("OK: routes.json and entry.ROUTES both map %s -> %s" % (ROUTE, OP))
