@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-338",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-338.search-response-readers-pass-over-age-and-plain.md",
+    "group": "OTHER",
+    "vintage_commit": "0a3c1c841d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "0a3c1c841d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-338.search-response-readers-pass-over-age-and-plain.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~140",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~140/IB62-3_reader_census.json",
+      "kind": "config_data",
+      "commit_or_etag": "df667e2f3f",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "7 readers (4 portal, 2 backend, 1 irpt_custody); 2 pass both arms, 5 fail the over-age arm; worker branch commit only",
+      "artifact_covered_by": [
+        "IB62-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/tests/test_search_readers_overage.py",
+      "kind": "test",
+      "commit_or_etag": "df667e2f3f",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "6 tests passed; directory suite 187 passed; worker branch commit only; owns build() for the two fixtures",
+      "artifact_covered_by": [
+        "IB62-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_directory_search_overage_reader.py",
+      "kind": "test",
+      "commit_or_etag": "df667e2f3f",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "3 tests: 2 passed, over-age arm xfail(strict) against W140-S2; worker branch commit only",
+      "artifact_covered_by": [
+        "IB62-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/ir-62-overage/search-readers.test.ts",
+      "kind": "test",
+      "commit_or_etag": "d53a7a0f",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "portal worktree repo (branch wk-IRPT_BCKEND-140-portal, commit d53a7a0f, not a workspace commit); bun test: 10 pass 0 fail (4 over-age arms test.failing against W140-S1); the issuer lands it on portal DEV at the drain",
+      "artifact_covered_by": [
+        "IB62-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "df667e2f3f",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "rows IRPT_BCKEND-W140-S1 (BLOCKING, ARMED) and IRPT_BCKEND-W140-S2 (BLOCKING, INERT) appended",
+      "artifact_covered_by": [
+        "IB62-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB62-3-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-3-AC1",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-3-AC1",
+      "output_evidence": "OK: 7 readers, every arm recorded; 5 with a FAIL (release holds on any) | IB62-3-AC1 PASS (rc=0)",
+      "denominator": "7 readers listed of 7 counted (4 portal + 2 backend + 1 irpt_custody); 14 arms recorded of 14",
+      "expect": "IB62-3-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB62-G-140",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-G-140",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-G-140",
+      "output_evidence": "OK: 5 changed path(s), all inside slot ~140's grant | IB62-G-140 PASS (rc=0)",
+      "denominator": "5 changed paths of 5 inside the grant (before the proof commit)",
+      "expect": "IB62-G-140 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Positive control for the harness: the plain wire fixture through LiveClient.searchDirectory resolves 2 hits, and the over-age fixture with internal_correlation_id deleted parses (refused=false, STALE, DIRECTORY_OVER_AGE, 2 hits), so a failure on the unmodified over-age fixture is the status member, not a broken harness.",
+      "expected": "plain arm passes; stripped over-age parses; unmodified over-age throws EnvelopeMismatch status",
+      "observed": "4 plain arms passed; stripped over-age parsed ok (probe, not committed); 4 unmodified over-age arms threw EnvelopeMismatch status",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "controlled clock: entry._today = 2026-10-07 and a Mon-Fri calendar replaced for the call; the one random member (internal_correlation_id) fixed; gen_search_fixtures.py --check reproduces the committed files",
+      "observed": "--check rc=0; backend 6 passed, custody 2 passed + 1 xfailed, portal 10 pass on repeated runs",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W140-S1",
+    "IRPT_BCKEND-W140-S2"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/directory/tests/test_search_readers_overage.py data/assets/scripts/gold/irpt_custody/tests/test_directory_search_overage_reader.py",
+      "result": "8 passed, 1 xfailed"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/directory/tests",
+      "result": "187 passed in 4.90s"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/ir-62-overage/search-readers.test.ts (from portal/)",
+      "result": "10 pass 0 fail"
+    }
+  ]
+}
