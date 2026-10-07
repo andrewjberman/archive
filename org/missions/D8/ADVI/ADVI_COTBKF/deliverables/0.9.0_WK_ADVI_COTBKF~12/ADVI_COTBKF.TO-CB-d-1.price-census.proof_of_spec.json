@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-d-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-d-1.price-census.md",
+    "group": "OTHER",
+    "vintage_commit": "ec1b871c5c"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~12",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round4.md",
+    "vintage_commit": "ec1b871c5c",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-d-1.price-census.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/analysis/commonwealth_price_census.py",
+      "kind": "script",
+      "commit_or_etag": "bf40cd69e6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; S3 reads of USABLE buckets only under the default boto3 chain (cloudops-dell2-agent-user, account 313476888478), no write, no vendor call"
+    },
+    {
+      "path_or_key": "data/assets/scripts/analysis/tests/test_commonwealth_price_census.py",
+      "kind": "test",
+      "commit_or_etag": "bf40cd69e6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; S3 reads of USABLE buckets only under the default boto3 chain (cloudops-dell2-agent-user, account 313476888478), no write, no vendor call"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~12/PRICE_CENSUS_20261007.json",
+      "kind": "config_data",
+      "commit_or_etag": "bf40cd69e6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "result record of a read"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~12/PRICE_CENSUS_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "bf40cd69e6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo file only; result record of a read"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB4d1-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_census.py expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_census.py",
+      "output_evidence": "15 passed in 1.08s (run under timeout 120, rc 0)",
+      "denominator": "15 of 15 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "CB4d1-AC2",
+      "criterion_verbatim": "python data/assets/scripts/analysis/commonwealth_price_census.py expect: PRICE-CENSUS buckets=40 every_bucket_graded=True barred_read=0",
+      "method": "command",
+      "invocation": "python data/assets/scripts/analysis/commonwealth_price_census.py",
+      "output_evidence": "PRICE-CENSUS buckets=40 every_bucket_graded=True barred_read=0 usable=35 barred=5 universe=4634 priced_any=1720 priced_fixed_income=184 security_days_covered=1318560 security_days_needed=9630847 (run under timeout 120, rc 0, 11 s against the cache warmed by an untimed cold run; the cold run read 11,291,021 canonical-price rows and 130 holdings files and was run in the background, untimed)",
+      "denominator": "40 of 40 buckets graded (35 USABLE, 5 BARRED); 0 calls attempted under the 5 BARRED buckets, counted by the CountingS3 client wrapper (plus the cache fill's own recorded count of 0); 1720 of 4634 securities priced on some day. security_days_needed is under the NYSE hardcoded-fallback calendar of this device (row ADVI_COTBKF-W12-S1), not comparable to round 2's",
+      "status": "PASS",
+      "expect": "PRICE-CENSUS buckets=40 every_bucket_graded=True barred_read=0"
+    },
+    {
+      "criterion_id": "CB4d1-AC3",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9: the census is complete (no unnamed store that holds a per-security daily price in a USABLE bucket) and every BARRED grade is the registry's, not the seat's",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~12/PRICE_CENSUS_20261007.json and PRICE_CENSUS_20261007.md (buckets, stores_read)",
+      "output_evidence": "40 bucket rows: 5 BARRED from scopes.json (opal-data-49financial and opal-data-bd of firm 49financial; opal-data-inflection and opal-data-inf of firm inflection; opal-data-demo of firm demo), each named with the stores it is known to hold and never opened; 35 USABLE, of which 6 price stores read in 3 buckets (opal-data-cot, opal-data-etfs, opal-data-portal-v2), 30 listed at top level (28) or refused the list under this identity (opal-data-cottonwood, opalinvest-portal: AccessDenied, row ADVI_COTBKF-W12-S2).",
+      "denominator": "40 of 40 buckets; 33 of 35 USABLE buckets listed or read, 2 refused",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the oracle is 3.0.0_SA_CVO at L9; this record carries the output and no verdict",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant control named by the order; the tests carry the difference control (the same counting wrapper counts calls under a USABLE bucket and refuses and counts a call under a BARRED one)",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "three consecutive cached runs gave the same PRICE-CENSUS line",
+      "observed": "PRICE-CENSUS buckets=40 every_bucket_graded=True barred_read=0 usable=35 barred=5 universe=4634 priced_any=1720 priced_fixed_income=184 security_days_covered=1318560 security_days_needed=9630847 on every run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "ADVI_COTBKF-W12-S1: no pandas_market_calendars on this device; the 2024-2027 fallback calendar changes security_days_needed against round 2 (ARMED, disarm owner 2.0.0_SA_COO~C2)",
+    "ADVI_COTBKF-W12-S2: opal-data-cottonwood and opalinvest-portal refuse a list under this identity (AccessDenied)",
+    "ADVI_COTBKF-W12-S3: 47 of 130 gold holdings files have a ticker column and no cusip column",
+    "ADVI_COTBKF-W12-S4: ruff absent on this device; the fail-closed gate blocked the first commit; ruff==0.15.11 installed with pip --user"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~12/ADVI_COTBKF.TO-CB-d-1.price-census.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_census.py",
+      "result": "15 passed in 1.08s"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 --extend-select FA <the two files>",
+      "result": "All checks passed!"
+    }
+  ]
+}
