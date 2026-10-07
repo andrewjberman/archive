@@ -63,9 +63,10 @@ pin-exact rerun, equal in every byte count above. The tool has matched the serve
 ## TWO KNOWN FAULTS THE ACT SERVES, stated so the CTO half covers them
 
 1. **4 mentions open an almost empty dialog (served today: 0).** In GQGU's panel, "META PLATFORMS INC" and "ASML HOLDING
-   NV-NY REG SHS" in the trade sentence (twice each) target the CUSIP-keyed dialogs `30303M102` and `N07059210`, which hold a
-   name and nothing else; the full dialogs sit under `META_US_Equity` and `ASML_US_Equity`. The trade sentence links by the
-   schedule's raw key and was not folded to the one key of round 22. The publisher prints its FAIL line and publishes. Row
+   NV-NY REG SHS" in one sentence ("The fund also opened ...", twice each) target the CUSIP-keyed dialogs `30303M102` and `N07059210`, which hold a
+   name and nothing else; the full dialogs sit under `META_US_Equity` and `ASML_US_Equity`. CAUSE NOT TRACED (corrected ~17:1xZ: this half first
+   said the sentence links by the schedule's raw key; that was a guess. The sentence is in the fund's account text, and a
+   dialog shell exists under the CUSIP key with no section; which stage emits the shell was not read). The publisher prints its FAIL line and publishes. Row
    ETFS_RIVALS-Z-S65. The count read 3 from round 17 and 6 from round 21 on day 2026-10-06 and this seat did not report it:
    my miss. REC: deploy with it stated, repair in the next round (one cell).
 2. **25 AI badges read "Grounded on an earlier build"** until an AI step runs on the rebuilt tables: the 2026-10-08 13:00Z
