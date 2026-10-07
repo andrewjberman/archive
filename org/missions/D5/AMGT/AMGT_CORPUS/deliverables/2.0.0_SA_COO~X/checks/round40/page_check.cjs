@@ -204,6 +204,74 @@ function ap5() {
   console.log(`ap5 build ${build}/3 control ${control}/3`)
 }
 
-const ARMS = { ap2, ap3, ap4, ap5 }
+/**
+ * rev  CRPS-ap-4 AMENDMENT 1 -- the five amendments of the CTO's review of candidate 636ce634
+ *      (ledger/CTO_REVIEW_PORTAL_636ce634_ROUND40.md)            -> `rev build <b>/5 control <c>/3`
+ *      build    r1 the term filter matches WHOLE WORDS: the term "AI" reads count 1 on four headlines of which one says
+ *                  "AI demand", one "raises", one "said" and one "Air Liquide" (a substring match reads 4);
+ *               r2 the pillar opener and the header cite word the same docx locator the same way ("Paragraph <n>") and
+ *                  neither shows the word "locator";
+ *               r3 on the header dossier line each served passage sits inside a <details> that is closed at rest;
+ *               r4 the header dossier line's text has no ". --" join;
+ *               r5 ThesisTab.tsx reads `const PILLARS_HEADING = "` (the lost space is back).
+ *      control  the ap2, ap3 and ap4 arms of this file still read as they did (run them beside this arm); here: c1 a term
+ *               matching a whole word in two headlines still reads 2 with exactly those items; c2 the no-terms feed is
+ *               still byte-equal to ap4_base_snapshot.json; c3 the machine's posture line is still byte-equal to
+ *               ap3_base_snapshot.json.
+ */
+function rev() {
+  const { FeedList } = load('components/HeaderBrief.tsx', ['FeedList'], { HEADER_FEED_VISIBLE_COUNT: 3, __esModule: true })
+  const item = (k, title) => ({ publisher: 'Reuters', published_at: '2026-10-0' + k + 'T10:00:00Z', article_key: 'a' + k, url: 'https://example.com/' + k, title })
+  const feed = { coverage_status: 'COVERED', window: { start_date: '2026-09-07', end_date: '2026-10-07' },
+    items: [item(1, 'AI demand lifts chip orders'), item(2, 'Company raises guidance on pricing power'), item(3, 'Analysts said margins held'),
+      item(4, 'Air Liquide wins contract as pricing power holds')] }
+  const html = render(FeedList, { feed, terms: ['AI', 'pricing power'] })
+  const termBlock = (term) => {
+    const head = (html.match(new RegExp(`<details[^>]*data-feed-term="${term}"[^>]*>`)) || [''])[0]
+    const body = (html.split(new RegExp(`<details[^>]*data-feed-term="${term}"`))[1] || '').split('</details>')[0]
+    return { count: (head.match(/data-feed-term-count="(\d+)"/) || [])[1], keys: (body.match(/data-feed-item="([^"]+)"/g) || []).map((s) => s.slice(16, -1)).sort().join(',') }
+  }
+  const ai = termBlock('AI'), pp = termBlock('pricing power')
+  const r1 = ai.count === '1' && ai.keys === 'a1' ? 1 : 0
+  const c1 = pp.count === '2' && pp.keys === 'a2,a4' ? 1 : 0
+  const c2 = snap('ap4_base_snapshot.json', (() => {
+    const base = { coverage_status: 'COVERED', window: { start_date: '2026-09-07', end_date: '2026-10-07' },
+      items: [item(1, 'Imperial leans on Pricing Power as volumes fall'), item(2, 'Vapour sales double in Europe'),
+        item(3, 'Regulator reviews flavour rules'), item(4, 'Analysts question pricing power in the United States')] }
+    return { feed: render(FeedList, { feed: base }) }
+  })()) ? 1 : 0
+
+  const { ResearchTeamPillars } = load('tabs/ThesisTab.tsx', ['ResearchTeamPillars'])
+  const pillars = render(ResearchTeamPillars, { dossier: { thesis_pillars: [{ pillar: 'Pricing power', text: 'The group raises prices.',
+    terms: ['pricing power'], citation: { report_key: 's3://bucket/research/IMB/IMB Initiation 2026.docx', locator: 14, passage: 'Pricing power funds the transition.' } }] } })
+  const { DossierPositionLine, PostureHeaderLine } = load('components/SecurityOverlay.tsx', ['DossierPositionLine', 'PostureHeaderLine'])
+  const FUND_PASSAGE = 'We hold the shares in the Global Opportunities Fund.'
+  const POS_PASSAGE = 'The position stands at 3.1% of the fund after the September add.'
+  const line = render(DossierPositionLine, { dossier: {
+    fund_of_record: { status: 'SERVED', value: 'Global Opportunities Fund',
+      citation: { report_key: 's3://bucket/research/BA/BA Update 2026 09.docx', locator: 2, passage: FUND_PASSAGE } },
+    last_stated_position: { status: 'SERVED', value: { text: 'Overweight, 3.1% of the fund' },
+      citation: { report_key: 's3://bucket/research/BA/BA Update 2026 09.docx', locator: 5, passage: POS_PASSAGE } } } })
+  const r2 = /Paragraph 14/.test(text(pillars)) && /Paragraph 2\b/.test(text(line)) && /Paragraph 5\b/.test(text(line)) &&
+    !/locator/i.test(text(pillars)) && !/locator/i.test(text(line)) ? 1 : 0
+  const insideClosedDetails = (passage) => {
+    const at = line.indexOf(passage)
+    if (at < 0) return false
+    const before = line.slice(0, at)
+    const open = before.lastIndexOf('<details'), close = before.lastIndexOf('</details>')
+    if (open < 0 || close > open) return false
+    return !/\sopen(=|\s|>)/.test(before.slice(open, before.indexOf('>', open) + 1))
+  }
+  const r3 = insideClosedDetails(FUND_PASSAGE) && insideClosedDetails(POS_PASSAGE) ? 1 : 0
+  const r4 = !/\.\s*--/.test(text(line)) ? 1 : 0
+  const src = fs.readFileSync(path.join(portalRoot, 'src', 'pages', 'SecurityAnalysis', 'tabs', 'ThesisTab.tsx'), 'utf8')
+  const r5 = /const PILLARS_HEADING = "/.test(src) ? 1 : 0
+  const posture = { status: 'SERVED', verdict: 'better', as_of: '2026-10-06T13:00:00Z', comparable: 'RTX_US_Equity', comparable_name: 'RTX' }
+  const c3 = snap('ap3_base_snapshot.json', { posture_line: render(PostureHeaderLine, { posture, subjectIdentity: null, readAt: null }) }) ? 1 : 0
+  console.log(`r1 whole-word ${JSON.stringify(ai)}; r2 one locator wording ${r2}; r3 passages behind closed details ${r3}; r4 no ". --" ${r4}; r5 space ${r5}`)
+  console.log(`rev build ${r1 + r2 + r3 + r4 + r5}/5 control ${c1 + c2 + c3}/3`)
+}
+
+const ARMS = { ap2, ap3, ap4, ap5, rev }
 if (!ARMS[arm]) { console.log('usage: node page_check.cjs <ap2|ap3|ap4|ap5> [<portal root>] [--snapshot]'); process.exit(2) }
 ARMS[arm]()
