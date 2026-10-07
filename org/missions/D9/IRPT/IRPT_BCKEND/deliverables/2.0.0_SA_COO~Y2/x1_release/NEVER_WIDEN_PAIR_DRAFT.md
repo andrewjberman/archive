@@ -35,6 +35,14 @@ he grants one, the after-read uses a test filer whose firms are listed explicitl
 | `irpt-export-render` | interactive_access.py | `aRCgH9B0pglos8cPiybPhmJShzjUts/Tr5R9R/AZYJw=` | none (as for irpt-status) |
 | `irpt-performance-adapter` | interactive_access.py | `NU6YVERLJ0i6qmazBYWUF+1xVDPGHwdMKqQ5vgjmVc4=` | none (as for irpt-status) |
 
+**MEASURED by `2.0.0_SA_COO~P2` (msg 1021, `release-census` at HEAD f4307c366d):** `interactive_access.py` is NOT a changed
+member of `irpt-status` (4 changed: canonical_profile_reads, loaders, maintained_sources, served), `irpt-export-render` (1:
+submit_async, IB-pr-352) or `irpt-performance-adapter` (2: holdings_gold, loaders). Their `staged_from` pins hold the older
+blob, so IB-pr-354 reaches none of them. **The pair therefore moves ONE function, `irpt-ycharts-generate`.** The three rows
+above stay as no-change controls, and their other changed members belong to their own releases, not this pair.
+`irpt-ycharts-generate`'s pin is set by `~P2`'s IB-pr-358 (upload-door reader wiring, slot ~166). Its census is owed when
+that order drains.
+
 **To settle before signing:**
 1. `irpt-export-render`'s map row reads `exDoi/uo5eB9...`, but live reads `aRCgH9B0...` (IB-pr-349, 14:38Z today). The map row
    is stale. That is `~P2`'s record to fix. The rollback above uses the LIVE value.
