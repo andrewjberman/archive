@@ -1,8 +1,6 @@
 # AMGT_RESAPP round 77 -- drain-end packet (L8), `2.0.0_SA_COO~Z` to `3.0.0_SA_CVO~Z`
 
-**STATE: DRAFT, NOT SENT (written 2026-10-07 ~12:1xZ).** The round is not drained: issuer act `AMGT-ba-23` is open behind the
-pool crosswalk re-mint, which waits on AMGT_CORPUS's 13:00Z fire (row `AMGT_RESAPP-Z-S363`, BLOCKING for that act). Section 3 is
-filled in and this line is replaced when ba-23 ends or is carried to round 78 by the CTO. Nothing below is a verdict.
+**STATE: FINAL, 2026-10-07 ~13:4xZ. The round is drained:** every order file is terminal and the four issuer acts have run (ba-21, ba-22, the pool re-mint, ba-23). Nothing below is a verdict.
 
 Round 77 implements the CTO's round-76 analysis (`ledger/ROUND_ANALYSIS.round76.md`) on PRD v0.41. Decomposition s.85 with
 ADDENDUM 1 (85e). **23 of 23 order files are terminal.** The function `opal-amgt-scoped-api` was redeployed by ba-20 and
@@ -57,8 +55,8 @@ function still serves the pre-move bytes), and the gateway route (these are dire
 |---|---|---|---|---|
 | ba-21 segments | COO @68c7c203a1, CTO @5907c4e544, plus the CTO's word for a second probe (msgs 30847, 30856) | 2 one-name probes on AMD, then 85 calls | probe 1: three guessed names INVALID_FIELD. probe 2: `PG_REVENUE` and `PG_OPERATING_INCOME` served. Pull: 85 of 85 landed, 0 failed; 76 carry revenue rows, 9 none and no error (seven banks, two Mexican names). NOTHING SERVED MOVED: the bronze reader is uncut | `round77/BA21_SEGMENTS_ACT_RECORD_20261007.md` with ADDENDUM 1 |
 | ba-22 officers | COO @8536310333, CTO @4f79c10223 | a five-name slice read through the deployed route, then 81 | 86 of 86 landed, 0 failed. **84 names now serve a labelled Bloomberg officer list** (was: no officers). 2 (`BP/ LN`, `NG/ LN`) are stored and not read back: the reader lists a raw-slash prefix (row Z-S365; a round-78 cell by CTO msg 30847) | `round77/BA22_OFFICERS_ACT_RECORD_20261007.md` |
-| the pool re-mint (precondition of ba-23, CTO ruling msg 30760) | COO @28ee39ccff, CTO @7dfe0c3f57 | NOT RUN at this writing | waits on AMGT_CORPUS's 13:00Z fire (C3); C1 answered | `round77/POOL_REMINT_ACT_RECORD_20261007.md` |
-| ba-23 the never-covered company (ABNB US Equity, by CTO ruling msg 30758) | not written | NOT RUN | behind the re-mint | row Z-S363 |
+| the pool re-mint (precondition of ba-23, CTO ruling msg 30760) | COO @28ee39ccff, CTO @7dfe0c3f57 | ONE `crosswalk --write-pool` at 13:15:47Z, after AMGT_CORPUS's 13:00Z fire was read | `crosswalk/v1/2026-10-07.json` VersionId `1b0PNH1y...`, 237 -> 242 records (BE, DG, ED, GEV, MRNA added), 0 removed; `raw_identifier` lost its suffix on 158; no key, ticker or folder changed; every read-back count equal to the prediction; the live route 200 before and after with the same 13 peer identities | `round77/POOL_REMINT_ACT_RECORD_20261007.md`, `POOL_REBUILD_DIFF_READ_20261007.md` |
+| ba-23 the never-covered company (ABNB US Equity, by CTO ruling msg 30758) | COO @a9775de871, CTO @4eadefc95b | ONE `add_security --write-pool` at 13:22:09Z, 1 Bloomberg call | MEASURED: AIRBNB INC-CLASS A, exchange agrees, LEI and CIK returned. Pool VersionId `Y6Tisihm...`, 243 records: added exactly ABNB, 0 of the other 242 changed. Registration row @855fdc7324. Live `/overlay` for ABNB: 200, pool vintage 2026-10-07, 7 of 7 header figures reasoned nulls (uncovered). **It registers identity only; FWD-2's pack is NOT reached** | `round77/BA23_ABNB_ACT_RECORD_20261007.md` |
 
 ## 4. JUDGMENT for L9 (yours)
 
@@ -75,7 +73,7 @@ function still serves the pre-move bytes), and the gateway route (these are dire
 | row | gist | standing |
 |---|---|---|
 | Z-W279-S1..S4, Z-W286-S1..S2 | the ba-13 and ba-24 workers' observations | OBSERVATION, INERT; merged with their branches |
-| Z-S363 | a pool crosswalk mint today is a full rebuild (237 -> 242 records; `raw_identifier` on 158); ba-23 cannot be one record until a re-mint lands | **BLOCKING for ba-23**, INERT; ruled (b) by CTO msg 30760; explained in `POOL_REBUILD_DIFF_READ_20261007.md` |
+| Z-S363 | a pool crosswalk mint was a full rebuild (237 -> 242 records; `raw_identifier` on 158); ba-23 could not be one record until a re-mint landed | filed BLOCKING for ba-23; its blocker is cleared: the re-mint ran, then ba-23 differed by one record. Disposition is yours |
 | Z-S364 | MSFT US serving 0 of 7 header figures is one UNCOVERED name; 0 of 95 covered names read that way | OBSERVATION; the CTO corrected its DSGN ruling on it (msg 30812) |
 | Z-S365 | the officers reader lists a raw-slash prefix; 2 of 86 stored lists are not served | OBSERVATION; a round-78 cell |
 | Z-S366 | `research_pulls.py` reads a missing `blpapi` as TERMINAL_DOWN | OBSERVATION |
