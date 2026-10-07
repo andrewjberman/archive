@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-pd-1.periods-are-30-90-365-calendar-days-in-the-tables",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "7667270270",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-pd-1.periods-are-30-90-365-calendar-days-in-the-tables.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7667270270"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_holding_contribution.py",
+      "kind": "script",
+      "commit_or_etag": "af69e6a929",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write (local sink), no vendor call",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_buying_trend.py",
+      "kind": "script",
+      "commit_or_etag": "af69e6a929",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write (local sink), no vendor call",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r15pd1_calendar_periods.py",
+      "kind": "script",
+      "commit_or_etag": "af69e6a929",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write (local sink), no vendor call",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/pd-1.AC1.py -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/pd-1.AC1.py",
+      "output_evidence": "holding_contribution.period_start: {'R30': '2026-09-06', 'R90': '2026-07-08', 'R365': '2025-10-06'} | want: {'R30': '2026-09-06', 'R90': '2026-07-08', 'R365': '2025-10-06'}\nOK:   (a) holding_contribution: R30 / R90 / R365 start 30 / 90 / 365 calendar days before the day\nbuying_trend._period_starts: {'R30': '2026-09-06', 'R90': '2026-07-08', 'R365': '2025-10-06'}\nOK:   (b) buying_trend: R30 / R90 / R365 start 30 / 90 / 365 calendar days before the day\nPERIODS: holding_contribution ('MTD', 'QTD', 'YTD', 'R30', 'R90', 'R365') | buying_trend ('YTD', 'R30', 'MTD', 'QTD', 'R90', 'R365') | earliest_start: 2025-10-06\nOK:   (c) both PERIODS hold R30, R90, R365 and MTD, QTD, YTD; earliest_start is the R365 start\nMTD/QTD/YTD starts: holding_contribution {'MTD': '2026-10-01', 'QTD': '2026-10-01', 'YTD': '2026-01-01'} | buying_trend {'MTD': '2026-10-01', 'QTD': '2026-10-01', 'YTD': '2026-01-01'}\nOK:   (d) control: MTD, QTD, YTD are still periods of both tables, with unchanged starts\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/pd-1.AC2.py -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/pd-1.AC2.py",
+      "output_evidence": "holding_contribution status: OK | PFOE (nominal, start, clipped) by period: {'R30': [('2026-09-05', '2026-10-02', True)], 'R90': [('2026-07-07', '2026-10-02', True)], 'R365': [('2025-10-05', '2026-10-02', True)], 'MTD': [('2026-10-01', '2026-10-02', True)], 'YTD': [('2026-01-01', '2026-10-02', True)]}\nOK:   (a) holding_contribution writes R90 and R365 rows on calendar-day windows, clipped to the fund's first report\nbuying_trend TXUE (securities, window_start) by period: {'R30': ({'CCC'}, ['2026-09-05']), 'R90': ({'BBB', 'CCC'}, ['2026-07-07']), 'R365': ({'BBB', 'AAA', 'CCC'}, ['2025-10-05']), 'YTD': ({'BBB', 'CCC'}, ['2026-01-01']), 'MTD': ({'CCC'}, ['2026-10-01'])}\nOK:   (b) buying_trend writes R90 and R365 lines on calendar-day windows; R30 starts 30 calendar days back\nr30_window_was / r30_window_is: holding_contribution ({'fund': 'PFOE', 'start': '2026-08-24', 'end': '2026-10-05'}, {'fund': 'PFOE', 'start': '2026-09-05', 'end': '2026-10-05'}) | buying_trend ({'fund': 'PFOE', 'start': '2026-08-25', 'end': '2026-10-06'}, {'fund': 'PFOE', 'start': '2026-09-05', 'end': '2026-10-06'})\nOK:   (c) both stages' detail states the old and the new R30 window\nbuying_trend status: OK | detail: {'rows': 12, 'funds': 1, 'r30_window_was': {'fund': 'PFOE', 'start': '2026-08-25', 'end': '2026-10-06'}, 'r30_window_is': {'fund': 'PFOE', 'start': '2026-09-05', 'end': '2026-10-06'}}\nOK:   (d) control: both stages run; MTD and YTD rows keep their starts\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "package suite once (python -m pytest rivalfunds/tests -q from data/etfs/scripts); pd-1.AC1 and pd-1.AC2 once each",
+      "observed": "799 passed, 2 skipped, 0 failed; both checks PASS",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "none named by the order",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order status to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W1-S51"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "af69e6a929"
+    }
+  ]
+}
