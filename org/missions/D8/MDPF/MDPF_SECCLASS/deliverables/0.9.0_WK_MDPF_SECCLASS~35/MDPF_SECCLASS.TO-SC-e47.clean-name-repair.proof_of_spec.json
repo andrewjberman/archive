@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e47",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "90f99888cd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "5d70aab6c9",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e47.clean-name-repair.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~35",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/security_name.py",
+      "kind": "script",
+      "commit_or_etag": "dab92a7d7c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "clean_name step 4 gains ticker (one token, 1-5 chars), vowelless 2-4 letter acronym, corporate-form set and lowered joining words; new module constants CORPORATE_FORMS, JOINING_WORDS, TICKER_MAX_LEN, ACRONYM_MIN_LEN, ACRONYM_MAX_LEN, VOWELS; signature unchanged; stdlib, ASCII.",
+      "artifact_covered_by": [
+        "SC9-e47-AC1",
+        "SC9-e47-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
+      "kind": "test",
+      "commit_or_etag": "dab92a7d7c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "80 tests; one positive and one negative test per new branch; BK/NTS/MKTS/BLDR round-8 expectations updated to upper; 'COM' alone now COM; ETF SHS COM moved from the idempotent list to an explicit test (row W35-S1).",
+      "artifact_covered_by": [
+        "SC9-e47-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC9-e47-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py -- expect: CLEAN-NAME-TABLE ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py",
+      "expect": "CLEAN-NAME-TABLE ok=True",
+      "output_evidence": "CLEAN-NAME-TABLE ok=True cases=23 mismatches=0 (rc=0)",
+      "denominator": "23 of 23 table cases match",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC9-e47-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=80 passed in 0.37s (rc=0)",
+      "denominator": "80 of 80 tests passed, 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant: empty CORPORATE_FORMS at runtime, then run the issuer's table.",
+      "expected": "CLEAN-NAME-TABLE ok=False with the NA case mismatching",
+      "observed": "MISMATCH input='WELLS FARGO BANK NA 4.1% 2029' want='Wells Fargo Bank NA 4.1% 2029' got='Wells Fargo Bank Na 4.1% 2029'; CLEAN-NAME-TABLE ok=False cases=23 mismatches=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Table and pytest each run twice against the same rule.",
+      "observed": "Identical results: ok=True 23 of 23; 80 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Names outside the grounded table and the custody feeds; any table read or write; shipped-artifacts hookup.",
+      "reason": "BOUNDS: pure code; SC-e-48 meets the custody names."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W35-S1"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on each .py)",
+      "result": "ruff + py_compile clean 2 of 2"
+    }
+  ]
+}
