@@ -6,7 +6,7 @@
   "spec_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-340.one-fixture-per-gated-route.md",
     "group": "OTHER",
-    "vintage_commit": "c6442ceec1"
+    "vintage_commit": "10f9412e1c"
   },
   "decomp_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
@@ -38,9 +38,29 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~142/IB62-5_gated_fixtures.json",
       "kind": "doc",
-      "commit_or_etag": "a1644ac014",
+      "commit_or_etag": "ee8c6e6d97",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "route_count 21, 17 gated, 16 of 17 fixture pairs PASS both arms, POST /analysis/inputs denied arm FAIL, battery_overall_pass false. Byte-identical across runs (sha256 0c6ac02c4b7879fa...).",
+      "deploy_evidence": "route_count 21, 17 gated, 17 of 17 fixture pairs PASS both arms, battery_overall_pass true. Byte-identical across two runs after the fix (sha256 5a9bef893374d2b8...).",
+      "artifact_covered_by": [
+        "IB62-5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "ee8c6e6d97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1: the two owner-access refusals raise InputAccessDenied (public_reason_code NOT_AUTHORIZED, the estate's authorization deny) and InputUnavailable (NOT_FOUND, ruling 22: a missing row and a row of another owner raise the same class and text). Both subclass PermissionError; messages unchanged. Nothing deployed; any release is the issuer's after the drain.",
+      "artifact_covered_by": [
+        "IB62-5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_uploads_refusal_class.py",
+      "kind": "test",
+      "commit_or_etag": "ee8c6e6d97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 tests, 6 passed with intake/tests/test_uploads.py (23 passed, 11 subtests); intake/tests/run_offline_suite.py rc 0, RESULT-END printed.",
       "artifact_covered_by": [
         "IB62-5-AC1"
       ]
@@ -52,19 +72,18 @@
       "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-5-AC1",
       "method": "test_suite",
       "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-5-AC1",
-      "output_evidence": "FAIL: battery_overall_pass False\nIB62-5-AC1 FAIL (rc=1)",
-      "denominator": "21 routes listed (route_count 21 = 21 listed); 17 gated, each with an allowed and a denied fixture file that exists (17 of 17); fixture arms: 16 of 17 pairs PASS allowed and denied, 1 FAIL (POST /api/scoped/investor-reporting/analysis/inputs, denied arm: partner_without_ordinary_authorizer answered UNEXPECTED); generic arms 0 DRIVEN-FAIL",
+      "output_evidence": "OK: 21 routes, 17 gated with both fixtures, battery green\nIB62-5-AC1 PASS",
+      "denominator": "21 routes listed (route_count 21 = 21 listed); 17 gated, each with an allowed and a denied fixture file that exists (17 of 17); fixture arms 17 of 17 pairs PASS both arms; generic arms 0 DRIVEN-FAIL; fixture expected codes untouched (POST /analysis/inputs denied arm now answers NOT_AUTHORIZED for both cases)",
       "expect": "IB62-5-AC1 PASS",
-      "status": "FAIL",
-      "status_reason": "A driven denied arm FAILS: the repository's own upload world refuses a non-admitted partner upload with the residual code UNEXPECTED (intake/uploads.py:177 bare PermissionError). Row IRPT_BCKEND-W142-S1 (BLOCKING). The fix is outside this order's paths."
+      "status": "PASS"
     },
     {
       "criterion_id": "IB62-G-142",
       "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-G-142",
       "method": "test_suite",
       "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-G-142",
-      "output_evidence": "OK: 42 changed path(s), all inside slot ~142's grant\nIB62-G-142 PASS (rc=0), run after the build commit a1644ac014 and before the proof commit",
-      "denominator": "42 paths changed by this worker's commits at the time of the run, 42 inside the grant",
+      "output_evidence": "OK: 43 changed path(s), all inside slot ~142's grant\nIB62-G-142 PASS (rc=0), run after the fix commit ee8c6e6d97 and before the proof commit",
+      "denominator": "43 paths changed by this worker's commits at the time of the run, 43 inside the grant",
       "expect": "IB62-G-142 PASS",
       "status": "PASS"
     }
@@ -78,7 +97,7 @@
     },
     "determinism": {
       "method": "battery_ib_pr_340.py run twice from the worktree root; sha256 of IB62-5_gated_fixtures.json, IB62-5_replay_output.json and IB62-5_generic_arms_output.json compared",
-      "observed": "0c6ac02c4b7879fa, 2c1e68b6dfe79d35, 6496add6a2b48636 both times (byte-identical; the pytest wall time is stripped from the transcript)",
+      "observed": "5a9bef893374d2b8, 0df49e8e3444f824, 6496add6a2b48636 on both runs after the fix (byte-identical)",
       "status": "STABLE"
     }
   },
@@ -87,7 +106,8 @@
     "IRPT_BCKEND-W142-S2",
     "IRPT_BCKEND-W142-S3",
     "IRPT_BCKEND-W142-S4",
-    "IRPT_BCKEND-W142-S5"
+    "IRPT_BCKEND-W142-S5",
+    "IRPT_BCKEND-W142-S6"
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
   "declared_exclusions": [],
@@ -95,12 +115,17 @@
     {
       "tool": "python",
       "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~142/battery_ib_pr_340.py",
-      "result": "route_count=21 gated=17 battery_overall_pass=False; PROBLEM: POST /api/scoped/investor-reporting/analysis/inputs: denied arm FAIL"
+      "result": "route_count=21 gated=17 battery_overall_pass=True; driven_fails: []"
     },
     {
       "tool": "python",
-      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~142/make_fixtures_p340.py",
-      "result": "wrote 17 fixture pairs"
+      "invocation": "python infra/aws/lambda/investor-reporting/intake/tests/run_offline_suite.py",
+      "result": "rc 0; RESULT-END printed; g_offline true"
+    },
+    {
+      "tool": "python",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/intake/tests/test_uploads_refusal_class.py infra/aws/lambda/investor-reporting/intake/tests/test_uploads.py -q",
+      "result": "23 passed, 11 subtests passed"
     }
   ]
 }
