@@ -1,0 +1,121 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-rl-10",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~28",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "36ae4e822d"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "d32e40998d",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rl-10.gateway-hotfix-r24-portal-login.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/opal_portal/integration.py",
+   "kind": "script",
+   "commit_or_etag": "9d3e2eb3fce3ceabbf06f6c1819451894291be05",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "host md5 cc08e21e == release bytes (r24_verify.sh after 7 of 7 PASS, shipped md5 96 of 96); deploy Success ssm:659e1f35-6ac4-47bf-87cb-9aa91f1cf44b 2026-10-06T23:59:57Z; S3 opal-gateway-9d3e2eb3fc.tar.gz and latest git-ref 9d3e2eb3fc",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~28/RL10_LOGIN.json",
+   "kind": "config_data",
+   "commit_or_etag": "cba8c1e345",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "ssm 85fa53f0-e25f-487a-aa17-8603c0485e24 Success on i-07dccb1615503ac99; RL10_DIGEST 79f13138 found in host output",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+   "kind": "config_data",
+   "commit_or_etag": "cba8c1e345",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "services.opal-gateway deployed_commit 9d3e2eb3fce3ceabbf06f6c1819451894291be05 previous 2c27f3a795; rl10.AC1 reads it at HEAD",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261006T2354Z_nfra-oplgtw-gateway-hotfix-r24_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "a88b3b9d21",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "ledger CLOSED, 5 of 5 legs proven, sentinel removed at HEAD",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 (cell OG-rl-10): only the hotfix file is live, the ledger is closed, and the floor holds.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r24/checks/rl10.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "deployed=9d3e2eb3fc descends from 2c27f3a795=yes; shipped files outside the hotfix set 0; host shipped files equal the release bytes: 1 of 1\nentry files at HEAD=1; sentinel at HEAD=no\nfloor: rl4.AC1 yes; ht.AC2 yes\nRESULT: PASS\nexit=0",
+   "denominator": "host shipped files equal the release bytes 1 of 1; 0 shipped files outside the hotfix set; entry files at HEAD 1, sentinel at HEAD no; floor rl4.AC1 yes, ht.AC2 yes",
+   "status": "PASS",
+   "expect": "(?s)descends from 2c27f3a795=yes; shipped files outside the hotfix set 0; host shipped files equal the release bytes: (\\d+) of \\1.*entry files at HEAD=[1-9]\\d*; sentinel at HEAD=no.*floor: rl4.AC1 yes; ht.AC2 yes.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 (cell OG-rl-10): the deployed gateway's own login reaches the portal through the front door and is accepted.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r24/checks/rl10.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "portal login OK through the front door on the served release: yes; ssm status Success; digest in host output: yes\nRESULT: PASS\nexit=0",
+   "denominator": "RL10_LOGIN.json body: login OK, auth_host www.opalinvest.dev, installed_code true, served_release 9d3e2eb3fc, grants_written 0; ssm 85fa53f0 Success; digest found in host output",
+   "status": "PASS",
+   "expect": "(?s)portal login OK through the front door on the served release: yes; ssm status Success; digest in host output: yes.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "Rollback from /c/tmp/og-rb17",
+   "reason": "Not executed: verify after PASSED 7 of 7 with the floor, and the installed-code login was OK."
+  },
+  {
+   "item": "Phase D drain-back check",
+   "reason": "The order excludes it: CLOUD carries the held r23 set, which is not live; the fix commit reaches CLOUD through the issuer's drain of this branch."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W28-S8"
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail: 601a6874e7 (Phase A), a63109bed0 (ledger open), cba8c1e345 (deploy, manifest, verify, login), a88b3b9d21 (ledger close).",
+ "compiler_tools": [
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open, close-leg x5, close",
+   "result": "CLOSED, all 5 legs proven, sentinel removed"
+  },
+  {
+   "tool": "infra/aws/ec2/safe-ec2-deploy.sh",
+   "invocation": "DEPLOY_BASE_REF=2c27f3a795 HALT_ACK=1 AGENT_NAME=0.9.0_WK_NFRA_OPLGTW~28 opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+   "result": "rc=0, deploy Success; wrapper manifest commit refused by lane gate (row S8)"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The same installed-code login run BEFORE the deploy (Phase A, live code on the host).",
+   "expected": "IntegrationAuthError portal login 403 on the raw host",
+   "observed": "portal login 403 on module md5 f8d19990, auth host the raw API Gateway host (Phase A SSM f1dba572, r24_before.out); after the deploy: login OK, md5 cc08e21e, www.opalinvest.dev",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The installed-code login ran twice after the deploy: inside verify after (ssm ff13efc1) and the recorded read (ssm 85fa53f0).",
+   "observed": "login OK, auth host www.opalinvest.dev, module md5 cc08e21e both times",
+   "status": "STABLE"
+  }
+ }
+}
