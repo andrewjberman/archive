@@ -1,0 +1,133 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyForeignFirmPrincipals",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::opal-data-49financial",
+        "arn:aws:s3:::opal-data-49financial/*"
+      ],
+      "Condition": {
+        "ArnNotLike": {
+          "aws:PrincipalArn": [
+            "arn:aws:iam::313476888478:role/*-49f-*",
+            "arn:aws:iam::313476888478:role/aws-service-role/resource-explorer-2.amazonaws.com/AWSServiceRoleForResourceExplorer",
+            "arn:aws:iam::313476888478:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport",
+            "arn:aws:iam::313476888478:role/aws-service-role/trustedadvisor.amazonaws.com/AWSServiceRoleForTrustedAdvisor",
+            "arn:aws:iam::313476888478:role/bd-exporter-ec2-role",
+            "arn:aws:iam::313476888478:role/infrastructure-ops-lambda-role",
+            "arn:aws:iam::313476888478:role/infrastructure-snapshot-role",
+            "arn:aws:iam::313476888478:role/opal-advi-stitch-landing-role",
+            "arn:aws:iam::313476888478:role/opal-drift-producer-codebuild-role",
+            "arn:aws:iam::313476888478:role/opal-globgrph-derive-runner-task",
+            "arn:aws:iam::313476888478:role/opal-globgrph-incremental-updater",
+            "arn:aws:iam::313476888478:role/opal-news-lambda-role",
+            "arn:aws:iam::313476888478:role/partners-lambda-role",
+            "arn:aws:iam::313476888478:role/security-sweep-dedicated-role",
+            "arn:aws:iam::313476888478:user/Andrew_Berman",
+            "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+            "arn:aws:iam::313476888478:user/Opal_Terminal",
+            "arn:aws:iam::313476888478:role/irpt-holdings-role",
+            "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+            "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+            "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "DenyPerformanceAdapterAnyOtherAction",
+      "Effect": "Deny",
+      "Principal": "*",
+      "NotAction": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::opal-data-49financial",
+        "arn:aws:s3:::opal-data-49financial/*"
+      ],
+      "Condition": {
+        "ArnLike": {
+          "aws:PrincipalArn": "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+        }
+      }
+    },
+    {
+      "Sid": "DenyPerformanceAdapterReadsOutsideTheHoldingsGold",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "NotResource": "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/*",
+      "Condition": {
+        "ArnLike": {
+          "aws:PrincipalArn": "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+        }
+      }
+    },
+    {
+      "Sid": "DenyPerformanceAdapterListingOutsideTheHoldingsGold",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::opal-data-49financial",
+      "Condition": {
+        "StringNotLike": {
+          "s3:prefix": "irpt/49financial/gold/holdings_performance_daily/*"
+        },
+        "ArnLike": {
+          "aws:PrincipalArn": "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+        }
+      }
+    },
+    {
+      "Sid": "DenyScopedExemption1AnyOtherAction",
+      "Effect": "Deny",
+      "Principal": "*",
+      "NotAction": [
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": [
+        "arn:aws:s3:::opal-data-49financial",
+        "arn:aws:s3:::opal-data-49financial/*"
+      ],
+      "Condition": {
+        "ArnLike": {
+          "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+        }
+      }
+    },
+    {
+      "Sid": "DenyScopedExemption1ObjectsOutsidePrefix",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "NotResource": "arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/holdings/*",
+      "Condition": {
+        "ArnLike": {
+          "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+        }
+      }
+    },
+    {
+      "Sid": "DenyScopedExemption1ListingOutsidePrefix",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::opal-data-49financial",
+      "Condition": {
+        "StringNotLike": {
+          "s3:prefix": "irpt/49financial/platinum/holdings/*"
+        },
+        "ArnLike": {
+          "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+        }
+      }
+    }
+  ]
+}
