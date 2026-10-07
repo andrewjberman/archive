@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-33",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "f60da42359",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-33.account-class-daily-build.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~18",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~18/CLASS_DAILY_LOCAL_RUN.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+      "kind": "script",
+      "commit_or_etag": "306eed4ab1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local producer beside account_return_daily.py (imported read-only); --local only, no upload path; S3 reads only; not deployed.",
+      "artifact_covered_by": [
+        "DB21-1-AC1",
+        "DB21-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_account_class_daily.py",
+      "kind": "test",
+      "commit_or_etag": "306eed4ab1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "20 offline tests on synthetic positions, trades and in-kind legs, passing.",
+      "artifact_covered_by": [
+        "DB21-1-AC1",
+        "DB21-1-AC2",
+        "DB21-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_ACCOUNT_CLASS_DAILY_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "306eed4ab1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Contract 0.1.0: nine columns, seven-value class_enum, coverage enum, class source pinned @63fa1a2e32; served=false.",
+      "artifact_covered_by": [
+        "DB21-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~18/CLASS_DAILY_LOCAL_RUN.json",
+      "kind": "config_data",
+      "commit_or_etag": "306eed4ab1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Record of the local run: 61 accounts, 5 trading days, 254 measured account-days, 992 class rows, 78 holdings.",
+      "artifact_covered_by": [
+        "DB21-1-AC1",
+        "DB21-1-AC2",
+        "DB21-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~18/CLASS_DAILY_LOCAL_RUN.md",
+      "kind": "doc",
+      "commit_or_etag": "306eed4ab1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only summary, no client figure.",
+      "artifact_covered_by": [
+        "DB21-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB21-1-AC1",
+      "criterion_verbatim": "DB21-1-AC1 -- on every measured account-day of the run (at least 50), the classes sum to the account's daily return within 1e-9.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r21/p21_class_daily.py\" . DB21-1-AC1",
+      "output_evidence": "OK: 254 account-days; classes sum to the account's daily return, largest gap 2.116e-16\nDB21-1-AC1 PASS",
+      "denominator": "254 of 254 MEASURED account-days sum within 1e-9 (260 account-days with class rows; 5 not measurable for classes, 1 account return not measurable)",
+      "status": "PASS",
+      "expect": "DB21-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB21-1-AC2",
+      "criterion_verbatim": "DB21-1-AC2 -- the seven-value vocabulary only; an unnamed ticker is `unclassified`, a cash position is `cash`, nothing else is reassigned.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r21/p21_class_daily.py\" . DB21-1-AC2",
+      "output_evidence": "OK: 78 holdings mapped; 45 unclassified kept as their own class; vocabulary within the seven\nDB21-1-AC2 PASS",
+      "denominator": "78 of 78 distinct holdings map by the rule (33 named by the module, 45 unclassified, 0 cash positions in the sample; the cash rule is exercised offline)",
+      "status": "PASS",
+      "expect": "DB21-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB21-1-AC3",
+      "criterion_verbatim": "DB21-1-AC3 -- the contract file's enum is the seven values and its columns equal the produced table's, including firm, account_id, method_version and coverage.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r21/p21_class_daily.py\" . DB21-1-AC3",
+      "output_evidence": "OK: contract enum is the seven classes; 9 columns match the produced table\nDB21-1-AC3 PASS",
+      "denominator": "9 of 9 contract columns equal the record's columns, in order",
+      "status": "PASS",
+      "expect": "DB21-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The offline tests carry their own negative arms: an unknown ticker against the module's guessing helper, a day whose class values do not tie to the account, and a sub-cent residual that must NOT void the day.",
+      "expected": "tests pass",
+      "observed": "20 of 20 passed (at 306eed4ab1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Single run",
+      "observed": "not re-run",
+      "status": "N/A-WITH-REASON",
+      "reason": "One bounded read-only local run; the sample is seeded (20261007) so it is reproducible, but it was not repeated."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, upload, Lambda, schedule or vendor call",
+      "reason": "Refusal clause of the order; none made. The producer has no upload path."
+    },
+    {
+      "item": "The live in-kind (IC) path on real data",
+      "reason": "0 IC legs fell in the sampled accounts and days; the path is exercised by an offline test only."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W18-S1",
+    "IRPT_DASHBD-W18-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_account_class_daily.py",
+      "result": "20 passed (306eed4ab1)"
+    }
+  ]
+}
