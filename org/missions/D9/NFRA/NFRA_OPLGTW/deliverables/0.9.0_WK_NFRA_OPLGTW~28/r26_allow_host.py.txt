@@ -1,0 +1,132 @@
+"""OG-rl-12 host program (OG-al-2 on the host): the scoped concierge's allow decision for the status tool, read through app/identity_scope.py's OWN functions.
+Run by r26_ssm_prog.py as a SEPARATE process (env -i, installed venv, cwd = the gateway dir being tested; staged = a host scratch copy carrying the release bytes, installed
+tree untouched; never the running service). Modes (argv[1]): before (installed live code) | rehearsal (staged release bytes) | after (installed release code).
+argv[2] = the served release sha (after / rehearsal); argv[3] = the overlay row count BEFORE the release (after only; computed locally from the live allowlist blob).
+
+NEVER printed: an email address, a token, a tid/oid, a bearer, any .env value. The scoped identity is the code seed's one scoped identity, held in a variable and never printed
+(it is called "the scoped concierge" in every line). /opt/opal-gateway/.env is NEVER sourced: it is parsed AS TEXT in this process to populate the process environment (the same
+keys the service's EnvironmentFile feeds it), because identity_scope.consent_scopes reads the caller-identity config keys; no value leaves the process, only booleans, counts and
+Graph scope NAMES. Nothing is sent, no Graph or portal request is made, no token cache is touched, no grant, state store, .env or secret is written."""
+import asyncio
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+import urllib.parse
+
+GW = os.environ.get("OG_GW_DIR", "/opt/opal-gateway")
+SCR = os.environ["R26_SCRATCH"]
+mode = sys.argv[1] if len(sys.argv) > 1 else "before"
+served = sys.argv[2] if len(sys.argv) > 2 else ""
+rows_before_arg = int(sys.argv[3]) if len(sys.argv) > 3 else None
+staged = GW != "/opt/opal-gateway"
+sys.path.insert(0, GW)
+
+ENVD = {}
+for line in open("/opt/opal-gateway/.env", encoding="utf-8"):
+    m = re.match(r"^([A-Za-z0-9_]+)=(.*)$", line.rstrip("\r\n"))
+    if m:
+        v = m.group(2)
+        if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+            v = v[1:-1]
+        ENVD[m.group(1)] = v
+os.environ.update(ENVD)
+pid = subprocess.check_output(["systemctl", "show", "opal-gateway", "-p", "MainPID", "--value"]).decode().strip()
+enabled = ""
+for kv in open("/proc/%s/environ" % pid, "rb").read().split(bytes([0])):
+    if kv.startswith(b"ENABLED_INTEGRATIONS="):
+        enabled = kv.split(b"=", 1)[1].decode("utf-8", "replace")
+os.environ["ENABLED_INTEGRATIONS"] = enabled
+os.environ["TOKEN_CACHE_DIR"] = os.path.join(SCR, "tokcache")      # a scratch dir: nothing here ever reads or writes the live cache
+os.makedirs(os.environ["TOKEN_CACHE_DIR"], exist_ok=True)
+ALLOWLIST = os.path.join(GW, "identity_tool_allowlist.txt")
+os.environ["IDENTITY_TOOL_ALLOWLIST_PATH"] = ALLOWLIST
+os.environ["MOCK_GRAPH"] = "1"
+
+from mcp.server.fastmcp import FastMCP  # noqa: E402
+from app import identity_scope, token_broker, tools, integrations  # noqa: E402
+from app.config import get_config  # noqa: E402
+
+cfg = get_config()
+FULL = set(cfg.GRAPH_SCOPES)
+STATUS, UPLOAD = "opal_data_refresh_status", "opal_data_refresh_upload"
+print("R26_CODE mode=%s staged=%s identity_scope.md5=%s allowlist.md5=%s allowlist_path_is_gateway_root=%s"
+      % (mode, staged, hashlib.md5(open(identity_scope.__file__, "rb").read()).hexdigest()[:8],
+         hashlib.md5(open(ALLOWLIST, "rb").read()).hexdigest()[:8], os.path.abspath(identity_scope._cfg.IDENTITY_TOOL_ALLOWLIST_PATH) == os.path.abspath(ALLOWLIST)))
+
+# --- the overlay: the file's rows as the loader counts them (a line with >= 2 tokens before any '#') ---
+rows = 0
+for ln in open(ALLOWLIST, encoding="utf-8"):
+    if len(ln.split("#", 1)[0].split()) >= 2:
+        rows += 1
+scoped_map, qualified = identity_scope._load_overlay()
+scoped_ids = sorted(scoped_map)
+print("R26_OVERLAY rows=%d scoped_identities=%d qualified_identities=%d" % (rows, len(scoped_ids), len(qualified)))
+SC = sorted(identity_scope._SEED)[0]        # the seed's one scoped identity; never printed
+assert SC in scoped_map and len(identity_scope._SEED) == 1
+
+# --- the allow decision, through identity_scope.check ---
+def allowed(ident, tool, client_id=None):
+    return identity_scope.check(ident, tool, client_id) is None
+
+
+status_allowed = allowed(SC, STATUS)
+status_allowed_other_client = allowed(SC, STATUS, "r26-some-other-client")        # an unqualified row admits on ANY client
+upload_unqualified_denied = not allowed(SC, UPLOAD)                               # the upload row stays client-qualified: no client -> refused
+q_clients = sorted((qualified.get(SC) or {}).get(UPLOAD, ()))
+upload_with_registered_client = bool(q_clients) and allowed(SC, UPLOAD, q_clients[0])
+unnamed = {t: allowed(SC, t) for t in ("send_email", "r26_tool_nothing_names", "opal_data_refresh_run")}
+unscoped_ident = "r26-unscoped-probe@example.invalid"
+unscoped_untouched = allowed(unscoped_ident, STATUS) and allowed(unscoped_ident, "send_email")        # an unscoped identity is never in the map
+print("R26_ALLOW status_tool_allowed_for_the_scoped_concierge=%s on_any_client=%s" % (status_allowed, status_allowed_other_client))
+print("R26_ALLOW upload_without_client_denied=%s upload_with_registered_client_admitted=%s (the upload row is unchanged)" % (upload_unqualified_denied, upload_with_registered_client))
+print("R26_ALLOW unnamed_tools_allowed_for_the_scoped_concierge=%s" % sorted(t for t, a in unnamed.items() if a))
+print("R26_ALLOW unscoped_identity_untouched=%s" % unscoped_untouched)
+tool_set = sorted(scoped_map[SC])
+print("R26_SCOPED_TOOLS count=%d has_status=%s has_upload_unqualified=%s" % (len(tool_set), STATUS in tool_set, UPLOAD in tool_set))
+
+# --- consent scopes for the scoped concierge: the real /login consent leg's URL, and consent_scopes() beside it ---
+def consent_scope_names(email):
+    url = token_broker.build_consent_url(token_broker.make_state(email))
+    q = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+    return sorted(set(" ".join(q.get("scope", [])).split()) - {"openid", "profile", "offline_access"})
+
+
+try:
+    consent_url_names = consent_scope_names(SC)
+    unscoped_consent = consent_scope_names(unscoped_ident)
+    consent_ok = True
+except Exception as exc:  # noqa: BLE001 -- the type name only
+    consent_url_names, unscoped_consent, consent_ok = [], [], False
+    print("R26_CONSENT_URL_ERR %s" % type(exc).__name__)
+fn_scopes = identity_scope.consent_scopes(SC) or []
+print("R26_CONSENT scoped_concierge_url_scope_count=%d consent_scopes_fn_count=%d equal=%s subset_of_full=%s unscoped_url_scope_count=%d scopes=%s"
+      % (len(consent_url_names), len(fn_scopes), sorted(consent_url_names) == sorted(fn_scopes), set(consent_url_names) <= FULL, len(unscoped_consent), ",".join(consent_url_names)))
+
+# --- the registered tool count, as the service registers it ---
+integrations.register_enabled(tools.mcp, enabled.split())
+names = sorted(t.name for t in asyncio.run(FastMCP.list_tools(tools.mcp)))
+print("R26_TOOLS count=%d has_status=%s has_upload=%s" % (len(names), STATUS in names, UPLOAD in names))
+
+rows_before = rows_before_arg if rows_before_arg is not None else rows
+body = {"served_release": served, "installed_code": not staged, "status_tool_allowed_for_scoped": bool(status_allowed),
+        "unnamed_tool_allowed_for_scoped": any(unnamed.values()), "scoped_scope_count": len(consent_url_names) if consent_ok else len(fn_scopes),
+        "tools": len(names), "overlay_rows_before": rows_before, "overlay_rows_after": rows, "grants_written": 0}
+s = json.dumps(body, sort_keys=True)
+dig = hashlib.sha256(s.encode("utf-8")).hexdigest()
+if mode == "before":
+    print("R26_BEFORE overlay_rows=%d status_tool_allowed=%s status_tool_registered=%s tools=%d scoped_concierge_consent_scopes=%d"
+          % (rows, status_allowed, STATUS in names, len(names), len(consent_url_names)))
+    sys.exit(0)
+if staged:
+    print("RL12_REHEARSAL_BODY " + s)
+    print("RL12_REHEARSAL_DIGEST " + dig)
+    b2 = dict(body, installed_code=True)
+    s2 = json.dumps(b2, sort_keys=True)
+    print("STEP7_STANDIN RL12_BODY " + s2)
+    print("STEP7_STANDIN RL12_DIGEST " + hashlib.sha256(s2.encode("utf-8")).hexdigest())
+else:
+    print("RL12_BODY " + s)
+    print("RL12_DIGEST " + dig)
