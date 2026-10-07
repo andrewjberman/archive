@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_CUSTDY.TO-CU-c-1",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-c-1.hop3-real-run.md",
+    "group": "OTHER",
+    "vintage_commit": "0e054dd64e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.round3.md",
+    "vintage_commit": "0e054dd64e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-c-1.hop3-real-run.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_CUSTDY~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/hop3_real_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-7; no S3 write; one real CLI run on dell2 wrote its file under .scratch only (not committed)",
+      "artifact_covered_by": [
+        "CU8-AC1",
+        "CU8-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_hop3_real_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-7",
+      "artifact_covered_by": [
+        "CU8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_CUSTDY-W7-S1 and IRPT_CUSTDY-W7-S2 appended",
+      "artifact_covered_by": [
+        "CU8-AC1",
+        "CU8-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CU8-AC1",
+      "criterion_verbatim": "CU8-AC1 -- the wrapper's behaviour on fixtures: shape, masking, uncovered, SI held, the error-in-file path.",
+      "method": "command",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_hop3_real_run.py",
+      "output_evidence": "..........   [100%]\n10 passed in 4.16s\nrc=0",
+      "denominator": "10 of 10 tests passed (shape, masking via unmasked_runs, uncovered listed not computed, SI held, calendar never asked pre-floor, raising reader x2 -> file with error + exit 1, error text masked, missing args refused)",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU8-AC2",
+      "criterion_verbatim": "CU8-AC2 -- the seam end to end through the real CLI on fixtures. The real run is the laptop's (its FILE grades E2); on dell2 the real neighbour is fenced (rows S4, S6).",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/hop3_real_run.py --self-test",
+      "output_evidence": "self-test: rc=0 households=2 accounts=3 uncovered=3 calendar_calls_pre_floor=0\nHOP3-REAL-RUN-SELFTEST file_ok=True masked_ok=True held_ok=True error_written_ok=True\nrc=0",
+      "denominator": "4 of 4 flags True on the last line",
+      "expect": "HOP3-REAL-RUN-SELFTEST file_ok=True masked_ok=True held_ok=True error_written_ok=True",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "a real-account run on the returns gold",
+      "reason": "The firm bucket is an explicit deny for the dell2 user; the wrapper is built here and run on the laptop. The one dell2 real run recorded error=AccessDenied in its file (row IRPT_CUSTDY-W7-S2)."
+    },
+    {
+      "item": "ruff py39 lint",
+      "reason": "checked by the commit gate at commit, not separately"
+    }
+  ],
+  "surprises": [
+    "IRPT_CUSTDY-W7-S1",
+    "IRPT_CUSTDY-W7-S2"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_hop3_real_run.py",
+      "result": "10 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "One-off mutant: hop3_real_run._mask made to return the full account string (the uncovered-list masking never applies); tests re-run; module restored byte-identical (cmp).",
+      "expected": "the masking and uncovered-list tests fail",
+      "observed": "2 failed, 8 passed (test_no_unmasked_account, test_uncovered_listed_not_computed); restored, 10 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- fixtures are generated in tmp dirs from constants; the only clock read is run_at, which no test compares",
+      "observed": "self-test last line identical on repeat runs (2 runs)",
+      "status": "N/A-WITH-REASON",
+      "reason": "no real-world read exists in this order; the firm bucket is fenced from dell2, so the real run is a laptop act"
+    }
+  }
+}
