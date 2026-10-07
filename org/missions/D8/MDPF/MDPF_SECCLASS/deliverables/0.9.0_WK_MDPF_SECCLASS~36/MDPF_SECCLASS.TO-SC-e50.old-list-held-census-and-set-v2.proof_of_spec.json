@@ -18,7 +18,7 @@
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/old_list_census_held.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "8be44af815",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "census under ruling 2.4's held definition plus the V2 set re-planned under the contract bound; read-only AWS, no model call",
       "artifact_covered_by": [
@@ -29,7 +29,7 @@
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_CENSUS_HELD_20261007.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "8be44af815",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "denominator 10965, held 2655, not_held 8310, claim inferred; as-of 49financial 2026-10-05, cottonwood 2026-10-05, inflection 2026-10-02",
       "artifact_covered_by": [
@@ -39,7 +39,7 @@
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_RECLASSIFY_SET_V2_20261007.tsv",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "8be44af815",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "10965 rows: DIRECT 5811 (incl. 15 cash), AI 2770, PRESENT 2381, UNPLACED-KEY 3",
       "artifact_covered_by": [
@@ -64,17 +64,16 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/old_list_held_census_check.py set",
       "expect": "OLD-LIST-SET-V2 ok=True",
-      "output_evidence": "OLD-LIST-SET-V2 ok=False rows=10965 live=10965 cash_planned=15 problems=['bound:ADC', 'bound:AG', 'bound:AGI'] (rc=1)",
-      "denominator": "10965 of 10965 old keys once; 5811 of 5811 DIRECT rows inside the bound; 2770 AI rows carry no class by design and fail the check as written (row MDPF_SECCLASS-W36-S4)",
-      "status": "FAIL",
-      "status_reason": "The check grades every AI row's sub_asset_class against the contract list; an AI row has no verdict before the model runs, so 2,770 blank AI rows fail it. Not met as written; test not weakened; row MDPF_SECCLASS-W36-S4."
+      "output_evidence": "OLD-LIST-SET-V2 ok=True rows=10965 live=10965 direct=5811 ai=2770 cash_planned=15 problems=[] (rc=0)",
+      "denominator": "10965 of 10965 old keys once; 5811 of 5811 DIRECT rows inside the contract bound; 2770 of 2770 AI rows blank in asset_class and sub_asset_class (graded under AMENDMENT 1, 202600d14f; row MDPF_SECCLASS-W36-S4 resolved by the amendment); 15 of 15 cash rows planned",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
       "description": "Order dry run at base 5d70aab6c9: AC1 FAIL (missing=OLD_LIST_CENSUS_HELD_*.json), AC2 FAIL (missing=OLD_LIST_RECLASSIFY_SET_V2_*.tsv).",
       "expected": "AC1 and AC2 fail before the build",
-      "observed": "AC1 passes after the build; AC2 fails for a different reason (2770 blank AI rows), not for the missing file.",
+      "observed": "AC1 and AC2 both pass after the build under the amended check (AC2 first failed under the pre-amendment check on 2770 blank AI rows, row W36-S4).",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
