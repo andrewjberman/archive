@@ -73,6 +73,16 @@ function gradeFoot(foot, capFact, advFact, wantCap, wantAdv) {
   return f;
 }
 
+// A non-money numeric fact (served 1234567): the plain grouped number, no currency words, no magnitude letter.
+function nonMoneyFaults(fact) {
+  const f = [];
+  if (!fact) return ['the non-money fact is not rendered'];
+  if (!fact.includes('1,234,567')) f.push(`a non-money number does not print as the plain grouped number "1,234,567" ("${fact}")`);
+  if (/currency|USD|EUR|CHF/i.test(fact)) f.push(`a non-money number carries currency words ("${fact}")`);
+  if (/\d(\.\d+)?[KMBT]\b/.test(fact)) f.push(`a non-money number carries a magnitude letter ("${fact}")`);
+  return f;
+}
+
 const arms = [];
 if (loadErr || !MT || !ST || typeof ST.formatStatValue !== 'function') {
   arms.push(['LOAD', false, loadErr || 'ModelTab or StatTile.formatStatValue did not load']);
@@ -98,6 +108,23 @@ if (loadErr || !MT || !ST || typeof ST.formatStatValue !== 'function') {
     if (!/currency not stated/i.test(bareFoot)) f.push(`a money fact with no currency does not say the currency is not stated ("${bareFoot.slice(0, 120)}")`);
     arms.push(['KEEP: country, labels, and no invented currency', f.length === 0, f.length ? `${f.length} failing; first: ${f[0]}` : 'Country: UNITED STATES; both labels; a fact with no currency says so']);
   }
+  {
+    // AMENDMENT 1 (CTO review msg 30881): only a DECLARED money fact takes the money format. V3_HEADER_LABELS is an open list, so a
+    // numeric fact that is not money must print as a plain grouped number. COUNTRY_FULL_NAME is the one non-money mnemonic the list
+    // holds today; here it is served as a NUMBER (an issuer variant) to exercise that branch.
+    const f = [];
+    const b = withFacts('USD');
+    const row = b.header_figures.find((x) => x && x.mnemonic === 'COUNTRY_FULL_NAME');
+    row.value = 1234567; row.unit = null; row.currency = null;
+    BUNDLE = b;
+    const h = render();
+    BUNDLE = withFacts('USD');
+    const fact = factText(h, 'COUNTRY_FULL_NAME');
+    f.push(...nonMoneyFaults(fact));
+    const cap = factText(h, 'CRNCY_ADJ_MKT_CAP');
+    if (!cap.includes(ST.formatStatValue(152320, 'currency-millions', 'USD', U_MM))) f.push(`with a non-money number beside it, market capitalisation lost the money format ("${cap}")`);
+    arms.push(['A NUMBER THAT IS NOT MONEY IS NOT FORMATTED AS MONEY', f.length === 0, f.length ? `${f.length} failing; first: ${f[0]}` : `a non-money numeric fact reads "${fact}"; the money facts keep the money format`]);
+  }
 }
 {
   const f = [];
@@ -106,11 +133,13 @@ if (loadErr || !MT || !ST || typeof ST.formatStatValue !== 'function') {
   if (gradeFoot(longFoot, 'Market capitalisation: USD 152,320 million', 'Average daily value traded (three months): USD 1,356,158,848', 'USD 152B', 'USD 1.36B').length < 4) f.push('the long forms are not refused on all four counts');
   if (gradeFoot(shortFoot, 'Market capitalisation: USD 152B', 'Average daily value traded (three months): USD 1.36B', 'USD 152B', 'USD 1.36B').length) f.push('the short forms are refused');
   if (!gradeFoot('', '', '', 'x', 'y').length) f.push('a missing foot is admitted');
-  arms.push(['PLANTED', f.length === 0, f.length ? f.join(' | ') : 'the long forms refused on 4 counts, a missing foot refused, the short forms admitted']);
+  if (!nonMoneyFaults('Country: 1.23M currency not stated').length) f.push('a non-money number in the money format is admitted');
+  if (nonMoneyFaults('Country: 1,234,567').length) f.push('a plain grouped non-money number is refused');
+  arms.push(['PLANTED', f.length === 0, f.length ? f.join(' | ') : 'the long forms refused on 4 counts, a missing foot refused, a money-formatted non-money number refused; the clean forms admitted']);
 }
 
 const TITLE = "THE MODEL TAB'S FOOT PRINTS MONEY IN THE PAGE'S ONE MONEY FORMAT";
 let pass = 0;
 for (const [name, ok, ev] of arms) { if (ok) pass += 1; console.log(`ARM ${ok ? 'PASS' : 'FAIL'} ${name} :: ${ev}`); }
 console.log(`${TITLE}: ${pass} of ${arms.length} arms`);
-process.exit(pass === arms.length && arms.length === 3 ? 0 : 1);
+process.exit(pass === arms.length && arms.length === 4 ? 0 : 1);
