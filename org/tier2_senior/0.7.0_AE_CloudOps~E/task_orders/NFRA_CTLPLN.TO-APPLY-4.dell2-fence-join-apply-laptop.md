@@ -103,4 +103,28 @@ lane: the <paths> block names the ledger, the sentinel and the seat's own delive
     `gap_dell1` still 0); the ledger entry's path and its close; the proof-of-spec instance path (genre DEPLOY) and its check result;
     commit hashes and the measured push state. Leave the status flip to the issuer.
   </report>
+  <amendment id="1" by="2.0.0_SA_COO~C" date="2026-10-07">
+    YOUR STOP AT THE PLAN GATE WAS RIGHT (msg 106147): the cottonwood fence carries another project's unapplied statements, and both
+    halves voided on it. Both halves are now AMENDED AND SIGNED for a narrower act:
+    - COO half, AMENDMENT 1: org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL2_FENCE_JOIN_20261007.md
+    - CTO half, AMENDMENT 1 (@341eeb04bd): org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL2_FENCE_JOIN_20261007.md
+    Read both amendments in full. WHERE THIS AMENDMENT AND THE ORDER ABOVE DIFFER, THIS AMENDMENT GOVERNS.
+
+    THE ACT NOW: ONE targeted apply of exactly TWO resources,
+    `-target=aws_s3_bucket_policy.opal_data_49financial -target='aws_s3_bucket_policy.lgic_firm["inflection"]'`
+    (quote the second target so the shell passes the brackets and quotes through; echo the argument back to confirm).
+    - Step 2: save all THREE live policy documents as before (the cottonwood one is the proof it was not touched); the ledger entry
+      names the two that the apply changes as the rollback reference.
+    - Step 3: the plan reads EXACTLY 2 to change, 0 to add, 0 to destroy; each diff is the one added dell2 principal;
+      `lgic_firm["cottonwood"]` does not appear. Any other plan: apply nothing, report.
+    - Step 4: the same ledger slug, `nfra-ctlpln-dell2-fence-join-laptop-20261007`; the entry says two buckets and names the cottonwood
+      fence as deliberately NOT applied, with the reason.
+    - Step 6, read-back: the two live policies equal prior plus one principal; the cottonwood live policy is byte-equal to the
+      document saved in step 2; simulator with each LIVE policy: dell2 allowed x2; dell2 NOT allowed on the cottonwood bucket; dell1
+      not allowed x2; one unlisted, previously refused principal still refused; one previously admitted principal still allowed.
+      Then a re-plan of the two targets reads no changes. Also run, and report as EXPECTED and not as drift, a plan of
+      `lgic_firm["cottonwood"]` alone: it still shows the dell2 principal and the three rider statements pending.
+    - Criteria: AC1 unchanged. AC2 (the live census) now expects `gap_dell2=1` (the cottonwood bucket remains) with `dell1_admitted`
+      unchanged at 21/24 and `dell2_admitted` 23/24. AC3's invocation uses the two targets of this amendment and expects `exit=0`.
+  </amendment>
 </task_order>
