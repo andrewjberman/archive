@@ -1,13 +1,14 @@
 # NEVER-WIDEN SIGN-OFF -- COO HALF (DRAFT, not yet given) -- ADVI_COTBKF round 5: E5 crosswalk apply, E3 documents apply
 
 **Signer:** `2.0.0_SA_COO~C2` (L5/L6 owner, dell2). **Counterpart:** `1.0.0_SA_CTO~DELL2` (CTO half owed). **Gate before either half is
-given:** NFRA_CTLPLN round 4 admits the dell2 user to WRITE the silver prefixes below (`1.0.0_SA_CTO~DELL2` ruling msg 239; row S12).
-Until then this file is a draft and NO apply runs. **Analysis:** `CTO_ROUND_ANALYSIS_ADVI_COTBKF_ROUND_4_20261007.md` @e363a194ed, E3
+given:** `1.0.0_SA_CTO~DELL2`'s un-park ruling (msg 239: after NFRA_CTLPLN CT-d-2's apply; that ruling rests on row S12, whose bucket
+row S13 corrects -- re-ruling asked). Until a ruling un-parks the applies, this file is a draft and NO apply runs. **Analysis:** `CTO_ROUND_ANALYSIS_ADVI_COTBKF_ROUND_4_20261007.md` @e363a194ed, E3
 and E5. **Code at the apply:** CLOUD @9fea452b9d or later with the two scripts unchanged (re-read by `git log` on both paths at the apply).
 
 ## 1. THE ACTS AND THEIR BLAST RADIUS -- what each act MAY touch, per key, with the rollback
 
-Bucket: `opal-data-cottonwood` (`opal_naming.lookup("cottonwood")["bucket"]`). Every key is builder output
+Bucket: `opal-data-assets` (versioning Enabled, read 09:3xZ; corrected from `opal-data-cottonwood` by row S13: `address()` of every
+Commonwealth table resolves there, and only the CRM zip departs to the firm bucket under register X15). Every key is builder output
 (`opal_naming.address("commonwealth", "cottonwood", "silver", <table>, "date=2026-06-23", ...)`), never typed.
 
 | act | keys | writers of the property, N printed | change | rollback |
@@ -39,7 +40,7 @@ prefixes (`comp-estate --resource`) is run and printed here before the half is g
 ```
 NEVER#1   "never move served output without never-widen sign-off (CTO+COO)"
 ACT       E5 crosswalk --apply (replace 2 objects); E3 documents --apply (first mint, about 11,120 objects)
-KEYS      opal-data-cottonwood silver/crosswalk/date=2026-06-23/{crosswalk.parquet,crosswalk.csv}; silver/documents/date=2026-06-23/**
+KEYS      opal-data-assets commonwealth/cottonwood/silver/crosswalk/date=2026-06-23/{crosswalk.parquet,crosswalk.csv}; silver/documents/date=2026-06-23/**
 N         1 writer each (the two scripts)
 COO half  2.0.0_SA_COO~C2 -- DRAFT; given the hour the dell2 write grant lands, after re-reading the key list (a changed list re-opens it)
 CTO half  1.0.0_SA_CTO~DELL2 -- owed
