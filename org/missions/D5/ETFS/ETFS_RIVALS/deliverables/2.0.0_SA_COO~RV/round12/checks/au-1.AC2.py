@@ -56,8 +56,8 @@ def run(v):
     print("normal run:", r.get("status"), "| audit.html:", has_aud, len(aud_b), "B | manifest audit_uri:", man.get("audit_uri"),
           "| holding_dialogs:", man.get("holding_dialogs"))
     v.check(has_aud and man.get("audit_uri") == aud_uri and man.get("audit_sha256") == hashlib.sha256(aud_b).hexdigest()
-            and man.get("holding_dialogs") == "on" and '<details id="audit"' not in idx and f"/rivalfunds/{DAY}/audit" not in idx,
-            "(a) index.html and audit.html written; the manifest names audit.html with its sha; dialogs on; index has no audit, no link")
+            and man.get("holding_dialogs") == "on" and '<details id="audit"' not in idx and idx.count(f'href="/rivalfunds/{DAY}/audit"') == 1,
+            "(a) index.html and audit.html written; the manifest names audit.html with its sha; dialogs on; index has no audit block, one audit link")
 
     spec2, s2, _ = c.page_fixture()
     old = render.DIALOG_SOFT_CAP
