@@ -80,10 +80,9 @@
       "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py expect: typed_in_tf=0 cross_firm_leaks=0 (same line: rows=3/3, other_rows_changed=0, validator=ok, negative_arm=denied, ok=True)",
       "method": "command",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py",
-      "output_evidence": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok ok=False\n(rc 1, under timeout 120, 29 s; the same output carries 'TF infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf: byte-equal to 3ec42c56bf = False' and 'TF infra/aws/terraform/shared-infra/s3-49financial.tf: byte-equal to 3ec42c56bf = False', and terraform_validate=OK rc=0 on the real root)",
-      "denominator": "3 of 3 pairs have exactly one row; 3 of 3 evaluator calls allowed; negative arm 1 of 1 denied; 0 of 3 buckets leak; 0 of 2 .tf files byte-equal to the pin 3ec42c56bf (the two edits of this amendment)",
-      "status": "FAIL",
-      "status_reason": "EXPECTED and stated by AMENDMENT 4 item 3: this check pins the two fence .tf files to commit 3ec42c56bf, and this amendment edits both (one concat( wrap, one added argument), so ok reads False and rc is 1 although every other field reads as the criterion requires (typed_in_tf=0, cross_firm_leaks=0, rows=3/3, other_rows_changed=0, validator=ok, negative_arm=denied). The check and its pin were not touched; the issuer moves the pin at the merge, after NFRA_CTLPLN.TO-APPLY-5 closes, and re-grades AC1 then.",
+      "output_evidence": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok ok=True\n(rc 0, under timeout 120, pass 2026-10-07 by 0.9.0_WK_NFRA_CTLPLN~6 after AMENDMENT 5; the same output carries 'TF infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf: byte-equal to cc0c2b4b5c = True' and 'TF infra/aws/terraform/shared-infra/s3-49financial.tf: byte-equal to cc0c2b4b5c = True', and terraform_validate=OK rc=0 on the real root)",
+      "denominator": "3 of 3 pairs have exactly one row; 3 of 3 evaluator calls allowed; negative arm 1 of 1 denied; 0 of 3 buckets leak; 2 of 2 .tf files byte-equal to the TF_PIN cc0c2b4b5c (registry baseline stays on 3ec42c56bf)",
+      "status": "PASS",
       "expect": "typed_in_tf=0 cross_firm_leaks=0"
     },
     {
@@ -91,21 +90,20 @@
       "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py expect: FENCE-ROW-SHAPE rows= (same line: ok=True, can_carry_today reported as measured)",
       "method": "command",
       "invocation": "python infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py",
-      "output_evidence": "FENCE-ROW-SHAPE rows=29 key_sets=1 rows_with_actions=0 rows_with_prefix=0 readers=18 extra_key_ignored=1 extra_key_refused=2 can_carry_today=False ok=True\n(rc 0, under timeout 120; 42 s cold, 6 s with the simulator cache warm; can_carry_today=False as measured: 29 rows, 1 key set, 0 rows with an action key, 0 with a prefix key. extra_key_ignored=1 extra_key_refused=2 now: the validator and the module refuse an unknown key, the join check's renderer still ignores it, row NFRA_CTLPLN-W6-S6. Before this pass the same script timed out at 120 s on this worktree, row NFRA_CTLPLN-W6-S7)",
+      "output_evidence": "FENCE-ROW-SHAPE rows=29 key_sets=1 rows_with_actions=0 rows_with_prefix=0 readers=18 extra_key_ignored=1 extra_key_refused=2 can_carry_today=False ok=True\n(rc 0, under timeout 120, 7 s; fresh run 2026-10-07 by 0.9.0_WK_NFRA_CTLPLN~6 after AMENDMENT 5)",
       "denominator": "29 of 29 rows read; 18 of 18 live files git grep returned classified (0 unclassified); 3 of 3 row-parsing readers measured with an unknown key on a scratch registry outside the repository: validator refused (3 of 3 rows), module refused at plan time (terraform plan rc=1 in a provider-less scratch module), join check renderer ignored it (3 of 3 buckets)",
       "status": "PASS",
       "expect": "FENCE-ROW-SHAPE rows="
     },
     {
       "criterion_id": "CT4d2-AC3",
-      "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py expect: unknown_key_refused_by=validator+module (the same line must read ok=True with unchanged_today=True)",
+      "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py expect: unknown_key_refused_by=validator\\+module (the same line must read ok=True with unchanged_today=True)",
       "method": "command",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py",
-      "output_evidence": "FENCE-SCOPED rows_today=29 unchanged_today=True scoped_rendered=9/9 sim_ok=30/30 refusals_ok=7/7 unknown_key_refused_by=validator+module ok=True\n(rc 0, under timeout 120: 32 s on a cold simulator cache, 6 s warm; today's render: every bucket policy byte-identical before and after, sha256[:16] d01ea6e969721945 (49financial, 2536 bytes), a25e8756d60a266c (cottonwood, 1772 bytes), c33a6b0b660ec78b (inflection, 560 bytes); fence_exemption_arns identical, 29 ARNs over 7 buckets; zero scoped statements)",
+      "output_evidence": "FENCE-SCOPED rows_today=29 unchanged_today=True scoped_rendered=9/9 sim_ok=30/30 refusals_ok=7/7 unknown_key_refused_by=validator+module ok=True\n(rc 0, under timeout 120, 8 s; fresh run 2026-10-07 by 0.9.0_WK_NFRA_CTLPLN~6 after AMENDMENT 5; unchanged_today=True, ok=True on the same line)",
       "denominator": "29 of 29 rows accepted by the validator today; 3 of 3 bucket policies byte-identical; 9 of 9 scoped statements rendered and present at the tail of the fence file's rendered policy; 30 of 30 simulator arms matched (27 scoped arms over 3 buckets, 3 plain-admission controls); 7 of 7 refusal cases refused by the validator, 5 of 7 also by the module's plan-time rules (cases 5 and 7 are validator-only), the unknown key by both",
-      "status": "UNVERIFIABLE-BY-INSTRUMENT",
-      "status_reason": "The criterion is met by its words: the verbatim last line reads unknown_key_refused_by=validator+module, ok=True and unchanged_today=True. The checker grades the <expect> as a regex, where the + of validator+module is a quantifier, so no correct output can match it (re.search returns None on the verbatim line; the escaped form validator\\+module matches). Substitute oracle: the verbatim line above, read by the issuer, who owns the expectation and amends it to the escaped form; row NFRA_CTLPLN-W6-S10.",
-      "expect": "unknown_key_refused_by=validator+module"
+      "status": "PASS",
+      "expect": "unknown_key_refused_by=validator\\+module"
     }
   ],
   "controls": {
@@ -154,7 +152,7 @@
     {
       "tool": "python",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py",
-      "result": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok ok=False"
+      "result": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok ok=True"
     },
     {
       "tool": "python",
