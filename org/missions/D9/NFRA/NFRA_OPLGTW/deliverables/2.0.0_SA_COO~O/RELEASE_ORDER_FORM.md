@@ -75,9 +75,11 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
 
 - Never source `/opt/opal-gateway/.env` (row Z-S32).
 - Never write a grant.
-- **The identifier bound (R39, `ledger/ROUND_ANALYSIS.round26.md` @c474e2d3f3).** An order's "never print or commit an
-  account id" means a client, custody or brokerage account identifier. An AWS account id inside a bucket name or a
-  resource address is outside it, and deploy output is not redacted for it.
+- **The identifier bound (R39 and ADDENDUM 1 of `ledger/ROUND_ANALYSIS.round26.md` @51572f8092).** An order's "never
+  print or commit an account id" means a CLIENT account identifier: an end client's account number. Two things are
+  outside it, and output is not redacted for them: an AWS account id inside a bucket name or a resource address, and
+  a Schwab MASTER account id, which is an estate key (census:
+  `deliverables/2.0.0_SA_COO~O/R38_WHOLE_TREE_CENSUS_20261007.md` @48e547c6f9).
 - **The manifest note (row Z-W28-S19).** `release_note` holds the current release's note only. Earlier notes live in
   the ledger entries.
 - **Operator-command output (row Z-W28-S2).** An order that runs `ops/schwab_entitlement_admin.py` redirects the
