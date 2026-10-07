@@ -1,0 +1,131 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-TV-l1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-TV-l1.ticket-service-analysis-request.md",
+  "group": "OTHER",
+  "vintage_commit": "a56311ea64"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~1",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP.md",
+  "vintage_commit": "a56311ea64",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-TV-l1.ticket-service-analysis-request.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "53575b1cfd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "handler edited by path; the order forbids terraform, deploy, Lambda invocation and AWS calls; the route line and the analysis_request routing entry are the issuer's hookups at the merge",
+   "artifact_covered_by": [
+    "TV1-l1-AC1",
+    "TV1-l1-AC2",
+    "TV1-l1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_analysis_request.py",
+   "kind": "test",
+   "commit_or_etag": "53575b1cfd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "repo-local test; in-memory table, notifiers stubbed, no network",
+   "artifact_covered_by": [
+    "TV1-l1-AC1",
+    "TV1-l1-AC2",
+    "TV1-l1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_authz_matrix.py",
+   "kind": "test",
+   "commit_or_etag": "53575b1cfd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "repo-local test; requester-claim assertion moved to the new rule, action count 7 to 8, report route added to the coverage list (row TCKT_VNEXT-D2-W1-S3)",
+   "artifact_covered_by": [
+    "TV1-l1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "TV1-l1-AC1",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_CHECKS/r1_checks.py l1-types expect: TV1-L1-TYPES-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_CHECKS/r1_checks.py l1-types",
+   "output_evidence": "run under timeout 120, rc=0: TV1-L1-TYPES-OK passed=6",
+   "denominator": "6 of 6 named type tests found by name and passed",
+   "status": "PASS",
+   "expect": "TV1-L1-TYPES-OK"
+  },
+  {
+   "criterion_id": "TV1-l1-AC2",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_CHECKS/r1_checks.py l1-selfclaim expect: TV1-L1-SELFCLAIM-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_CHECKS/r1_checks.py l1-selfclaim",
+   "output_evidence": "run under timeout 120, rc=0: TV1-L1-SELFCLAIM-OK passed=2",
+   "denominator": "2 of 2 named self-claim tests found by name and passed",
+   "status": "PASS",
+   "expect": "TV1-L1-SELFCLAIM-OK"
+  },
+  {
+   "criterion_id": "TV1-l1-AC3",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_CHECKS/r1_checks.py l1-report expect: TV1-L1-REPORT-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_CHECKS/r1_checks.py l1-report",
+   "output_evidence": "run under timeout 120, rc=0: TV1-L1-REPORT-OK passed=5",
+   "denominator": "5 of 5 named report-reference tests found by name and passed",
+   "status": "PASS",
+   "expect": "TV1-L1-REPORT-OK"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "in-process mutants against the committed handler, each run against the one test that guards it: (1) the old requester clause restored in _sod_block; (2) _INPUT_ID_RE loosened to ^portfolio_.*$; (3) the comparison_model required_unless rule dropped; (4) REPORT admitted to the client class (did not fire: the assignee check still refuses a client, so the control is stated, not claimed)",
+   "expected": "mutants 1-3 make their guarding test fail",
+   "observed": "restore-requester-clause FIRED-AS-EXPECTED; loosen-input-id FIRED-AS-EXPECTED; drop-comparison-model-rule FIRED-AS-EXPECTED; admit-client-to-REPORT DID-NOT-FIRE (a second layer, the assignee check, holds)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the new test file run twice on the same tree: python -m pytest -q infra/aws/lambda/ticket_center/tests/test_analysis_request.py",
+   "observed": "13 passed in 2.08s; 13 passed in 2.56s; full ticket_center suite 89 passed, 43 subtests passed",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the deployed Lambda, the API Gateway route line and the analysis_request routing entry",
+   "reason": "the order forbids terraform/deploy/AWS; infra/aws/terraform/ticket-center/main.tf is the issuer's hookup at the merge"
+  },
+  {
+   "item": "a real DynamoDB write of report_ref and answers",
+   "reason": "the in-memory table models the report write and refuses floats as DynamoDB does; the real UpdateExpression and condition are not exercised against DynamoDB here"
+  }
+ ],
+ "surprises": [
+  "TCKT_VNEXT-D2-W1-S1",
+  "TCKT_VNEXT-D2-W1-S2",
+  "TCKT_VNEXT-D2-W1-S3",
+  "TCKT_VNEXT-D2-W1-S4"
+ ],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~1/TCKT_VNEXT.TO-TV-l1.ticket-service-analysis-request.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_CHECKS/r1_checks.py l1-types",
+   "result": "TV1-L1-TYPES-OK passed=6"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_CHECKS/r1_checks.py l1-selfclaim",
+   "result": "TV1-L1-SELFCLAIM-OK passed=2"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_CHECKS/r1_checks.py l1-report",
+   "result": "TV1-L1-REPORT-OK passed=5"
+  }
+ ]
+}
