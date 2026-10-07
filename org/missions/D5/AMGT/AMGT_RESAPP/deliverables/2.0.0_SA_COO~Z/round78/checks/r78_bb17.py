@@ -114,7 +114,11 @@ def ac1(where):
            "%d of %d rosters with such a row" % (first, checked))
 
     prov = ov_ba.get("provenance")
-    entries = prov if isinstance(prov, list) else list(prov.values()) if isinstance(prov, dict) else []
+    # AMENDMENT 1 (issuer, row Z-W302-S1): the overlay's provenance is {"inputs": [entry, ...]}; the first cut of this
+    # clause took the dict's values as the entries and so read 0 of 0. The entries are read from every list it holds.
+    entries = []
+    for part in (prov if isinstance(prov, list) else list(prov.values()) if isinstance(prov, dict) else []):
+        entries.extend(part if isinstance(part, list) else [part])
     entries = [e for e in entries if isinstance(e, dict) and "source" in e]
     clause("H5 every provenance entry carries a plain source name key", bool(entries) and all("source_name" in e for e in entries),
            "%d of %d" % (sum(1 for e in entries if "source_name" in e), len(entries)))
