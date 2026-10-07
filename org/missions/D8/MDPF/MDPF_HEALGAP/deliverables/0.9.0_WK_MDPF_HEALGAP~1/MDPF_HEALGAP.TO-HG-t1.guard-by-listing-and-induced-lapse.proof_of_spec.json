@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t1",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t1.guard-by-listing-and-induced-lapse.md",
+    "group": "OTHER",
+    "vintage_commit": "474ec88e5a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "474ec88e5a",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t1.guard-by-listing-and-induced-lapse.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "8af853ce59",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: offline only; the deploy is the issuer's",
+      "introduces": [
+        "auth-lapse"
+      ],
+      "artifact_covered_by": [
+        "HG1-t1-AC1",
+        "HG1-t1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/test_healgap_guard.py",
+      "kind": "test",
+      "commit_or_etag": "8af853ce59",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest file, not deployed",
+      "artifact_covered_by": [
+        "HG1-t1-AC1",
+        "HG1-t1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG1-t1-AC1",
+      "criterion_verbatim": "with GetObject denied, a listed stamp makes the runner skip before the session read, and an absent stamp reaches it.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R1_CHECKS/hg_t1_guard_tests.py",
+      "output_evidence": "test_healgap_guard.py::test_guard_skips_on_listed_stamp_with_getobject_denied PASSED; ::test_guard_pulls_when_stamp_absent_control PASSED; ::test_induced_auth_lapse_raises_before_session_read PASSED; ::test_induced_auth_lapse_skipped_on_complete_day PASSED; 4 passed in 0.47s; GUARD-TESTS-OK (rc=0). Base (474ec88e5a) per the order: GUARD-TESTS-BAD rc=4, no test file.",
+      "denominator": "2 of 2 required tests passed by name (4 of 4 collected in the file)",
+      "status": "PASS",
+      "expect": "GUARD-TESTS-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "HG1-t1-AC2",
+      "criterion_verbatim": "the induced lapse fails as an HTTP 401 before the session read on an incomplete day, and a complete day still skips.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R1_CHECKS/hg_t1_induce_tests.py",
+      "output_evidence": "test_healgap_guard.py::test_guard_skips_on_listed_stamp_with_getobject_denied PASSED; ::test_guard_pulls_when_stamp_absent_control PASSED; ::test_induced_auth_lapse_raises_before_session_read PASSED; ::test_induced_auth_lapse_skipped_on_complete_day PASSED; 4 passed in 0.47s; INDUCE-TESTS-OK (rc=0). Base per the order: INDUCE-TESTS-BAD rc=4, no test file.",
+      "denominator": "2 of 2 required tests passed by name (4 of 4 collected in the file)",
+      "status": "PASS",
+      "expect": "INDUCE-TESTS-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Guard reverted to get_object in a scratch copy (.scratch/mut, since deleted): the stamp-present tests must fail while the fake S3 denies get_object",
+      "expected": "test_guard_skips_on_listed_stamp_with_getobject_denied and test_induced_auth_lapse_skipped_on_complete_day FAIL; the two absent-stamp tests still pass",
+      "observed": "2 failed, 2 passed: FAILED test_guard_skips_on_listed_stamp_with_getobject_denied (SessionReached), FAILED test_induced_auth_lapse_skipped_on_complete_day (RuntimeError HTTP 401 INDUCED)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the check scripts were run twice (before and after the naming-gate edit to the test file): both runs 4 passed, same tokens",
+      "observed": "GUARD-TESTS-OK / INDUCE-TESTS-OK on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy to AWS, Lambda invoke, any live induce run",
+      "reason": "order BOUNDS: offline only; the deploy is the issuer's"
+    },
+    {
+      "item": "_reconcile_counts, landing gates, model-detail scope, landing_guard.py",
+      "reason": "order BOUNDS: not touched"
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-W1-S1: the commit gate's ruff is 0.16.10 against a 0.15.11 pin and refuses every commit of lambda_function.py; worked around by an uncommitted env shim"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~1/MDPF_HEALGAP.TO-HG-t1.guard-by-listing-and-induced-lapse.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python test_lambda_function.py",
+      "invocation": "cd infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/ && python test_lambda_function.py",
+      "result": "Ran 17 tests, exit 0 (existing offline suite still passes)"
+    }
+  ]
+}

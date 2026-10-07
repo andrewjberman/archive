@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_CUSTDY.TO-CU-b-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-b-1.pick-on-live-data.md",
+    "group": "OTHER",
+    "vintage_commit": "e27b2bce34"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.round2.md",
+    "vintage_commit": "e27b2bce34",
+    "to_ref": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-b-1.pick-on-live-data.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_CUSTDY~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/advisor_client_list.py",
+      "kind": "script",
+      "commit_or_etag": "7f066bfba9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local Python; no deploy",
+      "artifact_covered_by": [
+        "CU5-AC1",
+        "CU5-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/none_source.py",
+      "kind": "script",
+      "commit_or_etag": "7f066bfba9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local Python; no deploy",
+      "artifact_covered_by": [
+        "CU5-AC1",
+        "CU5-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_advisor_projection_refused.py",
+      "kind": "test",
+      "commit_or_etag": "7f066bfba9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local Python; no deploy",
+      "artifact_covered_by": [
+        "CU5-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CU5-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_advisor_projection_refused.py -> passed",
+      "method": "command",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_advisor_projection_refused.py",
+      "output_evidence": "6 passed in 1.22s | rc=0",
+      "denominator": "6 of 6 tests passed; round 1's test_advisor_client_list.py 9 of 9 passed beside it and the whole irpt_custody tests dir 42 of 42",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU5-AC2",
+      "criterion_verbatim": "python data/assets/scripts/gold/irpt_custody/advisor_client_list.py --pick --as-of 2026-09-30 --ownership s3://opal-data-bd/platinum/49financial/ownership_map.json -> ADVISOR-PICK scanned=",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/advisor_client_list.py --pick --as-of 2026-09-30 --ownership s3://opal-data-bd/platinum/49financial/ownership_map.json",
+      "output_evidence": "ADVISOR-PICK scanned=190 eligible=16 pick=matthew_gooch households=10 classes=4 projection_refused=482 of=7022 | rc=0",
+      "denominator": "190 of 190 advisors scanned (190 CENSUS lines); 482 of 7022 distinct granted accounts projection-refused; counts reported, not graded (the map refreshes daily)",
+      "expect": "ADVISOR-PICK scanned=",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU5-AC3",
+      "criterion_verbatim": "python data/assets/scripts/gold/irpt_custody/none_source.py --ownership s3://opal-data-bd/platinum/49financial/ownership_map.json -> NONE-SOURCE file=",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/none_source.py --ownership s3://opal-data-bd/platinum/49financial/ownership_map.json",
+      "output_evidence": "NONE-SOURCE file=infra/aws/lambda/investor-reporting/_ids/data/custodian_key_seam.json:48 owner=IRPT_BCKEND refused=482 distinct=7022 via_none=482 | rc=0 (preceded by NONE-GUARD file=infra/aws/lambda/investor-reporting/_ids/ids.py:387 owner=IRPT_BCKEND)",
+      "denominator": "482 of 482 refused accounts trace to a seam index value equal to 'None'; 7022 distinct granted accounts projected",
+      "expect": "NONE-SOURCE file=",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 run twice; AC2 and AC3 run on the same day's map",
+      "observed": "AC1 PASS both runs; AC2 and AC3 agree on 482 of 7022",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the catch in book_of edited in place to re-raise every projection exception (round 1's behaviour), then restored byte for byte from a scratch copy before commit",
+      "expected": "CU5-AC1 FAIL",
+      "observed": "4 failed, 2 passed (the refused-account tests raise IdRefused); restored: 6 passed",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "surprises": [
+    "IRPT_CUSTDY-W5-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [
+    {
+      "item": "the fix of the 'None' values in the seam file and the guard at ids.py:387-388",
+      "reason": "files of IRPT_BCKEND, outside this order's grant; routed by row IRPT_CUSTDY-W5-S1"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CU5-AC1,CU5-AC2,CU5-AC3",
+      "result": "rc=0 (see commit)"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e26",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "87ad6d2e4c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c32",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e26.old-list-census-and-key-form.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~25",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_census.py",
+      "kind": "script",
+      "commit_or_etag": "2f2d1faa55",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Consistent paginated scan of bd-securities and etf-classifications plus the Holdings producer's local per-firm build (no upload); writes the census file; ruff clean.",
+      "artifact_covered_by": [
+        "SC8-e26-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_CENSUS_20261007.json",
+      "kind": "doc",
+      "commit_or_etag": "2f2d1faa55",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "denominator 10965; by_membership 2381/1500/7084; by_key_form 3825/0/7133/7; held_source names the producer build, as-of 2026-10-05, claim inferred.",
+      "artifact_covered_by": [
+        "SC8-e26-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/KEY_FORM_PROPOSAL_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "2f2d1faa55",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One PROPOSED KEY FORM line (NAME::<slug>), 7133 rows keyed, four postulates, comp-find token census 3733 hits across 58833 files.",
+      "artifact_covered_by": [
+        "SC8-e26-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e26-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e26.py census -- expect: SC-E26-CENSUS ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e26.py census",
+      "expect": "SC-E26-CENSUS ok=True",
+      "output_evidence": "SC-E26-CENSUS ok=True file=OLD_LIST_CENSUS_20261007.json denominator=10965 live=10965 (rc=0)",
+      "denominator": "by_membership 2381+1500+7084 = 10965 of 10965; by_key_form 3825+0+7133+7 = 10965 of 10965; live consistent count 10965",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e26-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e26.py keyform -- expect: SC-E26-KEYFORM ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e26.py keyform",
+      "expect": "SC-E26-KEYFORM ok=True",
+      "output_evidence": "SC-E26-KEYFORM ok=True file=KEY_FORM_PROPOSAL_20261007.md (rc=0)",
+      "denominator": "1 of 1 proposal file; one PROPOSED KEY FORM line; 4 of 4 postulates present",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The census with by_membership.rest raised by 1 (partition sums to 10966 against denominator 10965), run through the same checker from a scratch tree.",
+      "expected": "SC-E26-CENSUS ok=False by_membership sums to 10966, denominator 10965 (rc=1)",
+      "observed": "SC-E26-CENSUS ok=False by_membership sums to 10966, denominator 10965 (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "issuer_check_sc_e26.py census run twice back to back against the live table.",
+      "observed": "Identical line both times: ok=True denominator=10965 live=10965",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The served platinum Holdings objects (opal-data-<firm>) as the held source.",
+      "reason": "Explicit resource-policy deny to this device's identity (row MDPF_SECCLASS-W25-S1); the held set is the producer's own local build, claim inferred, named in held_source."
+    },
+    {
+      "item": "Any write to bd-securities, etf-classifications or S3.",
+      "reason": "BOUNDS: read-only measurement cell."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W25-S1",
+    "MDPF_SECCLASS-W25-S2"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_census.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on the .py)",
+      "result": "ruff clean after fixing 10 findings; commit 2f2d1faa55 landed"
+    }
+  ]
+}
