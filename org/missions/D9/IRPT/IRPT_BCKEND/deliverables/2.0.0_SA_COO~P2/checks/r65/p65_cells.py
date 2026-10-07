@@ -34,8 +34,7 @@ PYPDF_ONLY = {
     "tests/test_submit_service.py::test_submit_then_first_read_after_the_render_finalizes_the_receipt",
 }
 GRANTS = {
-    "145": (EXP + "/entry.py", EXP + "/receipt.py", EXP + "/bundle.py", EXP + "/tests/test_covered_account_ids.py",
-            EXP + "/backfill_covered_account_ids.py", EXP + "/tests/test_backfill_covered_account_ids.py") + SCHEMAS
+    "145": (EXP + "/",) + SCHEMAS
            + (CH, TO + "343.", TO + "344.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~145/"),
     "146": (CH, TO + "345.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~146/"),
 }
