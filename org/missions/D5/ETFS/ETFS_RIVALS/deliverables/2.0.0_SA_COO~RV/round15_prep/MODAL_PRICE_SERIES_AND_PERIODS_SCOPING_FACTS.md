@@ -52,3 +52,17 @@ not re-read by this seat.
 - Token census over `data/etfs/scripts/rivalfunds/*.py` and its tests for YTD / QTD / MTD / R30 / R90 / R365: 166 occurrences
   in 27 files (this seat's Grep; 5 product files, 22 test files). The AI accounts also name periods (`ai_accounts.py`, 6).
 - He named QTD and YTD only. MTD is not named.
+
+## 5. The size budget against `C-PAGE-CAP` (MEASURED 2026-10-07 ~05:1xZ on the served 2026-10-06 index.html, batch rv-publish-1006r14)
+
+- Page 1,279,784 B. Its dialogs block is 446,080 B: **423** security dialogs holding **671** fund sections, of which **365**
+  carry a buying line (a fund traded the security), in **276** dialogs. (The 171 in section 3 was the AUDIT page's dialog count,
+  the wrong object for this budget; corrected here.)
+- `C-PAGE-CAP` asks for 20% headroom under `DIALOG_SOFT_CAP` (1,950,000 B): a ceiling of 1,560,000 B. Room left under it:
+  **280,216 B** -- 662 B per dialog, 417 B per fund section, 767 B per traded fund section.
+- Under the cap itself (no headroom): 670,216 B -- 1,584 B per dialog.
+- Not measured: the bytes of one real curve. An inline SVG path of n points costs roughly 10 to 12 B a point before markers
+  (an estimate, not a measurement); three ranges at 21 / 63 / 52 (weekly) points is on the order of 1,500 B a curve. On that
+  estimate one curve per dialog does not fit under the 20% ceiling and barely fits under the cap with nothing else added.
+- Also unruled by Andrew at this writing: the day unit of 30d / 90d / 365d (trading or calendar); the CTO recommends calendar
+  (msg 30607) and has carded it to him.
