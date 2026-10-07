@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-d-8",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/prd/NFRA_CTLPLN_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4cea56993a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round4.md",
+    "vintage_commit": "208c5d85ee",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-8.missing-row-refusal-proposal.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/tests/probe_missing_registry_row.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New probe: feeds .tools/naming-apply-gate.py --plan-json three synthetic add-one-lambda plans (registered name, well-named unregistered name, badly formed name) as safe-apply.sh does; no AWS, no terraform; edits no gate or registry file.",
+      "artifact_covered_by": [
+        "CT4d8-AC1"
+      ],
+      "introduces": [
+        "def run_gate(",
+        "def main("
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~11/PROPOSAL_MISSING_ROW_REFUSAL_FOR_LGIC_ENFORCE.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Proposal to the owner of LGIC_ENFORCE: measured behaviour, the refusal, its place in the gate, cost, non-application, starting mode, what it does not cover. Changes no file of that project.",
+      "artifact_covered_by": [
+        "CT4d8-AC2"
+      ],
+      "introduces": [
+        "## 1. What the apply path does today (measured)",
+        "## 7. The question this proposal hands you"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended: NFRA_CTLPLN-W11-S1, NFRA_CTLPLN-W11-S2.",
+      "artifact_covered_by": [
+        "CT4d8-AC1"
+      ],
+      "introduces": [
+        "NFRA_CTLPLN-W11-S1",
+        "NFRA_CTLPLN-W11-S2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT4d8-AC1",
+      "criterion_verbatim": "CT4d8-AC1 -- the gate was exercised (its known-bad case is refused), so the other two results are measurements. Record the whole last line; unregistered_wellnamed is the finding, whichever value it takes.",
+      "method": "command",
+      "invocation": "python .tools/tests/probe_missing_registry_row.py",
+      "output_evidence": "registry census: resources.json holds 465 row(s); 0 of 465 row name(s) grade CONFORMANT under lib/opal_naming.grade()\n--- case A: refused rc=1 | NAMING-PLAN: REFUSE 1 graded\n--- case B: admitted rc=0 | NAMING-PLAN: PASS 1 graded\n--- case C: refused rc=1 | NAMING-PLAN: REFUSE 1 graded\nMISSING-ROW-PROBE registered_wellnamed=refused unregistered_wellnamed=admitted badly_named=refused gate_mode=ENFORCE ok=True",
+      "denominator": "3 of 3 synthetic plans run through the gate; the positive control (case C, badly formed) refused, rc=1",
+      "status": "PASS",
+      "expect": "badly_named=refused"
+    },
+    {
+      "criterion_id": "CT4d8-AC2",
+      "criterion_verbatim": "CT4d8-AC2 (judgment) -- the proposal is one the owning project can act on without asking a question: it states the measured behaviour, the refusal, its place in the gate, its cost and its non-application.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment row, no instrument this worker can call",
+      "output_evidence": "Artifact for the L9 read: org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~11/PROPOSAL_MISSING_ROW_REFUSAL_FOR_LGIC_ENFORCE.md. This worker records the artifact path and gives no verdict.",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true; graded at L9 by 3.0.0_SA_CVO per the task order's proof_of_spec block -- a PASS/FAIL here is INVALID"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-BY-CONSTRUCTION: the probe's own positive control is case C (a badly formed name must be refused); a probe that never reached the gate would print error, not refused.",
+      "expected": "N/A",
+      "observed": "N/A -- see description",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Probe run twice against the same tree in the same session.",
+      "observed": "Both runs printed the same last line (the gate and the registry are read, never written; the verdict log append is gitignored runtime state).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The gate's behaviour on a real plan, and on dell1 or dell2.",
+      "reason": "BOUNDS: no terraform plan against a backend, no AWS call. The PRD records the Dell run as UNMEASURED; the probe grades synthetic plans only."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W11-S1",
+    "NFRA_CTLPLN-W11-S2"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~11/PROPOSAL_MISSING_ROW_REFUSAL_FOR_LGIC_ENFORCE.md",
+  "compiler_tools": [
+    {
+      "tool": "probe_missing_registry_row.py",
+      "invocation": "timeout 120 python .tools/tests/probe_missing_registry_row.py",
+      "result": "rc=0, ok=True"
+    }
+  ]
+}
