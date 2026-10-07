@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-d-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-5.resource-policy-deny.md",
+    "group": "OTHER",
+    "vintage_commit": "208c5d85ee"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~8",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round4.md",
+    "vintage_commit": "208c5d85ee",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-5.resource-policy-deny.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py",
+      "kind": "test",
+      "commit_or_etag": "ce05f0e838",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_respol_policy.json",
+      "kind": "config_data",
+      "commit_or_etag": "ce05f0e838",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DenyResourcePolicyWrites, 74 actions, 2,334 characters without whitespace; nothing applied"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/iam.tf",
+      "kind": "config_data",
+      "commit_or_etag": "ce05f0e838",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new aws_iam_policy.dell_agent_respol and its group attachment; terraform validate Success; nothing applied"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "kind": "test",
+      "commit_or_etag": "ce05f0e838",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
+      "kind": "test",
+      "commit_or_etag": "ce05f0e838",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT4d5-AC1",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py expect: ruled_allowed_caught=0 ok=True",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py` (rc 0). LAST LINE: RESPOL-DERIVED services=28 with_actions=20 none=7 unsure=1 actions=74 covered=74/74 ruled_allowed_caught=0 ok=True. NONE: application-autoscaling, cloudwatch, cur, ecs, scheduler, sts, tag. UNSURE: apigateway (row NFRA_CTLPLN-W8-S2). The statement landed in dell_respol_policy.json (2,334 characters), not dell_deploy_policy.json (4,951, byte-unchanged; 4,951 + 2,334 exceeds 6,144).",
+      "denominator": "28 allowed services (20 with actions + 7 NONE + 1 UNSURE); 74 of 74 derived actions covered; 0 of 6 ruled-allowed calls caught",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CT4d5-AC2",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=11/11 all_ok=True",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py` (rc 0). LAST LINE: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=11/11 all_ok=True. Fourth block: s3:PutBucketPolicy, lambda:AddPermission, kms:PutKeyPolicy, kms:CreateGrant, secretsmanager:PutResourcePolicy, sns:AddPermission, sqs:AddPermission, logs:PutResourcePolicy, ecr:SetRepositoryPolicy each -> explicitDeny (9 of 9); sqs:SetQueueAttributes and sns:SetTopicAttributes -> allowed (2 of 2). The four first-block arms (s3 PutBucketPolicy, lambda AddPermission, kms PutKeyPolicy, secretsmanager PutResourcePolicy) now require explicitDeny instead of implicitDeny (row NFRA_CTLPLN-W8-S1).",
+      "denominator": "22 of 22 allowed, 19 of 19 denied, 5 of 5 passrole, 8 of 8 protected, 11 of 11 respol arms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CT4d5-AC3",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py expect: policy_size_ok=True ok=True",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py` (rc 0; terraform init -backend=false had been warmed once outside the bound, 5.5 s, provider already cached). LAST LINE: IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=8/8 policy_size_ok=True ok=True. Characters without whitespace: dell1_bus 276, dell2_bus 276, dell_create 3998, dell_deploy 4951, dell_respol 2334, limit 6144. render_passrole.py --check: PASSROLE-RENDER applied=0 named=0 wildcard=0 in_sync=True ok=True. derive_protected_functions.py --check: PROTECTED-CENSUS functions=233 regions=17 refused_regions=0 protected=10 by_authorizer=1 by_edge=5 ruled_in=4 unruled=0 in_sync=True ok=True.",
+      "denominator": "8 of 8 names from the builder; 5 of 5 policy documents within 6144 characters; 2 of 2 renderer checks in_sync=True",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the Deny statement file removed (dell_respol_policy.json moved aside for one run, then restored; git status clean of it afterwards)",
+      "expected": "covered=0/74 and ok=False, so AC1 discriminates",
+      "observed": "RESPOL-DERIVED services=28 with_actions=20 none=7 unsure=1 actions=74 covered=0/74 ruled_allowed_caught=0 ok=False",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the cloud evaluator and the derivation are deterministic over fixed input",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform apply, plan against the backend, any IAM write",
+      "reason": "order BOUNDS: apply nothing; the only AWS calls were iam:SimulateCustomPolicy and the function listing of derive_protected_functions.py --check"
+    },
+    {
+      "item": "the exercised refusal on a Dell",
+      "reason": "the order: run after the order by the issuer's route"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W8-S1",
+    "NFRA_CTLPLN-W8-S2"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~8/NFRA_CTLPLN.TO-CT-d-5.resource-policy-deny.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "terraform",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity validate",
+      "result": "Success! The configuration is valid."
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-d-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-1.dell-fence-census.md",
+    "group": "OTHER",
+    "vintage_commit": "208c5d85ee"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~6",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round4.md",
+    "vintage_commit": "208c5d85ee",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-1.dell-fence-census.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/tests/dell_fence_census.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local read-only census; nothing deployed, no AWS write"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/tests/dell_fence_census.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "saved census result from one --live run; nothing deployed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT4d1-AC1",
+      "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/dell_fence_census.py --from-file infra/aws/terraform/shared-infra/tests/dell_fence_census.json expect: unreadable=0 (same line: disagree=0 ok=True)",
+      "method": "command",
+      "invocation": "python infra/aws/terraform/shared-infra/tests/dell_fence_census.py --from-file infra/aws/terraform/shared-infra/tests/dell_fence_census.json",
+      "output_evidence": "FENCE-CENSUS buckets=24 read=24 unreadable=0 fenced=3 no_policy=11 no_fence=10 dell1_admitted=21/24 dell2_admitted=21/24 disagree=0 undeclared=2 gap_dell1=0 gap_dell2=3 ok=True\n(rc 0, 0.25 s under timeout 120; the --live run that saved the file took about 70 s, inside the bound)",
+      "denominator": "24 of 24 opal-data-* buckets read (of 40 buckets in the account; 16 are outside the declared domain): 3 fenced, 11 no-policy, 10 no-fence; 48 of 48 evaluator calls returned a decision; disagree=0",
+      "status": "PASS",
+      "expect": "unreadable=0"
+    },
+    {
+      "criterion_id": "CT4d1-AC2",
+      "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/dell_fence_census.py --from-file ... --control expect: CONTROL admitted_principal=allowed dell_on_fenced=denied ok=True",
+      "method": "command",
+      "invocation": "python infra/aws/terraform/shared-infra/tests/dell_fence_census.py --from-file infra/aws/terraform/shared-infra/tests/dell_fence_census.json --control",
+      "output_evidence": "CONTROL admitted_principal=allowed dell_on_fenced=denied ok=True\n(rc 0; two live iam simulate-principal-policy calls on one fenced bucket: an admitted user evaluated allowed with reading ADMITTED, dell2 evaluated explicitDeny with reading DENIED)",
+      "denominator": "1 of 1 fenced bucket exercised (first of the 3 fenced); 1 admitted principal, 1 Dell user",
+      "status": "PASS",
+      "expect": "CONTROL admitted_principal=allowed dell_on_fenced=denied ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2 is the control: the same reading and the same evaluator call separate an admitted principal (allowed) from a Dell user (explicitDeny) on one fenced bucket",
+      "expected": "allowed vs explicitDeny",
+      "observed": "allowed vs explicitDeny",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: the saved file is one live measurement; --from-file re-prints it without AWS",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a fence enforced outside the bucket policy (an access point, a key policy)",
+      "reason": "BLIND by the order's preflight: the live Dell read after CT-d-2's apply is the test"
+    },
+    {
+      "item": "fence statements keyed on aws:userid",
+      "reason": "none exist among the 24 policies; the script reports such a form UNPARSED and counts it in disagree rather than guess"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W6-S1",
+    "NFRA_CTLPLN-W6-S2"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~6/NFRA_CTLPLN.TO-CT-d-1.dell-fence-census.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python infra/aws/terraform/shared-infra/tests/dell_fence_census.py --from-file infra/aws/terraform/shared-infra/tests/dell_fence_census.json",
+      "result": "FENCE-CENSUS buckets=24 read=24 unreadable=0 fenced=3 no_policy=11 no_fence=10 dell1_admitted=21/24 dell2_admitted=21/24 disagree=0 undeclared=2 gap_dell1=0 gap_dell2=3 ok=True"
+    }
+  ]
+}
