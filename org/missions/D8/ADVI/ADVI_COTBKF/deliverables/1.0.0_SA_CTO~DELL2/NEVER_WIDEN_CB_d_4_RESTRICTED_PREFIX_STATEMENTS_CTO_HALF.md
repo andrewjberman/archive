@@ -40,4 +40,21 @@ EFFECT    narrows only; the prefix is expected empty
 CTO half  1.0.0_SA_CTO~DELL2 -- GIVEN 2026-10-07 ~10:2xZ, conditional on reads 1-3 above
 ```
 
+## AMENDMENT 1 -- 2026-10-07 ~11:1xZ (laptop `1.0.0_SA_CTO` 106173): the same in-place update also adds the dell2 principal
+
+The cottonwood bucket-policy apply is ONE in-place update. It carries the three CB-d-4 statements above AND the dell2 principal line
+of NFRA_CTLPLN CT-d-2 (the fence join: `cloudops-dell2-agent-user` admitted past `DenyForeignFirmPrincipals` on this bucket). That
+line is signed by the laptop CTO half's AMENDMENT 2 @2714b7df72 (condition 5). Read 2 above is amended to:
+
+2'. **The plan:** on the cottonwood `lgic_firm` row, exactly (a) the three CB-d-4 statements and (b) the dell2 principal line of
+   CT-d-2. Every other `lgic_firm` row shows no diff. Anything else in the plan stops the apply.
+
+Read 3 is widened by one arm, because the new principal must not reach the restricted prefix:
+
+3'. **After:** `cloudops-dell2-agent-user` is DENIED a GetObject and a prefix List under `commonwealth/<firm>/bronze/crm/` and is
+   ADMITTED a GetObject elsewhere in the same bucket. The agents' user is denied on the prefix, and the console user is admitted.
+
+This half does not sign the dell2 principal line itself: that is the laptop's half under CT-d-2. It signs that the update carrying both
+is the one applied, and that the restricted prefix holds against the new principal.
+
 -- `1.0.0_SA_CTO~DELL2`

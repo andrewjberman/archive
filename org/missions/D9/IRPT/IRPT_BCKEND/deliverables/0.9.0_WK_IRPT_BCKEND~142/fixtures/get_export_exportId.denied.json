@@ -1,0 +1,82 @@
+{
+ "cases": [
+  {
+   "expect_codes": [
+    "NOT_AUTHORIZED"
+   ],
+   "name": "no_grant_advisor",
+   "principal": {
+    "advisor_id": "ADV-C-0003",
+    "email": "advisor.c@49financial.com"
+   }
+  },
+  {
+   "deps": "revoked",
+   "expect_codes": [
+    "NOT_AUTHORIZED"
+   ],
+   "name": "grant_revoked"
+  },
+  {
+   "event": {
+    "firm_id": "inflection"
+   },
+   "expect_codes": [
+    "FIRM_BINDING"
+   ],
+   "must_not_echo": [
+    "inflection"
+   ],
+   "name": "claimed_firm_mismatch"
+  },
+  {
+   "expect_codes": [
+    "NOT_AUTHORIZED"
+   ],
+   "name": "no_edge_marker",
+   "principal": {
+    "set_headers": {
+     "X-Origin-Verify": ""
+    }
+   }
+  },
+  {
+   "event": {
+    "pathParameters": {
+     "exportId": "${EXPORT_B}"
+    },
+    "receipt_fixture": {
+     "$include": "infra/aws/lambda/investor-reporting/_contracts/fixtures/ExportReceipt.valid.json",
+     "$instance": true,
+     "$patch": {
+      "artifact.storage_bucket": "opal-data-fixture",
+      "artifact.storage_key": "firms/49financial/generations/${EXPORT_B}/artifact.pdf",
+      "download_route.route": "/api/scoped/investor-reporting/export/${EXPORT_B}/download",
+      "export_ref.export_id": "${EXPORT_B}",
+      "facts.account_ids": [
+       "${A5}"
+      ],
+      "timestamps.created_at": "2026-10-02T09:00:00Z",
+      "timestamps.released_at": "2026-10-02T09:01:00Z"
+     }
+    }
+   },
+   "expect_codes": [
+    "NOT_FOUND"
+   ],
+   "must_not_echo": [
+    "${A5}"
+   ],
+   "name": "foreign_object"
+  }
+ ],
+ "fixture_schema": "irpt-gated-route-fixture/1",
+ "function": "irpt-export-render",
+ "operation": "export-receipt",
+ "principal_class": "DENIED: see cases (same request shape, one change each)",
+ "request_contract": [
+  "docs/contracts/investor-reporting/v1/routes.json#GET /api/scoped/investor-reporting/export/{exportId}",
+  "docs/contracts/investor-reporting/v1/ExportReceipt.schema.json"
+ ],
+ "route": "GET /api/scoped/investor-reporting/export/{exportId}"
+}
