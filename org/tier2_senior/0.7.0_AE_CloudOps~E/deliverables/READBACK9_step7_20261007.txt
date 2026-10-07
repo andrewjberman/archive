@@ -1,0 +1,113 @@
+============================================================================================================
+V1  LIVE == SAVED PRIOR + EXACTLY THE ONE STATEMENT   (key 44a2284f-1e14-4ea1-b6cb-f6121bfde35a)
+============================================================================================================
+  prior sha256 118c5cd7a4afc085b85aeccab8ab02dc9fb9c5d464e4dc482e78986ffb0fac17  (770 B, 2 statements)
+  live                                                  (3 statements)
+  the new statement appears 1 time(s)
+  live MINUS the new statement == saved prior: True
+  mutant control (one extra action planted in NamedReadersUseTheKey): False   <- must be False
+  the two pre-existing statements, unchanged field by field:
+     RootAdministersTheKeyAndCannotUseIt    identical: True
+     NamedReadersUseTheKey                  identical: True
+  THE NEW STATEMENT AS IT LIVES:
+     Sid       = DellAgentUsersDecryptOnly
+     Effect    = Allow
+     Action    = ['kms:Decrypt', 'kms:DescribeKey']
+     Principal = ['arn:aws:iam::313476888478:user/cloudops-dell1-agent-user', 'arn:aws:iam::313476888478:user/cloudops-dell2-agent-user']
+     Resource  = *
+     exactly kms:Decrypt + kms:DescribeKey: True
+     exactly the two Dell agent users:      True
+     NO encrypt / data-key / re-encrypt:    True
+############ V2a  the cell's check, RE-RUN AFTER the apply ############
+ARM reader Andrew_Berman kms:Decrypt -> allowed, kms:Encrypt -> allowed (want allowed, allowed) OK
+ARM unlisted transcripts-unlisted-probe-user kms:Decrypt -> implicitDeny, kms:Encrypt -> implicitDeny (want not allowed) OK
+SIMULATOR LIMITS: bare Resource "*" refused by the simulator (replaced by the key ARN for the call only); the simulator takes the UNION of identity and resource policies and does not model the KMS rule that a customer-managed key needs the KEY POLICY to permit use (a neutral identity policy is used here so only the key policy can allow); a real decrypt of a real object, key grants, SCPs and the S3 object path need the apply and are another route's.
+TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True statements_added=1 ok=False
+
+############ V2b  arms against the LIVE policy, BOTH readings ############
+principal                      action                   RAW_SIM        KMS_RULE       why (KMS rule)
+--------------------------------------------------------------------------------------------------------------------
+cloudops-dell1-agent-user      kms:Decrypt              allowed        allowed        named statement: DellAgentUsersDecryptOnly
+cloudops-dell1-agent-user      kms:DescribeKey          allowed        allowed        named statement: DellAgentUsersDecryptOnly
+cloudops-dell2-agent-user      kms:Decrypt              allowed        allowed        named statement: DellAgentUsersDecryptOnly
+cloudops-dell2-agent-user      kms:DescribeKey          allowed        allowed        named statement: DellAgentUsersDecryptOnly
+cloudops-dell1-agent-user      kms:Encrypt              implicitDeny   implicitDeny   no statement names it
+cloudops-dell1-agent-user      kms:GenerateDataKey      implicitDeny   implicitDeny   no statement names it
+cloudops-dell1-agent-user      kms:ReEncryptFrom        implicitDeny   implicitDeny   no statement names it
+cloudops-dell2-agent-user      kms:Encrypt              implicitDeny   implicitDeny   no statement names it
+cloudops-dell2-agent-user      kms:GenerateDataKey      implicitDeny   implicitDeny   no statement names it
+cloudops-dell2-agent-user      kms:ReEncryptFrom        implicitDeny   implicitDeny   no statement names it
+cloudops-dell1-agent-user      kms:PutKeyPolicy         explicitDeny   explicitDeny   root delegation + own policy (explicitDeny)
+cloudops-dell2-agent-user      kms:PutKeyPolicy         explicitDeny   explicitDeny   root delegation + own policy (explicitDeny)
+cloudops-dell1-agent-user      kms:ScheduleKeyDeletion  allowed        implicitDeny   root delegation + own policy (implicitDeny)
+cloudops-dell2-agent-user      kms:ScheduleKeyDeletion  allowed        implicitDeny   root delegation + own policy (implicitDeny)
+Andrew_Berman                  kms:Encrypt              allowed        allowed        named statement: NamedReadersUseTheKey
+Andrew_Berman                  kms:Decrypt              allowed        allowed        named statement: NamedReadersUseTheKey
+Traceback (most recent call last):
+  File "<stdin>", line 62, in <module>
+  File "<stdin>", line 32, in sim
+  File "C:\Users\AndrewBerman\AppData\Local\Programs\Python\Python312\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AndrewBerman\AppData\Local\Programs\Python\Python312\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AndrewBerman\AppData\Local\Programs\Python\Python312\Lib\site-packages\botocore\client.py", line 1094, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.NoSuchEntityException: An error occurred (NoSuchEntity) when calling the SimulatePrincipalPolicy operation: Unable to retrieve specified IAM entity.
+############ WHICH CONJUNCT OF ok= FAILS -- measured, every one printed ############
+  check's last line : TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True statements_added=1 ok=False
+  check's diff line : diff: added=['DellAgentUsersDecryptOnly'] removed=0 earlier_statements_identical_and_in_place=True reader_statement_byte_identical=True document_fields_other_than_Statement_same=True
+  check's live line : live key policy (kms get-key-policy) statements=3 equals the pre-edit render (one-element lists normalised as KMS stores them): False
+
+  CONJUNCTS of ok (line 348-349), each read from the check's own output:
+     dell_decrypt == 2                      -> True
+     dell_write_refused == 10/10            -> True
+     reader_unchanged                       -> True
+     unlisted_refused                       -> True
+     statements_added == 1                  -> True
+     len(dell_principals) == 2              -> True  (two ARNs rendered; the diff line names one added Sid)
+     simulator_errors == 0                  -> True  (no simulator error printed)
+     live_same                              -> False   <-- THE ONLY FALSE CONJUNCT
+
+  live_same is defined at line 290: the LIVE key policy must equal the PRE-EDIT render.
+  It is a PRE-APPLY FRESHNESS GUARD -- it asserts the cloud still holds the un-edited document
+  so the check's 'before' baseline is real. After a successful apply it is necessarily False
+  (live has 3 statements, the pre-edit render has 2). ok=True AFTER the apply would mean the
+  apply had NOT landed. The order's AC1 <expect> deliberately omits ok=, and all four of its
+  named components still match.
+
+############ V2c  the UNLISTED arm, done the way the check does it ############
+  unlisted (NEUTRAL identity, so only the key policy can allow)  kms:Decrypt      -> implicitDeny
+  unlisted (NEUTRAL identity, so only the key policy can allow)  kms:Encrypt      -> implicitDeny
+  My earlier arm threw NoSuchEntity because it used simulate_principal_policy, which requires
+  the IAM entity to EXIST. The check uses simulate_custom_policy with a neutral identity and
+  CallerArn, which needs no such user -- the right instrument for 'a principal the key policy
+  does not name'. My error, not the check's; recorded because the two calls are easy to confuse.
+############ V3  TARGETED re-plan -- must read no changes ############
+  exit=0   (0 = NO CHANGES)
+  No changes. Your infrastructure matches the configuration.
+
+############ V4  UNTARGETED plan, READ-ONLY (-lock=false), applying NOTHING ############
+  exit=0
+  BEFORE was: 9 to add, 4 to change, 0 to destroy
+  AFTER  is : Plan: 9 to add, 3 to change, 0 to destroy.
+
+  the key is NO LONGER among the changes:
+     aws_kms_key.transcripts blocks: 0
+  what remains, NONE of it applied by this seat:
+       # aws_cloudwatch_event_rule.pull will be created
+       # aws_cloudwatch_event_target.pull will be created
+       # aws_cloudwatch_log_group.pull will be created
+       # aws_iam_policy.pull will be created
+       # aws_iam_role.pull will be created
+       # aws_iam_role_policy_attachment.pull will be created
+       # aws_kms_grant.pull will be created
+       # aws_lambda_function.mail_pull will be updated in-place
+       # aws_lambda_function.pull will be created
+       # aws_lambda_permission.pull_from_rule will be created
+       # module.ldo_001.aws_lambda_function.handler will be updated in-place
+       # module.ldo_001.aws_lambda_function.ingress[0] will be updated in-place
+
+  destroys anywhere in the untargeted plan:
+     0
