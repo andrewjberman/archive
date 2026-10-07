@@ -1,0 +1,1119 @@
+comp-iam: NOTE -- TF role label 'orchestrator' is reused across modules by ['astn-wsjft-orchestrator-role', 'estate-report-orchestrator-role', 'etfs-reports-orchestrator-role']; now module-namespaced (pre-fix this silently mis-linked their inline policies -> FALSE-MISSING).
+comp-iam: NOTE -- TF role label 'runner' is reused across modules by ['estate-report-runner-role', 'irpt-ycharts-runner-role']; now module-namespaced (pre-fix this silently mis-linked their inline policies -> FALSE-MISSING).
+comp-iam: NOTE -- TF role label 'scheduler' is reused across modules by ['astn-wsjft-scheduler-role', 'estate-report-scheduler-role', 'etfs-reports-scheduler-role', 'irpt-intake-poll-role']; now module-namespaced (pre-fix this silently mis-linked their inline policies -> FALSE-MISSING).
+==============================================================================
+PLANE: DESIRED (Terraform). This does NOT read live AWS.
+  comp-iam parses Terraform. It cannot tell landed from planned, and it is
+  blind to any grant Terraform does not declare. A live
+  `simulate-principal-policy` is the APPLIED plane; exercising the call is
+  the only EXERCISED evidence. Rule 22a: DESIRED != APPLIED != EXERCISED.
+  That rule does NOT retire because this tool now compares resources.
+
+  scanned 3 trees (541 .tf files): infra/aws/terraform, infra/aws/multi-account/terraform, infra/aws/ec2
+  policy blocks attached 437; NOT ATTACHED 58  (a role ref this parser cannot resolve); standalone 22  (aws_iam_policy -- no role by design)
+  ^ statements comp-iam has NEVER SEEN. Its verdicts are computed WITHOUT
+    them, so a role may hold a grant this tool cannot find. Run
+    `comp-iam attach-census` for the list. NOT a plane limitation --
+    a parser limitation, and it is stated rather than swallowed.
+
+  DENY-OVERLAY INCOMPLETE: 10 deny statement(s) unparsed (TF reference does not resolve within its own module; for_each -- `role = each.value` not resolved; role name comes from a var/module/local; role reference form not recognised)
+  ^ comp-iam CANNOT answer 'is this denied?'. Among these are NEVER#1's
+    cross-firm Deny belts. Asking this tool about a Deny it never parsed
+    returns SILENCE, and silence must not be read as allowed.
+==============================================================================
+SURFACE: gaps -- TWO-PLANE (action + resource; Andrew-direct fix 2026-08-11).
+  Plane 1: ACTION gaps -- missing/deny-present/coverage-unknown, classes unchanged.
+  Plane 2: RESOURCE MISMATCHES -- the action is HELD, but NOT on the resource this
+  call touches (the class that previously FAILED GREEN on this surface).
+  GRANTED-BROAD (Resource:'*') is EXCLUDED, NOT CLEARED -- a wildcard cannot be
+  falsified by a resource check. Unresolvable resources are counted and named.
+  Still DESIRED-plane (parsed TF): for a fresh change ground on live get-role-policy;
+  for a NEW bucket/table/ARN the apply-time oracle stays simulate-principal-policy.
+==============================================================================
+
+PERMISSION GAPS (39 missing-permission)
+
+  astn-wsjft-orchestrator  (role: astn-wsjft-orchestrator-role)
+    !! MISSING: s3:PutObject
+       Called via: aws s3 cp
+       At: infra/aws/lambda/astn-wsjft-orchestrator/lambda_function.py:173
+       Fix: add 's3:PutObject' to astn-wsjft-orchestrator-role policy in iam.tf
+
+  canonical-schwab-si2  (role: quartz-si2-spike-role)
+    !! MISSING: s3:CopyObject
+       Called via: s3.copy_object
+       At: infra/aws/ec2/canonical-schwab-si2/migrate-0833-to-canonical.py:137
+       Fix: add 's3:CopyObject' to quartz-si2-spike-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: boto3.client('sts').assume_role (method not in comp-iam's 'sts' action map)
+       At: infra/aws/ec2/canonical-schwab-si2/remap-bronze-to-monolith.py:112
+       Fix: add 'UNMAPPED-METHOD' to quartz-si2-spike-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: raw.decode (method not in comp-iam's 'secretsmanager' action map)
+       At: infra/aws/ec2/canonical-schwab-si2/schwab_sdd_authprobe.py:67
+       Fix: add 'UNMAPPED-METHOD' to quartz-si2-spike-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: raw.decode (method not in comp-iam's 'secretsmanager' action map)
+       At: infra/aws/ec2/canonical-schwab-si2/schwab_sdd_discover.py:44
+       Fix: add 'UNMAPPED-METHOD' to quartz-si2-spike-role policy in iam.tf
+
+  cot-rebalancer-runner  (role: cot-rebalancer-runner-role)
+    !! MISSING: s3:GetObject
+       Called via: _s3.get_object
+       At: infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/lambda_function.py:215
+       Fix: add 's3:GetObject' to cot-rebalancer-runner-role policy in iam.tf
+
+  etfs-reports-orchestrator  (role: etfs-reports-orchestrator-role)
+    !! MISSING: s3:PutObject
+       Called via: aws s3 cp
+       At: infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py:653
+       Fix: add 's3:PutObject' to etfs-reports-orchestrator-role policy in iam.tf
+
+  mcportal-grant-writer-lambda  (role: mcportal-grant-writer-role)
+    !! MISSING: UNRESOLVED-RESOURCE
+       Called via: UNRESOLVED-RESOURCE(audit_key = <unresolved>.Key(...)) (DEFERRED/UNTRACED -- grant required, not observable at this call site)
+       At: infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/lambda_function.py:288
+       Fix: add 'UNRESOLVED-RESOURCE' to mcportal-grant-writer-role policy in iam.tf
+
+  opal-amgt-scoped-api  (role: opal-amgt-scoped-api-role)
+    !! MISSING: UNRESOLVED-RESOURCE
+       Called via: UNRESOLVED-RESOURCE(table = <unresolved>.Table(...)) (DEFERRED/UNTRACED -- grant required, not observable at this call site)
+       At: lib/research/api/scoped_amgt.py:494
+       Fix: add 'UNRESOLVED-RESOURCE' to opal-amgt-scoped-api-role policy in iam.tf
+    !! MISSING: UNRESOLVED-RESOURCE
+       Called via: UNRESOLVED-RESOURCE(<unresolved>.Table(...).get_item) (DEFERRED/UNTRACED -- grant required, not observable at this call site)
+       At: lib/research/api/scoped_amgt.py:451
+       Fix: add 'UNRESOLVED-RESOURCE' to opal-amgt-scoped-api-role policy in iam.tf
+    !! MISSING: UNRESOLVED-RESOURCE
+       Called via: UNRESOLVED-RESOURCE(<unresolved>.Table(...).get_item) (DEFERRED/UNTRACED -- grant required, not observable at this call site)
+       At: lib/research/api/scoped_amgt.py:1643
+       Fix: add 'UNRESOLVED-RESOURCE' to opal-amgt-scoped-api-role policy in iam.tf
+    !! MISSING: UNRESOLVED-RESOURCE
+       Called via: UNRESOLVED-RESOURCE(<unresolved>.Table(...).get_item) (DEFERRED/UNTRACED -- grant required, not observable at this call site)
+       At: lib/research/api/scoped_amgt.py:767
+       Fix: add 'UNRESOLVED-RESOURCE' to opal-amgt-scoped-api-role policy in iam.tf
+    !! MISSING: UNRESOLVED-RESOURCE
+       Called via: UNRESOLVED-RESOURCE(<unresolved>.Table(...).get_item) (DEFERRED/UNTRACED -- grant required, not observable at this call site)
+       At: lib/research/api/scoped_amgt.py:769
+       Fix: add 'UNRESOLVED-RESOURCE' to opal-amgt-scoped-api-role policy in iam.tf
+
+  opal-assets-ingest-mirror  (role: opal-assets-ingest-router-role)
+    !! MISSING: s3:ListBucket
+       Called via: _s3.list_objects_v2
+       At: infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:378
+       Fix: add 's3:ListBucket' to opal-assets-ingest-router-role policy in iam.tf
+    !! MISSING: s3:GetObject
+       Called via: _s3.get_object
+       At: infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:409
+       Fix: add 's3:GetObject' to opal-assets-ingest-router-role policy in iam.tf
+    !! MISSING: s3:CopyObject
+       Called via: _s3.copy_object
+       At: infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:517
+       Fix: add 's3:CopyObject' to opal-assets-ingest-router-role policy in iam.tf
+    !! MISSING: s3:GetObject
+       Called via: _s3.copy_object
+       At: infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:517
+       Fix: add 's3:GetObject' to opal-assets-ingest-router-role policy in iam.tf
+    !! MISSING: s3:ListBucket
+       Called via: _s3.list_objects_v2
+       At: infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:527
+       Fix: add 's3:ListBucket' to opal-assets-ingest-router-role policy in iam.tf
+
+  opal-gateway  (role: opal-gateway-role)
+    !! MISSING: UNMAPPED-METHOD
+       Called via: s3.create_bucket (method not in comp-iam's 's3' action map)
+       At: infra/aws/ec2/opal-gateway/tests/acceptance/conftest.py:239
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: s3.put_bucket_versioning (method not in comp-iam's 's3' action map)
+       At: infra/aws/ec2/opal-gateway/tests/acceptance/conftest.py:240
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: s3.create_bucket (method not in comp-iam's 's3' action map)
+       At: infra/aws/ec2/opal-gateway/tests/acceptance/conftest.py:241
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: iam.create_role (method not in comp-iam's 'iam' action map)
+       At: infra/aws/ec2/opal-gateway/tests/acceptance/conftest.py:249
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: client.create_table (method not in comp-iam's 'dynamodb' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_access_state.py:82
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: raw.transact_write_items (method not in comp-iam's 'dynamodb' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_access_state.py:515
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: raw.transact_write_items (method not in comp-iam's 'dynamodb' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_access_state.py:523
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: raw.split (method not in comp-iam's 'dynamodb' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py:279
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: client.create_table (method not in comp-iam's 'dynamodb' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py:80
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: raw.create_table (method not in comp-iam's 'dynamodb' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_jwt_cve_lock.py:56
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNRESOLVED-RESOURCE
+       Called via: UNRESOLVED-RESOURCE(audit_key = <unresolved>.Key(...)) (DEFERRED/UNTRACED -- grant required, not observable at this call site)
+       At: infra/aws/ec2/opal-gateway/tests/test_mcpmsp_asker_firm.py:300
+       Fix: add 'UNRESOLVED-RESOURCE' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: s3.create_bucket (method not in comp-iam's 's3' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py:69
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: s3.put_bucket_versioning (method not in comp-iam's 's3' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py:70
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: raw.create_table (method not in comp-iam's 'dynamodb' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py:98
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: s3:CopyObject
+       Called via: s3.copy_object
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py:281
+       Fix: add 's3:CopyObject' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: s3.create_bucket (method not in comp-iam's 's3' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py:326
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: s3.put_bucket_versioning (method not in comp-iam's 's3' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py:327
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: s3:DeleteObject
+       Called via: s3.delete_object
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py:651
+       Fix: add 's3:DeleteObject' to opal-gateway-role policy in iam.tf
+    !! MISSING: UNMAPPED-METHOD
+       Called via: s3.list_object_versions (method not in comp-iam's 's3' action map)
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py:1160
+       Fix: add 'UNMAPPED-METHOD' to opal-gateway-role policy in iam.tf
+    !! MISSING: s3:DeleteObject
+       Called via: s3.delete_object
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py:1162
+       Fix: add 's3:DeleteObject' to opal-gateway-role policy in iam.tf
+
+  opal-partners-data  (role: partners-lambda-role)
+    !! MISSING: dynamodb:Scan
+       Called via: users_table.scan
+       At: infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:330
+       Fix: add 'dynamodb:Scan' to partners-lambda-role policy in iam.tf
+
+DENY-PRESENT (295) -- ALLOW granted but a Deny statement matches; verify effective-allow:
+    ?? keyword-intelligence-generator [news-ingestion-lambda-role] secretsmanager:GetSecretValue
+       sm.get_secret_value -- ALLOW granted BUT Deny present on ['arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/bd/*', 'arn:aws:secretsmanager:us-east-2:313476888478:secret:opal/bd/*']
+       At: infra/aws/lambda/keyword_intelligence_generator/lambda_function.py:89
+    ?? news-ingestion-scheduler [news-ingestion-lambda-role] secretsmanager:GetSecretValue
+       secrets_client.get_secret_value -- ALLOW granted BUT Deny present on ['arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/bd/*', 'arn:aws:secretsmanager:us-east-2:313476888478:secret:opal/bd/*']
+       At: infra/aws/lambda/news_ingestion_scheduler/lambda_function.py:275
+    ?? news-semantic-clustering [lambda-execution-role] s3:PutObject
+       s3_client.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/news_semantic_clustering/lambda_function.py:690
+    ?? news-semantic-clustering [lambda-execution-role] s3:PutObject
+       s3_client.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/news_semantic_clustering/lambda_function.py:699
+    ?? news-trending-analysis [news-ingestion-lambda-role] secretsmanager:GetSecretValue
+       secrets_client.get_secret_value -- ALLOW granted BUT Deny present on ['arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/bd/*', 'arn:aws:secretsmanager:us-east-2:313476888478:secret:opal/bd/*']
+       At: infra/aws/lambda/news_trending_analysis/lambda_function.py:154
+    ?? opal-news-layer3-curation [opal-news-lambda-role] secretsmanager:GetSecretValue
+       secrets_client.get_secret_value -- ALLOW granted BUT Deny present on ['arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/bd/*', 'arn:aws:secretsmanager:us-east-2:313476888478:secret:opal/bd/*']
+       At: infra/aws/lambda/news_layer3_curation/lambda_function.py:598
+    ?? opal-news-layer3-curation [opal-news-lambda-role] s3:GetObject
+       s3_client.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/news_layer3_curation/lambda_function.py:646
+    ?? opal-pm-optimization-autosave-put [lambda-execution-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/portfolio_optimization_autosave_put/lambda_function.py:128
+    ?? opal-pm-optimization-loader [lambda-execution-role] s3:DeleteObject
+       s3_client.delete_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/portfolio_optimization_loader/lambda_function.py:91
+    ?? opal-pm-optimization-loader [lambda-execution-role] s3:PutObject
+       s3_client.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/portfolio_optimization_loader/lambda_function.py:209
+    ?? opal-pm-upload-urls [lambda-execution-role] s3:PutObject
+       s3_client.generate_presigned_url (DEFERRED/UNTRACED -- grant required, not observable at this call site -- redemption-time action on whoever holds the URL (ClientMethod='put_object')) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/opal_pm_upload_urls/lambda_function.py:89
+    ?? opal-pm-upload-urls [lambda-execution-role] s3:PutObject
+       s3_client.generate_presigned_url (DEFERRED/UNTRACED -- grant required, not observable at this call site -- redemption-time action on whoever holds the URL (ClientMethod='put_object')) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/opal_pm_upload_urls/lambda_function.py:99
+    ?? opal-portal-data-proxy [opal-portal-lambda-role] secretsmanager:GetSecretValue
+       secrets_client.get_secret_value -- ALLOW granted BUT Deny present on ['arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/bd/*', 'arn:aws:secretsmanager:us-east-2:313476888478:secret:opal/bd/*']
+       At: infra/aws/lambda/portal_data_proxy/lambda_function.py:1387
+    ?? opal-portal-volatility-fetcher [opal-portal-lambda-role] secretsmanager:GetSecretValue
+       secrets.get_secret_value -- ALLOW granted BUT Deny present on ['arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/bd/*', 'arn:aws:secretsmanager:us-east-2:313476888478:secret:opal/bd/*']
+       At: infra/aws/lambda/v2_portal/07_macroeconomics/lambdas/opal-portal-volatility-fetcher/lambda_function.py:84
+    ?? opal-portfolio-pickle-parser [lambda-execution-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/portfolio_pickle_parser/lambda_function.py:115
+    ?? opal-portfolio-pickle-parser [lambda-execution-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/portfolio_pickle_parser/lambda_function.py:142
+    ?? opal-portfolio-pickle-parser [lambda-execution-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/portfolio_pickle_parser/lambda_function.py:161
+    ?? opal-portfolio-pickle-parser [lambda-execution-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/portfolio_pickle_parser/lambda_function.py:169
+    ?? semantic-trending-topics-portal-publisher [lambda-execution-role] s3:PutObject
+       s3_client.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/semantic-trending-topics-portal-publisher/lambda_function.py:276
+    ?? opal-portfolio-autosave-put [lambda-execution-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/lambda/portfolio_autosave_put/lambda_function.py:161
+    ?? bd-49f-runner [bd-49f-runner-role] s3:GetObject
+       _s3.download_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/lambda/bd-pipeline/bd-49f-runner/lambda_function.py:74
+    ?? bd-silver-merge [bd-silver-merge-role] s3:GetObject
+       _s3.download_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/lambda/bd-pipeline/bd-silver-merge/lambda_function.py:49
+    ?? bd-49f-fees-runner [bd-49f-fees-runner-role] s3:GetObject
+       _s3.download_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/lambda/bd-pipeline/bd-49f-fees-runner/lambda_function.py:58
+    ?? bd-49f-fees-runner [bd-49f-fees-runner-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/lambda/bd-pipeline/bd-49f-fees-runner/lambda_function.py:116
+    ?? cot-rebalancer-runner [cot-rebalancer-runner-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-assets/blackdiamond/49f/*']
+       At: infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/lambda_function.py:195
+    ?? cot-rebalancer-runner [cot-rebalancer-runner-role] s3:ListBucket
+       _s3.list_objects_v2 -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-assets/blackdiamond/49f/*']
+       At: infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/lambda_function.py:196
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_00.accounts_dimension.py:67
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_00.accounts_dimension.py:168
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_00.accounts_dimension.py:339
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_00.accounts_dimension.py:666
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_00.accounts_dimension.py:671
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_00.accounts_dimension.py:139
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_00.accounts_dimension.py:201
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_00.accounts_dimension.py:326
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:123
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:177
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:569
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:580
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:599
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:610
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:757
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:783
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:788
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:164
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_01.advisor_assignments.py:555
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_02.fee_rate_history.py:78
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_02.fee_rate_history.py:407
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_02.fee_rate_history.py:455
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_02.fee_rate_history.py:474
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_02.fee_rate_history.py:485
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_02.fee_rate_history.py:679
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_02.fee_rate_history.py:130
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_02.fee_rate_history.py:330
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_02.fee_rate_history.py:440
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:84
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:153
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:176
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:227
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3_schwab.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:507
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3_client.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1210
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3_client.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1213
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.list_objects_v2 -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1441
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1564
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1571
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1855
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1858
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       _s3.head_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1896
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       _s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1933
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1943
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_03.positions_cube.py:1984
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_04.client_dimension.py:74
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_04.client_dimension.py:109
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_04.client_dimension.py:443
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_04.client_dimension.py:448
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/A_04.client_dimension.py:93
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:125
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:164
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:185
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:256
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:690
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:861
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:869
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:1004
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:1010
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3_client.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:1352
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:371
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:409
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_00.canonical_holdings.py:674
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:147
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:187
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:287
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:346
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:400
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:445
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.head_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:493
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3_schwab.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:544
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3_schwab.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:560
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:816
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:836
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:1811
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.list_objects_v2 -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:2496
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.list_objects_v2 -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:3010
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:3046
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:3049
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:3068
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:3085
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       _s3.head_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:3121
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       _s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:3160
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:3170
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:3213
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.list_objects_v2 -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_01.holdings_lots.py:3296
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:110
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       _s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:203
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:231
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       _s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:336
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       _s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:466
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:623
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:629
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.head_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:739
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:746
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:859
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:862
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:1018
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:1153
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:215
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:266
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:665
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_02.canonical_lots.py:966
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_03.account_gains.py:117
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_03.account_gains.py:417
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_03.account_gains.py:592
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_03.account_gains.py:677
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_03.account_gains.py:699
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_03.account_gains.py:745
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_03.account_gains.py:134
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_03.account_gains.py:156
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_03.account_gains.py:174
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/B_03.account_gains.py:636
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_00.canonical_performance.py:91
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_00.canonical_performance.py:328
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_00.canonical_performance.py:108
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01.canonical_nna.py:98
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01.canonical_nna.py:360
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01.canonical_nna.py:418
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01.canonical_nna.py:563
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       _s3_local.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01.canonical_nna.py:701
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01.canonical_nna.py:114
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01.canonical_nna.py:140
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01b.role_aua_backfill.py:64
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.head_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01b.role_aua_backfill.py:71
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01b.role_aua_backfill.py:157
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.list_objects_v2 -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01b.role_aua_backfill.py:211
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.list_objects_v2 -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01b.role_aua_backfill.py:283
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01c.role_aua_flow_join.py:78
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01c.role_aua_flow_join.py:100
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_01c.role_aua_flow_join.py:84
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_02.client_performance.py:75
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_02.client_performance.py:314
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_02.client_performance.py:347
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_02.client_performance.py:352
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_02.client_performance.py:501
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_02.client_performance.py:507
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_02.client_performance.py:86
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_03.account_performance.py:94
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_03.account_performance.py:311
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_03.account_performance.py:315
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_03.account_performance.py:104
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_05.client_tax_liability.py:113
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_05.client_tax_liability.py:155
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_05.client_tax_liability.py:201
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_05.client_tax_liability.py:401
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_05.client_tax_liability.py:100
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_05.client_tax_liability.py:142
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py:273
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py:296
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py:309
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py:312
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py:360
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py:372
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py:395
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py:647
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py:279
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_07.advisor_attribution.py:111
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.upload_file -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_07.advisor_attribution.py:473
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_08.advisor_fee_efficiency.py:101
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3_local.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_08.advisor_fee_efficiency.py:190
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_08.advisor_fee_efficiency.py:554
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_08.advisor_fee_efficiency.py:831
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3_local.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_08.advisor_fee_efficiency.py:179
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/C_08.advisor_fee_efficiency.py:590
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00.portal_aggregates.py:210
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00.portal_aggregates.py:213
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00.portal_aggregates.py:237
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00.portal_aggregates.py:331
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00.portal_aggregates.py:318
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00b.portal_timeseries.py:198
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3_local.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00b.portal_timeseries.py:327
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00b.portal_timeseries.py:409
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00b.portal_timeseries.py:1238
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3_local.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00b.portal_timeseries.py:312
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00b.portal_timeseries.py:387
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00b.portal_timeseries.py:653
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00c.portal_leaderboard.py:91
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00c.portal_leaderboard.py:133
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00c.portal_leaderboard.py:187
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00c.portal_leaderboard.py:80
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00c.portal_leaderboard.py:120
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00c.portal_leaderboard.py:176
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00f.advisor_nna_canonical.py:152
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00f.advisor_nna_canonical.py:216
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00f.advisor_nna_canonical.py:767
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.head_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00f.advisor_nna_canonical.py:937
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_00f.advisor_nna_canonical.py:163
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_01.partner_analytics.py:323
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_01.partner_analytics.py:2548
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_01.partner_analytics.py:2559
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:99
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:535
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3_local.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:1608
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3_local.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:1642
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3_local.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:1721
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:2301
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:3117
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:DeleteObject
+       s3.delete_objects -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:3260
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:348
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:406
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:525
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3_local.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:1627
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3_local.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:1699
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_02.advisor_client_detail.py:3244
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:174
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:198
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:207
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:302
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:476
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:490
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:503
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:507
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:522
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:527
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:546
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:550
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:570
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:575
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:580
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:585
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_03.composition_artifacts.py:183
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:244
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:251
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:262
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:DeleteObject
+       s3.delete_objects -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:761
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:1642
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:CopyObject
+       s3.copy_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:2428
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.copy_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:2428
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:2970
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:3004
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:3138
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:3290
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:3478
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:3530
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:312
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:1627
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:2941
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:2955
+    ?? bd-gold-runner (EC2) [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/gold/D_04.client_portal_summary.py:3126
+    ?? bd-allocations [bd-exporter-ec2-role] s3:GetObject
+       aws s3 cp -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/ec2/bd-exporter/terraform/scripts/parallel_process.py:141
+    ?? bd-allocations [bd-exporter-ec2-role] s3:PutObject
+       aws s3 cp -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/ec2/bd-exporter/terraform/scripts/parallel_process.py:141
+    ?? bd-transactions [bd-exporter-ec2-role] s3:GetObject
+       aws s3 cp -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/ec2/bd-exporter/terraform/scripts/parallel_process.py:141
+    ?? bd-transactions [bd-exporter-ec2-role] s3:PutObject
+       aws s3 cp -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/ec2/bd-exporter/terraform/scripts/parallel_process.py:141
+    ?? bd-fees [bd-exporter-ec2-role] s3:GetObject
+       aws s3 cp -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/ec2/bd-exporter/terraform/scripts/parallel_process.py:141
+    ?? bd-fees [bd-exporter-ec2-role] s3:PutObject
+       aws s3 cp -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/ec2/bd-exporter/terraform/scripts/parallel_process.py:141
+    ?? bd-assets [bd-exporter-ec2-role] s3:GetObject
+       aws s3 cp -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/ec2/bd-exporter/terraform/scripts/parallel_process.py:141
+    ?? bd-assets [bd-exporter-ec2-role] s3:PutObject
+       aws s3 cp -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: infra/aws/ec2/bd-exporter/terraform/scripts/parallel_process.py:141
+    ?? bd-price-runner [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/silver/bd_price_update.py:195
+    ?? bd-price-runner [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/silver/bd_price_update.py:283
+    ?? bd-price-runner [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/silver/bd_price_update.py:609
+    ?? bd-price-runner [bd-exporter-ec2-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/silver/bd_price_update.py:641
+    ?? bd-price-runner [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/silver/bd_price_update.py:666
+    ?? bd-price-runner [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/silver/bd_price_update.py:916
+    ?? bd-price-runner [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/silver/bd_price_update.py:933
+    ?? bd-price-runner [bd-exporter-ec2-role] s3:PutObject
+       s3.put_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/silver/bd_price_update.py:954
+    ?? bd-price-runner [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/silver/bd_price_update.py:211
+    ?? bd-price-runner [bd-exporter-ec2-role] s3:ListBucket
+       s3.get_paginator (DEFERRED/UNTRACED -- grant required, not observable at this call site -- get_paginator('list_objects_v2') polls list_objects_v2) -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+       At: data/black_diamond/scripts/silver/bd_price_update.py:878
+    ?? inf-gold-qa-runner [inf-gold-qa-runner-ec2-role] s3:DeleteObject
+       s3.delete_objects -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-inf/platinum/*']
+       At: infra/aws/ec2/inf-gold-qa-runner/adhoc/platinum_clients_probe_cleanup.py:44
+    ?? opal-gateway [opal-gateway-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::${local.gw_deny_bkt}/platinum/mdpf/${f}/*']
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py:75
+    ?? opal-gateway [opal-gateway-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::${local.gw_deny_bkt}/platinum/mdpf/${f}/*']
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py:319
+    ?? opal-gateway [opal-gateway-role] s3:GetObject
+       s3.get_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::${local.gw_deny_bkt}/platinum/mdpf/${f}/*']
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py:253
+    ?? opal-gateway [opal-gateway-role] s3:GetObject
+       s3.head_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::${local.gw_deny_bkt}/platinum/mdpf/${f}/*']
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py:265
+    ?? opal-gateway [opal-gateway-role] s3:GetObject
+       s3.copy_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::${local.gw_deny_bkt}/platinum/mdpf/${f}/*']
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py:281
+    ?? opal-gateway [opal-gateway-role] s3:GetObject
+       s3.head_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::${local.gw_deny_bkt}/platinum/mdpf/${f}/*']
+       At: infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py:282
+    ?? canonical-schwab-si2 [quartz-si2-spike-role] s3:ListBucket
+       s3.list_objects_v2 -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/ec2/canonical-schwab-si2/migrate-0833-to-canonical.py:77
+    ?? canonical-schwab-si2 [quartz-si2-spike-role] s3:ListBucket
+       s3.list_objects_v2 -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/ec2/canonical-schwab-si2/migrate-0833-to-canonical.py:94
+    ?? canonical-schwab-si2 [quartz-si2-spike-role] s3:GetObject
+       s3.copy_object -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/ec2/canonical-schwab-si2/migrate-0833-to-canonical.py:137
+    ?? canonical-schwab-si2 [quartz-si2-spike-role] s3:GetObject
+       aws s3 cp -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/ec2/canonical-schwab-si2/remap-bronze-to-monolith.py:10
+    ?? canonical-schwab-si2 [quartz-si2-spike-role] s3:PutObject
+       aws s3 cp -- ALLOW granted BUT Deny present on ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*', 'arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*', 'arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
+       At: infra/aws/ec2/canonical-schwab-si2/remap-bronze-to-monolith.py:10
+    (resource/condition-precise resolution = census-backed reconcile tier)
+
+COVERAGE-UNKNOWN (1) -- boto3 services comp-iam does NOT model: ['wafv2']
+    These produce NO gap signal either way -- comp-iam CANNOT verify their IAM perms.
+    ?? opal-ipset-reconciler [opal-ipset-reconciler] wafv2:UNMODELED  (infra/aws/lambda/opal-ipset-reconciler/lambda_function.py:229)
+
+RESOURCE-MISMATCH (3) -- the action is HELD, but NOT on the resource this call touches (previously reported [GRANTED] on this surface):
+  etfs-reports-reporter  (role: etfs-reports-reporter-role)
+    !! s3:PutObject  on  arn:aws:s3:::opal-data-etfs/platinum/etf_ownership_dashboard.json
+       via: s3.put_object at data/etfs/scripts/presentation/etf_ownership_dashboard.py:380
+       note: action held on other resources, not on arn:aws:s3:::opal-data-etfs/platinum/etf_ownership_dashboard.json
+  opal-gateway  (role: opal-gateway-role)
+    !! s3:GetObject  on  arn:aws:s3:::opal-mcp-audit/*   (pattern)
+       via: s3.get_object at infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py:75
+       note: bucket 'opal-mcp-audit' appears in NO Allow statement for s3:GetObject (held: ['opal-313476888478-lambda-artifacts', 'opal-data-portal-v2'])
+    !! s3:GetObject  on  arn:aws:s3:::opal-mcp-audit/*   (pattern)
+       via: s3.get_object at infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py:319
+       note: bucket 'opal-mcp-audit' appears in NO Allow statement for s3:GetObject (held: ['opal-313476888478-lambda-artifacts', 'opal-data-portal-v2'])
+
+  RESOURCE PLANE: 880 call(s) verdicted across 105 mapped role(s); 665 UNRESOLVABLE-RESOURCE, 142 GRANTED, 50 GRANTED-BROAD, 20 UNGRANTED, 3 GRANTED-ACTION / UNGRANTED-RESOURCE
+    266 call(s) in 26 role-UNMAPPED service(s) NOT resource-checked (no role to verdict against -- honest hole, not a pass)
+    50 GRANTED-BROAD row(s) are EXCLUDED, NOT CLEARED -- a wildcard grant cannot be falsified by a resource check
+
+Total: 39 missing | 295 deny-present | 1 coverage-unknown | 3 resource-mismatch  across 34 service(s)
