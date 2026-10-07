@@ -1,0 +1,84 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-337",
+ "firm": "49F",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "0a3c1c841d",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-337.refresh-handler-pinned-to-the-running-blob.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-337.refresh-handler-pinned-to-the-running-blob.md (CTO half @74e91285b4)",
+  "group": "OTHER",
+  "vintage_commit": "0a3c1c841d"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~139",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+   "kind": "config_data",
+   "commit_or_etag": "007100625a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Row irpt-directory-refresh only: staged_from member handler.py pinned to 48313e9c0e4391f3b269013aebb318f8acb12f9e, sha256 e46922a003791d901d037d80c82cf538c313dfe907096194f4fcca556712702e (matches git show blob). BUILD_ONLY=1 build: Complete (BUILD_ONLY) -- 1 function(s) built, zips kept, nothing uploaded, source map untouched.",
+   "artifact_covered_by": [
+    "IB62-2-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~139/census_irpt-directory-refresh.txt",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "release-census output at pin 007100625a: changed_members=1, refresh.py built=ed3d0c881890 live=aa50d63e3f32."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB62-2-AC1",
+   "criterion_verbatim": "the census of irpt-directory-refresh at HEAD prints changed_members=1 and the one member is refresh.py.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-2-AC1",
+   "output_evidence": "OK: changed_members=1 (refresh.py)\nIB62-2-AC1 PASS (rc=0)",
+   "denominator": "1 changed member of 5 built members",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB62-G-139",
+   "criterion_verbatim": "a GUARD: your commits touch only your grant.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-G-139",
+   "output_evidence": "OK: 1 changed path(s), all inside slot ~139's grant\nIB62-G-139 PASS (rc=0)",
+   "denominator": "1 changed path at the time of the run",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Base (before this commit) is the mutant: the issuer's dry-run at bc794d2770 recorded IB62-2-AC1 FAIL with 2 changed members (handler.py rides). My own in-worktree revert did not discriminate because the checker reads the committed HEAD map, not the working tree.",
+   "expected": "base FAIL changed_members=2; with the pin PASS changed_members=1",
+   "observed": "issuer-recorded base FAIL; post-commit PASS changed_members=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "IB62-2-AC1 run three times at the same HEAD",
+   "observed": "identical PASS each run",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "upload and apply of the refresh build",
+   "reason": "forbidden by the order; any release is the issuer's after the drain"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~139/census_irpt-directory-refresh.txt",
+ "compiler_tools": [
+  {
+   "tool": "release-census.py",
+   "invocation": "python infra/aws/lambda/ci/release-census.py irpt-directory-refresh --pin 007100625a",
+   "result": "changed_members=1 (refresh.py)"
+  }
+ ]
+}

@@ -37,6 +37,10 @@ R17 = P + "0.9.0_WK_IRPT_DASHBD~12/TIEOUT_49F_BD_POPULATION_E2.json"
 PLAN = P + "0.9.0_WK_IRPT_DASHBD~6/BD_POPULATION_PLAN_E3.json"
 REASONS = {"FLOW_TIMING", "MISSING_PRICE", "INCOME_DATE", "COVERAGE_DAYS", "UNEXPLAINED"}
 CLOSURE = "2025-01-09"
+# Amendment 1 (row IRPT_DASHBD-W13-S3): the order also nulls the add-back when BD's average value is not positive, and the
+# record carries no market values. The issuer measured each such range in the landed bronze object; this is that literal list.
+# (start, end, fees_reported): beginningMarketValue 0.01, endingMarketValue -0.70 (account-level point, pull=20261004).
+NONPOSITIVE_AVERAGE = {("2026-06-17", "2026-07-21", -52.99)}
 
 
 def _load(root, rel, fail):
@@ -107,14 +111,17 @@ def main():
     elif cid == "DB18-1-AC2":
         r = _load(root, GROSS, fail)
         graded = [s for s in r.get("segments") or [] if s.get("verdict") in ("WITHIN", "OUTSIDE")]
+        def _exempt(s):
+            seg = s.get("segment") or {}
+            return (seg.get("start"), seg.get("end"), s.get("bd_fees_reported")) in NONPOSITIVE_AVERAGE
         wrong = [s for s in graded
-                 if (s.get("bd_fees_reported") in (None, 0, 0.0)) != (s.get("bd_fee_addback") is None)]
+                 if (s.get("bd_fees_reported") in (None, 0, 0.0) or _exempt(s)) != (s.get("bd_fee_addback") is None)]
         if wrong:
             fail("%d rows where bd_fee_addback's nullness disagrees with bd_fees_reported" % len(wrong))
         n = _pytest(root, TESTS_GROSS, ("bd_fee_addback",), fail)
         nulls = sum(1 for s in graded if s.get("bd_fee_addback") is None)
-        print("OK: addback null on %d of %d graded rows, exactly where BD reported no fee; %d tests passed" % (
-            nulls, len(graded), n))
+        print("OK: addback null on %d of %d graded rows, exactly where BD reported no fee or on the %d measured "
+              "non-positive-average range(s); %d tests passed" % (nulls, len(graded), len(NONPOSITIVE_AVERAGE), n))
     elif cid == "DB18-1-AC3":
         r = _load(root, GROSS, fail)
         old = {_key(s): s.get("opal_return") for s in _load(root, R17, fail).get("segments") or []}
