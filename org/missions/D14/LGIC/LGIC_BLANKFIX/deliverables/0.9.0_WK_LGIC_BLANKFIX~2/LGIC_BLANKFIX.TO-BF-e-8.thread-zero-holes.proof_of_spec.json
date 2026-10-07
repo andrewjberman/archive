@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-e-8",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-e-8.thread-zero-holes.md",
+    "group": "OTHER",
+    "vintage_commit": "2015588ed5"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~2",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round2.md",
+    "vintage_commit": "2015588ed5",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-e-8.thread-zero-holes.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming_rootcheck.py",
+      "kind": "script",
+      "commit_or_etag": "4d5f31dad0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo library only; LOCAL risk, no deploy"
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_rootcheck.py",
+      "kind": "test",
+      "commit_or_etag": "4d5f31dad0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo test only; LOCAL risk, no deploy"
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~2/THREAD_TRACE_round2_bd-pipeline.txt",
+      "kind": "doc",
+      "commit_or_etag": "4d5f31dad0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "saved output of the thread run; LOCAL risk, no deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BE8-AC1",
+      "criterion_verbatim": "python lib/tests/test_opal_naming_rootcheck.py expect: ROOTCHECK-TEST ok=True",
+      "method": "test_suite",
+      "invocation": "python lib/tests/test_opal_naming_rootcheck.py",
+      "output_evidence": "ROOTCHECK-TEST ok=True cases=48 (rc 0)",
+      "denominator": "48 of 48 cases held: one per new behaviour (policy fill, unresolved role HOLE, exception wins, agreeing word RIGHT, contradicted word rebuilt, real reader on daily-vs-15min, ruled canonical, REFUSED, CARDED sentence and correct name), no FIX line with a blank, the difference control (unfillable cadence returns 1, fillable 0), a REFUSED line alone returns 0, REFUSED beside a HOLE returns 1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BE8-AC2",
+      "criterion_verbatim": "python lib/opal_naming_rootcheck.py infra/aws/terraform/bd-pipeline --map infra/logic/registry/root_map.json --report-only expect: hole=0",
+      "method": "command",
+      "invocation": "python lib/opal_naming_rootcheck.py infra/aws/terraform/bd-pipeline --map infra/logic/registry/root_map.json --report-only",
+      "output_evidence": "ROOTCHECK ok=True root=infra/aws/terraform/bd-pipeline items=140 right=9 fix=113 not_asked=9 pattern=1 carded=6 refused=2 hole=0 (rc 0; the same run without --report-only also exits 0)",
+      "denominator": "9+113+9+1+6+2+0 = 140 of 140 items; hole=0 is reached by wiring, not by relabelling: the four inline-policy holes now FIX from the role (advi), the two Cottonwood-path keys are the REFUSED class (counted, not blank), UNDECIDED stays HOLE (0 on this root)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BE8-AC3",
+      "criterion_verbatim": "a seat that built none of the check reads the saved trace to the end and can act on every line without asking a question, and tells a name that is wrong apart from a name that is not asked for a system",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~2/THREAD_TRACE_round2_bd-pipeline.txt",
+      "output_evidence": "artifact: org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~2/THREAD_TRACE_round2_bd-pipeline.txt (141 lines: 140 name lines and the ROOTCHECK line); no verdict recorded by the worker",
+      "denominator": "N/A -- judgment criterion, graded at L9, not by the worker",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the substitute oracle is the reading by 3.0.0_SA_CVO of the saved trace, never self-graded by the worker"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names the difference control inside BE8-AC1: one unfillable cadence returns 1, a fillable one returns 0",
+      "expected": "rc 1 vs rc 0",
+      "observed": "code_bad == 1 and code_good == 0 held inside the 48 cases",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the saved trace and a second run without --report-only compared byte for byte (cmp)",
+      "observed": "SAME",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "names of the root that live only in AWS",
+      "reason": "BLIND by the order's preflight: the check reads repository text only, no AWS call"
+    },
+    {
+      "item": "a ruled exception for an inline policy versus its role's system",
+      "reason": "the exception keeps winning (cross-firm-bucket-deny, describe-tags-self, monolith-bd49f-xref-silver-read), row LGIC_BLANKFIX-W2-S4"
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-W2-S4",
+    "LGIC_BLANKFIX-W2-S5"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~2/LGIC_BLANKFIX.TO-BF-e-8.thread-zero-holes.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python lib/opal_naming_rootcheck.py infra/aws/terraform/bd-pipeline --map infra/logic/registry/root_map.json --report-only",
+      "result": "ROOTCHECK ok=True items=140 right=9 fix=113 not_asked=9 pattern=1 carded=6 refused=2 hole=0"
+    }
+  ]
+}
