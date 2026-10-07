@@ -12,7 +12,7 @@ Prints "<id> PASS" or "<id> FAIL" as the last line. Every check finishes inside 
               carries only its own paths; a forced retry adds no second CHANGELOG entry). Base: FAIL (no test).
   IB61-3-AC1  E-P3: ci/tests/test_release_census.py passes (a planted extra file is reported), and release-census.py
               reads no worker-written census file. Base: FAIL (no tool).
-  IB61-3-AC2  E-P3: release-census.py irpt-ycharts-generate --pin f36a8cdefd prints changed_members=19. Base: FAIL.
+  IB61-3-AC2  E-P3: release-census.py irpt-ycharts-generate --pin f36a8cdefd prints changed_members=4 (amendment 1; was 19). Base: FAIL.
   IB61-4-AC1  E-P4: BUILD_ONLY=1 irpt-performance-adapter exits 0 past the ADHC_DRIFTD.002 parity gate, and none of
               build_candidate.py, build_dependencies.py, cot_probe.py sits at the top level of performance/. Base: FAIL.
   IB61-5-AC1  E-P5: directory/tests/test_refresh_manifest_dispatch_date.py passes (names 2026-10-06, dispatched_for, READY),
@@ -149,9 +149,9 @@ def main():
         m = re.search(r"changed_members=(\d+)", out)
         if rc or not m:
             fail("rc %d, no changed_members= line: %s" % (rc, _last(out)))
-        if int(m.group(1)) != 19:
-            fail("changed_members=%s, expected 19 (the issuer's re-census at f36a8cdefd)" % m.group(1))
-        print("OK: changed_members=19")
+        if int(m.group(1)) != 4:
+            fail("changed_members=%s, expected 4 (amendment 1: the by-blob census at f36a8cdefd)" % m.group(1))
+        print("OK: changed_members=4")
     elif cid == "IB61-4-AC1":
         top = [f for f in TOOL_FILES if (root / IR / "performance" / f).is_file()]
         if top:
