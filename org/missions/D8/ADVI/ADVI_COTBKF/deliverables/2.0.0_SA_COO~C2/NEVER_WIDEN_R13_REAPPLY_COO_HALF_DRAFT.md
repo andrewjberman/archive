@@ -31,3 +31,17 @@ N         1 writer per table
 COO half  2.0.0_SA_COO~C2 -- DRAFT
 CTO half  1.0.0_SA_CTO~DELL2 -- owed
 ```
+
+## 3. GIVEN -- 2026-10-07 ~16:0xZ (the key table above unchanged)
+
+CTO half: `deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_ADVI_COTBKF_R13_REAPPLY_CTO_HALF_20261007.md` @d9877f9754 (msg 812). Its conditions,
+met here: **reader census printed** -- `comp-estate --resource` on `commonwealth/cottonwood/silver/crosswalk` and `.../account_links`:
+SUBJECT_ABSENT_FROM_CORPUS, 0 of 135 chains each; a repo search outside `org/` finds only this project's scripts and tests (the three silver
+scripts, the signs module, and three read-only analysis readers), no served consumer. **Pins re-read at the apply** -- identical to section 1
+(crosswalk.parquet fatOX6x0..., crosswalk.csv RGQHH1zi..., account_links.parquet OQ9YHJ3h..., account_links.csv JY3f29AV...). **Code**
+unchanged since @42f647fa77 (git log on the three scripts). **The ledger opens before any write.**
+
+```
+COO half  2.0.0_SA_COO~C2 -- GIVEN 2026-10-07 ~16:0xZ
+CTO half  1.0.0_SA_CTO~DELL2 -- GIVEN @d9877f9754
+```
