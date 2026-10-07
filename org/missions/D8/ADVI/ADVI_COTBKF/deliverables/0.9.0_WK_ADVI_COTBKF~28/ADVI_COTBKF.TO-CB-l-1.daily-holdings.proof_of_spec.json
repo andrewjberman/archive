@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-l-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-l-1.daily-holdings.md",
+    "group": "OTHER",
+    "vintage_commit": "66e333ca14"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~28",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round12.md",
+    "vintage_commit": "66e333ca14",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-l-1.daily-holdings.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_daily_holdings.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local build; nothing deployed, no S3 write"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_daily_holdings.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local build; nothing deployed, no S3 write"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~28/daily_holdings.parquet",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local build; nothing deployed, no S3 write"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~28/snapshot_differences.csv",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local build; nothing deployed, no S3 write"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~28/daily_holdings.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local build; nothing deployed, no S3 write"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB12l1-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_daily_holdings.py expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_daily_holdings.py",
+      "output_evidence": "6 passed in 10.98s (rc 0, run under timeout 120)",
+      "denominator": "6 of 6 tests passed (buy / partial sell / transfer in / transfer out / two identical same-day buys expected on each trading day; dropped-transaction control moves 60 to 55; weekend trade rolls to next trading day; flat days not stored; stub snapshot with one mismatched pair gives snapshot_diffs=1 and its row; rebuilt-open pair absent from snapshot is a difference and cash is skipped)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB12l1-AC2",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_daily_holdings.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~28 expect: DAILY-HOLDINGS accounts=1533",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_daily_holdings.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~28",
+      "output_evidence": "DAILY-HOLDINGS accounts=1533 account_days=1691729 holding_rows=23226716 snapshot_accounts=83 snapshot_pairs=394 snapshot_equal=381 snapshot_diffs=13 (rc 0, about 12 s); snapshot_differences.csv holds 13 rows over 3 accounts",
+      "denominator": "1533 of 1533 accounts; 1,416,497 transaction rows read from the cache, none de-duplicated; 13 of 13 differences in the CSV; last daily state equals the full rebuild for 1533 of 1533 accounts",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB12l1-AC3",
+      "criterion_verbatim": "JUDGMENT: one account's daily holdings read across its span against its transactions",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~28/daily_holdings.parquet against the transactions of one account",
+      "output_evidence": "outputs produced: daily_holdings.parquet (18,241,175 bytes, 23,226,716 rows), snapshot_differences.csv, daily_holdings.md; no verdict given",
+      "denominator": "1 account to be read by the grader",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; graded by 3.0.0_SA_CVO at L9, never self-graded",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "drop one of the two identical same-day buys from the stub",
+      "expected": "the 03-09 quantity moves from 60 to 55",
+      "observed": "test_dropping_one_transaction_moves_the_result passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: one-time build",
+      "observed": "not run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "corporate actions the transactions do not record",
+      "reason": "the order's declared BLIND; the 13 snapshot differences are fractional residues not explained here (row D2-W28-S1)"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W28-S1"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~28/ADVI_COTBKF.TO-CB-l-1.daily-holdings.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_daily_holdings.py",
+      "result": "6 passed"
+    },
+    {
+      "tool": "commonwealth_daily_holdings.py",
+      "invocation": "see AC2",
+      "result": "accounts=1533 snapshot_diffs=13"
+    }
+  ]
+}
