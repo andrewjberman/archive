@@ -73,3 +73,33 @@ one portal type are other projects' own fields of the same name (rival funds, in
 The re-mint is safe on the keyed fields (0 changes) and the folder (0 changes). The two open questions that bound its blast
 radius are items 1 and 2. They are one trace each; the re-mint half should carry both answers, or a five-name before/after read
 of `/overlay` peers and of the CORPUS backlog on universe-sourced names.
+
+## ADDENDUM 1 (~10:0xZ) -- the two traces this read left open, both run
+
+**Trace 1: does a pool record's `raw_identifier` reach the peers and posture identity? YES for peers, NO for posture; nothing
+compares it and the page does not render it.**
+- `crosswalk.resolve()` returns the pool record's own `raw_identifier` on a hit (`lib/research/identity/crosswalk.py:1234`).
+  Exercised on the served object: `resolve("2602335D_US_Equity")` and `resolve("AMD_US_Equity")` each return `MEASURED`,
+  `matched_as model_key`, `raw_identifier "<root> US Equity"`.
+- `lib/research/peers/engine.py:265` copies that value into the peer's identity dict. So after a re-mint, a universe-sourced peer's
+  `identity.raw_identifier` reads `<root> US` where it reads `<root> US Equity` today, on up to 158 names.
+- `lib/research/posture/membership.py:147-176` and `posture/comparable.py:207-218` set `raw_identifier` to the key or the ticker
+  they were handed, never to the pool record's value. Unaffected.
+- Uses of the value: the three hits in `peers/engine.py` are assignments; no comparison on `raw_identifier` was found in
+  `lib/research` non-test code. In `portal/src` the name appears ONCE, the optional type field at
+  `pages/SecurityAnalysis/types.ts:503`; no component reads it. So the change is carried in the served JSON and shown nowhere.
+
+**Trace 2: does the CORPUS backlog compare `bloomberg_ticker.value`? NO.** `lib/research/corpus/backlog.py:57-62` reads
+`bloomberg_ticker` status and evidence only to word the reason of a hit that has NO `security_key`. The 158 changed records are
+all `MEASURED` with a key, so that branch is not reached for them; `value` is never read there.
+
+**One served change the first read under-stated: the 5 added names become resolvable.** On the served object
+`resolve("BE_US_Equity")` reads `UNRESOLVED` (and `CSCO_US_Equity`, a name outside both objects, reads `UNRESOLVED` as the
+control). After a re-mint BE, DG, ED, GEV and MRNA resolve `MEASURED`. Wherever one of the five appears as a peer or a comparable
+member, its identity moves from unresolved to keyed. That is the intended effect of the newer universe input, and it is the one
+visible change of the re-mint.
+
+**One more read: `python -m lib.research.identity.crosswalk --as-of 2026-10-07 --disclosure`** (read-only by its own contract)
+prints `folders_in_records 96 research_folders_live 97 snapshot_input_names 89 snapshot_stale_against_live True`: one live
+research folder is not in the coverage snapshot the build reads. The re-mint does not add it; it is named so the half does not
+claim the pool is current against the folders.
