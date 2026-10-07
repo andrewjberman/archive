@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ba-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-1.stale-flag-keys-on-collected-inputs.md",
+  "group": "OTHER",
+  "vintage_commit": "7daf7c5677"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "7daf7c5677",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-1.stale-flag-keys-on-collected-inputs.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~267",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/freshness/stale_rule.py",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the stale rule module: annotate_row, annotate_view, STALE_AFTER_TRADING_DAYS=7",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/freshness/tests/test_stale_rule.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "8 plant tests, 8 passed (pytest lib/research/freshness/tests)",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "six plants: never-collected inputs read not_collected and flag nothing, the oldest collected input is the keyed date, 7 trading days is current and 8 is stale; C1-C6 PASS; R77 BA1 AC1 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba1.py\" --crit AC1 --where local; echo \"exit=$?\"",
+   "output_evidence": "plant a: stale False; stale_inputs []; keyed_date 2026-10-05; inputs {'bloomberg': 'fresh', 'seekingalpha': 'not_collected', 'serp': 'not_collected', 'pack': 'fresh'}\n   plant b: stale True; stale_inputs ['bloomberg']; keyed_date 2026-09-23; inputs {'bloomberg': 'stale', 'seekingalpha': 'not_collected', 'serp': 'not_collected', 'pack': 'not_collected'}\n   plant c: stale False; stale_inputs []; keyed_date None; inputs {'bloomberg': 'not_collected', 'seekingalpha': 'not_collected', 'serp': 'not_collected', 'pack': 'not_collected'}\n   plant d: stale True; stale_inputs ['seekingalpha', 'pack']; keyed_date 2026-09-08; inputs {'bloomberg': 'fresh', 'seekingalpha': 'stale', 'serp': 'not_collected', 'pack': 'stale'}\n   plant e: stale False; stale_inputs []; keyed_date 2026-09-25; inputs {'bloomberg': 'fresh', 'seekingalpha': 'not_collected', 'serp': 'not_collected', 'pack': 'not_collected'}\n   plant f: stale True; stale_inputs ['bloomberg']; keyed_date 2026-09-24; inputs {'bloomberg': 'stale', 'seekingalpha': 'not_collected', 'serp': 'not_collected', 'pack': 'not_collected'}\nPASS C1 a name whose collected inputs are all current is not stale, and its never-collected inputs read not_collected \nPASS C2 an old collected input flags the row and names itself \nPASS C3 a name with nothing collected is not stale, has no keyed date and says why in plain words \nPASS C4 the keyed date is the OLDEST collected input's day \nPASS C5 the line is 7 trading days: 7 is current, 8 is stale \nPASS C6 the source row is not changed in place \nR77 BA1 AC1 SERVED: YES\nexit=0",
+   "denominator": "6 of 6 plant clauses C1-C6 PASS",
+   "status": "PASS",
+   "expect": "(?s)PASS C1 .*PASS C2 .*PASS C3 .*PASS C4 .*PASS C5 .*PASS C6 .*R77 BA1 AC1 SERVED: YES\\s+exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "over the covered rows of the served view: 0 never-collected inputs flagged, 0 flag/date disagreements, the stale and not-stale counts printed; C1-C3 PASS; R77 BA1 AC2 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba1.py\" --crit AC2 --where local; echo \"exit=$?\"",
+   "output_evidence": "local view: status 200; covered rows 95; stale 3; not stale 92; never-collected inputs flagged 0; flag/date disagreements 0 e.g. []\nPASS C1 no never-collected input is flagged on any covered row 0\nPASS C2 the flag and the keyed date agree on every covered row 0\nPASS C3 every covered row is annotated (stale is a boolean) 95\nR77 BA1 AC2 SERVED: YES\nexit=0",
+   "denominator": "95 covered rows of the served view (3 stale, 92 not stale); 3 of 3 clauses PASS",
+   "status": "PASS",
+   "expect": "(?s)never-collected inputs flagged 0; flag/date disagreements 0.*PASS C1 .*PASS C2 .*PASS C3 .*R77 BA1 AC2 SERVED: YES\\s+exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "the default /freshness rows keep exactly their ten keys; C1 PASS; R77 BA1 AC3 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba1.py\" --crit AC3 --where local; echo \"exit=$?\"",
+   "output_evidence": "default /freshness: status 200; rows 302; rows off the ten-key set 0 e.g. []\nPASS C1 the default /freshness rows keep exactly their ten keys 302 of 302\nR77 BA1 AC3 SERVED: YES\nexit=0",
+   "denominator": "302 of 302 default /freshness rows carry exactly the ten keys",
+   "status": "PASS",
+   "expect": "(?s)PASS C1 .*R77 BA1 AC3 SERVED: YES\\s+exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Plant c (nothing collected) and plant f (8 trading days) in AC1: the rule must not flag c and must flag f.",
+   "expected": "c not stale, f stale",
+   "observed": "c stale False, f stale True",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC2 run once on the local served view",
+   "observed": "95 covered, 3 stale (BABA, BA, COST on Seeking Alpha 2026-09-11), 92 not stale",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Route hookup and page render",
+   "reason": "cells ba-11 and ba-4; this cell adds a module only."
+  },
+  {
+   "item": "Flipping the task order's <status>",
+   "reason": "the issuer's flip (order section 5)."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- no session-log path in this worker's paths. Worktree C:/tmp/r77-267 on wk-AMGT_RESAPP-267.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~267 <0.9.0_WK_AMGT_RESAPP~267@opal.agent>\" -F .scratch/msg1.txt -- <paths>",
+   "result": "see COMMITS in the report"
+  }
+ ]
+}
