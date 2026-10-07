@@ -48,9 +48,9 @@
     {
       "path_or_key": "infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py",
       "kind": "script",
-      "commit_or_etag": "cc0c2b4b5c",
+      "commit_or_etag": "c0145f0db0",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "CT4d2-AC3; scratch roots outside the repository, no provider, CHECKPOINT_DISABLE=1; AWS calls sts get-caller-identity and iam simulate-principal-policy only"
+      "deploy_evidence": "CT4d2-AC3; AMENDMENT 6: two derived registry states (scoped rows removed / present), control accepted before each planted defect; scratch roots outside the repository, no provider, CHECKPOINT_DISABLE=1; AWS calls sts get-caller-identity and iam simulate-principal-policy only"
     },
     {
       "path_or_key": "infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py",
@@ -72,6 +72,27 @@
       "commit_or_etag": "cc0c2b4b5c",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "the three rows, the per-bucket plan by reading, the landing order; no registry row written"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py",
+      "kind": "script",
+      "commit_or_etag": "c0145f0db0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CT4d2-AC1; AMENDMENT 6: scoped rows classified and proven confined (fields, the module's render, the simulator), not counted as leaks; the negative arm strips Dell ARNs; line gains scoped_rows and scoped_confined"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/tests/dell_fence_join_pairs.json",
+      "kind": "test",
+      "commit_or_etag": "c0145f0db0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "unscoped expected rows only (the three dell2 pairs); the stale dell1_joined_to_any_fence key replaced by dell1_unscoped_pairs and a note"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/tests/fence_checks_registry_states.md",
+      "kind": "doc",
+      "commit_or_etag": "c0145f0db0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the six failing fields, each classified (i) the check's assumption about the registry; the direct validator test; what changed and why nothing it proves is weaker"
     }
   ],
   "acceptance": [
@@ -80,8 +101,8 @@
       "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py expect: typed_in_tf=0 cross_firm_leaks=0 (same line: rows=3/3, other_rows_changed=0, validator=ok, negative_arm=denied, ok=True)",
       "method": "command",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py",
-      "output_evidence": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok ok=True\n(rc 0, under timeout 120, pass 2026-10-07 by 0.9.0_WK_NFRA_CTLPLN~6 after AMENDMENT 5; the same output carries 'TF infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf: byte-equal to cc0c2b4b5c = True' and 'TF infra/aws/terraform/shared-infra/s3-49financial.tf: byte-equal to cc0c2b4b5c = True', and terraform_validate=OK rc=0 on the real root)",
-      "denominator": "3 of 3 pairs have exactly one row; 3 of 3 evaluator calls allowed; negative arm 1 of 1 denied; 0 of 3 buckets leak; 2 of 2 .tf files byte-equal to the TF_PIN cc0c2b4b5c (registry baseline stays on 3ec42c56bf)",
+      "output_evidence": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok scoped_rows=3 scoped_confined=3/3 ok=True\n(rc 0, under timeout 120, 30 s; run 2026-10-07 by 0.9.0_WK_NFRA_CTLPLN~6 after AMENDMENT 6, on the registry as it now is with the three scoped dell1 rows landed @d5516cb074; the same line reads rows=3/3, typed_in_tf=0, cross_firm_leaks=0, other_rows_changed=0, validator=ok, negative_arm=denied, scoped_rows=3 scoped_confined=3/3, ok=True; the output also carries 'TF ...s3-lgic-firm-buckets.tf: byte-equal to cc0c2b4b5c = True', 'TF ...s3-49financial.tf: byte-equal to cc0c2b4b5c = True' and terraform_validate=OK rc=0)",
+      "denominator": "3 of 3 dell2 pairs have exactly one unscoped row; 3 of 3 evaluator calls allowed (joined=3/3 pairs); negative arm 1 of 1 denied; 3 of 3 scoped dell1 rows confined (fields obey the closed rules with the prefix's firm segment equal to its own bucket's firm token, the module's render holds the 3 Deny statements for each, 9 of 9 simulator arms matched: get under the prefix allowed, get in a sibling prefix denied, put under the prefix denied); 0 of 3 buckets leak; 2 of 2 .tf files byte-equal to TF_PIN cc0c2b4b5c; the nine items the pre-repair check counted as leaks were the 3 scoped rows plus the 6 occurrences of the name inside them",
       "status": "PASS",
       "expect": "typed_in_tf=0 cross_firm_leaks=0"
     },
@@ -90,8 +111,8 @@
       "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py expect: FENCE-ROW-SHAPE rows= (same line: ok=True, can_carry_today reported as measured)",
       "method": "command",
       "invocation": "python infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py",
-      "output_evidence": "FENCE-ROW-SHAPE rows=29 key_sets=1 rows_with_actions=0 rows_with_prefix=0 readers=18 extra_key_ignored=1 extra_key_refused=2 can_carry_today=False ok=True\n(rc 0, under timeout 120, 7 s; fresh run 2026-10-07 by 0.9.0_WK_NFRA_CTLPLN~6 after AMENDMENT 5)",
-      "denominator": "29 of 29 rows read; 18 of 18 live files git grep returned classified (0 unclassified); 3 of 3 row-parsing readers measured with an unknown key on a scratch registry outside the repository: validator refused (3 of 3 rows), module refused at plan time (terraform plan rc=1 in a provider-less scratch module), join check renderer ignored it (3 of 3 buckets)",
+      "output_evidence": "FENCE-ROW-SHAPE rows=32 key_sets=2 rows_with_actions=3 rows_with_prefix=3 readers=18 extra_key_ignored=1 extra_key_refused=2 can_carry_today=True ok=True\n(rc 0, under timeout 120; run 2026-10-07 by 0.9.0_WK_NFRA_CTLPLN~6 after AMENDMENT 6; the counts moved with the registry: rows 29 -> 32, key_sets 1 -> 2, rows_with_actions 0 -> 3, rows_with_prefix 0 -> 3, can_carry_today False -> True, because the three scoped rows have landed; ok=True)",
+      "denominator": "32 of 32 rows read; 18 of 18 live files git grep returned classified (0 unclassified); the row-parsing readers measured with an unknown key on a scratch registry outside the repository: validator refused, module refused at plan time (terraform plan rc=1 in a provider-less scratch module), join-check renderer's old behaviour reported as measured (extra_key_ignored=1, extra_key_refused=2)",
       "status": "PASS",
       "expect": "FENCE-ROW-SHAPE rows="
     },
@@ -100,17 +121,17 @@
       "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py expect: unknown_key_refused_by=validator\\+module (the same line must read ok=True with unchanged_today=True)",
       "method": "command",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py",
-      "output_evidence": "FENCE-SCOPED rows_today=29 unchanged_today=True scoped_rendered=9/9 sim_ok=30/30 refusals_ok=7/7 unknown_key_refused_by=validator+module ok=True\n(rc 0, under timeout 120, 8 s; fresh run 2026-10-07 by 0.9.0_WK_NFRA_CTLPLN~6 after AMENDMENT 5; unchanged_today=True, ok=True on the same line)",
-      "denominator": "29 of 29 rows accepted by the validator today; 3 of 3 bucket policies byte-identical; 9 of 9 scoped statements rendered and present at the tail of the fence file's rendered policy; 30 of 30 simulator arms matched (27 scoped arms over 3 buckets, 3 plain-admission controls); 7 of 7 refusal cases refused by the validator, 5 of 7 also by the module's plan-time rules (cases 5 and 7 are validator-only), the unknown key by both",
+      "output_evidence": "FENCE-SCOPED rows_today=32 unchanged_today=True scoped_rendered=9/9 sim_ok=30/30 refusals_ok=7/7 unknown_key_refused_by=validator+module ok=True\n(rc 0, under timeout 120, 30 s; run 2026-10-07 by 0.9.0_WK_NFRA_CTLPLN~6 after AMENDMENT 6; unchanged_today=True and ok=True on the same line; also run in a scratch checkout of d5516cb074^ (registry without the rows): rows_today=29 unchanged_today=True scoped_rendered=9/9 sim_ok=30/30 refusals_ok=7/7 ok=True)",
+      "denominator": "32 of 32 rows accepted by the validator today; 3 of 3 bucket policies byte-identical to the render at d5516cb074^ once every scoped row is removed (and 0 scoped statements; 9 statements for the 3 scoped rows on today's registry); 9 of 9 scoped statements (3 rows x 3) rendered and present at the tail of the fence file's rendered policy; 30 of 30 simulator arms matched (27 scoped arms over 3 buckets, 3 plain-admission controls); control accepted (0 validator refusals, module plan rc 0) then 7 of 7 refusal cases each refused by the validator on the planted row and field alone, 5 of 7 also by the module's plan-time rules (cases 5 and 7 are validator-only), the unknown key by both",
       "status": "PASS",
       "expect": "unknown_key_refused_by=validator\\+module"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "each refusal case is its own mutation of the scoped registry and the unmutated scoped registry is the control (0 refusals); the simulator's plain-admission document (no rendered statements) is the control for the statements: list with no prefix, list with the empty string and put all read allowed there and explicitDeny with the statements",
-      "expected": "mutants refused, control accepted; controls allowed, with statements explicitDeny",
-      "observed": "7 of 7 mutants refused, control 0 refusals; 3 of 3 controls allowed, 3 of 3 matching arms explicitDeny",
+      "description": "check_fence_scoped_rows.py: each refusal case is the accepted with-state registry (control: 0 validator refusals, module plan rc 0) with exactly one defect planted, so a refusal is the planted defect's alone; the simulator's plain-admission document is the control for the statements. check_dell_fence_join.py: run against a scratch copy of the registry with one defect planted, outside the repository",
+      "expected": "mutants refused or the check reading ok=False, controls accepted, plain admission allowed and with statements explicitDeny",
+      "observed": "7 of 7 refusal mutants refused by the validator (direct runs of lib/opal_naming.py validate --registry-dir on scratch copies: control rc 0, each planted defect rc 1 with exactly one refusal on the planted row); 3 of 3 plain-admission controls allowed, matching arms explicitDeny; join check: an unscoped dell1 row -> cross_firm_leaks=1 other_rows_changed=1 ok=False, a scoped row with another firm's prefix -> scoped_confined=2/3 ok=False, a scoped row with s3:PutObject in actions -> scoped_confined=2/3 ok=False, a Dell user named in _about -> cross_firm_leaks=1 ok=False",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -152,17 +173,17 @@
     {
       "tool": "python",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py",
-      "result": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok ok=True"
+      "result": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok scoped_rows=3 scoped_confined=3/3 ok=True"
     },
     {
       "tool": "python",
       "invocation": "python infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py",
-      "result": "FENCE-ROW-SHAPE rows=29 key_sets=1 rows_with_actions=0 rows_with_prefix=0 readers=18 extra_key_ignored=1 extra_key_refused=2 can_carry_today=False ok=True"
+      "result": "FENCE-ROW-SHAPE rows=32 key_sets=2 rows_with_actions=3 rows_with_prefix=3 readers=18 extra_key_ignored=1 extra_key_refused=2 can_carry_today=True ok=True"
     },
     {
       "tool": "python",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_fence_scoped_rows.py",
-      "result": "FENCE-SCOPED rows_today=29 unchanged_today=True scoped_rendered=9/9 sim_ok=30/30 refusals_ok=7/7 unknown_key_refused_by=validator+module ok=True"
+      "result": "FENCE-SCOPED rows_today=32 unchanged_today=True scoped_rendered=9/9 sim_ok=30/30 refusals_ok=7/7 unknown_key_refused_by=validator+module ok=True"
     }
   ]
 }
