@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-39",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "09eafc7c24",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-39.four-windows.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~22",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~22/WINDOWS_E1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_activity_lots.py",
+      "kind": "script",
+      "commit_or_etag": "c9e69c981c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Wash-sale basis rule (unrealized_rows, apply_inkind_reference sold-lot branch, basis_source WASH_SALE_EXCLUDED_BASIS), re-selection true-up (_custodian_restatement, audit reselections), event-id sale link with acquired-date tiebreak (_sold_lot); METHOD_VERSION 3, SCHEMA_VERSION 1.2. No account id in the source. ruff py39 clean.",
+      "artifact_covered_by": [
+        "DB25-2-AC1",
+        "DB25-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_account_activity_lots.py",
+      "kind": "script",
+      "commit_or_etag": "c9e69c981c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "35 tests pass (31 kept, 4 new: wash-sale basis at entry, wash-sale basis at closing, re-selection true-up with the window tying, re-lot basis move listed and not bent).",
+      "artifact_covered_by": [
+        "DB25-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~22/WINDOWS_E1.json",
+      "kind": "config_data",
+      "commit_or_etag": "c9e69c981c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "windows (4: account, gap_before, gap_after, lot_events, cause, kind RULE) and regrade (91 graded, 58 passed, 33 failed all ROUNDING), rule_audit, controls.",
+      "artifact_covered_by": [
+        "DB25-2-AC1",
+        "DB25-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~22/WINDOWS_E1.md",
+      "kind": "doc",
+      "commit_or_etag": "c9e69c981c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only summary; no client figure, balance or account number.",
+      "artifact_covered_by": [
+        "DB25-2-AC1",
+        "DB25-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~22/windows_e1.py",
+      "kind": "script",
+      "commit_or_etag": "c9e69c981c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Driver: runs the producer over the round-23 accounts and days, grades and classes the windows, reads the four against their lot events, runs the rules-off control; reads S3 only; ruff clean.",
+      "artifact_covered_by": [
+        "DB25-2-AC1",
+        "DB25-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c9e69c981c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows W22-S2 and W22-S3 (OBSERVATION, INERT) appended; existing bytes unchanged; the rows passed surprise-row-gate.",
+      "artifact_covered_by": [
+        "DB25-2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB25-2-AC1",
+      "criterion_verbatim": "DB25-2-AC1 -- the 4 windows each read against lot events with a named cause. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r25/p25_windows.py\" . DB25-2-AC1",
+      "output_evidence": "OK: 4 windows read against lot events, each with its cause\nDB25-2-AC1 PASS",
+      "denominator": "4 of 4 round-24 non-ROUNDING windows (MISSING-TERM 3, OTHER 1) carry non-empty lot_events (1, 10, 19, 1) and a cause; kind RULE 4, VENDOR 0",
+      "status": "PASS",
+      "expect": "DB25-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB25-2-AC2",
+      "criterion_verbatim": "DB25-2-AC2 -- the 91 windows re-run, every miss classed; no account id in the producer. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r25/p25_windows.py\" . DB25-2-AC2",
+      "output_evidence": "OK: re-run over 91 windows: 58 tie, 33 miss ({'ROUNDING': 33}); no account id in the producer\nDB25-2-AC2 PASS",
+      "denominator": "91 of 91 accounts graded (the round-23 sample, window 2026-09-01..2026-10-05); 58 passed, 33 failed (round 24: 55 and 36); 33 of 33 failures carry a class: ROUNDING 33; 0 of the 4 round-24 ids appear in the producer source",
+      "status": "PASS",
+      "expect": "DB25-2-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The discriminator for both rules: the same four accounts re-run with the wash-sale basis and the re-selection true-up switched off. If the rules were not what closes the gaps, the gaps would not come back.",
+      "expected": "the four window gaps equal round 24's four gaps",
+      "observed": "4 of 4 equal to the cent (rules off: -0.1933, -1.7793, -2305.0, -99.9361 against round 24's -0.1933, -1.7793, -2305.0, -99.9361); rules on: -0.0033, 0.0107, 0.0, 0.0039; and 102 of 102 lots carrying a disallowed loss on the last day have cost basis less loss equal to the custodian's original cost",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "windows_e1.py was run twice end to end over the same 100 accounts and 24 days and the two WINDOWS_E1.json files compared byte for byte",
+      "observed": "identical (cmp), 91 graded, 58 passed, 33 failed both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any edit of account_return_daily.py or a served producer; any S3 write, vendor call, bun or download",
+      "reason": "Bounds and refusal clause of the order; none made. S3 was read only."
+    },
+    {
+      "item": "the 33 ROUNDING windows are not decomposed",
+      "reason": "The order's tolerance (0.05) classes them; they carry the class and the tolerance as cause."
+    },
+    {
+      "item": "the lot contracts under org/standards are not edited",
+      "reason": "Outside this order's paths; row W22-S3 names the missing basis_source line."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W22-S2",
+    "IRPT_DASHBD-W22-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 data/assets/scripts/gold/irpt_reporting/",
+      "result": "All checks passed; commit-gate and surprise-row-gate passed on the record commit"
+    }
+  ]
+}
