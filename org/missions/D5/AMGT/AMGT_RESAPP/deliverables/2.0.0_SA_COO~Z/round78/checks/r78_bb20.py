@@ -60,9 +60,12 @@ def main():
         clause("C1 with CR removed, every listed file equals its bytes at the base", len(same) == len(files),
                "%d of %d against %s" % (len(same), len(files), BASE))
     else:
-        changed = [p for p in _git(root, "diff", "--name-only", BASE, "HEAD", "--", "data/smartx", "infra/aws").stdout.splitlines() if p]
+        # AMENDMENT 1 (issuer): BASE..HEAD on the shared tree also holds other projects' commits under infra/aws, so the
+        # diff graded a peer's work. The bound is THIS cell's own change: the commits authored by the cell's worker.
+        changed = sorted(set(p for p in _git(root, "log", "--author=0.9.0_WK_AMGT_RESAPP~304 <", "--name-only", "--format=", "--",
+                                             "data/smartx", "infra/aws").stdout.splitlines() if p.strip()))
         other = [p for p in changed if p not in files]
-        clause("C1 nothing else under data/smartx or infra/aws changed since the base", not other,
+        clause("C1 the cell's own commits changed nothing else under data/smartx or infra/aws", bool(changed) and not other,
                "changed %d, outside the list %d %s" % (len(changed), len(other), other[:4]))
     ok = all(results)
     print("R78 BB20 %s SERVED: %s" % (a.crit, "YES" if ok else "NO"))

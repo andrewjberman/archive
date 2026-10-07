@@ -82,9 +82,13 @@ def main():
         print("%s %s %s" % ("PASS" if cond else "FAIL", name, detail))
 
     if a.crit == "AC3":
-        stamp, count = tree_stamp()
-        clause("C1 every other tracked file under integrations/bloomberg is the one at the cut", stamp == STAMP,
-               "%d files; stamp %s" % (count, stamp[:16]))
+        # AMENDMENT 1 (issuer, row Z-W299-S1): the stamp of the whole folder moved when another project committed there
+        # after the cut, so it graded a peer's work. The bound is THIS cell's own change: every commit authored by the
+        # cell's worker touches, under integrations/bloomberg, the two files of the cell and no other.
+        own = sorted(set(p for p in _git("log", "--author=0.9.0_WK_AMGT_RESAPP~299 <", "--name-only", "--format=", "--",
+                                         "integrations/bloomberg").splitlines() if p.strip()))
+        clause("C1 the cell's own commits touch only its two files under integrations/bloomberg",
+               bool(own) and set(own) <= {DRIVER, TEST}, "%d path(s) %s" % (len(own), own))
         dirty = [ln for ln in _git("status", "--porcelain", "--", "integrations/bloomberg").splitlines()
                  if ln[3:].strip().strip('"') not in (DRIVER, TEST)]
         clause("C2 nothing else there is modified or untracked", not dirty, "%d other path(s) %s" % (len(dirty), dirty[:4]))
