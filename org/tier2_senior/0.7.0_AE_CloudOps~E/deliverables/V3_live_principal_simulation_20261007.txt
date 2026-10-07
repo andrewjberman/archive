@@ -1,0 +1,45 @@
+LIVE PRINCIPAL: arn:aws:iam::313476888478:user/cloudops-dell1-agent-user
+instrument: iam:SimulatePrincipalPolicy, ONE resource ARN per call
+
+=== BLOCK 1 (ALLOWED) -- 22 arms, each expected `allowed` ===
+  s3:PutObject                                 arn:aws:s3:::opal-data-assets/x                                  -> allowed        OK
+  lambda:UpdateFunctionCode                    arn:aws:lambda:us-east-1:313476888478:function:x                 -> allowed        OK
+  ecs:RegisterTaskDefinition                   *                                                                -> allowed        OK
+  s3:GetObject                                 arn:aws:s3:::opal-313476888478-terraform-state/nfra-ctlpln-ident -> allowed        OK
+  sqs:SendMessage                              arn:aws:sqs:us-east-1:313476888478:agentbus-ajbdev-sitez-to-lapt -> allowed        OK
+  sqs:SendMessage                              arn:aws:sqs:us-east-1:313476888478:agentbus-ajbdev-laptop-to-sit -> allowed        OK
+  sqs:SendMessage                              arn:aws:sqs:us-east-1:313476888478:agentbus-global-dell2-queue.f -> allowed        OK
+  sqs:ReceiveMessage                           arn:aws:sqs:us-east-1:313476888478:agentbus-global-dell1-queue.f -> allowed        OK
+  dynamodb:CreateTable                         arn:aws:dynamodb:us-east-1:313476888478:table/x                  -> allowed        OK
+  sqs:CreateQueue                              arn:aws:sqs:us-east-1:313476888478:agentbus-x                    -> allowed        OK
+  s3:CreateBucket                              arn:aws:s3:::opal-x-test                                         -> allowed        OK
+  secretsmanager:CreateSecret                  *                                                                -> allowed        OK
+  scheduler:CreateSchedule                     arn:aws:scheduler:us-east-1:313476888478:schedule/default/x      -> allowed        OK
+  lambda:CreateFunction                        arn:aws:lambda:us-east-1:313476888478:function:x                 -> allowed        OK
+  logs:TagResource                             arn:aws:logs:us-east-1:313476888478:log-group:x                  -> allowed        OK
+  dynamodb:TagResource                         arn:aws:dynamodb:us-east-1:313476888478:table/x                  -> allowed        OK
+  apigateway:POST                              arn:aws:apigateway:us-east-1::/apis                              -> allowed        OK
+  route53:ListResourceRecordSets               arn:aws:route53:::hostedzone/Z0000000                            -> allowed        OK
+  scheduler:GetSchedule                        arn:aws:scheduler:us-east-1:313476888478:schedule/default/x      -> allowed        OK
+  secretsmanager:DescribeSecret                *                                                                -> allowed        OK
+  s3:GetEncryptionConfiguration                arn:aws:s3:::opal-x-test                                         -> allowed        OK
+  apigateway:GET                               arn:aws:apigateway:us-east-1::/apis                              -> allowed        OK
+BLOCK1 allowed_ok=22/22
+
+=== BLOCK 3 (PASSROLE) -- 5 arms against the LIVE policy ===
+    NOTE: arm 1 expects `allowed` only under the RENDERED fixture copy. The LIVE
+    policy has an EMPTY named-role list (PASSROLE-RENDER applied=0 named=0), so live
+    the correct expectation for EVERY PassRole arm is DENIED. Both halves say so:
+    "no role can be passed, before or after".
+  iam:PassRole         ctlpln-fixture-role                                  svc=lambda.amazonaws.com     -> explicitDeny   DENIED-OK
+  iam:PassRole         ctlpln-fixture-role                                  svc=ec2.amazonaws.com        -> explicitDeny   DENIED-OK
+  iam:PassRole         some-other-role                                      svc=lambda.amazonaws.com     -> explicitDeny   DENIED-OK
+  iam:CreateRole       *                                                    svc=None                     -> explicitDeny   DENIED-OK
+  iam:PutRolePolicy    ctlpln-fixture-role                                  svc=None                     -> explicitDeny   DENIED-OK
+BLOCK3 denied_ok=5/5
+
+V3-LIVE-PRINCIPAL block1_allowed_ok=22/22 block3_denied_ok=5/5 all_ok=True
+
+No BLOCK1 mismatch, so no deny is being acted on from block 1; the 22 `allowed`
+results are themselves the live proof that the instrument returns `allowed` for
+this principal and is not uniformly denying.
