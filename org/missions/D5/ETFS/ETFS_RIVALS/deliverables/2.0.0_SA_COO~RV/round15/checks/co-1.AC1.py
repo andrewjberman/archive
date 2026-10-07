@@ -55,7 +55,7 @@ import _common as c  # noqa: E402
 DAY, ASOF = "2026-09-30", "2026-09-29"
 RANGES = {"R30": "2026-08-30", "R90": "2026-07-01", "R365": "2025-09-29"}
 TOP = {"fund", "asof", "generated_at", "ranges", "securities"}
-SEC_KEYS = {"name", "source_words", "points", "gaps", "markers"}
+SEC_KEYS = {"name", "source_words", "points", "gaps", "markers", "currency"}
 MARKER_KEYS = {"side", "start", "end", "span", "usd", "bps", "r", "n_trades"}
 FUNDS = ("TXUE", "BASG")
 
@@ -76,6 +76,23 @@ def fixture():
                         "BASG": ({k: q for k, q in book.items() if k != "S02"}, "issuer", 0.1 * step)})
     r = gold_trade_schedule.handler_entry({"date": tp2.DAY, "mode": "replay", "batch_id": "g", "sink": spec})
     assert r["status"] == "OK", r
+    # round 16 (RIV-pc-1): a holding-implied price is drawn only for a listing stored as USD, so the fixture's securities carry a
+    # G4 row holding `currency` USD and no px_close (every price stays holding-implied)
+    import io as _io
+
+    import pandas as pd
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    from rivalfunds import homes
+
+    for d in ("2026-09-25", "2026-09-28", tp2.DAY):
+        g4 = pd.DataFrame([{"security_id": k, "date": pd.Timestamp(d).date(), "px_close": float("nan"), "currency": "USD"}
+                           for k in tp2._book(0)])
+        buf = _io.BytesIO()
+        pq.write_table(pa.Table.from_pandas(g4, preserve_index=False), buf)
+        s.put(homes.address("rivalfunds", "etfs", "gold", "security_market", f"date={d}", "part-20260930T000000Z-aaaaaaaaaaaa.parquet"),
+              buf.getvalue())
     return spec, s
 
 
