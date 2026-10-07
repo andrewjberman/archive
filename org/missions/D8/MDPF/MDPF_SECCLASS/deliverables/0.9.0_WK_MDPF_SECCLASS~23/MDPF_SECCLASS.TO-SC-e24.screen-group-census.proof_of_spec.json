@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e24",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2e6ecff606c8719a8690641920aae52f06fa94f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e24.screen-group-census.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~23",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/screen_group_census.py",
+      "kind": "script",
+      "commit_or_etag": "d418e5ed00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only walk of portal/src (627 non-test files) + 10 producer files; derives each screen's groups from source; accounts for every class-vocabulary file; --write regenerates the mapping JSON; ruff and commit-gate clean.",
+      "artifact_covered_by": [
+        "SC8-e24-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/SCREEN_GROUP_MAPPING_20261007.json",
+      "kind": "config_data",
+      "commit_or_etag": "d418e5ed00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "19 screens, 7 with fewer than six groups all mapped; 5 inferred cells; geography at yang-generate-positioning/lambda_function.py:95, values Emerging/Global/International/US.",
+      "artifact_covered_by": [
+        "SC8-e24-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/SCREEN_GROUP_MAPPING_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "d418e5ed00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The same as a table: screens, the six-by-screen mapping, notes, the five proposals named, S26 placement proposal, excluded files.",
+      "artifact_covered_by": [
+        "SC8-e24-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e24-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/screen_group_mapping_check.py -- expect: SCREEN-GROUP-MAPPING ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/screen_group_mapping_check.py",
+      "expect": "SCREEN-GROUP-MAPPING ok=True",
+      "output_evidence": "SCREEN-GROUP-MAPPING ok=True file=SCREEN_GROUP_MAPPING_20261007.json screens=19 fewer_than_six=7 mapped=7 problems=0 (rc=0; run under timeout 120)",
+      "denominator": "19 of 19 screens graded; 7 of 7 fewer-than-six screens mapped; 0 problems",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e24-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/screen_group_census.py -- expect: SCREEN-GROUP-CENSUS files_scanned=",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/screen_group_census.py",
+      "expect": "SCREEN-GROUP-CENSUS files_scanned=",
+      "output_evidence": "SCREEN-GROUP-CENSUS files_scanned=637 screens=19 (rc=0, about 2 s)",
+      "denominator": "637 files read (627 portal source + 10 producers); 70 carry a class vocabulary: 44 a screen's, 26 excluded with a reason, 0 unaccounted",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control: with the mapping file moved aside the AC1 check must fail as it did at the base.",
+      "expected": "SCREEN-GROUP-MAPPING ok=False file=ABSENT",
+      "observed": "SCREEN-GROUP-MAPPING ok=False file=ABSENT screens=0 fewer_than_six=0 mapped=0 problems=1 (rc=1); the file was moved back and git status showed no change",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python screen_group_census.py run twice back to back; cmp of the two outputs.",
+      "observed": "Identical, 0 differences, rc=0 each.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Showing the mapping on each screen, and naming the securities that change group on a switch.",
+      "reason": "Cell text: later rounds; this cell delivers the census and the mapping as data."
+    },
+    {
+      "item": "Whether each inferred mapping is right.",
+      "reason": "The CVO grades it; AC1 grades shape and coverage only."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W23-S1",
+    "MDPF_SECCLASS-W23-S2",
+    "MDPF_SECCLASS-W23-S3"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/screen_group_census.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/screen_group_census.py",
+      "result": "pre-commit gate clean 1 of 1 file(s)"
+    }
+  ]
+}
