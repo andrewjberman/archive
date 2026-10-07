@@ -42,7 +42,7 @@ body = {"served_release": sha, "installed_code": True,
         "portal_login": lg["body"]["login"], "portal_login_ssm": lg["ssm_command_id"],
         "real_holder": [held(qy, "dim_asset_query"), held(dl, "dim_asset_download")],
         "real_holder_ssm": {"query": qy["ssm_command_id"], "download": dl["ssm_command_id"]},
-        "status_id_refused": st["body"]["status_id_refused"], "status_id_accepted": st["body"]["status_id_accepted"], "status_id_ssm": st["ssm_command_id"], "grants_written": 0,
+        "status_id_refused": st["body"]["status_id_refused"], "status_id_refused_dot": st["body"]["status_id_refused_dot"], "status_id_accepted": st["body"]["status_id_accepted"], "status_id_ssm": st["ssm_command_id"], "grants_written": 0,
         "chart_404": {"ok": rt["chart_404"], "status": rt["chart_404_status"], "body_names_no_chart": rt["chart_404_body_named"]},
         "chart_400": {"ok": rt["chart_400"], "status": rt["chart_400_status"]},
         "day_page_unchanged": {"ok": rt["day_page_unchanged"], "status": rt["day_status"], "bytes": rt["day_bytes"], "sha16": rt["day_sha16"]},
@@ -50,6 +50,7 @@ body = {"served_release": sha, "installed_code": True,
 body["route_ok"] = all(body[k]["ok"] is True for k in ("chart_404", "chart_400", "day_page_unchanged", "audit_page_unchanged"))
 body["floor_ok"] = (body["portal_login"] == "OK" and all(r["outcome"] == "OK" and r["returned"] == r["distinct_returned"] == r["held"] and r["unheld_returned"] == 0 for r in body["real_holder"]))
 body["status_id_ok"] = (body["status_id_refused"]["outcome"] == "refused" and body["status_id_refused"]["http_requests"] == 0
+                        and body["status_id_refused_dot"]["outcome"] == "refused" and body["status_id_refused_dot"]["http_requests"] == 0
                         and body["status_id_accepted"]["outcome"] == "OK" and body["status_id_accepted"]["status_value"] in ("SUCCEEDED", "FAILED", "TIMED_OUT", "ABORTED"))
 json.dump({"body": body, "instance_id": lg["instance_id"]}, open(here + "/RL12_FLOOR.json", "w", encoding="utf-8", newline="\n"), indent=1, sort_keys=True)
 print("RL12_FLOOR route_ok=%s floor_ok=%s status_id_ok=%s portal_login=%s real_holder=%s refused=%s accepted=%s" % (body["route_ok"], body["floor_ok"], body["status_id_ok"], body["portal_login"],
