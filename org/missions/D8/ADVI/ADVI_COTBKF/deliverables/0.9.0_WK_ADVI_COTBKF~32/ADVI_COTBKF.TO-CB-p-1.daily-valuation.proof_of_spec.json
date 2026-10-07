@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-p-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-p-1.daily-valuation.md",
+    "group": "OTHER",
+    "vintage_commit": "b76a9b5088"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~32",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round16.md",
+    "vintage_commit": "b76a9b5088",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-p-1.daily-valuation.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_daily_valuation.py",
+      "kind": "script",
+      "commit_or_etag": "477a4d025d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script and test; S3 reads of the six census price stores under the default boto3 chain, no write, no vendor call, no barred bucket (CountingS3 refuses them)"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_daily_valuation.py",
+      "kind": "test",
+      "commit_or_etag": "477a4d025d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script and test; S3 reads of the six census price stores under the default boto3 chain, no write, no vendor call, no barred bucket (CountingS3 refuses them)"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~32/daily_valuation.md",
+      "kind": "doc",
+      "commit_or_etag": "477a4d025d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo file only; result record of a read"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB16p1-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_daily_valuation.py expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_daily_valuation.py",
+      "output_evidence": "11 passed in 2.18s (run under timeout 120, rc 0)",
+      "denominator": "11 of 11 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "CB16p1-AC2",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_daily_valuation.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~32 expect: DAILY-VALUATION accounts=1533",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_daily_valuation.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~32",
+      "output_evidence": "DAILY-VALUATION accounts=1533 account_days=1691729 complete=132132 holding_days=22547096 priced=6560170 blank=1559597 sources=cottonwood-silver-canonical-prices,cottonwood-gold-canonical-holdings,etfs-bbg-testpull-ticker-history,cash-at-par (run under timeout 120, rc 0, 74 s against the price cache warmed by an untimed cold run of 1m45s)",
+      "denominator": "1533 of 1533 accounts valued; 132,132 of 1,691,729 account-days complete (7.81%); 6,560,170 of 22,547,096 holding-days priced (29.09%); account_days equals step 1's own stat (1,691,729)",
+      "status": "PASS",
+      "expect": "DAILY-VALUATION accounts=1533"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the test suite's blank-not-filled control: removing one price row turns a complete day blank (test_removing_one_price_row_turns_a_complete_day_blank), plus no carry-forward from Monday to Tuesday",
+      "expected": "complete day -> blank, value null",
+      "observed": "11 passed incl. both controls",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two cached runs of the real invocation after the first priced-tolerance fix",
+      "observed": "identical DAILY-VALUATION line complete=132132 priced=6560170 on the cached runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "ADVI_COTBKF-D2-W32-S1: the census read_store keeps no price column; the valuation swaps its cleaner in memory and re-reads the six stores (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~32/ADVI_COTBKF.TO-CB-p-1.daily-valuation.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_daily_valuation.py",
+      "result": "11 passed in 2.18s"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 <the two files>",
+      "result": "All checks passed!"
+    }
+  ]
+}
