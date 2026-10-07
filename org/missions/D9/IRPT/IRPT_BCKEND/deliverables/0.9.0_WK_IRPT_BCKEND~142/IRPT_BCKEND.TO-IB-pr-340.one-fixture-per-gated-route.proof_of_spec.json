@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-340",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-340.one-fixture-per-gated-route.md",
+    "group": "OTHER",
+    "vintage_commit": "c6442ceec1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "c6442ceec1",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-340.one-fixture-per-gated-route.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~142",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~142/battery_ib_pr_340.py",
+      "kind": "script",
+      "commit_or_etag": "a1644ac014",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A copy of the round-61 battery (original untouched) extended with fixture arms and a driver. Read-only run from the worktree root; no deploy. In-process arms are network-blocked; the only network calls are the API Gateway get-routes read, a CloudFront get-distribution read and unauthenticated GET probes, as in round 61.",
+      "artifact_covered_by": [
+        "IB62-5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~142/fixtures/",
+      "kind": "config_data",
+      "commit_or_etag": "a1644ac014",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "17 allowed + 17 denied operation-shaped fixture files (one pair per gated route) and _world.json, written by make_fixtures_p340.py. Data only.",
+      "artifact_covered_by": [
+        "IB62-5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~142/IB62-5_gated_fixtures.json",
+      "kind": "doc",
+      "commit_or_etag": "a1644ac014",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "route_count 21, 17 gated, 16 of 17 fixture pairs PASS both arms, POST /analysis/inputs denied arm FAIL, battery_overall_pass false. Byte-identical across runs (sha256 0c6ac02c4b7879fa...).",
+      "artifact_covered_by": [
+        "IB62-5-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB62-5-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-5-AC1",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-5-AC1",
+      "output_evidence": "FAIL: battery_overall_pass False\nIB62-5-AC1 FAIL (rc=1)",
+      "denominator": "21 routes listed (route_count 21 = 21 listed); 17 gated, each with an allowed and a denied fixture file that exists (17 of 17); fixture arms: 16 of 17 pairs PASS allowed and denied, 1 FAIL (POST /api/scoped/investor-reporting/analysis/inputs, denied arm: partner_without_ordinary_authorizer answered UNEXPECTED); generic arms 0 DRIVEN-FAIL",
+      "expect": "IB62-5-AC1 PASS",
+      "status": "FAIL",
+      "status_reason": "A driven denied arm FAILS: the repository's own upload world refuses a non-admitted partner upload with the residual code UNEXPECTED (intake/uploads.py:177 bare PermissionError). Row IRPT_BCKEND-W142-S1 (BLOCKING). The fix is outside this order's paths."
+    },
+    {
+      "criterion_id": "IB62-G-142",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-G-142",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r62/p62_cells.py\" . IB62-G-142",
+      "output_evidence": "OK: 42 changed path(s), all inside slot ~142's grant\nIB62-G-142 PASS (rc=0), run after the build commit a1644ac014 and before the proof commit",
+      "denominator": "42 paths changed by this worker's commits at the time of the run, 42 inside the grant",
+      "expect": "IB62-G-142 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutated copies of the fixture directory driven through the same fixture worker (B.FIXDIR pointed at a scratch copy): (1) holdings denied foreign_object declared NOT_AUTHORIZED instead of OBJECT_NOT_COVERED; (2) narrative allowed data_contains set to a token the answer lacks. Inside the battery, every denied arm injects one protected value into a synthetic refusal and requires the identical leak test to detect it (injected_control_detected true on all 17 pairs).",
+      "expected": "holdings denied FAIL naming the wrong code; narrative allowed FAIL naming the missing token and denied FAIL on the difference control",
+      "observed": "holdings denied FAIL: foreign_object: answered OBJECT_NOT_COVERED, the fixture names ['NOT_AUTHORIZED']; narrative allowed FAIL: served answer lacks ['NOT-IN-THE-ANSWER-0000'], denied FAIL: difference control failed: the allowed principal's request was not served",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "battery_ib_pr_340.py run twice from the worktree root; sha256 of IB62-5_gated_fixtures.json, IB62-5_replay_output.json and IB62-5_generic_arms_output.json compared",
+      "observed": "0c6ac02c4b7879fa, 2c1e68b6dfe79d35, 6496add6a2b48636 both times (byte-identical; the pytest wall time is stripped from the transcript)",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W142-S1",
+    "IRPT_BCKEND-W142-S2",
+    "IRPT_BCKEND-W142-S3",
+    "IRPT_BCKEND-W142-S4",
+    "IRPT_BCKEND-W142-S5"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~142/battery_ib_pr_340.py",
+      "result": "route_count=21 gated=17 battery_overall_pass=False; PROBLEM: POST /api/scoped/investor-reporting/analysis/inputs: denied arm FAIL"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~142/make_fixtures_p340.py",
+      "result": "wrote 17 fixture pairs"
+    }
+  ]
+}
