@@ -50,7 +50,7 @@ def main():
         src = t.read_text(encoding="utf-8")
         if "custody-report" not in src or not re.search(r"\b0\b", src):
             fail("the test does not name custody-report and a zero request count")
-        rc, out = _run(["bun", "test", TEST], portal)
+        rc, out = _run(["bun", "--no-install", "test", TEST], portal)
         m = re.search(r"(\d+) pass", out)
         f = re.search(r"(\d+) fail", out)
         if rc or not m or (f and int(f.group(1)) > 0):
