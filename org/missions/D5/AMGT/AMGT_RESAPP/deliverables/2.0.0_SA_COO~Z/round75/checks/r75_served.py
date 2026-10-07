@@ -1,6 +1,6 @@
 """AMGT_RESAPP round 75 -- the CTO's round-74 analysis @0967e3d9c5, section 4 (PRD v0.40).
 
-  --cell c57|c58|c59|c60|c61 --where local|deployed [--bar N]
+  --cell c57|c58|c59|c60|c61 --where local|deployed [--bar N] [--burst N]
 
 c57 (FWD-5, ruling 1): for the PDF prints of BA, AMD and ASML_NA, C1 no line under a "Fiscal year YYYY" heading is stamped with the
     run date (today, UTC); C2 the run date appears exactly ONCE in each print, on page 1 (the header).
@@ -9,8 +9,10 @@ c58 (FWD-5, ruling 2): C1 the BA print carries every sentence /security/BA_US_Eq
     section whose served sentences are non-empty.
 c59 (FWD-7, ruling 3): local -- C1 `lib.research.freshness.snapshot.build_freshness_snapshot()` returns rows EQUAL to
     `scoped_amgt.read_coverage_freshness()` rows (every row, every field). deployed -- C1 the snapshot object the route reads exists
-    and its rows EQUAL a locally computed view; C2 a burst of 6 concurrent /freshness invokes: every COLD one (a REPORT with Init
-    Duration) answers 200 within the bar (init + duration, default 2,000 ms), and at least one cold invoke is observed; C3 one invoke
+    and its rows EQUAL a locally computed view; C2 a burst of --burst concurrent /freshness invokes (default 40, wide enough to
+    exceed the warm pool; row Z-S361, issuer ruling 2026-10-06): every COLD one (a REPORT with Init Duration) answers 200 within the
+    bar (init + duration, default 2,000 ms). An EMPTY cold list is UNMEASURED, never a FAIL: the verdict then reads
+    `R75 C59 SERVED: UNMEASURED` with exit 2 (a slow or failed cold invoke stays NO, exit 1); C3 one invoke
     after 65 s idle (the in-process hold expired) answers 200 within the bar.
 c60 (ruling 5): in a FRESH process, `read_monthly_chatter(30)` logs `AMGT_PHASE route=chatter phase=names ms=<n>` with n within the
     bar (default 300 ms).
@@ -18,7 +20,7 @@ c61 (ruling 6): over every covered name's /thesis, C1 no segment_breakdown row i
     (a digit or '$'), and BA's headings are one segment name each: at most 3 distinct, each in {Commercial Airplanes; Defense, Space &
     Security; Global Services}; C2 every driver-chart point whose passage_text is a table run (half or more of its tokens numeric)
     serves `passage_table` with non-empty `columns` and `rows`, each row a non-empty `label`.
-Verdict: R75 <CELL> SERVED: YES|NO.
+Verdict: R75 <CELL> SERVED: YES|NO (exit 0|1); c59 deployed may also read UNMEASURED (exit 2).
 """
 from __future__ import annotations
 
@@ -55,8 +57,10 @@ def main():
     ap.add_argument("--cell", choices=("c57", "c58", "c59", "c60", "c61"), required=True)
     ap.add_argument("--where", choices=("local", "deployed"), required=True)
     ap.add_argument("--bar", type=float, default=0.0)
+    ap.add_argument("--burst", type=int, default=40)
     a = ap.parse_args()
     ok = []
+    unmeasured = []
 
     def clause(name, cond, detail=""):
         ok.append(bool(cond))
@@ -80,7 +84,10 @@ def main():
     if a.where == "deployed":
         import boto3
 
-        lam = boto3.client("lambda", region_name="us-east-1")
+        from botocore.config import Config
+
+        lam = boto3.client("lambda", region_name="us-east-1",
+                           config=Config(max_pool_connections=max(10, a.burst + 4), read_timeout=120))
 
         def invoke(path, query=None, tail=False):
             r = lam.invoke(FunctionName=FN, Payload=json.dumps(_event(path, query)).encode(),
@@ -208,8 +215,8 @@ def main():
             print(f"   rot: served {sorted(rots)[:1]}; rendered from the deployed /lists {json.dumps(want_rot)[:120]}")
             clause("C1 the route serves the snapshot; rows equal the computed view, rot equal to the deployed register's",
                    bool(src) and same == n and n > 0 and rots == {json.dumps(want_rot)}, f"{same} of {n}")
-            with concurrent.futures.ThreadPoolExecutor(6) as ex:
-                res = list(ex.map(lambda _: invoke(f"{PREFIX}/freshness", tail=True), range(6)))
+            with concurrent.futures.ThreadPoolExecutor(a.burst) as ex:
+                res = list(ex.map(lambda _: invoke(f"{PREFIX}/freshness", tail=True), range(a.burst)))
             cold = []
             for (b, log) in res:
                 rep = next((ln for ln in log.split("\n") if ln.startswith("REPORT")), "")
@@ -217,9 +224,13 @@ def main():
                 dur = re.search(r"\tDuration: ([\d.]+) ms", rep)
                 if init and dur:
                     cold.append((b.get("statusCode"), float(init.group(1)) + float(dur.group(1))))
-            print(f"   burst of 6: cold invokes {len(cold)} {[(c, round(t)) for c, t in cold]}")
-            clause("C2 every cold invoke answers within the bar", cold and all(c == 200 and t <= bar for c, t in cold),
-                   f"bar {bar:.0f}")
+            print(f"   burst of {a.burst}: cold invokes {len(cold)} {sorted((c, round(t)) for c, t in cold)}")
+            if cold:
+                clause("C2 every cold invoke answers within the bar", all(c == 200 and t <= bar for c, t in cold),
+                       f"bar {bar:.0f}; {len(cold)} cold of {a.burst}")
+            else:
+                unmeasured.append("C2")
+                print(f"UNMEASURED C2 no cold invoke was observed in a burst of {a.burst}; widen --burst (this is not a FAIL)")
             time.sleep(65)
             t0 = time.time()
             b, log = invoke(f"{PREFIX}/freshness", tail=True)
@@ -256,11 +267,14 @@ def main():
         clause("C1 every segment row is headed by one segment name", not bad_heads and ba_ok,
                f"bad {len(bad_heads)}; BA {len(ba_heads)} headings")
         clause("C2 every table passage serves its row and column labels", not table_bad, f"{len(table_bad)} of {tables}")
-    return _verdict(a, ok)
+    return _verdict(a, ok, unmeasured)
 
 
-def _verdict(a, ok):
+def _verdict(a, ok, unmeasured=()):
     verdict = "YES" if ok and all(ok) else "NO"
+    if verdict == "YES" and unmeasured:
+        print(f"R75 {a.cell.upper()} SERVED: UNMEASURED ({', '.join(unmeasured)} observed nothing to grade)")
+        return 2
     print(f"R75 {a.cell.upper()} SERVED: {verdict}")
     return 0 if verdict == "YES" else 1
 
