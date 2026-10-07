@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_TRNSPT.TO-TR-w4",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R4.md",
+    "vintage_commit": "b6a856bfb9",
+    "to_ref": "org/missions/D9/NFRA/NFRA_TRNSPT/task-orders/NFRA_TRNSPT.TO-TR-w4.mail-window-spans.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/prd/NFRA_TRNSPT_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b6a856bfb9"
+  },
+  "assignee": "0.9.0_WK_NFRA_TRNSPT~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/transcripts-pull/mail_handler.py",
+      "kind": "script",
+      "commit_or_etag": "442c671a63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "WINDOW_DAYS bound 1..120; default 7; nothing applied.",
+      "artifact_covered_by": [
+        "TR4-w4-AC1",
+        "TR4-w4-AC2",
+        "TR4-w4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_mail_window_spans.py",
+      "kind": "test",
+      "commit_or_etag": "442c671a63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "120-day window: 4 spans, first 2026-05-28T00:00Z, last ends 2026-09-25T00:00Z, contiguous, each <=31d; known row skipped (skipped_known>=1, landed 0).",
+      "artifact_covered_by": [
+        "TR4-w4-AC1",
+        "TR4-w4-AC2",
+        "TR4-w4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_mail_pull_handler.py",
+      "kind": "test",
+      "commit_or_etag": "442c671a63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bound test now [0,121] matching 1..120.",
+      "artifact_covered_by": [
+        "TR4-w4-AC1",
+        "TR4-w4-AC2",
+        "TR4-w4-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TR4-w4-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R4_CHECKS/r4_checks.py w4-spans -> R4-W4-SPANS-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R4_CHECKS/r4_checks.py w4-spans",
+      "output_evidence": "(run under timeout 120) R4-W4-SPANS-OK passed=4\nexit=0",
+      "denominator": "4 of 4 tests passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TR4-w4-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R4_CHECKS/r4_checks.py w4-bounds -> R4-W4-BOUNDS-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R4_CHECKS/r4_checks.py w4-bounds",
+      "output_evidence": "(run under timeout 120) R4-W4-BOUNDS-OK passed=3\nexit=0",
+      "denominator": "3 of 3 tests passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TR4-w4-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T/R2_CHECKS/r2_bundle_import_check.py -> BUNDLE-IMPORT-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T/R2_CHECKS/r2_bundle_import_check.py",
+      "output_evidence": "(run under timeout 120) BUNDLE-IMPORT-OK files=48\nexit=0",
+      "denominator": "48 files imported",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "none",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/transcripts/scripts/tests/test_mail_window_spans.py data/transcripts/scripts/tests/test_mail_pull_handler.py -q -p no:cacheprovider",
+      "result": "13 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base handler (bound 1..31) given WINDOW_DAYS=120 by the new tests.",
+      "expected": "AC1 and AC2 FAIL at the base (dry-run at CLOUD b6a856bfb9: R4-W4-SPANS-FAIL absent, R4-W4-BOUNDS-FAIL absent)",
+      "observed": "issuer dry-run recorded both FAIL at the base; both OK after 442c671a63",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "r4_checks w4-spans and w4-bounds run twice each (once before the ruff-fix recommit, once after).",
+      "observed": "OK both times; 13 passed in the two test files.",
+      "status": "STABLE"
+    }
+  }
+}
