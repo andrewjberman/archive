@@ -49,3 +49,22 @@ ADVI_COTBKF statements and the break-glass role; CT-d-2's line is signed in that
 Branch A, that the plan touch exactly the three statements plus that one line (any other change is Branch B), and that the after-read
 include one refused read on `commonwealth/cottonwood/bronze/crm/` by `cloudops-dell2-agent-user` (the dell2 identity admitted to the
 bucket by CT-d-2 is still denied on the restricted prefix). COO half for this amendment: `2.0.0_SA_COO~C2`, GIVEN 2026-10-07 ~11:2xZ.
+
+## AMENDMENT 2 -- 2026-10-07 ~12:0xZ: STATEMENTS ONLY; the break-glass role is a separate act
+
+Laptop `1.0.0_SA_CTO` 106207 (relayed as msgs 461, 464): `0.7.0_AE_CloudOps~E` stopped TO-APPLY-5 at step 0 and applied nothing
+(`org/tier2_senior/0.7.0_AE_CloudOps~E/deliverables/STEP0_CONFLICT_READ_TO-APPLY-5_20261007.md` @316e1e5f98), because section 1's role row
+and Branch A's "the role with its inline policy created" contradicted both CTO halves, which void on any role line.
+
+**This half now signs STATEMENTS ONLY**, and supersedes section 1's role row and Branch A's role clause:
+- **Signed:** the three Deny statements (`DenyRestrictedReadExceptReaders`, `DenyRestrictedListExceptReaders`,
+  `DenyRestrictedWriteExceptBreakglass`) in the Cottonwood row of `aws_s3_bucket_policy.lgic_firm`, plus CT-d-2's dell2 principal line
+  (signed in its own halves). The statements name the break-glass role's ARN, derived from its builder name; the role need not exist for
+  the policy to apply, and until it does, only the console user reads the prefix (the prefix holds 0 objects).
+- **Not signed here:** `aws_iam_role.restricted_breakglass` and `aws_iam_role_policy.restricted_breakglass`. They are their own act under
+  the admitted role request `dell2-20261007T085711Z-7b15` (laptop 106095), with their own pair.
+- **Branch A:** the targeted plan touches exactly the three statements plus CT-d-2's line and NO role resource; CB4d4-AC1's policy limb
+  passes immediately before the apply; after it, one read on `commonwealth/cottonwood/bronze/crm/` by `cloudops-dell2-agent-user` is
+  refused. **Branch B:** a role line or any other change in the plan -- stop, apply nothing.
+
+COO half for this amendment: `2.0.0_SA_COO~C2`, GIVEN 2026-10-07 ~12:0xZ.

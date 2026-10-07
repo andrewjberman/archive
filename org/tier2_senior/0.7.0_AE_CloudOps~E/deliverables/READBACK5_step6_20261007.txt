@@ -1,0 +1,58 @@
+========================================================================================================
+V1 -- LIVE vs PRIOR + one principal + three statements
+========================================================================================================
+  prior 501 B sha256=49f1cf260f0f18d5f52244c2a48bb5159765dd293633b750a9f0fbad39dcc7ae  (1 statement)
+  live  1772 B sha256=e73fc8922b0f2f32dac33a9100dfe856d5167d1e40892dc9a6935ed805ab03b4  (4 statements)
+  LIVE == PRIOR + dell2 principal + the three statements : True
+  live Sids: ['DenyForeignFirmPrincipals', 'DenyRestrictedReadExceptReaders', 'DenyRestrictedListExceptReaders', 'DenyRestrictedWriteExceptBreakglass']
+  the three signed Sids all present: True
+  fence admitted 5 -> 6, dell2 present: True
+  NEGATIVE CONTROL, same comparator, planted mutant: LIVE==mutated = False  <- must be False
+
+========================================================================================================
+V2 -- the NFRA_CTLPLN halves' arms (the dell2 line)
+========================================================================================================
+  dell2 reads OUTSIDE the restricted prefix                s3:GetObject           want=allow -> allowed        OK       
+        resource: arn:aws:s3:::opal-data-cottonwood/irpt/probe.txt
+        matched: ['cloudops-dell-agent-deploy-policy']  the act's purpose: dell2 reaches Cottonwood firm data
+  dell1 reads the bucket (no row anywhere)                 s3:GetObject           want=deny  -> explicitDeny   OK       
+        resource: arn:aws:s3:::opal-data-cottonwood/irpt/probe.txt
+        matched: ['ResourcePolicy']  
+  UNLISTED previously-refused: opal-gateway-role           s3:GetObject           want=deny  -> explicitDeny   OK       
+        resource: arn:aws:s3:::opal-data-cottonwood/irpt/probe.txt
+        matched: ['ResourcePolicy']  exists, created 2026-08-15; in no fence list
+  CONTROL previously-admitted: Opal_Terminal, outside      s3:GetObject           want=allow -> allowed        OK       
+        resource: arn:aws:s3:::opal-data-cottonwood/irpt/probe.txt
+        matched: ['AdministratorAccess']  existing access not broken
+V2: 4/4
+
+========================================================================================================
+V3 -- the ADVI_COTBKF halves' arms + NFRA_CTLPLN CTO condition 3 (ON the prefix)
+========================================================================================================
+  dell2 READ on the prefix                                 s3:GetObject           want=deny  -> explicitDeny   OK       
+        resource: arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/probe.txt
+        matched: ['ResourcePolicy']  the amended ADVI_COTBKF COO half's own after-read
+  dell2 LIST the prefix                                    s3:ListBucket          want=deny  -> explicitDeny   OK       
+        resource: arn:aws:s3:::opal-data-cottonwood   [s3:prefix=commonwealth/cottonwood/bronze/crm/]
+        matched: ['ResourcePolicy']  s3:prefix supplied, or the condition would false-deny
+  dell2 PUT on the prefix                                  s3:PutObject           want=deny  -> explicitDeny   OK       
+        resource: arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/probe.txt
+        matched: ['ResourcePolicy']  
+  LAPTOP user/Andrew_Berman READ on the prefix             s3:GetObject           want=deny  -> explicitDeny   OK       
+        resource: arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/probe.txt
+        matched: ['ResourcePolicy']  the laptop locks itself out -- ADVI_COTBKF's stated intent
+  LAPTOP LIST the prefix                                   s3:ListBucket          want=deny  -> explicitDeny   OK       
+        resource: arn:aws:s3:::opal-data-cottonwood   [s3:prefix=commonwealth/cottonwood/bronze/crm/]
+        matched: ['ResourcePolicy']  
+  LAPTOP PUT on the prefix                                 s3:PutObject           want=deny  -> explicitDeny   OK       
+        resource: arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/probe.txt
+        matched: ['ResourcePolicy']  
+  LAPTOP still READS OUTSIDE the prefix (CONTROL)          s3:GetObject           want=allow -> allowed        OK       
+        resource: arn:aws:s3:::opal-data-cottonwood/irpt/probe.txt
+        matched: ['AdministratorAccess']  the lockout is prefix-scoped, not bucket-wide
+  CONSOLE user admitted ON the prefix                      s3:GetObject           want=allow -> allowed        OK       
+        resource: arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/probe.txt
+        matched: ['AdministratorAccess']  one of the two excepted readers
+V3: 8/8
+
+READBACK5 v1_equal=True v2=4/4 v3=8/8 all_ok=True

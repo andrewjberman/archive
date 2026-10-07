@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e47",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "90f99888cd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "5d70aab6c9",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e47.clean-name-repair.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~35",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/security_name.py",
+      "kind": "script",
+      "commit_or_etag": "9e01f8ee64",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "clean_name step 4 gains ticker (one token, 1-5 chars), vowelless 2-4 letter acronym, corporate-form set and lowered joining words; new module constants CORPORATE_FORMS, JOINING_WORDS, TICKER_MAX_LEN, ACRONYM_MIN_LEN, ACRONYM_MAX_LEN, VOWELS; signature unchanged; stdlib, ASCII. Amendment 1: step 4 drops EVERY trailing VENDOR_SUFFIXES token (while loop, len>1 guard), so clean_name is idempotent (row W35-S1).",
+      "artifact_covered_by": [
+        "SC9-e47-AC1",
+        "SC9-e47-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
+      "kind": "test",
+      "commit_or_etag": "9e01f8ee64",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "82 tests; one positive and one negative test per new branch; BK/NTS/MKTS/BLDR expectations upper; 'COM' alone stays COM; amendment 1: ETF SHS COM -> ETF, FOO COM SHS -> Foo, and ETF SHS COM is back in the idempotence INPUTS list.",
+      "artifact_covered_by": [
+        "SC9-e47-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC9-e47-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py -- expect: CLEAN-NAME-TABLE ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py",
+      "expect": "CLEAN-NAME-TABLE ok=True",
+      "output_evidence": "CLEAN-NAME-TABLE ok=True cases=24 mismatches=0 (rc=0)",
+      "denominator": "24 of 24 table cases match",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC9-e47-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=82 passed in 0.20s (rc=0)",
+      "denominator": "82 of 82 tests passed, 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant: empty CORPORATE_FORMS at runtime, then run the issuer's table.",
+      "expected": "CLEAN-NAME-TABLE ok=False with the NA case mismatching",
+      "observed": "Not re-run under amendment 1; the NA mutant from the first pass stands for the CORPORATE_FORMS branch.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Table and pytest each run twice against the same rule.",
+      "observed": "AC1 and AC2 each run identical on the pre-flip and post-edit runs: ok=True 24 of 24; 82 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Names outside the grounded table and the custody feeds; any table read or write; shipped-artifacts hookup.",
+      "reason": "BOUNDS: pure code; SC-e-48 meets the custody names."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W35-S1"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on each .py)",
+      "result": "ruff + py_compile clean 2 of 2"
+    }
+  ]
+}
