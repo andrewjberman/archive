@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e31",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e31.ai-classifier-in-service.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classification_model.py",
+      "kind": "script",
+      "commit_or_etag": "edc7ceaaa1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ASSET_CLASS_VOCAB is the six classes; build_prompt names the six and shows no sub-class of a non-six class. This _shared file matches the etf_classification*.py shipped-copy pattern: it is NOT pushed by this worker; the issuer signs its half before any pushed range carries it.",
+      "artifact_covered_by": ["SC8-e31-AC1", "SC8-e31-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/classify-residual-model.py",
+      "kind": "script",
+      "commit_or_etag": "edc7ceaaa1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "In-service runner: direct-match plan first, value bound, clean_name, conditional put via etf_classification_scheduled.write(), listing rewrite; dry run by default; model called only with --model AND --write. Not run with a model; no scheduling.",
+      "artifact_covered_by": ["SC8-e31-AC1", "SC8-e31-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-secclass/ai-index/index_writer.py",
+      "kind": "script",
+      "commit_or_etag": "edc7ceaaa1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "C-AIINDEX listing writer; address from lib/opal_naming.py address(), no typed bucket or key. No function, role or schedule created.",
+      "artifact_covered_by": ["SC8-e31-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-secclass/ai-index/tests/test_ai_index.py",
+      "kind": "script",
+      "commit_or_etag": "edc7ceaaa1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 tests, S3 and DynamoDB stubbed.",
+      "artifact_covered_by": ["SC8-e31-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_model_classifier.py",
+      "kind": "script",
+      "commit_or_etag": "edc7ceaaa1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "33 tests: the stale 0.3.0 version pin replaced; 15 new tests for the six-class vocabulary, multi_asset refusal, sub-class bound, planned ticker never sent, clean name, present key never written, dry run.",
+      "artifact_covered_by": ["SC8-e31-AC1"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/ai_classifier_dry_run.py",
+      "kind": "script",
+      "commit_or_etag": "edc7ceaaa1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Dry run over Inflection's 47 ticker-carrying held pairs (R2_UNRESOLVED_REVIEW_20260930.json); table handle and transport wrapped with counters; asserts model_calls == 0, no put, would_land == 0.",
+      "artifact_covered_by": ["SC8-e31-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e31-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_model_classifier.py infra/aws/lambda/mdpf-secclass/ai-index/tests -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_model_classifier.py infra/aws/lambda/mdpf-secclass/ai-index/tests",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=42 passed in 0.33s (rc=0)",
+      "denominator": "42 of 42 tests passed (33 in test_model_classifier.py, 9 in ai-index/tests), 0 failed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e31-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e31_vocab_bound.py -- expect: VOCAB-BOUND ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e31_vocab_bound.py",
+      "expect": "VOCAB-BOUND ok=True",
+      "output_evidence": "VOCAB-BOUND ok=True (rc=0)",
+      "denominator": "3 of 3 limbs hold: vocabulary is exactly the six, prompt names each of the six and never multi_asset, a stubbed multi_asset reply is refused to null",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e31-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/ai_classifier_dry_run.py -- expect: model_calls=0",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/ai_classifier_dry_run.py",
+      "expect": "model_calls=0",
+      "output_evidence": "AI-DRY-RUN held=47 present=16 direct=0 to_model=31 would_land=0 model_calls=0 index_address=s3://opal-data-mdpf/mdpf/global/gold/ai_classified_securities/date=2026-10-07/index.json (rc=0)",
+      "denominator": "47 held pairs of firm inflection: 16 present, 0 direct, 31 to the model stub; 0 model calls, 0 put attempts (live table 3507 tickers read)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant: add 'multi_asset' back to etf_classification_model.ASSET_CLASS_VOCAB at runtime, then run the issuer's bound check.",
+      "expected": "VOCAB-BOUND ok=False naming the vocabulary and the unrefused multi_asset reply",
+      "observed": "VOCAB-BOUND ok=False fails=vocab=['alternatives', 'cash', 'commodities', 'equity', 'fixed_income', 'multi_asset', 'structured'];multi_asset_reply_not_refused='multi_asset' (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 run twice, before and after the commit (the naming-gate fix in index_writer.py between them).",
+      "observed": "Identical results both times: 42 passed; ok=True; model_calls=0 with the same held=47 present=16 to_model=31.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any model call, table write, S3 write or secret read; scheduling the runner; the first real run.",
+      "reason": "BOUNDS: Andrew's word covers the classifier in service, exercised by the issuer's first real run under its own half; the tests and dry run stub send."
+    },
+    {
+      "item": "Any resource (function, role, schedule). If the runner is made a Lambda it needs a function, role and schedule named by name() and a resources.json row, cut by the issuer with its Terraform.",
+      "reason": "AMENDMENT 1 bound 1: create no resource of any kind; none is created, none is named here because the cell declares none."
+    },
+    {
+      "item": "The 13 table rows already classified_by model carry no name (AMUSX, BAGIX, BAGSX, BSIIX, CSRSX, DODIX, EMXC, FXNAX, IGSB, JEMSX, PFUNX, USRT, VCMDX; measured live 2026-10-07, 13 of 13 unnamed). Rows with class cash: 0.",
+      "reason": "A conditional put never touches an existing row; naming them is not this cell's write."
+    }
+  ],
+  "surprises": ["MDPF_SECCLASS-W26-S2", "MDPF_SECCLASS-W26-S3", "MDPF_SECCLASS-W26-S4"],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/ai_classifier_dry_run.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on each .py), with ruff 0.15.11 first on PATH in a scratch venv (row W26-S4)",
+      "result": "py_compile, ds-precommit, ruff and the naming gate clean 6 of 6 after one naming-gate refusal (a hand-kept 'mdpf' constant) fixed by passing it straight to the address() call"
+    }
+  ]
+}
