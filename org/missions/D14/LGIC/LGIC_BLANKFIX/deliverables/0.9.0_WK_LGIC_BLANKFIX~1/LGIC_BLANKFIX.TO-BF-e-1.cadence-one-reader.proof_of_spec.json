@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-e-1",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-e-1.cadence-one-reader.md",
+    "group": "OTHER",
+    "vintage_commit": "0abd2716dd"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~1",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round2.md",
+    "vintage_commit": "0abd2716dd",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-e-1.cadence-one-reader.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming_cadence.py",
+      "kind": "script",
+      "commit_or_etag": "c17998e4fb",
+      "introduces": [
+        "def carried_word(",
+        "def verdict_for(",
+        "def _dow_days("
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "word_for reads P1 daily on five or more days, the P2 {N}min/{N}h form and the ruled event rule; contradicted ROOT command. Worker branch wk-LGIC_BLANKFIX-1, LOCAL.",
+      "artifact_covered_by": [
+        "BE1-AC1",
+        "BE1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_cadence.py",
+      "kind": "script",
+      "commit_or_etag": "c17998e4fb",
+      "introduces": [
+        "CARRIED = ["
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CADENCE-TEST ok=True cases=45. Worker branch wk-LGIC_BLANKFIX-1, LOCAL.",
+      "artifact_covered_by": [
+        "BE1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_naming.py",
+      "kind": "script",
+      "commit_or_etag": "c17998e4fb",
+      "introduces": [
+        "self.cadence_token = re.compile("
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "vocabulary load plus _cadence_slot accept the schema's interval token; nothing else moved. 5 sibling lib test scripts ok=True; test_opal_naming.py 6 failed 87 passed (the six base failures). Worker branch wk-LGIC_BLANKFIX-1, LOCAL.",
+      "artifact_covered_by": [
+        "BE1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BE1-AC1",
+      "criterion_verbatim": "<criterion id=\"BE1-AC1\" cell_refs=\"BF-e-1\"><invocation>python lib/tests/test_opal_naming_cadence.py</invocation><expect>CADENCE-TEST ok=True</expect></criterion>",
+      "method": "command",
+      "invocation": "python lib/tests/test_opal_naming_cadence.py",
+      "expect": "CADENCE-TEST ok=True",
+      "output_evidence": "CADENCE-TEST ok=True cases=45\nrc=0",
+      "denominator": "45 of 45 cases hold (18 expression cases of the base kept, new interval/weekday words, 4 carried-word cases, 9 verdict_for/grader assertions). The difference control as the cell words it (daily name on MON-FRI reads agrees=False) contradicts AMENDMENT 1 P1 and is built as agrees=True, with the False arm on rate(15 minutes) (row W1-S4).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BE1-AC2",
+      "criterion_verbatim": "<criterion id=\"BE1-AC2\" cell_refs=\"BF-e-1\"><invocation>python lib/opal_naming_cadence.py contradicted infra/aws/terraform/bd-pipeline</invocation><expect>CADENCE-CONTRADICTED ok=True</expect></criterion>",
+      "method": "command",
+      "invocation": "python lib/opal_naming_cadence.py contradicted infra/aws/terraform/bd-pipeline",
+      "expect": "CADENCE-CONTRADICTED ok=True",
+      "output_evidence": "CADENCE-CONTRADICTED ok=True root=infra/aws/terraform/bd-pipeline rows=20 contradicted=0\nrc=0",
+      "denominator": "20 of 20 schedule and event rows of the root read, 0 contradicted; the 20 equals the independent count. Run with lib/opal_naming_event_rules.json present in the worktree but NOT committed (row W1-S6 BLOCKING: the naming limb refuses it).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The difference control inside BE1-AC1: the same daily-named rule must read agrees=True on cron(30 22 * * ? *) and on cron(30 22 ? * MON-FRI *) (P1) and agrees=False on rate(15 minutes). A reader that took the word from the name alone would never read False.",
+      "expected": "agrees False on the 15-minute rate, True on both daily crons, None when either word is missing",
+      "observed": "all five arms hold in CADENCE-TEST ok=True cases=45",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both invocations run twice on the same tree, last lines compared.",
+      "observed": "CADENCE-TEST ok=True cases=45 and CADENCE-CONTRADICTED ok=True ... rows=20 contradicted=0 both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "lib/opal_naming_rootcheck.py wiring of verdict_for",
+      "reason": "Cell BF-e-8's, outside this order's grant."
+    },
+    {
+      "item": "Committing lib/opal_naming_event_rules.json",
+      "reason": "The ENFORCE naming limb refused it (row W1-S6, BLOCKING); written in the worktree, not committed. The order is not flipped."
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-W1-S4",
+    "LGIC_BLANKFIX-W1-S5",
+    "LGIC_BLANKFIX-W1-S6"
+  ],
+  "session_log": "0.9.0_WK_LGIC_BLANKFIX~1 on LGIC_BLANKFIX.TO-BF-e-1, worktree C:/tmp/wk-blankfix-1 (branch wk-LGIC_BLANKFIX-1, base 0abd2716dd). Branch printed, TREE-OK. Built the P1/P2/P3 words, carried_word, verdict_for and the contradicted command; extended the tests; the grader reads the interval token. Safe-commit refused the ruled-rows data file (naming limb): row W1-S6; the rest committed. Both criteria PASS in the worktree.",
+  "compiler_tools": [
+    {
+      "tool": "lib/opal_naming_cadence.py",
+      "invocation": "python lib/opal_naming_cadence.py root infra/aws/terraform/bd-pipeline ; estate",
+      "result": "CADENCE-ROOT rows=20 decided=20 undecided=0 contradicted=0; CADENCE-ESTATE rows=142 decided=119 undecided=23"
+    }
+  ]
+}
