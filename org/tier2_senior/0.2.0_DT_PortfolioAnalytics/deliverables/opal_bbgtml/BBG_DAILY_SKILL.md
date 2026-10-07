@@ -38,11 +38,20 @@ Wait ~1 minute after PASS (OneDrive syncs the output folder), then ask Claude:
 What the tool does (all server-side — the big files never pass through the chat):
 1. Finds today's two PKLs in the SharePoint output folder (your own SharePoint access).
 2. Uploads them through the portal's /data-refresh channel.
-3. Triggers the Yang data pipeline and watches it to completion.
-4. Confirms against the LIVE portal manifest that the new date is being served.
+3. Triggers the Yang data pipeline and **returns right after the trigger** (it does not wait
+   for the run; the client connection drops near 120 s).
 
-You get back three confirmations: **uploaded ✓ → pipeline ✓ → displayed ✓**. If any leg
-fails, the tool says which and why — nothing half-lands silently.
+You get back the uploaded files, the `upload_id` and the `execution_id`. **Then read
+`opal_data_refresh_status` with that execution id** until the run is terminal: it returns the
+run's status and the LIVE portal manifest's displayed date, so you confirm **uploaded ✓ → pipeline ✓ →
+displayed ✓**. If `opal_data_refresh_status` is not available to your identity, read the portal's
+displayed date instead. If any leg fails, the tool says which and why — nothing half-lands silently.
+
+Never re-send on a dropped transport.
+
+A dropped reply does not mean the send failed: the
+send landed. A repeat `confirm` of the same two files inside 30 minutes returns the first
+execution id and fires nothing.
 
 **Safe practice run:** `opal_data_refresh_upload with dry_run=true` uploads to the staging
 area WITHOUT running the pipeline — use this the first time, or any time you want to test.
