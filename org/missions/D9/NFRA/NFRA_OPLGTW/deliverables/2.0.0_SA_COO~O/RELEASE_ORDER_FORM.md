@@ -88,9 +88,12 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
   `displayed_date`. That is the TIME the manifest was generated, not the data's as-of date. A re-publish of an older
   date reads as the day of the re-publish. An order or caller text that needs the as-of date names another field.
 - **The deploy script's install lines (R39, R40).** Before an order runs `deploy-to-ec2.sh`, the issuer reads its lines
-  in `org/tier0_exec/0.0.0_AB_MSTR~Z/deliverables/SITEZ_INSTALL_DOWNLOAD_LINE_CENSUS_20261007.md`. A release whose
-  diff touches `requirements.txt` goes to the CTO before its never-widen pair, until Andrew says whether the gateway
-  host is a box under his no-fetch word.
+  in `org/tier0_exec/0.0.0_AB_MSTR~Z/deliverables/SITEZ_INSTALL_DOWNLOAD_LINE_CENSUS_20261007.md`. Two terms of the
+  CTO's ruling that lifted the deploy hold (msg 31254) stand:
+  - A release whose diff touches `requirements.txt` or `bun.lock` goes to the CTO before its never-widen pair.
+  - Each release's ANNOUNCE states in one line that whether a frozen `bun install` with every entry cached still sends
+    a metadata request is UNDETERMINED, until it is measured. No package is fetched either way: the pre-check
+    (`ops/bun_cache_precheck.py`) stops the deploy on a cache miss, and the missing list goes to the laptop's intake.
 - **The identifier bound (R39 and ADDENDUM 1 of `ledger/ROUND_ANALYSIS.round26.md` @51572f8092).** An order's "never
   print or commit an account id" means a CLIENT account identifier: an end client's account number. Two things are
   outside it, and output is not redacted for them: an AWS account id inside a bucket name or a resource address, and
