@@ -17,23 +17,23 @@
   {
    "path_or_key": "org/devices/intake/intake_receive.py",
    "kind": "script",
-   "commit_or_etag": "ad64850542",
+   "commit_or_etag": "95f6b22832",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "standard-library-only tool (verify, prove, install, selftest-unchecked); committed on the worker branch, nothing deployed or run against any index"
+   "deploy_evidence": "verify reads the manifest intake_check.py pack writes (one entry per wheel with check_record and delivery companions, each verified by hash); size and bytes synonyms; earlier shapes kept; committed on the worker branch, nothing deployed"
   },
   {
    "path_or_key": "org/devices/intake/test_intake_receive.py",
    "kind": "test",
-   "commit_or_etag": "ad64850542",
+   "commit_or_etag": "95f6b22832",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "23 cases on synthetic wheels in temporary folders; pip only with --no-index --no-deps on local files"
+   "deploy_evidence": "25 cases; two added: a pack built by intake_check.run_pack, and companion absent or changed refuses the wheel"
   },
   {
-   "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~8/INTAKE_RECEIVE_COMMANDS.md",
-   "kind": "doc",
-   "commit_or_etag": "ad64850542",
+   "path_or_key": "org/devices/intake/test_intake_seam.py",
+   "kind": "test",
+   "commit_or_etag": "95f6b22832",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "the commands a receiving box runs, in order, with the meaning of each last line"
+   "deploy_evidence": "six stages through the tools' command lines against a loopback index plus three negative arms; temporary folder removed"
   }
  ],
  "acceptance": [
@@ -42,8 +42,8 @@
    "criterion_verbatim": "python org/devices/intake/test_intake_receive.py expect: INTAKE-RECEIVE-TEST cases= ; every case passing: the line must read ok=True",
    "method": "test_suite",
    "invocation": "python org/devices/intake/test_intake_receive.py",
-   "output_evidence": "Run under timeout 120, rc 0. LAST LINE: INTAKE-RECEIVE-TEST cases=23/23 ok=True",
-   "denominator": "23 of 23 cases passed (Python 3.12.10)",
+   "output_evidence": "Run under timeout 120, rc 0. LAST LINE: INTAKE-RECEIVE-TEST cases=25/25 ok=True",
+   "denominator": "25 of 25 cases passed (Python 3.12.10)",
    "status": "PASS"
   },
   {
@@ -54,18 +54,27 @@
    "output_evidence": "Run under timeout 120, rc 0. LAST LINE: INTAKE-PROVE device=laptop python=3.12.10 wheels=1 installed=0 imported=0 import_missing_dep=0 failed=0 refused=1 ok=False",
    "denominator": "1 of 1 synthetic wheel refused; 0 installed; temporary folder removed",
    "status": "PASS"
+  },
+  {
+   "criterion_id": "CT5e4-AC3",
+   "criterion_verbatim": "python org/devices/intake/test_intake_seam.py expect: INTAKE-SEAM-TEST stages=6 negative_arms=3/3 index_requests=4 ok=True",
+   "method": "test_suite",
+   "invocation": "python org/devices/intake/test_intake_seam.py",
+   "output_evidence": "Run under timeout 120, rc 0. LAST LINE: INTAKE-SEAM-TEST stages=6 negative_arms=3/3 index_requests=4 ok=True",
+   "denominator": "6 of 6 stages and 3 of 3 negative arms; 4 requests, all to 127.0.0.1",
+   "status": "PASS"
   }
  ],
  "controls": {
   "mutant": {
    "description": "the same synthetic pack with the wheel's record reading checked instead of not_checked is the test file's good-pack case",
    "expected": "installed=2 imported=2 refused=0 for the two checked wheels, installed=0 refused=1 for the not_checked wheel",
-   "observed": "case_two_checked_prove_install_import_receipts and case_not_checked_refused_and_not_installed both PASS in the 23-case run",
+   "observed": "case_two_checked_prove_install_import_receipts and case_not_checked_refused_and_not_installed PASS in the 25-case run; the seam test's three tampered copies of the good pack are each refused by verify (ok=False) while the untampered pack reads ok=True",
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
    "method": "test file and selftest-unchecked each run twice (once before commit, once after)",
-   "observed": "cases=23/23 ok=True and refused=1 installed=0 on both runs",
+   "observed": "cases=25/25 ok=True, refused=1 installed=0 and the seam line ok=True on a first run and again after commit",
    "status": "STABLE"
   }
  },
@@ -75,8 +84,8 @@
    "reason": "order: 3.12 here for the test; the code uses the standard library only and no module removed in 3.13 or 3.14"
   },
   {
-   "item": "the tool was never run against a real pack from the packing tool or a real index file",
-   "reason": "order BOUNDS: no request leaves this machine; synthetic wheels only"
+   "item": "the seam test uses a synthetic wheel and stand-ins for the installed copy, the antivirus answer and the signer",
+   "reason": "order BOUNDS: no request leaves this machine; the real antivirus, site-packages and signer directory are not touched"
   },
   {
    "item": "the real install (--user) was not run",
@@ -91,7 +100,12 @@
   {
    "tool": "python",
    "invocation": "python org/devices/intake/test_intake_receive.py",
-   "result": "INTAKE-RECEIVE-TEST cases=23/23 ok=True"
+   "result": "INTAKE-RECEIVE-TEST cases=25/25 ok=True"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/devices/intake/test_intake_seam.py",
+   "result": "INTAKE-SEAM-TEST stages=6 negative_arms=3/3 index_requests=4 ok=True"
   }
  ]
 }
