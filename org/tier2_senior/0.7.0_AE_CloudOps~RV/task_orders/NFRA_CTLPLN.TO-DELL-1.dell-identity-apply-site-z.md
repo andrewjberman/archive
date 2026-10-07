@@ -5,6 +5,7 @@
     <issued_to>0.7.0_AE_CloudOps~RV</issued_to>
     <date>2026-10-07</date>
     <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
