@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e65",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9b6348f15edb1ee3ba13c5158837bf385376461e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R11.md",
+    "vintage_commit": "42730b6f02",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e65.cash-token-direct-plan.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~49",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "cash_token_match, CASH_NAME_PHRASES (8), _normalize_cash_name; plan_rows places cash/Cash input=cash_token after the existing/seed skips; in worktree wk-secclass-49, commit refused (row W49-S1)",
+      "artifact_covered_by": [
+        "SC11-e65-AC1",
+        "SC11-e65-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/standards/MDPF_SECCLASS_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "contract_version 0.7.0 -> 0.8.0; fields.classified_by.cash_token_name_phrases carries the eight phrases (PRD v0.16)",
+      "artifact_covered_by": [
+        "SC11-e65-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_cash_token.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "17 tests incl. contract-equality pin, punctuation cases, existing/seed never planned",
+      "artifact_covered_by": [
+        "SC11-e65-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "PINNED_CONTRACT_VERSION 0.8.0",
+      "artifact_covered_by": [
+        "SC11-e65-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC11-e65-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e65_cash_token.py -- expect: SC-E65 ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e65_cash_token.py",
+      "expect": "SC-E65 ok=True",
+      "output_evidence": "SC-E65 ok=True BDCASHIN=('cash', 'Cash') FCASH=('cash', 'Cash') CASHMERE=None unresolved=1 (rc=0)",
+      "denominator": "3 of 3 held securities graded as expected (2 in, 1 out)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC11-e65-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=229 passed in 0.52s",
+      "denominator": "229 of 229 tests passed, 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W49-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh ... -- <4 build paths>",
+      "result": "REFUSED rc=1: owned-paths lane violation on 4 of 4 paths (row MDPF_SECCLASS-W49-S1); build paths uncommitted"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CASHMERE (Cashmere Valley Bank) and the v0.16 negatives (Cash Flow Dividend Fund, Cash Cow, Acme Prime Cash Reserves) must not plan cash/Cash.",
+      "expected": "not planned cash/Cash; listed unresolved",
+      "observed": "sc_e65 CASHMERE=None unresolved=1; test_non_allowlisted_cash_names_are_out passes",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 run once each after the final edit",
+      "observed": "AC1 ok=True; AC2 229 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any table write, deploy, upload or push; the commit of the four build paths.",
+      "reason": "BOUNDS: LOCAL build; the commit is refused by the lane gate because the order's <paths> block does not parse (row MDPF_SECCLASS-W49-S1)."
+    }
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e65_cash_token.py"
+}
