@@ -27,8 +27,11 @@ of the three roots in that window.
 - **Correction to the issuance text:** decomposition section 63 and the `aw-1` face count the 5 TimeoutError jobs as bbg 2,
   wsj 2, barrons 1 "of 15". Measured from the run records: barrons 2, wsj 2, bbg 1, and bbg's other two errors were
   `TargetClosedError`, a different class that `aw-1` does not address (bbg stopped on it at 19:4xZ).
-- The five TimeoutError pairs are undone in their checkpoints, so each leg's resume re-runs them; no separate `--names` run
-  was needed for barrons and bbg. wsj's two are re-run when that leg next passes them.
+- **CORRECTED 2026-10-07 ~03:3xZ (row AMGT_HARVST-Z-S94): the sentence that stood here was WRONG.** It said the five
+  TimeoutError pairs were undone in their checkpoints and re-ran at each leg's resume. They were recorded DONE with status
+  `error` (`backfill_driver.py:314`), and a resume skips every done pair (`:120`), so none of them re-ran. Across the four
+  checkpoints 37 pairs ended on a stop status and were never retried
+  (`deliverables/2.0.0_SA_COO_H/round52/stop_status_pairs.json`). They are re-run with `--names` on their own checkpoints.
 
 ## Open at the close
 
