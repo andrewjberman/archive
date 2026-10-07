@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ba-9",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-9.name-search-resolver.md",
+  "group": "OTHER",
+  "vintage_commit": "7daf7c56779350060d9390b2f8ce471868249f66"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "7daf7c56779350060d9390b2f8ce471868249f66",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-9.name-search-resolver.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~275",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/name_search.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "new module, resolve_query(q); local only, no deploy in scope (route mount is AMGT-ba-11)",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_name_search.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "8 hermetic plant tests: exact, name, lower-case, ticker, none, empty, one letter, cap, plain reasons; 8 passed",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "appended row AMGT_RESAPP-Z-W275-S1 (OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~Z)",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "\"992 HK\" and \"992_HK_Equity\" pass through as exact; \"Lenovo\" and \"lenovo\" list 992_HK_Equity with a name and a ticker; no match and an empty query read a plain reason; every keyed record's own key passes through (N of N); C1-C4 PASS; R77 BA9 AC1 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba9.py\" --crit AC1 --where local; echo \"exit=$?\"",
+   "output_evidence": "PASS C1 an exact form passes through exact 992_HK_Equity\r\n   'Lenovo': status candidates candidates ['992_HK_Equity']\r\n   'lenovo': status candidates candidates ['992_HK_Equity']\r\nPASS C2 a company name returns its candidates \r\nPASS C3 no match reads a plain reason none \"no company we cover matches 'zzqx no such company 7781'\"\r\n   keyed crosswalk records 237; passing through exact 237; e.g. missing []\r\nPASS C4 every key passes through as exact 237 of 237\r\nR77 BA9 AC1 SERVED: YES\r\nexit=0",
+   "denominator": "4 of 4 clauses PASS; 237 of 237 keyed records pass through exact; exit=0",
+   "status": "PASS",
+   "status_reason": "every clause the expect names printed PASS, verdict YES, exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "every plant case in test_name_search.py passes; R77 BA9 AC2 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba9.py\" --crit AC2 --where local; echo \"exit=$?\"",
+   "output_evidence": "   8 passed in 0.84s\nPASS C1 every plant case passes rc=0\nR77 BA9 AC2 SERVED: YES\nexit=0",
+   "denominator": "8 of 8 plant tests passed; exit=0",
+   "status": "PASS",
+   "status_reason": "8 passed, verdict YES, exit=0",
+   "judgment": false
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W275-S1"
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Planted mutant: the word-start guard (?<![0-9a-z]) removed from the name match in name_search._matches, so a query matches in the middle of a word.",
+   "expected": "test_lower_case_name_and_word_start fails (the 'ovo' query must read none, not match Lenovo).",
+   "observed": "1 failed, 7 passed: test_lower_case_name_and_word_start - assert 'candidates' == 'none'. Mutant reverted; 8 passed again.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2 each run once at the final bytes; the test suite is hermetic (a tmp crosswalk file); AC1 reads the live pool crosswalk 2026-09-29.",
+   "observed": "AC1 4 of 4 clauses PASS and AC2 8 passed, as in the recorded outputs; the api suite 740 passed.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The route GET /api/scoped/amgt/resolve and the page search box.",
+   "reason": "Named OUT OF SCOPE by the order: the route mount is AMGT-ba-11's, the page search box is DSGN_AMGTV1's; this order's paths grant no write to scoped_amgt.py."
+  }
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "python -m pytest -q -p no:cacheprovider lib/research/api/tests/",
+   "result": "740 passed, 297 warnings in 50.38s"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+   "result": "see WORKER REPORT for the verdict line"
+  }
+ ]
+}
