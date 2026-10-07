@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e41",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "90f99888cd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "5d70aab6c9",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e41.widened-reader-census.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/old_list_reader_census_bd.py",
+      "kind": "script",
+      "commit_or_etag": "d7817b43c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census: git grep over data/black_diamond (13 files, 66 naming lines, 32 table-call lines), run-time-name builders and caller-supplied names, IAM list/get over 290 roles + 9 users + 2 groups, assumers over 232 Lambda functions and 33 EC2 instances, an etf-classifications updated_by scan (3,507 rows) and CloudWatch request counts; no write, no install, no download; py_compile ok, commit-gate passed at commit.",
+      "artifact_covered_by": [
+        "SC9-e41-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_READER_TRACE_BD_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "d7817b43c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "17 sections: 13 census files, 3 run-time-name sections, 1 role-grant section; DENOMINATOR line; verdicts NEEDS-OLD-LIST 2, REPOINTABLE 1, DEAD-READ 2, NOT-A-READER 12; each of the 5 real-reader sections carries MISSING-ROW, SERVED-NEW and CANONICAL-PRODUCER.",
+      "artifact_covered_by": [
+        "SC9-e41-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC9-e41-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/issuer_check_sc_e41.py -- expect: SC-E41-TRACE ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/issuer_check_sc_e41.py",
+      "expect": "SC-E41-TRACE ok=True",
+      "output_evidence": "SC-E41-TRACE ok=True sections=17 census=13 file=OLD_LIST_READER_TRACE_BD_20261007.md (rc=0, run under timeout 120)",
+      "denominator": "13 of 13 census files each carry a section; 17 of 17 sections well formed (exactly one READS, EVIDENCE and VERDICT; 5 of 5 real readers carry MISSING-ROW, SERVED-NEW and CANONICAL-PRODUCER); 3 sections headed runtime, 1 headed role",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The committed trace with the section for data/black_diamond/scripts/gold/E_18.detect_new_securities.py removed (18 parts split, 17 kept), written as a temporary OLD_LIST_READER_TRACE_BD_99999999.md so the checker's newest-file glob reads it, run through the same checker, then deleted.",
+      "expected": "SC-E41-TRACE ok=False census=13 uncovered=1 (rc=1)",
+      "observed": "SC-E41-TRACE ok=False census=13 uncovered=1 first=['data/black_diamond/scripts/gold/E_18.detect_new_securities.py'] (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "issuer_check_sc_e41.py run twice back to back against the committed trace.",
+      "observed": "Identical line both times: SC-E41-TRACE ok=True sections=17 census=13 file=OLD_LIST_READER_TRACE_BD_20261007.md",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Firm-bucket objects (opal-data-bd code/gold/ bytes, ticker_resolution.parquet, holdings_lots) and the deployed gold_dispatch.sh and E_18 on the Black Diamond runner.",
+      "reason": "This device's principal is denied the three firm buckets (row W25-S1); every verdict reads the repo copy, and the live-plane facts come from DynamoDB, IAM, Lambda, EC2, ECS, CodeBuild, CloudWatch and the Scheduler only."
+    },
+    {
+      "item": "The deployed code of the 13 + 2 Lambda functions behind the role grants, and Glue jobs (glue:GetJobs denied), and any region other than us-east-1.",
+      "reason": "BOUNDS: no download of any kind (row S49); a function's code was read from the repo and its live configuration, not fetched."
+    },
+    {
+      "item": "Any write to bd-securities, etf-classifications, S3 or IAM, any invocation of a live function, any vendor call.",
+      "reason": "BOUNDS: read-only trace."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W31-S1",
+    "MDPF_SECCLASS-W31-S2",
+    "MDPF_SECCLASS-W31-S3",
+    "MDPF_SECCLASS-W31-S4"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/old_list_reader_census_bd.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on the .py)",
+      "result": "passed; commit d7817b43c4 landed on wk-MDPF_SECCLASS-31"
+    }
+  ]
+}
