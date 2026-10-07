@@ -1,0 +1,1679 @@
+diff --git a/infra/aws/terraform/nfra-ctlpln-identity/dell_deploy_policy.json b/infra/aws/terraform/nfra-ctlpln-identity/dell_deploy_policy.json
+index a3cefb87df..08077baf15 100644
+--- a/infra/aws/terraform/nfra-ctlpln-identity/dell_deploy_policy.json
++++ b/infra/aws/terraform/nfra-ctlpln-identity/dell_deploy_policy.json
+@@ -75,6 +75,54 @@
+       "Effect": "Deny",
+       "Action": ["dynamodb:DeleteTable", "dynamodb:DeleteBackup", "rds:Delete*"],
+       "Resource": "*"
++    },
++    {
++      "Sid": "DenyProtectedFunctions",
++      "Effect": "Deny",
++      "Action": [
++        "lambda:UpdateFunctionCode",
++        "lambda:UpdateFunctionConfiguration",
++        "lambda:PublishVersion",
++        "lambda:CreateAlias",
++        "lambda:UpdateAlias",
++        "lambda:DeleteFunction",
++        "lambda:DeleteAlias",
++        "lambda:PutFunctionConcurrency",
++        "lambda:UpdateFunctionUrlConfig",
++        "lambda:CreateFunctionUrlConfig"
++      ],
++      "Resource": [
++        "arn:aws:lambda:us-east-1:313476888478:function:auth-validator-edge",
++        "arn:aws:lambda:us-east-1:313476888478:function:auth-validator-edge:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:bd-49f-session-trigger",
++        "arn:aws:lambda:us-east-1:313476888478:function:bd-49f-session-trigger:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:cache-control-injector",
++        "arn:aws:lambda:us-east-1:313476888478:function:cache-control-injector:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:cot-bd-session-trigger",
++        "arn:aws:lambda:us-east-1:313476888478:function:cot-bd-session-trigger:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-authorizer",
++        "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-authorizer:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-rest-authorizer",
++        "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-rest-authorizer:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:opal-session-analytics",
++        "arn:aws:lambda:us-east-1:313476888478:function:opal-session-analytics:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:opalinvest-auth-handler",
++        "arn:aws:lambda:us-east-1:313476888478:function:opalinvest-auth-handler:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:public-data-router",
++        "arn:aws:lambda:us-east-1:313476888478:function:public-data-router:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router",
++        "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router-response",
++        "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router-response:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:trade-auth-handler",
++        "arn:aws:lambda:us-east-1:313476888478:function:trade-auth-handler:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:trade-authorizer",
++        "arn:aws:lambda:us-east-1:313476888478:function:trade-authorizer:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:ycharts-session-capture",
++        "arn:aws:lambda:us-east-1:313476888478:function:ycharts-session-capture:*",
++        "arn:aws:lambda:us-east-1:313476888478:function:ycharts-session-probe",
++        "arn:aws:lambda:us-east-1:313476888478:function:ycharts-session-probe:*"
++      ]
+     }
+   ]
+ }
+diff --git a/infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py b/infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py
+index 51c847e0fe..e50ea20c6c 100644
+--- a/infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py
++++ b/infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py
+@@ -10,6 +10,9 @@ import boto3
+ HERE = Path(__file__).resolve().parent.parent
+ GROUP_POLICY = HERE / "dell_deploy_policy.json"
+ CREATE_POLICY = HERE / "dell_create_policy.json"
++PROTECT_POLICY = HERE / "dell_protect_policy.json"  # only when the Deny statement did not fit the deploy policy
++PROTECTED_JSON = HERE / "protected_functions.json"
++LISTING_JSON = HERE / "protected_functions_listing.json"
+ DELL1_BUS_POLICY = HERE / "dell1_bus_policy.json"  # dell1's effective set = both group policies + this, in one call
+ STATE = "arn:aws:s3:::opal-313476888478-terraform-state"
+ Q = "arn:aws:sqs:us-east-1:313476888478:agentbus-"
+@@ -103,6 +106,35 @@ def decide_ctx(iam, docs, action, resource, service):
+     return r["EvaluationResults"][0]["EvalDecision"]
+ 
+ 
++def protected_arms():
++    """Third block (CT-c-5), on the REAL files: six denied arms on three protected functions (one per rule where the census has one),
++    one allowed arm on a function the census did not protect, one allowed CreateFunction on a new name."""
++    saved = json.loads(PROTECTED_JSON.read_text(encoding="utf-8"))
++    listing = json.loads(LISTING_JSON.read_text(encoding="utf-8"))
++    rules = saved["rules"]
++    chosen, none_for = [], []
++    for rule in ("a", "b", "c"):
++        pool = [a for a in saved["protected"] if rule in rules[a] and a not in chosen]
++        only = [a for a in pool if rules[a] == [rule]]  # prefer a function this rule alone caught
++        if pool:
++            chosen.append((only or pool)[0])
++        else:
++            none_for.append(rule)
++    for a in saved["protected"]:
++        if len(chosen) < 3 and a not in chosen:
++            chosen.append(a)
++    print("PROTECTED-ARMS rules with no function in the census: %s; chosen: %s" % (",".join(none_for) or "none", ", ".join(
++        "%s(%s)" % (a.split(":function:")[1], "+".join(rules[a])) for a in chosen)))
++    arms = []
++    for a in chosen:
++        for action in ("lambda:UpdateFunctionCode", "lambda:UpdateFunctionConfiguration"):
++            arms.append((action, a, False))
++    free = next(f["arn"] for f in listing["functions"] if f["arn"] not in rules)
++    arms.append(("lambda:UpdateFunctionCode", free, True))
++    arms.append(("lambda:CreateFunction", "arn:aws:lambda:us-east-1:313476888478:function:ctlpln-new-function", True))
++    return arms
++
++
+ def decide(iam, docs, action, resource):
+     r = iam.simulate_custom_policy(PolicyInputList=docs, ActionNames=[action], ResourceArns=[resource])
+     return r["EvaluationResults"][0]["EvalDecision"]
+@@ -129,9 +161,16 @@ def main():
+             hit = (dec == "allowed") == want_allowed
+             p_ok += hit
+             print("PASSROLE-%s %s on %s service=%s -> %s" % ("ALLOWED-EXPECTED" if want_allowed else "DENIED-EXPECTED ", action, res, svc, dec))
+-    ok = a_ok == len(ALLOWED) and d_ok == len(DENIED) and p_ok == len(PASSROLE)
+-    print("POLICY-SIM allowed_ok=%d/%d denied_ok=%d/%d passrole_ok=%d/%d all_ok=%s"
+-          % (a_ok, len(ALLOWED), d_ok, len(DENIED), p_ok, len(PASSROLE), ok))
++    prot = protected_arms()
++    pdocs3 = docs + ([json.dumps(json.loads(PROTECT_POLICY.read_text(encoding="utf-8")))] if PROTECT_POLICY.exists() else [])
++    pr_ok = 0
++    for action, res, want_allowed in prot:
++        dec = decide(iam, pdocs3, action, res)
++        pr_ok += (dec == "allowed") == want_allowed
++        print("PROTECTED-%s %s on %s -> %s" % ("ALLOWED-EXPECTED" if want_allowed else "DENIED-EXPECTED ", action, res, dec))
++    ok = a_ok == len(ALLOWED) and d_ok == len(DENIED) and p_ok == len(PASSROLE) and pr_ok == len(prot)
++    print("POLICY-SIM allowed_ok=%d/%d denied_ok=%d/%d passrole_ok=%d/%d protected_ok=%d/%d all_ok=%s"
++          % (a_ok, len(ALLOWED), d_ok, len(DENIED), p_ok, len(PASSROLE), pr_ok, len(prot), ok))
+     return 0 if ok else 1
+ 
+ 
+diff --git a/infra/aws/terraform/nfra-ctlpln-identity/protected_functions.json b/infra/aws/terraform/nfra-ctlpln-identity/protected_functions.json
+new file mode 100644
+index 0000000000..4d177ba0b5
+--- /dev/null
++++ b/infra/aws/terraform/nfra-ctlpln-identity/protected_functions.json
+@@ -0,0 +1,68 @@
++{
++  "protected": [
++    "arn:aws:lambda:us-east-1:313476888478:function:auth-validator-edge",
++    "arn:aws:lambda:us-east-1:313476888478:function:bd-49f-session-trigger",
++    "arn:aws:lambda:us-east-1:313476888478:function:cache-control-injector",
++    "arn:aws:lambda:us-east-1:313476888478:function:cot-bd-session-trigger",
++    "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-authorizer",
++    "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-rest-authorizer",
++    "arn:aws:lambda:us-east-1:313476888478:function:opal-session-analytics",
++    "arn:aws:lambda:us-east-1:313476888478:function:opalinvest-auth-handler",
++    "arn:aws:lambda:us-east-1:313476888478:function:public-data-router",
++    "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router",
++    "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router-response",
++    "arn:aws:lambda:us-east-1:313476888478:function:trade-auth-handler",
++    "arn:aws:lambda:us-east-1:313476888478:function:trade-authorizer",
++    "arn:aws:lambda:us-east-1:313476888478:function:ycharts-session-capture",
++    "arn:aws:lambda:us-east-1:313476888478:function:ycharts-session-probe"
++  ],
++  "rules": {
++    "arn:aws:lambda:us-east-1:313476888478:function:auth-validator-edge": [
++      "b",
++      "c"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:bd-49f-session-trigger": [
++      "c"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:cache-control-injector": [
++      "b"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:cot-bd-session-trigger": [
++      "c"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-authorizer": [
++      "c"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-rest-authorizer": [
++      "a",
++      "c"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:opal-session-analytics": [
++      "c"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:opalinvest-auth-handler": [
++      "c"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:public-data-router": [
++      "b"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router": [
++      "b"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router-response": [
++      "b"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:trade-auth-handler": [
++      "c"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:trade-authorizer": [
++      "c"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:ycharts-session-capture": [
++      "c"
++    ],
++    "arn:aws:lambda:us-east-1:313476888478:function:ycharts-session-probe": [
++      "c"
++    ]
++  }
++}
+diff --git a/infra/aws/terraform/nfra-ctlpln-identity/protected_functions_listing.json b/infra/aws/terraform/nfra-ctlpln-identity/protected_functions_listing.json
+new file mode 100644
+index 0000000000..ac8299609f
+--- /dev/null
++++ b/infra/aws/terraform/nfra-ctlpln-identity/protected_functions_listing.json
+@@ -0,0 +1,1201 @@
++{
++ "regions": {
++  "ap-northeast-1": 0,
++  "ap-northeast-2": 0,
++  "ap-northeast-3": 0,
++  "ap-south-1": 0,
++  "ap-southeast-1": 0,
++  "ap-southeast-2": 0,
++  "ca-central-1": 0,
++  "eu-central-1": 0,
++  "eu-north-1": 0,
++  "eu-west-1": 0,
++  "eu-west-2": 0,
++  "eu-west-3": 0,
++  "sa-east-1": 0,
++  "us-east-1": 232,
++  "us-east-2": 1,
++  "us-west-1": 0,
++  "us-west-2": 0
++ },
++ "refused": [],
++ "refused_regions": [],
++ "functions": [
++  {
++   "region": "us-east-1",
++   "name": "access-anomaly-scanner",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:access-anomaly-scanner"
++  },
++  {
++   "region": "us-east-1",
++   "name": "advi-49f-gold-dispatch",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:advi-49f-gold-dispatch"
++  },
++  {
++   "region": "us-east-1",
++   "name": "amgt-resapp-chatter-axis",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:amgt-resapp-chatter-axis"
++  },
++  {
++   "region": "us-east-1",
++   "name": "astn-wsjft-orchestrator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:astn-wsjft-orchestrator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "auth-validator-edge",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:auth-validator-edge"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-49f-etf-ownership-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-49f-etf-ownership-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-49f-fees-runner",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-49f-fees-runner"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-49f-keepalive",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-49f-keepalive"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-49f-runner",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-49f-runner"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-49f-session-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-49f-session-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-allocation-file-checker",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-allocation-file-checker"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-allocation-processor",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-allocation-processor"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-allocation-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-allocation-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-asset-dim-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-asset-dim-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-cot-keepalive",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-cot-keepalive"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-gold-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-gold-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-incrparity-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-incrparity-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-price-update",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-price-update"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-realized-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-realized-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-silver-merge",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-silver-merge"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-transactions-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-transactions-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "bd-unrealized-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:bd-unrealized-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "cache-control-injector",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:cache-control-injector"
++  },
++  {
++   "region": "us-east-1",
++   "name": "cost-anomaly-scanner",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:cost-anomaly-scanner"
++  },
++  {
++   "region": "us-east-1",
++   "name": "cot-bd-session-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:cot-bd-session-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "cot-etf-ownership-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:cot-etf-ownership-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "cot-rebalancer-runner",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:cot-rebalancer-runner"
++  },
++  {
++   "region": "us-east-1",
++   "name": "cot-satellites-characteristics-producer",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:cot-satellites-characteristics-producer"
++  },
++  {
++   "region": "us-east-1",
++   "name": "cot-satellites-registry-producer",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:cot-satellites-registry-producer"
++  },
++  {
++   "region": "us-east-1",
++   "name": "daily-agenda-generator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:daily-agenda-generator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "daily-sprint-generator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:daily-sprint-generator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "deck-generation",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:deck-generation"
++  },
++  {
++   "region": "us-east-1",
++   "name": "ec2-auto-shutdown-enforcer",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:ec2-auto-shutdown-enforcer"
++  },
++  {
++   "region": "us-east-1",
++   "name": "ec2-runtime-monitor",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:ec2-runtime-monitor"
++  },
++  {
++   "region": "us-east-1",
++   "name": "estate-report-orchestrator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:estate-report-orchestrator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "etf-ownership-dashboard",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:etf-ownership-dashboard"
++  },
++  {
++   "region": "us-east-1",
++   "name": "etf-positioning-producer",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:etf-positioning-producer"
++  },
++  {
++   "region": "us-east-1",
++   "name": "etfs-canon-fanin",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:etfs-canon-fanin"
++  },
++  {
++   "region": "us-east-1",
++   "name": "etfs-netassets-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:etfs-netassets-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "etfs-reports-orchestrator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:etfs-reports-orchestrator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "etfs-rivalfunds-daily-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:etfs-rivalfunds-daily-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "etfs-rivalfunds-fetch-holdings-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:etfs-rivalfunds-fetch-holdings-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "exec-summary-generator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:exec-summary-generator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "finbert-batch-processor",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:finbert-batch-processor"
++  },
++  {
++   "region": "us-east-1",
++   "name": "find-insure-crawl-web",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:find-insure-crawl-web"
++  },
++  {
++   "region": "us-east-1",
++   "name": "find-insure-crawl-web-scraping-browser",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:find-insure-crawl-web-scraping-browser"
++  },
++  {
++   "region": "us-east-1",
++   "name": "find-insure-parse-web",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:find-insure-parse-web"
++  },
++  {
++   "region": "us-east-1",
++   "name": "find-insure-score-web",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:find-insure-score-web"
++  },
++  {
++   "region": "us-east-1",
++   "name": "fred-data-ingestion",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:fred-data-ingestion"
++  },
++  {
++   "region": "us-east-1",
++   "name": "fred-macro-ingestion",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:fred-macro-ingestion"
++  },
++  {
++   "region": "us-east-1",
++   "name": "gldinc-ss4c-canary",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:gldinc-ss4c-canary"
++  },
++  {
++   "region": "us-east-1",
++   "name": "historical-prices-scheduler",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:historical-prices-scheduler"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-accounts-v2-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-accounts-v2-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-api-assets-v2",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-api-assets-v2"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-api-eclipse",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-api-eclipse"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-api-positions",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-api-positions"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-api-reps",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-api-reps"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-api-txn",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-api-txn"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-assets-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-assets-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-billing-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-billing-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-bronze-complete-emitter",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-bronze-complete-emitter"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-bronze-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-bronze-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-client-detail",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-client-detail"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-ec2-launch-monitor",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-ec2-launch-monitor"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-ec2-retry-launch",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-ec2-retry-launch"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-etf-ownership-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-etf-ownership-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-gold-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-gold-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-jwt-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-jwt-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-nna-partition-checker",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-nna-partition-checker"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-otp-relay",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-otp-relay"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-performance-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-performance-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-portal-advisor-publisher",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-portal-advisor-publisher"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-portal-publisher",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-portal-publisher"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-silver-aggregator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-silver-aggregator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-silver-chain",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-silver-chain"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-tax-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-tax-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "inf-unified-account-dim-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:inf-unified-account-dim-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "infrastructure-daily-snapshot",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:infrastructure-daily-snapshot"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-49f-reporting-gold-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-49f-reporting-gold-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-49f-reporting-publish-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-49f-reporting-publish-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-49f-reporting-read-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-49f-reporting-read-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-directory-refresh",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-directory-refresh"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-directory-search",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-directory-search"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-export-render",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-export-render"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-holdings",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-holdings"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-holdings-performance-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-holdings-performance-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-holdings-refresh-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-holdings-refresh-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-inf-holdings-performance-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-inf-holdings-performance-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-intake-poller",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-intake-poller"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-narrative",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-narrative"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-performance-adapter",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-performance-adapter"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-status",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-status"
++  },
++  {
++   "region": "us-east-1",
++   "name": "irpt-ycharts-generate",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:irpt-ycharts-generate"
++  },
++  {
++   "region": "us-east-1",
++   "name": "keyword-intelligence-generator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:keyword-intelligence-generator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "market-update-data-aggregator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:market-update-data-aggregator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "market-update-exporter",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:market-update-exporter"
++  },
++  {
++   "region": "us-east-1",
++   "name": "market-update-generator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:market-update-generator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "mcportal-grant-writer-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:mcportal-grant-writer-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "mdpf-accrual-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-accrual-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "mdpf-feeder-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-feeder-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "mdpf-gold-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-gold-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "mdpf-secclass-new-security-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-secclass-new-security-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "news-ingestion-scheduler",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:news-ingestion-scheduler"
++  },
++  {
++   "region": "us-east-1",
++   "name": "news-semantic-clustering",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:news-semantic-clustering"
++  },
++  {
++   "region": "us-east-1",
++   "name": "news-trending-analysis",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:news-trending-analysis"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-49f-served-guard",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-49f-served-guard"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-amgt-scoped-api",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-amgt-scoped-api"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-bd49f-daily-pull",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-bd49f-daily-pull"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-bd49f-dim-convert",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-bd49f-dim-convert"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-bd49f-reporting-pull",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-bd49f-reporting-pull"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-daily-emitter",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-daily-emitter"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-ingest-mirror",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-ingest-mirror"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-mdpf-portal-publisher",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-mdpf-portal-publisher"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-silver-bd49finsurance",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-silver-bd49finsurance"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-silver-blackdiamond",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-silver-blackdiamond"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-silver-eclipse",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-silver-eclipse"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-silver-etf",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-silver-etf"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-silver-orion",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-silver-orion"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-silver-schwab",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-silver-schwab"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-assets-silver-smartx",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-silver-smartx"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-bd-transaction-consolidator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-bd-transaction-consolidator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-cot-served-guard",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-cot-served-guard"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-cot-value-parity",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-cot-value-parity"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-data-refresh-api",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-data-refresh-api"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-data-refresh-api-qa-scratch",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-data-refresh-api-qa-scratch"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-globgrph-incremental-updater",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-globgrph-incremental-updater"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-inf-served-guard",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-inf-served-guard"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-inf-value-parity",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-inf-value-parity"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-infrastructure-monitor",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-infrastructure-monitor"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-ipset-reconciler",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-ipset-reconciler"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-keyword-drilldown-generator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-keyword-drilldown-generator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-market-overview-tiered-generator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-market-overview-tiered-generator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-market-regime-classifier",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-market-regime-classifier"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-market-rsi-tiered-generator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-market-rsi-tiered-generator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-ms-ingest-liveness",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-ms-ingest-liveness"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-news-ai-sentiment",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-news-ai-sentiment"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-news-layer3-curation",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-news-layer3-curation"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-otp-liveness",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-otp-liveness"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-partners-data",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-partners-data"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-pm-optimization-autosave-put",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-pm-optimization-autosave-put"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-pm-optimization-loader",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-pm-optimization-loader"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-pm-snapshot-handler",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-pm-snapshot-handler"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-pm-upload-urls",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-pm-upload-urls"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portal-authorizer",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-authorizer"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portal-content-api",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-content-api"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portal-data-proxy",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-data-proxy"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portal-fear-greed-fetcher",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-fear-greed-fetcher"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portal-rest-authorizer",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-rest-authorizer"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portal-volatility-fetcher",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-volatility-fetcher"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portfolio-autosave-get",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portfolio-autosave-get"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portfolio-autosave-put",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portfolio-autosave-put"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portfolio-excel-generator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portfolio-excel-generator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portfolio-export-download",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portfolio-export-download"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portfolio-funds-list",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portfolio-funds-list"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portfolio-pickle-parser",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portfolio-pickle-parser"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portfolio-version-get",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portfolio-version-get"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-portfolio-versions-list",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-portfolio-versions-list"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-research-pull-enqueue",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-research-pull-enqueue"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-security-scanner-processor",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-security-scanner-processor"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-sentinel",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-sentinel"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-session-analytics",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-session-analytics"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-smartx-ingestion-pipeline",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-smartx-ingestion-pipeline"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-ticket-api",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-ticket-api"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-trending-image-generator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-trending-image-generator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opal-trending-topics-portal-publisher",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-trending-topics-portal-publisher"
++  },
++  {
++   "region": "us-east-1",
++   "name": "opalinvest-auth-handler",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:opalinvest-auth-handler"
++  },
++  {
++   "region": "us-east-1",
++   "name": "outlook-global-transcripts-pull-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:outlook-global-transcripts-pull-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "partner-etl-ops-sqs-consumer",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:partner-etl-ops-sqs-consumer"
++  },
++  {
++   "region": "us-east-1",
++   "name": "portal-time-machine",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:portal-time-machine"
++  },
++  {
++   "region": "us-east-1",
++   "name": "public-data-router",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:public-data-router"
++  },
++  {
++   "region": "us-east-1",
++   "name": "rivalfunds-build-canonical-shape-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:rivalfunds-build-canonical-shape-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "rivalfunds-build-silver-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:rivalfunds-build-silver-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "rivalfunds-publish-page-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:rivalfunds-publish-page-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "schwab-anonymizer",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:schwab-anonymizer"
++  },
++  {
++   "region": "us-east-1",
++   "name": "security-sweep-comprehensive",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:security-sweep-comprehensive"
++  },
++  {
++   "region": "us-east-1",
++   "name": "seeking-alpha-analysis-coordinator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:seeking-alpha-analysis-coordinator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "seeking-alpha-analysis-dedup",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:seeking-alpha-analysis-dedup"
++  },
++  {
++   "region": "us-east-1",
++   "name": "seeking-alpha-analysis-listing-parser",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:seeking-alpha-analysis-listing-parser"
++  },
++  {
++   "region": "us-east-1",
++   "name": "seeking-alpha-analysis-scraper",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:seeking-alpha-analysis-scraper"
++  },
++  {
++   "region": "us-east-1",
++   "name": "seeking-alpha-news-coordinator",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:seeking-alpha-news-coordinator"
++  },
++  {
++   "region": "us-east-1",
++   "name": "seeking-alpha-news-dedup",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:seeking-alpha-news-dedup"
++  },
++  {
++   "region": "us-east-1",
++   "name": "seeking-alpha-news-scraper",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:seeking-alpha-news-scraper"
++  },
++  {
++   "region": "us-east-1",
++   "name": "semantic-news-layer3-curation",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:semantic-news-layer3-curation"
++  },
++  {
++   "region": "us-east-1",
++   "name": "semantic-trending-topics-portal-publisher",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:semantic-trending-topics-portal-publisher"
++  },
++  {
++   "region": "us-east-1",
++   "name": "sentiment_query_api",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:sentiment_query_api"
++  },
++  {
++   "region": "us-east-1",
++   "name": "shared-advisor-router",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router"
++  },
++  {
++   "region": "us-east-1",
++   "name": "shared-advisor-router-response",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router-response"
++  },
++  {
++   "region": "us-east-1",
++   "name": "smartx-assets-daily-pull",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:smartx-assets-daily-pull"
++  },
++  {
++   "region": "us-east-1",
++   "name": "smartx-jwt-refresher",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:smartx-jwt-refresher"
++  },
++  {
++   "region": "us-east-1",
++   "name": "smartx-rest-pull",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:smartx-rest-pull"
++  },
++  {
++   "region": "us-east-1",
++   "name": "teams-global-chat-assist-handler-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:teams-global-chat-assist-handler-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "teams-global-chat-assist-ingress-lambda",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:teams-global-chat-assist-ingress-lambda"
++  },
++  {
++   "region": "us-east-1",
++   "name": "trade-auth-handler",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:trade-auth-handler"
++  },
++  {
++   "region": "us-east-1",
++   "name": "trade-authorizer",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:trade-authorizer"
++  },
++  {
++   "region": "us-east-1",
++   "name": "trade-dashboard-api",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:trade-dashboard-api"
++  },
++  {
++   "region": "us-east-1",
++   "name": "trade-identifier-cache",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:trade-identifier-cache"
++  },
++  {
++   "region": "us-east-1",
++   "name": "trade-parquet-batch-export",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:trade-parquet-batch-export"
++  },
++  {
++   "region": "us-east-1",
++   "name": "trade-submission-handler",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:trade-submission-handler"
++  },
++  {
++   "region": "us-east-1",
++   "name": "trade-workflow-handler",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:trade-workflow-handler"
++  },
++  {
++   "region": "us-east-1",
++   "name": "wsb-49f-model-aua-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:wsb-49f-model-aua-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "wsd-49f-partner-held-etf-daily",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:wsd-49f-partner-held-etf-daily"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-canon-interlock",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-canon-interlock"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-capture-output-versions",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-capture-output-versions"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-cleanup-uploads",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-cleanup-uploads"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-allocation-summary",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-allocation-summary"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-cma",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-cma"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-correlation",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-correlation"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-etf-returns",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-etf-returns"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-factor-tilts",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-factor-tilts"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-holdings-attribution",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-holdings-attribution"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-latest",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-latest"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-macro",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-macro"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-macro-timeseries",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-macro-timeseries"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-manifest",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-manifest"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-peer-performance",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-peer-performance"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-positioning",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-positioning"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-risk-premium",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-risk-premium"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-valuation",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-valuation"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-generate-volatility",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-generate-volatility"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-get-prior-metadata",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-get-prior-metadata"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-ingest-dynamodb",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-ingest-dynamodb"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-invalidate-cloudfront",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-invalidate-cloudfront"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-model-portfolio-benchmarks",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-model-portfolio-benchmarks"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-move-to-processed",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-move-to-processed"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-pipeline-trigger",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-pipeline-trigger"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-refresh-fred-cache",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-refresh-fred-cache"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-time-machine",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-time-machine"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-validate-files",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-validate-files"
++  },
++  {
++   "region": "us-east-1",
++   "name": "yang-varflag-check",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:yang-varflag-check"
++  },
++  {
++   "region": "us-east-1",
++   "name": "ycharts-market-data-pull",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:ycharts-market-data-pull"
++  },
++  {
++   "region": "us-east-1",
++   "name": "ycharts-session-capture",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:ycharts-session-capture"
++  },
++  {
++   "region": "us-east-1",
++   "name": "ycharts-session-probe",
++   "arn": "arn:aws:lambda:us-east-1:313476888478:function:ycharts-session-probe"
++  },
++  {
++   "region": "us-east-2",
++   "name": "opal-news-layer3-curation",
++   "arn": "arn:aws:lambda:us-east-2:313476888478:function:opal-news-layer3-curation"
++  }
++ ],
++ "authorizer_targets": [
++  "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-rest-authorizer"
++ ],
++ "unresolved_authorizer_uris": [],
++ "edge_targets": [
++  "arn:aws:lambda:us-east-1:313476888478:function:auth-validator-edge",
++  "arn:aws:lambda:us-east-1:313476888478:function:cache-control-injector",
++  "arn:aws:lambda:us-east-1:313476888478:function:public-data-router",
++  "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router",
++  "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router-response"
++ ]
++}
+diff --git a/infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py b/infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py
+new file mode 100644
+index 0000000000..19454f9a12
+--- /dev/null
++++ b/infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py
+@@ -0,0 +1,263 @@
++"""Census of the Lambda functions that decide access, and the explicit Deny rendered from it (NFRA_CTLPLN CT-c-5, FWD-10).
++
++The CTO's ruling (msg 106008): a Dell may not update the code or configuration of a function that decides access (authorizers, the edge
++auth validator, user and key management); everywhere else the Allow on Resource * stands. The protected list is DERIVED here, by census of
++the live functions, and printed with its denominator; the Deny statement is RENDERED from it, never typed.
++
++  --live (default)      list the functions in every region `ec2 describe-regions` returns, plus the API Gateway authorizers and the
++                        CloudFront Lambda@Edge associations, with the repo's .tools/aws shim. READ-ONLY calls only (list/get/describe).
++  --from-file <json>    take a saved listing (protected_functions_listing.json) instead of calling AWS.
++  --check (default)     compare the saved files with a fresh census; write nothing.
++  --write               write protected_functions.json, protected_functions_listing.json and the rendered statement.
++
++The statement DenyProtectedFunctions goes into dell_deploy_policy.json when the document stays within 6,144 characters without
++whitespace, else into its own policy dell_protect_policy.json (and the other file never carries it).
++"""
++import argparse
++import json
++import os
++import re
++import subprocess
++import sys
++from concurrent.futures import ThreadPoolExecutor
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parent.parent
++REPO = ROOT.parents[3]
++sys.path.insert(0, str(Path(__file__).resolve().parent))
++import render_passrole as rp  # noqa: E402  (block_text, BLOCK_SEP: the same hand-formatted statement layout)
++
++AWS = str(REPO / ".tools" / ("aws.cmd" if os.name == "nt" else "aws"))
++DEPLOY = ROOT / "dell_deploy_policy.json"
++PROTECT = ROOT / "dell_protect_policy.json"
++PROTECTED = ROOT / "protected_functions.json"
++LISTING = ROOT / "protected_functions_listing.json"
++SID = "DenyProtectedFunctions"
++LIMIT = 6144
++ACCOUNT = "313476888478"
++ACTIONS = ["lambda:UpdateFunctionCode", "lambda:UpdateFunctionConfiguration", "lambda:PublishVersion", "lambda:CreateAlias",
++           "lambda:UpdateAlias", "lambda:DeleteFunction", "lambda:DeleteAlias", "lambda:PutFunctionConcurrency",
++           "lambda:UpdateFunctionUrlConfig", "lambda:CreateFunctionUrlConfig"]
++
++# ---- the rule table (the record) --------------------------------------------------------------------------------------------
++# (a) the target of an API Gateway authorizer; (b) associated with a CloudFront distribution as Lambda@Edge; (c) the NAME matches one of
++# these words on a word boundary, case-insensitive. A boundary is a non-alphanumeric character or the string end, so `opal-auth-fn` and
++# `user_mgmt` match and `author` does not match `auth`.
++NAME_WORDS = ["auth", "authorizer", "authz", "login", "signin", "sso", "cognito", "user", "users", "apikey", "api-key", "credential",
++              "token", "session", "mfa", "password"]
++NAME_RE = re.compile(r"(?<![A-Za-z0-9])(%s)(?![A-Za-z0-9])" % "|".join(re.escape(w) for w in sorted(NAME_WORDS, key=len, reverse=True)),
++                     re.I)
++RULES = {"a": "authorizer", "b": "lambda-at-edge", "c": "name"}
++# -----------------------------------------------------------------------------------------------------------------------------
++
++FN_ARN = re.compile(r"(arn:aws:lambda:[a-z0-9-]+:\d{12}:function:[A-Za-z0-9_-]+)")
++URI_ARN = re.compile(r"functions/(arn:aws:lambda:[^/]+)/invocations")
++
++
++def aws(*args):
++    """One read-only AWS CLI call through the repo shim. Returns (rc, parsed json | None, stderr)."""
++    r = subprocess.run([AWS, *args, "--output", "json"], capture_output=True, text=True, encoding="utf-8",
++                       errors="replace", timeout=100)
++    if r.returncode != 0:
++        return r.returncode, None, r.stderr.strip()[-200:]
++    try:
++        return 0, (json.loads(r.stdout) if r.stdout.strip() else {}), ""
++    except ValueError as e:
++        return 1, None, "unparseable output: %s" % e
++
++
++def base_arn(arn):
++    """Strip a version or alias qualifier: arn:aws:lambda:<region>:<acct>:function:<name>[:<qual>] -> the unqualified function ARN."""
++    m = FN_ARN.match(arn or "")
++    return m.group(1) if m else None
++
++
++def census_region(region):
++    """Everything one region contributes: its functions and the Lambda ARNs its API Gateway authorizers point at."""
++    out = {"region": region, "functions": [], "authorizer_targets": [], "unresolved": [], "refused": []}
++
++    def call(label, *args):
++        rc, data, err = aws(*args, "--region", region)
++        if rc != 0:
++            out["refused"].append("%s: %s" % (label, err.replace("\n", " ")[-120:]))
++        return data
++
++    d = call("lambda list-functions", "lambda", "list-functions")
++    for f in (d or {}).get("Functions", []):
++        out["functions"].append({"region": region, "name": f["FunctionName"], "arn": base_arn(f["FunctionArn"])})
++
++    def targets(items):
++        for a in items:
++            uri = a.get("authorizerUri") or ""
++            m = URI_ARN.search(uri)
++            b = base_arn(m.group(1)) if m else None
++            if b:
++                out["authorizer_targets"].append(b)
++            elif uri:
++                out["unresolved"].append("%s %s" % (region, uri[:120]))
++
++    d = call("apigatewayv2 get-apis", "apigatewayv2", "get-apis")
++    for api in (d or {}).get("Items", []):
++        a = call("apigatewayv2 get-authorizers", "apigatewayv2", "get-authorizers", "--api-id", api["ApiId"])
++        targets((a or {}).get("Items", []))
++    d = call("apigateway get-rest-apis", "apigateway", "get-rest-apis")
++    for api in (d or {}).get("items", []):
++        a = call("apigateway get-authorizers", "apigateway", "get-authorizers", "--rest-api-id", api["id"])
++        targets((a or {}).get("items", []))
++    return out
++
++
++def live_listing():
++    rc, d, err = aws("ec2", "describe-regions", "--region", "us-east-1")
++    if rc != 0:
++        raise SystemExit("ERROR: ec2 describe-regions refused: %s" % err)
++    regions = sorted(r["RegionName"] for r in d["Regions"])
++    with ThreadPoolExecutor(max_workers=8) as ex:
++        per = list(ex.map(census_region, regions))
++    edge, refused_edge = [], None
++    rc, d, err = aws("cloudfront", "list-distributions", "--region", "us-east-1")
++    if rc != 0:
++        refused_edge = err.replace("\n", " ")[-120:]
++    else:
++        for dist in (d.get("DistributionList") or {}).get("Items") or []:
++            behaviours = [dist.get("DefaultCacheBehavior") or {}] + list(((dist.get("CacheBehaviors") or {}).get("Items")) or [])
++            for b in behaviours:
++                for assoc in ((b.get("LambdaFunctionAssociations") or {}).get("Items")) or []:
++                    arn = base_arn(assoc.get("LambdaFunctionARN"))
++                    if arn:
++                        edge.append(arn)
++    listing = {
++        "regions": {p["region"]: len(p["functions"]) for p in per},
++        "refused": sorted(["%s %s" % (p["region"], x) for p in per for x in p["refused"]]
++                          + (["cloudfront list-distributions: %s" % refused_edge] if refused_edge else [])),
++        "refused_regions": sorted({p["region"] for p in per if p["refused"]} | ({"cloudfront"} if refused_edge else set())),
++        "functions": sorted((f for p in per for f in p["functions"]), key=lambda f: (f["region"], f["name"])),
++        "authorizer_targets": sorted({t for p in per for t in p["authorizer_targets"]}),
++        "unresolved_authorizer_uris": sorted(u for p in per for u in p["unresolved"]),
++        "edge_targets": sorted(set(edge)),
++    }
++    return listing
++
++
++def derive(listing):
++    """Apply the rule table. Returns {arn: [rules]} over the protected functions (own-account ARNs only)."""
++    prot = {}
++    by_arn = {f["arn"]: f for f in listing["functions"]}
++    for arn in listing["authorizer_targets"]:
++        if arn.split(":")[4] == ACCOUNT:
++            prot.setdefault(arn, set()).add("a")
++    for arn in listing["edge_targets"]:
++        if arn.split(":")[4] == ACCOUNT:
++            prot.setdefault(arn, set()).add("b")
++    for f in listing["functions"]:
++        if NAME_RE.search(f["name"]):
++            prot.setdefault(f["arn"], set()).add("c")
++    return {a: sorted(prot[a]) for a in sorted(prot)}, by_arn
++
++
++def statement(arns):
++    res = []
++    for a in arns:
++        res += [a, a + ":*"]
++    return {"Sid": SID, "Effect": "Deny", "Action": ACTIONS, "Resource": res}
++
++
++def strip_statement(text):
++    """Return the policy text with DenyProtectedFunctions removed (byte-identical otherwise), and the file's EOL."""
++    eol = "\r\n" if "\r\n" in text else "\n"
++    t = text.replace("\r\n", "\n")
++    head, sep, rest = t.partition('"Statement": [\n')
++    inner, tail_sep, tail = rest.rpartition("\n  ]")
++    open_b, close_b = "    {\n", "\n    }"
++    if not sep or not tail_sep or not inner.startswith(open_b) or not inner.endswith(close_b):
++        raise ValueError("policy text does not have the expected statement array layout")
++    cores = inner[len(open_b):-len(close_b)].split(rp.BLOCK_SEP)
++    blocks = [open_b + c + close_b for c in cores]
++    keep = [b for b in blocks if re.search(r'"Sid":\s*"([^"]+)"', b).group(1) != SID]
++    return head, sep, keep, tail_sep, tail, eol
++
++
++def render_deploy(text, stmt):
++    head, sep, keep, tail_sep, tail, eol = strip_statement(text)
++    if stmt is not None:
++        keep.append(rp.block_text(stmt))
++    return (head + sep + ",\n".join(keep) + tail_sep + tail).replace("\n", eol)
++
++
++def size(text):
++    return len(re.sub(r"\s", "", text))
++
++
++def render_all(arns):
++    """Return (deploy text, protect text or None, where the statement lives)."""
++    cur = DEPLOY.read_bytes().decode("utf-8")
++    stmt = statement(arns)
++    inline = render_deploy(cur, stmt)
++    if size(inline) <= LIMIT:
++        return inline, None, "dell_deploy_policy.json"
++    protect = json.dumps({"Version": "2012-10-17", "Statement": [stmt]}, indent=2) + "\n"
++    return render_deploy(cur, None), protect, "dell_protect_policy.json"
++
++
++def main(argv=None):
++    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
++    src = ap.add_mutually_exclusive_group()
++    src.add_argument("--live", action="store_true", help="census the live account (default)")
++    src.add_argument("--from-file", metavar="JSON", help="a saved listing instead of calling AWS")
++    mode = ap.add_mutually_exclusive_group()
++    mode.add_argument("--check", action="store_true", help="compare, write nothing (default)")
++    mode.add_argument("--write", action="store_true", help="write the saved files and the rendered statement")
++    a = ap.parse_args(argv)
++
++    listing = json.loads(Path(a.from_file).read_text(encoding="utf-8")) if a.from_file else live_listing()
++    n_regions = len(listing["regions"])
++    n_functions = len(listing["functions"])
++    print("REGIONS %d; per-region function counts: %s" % (n_regions, ", ".join("%s=%d" % kv for kv in sorted(listing["regions"].items()))))
++    print("FUNCTIONS listed=%d (sum of the per-region counts=%d)" % (n_functions, sum(listing["regions"].values())))
++    for x in listing["refused"]:
++        print("REFUSED " + x)
++    for x in listing["unresolved_authorizer_uris"]:
++        print("UNRESOLVED-AUTHORIZER-URI " + x)
++    print("authorizer targets=%d edge associations=%d" % (len(listing["authorizer_targets"]), len(listing["edge_targets"])))
++
++    prot, by_arn = derive(listing)
++    for arn, rules in prot.items():
++        listed = "" if arn in by_arn else "  [NOT-LISTED: a reference to a function the census did not list]"
++        print("PROTECTED %s rules=%s%s" % (arn, "+".join("(%s) %s" % (r, RULES[r]) for r in rules), listed))
++    name_only = [arn for arn, rules in prot.items() if rules == ["c"]]
++    for arn in name_only:
++        print("NAME-ONLY %s" % arn)
++
++    arns = sorted(prot)
++    saved = {"protected": arns, "rules": {k: prot[k] for k in arns}}
++    deploy_text, protect_text, where = render_all(arns)
++    print("STATEMENT %s rendered into %s; deploy chars=%d, protect chars=%s" %
++          (SID, where, size(deploy_text), size(protect_text) if protect_text else "n/a"))
++
++    if a.write:
++        PROTECTED.write_text(json.dumps(saved, indent=2) + "\n", encoding="utf-8", newline="\n")
++        LISTING.write_text(json.dumps(listing, indent=1) + "\n", encoding="utf-8", newline="\n")
++        DEPLOY.write_bytes(deploy_text.encode("utf-8"))
++        if protect_text:
++            PROTECT.write_text(protect_text, encoding="utf-8", newline="\n")
++        elif PROTECT.exists():
++            print("NOTE: %s exists but the statement now fits the deploy policy; the file is not edited here" % PROTECT.name)
++        print("WROTE %s, %s, %s" % (PROTECTED.name, LISTING.name, DEPLOY.name if not protect_text else DEPLOY.name + " + " + PROTECT.name))
++
++    try:
++        have = json.loads(PROTECTED.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        have = None
++    in_sync = (have == saved and DEPLOY.read_bytes().decode("utf-8") == deploy_text and
++               ((PROTECT.read_bytes().decode("utf-8") == protect_text) if protect_text else True))
++    by_a = sum(1 for r in prot.values() if "a" in r)
++    by_e = sum(1 for r in prot.values() if "b" in r)
++    refused_regions = len(listing["refused_regions"])
++    ok = len(arns) > 0 and refused_regions == 0 and in_sync
++    print("PROTECTED-CENSUS functions=%d regions=%d refused_regions=%d protected=%d by_authorizer=%d by_edge=%d name_only=%d in_sync=%s ok=%s"
++          % (n_functions, n_regions, refused_regions, len(arns), by_a, by_e, len(name_only), in_sync, ok))
++    return 0 if ok else 1
++
++
++if __name__ == "__main__":
++    sys.exit(main())
