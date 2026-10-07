@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-c-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-c-4.role-roundtrip-check.md",
+    "group": "OTHER",
+    "vintage_commit": "d546a6ec96"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~5",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round3.md",
+    "vintage_commit": "2abeda287a",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-c-4.role-roundtrip-check.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/role_request.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed",
+      "artifact_covered_by": [
+        "CT3c4-AC1",
+        "CT3c4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/role_roundtrip_check.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed",
+      "artifact_covered_by": [
+        "CT3c4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/test_role_roundtrip.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed",
+      "artifact_covered_by": [
+        "CT3c4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/standards/ROLE_REQUEST.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed",
+      "artifact_covered_by": [
+        "CT3c4-AC1",
+        "CT3c4-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT3c4-AC1",
+      "criterion_verbatim": "python org/devices/test_role_roundtrip.py expect: ROLE-ROUNDTRIP-SELFTEST cases=7/7 ok=True",
+      "method": "command",
+      "invocation": "python org/devices/test_role_roundtrip.py",
+      "output_evidence": "PASS case_happy: ROLE-ROUNDTRIP request=dell1-20261007T070922Z-ba3a answered=applied create=ok unnamed_pass=refused iam_write=refused ok=True | calls=['lambda create-function', 'lambda get-function', 'lambda create-function', 'iam tag-role'] | laptop mark-applied rc=0  | bus lines sent by the Dell: 1\nPASS case_refused: ROLE-ROUNDTRIP request=dell1-20261007T070930Z-f698 answered=refused create=fail unnamed_pass=error iam_write=error ok=False | aws calls=0 | laptop mark-refused rc=0  | bus lines sent by the Dell: 1\nPASS case_timeout: ROLE-ROUNDTRIP request=dell1-20261007T070935Z-563b answered=timeout create=fail unnamed_pass=error iam_write=error ok=False | aws calls=0 | no answer by design | bus lines sent by the Dell: 1\nPASS case_unnamed_allowed: ROLE-ROUNDTRIP request=dell1-20261007T070942Z-62c3 answered=applied create=ok unnamed_pass=ALLOWED iam_write=refused ok=False | laptop mark-applied rc=0  | bus lines sent by the Dell: 1\nPASS case_iam_allowed: ROLE-ROUNDTRIP request=dell1-20261007T070948Z-a689 answered=applied create=ok unnamed_pass=refused iam_write=ALLOWED ok=False | laptop mark-applied rc=0  | bus lines sent by the Dell: 1\nPASS case_dell_cannot_answer: dell rc=2 err=REFUSED: device dell1 has register role 'execution'; only the `control-plane` box answers  | laptop rc=0 files=1\nPASS case_wildcard_arn: refused=[True, True, True, True, True] none_written=True control rc=0 \nROLE-ROUNDTRIP-SELFTEST cases=7/7 ok=True\n(rc 0)",
+      "denominator": "7 of 7 cases (happy path; laptop refuses; timeout; unnamed pass ALLOWED; IAM write ALLOWED; mark-applied as a Dell refused; wildcard ARN refused)",
+      "status": "PASS",
+      "expect": "ROLE-ROUNDTRIP-SELFTEST cases=7/7 ok=True"
+    },
+    {
+      "criterion_id": "CT3c4-AC2",
+      "criterion_verbatim": "python org/devices/test_role_request.py expect: ROLE-REQUEST cases=10/10 ok=True",
+      "method": "command",
+      "invocation": "python org/devices/test_role_request.py",
+      "output_evidence": "PASS case_valid: ROLE-REQUEST-VALID dell1-20261007T070959Z-07b8 ok=True\nPASS case_unset: rc=2 stderr=REFUSED: AGENTBUS_DEVICE is not set; a box's own name is its environment variable, never derived from a path records=0 sent=0\nPASS case_not_execution: rc=2 stderr=REFUSED: device laptop has register role 'control-plane'; only an `execution` box writes a role request records=0 sent=0\nPASS case_other_dell: rc=2 stderr=REFUSED: project FIXD2 is placed on DELL2, not on dell1; a box writes in only for work placed on it records=0 sent=0\nPASS case_missing_file: rc=2 stderr=REFUSED: permission 0: code_ref file src/nope.py does not exist records=0 sent=0\nPASS case_line_past_end: rc=2 stderr=REFUSED: permission 0: code_ref line 6 is outside src/app.py (5 lines) records=0 sent=0\nPASS case_iam: rc=2 stderr=REFUSED: permission 0: 'iam:PassRole' is an iam: action; a Dell never asks for access-changing permissions records=0 sent=0\nPASS case_star: rc=2 stderr=REFUSED: permission 0: action '*' is a wildcard; ask for the named action\nREFUSED: permissions[0].action: '*' does not match ^[A-Za-z0-9-]+:[A-Za-z0-9*]+$\nREFUS records=0 sent=0\nPASS case_bus_line: ROLE-REQUEST dell1-20261007T070959Z-7903 FIXD1 aws_lambda_function/fix-probe org/devices/role_requests/dell1/dell1-20261007T070959Z-7903.json\nPASS case_list: COUNT requested=1 applied=1 refused=0 total=2\nROLE-REQUEST cases=10/10 ok=True\n(rc 0)",
+      "denominator": "10 of 10 cases",
+      "status": "PASS",
+      "expect": "ROLE-REQUEST cases=10/10 ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the four failure arms inside AC1 are the control: laptop refuses, timeout, unnamed pass ALLOWED, IAM write ALLOWED each assert the exact last line with ok=False; the Dell-answer and wildcard cases each carry an accepted laptop call as their positive control",
+      "expected": "4 of 4 failure arms ok=False",
+      "observed": "4 of 4 failure arms ok=False",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: request_id carries a timestamp and random hex by design; the tests match the line's shape",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live round trip (a Dell, the laptop's role apply, the Dell policy's apply)",
+      "reason": "not this order's: the order builds and proves the two instruments against stand-ins; the issuer runs the live trip after"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~5/NFRA_CTLPLN.TO-CT-c-4.role-roundtrip-check.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/devices/test_role_roundtrip.py",
+      "result": "ROLE-ROUNDTRIP-SELFTEST cases=7/7 ok=True"
+    }
+  ]
+}
