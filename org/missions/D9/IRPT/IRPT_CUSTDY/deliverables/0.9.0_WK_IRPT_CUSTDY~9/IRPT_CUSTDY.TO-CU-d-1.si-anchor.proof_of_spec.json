@@ -71,10 +71,30 @@
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "rows IRPT_CUSTDY-W9-S1, W9-S2, W9-S3 appended",
+      "deploy_evidence": "rows IRPT_CUSTDY-W9-S1..S5 appended",
       "artifact_covered_by": [
         "CU10-AC1",
         "CU10-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/hop3_real_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-9; fixture first data date moved to 2009-03-15 (rule 3) plus EARLY_FIRST_DATA 2019",
+      "artifact_covered_by": [
+        "CU10-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_hop3_real_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-9; two tests re-expressed under rules 1-3",
+      "artifact_covered_by": [
+        "CU10-AC3"
       ]
     }
   ],
@@ -84,8 +104,8 @@
       "criterion_verbatim": "CU10-AC1 -- the ruling's three rules, the exact rule-2 label, the \"inception\" guard test, the 2010 floor, on fixtures.",
       "method": "command",
       "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_si_anchor.py",
-      "output_evidence": "................                                                         [100%]\n16 passed in 16.79s\nrc=0",
-      "denominator": "16 of 16 tests passed (round-2 files test_client_report_figures.py + test_client_report_held_si.py also 23 of 23)",
+      "output_evidence": ".........................                                                [100%]\n25 passed in 31.51s\nrc=0",
+      "denominator": "25 of 25 tests passed in test_si_anchor.py (one per amendment-2 branch a/b/c, rule 2, rule 3, none; the zero-read-confirmed guard; the (b)/(c) never-inception guard; probe branch line and labels_ok both ways); round-2 files test_client_report_figures.py + test_client_report_held_si.py + test_hop3_real_run.py also green (23 + 11)",
       "expect": "passed",
       "status": "PASS"
     },
@@ -94,30 +114,41 @@
       "criterion_verbatim": "CU10-AC2 -- the seam against its REAL neighbour: the chosen advisor's real accounts, Schwab silver and returns gold on dell2. The per-rule counts are reported, not graded.",
       "method": "command",
       "invocation": "python data/assets/scripts/gold/irpt_custody/si_anchor_probe.py --accounts-from-advisor matthew_gooch --as-of 2026-09-30",
-      "output_evidence": "[last line of 15; the 14 ACCOUNT lines above it are masked to last 4, each rule=1 si_status=NO_DATA]\nSI-ANCHOR advisor=matthew_gooch accounts=14 rule1=14 rule2=0 rule3=0 no_anchor=0 labels_ok=True\nrc=0",
-      "denominator": "14 of 14 accounts of the advisor's covered book carry an si_anchor; rule1=14 rule2=0 rule3=0 no_anchor=0 (reported, not graded); 14 of 14 SI figures NO_DATA (row IRPT_CUSTDY-W9-S2)",
+      "output_evidence": "[ran 153 s wall under timeout 600, above the 120 s default bound; 14 ACCOUNT lines masked to last 4, 12 branch=a and 2 branch=b, every si_status=OK]\nSI-ANCHOR advisor=matthew_gooch accounts=14 rule1=12 rule2=2 rule3=0 no_anchor=0 branch_a=12 branch_b=2 branch_c=0 branch_rule2=0 branch_rule3=0 branch_none=0 labels_ok=True\nrc=0",
+      "denominator": "14 of 14 accounts of the advisor's covered book carry an si_anchor and a branch: branch_a=12 branch_b=2 branch_c=0 rule3=0 none=0 (reported, not graded; matches the order's expected 12 a / 2 b); labels_ok=True over 14 of 14 (row IRPT_CUSTDY-W9-S5)",
       "expect": "labels_ok=True",
       "status": "PASS"
+    },
+    {
+      "criterion_id": "CU10-AC3",
+      "criterion_verbatim": "CU10-AC3 (AMENDMENT 1) -- the whole irpt_custody suite on your branch, after merging CLOUD, reads 0 failed and 0 errors: retiring the 2024 floor must not leave test_hop3_real_run.py or hop3_real_run.py --self-test red (row W9-S3).",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/tests/run_suite_check.py",
+      "output_evidence": "SUITE dir=data/assets/scripts/gold/irpt_custody/tests passed=108 failed=2 errors=0 skipped=0 xfailed=1\nrc=1\n[the 2 failures: tests/test_hop3_directory_gap.py::test_account_line_prints_name_source_and_absent_anchor_without_failing and ::test_a_present_si_anchor_prints_its_date_and_rule, both assert si_anchor=ABSENT on documents that now carry the field; the file is outside this order's paths -- row IRPT_CUSTDY-W9-S4]. Amendment 1's own targets are green: test_hop3_real_run.py 11 of 11, hop3_real_run.py --self-test held_ok=True.",
+      "denominator": "111 tests in the suite run (108 passed, 2 failed, 0 errors, 0 skipped, 1 xfailed); 0 of the 2 failures inside this order's paths",
+      "expect": "failed=0 errors=0",
+      "status": "FAIL",
+      "status_reason": "failed=2: tests/test_hop3_directory_gap.py (CU-d-2's file, outside this order's paths) asserts si_anchor=ABSENT on account lines, false now that every document carries si_anchor. The refusal clause forbids weakening or skipping; the file needs granting (row IRPT_CUSTDY-W9-S4, ARMED, disarm_owner 2.0.0_SA_COO~K2)."
     }
   ],
   "controls": {
     "mutant": {
-      "description": "One-off mutant: LABEL_RULE2 set to 'since inception %s' in client_report_figures.py, test_si_anchor.py re-run, module restored byte-identical (cmp).",
-      "expected": "the rule-2 label tests, the inception guard, the validator test and the probe test fail",
-      "observed": "5 failed, 11 passed (rule_2_is_labelled_exactly, rule_2_account_is_never_labelled_inception, validator_rejects_..., silver_open_date_is_rule_1, probe_prints_masked_lines_and_the_counts); restored, 16 passed",
+      "description": "One-off mutant: client_report_figures.py `if first >= opened and held_before_first == 0:` -> `if first >= opened:` (branch a no longer needs the zero read), test_si_anchor.py re-run, module restored byte-identical (cmp).",
+      "expected": "the branch-a-needs-zero-read, branch-c and both end-to-end refusal tests fail",
+      "observed": "4 failed, 21 passed (branch_a_needs_the_zero_read_confirmed, branch_c_holdings_before_first_funding, branch_a_is_refused_when_a_holding_is_found, branch_a_is_refused_when_the_zero_read_cannot_be_confirmed); restored, 25 passed",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "N/A -- fixtures are generated in tmp dirs from constants and an in-memory frame; no clock or randomness is read",
-      "observed": "16 passed on each of three runs",
+      "observed": "25 passed on the final run; the earlier 23 + 25 runs agreed",
       "status": "N/A-WITH-REASON",
       "reason": "the real run reads the live silver and gold; its per-rule counts move with the data, only labels_ok is graded"
     }
   },
   "declared_exclusions": [
     {
-      "item": "hop3_real_run.py and test_hop3_real_run.py",
-      "reason": "Outside this order's paths and never to be edited; both assert the retired HELD_CALENDAR_FIX on a 2019 date and now fail (row IRPT_CUSTDY-W9-S3)."
+      "item": "tests/test_hop3_directory_gap.py",
+      "reason": "CU-d-2's file, outside this order's paths; its two si_anchor=ABSENT assertions fail now that CU-d-1 writes the field (row IRPT_CUSTDY-W9-S4)."
     },
     {
       "item": "ruff py39 lint",
@@ -127,14 +158,16 @@
   "surprises": [
     "IRPT_CUSTDY-W9-S1",
     "IRPT_CUSTDY-W9-S2",
-    "IRPT_CUSTDY-W9-S3"
+    "IRPT_CUSTDY-W9-S3",
+    "IRPT_CUSTDY-W9-S4",
+    "IRPT_CUSTDY-W9-S5"
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "pytest",
       "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_si_anchor.py",
-      "result": "16 passed"
+      "result": "25 passed"
     }
   ]
 }
