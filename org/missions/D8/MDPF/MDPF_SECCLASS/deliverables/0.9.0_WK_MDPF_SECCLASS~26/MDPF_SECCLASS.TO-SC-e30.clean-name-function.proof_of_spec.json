@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e30",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e30.clean-name-function.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/security_name.py",
+      "kind": "script",
+      "commit_or_etag": "4a2895b4af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "clean_name(name) plus module constants VENDOR_SUFFIXES, KEEP_UPPER, BRAND_MAP; stdlib only, ASCII, no I/O; shipped-artifacts hookup is the issuer's at the merge.",
+      "artifact_covered_by": ["SC8-e30-AC1", "SC8-e30-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
+      "kind": "script",
+      "commit_or_etag": "4a2895b4af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "51 parametrized tests: blank/None, whitespace, lowercase passthrough, suffix drop, hyphen split, digit/percent/slash, one-letter, keep-upper set, brand map, no expansion, idempotence, ASCII.",
+      "artifact_covered_by": ["SC8-e30-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e30-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=51 passed in 0.28s (rc=0)",
+      "denominator": "51 of 51 tests passed, 0 failed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e30-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py -- expect: CLEAN-NAME-TABLE ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py",
+      "expect": "CLEAN-NAME-TABLE ok=True",
+      "output_evidence": "CLEAN-NAME-TABLE ok=True cases=17 mismatches=0 (rc=0)",
+      "denominator": "17 of 17 table cases match (11 all-caps, 4 controls, 2 empty)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant: empty VENDOR_SUFFIXES at runtime, then run the issuer's table.",
+      "expected": "CLEAN-NAME-TABLE ok=False with the two suffix cases mismatching",
+      "observed": "MISMATCH 'MAXIMUS INC COM' got 'Maximus Inc Com'; MISMATCH 'COCA-COLA EUROPACIFIC PARTNERS SHS' got '... Shs'; CLEAN-NAME-TABLE ok=False cases=17 mismatches=2 (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Table and pytest run twice (before and after the annotation fix) against the same rule.",
+      "observed": "Identical results both times: ok=True 17 of 17; 51 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any table read or write, the shipped-artifacts hookup, and consumers SC-e-31 and SC-e-34.",
+      "reason": "BOUNDS: this cell is pure code; hookups belong to the issuer at the merge."
+    }
+  ],
+  "surprises": ["MDPF_SECCLASS-W26-S1"],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on each .py)",
+      "result": "ruff + py_compile clean 2 of 2 after the annotation fix"
+    }
+  ]
+}

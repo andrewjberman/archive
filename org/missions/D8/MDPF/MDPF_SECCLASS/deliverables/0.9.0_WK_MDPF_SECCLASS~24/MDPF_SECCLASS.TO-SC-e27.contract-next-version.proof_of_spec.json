@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e27",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2e6ecff606c8719a8690641920aae52f06fa94f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e27.contract-next-version.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~24",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/standards/MDPF_SECCLASS_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "a8fa301112",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "contract_version 0.5.0; fields gics_sector (10 values), gics_industry_group (23 values); identifier_namespace gains NAME; the seven 0.4.0 fields kept. A contract file; no table write, no deploy.",
+      "artifact_covered_by": [
+        "SC8-e27-AC2",
+        "SC8-e27-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py",
+      "kind": "test",
+      "commit_or_etag": "a8fa301112",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "PINNED_CONTRACT_VERSION 0.5.0; namespace test pins BLOOMBERG/CUSIP/NAME/TICKER; two exact value-set tests and a NAME key-form test added; 21 passed.",
+      "artifact_covered_by": [
+        "SC8-e27-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e27-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=21 passed in 0.41s",
+      "denominator": "21 of 21 tests in the file pass (was 2 failed, 15 passed at the cut)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e27-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e27.py -- expect: SC-E27-CONTRACT ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e27.py",
+      "expect": "SC-E27-CONTRACT ok=True",
+      "output_evidence": "SC-E27-CONTRACT ok=True version=0.5.0 new_fields=gics_industry_group,gics_sector key_form=NAME::<slug>` where slug = ... (rc=0)",
+      "denominator": "2 of 2 new fields equal the measured sets (10 sector, 23 industry group); 7 of 7 0.4.0 fields present; 1 of 1 key-form line verbatim",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "both criteria run twice (before and after the commit-gate lint fix).",
+      "observed": "21 passed and ok=True both times.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Copy of the contract with the last gics_sector value dropped, graded by issuer_check_sc_e27.check() with CONTRACT pointed at the scratch copy.",
+      "expected": "ok=False values do not equal the measured sets",
+      "observed": "(False, \"new fields' values do not equal the measured sector and industry-group sets\")",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "test_model_classifier.py:245-248 (pins 0.3.0, red at the cut and still red)",
+      "reason": "SC-e-31's file, not in this order's paths."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W24-S2"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (ruff 0.16.10)",
+      "result": "refused pre-existing UP031 at test line 81; fixed with an equivalent f-string (no runtime change), noted in row W24-S2; commit a8fa301112"
+    }
+  ]
+}
