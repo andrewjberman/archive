@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECHIST.TO-SH-t1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-SH-t1.per-security-history-depth.md",
+    "group": "OTHER",
+    "vintage_commit": "f8a41e7902"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECHIST~1",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECHIST/decompositions/MDPF_SECHIST_DECOMP.md",
+    "vintage_commit": "f8a41e7902",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-SH-t1.per-security-history-depth.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/pipeline/etf_daily_pull.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo files only; site Z runs the working tree after the issuer's merge and the site Z owner's deploy; no S3 write, no Bloomberg call"
+    },
+    {
+      "path_or_key": "integrations/bloomberg/pipeline/test_etf_daily_pull_history_plan.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo files only; site Z runs the working tree after the issuer's merge and the site Z owner's deploy; no S3 write, no Bloomberg call"
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECHIST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo files only; site Z runs the working tree after the issuer's merge and the site Z owner's deploy; no S3 write, no Bloomberg call"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SH1-t1-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R1_CHECKS/sh_t1_plan_tests.py expect: PLAN-TESTS-OK",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R1_CHECKS/sh_t1_plan_tests.py",
+      "output_evidence": "test_etf_daily_pull_history_plan.py (exercising etf_daily_pull.py): 4 passed in 0.52s; PLAN-TESTS-OK (rc 0; run under timeout 120)",
+      "denominator": "4 of 4 named tests PASSED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SH1-t1-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R1_CHECKS/sh_t1_live_plan.py expect: SEAM-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R1_CHECKS/sh_t1_live_plan.py",
+      "output_evidence": "etf_daily_pull.plan_only(): SEAM-OK planned=15 CSCO@2025-09-29 BX@2025-09-29 (rc 0; asof=2026-10-06 universe=172 needing=15 planned=15 capped=0; whole run 3.8 s) (run under timeout 120)",
+      "denominator": "15 of 15 needing securities planned; both named (CSCO, BX) present; 0 over 400 days; written=[]",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Make the backfill except-block re-raise (adding a bare `raise` after the WARN log) and run test_backfill_failure_keeps_production_rc.",
+      "expected": "the test fails",
+      "observed": "1 failed, 3 passed: RuntimeError: fake bloomberg refuses the depth window propagated out of main(); restored, 4 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: pure plan function over a sorted ticker order; tests assert exact outputs",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "MDPF_SECHIST-W1-S1: the need rule never converges for a security whose real history is under a year (2602335D, PFDE, PFOE are re-planned every run)"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECHIST/deliverables/0.9.0_WK_MDPF_SECHIST~1/MDPF_SECHIST.TO-SH-t1.per-security-history-depth.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/pipeline/test_etf_daily_pull_history_plan.py",
+      "result": "4 passed in 0.52s"
+    }
+  ]
+}
