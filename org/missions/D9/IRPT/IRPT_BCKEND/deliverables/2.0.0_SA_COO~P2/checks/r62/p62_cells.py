@@ -13,7 +13,8 @@ Prints "<id> PASS" or "<id> FAIL" as the last line. Every check finishes inside 
               Base: FAIL (no census).
   IB62-4-AC1  _ids: the seam file's index holds 0 'None' values, and the new test naming 'None' plus the _ids suite pass.
               Base: FAIL (826 'None').
-  IB62-1-AC2  E-P9 submit: export/tests/test_submit_client_report.py passes (names client-report) and the export suite passes.
+  IB62-1-AC2  E-P9 submit: export/tests/test_submit_client_report.py passes (names client-report) and the export suite has no
+              failure beyond the six pypdf-only tests (amendment 1, row W138-S1).
               Base: FAIL (no test).
   IB62-1-AC3  E-P9 package: render_manifest/manifest.ts lists a 'client-report' kind with a schemaVersion entry, and the portal
               render package (portal/src/pages/InvestorReporting/render/) names 'client-report'. Base: FAIL.
@@ -38,13 +39,18 @@ CH = P + "/surprise-channel/investigations/INVESTIGATION_v1.md"
 TO = P + "/task-orders/IRPT_BCKEND.TO-IB-pr-"
 GRANTS = {
     "138": (EX + "/render_export.cjs", EX + "/tests/test_template_kind.cjs", "infra/aws/lambda/investor-reporting/export/",
-            "portal", CH, TO + "336.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~138/"),
+            "portal", "docs/contracts/investor-reporting/v1/ExportBundle.schema.json",
+            "infra/aws/lambda/investor-reporting/_contracts/ExportBundle.schema.json",
+            "infra/aws/lambda/investor-reporting/reports/repository.py", "infra/aws/lambda/investor-reporting/reports/tests/",
+            CH, TO + "336.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~138/"),
     "139": (CI + "/lambda-source-map.json", CH, TO + "337.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~139/"),
     "140": ("portal", "data/assets/scripts/gold/irpt_custody/tests/test_directory_search_overage_reader.py",
             "infra/aws/lambda/investor-reporting/directory/tests/test_search_readers_overage.py", CH, TO + "338.",
             P + "/deliverables/0.9.0_WK_IRPT_BCKEND~140/"),
     "141": (IDS + "/", CH, TO + "339.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~141/"),
-    "142": (CH, TO + "340.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~142/"),
+    "142": ("infra/aws/lambda/investor-reporting/intake/uploads.py",
+            "infra/aws/lambda/investor-reporting/intake/tests/test_uploads_refusal_class.py",
+            CH, TO + "340.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~142/"),
 }
 
 
@@ -73,7 +79,7 @@ def main():
         if not t.is_file():
             fail("no %s/tests/test_template_kind.cjs" % EX)
         src = t.read_text(encoding="utf-8")
-        for w in ("performance-landscape-letter", "analysis-portrait-letter", "client-report"):
+        for w in ("performance-landscape-letter", "analysis-portrait-letter", "custody-report"):
             if w not in src:
                 fail("test never names %r" % w)
         rc, out = _run(["node", str(t)], root)
@@ -125,32 +131,54 @@ def main():
             fail("_ids suite: %s" % last)
         print("OK: 0 'None' of %d index values; _ids %s" % (len(idx), last))
     elif cid == "IB62-1-AC2":
-        t = root / "infra/aws/lambda/investor-reporting/export/tests/test_submit_client_report.py"
+        t = root / "infra/aws/lambda/investor-reporting/export/tests/test_submit_custody_report.py"
         if not t.is_file():
-            fail("no export/tests/test_submit_client_report.py")
-        if "client-report" not in t.read_text(encoding="utf-8") and "CLIENT_REPORT" not in t.read_text(encoding="utf-8"):
-            fail("test never names the client-report kind")
-        rc, out = _run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/test_submit_client_report.py"],
+            fail("no export/tests/test_submit_custody_report.py (amendment 2: custody naming, PRD v0.29)")
+        if "custody_report_ref" not in t.read_text(encoding="utf-8") or "CUSTODY_REPORT" not in t.read_text(encoding="utf-8"):
+            fail("test never names custody_report_ref and CUSTODY_REPORT")
+        rc, out = _run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/test_submit_custody_report.py"],
                        root / "infra/aws/lambda/investor-reporting/export")
         last = _last(out)
         if rc or "passed" not in last or re.search(r"\d+ (failed|error)", last):
             fail("new tests: %s" % last)
-        rc, out = _run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/"],
+        rc, out = _run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rf", "tests/"],
                        root / "infra/aws/lambda/investor-reporting/export")
         last2 = _last(out)
-        if rc or re.search(r"\d+ (failed|error)", last2):
-            fail("export suite: %s" % last2)
-        print("OK: new %s; export suite %s" % (last, last2))
+        # Amendment 1 (issuer, row W138-S1): these six fail at the base too, only because pypdf is not on this box
+        # (no egress to fetch it). Any OTHER failure, or one of these failing for another reason, still fails AC2.
+        pypdf_only = {
+            "tests/test_export.py::test_the_content_hash_is_stable_and_the_validator_reads_a_real_pdf",
+            "tests/test_export.py::test_the_validator_fails_a_non_pdf_rather_than_raising",
+            "tests/test_export.py::test_the_forbidden_marker_census_is_measured_not_asserted",
+            "tests/test_export_path_b.py::test_the_receipt_names_the_frozen_as_of",
+            "tests/test_submit_async.py::test_the_marked_event_builds_and_the_handle_reaches_the_receipt",
+            "tests/test_submit_service.py::test_submit_then_first_read_after_the_render_finalizes_the_receipt",
+        }
+        failed = {}
+        for ln in out.splitlines():
+            m = re.match(r"FAILED (\S+?)(?: - (.*))?$", ln.strip())
+            if m:
+                failed[m.group(1).replace("\\", "/")] = m.group(2) or ""
+        extra = [k for k in failed if k not in pypdf_only or "pypdf" not in failed[k]]
+        if re.search(r"\d+ error", last2) or extra:
+            fail("export suite: %s; failures outside the six pypdf-only tests: %s" % (last2, extra[:6]))
+        print("OK: new %s; export suite %s (%d pypdf-only failures admitted by amendment 1)" % (last, last2, len(failed)))
     elif cid == "IB62-1-AC3":
         m = (root / "infra/aws/lambda/investor-reporting/export/render_manifest/manifest.ts").read_text(encoding="utf-8")
-        if "'client-report'" not in m and '"client-report"' not in m:
-            fail("render_manifest/manifest.ts has no 'client-report' kind")
-        if not re.search(r"client-report[\s\S]{0,800}schemaVersion|schemaVersion[\s\S]{0,800}client-report", m):
-            fail("no schemaVersion entry beside the client-report kind")
+        if "'custody-report'" not in m and '"custody-report"' not in m:
+            fail("render_manifest/manifest.ts has no 'custody-report' kind")
+        if not re.search(r"custody-report[\s\S]{0,800}schemaVersion|schemaVersion[\s\S]{0,800}custody-report", m):
+            fail("no schemaVersion entry beside the custody-report kind")
         pr = root / "portal/src/pages/InvestorReporting/render"
-        hits = [f.name for f in pr.glob("*.ts*") if "client-report" in f.read_text(encoding="utf-8", errors="replace")] if pr.is_dir() else []
+        hits = [f.name for f in pr.glob("*.ts*") if "custody-report" in f.read_text(encoding="utf-8", errors="replace")] if pr.is_dir() else []
         if not hits:
-            fail("the portal render package names no 'client-report' (portal/src/pages/InvestorReporting/render/)")
+            fail("the portal render package names no 'custody-report' (portal/src/pages/InvestorReporting/render/)")
+        for c in ("docs/contracts/investor-reporting/v1/ExportBundle.schema.json",
+                  "infra/aws/lambda/investor-reporting/_contracts/ExportBundle.schema.json"):
+            if "custody_report_ref" not in (root / c).read_text(encoding="utf-8"):
+                fail("%s has no custody_report_ref (amendment 2)" % c)
+        if "CUSTODY_REPORT" not in (root / "infra/aws/lambda/investor-reporting/reports/repository.py").read_text(encoding="utf-8"):
+            fail("reports/repository.py KINDS has no CUSTODY_REPORT (amendment 2)")
         print("OK: manifest kind + schemaVersion; portal render files: %s" % hits)
     elif cid == "IB62-4-AC2":
         f = root / P / "deliverables/0.9.0_WK_IRPT_BCKEND~141/seam_writer.txt"
