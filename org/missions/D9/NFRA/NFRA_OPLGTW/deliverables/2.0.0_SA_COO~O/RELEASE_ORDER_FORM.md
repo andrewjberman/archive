@@ -91,6 +91,10 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
   in `org/tier0_exec/0.0.0_AB_MSTR~Z/deliverables/SITEZ_INSTALL_DOWNLOAD_LINE_CENSUS_20261007.md`. Two terms of the
   CTO's ruling that lifted the deploy hold (msg 31254) stand:
   - A release whose diff touches `requirements.txt` or `bun.lock` goes to the CTO before its never-widen pair.
+  - **The fetch control (R45, `ledger/ROUND_ANALYSIS.round27.md` ADDENDUM 1 @f6fd7281cf).** Every deploy records the
+    time its deploy command starts and, after it returns, the count of bun install-cache entries (top level and one
+    level down) created or modified at or after that time. The count is 0. Above 0 is a fetch: the release stops,
+    rolls back and goes to the CTO as a BLOCKING row.
   - Each release's ANNOUNCE states in one line that whether a frozen `bun install` with every entry cached still sends
     a metadata request is UNDETERMINED, until it is measured. No package is fetched either way: the pre-check
     (`ops/bun_cache_precheck.py`) stops the deploy on a cache miss, and the missing list goes to the laptop's intake.
