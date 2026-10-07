@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-r-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round3.md",
+    "vintage_commit": "5533577343",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-r-2.match-keys.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "47ef4c98cc"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming_rootmap.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only over the repository; no AWS call. load_map accepts exception `roles` and entry `fills`; resolve takes role=None and reports basis exception-with-role or exception.",
+      "introduces": [
+        "def resolve(map, root, name, type, role=None):",
+        "_FILL_SLOTS = (\"system\", \"scope\", \"source\")"
+      ],
+      "artifact_covered_by": [
+        "BR2-AC1",
+        "BR2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_naming_rootcheck.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "An inline policy takes its role's system unless the exception names the role; fills read for {system}; new `keys` command.",
+      "introduces": [
+        "def policy_system(ans):",
+        "def keys_check(root, map_path, out=print):"
+      ],
+      "artifact_covered_by": [
+        "BR2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_naming_keyfill.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Legacy match already on (bucket, template), confirmed unchanged; an entry's fills limits which of scope and source fill a key.",
+      "introduces": [
+        "can_scope = fills is None or \"scope\" in fills"
+      ],
+      "artifact_covered_by": [
+        "BR2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_rootmap.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "30 assertions: roles difference control, bad roles, fills accepted and refused.",
+      "introduces": [
+        "exception-with-role"
+      ],
+      "artifact_covered_by": [
+        "BR2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_rootcheck.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "87 cases: the role difference control in decide(), policy_system, fills for {system}.",
+      "introduces": [
+        "an exception without a role never overrides the role"
+      ],
+      "artifact_covered_by": [
+        "BR2-AC1",
+        "BR2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_keyfill.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "21 cases: the fills difference control, the 49 Financial copy of the legacy key is an ordinary fill.",
+      "introduces": [
+        "FILLS DIFFERENCE CONTROL"
+      ],
+      "artifact_covered_by": [
+        "BR2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BR2-AC1",
+      "criterion_verbatim": "BR2-AC1 -- an exception overrides a role only when it names that role (the difference control).",
+      "method": "command",
+      "invocation": "python lib/tests/test_opal_naming_rootmap.py",
+      "output_evidence": "ROOTMAP-TEST ok=True assertions=30\nrc=0",
+      "denominator": "30 of 30 rootmap assertions held (role named / other role / no role given / same exception without roles / bad roles x4 / fills good x3 and bad x3); companion tests ROOTCHECK-TEST ok=True cases=87 and KEYFILL-TEST ok=True cases=21; python -m pytest lib/tests: 194 passed",
+      "status": "PASS",
+      "expect": "ROOTMAP-TEST ok=True"
+    },
+    {
+      "criterion_id": "BR2-AC2",
+      "criterion_verbatim": "BR2-AC2 -- on the real root no role-less exception overrides a role's system.",
+      "method": "command",
+      "invocation": "python lib/opal_naming_rootcheck.py keys infra/aws/terraform/bd-pipeline --map infra/logic/registry/root_map.json",
+      "output_evidence": "ROOTCHECK-KEYS ok=True root=infra/aws/terraform/bd-pipeline policies=36 role=19 exception_with_role=6 exception_without_role_overriding=0\nrc=0",
+      "denominator": "36 of 36 inline policies of the root have a line (independent text count of aws_iam_role_policy headers = 36); 6 exceptions carry roles and each took effect with its role; 0 overrides",
+      "status": "PASS",
+      "expect": "exception_without_role_overriding=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "keys_check run on a copy of the map with a role-less exception pipeline-chain -> firmsep, with policy_system replaced by a version in which any exception wins (the old rule).",
+      "expected": "ROOTCHECK-KEYS ok=False",
+      "observed": "ROOTCHECK-KEYS ok=False root=infra/aws/terraform/bd-pipeline policies=36 role=17 exception_with_role=6 exception_without_role_overriding=2",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the root run before (HEAD modules) and after the build at the same map bytes; outputs diffed",
+      "observed": "diff empty; both ROOTCHECK ok=True items=140 right=9 fix=111 not_asked=9 pattern=3 carded=0 refused=2 hole=6; the eleven roots whose entry carries fills also diff empty",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AWS-only names",
+      "reason": "the repository plane only; no AWS call (order BOUNDS)"
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-W1-S7",
+    "LGIC_BLANKFIX-W1-S8"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/LGIC_BLANKFIX.TO-BF-r-2.match-keys.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "opal_naming_rootcheck.py keys",
+      "invocation": "python lib/opal_naming_rootcheck.py keys infra/aws/terraform/bd-pipeline --map infra/logic/registry/root_map.json",
+      "result": "ROOTCHECK-KEYS ok=True root=infra/aws/terraform/bd-pipeline policies=36 role=19 exception_with_role=6 exception_without_role_overriding=0"
+    }
+  ]
+}
