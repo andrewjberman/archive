@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e58",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9b6348f15edb1ee3ba13c5158837bf385376461e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R10.md",
+    "vintage_commit": "3a11e67c2064aca8ae0375a7f4c2d5578b22b93c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e58.bd-pages-thread-trace.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~41",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/BD_PAGES_THREAD_TRACE_20261007.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 hops page..canonical_source; first_failing_hop page (portal composition.ts:212); silver_dim also FAIL (build_bd_assets_dim.py:366); read-only trace, no code or bytes changed",
+      "artifact_covered_by": [
+        "SC10-e58-AC1",
+        "SC10-e58-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/BD_PAGES_THREAD_TRACE_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one-page reading: hop table, first failing hop, fix",
+      "artifact_covered_by": [
+        "SC10-e58-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC10-e58-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e58_thread_trace_check.py -- expect: SC-E58 ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e58_thread_trace_check.py",
+      "expect": "SC-E58 ok=True",
+      "output_evidence": "SC-E58 ok=True hops=7 first_failing_hop=page (rc=0)",
+      "denominator": "7 of 7 hops in journey order, each with evidence; GLD/PHYS/VXX read on 7 of 7 hops; 2 FAIL hops (page, silver_dim), first = page with fix_file and fix_line",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC10-e58-AC2",
+      "criterion_verbatim": "JUDGMENT (3.0.0_SA_CVO, L9): the named failing hop is the true first break of the journey, and no hop is graded PASS on a read that could not see it.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: a judgment criterion carries no invocation",
+      "output_evidence": "No verdict recorded by the worker. Material for the judge: page is graded FAIL because the served sub-class never reaches the screen (code-path read plus 0 portal/ hits for asset_class_canonical); if the judge reads class-only slices as enough, the first failing hop is silver_dim (measured, off the page chain). api and classifier_lib are PASS by code-path read (claim inferred); the page was not rendered and the API was not called.",
+      "denominator": "n/a",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: graded by 3.0.0_SA_CVO at L9, never self-graded by the worker."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Set first_failing_hop to silver_dim in the record (the first FAIL in journey order is page), ran the AC1 check, restored the file from a copy and re-ran.",
+      "expected": "ok=False first_failing_hop=silver_dim measured=page, then ok=True after restore",
+      "observed": "SC-E58 ok=False first_failing_hop=silver_dim measured=page (rc=1); after restore SC-E58 ok=True hops=7 first_failing_hop=page (rc=0); restored file git hash-object f624ffb58a04919e78371156b74916481bcf8223 equals the copy. Base dry run per the order: AC1 FAIL (absent record).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "sc_e58_thread_trace_check.py run twice over the same record",
+      "observed": "identical output both times: SC-E58 ok=True hops=7 first_failing_hop=page",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A rendered page read and a live API call.",
+      "reason": "No browser and no egress on this seat; page and api are graded from code paths (claim inferred)."
+    },
+    {
+      "item": "Any code edit, table write, S3 write, deploy, producer run, package install or download.",
+      "reason": "BOUNDS: read-only trace."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W41-S1",
+    "MDPF_SECCLASS-W41-S2",
+    "MDPF_SECCLASS-W41-S3",
+    "MDPF_SECCLASS-W41-S4"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <paths>",
+      "result": "see commit"
+    }
+  ]
+}
