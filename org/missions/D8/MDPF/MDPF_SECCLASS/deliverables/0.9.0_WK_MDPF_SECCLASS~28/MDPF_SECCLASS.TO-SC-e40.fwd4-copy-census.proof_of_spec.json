@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e40",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2e6ecff606c8719a8690641920aae52f06fa94f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e40.fwd4-copy-census.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~28",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/fwd4_copy_census.py",
+      "kind": "script",
+      "commit_or_etag": "2af13eb6a1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census over git ls-files (21514 files); prints FWD4-CENSUS and, with --plant, FWD4-PLANT; ruff clean.",
+      "artifact_covered_by": [
+        "SC8-e40-AC1",
+        "SC8-e40-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/FWD4_CENSUS_20261007.json",
+      "kind": "doc",
+      "commit_or_etag": "2af13eb6a1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "denominator_files, scopes, surfaces S06-S16 and S22-S26, copies (path, line, surface, kind, band), plant, shipped_copies.",
+      "artifact_covered_by": [
+        "SC8-e40-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e40-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/fwd4_copy_census.py -- expect: FWD4-CENSUS denominator_files=",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/fwd4_copy_census.py",
+      "expect": "FWD4-CENSUS denominator_files=",
+      "output_evidence": "FWD4-CENSUS denominator_files=21514 copies=305 literal=134 client-copy=2 old-list=142 model=27 test=44 tooling=201 prod=60 seconds=58.0 (rc=0)",
+      "denominator": "21514 of 21514 tracked code files scanned (repo 20231 + portal src 1283), 0 unreadable; 305 copies: literal=134 client-copy=2 old-list=142 model=27; by band test=44 tooling=201 prod=60",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e40-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/fwd4_copy_census.py --plant -- expect: FWD4-PLANT found=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/fwd4_copy_census.py --plant",
+      "expect": "FWD4-PLANT found=True",
+      "output_evidence": "FWD4-PLANT found=True planted=infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/zz_fwd4_plant_46b9eaa1b1b4/etf_classification.py kind=client-copy,literal removed=True (rc=0)",
+      "denominator": "1 of 1 plants found with the source's kinds (client-copy,literal); rescan covered 285 files of infra/aws/lambda/v2_portal; git status afterwards lists no plant path",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e40-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_fwd4_census_surfaces_check.py -- expect: FWD4-SURFACES ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_fwd4_census_surfaces_check.py",
+      "expect": "FWD4-SURFACES ok=True",
+      "output_evidence": "FWD4-SURFACES ok=True required=14 missing=- paths_gone=0 copies=305 denominator_files=21514 (rc=0)",
+      "denominator": "14 of 14 required surfaces scanned with existing paths (S06 S07 S10 S11 S12 S13 S14 S15 S16 S22 S23 S24 S25 S26); 305 of 305 copies carry path, line and surface",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted copy: the bytes of opal-partners-data/etf_classification.py put at a new unique path inside infra/aws/lambda/v2_portal, then removed.",
+      "expected": "the census reports the plant with kinds client-copy and literal",
+      "observed": "FWD4-PLANT found=True planted=infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/zz_fwd4_plant_46b9eaa1b1b4/etf_classification.py kind=client-copy,literal removed=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times at the same tree (59/43/33 s); copy counts equal on the runs after SELF_EXCLUDED landed (305 = 134+2+142+27).",
+      "observed": "copies=305 literal=134 client-copy=2 old-list=142 model=27 test=44 tooling=201 prod=60 on the last two runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A fix to any surface the census reports, any AWS or model call.",
+      "reason": "BOUNDS: a copy is reported, never fixed here; code read only."
+    },
+    {
+      "item": "14 data JSON files over 3 MB are read to byte 3,000,000; submodule trees (mcportal, models/factor_scanner, opal_ai) are not scanned.",
+      "reason": "120 s bound; listed in the JSON (read_truncated_over_bytes, scopes.gitlinks_not_scanned); row W28-S2."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W28-S1",
+    "MDPF_SECCLASS-W28-S2",
+    "MDPF_SECCLASS-W28-S3",
+    "MDPF_SECCLASS-W28-S4"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/FWD4_CENSUS_20261007.json",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <each .py> (run inside safe-commit)",
+      "result": "ruff clean on fwd4_copy_census.py after one fix (re.I alias, subprocess check)"
+    }
+  ]
+}

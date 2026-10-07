@@ -1,0 +1,37 @@
+{
+ "driver": "entry",
+ "event": {
+  "cutoff_at": "2026-09-09T23:59:59Z",
+  "declared_daily_length": 92,
+  "fixture": "infra/aws/lambda/investor-reporting/narrative/fixtures/topics_window.json",
+  "pathParameters": {
+   "reportId": "${REPORT_OK}"
+  },
+  "performance_report": {
+   "$include": "infra/aws/lambda/investor-reporting/narrative/fixtures/performance_report_inf.json",
+   "$patch": {
+    "lineage.account_ids": [
+     "${A1}"
+    ]
+   }
+  },
+  "store": "recorded"
+ },
+ "expect": {
+  "data_contains": [
+   "a872f77a65924b42d9f31ccd8682d38d8ed5fbee5b7e7c64864584d41586d1b3",
+   "2026-07-12"
+  ],
+  "outcome": "SERVED"
+ },
+ "fixture_schema": "irpt-gated-route-fixture/1",
+ "function": "irpt-narrative",
+ "notes": "the report the narrative reads is the entry's `performance_report` field (the retained Performance report), here the pseudonymised IB-s-13 fixture with `lineage.account_ids` set to the account the principal does (A1) or does not (A5) hold; the topic store is the recorded transport (`store: recorded`, the entry's own offline mode).",
+ "operation": "narrative-packet",
+ "principal_class": "ALLOWED: FIRM_ADVISOR ADV-A-0001 of 49financial, grant A1+A2+A3",
+ "request_contract": [
+  "docs/contracts/investor-reporting/v1/routes.json#GET /api/scoped/investor-reporting/narrative/{reportId}",
+  "docs/contracts/investor-reporting/v1/NarrativePacket.schema.json"
+ ],
+ "route": "GET /api/scoped/investor-reporting/narrative/{reportId}"
+}

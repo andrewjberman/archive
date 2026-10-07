@@ -1,0 +1,66 @@
+{
+ "driver": "entry",
+ "event": {
+  "pathParameters": {
+   "accountSetId": "${sel_a}"
+  },
+  "queryStringParameters": {
+   "end": "2026-09-09",
+   "start": "2026-01-01"
+  }
+ },
+ "expect": {
+  "data_contains": [
+   "bd-2026-09-09-pr340"
+  ],
+  "data_schema": "PerformanceReport.schema.json",
+  "outcome": "SERVED"
+ },
+ "fixture_schema": "irpt-gated-route-fixture/1",
+ "function": "irpt-performance-adapter",
+ "notes": "the request names an explicit server-issued selection and a start/end window (the entry's own validators); the provider calculation is the storage/provider boundary (`handler.run`) answering the contract's PerformanceReport fixture, so the authorization is the entry's and the figures are recorded, not live.",
+ "operation": "performance-report",
+ "principal_class": "ALLOWED: FIRM_ADVISOR ADV-A-0001 of 49financial, grant A1+A2+A3",
+ "request_contract": [
+  "docs/contracts/investor-reporting/v1/routes.json#GET /api/scoped/investor-reporting/performance/{accountSetId}",
+  "docs/contracts/investor-reporting/v1/PerformanceReport.schema.json"
+ ],
+ "route": "GET /api/scoped/investor-reporting/performance/{accountSetId}",
+ "stubs": {
+  "performance_provider": {
+   "outcome": {
+    "absences": [],
+    "contract_validated": true,
+    "refusals": [],
+    "report": {
+     "$include": "infra/aws/lambda/investor-reporting/_contracts/fixtures/PerformanceReport.valid.json",
+     "$instance": true,
+     "$patch": {
+      "lineage.source_revision": "bd-2026-09-09-pr340",
+      "lineage.tenant_firm_id": "${OPAQUE_FIRM}"
+     }
+    }
+   }
+  },
+  "selection_store": {
+   "selections": [
+    {
+     "account_ids": [
+      "${A1}"
+     ],
+     "advisor_id": "ADV-A-0001",
+     "name": "sel_a",
+     "operation": "performance-report"
+    },
+    {
+     "account_ids": [
+      "${A5}"
+     ],
+     "advisor_id": "ADV-B-0002",
+     "name": "sel_b",
+     "operation": "performance-report"
+    }
+   ]
+  }
+ }
+}

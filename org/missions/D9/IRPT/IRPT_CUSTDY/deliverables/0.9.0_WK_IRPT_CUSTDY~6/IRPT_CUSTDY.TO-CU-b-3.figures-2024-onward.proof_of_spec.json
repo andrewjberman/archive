@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_CUSTDY.TO-CU-b-3",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-b-3.figures-2024-onward.md",
+    "group": "OTHER",
+    "vintage_commit": "e27b2bce34"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.round2.md",
+    "vintage_commit": "e27b2bce34",
+    "to_ref": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-b-3.figures-2024-onward.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_CUSTDY~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/client_report_figures.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-6; no S3 call, --apply never run",
+      "artifact_covered_by": [
+        "CU7-AC1",
+        "CU7-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_client_report_held_si.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-6",
+      "artifact_covered_by": [
+        "CU7-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_client_report_figures.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-6; three assertions edited for the source key only",
+      "artifact_covered_by": [
+        "CU7-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_CUSTDY-W6-S1 appended",
+      "artifact_covered_by": [
+        "CU7-AC1",
+        "CU7-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CU7-AC1",
+      "criterion_verbatim": "CU7-AC1 -- the HOLD rule, the computed periods, and the source on every figure, on fixtures.",
+      "method": "command",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_client_report_held_si.py",
+      "output_evidence": "...........                                                              [100%]\n11 passed in 6.47s\nrc=0",
+      "denominator": "11 of 11 tests passed (round-1 test_client_report_figures.py also 12 of 12; whole tests dir 47 passed)",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU7-AC2",
+      "criterion_verbatim": "CU7-AC2 -- the seam through the real CLI on fixtures (the real neighbour is fenced from dell2, row S4); the round-1 flags must stay True on the same line.",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/client_report_figures.py --self-test",
+      "output_evidence": "CLIENT-FIGURES-SELFTEST contract_ok=True periods_ok=True nodata_marked=True held_ok=True sources_ok=True\nrc=0",
+      "denominator": "5 of 5 flags True on the last line; held fixture 2 households, 0 pre-2024-01-01 calendar calls",
+      "expect": "held_ok=True sources_ok=True",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "One-off mutant: _pre_floor made to return False (the hold never fires) in client_report_figures.py, new tests re-run, module restored byte-identical (cmp).",
+      "expected": "the held-SI, household-held, anchor-withheld, refusal and self-test tests fail",
+      "observed": "5 failed, 6 passed (pre_2024_inception_si_is_held, household_si_is_held, held_anchor_never_reaches_the_linker, as_of_before_2024_refused, cli_self_test); restored, 11 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- fixtures are generated in tmp dirs from constants; no clock or randomness is read",
+      "observed": "self-test final line identical on repeat runs",
+      "status": "N/A-WITH-REASON",
+      "reason": "no real-world read exists in this order; the firm bucket is fenced from dell2 (row S4) so the real run is a laptop act"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a read of the real returns gold and a real-account run",
+      "reason": "The firm bucket is fenced from dell2 (row IRPT_CUSTDY-S4); the order builds and checks on fixtures only."
+    },
+    {
+      "item": "ruff py39 lint",
+      "reason": "ruff is not installed in this worktree's shell; py_compile and the commit gate cover the file."
+    }
+  ],
+  "surprises": [
+    "IRPT_CUSTDY-W6-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_client_report_held_si.py",
+      "result": "11 passed"
+    }
+  ]
+}

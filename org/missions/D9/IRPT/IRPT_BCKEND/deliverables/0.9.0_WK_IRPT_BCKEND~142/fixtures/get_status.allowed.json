@@ -1,0 +1,43 @@
+{
+ "driver": "entry",
+ "event": {
+  "object_id": "${JOB_A}"
+ },
+ "expect": {
+  "data_contains": [
+   "${JOB_A}",
+   "JOB_LEASE_HELD"
+  ],
+  "outcome": "SERVED"
+ },
+ "fixture_schema": "irpt-gated-route-fixture/1",
+ "function": "irpt-status",
+ "notes": "status_loader names its job from request.object_id / request.params; the API Gateway event carries neither, so the fixture sets object_id, the field the compute reads. The job's lease row is the recorded irpt-jobs store, keyed by the OPAQUE firm id the loader reads (scope.verified_request_firm_id). A job of another firm is refused NOT_FOUND.",
+ "operation": "status-summary",
+ "principal_class": "ALLOWED: FIRM_ADVISOR ADV-A-0001 of 49financial, grant A1+A2+A3",
+ "request_contract": [
+  "docs/contracts/investor-reporting/v1/routes.json#GET /api/scoped/investor-reporting/status",
+  "docs/contracts/investor-reporting/v1/StatusEnvelope.schema.json"
+ ],
+ "route": "GET /api/scoped/investor-reporting/status",
+ "stubs": {
+  "job_store": {
+   "jobs": [
+    {
+     "fence_token": 7,
+     "job": "${JOB_A}",
+     "lease_expires_at": 1798675200,
+     "lease_owner": "irpt-worker-1",
+     "tenant": "${OPAQUE_FIRM}"
+    },
+    {
+     "fence_token": 3,
+     "job": "${JOB_OTHER_FIRM}",
+     "lease_expires_at": 1798675200,
+     "lease_owner": "irpt-worker-9",
+     "tenant": "${OTHER_OPAQUE_FIRM}"
+    }
+   ]
+  }
+ }
+}

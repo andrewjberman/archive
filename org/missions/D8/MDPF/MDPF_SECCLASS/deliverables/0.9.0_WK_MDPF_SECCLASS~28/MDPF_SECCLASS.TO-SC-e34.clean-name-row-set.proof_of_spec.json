@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e34",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2e6ecff606c8719a8690641920aae52f06fa94f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e34.clean-name-row-set.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~28",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/CLEAN_NAME_ROW_SET_20261007.tsv",
+      "kind": "doc",
+      "commit_or_etag": "80cb51e6a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "883 named rows of 3,507 (2,624 unnamed, outside the cell): WRITE 495 (scheduled 492, legacy 3), SEED-SOURCE 33, UNCHANGED 355; read-only scan, no table write.",
+      "artifact_covered_by": [
+        "SC8-e34-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/clean_name_row_set.py",
+      "kind": "script",
+      "commit_or_etag": "80cb51e6a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only consistent scan of etf-classifications; writes the TSV; ruff clean.",
+      "artifact_covered_by": [
+        "SC8-e34-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/clean_name_write.py",
+      "kind": "script",
+      "commit_or_etag": "80cb51e6a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Dry run by default with a mutating-call counter; --write refused (rc 4) with the half request's UNSIGNED headings and (rc 1) without --half/--snapshot; no --write run; ruff clean. Refusal run: PRECONDITION half: NOT MET - COO half is not SIGNED: ## COO half -- UNSIGNED / REFUSED: nothing written (rc=4); and REFUSED: --write needs --half <path> and --snapshot <path> (rc=1); no snapshot file was created",
+      "artifact_covered_by": [
+        "SC8-e34-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CLEAN_NAMES_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "80cb51e6a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Half request, COO and CTO halves UNSIGNED: blast radius with the 495 keys, the 33-row SEED-SOURCE list, readers named and not named, rollback per key, dry-run line.",
+      "artifact_covered_by": [
+        "SC8-e34-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e34-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e34_row_set_check.py -- expect: CLEAN-NAME-SET ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e34_row_set_check.py",
+      "expect": "CLEAN-NAME-SET ok=True",
+      "output_evidence": "CLEAN-NAME-SET ok=True rows=883 write=495 seed_source=33 unchanged=355 unnamed_live=2624 fails=0 (rc=0)",
+      "denominator": "883 of 883 named live rows appear once, match the live name, carry the function's clean name and the right action; 2,624 unnamed rows outside the set; 3,507 rows scanned",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e34-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/clean_name_write.py -- expect: puts=0",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/clean_name_write.py",
+      "expect": "puts=0",
+      "output_evidence": "CLEAN-NAME-DRY-RUN write=495 seed_source=33 unchanged=355 refused_stale=0 puts=0 (rc=0)",
+      "denominator": "495 of 495 WRITE keys read by consistent get-item and still hold the set's current name (0 stale); 0 mutating calls counted",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The committed set with one WRITE row's clean_name altered (ABB: 'X' appended), AC1's checker run against it, then the set restored from a scratch copy.",
+      "expected": "AC1's checker FAILS naming the row (not_the_function:ABB)",
+      "observed": "FAIL not_the_function:ABB / CLEAN-NAME-SET ok=False rows=883 write=495 seed_source=33 unchanged=355 unnamed_live=2624 fails=1 (rc=1); restored, sha256 a34dfba7c98c7e0e before and after, checker ok=True again",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "clean_name_row_set.py re-run on the committed tree; sha256 of the TSV before and after.",
+      "observed": "a34dfba7c98c7e0e both times; git status clean on the set; AC1 ok=True after",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The 2,624 rows with no name in the table (2,552 scheduled, 59 legacy, 13 model).",
+      "reason": "No source name in the table; sourcing one is a later decision, not a casing act (TO worker face)."
+    },
+    {
+      "item": "Any --write run, any table write, any edit to security_name.py, the seed module or a reader.",
+      "reason": "BOUNDS: the write is the issuer's act under the signed half."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W28-S5"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CLEAN_NAMES_20261007.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <each .py> (run inside safe-commit)",
+      "result": "ruff clean on clean_name_row_set.py and clean_name_write.py after one fix (UP031 percent formatting converted to f-strings)"
+    }
+  ]
+}

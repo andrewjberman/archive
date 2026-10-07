@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e25",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2e6ecff606c8719a8690641920aae52f06fa94f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e25.sector-industry-group-values.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~24",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sector_industry_group_values.py",
+      "kind": "script",
+      "commit_or_etag": "e45e4eaa87",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only S3 reads (list + get_object) of 32 bbg characteristics partitions and the newest gold/holding file; writes only the values JSON.",
+      "artifact_covered_by": [
+        "SC8-e25-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/SECTOR_INDUSTRY_GROUP_VALUES_20261007.json",
+      "kind": "config_data",
+      "commit_or_etag": "e45e4eaa87",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "32 partitions; characteristics newest bbg/2026-10-05 114 rows 10 sectors 23 industry groups; served holding 188 rows; diffs printed.",
+      "artifact_covered_by": [
+        "SC8-e25-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/C_SECTOR_FOUR_POSTULATE_RECORD_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "e45e4eaa87",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four postulates for gics_sector and gics_industry_group, proposed names and closed lists, two token census lines (246/94 and 155/43 over 58819 files).",
+      "artifact_covered_by": [
+        "SC8-e25-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e25-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e25.py values -- expect: SC-E25-VALUES ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e25.py values",
+      "expect": "SC-E25-VALUES ok=True",
+      "output_evidence": "SC-E25-VALUES ok=True file=SECTOR_INDUSTRY_GROUP_VALUES_20261007.json sector=10 industry_group=23 rows=114 (rc=0)",
+      "denominator": "1 of 1 values file; characteristics sets equal a fresh read of 114 rows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e25-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e25.py record -- expect: SC-E25-RECORD ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/issuer_check_sc_e25.py record",
+      "expect": "SC-E25-RECORD ok=True",
+      "output_evidence": "SC-E25-RECORD ok=True file=C_SECTOR_FOUR_POSTULATE_RECORD_20261007.md (rc=0)",
+      "denominator": "1 of 1 record file; 4 of 4 postulates stated for 2 of 2 attributes",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "sector_industry_group_values.py run twice (before and after a lint-only edit) against the live bucket.",
+      "observed": "Same 32 partitions, newest 2026-10-05, 114 and 188 rows both times; AC1 passes on the rerun values file.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Values file with one characteristics sector value dropped, graded by the issuer check's check_values() with its directory pointed at a scratch copy.",
+      "expected": "ok=False sector values differ from a fresh read",
+      "observed": "(False, 'sector values differ from a fresh read of s3://opal-data-etfs/bbg/2026-10-05/characteristics.parquet')",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Declaring the attributes in org/standards/MDPF_SECCLASS_CONTRACT.json and any table write.",
+      "reason": "Measurement cell; SC-e-27 declares, per the task order."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W24-S1"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sector_industry_group_values.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on the .py)",
+      "result": "ruff clean after fixing 5 lint findings; commit e45e4eaa87"
+    }
+  ]
+}

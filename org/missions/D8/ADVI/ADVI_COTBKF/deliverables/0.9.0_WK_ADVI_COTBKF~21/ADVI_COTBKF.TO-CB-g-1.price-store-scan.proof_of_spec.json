@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-g-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-g-1.price-store-scan.md",
+    "group": "OTHER",
+    "vintage_commit": "28e63ee8e6"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~21",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round7.md",
+    "vintage_commit": "28e63ee8e6",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-g-1.price-store-scan.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/analysis/commonwealth_price_store_scan.py",
+      "kind": "script",
+      "commit_or_etag": "c9207a8007",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo code only; read-only scanner, the real listing runs on the laptop after the drain (issuer relays)"
+    },
+    {
+      "path_or_key": "data/assets/scripts/analysis/tests/test_commonwealth_price_store_scan.py",
+      "kind": "test",
+      "commit_or_etag": "c9207a8007",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo code only"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB7g1-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_store_scan.py expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_store_scan.py",
+      "output_evidence": "run under timeout 120: 11 passed in 0.49s (rc 0)",
+      "denominator": "11 of 11 tests passed; includes a stub tree with one price store (cusip, date, close; two date partitions) and one non-price table finding exactly 1 candidate with span 2026-06-22..2026-06-23 and 3 securities; AccessDenied -> status=DENIED exit 3; empty-but-listed prefix -> status=LISTED objects=0 exit 0 (difference control); a non-denied error (SlowDown) exits 1 with no PRICE-STORE-SCAN line",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB7g1-AC2",
+      "criterion_verbatim": "python data/assets/scripts/analysis/commonwealth_price_store_scan.py --out .scratch/advi_cotbkf/price_store_scan_dell2 expect: PRICE-STORE-SCAN bucket=opal-data-cottonwood prefix=irpt/cottonwood/ status=DENIED",
+      "method": "command",
+      "invocation": "python data/assets/scripts/analysis/commonwealth_price_store_scan.py --out .scratch/advi_cotbkf/price_store_scan_dell2",
+      "output_evidence": "run under timeout 120: PRICE-STORE-SCAN bucket=opal-data-cottonwood prefix=irpt/cottonwood/ status=DENIED objects=0 candidates=0 security_days_possible=0 need=9388961 (rc 3)",
+      "denominator": "1 of 1 real-bucket list attempts denied from dell2; bucket and prefix both from the registry defaults",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "difference control in the tests: empty-but-listed prefix prints status=LISTED objects=0 and exits 0, against AccessDenied printing status=DENIED and exiting 3",
+      "expected": "LISTED/0 vs DENIED/3",
+      "observed": "test_denied_list_is_denied_not_empty_exit_3 and test_empty_but_listed_prefix_is_listed_exit_0 both passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two consecutive runs of the AC2 command; the PRICE-STORE-SCAN line compared",
+      "observed": "identical DENIED line both runs, rc 3 both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the real bucket listing",
+      "reason": "dell2 identity is denied List on opal-data-cottonwood; the listing runs on the laptop after the drain (order cell text)"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~21/ADVI_COTBKF.TO-CB-g-1.price-store-scan.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_store_scan.py",
+      "result": "11 passed"
+    }
+  ]
+}
