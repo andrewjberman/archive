@@ -1,16 +1,20 @@
-# RENDER_ZW1 -- AV-zw-1 rendered text (AC3, judgment)
+# RENDER_ZW1 -- AV-zw-1 rendered text (AC3, judgment) -- as amended (amendment 1: the company line leads the header)
 
-Source: static render of `components/TopBand.tsx` and `components/InputProvenance.tsx` (the worktree's own source, through the
-round-15 loader `_load.cjs`) over the `payload` of each fixture in
+Source: static render of `CompanyLine` and `TopBand` (`components/TopBand.tsx`) and `InputProvenance` (`components/InputProvenance.tsx`),
+the worktree's own source at portal dacc0126, through the round-15 loader `_load.cjs`, over the `payload` of each fixture in
 `org/missions/D13/DSGN/DSGN_AMGTV1/deliverables/2.0.0_SA_COO~D/round45/fixtures/`. Text is the rendered markup with tags removed, one
-line per element. No served value was altered. Neither fixture serves a news item (0 of 95 names did on the capture day), so the
-item face is not in this render; r45.cjs arm 2 grades it on planted items.
+line per element. No served value was altered. `CompanyLine` is mounted in the name header (`IdentityHeader`, directly under the
+identity card row, above the key figures and the timeline); `TopBand` and the provenance panel sit above the tabs. Neither fixture
+serves a news item (0 of 95 names did on the capture day), so the item face is not in this render; r45.cjs arm 2 grades it on planted items.
 
 ## BA_US_Equity
 
-### Top band
+### Company line (name header, above the key figures)
 
     The Boeing Company operates as an aerospace company. The Company develops, manufactures, and services commercial airplanes, defense products, and space systems. Boeing serves clients worldwide.
+
+### Top band (above the tabs)
+
     no news named this name on 2026-10-06, the latest trading day; the newest news we hold for it is from 2026-10-05
     no social source is admitted yet
 
@@ -24,9 +28,12 @@ item face is not in this render; r45.cjs arm 2 grades it on planted items.
 
 ## MSFT_US_Equity
 
-### Top band
+### Company line (name header, above the key figures)
 
     no company description is held for this name yet, so no one-line description is shown
+
+### Top band (above the tabs)
+
     no news named this name on 2026-10-06, the latest trading day; the newest news we hold for it is from 2026-10-02
     no social source is admitted yet
 
