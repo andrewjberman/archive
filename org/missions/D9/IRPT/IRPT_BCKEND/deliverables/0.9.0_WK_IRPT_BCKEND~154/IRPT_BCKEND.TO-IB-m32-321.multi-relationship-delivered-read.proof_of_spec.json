@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-m32-321",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m32-321.multi-relationship-delivered-read.md",
+    "group": "OTHER",
+    "vintage_commit": "d56fc1c8c6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R32_M.md",
+    "vintage_commit": "d56fc1c8c6",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-m32-321.multi-relationship-delivered-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~154",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~154/R32_M_MULTI_RELATIONSHIP_GRADE.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only grade of one delivered file via git show; no AWS call, no reader re-run",
+      "artifact_covered_by": [
+        "IBM32-321-AC1",
+        "IBM32-321-AC2",
+        "IBM32-321-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBM32-321-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R32_CHECKS/r32_delivered_read.py m1 -> M1-MULTI-RELATIONSHIP-NAMED",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R32_CHECKS/r32_delivered_read.py m1",
+      "output_evidence": "M1-MULTI-RELATIONSHIP-NAMED | rc=0 | account acc_0f1e215e521798954f80f291 in relationships ['z09305591', 'z09326136']; 3 account(s) hold more than one Relationship ID of 860 with relationship rows",
+      "denominator": "3 of 860 accounts with relationship rows; file sha256 matched its pin",
+      "expect": "M1-MULTI-RELATIONSHIP-NAMED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBM32-321-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R32_CHECKS/r32_delivered_read.py m2 -> M2-RECONCILES",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R32_CHECKS/r32_delivered_read.py m2",
+      "output_evidence": "M2-RECONCILES | rc=0 | 58 raw rows -> 29 unique positions (29 duplicates collapsed); subtree ties True over 4 partitions, 0 unbalanced; rebuilt 462857.7422 vs served 462857.7422 (2026-10-05 2026-10-05 rev bb51912332f6)",
+      "denominator": "1 of 3 multi-relationship accounts tied (the criterion asks for one); 29 unique positions; 4 partitions",
+      "expect": "M2-RECONCILES",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBM32-321-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R32_CHECKS/r32_delivered_read.py m3 -> M3-OVERLAP-MEASURED",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R32_CHECKS/r32_delivered_read.py m3",
+      "output_evidence": "M3-OVERLAP-MEASURED | rc=0 | of 860 accounts -- both 1, multi-model only 180, multi-relationship only 2, neither 677",
+      "denominator": "1 + 180 + 2 + 677 = 860 of 860 accounts",
+      "expect": "M3-OVERLAP-MEASURED",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Issuer's difference control: AC2 with a wrong pinned hash prints NOT-M2-RECONCILES. Not re-run by this worker (pins are read-only).",
+      "expected": "NOT-M2-RECONCILES under a wrong pin",
+      "observed": "issuer-measured at the cut (order dry-run); not reproduced here",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each check run twice in this session against the same pinned file",
+      "observed": "rc 0 and the same last-line token both runs for m1, m2, m3",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> IBM32-321-AC1,IBM32-321-AC2,IBM32-321-AC3",
+      "result": "see final report"
+    }
+  ]
+}
