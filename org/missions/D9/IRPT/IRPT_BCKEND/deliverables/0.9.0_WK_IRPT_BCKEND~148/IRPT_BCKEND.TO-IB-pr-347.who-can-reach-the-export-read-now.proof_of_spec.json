@@ -1,0 +1,87 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-347",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-347.who-can-reach-the-export-read-now.md",
+  "group": "OTHER",
+  "vintage_commit": "5d3eed8904"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "5d3eed8904",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-347.who-can-reach-the-export-read-now.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~148",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~148/IB67-1_export_reach.json",
+   "kind": "doc",
+   "commit_or_etag": "d8059f1274",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "read-only census of opal-users-v2, opal-partner-*, the three ownership maps and directories, and the live API Gateway / CloudFront / WAF config; worker branch commit only",
+   "artifact_covered_by": [
+    "IB67-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "d8059f1274",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "rows IRPT_BCKEND-W148-S1 (BLOCKING) and IRPT_BCKEND-W148-S2 appended",
+   "artifact_covered_by": [
+    "IB67-G-148"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB67-1-AC1",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r67/p67_cells.py\" . IB67-1-AC1",
+   "method": "test_suite",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r67/p67_cells.py\" . IB67-1-AC1",
+   "output_evidence": "OK: non_opal_reach=7 of 52 principals read | IB67-1-AC1 PASS (rc=0)",
+   "denominator": "52 principals read (22 Opal/Dev, 30 non-Opal); 7 of 30 non-Opal reach; 7 listed",
+   "expect": "IB67-1-AC1 PASS",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB67-G-148",
+   "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r67/p67_cells.py\" . IB67-G-148",
+   "method": "test_suite",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r67/p67_cells.py\" . IB67-G-148",
+   "output_evidence": "OK: 2 changed path(s), all inside slot ~148's grant | IB67-G-148 PASS (rc=0)",
+   "denominator": "2 changed paths of 2 inside the grant (before the proof commit)",
+   "expect": "IB67-G-148 PASS",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The check refuses a census whose non_opal_reach differs from the principals listed.",
+   "expected": "FAIL when non_opal_reach != len(non_opal_principals)",
+   "observed": "copy of the census with non_opal_reach=8 and 7 principals listed, checked from a scratch root -> 'FAIL: non_opal_reach 8 != principals listed 7' | IB67-1-AC1 FAIL, rc=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "one full scan of opal-users-v2 (81 items, no LastEvaluatedKey) and of four opal-partner-* tables, read-only; the three ownership maps and directories read once",
+   "observed": "81 items = 52 PROFILE + 22 MEMBER + 6 META + 1 CONFIG; 52 profiles classified 52 of 52; 7 + 23 = 30 non-Opal",
+   "status": "STABLE"
+  }
+ },
+ "surprises": [
+  "IRPT_BCKEND-W148-S1",
+  "IRPT_BCKEND-W148-S2"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "declared_exclusions": [],
+ "compiler_tools": [
+  {
+   "tool": ".tools/aws dynamodb scan / s3api get-object / apigatewayv2 get-routes / cloudfront get-distribution-config / wafv2 get-web-acl",
+   "invocation": "read-only calls; scratch files outside the commit, deleted after the census",
+   "result": "principals_read=52 non_opal_reach=7 api_direct_callable=YES"
+  }
+ ]
+}

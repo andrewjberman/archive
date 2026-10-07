@@ -1,0 +1,161 @@
+{
+ "task_order": "IRPT_BCKEND.TO-IB-pr-347",
+ "worker": "0.9.0_WK_IRPT_BCKEND~148",
+ "measured_at": "2026-10-07T12:3xZ-12:5xZ (read-only; ownership maps and directories as of the object dates below)",
+ "sources": {
+  "principal_store": "DynamoDB opal-users-v2 (the table opal-portal-authorizer's USERS_TABLE names; 81 items, full scan, no LastEvaluatedKey): 52 PROFILE rows read with projection PK,email,firmId,role,status,userType,allowedFirmIds,isInternal (no password hash, token or MFA field read); 6 META (firm) rows read for firmId/status/tier/parentFirmId",
+  "partner_identity": "DynamoDB opal-partner-49financial (11 rows), opal-partner-cottonwood (4), opal-partner-demo (1), opal-partner-inflection (7), scanned with projection email,advisorKey,advisorRole,firmRole -- the rows auth-handler mintSession reads (getPartnerIdentity) to put advisorId/advisorRole/firmRole into the JWT",
+  "grants_and_policy": "the ownership maps _authz/loaders.py load_ownership reads, s3://opal-data-bd/platinum/49financial/ownership_map.json (472,562 bytes, generated_at 2026-10-07T05:27:36Z, 190 advisors), s3://opal-data-cot/platinum/cottonwood/ownership_map.json (107 bytes, generated_at 2026-10-07T11:38:21Z, 0 advisors), s3://opal-data-inf/platinum/inflection/ownership_map.json (HeadObject 404: object absent, which load_ownership answers as the empty map); load_policy returns the constant policy irpt-scoped-v1 rev 1 and carries no per-principal grant",
+  "directories": "s3://opal-data-bd|cot|inf/investor-reporting/directory/latest.json -> directory.json (49financial as_of 2026-10-05, entry_count 4696, 7,768,167 bytes; cottonwood as_of 2026-10-05, entry_count 270; inflection as_of 2026-10-06, entry_count 294)",
+  "decision_code": "infra/aws/lambda/investor-reporting/_scope/resolve.py (classify_principal, resolve, advisor_grant) and _authz/enforce.py resolve_now, run offline against the live artifacts above with each principal's headers reconstructed (email, profile role, partner advisorKey/advisorRole, firm opaque id); _ids.projection_for_firm for the id projection; export/entry.py _covered and export_receipt",
+  "authorizer_code": "infra/aws/users/lambda/portal-authorizer/index.mjs (handler: human JWT path, computeAllowedFirms); infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts generateAccessToken (tier = internal iff firmId == opal-capital)",
+  "live_edge": "API Gateway 7k3ed8px20 (opal-portal-data-proxy-api) get-routes / get-authorizers / get-integration; CloudFront EVTSA9VEHNZVH get-distribution-config; WAF opal-cloudfront-protection get-web-acl; lambda get-function-configuration irpt-export-render",
+  "page_gate": "portal/src/App.tsx :107 (nav entry) and :462 (route): requireAdmin requireInternal requireDev; :614 the print route additionally allowRenderClaim",
+  "prior_records": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~146/IB65-3_exposure_census.json; org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/the-replay-authenticated-across-every-deployed-route.result.md"
+ },
+ "routes": [
+  {
+   "route": "GET /api/scoped/investor-reporting/export/{exportId}",
+   "operation": "export-receipt",
+   "integration": "61aupci AWS_PROXY -> irpt-export-render",
+   "authorization": "CUSTOM naqxlm"
+  },
+  {
+   "route": "GET /api/scoped/investor-reporting/export/{exportId}/download",
+   "operation": "export-download",
+   "integration": "61aupci AWS_PROXY -> irpt-export-render",
+   "authorization": "CUSTOM naqxlm"
+  },
+  {
+   "route": "POST /api/scoped/investor-reporting/export",
+   "operation": "submit-export (a write, listed for completeness; the fail-open branch is in the read path _covered)",
+   "integration": "61aupci AWS_PROXY -> irpt-export-render",
+   "authorization": "CUSTOM naqxlm"
+  }
+ ],
+ "authorizer": "Edge: CloudFront EVTSA9VEHNZVH behavior /api/scoped/investor-reporting/* -> APIGateway-portal, viewer-request Lambda@Edge auth-validator-edge:22 (verifies the human JWT, injects the X-User-* headers; its only investor-reporting-specific branch is the RENDER-token branch, which admits four GET routes and not the export routes), WAF opal-cloudfront-protection with no path rule (block-IP, two rate limits, three managed groups in COUNT). Gateway: authorizer naqxlm portal-jwt-authorizer (REQUEST, payload 2.0, simple responses, identity source $request.header.Authorization, result TTL unset) = Lambda opal-portal-authorizer. WHAT IT ADMITS: any request that passes the origin gate and carries a valid RS256 human JWT (issuer opal-portal-auth, audience opal-portal-api), of ANY tier, role, firm or userType; it computes allowedFirmIds for context and does not gate on it. A render-audience token is admitted only on the four RENDER_ROUTE_CLAIMS GETs, never the export routes. The decision that matters is therefore made inside irpt-export-render: firm binding (IRPT_DIRECTORY_BUCKET_MAP carries 49financial, cottonwood, inflection), principal class, non-empty permitted set, then _covered.",
+ "principals_read": 52,
+ "principals_breakdown": {
+  "opal_capital_or_dev": {
+   "count": 22,
+   "active": 20,
+   "disabled": 2,
+   "note": "firmId opal-capital (JWT tier internal) or userType Dev; the population the page gate admits; not counted in non_opal_reach"
+  },
+  "non_opal": {
+   "count": 30,
+   "all_active": true,
+   "per_firm": {
+    "49financial": {
+     "non_opal_profiles": 12,
+     "reach": 6
+    },
+    "cottonwood": {
+     "non_opal_profiles": 7,
+     "reach": 1
+    },
+    "inflection": {
+     "non_opal_profiles": 8,
+     "reach": 0
+    },
+    "demo": {
+     "non_opal_profiles": 3,
+     "reach": 0
+    }
+   }
+  }
+ },
+ "non_opal_reach": 7,
+ "non_opal_reach_basis": "A non-Opal principal is counted when the production resolver, run over the live ownership map and directory with that principal's reconstructed headers, returns a NON-EMPTY permitted_account_set -- the condition under which Enforcer.resolve_now lets the request reach export_receipt/export_download. Every listed principal can authenticate (profile active), and can call the route today.",
+ "non_opal_reach_split": {
+  "FIRM_ADVISOR (49financial)": 6,
+  "FIRM_OPERATIONS (cottonwood admin)": 1
+ },
+ "non_opal_principals": [
+  {
+   "principal": "p-32e6faafdf",
+   "firm_token": "49financial",
+   "class": "FIRM_ADVISOR",
+   "grant": "ownership-map grant for the principal's advisor key, projected and intersected with the firm directory: 403 permitted accounts (539 granted accounts, 287 granted relationships in the map)",
+   "permitted_accounts": 403,
+   "profile_role": "user",
+   "partner_firm_role": "user",
+   "partner_advisor_role": "consultant"
+  },
+  {
+   "principal": "p-332685118d",
+   "firm_token": "49financial",
+   "class": "FIRM_ADVISOR",
+   "grant": "ownership-map grant for the principal's advisor key, projected and intersected with the firm directory: 5 permitted accounts (12 granted accounts, 4 granted relationships in the map)",
+   "permitted_accounts": 5,
+   "profile_role": "user",
+   "partner_firm_role": "user",
+   "partner_advisor_role": "implementor"
+  },
+  {
+   "principal": "p-79a6ff4f78",
+   "firm_token": "49financial",
+   "class": "FIRM_ADVISOR",
+   "grant": "ownership-map grant for the principal's advisor key, projected and intersected with the firm directory: 457 permitted accounts (601 granted accounts, 307 granted relationships in the map)",
+   "permitted_accounts": 457,
+   "profile_role": "user",
+   "partner_firm_role": "user",
+   "partner_advisor_role": "architect"
+  },
+  {
+   "principal": "p-7b3b2d82ed",
+   "firm_token": "49financial",
+   "class": "FIRM_ADVISOR",
+   "grant": "ownership-map grant for the principal's advisor key, projected and intersected with the firm directory: 989 permitted accounts (1286 granted accounts, 550 granted relationships in the map)",
+   "permitted_accounts": 989,
+   "profile_role": "user",
+   "partner_firm_role": "user",
+   "partner_advisor_role": "local_ops"
+  },
+  {
+   "principal": "p-85bbaa45bd",
+   "firm_token": "49financial",
+   "class": "FIRM_ADVISOR",
+   "grant": "ownership-map grant for the principal's advisor key, projected and intersected with the firm directory: 377 permitted accounts (472 granted accounts, 181 granted relationships in the map)",
+   "permitted_accounts": 377,
+   "profile_role": "user",
+   "partner_firm_role": "admin",
+   "partner_advisor_role": "architect"
+  },
+  {
+   "principal": "p-f710640d58",
+   "firm_token": "49financial",
+   "class": "FIRM_ADVISOR",
+   "grant": "ownership-map grant for the principal's advisor key, projected and intersected with the firm directory: 276 permitted accounts (330 granted accounts, 150 granted relationships in the map)",
+   "permitted_accounts": 276,
+   "profile_role": "user",
+   "partner_firm_role": "admin",
+   "partner_advisor_role": "architect"
+  },
+  {
+   "principal": "p-9cb237e209",
+   "firm_token": "cottonwood",
+   "class": "FIRM_OPERATIONS",
+   "grant": "role=admin with a verified firm -> FIRM_OPERATIONS: the WHOLE firm population is the permitted set (862 accounts in the firm directory); no ownership-map entry is needed",
+   "permitted_accounts": 862,
+   "profile_role": "admin",
+   "partner_firm_role": null,
+   "partner_advisor_role": null
+  }
+ ],
+ "non_opal_not_reaching": {
+  "no advisorId claim and no admin role -> UNKNOWN -> NO_PRINCIPAL refusal": 9,
+  "FIRM_ADVISOR with an EMPTY permitted set (no ownership-map entry, empty or absent map) -> EMPTY_GRANT refusal": 11,
+  "firm absent from the export function's IRPT_DIRECTORY_BUCKET_MAP (FIRM_BINDING refusal)": 3
+ },
+ "fail_open_bearing": "The fail-open branch (_covered returns True when the receipt names no account) widens a LIMITED-grant caller only. For the 6 49financial FIRM_ADVISOR principals it means a same-firm export id whose receipt carries no account list reads as covered although the advisor's own permitted set does not contain the export's accounts. For the 1 cottonwood FIRM_OPERATIONS principal the permitted set is the whole firm, so the branch widens nothing beyond the firm. Cross-firm reach is not opened by the branch: the receipt key is built from the verified firm, never the request. Whether any receipt actually names no account was not read (evidence bucket receipts not enumerated).",
+ "api_direct_callable": "YES. The page gate (App.tsx: requireAdmin, requireInternal, requireDev) is a client-side route guard in the SPA; it hides the page and enforces nothing on the API. No server layer in front of the export routes checks tier, role or firm for a human token: the edge validator has no investor-reporting human-path gate in its source, the WAF has no path rule, and the gateway authorizer admits any valid human JWT. A non-Opal principal with a valid login (the 7 listed) can send GET /api/scoped/investor-reporting/export/{exportId} (and /download) with its own bearer token to the CloudFront host and be served by irpt-export-render. The 23 non-Opal principals not listed reach the function and are refused inside it. Reaching a receipt additionally needs an export id that exists under the principal's own firm.",
+ "limits": [
+  "SNAPSHOT: one read at 2026-10-07T12:3xZ-12:5xZ. Ownership maps regenerate (49financial 05:27Z, cottonwood 11:38Z on 2026-10-07) and a profile or partner row can change; the 7 is a point-in-time number.",
+  "OFFLINE DECISION, NOT A LIVE REQUEST: no token was minted and no request was sent (a worker may not write the auth plane or sign a token). The class and the permitted set come from running the production classify_principal/resolve/advisor_grant code over reconstructed headers. The JWT claims are assumed to be minted as auth-handler/src/jwt.ts and auth.ts read at this worktree (advisorId = partner advisorKey, advisorRole and firmRole from the partner row); the deployed auth-handler and edge-validator bytes were not diffed to the repo.",
+  "NOT READ: lastLogin or MFA state (a principal who never logs in still counts as able to); whether any export receipt exists without an account list; export id guessability; the deployed edge validator version 22 source; the authorizer result cache behaviour (TTL unset in the route config).",
+  "JOIN: a profile row is joined to its partner row by email (the key getPartnerIdentity uses); the four partner tables were scanned in full (23 rows). A profile with no partner row classifies as it would at login: no advisorId, so only role=admin reaches a scope.",
+  "Opaque ids: p-<10 hex> of sha256 over a random per-run salt that was discarded; no email, name, advisor key or raw account number is in this file.",
+  "Opal count (22) counts every opal-capital profile and every userType Dev profile, active or not; reach for them is not graded here by design."
+ ]
+}
