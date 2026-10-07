@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-b-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-b-3.dell-inbound-queues.md",
+    "group": "OTHER",
+    "vintage_commit": "c762a1821c"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~3",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round2.md",
+    "vintage_commit": "f9f72d4fd4",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-b-3.dell-inbound-queues.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-agentbus/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "221ee5b0b6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "plan-only order; nothing applied"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-agentbus/sqs.tf",
+      "kind": "terraform",
+      "commit_or_etag": "221ee5b0b6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "plan-only order; nothing applied"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-agentbus/tests/check_queues.py",
+      "kind": "script",
+      "commit_or_etag": "221ee5b0b6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only check; nothing deployed"
+    },
+    {
+      "path_or_key": ".tools/agentbus-sqs.sh",
+      "kind": "script",
+      "commit_or_etag": "221ee5b0b6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on the worker branch; reaches boxes by the drain and pull"
+    },
+    {
+      "path_or_key": ".tools/tests/test_agentbus_tailnet_stamp.py",
+      "kind": "test",
+      "commit_or_etag": "221ee5b0b6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file"
+    },
+    {
+      "path_or_key": ".tools/agentbus-consumer.py",
+      "kind": "script",
+      "commit_or_etag": "221ee5b0b6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on the worker branch; reaches boxes by the drain and pull"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT2b3-AC1",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-agentbus/tests/check_queues.py expect: names_from_builder=2/2 attributes_match=True plan_add=2 plan_change=0 plan_destroy=0",
+      "method": "command",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-agentbus/tests/check_queues.py",
+      "output_evidence": "builder names: {\"dell1\": \"agentbus-global-dell1-queue.fifo\", \"dell2\": \"agentbus-global-dell2-queue.fifo\"}; planned names identical; Plan: 2 to add, 0 to change, 0 to destroy (hashicorp/aws 6.67.0, rc 0)\nQUEUES-CHECK names_from_builder=2/2 attributes_match=True plan_add=2 plan_change=0 plan_destroy=0",
+      "denominator": "2 of 2 queues planned, names equal to lib/opal_naming.py FIFO output, 8 of 8 attributes matched on both, no kms key; plan 2 add / 0 change / 0 destroy",
+      "status": "PASS",
+      "expect": "names_from_builder=2/2 attributes_match=True plan_add=2 plan_change=0 plan_destroy=0"
+    },
+    {
+      "criterion_id": "CT2b3-AC2",
+      "criterion_verbatim": "python -m pytest -q .tools/tests/test_agentbus_tailnet_stamp.py expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest -q .tools/tests/test_agentbus_tailnet_stamp.py",
+      "output_evidence": "14 passed in 101.15s (rc 0); drives agentbus-sqs.sh send/recv under a stub aws and agentbus-consumer.py under a fake boto3",
+      "denominator": "14 of 14 tests passed: 4 register boxes as sender, alias recipient, unregistered sender refused on send, fifth-box register fixture on send/recv/consumer, recv refuses+records+deletes an unheld sender, unstamped delivered with WARN, all-held delivery, consumer refuses+records+deletes the same way and delivers held and unstamped",
+      "status": "PASS",
+      "expect": "passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant control named by the order",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: stubbed aws, no clock or network in the assertions",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": ".terraform.lock.hcl commit",
+      "reason": "gitignored by .gitignore:208 (**/.terraform.lock.hcl); terraform init -upgrade wrote 6.67.0 locally, safe-commit cannot add it"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W3-S1",
+    "NFRA_CTLPLN-W3-S2",
+    "NFRA_CTLPLN-W3-S3",
+    "NFRA_CTLPLN-W3-S4"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~3/NFRA_CTLPLN.TO-CT-b-3.dell-inbound-queues.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-agentbus/tests/check_queues.py",
+      "result": "QUEUES-CHECK names_from_builder=2/2 attributes_match=True plan_add=2 plan_change=0 plan_destroy=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q .tools/tests/test_agentbus_tailnet_stamp.py",
+      "result": "14 passed"
+    }
+  ]
+}
