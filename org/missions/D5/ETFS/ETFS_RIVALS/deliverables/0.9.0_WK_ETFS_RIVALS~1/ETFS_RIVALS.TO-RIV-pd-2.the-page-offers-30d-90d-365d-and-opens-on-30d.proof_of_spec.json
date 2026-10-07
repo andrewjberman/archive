@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-pd-2.the-page-offers-30d-90d-365d-and-opens-on-30d",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "7667270270",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-pd-2.the-page-offers-30d-90d-365d-and-opens-on-30d.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7667270270"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/render.py",
+      "kind": "script",
+      "commit_or_etag": "0c18cbd447",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r15pd2_rolling_periods_page.py",
+      "kind": "script",
+      "commit_or_etag": "0c18cbd447",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write, no vendor call",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/pd-2.AC1.py -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/pd-2.AC1.py",
+      "output_evidence": "render.PERIODS: ('R30', 'R90', 'R365') | PERIOD_LABEL: {'R30': 'Last 30 days', 'R90': 'Last 90 days', 'R365': 'Last 365 days'}\nOK:   (a) PERIODS is (R30, R90, R365) and PERIOD_LABEL names the last 30 / 90 / 365 days\nvisible banned text: main {} | audit {}\nOK:   (b) no QTD / YTD / MTD or its long name is visible on the main or the audit page\nperiod radios (id, checked): [('rf-period-R30', True), ('rf-period-R90', False), ('rf-period-R365', False)]\nswitches: 5 | distinct orders: [('R30', '|', 'R90', 'R365')] | rank panels: {'IDVZ': {'R30', 'R90', 'R365'}, 'TXUE': {'R30', 'R90', 'R365'}}\nOK:   (c) every switch reads R30, the dividing line, R90, R365 and opens on R30; a rank panel per fund per period\nR30 radio checked: True | Apple Inc in the R30 rank panel: {'IDVZ': True, 'TXUE': True} | main bytes: 53647 | audit bytes: 26498\nOK:   (d) control: the page renders with six periods in the context, opens on R30 and shows the R30 rankings\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK; run from the worktree root (rc 0)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/pd-2.AC2.py -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/pd-2.AC2.py",
+      "output_evidence": "Apple dialog sections: ['IDVZ', 'TXUE'] | TXUE section text: Contribution to TXUE's return Last 30 days +1.20% #1 best Last 90 days +2.10% #1 best Last 365 days +3.40% #1 best TXUE buying last 365 days -$5.0m net sold across 1 trade. Mostly one large trade.\nOK:   (a) the dialog lists the last 30 / 90 / 365 days and no MTD / QTD / YTD row\nOK:   (b) the dialog's buying line is the R365 trend row\ntop switch 'nothing ranked' states by period: {'R30': [], 'R90': ['IDVZ'], 'R365': []}\nOK:   (c) a period that ranks nothing for a fund greys and says why (R90 for IDVZ only)\nOK:   (d) control: Apple's dialog has a section per fund with its R30 figure and its buying line\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK; run from the worktree root (rc 0)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "every ranking, trend and dialog offers exactly 30d, 90d and 365d, opens on 30d, and a period a fund's history does not reach reads partial with its reason (graded by 3.0.0_SA_CVO~RV at L9 on the served page)",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "none: judgment criterion",
+      "output_evidence": "pd-2.AC1 and pd-2.AC2 pass on the fixture page; the served page is not rendered by this order. No verdict given.",
+      "denominator": "n/a",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded by 3.0.0_SA_CVO~RV at L9 on the served page, never self-graded"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "package suite once (python -m pytest rivalfunds/tests -q from data/etfs/scripts); pd-2.AC1, pd-2.AC2, round14 ab-1.AC1 and as-1.AC1 once each",
+      "observed": "802 passed, 2 skipped, 0 failed; all four checks PASS",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "none named by the order",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order status to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~1 <0.9.0_WK_ETFS_RIVALS~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "0c18cbd447"
+    }
+  ]
+}

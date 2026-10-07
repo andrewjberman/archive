@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bc-1.gold-list-takes-legal-names",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bc-1.gold-list-takes-legal-names.md",
+    "group": "OTHER",
+    "vintage_commit": "13cdd1d909"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "13cdd1d909",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bc-1.gold-list-takes-legal-names.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~106",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~106, worktree wk-hvst-r56-106 on branch wk-AMGT_HARVST-106, TREE-OK. universe_securities.py takes legal_names (pool name, then identity map, then key); build() reads the configured identity record. Census is a read-only S3 GET over 18634 silver articles and 242 securities. No gold built, nothing written to S3. Two rows filed: Z-W106-S1, Z-W106-S2.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/universe_securities.py",
+      "kind": "script",
+      "commit_or_etag": "028c66aa4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build; no gold rebuilt.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_bc1_legal_names.py",
+      "kind": "test",
+      "commit_or_etag": "028c66aa4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "11 plant tests, no network.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~106/bc1_census.py",
+      "kind": "script",
+      "commit_or_etag": "028c66aa4e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census; imports the served matcher.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~106/bc1_census.out",
+      "kind": "doc",
+      "commit_or_etag": "8f17e7e578",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim output, last line CENSUS OK.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest test_bc1_legal_names.py expects passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_bc1_legal_names.py -rA --tb=line -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "rc 0. 11 passed in 0.24s",
+      "denominator": "11 of 11 tests",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cat bc1_census.out expects CENSUS OK",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~106/bc1_census.out",
+      "expect": "CENSUS OK",
+      "output_evidence": "rc 0. DENOMINATOR: securities 242, silver articles 18634, identity records 234. KEY-ONLY ALIAS SETS: before 137 of 242, after 3 of 242. TOTAL: names changed 138 of 242; pairs before 14895 after 22979 gained 8084. AGREEMENT: 100 of 100. Last line: CENSUS OK",
+      "denominator": "18634 articles; 242 securities; 234 identity records",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pytest lib/research/harvest/tests expects passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest/tests -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "rc 0. 308 passed in 2.45s",
+      "denominator": "308 of 308 tests",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, gold or silver build, publisher or vendor host",
+      "reason": "Order item 5: a gold rebuild is a later, separately authorised act."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W106-S1",
+    "AMGT_HARVST-Z-W106-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "committed 028c66aa4e and 8f17e7e578"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Difference control in test_v: legal_names=None equals the base-commit output kept as a literal.",
+      "expected": "no entry changes with the map off",
+      "observed": "test_v_difference_control_none_equals_base_and_the_map_changes_only_the_named_entries passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AGREEMENT control: census count vs publication_gold._security_mentions on a seeded sample of 20 articles x 5 changed securities",
+      "observed": "AGREEMENT: 100 of 100",
+      "status": "STABLE"
+    }
+  }
+}
