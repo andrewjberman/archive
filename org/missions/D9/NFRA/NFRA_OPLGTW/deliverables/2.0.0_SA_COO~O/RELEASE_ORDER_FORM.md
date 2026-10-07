@@ -18,6 +18,8 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
 4. **Rollback.** A worktree at the live sha, equal file by file to the live S3 artifact.
 5. **BEFORE run.** On the host through the installed engine, with a synthetic principal and an in-memory grant: never a
    real identity, never a state-store write. Remove every host scratch copy.
+   - **One host run at a time, each in its own scratch directory (row Z-W28-S9).** Name the scratch per run, for
+     example `/tmp/og_<release>_<run id>`. Two runs sharing one scratch directory corrupt each other.
 6. **Verify script.** Host `/health`, shipped md5 against the release list, the tool count, the `.env` key NAMES (and
    value hashes when the template changes), the AFTER arms, and the floor checks.
 7. **PRE-GO CHECK EXERCISE (R18, row Z-W15-S51).** Run each new or reused criterion script ONCE against the release
@@ -36,6 +38,20 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
 
 9. Re-read live; if it moved, re-cut. Open the NEVER-2 ledger, with entry AND sentinel committed before the act.
 10. Deploy through `infra/aws/ec2/safe-ec2-deploy.sh` with `DEPLOY_BASE_REF=<live full sha> HALT_ACK=1`.
+    - **Deploy line:** from the release worktree,
+      `DEPLOY_BASE_REF=<live full sha> HALT_ACK=1 AGENT_NAME=<worker serial> bash infra/aws/ec2/safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh`.
+    - **DEPLOY IDENTITY (R35 part 2, rows Z-W28-S7, Z-S62).** The deploy presents the ISSUER's serial to the halt gate.
+      In the deploy shell run `unset OPAL_AGENT_SERIAL`, and create no `org/mcp/sessions/` in the release tree. The gate
+      then resolves the session's serial from the shared tree's session file (`org/XXX.md` step A.1, which the issuer
+      writes at startup). A `[STOP]` addressed to the issuer halts the deploy. `AGENT_NAME` carries the worker's serial
+      for the manifest attribution only.
+      - Dry-run the gate read-only before the act: `halt_gate_resolve_serial` then `halt_gate_validate_serial`, rc=0.
+      - Since OG-hg-1 (round 24) the gate also finds a worker's own order in the shared root, so a worker serial is
+        admitted too. The issuer-serial route stays the form's route until a release has exercised the other.
+    - **THE MANIFEST COMMIT (row Z-W28-S8).** The wrapper's own commit of `infra/aws/ec2/EC2_MANIFEST.json` is refused
+      by the owned-paths lane gate after the deploy has landed. That is expected. The worker records the manifest by
+      hand in its OWN worktree, on its worker branch, in the same commit as the deploy output. The issuer drains that
+      branch. The wrapper's uncommitted edit stays in the throwaway release worktree.
 11. Run the verify script IMMEDIATELY. On any failure: roll back, re-verify, and close ROLLED BACK.
     - A floor FAIL whose cause is a check constant is NOT a rollback trigger only when the same arm, re-run with the
       corrected constant, PASSes, and the deviation is recorded as a row.
@@ -56,5 +72,9 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
 
 - Never source `/opt/opal-gateway/.env` (row Z-S32).
 - Never write a grant.
+- **Operator-command output (row Z-W28-S2).** An order that runs `ops/schwab_entitlement_admin.py` redirects the
+  output of `prepare()` and `activate` to the off-repo directory and prints only the operations line. The scope diff
+  prints master account ids as dictionary keys. The order also names how it resolves the holder's pk: a read-only scan
+  under the caller identity, because the operator role cannot run `dynamodb:Scan`.
 - Halves name the blast radius, never the producer's decision.
 - An Andrew-scope question (audience, grants) is routed to Andrew, never decided by a half.
