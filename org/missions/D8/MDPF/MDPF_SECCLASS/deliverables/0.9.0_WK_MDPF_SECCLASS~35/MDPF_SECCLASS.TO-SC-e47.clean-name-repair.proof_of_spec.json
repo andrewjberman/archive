@@ -18,9 +18,9 @@
     {
       "path_or_key": "infra/aws/lambda/v2_portal/_shared/security_name.py",
       "kind": "script",
-      "commit_or_etag": "dab92a7d7c",
+      "commit_or_etag": "9e01f8ee64",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "clean_name step 4 gains ticker (one token, 1-5 chars), vowelless 2-4 letter acronym, corporate-form set and lowered joining words; new module constants CORPORATE_FORMS, JOINING_WORDS, TICKER_MAX_LEN, ACRONYM_MIN_LEN, ACRONYM_MAX_LEN, VOWELS; signature unchanged; stdlib, ASCII.",
+      "deploy_evidence": "clean_name step 4 gains ticker (one token, 1-5 chars), vowelless 2-4 letter acronym, corporate-form set and lowered joining words; new module constants CORPORATE_FORMS, JOINING_WORDS, TICKER_MAX_LEN, ACRONYM_MIN_LEN, ACRONYM_MAX_LEN, VOWELS; signature unchanged; stdlib, ASCII. Amendment 1: step 4 drops EVERY trailing VENDOR_SUFFIXES token (while loop, len>1 guard), so clean_name is idempotent (row W35-S1).",
       "artifact_covered_by": [
         "SC9-e47-AC1",
         "SC9-e47-AC2"
@@ -29,9 +29,9 @@
     {
       "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
       "kind": "test",
-      "commit_or_etag": "dab92a7d7c",
+      "commit_or_etag": "9e01f8ee64",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "80 tests; one positive and one negative test per new branch; BK/NTS/MKTS/BLDR round-8 expectations updated to upper; 'COM' alone now COM; ETF SHS COM moved from the idempotent list to an explicit test (row W35-S1).",
+      "deploy_evidence": "82 tests; one positive and one negative test per new branch; BK/NTS/MKTS/BLDR expectations upper; 'COM' alone stays COM; amendment 1: ETF SHS COM -> ETF, FOO COM SHS -> Foo, and ETF SHS COM is back in the idempotence INPUTS list.",
       "artifact_covered_by": [
         "SC9-e47-AC2"
       ]
@@ -44,8 +44,8 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py",
       "expect": "CLEAN-NAME-TABLE ok=True",
-      "output_evidence": "CLEAN-NAME-TABLE ok=True cases=23 mismatches=0 (rc=0)",
-      "denominator": "23 of 23 table cases match",
+      "output_evidence": "CLEAN-NAME-TABLE ok=True cases=24 mismatches=0 (rc=0)",
+      "denominator": "24 of 24 table cases match",
       "status": "PASS"
     },
     {
@@ -54,8 +54,8 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
       "expect": "PYTEST-OK",
-      "output_evidence": "PYTEST-OK rc=0 summary=80 passed in 0.37s (rc=0)",
-      "denominator": "80 of 80 tests passed, 0 failed",
+      "output_evidence": "PYTEST-OK rc=0 summary=82 passed in 0.20s (rc=0)",
+      "denominator": "82 of 82 tests passed, 0 failed",
       "status": "PASS"
     }
   ],
@@ -63,12 +63,12 @@
     "mutant": {
       "description": "Mutant: empty CORPORATE_FORMS at runtime, then run the issuer's table.",
       "expected": "CLEAN-NAME-TABLE ok=False with the NA case mismatching",
-      "observed": "MISMATCH input='WELLS FARGO BANK NA 4.1% 2029' want='Wells Fargo Bank NA 4.1% 2029' got='Wells Fargo Bank Na 4.1% 2029'; CLEAN-NAME-TABLE ok=False cases=23 mismatches=1",
+      "observed": "Not re-run under amendment 1; the NA mutant from the first pass stands for the CORPORATE_FORMS branch.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "Table and pytest each run twice against the same rule.",
-      "observed": "Identical results: ok=True 23 of 23; 80 passed.",
+      "observed": "AC1 and AC2 each run identical on the pre-flip and post-edit runs: ok=True 24 of 24; 82 passed.",
       "status": "STABLE"
     }
   },
