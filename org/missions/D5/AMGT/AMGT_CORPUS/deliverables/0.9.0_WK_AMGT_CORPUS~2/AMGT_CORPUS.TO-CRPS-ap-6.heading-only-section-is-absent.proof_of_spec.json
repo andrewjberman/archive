@@ -17,20 +17,31 @@
     {
       "path_or_key": "lib/research/corpus/dossier.py",
       "kind": "script",
-      "commit_or_etag": "04e5612a7104ca62d1e1db7ae9066b8847cad78d",
+      "commit_or_etag": "e3d276634c91392f2821e27a5eaa4376faa74207",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "AMENDMENT 3: _items_after_lead_carry_prose (one item over extract._HEADING_WORD_CAP words, or 25 or more words in all across the items after the lead, counted with str.split() on the item text as extracted, in dossier.py); _section_block_is_heading_only uses it, an inline remainder that is prose still serves, class B is still tried after a failing class A; _section_block_table_follows matches a stored table whose non-empty cells all appear as items of the block; --section-recompose-census prints OTHER-CHANGE lines and an other_change count for changed fields outside the served-under-40 values (read-only, not run, reads S3). METHOD_VERSION stays /6.",
+      "deploy_evidence": "AMENDMENT 4: _trim_to_last_sentence_end cuts the text after the lead line at its last sentence end (pattern: one of . ! ? then any run of closing quote or bracket characters, then whitespace or the end of the text; a stop followed by a digit or a letter is not an end); the trim sits in _resolve_section_field, after the block is chosen and served, so it never turns a served value absent; no sentence end after the lead leaves the value unchanged; the citation passage is value[:_PASSAGE_CAP] of the trimmed value; --section-recompose-census marks a TRIM (new value a strict prefix of served) with 'TRIM dropped=<n>' and prints a last line 'section_recompose_census trims <n> chars_dropped_max <m>' (read-only, not run, reads S3); METHOD_VERSION amgt-corpus-dossier/7.",
       "artifact_covered_by": [
         "AC1",
-        "AC2"
+        "AC2",
+        "AC3"
       ]
     },
     {
       "path_or_key": "lib/research/corpus/tests/test_dossier_heading_only_round40.py",
       "kind": "test",
-      "commit_or_etag": "04e5612a7104ca62d1e1db7ae9066b8847cad78d",
+      "commit_or_etag": "e3d276634c91392f2821e27a5eaa4376faa74207",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "28 tests: the 20 inherited plus page-furniture pdf absent, date-only docx absent, table-cell reason, six short bullets served, word counting as extracted, inline remainder with furniture after it, class A furniture then class B real, recompose census OTHER-CHANGE on stubs (no put).",
+      "deploy_evidence": "42 tests: the 28 inherited plus 14 for AMENDMENT 4 (date item dropped, stray token dropped, unfinished last sentence dropped, whole value unchanged, decimal not an end, sentence-end pattern cases incl. quotes and brackets, closing quote after the full stop, bullets unchanged, lead never trimmed, trim never absent, passage from the trimmed value, census TRIM marker and last line, _trim_dropped).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier_method_bump.py",
+      "kind": "test",
+      "commit_or_etag": "e3d276634c91392f2821e27a5eaa4376faa74207",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pinned literal /7; a stored /6 object with equal inputs writes, a stored /7 object writes nothing. The case_body, case_unit and case_positional tests carry the /7 literal with an AMENDMENT 4 comment (case_unit + case_positional: 24 passed).",
       "artifact_covered_by": [
         "AC2"
       ]
@@ -52,22 +63,32 @@
       "criterion_verbatim": "pytest test_dossier.py test_dossier_case_body.py test_dossier_method_bump.py test_dossier_heading_only_round40.py -- expect (?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest lib/research/corpus/tests/test_dossier.py lib/research/corpus/tests/test_dossier_case_body.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_dossier_heading_only_round40.py -q -p no:cacheprovider --color=no",
-      "output_evidence": "53 passed in 1.08s",
-      "denominator": "53 of 53 tests passed",
+      "output_evidence": "67 passed in 0.97s",
+      "denominator": "67 of 67 tests passed",
       "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "ap6r_check.py -- expect (?m)^ap6r build 3/3 control 3/3$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round40/ap6r_check.py\"",
+      "output_evidence": "ap6r build 3/3 control 3/3",
+      "denominator": "build 3 of 3 arms, control 3 of 3 arms",
+      "expect": "(?m)^ap6r build 3/3 control 3/3$",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "The last line of _items_after_lead_carry_prose (return total >= _PROSE_TOTAL_WORDS) edited to return True, so every block counts as carrying prose; then ap6_check.py and the new test file run; the line restored afterwards.",
-      "expected": "arms b1, b2, b5, b6 FAIL and the tests for furniture, date-only, word counting and A-furniture-then-B FAIL.",
-      "observed": "ap6 build 2/6 control 3/3; 13 failed, 15 passed in the new test file; with the line restored ap6 build 6/6 control 3/3 and 53 passed over the four AC2 files.",
+      "description": "In _resolve_section_field the line text = _trim_to_last_sentence_end(items) edited to text = text (no trim); then ap6r_check.py and the new test file run; the line restored afterwards.",
+      "expected": "ap6r build arms r1, r2, r3 FAIL and the trim tests in the new test file FAIL.",
+      "observed": "ap6r build 0/3 control 3/3; 6 failed, 36 passed in the new test file; with the line restored ap6r build 3/3 control 3/3, ap6 build 6/6 control 3/3 and 67 passed over the four AC2 files.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "ap6_check.py run on the final file.",
-      "observed": "ap6_check.py run on the final file: ap6 build 6/6 control 3/3.",
+      "method": "ap6_check.py and ap6r_check.py run on the final file.",
+      "observed": "ap6 build 6/6 control 3/3; ap6r build 3/3 control 3/3.",
       "status": "STABLE"
     }
   },
@@ -87,7 +108,12 @@
     {
       "tool": "pytest (AC2)",
       "invocation": "python -m pytest test_dossier.py test_dossier_case_body.py test_dossier_method_bump.py test_dossier_heading_only_round40.py",
-      "result": "53 passed in 1.08s"
+      "result": "67 passed in 0.97s"
+    },
+    {
+      "tool": "ap6r_check.py (AC3)",
+      "invocation": "python ap6r_check.py",
+      "result": "ap6r build 3/3 control 3/3"
     }
   ]
 }
