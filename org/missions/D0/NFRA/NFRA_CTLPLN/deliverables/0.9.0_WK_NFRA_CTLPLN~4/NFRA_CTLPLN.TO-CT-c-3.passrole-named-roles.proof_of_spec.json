@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-c-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-c-3.passrole-named-roles.md",
+    "group": "OTHER",
+    "vintage_commit": "2abeda287a"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~4",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round3.md",
+    "vintage_commit": "2abeda287a",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-c-3.passrole-named-roles.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/render_passrole.py",
+      "kind": "test",
+      "commit_or_etag": "9ab01ccc3b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_deploy_policy.json",
+      "kind": "config_data",
+      "commit_or_etag": "9ab01ccc3b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "kind": "test",
+      "commit_or_etag": "9ab01ccc3b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT3c3-AC1",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/render_passrole.py --check expect: wildcard=0 in_sync=True ok=True",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/render_passrole.py --check",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/render_passrole.py --check` (rc 0): PASSROLE-RENDER applied=0 named=0 wildcard=0 in_sync=True ok=True. The live records directory org/devices/role_requests does not exist: zero records, the zero case. Before --write the same check printed in_sync=False ok=False (rc 1). Error cases against temporary fixtures (wildcard ARN, applied with no role_arn, answer with no request) each exit rc 1; a refused-only answer and a missing directory exit rc 0.",
+      "denominator": "0 applied of 0 requests in the live directory; 0 wildcard ARNs; the deploy policy now holds 9 statements: 7 of the 8 prior statements byte-identical to HEAD~1, DenyEveryIamWrite loses only its iam:PassRole entry, DenyPassRoleExceptNamed is new (git diff: 7 lines added, 1 changed)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CT3c3-AC2",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect: POLICY-SIM allowed_ok=21/21 denied_ok=18/18 passrole_ok=5/5 all_ok=True",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py` (rc 0): POLICY-SIM allowed_ok=21/21 denied_ok=18/18 passrole_ok=5/5 all_ok=True. Rendered-copy block: iam:PassRole on ctlpln-fixture-role with lambda.amazonaws.com -> allowed; same role with ec2.amazonaws.com -> implicitDeny; role/some-other-role -> explicitDeny; iam:CreateRole -> explicitDeny; iam:PutRolePolicy on the fixture role -> explicitDeny. The first block (real files, zero case) holds: iam:PassRole on role/x -> explicitDeny.",
+      "denominator": "21 of 21 allowed, 18 of 18 denied (real files); 5 of 5 passrole arms (rendered copy in a temporary directory; the real policy is not touched)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the renderer's error cases and the pre-write state of the real file",
+      "expected": "in_sync=False before --write; rc 1 for a wildcard ARN, an applied answer with no role_arn, an answer with no request",
+      "observed": "before --write: in_sync=False ok=False rc 1; wildcard ARN, no role_arn, orphan answer: each rc 1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the cloud evaluator and the renderer are deterministic over fixed input",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform apply, plan against the backend, any IAM write",
+      "reason": "order BOUNDS: apply nothing; the only AWS call is the read-only iam:SimulateCustomPolicy"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W4-S8"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~4/NFRA_CTLPLN.TO-CT-c-3.passrole-named-roles.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "terraform",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity validate",
+      "result": "Success! The configuration is valid."
+    }
+  ]
+}

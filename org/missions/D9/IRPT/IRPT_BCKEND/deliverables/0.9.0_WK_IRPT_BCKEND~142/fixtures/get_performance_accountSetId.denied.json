@@ -1,0 +1,78 @@
+{
+ "cases": [
+  {
+   "expect_codes": [
+    "NOT_AUTHORIZED"
+   ],
+   "name": "no_grant_advisor",
+   "principal": {
+    "advisor_id": "ADV-C-0003",
+    "email": "advisor.c@49financial.com"
+   }
+  },
+  {
+   "deps": "revoked",
+   "expect_codes": [
+    "NOT_AUTHORIZED"
+   ],
+   "name": "grant_revoked"
+  },
+  {
+   "event": {
+    "firm_id": "inflection"
+   },
+   "expect_codes": [
+    "FIRM_BINDING"
+   ],
+   "must_not_echo": [
+    "inflection"
+   ],
+   "name": "claimed_firm_mismatch"
+  },
+  {
+   "expect_codes": [
+    "NOT_AUTHORIZED"
+   ],
+   "name": "no_edge_marker",
+   "principal": {
+    "set_headers": {
+     "X-Origin-Verify": ""
+    }
+   }
+  },
+  {
+   "event": {
+    "pathParameters": {
+     "accountSetId": "${sel_b}"
+    }
+   },
+   "expect_codes": [
+    "OBJECT_NOT_COVERED"
+   ],
+   "must_not_echo": [
+    "${A5}"
+   ],
+   "name": "foreign_object"
+  },
+  {
+   "event": {
+    "pathParameters": {
+     "accountSetId": "sel_0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   },
+   "expect_codes": [
+    "OBJECT_NOT_COVERED"
+   ],
+   "name": "unknown_selection"
+  }
+ ],
+ "fixture_schema": "irpt-gated-route-fixture/1",
+ "function": "irpt-performance-adapter",
+ "operation": "performance-report",
+ "principal_class": "DENIED: see cases (same request shape, one change each)",
+ "request_contract": [
+  "docs/contracts/investor-reporting/v1/routes.json#GET /api/scoped/investor-reporting/performance/{accountSetId}",
+  "docs/contracts/investor-reporting/v1/PerformanceReport.schema.json"
+ ],
+ "route": "GET /api/scoped/investor-reporting/performance/{accountSetId}"
+}

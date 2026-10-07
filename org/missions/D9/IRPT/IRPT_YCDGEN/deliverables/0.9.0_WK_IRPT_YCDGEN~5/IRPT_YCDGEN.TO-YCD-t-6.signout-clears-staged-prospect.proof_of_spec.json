@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-t-6.signout-clears-staged-prospect",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-t-6.signout-clears-staged-prospect.md",
+    "group": "OTHER",
+    "vintage_commit": "26ee7b7639"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6K.md",
+    "vintage_commit": "26ee7b7639",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-t-6.signout-clears-staged-prospect.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/analysis/stagedProspect.ts",
+      "kind": "script",
+      "commit_or_etag": "949830e8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "clearStagedProspectOnSignOut() returns staged, notedDropdownFirm and the catalogue to fresh values and notifies listeners; resetStagedProspect() calls it; header comment agrees with ProspectComposer.tsx:156. Commit 949830e8 is in the PORTAL repo on branch wk-IRPT_YCDGEN-t6-portal (a nested git repo), not in the workspace repo. Local.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/contexts/AuthContext.tsx",
+      "kind": "script",
+      "commit_or_etag": "949830e8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one import and one call in logout() beside clearCanonicalDataAsOf(). Commit 949830e8 is in the PORTAL repo on branch wk-IRPT_YCDGEN-t6-portal (a nested git repo), not in the workspace repo. Local.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/scripts/prospect-firm-exercise.mjs",
+      "kind": "script",
+      "commit_or_etag": "949830e8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fourth arm signout added; firm, dropdown and remount arms unchanged. Commit 949830e8 is in the PORTAL repo on branch wk-IRPT_YCDGEN-t6-portal (a nested git repo), not in the workspace repo. Local.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_YCDGEN-W5-S1 appended",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- after the sign-out reset every piece of staged state reads back fresh, and logout calls the reset",
+      "method": "command",
+      "invocation": "bun portal/scripts/prospect-firm-exercise.mjs signout",
+      "output_evidence": "OK: control: firm, file, result, uploadAttempt and parentInput are all staged before the reset\nOK: control: the firm catalogue is published (2 firms)\nOK: the store exports clearStagedProspectOnSignOut\nOK: after the reset the staged firm is null\nOK: after the reset the staged file is null\nOK: after the reset the review result is null\nOK: after the reset the uploadAttempt is null\nOK: after the reset the parentInput is undefined\nOK: after the reset the published firm catalogue is empty and not internal\nOK: after the reset the noted dropdown firm is fresh: noting the same firm again preselects the card\nOK: a mount after the reset finds nothing staged\nOK: the reset notifies the catalogue listeners\nOK: AuthContext.tsx: the logout body was found\nOK: AuthContext.tsx: logout() calls clearStagedProspectOnSignOut()\nOK: AuthContext.tsx: logout() still calls clearCanonicalDataAsOf() (the block the reset sits beside)\nRESULT: signout PASS\nrc=0",
+      "denominator": "15 of 15 checks held",
+      "expect": "^RESULT: signout PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- a staged file and its review result still survive a remount and are cleared by a change of firm",
+      "method": "command",
+      "invocation": "bun portal/scripts/prospect-firm-exercise.mjs remount",
+      "output_evidence": "OK: control: with nothing staged a fresh mount is NOTHING_CHOSEN\nOK: after a remount the review result is still there (NORMALIZED)\nOK: after a remount the staged file is still there, byte for byte\nOK: a client pick (the whole Analysis tab re-keyed on a new scope) keeps the review result (NORMALIZED)\nOK: the same firm again clears nothing\nOK: a change of the card firm is reported as a change\nOK: a change of the card firm clears the staged file and its review result\nOK: a mount after the change finds nothing staged (NOTHING_CHOSEN)\nOK: a Firm dropdown change re-names the card firm and clears the staged file\nOK: ProspectComposer writes the file and result through to the staged slot\nOK: a change of the card firm clears the composer state and the staged slot\nOK: choosing a different file clears the old file and its review before the new one is held\nOK: no localStorage, sessionStorage, IndexedDB, console print or serialisation in the staged store or the composer\nRESULT: remount PASS\nrc=0",
+      "denominator": "13 of 13 checks held",
+      "expect": "^RESULT: remount PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- the card still sends the chosen firm on the upload and the submit with no client picked",
+      "method": "command",
+      "invocation": "bun portal/scripts/prospect-firm-exercise.mjs firm",
+      "output_evidence": "MEASURE: tenant the Analysis tab hands the card with no client picked = undefined\nMEASURE: card tenant-known marker, dropdown on a single firm (the card is then preselected to it): yes\nOK: no firm chosen: decision refuses with \"Choose the firm this portfolio is for before you review it.\"\nOK: no firm chosen: nothing sent (uploads=0, submits=0; upload refused: Choose the firm this portfolio is for before you review it.; submit refused: Choose the firm this portfolio is for before you review it.)\nOK: no firm chosen: the card shows its refusal in plain words: \"Choose the firm this portfolio is for before you review it.\"\nOK: the refusal text carries no internal code\nOK: firm chosen: decision tenant = \"cottonwood\"\nOK: upload carries the selected tenant: \"cottonwood\"\nOK: submit carries the selected tenant: {\"selectedTenant\":\"cottonwood\"}\nOK: the card's firm choice lists every catalogue firm: [\"cottonwood\",\"inflection\"]\nOK: the chosen firm is the selected option\nOK: with a firm chosen the refusal is gone and the card knows its tenant (yes)\nOK: the card is preselected to the Firm dropdown firm when it is not Global\nOK: Global preselects nothing: the card refuses until a firm is chosen\nOK: single-firm control: the tab tenant passes through unchanged on the upload and the submit\nOK: single-firm control: the card shows no firm choice and no refusal\nOK: ProspectComposer upload and submit go through sendProspectUpload / sendProspectSubmit\nOK: ProspectComposer calls neither api send directly\nOK: the comparison catalogue read carries the same tenant\nRESULT: firm PASS\nrc=0",
+      "denominator": "17 of 17 checks held (2 MEASURE lines beside them)",
+      "expect": "^RESULT: firm PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The signout arm run against a temporary copy of AuthContext.tsx whose logout body has the clearStagedProspectOnSignOut() call (and its import) removed: bun portal/scripts/prospect-firm-exercise.mjs signout <copy>.",
+      "expected": "RESULT: signout FAIL, rc 1, on the logout-calls-the-reset check only",
+      "observed": "OK: AuthContext.tsx: the logout body was found\nERROR: AuthContext.tsx: logout() calls clearStagedProspectOnSignOut()\nOK: AuthContext.tsx: logout() still calls clearCanonicalDataAsOf() (the block the reset sits beside)\nRESULT: signout FAIL (1 check(s) failed)\nrc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- static render over committed fixtures",
+      "observed": "single run per criterion",
+      "status": "N/A-WITH-REASON",
+      "reason": "no clock, network or randomness is read"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "bun test src/pages/InvestorReporting/__tests__/fe-s-13 src/pages/InvestorReporting/tabs/analysis: 40 pass, 11 fail before the edit and 40 pass, 11 fail after it; bun x tsc --noEmit: 0 error TS before and after (rc 0)",
+      "reason": "Baseline carried by the order (row W2-S15); not a criterion. bunx absent from the shell, see IRPT_YCDGEN-W5-S1."
+    },
+    {
+      "item": "the catalogue-listener notification is graded by a source-shape check on the reset body, not by a mounted subscriber (no DOM library installed)",
+      "reason": "static render does not subscribe; the reset body is read directly"
+    }
+  ],
+  "surprises": [
+    "IRPT_YCDGEN-W5-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "tsc",
+      "invocation": "bun x tsc --noEmit (portal)",
+      "result": "exit status 0, 0 error TS"
+    }
+  ]
+}

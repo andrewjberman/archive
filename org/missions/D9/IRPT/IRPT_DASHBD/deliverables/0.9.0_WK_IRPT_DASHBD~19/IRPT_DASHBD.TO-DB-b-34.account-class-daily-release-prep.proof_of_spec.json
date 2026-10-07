@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-34",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "4c34d86104",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-34.account-class-daily-release-prep.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~19",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~19/RELEASE_LOCAL_RUN.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_class_daily.py",
+      "kind": "script",
+      "commit_or_etag": "7517444629",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Classes from the etf-classifications table (one GetItem per ticker), per-day compute_classes and emit_class_day; nothing deployed or applied by this cell.",
+      "artifact_covered_by": [
+        "DB22-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/handler.py",
+      "kind": "script",
+      "commit_or_etag": "bae1e8bd8b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Emits both tables after the returns days, scheduled and backfill; amendment 1 @e765698322: the scheduled fire catches the class table up from its own newest landed partition (row IRPT_DASHBD-W19-S4 fixed in code, W19-S6); the apply and the bundle pins are the deploying lane's act (row IRPT_DASHBD-W19-S2).",
+      "artifact_covered_by": [
+        "DB22-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_class_table_emission.py",
+      "kind": "test",
+      "commit_or_etag": "7517444629",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 offline tests: both tables for a day, a class failure leaves the returns table written, backfill, dry run, import guard.",
+      "artifact_covered_by": [
+        "DB22-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-gold/tests/test_class_catch_up.py",
+      "kind": "test",
+      "commit_or_etag": "bae1e8bd8b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 offline tests (amendment 1, rows W19-S4/S6): a skipped class day is retried on the next fire; the catch-up never writes a day beyond the newest returns day; bound, weekend, holiday, listing failure, refused recompute.",
+      "artifact_covered_by": [
+        "DB22-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_account_class_daily.py",
+      "kind": "test",
+      "commit_or_etag": "7517444629",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Table-based class tests, declaration test and contract test, passing.",
+      "artifact_covered_by": [
+        "DB22-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "kind": "config_data",
+      "commit_or_etag": "7517444629",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Trade-leg tokens (trade_code_value, trade_direction_column, trade_direction_map, trade_identifier_columns) added to the declaration; account_return_daily.py not edited and its output byte-identical.",
+      "artifact_covered_by": [
+        "DB22-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-gold/locals.tf",
+      "kind": "terraform",
+      "commit_or_etag": "7517444629",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt_rg_gold_table_class named once; write set is the returns and class prefixes. Not planned (no terraform on this box), not applied.",
+      "artifact_covered_by": [
+        "DB22-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-gold/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "7517444629",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "dynamodb:GetItem on table/etf-classifications only; no s3 Delete; not planned, not applied.",
+      "artifact_covered_by": [
+        "DB22-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/reporting-gold/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "7517444629",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Comment only: the bundle members are pinned in lambda-source-map.json, outside this order's paths (row IRPT_DASHBD-W19-S2).",
+      "artifact_covered_by": [
+        "DB22-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/standards/IRPT_DASHBD_ACCOUNT_CLASS_DAILY_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "7517444629",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "class_source now names the table, its key ticker, the GetItem read and the client pin; served=false.",
+      "artifact_covered_by": [
+        "DB22-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~19/RELEASE_LOCAL_RUN.json",
+      "kind": "config_data",
+      "commit_or_etag": "bae1e8bd8b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Record of the local release run: returns sha256 equal before and after, the before side run with the base handler AND the base sources.json (954983d543); 18 measured account-days, 76 class rows, unclassified share with its denominator.",
+      "artifact_covered_by": [
+        "DB22-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~19/RELEASE_LOCAL_RUN.md",
+      "kind": "doc",
+      "commit_or_etag": "bae1e8bd8b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only summary, no client figure; includes the 61-account table-versus-module share.",
+      "artifact_covered_by": [
+        "DB22-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~19/NEVER_WIDEN_PACKET_ACCOUNT_CLASS_DAILY_RELEASE.md",
+      "kind": "doc",
+      "commit_or_etag": "bae1e8bd8b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The never-widen packet, both halves unsigned; builder output printed; the three source-map staged_from pins are a named precondition of the apply (W19-S2, amendment 1).",
+      "artifact_covered_by": [
+        "DB22-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB22-1-AC1",
+      "criterion_verbatim": "DB22-1-AC1 -- the returns table is byte-identical before and after the extension; the classes sum to the account within 1e-9 on every measured account-day; the unclassified share is printed with its denominator; the reporting-gold tests pass. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r22/p22_release_prep.py\" . DB22-1-AC1",
+      "output_evidence": "OK: returns DELTA=0 (sha256 equal); 18 account-days sum within 1.561e-16; unclassified share 0.0007203231709562427 of 2445430.15; 49 passed\nDB22-1-AC1 PASS",
+      "denominator": "[re-run under amendment 1 @e765698322 (rows W19-S2, W19-S4, W19-S6)] returns sha256 equal on 1 of 1 day (11453fc7...ae2e1 before and after, 19 rows each, 20 accounts requested; the before side ran the base handler and the base sources.json at 954983d543); 18 of 18 measured account-days sum within 1e-9 (19 account-days with class rows, 1 CLASS_VALUES_DO_NOT_SUM_TO_ACCOUNT); share 0.072 percent over 76 class rows; 49 of 49 reporting-gold tests passed (37 + 12 new catch-up tests)",
+      "status": "PASS",
+      "expect": "DB22-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB22-1-AC2",
+      "criterion_verbatim": "DB22-1-AC2 -- the role writes the returns and class prefixes only, never dim_return_method, with no Delete. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r22/p22_release_prep.py\" . DB22-1-AC2",
+      "output_evidence": "OK: the role writes the returns and class prefixes only; no Delete; GetItem on etf-classifications only\nDB22-1-AC2 PASS",
+      "denominator": "2 of 2 write prefixes (returns, class); 1 of 1 DynamoDB action (GetItem) on 1 of 1 table; 0 Delete actions in iam.tf",
+      "status": "PASS",
+      "expect": "DB22-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB22-1-AC3",
+      "criterion_verbatim": "DB22-1-AC3 -- the never-widen packet carries the blast radius, rollback, both branches, the after-read and both halves. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r22/p22_release_prep.py\" . DB22-1-AC3",
+      "output_evidence": "OK: the packet carries blast radius, rollback, branch a, branch b, after-read, cto half, coo half\nDB22-1-AC3 PASS",
+      "denominator": "7 of 7 required packet sections present (both halves unsigned)",
+      "status": "PASS",
+      "expect": "DB22-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The offline tests carry their own negative arms: a table read failure raises and is not an absence, a class failure leaves the returns table written, a module that will not import is a named skip, and a table value outside the six is unclassified with its value kept.",
+      "expected": "tests pass",
+      "observed": "49 of 49 reporting-gold tests and 47 of 47 irpt_reporting tests passed (at bae1e8bd8b); the catch-up tests carry the negative arms (a day beyond the newest returns day is never written; a failing class day is named and does not hold the returns table; a failed listing never raises)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The returns parquet was produced by separate handler runs (base handler with the base sources.json, and extended handler with the branch's declaration) over the same day and accounts, twice (first run and the amendment-1 re-run); re-run under amendment 1 @e765698322 (rows W19-S2, W19-S4, W19-S6)",
+      "observed": "sha256 equal on every pair (11453fc79610d5830f58f77cc835ea1127e2533f67ae0fb985de729c677ae2e1)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform plan or apply, the Lambda bundle pins, the artifact rebuild, any S3 write",
+      "reason": "Refusal clause and bounds of the order; none made. The pins live in lambda-source-map.json, outside the order's paths; amendment 1 @e765698322 rules them a named precondition of the apply for the deploying lane (row IRPT_DASHBD-W19-S2), set against the drain commit."
+    },
+    {
+      "item": "The served partition's identity and unclassified share (the CTO's criteria 2 and 3 on the served table)",
+      "reason": "They are the apply's after-read (packet A2 and A3), run by the issuer under the signed halves."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W19-S1",
+    "IRPT_DASHBD-W19-S2",
+    "IRPT_DASHBD-W19-S3",
+    "IRPT_DASHBD-W19-S4",
+    "IRPT_DASHBD-W19-S5",
+    "IRPT_DASHBD-W19-S6"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/reporting-gold/tests data/assets/scripts/gold/irpt_reporting/tests",
+      "result": "49 + 47 passed (bae1e8bd8b)"
+    }
+  ]
+}

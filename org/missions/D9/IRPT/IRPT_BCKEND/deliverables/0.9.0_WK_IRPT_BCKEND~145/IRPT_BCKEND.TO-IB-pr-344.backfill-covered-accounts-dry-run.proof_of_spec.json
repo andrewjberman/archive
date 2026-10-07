@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-344",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "d94f67a083"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "d94f67a083",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-344.backfill-covered-accounts-dry-run.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~145",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/backfill_covered_account_ids.py",
+      "kind": "script",
+      "commit_or_etag": "802216e2e0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nothing deployed, nothing applied; --apply is the issuer's act",
+      "artifact_covered_by": [
+        "IB65-2-AC1",
+        "IB65-G-145"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/tests/test_backfill_covered_account_ids.py",
+      "kind": "test",
+      "commit_or_etag": "802216e2e0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nothing deployed, nothing applied; --apply is the issuer's act",
+      "artifact_covered_by": [
+        "IB65-2-AC1",
+        "IB65-G-145"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~145/IB65-2_backfill_census.json",
+      "kind": "config_data",
+      "commit_or_etag": "802216e2e0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nothing deployed, nothing applied; --apply is the issuer's act",
+      "artifact_covered_by": [
+        "IB65-2-AC1",
+        "IB65-G-145"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB65-2-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r65/p65_cells.py\" . IB65-2-AC1 expects IB65-2-AC1 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r65/p65_cells.py\" . IB65-2-AC1",
+      "output_evidence": "OK: 7 passed in 2.21s; read 0 = filled 0 + unfillable 0, wrote nothing\nIB65-2-AC1 PASS\nrc=0",
+      "denominator": "7 of 7 back-fill tests pass; census read 0 = filled 0 + unfillable 0, wrote 0; 1 receipt listed across 2 firms (49financial 1, cottonwood 0) and its GetObject is KMS-denied (row W145-S5) so the reconcile is vacuous",
+      "status": "PASS",
+      "expect": "IB65-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB65-G-145",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r65/p65_cells.py\" . IB65-G-145 expects IB65-G-145 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r65/p65_cells.py\" . IB65-G-145",
+      "output_evidence": "OK: 18 changed path(s), all inside slot ~145's grant\nIB65-G-145 PASS\nrc=0",
+      "denominator": "15 of 15 changed paths inside slot ~145 grant",
+      "status": "PASS",
+      "expect": "IB65-G-145 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a write attempted on the default path would be recorded in the fixture S3's puts list",
+      "expected": "no put",
+      "observed": "test_the_default_dry_run_writes_nothing: puts == [] and objects unchanged; the real run wrote 0",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "tests run offline twice (criterion + direct)",
+      "observed": "7 passed twice",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "--apply",
+      "reason": "the issuer's act under a never-widen pair; never run by this worker (wrote 0)"
+    },
+    {
+      "item": "reading the one receipt's content",
+      "reason": "kms:Decrypt denied to this identity; filed as row W145-S5, nothing widened"
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W145-S5: the census could list the receipt but not read it (kms:Decrypt denied)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python p65_cells.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r65/p65_cells.py\" . <id>",
+      "result": "IB65-2-AC1 PASS, IB65-G-145 PASS"
+    }
+  ]
+}

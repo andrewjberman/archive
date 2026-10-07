@@ -5,9 +5,14 @@
     <issued_to>0.7.0_AE_CloudOps~RV</issued_to>
     <date>2026-10-07</date>
     <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
+<decomp_ref>
+<decomp_doc>org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round2.md</decomp_doc> (round 2), cell `CT-b-1`: this order is that cell's site-Z apply leg.
+<owned_cells>CT-b-1</owned_cells>
+</decomp_ref>
 # pipeline-override: the site-Z apply leg of the laptop's NFRA_CTLPLN round 2 (cell CT-b-1, issuer 2.0.0_SA_COO~C, order complete as a build); routed to site Z by 0.0.0_AB_MSTR~Z msgs 30561 and 30565 on Andrew's word "Where is the Dell Keys? i want that issued"; a seat act bounded by a never-widen pair, not a round of this lane
 
   <objective>

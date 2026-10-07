@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-335",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-335.fwd2-replay-on-current-bytes.md",
+    "group": "OTHER",
+    "vintage_commit": "561577da0d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "561577da0d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-335.fwd2-replay-on-current-bytes.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~137",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~137/battery_ib_pr_335.py",
+      "kind": "script",
+      "commit_or_etag": "02be8f1f46",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A read-only battery run from the worktree root; no deploy. The in-process arms run with the network hard-blocked; live calls are an API Gateway get-routes read, a CloudFront get-distribution read and unauthenticated GET probes.",
+      "artifact_covered_by": [
+        "IB61-7-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~137/IB61-7_replay_output.json",
+      "kind": "doc",
+      "commit_or_etag": "02be8f1f46",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The transcript: route_count 21, overall_pass true; 4 arms x 21 routes, 0 DRIVEN-FAIL, the rest GATED with a reason. Byte-identical across two runs (sha256 369297baff74eb85...).",
+      "artifact_covered_by": [
+        "IB61-7-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB61-7-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-7-AC1",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-7-AC1",
+      "output_evidence": "OK: 21 routes, every arm DRIVEN-PASS or GATED with a reason\nIB61-7-AC1 PASS (rc=0)",
+      "denominator": "21 of 21 live routes; 84 arm cells: service_principal 17 DRIVEN-PASS / 4 GATED, advisor_principal 6 / 15, revoked_grant_warm_cache 6 / 15, negative_no_protected_field 4 / 17, 0 DRIVEN-FAIL",
+      "expect": "IB61-7-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB61-G-137",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-G-137",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-G-137",
+      "output_evidence": "OK: 3 changed path(s), all inside slot ~137's grant\nIB61-G-137 PASS (rc=0), run after the build commit 02be8f1f46 and before the proof commit",
+      "denominator": "3 paths changed by this worker's commits at the time of the run, 3 inside the grant",
+      "expect": "IB61-G-137 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Copy of the transcript in a scratch root with one GATED arm's reason emptied, graded by the same AC1 checker (p61_cells.py .scratch/mutroot IB61-7-AC1). Inside the battery, the negative arm also injects one protected value into a synthetic refusal and requires the same leak test to catch it (control_injected_value_detected true on all 4 DRIVEN-PASS negative arms).",
+      "expected": "FAIL: route ... arm advisor_principal GATED with no reason",
+      "observed": "FAIL: route GET /api/scoped/investor-reporting/analysis/requests arm advisor_principal GATED with no reason (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "battery_ib_pr_335.py run twice from the worktree root; sha256 of IB61-7_replay_output.json compared",
+      "observed": "369297baff74eb85 both times (byte-identical)",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-W137-S1",
+    "IRPT_BCKEND-W137-S2"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~137/battery_ib_pr_335.py",
+      "result": "route_count=21 overall_pass=True; driven_fails: []; live_boundary_defects: []"
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+diff --git a/infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py b/infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py
+index 4f0e70fe3c..e5296f13e9 100644
+--- a/infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py
++++ b/infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py
+@@ -681,8 +681,9 @@ def reconcile_owned(collection, name, fingerprint):
+ # ONE status GET per receive (CTO rulings batch 88 item 4, E2). The WAF challenged the 3rd status GET in 4 of 4
+ # September runs (CTO 101917 (b), when this was 2) and the 2ND, 15 s after the first, in 3 of 3 jobs on 2026-10-01;
+ # each challenge cost the job its receive's 900 s. A `calculating` answer is never polled again inside the receive;
+-# the message keeps the receive's 900 s (batch 97 item 4: a redelivery 122 s later was challenged on its first
+-# request, whatever it was, and one about 900 s later was answered in 4 of 4 jobs).
++# the message is released for resident_worker.READ_BACK_RELEASE_VISIBILITY_S = 390 s (CTO rulings batch 262: the
++# firewall window lies in (122, 373] s -- batch 97 item 4's redelivery 122 s later was challenged, and on 2026-10-05
++# a 7th request 373 s after the first of 6 answered).
+ READ_BACK_POLLS = 1
+ READ_BACK_SPACING_S = 15.0
+ READ_BACK_LEASE_TTL_S = 900
+diff --git a/infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py b/infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py
+index 8bf439b9b7..26fee9ec5f 100644
+--- a/infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py
++++ b/infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py
+@@ -734,6 +734,12 @@ def _lookup_retry_after(resolver):
+ 
+ RESOLVE_RETRY_VISIBILITY_S = 60
+ 
++# CTO rulings batch 262: a ReadBackPending (a still-calculating portfolio or a read challenge) releases the message
++# for 390 s, not the receive's 900. The YCharts firewall window measured on 2026-10-05 lies in (122, 373] s: a
++# redelivery 122 s later was challenged (batch 97 item 4), and after 6 requests a 7th 373 s after the first answered
++# (WAF-PROBE-20261005T1254Z-W330). 390 s clears the window; two calculating answers still total 780 s, under 900.
++READ_BACK_RELEASE_VISIBILITY_S = 390
++
+ # CTO rulings batch 120: a resolve refused because the provider OPERATION LEASE is held (another job's generation)
+ # does not spend the resolve. The worker sends a FRESH copy of the message delayed by the lease's retry-after and
+ # deletes the received one, so SQS's own receive count (maxReceiveCount 5) restarts and the message never walks to
+@@ -768,10 +774,19 @@ def poll_once(*, sqs, queue_url, assembly):
+                 result[key] = value
+             return result
+         decoded = json.loads(body, object_pairs_hook=unique_pairs)
+-        # A ReadBackPending (a still-calculating portfolio or a read challenge) propagates with the receive's
+-        # own 900 s: the 120-second release of batch 88 (E2) is withdrawn (CTO rulings batch 97 item 4) -- its
+-        # redelivery was challenged on its first request, 122 s after the first receive.
+-        result = assembly.execute(decoded, heartbeat)
++        # A ReadBackPending (a still-calculating portfolio or a read challenge) releases the message for
++        # READ_BACK_RELEASE_VISIBILITY_S (CTO rulings batch 262) and propagates. The release is best-effort: if the
++        # visibility call itself fails, the receive's 900 s stands and the pending refusal still propagates (it is
++        # never replaced by the call's error -- the st9 half's remark 3 on batch 88's release).
++        try:
++            result = assembly.execute(decoded, heartbeat)
++        except ReadBackPending:
++            try:
++                sqs.change_message_visibility(QueueUrl=queue_url, ReceiptHandle=envelope["ReceiptHandle"],
++                                              VisibilityTimeout=READ_BACK_RELEASE_VISIBILITY_S)
++            except Exception as exc:  # noqa: BLE001  the release is best-effort; 900 s stands
++                print("IRPT_RESIDENT_READ_BACK_RELEASE_KEPT_900 class=%s" % type(exc).__name__, flush=True)
++            raise
+         ended = False
+         if isinstance(decoded, dict) and decoded.get("kind") == "resolve_upload":
+             detail = result.get("detail") if isinstance(result.get("detail"), dict) else {}
+diff --git a/infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py b/infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py
+index b30c3ba1fa..8c598b416c 100644
+--- a/infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py
++++ b/infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py
+@@ -673,11 +673,11 @@ class _VisibilityQueue:
+ 
+ 
+ @pytest.mark.parametrize('first_receive', ['calculating', 'waf'])
+-def test_a_calculating_portfolio_and_a_challenge_both_keep_the_receives_900_seconds(
++def test_a_calculating_portfolio_and_a_challenge_both_release_for_390_seconds(
+         world, monkeypatch, first_receive):
+-    """CTO rulings batch 97 item 4 (the 120-second release of batch 88 is withdrawn). The message is never deleted
+-    on a release and no visibility other than 900 is ever asked for; the redelivery finishes the job with exactly
+-    one more status GET."""
++    """CTO rulings batch 262: a ReadBackPending releases the message for 390 s (the measured firewall window lies in
++    (122, 373] s), on both branches. The message is never deleted on a release, the release is the LAST visibility
++    asked for on that receive, and the redelivery finishes the job with exactly one more status GET."""
+     r = installed(world, monkeypatch)
+     route = ('GET', '/model_portfolios/2332060/status')
+     valid = r.replay.script[route][0]
+@@ -685,8 +685,8 @@ def test_a_calculating_portfolio_and_a_challenge_both_keep_the_receives_900_seco
+     queue = _VisibilityQueue(r.message)
+     with pytest.raises(resident_worker.ReadBackPending, match='READ_BACK_PENDING:' + first_receive.upper()):
+         resident_worker.poll_once(sqs=queue, queue_url='offline-queue', assembly=r.assembly)
+-    assert queue.deleted == [] and queue.visibility and set(queue.visibility) == {900}
+-    assert not hasattr(resident_worker, 'READ_BACK_CALCULATING_VISIBILITY_S')
++    assert resident_worker.READ_BACK_RELEASE_VISIBILITY_S == 390
++    assert queue.deleted == [] and queue.visibility[-1] == 390 and set(queue.visibility) <= {900, 390}
+     assert resident_worker.poll_once(sqs=queue, queue_url='offline-queue', assembly=r.assembly) == 1
+     assert queue.deleted == ['rh-1'] and r.row['state']['S'] == 'READY'
+     assert sum(c['route'] == '/model_portfolios/2332060/status' for c in r.replay.sent_headers) == 2
+@@ -861,3 +861,25 @@ def test_redelivered_ready_vendor_job_still_binds_to_its_extraction_evidence(wor
+     r.row['job_detail'] = {'S': json.dumps({**detail, 'certification_sha256': '0' * 64})}
+     with pytest.raises(ValueError, match='READY_CERTIFICATION_BINDING'):
+         r.assembly.execute(r.message, lambda: None)
++
++
++class _FailingReleaseQueue(_VisibilityQueue):
++    """The release call itself fails; heartbeats still work."""
++    def change_message_visibility(self, **kw):
++        if kw['VisibilityTimeout'] == 390:
++            raise RuntimeError('ThrottlingException')
++        super().change_message_visibility(**kw)
++
++
++def test_a_failed_release_keeps_the_receives_900_and_the_pending_refusal_propagates(world, monkeypatch, capsys):
++    """CTO rulings batch 262, best-effort release: the visibility call's own error never replaces the pending
++    refusal (the st9 half's remark 3 on batch 88's release); the receive's 900 s stands and the journal says so."""
++    r = installed(world, monkeypatch)
++    route = ('GET', '/model_portfolios/2332060/status')
++    valid = r.replay.script[route][0]
++    r.replay.script[route] = [CALCULATING_READ, valid]
++    queue = _FailingReleaseQueue(r.message)
++    with pytest.raises(resident_worker.ReadBackPending, match='READ_BACK_PENDING:CALCULATING'):
++        resident_worker.poll_once(sqs=queue, queue_url='offline-queue', assembly=r.assembly)
++    assert queue.deleted == [] and 390 not in queue.visibility
++    assert 'IRPT_RESIDENT_READ_BACK_RELEASE_KEPT_900 class=RuntimeError' in capsys.readouterr().out

@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-bf-1.a-bloomberg-close-price-backfill-over-a-date-range-under-a-budget",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "d97558efe8",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-bf-1.a-bloomberg-close-price-backfill-over-a-date-range-under-a-budget.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "d97558efe8"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "3a941ae6c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write (local sink), no vendor call (every Bloomberg hook stubbed)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/bbg_budget.py",
+      "kind": "script",
+      "commit_or_etag": "3a941ae6c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write (local sink), no vendor call (every Bloomberg hook stubbed)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r15bf1_market_range.py",
+      "kind": "script",
+      "commit_or_etag": "3a941ae6c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit; no deploy, no S3 write (local sink), no vendor call (every Bloomberg hook stubbed)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/bf-1.AC1.py -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/bf-1.AC1.py",
+      "output_evidence": "fixture: 60 securities x 6 trading days 2026-09-21..2026-09-28 = 360 points | backfill budget 120000 (ceiling 150000 - reserve 30000)\ndry run: status OK | points keys [('plan.points', 360), ('points', 360), ('points_left', 1000)] | vendor calls 0 | objects 0 | ledger spent 0 | detail dry run: 360 points planned, 1000 left, 0 dates already held; no request made\nOK:   (a) dry run returns the plan (360 points), makes ZERO calls, writes and spends nothing\nover max_points: status REFUSED | vendor calls 0 | objects 0 | ledger spent 0 | names 360 and the points left: True | detail backfill refused before any request: plan 360 points (60 securities x 6 trading days 2026-09-21..2026-09-28) > 211 points left (smaller of max_points 211 and the budget remainder 120000)\nOK:   (b) a plan over max_points is REFUSED before any call, naming the points left\nover the budget: status REFUSED | vendor calls 0 | objects 0 | ledger spent 119863 of 120000 | market-range lines 0 | names 137: True | detail backfill refused before any request: plan 360 points (60 securities x 6 trading days 2026-09-21..2026-09-28) > 137 points left (smaller of max_points 100000 and the budget remainder 137); backfill ref\nOK:   (c) a plan over ceiling - reserve - spent(today) is REFUSED before any call, naming the 137 points left\nplan-market: status OK | securities 60 | batches [50, 10] | vendor calls 0\nOK:   (d) control: plan-market still plans the 60 securities in 2 batches with no vendor call\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/bf-1.AC2.py -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/bf-1.AC2.py",
+      "output_evidence": "fixture: 60 securities x 6 trading days ['2026-09-21', '2026-09-22', '2026-09-23', '2026-09-24', '2026-09-25', '2026-09-28'] = 360 points | planted date=2026-09-23/market-20260924T010000Z-plantedplant.parquet (6122 bytes)\nresult: status OK | detail {'landed': 5, 'skipped': 1, 'no_rows': 0, 'points_requested': 360}\nhistorical requests: 2 [(50, ['PX_LAST'], '2026-09-21', '2026-09-28'), (10, ['PX_LAST'], '2026-09-21', '2026-09-28')] | reference requests: 0 | reached blp_client: 0\nOK:   (a) ONE historical request per batch of 50 securities over [start, end], PX_LAST only, and no other request\n  date=2026-09-21: 60 rows, as_of_source ['backfill'], date ['2026-09-21'], px_close set 60\n  date=2026-09-22: 60 rows, as_of_source ['backfill'], date ['2026-09-22'], px_close set 60\n  date=2026-09-24: 60 rows, as_of_source ['backfill'], date ['2026-09-24'], px_close set 60\n  date=2026-09-25: 60 rows, as_of_source ['backfill'], date ['2026-09-25'], px_close set 60\n  date=2026-09-28: 60 rows, as_of_source ['backfill'], date ['2026-09-28'], px_close set 60\npartitions holding an object: ['2026-09-21', '2026-09-22', '2026-09-23', '2026-09-24', '2026-09-25', '2026-09-28'] | outside the trading days: []\nOK:   (b) one market-*.parquet per landed date, 60 rows each, every row as_of_source 'backfill'; none on the weekend\ndate=2026-09-23: objects ['market-20260924T010000Z-plantedplant.parquet'] | planted bytes unchanged: True | skip keys in the result: [('detail.skipped', 1), ('skipped_dates', ['2026-09-23'])]\nOK:   (c) a date already holding a market-*.parquet is skipped (the object untouched) and counted (1)\nledger market-range lines: [{'at': '2026-10-07T08:58:34Z', 'mode': 'market-range', 'rows': 300, 'batch_id': 'bf1-fit'}, {'at': '2026-10-07T08:58:34Z', 'mode': 'market-range', 'rows': 60, 'batch_id': 'bf1-fit'}] | rows 360 | spent(today) 360\nOK:   (d) the points are recorded in the bbg_budget ledger with mode 'market-range'\nplan-market: status OK | securities 60 | batches [50, 10] | vendor calls 0\nOK:   (e) control: plan-market still plans the 60 securities in 2 batches with no vendor call\nAC2 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "5 of 5 checks OK; run under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "package suite once, AC1 and AC2 twice (before and after the commit)",
+      "observed": "803 passed, 2 skipped, 0 failed; AC1 PASS, AC2 PASS both times",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "none named by the order",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order status to complete",
+      "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "The live Bloomberg backfill",
+      "reason": "The live run is the issuer's act under a never-widen pair; this cell is build only and made no vendor call."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~3 <0.9.0_WK_ETFS_RIVALS~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "3a941ae6c6"
+    }
+  ]
+}

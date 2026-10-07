@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-c-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-c-2.role-request.md",
+    "group": "OTHER",
+    "vintage_commit": "3200ebe93c"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~5",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round3.md",
+    "vintage_commit": "3200ebe93c",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-c-2.role-request.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/role_request.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed"
+    },
+    {
+      "path_or_key": "org/devices/test_role_request.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed"
+    },
+    {
+      "path_or_key": "org/standards/ROLE_REQUEST.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT3c2-AC1",
+      "criterion_verbatim": "python org/devices/test_role_request.py expect: ROLE-REQUEST cases=10/10 ok=True",
+      "method": "command",
+      "invocation": "python org/devices/test_role_request.py",
+      "output_evidence": "PASS case_valid: ROLE-REQUEST-VALID dell1-20261007T065650Z-8fa7 ok=True\nPASS case_unset: rc=2 stderr=REFUSED: AGENTBUS_DEVICE is not set; a box's own name is its environment variable, never derived from a path records=0 sent=0\nPASS case_not_execution: rc=2 stderr=REFUSED: device laptop has register role 'control-plane'; only an `execution` box writes a role request records=0 sent=0\nPASS case_other_dell: rc=2 stderr=REFUSED: project FIXD2 is placed on DELL2, not on dell1; a box writes in only for work placed on it records=0 sent=0\nPASS case_missing_file: rc=2 stderr=REFUSED: permission 0: code_ref file src/nope.py does not exist records=0 sent=0\nPASS case_line_past_end: rc=2 stderr=REFUSED: permission 0: code_ref line 6 is outside src/app.py (5 lines) records=0 sent=0\nPASS case_iam: rc=2 stderr=REFUSED: permission 0: 'iam:PassRole' is an iam: action; a Dell never asks for access-changing permissions records=0 sent=0\nPASS case_star: rc=2 stderr=REFUSED: permission 0: action '*' is a wildcard; ask for the named action\nREFUSED: permissions[0].action: '*' does not match ^[A-Za-z0-9-]+:[A-Za-z0-9*]+$\nREFUS records=0 sent=0\nPASS case_bus_line: ROLE-REQUEST dell1-20261007T065650Z-387c FIXD1 aws_lambda_function/fix-probe org/devices/role_requests/dell1/dell1-20261007T065650Z-387c.json\nPASS case_list: COUNT requested=1 applied=1 refused=0 total=2\nROLE-REQUEST cases=10/10 ok=True\n(rc 0)",
+      "denominator": "10 of 10 cases (1 accepted request, 7 refused malformed, bus-line case, list-count case)",
+      "status": "PASS",
+      "expect": "ROLE-REQUEST cases=10/10 ok=True"
+    },
+    {
+      "criterion_id": "CT3c2-AC2",
+      "criterion_verbatim": "AGENTBUS_DEVICE=dell1 python org/devices/role_request.py write --dry-run ... expect: ROLE-REQUEST dell1-",
+      "method": "command",
+      "invocation": "AGENTBUS_DEVICE=dell1 python org/devices/role_request.py write --dry-run --project IRPT_BCKEND --root investor-reporting --kind aws_lambda_function --name ctlpln-roundtrip-probe --service lambda.amazonaws.com --permission logs:CreateLogStream,arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/ctlpln-roundtrip-probe:*,org/devices/role_request.py:1",
+      "output_evidence": "DRY-RUN: nothing written, nothing sent\n{\n  \"request_id\": \"dell1-20261007T065650Z-a1b5\",\n  \"device\": \"dell1\",\n  \"tailnet_name\": \"dell1\",\n  \"requested_by\": \"0.9.0_WK_NFRA_CTLPLN~5\",\n  \"requested_at\": \"2026-10-07T06:56:50Z\",\n  \"project\": \"IRPT_BCKEND\",\n  \"terraform_root\": \"infra/aws/terraform/investor-reporting\",\n  \"resource\": {\n    \"kind\": \"aws_lambda_function\",\n    \"name\": \"ctlpln-roundtrip-probe\"\n  },\n  \"assuming_service\": \"lambda.amazonaws.com\",\n  \"permissions\": [\n    {\n      \"action\": \"logs:CreateLogStream\",\n      \"resource_arn\": \"arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/ctlpln-roundtrip-probe:*\",\n      \"code_ref\": \"org/devices/role_request.py:1\"\n    }\n  ],\n  \"status\": \"requested\"\n}\nROLE-REQUEST dell1-20261007T065650Z-a1b5 IRPT_BCKEND aws_lambda_function/ctlpln-roundtrip-probe org/devices/role_requests/dell1/dell1-20261007T065650Z-a1b5.json\n(rc 0; org/devices/role_requests/ exists after the run: False)",
+      "denominator": "1 of 1 dry run against the real register and real IRPT_BCKEND project.json (placement DELL1)",
+      "status": "PASS",
+      "expect": "ROLE-REQUEST dell1-"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the seven refusal cases inside AC1 are the control: each asserts rc != 0, no record, no bus send",
+      "expected": "7 of 7 refused",
+      "observed": "7 of 7 refused",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: request_id carries a timestamp and random hex by design; the tests assert shape, not value",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the verbs that write an answer (mark-applied, mark-refused)",
+      "reason": "not this cell's; a marked place is left in org/devices/role_request.py (answer_path and the ANSWER VERBS section)"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~5/NFRA_CTLPLN.TO-CT-c-2.role-request.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/devices/test_role_request.py",
+      "result": "ROLE-REQUEST cases=10/10 ok=True"
+    }
+  ]
+}

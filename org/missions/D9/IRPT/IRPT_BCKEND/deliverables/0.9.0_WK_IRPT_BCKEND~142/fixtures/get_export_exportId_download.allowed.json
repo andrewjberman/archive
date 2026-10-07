@@ -1,0 +1,47 @@
+{
+ "driver": "entry",
+ "event": {
+  "pathParameters": {
+   "exportId": "${EXPORT_A}"
+  },
+  "receipt_fixture": {
+   "$include": "infra/aws/lambda/investor-reporting/_contracts/fixtures/ExportReceipt.valid.json",
+   "$instance": true,
+   "$patch": {
+    "artifact.storage_bucket": "opal-data-fixture",
+    "artifact.storage_key": "firms/49financial/generations/${EXPORT_A}/artifact.pdf",
+    "download_route.route": "/api/scoped/investor-reporting/export/${EXPORT_A}/download",
+    "export_ref.export_id": "${EXPORT_A}",
+    "facts.account_ids": [
+     "${A1}",
+     "${A2}"
+    ],
+    "timestamps.created_at": "2026-10-02T09:00:00Z",
+    "timestamps.released_at": "2026-10-02T09:01:00Z"
+   }
+  }
+ },
+ "expect": {
+  "data_contains": [
+   "${EXPORT_A}",
+   "8888888888888888888888888888888888888888888888888888888888888888"
+  ],
+  "outcome": "SERVED"
+ },
+ "fixture_schema": "irpt-gated-route-fixture/1",
+ "function": "irpt-export-render",
+ "notes": "the Opal signer is the entry's `_download_client` seam: a recorded client whose head_object answers a byte length and whose presign is `download.FixtureSigner` (SigV4-shaped, 300 s, host = the Opal bucket); `signed_answer` still verifies the URL, the bucket and the bound firm's key prefix.",
+ "operation": "export-download",
+ "principal_class": "ALLOWED: FIRM_ADVISOR ADV-A-0001 of 49financial, grant A1+A2+A3",
+ "request_contract": [
+  "docs/contracts/investor-reporting/v1/routes.json#GET /api/scoped/investor-reporting/export/{exportId}/download",
+  "docs/contracts/investor-reporting/v1/ExportReceipt.schema.json"
+ ],
+ "route": "GET /api/scoped/investor-reporting/export/{exportId}/download",
+ "stubs": {
+  "download_client": {
+   "bucket": "opal-data-fixture",
+   "byte_length": 48211
+  }
+ }
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-e-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-e-1.calendar-refusal.md",
+    "group": "OTHER",
+    "vintage_commit": "97d5250c99"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~17",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round5.md",
+    "vintage_commit": "97d5250c99",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-e-1.calendar-refusal.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_calendar_guard.py",
+      "kind": "script",
+      "commit_or_etag": "5fdbdee170",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DS-lane script, candidate commit (rule 13); pure, no AWS, no write"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_calendar_guard.py",
+      "kind": "test",
+      "commit_or_etag": "5fdbdee170",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stubbed calendars, no AWS, no data files; 6 tests"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_account_links.py",
+      "kind": "script",
+      "commit_or_etag": "5fdbdee170",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "guard call after the transactions read, span padded by TradingIndex's 45 days; refuses before output",
+      "artifact_covered_by": ["CB5e1-AC1"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/analysis/commonwealth_price_census.py",
+      "kind": "script",
+      "commit_or_etag": "5fdbdee170",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "guard call after the universe read, before tdays/any cache or output write",
+      "artifact_covered_by": ["CB5e1-AC1"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/analysis/commonwealth_price_need.py",
+      "kind": "script",
+      "commit_or_etag": "5fdbdee170",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "guard call after the transactions read, before build_securities/any output write",
+      "artifact_covered_by": ["CB5e1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB5e1-AC1",
+      "criterion_verbatim": "python \"org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/checks/check_e1_calendar_refusal.py\" expect: CALENDAR-REFUSAL refused=3 of 3",
+      "method": "command",
+      "invocation": "python \"org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/checks/check_e1_calendar_refusal.py\"",
+      "output_evidence": "CALENDAR-REFUSAL refused=3 of 3 calendar=NYSE/hardcoded-fallback-2024-2027 (timeout 300, rc 0); each script rc=2 with 'CALENDAR-UNCOVERED 2013..2023 source=NYSE/hardcoded-fallback-2024-2027'; full output in org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~17/CB5e1-AC1_output.txt",
+      "denominator": "3 of 3 scripts refused (account_links, price_census, price_need); all output in a deleted temp dir, nothing dated before 2024 kept",
+      "status": "PASS",
+      "expect": "CALENDAR-REFUSAL refused=3 of 3"
+    },
+    {
+      "criterion_id": "CB5e1-AC2",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_calendar_guard.py expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_calendar_guard.py",
+      "output_evidence": "6 passed in 0.04s (timeout 120, rc 0): 2013-2023 refused naming 2013..2023; 2024-2026 admitted; package stub admits 2013-2026; same span two calendars opposite answers; covered years derived from the stub's holiday set",
+      "denominator": "6 of 6 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant named by the order; the difference control (same span, fallback vs package stub, opposite answers) is test_difference_control_same_span_two_calendars_opposite_answers",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 check run twice (before and after the commit), output compared",
+      "observed": "identical CALENDAR-UNCOVERED 2013..2023 line from each of the three scripts both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~17/ADVI_COTBKF.TO-CB-e-1.calendar-refusal.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_calendar_guard.py",
+      "result": "6 passed"
+    }
+  ]
+}
