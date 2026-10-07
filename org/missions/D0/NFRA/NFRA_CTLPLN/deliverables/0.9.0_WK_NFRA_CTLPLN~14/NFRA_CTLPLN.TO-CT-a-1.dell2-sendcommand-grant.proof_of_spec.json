@@ -5,49 +5,77 @@
   "spec_ref": {
     "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-a-1.dell2-sendcommand-grant.md",
     "group": "OTHER",
-    "vintage_commit": "7dd661eb9f"
+    "vintage_commit": "8040bad707"
   },
   "assignee": "0.9.0_WK_NFRA_CTLPLN~14",
   "decomp_ref": {
     "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
-    "vintage_commit": "7dd661eb9f",
+    "vintage_commit": "8040bad707",
     "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-a-1.dell2-sendcommand-grant.md"
   },
   "artifacts_produced": [
     {
-      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py",
-      "kind": "test",
-      "commit_or_etag": "8b260a787e",
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/modules/routes_policy/",
+      "kind": "config_data",
+      "commit_or_etag": "0c212eff57",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "read-only derivation over the repository; no AWS call; nothing applied"
+      "deploy_evidence": "pure Terraform module (variables, locals, outputs; no provider, no resource, no file path) that builds two Deny policy documents from the decoded census; evaluated standalone, terraform validate Success; nothing applied"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/routes.tf",
+      "kind": "config_data",
+      "commit_or_etag": "0c212eff57",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "module call plus aws_iam_policy.dell_agent_routes_fn[0], aws_iam_policy.dell_agent_routes_host[0] and their two group attachments, behind a precondition on the census header; nothing applied, no plan against the backend"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/render_routes_policy.py",
+      "kind": "test",
+      "commit_or_etag": "0c212eff57",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py",
+      "kind": "test",
+      "commit_or_etag": "0c212eff57",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only census; --check-fresh and --stamp-header added; the policy-file writer removed"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json",
+      "kind": "config_data",
+      "commit_or_etag": "0c212eff57",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "header added (command, read time, 175 of 175, account, caller); no census re-run"
     },
     {
       "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell2_ssm_policy.json",
       "kind": "config_data",
-      "commit_or_etag": "8b260a787e",
+      "commit_or_etag": "109a410fe7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "rendered by derive_ssm_documents.py --write: ReadCommandResults and DenyShellDocuments; no send statement because 0 of 16 documents are fixed text; 879 characters without whitespace; nothing applied"
+      "deploy_evidence": "SendResidentDocumentsToResidentHost added (instance plus the two resident documents), those two removed from DenyShellDocuments; nothing applied"
     },
     {
-      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/iam.tf",
-      "kind": "config_data",
-      "commit_or_etag": "8b260a787e",
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py",
+      "kind": "test",
+      "commit_or_etag": "109a410fe7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "aws_iam_policy.dell2_ssm and aws_iam_user_policy_attachment.dell2_ssm (dell2 only); terraform validate Success; nothing applied"
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write"
     },
     {
       "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
       "kind": "test",
-      "commit_or_etag": "8b260a787e",
+      "commit_or_etag": "109a410fe7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "sixth block, 12 counted arms and 4 uncounted probes; iam:SimulateCustomPolicy only"
+      "deploy_evidence": "sixth block 9 arms, seventh block 5 arms; iam:SimulateCustomPolicy only"
     },
     {
       "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
       "kind": "test",
-      "commit_or_etag": "8b260a787e",
+      "commit_or_etag": "0c212eff57",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "nine names; the size loop covers dell2_ssm_policy.json"
+      "deploy_evidence": "eleven names; the sizes of the two documents the module builds"
     }
   ],
   "acceptance": [
@@ -56,8 +84,8 @@
       "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check expect: unresolved=0",
       "method": "test_suite",
       "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check",
-      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check` (rc 0). LAST LINE: SSM-DOCS declared=16 unresolved=0 resident_fixed=0 resident_free_text=2 export_render=1 other=13 unsure_params=2 in_policy=0 ok=True. ok=True is stated here: unresolved=0, 0+2+1+13=16 documents, policy names exactly the 0 fixed documents. unsure_params=2 (two declared-but-unused parameters of one unrelated document, treated as free text). Census cross-check: 16 uncommented resource blocks over 544 .tf files = 16 parsed. Classifier control (5 synthetic blocks) OK. Mutant: the DenyShellDocuments statement removed -> ok=False (POLICY-RENDER file_matches_rendering=False). Both resident documents are RESIDENT-FREE-TEXT: irpt-ycharts-deploy ArtifactPrefix at infra/aws/terraform/investor-reporting/ycharts/ssm.tf:43, irpt-ycharts-run MaxReacquisitions at ssm.tf:85. Live documents were not compared to the repository.",
-      "denominator": "16 of 16 declared documents read; 0 unresolved; 0 resident_fixed, 2 resident_free_text, 1 export_render, 13 other",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check` (rc 0). LAST LINE: SSM-DOCS declared=16 unresolved=0 resident_fixed=0 resident_free_text=2 export_render=1 other=13 unsure_params=2 in_policy=2 ok=True. ok=True is stated here with unsure_params=2 (two declared-but-unused parameters of one unrelated document, treated as free text). Under ruling D the policy's send statement names the two resident documents (both RESIDENT-FREE-TEXT, 0 RESIDENT-FIXED), granted because the census reads NO for the resident host's role; the ok rule compares the policy with that granted set (row NFRA_CTLPLN-W14-S5). Live documents were not compared to the repository.",
+      "denominator": "16 of 16 declared documents read; 0 unresolved; 0 resident_fixed, 2 resident_free_text, 1 export_render, 13 other; 2 of 2 granted documents in the policy",
       "status": "PASS"
     },
     {
@@ -65,50 +93,66 @@
       "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect: respol_ok=11/11 ssm_ok=",
       "method": "test_suite",
       "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
-      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py` (rc 0). LAST LINE: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=11/11 ssm_ok=12/12 all_ok=True. The sixth block has 12 counted arms and ZERO allowed send arms, because no document is fixed: dell2 SendCommand with [instance, AWS-RunShellScript] explicitDeny; with [instance, export render document] explicitDeny; with [instance, each of 2 free-text resident documents] explicitDeny (2 arms); with [instance, an ungranted plain document] implicitDeny; with [another instance, an ungranted plain document] implicitDeny; dell2 GetCommandInvocation, ListCommandInvocations, ListCommands, DescribeInstanceInformation allowed (4 arms); dell1 SendCommand [instance, document] implicitDeny; dell1 GetCommandInvocation implicitDeny. The evaluator takes both ARNs in one call; per-resource decisions are printed beside the overall one. The 'rewrite of a granted document' arm does not exist (0 granted documents); two uncounted probes show dell1 and dell2 can ssm:UpdateDocument and s3:PutObject the runner artifact prefix (row NFRA_CTLPLN-W14-S2). Mutant: the DenyShellDocuments statement removed -> ssm_ok=8/12 all_ok=False.",
-      "denominator": "22/22 allowed, 19/19 denied, 5/5 passrole, 8/8 protected, 11/11 respol, 12/12 ssm arms",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py` (rc 0, 7 s). LAST LINE: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=11/11 ssm_ok=9/9 routes_ok=5/5 all_ok=True. Sixth block, 9 arms: dell2 SendCommand with [instance, each of the 2 resident documents] allowed (2); with [another instance, a resident document] implicitDeny; with [instance, AWS-RunShellScript] explicitDeny; with [instance, the export render document] explicitDeny; with [instance, a document nothing grants] implicitDeny; dell2 GetCommandInvocation allowed; dell1 SendCommand [instance, resident document] implicitDeny; dell1 GetCommandInvocation implicitDeny. Seventh block, 5 arms on the group set plus the two Deny documents the module builds, routes picked from the census file at run time: function of the YES-IAM role explicitDeny; document feeding a YES host explicitDeny; a YES host's downloaded prefix explicitDeny; each of those three is NOT explicitDeny on the group set without the routes documents (allowed), so the refusal is the new Deny's; function of a NO role allowed; the resident host's own artifact prefix allowed.",
+      "denominator": "22/22 allowed, 19/19 denied, 5/5 passrole, 8/8 protected, 11/11 respol, 9/9 ssm arms, 5/5 routes arms",
       "status": "PASS"
     },
     {
       "criterion_id": "CTa1-AC3",
-      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py expect: names_from_builder=9/9 policy_size_ok=True ok=True",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py expect: policy_size_ok=True ok=True",
       "method": "test_suite",
       "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
-      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py` (rc 0; terraform init -backend=false was warmed once outside the bound, rc 0). LAST LINE: IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=9/9 policy_size_ok=True ok=True. aws_iam_policy.dell2_ssm name 'cloudops-dell2-agent-ssm-policy' MATCH the builder. Characters without whitespace: dell1_bus 276, dell2_bus 276, dell2_ssm 879, dell_create 3998, dell_deploy 4951, dell_respol 2334, limit 6144.",
-      "denominator": "9 of 9 names from the builder; 6 of 6 policy documents within 6144 characters",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py` (rc 0). LAST LINE: IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=11/11 policy_size_ok=True ok=True. terraform init -backend=false and validate on the real root with the new module directory: rc 0 and 'Success! The configuration is valid.' Characters without whitespace: dell1_bus 276, dell2_bus 276, dell2_ssm 1048, dell_create 3998, dell_deploy 4951, dell_respol 2334, routes-fn (module output) 5521, routes-host (module output) 1445, limit 6144. Renderer: ROUTES-RENDER functions=33 documents=12 prefixes=5 policies=2 chars=5521,1445 header_ok=True ok=True",
+      "denominator": "11 of 11 names from the builder; 8 of 8 policy documents (6 files and 2 module outputs) within 6144 characters",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTa1-AC4",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json expect: unread=0",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json",
+      "output_evidence": "Run as `timeout 120 python ... --from-file ...reached_roles_census.json` (rc 0, no AWS call). LAST LINE: ROLE-CENSUS functions=233 tasks=9 hosts=33 roles=175 read=175 unread=0 yes_iam=1 yes_trail=0 yes_delete=9 yes_any=10 no=165 resident_host_role=NO ok=True. ok=True is stated here: 175 of 175 roles read, 0 unread; YES counts yes_iam=1 yes_trail=0 yes_delete=9 (10 distinct YES roles); resident_host_role=NO. The evaluator reads identity policies only (not resource policies or SCPs). Freshness, run once live outside the bound: CENSUS-FRESH saved=2026-10-07T11:05:41Z roles_saved=175 roles_live=175 verdict_changes=0 new_roles=0 gone_roles=0 route_changes=0 fresh=True",
+      "denominator": "175 of 175 roles read; 0 unread; 10 YES, 165 NO",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "the DenyShellDocuments statement removed from dell2_ssm_policy.json for one run (the file restored byte-identical afterwards)",
-      "expected": "derive --check ok=False and ssm_ok below its full count, so AC1 and AC2 discriminate",
-      "observed": "derive: SSM-DOCS ... in_policy=0 ok=False (POLICY-RENDER file_matches_rendering=False); simulate: ssm_ok=8/12 all_ok=False (arms 01-04 implicitDeny where explicitDeny is required); RESTORED identical=True",
+      "description": "the census header's roles_read set to 174 in a temporary root outside the repository, with the exact condition expression copied from routes.tf in a terraform_data precondition (a builtin resource, no provider); terraform plan there",
+      "expected": "the plan is refused ('Resource precondition failed') when roles_read != roles_total",
+      "observed": "refused: roles_read is 174, roles_total is 175, roles is object with 175 attributes; the real root was not planned",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "N/A: the derivation reads fixed repository text and the cloud evaluator is deterministic over fixed input",
-      "observed": "N/A",
-      "status": "N/A-WITH-REASON"
+      "method": "render_routes_policy.py run twice, stdout hashed with sha256sum",
+      "observed": "identical: fc9f278748cdffc30b7e25dd2b58a846ee857a4100ec163c60f57f23c9dc830b both runs",
+      "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "terraform apply, plan against the backend, any IAM write, ssm send-command, any session",
-      "reason": "order BOUNDS: apply nothing, send nothing; the only AWS calls were iam:SimulateCustomPolicy"
+      "item": "terraform apply, plan against the backend, any IAM write, ssm send-command, any session, any task or function run",
+      "reason": "order BOUNDS: apply nothing, send nothing; the AWS calls were read-only (list, describe, get, sts get-caller-identity, simulate-principal-policy, simulate-custom-policy)"
     },
     {
       "item": "the live SSM documents in the account were not compared to the repository text",
       "reason": "order BOUNDS: documents are read from the repository"
     },
     {
-      "item": "the allowed send arms and the rewrite-of-a-granted-document arm",
-      "reason": "no document classifies RESIDENT-FIXED (row NFRA_CTLPLN-W14-S1); the order's bound is a policy without the send statement"
+      "item": "the evaluator does not apply resource policies on the target or organisation SCPs",
+      "reason": "a YES is 'the role's own policies allow it' and a NO is firm for identity policy only (census caveat)"
+    },
+    {
+      "item": "the census header's caller identity is the same credentials read at stamping, not at the 508-second read",
+      "reason": "the STEP 1 run record did not carry it; the freshness check re-read every role live afterwards and found no difference"
     }
   ],
   "surprises": [
     "NFRA_CTLPLN-W14-S1",
-    "NFRA_CTLPLN-W14-S2"
+    "NFRA_CTLPLN-W14-S2",
+    "NFRA_CTLPLN-W14-S3",
+    "NFRA_CTLPLN-W14-S4",
+    "NFRA_CTLPLN-W14-S5"
   ],
   "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~14/NFRA_CTLPLN.TO-CT-a-1.dell2-sendcommand-grant.proof_of_spec.json",
   "compiler_tools": [
