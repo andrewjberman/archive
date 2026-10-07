@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_CUSTDY.TO-CU-a-2",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-a-2.client-report-figures.md",
+    "group": "OTHER",
+    "vintage_commit": "30f94c3ab1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.md",
+    "vintage_commit": "30f94c3ab1",
+    "to_ref": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-a-2.client-report-figures.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_CUSTDY~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/client_report_figures.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-2; no S3 write, --apply never run",
+      "artifact_covered_by": [
+        "CU2-AC1",
+        "CU2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_client_report_figures.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local on branch wk-IRPT_CUSTDY-2",
+      "artifact_covered_by": [
+        "CU2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_CUSTDY-W2-S1 appended",
+      "artifact_covered_by": [
+        "CU2-AC1",
+        "CU2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CU2-AC1",
+      "criterion_verbatim": "CU2-AC1 -- the figures on fixtures: contract keys, ruled periods, NO_DATA in place, labelled fees, the coverage refusal, masking.",
+      "method": "command",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_client_report_figures.py",
+      "output_evidence": "............                                                             [100%]\n12 passed in 5.30s\nrc=0",
+      "denominator": "12 of 12 tests passed",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU2-AC2",
+      "criterion_verbatim": "CU2-AC2 -- the hop's seam against its REAL neighbour: one read-only pass over the real Schwab silver of one master through the real CLI. Whatever as_of_covered reads is reported, not graded.",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/client_report_figures.py --coverage --master 08335338",
+      "output_evidence": "SCHWAB-COVERAGE master=08335338 read_ok=True tables=20 latest=2026-10-05 as_of_covered=True\nrc=0",
+      "denominator": "20 silver tables listed for master 08335338; as_of 2026-09-30 reported covered=True (reported, not graded)",
+      "expect": "SCHWAB-COVERAGE master=08335338 read_ok=True",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "One-off mutant: the NO_DATA branch of _cell_to_return changed to zero-fill (value 0.0 instead of null) in the module, tests re-run, module restored byte-identical (cmp).",
+      "expected": "the NO_DATA, contract and masking tests fail",
+      "observed": "3 failed, 9 passed (test_documents_carry_the_contract_keys, test_missing_figure_is_no_data_not_zero, test_no_printed_line_carries_more_than_the_last_four); restored, 12 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- fixtures are generated in tmp_path from constants; no clock or randomness is read",
+      "observed": "two runs of the self-test printed the identical final line",
+      "status": "N/A-WITH-REASON",
+      "reason": "the only real-world read is CU2-AC2, whose latest partition date moves with the feed and is reported, not graded"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "--apply against S3 and a full-population run over real accounts",
+      "reason": "The order reserves the S3 write and the real run to the issuer after the drain; the apply path was exercised only against a local directory (test_apply_writes_at_the_builder_address)."
+    },
+    {
+      "item": "ruff py39 lint",
+      "reason": "ruff is not installed in this worktree's shell; py_compile and the commit gate cover the file."
+    }
+  ],
+  "surprises": [
+    "IRPT_CUSTDY-W2-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_client_report_figures.py",
+      "result": "12 passed"
+    }
+  ]
+}
