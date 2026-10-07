@@ -1,0 +1,105 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_BLANKFIX.TO-BF-e-7",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round2.md",
+  "vintage_commit": "9b4f050ec7",
+  "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-e-7.contested-folders.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "47ef4c98cc"
+ },
+ "assignee": "0.9.0_WK_LGIC_BLANKFIX~7",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/opal_naming_scope.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A repository library module with no deploy target; run from the command line."
+  },
+  {
+   "path_or_key": "lib/tests/test_opal_naming_scope.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A plain-script test; no deploy target."
+  },
+  {
+   "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~7/ROOT_MAP_SOURCE_DIRS_PROPOSED.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A PROPOSAL in the deliverables folder (the landed map byte for byte; see row LGIC_BLANKFIX-W7-S1); nothing under infra/logic/ was created or edited."
+  },
+  {
+   "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Three rows appended (W7-S1, W7-S2, W7-S3); no existing row edited."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "BE7-AC1",
+   "criterion_verbatim": "BE7-AC1 -- a listed folder is read once under its root, and the denominator still sums.",
+   "method": "command",
+   "invocation": "python lib/tests/test_opal_naming_scope.py",
+   "output_evidence": "SCOPE-TEST ok=True assertions=348\nrc=0",
+   "denominator": "348 of 348 assertions held (the 77-line original's assertions kept; difference control on infra/aws/lambda/cot-pipeline/cot-rebalancer-runner, 4 items: no map -> 0 read by opal-assets, assigned+unassigned = 1965; map -> 4 read by opal-assets only, assigned 1846 -> 1850, unassigned 119 -> 115, sum 1965; a folder listed by two entries raises ValueError naming both; CLI --map reaches contested and table)",
+   "status": "PASS",
+   "expect": "SCOPE-TEST ok=True"
+  },
+  {
+   "criterion_id": "BE7-AC2",
+   "criterion_verbatim": "BE7-AC2 -- every contested folder of the real repository is listed with its claimants and evidence.",
+   "method": "command",
+   "invocation": "python lib/opal_naming_scope.py contested",
+   "output_evidence": "SCOPE-CONTESTED ok=True folders=12 items=51 assigned=0 unassigned=51\nrc=0",
+   "denominator": "12 of 12 contested folders printed, each with its claimant roots and evidence kinds per root (51 items: 4 + 4 under cot-pipeline, 43 under investor-reporting); ok=True requires every claimant to carry evidence",
+   "status": "PASS",
+   "expect": "SCOPE-CONTESTED ok=True"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The clash map of the test: two root-map entries (opal-assets, cot-pipeline) both listing infra/aws/lambda/cot-pipeline/cot-rebalancer-runner, run through root_items, root_table, contested_rows and the table command.",
+   "expected": "ValueError naming both entries and the folder; the table command prints ok=False and exits 1",
+   "observed": "asserted inside python lib/tests/test_opal_naming_scope.py (348 of 348 held)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "python lib/opal_naming_scope.py table printed to a file before and after the edit, compared with cmp; the test and the contested command run twice.",
+   "observed": "table output byte-identical before and after (SCOPE-TABLE ok=True roots=61 items=1965 assigned=1846 unassigned=119); SCOPE-TEST and SCOPE-CONTESTED last lines identical on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "source_dirs entries for the 11 roots shown to own the contested folders",
+   "reason": "The repository decides who declares the functions but not the scope of a root entry (row LGIC_BLANKFIX-W7-S1); the proposal is the landed map unchanged and the owners are in the report as undecided entries."
+  },
+  {
+   "item": "the parent folder infra/aws/lambda/investor-reporting (11 items)",
+   "reason": "Declared by all 12 sibling roots; the order says say so and do not pick."
+  }
+ ],
+ "surprises": [
+  "LGIC_BLANKFIX-W7-S1",
+  "LGIC_BLANKFIX-W7-S2",
+  "LGIC_BLANKFIX-W7-S3"
+ ],
+ "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~7/ROOT_MAP_SOURCE_DIRS_PROPOSED.json",
+ "compiler_tools": [
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> BE7-AC1,BE7-AC2",
+   "result": "run before the complete flip; exit code is the verdict"
+  }
+ ]
+}

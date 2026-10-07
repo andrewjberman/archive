@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_CUSTDY.TO-CU-f-3",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-f-3.anchor-probe-bounded.md",
+    "group": "OTHER",
+    "vintage_commit": "376f130948"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.round6.md",
+    "vintage_commit": "376f130948",
+    "to_ref": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-f-3.anchor-probe-bounded.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_CUSTDY~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/client_report_figures.py",
+      "kind": "script",
+      "commit_or_etag": "3a4149c42f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "workspace branch wk-IRPT_CUSTDY-14 commit 3a4149c42f (LOCAL); the drain merges it",
+      "artifact_covered_by": [
+        "CU17-AC1",
+        "CU17-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/hop3_timed_check.py",
+      "kind": "script",
+      "commit_or_etag": "3a4149c42f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "workspace branch wk-IRPT_CUSTDY-14 commit 3a4149c42f (LOCAL); the drain merges it",
+      "artifact_covered_by": [
+        "CU17-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_si_anchor_bounded.py",
+      "kind": "test",
+      "commit_or_etag": "3a4149c42f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "workspace branch wk-IRPT_CUSTDY-14 commit 3a4149c42f (LOCAL); the drain merges it",
+      "artifact_covered_by": [
+        "CU17-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "3a4149c42f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "workspace branch wk-IRPT_CUSTDY-14 commit 3a4149c42f (LOCAL); the drain merges it",
+      "artifact_covered_by": [
+        "CU17-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CU17-AC1",
+      "criterion_verbatim": "CU17-AC1 -- the CTO's criterion (1), timed on real data on dell2. Run it under `timeout 600` so a regression reports instead of hanging.",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/hop3_timed_check.py --advisor matthew_gooch --as-of 2026-09-30",
+      "output_evidence": "(run under timeout 600) HOP3-TIMED advisor=matthew_gooch seconds=62.2 within_120=True households=10 accounts=14 si_ok=14 si_labels_rule1=12 si_labels_rule2=2\nrc=0",
+      "denominator": "1 advisor (matthew_gooch), 14 of 14 covered accounts carry SI OK: 12 under rule 1 (since inception (first funded <date>)) + 2 under rule 2 (since <date>, the first date Opal holds), 10 households; the same 14/12/2 the unchanged code gave (baseline run before the change: seconds=148.2 within_120=False, same counts). Other timings on the final code: 68.2 s (instrumented run); on the unchanged code 133 s and 194 s, so the network moves the time but the 62-68 s runs sit inside the bound",
+      "expect": "within_120=True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU17-AC2",
+      "criterion_verbatim": "CU17-AC2 -- the CTO's criterion (2) on fixtures: same anchors, no unbounded listing.",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_si_anchor_bounded.py",
+      "output_evidence": "9 passed in 17.76s\nrc=0",
+      "denominator": "9 of 9 tests passed in 1 file (real S3Store over a stubbed boto3 client): no list call without a delimiter or a date=<day>/ prefix and none table-wide (1); positions read only on the 3 span days, each once, none of the 3 days outside the span (1); no read when no account owes the probe (1); branch a, branch c holdings found, branch c missing partition give the anchors, branch and holdings count of the sequential _holdings_before_first reference (3); unpadded ids in the silver still match (1); LocalStore and S3Store agree (1); timed-check counts and bound (1). Whole irpt_custody suite: 147 passed, 1 xfailed, 1 failed (test_none_source_names_the_seam_line, inherited, row IRPT_CUSTDY-W14-S2); hop3_real_run.py --self-test file_ok=True masked_ok=True held_ok=True error_written_ok=True",
+      "expect": "passed",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "none run; the stubbed-S3 tests assert on recorded calls and on equality with the sequential reference",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC2 fixtures only: no clock, network or randomness; AC1 is a live timing and varies with the network",
+      "observed": "AC2 passed in 3 runs (12.8 s, 17.8 s, whole-suite run); AC1 62.2 s and 68.2 s on the final code",
+      "status": "N/A-WITH-REASON",
+      "reason": "AC1 is a live measurement by design"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the unkeyed lookup context build (unkeyed_lookup.build_context, ~25-30 s) and the returns load (~14-22 s)",
+      "reason": "outside this order's paths and not the SI probe; the total is inside the bound without them"
+    }
+  ],
+  "surprises": [
+    "IRPT_CUSTDY-W14-S3"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests",
+      "result": "147 passed, 1 xfailed, 1 failed (inherited, W14-S2)"
+    }
+  ]
+}

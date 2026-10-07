@@ -1,0 +1,90 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_BLANKFIX.TO-BF-e-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round2.md",
+  "vintage_commit": "9b4f050ec7",
+  "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-e-3.key-carries-bucket.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "47ef4c98cc"
+ },
+ "assignee": "0.9.0_WK_LGIC_BLANKFIX~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/opal_naming_keyfill.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A repository library module with no deploy target; run only from the command line."
+  },
+  {
+   "path_or_key": "lib/tests/test_opal_naming_keyfill.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A plain-script test; no deploy target."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "BE3-AC1",
+   "criterion_verbatim": "BE3-AC1 -- the bucket is what decides a legacy match, and another firm's bucket is refused, not filled.",
+   "method": "command",
+   "invocation": "python lib/tests/test_opal_naming_keyfill.py",
+   "output_evidence": "OK: RAISING SKIPPED rows=0 raising=1\nKEYFILL-TEST ok=True cases=17\nrc=0",
+   "denominator": "17 of 17 cases held (LEGACY only in the entry's bucket; the same path with another or unread bucket is not LEGACY; a key in another firm's bucket and a cot-token path are REFUSED-CROSS-FIRM; bucket_of on three source texts; row shape)",
+   "status": "PASS",
+   "expect": "KEYFILL-TEST ok=True"
+  },
+  {
+   "criterion_id": "BE3-AC2",
+   "criterion_verbatim": "BE3-AC2 -- the real source folder: every blank key classed, each with its bucket or the reason none was read.",
+   "method": "command",
+   "invocation": "python lib/opal_naming_keyfill.py dir infra/aws/lambda/bd-pipeline --root bd-pipeline --map infra/logic/registry/root_map.json",
+   "output_evidence": "KEYFILL-DIR ok=True dir=infra/aws/lambda/bd-pipeline rows=16 address=13 legacy=0 pattern=1 refused=2 undecided=0 raising=6 with_bucket=16\nrc=0",
+   "denominator": "16 of 16 rows classed (13 address, 1 pattern, 2 refused, 0 legacy, 0 undecided) and 16 of 16 carry a bucket; 6 further items raise in grade() and are skipped",
+   "status": "PASS",
+   "expect": "with_bucket="
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The BE3-AC2 invocation re-run with --root no-such-root (no root entry).",
+   "expected": "no row can be an ADDRESS and the last line reads ok=False",
+   "observed": "KEYFILL-DIR ok=False dir=infra/aws/lambda/bd-pipeline rows=16 address=0 legacy=0 pattern=1 refused=0 undecided=15 raising=6 with_bucket=16",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Both criterion invocations were run twice (once while building, once at the final read) and the last lines compared.",
+   "observed": "KEYFILL-TEST ok=True cases=17; KEYFILL-DIR ok=True rows=16 address=13 legacy=0 pattern=1 refused=2 undecided=0 raising=6 with_bucket=16 -- identical both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the 6 names of the folder that grade() raises on",
+   "reason": "The classifier skips and counts them (raising=6); they carry no row."
+  }
+ ],
+ "surprises": [
+  "LGIC_BLANKFIX-W3-S3"
+ ],
+ "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "lib/opal_naming_keyfill.py",
+   "invocation": "python lib/opal_naming_keyfill.py dir infra/aws/lambda/bd-pipeline --root bd-pipeline --map infra/logic/registry/root_map.json",
+   "result": "KEYFILL-DIR ok=True rows=16 address=13 legacy=0 pattern=1 refused=2 undecided=0 raising=6 with_bucket=16"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> BE3-AC1,BE3-AC2",
+   "result": "run before the complete flip; exit code is the verdict"
+  }
+ ]
+}

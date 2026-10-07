@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-m-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-m-1.one-signing-table.md",
+    "group": "OTHER",
+    "vintage_commit": "65ce59b838"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~29",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round13.md",
+    "vintage_commit": "65ce59b838",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-m-1.one-signing-table.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_signs.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local build; nothing deployed, no S3 write"
+    },
+    {
+      "path_or_key": "data/assets/scripts/analysis/commonwealth_tx_types.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only census of the applied silver table; nothing deployed, no S3 write"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_daily_holdings.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local build; nothing deployed, no S3 write"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_signs.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local tests; nothing deployed"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~29/fractional_residuals.csv",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local build; nothing deployed, no S3 write"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB13m1-AC1",
+      "criterion_verbatim": "python data/assets/scripts/analysis/commonwealth_tx_types.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~29 expect: unsigned_with_quantity=0",
+      "method": "command",
+      "invocation": "python data/assets/scripts/analysis/commonwealth_tx_types.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~29",
+      "output_evidence": "TX-TYPES types=61 signed=31 unsigned=30 unsigned_with_quantity=0 unsigned_with_quantity_named=8 (rc 0, read of the applied silver table on S3, about 7 s, under timeout 120; signs and NO_SHARE_MOVEMENT read from data/assets/scripts/silver/commonwealth_signs.py)",
+      "denominator": "61 of 61 delivered Transaction_Types listed (1,416,497 rows read); 31 signed in the one table, 30 unsigned and all 30 named in NO_SHARE_MOVEMENT with a reason; 8 of the 30 carry a non-zero quantity on a non-cash CUSIP (dv, int, dvlt, dvst, ac, acca, accal, ileu), 0 of 61 undecided. Negative control: with NO_SHARE_MOVEMENT emptied the same census gives unsigned_with_quantity=8",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB13m1-AC2",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_daily_holdings.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~29 expect: snapshot_diffs=0",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_daily_holdings.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~29",
+      "output_evidence": "DAILY-HOLDINGS accounts=1533 account_days=1691729 holding_rows=22547096 snapshot_accounts=83 snapshot_pairs=381 snapshot_equal=381 snapshot_diffs=0 fractional_residuals=5 fractional_accounts=5 (rc 0, about 10 s, under timeout 120)",
+      "denominator": "381 of 381 snapshot pairs equal (round 12: 394 pairs, 13 differences); 1533 of 1533 accounts rebuilt from 1,416,497 rows of the cache (the cache holds the applied table: 14 objects, same prefix); last daily state equals the full rebuild for 1533 of 1533 accounts; fractional_residuals.csv holds 5 rows over 5 accounts, recorded, none presumed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB13m1-AC3",
+      "criterion_verbatim": "JUDGMENT: account D49141617 read again across its span, with 0 cash-in-lieu residuals",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~29/D49141617_read.txt and daily_holdings.parquet against the transactions of account D49141617",
+      "output_evidence": "outputs produced: D49141617_read.txt (3,537 rows, 2016-01-25 to 2026-06-22, 8 leu rows on 8 securities, every leu pair at 0 after its last transaction, 0 of 101 non-cash pairs under one share), daily_holdings.parquet; no verdict given",
+      "denominator": "1 account to be read by the grader",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; graded by 3.0.0_SA_CVO at L9, never self-graded",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "empty NO_SHARE_MOVEMENT in the census, and drop leu, pyd and trci from SIGN",
+      "expected": "unsigned_with_quantity rises from 0 to 8 (named types become undecided) and to 3 (three signed types undecided)",
+      "observed": "census(df, SIGN, {}) -> unsigned_with_quantity=8; census(df, SIGN without leu/pyd/trci, NO_SHARE_MOVEMENT) -> unsigned_with_quantity=3",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: one-time build",
+      "observed": "census and rebuild each run twice (S3 read and local cache read) with the same TX-TYPES line",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "corporate actions the transactions do not record",
+      "reason": "the order's declared BLIND; the 5 fractional residuals are listed with their type history and not explained here"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W29-S1",
+    "ADVI_COTBKF-D2-W29-S2"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~29/ADVI_COTBKF.TO-CB-m-1.one-signing-table.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests -q -k commonwealth",
+      "result": "122 passed (all commonwealth silver tests; the 43 existing tests of the three scripts still pass, plus the new ones)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 <the edited .py files>",
+      "result": "All checks passed"
+    }
+  ]
+}
