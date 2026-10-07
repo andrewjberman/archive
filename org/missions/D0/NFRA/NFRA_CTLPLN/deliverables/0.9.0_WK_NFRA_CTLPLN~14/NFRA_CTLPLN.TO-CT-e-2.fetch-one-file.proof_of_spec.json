@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-e-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-e-2.fetch-one-file.md",
+    "group": "OTHER",
+    "vintage_commit": "6d77b5a055"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~14",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round5.md",
+    "vintage_commit": "6d77b5a055",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-e-2.fetch-one-file.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the worker ran one anyway on a scratch copy outside the tree: the digest comparison and the loopback host comparison each replaced by `if False`",
+      "expected": "the digest, size, other-host and redirect cases fail",
+      "observed": "scratch copy gave INTAKE-FETCH-TEST cases=13/19 ok=False (6 cases failed: case_digest_mismatch, case_size_mismatch_and_overrun, case_other_host_url, case_redirect_other_host, case_public_host_rule, case_list_reads_batch)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: every case starts its own fake index on an ephemeral 127.0.0.1 port with a temporary holding and records root",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any request to the real index, and the real index's response and attestation shapes",
+      "reason": "the order forbids contacting it; the fake index is built from the field names the order gives; the first real fetch is the issuer's act on the CTO's signature"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_fetch.py",
+      "kind": "script",
+      "commit_or_etag": "1eec678bd9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit; nothing deployed, no push",
+      "artifact_covered_by": [
+        "CT5e2-AC1",
+        "CT5e2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_fetch.py",
+      "kind": "test",
+      "commit_or_etag": "1eec678bd9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit; nothing deployed, no push",
+      "artifact_covered_by": [
+        "CT5e2-AC1",
+        "CT5e2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/README.md",
+      "kind": "doc",
+      "commit_or_etag": "1eec678bd9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit; nothing deployed, no push",
+      "artifact_covered_by": [
+        "CT5e2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/devices/intake/records/selfcheck/pyyaml-6.0.3-cp314-cp314-win_amd64.whl.fetch.json",
+      "kind": "doc",
+      "commit_or_etag": "1eec678bd9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit; nothing deployed, no push",
+      "artifact_covered_by": [
+        "CT5e2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT5e2-AC1",
+      "criterion_verbatim": "python org/devices/intake/test_intake_fetch.py expect: INTAKE-FETCH-TEST cases= (every case passing: the line must read ok=True)",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_fetch.py",
+      "output_evidence": "PASS: case_happy\nPASS: case_missing_file\nPASS: case_digest_mismatch\nPASS: case_size_mismatch_and_overrun\nPASS: case_other_host_url\nPASS: case_wrong_segment_url\nPASS: case_redirect_other_host\nPASS: case_redirect_same_host_followed\nPASS: case_redirect_hop_cap\nPASS: case_attestation_absent\nPASS: case_linux_name\nPASS: case_index_spelling\nPASS: case_yanked\nPASS: case_connection_error_one_retry\nPASS: case_public_without_approval_zero_sockets\nPASS: case_public_host_rule\nPASS: case_list_reads_batch\nPASS: case_cli_last_line\nPASS: case_record_is_ascii_and_rewrites_safe\nINTAKE-FETCH-TEST cases=19/19 ok=True\nrc=0",
+      "denominator": "19 of 19 cases pass, all against a fake index on 127.0.0.1 (second listener on another port counted zero hits in the other-host and redirect cases; the public-base case patched the opener, getaddrinfo and socket.connect to raise and none was called)",
+      "status": "PASS",
+      "expect": "INTAKE-FETCH-TEST cases="
+    },
+    {
+      "criterion_id": "CT5e2-AC2",
+      "criterion_verbatim": "python org/devices/intake/intake_fetch.py fetch --batch selfcheck --name pyyaml --version 6.0.3 --python-tag cp314 --abi-tag cp314 --platform-tag win_amd64 expect: outcome=refused (the same line must read requests=0)",
+      "method": "command",
+      "invocation": "python org/devices/intake/intake_fetch.py fetch --batch selfcheck --name pyyaml --version 6.0.3 --python-tag cp314 --abi-tag cp314 --platform-tag win_amd64",
+      "output_evidence": "record: C:\\tmp\\wk-ctlpln-14\\org\\devices\\intake\\records\\selfcheck\\pyyaml-6.0.3-cp314-cp314-win_amd64.whl.fetch.json\nREFUSED: public index needs --approved-by <file> naming pyyaml==6.0.3\nINTAKE-FETCH batch=selfcheck file=pyyaml-6.0.3-cp314-cp314-win_amd64.whl requests=0 outcome=refused sha256=- bytes=0 attestation=unread\nrc=0",
+      "denominator": "1 bare public-base call: requests=0 and outcome=refused on one line; a refusal record with an empty requests list was written to org/devices/intake/records/selfcheck/",
+      "status": "PASS",
+      "expect": "outcome=refused"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~14/NFRA_CTLPLN.TO-CT-e-2.fetch-one-file.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/devices/intake/test_intake_fetch.py",
+      "result": "INTAKE-FETCH-TEST cases=19/19 ok=True"
+    }
+  ]
+}
