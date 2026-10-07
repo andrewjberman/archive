@@ -1,5 +1,6 @@
-"""RIV-bf-1 AC2 (FWD-22; F.5 card 2 answer; WORLD; ROUND15_CELLS_DRAFT.md revision 1.5): a range backfill that fits sends ONE
-historical request per batch of 50 securities over the whole range, lands one `security_market` object per date labelled
+"""RIV-bf-1 AC2 (FWD-22; F.5 card 2 answer; WORLD; ROUND15_CELLS_DRAFT.md revision 1.5; amended round 20, RIV-bk-1): a range
+backfill that fits sends ONE historical request per batch of 50 securities per contiguous run of un-held trading days (ONE CRNCY
+reference request first, for the securities with no stored currency), lands one `security_market` object per date labelled
 `backfill`, never overwrites a date that already holds a market object, and records its points in the budget ledger.
 
 Measured today (CLOUD 90e794e816): `{"mode": "market-range"}` returns FAILED "bad event: mode 'market-range' is not ..."; the
@@ -17,12 +18,14 @@ field for every trading day of the request; `integrations.bloomberg.mcp` is repl
 Fixture: 60 securities (`S000 US Equity` .. `S059 US Equity`), start 2026-09-21 (Monday), end 2026-09-28 (Monday): 6 NYSE
 trading days, 360 points, `max_points` 1000, `dry_run` false. The sink already holds ONE object for 2026-09-23
 (`market-20260924T010000Z-plantedplant.parquet`, one row, `as_of_source` "historical").
-  - (a) status OK; the stub records exactly 2 historical requests, of 50 and 10 securities, each over 2026-09-21..2026-09-28 and
-    each for `["PX_LAST"]` only; no reference request; nothing reaches the shared client;
+  - (a) status OK; the stub records exactly 4 historical requests (round 20: the held 2026-09-23 splits the range into the runs
+    2026-09-21..09-22 and 2026-09-24..09-28), of 50 and 10 securities in each run and each for `["PX_LAST"]` only; ONE reference
+    request, for `["CRNCY"]` and the 60 securities (none holds a stored currency); nothing reaches the shared client;
   - (b) each of 2026-09-21, -22, -24, -25, -28 holds exactly ONE `market-*.parquet` of 60 rows, every row `as_of_source` ==
     "backfill", `date` == its partition and `px_close` set; the weekend 26 / 27 holds none;
   - (c) the skip: 2026-09-23 still holds exactly the planted object, byte for byte, and the result counts 1 skipped date;
-  - (d) the ledger holds `market-range` lines whose rows sum to the points (360 planned, or 300 landed);
+  - (d) the ledger holds `market-range` lines whose rows sum to the points asked: 300 historical (the held date is not asked)
+    plus 60 for the currency request;
   - (e) control: the existing mode `plan-market` over the same 60 securities returns OK with 2 batches and no vendor call.
 FAIL at base: (a), (b), (c), (d) FAIL (the mode is refused as a bad event: no request, no object, no count, no ledger line);
 (e) PASSES."""
@@ -166,10 +169,13 @@ def run(v):
 
     shapes = sorted(((len(secs), fields, lo, hi) for secs, fields, lo, hi in vd.hist), reverse=True)
     asked = sorted(x for secs, _f, _lo, _hi in vd.hist for x in secs)
-    print(f"historical requests: {len(vd.hist)} {shapes} | reference requests: {len(vd.ref)} | reached blp_client: {len(vd.leaked)}")
-    v.check(fixture_ok and res.get("status") == "OK" and shapes == [(50, ["PX_LAST"], START, END), (10, ["PX_LAST"], START, END)]
-            and asked == sorted(SECS) and not vd.ref and not vd.leaked,
-            "(a) ONE historical request per batch of 50 securities over [start, end], PX_LAST only, and no other request")
+    runs = (("2026-09-24", "2026-09-28"), ("2026-09-21", "2026-09-22"))   # the un-held runs, newest first (the shapes sort reverse)
+    want = [(n, ["PX_LAST"], lo, hi) for n in (50, 10) for lo, hi in runs]
+    print(f"historical requests: {len(vd.hist)} {shapes} | reference requests: {len(vd.ref)} {[(len(x), f) for x, f in vd.ref]} | "
+          f"reached blp_client: {len(vd.leaked)}")
+    v.check(fixture_ok and res.get("status") == "OK" and shapes == want and asked == sorted(SECS * 2)
+            and [(sorted(x), f) for x, f in vd.ref] == [(sorted(SECS), ["CRNCY"])] and not vd.leaked,
+            "(a) ONE historical request per batch of 50 securities per run of un-held days, PX_LAST only, and ONE CRNCY reference request")
 
     objs = market_objects(s, homes)
     good = []
@@ -194,7 +200,7 @@ def run(v):
     lines = [ln for ln in ledger_lines(bb) if ln.get("mode") == "market-range"]
     total = sum(int(ln.get("rows", 0)) for ln in lines)
     print(f"ledger market-range lines: {lines} | rows {total} | spent(today) {bb.spent()}")
-    v.check(bool(lines) and total in (PLAN, PLAN - len(SECS)) and bb.spent() == total,
+    v.check(bool(lines) and total == (PLAN - len(SECS)) + len(SECS) and bb.spent() == total,
             "(d) the points are recorded in the bbg_budget ledger with mode 'market-range'")
 
     vd2 = bind(eb, days)
