@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-36",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "d157a1c98d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-36.identity-gap-diagnosis.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~21",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~21/GAP_DIAGNOSIS_E1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~21/GAP_DIAGNOSIS_E1.json",
+      "kind": "config_data",
+      "commit_or_etag": "32caac124b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The diagnosis: largest_gap_window (7 terms, source rows and counts, cause, 11 evidence rows), type_census (35 types over 2,662 rows) with 10 unmapped_value_movers, gap_classes (39 rows, tolerance 0.05: 30 ROUNDING, 9 MISSING-TERM).",
+      "artifact_covered_by": [
+        "DB24-1-AC1",
+        "DB24-1-AC2",
+        "DB24-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~21/GAP_DIAGNOSIS_E1.md",
+      "kind": "doc",
+      "commit_or_etag": "32caac124b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only summary; no client figure or balance.",
+      "artifact_covered_by": [
+        "DB24-1-AC1",
+        "DB24-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~21/gap_diagnosis_e1.py",
+      "kind": "script",
+      "commit_or_etag": "32caac124b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only helper: imports the producer and the served producer, reads S3 get/list only, writes GAP_DIAGNOSIS_E1.json; py_compile clean; the two producer runs (as-run and infer_string False) are evidence, never an edit.",
+      "artifact_covered_by": [
+        "DB24-1-AC1",
+        "DB24-1-AC2",
+        "DB24-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "32caac124b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows W21-S1 (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~D2), W21-S2 and W21-S3 (OBSERVATION, INERT) appended; existing bytes unchanged (3 new rows of 81 passed surprise-row-gate).",
+      "artifact_covered_by": [
+        "DB24-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB24-1-AC1",
+      "criterion_verbatim": "DB24-1-AC1 -- the largest-gap window printed term by term, each term with its source rows and count, the cause named with its rows. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r24/p24_identity.py\" . DB24-1-AC1",
+      "output_evidence": "beginning_value            1612718.26  rows 1\n  contributions              1226000.00  rows 3\n  withdrawals                      0.00  rows 0\n  realized                         0.00  rows 0\n  unrealized_change         -1553805.34  rows 8\n  income                           2.55  rows 2\n  ending_value                176002.55  rows 1\nOK: 0018321241 window read term by term; cause: The journals and transfers of assets that moved this account's value are CONDITIONAL-BY-COUNTERPARTY rows in the shared code table, and the served flow rule nev\nDB24-1-AC1 PASS\nrc=0",
+      "denominator": "1 of 1 largest-gap window (round 23's largest |gap|); all 7 terms recomputed from dim_balance, fact_trn, fact_rld and fact_uln/fact_ult and tie the producer's own terms (7 of 7 difference 0); 11 evidence rows (6 cash journals, 5 in-kind legs); window gap 1,108,912.92 = 1,060,000.00 + 48,912.92, residual 0.0000",
+      "status": "PASS",
+      "expect": "DB24-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB24-1-AC2",
+      "criterion_verbatim": "DB24-1-AC2 -- every transaction type censused with count, sign, mapped term and whether it moves value; the unmapped movers listed. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r24/p24_identity.py\" . DB24-1-AC2",
+      "output_evidence": "OK: 35 types censused (3 UNSIGNED); 10 move value and map to no term: ['$JNL/FC/FC/CREDIT', '$JNL/FC/JR/CREDIT', '$JNL/FC/JR/DEBIT', 'ADJ/IC/IC/SHORT', 'FEE/FC/FE/DEBIT', 'FTP/FC/WD/DEBIT', 'JNL/IC/JR/SHORT', 'TOA/FC/TA/CREDIT', 'TOA/IC/TA/LONG', 'TOA/IC/TA/SHORT']\nDB24-1-AC2 PASS\nrc=0",
+      "denominator": "35 of 35 types over 2,662 fact_trn rows of the 91 graded accounts in the 24 window partitions (24 of 24 partitions are the 24 trading days); 3 UNSIGNED, 18 mapped to a term, 17 map to none of which 7 move no value (sweeps and trade legs, 270 of 270 sweep account-days net zero) and 10 move value (listed)",
+      "status": "PASS",
+      "expect": "DB24-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB24-1-AC3",
+      "criterion_verbatim": "DB24-1-AC3 -- the 39 gaps classed ROUNDING (within 0.05) or MISSING-TERM (with its cause), counts printed. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r24/p24_identity.py\" . DB24-1-AC3",
+      "output_evidence": "OK: 39 gaps classed: ROUNDING 30, MISSING-TERM 9 (tolerance 0.05)\nDB24-1-AC3 PASS\nrc=0",
+      "denominator": "39 of 39 round-23 gaps classed with the tolerance 0.05 stated before the run: ROUNDING 30, MISSING-TERM 9; the 9 are each explained by 1 or 2 named components with a residual of 0.0135 or less; the 91-account reproduction matches round 23 with maximum difference 0.0",
+      "status": "PASS",
+      "expect": "DB24-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The discriminator for the named cause: the same served producer run with pd.options.future.infer_string = False (None kept as None). If the cause were wrong, the flow of the dropped rows would not change.",
+      "expected": "the CONDITIONAL rows add nothing to the flow as run and a non-zero amount counterfactually",
+      "observed": "12 of 12 days with a CONDITIONAL row show the rows absent from the as-run flow; for the largest-gap account as run 0.00 against counterfactual -351,775.00 (2026-09-02), -3,000,165.12 (2026-09-14), -500,000.00 (2026-09-21), 736,000.00 (2026-09-29); census key ft_excluded_class-nan_rows 71/38/32/74 as run, resolved_* populated counterfactually",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The producer was re-run end to end over the same 100 accounts and 24 days and its window_identity compared with the round-23 record",
+      "observed": "91 graded, 52 within one cent, 39 above, same 39 accounts, maximum gap difference 0.0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any edit of account_activity_lots.py, account_return_daily.py or a served producer; any S3 write, vendor call or bun",
+      "reason": "Bounds and refusal clause of the order; none made. The fix is DB-b-37."
+    },
+    {
+      "item": "the 30 ROUNDING gaps are not decomposed",
+      "reason": "The order's tolerance (0.05 per account-window, stated before the run) classes them; they carry their class and the tolerance as cause."
+    },
+    {
+      "item": "whether the Lambda runtime serving account_return_daily carries pandas 3",
+      "reason": "Unmeasured here (no pin found); filed in row W21-S1 as the armed hazard's open limb."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W21-S1",
+    "IRPT_DASHBD-W21-S2",
+    "IRPT_DASHBD-W21-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~21/gap_diagnosis_e1.py",
+      "result": "clean (32caac124b); commit-gate and surprise-row-gate passed on the record commit"
+    }
+  ]
+}
