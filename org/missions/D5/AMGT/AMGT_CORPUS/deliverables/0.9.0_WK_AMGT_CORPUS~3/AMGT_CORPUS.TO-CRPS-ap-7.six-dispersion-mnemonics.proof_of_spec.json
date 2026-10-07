@@ -17,11 +17,11 @@
     {
       "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
       "kind": "script",
-      "commit_or_etag": "1f9361dd25",
+      "commit_or_etag": "09ec15327af51383139d7e2a8522625eec7545c3",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "AMENDMENT 1: FORECAST_FIELDS ends after BEST_CPS with BEST_CPS_STDDEV, BEST_CPS_NUMEST, BEST_EPS_STDDEV, BEST_EPS_NUMEST (16 fields; 8 calls per name unchanged); the four refused names (BEST_*_STANDARD_DEV, BEST_*_AVG) are out of FIELD_BASIS and _MONEY_REPORTING_FIELDS; the two _STDDEV names are money per share in the reporting currency; the two _NUMEST counts stay in _COUNT_RATIO_NO_CURRENCY_FIELDS. The comment at FORECAST_FIELDS cites the probe evidence and states the period term: all four ride the same BEST_FPERIOD_OVERRIDE request as BEST_CPS and BEST_EPS, one per override in FORECAST_OVERRIDES.",
-      "introduces": ["BEST_CPS_STDDEV"],
-      "artifact_covered_by": ["AC1", "AC2"]
+      "deploy_evidence": "AMENDMENT 1 (commit 1f9361dd25): FORECAST_FIELDS ends after BEST_CPS with BEST_CPS_STDDEV, BEST_CPS_NUMEST, BEST_EPS_STDDEV, BEST_EPS_NUMEST (16 fields; 8 calls per name unchanged); the four refused names are out of every list and map. AMENDMENT 2 (commit 09ec15327a): record_fire_budget(*, calls, security_fields, figures, records, stamp) loads bbg_budget.py by path (the estate's own glob rule, exactly one hit under data/*/scripts/rivalfunds/) and appends ONE line: mode amgt-model-block, rows = figures, batch_id amgt-model-block:<stamp>:calls=:security_fields=:figures=:records=:rows_unit=returned-figures; it returns what record returns and never raises (any failure returns False). _CountingClient now also counts RETURNED RECORDS from the responses it receives: one per security row of a reference_data response (the header call and each forecast override call), one per dated row of a historical_data response (each history chunk). Call site 1: the end of a real cmd_admit with pulled >= 1; call site 2: the end of a real cmd_refresh that reached Bloomberg. Each prints one budget_record line BEFORE the unchanged summary line, so the summary stays the last line (test_model_block_round34 reads lines[-1]).",
+      "introduces": ["record_fire_budget"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
     },
     {
       "path_or_key": "integrations/bloomberg/research/build_unit_map.py",
@@ -39,6 +39,14 @@
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "10 offline tests with stub clients: the four in the forecast list once, in order, 16 fields; the four refused spellings in no list, basis map or family; each forecast request carries the four; 8 calls per name; a derive yields a figure per statistic at FY1 with its unit and currency; a missing statistic yields its unresolved record with a reason; a period with no end date records all four; the four have a unit family; and the PERIOD TERM test prints, for BA US Equity, the override each of BEST_CPS, BEST_CPS_STDDEV, BEST_CPS_NUMEST, BEST_EPS_STDDEV, BEST_EPS, BEST_EPS_NUMEST was sent under (1FY, 2FY, 3FY all equal) and asserts a mean and its standard deviation derive under the same fiscal_period (FY1, FY2, FY3).",
       "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_fire_budget_record_round40.py",
+      "kind": "test",
+      "commit_or_etag": "09ec15327af51383139d7e2a8522625eec7545c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 offline tests, RIVALFUNDS_BBG_BUDGET_DIR a pytest temp directory in every one (the Terminal machine's real ledger is never written), stub S3, stub Bloomberg client: the helper writes the one line with the exact batch_id; an unwritable directory returns False and raises nothing; a missing ledger module returns False; a dry-run refresh and a dry-run admit write no line; a real refresh over a stub client writes exactly one line whose calls, security_fields, figures and records equal the stub's independently computed numbers and prints the budget_record line; the same for a real admit; an admit with nothing to pull writes no line; a failed write leaves the refresh rc 0 and prints written 0.",
+      "artifact_covered_by": ["AC3"]
     },
     {
       "path_or_key": "integrations/bloomberg/research/tests/test_model_block_22_fields.py",
@@ -73,22 +81,32 @@
       "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest <the six named test files and test_dispersion_fields_round40.py> -q -p no:cacheprovider --color=no -- expect (?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest integrations/bloomberg/research/tests/test_model_block_22_fields.py integrations/bloomberg/research/tests/test_build_unit_map_families.py integrations/bloomberg/research/tests/test_build_unit_map_families_round35.py integrations/bloomberg/research/tests/test_currency_labels.py integrations/bloomberg/research/tests/test_stage_derive_fye.py integrations/bloomberg/research/tests/test_model_block_round34.py integrations/bloomberg/research/tests/test_dispersion_fields_round40.py -q -p no:cacheprovider --color=no",
-      "output_evidence": "61 passed, 52 warnings in 7.36s",
-      "denominator": "rc 0; 61 of 61 tests passed, 0 failed (51 in the six existing files, 10 in the new file)",
+      "output_evidence": "61 passed, 55 warnings in 1.79s",
+      "denominator": "rc 0; 61 of 61 tests passed, 0 failed (51 in the six existing files, 10 in the dispersion file), run after the last code edit with the budget call sites in place",
       "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round40/ap7_budget_check.py\" -- expect (?m)^ap7b build 2/2 control 2/2$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round40/ap7_budget_check.py\"",
+      "output_evidence": "ap7b build 2/2 control 2/2",
+      "denominator": "rc 0; build 2 of 2 (one ledger line: mode amgt-model-block, rows 66879, batch_id carrying calls=768, security_fields=13824, figures=66879, records=4224 and rows_unit; spent() rose by exactly 66879); control 2 of 2 (an unwritable ledger path returns False and raises nothing; 8 calls per name). The check sets its own temp ledger directory.",
+      "expect": "(?m)^ap7b build 2/2 control 2/2$",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Plausible bug: the two _STDDEV statistics lose their reporting-currency treatment (removed from _MONEY_REPORTING_FIELDS). Run by .scratch/mutant_ap7_a1.py (not committed) against the new test file.",
-      "expected": "the currency assertions on the two _STDDEV statistics FAIL under the mutant, so the tests discriminate the fix from the bug.",
-      "observed": "MUTANT pytest rc 1: 2 failed, 8 passed (test_a_derive_yields_a_figure_for_each_of_the_four_at_fy1_with_the_right_unit_and_currency, test_a_per_share_statistic_with_no_reporting_currency_is_an_unstated_null_never_a_guess); the fix passes 10 of 10",
+      "description": "Plausible bug (AMENDMENT 2): record_fire_budget writes int(calls) as the ledger rows instead of int(figures), so the ledger under-counts the draw by the figures-to-calls ratio. Applied by an Edit to model_block_pull.py, run, then reverted by Edit (git status clean after). Earlier AMENDMENT 1 mutant, run by the prior seat: the two _STDDEV statistics lose their reporting-currency treatment; 2 tests of the dispersion file failed.",
+      "expected": "the rows assertions fail under the mutant in the new test file and the issuer's ap7_budget_check.py reads build 0/2, so the tests discriminate the fix from the bug.",
+      "observed": "MUTANT: test_fire_budget_record_round40.py 2 failed, 7 passed (test_helper_writes_the_one_line, test_real_refresh_writes_exactly_one_line_matching_the_stub); ap7_budget_check.py printed ap7b build 0/2 control 2/2; reverted, the fix passes 9 of 9 and ap7b build 2/2 control 2/2",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AC1 reads two modules' constants; AC2 uses stub clients and stub S3 reads only, no clock-dependent assertion and no network.",
-      "observed": "AC1 line and AC2 61 passed recorded after the last code edit, twice, identical pass counts",
+      "method": "AC1 reads two modules' constants; AC2 and the new test file use stub clients, stub S3 and a temp ledger directory only, no network and no clock-dependent assertion; AC3 writes only to its own temp directory.",
+      "observed": "AC1, AC2 (61 passed) and AC3 recorded after the last code edit, identical on a second run",
       "status": "STABLE"
     }
   },
@@ -96,6 +114,10 @@
     {
       "item": "field_map.json, the scheduled task's re-pin, the one-name probe and lib/research/scores/divergence.py",
       "reason": "NOT in <paths>; the issuer's CRPS-ap-10 owns the probe and re-pin, and the divergence.py rename is an AMGT_RESAPP cell. No Bloomberg call of any kind was made."
+    },
+    {
+      "item": "a record for a refresh that returns before reaching Bloomberg (nothing to pull, or the session refused)",
+      "reason": "No Bloomberg request is sent on those paths, so there is no draw to record; the order names admit's at-least-one-name condition and the refresh's end. The helper is called on the path that built the _CountingClient."
     }
   ],
   "surprises": [],
@@ -105,6 +127,11 @@
       "tool": "pytest (AC2)",
       "invocation": "python -m pytest <seven files> -q",
       "result": "rc 0; 61 passed"
+    },
+    {
+      "tool": "pytest (new file, AMENDMENT 2)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_fire_budget_record_round40.py -q",
+      "result": "rc 0; 9 passed, 18 warnings in 0.41s"
     }
   ]
 }

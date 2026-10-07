@@ -1,0 +1,28 @@
+DenyResourcePolicyWrites carries 74 actions (the halves say 74): True
+
+=== THE ORDER'S TWO REQUIRED ARMS ===
+  one refused resource-policy write              s3:PutBucketPolicy       -> explicitDeny   want=explicitDeny   OK
+        matched: ['IAM Policy:cloudops-dell-agent-respol-policy']
+  one create the create policy allows (CONTROL)  s3:CreateBucket          -> allowed        want=allowed        OK
+        matched: ['IAM Policy:cloudops-dell-agent-create-policy']
+REQUIRED ARMS: 2/2
+
+=== TWO MORE IN-LIST DENIES, to show the Deny's reach beyond S3 ===
+  kms:PutKeyPolicy             in the 74=True  -> explicitDeny   OK   matched: ['IAM Policy:cloudops-dell-agent-respol-policy']
+  lambda:AddPermission         in the 74=True  -> explicitDeny   OK   matched: ['IAM Policy:cloudops-dell-agent-respol-policy']
+EXTRA IN-LIST DENIES: 2/2
+
+=== THE ALREADY-RULED GAP, confirmed live -- NOT a defect of this act, NOT a new finding ===
+    CLAUDE.md NEVER block, verbatim: 'STILL WITH NO CLOUD REFUSAL BEHIND IT: a resource policy set
+    through sqs:SetQueueAttributes, sns:SetTopicAttributes, or at the creation of a key, queue, topic
+    or bucket (rows W4-S1, W4-S2, NFRA_CTLPLN-S6)'. Those rows already exist; this is not re-filed.
+  sqs:SetQueueAttributes     in the 74=False -> allowed        (open by design: True)   matched: ['IAM Policy:cloudops-dell-agent-create-policy']
+  sns:SetTopicAttributes     in the 74=False -> allowed        (open by design: True)   matched: ['IAM Policy:cloudops-dell-agent-create-policy']
+
+    PRECISION POINT for the record: the COO half's prose lists 'a queue policy' among what is refused.
+    The only queue actions in the 74 are sqs:AddPermission and sqs:RemovePermission -- NOT
+    SetQueueAttributes, which is the call Terraform uses to set a queue policy. So a Dell-placed
+    project setting a queue policy that way is NOT refused. The gap is ruled and owned; the half's
+    wording is what overstates it.
+
+RESPOL-ARMS required=2/2 extra_in_list=2/2 ruled_gap_probes=2 all_required_ok=True

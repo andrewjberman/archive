@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-DEPLOY-e65.cash-token-shared-module-deploy-laptop",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "16092a4806"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R11.md",
+    "vintage_commit": "16092a4806",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~S/task_orders/MDPF_SECCLASS.TO-DEPLOY-e65.cash-token-shared-module-deploy-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-bd/code/gold/lib/_shared/etf_classification_scheduled.py",
+      "kind": "s3_object",
+      "commit_or_etag": "3f1e6be8910952f33c88bf100c610ab6",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ONE safe-deploy run 2026-10-07T16:5xZ from a scratch worktree detached at origin/CLOUD efc2e63467; line 'DEPLOYED-SHIPPED infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py -> s3://opal-data-bd/code/gold/lib/_shared/etf_classification_scheduled.py'; head-object after: ETag 3f1e6be8910952f33c88bf100c610ab6, new VersionId 0aE1FGTSH.2rsPdoj.3mtrBuHmmByxAu; moved from base cfe898d1b8677c0765a7f5ee8026761c, rollback VersionId P9g4.GzldooFjJgeyMTfk2YlTzT5sQUg read BEFORE the act and still retrievable after it",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/code/gold/lib/_shared/etf_classification_scheduled.py",
+      "kind": "s3_object",
+      "commit_or_etag": "3f1e6be8910952f33c88bf100c610ab6",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "same run; line 'DEPLOYED-SHIPPED ... -> s3://opal-data-cot/code/gold/lib/_shared/etf_classification_scheduled.py'; head-object after: ETag 3f1e6be8910952f33c88bf100c610ab6, new VersionId 0e4OsubYyRdw4RnmCvfMYM0SZtLLM9z9; moved from base cfe898d1b8677c0765a7f5ee8026761c, rollback VersionId 893RBl4.9fYgJGC7j0qjLTXzVkCQaPX1 read BEFORE the act and still retrievable after it",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261007T1649Z_secclass-e65-cash-token-deploy-s-20261007_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "e0b3189735",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "opened BEFORE the upload at e0b3189735 with 4 legs; L1, L2, L3 CLOSED on proof; L4 (the 23:00Z BD E_18 read, CTO condition 3) HELD against a named external gate with a re-read event. deploy_ledger list prints 'apply legs proven, only verify open; tracked-not-stranded'",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/e65_shipped_etag_check.py -- expect: E65-SHIPPED ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/e65_shipped_etag_check.py",
+      "expect": "E65-SHIPPED ok=True",
+      "output_evidence": "E65-SHIPPED ok=True head=3f1e6be8910952f33c88bf100c610ab6 bd=3f1e6be8910952f33c88bf100c610ab6 cot=3f1e6be8910952f33c88bf100c610ab6 control=MATCH",
+      "denominator": "2 of 2 moving keys at the candidate ETag; the check's own control reads MATCH. Base stated by the order: AC1 FAILS at the cut, and it did -- both keys read cfe898d1 before the act.",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "safe-deploy.sh",
+      "invocation": ".tools/safe-deploy.sh data/black_diamond/scripts/gold/E_18.detect_new_securities.py data/cot/scripts/gold/A_00.accounts_dimension.py (ONE run, from the scratch worktree root)",
+      "result": "OK rc=0 -- 'OK: safe-deploy gate PASS -- all 2 file(s) deployed and verified'; 6 DEPLOYED-SHIPPED lines + 2 DEPLOYED lines + 2 'VERIFY OK comp-pipescript deployed' lines"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --slug secclass-e65-cash-token-deploy-s-20261007 (4 legs); close-leg L1, L2, L3; hold --gate-type external",
+      "result": "OK -- HELD-SOVEREIGN-GATED, open-verify=['L4'], tracked-not-stranded"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author '0.7.0_AE_CloudOps~S ...' -F <msgfile> -- <ledger paths>",
+      "result": "OK rc=0 @e0b3189735 (entry opened before the act)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Six of the eight keys this one safe-deploy run uploads are byte-identical re-uploads (the two gold carriers plus etf_classification.py and etf_classifications_dynamodb.py in both buckets). If the act were wider than the half signed, at least one of them would come back at a DIFFERENT ETag.",
+      "expected": "all six return their exact pre-act ETag; only the two moving keys change",
+      "observed": "8 of 8 keys read after the run, 0 off expectation: bd carrier a7820a205692444dadb59e526200bff6, cot carrier cb10e3cd255db2c58363b6b911aef6cc, etf_classification.py 3a033c04678f1c96d116b641545b17bb in both buckets, etf_classifications_dynamodb.py 4cc11d3e74486730febb7e6b4a0ba916 in both buckets -- each unchanged; only the two moving keys went cfe898d1 -> 3f1e6be8",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "step 1's md5 read independently at three places: the scratch worktree's file on disk, origin/CLOUD via git show, and the shared laptop CLOUD HEAD after 0.0.0_AB_MSTR's level-set; and every ABSENT/empty read in this act was run with its expected value printed beside it, because a failed git show returns clean-empty and md5s to d41d8cd98f00b204e9800998ecf8427e, indistinguishable from a real read",
+      "observed": "3f1e6be8910952f33c88bf100c610ab6 at all three (35,100 bytes), and 1.0.0_SA_CTO msg 106422 independently reports the same value for the trunk; one such clean-empty did occur mid-session when a peer's fetch clobbered FETCH_HEAD in the shared tree -- it was caught by the printed expectation and the measurement was redone against the stable origin/CLOUD ref",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The 23:00Z BD E_18 run's cash_token plan lines (CTO half af8fa774f3 condition 3).",
+      "reason": "Not yet produced at the time of this instance. Carried as ledger leg L4 under an explicit external hold with a named re-read event, NOT closed and NOT claimed."
+    },
+    {
+      "item": "No table write, no other script, no other bucket, no push of a shared branch.",
+      "reason": "BOUNDS. The deploy writes no repo file; commits are LOCAL on laptop CLOUD, and CLOUD is pushed only by 0.0.0_AB_MSTR (org/XXX.md shared-branch law)."
+    },
+    {
+      "item": "The CTO half's condition 1 names safe-deploy on infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py directly.",
+      "reason": "file_to_s3_target returns None for that path and upload_plan returns [], so the literal invocation deploys nothing. The order's step 4 names the two gold carriers, which is the form that actually ships the module, and the order's own context explains why. Step 4 was carried."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~S/logs/session_e42_a07_canonical_first_1317-1420Z.md"
+}
