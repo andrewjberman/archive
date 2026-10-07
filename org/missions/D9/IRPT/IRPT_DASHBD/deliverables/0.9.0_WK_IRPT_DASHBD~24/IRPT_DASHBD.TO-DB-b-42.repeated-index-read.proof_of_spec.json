@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-42",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b65c14f4df"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "b65c14f4df",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-42.repeated-index-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~24",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~24/REPEATED_INDEX_E2.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "S3 reads only; 0 writes, no deploy; verdict CANNOT so no code edited.",
+      "artifact_covered_by": [
+        "DB26-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~24/REPEATED_INDEX_E2.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only note; no client figure.",
+      "artifact_covered_by": [
+        "DB26-2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB26-2-AC1",
+      "criterion_verbatim": "DB26-2-AC1 -- the served partitions read with the count printed; the verdict agrees with the count; on CAN, the named refusal's test passes. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r26/p26_release.py\" . DB26-2-AC1",
+      "output_evidence": "OK: 190 partitions, 190 frames read; 0 with a repeated label; verdict CANNOT\nDB26-2-AC1 PASS",
+      "denominator": "190 of 190 trading days 2026-01-02..2026-10-05 had a partition; 190 frames, 1,403,930 rows; 0 frames with a repeated index label",
+      "status": "PASS",
+      "expect": "DB26-2-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Positive control for the detector the read used (Index.has_duplicates): a synthetic frame with index [0,1,1] must report a repeat, and a pd.concat(ignore_index=True) of two frames must not.",
+      "expected": "True on the repeated-label frame; False on the ignore_index concat",
+      "observed": "control has_duplicates True; concat ignore_index False",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "criterion DB26-2-AC1 run twice against the same REPEATED_INDEX_E2.json.",
+      "observed": "DB26-2-AC1 PASS both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "E2 criterion (1), the None-hardening test on pandas 2.2.3",
+      "reason": "Not in this order; no pandas 2.2.3 environment on dell2."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "boto3 S3 read + account_return_daily.read_partition",
+      "invocation": ".scratch/e2_read.py . REPEATED_INDEX_E2.json (190 trading-day partitions)",
+      "result": "OK: 190 frames, 0 repeated"
+    }
+  ]
+}
