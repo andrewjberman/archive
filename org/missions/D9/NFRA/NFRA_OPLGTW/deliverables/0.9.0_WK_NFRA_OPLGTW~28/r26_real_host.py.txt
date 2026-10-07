@@ -1,0 +1,122 @@
+# OG-rl-9 on-host REAL-HOLDER read (shipped by r23b_ssm.py behind the committed ga1_host_prelude.py.txt: HybridStore, POLICY# reads real, all else in memory).
+# Derived from ga1_host.py.txt (the ~28 probe), extended with the dim_asset QUERY path and blank-cusip row counts. READ ONLY: the real holder's
+# profile and grant are read from the real store through app.data_entitlement; nothing is written to DynamoDB; put_runtime on a POLICY key raises.
+# tid/oid arrive in the process environment (SSM parameters), are never printed. Prints counts, codes, booleans and sha256 only.
+#   GA1_BODY / GA1_DIGEST   the DOWNLOAD body, exactly the ga1_host.py.txt shape and digest rule  -> GA1_DOWNLOAD.json
+#   GA1Q_BODY / GA1Q_DIGEST the QUERY body (same keys, dim_asset_query instead of dim_asset_download), digest = sha256(json.dumps(body, sort_keys=True))  -> GA1_QUERY.json
+#   R23_BLANK               blank-cusip row counts of each path (and non-blank unheld, duplicates)  -> RL9_BEFORE.json on the live code
+import csv
+import hashlib
+import tempfile
+
+MASTER = "08242234"
+DATE = "2026-10-01"
+
+
+def _blank(v):
+    return v is None or not str(v).strip()
+
+
+def refused_or_ok(result):
+    doc = result.structuredContent or {}
+    if result.isError:
+        err = doc.get("error") or {}
+        return "REFUSED %s %s" % (err.get("code"), err.get("reason"))
+    return "OK"
+
+
+def run():
+    import pyarrow.parquet as pq
+    from app import data_entitlement as de
+    from app.context import Principal
+    from app.integrations.schwab import export as sexport
+    from app.integrations.schwab import integration as _integ
+
+    mode = os.environ.get("OG_GA1_MODE", "before")
+    tid, oid = os.environ["GA1_TID"], os.environ["GA1_OID"]
+    allow = lambda: True  # noqa: E731
+    svc, catalog, store, contract = build()
+    with open(_integ.__file__, "rb") as fh:
+        print("R23_MODULE integration.py md5 %s staged=%s" % (hashlib.md5(fh.read()).hexdigest()[:8], bool(os.environ.get("OG_GA1_STAGE"))))
+    praw = store.get(de.profile_key(tid, oid))
+    assert praw is not None, "holder profile not found in the store"
+    profile = de.parse_profile(praw, tid, oid)
+    grant = de.parse_grant(store.get(de.grant_key(tid, oid, profile.grant_revision)), tid, oid, profile.grant_revision)
+    assert grant.status == "active" and "dim_asset" in grant.scope.datasets
+    principal = Principal(tid, oid, praw.get("email") or "")
+    granted = sorted(grant.scope.accounts.get(MASTER, ()))
+    gset = set(granted)
+    print("GA1_GRANT profile_revision=%s grant_revision=%s operations=%s datasets=%s policy_reads_so_far=%d"
+          % (profile.revision, grant.revision, sorted(grant.scope.operations), sorted(grant.scope.datasets), store.policy_reads))
+
+    res = catalog.snapshot(MASTER, DATE, allow)
+    assert res.status == "complete" and res.snapshot, ("snapshot not servable", res.result)
+    entries = [dict(f) for f in res.snapshot["files"] if f.get("dataset") == "dim_position"]
+    sources, cleanup = svc._fetch(entries, allow)
+    try:
+        rows = []
+        for src in sources:
+            tbl = pq.read_table(src.path, columns=["account_id", "cusip"])
+            rows.extend(zip(tbl.column("account_id").to_pylist(), tbl.column("cusip").to_pylist()))
+    finally:
+        cleanup()
+    held = {c for a, c in rows if a in gset and not _blank(c)}
+    held_blank_positions = len([1 for a, c in rows if a in gset and _blank(c)])
+    print("R23_HELD held_nonblank_cusips=%d blank_cusip_positions_in_granted_accounts=%d" % (len(held), held_blank_positions))
+
+    qdl = {"master": MASTER, "dataset": "dim_asset", "business_date": DATE, "mode": "rows", "columns": ["cusip"]}
+
+    # DOWNLOAD path
+    dl_result = asyncio.run(svc.prepare_download(principal, query=dict(qdl)))
+    download = refused_or_ok(dl_result)
+    d_cusips = []
+    if download == "OK":
+        secret = dl_result.structuredContent["download_url"].split("#", 1)[1]
+        ticket = store.get(sexport._key(secret))
+        scratch_exports = tempfile.mkdtemp(prefix="exports_", dir=SCRATCH)
+        path, _size, _n, _info = asyncio.run(sexport.generate_csv(principal, ticket, service=svc, directory=scratch_exports))
+        with open(path, newline="", encoding="utf-8") as fh:
+            crow = list(csv.reader(fh))
+        assert crow and crow[0][0].startswith("cusip"), "csv header"
+        d_cusips = [r[0] for r in crow[1:]]
+
+    # QUERY path (cursor-followed at 100 per page)
+    q_cusips, pages, q_err = [], 0, None
+    q = dict(qdl, page_size=100)
+    while pages < 400:
+        r = asyncio.run(svc.query(principal, q))
+        pages += 1
+        if r.isError:
+            q_err = refused_or_ok(r)
+            break
+        doc = r.structuredContent or {}
+        q_cusips.extend(row[0] for row in (doc.get("rows") or []))
+        if not doc.get("cursor"):
+            break
+        q = dict(q, cursor=doc["cursor"])
+    query = q_err or "OK"
+
+    def check(cs):
+        return {"returned": len(cs), "distinct_returned": len(set(cs)), "held_cusips_in_dim_position": len(held),
+                "unheld_returned": len([c for c in cs if c not in held])}
+
+    def diag(cs):
+        return {"returned": len(cs), "blank_cusip_rows": len([c for c in cs if _blank(c)]),
+                "nonblank_unheld_rows": len([c for c in cs if not _blank(c) and c not in held]),
+                "duplicate_rows": len(cs) - len(set(cs)), "held_cusips_missing": len(held - set(cs))}
+
+    print("R23_BLANK " + json.dumps({"mode": mode, "download": download, "download_diag": diag(d_cusips), "query": query,
+                                    "query_diag": diag(q_cusips), "query_pages": pages}, sort_keys=True))
+    common = {"synthetic_principal": False, "grant_source": "store", "grants_written": 0, "master": MASTER, "date": DATE,
+              "granted_accounts": len(granted), "served_release": os.environ["GA1_SERVED_RELEASE"]}
+    body = dict(common, dim_asset_download=download, held_check=check(d_cusips))
+    qbody = dict(common, dim_asset_query=query, held_check=check(q_cusips))
+    print("GA1_MODE %s policy_reads=%d put_runtime_calls_in_memory=%d" % (mode, store.policy_reads, store.put_runtime_calls))
+    print("GA1_BODY " + json.dumps(body, sort_keys=True))
+    print("GA1_DIGEST " + hashlib.sha256(json.dumps(body, sort_keys=True).encode("utf-8")).hexdigest())
+    print("GA1Q_BODY " + json.dumps(qbody, sort_keys=True))
+    print("GA1Q_DIGEST " + hashlib.sha256(json.dumps(qbody, sort_keys=True).encode("utf-8")).hexdigest())
+
+
+if __name__ == "__main__":
+    run()
