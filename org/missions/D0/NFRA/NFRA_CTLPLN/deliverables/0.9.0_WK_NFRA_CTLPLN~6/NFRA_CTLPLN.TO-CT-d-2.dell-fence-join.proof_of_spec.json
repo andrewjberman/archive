@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-2.dell-fence-join.md",
     "group": "OTHER",
-    "vintage_commit": "2b20f8d5ed"
+    "vintage_commit": "614db9d7c3"
   },
   "assignee": "0.9.0_WK_NFRA_CTLPLN~6",
   "decomp_ref": {
@@ -15,32 +15,25 @@
   },
   "artifacts_produced": [
     {
-      "path_or_key": "infra/logic/registry/exemptions.json",
-      "kind": "config_data",
-      "commit_or_etag": "ca2c18c4a4",
+      "path_or_key": "infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py",
+      "kind": "script",
+      "commit_or_etag": "b7897803d4",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "three rows added (18 lines added, 0 deleted against 3ec42c56bf); NOT applied by this order (the apply is the issuer's, one laptop apply under its pair)"
+      "deploy_evidence": "repo-local read-only script; AWS calls sts get-caller-identity and iam simulate-principal-policy only; terraform init -backend=false, validate and console only inside temporary directories outside the repository"
     },
     {
-      "path_or_key": "infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf",
-      "kind": "terraform",
-      "commit_or_etag": "ca2c18c4a4",
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~6/PROPOSAL_FENCE_ROW_SHAPE_READ_ONLY_PREFIX.md",
+      "kind": "doc",
+      "commit_or_etag": "b7897803d4",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "reverted to its bytes at 3ec42c56bf (git diff 3ec42c56bf prints nothing); the typed line is gone"
-    },
-    {
-      "path_or_key": "infra/aws/terraform/shared-infra/s3-49financial.tf",
-      "kind": "terraform",
-      "commit_or_etag": "ca2c18c4a4",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "reverted to its bytes at 3ec42c56bf (git diff 3ec42c56bf prints nothing); the typed line is gone"
+      "deploy_evidence": "proposal for the CTO's ruling; changes no registry, module, .tf or lib file (git diff against 614db9d7c3 touches only the script, the proposal, the investigation file and, at the flip, this instance and the order)"
     },
     {
       "path_or_key": "infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py",
       "kind": "script",
       "commit_or_etag": "ca2c18c4a4",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "repo-local static check; read-only simulator calls only"
+      "deploy_evidence": "unchanged by this pass; re-run bounded and still ok=True"
     }
   ],
   "acceptance": [
@@ -49,10 +42,20 @@
       "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py expect: typed_in_tf=0 cross_firm_leaks=0 (same line: rows=3/3, other_rows_changed=0, validator=ok, negative_arm=denied, ok=True)",
       "method": "command",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py",
-      "output_evidence": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok ok=True\n(rc 0, run bounded under timeout 120 after the commit; registry diff against 3ec42c56bf: rows_added=3 text_lines_added=18 text_lines_deleted=0; both .tf files byte-equal to 3ec42c56bf; terraform_validate=OK rc=0; naming validator VALIDATE: OK 53 system row(s), 13 scope row(s), 41 warning(s))",
-      "denominator": "3 of 3 confirmed pairs have exactly one registry row under their bucket key; 7 registry keys read, the second Dell user in exactly the 3 listed and the first Dell user in 0 and absent from the file text; 3 of 3 evaluator calls on the edited document returned allowed (the same 3 on the live document returned explicitDeny); 2 of 2 .tf files byte-equal to the pin and carrying 0 Dell user ARNs; 3 of 3 paired buckets render the Dell ARN by the module's rule (read in Python); negative arm 1 of 1 denied (first Dell user on one fenced bucket, live document)",
+      "output_evidence": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok ok=True\n(rc 0, run under timeout 120 after the commit b7897803d4; the line carries rows=3/3, typed_in_tf=0, cross_firm_leaks=0, negative_arm=denied, other_rows_changed=0, validator=ok, ok=True; terraform_validate=OK rc=0)",
+      "denominator": "3 of 3 confirmed pairs have exactly one registry row under their bucket key; 3 of 3 evaluator calls on the edited document allowed; 2 of 2 .tf files byte-equal to the pin and carrying 0 Dell user ARNs; negative arm 1 of 1 denied; the first Dell user appears in 0 of 7 registry keys",
       "status": "PASS",
       "expect": "typed_in_tf=0 cross_firm_leaks=0"
+    },
+    {
+      "criterion_id": "CT4d2-AC2",
+      "criterion_verbatim": "python infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py expect: FENCE-ROW-SHAPE rows= (same line: ok=True, can_carry_today reported as measured)",
+      "method": "command",
+      "invocation": "python infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py",
+      "output_evidence": "FENCE-ROW-SHAPE rows=29 key_sets=1 rows_with_actions=0 rows_with_prefix=0 readers=16 extra_key_ignored=3 extra_key_refused=0 can_carry_today=False ok=True\n(rc 0, run under timeout 120 after the commit b7897803d4, about 60 s; can_carry_today=False as measured: 29 rows, 1 key set (arn, principal, reason, signoff_ref), 0 rows with an action key, 0 with a prefix key. Preceding line: SCOPED-PROOF prefix_facts=True simulator_arms=True prototype_validator_rule=True)",
+      "denominator": "29 of 29 rows read; 16 of 16 live files git grep returned classified (0 unclassified); 3 of 3 row-parsing readers measured with an extra key on a scratch copy of the registry outside the repository: validator ignored it (0 refusals; control with a required field removed refused 3 of 3), module opal_name ignored it and rendered a full admission (3 of 3 buckets, terraform console), the join check's renderer ignored it (3 of 3); 3 of 3 buckets show the irpt/<firm>/platinum/holdings/ prefix; 25 of 25 simulator arms matched on scratch bucket documents built from saved policy copies",
+      "status": "PASS",
+      "expect": "FENCE-ROW-SHAPE rows="
     }
   ],
   "controls": {
@@ -70,16 +73,22 @@
   },
   "declared_exclusions": [
     {
-      "item": "a fence enforced outside the bucket policy (an access point, a key policy)",
-      "reason": "BLIND by the order's preflight: the live Dell read after the apply is the test"
+      "item": "a fence enforced outside the bucket policy (an access point, a key policy), and organization policies the simulator does not evaluate",
+      "reason": "BLIND: the live read-back after an apply (get under the prefix succeeds; get outside it and a put are refused) is the test; this pass applies nothing"
     },
     {
-      "item": "the live policy after an apply, and the module output evaluated by terraform itself",
-      "reason": "nothing is applied by this order; terraform console cannot run without the backend, so the module's render rule (opal_name main.tf:91-95) is read in Python over the same registry file; the edited document is the live document from the saved census plus the rendered ARN, evaluated by the simulator"
+      "item": "the simulator's s3:prefix context against a real list request",
+      "reason": "the simulator takes the key as a supplied value; absent and empty-string were both refused, but no bucket listing was permitted in this pass"
+    },
+    {
+      "item": "the live bucket policies",
+      "reason": "the arms use SAVED policy documents from tests/dell_fence_census.json (read earlier today), not live policies; no live policy read was permitted"
     }
   ],
   "surprises": [
-    "NFRA_CTLPLN-W6-S3"
+    "NFRA_CTLPLN-W6-S3",
+    "NFRA_CTLPLN-W6-S4",
+    "NFRA_CTLPLN-W6-S5"
   ],
   "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~6/NFRA_CTLPLN.TO-CT-d-2.dell-fence-join.proof_of_spec.json",
   "compiler_tools": [
@@ -87,6 +96,11 @@
       "tool": "python",
       "invocation": "python infra/aws/terraform/shared-infra/tests/check_dell_fence_join.py",
       "result": "FENCE-JOIN pairs=3 rows=3/3 typed_in_tf=0 cross_firm_leaks=0 evaluator_allowed=3/3 negative_arm=denied other_rows_changed=0 validator=ok ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python infra/aws/terraform/shared-infra/tests/derive_fence_row_shape.py",
+      "result": "FENCE-ROW-SHAPE rows=29 key_sets=1 rows_with_actions=0 rows_with_prefix=0 readers=16 extra_key_ignored=3 extra_key_refused=0 can_carry_today=False ok=True"
     }
   ]
 }
