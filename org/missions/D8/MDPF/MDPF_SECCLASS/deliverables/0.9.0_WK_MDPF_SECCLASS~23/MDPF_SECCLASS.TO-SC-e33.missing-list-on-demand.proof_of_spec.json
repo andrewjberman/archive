@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e33",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2e6ecff606c8719a8690641920aae52f06fa94f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e33.missing-list-on-demand.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~23",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/missing_list.py",
+      "kind": "script",
+      "commit_or_etag": "53f75cebd7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Runs in about 14 s over three local producer builds; writes only the three dated lists; commit-gate clean.",
+      "artifact_covered_by": [
+        "SC8-e33-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/MISSING_LIST_49financial_20261007.json",
+      "kind": "config_data",
+      "commit_or_etag": "53f75cebd7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "held 1843, missing 451, USD 8,434,973.35. Local producer build as-of 2026-10-05 @4b258de305 (inferred, not the served bytes); read-only AWS (BatchGetItem consistent) on etf-classifications.",
+      "artifact_covered_by": [
+        "SC8-e33-AC1",
+        "SC8-e33-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/MISSING_LIST_cottonwood_20261007.json",
+      "kind": "config_data",
+      "commit_or_etag": "53f75cebd7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "held 1264, missing 341, USD 104,698,377.38; 906 cash-line nodes excluded. Local producer build as-of 2026-10-05 @4b258de305 (inferred, not the served bytes); read-only AWS (BatchGetItem consistent) on etf-classifications.",
+      "artifact_covered_by": [
+        "SC8-e33-AC1",
+        "SC8-e33-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/MISSING_LIST_inflection_20261007.json",
+      "kind": "config_data",
+      "commit_or_etag": "53f75cebd7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "held 1601, missing 773, USD 2,830,405.28. Local producer build as-of 2026-10-05 @4b258de305 (inferred, not the served bytes); read-only AWS (BatchGetItem consistent) on etf-classifications.",
+      "artifact_covered_by": [
+        "SC8-e33-AC1",
+        "SC8-e33-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e33-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/missing_list.py -- expect: MISSING-LIST-PULL firms=3",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/missing_list.py",
+      "expect": "MISSING-LIST-PULL firms=3",
+      "output_evidence": "MISSING-LIST-PULL firms=3 total=1565 (rc=0, real 14.2 s); per firm: 49financial held=1843 missing=451; cottonwood held=1264 missing=341; inflection held=1601 missing=773; run under timeout 120",
+      "denominator": "3 of 3 firms written; 1565 missing of 4708 held securities",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e33-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/missing_list_check.py -- expect: MISSING-LIST ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/missing_list_check.py",
+      "expect": "MISSING-LIST ok=True",
+      "output_evidence": "MISSING-LIST ok=True firms=3 of 3 listed=1565 false_entries=0 control=present problems=0 (rc=0); run under timeout 120",
+      "denominator": "3 of 3 firm files in shape; 1565 listed keys (plus their CUSIP: keys) read absent; control AAETX present",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control: the same AC2 check at the base, before any list existed, must fail.",
+      "expected": "MISSING-LIST ok=False",
+      "observed": "Issuer's dry-run at the base 2026-10-07: MISSING-LIST ok=False firms=0 of 3 listed=0 false_entries=0 control=present problems=3 (also reproduced by the predecessor on this slot, row W23-S4)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "missing_list_check.py run twice back to back; cmp of the two outputs.",
+      "observed": "Identical, 0 differences, rc=0 each.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The served-bytes Holdings read.",
+      "reason": "The firm buckets deny this device's principal (row W23-S4); the issuer's AMENDMENT 1 rules a local producer build, source marked inferred."
+    },
+    {
+      "item": "Reaching zero.",
+      "reason": "Cell text: the later writes (SC-e-32) do that; a non-zero total today is the expected result."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W23-S4",
+    "MDPF_SECCLASS-W23-S5"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/missing_list.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/missing_list.py",
+      "result": "pre-commit gate clean 1 of 1 file(s)"
+    }
+  ]
+}
