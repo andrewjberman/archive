@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e21",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2e6ecff606c8719a8690641920aae52f06fa94f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e21.seed-six-class-values.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~21",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classification.py",
+      "kind": "script",
+      "commit_or_etag": "fe01988af3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-MDPF_SECCLASS-21 at fe01988af3 (LOCAL, not pushed, not deployed); gate command `ruff check --target-version py39 --extend-select FA` passes. 20 seed keys in ETF_CLASSIFICATIONS moved to the set's class (16 equity, 4 fixed_income); ETF_SUB_ASSET_CLASS: 5 restored, 15 removed; 5 comments rewritten; multi_asset token count 25 at base -> 0. AMENDMENT 1 annotation fixes (typing.Dict/Set/Optional -> dict/set/X | None, unused typing import removed) change no runtime value.",
+      "artifact_covered_by": [
+        "SC8-e21-AC1",
+        "SC8-e21-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py",
+      "kind": "test",
+      "commit_or_etag": "fe01988af3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed at fe01988af3 (LOCAL). 3 tests named six_class appended; whole file 22 passed (19 existing + 3). AMENDMENT 1: one noqa comment dropped and three assertion messages moved to f-strings (row W21-S3); gate command passes.",
+      "artifact_covered_by": [
+        "SC8-e21-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_SEED_SIX_CLASS_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "8d309c686a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Half request: blast radius as a literal 20-key list, AC2 output verbatim, the seed script's dry run (15 of 197 written, none beyond the 20), the low_confidence open question. r20_half_ready.py prints HALF-READY. Both halves UNSIGNED.",
+      "artifact_covered_by": [
+        "SC8-e21-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e21-AC1",
+      "criterion_verbatim": "python -m pytest -q infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py -k six_class -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest -q infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py -k six_class",
+      "expect": "passed",
+      "output_evidence": "3 passed, 19 deselected in 0.11s (rc=0), re-run after the AMENDMENT 1 annotation fixes at fe01988af3",
+      "denominator": "3 of 3 six_class tests passed; whole file 22 passed (19 existing + 3)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e21-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/seed_six_class_dry_run.py -- expect: SEED-SIX-CLASS ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/seed_six_class_dry_run.py",
+      "expect": "SEED-SIX-CLASS ok=True",
+      "output_evidence": "SEED-SIX-CLASS ok=True module_tickers=197 live_rows=3507 remap_seed_keys=20 conflicts=0 off_vocab=0 remap_keys_moved=0 multi_asset_tokens=0 (rc=0); INFO low_confidence_would_drop=15 keys=AAETX,AMECX,CAIBX,CFIHX,CLBAX,FBALX,FKIQX,FTYPX,KAGIX,LIPKX,MDLOX,SGIIX,VSMGX,VTIVX,VTTHX; re-run after the AMENDMENT 1 fixes, identical to the pre-fix run",
+      "denominator": "197 module tickers planned against a live scan of 3507 rows; 20 of 20 remap seed keys checked",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Same token detector on the BASE copy of the module (git show b07521c5dd:...etf_classification.py).",
+      "expected": "25 multi_asset tokens at base, 0 after the edit",
+      "observed": "BASE multi_asset tokens 25; EDITED multi_asset tokens 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/seed_six_class_dry_run.py run twice back to back against the live table.",
+      "observed": "Identical SEED-SIX-CLASS ok=True line both times, rc=0 each.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The seed run, any table write, any S3 write, any push.",
+      "reason": "BOUNDS: the seed run is the issuer's act after both halves sign; the worker ran only --dry-run and the read-only check."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W21-S1",
+    "MDPF_SECCLASS-W21-S2",
+    "MDPF_SECCLASS-W21-S3"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_SEED_SIX_CLASS_20261007.md",
+  "compiler_tools": [
+    {
+      "tool": "ruff (gate command)",
+      "invocation": "python -m ruff check --target-version py39 --extend-select FA <each .py>",
+      "result": "All checks passed on both files at fe01988af3; safe-commit gate passed"
+    }
+  ]
+}
