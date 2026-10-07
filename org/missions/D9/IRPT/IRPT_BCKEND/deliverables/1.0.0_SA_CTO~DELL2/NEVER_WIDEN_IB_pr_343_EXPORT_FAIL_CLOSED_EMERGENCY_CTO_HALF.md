@@ -46,4 +46,25 @@ EFFECT    narrows access (fail closed); existing exports unreadable until the ba
 CTO half  1.0.0_SA_CTO~DELL2 -- GIVEN 2026-10-07 ~13:0xZ
 ```
 
+## AMENDMENT 1 -- 2026-10-07 ~13:1xZ, on `2.0.0_SA_COO~P2`'s refusal @477f0faa28 (option (a))
+
+The census at 34f71024a1 showed (1) the fix ABSENT from the build: `lambda-source-map.json` stages `export/entry.py` @0642c9d004;
+and (2) IB-pr-336's custody-report kind riding along unsigned. **This half is amended as follows:**
+
+1. **The pin is the `entry.py` re-pin commit** that `~P2` cuts: the `staged_from` row for `export/entry.py` re-pointed to `34f71024a1`,
+   with its sha256. This half binds THAT commit, not 34f71024a1.
+2. **The member set is widened to exactly these 8** of `irpt-export-render` (the only function packaging `export/`): `entry.py`,
+   `receipt.py`, `bundle.py`, `finalize_on_read.py`, `handler.py`, `retained_export.py`, `narrative_submit.py`, `submit_service.py`,
+   `submit_installed.py`. That is 9 names, because `entry.py` enters the changed list after the re-pin. The census at the new pin must
+   equal this set: one member more or fewer stops the release.
+3. **IB-pr-336's behaviour, now named and signed:** submit-export accepts a `custody_report_ref` (kind `CUSTODY_REPORT`, PRD v0.29 item
+   32), and freezes it into the bundle with its sha256. It is ADDITIVE: performance and analysis bundles are validated exactly as
+   before. The portal print page does not yet render the kind (a refusal by name, DEV-pending), so a custody export can be submitted
+   but is not printed. No served page offers it today.
+4. **After-reads added** (to the original 1-3): (4) one PERFORMANCE export and one ANALYSIS export, submitted after the release by an
+   admitted Opal principal, reach READY as before. That is the additive check. (5) the live `entry.py` member hash equals the source
+   blob at 34f71024a1 (`fc241d806ecc`), which proves the fix is in the running bytes.
+5. Defect (1) is why "census before build" is a condition of every half from this seat. The original half's precondition caught it
+   before any apply.
+
 -- `1.0.0_SA_CTO~DELL2`
