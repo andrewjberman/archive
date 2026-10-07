@@ -20,7 +20,7 @@
       "kind": "script",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "clean_name: UPPER_FORMS/TITLE_FORMS one casing per form; ADR/ADS upper; rule B onset + repeated letter + ACRONYM_LIST; LOCAL commit only",
+      "deploy_evidence": "clean_name: UPPER_FORMS/TITLE_FORMS one casing per form; ADR/ADS upper; rule B onset + repeated letter + ACRONYM_LIST; LOCAL commit only; R12b X&Y token (1-2 letters each side) stays upper",
       "artifact_covered_by": [
         "SC9-e47-AC1",
         "SC9-e47-AC2",
@@ -32,7 +32,7 @@
       "kind": "test",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "128 tests; each form in both input casings, rule B positives and negatives, ACRONYM_LIST and ACRONYM_EXCEPTIONS pinned, idempotence",
+      "deploy_evidence": "136 tests; each form in both input casings, rule B, ACRONYM_LIST pinned, idempotence; R12b X&Y pins S&P, AT&T, P&G, H&R plus negatives",
       "artifact_covered_by": [
         "SC9-e47-AC2"
       ]
@@ -42,7 +42,7 @@
       "kind": "config_data",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "rebuilt with clean_name_row_set_v2.py: 1741 lines; WRITE 1360 (table 503 + custody 857), UNCHANGED 369, SEED-SOURCE 12; writer dry run puts=0 refused_stale=0",
+      "deploy_evidence": "rebuilt with clean_name_row_set_v2.py (--held-root reuse, W56-S1): 1741 lines; WRITE 1360; diff vs 78715af985 = 8 rows, all '&' names (IJJ IJK IJS IJT IVE IVW RSP SPGI); dry run write=503 custody=857 unchanged=369 refused_stale=0 puts=0",
       "artifact_covered_by": [
         "SC12-e47-AC3"
       ]
@@ -55,8 +55,8 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py",
       "expect": "CLEAN-NAME-TABLE ok=True",
-      "output_evidence": "CLEAN-NAME-TABLE ok=True cases=31 mismatches=0 (rc=0)",
-      "denominator": "31 of 31 table cases match, 0 mismatches",
+      "output_evidence": "CLEAN-NAME-TABLE ok=True cases=34 mismatches=0 (rc=0)",
+      "denominator": "34 of 34 table cases match, 0 mismatches",
       "status": "PASS"
     },
     {
@@ -65,8 +65,8 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
       "expect": "PYTEST-OK",
-      "output_evidence": "PYTEST-OK rc=0 summary=128 passed in 0.16s",
-      "denominator": "128 of 128 tests passed, 0 failed",
+      "output_evidence": "PYTEST-OK rc=0 summary=136 passed in 0.38s",
+      "denominator": "136 of 136 tests passed, 0 failed",
       "status": "PASS"
     },
     {
@@ -81,7 +81,8 @@
     }
   ],
   "surprises": [
-    "MDPF_SECCLASS-W56-S1"
+    "MDPF_SECCLASS-W56-S1",
+    "MDPF_SECCLASS-W56-S2"
   ],
   "compiler_tools": [
     {
@@ -92,14 +93,14 @@
   ],
   "controls": {
     "mutant": {
-      "description": "Negatives: PLCE, LTDA, Adrian stay words; BLUE/TRAN/SQU/EAST/ABBA capitalize; XCEL listed as an exception",
+      "description": "Negatives: PLCE, LTDA, Adrian stay words; BLUE/TRAN/SQU/EAST/ABBA capitalize; XCEL listed as an exception; R12b negatives: spaced '&' (JOHNSON & JOHNSON), mixed-case S&p, GR&INC (3-letter half), R2&D",
       "expected": "capitalized, not upper",
       "observed": "test_form_negative_similar_token_unchanged_in_mixed_case, test_acronym_rule_b_negatives_capitalize, test_acronym_exceptions_capitalize pass",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "AC1-AC3 run once each after the final edit and rebuild",
-      "observed": "AC1 ok=True; AC2 128 passed; AC3 ok=True",
+      "observed": "AC1 ok=True 34/34; AC2 136 passed; AC3 ok=True; all run once after the final edit and rebuild",
       "status": "STABLE"
     }
   },
