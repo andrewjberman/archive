@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_CUSTDY.TO-CU-c-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-c-2.pick-reread.md",
+    "group": "OTHER",
+    "vintage_commit": "9b91ef7a78"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.round3.md",
+    "vintage_commit": "9b91ef7a78",
+    "to_ref": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-c-2.pick-reread.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_CUSTDY~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/pick_reread.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local Python; no deploy",
+      "artifact_covered_by": [
+        "CU9-AC1",
+        "CU9-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_pick_reread.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local pytest; no deploy",
+      "artifact_covered_by": [
+        "CU9-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CU9-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_pick_reread.py -> passed",
+      "method": "command",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_pick_reread.py",
+      "output_evidence": "9 passed in 0.93s | rc=0 (run under timeout 120)",
+      "denominator": "9 of 9 tests passed (before parsed from census incl. the real round-2 census; closed reason set and sum; NOT_IN_DIRECTORY; NO_SILVER_AT_AS_OF; eligibility True and False; advisor override; self-test last line)",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU9-AC2",
+      "criterion_verbatim": "python data/assets/scripts/gold/irpt_custody/pick_reread.py --as-of 2026-09-30 --before-census org/missions/D9/IRPT/IRPT_CUSTDY/deliverables/0.9.0_WK_IRPT_CUSTDY~5/ADVISOR_CENSUS_20260930.md -> reasons_sum_ok=True",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/pick_reread.py --as-of 2026-09-30 --before-census org/missions/D9/IRPT/IRPT_CUSTDY/deliverables/0.9.0_WK_IRPT_CUSTDY~5/ADVISOR_CENSUS_20260930.md",
+      "output_evidence": "REASON PROJECTION_REFUSED count=0 | REASON NOT_IN_DIRECTORY count=1961 | REASON NO_SILVER_AT_AS_OF count=228 | COVERED count=4833 | CROSSCHECK refused_matches_pick=True distinct_matches_pick=True | PICK-REREAD before_refused=482 after_refused=0 of=7022 uncovered=2189 reasons_sum_ok=True advisor=matthew_gooch advisor_still_eligible=True pick_now=matthew_gooch | rc=0 (run under timeout 120)",
+      "denominator": "7022 distinct granted accounts: 4833 covered + 2189 uncovered (0 + 1961 + 228); before/after counts and the eligibility verdict are reported, not graded (the map refreshes daily)",
+      "expect": "reasons_sum_ok=True",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "self-test on fixtures (python pick_reread.py --self-test) reproduces covered / NOT_IN_DIRECTORY / PROJECTION_REFUSED each once over 12 accounts",
+      "observed": "PICK-REREAD-SELFTEST before_ok=True after_ok=True reasons_ok=True eligible_ok=True",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "classify() in pick_reread.py edited to count a NOT_IN_DIRECTORY account as NO_SILVER_AT_AS_OF; restored byte for byte from a scratch copy (cmp clean) before commit",
+      "expected": "CU9-AC1 FAIL",
+      "observed": "3 failed, 6 passed (reasons, NOT_IN_DIRECTORY and self-test tests); after restore 9 passed",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CU9-AC1,CU9-AC2",
+      "result": "rc=0 (see commit)"
+    }
+  ]
+}
