@@ -1,0 +1,99 @@
+{
+  "reader_count": 7,
+  "enumeration": "At HEAD 0a3c1c841d / portal DEV 8ddfe409 (worktree wk-IRPT_BCKEND-140). (1) Portal: native Grep of 'searchDirectory|directory-search|DirectorySearch|irpt-directory-search' over portal/ (excluding node_modules): 40 files; of those, product code that CONSUMES the response (not a comment, a declaration table or a test): contracts/envelope.ts (IR_DATA_ADAPTER['directory-search'] via parseIrEnvelope), api/endpoints/investor-reporting.ts (LiveClient.searchDirectory -> send -> parseIrEnvelope), and the two callers of api.searchDirectory( outside tests: header/search.ts:408 and tabs/analysis/GenerateComposer.tsx:83 = 4 portal readers. (2) Backend: Grep of 'directory/search|irpt-directory-search|directory-search|directory_search' over infra/aws/lambda, data, lib, .tools *.py: no Lambda calls the search entry; the consumers of entry.search's return are the guarded boundary -- _authz/served.py Entry.handle (unwraps _data/_status into the v1 envelope) and _authz/enforce.py Enforcer.serve (carries and caches the compute payload) = 2 backend readers. (3) IRPT_CUSTDY: data/assets/scripts/gold/irpt_custody/ holds 6 modules; the one that reads a directory answer is advisor_client_list.py load_directory (hop 1, CU-a-1) = 1 reader (the other five read no directory). Total 4 + 2 + 1 = 7. Considered and NOT counted: FixtureAdapter.serve (reads checked-in fixture JSON, no wire body), directory/handler.py search and entry.py search (the producer), _authz/served.py:923 (the prospect-owner path, not search), header/IdentityCard.tsx and index.tsx (comments only; IdentityCard's self-fetch no longer runs directory-search), contracts/wire/{responses,consumed,index}.ts (declaration tables), _contracts/tests/test_seam_paired.py (route pairing).",
+  "fixtures": {
+    "clock": "entry._today = 2026-10-07 (Wed), Mon-Fri calendar replaced; plain directory as_of 2026-10-06 (1 trading day), over-age 2026-10-02 (3 trading days > MAX_AGE_TRADING_DAYS 2)",
+    "source": "the real guarded irpt-directory-search handler, recorded storage; build() in infra/aws/lambda/investor-reporting/directory/tests/test_search_readers_overage.py",
+    "files": "portal/src/pages/InvestorReporting/__tests__/ir-62-overage/fixtures/{plain,over_age}.{raw,wire}.json"
+  },
+  "readers": [
+    {
+      "path": "portal/src/pages/InvestorReporting/contracts/envelope.ts::parseIrEnvelope",
+      "kind": "portal",
+      "plain": {
+        "result": "PASS",
+        "test": "portal/src/pages/InvestorReporting/__tests__/ir-62-overage/search-readers.test.ts::P1 contracts/envelope.ts parseIrEnvelope > plain fixture: parsed, not refused, every hit adapted"
+      },
+      "over_age": {
+        "result": "FAIL",
+        "test": "portal/src/pages/InvestorReporting/__tests__/ir-62-overage/search-readers.test.ts::P1 contracts/envelope.ts parseIrEnvelope > over-age fixture: parsed, not refused, the stale hits adapted, the expiry carried (test.failing, W140-S1)"
+      }
+    },
+    {
+      "path": "portal/src/api/endpoints/investor-reporting.ts::LiveClient.searchDirectory",
+      "kind": "portal",
+      "plain": {
+        "result": "PASS",
+        "test": "portal/src/pages/InvestorReporting/__tests__/ir-62-overage/search-readers.test.ts::P2 api/endpoints/investor-reporting.ts LiveClient.searchDirectory > plain fixture: resolves every hit"
+      },
+      "over_age": {
+        "result": "FAIL",
+        "test": "portal/src/pages/InvestorReporting/__tests__/ir-62-overage/search-readers.test.ts::P2 api/endpoints/investor-reporting.ts LiveClient.searchDirectory > over-age fixture: resolves the same hits (not an error) (test.failing, W140-S1)"
+      }
+    },
+    {
+      "path": "portal/src/pages/InvestorReporting/header/search.ts::DirectorySearchRunner.flush",
+      "kind": "portal",
+      "plain": {
+        "result": "PASS",
+        "test": "portal/src/pages/InvestorReporting/__tests__/ir-62-overage/search-readers.test.ts::P3 header/search.ts DirectorySearchRunner.flush > plain fixture: one option row per hit"
+      },
+      "over_age": {
+        "result": "FAIL",
+        "test": "portal/src/pages/InvestorReporting/__tests__/ir-62-overage/search-readers.test.ts::P3 header/search.ts DirectorySearchRunner.flush > over-age fixture: the same option rows (not an error) (test.failing, W140-S1)"
+      }
+    },
+    {
+      "path": "portal/src/pages/InvestorReporting/tabs/analysis/GenerateComposer.tsx::fetchComposerAccountEntries",
+      "kind": "portal",
+      "plain": {
+        "result": "PASS",
+        "test": "portal/src/pages/InvestorReporting/__tests__/ir-62-overage/search-readers.test.ts::P4 tabs/analysis/GenerateComposer.tsx fetchComposerAccountEntries > plain fixture: answers a list (not the null failure answer)"
+      },
+      "over_age": {
+        "result": "FAIL",
+        "test": "portal/src/pages/InvestorReporting/__tests__/ir-62-overage/search-readers.test.ts::P4 tabs/analysis/GenerateComposer.tsx fetchComposerAccountEntries > over-age fixture: answers the same list as the plain fixture (not the null failure answer) (test.failing, W140-S1)"
+      }
+    },
+    {
+      "path": "infra/aws/lambda/investor-reporting/_authz/served.py::Entry.handle",
+      "kind": "backend",
+      "plain": {
+        "result": "PASS",
+        "test": "infra/aws/lambda/investor-reporting/directory/tests/test_search_readers_overage.py::test_B1_served_Entry_handle__plain"
+      },
+      "over_age": {
+        "result": "PASS",
+        "test": "infra/aws/lambda/investor-reporting/directory/tests/test_search_readers_overage.py::test_B1_served_Entry_handle__over_age"
+      }
+    },
+    {
+      "path": "infra/aws/lambda/investor-reporting/_authz/enforce.py::Enforcer.serve",
+      "kind": "backend",
+      "plain": {
+        "result": "PASS",
+        "test": "infra/aws/lambda/investor-reporting/directory/tests/test_search_readers_overage.py::test_B2_enforce_Enforcer_serve__plain"
+      },
+      "over_age": {
+        "result": "PASS",
+        "test": "infra/aws/lambda/investor-reporting/directory/tests/test_search_readers_overage.py::test_B2_enforce_Enforcer_serve__over_age"
+      }
+    },
+    {
+      "path": "data/assets/scripts/gold/irpt_custody/advisor_client_list.py::load_directory",
+      "kind": "irpt_custody",
+      "plain": {
+        "result": "PASS",
+        "test": "data/assets/scripts/gold/irpt_custody/tests/test_directory_search_overage_reader.py::test_C1_advisor_client_list_load_directory__plain"
+      },
+      "over_age": {
+        "result": "FAIL",
+        "test": "data/assets/scripts/gold/irpt_custody/tests/test_directory_search_overage_reader.py::test_C1_advisor_client_list_load_directory__over_age (xfail strict, W140-S2)"
+      }
+    }
+  ],
+  "fail_rows": {
+    "IRPT_BCKEND-W140-S1": "the four portal readers, over-age arm",
+    "IRPT_BCKEND-W140-S2": "IRPT_CUSTDY load_directory, over-age arm"
+  }
+}
