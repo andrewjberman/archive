@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ba-25.research-pull-driver",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "df9574dfd42e844ca9fe5c07614a3f3f328d8e86"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "df9574dfd42e844ca9fe5c07614a3f3f328d8e86",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-25.research-pull-driver.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~287",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/research_pulls.py",
+      "kind": "script",
+      "commit_or_etag": "b18a66387672b0661dfc943467785b50c0323336",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: plan / run / CLI driver; library code run by hand under a pair, no deploy target; 0 Bloomberg calls made building or testing it",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/research_pull_fields.json",
+      "kind": "config_data",
+      "commit_or_etag": "b18a66387672b0661dfc943467785b50c0323336",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: fields per kind as data; segments UNPROBED",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_research_pulls.py",
+      "kind": "test",
+      "commit_or_etag": "b18a66387672b0661dfc943467785b50c0323336",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 20 tests on fakes; 20 passed",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "b18a66387672b0661dfc943467785b50c0323336",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: \"segments\" added to BRONZE_REQUESTS (one tuple entry)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "each plan states its names, calls per name and their product, and makes no Bloomberg call; R77 BA25 PLAN: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba25.py\" --cell plan; echo \"exit=$?\"",
+      "output_evidence": "plans (kind, names, calls_per_name, calls, fields): [('officers', 3, 1, 3, 2), ('segments', 3, 1, 3, 4)]\nPASS C1 each plan states names, calls per name and the product \nPASS C2 a plan makes no Bloomberg call 0 calls\nR77 BA25 PLAN: YES\nexit=0",
+      "denominator": "2 plans (officers, segments) x 3 names; 2 clauses",
+      "status": "PASS",
+      "expect": "R77 BA25 \\w+: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "refused before the vehicle, refused on a signed-out Terminal, stopped at the capacity refusal with no further call, and the healthy control pulls every name; R77 BA25 STOPS: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba25.py\" --cell stops; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 refused before the vehicle has run: no call, no write VEHICLE_NOT_RUN calls 0 writes 0\nPASS C2 a signed-out Terminal pulls nothing TERMINAL_DOWN calls 0 writes 0\nPASS C3 a capacity refusal stops the sequence and is not retried CAPACITY pulled 2 calls 3 writes 2\nPASS C4 control: a healthy run pulls and writes every name None pulled 3 writes 3\nPASS C5 the exit codes are the stated ones {'OK': 0, 'CAPACITY': 3, 'VEHICLE_NOT_RUN': 4, 'TERMINAL_DOWN': 5}\nR77 BA25 STOPS: YES\nexit=0",
+      "denominator": "5 clauses (C1-C5); runs over 3 and 5 names",
+      "status": "PASS",
+      "expect": "R77 BA25 \\w+: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the driver names no sign-in script and nothing under pipeline/ or auth/; R77 BA25 SOURCE: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba25.py\" --cell source; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 the driver names no sign-in script and nothing under pipeline/ or auth/ []\nR77 BA25 SOURCE: YES\nexit=0",
+      "denominator": "1 clause; 1 driver source file",
+      "status": "PASS",
+      "expect": "R77 BA25 \\w+: YES.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted mutant: the CapacityRefused handler in run() changed from stop-and-return to `continue` (the sequence keeps calling after a refusal).",
+      "expected": "r77_ba25.py --cell stops clause C3 FAILS (calls 5, stopped None) and the verdict is NO.",
+      "observed": "FAIL C3 a capacity refusal stops the sequence and is not retried None pulled 2 calls 5 writes 2; R77 BA25 STOPS: NO; exit=1. Mutant reverted (file restored byte-for-byte; git status clean).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "r77_ba25.py --cell stops run twice on the committed bytes; output md5 identical both times (4243896ba766d7fb96a0c2c523fa8a0b for the mutant-free run pair); the 20 tests in test_research_pulls.py pass on each run.",
+      "observed": "identical output on 2 runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a live Bloomberg call, a field search, and any session to the Terminal",
+      "reason": "order bound 1: this cell builds and tests against fakes; the issuer runs the one-name probe and the paired pulls"
+    },
+    {
+      "item": "the served read of the new segments bronze",
+      "reason": "named NOT this cell in the order"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W287-S1",
+    "AMGT_RESAPP-Z-W287-S2"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~287/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest integrations/bloomberg/research/tests/",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/ -q",
+      "result": "1 failed, 314 passed (the 1 failure, test_price_axis_pull_client_is_the_loopback_dapi_not_a_lambda, is ModuleNotFoundError: No module named blpapi on this device, in a file this cell does not touch)"
+    },
+    {
+      "tool": "pytest lib/research/harvest/tests/",
+      "invocation": "python -m pytest lib/research/harvest/tests/ -q",
+      "result": "296 passed in 11.90s"
+    }
+  ]
+}
