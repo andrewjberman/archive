@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-bk-1.backfill-rows-feed-the-price-curve-only-and-carry-their-currency",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "312c34ca27",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-bk-1.backfill-rows-feed-the-price-curve-only-and-carry-their-currency.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "312c34ca27"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~10",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_holding_contribution.py",
+      "kind": "script",
+      "commit_or_etag": "e14cfc522b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 20 repair cell; drop_backfill + handler_entry read; no S3, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_canonical_shape.py",
+      "kind": "script",
+      "commit_or_etag": "e14cfc522b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_g4_for skips all-backfill partitions; no S3, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "e14cfc522b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "market-range: currency, lookups, un-held dates only; vendor hooks stubbed, no Bloomberg call",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_buying_trend.py",
+      "kind": "script",
+      "commit_or_etag": "e14cfc522b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "G4 read loads security_parsekey",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r15bf1_market_range.py",
+      "kind": "script",
+      "commit_or_etag": "e14cfc522b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "re-pinned: reference stub, plan gains currency_lookups, held-date runs, ledger 360/420",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r20bk1_backfill_rows.py",
+      "kind": "script",
+      "commit_or_etag": "e14cfc522b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 new tests, no network",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/bf-1.AC2.py",
+      "kind": "script",
+      "commit_or_etag": "e14cfc522b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "figures, request shapes and the no-reference-request clause only; ends PASS 0 failures",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the rankings stage and the canonical-shape stage ignore backfill-marked G4 rows: a day's table is equal with and without them; control: the planted rows are in the fixture and would have been used",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/bk-1.AC1.py",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "output_evidence": "drop_backfill: exists True | kept of [A backfill, B historical, C pull, D null]: ['B', 'C', 'D'] | a frame with no as_of_source column unchanged: True\nOK:   (a) drop_backfill removes exactly the backfill-marked rows and returns a frame without the column unchanged\nrankings without the plant: status OK | rows 24 | sha 67a8d9e676e8\nrankings with the plant:    status OK | rows 24 | sha 67a8d9e676e8\n  XAA R30 without: contribution 0.005941 | price_source holding_implied | n_days_priced 3 | n_days_holding_implied 3\n  XAA R30 with:    contribution 0.005941 | price_source holding_implied | n_days_priced 3 | n_days_holding_implied 3\n  XAA MTD without: contribution 0.003941 | price_source holding_implied | n_days_priced 2 | n_days_holding_implied 2\n  XAA MTD with:    contribution 0.003941 | price_source holding_implied | n_days_priced 2 | n_days_holding_implied 2\ntables equal on every column but ('revision', 'produced_at', 'input_manifest'): True\nOK:   (b) the day's holding_contribution table is identical with and without backfill-marked G4 partitions\n_g4_for(2026-10-02): date 2026-09-29 | object market-20260929T010000Z-aaaaaaaaaaaa.parquet | AAA sector 'Information Technology' | AAA as_of_source 'historical'\n_g4_for(2026-10-01): date 2026-09-29 | object market-20260929T010000Z-aaaaaaaaaaaa.parquet | AAA sector 'Information Technology' | AAA as_of_source 'historical'\n_g4_for(2026-09-29): date 2026-09-29 | object market-20260929T010000Z-aaaaaaaaaaaa.parquet | AAA sector 'Information Technology' | AAA as_of_source 'historical'\nOK:   (c) an all-backfill partition is never picked: the nearest earlier partition holding a non-backfill row is\nmixed partition 2026-10-02: picked date 2026-10-02 object market-20261002T010000Z-eeeeeeeeeeee.parquet | apply_g4 resolved 1 | {'BBB_US_Equity': ('RESOLVED', 'Energy'), 'CCC_US_Equity': (None, None)}\nOK:   (d) a partition holding a non-backfill row is picked, and its backfill-marked row never fills GICS\ncontrol: table rows 24 | XAA R30 contribution 0.005941 | price_source holding_implied | n_days_priced 3 | n_days_holding_implied 3 | planted objects (as_of_source, closes, rows) {'2026-09-30': (['backfill'], 1, 1), '2026-10-01': (['backfill'], 1, 1)} | the pick fixture's 2026-10-01 object all backfill: True\nOK:   (e) control: without the plant XAA is holding-implied on its 3 days, the planted objects are in the sink and marked backfill, and _g4_for picks a normal partition of its own report date\nAC1 RESULT: PASS 0 failures",
+      "denominator": "5 of 5 checks OK ((a)-(e)); exit code 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the backfill mode stamps every row's currency (stored, else one CRNCY reference request through the budget ledger), reports the lookups in its plan, and counts only un-held dates; control: the stub records the historical requests",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/bk-1.AC2.py",
+      "expect": "AC2 RESULT: PASS 0 failures",
+      "output_evidence": "fixture: 5 securities x 6 trading days 2026-09-21..2026-09-28 = 30 points | no stored currency: ['LKA US Equity', 'LKB LN Equity', 'NON US Equity'] | run date 2026-10-06\ndry run: status OK | plan {'points': 30, 'securities': 5, 'trading_days': 6, 'batches': 1, 'currency_lookups': 3} | currency_lookups [('plan.currency_lookups', 3)] | vendor calls 0 | objects in the range 0 | ledger spent 0\nOK:   (a) a dry run's plan carries currency_lookups 3 (the securities with no stored currency) and makes no request\nlive run: status OK | reference requests [(['LKA US Equity', 'LKB LN Equity', 'NON US Equity'], ['CRNCY'])] | historical requests [(5, ['PX_LAST'], '2026-09-21', '2026-09-28')] | reached blp_client 0 | detail {'landed': 6, 'skipped': 0, 'no_rows': 0, 'points_requested': 33}\nOK:   (b) exactly ONE reference request, for CRNCY only and for exactly the securities with no stored currency\n  date=2026-09-21: currency by security {'JJJ JP Equity': 'JPY', 'LKA US Equity': 'EUR', 'LKB LN Equity': 'GBp', 'NON US Equity': None, 'UUU US Equity': 'USD'} | as_of_source ['backfill']\n  date=2026-09-22: currency by security {'JJJ JP Equity': 'JPY', 'LKA US Equity': 'EUR', 'LKB LN Equity': 'GBp', 'NON US Equity': None, 'UUU US Equity': 'USD'} | as_of_source ['backfill']\n  date=2026-09-23: currency by security {'JJJ JP Equity': 'JPY', 'LKA US Equity': 'EUR', 'LKB LN Equity': 'GBp', 'NON US Equity': None, 'UUU US Equity': 'USD'} | as_of_source ['backfill']\n  date=2026-09-24: currency by security {'JJJ JP Equity': 'JPY', 'LKA US Equity': 'EUR', 'LKB LN Equity': 'GBp', 'NON US Equity': None, 'UUU US Equity': 'USD'} | as_of_source ['backfill']\n  date=2026-09-25: currency by security {'JJJ JP Equity': 'JPY', 'LKA US Equity': 'EUR', 'LKB LN Equity': 'GBp', 'NON US Equity': None, 'UUU US Equity': 'USD'} | as_of_source ['backfill']\n  date=2026-09-28: currency by security {'JJJ JP Equity': 'JPY', 'LKA US Equity': 'EUR', 'LKB LN Equity': 'GBp', 'NON US Equity': None, 'UUU US Equity': 'USD'} | as_of_source ['backfill']\nOK:   (c) every landed backfill row carries currency: the stored one, else the looked-up one, else None\nbudget order: [('check', 33), ('ref', 3), ('record', 3, 'market-range'), ('hist', 5), ('record', 30, 'market-range')] | check_points before the reference request [33] | record after it [3, 30] | ledger lines [('market-range', 3), ('market-range', 30)] sum 33\nOK:   (d) the lookup is checked against the budget before it is sent and recorded (3 points) after\ndry run with 2026-09-23 held: status OK | plan {'points': 25, 'securities': 5, 'trading_days': 6, 'batches': 1, 'currency_lookups': 3} | points 25 (free sink: 30) | skip keys [('skipped_dates', ['2026-09-23'])] | vendor calls 0\nOK:   (e) a date already holding a market object costs nothing: the plan's points drop by securities x 1\ncontrol: historical requests [(5, ['PX_LAST'], '2026-09-21', '2026-09-28')] | dates holding 5 backfill rows 6 of 6 | stored rows read back [('2026-10-05', 'JJJ JP Equity', 'JPY', 'pull'), ('2026-09-30', 'UUU US Equity', 'CAD', 'pull'), ('2026-10-02', 'UUU US Equity', 'USD', 'pull'), ('2026-10-01', 'LKA US Equity', 'CHF', 'backfill')]\nOK:   (f) control: the live run sends the historical request and lands 6 backfill objects, and the stored-currency rows are in the sink as planted\nAC2 RESULT: PASS 0 failures",
+      "denominator": "6 of 6 checks OK ((a)-(f)); exit code 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the trend stage's own G4 read loads the parsekey column and one security under a CUSIP and a Bloomberg key becomes one key; control: the join's map holds the pair",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/bk-1.AC3.py",
+      "expect": "AC3 RESULT: PASS 0 failures",
+      "output_evidence": "handler_entry: status OK | rows 12 | GQGU security buckets ['NBIS_US_Equity'] | every bucket of the table ['Information Technology', 'NBIS_US_Equity']\nOK:   (a) the trend table carries the CUSIP-keyed fund's lines under the one Bloomberg key, none under the CUSIP\n_read calls: 4 | security_market reads and their columns: [('security_id', 'date', 'security_name', 'security_parsekey')]\nOK:   (b) the stage's own security_market read loads security_parsekey\ncontrol: parsekey_map(full G4) {'N97284108': 'NBIS_US_Equity'} | build on the full frame ['NBIS_US_Equity'] | build on the frame cut to ['security_id', 'date', 'security_name'] ['N97284108'] | security_market reads seen 1\nOK:   (c) control: the fixture's G4 maps the CUSIP to the Bloomberg key, build joins on it when handed the column and keeps the CUSIP when it is not\nAC3 RESULT: PASS 0 failures",
+      "denominator": "3 of 3 checks OK ((a)-(c)); exit code 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted: each check carries its own control arm ((e) in bk-1.AC1, (f) in bk-1.AC2, (c) in bk-1.AC3) and fails at base by its docstring.",
+      "expected": "bk-1.AC1 (a)-(d), bk-1.AC2 (a)-(e), bk-1.AC3 (a)(b) FAIL before the build.",
+      "observed": "with the build all three end PASS 0 failures; bf-1.AC1 and bf-1.AC2 end PASS 0 failures; package suite 865 passed, 2 skipped, 0 failed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "bk-1.AC1, AC2, AC3 each run at least twice during the build.",
+      "observed": "same verdict lines each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the status flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W10-S1",
+    "ETFS_RIVALS-Z-W10-S2"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~10 <0.9.0_WK_ETFS_RIVALS~10@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "e14cfc522b"
+    }
+  ]
+}
