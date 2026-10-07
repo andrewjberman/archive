@@ -1,0 +1,45 @@
+====================================================================================================
+V2 -- LIVE vs PRIOR
+====================================================================================================
+  opal-data-49financial    PRIOR+1dell2 == LIVE : True    admitted 19 -> 20 (+1)   dell2 live=True
+      statements 4 -> 4 (must be equal: no statement added or removed)
+  opal-data-inflection     PRIOR+1dell2 == LIVE : True    admitted 5 -> 6 (+1)   dell2 live=True
+      statements 1 -> 1 (must be equal: no statement added or removed)
+
+  NEGATIVE CONTROL on the comparator (planted mutant through the SAME path):
+    opal-data-49financial    LIVE == mutated PRIOR : False  <- must be False
+    opal-data-inflection     LIVE == mutated PRIOR : False  <- must be False
+
+  COTTONWOOD, the UNTOUCHED control -- byte-equal to the document saved before the apply:
+    bytes prior=501 live=501   BYTE-EQUAL=True
+    sha256 prior=49f1cf260f0f18d5f52244c2a48bb5159765dd293633b750a9f0fbad39dcc7ae
+    sha256 live =49f1cf260f0f18d5f52244c2a48bb5159765dd293633b750a9f0fbad39dcc7ae
+    statements=1  dell2 admitted live=False (must be False)
+    rider statements live: [] (must be empty -- the rider is still unapplied)
+
+  V2 VERDICT: applied-pair equality=True ; cottonwood untouched=True
+
+====================================================================================================
+V3 -- simulate-principal-policy, LIVE bucket policy as the RESOURCE POLICY, one ARN per call
+====================================================================================================
+-- dell2: the grant, on the two APPLIED buckets
+  cloudops-dell2-agent-user                      opal-data-49financial    want=allow -> allowed        OK        [matched: IAM Policy] the act's purpose
+  cloudops-dell2-agent-user                      opal-data-inflection     want=allow -> allowed        OK        [matched: IAM Policy] the act's purpose
+-- dell2: the NEW NEGATIVE arm -- still fenced out of cottonwood
+  cloudops-dell2-agent-user                      opal-data-cottonwood     want=deny  -> explicitDeny   OK        [matched: Resource Policy] cottonwood deliberately not applied
+-- dell1: admitted to nothing
+  cloudops-dell1-agent-user                      opal-data-49financial    want=deny  -> explicitDeny   OK        [matched: Resource Policy] dell1 has no row anywhere
+  cloudops-dell1-agent-user                      opal-data-inflection     want=deny  -> explicitDeny   OK        [matched: Resource Policy] dell1 has no row anywhere
+  cloudops-dell1-agent-user                      opal-data-cottonwood     want=deny  -> explicitDeny   OK        [matched: Resource Policy] dell1 has no row anywhere
+-- unlisted, previously refused: opal-gateway-role (exists, created 2026-08-15; in no fence list, matches no wildcard)
+  opal-gateway-role                              opal-data-49financial    want=deny  -> explicitDeny   OK        [matched: Resource Policy] the fence still fences
+  opal-gateway-role                              opal-data-inflection     want=deny  -> explicitDeny   OK        [matched: Resource Policy] the fence still fences
+  opal-gateway-role                              opal-data-cottonwood     want=deny  -> explicitDeny   OK        [matched: Resource Policy] the fence still fences
+-- CONTROL, previously admitted: Opal_Terminal (in all three ArnNotLike lists before and after)
+  Opal_Terminal                                  opal-data-49financial    want=allow -> allowed        OK        [matched: IAM Policy] existing access not broken
+  Opal_Terminal                                  opal-data-inflection     want=allow -> allowed        OK        [matched: IAM Policy] existing access not broken
+  Opal_Terminal                                  opal-data-cottonwood     want=allow -> allowed        OK        [matched: IAM Policy] existing access not broken
+
+V3 VERDICT: 12/12 arms as expected
+
+FENCE-READBACK v2_applied_equal=True v2_cottonwood_untouched=True v3_arms=12/12 all_ok=True
