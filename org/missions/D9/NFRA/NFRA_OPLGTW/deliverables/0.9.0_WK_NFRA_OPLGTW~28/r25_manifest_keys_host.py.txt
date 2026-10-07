@@ -1,0 +1,24 @@
+"""OG-rl-11 host program (read-only): the key NAMES of the served manifest the status tool reads, and whether the release's _manifest_date finds a date in it.
+Run by r25_ssm_prog.py as a SEPARATE process (staged release bytes via R25_STAGE_FROM). Prints key names, value TYPES and a date-shaped boolean; never a value, token or credential.
+Makes the portal service login POST and ONE GET of the served manifest (the status tool's own second read). No grant, state store, .env or secret is written."""
+import os
+import re
+import sys
+
+GW = os.environ.get("OG_GW_DIR", "/opt/opal-gateway")
+sys.path.insert(0, GW)
+import httpx  # noqa: E402
+from app.integrations.opal_portal import integration as mod  # noqa: E402
+
+integ = mod.OpalPortalIntegration()
+tok = integ._session.token()
+m = httpx.get(mod.PORTAL_FRONT_DOOR + mod.MANIFEST_PATH, headers={"Authorization": "Bearer " + tok}, timeout=30)
+print("R25_MANIFEST http=%s module_has_manifest_date=%s" % (m.status_code, hasattr(mod, "_manifest_date")))
+body = m.json() if m.status_code == 200 else None
+if isinstance(body, dict):
+    print("R25_MANIFEST_KEYS %s" % ",".join("%s:%s" % (k, type(v).__name__) for k, v in sorted(body.items())))
+    print("R25_MANIFEST_DATE_FOUND_BY_TOOL %s" % (mod._manifest_date(body) is not None))
+    dated = sorted(k for k, v in body.items() if isinstance(v, str) and re.search(r"\d{4}-\d{2}-\d{2}", v))
+    print("R25_MANIFEST_TOP_LEVEL_KEYS_WITH_A_DATE_SHAPED_VALUE %s" % ",".join(dated))
+else:
+    print("R25_MANIFEST_BODY_TYPE %s" % type(body).__name__)
