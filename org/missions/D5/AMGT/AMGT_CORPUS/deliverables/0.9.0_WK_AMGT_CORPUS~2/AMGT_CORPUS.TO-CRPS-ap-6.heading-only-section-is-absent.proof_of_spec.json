@@ -17,9 +17,9 @@
     {
       "path_or_key": "lib/research/corpus/dossier.py",
       "kind": "script",
-      "commit_or_etag": "e3d276634c91392f2821e27a5eaa4376faa74207",
+      "commit_or_etag": "901be95e86f8e63847ca8aaaaa78f04132a3693c",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "AMENDMENT 4: _trim_to_last_sentence_end cuts the text after the lead line at its last sentence end (pattern: one of . ! ? then any run of closing quote or bracket characters, then whitespace or the end of the text; a stop followed by a digit or a letter is not an end); the trim sits in _resolve_section_field, after the block is chosen and served, so it never turns a served value absent; no sentence end after the lead leaves the value unchanged; the citation passage is value[:_PASSAGE_CAP] of the trimmed value; --section-recompose-census marks a TRIM (new value a strict prefix of served) with 'TRIM dropped=<n>' and prints a last line 'section_recompose_census trims <n> chars_dropped_max <m>' (read-only, not run, reads S3); METHOD_VERSION amgt-corpus-dossier/7.",
+      "deploy_evidence": "AMENDMENT 5: _trim_to_last_sentence_end is renamed _drop_trailing_fragment. It takes the WHOLE value text (lead line with its inline text, and every item after it, joined by a space), finds the last _SENTENCE_END match, and drops the text after it only when that text is one or two whitespace-separated words; three or more words, or no sentence end, leave the text exactly as joined. The call sits in _resolve_section_field after the block is chosen, so it never makes a served value absent or empty; the citation passage is value[:_PASSAGE_CAP] of the trimmed value; the --section-recompose-census TRIM marker and last line are unchanged (read-only, not run, reads S3). METHOD_VERSION stays amgt-corpus-dossier/7.",
       "artifact_covered_by": [
         "AC1",
         "AC2",
@@ -29,19 +29,10 @@
     {
       "path_or_key": "lib/research/corpus/tests/test_dossier_heading_only_round40.py",
       "kind": "test",
-      "commit_or_etag": "e3d276634c91392f2821e27a5eaa4376faa74207",
+      "commit_or_etag": "901be95e86f8e63847ca8aaaaa78f04132a3693c",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "42 tests: the 28 inherited plus 14 for AMENDMENT 4 (date item dropped, stray token dropped, unfinished last sentence dropped, whole value unchanged, decimal not an end, sentence-end pattern cases incl. quotes and brackets, closing quote after the full stop, bullets unchanged, lead never trimmed, trim never absent, passage from the trimmed value, census TRIM marker and last line, _trim_dropped).",
-      "artifact_covered_by": [
-        "AC2"
-      ]
-    },
-    {
-      "path_or_key": "lib/research/corpus/tests/test_dossier_method_bump.py",
-      "kind": "test",
-      "commit_or_etag": "e3d276634c91392f2821e27a5eaa4376faa74207",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Pinned literal /7; a stored /6 object with equal inputs writes, a stored /7 object writes nothing. The case_body, case_unit and case_positional tests carry the /7 literal with an AMENDMENT 4 comment (case_unit + case_positional: 24 passed).",
+      "deploy_evidence": "47 tests: the AMENDMENT 4 long-tail cut test now asserts a three-word tail STAYS; added a two-word fragment dropped, a three-word fragment stays, the real Nike shape (inline lead prose, date the only item), the Shopify shape, the abbreviation shape, and the pattern test reads _drop_trailing_fragment; the page-number test and the lone-lead test were updated to the new rule. Every edit is marked AMENDMENT 5 (CRPS-ap-6, round 40). case_unit + case_positional: 24 passed."
+      ,
       "artifact_covered_by": [
         "AC2"
       ]
@@ -63,32 +54,32 @@
       "criterion_verbatim": "pytest test_dossier.py test_dossier_case_body.py test_dossier_method_bump.py test_dossier_heading_only_round40.py -- expect (?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest lib/research/corpus/tests/test_dossier.py lib/research/corpus/tests/test_dossier_case_body.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_dossier_heading_only_round40.py -q -p no:cacheprovider --color=no",
-      "output_evidence": "67 passed in 0.97s",
-      "denominator": "67 of 67 tests passed",
+      "output_evidence": "72 passed in 0.87s",
+      "denominator": "72 of 72 tests passed",
       "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
       "status": "PASS"
     },
     {
       "criterion_id": "AC3",
-      "criterion_verbatim": "ap6r_check.py -- expect (?m)^ap6r build 3/3 control 3/3$",
+      "criterion_verbatim": "ap6r_check.py -- expect (?m)^ap6r build 3/3 control 6/6$",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round40/ap6r_check.py\"",
-      "output_evidence": "ap6r build 3/3 control 3/3",
-      "denominator": "build 3 of 3 arms, control 3 of 3 arms",
-      "expect": "(?m)^ap6r build 3/3 control 3/3$",
+      "output_evidence": "ap6r build 3/3 control 6/6",
+      "denominator": "build 3 of 3 arms, control 6 of 6 arms",
+      "expect": "(?m)^ap6r build 3/3 control 6/6$",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "In _resolve_section_field the line text = _trim_to_last_sentence_end(items) edited to text = text (no trim); then ap6r_check.py and the new test file run; the line restored afterwards.",
-      "expected": "ap6r build arms r1, r2, r3 FAIL and the trim tests in the new test file FAIL.",
-      "observed": "ap6r build 0/3 control 3/3; 6 failed, 36 passed in the new test file; with the line restored ap6r build 3/3 control 3/3, ap6 build 6/6 control 3/3 and 67 passed over the four AC2 files.",
+      "description": "In _resolve_section_field the line text = _drop_trailing_fragment(items) edited to text = text (no drop); then ap6r_check.py and the new test file run; the line restored afterwards.",
+      "expected": "ap6r build arms r1, r2, r3 FAIL and the fragment tests in the new test file FAIL.",
+      "observed": "ap6r build 0/3 control 6/6; 9 failed, 38 passed in the new test file; with the line restored ap6r build 3/3 control 6/6, ap6 build 6/6 control 3/3 and 72 passed over the four AC2 files.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "ap6_check.py and ap6r_check.py run on the final file.",
-      "observed": "ap6 build 6/6 control 3/3; ap6r build 3/3 control 3/3.",
+      "observed": "ap6 build 6/6 control 3/3; ap6r build 3/3 control 6/6.",
       "status": "STABLE"
     }
   },
@@ -108,12 +99,12 @@
     {
       "tool": "pytest (AC2)",
       "invocation": "python -m pytest test_dossier.py test_dossier_case_body.py test_dossier_method_bump.py test_dossier_heading_only_round40.py",
-      "result": "67 passed in 0.97s"
+      "result": "72 passed in 0.87s"
     },
     {
       "tool": "ap6r_check.py (AC3)",
       "invocation": "python ap6r_check.py",
-      "result": "ap6r build 3/3 control 3/3"
+      "result": "ap6r build 3/3 control 6/6"
     }
   ]
 }
