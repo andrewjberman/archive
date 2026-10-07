@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_CUSTDY.TO-CU-e-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-e-1.unkeyed-accounts.md",
+    "group": "OTHER",
+    "vintage_commit": "9ca7469fc3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.round5.md",
+    "vintage_commit": "9ca7469fc3",
+    "to_ref": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-e-1.unkeyed-accounts.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_CUSTDY~13",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/unkeyed_lookup.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local Python, read-only S3; no deploy",
+      "artifact_covered_by": [
+        "CU14-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/hop3_real_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local Python; no deploy",
+      "artifact_covered_by": [
+        "CU14-AC1",
+        "CU14-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_unkeyed_lookup.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local pytest; no deploy",
+      "artifact_covered_by": [
+        "CU14-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CU14-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_unkeyed_lookup.py -> passed",
+      "method": "command",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_unkeyed_lookup.py",
+      "output_evidence": "16 passed in 6.58s | rc=0 (run under timeout 200)",
+      "denominator": "16 collected tests: 16 passed, 0 failed (identifiers tried and printed; FOUND vs NOT_HELD with evidence; NOT_HELD rendered as not_covered in hop3 data on fixtures)",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU14-AC2",
+      "criterion_verbatim": "python data/assets/scripts/gold/irpt_custody/unkeyed_lookup.py --advisor matthew_gooch --as-of 2026-09-30 -> classified=4",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/unkeyed_lookup.py --advisor matthew_gooch --as-of 2026-09-30",
+      "output_evidence": "UNKEYED-LOOKUP advisor=matthew_gooch accounts=4 found=0 not_held=4 classified=4 | rc=0 (run under timeout 600)",
+      "denominator": "4 of 4 unkeyed accounts classed (****9851, ****0041, ****7341, ****9421: all NOT_HELD, census cause BD_KEY_ABSENT_FROM_EVERY_BRIDGE_SOURCE); 39 silver surfaces searched, 8 identifiers each, 32 LOOKUP lines; split reported not graded",
+      "expect": "classified=4",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CU14-AC3",
+      "criterion_verbatim": "python data/assets/scripts/gold/irpt_custody/tests/run_suite_check.py -> failed=0 errors=0",
+      "method": "command",
+      "invocation": "python data/assets/scripts/gold/irpt_custody/tests/run_suite_check.py",
+      "output_evidence": "SUITE dir=data/assets/scripts/gold/irpt_custody/tests passed=126 failed=0 errors=0 skipped=0 xfailed=1 | rc=0 (run under timeout 400)",
+      "denominator": "127 collected tests: 126 passed, 0 failed, 0 errors, 0 skipped, 1 pre-existing xfail; test_hop3_real_run.py and test_hop3_directory_gap.py unedited and passing",
+      "expect": "failed=0 errors=0",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [
+    "IRPT_CUSTDY-W13-S1",
+    "IRPT_CUSTDY-W13-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CU14-AC1,CU14-AC2,CU14-AC3",
+      "result": "rc=0 (see commit)"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "unkeyed_lookup.py real run twice on the same tree",
+      "observed": "both runs: UNKEYED-LOOKUP advisor=matthew_gooch accounts=4 found=0 not_held=4 classified=4 | positive control (real 08335338 account_id prefixed z through the real context): FOUND_UNDER_OTHER_KEY, so NOT_HELD is a search that could find",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "account_id dropped from KEY_COLUMNS in unkeyed_lookup.py; restored byte for byte (cmp clean)",
+      "expected": "CU14-AC1 FAIL",
+      "observed": "5 failed, 11 passed; after restore 16 passed",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_CUSTDY/surprise-channel/investigations/INVESTIGATION_v1.md"
+}
