@@ -1,0 +1,218 @@
+"""OG-rl-14 host program: the audit-lake key builder of the code in OG_GW_DIR (default the INSTALLED /opt/opal-gateway), read as SEPARATE processes (never the running service).
+Run by r28_ssm_prog.py under `env -i` from a per-run scratch directory that is removed in the same command list. Modes (argv[1]): before (installed live r27 code) | rehearsal (staged
+release bytes, installed tree untouched) | after (installed release code). argv[2] = the served release sha.
+
+NOTHING IS WRITTEN TO THE AUDIT LAKE. The key is observed in two ways, both on a FAKE S3 client:
+  (1) through `_emit`, the function that writes the lake object: audit._cfg is replaced by a namespace whose AUDIT_PATH is a scratch file and whose AUDIT_S3_BUCKET is a fake name, and
+      audit._s3_client is replaced by a recorder, so `_emit` calls put_object on the recorder and the key it chose is read from the recorder's call. boto3 is never imported by this
+      program and no real client is ever created (the recorder is non-None, so `_emit` never builds one).
+  (2) through `audit._lake_key(record)` directly, when the module has it (the release code does; the live r27 code does not).
+Four synthetic records, none of which names a person, an account or a tenant:
+  no_ts      : a record with `observed_at` and no `ts` (the shape taxsma_workbook._audit writes)
+  with_ts    : a record with a `ts` isoformat string (the shape every other writer produces)
+  empty_ts   : `ts` = ""      none_ts : `ts` = None      (both reach the no-time branch)
+The record passed in is deep-copied before the call and compared after it.
+
+CONSENT SECTION (tools and the scoped concierge's consent scopes), the same two counts r27's wrapper section printed, with NO principal, NO tool call, NO /login, NO Graph call: the
+consent URL is built for the code's own seed identity (held in a variable, never printed). /opt/opal-gateway/.env is NEVER sourced: it is parsed AS TEXT in the CONSENT child only,
+so the config can build its consent URL; no value is printed.
+Prints booleans, counts, key shapes with synthetic days and times; never an id, token, address or credential."""
+import asyncio
+import copy
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+import types
+from datetime import datetime, timezone
+
+SECTION = os.environ.get("R28_SECTION", "")
+GW = os.environ.get("OG_GW_DIR") or "/opt/opal-gateway"
+staged = GW != "/opt/opal-gateway"
+mode = sys.argv[1] if len(sys.argv) > 1 else "before"
+served = sys.argv[2] if len(sys.argv) > 2 else ""
+SCR = os.environ["R28_SCRATCH"]
+KEY_RE = re.compile(r"^audit/dt=([^/]*)/(.*)-([0-9a-f]{8})\.jsonl$")
+
+
+def emit(tag, obj):
+    print(tag + " " + json.dumps(obj, sort_keys=True))
+
+
+class Recorder:
+    """Stands in for the S3 client: records put_object calls, writes nothing anywhere."""
+
+    def __init__(self):
+        self.calls = []
+
+    def put_object(self, **kw):
+        self.calls.append({"Bucket": kw.get("Bucket"), "Key": kw.get("Key"), "ContentType": kw.get("ContentType"), "n": len(kw.get("Body") or b"")})
+
+
+def split_key(key):
+    m = KEY_RE.match(key or "")
+    if not m:
+        return None
+    return {"day": m.group(1), "time": m.group(2), "id": m.group(3)}
+
+
+def lake_section():
+    sys.path.insert(0, GW)
+    audit_path = os.path.join(SCR, "r28_lake_audit.jsonl")
+    os.environ.update({"MOCK_GRAPH": "1", "IDENTITY_PROVIDER": "alb_oidc", "RATE_LIMIT_ENABLED": "0", "AUDIT_PATH": audit_path, "AWS_DEFAULT_REGION": "us-east-1",
+                       "ENABLED_INTEGRATIONS": ""})
+    os.environ.pop("AUDIT_S3_BUCKET", None)
+    import dotenv
+    dotenv.load_dotenv = lambda *a, **k: False
+    from app import audit
+    has_builder = hasattr(audit, "_lake_key")
+    print("R28_LAKE_CODE audit.py md5 %s source=%s _lake_key_present=%s boto3_imported_before=%s"
+          % (hashlib.md5(open(audit.__file__, "rb").read()).hexdigest()[:8], "stage" if staged else "installed", has_builder, "boto3" in sys.modules))
+    rec = Recorder()
+    audit._cfg = types.SimpleNamespace(AUDIT_PATH=audit_path, AUDIT_S3_BUCKET="r28-fake-bucket-never-real", AWS_REGION="us-east-1")
+    audit._s3_client = rec
+    synthetic = {
+        "no_ts": {"event": "synthetic_r28", "observed_at": "2000-01-01T00:00:00+00:00", "outcome": "ok"},
+        "with_ts": {"ts": "2026-01-02T03:04:05.678901+00:00", "event": "synthetic_r28", "outcome": "ok"},
+        "empty_ts": {"ts": "", "event": "synthetic_r28", "outcome": "ok"},
+        "none_ts": {"ts": None, "event": "synthetic_r28", "outcome": "ok"},
+    }
+    res, changed = {}, 0
+    for name, r in synthetic.items():
+        before = copy.deepcopy(r)
+        d0 = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        n0 = len(rec.calls)
+        audit._emit(r)
+        d1 = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        key = rec.calls[-1]["Key"] if len(rec.calls) == n0 + 1 else None
+        sk = split_key(key)
+        unchanged = (r == before)
+        changed += 0 if unchanged else 1
+        entry = {"key_seen": key is not None, "key": key, "parts": sk, "record_unchanged": unchanged, "puts_on_recorder": len(rec.calls) - n0}
+        if sk is not None:
+            t = sk["time"]
+            entry["time_part_empty"] = (t == "")
+            entry["day_matches_time"] = bool(t) and t[:10] == sk["day"]
+            try:
+                p = datetime.fromisoformat(t) if t else None
+                entry["time_part_is_utc_isoformat"] = bool(p) and p.utcoffset() is not None and p.utcoffset().total_seconds() == 0
+            except ValueError:
+                entry["time_part_is_utc_isoformat"] = False
+            entry["day_is_writers_utc_day"] = sk["day"] in (d0, d1)
+        res[name] = entry
+        if has_builder:
+            b2 = copy.deepcopy(r)
+            k2 = audit._lake_key(r)
+            s2 = split_key(k2)
+            entry["direct_lake_key"] = k2
+            entry["direct_record_unchanged"] = (r == b2)
+            changed += 0 if r == b2 else 1
+            entry["direct_time_part_empty"] = bool(s2) and s2["time"] == ""
+            entry["direct_day_matches_time"] = bool(s2) and bool(s2["time"]) and s2["time"][:10] == s2["day"]
+    ts = synthetic["with_ts"]["ts"]
+    wt = res["with_ts"]["parts"] or {}
+    with_ts_shape = (res["with_ts"]["key"] is not None and wt.get("day") == ts[:10] and wt.get("time") == ts and bool(re.fullmatch(r"[0-9a-f]{8}", wt.get("id", ""))))
+    nt = res["no_ts"]
+    real_client_made = audit._s3_client is not rec
+    for name in ("no_ts", "with_ts", "empty_ts", "none_ts"):
+        e = res[name]
+        print("R28_LAKE %s key_shape=%s time_part_empty=%s day_matches_time=%s utc_isoformat=%s day_is_writers_utc_day=%s record_unchanged=%s%s"
+              % (name, re.sub(r"[0-9a-f]{8}\.jsonl$", "<id8>.jsonl", e["key"] or "NONE"), e.get("time_part_empty"), e.get("day_matches_time"), e.get("time_part_is_utc_isoformat"),
+                 e.get("day_is_writers_utc_day"), e["record_unchanged"],
+                 (" direct_key_shape=%s direct_time_part_empty=%s direct_day_matches_time=%s" % (re.sub(r"[0-9a-f]{8}\.jsonl$", "<id8>.jsonl", e["direct_lake_key"]), e["direct_time_part_empty"], e["direct_day_matches_time"])) if has_builder else ""))
+    out = {"lake_key_no_ts_time_part_empty": bool(nt.get("time_part_empty")) if nt["parts"] else True,
+           "lake_key_no_ts_day_matches_time": bool(nt.get("day_matches_time")),
+           "lake_key_with_ts_shape_unchanged": bool(with_ts_shape),
+           "records_changed_by_key_builder": changed,
+           "lake_objects_written": 1 if real_client_made else 0,
+           "empty_ts_time_part_empty": bool(res["empty_ts"].get("time_part_empty")), "none_ts_time_part_empty": bool(res["none_ts"].get("time_part_empty")),
+           "fake_recorder_puts": len(rec.calls), "real_s3_client_created": real_client_made, "boto3_imported_after": "boto3" in sys.modules,
+           "has_lake_key_builder": has_builder}
+    print("R28_LAKE_TOTALS fake_recorder_puts=%d real_s3_client_created=%s boto3_imported_after=%s records_changed=%d" % (len(rec.calls), real_client_made, "boto3" in sys.modules, changed))
+    emit("R28_LAKE_JSON", out)
+
+
+def consent_section():
+    ENVD = {}
+    for line in open("/opt/opal-gateway/.env", encoding="utf-8"):
+        m = re.match(r"^([A-Za-z0-9_]+)=(.*)$", line.rstrip("\r\n"))
+        if m:
+            v = m.group(2)
+            if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+                v = v[1:-1]
+            ENVD[m.group(1)] = v
+    os.environ.update(ENVD)
+    sys.path.insert(0, GW)
+    pid = subprocess.check_output(["systemctl", "show", "opal-gateway", "-p", "MainPID", "--value"]).decode().strip()
+    enabled = ""
+    for kv in open("/proc/%s/environ" % pid, "rb").read().split(bytes([0])):
+        if kv.startswith(b"ENABLED_INTEGRATIONS="):
+            enabled = kv.split(b"=", 1)[1].decode("utf-8", "replace")
+    audit_path = os.path.join(SCR, "r28_consent_audit.jsonl")
+    os.environ.update({"ENABLED_INTEGRATIONS": enabled, "MOCK_GRAPH": "1", "AUDIT_PATH": audit_path, "RATE_LIMIT_ENABLED": "0",
+                       "TOKEN_CACHE_DIR": os.path.join(SCR, "tokcache"), "IDENTITY_TOOL_ALLOWLIST_PATH": os.path.join(GW, "identity_tool_allowlist.txt")})
+    os.makedirs(os.environ["TOKEN_CACHE_DIR"], exist_ok=True)
+    os.environ.pop("AUDIT_S3_BUCKET", None)
+    import dotenv
+    dotenv.load_dotenv = lambda *a, **k: False
+    from mcp.server.fastmcp import FastMCP
+    from app import audit, identity_scope, token_broker, tools, integrations
+    import urllib.parse
+    assert not audit._cfg.AUDIT_S3_BUCKET, "AUDIT_S3_BUCKET must be empty"
+    SC = sorted(identity_scope._SEED)[0]            # the scoped concierge's seed identity; held in a variable, never printed
+    integrations.register_enabled(tools.mcp, enabled.split())
+    names = sorted(t.name for t in asyncio.run(FastMCP.list_tools(tools.mcp)))
+    q = urllib.parse.parse_qs(urllib.parse.urlparse(token_broker.build_consent_url(token_broker.make_state(SC))).query)
+    consent = sorted(set(" ".join(q.get("scope", [])).split()) - {"openid", "profile", "offline_access"})
+    print("R28_CONSENT tools=%d scoped_concierge_consent_scopes=%d source=%s" % (len(names), len(consent), "stage" if staged else "installed"))
+    emit("R28_CONSENT_JSON", {"tools": len(names), "scoped_scope_count": len(consent)})
+
+
+if SECTION == "lake":
+    lake_section()
+    sys.exit(0)
+if SECTION == "consent":
+    consent_section()
+    sys.exit(0)
+
+
+def child(section):
+    env = dict(os.environ)
+    env["R28_SECTION"] = section
+    p = subprocess.run([sys.executable, os.path.abspath(sys.argv[0])] + sys.argv[1:], env=env, capture_output=True, text=True)
+    tag = "R28_LAKE_JSON " if section == "lake" else "R28_CONSENT_JSON "
+    sys.stdout.write("\n".join(l for l in p.stdout.split("\n") if not l.startswith(tag)) + "\n")
+    if p.returncode != 0:
+        print("R28_CHILD_FAIL section=%s rc=%d stderr_tail=%s" % (section, p.returncode, re.sub(r"[0-9a-fA-F-]{36}", "<guid>", p.stderr[-400:]).replace("\n", " | ")))
+    for l in p.stdout.split("\n"):
+        if l.startswith(tag):
+            return json.loads(l[len(tag):])
+    return None
+
+
+lk = child("lake")
+cs = child("consent")
+if not lk or not cs:
+    print("RESULT: FAIL (a section did not report)")
+    sys.exit(1)
+body = {"served_release": served, "installed_code": not staged, "tools": cs["tools"], "scoped_scope_count": cs["scoped_scope_count"],
+        "lake_key_no_ts_time_part_empty": lk["lake_key_no_ts_time_part_empty"], "lake_key_no_ts_day_matches_time": lk["lake_key_no_ts_day_matches_time"],
+        "lake_key_with_ts_shape_unchanged": lk["lake_key_with_ts_shape_unchanged"], "records_changed_by_key_builder": lk["records_changed_by_key_builder"],
+        "lake_objects_written": lk["lake_objects_written"], "grants_written": 0}
+s = json.dumps(body, sort_keys=True)
+dig = hashlib.sha256(s.encode("utf-8")).hexdigest()
+print("R28_LAKE_SIDE empty_ts_time_part_empty=%s none_ts_time_part_empty=%s has_lake_key_builder=%s" % (lk["empty_ts_time_part_empty"], lk["none_ts_time_part_empty"], lk["has_lake_key_builder"]))
+if mode == "before":
+    emit("RL14_BEFORE_BODY", body)
+elif staged:
+    print("RL14_REHEARSAL_BODY " + s)
+    print("RL14_REHEARSAL_DIGEST " + dig)
+    b2 = dict(body, installed_code=True)
+    s2 = json.dumps(b2, sort_keys=True)
+    print("STEP7_STANDIN RL14_BODY " + s2)
+    print("STEP7_STANDIN RL14_DIGEST " + hashlib.sha256(s2.encode("utf-8")).hexdigest())
+else:
+    print("RL14_BODY " + s)
+    print("RL14_DIGEST " + dig)
