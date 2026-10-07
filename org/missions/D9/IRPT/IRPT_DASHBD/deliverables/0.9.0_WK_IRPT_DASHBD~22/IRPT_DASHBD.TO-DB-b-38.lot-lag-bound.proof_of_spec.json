@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-38",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e1e0be5ba0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "09eafc7c24",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-38.lot-lag-bound.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~22",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~22/LOT_LAG_E2.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/account_activity_lots.py",
+      "kind": "script",
+      "commit_or_etag": "3185e316f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LEG_LAG_DAYS 3 -> 1 with the measurement in the comment above it; no other line changed. ruff py39 clean; the producer's 31 tests pass.",
+      "artifact_covered_by": [
+        "DB25-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~22/LOT_LAG_E2.json",
+      "kind": "config_data",
+      "commit_or_etag": "3185e316f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "lags n=887 (p50 0, p90 0, p95 0, p99 0, max 1; counts 0:886, 1:1), unmatched 0, leg_lag_days 1, covered_percentile 100.0, choice_rule, by_kind.",
+      "artifact_covered_by": [
+        "DB25-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~22/LOT_LAG_E2.md",
+      "kind": "doc",
+      "commit_or_etag": "3185e316f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only summary; no client figure, balance or account number.",
+      "artifact_covered_by": [
+        "DB25-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~22/lot_lag_e2.py",
+      "kind": "script",
+      "commit_or_etag": "3185e316f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Driver: the producer's matcher with the bound lifted for in-kind legs, own matching for buys and sells; reads S3 only; ruff clean.",
+      "artifact_covered_by": [
+        "DB25-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "3185e316f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row W22-S1 (OBSERVATION, INERT) appended; 1 new row of 86 passed surprise-row-gate.",
+      "artifact_covered_by": [
+        "DB25-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB25-1-AC1",
+      "criterion_verbatim": "DB25-1-AC1 -- the lag distribution printed; LEG_LAG_DAYS in the producer equals the chosen value and covers the stated percentile. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r25/p25_windows.py\" . DB25-1-AC1",
+      "output_evidence": "OK: 887 lags; p50 0 p90 0 p95 0 p99 0 max 1; LEG_LAG_DAYS 1 covers 100.00% (stated 100.0)\nDB25-1-AC1 PASS",
+      "denominator": "887 of 887 trades (765 buys, 108 sells, 10 in-kind arrivals, 4 in-kind departures) of 91 graded accounts matched to a lot row; 0 unmatched; 886 at lag 0, 1 at lag 1",
+      "status": "PASS",
+      "expect": "DB25-1-AC1 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The discriminator: the checker run on the record against the producer as round 24 left it (LEG_LAG_DAYS = 3), which must fail on the mismatch.",
+      "expected": "FAIL: producer LEG_LAG_DAYS '3', record 1",
+      "observed": "FAIL: producer LEG_LAG_DAYS '3', record 1 / DB25-1-AC1 FAIL (rc=1), on a copy of the producer with the one line at 3",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "lot_lag_e2.py was run twice end to end over the same 100 sampled accounts and 24 days and the two LOT_LAG_E2.json files compared byte for byte",
+      "observed": "identical (cmp), 887 lags both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any edit of account_return_daily.py or a served producer; any S3 write, vendor call, bun or download",
+      "reason": "Bounds and refusal clause of the order; none made. S3 was read only."
+    },
+    {
+      "item": "the lag of a trade the lot tables never post is not measured",
+      "reason": "None exists in the window: 0 of 887 unmatched; the unmatched count and example list are in the JSON."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W22-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 data/assets/scripts/gold/irpt_reporting/account_activity_lots.py",
+      "result": "All checks passed; commit-gate and surprise-row-gate passed on the record commit"
+    }
+  ]
+}
