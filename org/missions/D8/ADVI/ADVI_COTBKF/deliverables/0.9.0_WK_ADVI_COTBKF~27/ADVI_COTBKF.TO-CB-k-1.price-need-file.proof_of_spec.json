@@ -31,7 +31,7 @@
     {
       "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~27/PRICE_NEED_FOR_SECHIST.csv",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "8d3c0fe34f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "read-only analysis; nothing deployed"
     },
@@ -49,26 +49,25 @@
       "criterion_verbatim": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_need_file.py expect: passed",
       "method": "command",
       "invocation": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_need_file.py",
-      "output_evidence": "7 passed in 3.93s (rc 0). DEVIATION from the order's stub text, filed as ADVI_COTBKF-D2-W27-S1: the order's 4-security stub (C partly covered) writes the 2 expected rows with the right days and sources but sums_ok is False under the order's own definition (universe - priced_any = 1, rows = 2); that is asserted as measured, and sums_ok=True is asserted on a stub whose rows are all never-priced; the forced-off control prints sums_ok=False; the no-vendor-import arm passes",
+      "output_evidence": "7 passed in 3.90s (rc 0). Under AMENDMENT 1 the 4-security stub (C equity partly covered, D bond unpriced) writes 2 rows (CCC 3 days YAHOO, DDD 5 days BLOOMBERG_SITE_Z) and prints sums_ok=True (securities 2 = count with any uncovered day, days 8 = 20 - 12); the forced-off control (per-source days +1, census days off by one, census securities off by one) gives sums_ok=False; the no-vendor-import arm passes",
       "denominator": "7 of 7 tests",
       "status": "PASS"
     },
     {
       "criterion_id": "CB11k1-AC2",
-      "criterion_verbatim": "python data/assets/scripts/analysis/commonwealth_price_need_file.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~27 expect: PRICE-NEED-FILE securities=2914 security_days=8091310",
+      "criterion_verbatim": "python data/assets/scripts/analysis/commonwealth_price_need_file.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~27 expect: PRICE-NEED-FILE securities=4545 security_days=8091310 (AMENDMENT 1)",
       "method": "command",
       "invocation": "python data/assets/scripts/analysis/commonwealth_price_need_file.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~27",
-      "output_evidence": "PRICE-NEED-FILE securities=4545 security_days=8091310 yahoo_securities=3226 yahoo_days=5773776 bloomberg_securities=1319 bloomberg_days=2317534 sums_ok=False fetched=0 (rc 1). Days match the census (9,388,961 - 1,297,651); securities do not: 2,914 never-priced (6,259,410 days) + 1,631 partly priced (1,831,900 gap days) = 4,545. Expected prefix securities=2914 NOT printed; refusal clause applied, test not weakened",
-      "denominator": "4545 rows written of 4634 universe; 4545 vs expected 2914",
-      "status": "FAIL",
-      "status_reason": "The printed securities=4545 differs from the expected securities=2914: 2,914 is the never-priced securities, 8,091,310 days also holds the gap days of 1,631 partly priced securities; the order's two figures describe different sets. Refusal clause applied, nothing weakened; row ADVI_COTBKF-D2-W27-S1."
+      "output_evidence": "PRICE-NEED-FILE securities=4545 security_days=8091310 yahoo_securities=3226 yahoo_days=5773776 bloomberg_securities=1319 bloomberg_days=2317534 sums_ok=True fetched=0 (rc 0). Days = census 9,388,961 - 1,297,651; securities 4,545 = 2,914 never priced (6,259,410 days) + 1,631 partly priced (1,831,900 gap days); CSV re-read: 4,545 rows, days_needed sum 8,091,310",
+      "denominator": "4545 rows written of 4634 universe; 8091310 of 8091310 census security-days",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "control: per-source totals forced off, and a census total forced off by one day",
+      "description": "control: per-source totals forced off, census days off by one, census securities-with-uncovered off by one",
       "expected": "check_sums False in both; final line ends sums_ok=False",
-      "observed": "7 of 7 tests passed incl. test_control_per_source_totals_forced_off_prints_sums_ok_false",
+      "observed": "7 of 7 tests passed incl. test_control_per_source_totals_forced_off_prints_sums_ok_false (sums_ok False in each forced case)",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -91,7 +90,7 @@
     {
       "tool": "commonwealth_price_need_file.py",
       "invocation": "see AC2",
-      "result": "securities=4545 security_days=8091310 sums_ok=False"
+      "result": "securities=4545 security_days=8091310 sums_ok=True"
     }
   ]
 }
