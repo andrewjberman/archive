@@ -24,6 +24,13 @@
  *     `data-input-provenance`; one `data-provenance-row` per entry.
  *   SecurityAnalysis.tsx mounts both from the overlay, above the tabs.
  *
+ * AMENDMENT 1 (2026-10-07, CTO render review ledger/CTO_RENDER_REVIEW_ROUND45_0aa353a6.md @e3d1e62b06 Amendment 2, msg 30533):
+ *   the one-line description LEADS THE PAGE. components/TopBand.tsx also exports `CompanyLine: FC<{ band? }>`, which holds the
+ *   `data-top-band-description` element (the served line, or its served reason) and renders nothing with no block. `TopBand` no
+ *   longer draws the description. components/SecurityOverlay.tsx mounts <CompanyLine band={...top_band}> in the name header, after
+ *   the identity card and before <HeaderCards and <TimelinePanel. The news items, the social line and the provenance panel stay
+ *   where they are, above the tabs.
+ *
  * Arms (each prints its evidence; exit 0 only on all of them):
  *   1 THE TOP BAND SAYS WHAT THE COMPANY IS (BA, MSFT): the served description line is shown (BA); where none is served its plain
  *     reason is shown (MSFT); the social sentence is shown; with no items the served reason is shown and no item is drawn; no block
@@ -66,11 +73,7 @@ const PLANTED_ITEMS = [
 function gradeBand(html, band) {
   const f = [];
   if (!/data-top-band[\s>=]/.test(html)) return ['no data-top-band root'];
-  const desc = part(html, 'data-top-band-description');
-  const want = norm(band.description_line || '') || norm(band.description_reason || '');
-  if (desc === null) f.push('no data-top-band-description');
-  else if (!want) f.push('fixture serves neither a description nor a reason');
-  else if (!desc.includes(want.slice(0, 80))) f.push(band.description_line ? 'the served description line is not shown' : 'the served description reason is not shown');
+  if (/data-top-band-description/.test(html)) f.push('TopBand still draws the description (it belongs to CompanyLine, in the name header)');
   const social = part(html, 'data-top-band-social');
   if (social === null || !social.includes(norm(band.social))) f.push('the served social sentence is not shown');
   const items = band.items || [];
@@ -98,6 +101,17 @@ function gradeBand(html, band) {
       } else if (open[1] === 'a' || href) f.push(`item ${i + 1}: no url served and it is a link`);
     });
   }
+  return f;
+}
+
+function gradeLine(html, band) {
+  const f = [];
+  const desc = part(html, 'data-top-band-description');
+  const want = norm(band.description_line || '') || norm(band.description_reason || '');
+  if (desc === null) f.push('no data-top-band-description');
+  else if (!want) f.push('fixture serves neither a description nor a reason');
+  else if (!desc.includes(want.slice(0, 80))) f.push(band.description_line ? 'the served description line is not shown' : 'the served description reason is not shown');
+  if (/data-top-band-item|data-top-band-social/.test(html)) f.push('the company line also draws news or social');
   return f;
 }
 
@@ -132,6 +146,17 @@ function gradeMount(page, hooks, overlay) {
   else if (tabs < 0 || band.index > tabs) f.push('<TopBand> is not above the tabs');
   if (!prov) f.push('SecurityAnalysis.tsx does not mount <InputProvenance entries={...input_provenance}>');
   else if (tabs < 0 || prov.index > tabs) f.push('<InputProvenance> is not above the tabs');
+  const line = /<CompanyLine\b[^>]*band=\{[^}]*\btop_band\b[^}]*\}/.exec(overlay);
+  const card = overlay.indexOf('data-identity-card');
+  const figs = overlay.indexOf('<HeaderCards');
+  const tl = overlay.indexOf('<TimelinePanel');
+  if (!line) f.push('components/SecurityOverlay.tsx does not mount <CompanyLine band={...top_band}>');
+  else {
+    if (card < 0 || line.index < card) f.push('<CompanyLine> is not under the identity card');
+    if (figs < 0 || line.index > figs) f.push('<CompanyLine> is not above the key figures');
+    if (tl < 0 || line.index > tl) f.push('<CompanyLine> is not above the timeline');
+  }
+  if (/<CompanyLine\b/.test(page)) f.push('SecurityAnalysis.tsx mounts <CompanyLine> (it belongs in the name header)');
   if (/useRequestRefresh/.test(page)) f.push('SecurityAnalysis.tsx still uses useRequestRefresh');
   if (/useRequestRefresh/.test(hooks)) f.push('hooks/useLeadPanelApi.ts still exports useRequestRefresh');
   if (/\bonRefresh\b|\brefreshPending\b/.test(page)) f.push('SecurityAnalysis.tsx still passes onRefresh / refreshPending');
@@ -150,13 +175,15 @@ const safe = (fn) => { try { return fn(); } catch (e) { return ['threw: ' + Stri
   if (!TB || !TB.TopBand) f = ['no components/TopBand.tsx exporting TopBand'];
   else {
     f = safe(() => {
-      const a = gradeBand(L.render(TB.TopBand, { band: BA.top_band }), BA.top_band).map((x) => 'BA: ' + x);
-      const b = gradeBand(L.render(TB.TopBand, { band: MSFT.top_band }), MSFT.top_band).map((x) => 'MSFT: ' + x);
+      if (!TB.CompanyLine) return ['components/TopBand.tsx does not export CompanyLine'];
+      const a = gradeBand(L.render(TB.TopBand, { band: BA.top_band }), BA.top_band).concat(gradeLine(L.render(TB.CompanyLine, { band: BA.top_band }), BA.top_band)).map((x) => 'BA: ' + x);
+      const b = gradeBand(L.render(TB.TopBand, { band: MSFT.top_band }), MSFT.top_band).concat(gradeLine(L.render(TB.CompanyLine, { band: MSFT.top_band }), MSFT.top_band)).map((x) => 'MSFT: ' + x);
+      if (L.render(TB.CompanyLine, { band: undefined }) !== '') a.push('CompanyLine renders something with no block');
       const none = L.render(TB.TopBand, { band: undefined }) !== '' ? ['renders something with no block'] : [];
       return a.concat(b, none);
     });
   }
-  arms.push(['THE TOP BAND SAYS WHAT THE COMPANY IS', f.length === 0, f.length ? f.join(' | ') : 'BA: the served line; MSFT: the served reason; social sentence; no items reads as its reason; no block: empty']);
+  arms.push(['THE TOP BAND SAYS WHAT THE COMPANY IS', f.length === 0, f.length ? f.join(' | ') : 'CompanyLine -- BA: the served line; MSFT: the served reason. TopBand -- social sentence; no items reads as its reason; no description; no block: empty']);
 }
 {
   let f;
@@ -182,16 +209,18 @@ const safe = (fn) => { try { return fn(); } catch (e) { return ['threw: ' + Stri
 }
 {
   const f = gradeMount(src('src/pages/SecurityAnalysis/SecurityAnalysis.tsx'), src('src/pages/SecurityAnalysis/hooks/useLeadPanelApi.ts'), src('src/pages/SecurityAnalysis/components/SecurityOverlay.tsx'));
-  arms.push(['MOUNTED ABOVE THE TABS; THE RE-RUN BUTTON IS GONE', f.length === 0, f.length ? f.join(' | ') : 'both mounted from the overlay before the tabs; no re-run hook, prop or button']);
+  arms.push(['MOUNTED ABOVE THE TABS; THE RE-RUN BUTTON IS GONE', f.length === 0, f.length ? f.join(' | ') : 'the company line is in the name header above the key figures and the timeline; band and panel before the tabs; no re-run hook, prop or button']);
 }
 {
   const f = [];
   const b = Object.assign({}, BA.top_band, { items: PLANTED_ITEMS, items_reason: null });
-  const good = `<section data-top-band><p data-top-band-description>${b.description_line}</p><ul>`
+  const good = `<section data-top-band><ul>`
     + `<a data-top-band-item href="https://example.com/planted-a?x=1&amp;y=2" target="_blank" rel="noopener noreferrer">${PLANTED_ITEMS[0].title} ${PLANTED_ITEMS[0].publisher}</a>`
     + `<span data-top-band-item>${PLANTED_ITEMS[1].title} ${PLANTED_ITEMS[1].publisher}</span></ul><p data-top-band-social>${b.social}</p></section>`;
   if (gradeBand(good, b).length) f.push('a good band refused: ' + gradeBand(good, b).join(';'));
-  if (!gradeBand(good.replace(/<p data-top-band-description>[\s\S]*?<\/p>/, ''), b).length) f.push('a missing description accepted');
+  if (!gradeBand(good.replace('<ul>', `<p data-top-band-description>${b.description_line}</p><ul>`), b).length) f.push('a description left in TopBand accepted');
+  if (gradeLine(`<p data-top-band-description>${b.description_line}</p>`, b).length) f.push('a good company line refused');
+  if (!gradeLine('<p data-top-band-description></p>', b).length) f.push('an empty company line accepted');
   if (!gradeBand(good.replace(/<a data-top-band-item[^>]*>/, '<span data-top-band-item>').replace('</a>', '</span>'), b).length) f.push('an item with a url and no link accepted');
   if (!gradeBand(good.replace(' target="_blank"', ''), b).length) f.push('a same-tab link accepted');
   const e = BA.input_provenance;
@@ -201,10 +230,12 @@ const safe = (fn) => { try { return fn(); } catch (e) { return ['threw: ' + Stri
   if (!gradeProvenance(goodP.replace('October 6th, 2026', e[0].last_run), e).length) f.push('the raw stamp accepted');
   if (!gradeProvenance(goodP.replace('Worked', 'landed'), e).length) f.push('the word "landed" accepted');
   const page = '<TopBand band={overlayQuery.data?.top_band} />\n<InputProvenance entries={overlayQuery.data?.input_provenance} />\n<TabNavigation';
-  if (gradeMount(page, '', '').length) f.push('a good mount refused: ' + gradeMount(page, '', '').join(';'));
-  if (!gradeMount(page, 'export function useRequestRefresh() {', '').length) f.push('a leftover re-run hook accepted');
-  if (!gradeMount('<TabNavigation\n' + page.replace('<TabNavigation', ''), '', '').length) f.push('a mount below the tabs accepted');
-  arms.push(['PLANTED: the graders refuse a missing description, an unlinked item, the raw stamp, "landed" and a leftover re-run hook', f.length === 0, f.length ? f.join(' | ') : '6 of 6 faults refused; 3 of 3 good forms accepted']);
+  const ovl = '<div data-identity-card="">x</div>\n<CompanyLine band={top?.top_band} />\n<HeaderCards bundle={bundle} />\n<TimelinePanel securityKey={k} />';
+  if (gradeMount(page, '', ovl).length) f.push('a good mount refused: ' + gradeMount(page, '', ovl).join(';'));
+  if (!gradeMount(page, 'export function useRequestRefresh() {', ovl).length) f.push('a leftover re-run hook accepted');
+  if (!gradeMount('<TabNavigation\n' + page.replace('<TabNavigation', ''), '', ovl).length) f.push('a mount below the tabs accepted');
+  if (!gradeMount(page, '', ovl.replace('<CompanyLine band={top?.top_band} />\n', '') + '\n<CompanyLine band={top?.top_band} />').length) f.push('a company line below the timeline accepted');
+  arms.push(['PLANTED: the graders refuse a misplaced or empty description, an unlinked item, the raw stamp, "landed" and a leftover re-run hook', f.length === 0, f.length ? f.join(' | ') : '8 of 8 faults refused; 4 of 4 good forms accepted']);
 }
 
 let ok = 0;
