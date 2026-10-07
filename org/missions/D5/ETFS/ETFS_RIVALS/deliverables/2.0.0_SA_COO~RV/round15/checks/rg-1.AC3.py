@@ -162,13 +162,13 @@ def run(v):
         print(f"  _g4_for uri {str((g or {}).get('uri')).rsplit('/', 1)[-1]} revision {(g or {}).get('revision')!r} | gics_source "
               f"{rows[0].get('gics_source')!r}")
         print(f"  rankings manifest g4: {[u.rsplit('/', 1)[-1] for u in man.get('g4', [])]}")
-        return (locs[LVO] == {newest_bare} and locs[IMO] == {newest_bare}
-                and (g or {}).get("uri") == newest_rec and (g or {}).get("revision") == want_rev
-                and want_rev in str(rows[0].get("gics_source"))
-                and man.get("g4") == [newest_bare])
+        # issuer ruling at the cut: the census's price location and the rankings manifest's g4 are PRINTED, not graded --
+        # a build may name the newest object or every object it read; _g4_for's recorded uri / revision stay as today
+        return ((g or {}).get("uri") == newest_rec and (g or {}).get("revision") == want_rev
+                and want_rev in str(rows[0].get("gics_source")))
 
-    guard(v, "b", "the G4 revision/location a stage records is the revision.newest object of the date (census location, _g4_for "
-                  "uri/revision and gics_source, the rankings manifest's g4)", arm_b)
+    guard(v, "b", "the G4 uri / revision _g4_for records is the revision.newest object of the date by its provenance rule, and "
+                  "gics_source carries it (the census location and the rankings manifest's g4 are printed, not graded)", arm_b)
 
     # ---- (c) the neighbouring checks -------------------------------------------------------------------------------------
     for label, path in OTHERS:
