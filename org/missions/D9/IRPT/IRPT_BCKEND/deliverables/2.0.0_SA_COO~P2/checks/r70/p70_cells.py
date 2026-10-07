@@ -12,7 +12,7 @@ Prints "<id> PASS" or "<id> FAIL" as the last line. Every check finishes inside 
   IB70-3-AC1  portal/src/pages/InvestorReporting/__tests__/ir-70-custody-print/ holds a test naming custody-report and
               ClientReportDocument; it and the ir-66 print-kind test pass with `bun --no-install test`. Base: FAIL (folder absent).
   IB70-3-AC2  in portal/: tsc -b --noEmit exits 0, and eslint on render/PrintEntry.tsx exits 0. Base: PASS (a control).
-  IB70-G-<n>  A GUARD for slot ~<n>: that worker's own workspace commits touch only its grant, never the portal gitlink. Base: PASS.
+  IB70-G-<n>  A GUARD for slot ~<n> (160, 161, 162): that worker's own workspace commits touch only its grant, never the portal gitlink. Base: PASS.
 """
 import re
 import subprocess
@@ -26,11 +26,11 @@ CH = P + "/surprise-channel/investigations/INVESTIGATION_v1.md"
 TO = P + "/task-orders/IRPT_BCKEND.TO-IB-pr-"
 PT = "src/pages/InvestorReporting/__tests__/"
 GRANTS = {
-    "150": (IR + "/reports/custody_write.py", IR + "/reports/tests/test_custody_write.py", CH, TO + "351.",
-            P + "/deliverables/0.9.0_WK_IRPT_BCKEND~150/"),
-    "151": (IR + "/export/submit_async.py", IR + "/export/tests/test_accept_business_date.py", CH, TO + "352.",
-            P + "/deliverables/0.9.0_WK_IRPT_BCKEND~151/"),
-    "152": (CH, TO + "353.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~152/"),
+    "160": (IR + "/reports/custody_write.py", IR + "/reports/tests/test_custody_write.py", CH, TO + "351.",
+            P + "/deliverables/0.9.0_WK_IRPT_BCKEND~160/"),
+    "161": (IR + "/export/submit_async.py", IR + "/export/tests/test_accept_business_date.py", CH, TO + "352.",
+            P + "/deliverables/0.9.0_WK_IRPT_BCKEND~161/"),
+    "162": (CH, TO + "353.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~162/"),
 }
 
 
