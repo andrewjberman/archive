@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-d-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-3.named-commit-deploy.md",
+    "group": "OTHER",
+    "vintage_commit": "208c5d85ee"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~7",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round4.md",
+    "vintage_commit": "208c5d85ee",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-3.named-commit-deploy.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/named_commit_check.py",
+      "kind": "script",
+      "commit_or_etag": "bd60f13148",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed",
+      "artifact_covered_by": [
+        "CT4d3-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_named_commit_deploy.py",
+      "kind": "test",
+      "commit_or_etag": "bd60f13148",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed",
+      "artifact_covered_by": [
+        "CT4d3-AC1"
+      ]
+    },
+    {
+      "path_or_key": ".tools/safe-deploy.sh",
+      "kind": "script",
+      "commit_or_etag": "bd60f13148",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed",
+      "artifact_covered_by": [
+        "CT4d3-AC1",
+        "CT4d3-AC2"
+      ]
+    },
+    {
+      "path_or_key": ".tools/safe-apply.sh",
+      "kind": "script",
+      "commit_or_etag": "bd60f13148",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed",
+      "artifact_covered_by": [
+        "CT4d3-AC1",
+        "CT4d3-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT4d3-AC1",
+      "criterion_verbatim": "python .tools/tests/test_named_commit_deploy.py expect: NAMED-COMMIT-TEST cases=8/8 ok=True",
+      "method": "command",
+      "invocation": "python .tools/tests/test_named_commit_deploy.py",
+      "output_evidence": "fixture: trunk=ec0394a0a1a7 off_trunk_published=27ad59b51bba unpublished=ca372541eb82\nPASS case 1: dell1, a commit on origin/CLOUD -> ADMITTED, ON-TRUNK | rc=0 NAMED-COMMIT ADMITTED commit=ec0394a0a1a7a10602dd7de0c8ca40d07bc458c2 device=dell1 role=execution trunk=ON-TRUNK branch=- reason=ancestor of origin/CLOUD\nPASS case 2: dell1, off the trunk, pushed to origin/q/dell1/X/round1 -> ADMITTED, OFF-TRUNK, branch printed | rc=0 NAMED-COMMIT ADMITTED commit=27ad59b51bba6b71332029b264e5d6d3a6228e2a device=dell1 role=execution trunk=OFF-TRUNK branch=q/dell1/X/round1 reason=published on origin/q/dell1/X/round1\nPASS case 3: dell1, off the trunk and NOT pushed -> REFUSED, not published | rc=1 NAMED-COMMIT REFUSED commit=ca372541eb82a8c68b9aeb1bb6a0813ea3600bdd device=dell1 role=execution trunk=OFF-TRUNK branch=- reason=not published: no other box can read the deployed bytes\nPASS case 4: dell1, the case-2 commit by its 7-character short hash -> REFUSED | rc=1 NAMED-COMMIT REFUSED commit=27ad59b device=dell1 role=- trunk=- branch=- reason=the commit must be a full 40-character lowercase hex hash; a short or symbolic name moves\nPASS case 5: laptop (control-plane), the case-2 commit -> UNCHANGED (the wrappers never refused it), admitted | rc=0 NAMED-COMMIT UNCHANGED commit=27ad59b51bba6b71332029b264e5d6d3a6228e2a device=laptop role=control-plane trunk=OFF-TRUNK branch=- reason=role control-plane: the wrappers never refused an off-trunk commit and this check does not start\nPASS case 6: device unset -> REFUSED | rc=1 NAMED-COMMIT REFUSED commit=27ad59b51bba6b71332029b264e5d6d3a6228e2a device=- role=- trunk=- branch=- reason=device unset: pass --device or set AGENTBUS_DEVICE\nPASS \u0001<tmp>/nowhere.git' does not appear to be a git repository fatal: Could not read from remote reposit (a failed fetch is never read as off-trunk)\nPASS case 8: the wrappers, on case 2 with an open sentinel, leave named_commit=<hash> in the ledger entry | safe-deploy.sh: rc=0 carried=True survives_rerender=True unpublished_rc=1 no_sentinel_rc=1; safe-apply.sh: rc=0 carried=True survives_rerender=True unpublished_rc=8 no_sentinel_rc=8\nNAMED-COMMIT-TEST cases=8/8 ok=True\nrc=0",
+      "denominator": "8 of 8 cases (1 on-trunk admit; 2 published off-trunk admit; 3 unpublished refused; 4 short hash refused; 5 laptop unchanged; 6 device unset refused; 7 origin unreachable refused; 8 both real wrappers as far as the check, ledger carries the field)",
+      "status": "PASS",
+      "expect": "NAMED-COMMIT-TEST cases=8/8 ok=True"
+    },
+    {
+      "criterion_id": "CT4d3-AC2",
+      "criterion_verbatim": "bash -n .tools/safe-deploy.sh && bash -n .tools/safe-apply.sh && bash .tools/safe-apply.sh -chdir=infra/aws/terraform/nfra-ctlpln-identity version 2>&1 | grep -c \"gates 'terraform apply' only\" expect: 1",
+      "method": "command",
+      "invocation": "bash -n .tools/safe-deploy.sh && bash -n .tools/safe-apply.sh && bash .tools/safe-apply.sh -chdir=infra/aws/terraform/nfra-ctlpln-identity version 2>&1 | grep -c \"gates 'terraform apply' only\"",
+      "output_evidence": "bash -n on both wrappers rc 0; the criterion's pipeline printed `1` (rc 0). The wrapper's own output for the same call, one line of which the grep counted:\nsafe-apply: ERROR -- no 'apply' subcommand in the arguments.\nsafe-apply: this wrapper gates 'terraform apply' only. For 'plan' or any\n            other subcommand call the terraform binary directly.\nsafe-apply: usage -- safe-apply.sh [-chdir=DIR] apply [apply-args...]\nwrapper rc=2\nNo terraform run, no named-commit check run: DEPLOY_COMMIT unset and the subcommand is not apply.",
+      "denominator": "1 of 1 (both wrappers parse; the non-apply refusal line is printed once)",
+      "status": "PASS",
+      "expect": "1"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "cases 3, 4, 6 and 7 are the control arms of case 2 (unpublished, short-named, device unset, fetch failed each REFUSED); case 5 is the unchanged-behaviour arm; case 8 also refuses an unpublished commit and an off-trunk commit with no open sentinel through each real wrapper",
+      "expected": "4 of 4 control arms REFUSED, case 5 UNCHANGED",
+      "observed": "4 of 4 control arms REFUSED, case 5 UNCHANGED",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: each case builds a fresh temporary repository; hashes differ per run, the verdicts do not",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the real wrappers end to end on a Dell (a real deploy or apply of an off-trunk commit)",
+      "reason": "not this order's: it deploys and applies nothing; the round's one real run (CT-d-4 read-back) is the test"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W7-S1",
+    "NFRA_CTLPLN-W7-S2"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~7/NFRA_CTLPLN.TO-CT-d-3.named-commit-deploy.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/tests/test_named_commit_deploy.py",
+      "result": "NAMED-COMMIT-TEST cases=8/8 ok=True"
+    }
+  ]
+}
