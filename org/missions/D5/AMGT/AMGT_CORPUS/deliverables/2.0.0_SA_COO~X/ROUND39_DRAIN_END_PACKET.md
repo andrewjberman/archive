@@ -1,7 +1,7 @@
 # AMGT_CORPUS round 39 -- drain-end packet (L8 input) to `3.0.0_SA_CVO~Z`
 
-**STATUS: DRAFT, NOT DELIVERED. 5 of 7 cells terminal. Pending: CRPS-ao-2 legs p (the BA plant, 00:00Z-12:30Z 2026-10-07) and v
-(the 2026-10-07 13:00Z scheduled fire); the portal DEV landing of `f8d92450` (CTO-approved, queued behind the DEV freeze).**
+**STATUS: DRAFT, NOT DELIVERED. 5 of 6 cells terminal. Pending: CRPS-ao-2 leg v only (the 2026-10-07 13:00Z scheduled fire). The
+portal is on DEV; the BA plant is made.**
 
 | | |
 |---|---|
@@ -21,8 +21,10 @@
 | `CRPS-ao-6` the FWD-14 four-class census | LOCAL (read) | READ @`969cdbff2f` | section 5 |
 
 Portal: candidate `wk-AMGT_CORPUS-2-portal` @`f8d92450` = ao-3 `d0c3f21b` + ao-4 `90816273` + origin/DEV `6b4e89a8` merged +
-AMENDMENT 1 `f8d92450`; 5 SecurityAnalysis files, +61/-23 over DEV. CTO render review: e1ee93a9 APPROVED with one tile owed
-@`1a9f406750`; f8d92450 APPROVED @`b5f90bbf8d`. **DEV landing: PENDING** (asked of `0.0.0_AB_MSTR~Z`, queued behind the freeze).
+AMENDMENT 1 `f8d92450`; 5 SecurityAnalysis files, +62/-23 over DEV. CTO render review: e1ee93a9 APPROVED with one tile owed
+@`1a9f406750`; f8d92450 APPROVED @`b5f90bbf8d`. **ON DEV: portal DEV `0c5ab419`** (pushed by `0.0.0_AB_MSTR~Z` on Andrew's word,
+msg 30450; origin/DEV read after a fetch). It is `f8d92450` merged over DEV `1814185b`, tree-identical to the issuer's own
+re-merge `12978b5e`, on which typecheck, the three ao3 arms, ao4, ao7 and the Model harness (12 of 12) were re-run and pass.
 
 ## 2. The SERVED act ao-2 (`NEVER_WIDEN_ROUND39_AO2_SERVED_ACT.md`)
 
@@ -30,7 +32,7 @@ AMENDMENT 1 `f8d92450`; 5 SecurityAnalysis files, +61/-23 over DEV. CTO render r
 |---|---|
 | L0 | Pair signed. Andrew, ~20:13Z, to the CTO's scope question: research is outside the Bloomberg no-modify order (CTO record `ANDREW_DIRECT_20261006_201xZ_...`). `-Plan -Commit 662cd2b11d` names Python311 (live-task). Fire closure between the pins `6f6e472641..662cd2b11d`: 2 of 16 changed non-test modules (`model_block_pull.py` = ao-1 only; `build_universe.py` = RESAPP av-7/aw-6). |
 | Lr | REGISTERED 2026-10-06 ~20:2xZ. Start In `opal-pinned\amgt-induction-daily\662cd2b11df0`, Python311, next 13:00Z. CLOSED in the ledger. |
-| Lp | **PENDING** -- one `derive --securities "BA US Equity" --no-sa-fallback` between 00:00Z and 12:30Z on 2026-10-07. |
+| Lp | MADE 2026-10-07T00:10:51Z, rc 0 (held 22:09Z-23:52Z under the integrate HOLD, made after RELEASE). BA's newest derived stamp `20261007T001051Z`; newest pull-log stamp `20261006T132334Z`; same raw stamp as the prior block, 745 of 745 figures, value/unit/currency moved 0. `refresh --dry-run` on the pinned producer bytes lists `DRY-RUN REFRESH: BA_US_Equity`, `already_current 0` of 96. CLOSED @`69bc020018`. |
 | Lv | **PENDING** -- the 2026-10-07 13:00Z fire: `already_current 0 pulled 96` with BA in the REFRESH set, rc 0; then `count_ratio_currency.py --served`. This fire is FWD-22's acceptance and disarms `Z-S88`. |
 
 ## 3. CRPS-ao-5 -- FWD-20 and FWD-21 on the running page (`evidence/r39_ao5_walk/`)
