@@ -1,0 +1,72 @@
+============================================================================================================
+V2 -- SIXTH BLOCK (command/ssm), LIVE attached policies
+    resident_host_role=NO  granted documents=2 (irpt-ycharts-deploy, irpt-ycharts-run)  export-render documents=1
+============================================================================================================
+  ARM 01 dell2 sends a resident document to the host          ssm:SendCommand              -> allowed        want=allowed      OK
+         resources: instance/i-0167fd745ad906a66 + document/irpt-ycharts-deploy
+         per-resource: {"instance/i-0167fd745ad906a66": "allowed", "document/irpt-ycharts-deploy": "allowed"}
+         matched: ['IAM Policy:cloudops-dell2-agent-ssm-policy']
+  ARM 02 dell2 sends a resident document to the host          ssm:SendCommand              -> allowed        want=allowed      OK
+         resources: instance/i-0167fd745ad906a66 + document/irpt-ycharts-run
+         per-resource: {"instance/i-0167fd745ad906a66": "allowed", "document/irpt-ycharts-run": "allowed"}
+         matched: ['IAM Policy:cloudops-dell2-agent-ssm-policy']
+  ARM 03 dell2 sends a resident document to ANOTHER instance  ssm:SendCommand              -> implicitDeny   want=denied       OK
+         resources: instance/i-02448edb624a7a7cf + document/irpt-ycharts-deploy
+         per-resource: {"instance/i-02448edb624a7a7cf": "implicitDeny", "document/irpt-ycharts-deploy": "allowed"}
+         matched: ['IAM Policy:cloudops-dell2-agent-ssm-policy']
+  ARM 04 dell2 sends the shell document to the host           ssm:SendCommand              -> explicitDeny   want=explicitDeny OK
+         resources: instance/i-0167fd745ad906a66 + document/AWS-RunShellScript
+         per-resource: {"instance/i-0167fd745ad906a66": "allowed", "document/AWS-RunShellScript": "explicitDeny"}
+         matched: ['IAM Policy:cloudops-dell2-agent-ssm-policy']
+  ARM 05 dell2 sends the export render document               ssm:SendCommand              -> explicitDeny   want=explicitDeny OK
+         resources: instance/i-0167fd745ad906a66 + document/irpt-export-render-run
+         per-resource: {"instance/i-0167fd745ad906a66": "allowed", "document/irpt-export-render-run": "explicitDeny"}
+         matched: ['IAM Policy:cloudops-dell2-agent-ssm-policy']
+  ARM 06 dell2 sends a document nothing grants to the host    ssm:SendCommand              -> implicitDeny   want=denied       OK
+         resources: instance/i-0167fd745ad906a66 + document/gateway-readonly-host-document
+         per-resource: {"instance/i-0167fd745ad906a66": "allowed", "document/gateway-readonly-host-document": "implicitDeny"}
+         matched: ['IAM Policy:cloudops-dell2-agent-ssm-policy']
+  ARM 07 dell2 reads a command result                         ssm:GetCommandInvocation     -> allowed        want=allowed      OK
+         resources: *
+         matched: ['IAM Policy:cloudops-dell2-agent-ssm-policy']
+  ARM 08 dell1 sends a resident document to the host          ssm:SendCommand              -> implicitDeny   want=denied       OK
+         resources: instance/i-0167fd745ad906a66 + document/irpt-ycharts-deploy
+         per-resource: {"instance/i-0167fd745ad906a66": "implicitDeny", "document/irpt-ycharts-deploy": "implicitDeny"}
+         matched: ['none']
+  ARM 09 dell1 reads a command result                         ssm:GetCommandInvocation     -> implicitDeny   want=denied       OK
+         resources: *
+         matched: ['none']
+V2: 9/9 arms as expected
+
+============================================================================================================
+V3 -- SEVENTH BLOCK (routes), LIVE attached policies; deny must be ATTRIBUTED to a routes Sid
+============================================================================================================
+  ARM 01 function update, function of a YES-IAM role              lambda:UpdateFunctionCode    -> explicitDeny   want=explicitDeny OK
+         resource: arn:aws:lambda:us-east-1:313476888478:function:news-semantic-clustering   (role lambda-execution-role)
+         matched: ['IAM Policy:cloudops-dell-agent-routes-fn-policy']   attributed-to-a-routes-policy=True
+  ARM 02 document write, document feeding a YES host              ssm:UpdateDocument           -> explicitDeny   want=explicitDeny OK
+         resource: arn:aws:ssm:us-east-1:313476888478:document/opal-cot-bd-session-fetch   (role cot-exporter-ec2-role)
+         matched: ['IAM Policy:cloudops-dell-agent-routes-host-policy']   attributed-to-a-routes-policy=True
+  ARM 03 prefix put, a YES host's downloaded prefix               s3:PutObject                 -> explicitDeny   want=explicitDeny OK
+         resource: arn:aws:s3:::opal-data-cot/code/bronze/cot_bronze_ingest.py   (role cot-exporter-ec2-role)
+         matched: ['IAM Policy:cloudops-dell-agent-routes-host-policy']   attributed-to-a-routes-policy=True
+  ARM 04 function update, function of a NO role (CONTROL)         lambda:UpdateFunctionCode    -> allowed        want=allowed      OK
+         resource: arn:aws:lambda:us-east-1:313476888478:function:fred-data-ingestion   (role FredIngestionLambdaRole)
+         matched: ['IAM Policy:cloudops-dell-agent-deploy-policy']   attributed-to-a-routes-policy=False
+  ARM 05 prefix put, the resident host's own artifact prefix (CONTROL) s3:PutObject                 -> allowed        want=allowed      OK
+         resource: arn:aws:s3:::opal-313476888478-lambda-artifacts/ec2/investor-reporting-ycharts/x   (role resident host role)
+         matched: ['IAM Policy:cloudops-dell-agent-deploy-policy']   attributed-to-a-routes-policy=False
+V3: 5/5 arms as expected
+
+============================================================================================================
+V4 -- the resource-policy Deny, and its control
+============================================================================================================
+  a Dell user writes a bucket policy           s3:PutBucketPolicy           -> explicitDeny   want=explicitDeny OK
+         matched: ['IAM Policy:cloudops-dell-agent-respol-policy']
+  CONTROL: a create the create policy allows   s3:CreateBucket              -> allowed        want=allowed      OK
+         matched: ['IAM Policy:cloudops-dell-agent-create-policy']
+  a Dell user writes a queue policy            sqs:SetQueueAttributes       -> allowed        want=explicitDeny FAIL
+         matched: ['IAM Policy:cloudops-dell-agent-create-policy']
+V4: 2/3 arms as expected
+
+STEP7-ARMS block6=9/9 block7=5/5 respol=2/3 all_ok=False

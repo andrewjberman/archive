@@ -1,0 +1,111 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_BLANKFIX.TO-BF-t-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.md",
+  "vintage_commit": "f15f222030",
+  "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-t-3.root-map-reader.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "47ef4c98cc"
+ },
+ "assignee": "0.9.0_WK_LGIC_BLANKFIX~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/opal_naming_rootmap.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A repository library module with no deploy target; nothing runs it outside the command line."
+  },
+  {
+   "path_or_key": "lib/tests/test_opal_naming_rootmap.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A plain-script test; no deploy target."
+  },
+  {
+   "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/ROOT_MAP_PROPOSED.json",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A PROPOSAL in the deliverables folder; no file under infra/logic/ was created or edited."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "BF3-AC1",
+   "criterion_verbatim": "BF3-AC1 -- the reader resolves a default and an exception, and the exception changes the answer.",
+   "method": "command",
+   "invocation": "python lib/tests/test_opal_naming_rootmap.py",
+   "output_evidence": "ROOTMAP-TEST ok=True assertions=15\nrc=0",
+   "denominator": "15 of 15 assertions held (exception resolves to its system; the same name without the exception resolves to the root default; unknown root None; unknown system, scope, source raise)",
+   "status": "PASS",
+   "expect": "ROOTMAP-TEST ok=True"
+  },
+  {
+   "criterion_id": "BF3-AC2",
+   "criterion_verbatim": "BF3-AC2 -- the proposed entry reproduces every registry row that already places a name of the root (the real neighbour).",
+   "method": "command",
+   "invocation": "python lib/opal_naming_rootmap.py reference infra/aws/terraform/bd-pipeline --map org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/ROOT_MAP_PROPOSED.json",
+   "output_evidence": "ROOTMAP-REFERENCE ok=True root=bd-pipeline rows=57 agree=57 disagree=0\nrc=0",
+   "denominator": "57 of 57 names of the bd-pipeline .tf files that have a resources.json row agree (96 graded names in the root; 26 exceptions, 31 root-default)",
+   "status": "PASS",
+   "expect": "ROOTMAP-REFERENCE ok=True"
+  },
+  {
+   "criterion_id": "BF3-AC3",
+   "criterion_verbatim": "BF3-AC3 -- the map file moves no generated view.",
+   "method": "command",
+   "invocation": "python lib/opal_naming_rootmap.py views --map org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/ROOT_MAP_PROPOSED.json",
+   "output_evidence": "ROOTMAP-VIEWS ok=True files=13 changed=0\nrc=0",
+   "denominator": "13 of 13 generated files byte-identical between generate() on the registry as it stands and on a copy holding the map file",
+   "status": "PASS",
+   "expect": "ROOTMAP-VIEWS ok=True"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "A copy of ROOT_MAP_PROPOSED.json (in .scratch/) with its first exception's system changed to the root default advi, then the BF3-AC2 invocation re-run against it.",
+   "expected": "reference refuses: the changed name disagrees with its resources.json row and the last line reads ok=False",
+   "observed": "ROOTMAP-REFERENCE ok=False root=bd-pipeline rows=57 agree=56 disagree=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Each of the three criterion invocations was run twice (once while building, once at the final read) and the last lines compared.",
+   "observed": "ROOTMAP-TEST ok=True assertions=15; ROOTMAP-REFERENCE ok=True rows=57 agree=57 disagree=0; ROOTMAP-VIEWS ok=True files=13 changed=0 -- identical both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the 12 names of bd-pipeline whose grade carries a {system} blank and that have no resources.json row",
+   "reason": "Not proposed as exceptions: the order says do not guess where SY1 leaves a system undecided. They resolve to the root default and are listed in the worker report."
+  },
+  {
+   "item": "the source of the gold/* S3 keys in infra/aws/lambda/bd-pipeline (advi or blackdiamond)",
+   "reason": "The entry carries one root default source (blackdiamond, the vendor feed the ingest side reads); no repository evidence decides a different source for the gold keys, and the order asks for the root's default."
+  }
+ ],
+ "surprises": [
+  "LGIC_BLANKFIX-W3-S1"
+ ],
+ "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/ROOT_MAP_PROPOSED.json",
+ "compiler_tools": [
+  {
+   "tool": "lib/opal_naming_rootmap.py",
+   "invocation": "python lib/opal_naming_rootmap.py reference infra/aws/terraform/bd-pipeline --map <proposal>; python lib/opal_naming_rootmap.py views --map <proposal>",
+   "result": "ROOTMAP-REFERENCE ok=True rows=57 agree=57; ROOTMAP-VIEWS ok=True files=13 changed=0"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> BF3-AC1,BF3-AC2,BF3-AC3",
+   "result": "run before the complete flip; exit code is the verdict"
+  }
+ ]
+}

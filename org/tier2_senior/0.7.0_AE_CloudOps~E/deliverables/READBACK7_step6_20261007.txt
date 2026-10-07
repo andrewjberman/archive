@@ -1,0 +1,35 @@
+================================================================================================
+V2 -- the document and the version
+================================================================================================
+  prior default v1  ->  NEW default v2
+  versions held: 2 of the 5 maximum
+     v2   default=True  2026-10-07 15:12:37+00:00
+     v1   default=False 2026-10-07 13:13:32+00:00
+
+  LIVE == REPO FILE (parsed): True
+  statements in the live document: 1  Sids: ['DenyResourcePolicyWrites']
+  action count: 75 (74 before)   sqs:SetQueueAttributes present: True
+  sqs actions now: ['sqs:AddPermission', 'sqs:RemovePermission', 'sqs:SetQueueAttributes']
+  NEGATIVE CONTROL, same comparator: LIVE==mutated = False  <- must be False
+
+  NOTE on attribution: this policy holds exactly ONE statement, so MatchedStatements naming
+  the POLICY (cloudops-dell-agent-respol-policy) names DenyResourcePolicyWrites uniquely.
+
+================================================================================================
+V1 -- the three live arms against the ATTACHED policies
+================================================================================================
+  a Dell user changes a queue's attributes     sqs:SetQueueAttributes     want=explicitDeny   -> explicitDeny   OK
+        principal: cloudops-dell1-agent-user
+        matched: ['cloudops-dell-agent-respol-policy']
+  CONTROL: a Dell user creates a queue         sqs:CreateQueue            want=allowed        -> allowed        OK
+        principal: cloudops-dell1-agent-user
+        matched: ['cloudops-dell-agent-create-policy']
+  CONTROL: a Dell user tags a queue            sqs:TagQueue               want=allowed        -> allowed        OK
+        principal: cloudops-dell1-agent-user
+        matched: ['cloudops-dell-agent-create-policy']
+  the other Dell, same refusal                 sqs:SetQueueAttributes     want=explicitDeny   -> explicitDeny   OK
+        principal: cloudops-dell2-agent-user
+        matched: ['cloudops-dell-agent-respol-policy']
+V1: 4/4
+
+READBACK7 live_equals_repo=True new_version=v2 arms=4/4 all_ok=True
