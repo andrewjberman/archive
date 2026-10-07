@@ -8,7 +8,7 @@ Two children, one body:
                 for a fund with no chart object, the archive, and a day with no page; reads the scratch audit records those requests wrote and reports their kept arg KEYS and bytes.
   WRAPPER section (OG-sd-1, row Z-W28-S13). The status tool called ONCE through the dispatch wrapper the MCP surface uses (app.integrations.base.run_integration_tool: entitlement lookup,
                 identity-scope allowlist, tier gate, audit), IN-PROCESS, with the scoped concierge as the principal (set with context.set_current_principal; NO /login, NO token acquired for
-                that identity, NO Graph call; MOCK_GRAPH=1). The concierge's immutable principal key is DERIVED read-only: the account entry of the host's own encrypted MSAL cache file for a roster principal (decrypted in memory, listed, never a token); failing that, a SYNTHETIC principal in no roster (the outcome then says so).
+                that identity, NO Graph call; MOCK_GRAPH=1). The concierge's principal key (tid, oid) is passed in as two SSM parameters read from the issuer's off-repo file (AMENDMENT A3); the gateway's encrypted sign-in cache is NEVER opened (the former method C is removed).
                 The status tool's own code does the portal service-account login POST and two GETs (status, served manifest) for the known execution (env R27_EXEC_ID, an SSM parameter
                 the runner redacts; never printed). The served manifest is then read ONCE more, independently, with the same bearer header the tool sent, for its generated_at.
 /opt/opal-gateway/.env is NEVER sourced: in the WRAPPER child it is parsed AS TEXT to populate the process environment (the same keys the service's EnvironmentFile feeds it), because the
@@ -153,36 +153,14 @@ def wrapper_section():
 
     # ---- the concierge's principal, derived read-only ----
     masters, writers = tiermod._roster_keys(cfg, "MASTER_ADMIN_PRINCIPALS"), tiermod._roster_keys(cfg, "WRITE_CAPABLE_PRINCIPALS")
-    source, found, ambiguous = "synthetic", None, False
-    # (C) The concierge's principal key from the host's own encrypted MSAL cache directory: for each roster key the cache file is named sha256("principal:<key>"); a file that exists is
-    # decrypted IN MEMORY with the broker's own key and its ACCOUNT entries are listed (cache.find; no network, no token read, no refresh, nothing written, the live file only read);
-    # the key whose account names the concierge is the concierge's principal. (The host role cannot query a POLICY# partition or scan the state table: both were tried on the
-    # probe run and both were refused, so neither is used.)
-    import msal
-    live_dir = ENVD.get("TOKEN_CACHE_DIR") or "/opt/opal-gateway/.token_cache"
-    present, hits = 0, []
-    for k in sorted(masters | writers):
-        f = os.path.join(live_dir, hashlib.sha256(("principal:" + k).encode()).hexdigest() + ".bin")
-        if not os.path.exists(f):
-            continue
-        present += 1
-        try:
-            cache = msal.SerializableTokenCache()
-            cache.deserialize(token_broker._fernet.decrypt(open(f, "rb").read()).decode())
-            if any(str(a.get("username", "")).strip().lower() == SC for a in cache.find(msal.TokenCache.CredentialType.ACCOUNT)):
-                hits.append(k)
-        except Exception as exc:  # noqa: BLE001 -- type name only
-            print("R27_PRINCIPAL_C_ERR %s" % type(exc).__name__)
-    if len(hits) == 1:
-        source, found = "token-cache-account", hits[0]
-    elif len(hits) > 1:
-        ambiguous = True
-    print("R27_PRINCIPAL_C roster_keys=%d (master %d, write_capable %d) cache_files_present=%d accounts_naming_the_concierge=%d" % (len(masters | writers), len(masters), len(writers), present, len(hits)))
-    if found is None:
-        from app.context import authorized_tenants
-        tid = sorted(authorized_tenants())[0] if authorized_tenants() else MOCK_TENANT_ID
-        found, source = tid + "/00000000-0000-0000-0000-0000000000c1", "synthetic"
-    ptid, poid = found.split("/")
+    # AMENDMENT A3: the gateway's encrypted sign-in cache is NEVER opened (method C is REMOVED from this program). The concierge's principal key (tid, oid) arrives ONLY as two SSM parameters
+    # (R27_TID, R27_OID) from the issuer's off-repo file; they are never printed (the runner redacts them), never stored, never written.
+    ptid, poid = os.environ.get("R27_TID", ""), os.environ.get("R27_OID", "")
+    if not (ptid and poid):
+        print("R27_PRINCIPAL source=ABSENT")
+        sys.exit(3)
+    source, ambiguous = "issuer-off-repo-file", False
+    print("R27_PRINCIPAL_SOURCE roster_keys=%d (master %d, write_capable %d) tid_and_oid_params_present=%s" % (len(masters | writers), len(masters), len(writers), bool(ptid and poid)))
     principal = make_principal(ptid, poid, SC)
     tier = tiermod.resolve_tier(principal, cfg)
     pinfo = {"source": source, "ambiguous": ambiguous, "in_master_roster": principal.key in masters, "in_write_capable_roster": principal.key in writers, "tier": tier.value,
