@@ -47,5 +47,8 @@ the branch, the tests and the never-widen pair text below.
   release, not 900 s. The redelivery finishes READY with exactly one more status GET.
 - **Rollback:** the resident root that precedes the build that carries this change. The release has no data
   migration.
+- **Close-leg step (row S320):** after `irpt-ycharts-generate` moves, record its live `CodeSha256` in
+  `infra/aws/lambda/ci/lambda-source-map.json` (`deployed_code_sha256` and `artifact_sha256`). Use
+  `record-terraform-deploy.sh --function irpt-ycharts-generate` only at the commit that was actually deployed.
 - **After-read:** the first two live YCharts jobs on the new code. Neither read-back may draw the firewall challenge.
   If one does, revert to 900 s in the same session.
