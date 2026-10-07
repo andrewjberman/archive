@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ba-1.stopped-pair-is-retried",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ba-1.stopped-pair-is-retried.md",
+    "group": "OTHER",
+    "vintage_commit": "6afb72a4d3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "6afb72a4d3",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ba-1.stopped-pair-is-retried.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~103",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~103 on wk-AMGT_HARVST-103. LOCAL code and plants only; no publisher contact, no .runtime touched.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/backfill_driver.py",
+      "kind": "script",
+      "commit_or_etag": "2bb6cedf5a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CONCLUDED_STATUSES, MAX_PAIR_ATTEMPTS=3, record_job_outcome, migrate_stop_rows, plan_pairs skips done+gave_up, build_summary four counts, PAIRS lines",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/transport.py",
+      "kind": "script",
+      "commit_or_etag": "2bb6cedf5a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "is_article_request + ARTICLE_SKIP_STATUSES; article 400 raises UpstreamUnavailable(400)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/publishers.py",
+      "kind": "script",
+      "commit_or_etag": "2bb6cedf5a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_article_skipped + article_skipped event in wsj, wsj-sitemap, bbg, bbg-sitemap and ft article loops",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_ba1_stopped_pair_is_retried.py",
+      "kind": "test",
+      "commit_or_etag": "2bb6cedf5a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "13 tests: plants i-vii",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_ae4_backfill_driver.py",
+      "kind": "test",
+      "commit_or_etag": "2bb6cedf5a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two assertions updated (see declared_exclusions)",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_ba1_stopped_pair_is_retried.py -rA --tb=line -p no:cacheprovider -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_ba1_stopped_pair_is_retried.py -rA --tb=line -p no:cacheprovider",
+      "output_evidence": "rc 0. '13 passed in 2.10s'",
+      "denominator": "13 of 13 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider",
+      "output_evidence": "rc 0. '717 passed, 3 skipped, 122 warnings, 6 subtests passed in 128.36s'",
+      "denominator": "717 passed of 720 collected, 3 skipped, 0 failed",
+      "status": "PASS",
+      "expect": "passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "record_job_outcome replaced by today's line (every status appended to done)",
+      "expected": "scenario (i) fails",
+      "observed": "test_vii_mutant_appending_every_status_to_done_makes_scenario_i_fail passed (pytest.raises AssertionError)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (one in-session, one literal)",
+      "observed": "13 passed; 717 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "order status flip",
+      "reason": "issuer flips; the order forbids the worker editing it"
+    },
+    {
+      "item": "test_ae4_backfill_driver.py::test_stopped_publisher_under_cooldown_is_not_resumed_then_resumes_after_expiry",
+      "reason": "assertion pinned 'resume at the pair AFTER the stopped one' (jobs K3,K4,K5); now K2,K3,K4,K5 (item 7 of the order)"
+    },
+    {
+      "item": "test_ae4_backfill_driver.py::test_error_inside_the_clearing_run_stops_the_leg_again_with_no_retry",
+      "reason": "assertion pinned jobs == [K2]; now [K1,K2] because K1 stopped on error and is planned again (item 7 of the order)"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W103-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "rc 0 at 2bb6cedf5a"
+    }
+  ]
+}
