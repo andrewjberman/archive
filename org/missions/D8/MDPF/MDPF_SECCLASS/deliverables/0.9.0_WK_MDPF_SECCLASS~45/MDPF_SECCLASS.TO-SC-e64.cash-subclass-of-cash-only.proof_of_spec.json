@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e64",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9b6348f15edb1ee3ba13c5158837bf385376461e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R10.md",
+    "vintage_commit": "3a11e67c2064aca8ae0375a7f4c2d5578b22b93c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e64.cash-subclass-of-cash-only.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~45",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-constituents.py",
+      "kind": "script",
+      "commit_or_etag": "73759d9aff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_row maps tickers in _CASH_RESIDUAL_TICKERS (CASH, CASH&OTHER) to cash/Cash; no seeder run, no AWS write",
+      "artifact_covered_by": [
+        "SC10-e64-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/standards/MDPF_SECCLASS_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "73759d9aff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "contract_version 0.6.0 -> 0.7.0; Cash removed from values_by_class.fixed_income; noted in source_by_class.cash and rule24_record",
+      "artifact_covered_by": [
+        "SC10-e64-AC1",
+        "SC10-e64-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py",
+      "kind": "test",
+      "commit_or_etag": "73759d9aff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CASH residual asserts cash/Cash; E402 noqa on line 32 (row MDPF_SECCLASS-W45-S1)",
+      "artifact_covered_by": [
+        "SC10-e64-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py",
+      "kind": "test",
+      "commit_or_etag": "73759d9aff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "version pin 0.7.0; fixed_income list pin (no Cash, 9 values); CASH row cash/Cash and SALXX control",
+      "artifact_covered_by": [
+        "SC10-e64-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC10-e64-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e64_cash_row.py -- expect: SC-E64 ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e64_cash_row.py",
+      "expect": "SC-E64 ok=True",
+      "output_evidence": "SC-E64 ok=True cash_row=cash/Cash contract_cash_in_fixed_income=False salxx=fixed_income/Ultra Short Duration (rc=0)",
+      "denominator": "3 of 3 sub-checks true (CASH row cash/Cash; contract Cash under cash only; SALXX control unmoved)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC10-e64-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py <test_seed_fields.py> <test_classified_by_v2.py> -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_seed_fields.py infra/aws/lambda/v2_portal/_shared/tests/test_classified_by_v2.py",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=45 passed in 0.28s",
+      "denominator": "45 of 45 tests passed, 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W45-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <each .py> (run by safe-commit)",
+      "result": "pre-commit gate clean 3 of 3 .py files after the E402 noqa (first attempt blocked, row MDPF_SECCLASS-W45-S1)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "SALXX control: the same build_row call with ticker SALXX and the same feed labels must not become cash/Cash.",
+      "expected": "SALXX stays fixed_income/Ultra Short Duration",
+      "observed": "sc_e64_cash_row.py printed salxx=fixed_income/Ultra Short Duration",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "sc_e64_cash_row.py and the 2-file pytest run twice (before and after commit)",
+      "observed": "identical: SC-E64 ok=True; 45 passed both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any table write, seeder run against AWS, deploy, or correction of the live CASH row.",
+      "reason": "BOUNDS: LOCAL build; the live row's correction is an issuer act under its own pair (condition 5 of the SC-e-42 half)."
+    }
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e64_cash_row.py"
+}
