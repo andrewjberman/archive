@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e47",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c90dcc4a53"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "c90dcc4a53",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e47.clean-name-repair.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~56",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/security_name.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "clean_name: UPPER_FORMS/TITLE_FORMS one casing per form; ADR/ADS upper; rule B onset + repeated letter + ACRONYM_LIST; LOCAL commit only; R12b X&Y token (1-2 letters each side) stays upper; R12c output ASCII only: _ascii_fold drops U+00AE/U+2122/U+00A9 (DROPPED_SIGNS, escapes), NFKD-folds the rest, drops what has no ASCII base, spaces collapse",
+      "artifact_covered_by": [
+        "SC9-e47-AC1",
+        "SC9-e47-AC2",
+        "SC12-e47-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "176 tests; each form in both input casings, rule B, ACRONYM_LIST pinned, idempotence; R12b X&Y pins; R12c: 4 issuer sign cases, NESTL+U+00C9 SA -> Nestle SA, mixed-case sign, no-ASCII-base drop, clean_name(x).isascii() over every case in the module's input lists",
+      "artifact_covered_by": [
+        "SC9-e47-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/CLEAN_NAME_ROW_SET_V2_20261007.tsv",
+      "kind": "config_data",
+      "commit_or_etag": "5e8a7dc725",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "NOT rebuilt at R12c (order: the issuer does not ask a rebuild); unchanged since 5e8a7dc725; AC3 read at this head",
+      "artifact_covered_by": [
+        "SC12-e47-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC9-e47-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py -- expect: CLEAN-NAME-TABLE ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e30_clean_name_table.py",
+      "expect": "CLEAN-NAME-TABLE ok=True",
+      "output_evidence": "CLEAN-NAME-TABLE ok=True cases=38 mismatches=0 (rc=0)",
+      "denominator": "38 of 38 table cases match, 0 mismatches",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC9-e47-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests/test_security_name.py",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=176 passed in 0.20s",
+      "denominator": "176 of 176 tests passed, 0 failed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC12-e47-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e48_name_census.py -- expect: SC-E48-CENSUS ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e48_name_census.py",
+      "expect": "SC-E48-CENSUS ok=True",
+      "output_evidence": "SC-E48-CENSUS ok=True rows=1741 actions={'UNCHANGED': 369, 'SEED-SOURCE': 12, 'WRITE': 1360} acronym_titled=0 form_upper=0 ltd_plc_titled=0 dual=[] (rc=0)",
+      "denominator": "0 offending of 1360 WRITE rows; 0 dual forms across 1741 rows",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W56-S1",
+    "MDPF_SECCLASS-W56-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh ... -- <paths>",
+      "result": "see report"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negatives: PLCE, LTDA, Adrian stay words; BLUE/TRAN/SQU/EAST/ABBA capitalize; XCEL listed as an exception; R12b negatives: spaced '&' (JOHNSON & JOHNSON), mixed-case S&p, GR&INC (3-letter half), R2&D; R12c negative: a name with no ASCII base character (U+4E2D) is dropped, a lone U+00AE yields None",
+      "expected": "capitalized, not upper",
+      "observed": "test_form_negative_similar_token_unchanged_in_mixed_case, test_acronym_rule_b_negatives_capitalize, test_acronym_exceptions_capitalize pass",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1-AC3 run once each after the final edit and rebuild",
+      "observed": "AC1 ok=True 38/38; AC2 176 passed; AC3 ok=True; all run once after the final edit (R12c)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any table write, deploy, upload or push.",
+      "reason": "BOUNDS: LOCAL build; dry run only (puts=0)."
+    }
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e48_name_census.py"
+}
