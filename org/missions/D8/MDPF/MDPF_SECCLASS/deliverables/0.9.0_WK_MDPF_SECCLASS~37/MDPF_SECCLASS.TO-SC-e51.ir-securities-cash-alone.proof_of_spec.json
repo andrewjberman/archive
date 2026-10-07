@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e51",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "90f99888cd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "5d70aab6c9",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e51.ir-securities-cash-alone.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~37",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/components/holdings/HoldingsBreakdownTable.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "49756da7",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Portal commit 49756da7 on branch wk-MDPF_SECCLASS-22-portal (stacked on 91d29d17a0), not pushed. New prop foldCash (default true = current behaviour); false groups Cash as its own group placed just ahead of Fixed Income, the order legendClassesFor gives the treemap legend."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/holdings/SecurityList.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "49756da7",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Portal commit 49756da7, not pushed. Passes foldCash={false} (one line)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/mdpf-secclass/ir-securities-cash-alone.test.ts",
+      "kind": "test",
+      "commit_or_etag": "49756da7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New, 4 tests, every name carries cash_alone."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC9-e51-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py src/pages/InvestorReporting/__tests__/mdpf-secclass/ir-securities-cash-alone.test.ts cash_alone -- expect: PORTAL-TESTS ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py src/pages/InvestorReporting/__tests__/mdpf-secclass/ir-securities-cash-alone.test.ts cash_alone",
+      "output_evidence": "PORTAL-TESTS ok=True pass=4 fail=0 rc=0 file=src/pages/InvestorReporting/__tests__/mdpf-secclass/ir-securities-cash-alone.test.ts filter=cash_alone",
+      "denominator": "4 of 4 cash_alone tests passed, 0 failed (IR rendering groups Cash alone; Positioning default still folds; order equals legendClassesFor unfolded; SecurityList passes false and HoldingsTab does not). Importers read: SecurityList (changed, intended), Positioning HoldingsTab (unchanged: no prop, default fold), iv-e-103/134/148/152 (unchanged: 12 pass 0 fail on rerun).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC9-e51-AC2",
+      "criterion_verbatim": "JUDGMENT (3.0.0_SA_CVO): the Investor Reporting > Holdings tab reads as one consistent grouping of Cash across its treemap, class bar and securities table.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: a judgment criterion carries no invocation",
+      "output_evidence": "No verdict recorded by the worker. Instrument output relevant to it: the table's group order equals legendClassesFor(..., foldCash:false), asserted in cash_alone test 3. The class bar was not read.",
+      "denominator": "n/a",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: graded by 3.0.0_SA_CVO at L9, never self-graded by the worker."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Flip SecurityList.tsx to foldCash={true} (one token), rerun AC1, then restore.",
+      "expected": "AC1 fails",
+      "observed": "PORTAL-TESTS ok=False pass=3 fail=1 rc=1; restored, ok=True pass=4 fail=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "portal_named_tests.py run three times on the committed tree (once before the mutant, once after restore, once in the final rerun).",
+      "observed": "PORTAL-TESTS ok=True pass=4 fail=0 rc=0 each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Typecheck, lint, the wider suites, the class bar (not read), push to portal DEV.",
+      "reason": "BOUNDS: drain checks and the issuer's landing; not in the criterion."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py",
+  "compiler_tools": [
+    {
+      "tool": "git commit (portal worktree)",
+      "invocation": "git commit --author 0.9.0_WK_MDPF_SECCLASS~37 -m <subject> in portal/ on branch wk-MDPF_SECCLASS-22-portal",
+      "result": "commit 49756da7; plain git commit used in the nested portal worktree, not safe-commit.sh"
+    }
+  ]
+}
