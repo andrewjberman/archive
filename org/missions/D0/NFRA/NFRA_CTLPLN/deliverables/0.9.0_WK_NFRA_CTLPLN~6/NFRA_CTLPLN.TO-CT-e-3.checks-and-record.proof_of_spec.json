@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-e-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-e-3.checks-and-record.md",
+    "group": "OTHER",
+    "vintage_commit": "adc8997f1b"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~6",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round5.md",
+    "vintage_commit": "adc8997f1b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-e-3.checks-and-record.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/intake/intake_check.py",
+      "kind": "script",
+      "commit_or_etag": "45eb26042e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CT5e3-AC2: verbs check, release, pack, selftest-unsigned; standard library only; opens a wheel as a zip and lists it, never installs, imports or executes a member; no request leaves the machine; ruff py39 clean"
+    },
+    {
+      "path_or_key": "org/devices/intake/test_intake_check.py",
+      "kind": "script",
+      "commit_or_etag": "45eb26042e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CT5e3-AC1: 29 cases, 28 passed, 1 skipped (the real platform scanner refused on this laptop, row NFRA_CTLPLN-W6-S11)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT5e3-AC1",
+      "criterion_verbatim": "python org/devices/intake/test_intake_check.py expect: INTAKE-CHECK-TEST cases= (every case passing: the line must read ok=True)",
+      "method": "command",
+      "invocation": "python org/devices/intake/test_intake_check.py",
+      "output_evidence": "SKIP case_real_scanner_on_tiny_synthetic_wheel: the real scanner refused or could not run: exit_code=2 scanner exit code 2 with an error in its output (it refused or did not scan); not a clean result, and not shown to be a threat\nREAL-SCANNER: verdict=failed exit_code=2 last_lines=['[Failed][0x80004005] Unspecified error', 'CmdTool: Failed with hr = 0x80004005. Check C:\\\\Users\\\\ANDREW~1\\\\AppData\\\\Local\\\\Temp\\\\MpCmdRun.log for more information']\nINTAKE-CHECK-TEST cases=28/29 skipped=1 ok=True\n(rc 0, under timeout 120; run twice, identical last line; 2026-10-07 by 0.9.0_WK_NFRA_CTLPLN~6 at 45eb26042e)",
+      "denominator": "29 cases: 28 passed, 0 failed, 1 skipped (the real scanner case: MpCmdRun.exe exit 2 '[Failed][0x80004005] Unspecified error', Defender's antivirus disabled on this laptop, row NFRA_CTLPLN-W6-S11); the stub scanner covers check 7 in 3 exit codes plus a missing scanner",
+      "status": "PASS",
+      "expect": "INTAKE-CHECK-TEST cases="
+    },
+    {
+      "criterion_id": "CT5e3-AC2",
+      "criterion_verbatim": "python org/devices/intake/intake_check.py selftest-unsigned expect: c8=unsigned verdict=not_checked (the difference control: on a synthetic clean file the tool cannot reach checked without the CTO's signature file)",
+      "method": "command",
+      "invocation": "python org/devices/intake/intake_check.py selftest-unsigned",
+      "output_evidence": "INTAKE-CHECK batch=selftest-batch file=selftestpkg-1.0.0-cp312-cp312-win_amd64.whl c1=passed c2=passed c3=passed c4=passed c5=not_applicable c6=passed c7=passed c8=unsigned verdict=not_checked\n(rc 0, under timeout 120; seven checks passed or not_applicable, check 8 unsigned)",
+      "denominator": "1 of 1 synthetic clean wheel; checks 1 to 7 read passed (c5 not_applicable with its reason) and the overall verdict is still not_checked; the same file with a signature file reads checked in test case case_clean_signed_checked_and_releases; compute_verdict is exhaustively tried over 4^7 x 6 non-passing check-8 forms with 0 reaching checked",
+      "status": "PASS",
+      "expect": "c8=unsigned verdict=not_checked"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the same synthetic clean wheel and fetch record, with one defect planted at a time: signature absent; one byte flipped; a differing .py; an added .pth; a release two days old; an unread attestation; a changed file after the check record; a hand-edited verdict; scanner exit 2 and 5; signature file missing the file name or outside the signer directory",
+      "expected": "each defect reads failed or unsigned on its own check and the overall verdict not_checked; the unplanted control reads checked and releases",
+      "observed": "28 of 28 non-skipped cases passed: the control (case_clean_signed_checked_and_releases) reads c1..c8 passed or not_applicable and verdict=checked; every planted defect reads not_checked, and release or pack refuses where the order says",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the test run twice and the selftest once; the last lines compared",
+      "observed": "identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the real platform scanner on this laptop",
+      "reason": "Defender's antivirus is disabled here (a managed third-party product is active), so MpCmdRun.exe exits 2 with an error; check 7 is exercised by the stub scanner and the real-scanner case is counted skipped (row NFRA_CTLPLN-W6-S11)"
+    },
+    {
+      "item": "code inside a compiled file",
+      "reason": "BLIND by design: no check here sees it; the check record and delivery text say so in the brief's words"
+    },
+    {
+      "item": "the public index and the fetch, receive and closure tools",
+      "reason": "not this cell; no request was made; fetch records in the tests are hand-written in THE SEAM's format (format points resolved in row NFRA_CTLPLN-W6-S12)"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W6-S11",
+    "NFRA_CTLPLN-W6-S12"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~6/NFRA_CTLPLN.TO-CT-e-3.checks-and-record.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/devices/intake/test_intake_check.py",
+      "result": "INTAKE-CHECK-TEST cases=28/29 skipped=1 ok=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/devices/intake/intake_check.py selftest-unsigned",
+      "result": "INTAKE-CHECK batch=selftest-batch file=selftestpkg-1.0.0-cp312-cp312-win_amd64.whl c1=passed c2=passed c3=passed c4=passed c5=not_applicable c6=passed c7=passed c8=unsigned verdict=not_checked"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check org/devices/intake/ --target-version py39",
+      "result": "All checks passed!"
+    }
+  ]
+}

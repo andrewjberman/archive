@@ -1,0 +1,97 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CTLPLN.TO-CT-e-4",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-e-4.receive-and-prove.md",
+  "group": "OTHER",
+  "vintage_commit": "1d0d8ff36c"
+ },
+ "assignee": "0.9.0_WK_NFRA_CTLPLN~8",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round5.md",
+  "vintage_commit": "1d0d8ff36c",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-e-4.receive-and-prove.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/devices/intake/intake_receive.py",
+   "kind": "script",
+   "commit_or_etag": "ad64850542",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "standard-library-only tool (verify, prove, install, selftest-unchecked); committed on the worker branch, nothing deployed or run against any index"
+  },
+  {
+   "path_or_key": "org/devices/intake/test_intake_receive.py",
+   "kind": "test",
+   "commit_or_etag": "ad64850542",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "23 cases on synthetic wheels in temporary folders; pip only with --no-index --no-deps on local files"
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~8/INTAKE_RECEIVE_COMMANDS.md",
+   "kind": "doc",
+   "commit_or_etag": "ad64850542",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the commands a receiving box runs, in order, with the meaning of each last line"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CT5e4-AC1",
+   "criterion_verbatim": "python org/devices/intake/test_intake_receive.py expect: INTAKE-RECEIVE-TEST cases= ; every case passing: the line must read ok=True",
+   "method": "test_suite",
+   "invocation": "python org/devices/intake/test_intake_receive.py",
+   "output_evidence": "Run under timeout 120, rc 0. LAST LINE: INTAKE-RECEIVE-TEST cases=23/23 ok=True",
+   "denominator": "23 of 23 cases passed (Python 3.12.10)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CT5e4-AC2",
+   "criterion_verbatim": "python org/devices/intake/intake_receive.py selftest-unchecked expect: refused=1 ; the same line must read installed=0",
+   "method": "test_suite",
+   "invocation": "python org/devices/intake/intake_receive.py selftest-unchecked",
+   "output_evidence": "Run under timeout 120, rc 0. LAST LINE: INTAKE-PROVE device=laptop python=3.12.10 wheels=1 installed=0 imported=0 import_missing_dep=0 failed=0 refused=1 ok=False",
+   "denominator": "1 of 1 synthetic wheel refused; 0 installed; temporary folder removed",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the same synthetic pack with the wheel's record reading checked instead of not_checked is the test file's good-pack case",
+   "expected": "installed=2 imported=2 refused=0 for the two checked wheels, installed=0 refused=1 for the not_checked wheel",
+   "observed": "case_two_checked_prove_install_import_receipts and case_not_checked_refused_and_not_installed both PASS in the 23-case run",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "test file and selftest-unchecked each run twice (once before commit, once after)",
+   "observed": "cases=23/23 ok=True and refused=1 installed=0 on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "no run on Python 3.14 (none installed on this machine; py -0 lists 3.12 only)",
+   "reason": "order: 3.12 here for the test; the code uses the standard library only and no module removed in 3.13 or 3.14"
+  },
+  {
+   "item": "the tool was never run against a real pack from the packing tool or a real index file",
+   "reason": "order BOUNDS: no request leaves this machine; synthetic wheels only"
+  },
+  {
+   "item": "the real install (--user) was not run",
+   "reason": "order: test the refusal path and the dry-run command only"
+  }
+ ],
+ "surprises": [
+  "NFRA_CTLPLN-W8-S6"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~8/NFRA_CTLPLN.TO-CT-e-4.receive-and-prove.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/devices/intake/test_intake_receive.py",
+   "result": "INTAKE-RECEIVE-TEST cases=23/23 ok=True"
+  }
+ ]
+}
