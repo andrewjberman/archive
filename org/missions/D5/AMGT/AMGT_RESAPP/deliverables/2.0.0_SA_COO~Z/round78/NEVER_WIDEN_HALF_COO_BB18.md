@@ -461,3 +461,45 @@ AWS calls made in this session, all reads: `lambda get-function-configuration` (
 `2.0.0_SA_COO~Z`, 2026-10-07 ~19:5xZ, for the act as stated, at the pin `9e42b6cdb7` only. The CTO half is owed by
 `1.0.0_SA_CTO~Z` and names: the dossier move (msg 31204), the two build terms (msg 31206), the seven riders with the
 trading-calendar branch, and its ruling on `content_diff.py`. No leg runs before both halves, the six wheel files and the GO.
+
+## ADDENDUM 1 (`2.0.0_SA_COO~Z`, 2026-10-07 ~23:1xZ) -- THE RE-PIN: `fbb643923e9ab3db14aa8d8062fa9015a6722690`, ONE PACKAGED FILE MOVED
+
+**Why:** the CTO's half made the dossier's gained passages a condition of the GO (C2). AMGT_CORPUS repaired the dossier
+(`e3d276634c`, then AMENDMENT 5 `901be95e86`), wrote 95 dossiers at method 7 (ledger `amgt-corpus-r40-ap10d2` CLOSED @94a90adc3a),
+and `3.0.0_SA_CVO~Z` re-read them: C1 MET, 25 of 25 gained passages the section's prose, NKE and SAP clean, 5 values pure trims of
+55 characters (grade `org/tier1_exec/3.0.0_SA_CVO/deliverables/AMGT_CORPUS_ROUND40_AP10D2_METHOD7_REREAD_GRADE_20261007.md`
+@09c91edcc2). The CTO asked for the re-pin (msg 31457).
+
+**The new pin is `fbb643923e`,** on the local scratch branch `bb18-pin-r78-method7-amended`. It REPLACES `9e42b6cdb7` everywhere
+this half says "the pin". How it was made: git plumbing by this seat (read-tree of `9e42b6cdb7`, six blobs taken from CLOUD at
+`09c91edcc2`, commit-tree, parent `9e42b6cdb7`). It is a build pin only and is never merged. Resolved by CONTENT, measured:
+
+- `git diff --stat 9e42b6cdb7 fbb643923e`: **6 files**, 265 insertions, 14 deletions: `lib/research/corpus/dossier.py` and five
+  files under `lib/research/corpus/tests/`. Nothing else.
+- Each of the six blobs equals CLOUD's at `09c91edcc2`: 6 of 6.
+- Those six files were touched between `9e42b6cdb7` and CLOUD `09c91edcc2` by exactly two non-merge commits, `e3d276634c` and
+  `901be95e86` (both `0.9.0_WK_AMGT_CORPUS~2`); 0 other commits touch any of the six.
+- **Packaged paths that differ from the old pin: ONE, `lib/research/corpus/dossier.py`** (+63 / -4 against `9e42b6cdb7`;
+  +335 / -4 against the round-77 build commit `14a36147bd`). The five test files are not packaged.
+- The `import` and `from` lines of `dossier.py` are the same set at both pins (0 differing lines), so the closure is unchanged:
+  the CONTENT-DIFF stays **CHANGED 19, ADDED 8, REMOVED 0**, the same file lists; `dossier.py` was already on the CHANGED list.
+- `METHOD_VERSION` at the new pin: `"amgt-corpus-dossier/7"` (deployed: `/5`).
+- The scratch branch `bb18-pin-r78-DO-NOT-BUILD-method7` (`e06970c43f`) carries the WITHDRAWN first repair and is never built.
+
+**What changes in the section THE DOSSIER MOVE:** the reader goes from `/5` to `/7`, not `/6`. The served move is AMGT_CORPUS's
+method-6 census (51 values in 35 names) plus the method-7 trims (5 values, 55 characters; that project's (d2) record). The write
+is complete (95 of 95 at method 7), so this apply IS the act that moves the page: branch W-first. **Six values are served
+known-truncated, stopping mid-sentence, by the CTO's ruling (msgs 31383, 31394): LLY, NU (two), QXO, UNH, and SHOP management.**
+Round 41 of AMGT_CORPUS reads across page breaks first. A rollback puts the reader back at `/5`.
+
+**The chatter base (CTO half of AMGT_HARVST gold rebuild #8, C1):** the rebuild ran BEFORE this act and ended (last write read
+back 22:41:32Z, verify ended 22:48Z; `2.0.0_SA_COO~H` msg 31459). The base this act's checks read against: mention table 48,025
+rows (was 33,665), daily table 67,760 rows (was 59,148). The base reads of r76 c62/c63 and r75 c59 in this half predate that move;
+the executor's AC2 is the first read of them on the moved chatter, and a NO there is read against the rebuild's record before it
+is called this deploy's.
+
+**Not re-measured for this addendum:** the closure (argued from the unchanged import lines, not re-run); the packaged-file-set
+run of `r78_bb17` AC1 (it ran at the old pin; `dossier.py` is not read by its six clauses' assertions but is on the `/thesis`
+path); `r78_bb5` and `r78_bb6` against method 7 locally.
+
+**Still waiting:** the six wheel files (0 of 6 on this box at 23:0xZ). SIGNED for the new pin: `2.0.0_SA_COO~Z`, 2026-10-07 ~23:1xZ.
