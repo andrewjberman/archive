@@ -1,0 +1,93 @@
+{
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~284/SESSION_LOG.md",
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "df9574dfd42e844ca9fe5c07614a3f3f328d8e86"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "df9574dfd42e844ca9fe5c07614a3f3f328d8e86",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-18.export-chart-line-mirrors-page.md"
+  },
+  "to_id": "AMGT_RESAPP.TO-AMGT-ba-18.export-chart-line-mirrors-page",
+  "assignee": "0.9.0_WK_AMGT_RESAPP~284",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: _thesis_driver_chart_markdown returns [] when drafting_status is not SERVED",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/print/tests/test_ba18_chart_line.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 7 cases; passed",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "C1 and C2 PASS: an undrafted thesis (ABSENT, INVALID, missing) and no bundle at all print no chart line; R77 BA18 AC1 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba18.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 an undrafted thesis (drafting_status 'ABSENT') prints no chart line got []\nPASS C1 an undrafted thesis (drafting_status 'INVALID') prints no chart line got []\nPASS C1 an undrafted thesis (drafting_status None) prints no chart line got []\nPASS C2 no bundle at all prints no chart line got []\nR77 BA18 AC1 SERVED: YES\nexit=0",
+      "denominator": "4 of 4 states (ABSENT, INVALID, missing, no bundle)",
+      "status": "PASS",
+      "expect": "R77 BA18 AC1 SERVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "C1 and C2 PASS (the control): a drafted thesis with no chart prints the one absence line in today's words, and a served chart prints none; R77 BA18 AC2 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba18.py\" --crit AC2 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 a drafted thesis with no chart prints the one absence line, naming the driver got ['The chart: ABSENT -- the thesis driver is \"commercial aircraft deliveries\"']\nPASS C2 a drafted thesis whose chart is served prints no absence line got []\nR77 BA18 AC2 SERVED: YES\nexit=0",
+      "denominator": "2 of 2 arms",
+      "status": "PASS",
+      "expect": "R77 BA18 AC2 SERVED: YES.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted mutant: render_pack.py restored to the base bytes (no drafting_status guard).",
+      "expected": "AC1 C2 FAILS and verdict NO.",
+      "observed": "FAIL C2 no bundle at all prints no chart line got ['The chart: ABSENT']; R77 BA18 AC1 SERVED: NO. Fix file restored; git diff shows the 2-line change.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice more on the committed bytes.",
+      "observed": "SERVED: YES twice.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any deploy, store write, vendor/SEC/model call, portal write",
+      "reason": "order bound 1"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest lib/research/print/tests",
+      "invocation": "python -m pytest -q lib/research/print/tests",
+      "result": "114 passed in 20.69s"
+    }
+  ]
+}

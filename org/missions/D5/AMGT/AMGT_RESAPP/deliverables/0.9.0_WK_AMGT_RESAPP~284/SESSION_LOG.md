@@ -1,0 +1,2 @@
+# 0.9.0_WK_AMGT_RESAPP~284 -- AMGT-ba-18
+Guard added to render_pack._thesis_driver_chart_markdown: drafting_status != SERVED returns []. AC1/AC2 PASS, mutant (base bytes) fails AC1 C2, print suite 114 passed. Page on a drafted name with no chart: 'The series for the thesis driver, "<series>", is not in the model data yet.' + detail; export: 'The chart: ABSENT -- the thesis driver is "<series>"' (unchanged, not ruled). No rows.
