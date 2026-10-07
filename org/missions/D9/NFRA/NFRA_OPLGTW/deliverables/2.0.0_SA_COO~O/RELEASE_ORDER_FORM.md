@@ -75,6 +75,22 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
 
 - Never source `/opt/opal-gateway/.env` (row Z-S32).
 - Never write a grant.
+- **The source of a principal identifier (R41, `ledger/ROUND_ANALYSIS.round27.md` @028a074f26).** An order whose check
+  needs a principal's tenant and object ids NAMES where they come from. The source is `gateway-access-state-table`,
+  read by the issuer with its own AWS identity and handed to the worker in an off-repo file under
+  `%LOCALAPPDATA%/opal/og-salt/`. The gateway's encrypted sign-in cache is NEVER a source: no order, worker or check
+  reads, lists or decrypts it.
+- **The page-time read (R42, row Z-W28-S21).** Where a release asserts that a served page is unchanged, the BEFORE read
+  is taken immediately before the deploy and the AFTER read immediately after it, each with the S3 object's
+  `LastModified`. A difference in size or digest counts as a change ONLY if `LastModified` did not move between the
+  two reads. The record prints `LastModified` at both.
+- **What `displayed_date` is (R44).** `opal_data_refresh_status` returns the served manifest's `generated_at` in
+  `displayed_date`. That is the TIME the manifest was generated, not the data's as-of date. A re-publish of an older
+  date reads as the day of the re-publish. An order or caller text that needs the as-of date names another field.
+- **The deploy script's install lines (R39, R40).** Before an order runs `deploy-to-ec2.sh`, the issuer reads its lines
+  in `org/tier0_exec/0.0.0_AB_MSTR~Z/deliverables/SITEZ_INSTALL_DOWNLOAD_LINE_CENSUS_20261007.md`. A release whose
+  diff touches `requirements.txt` goes to the CTO before its never-widen pair, until Andrew says whether the gateway
+  host is a box under his no-fetch word.
 - **The identifier bound (R39 and ADDENDUM 1 of `ledger/ROUND_ANALYSIS.round26.md` @51572f8092).** An order's "never
   print or commit an account id" means a CLIENT account identifier: an end client's account number. Two things are
   outside it, and output is not redacted for them: an AWS account id inside a bucket name or a resource address, and
