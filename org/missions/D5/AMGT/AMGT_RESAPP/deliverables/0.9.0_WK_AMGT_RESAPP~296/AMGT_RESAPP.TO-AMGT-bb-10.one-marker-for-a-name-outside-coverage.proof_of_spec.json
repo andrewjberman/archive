@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bb-10.one-marker-for-a-name-outside-coverage",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "B",
+    "vintage_commit": "23d65887caf397e9eb33bb7780a6c45f158e0e1e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "23d65887caf397e9eb33bb7780a6c45f158e0e1e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bb-10.one-marker-for-a-name-outside-coverage.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~296",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/coverage_marker.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW stdlib module exporting marker(security_key, covered_keys); not hooked up (AMGT-bb-17 does it).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_coverage_marker.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 9 tests, one per rule plus slash key, repeated key, set and list.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a covered name reads covered with no sentence; outside list and empty key read outside_coverage with one plain sentence; an unread list reads not_known; C1-C4 PASS; R78 BB10 AC1 SERVED: YES; exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round78/checks/r78_bb10.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1\nPASS C2\nPASS C3\nPASS C4\nR78 BB10 AC1 SERVED: YES\nexit=0",
+      "denominator": "4 of 4 checks PASS",
+      "status": "PASS",
+      "expect": "R78 BB10 AC1 SERVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "against the real covered list every covered name reads covered; MSFT and ABNB outside_coverage, AMD covered; pool splits; C1-C3 PASS; R78 BB10 AC2 SERVED: YES; exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round78/checks/r78_bb10.py\" --crit AC2 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS C1 every covered name reads covered 95 of 95\nPASS C2\nPASS C3 95 + 148 = 243\nR78 BB10 AC2 SERVED: YES\nexit=0",
+      "denominator": "95 of 95 covered; 243 of 243 pool names classified",
+      "status": "PASS",
+      "expect": "R78 BB10 AC2 SERVED: YES.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Rule 1 vs rule 3: an unread list (None) must not read outside_coverage.",
+      "expected": "A build treating None as empty would return outside_coverage; AC1 C3 would FAIL.",
+      "observed": "AC1 C3 PASS: None reads not_known with covered None.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "marker is a pure function; AC1 and AC2 run once each, same output on pytest and checker.",
+      "observed": "deterministic by construction",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "lib/research/api/scoped_amgt.py hookup",
+      "reason": "Out of bounds; AMGT-bb-17 makes the research_coverage hookup."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~296/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/api/coverage_marker.py",
+      "result": "OK: pre-commit gate clean for 1 of 1 file(s)"
+    }
+  ]
+}

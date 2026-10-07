@@ -92,6 +92,15 @@ print("R26_STATUS_REFUSED outcome=%s names_execution_id=%s http_get=%d http_post
       % ("refused" if refused else "NOT REFUSED", "execution_id" in txt, calls["get"], calls["post"]))
 refused_http = calls["get"] + calls["post"]
 
+# AMENDMENT A4 (CTO half C2): a second refused id, one containing a dot (synthetic string); 0 requests.
+dg0, dp0 = calls["get"], calls["post"]
+d = run("r26.refused-id")
+txt = json.dumps(d)
+refused_dot = ("execution_id" in txt) and (bool(d.get("error")) or "raised" in d) and calls["get"] == dg0 and calls["post"] == dp0
+print("R26_STATUS_REFUSED_DOT outcome=%s names_execution_id=%s http_get=%d http_post=%d"
+      % ("refused" if refused_dot else "NOT REFUSED", "execution_id" in txt, calls["get"] - dg0, calls["post"] - dp0))
+refused_dot_http = (calls["get"] - dg0) + (calls["post"] - dp0)
+
 exec_id = os.environ["R26_EXEC_ID"]
 g0, p0 = calls["get"], calls["post"]
 d = run(exec_id)
@@ -106,6 +115,7 @@ print("R26_STATUS_ACCEPTED outcome=%s status_value=%s terminal=%s http_get=%d ht
       % (accepted.replace(" ", "_"), status_value, terminal, calls["get"] - g0, calls["post"] - p0))
 
 body = {"served_release": served, "installed_code": not staged, "status_id_refused": {"id_shape": "contains a slash", "outcome": "refused" if refused else "NOT REFUSED", "http_requests": refused_http},
+        "status_id_refused_dot": {"id_shape": "contains a dot", "outcome": "refused" if refused_dot else "NOT REFUSED", "http_requests": refused_dot_http},
         "status_id_accepted": {"id": "the known 2026-10-07 ~01:26Z execution (not printed)", "outcome": accepted, "status_value": status_value, "terminal": terminal}, "grants_written": 0}
 s = json.dumps(body, sort_keys=True)
 dig = hashlib.sha256(s.encode("utf-8")).hexdigest()

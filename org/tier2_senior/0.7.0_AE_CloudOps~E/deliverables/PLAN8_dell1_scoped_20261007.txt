@@ -1,0 +1,383 @@
+aws_s3_bucket.opal_data_49financial: Refreshing state... [id=opal-data-49financial]
+aws_s3_bucket.lgic_firm["inflection"]: Refreshing state... [id=opal-data-inflection]
+data.aws_iam_user.restricted_console: Reading...
+data.aws_iam_role.irpt_performance_adapter: Reading...
+aws_s3_bucket.lgic_firm["cottonwood"]: Refreshing state... [id=opal-data-cottonwood]
+data.aws_iam_user.restricted_console: Read complete after 0s [id=AIDAUR7FNW6PC7P64KCTW]
+data.aws_iam_role.irpt_performance_adapter: Read complete after 0s [id=irpt-performance-adapter-role]
+aws_s3_bucket_public_access_block.opal_data_49financial: Refreshing state... [id=opal-data-49financial]
+aws_s3_bucket_policy.opal_data_49financial: Refreshing state... [id=opal-data-49financial]
+aws_s3_bucket_public_access_block.lgic_firm["cottonwood"]: Refreshing state... [id=opal-data-cottonwood]
+aws_s3_bucket_public_access_block.lgic_firm["inflection"]: Refreshing state... [id=opal-data-inflection]
+aws_s3_bucket_policy.lgic_firm["inflection"]: Refreshing state... [id=opal-data-inflection]
+aws_s3_bucket_policy.lgic_firm["cottonwood"]: Refreshing state... [id=opal-data-cottonwood]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_s3_bucket_policy.lgic_firm["cottonwood"] will be updated in-place
+  ~ resource "aws_s3_bucket_policy" "lgic_firm" {
+        id     = "opal-data-cottonwood"
+      ~ policy = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Condition = {
+                          ~ ArnNotLike = {
+                              ~ "aws:PrincipalArn" = [
+                                    # (5 unchanged elements hidden)
+                                    "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                        }
+                        # (5 unchanged attributes hidden)
+                    },
+                    {
+                        Action    = [
+                            "s3:GetObject*",
+                            "s3:GetObjectVersion*",
+                            "s3:GetObjectAttributes",
+                            "s3:GetObjectTagging",
+                        ]
+                        Condition = {
+                            ArnNotLike = {
+                                "aws:PrincipalArn" = [
+                                    "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+                                    "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role",
+                                ]
+                            }
+                        }
+                        Effect    = "Deny"
+                        Principal = "*"
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/*",
+                        ]
+                        Sid       = "DenyRestrictedReadExceptReaders"
+                    },
+                    # (1 unchanged element hidden)
+                    {
+                        Action    = [
+                            "s3:PutObject*",
+                            "s3:DeleteObject*",
+                            "s3:RestoreObject",
+                        ]
+                        Condition = {
+                            ArnNotLike = {
+                                "aws:PrincipalArn" = [
+                                    "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role",
+                                ]
+                            }
+                        }
+                        Effect    = "Deny"
+                        Principal = "*"
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/*",
+                        ]
+                        Sid       = "DenyRestrictedWriteExceptBreakglass"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                          + "s3:ListBucket",
+                          + "s3:GetBucketLocation",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-cottonwood",
+                          + "arn:aws:s3:::opal-data-cottonwood/*",
+                        ]
+                      + Sid       = "DenyScopedExemption1AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-cottonwood/irpt/cottonwood/platinum/holdings/*",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption1ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:ListBucket",
+                        ]
+                      + Condition = {
+                          + ArnLike       = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                          + StringNotLike = {
+                              + "s3:prefix" = [
+                                  + "irpt/cottonwood/platinum/holdings/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-cottonwood",
+                        ]
+                      + Sid       = "DenyScopedExemption1ListingOutsidePrefix"
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_s3_bucket_policy.lgic_firm["inflection"] will be updated in-place
+  ~ resource "aws_s3_bucket_policy" "lgic_firm" {
+        id     = "opal-data-inflection"
+      ~ policy = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Condition = {
+                          ~ ArnNotLike = {
+                              ~ "aws:PrincipalArn" = [
+                                    # (5 unchanged elements hidden)
+                                    "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                        }
+                        # (5 unchanged attributes hidden)
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                          + "s3:ListBucket",
+                          + "s3:GetBucketLocation",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-inflection",
+                          + "arn:aws:s3:::opal-data-inflection/*",
+                        ]
+                      + Sid       = "DenyScopedExemption1AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-inflection/irpt/inflection/platinum/holdings/*",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption1ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:ListBucket",
+                        ]
+                      + Condition = {
+                          + ArnLike       = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                          + StringNotLike = {
+                              + "s3:prefix" = [
+                                  + "irpt/inflection/platinum/holdings/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-inflection",
+                        ]
+                      + Sid       = "DenyScopedExemption1ListingOutsidePrefix"
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_s3_bucket_policy.opal_data_49financial will be updated in-place
+  ~ resource "aws_s3_bucket_policy" "opal_data_49financial" {
+        id     = "opal-data-49financial"
+      ~ policy = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Condition = {
+                          ~ ArnNotLike = {
+                              ~ "aws:PrincipalArn" = [
+                                    # (18 unchanged elements hidden)
+                                    "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                    "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+                                ]
+                            }
+                        }
+                        # (5 unchanged attributes hidden)
+                    },
+                    {
+                        Condition = {
+                            ArnLike = {
+                                "aws:PrincipalArn" = [
+                                    "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+                                ]
+                            }
+                        }
+                        Effect    = "Deny"
+                        NotAction = [
+                            "s3:GetObject",
+                            "s3:ListBucket",
+                        ]
+                        Principal = "*"
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-49financial",
+                            "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                        Sid       = "DenyPerformanceAdapterAnyOtherAction"
+                    },
+                    # (1 unchanged element hidden)
+                    {
+                        Action    = "s3:ListBucket"
+                        Condition = {
+                            ArnLike       = {
+                                "aws:PrincipalArn" = [
+                                    "arn:aws:iam::313476888478:role/irpt-performance-adapter-role",
+                                ]
+                            }
+                            StringNotLike = {
+                                "s3:prefix" = [
+                                    "irpt/49financial/gold/holdings_performance_daily/*",
+                                ]
+                            }
+                        }
+                        Effect    = "Deny"
+                        Principal = "*"
+                        Resource  = [
+                            "arn:aws:s3:::opal-data-49financial",
+                        ]
+                        Sid       = "DenyPerformanceAdapterListingOutsideTheHoldingsGold"
+                    },
+                  + {
+                      + Condition = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + NotAction = [
+                          + "s3:GetObject",
+                          + "s3:ListBucket",
+                          + "s3:GetBucketLocation",
+                        ]
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                          + "arn:aws:s3:::opal-data-49financial/*",
+                        ]
+                      + Sid       = "DenyScopedExemption1AnyOtherAction"
+                    },
+                  + {
+                      + Action      = [
+                          + "s3:GetObject",
+                        ]
+                      + Condition   = {
+                          + ArnLike = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                        }
+                      + Effect      = "Deny"
+                      + NotResource = [
+                          + "arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/holdings/*",
+                        ]
+                      + Principal   = "*"
+                      + Sid         = "DenyScopedExemption1ObjectsOutsidePrefix"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:ListBucket",
+                        ]
+                      + Condition = {
+                          + ArnLike       = {
+                              + "aws:PrincipalArn" = [
+                                  + "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                ]
+                            }
+                          + StringNotLike = {
+                              + "s3:prefix" = [
+                                  + "irpt/49financial/platinum/holdings/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Deny"
+                      + Principal = "*"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-49financial",
+                        ]
+                      + Sid       = "DenyScopedExemption1ListingOutsidePrefix"
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (1 unchanged attribute hidden)
+    }
+
+Plan: 0 to add, 3 to change, 0 to destroy.
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
