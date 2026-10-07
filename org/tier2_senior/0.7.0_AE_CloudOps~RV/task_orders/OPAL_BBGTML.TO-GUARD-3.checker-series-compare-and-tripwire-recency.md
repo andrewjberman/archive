@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~RV</issued_to>
     <date>2026-10-07</date>
-    <status>staged -- written 2026-10-07 06:2xZ, NOT sent: Andrew wind-down for a reboot (0.0.0_AB_MSTR~Z msg of 06:24Z) arrived before the GO; the issuer releases it after the relaunch</status>
+    <status>pending -- RELEASED 2026-10-07 ~09:1xZ by the issuer after the site-Z relaunch (Andrew-direct ~08:2xZ); written and staged 06:2xZ, held through the reboot wind-down; the merge window still excludes 10:30Z-12:00Z</status>
     <project_code>OPAL_BBGTML</project_code>
   </metadata>
 <risk>WORLD</risk>
