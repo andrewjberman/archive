@@ -3,7 +3,7 @@
 The page's rendered text of the driver chart and the segment breakdown, from the deployed /thesis bytes of
 `org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_groupB_fixture.json`, by walking the actual
 `ThesisDriverChart.tsx`, `PassageTable.tsx` and `SegmentBreakdown.tsx` as a React tree (portal branch wk-DSGN_AMGTV1-107-portal).
-A table row is printed as `label | figure | figure ...`; the `|` on the header line leads with an empty corner cell. In the
+The header line `| 737 | 747 ...` leads with an empty corner cell. AMENDMENT 1: a row whose figure count differs from the column labels (BA's 5-figure and 8-figure rows against 6 labels) is NOT in the table body; it is its own line beneath the table, the label then every figure in served order, so BA's table body is empty and both rows are lines. A row with exactly as many figures as labels would be a `label | figure | ...` table row. In the
 segment breakdown each "Source" line and the cite beneath it sit in a CLOSED disclosure on the page; this text dump prints
 closed disclosure content because it does not model the fold. The chart line itself is a recharts drawing and is not text.
 
@@ -26,8 +26,8 @@ Commercial Airplanes (BCA) aircraft deliveries -- from the filing, not the model
 2023: 528 -- show the filing passage
 2023
 | 737 | 747 | 767 | 777 | 787 | Total |
-Cumulative deliveries | 8,528 | 1,573 | 1,303 | 1,727 | 1,110 |
-Deliveries | 396 | (9) | 1 | 32 | (14) | 26 | 73 | 528 |
+Cumulative deliveries 8,528 1,573 1,303 1,727 1,110
+Deliveries 396 (9) 1 32 (14) 26 73 528
 Some rows list a different number of figures than there are columns, because the filing's blank cells and footnote marks are not kept; those rows give their figures in the order printed and may not line up with the columns.
 From the filing: ITEM 7. MANAGEMENT'S DISCUSSION AND ANALYSIS / TABLE 2023
 2024: 348 -- show the filing passage
@@ -45,8 +45,8 @@ Commercial Airplanes (BCA) aircraft deliveries -- from the filing, not the model
 2024: 348 -- show the filing passage
 2024
 | 737 | 747 | 767 | 777 | 787 | Total |
-Cumulative deliveries | 8,793 | 1,573 | 1,321 | 1,741 | 1,161 |
-Deliveries | 265 | (5) | 18 | (8) | 14 | 51 | 348 |
+Cumulative deliveries 8,793 1,573 1,321 1,741 1,161
+Deliveries 265 (5) 18 (8) 14 51 348
 Some rows list a different number of figures than there are columns, because the filing's blank cells and footnote marks are not kept; those rows give their figures in the order printed and may not line up with the columns.
 From the filing: ITEM 7. MANAGEMENT'S DISCUSSION AND ANALYSIS / TABLE 2024
 2025: 600 -- show the filing passage
