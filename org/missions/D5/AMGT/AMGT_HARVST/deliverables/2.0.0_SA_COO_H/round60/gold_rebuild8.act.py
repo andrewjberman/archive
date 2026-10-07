@@ -73,6 +73,18 @@ def main():
     as_of = now.date().isoformat()
     record = {"stamp": stamp, "as_of": as_of, "universe_file": R60, "served_universe_file": R33, "rebuild": 8,
               "gate_only": gate_only}
+    # CTO half C2 (@201121c305): what lands wrong, or ungraded, is named in the act's record.
+    record["stated_bounds"] = {
+        "carlisle_pairs_on_CSL_AU_Equity": "3 of 42 pairs resting on the form CSL are Carlisle Companies (CVO @f6e370e6cc)",
+        "ticker_forms_no_sample_reached": {"BNP": 5, "HEI": 3, "SNPS": 3, "DG": 2, "ED": 2, "GPN": 2, "ADBE": 1, "NKE": 1,
+                                           "SHOP": 1, "total_pairs_in_dry_run_3": 20},
+        "ICT_US_Equity": ("0 pairs after this act: its 17 served pairs rested on the refused form ICT alone (CVO @160f1c9602). "
+                          "What it is, from the list it came from: the collector's identity record names it "
+                          "'International Container Termin' (a cut name, status MEASURED), ticker 'ICT US Equity'; the "
+                          "identity registry carries only ICT_PM_Equity, INTL CONTAINER TERM SVCS INC."),
+        "ungraded_fallback_pairs": ("pairs matched through the matcher's fallback to a bare company name where the alias set "
+                                    "is empty (GSK, RWE, SAP, BP_US, Nokia): not graded; first sample of the next round analysis"),
+        "key_only_names": ["CAT_US_Equity", "CSL_AU_Equity", "6861_JP_Equity"]}
     bm, bd = a32.snap()
     record["before"] = {"mention_rows": len(bm), "mention_digest": a32.digest(bm), "daily_rows": len(bd),
                         "daily_digest": a32.digest(bd), "mention_part": a32.newest_part(pg.GOLD_TABLE),
