@@ -1,0 +1,255 @@
+"""OG-rl-11 host program (NFRA_OPALAI OA-f-14 on the host): the scoped identity's consent, its silent acquire and its Graph probes, plus the CTO's pre-GO identity-key read.
+Run by r25_ssm_prog.py as a SEPARATE process (env -i, installed venv, cwd = the gateway dir being tested; staged = a host scratch copy carrying the release bytes, installed tree
+untouched). Modes (argv[1]): before (live code: tool/consent counts + identity keys) | rehearsal (staged release bytes: everything) | after (installed release code: everything).
+argv[2] = the served release sha (rehearsal / after).
+
+NEVER printed: a token, an email, a tid/oid, a bearer, any .env value. /opt/opal-gateway/.env is NEVER sourced: it is parsed AS TEXT in this process to populate the process environment
+(the same keys the service's EnvironmentFile feeds it); no value leaves the process, only booleans, counts, HTTP status codes and Graph scope NAMES (which are not secrets).
+The scoped identity's token cache file is COPIED to the run's scratch directory and the broker is pointed at the copy (TOKEN_CACHE_DIR), so the silent acquire and the forced
+refresh can never write the live cache; the scratch is removed by the runner. No grant, state store, .env or secret is written. Every Graph call is a read-only GET. Nothing is sent."""
+import hashlib
+import json
+import os
+import re
+import shutil
+import sys
+import urllib.error
+import urllib.request
+
+GW = os.environ.get("OG_GW_DIR", "/opt/opal-gateway")
+SCR = os.environ["R25_SCRATCH"]
+mode = sys.argv[1] if len(sys.argv) > 1 else "before"
+served = sys.argv[2] if len(sys.argv) > 2 else ""
+staged = GW != "/opt/opal-gateway"
+sys.path.insert(0, GW)
+
+# --- the service's environment, parsed as TEXT (never sourced; never printed) ---
+ENVD = {}
+for line in open("/opt/opal-gateway/.env", encoding="utf-8"):
+    m = re.match(r"^([A-Za-z0-9_]+)=(.*)$", line.rstrip("\r\n"))
+    if m:
+        v = m.group(2)
+        if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+            v = v[1:-1]
+        ENVD[m.group(1)] = v
+os.environ.update(ENVD)
+LIVE_CACHE_DIR = os.environ.get("TOKEN_CACHE_DIR") or "/opt/opal-gateway/.token_cache"
+TC = os.path.join(SCR, "tokcache")
+os.makedirs(TC, exist_ok=True)
+os.environ["TOKEN_CACHE_DIR"] = TC            # the copy; the live cache is never the broker's write target
+os.environ["IDENTITY_TOOL_ALLOWLIST_PATH"] = os.path.join(GW, "identity_tool_allowlist.txt")
+os.environ["MOCK_GRAPH"] = "0"
+
+import msal  # noqa: E402
+from app import identity_scope, token_broker  # noqa: E402
+from app.config import get_config  # noqa: E402
+
+cfg = get_config()
+FULL = set(cfg.GRAPH_SCOPES)
+MSAL_ADDED = {"openid", "profile", "offline_access"}
+scoped_map = identity_scope._load_overlay()[0]
+scoped_ids = sorted(scoped_map)
+print("R25_CODE mode=%s staged=%s identity_scope.md5=%s token_broker.md5=%s consent_scopes_defined=%s"
+      % (mode, staged, hashlib.md5(open(identity_scope.__file__, "rb").read()).hexdigest()[:8],
+         hashlib.md5(open(token_broker.__file__, "rb").read()).hexdigest()[:8], hasattr(identity_scope, "consent_scopes")))
+print("R25_SCOPED_IDENTITIES count=%d" % len(scoped_ids))
+
+
+def consent_scope_names(email: str) -> list:
+    """The scope names the REAL /login consent leg puts in its authorization URL for `email` (token_broker.build_consent_url over a real state): parsed from the URL's
+    `scope` parameter in-process (the URL is never printed), minus the three OIDC scopes MSAL adds itself."""
+    url = token_broker.build_consent_url(token_broker.make_state(email))
+    q = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+    return sorted(set(" ".join(q.get("scope", [])).split()) - MSAL_ADDED)
+
+
+import urllib.parse  # noqa: E402
+
+# --- consent scopes: an unscoped identity, and each scoped identity ---
+UNSCOPED = "r25-unscoped-probe@example.invalid"
+assert UNSCOPED not in scoped_map
+unscoped_scopes = consent_scope_names(UNSCOPED)
+print("R25_UNSCOPED consent_scope_count=%d equals_full_envelope=%s" % (len(unscoped_scopes), set(unscoped_scopes) == FULL))
+per_scoped = {}
+for ident in scoped_ids:
+    names = consent_scope_names(ident)
+    per_scoped[ident] = names
+    print("R25_SCOPED[%d] consent_scope_count=%d subset_of_full=%s scopes=%s tools=%s" % (scoped_ids.index(ident), len(names), set(names) <= FULL, ",".join(names),
+                                                                                       ",".join(sorted(scoped_map[ident]))))
+SC = scoped_ids[0] if scoped_ids else None
+
+# --- the CTO pre-GO read: does each non-tool caller's identity key name a SCOPED identity? (a boolean per key; no value is printed) ---
+principal_keys = set()          # '<tid>/<oid>' of each scoped identity's cached account, in-process only
+for ident in scoped_ids:
+    src = os.path.join(LIVE_CACHE_DIR, hashlib.sha256(ident.encode()).hexdigest() + ".bin")
+    if os.path.exists(src):
+        shutil.copyfile(src, os.path.join(TC, os.path.basename(src)))
+        c = token_broker._load_cache(ident)
+        for acc in msal.ConfidentialClientApplication(client_id=cfg.CLIENT_ID, authority=cfg.AUTHORITY, client_credential=cfg.CLIENT_SECRET, token_cache=c).get_accounts():
+            hid = acc.get("home_account_id", "")
+            if "." in hid:
+                oid, tid = hid.split(".", 1)
+                principal_keys.add(("%s/%s" % (tid, oid)).lower())
+print("R25_SCOPED_CACHE_PRESENT %s" % [os.path.exists(os.path.join(LIVE_CACHE_DIR, hashlib.sha256(i.encode()).hexdigest() + ".bin")) for i in scoped_ids])
+
+
+def names_scoped(value: str) -> bool:
+    v = (value or "").strip().lower()
+    if not v:
+        return False
+    if "@" in v:
+        return v in scoped_map
+    return v in principal_keys
+
+
+KEYMAP = (("OG_TAXSMA_WORKBOOK_IDENTITY", "TAXSMA_WORKBOOK_IDENTITY"), ("MS_INGEST_IDENTITY", "MS_INGEST_IDENTITY"), ("OTP_MAILBOX", "OTP_MAILBOX"))
+keys_scoped = {}
+print("R25_ENV_KEY_NAMED_OG_TAXSMA_WORKBOOK_IDENTITY_PRESENT_IN_ENV %s (the service reads TAXSMA_WORKBOOK_IDENTITY; the OG_ name is the deploy shell's variable, not a host key)" % ("OG_TAXSMA_WORKBOOK_IDENTITY" in ENVD))
+for order_name, host_key in KEYMAP:
+    keys_scoped[order_name] = bool(names_scoped(ENVD.get(host_key, "")))
+    print("R25_IDENTITY_KEY %s scoped=%s" % (order_name, keys_scoped[order_name]))
+
+# --- covering the key booleans with the release's consent: every caller bound to a scoped identity has its scopes inside the consent union ---
+cover = {}
+if hasattr(identity_scope, "consent_scopes") and SC:
+    from app import graph_scope_map as gsm
+    consent = set(identity_scope.consent_scopes(SC) or [])
+    for order_name, host_key in KEYMAP:
+        callers = [c for c in gsm.CALLER_GRAPH_SCOPES.values() if c.config_key == host_key]
+        need = set().union(*[c.scopes for c in callers]) if callers else set()
+        cover[order_name] = (need <= consent) if keys_scoped[order_name] else None
+        print("R25_IDENTITY_KEY_COVERED %s covered_by_consent=%s" % (order_name, "n/a(key not scoped)" if cover[order_name] is None else cover[order_name]))
+
+if mode == "before":
+    print("R25_BEFORE scoped_consent_scope_count=%s unscoped_consent_scope_count=%d" % (len(per_scoped[SC]) if SC else None, len(unscoped_scopes)))
+    sys.exit(0)
+
+# --- silent acquire for the scoped identity, through the REAL broker, on the scratch copy of its cache ---
+recorded = {}
+_orig = msal.ConfidentialClientApplication.acquire_token_silent
+
+
+def _spy(self, scopes, account, **kw):
+    res = _orig(self, scopes, account, **kw)
+    recorded.setdefault("calls", []).append({"scopes": sorted(scopes), "force_refresh": bool(kw.get("force_refresh")),
+                                              "ok": bool(res and "access_token" in res), "error": (res or {}).get("error"),
+                                              "granted": sorted((res or {}).get("scope", "").split()) if res and "access_token" in res else None})
+    return res
+
+
+msal.ConfidentialClientApplication.acquire_token_silent = _spy
+acquire = "NO SCOPED IDENTITY"
+token = None
+if SC:
+    try:
+        token_broker.get_token(SC)
+        acquire = "OK"
+    except token_broker.NeedsLogin:
+        acquire = "NeedsLogin"
+    except Exception as exc:  # noqa: BLE001 -- the type name only
+        acquire = "ERR:" + type(exc).__name__
+print("R25_SILENT_ACQUIRE get_token=%s" % acquire)
+for c in recorded.get("calls", []):
+    print("R25_ACQUIRE_CALL requested=%s force_refresh=%s ok=%s error=%s granted=%s" % (",".join(c["scopes"]), c["force_refresh"], c["ok"], c["error"],
+                                                                                    ",".join(c["granted"]) if c["granted"] else None))
+requested = (recorded.get("calls") or [{}])[-1].get("scopes") or []
+# the PRODUCTION path after an access token has expired is a refresh-token exchange for exactly the narrowed scopes: force it here, on the scratch copy, so the probes use a token AAD
+# minted for the narrow set (a cached wider access token from the original consent could otherwise satisfy get_token without ever asking AAD about the narrow set)
+forced = "NOT RUN"
+if SC and acquire == "OK" and requested:
+    cache = token_broker._load_cache(SC)
+    app = token_broker._app(cache)
+    accts = app.get_accounts()
+    if accts:
+        res = app.acquire_token_silent(requested, account=accts[0], force_refresh=True)
+        if res and "access_token" in res:
+            token = res["access_token"]
+            forced = "OK"
+            print("R25_FORCED_NARROW_REFRESH ok granted_scopes=%s" % ",".join(sorted(res.get("scope", "").split())))
+        else:
+            forced = "ERR:%s" % ((res or {}).get("error") or "no result")
+    else:
+        forced = "NO ACCOUNT IN CACHE"
+print("R25_FORCED_NARROW_REFRESH_RESULT %s" % forced)
+silent = "OK" if (acquire == "OK" and forced == "OK") else ("get_token=%s forced_refresh=%s" % (acquire, forced))
+
+
+def get(path: str):
+    """One read-only Graph GET. Returns (HTTP status, parsed JSON or None). The token is only ever placed in the Authorization header."""
+    req = urllib.request.Request("https://graph.microsoft.com/v1.0" + path, headers={"Authorization": "Bearer " + token}, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            raw = r.read()
+            return r.status, (json.loads(raw) if raw else None)
+    except urllib.error.HTTPError as e:
+        return e.code, None
+    except Exception:  # noqa: BLE001
+        return "ERR", None
+
+
+probes = []     # (family, scope, path-shape, status)
+site_status = None
+if token:
+    s, _ = get("/me")
+    probes.append(("whoami", "User.Read", "GET /me", s))
+    s, _ = get("/me/chats?$top=1")
+    probes.append(("list_chats / read_chat_messages", "Chat.ReadWrite", "GET /me/chats?$top=1", s))
+    s, teams = get("/me/joinedTeams")
+    probes.append(("list_teams", "Team.ReadBasic.All", "GET /me/joinedTeams", s))
+    team_id = ((teams or {}).get("value") or [{}])[0].get("id") if s == 200 else None
+    chan_id = None
+    if team_id:
+        s, chans = get("/teams/%s/channels" % team_id)
+        probes.append(("list_channels", "Channel.ReadBasic.All", "GET /teams/{id}/channels", s))
+        chan_id = ((chans or {}).get("value") or [{}])[0].get("id") if s == 200 else None
+    else:
+        probes.append(("list_channels", "Channel.ReadBasic.All", "GET /teams/{id}/channels (no team id to probe with)", "SKIPPED"))
+    if team_id and chan_id:
+        s, _ = get("/teams/%s/channels/%s/messages?$top=1" % (team_id, chan_id))
+        probes.append(("read_channel_messages", "ChannelMessage.Read.All", "GET /teams/{id}/channels/{id}/messages?$top=1", s))
+    else:
+        probes.append(("read_channel_messages", "ChannelMessage.Read.All", "GET /teams/{id}/channels/{id}/messages (no channel id)", "SKIPPED"))
+    s, site = get("/sites/opalinvest.sharepoint.com:/sites/Shared")
+    site_status = s
+    probes.append(("opal_data_refresh_upload (delegated site resolve)", "Sites.Read.All", "GET /sites/opalinvest.sharepoint.com:/sites/Shared", s))
+    sid = (site or {}).get("id") if s == 200 else None
+    if sid:
+        s, _ = get("/sites/%s/drive/root" % sid)
+        probes.append(("opal_data_refresh_upload (delegated drive resolve)", "Sites.Read.All", "GET /sites/{id}/drive/root", s))
+        from app.integrations.opal_portal import integration as _portal    # the integration's own PROJECT_FOLDER constant (a path, not a secret)
+        folder = urllib.parse.quote(_portal.PROJECT_FOLDER)
+        s, _ = get("/sites/%s/drive/root:/%s" % (sid, folder))
+        probes.append(("opal_data_refresh_upload (delegated project-folder resolve, the _graph_find_pkl path)", "Sites.Read.All", "GET /sites/{id}/drive/root:/{PROJECT_FOLDER}", s))
+        s, _ = get("/sites/%s/drive/root:/%s:/children?$top=1" % (sid, folder))
+        probes.append(("opal_data_refresh_upload (delegated project-folder listing)", "Sites.Read.All", "GET /sites/{id}/drive/root:/{PROJECT_FOLDER}:/children?$top=1", s))
+for fam, scope, shape, st in probes:
+    print("R25_PROBE family=%s scope=%s %s -> %s" % (fam, scope, shape, st))
+ran = [p for p in probes if p[3] != "SKIPPED"]
+ok = [p for p in ran if p[3] == 200]
+print("R25_PROBES run=%d ok=%d skipped=%d" % (len(ran), len(ok), len(probes) - len(ran)))
+print("R25_SEND_SCOPES_NOT_GET_PROBEABLE ChatMessage.Send and ChannelMessage.Send are POST-only; their presence is read from the granted scope names above, never exercised")
+token = None
+
+body = {"served_release": served, "installed_code": not staged,
+        "unscoped_scope_count": len(unscoped_scopes),
+        "scoped_scope_count": len(per_scoped[SC]) if SC else None,
+        "scoped_subset_of_full": bool(SC and set(per_scoped[SC]) <= FULL),
+        "scoped_silent_acquire": silent,
+        "probes_run": len(ran), "probes_ok": len(ok),
+        "sharepoint_site_resolve": site_status,
+        "identity_keys_scoped": keys_scoped,
+        "grants_written": 0}
+s = json.dumps(body, sort_keys=True)
+dig = hashlib.sha256(s.encode("utf-8")).hexdigest()
+if staged:
+    print("RL11C_REHEARSAL_BODY " + s)
+    print("RL11C_REHEARSAL_DIGEST " + dig)
+    # STEP-7 STAND-IN ONLY: the same body with installed_code flipped to true (a staged run is not the installed code), so rl11.AC3's expected-PASS form can be exercised on the
+    # release tree before GO. Phase B's record is the installed-code run, never this line.
+    b2 = dict(body, installed_code=True)
+    s2 = json.dumps(b2, sort_keys=True)
+    print("STEP7_STANDIN RL11C_BODY " + s2)
+    print("STEP7_STANDIN RL11C_DIGEST " + hashlib.sha256(s2.encode("utf-8")).hexdigest())
+else:
+    print("RL11C_BODY " + s)
+    print("RL11C_DIGEST " + dig)
