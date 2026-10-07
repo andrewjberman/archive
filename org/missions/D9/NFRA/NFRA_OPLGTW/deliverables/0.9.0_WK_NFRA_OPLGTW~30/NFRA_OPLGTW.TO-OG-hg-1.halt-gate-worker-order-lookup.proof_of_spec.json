@@ -1,0 +1,84 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-hg-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~30",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "36ae4e822d"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "d32e40998d",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-hg-1.halt-gate-worker-order-lookup.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/halt-gate-check.sh",
+   "kind": "script",
+   "commit_or_etag": "526ba98949",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk shell-library change on the worker branch; no deploy by the order's bounds",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": ".tools/halt-gate-worker-order-test.sh",
+   "kind": "script",
+   "commit_or_etag": "526ba98949",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "fixture test on the worker branch; no deploy by the order's bounds",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the gate admits a new slot's worker from a release tree, reads the last status tag, and still halts on STOP.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r25/checks/hg1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "rc=0; cases passed 4 of 4; FAIL lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "cases passed 4 of 4; FAIL lines 0",
+   "status": "PASS",
+   "expect": "(?s)rc=0; cases passed 4 of 4; FAIL lines 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the gate's existing tests are no worse than before.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r25/checks/hg1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "halt-gate-ld0131-test rc=0; recipient-scoping RESULT: 0 passed, 9 failed (baseline failed 9)\nRESULT: PASS\nexit=0",
+   "denominator": "ld0131 test rc=0; recipient-scoping failed 9 against baseline 9 (0 passed, 9 failed, unchanged)",
+   "status": "PASS",
+   "expect": "(?s)halt-gate-ld0131-test rc=0; recipient-scoping RESULT: \\d+ passed, \\d+ failed.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "Deploy of the gate to any host; safe-ec2-deploy.sh",
+   "reason": "The order bounds forbid a deploy and a change to any caller of the gate."
+  }
+ ],
+ "surprises": [],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail: 526ba98949 (function, fixture, negative control).",
+ "compiler_tools": [{"tool": ".tools/halt-gate-worker-order-test.sh", "invocation": "bash .tools/halt-gate-worker-order-test.sh", "result": "4 of 4 PASS, rc=0"}],
+ "controls": {
+  "mutant": {
+   "description": "The pre-change halt_gate_worker_issuer restored through the fixture's HALT_GATE_LIB override.",
+   "expected": "case 1 and case 2 FAIL",
+   "observed": "case 1 FAIL (rc=3, release tree holds no order); case 2 FAIL (rc=0, first-tag read admits a last-tag-complete order); recorded in HG1_NEGATIVE_CONTROL.md",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The fixture ran four times against the new function (two before commit, AC1 twice after).",
+   "observed": "4 of 4 PASS each run",
+   "status": "STABLE"
+  }
+ }
+}
