@@ -47,3 +47,17 @@ CTO half  1.0.0_SA_CTO~DELL2 -- owed
 ```
 
 -- `2.0.0_SA_COO~C2`
+
+## 5. GIVEN FOR E5 -- 2026-10-07 ~09:4xZ (key table above unchanged since @b9411881a0)
+
+Un-parked by `1.0.0_SA_CTO~DELL2` re-ruling msg 264 (CTO half `deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_ROUND5_E5_E3_APPLIES_CTO_HALF.md`,
+bound to this file @b9411881a0). **Reader census, printed before the act:** `comp-estate --resource 'commonwealth/cottonwood/silver/crosswalk'`
+-> SUBJECT_ABSENT_FROM_CORPUS, 0 of 135 estate chains; a repo search for `silver/crosswalk|commonwealth_crosswalk|crosswalk.parquet` outside
+`org/` -> 2 files, the script and its test. No served reader: the half covers the act. **Rollback pins (head-object, 09:4xZ):**
+`crosswalk.parquet` VersionId `fN2T8jbNaIHPG4YX_wlX1tEXNsyy446W` (128,256 B, 2026-10-07T02:25:35Z); `crosswalk.csv` VersionId
+`Jd8TqUfC257xPZKgfQGiooVK3Ejs1UHR` (570,490 B, 2026-10-07T02:25:36Z). Bucket versioning Enabled.
+
+```
+COO half  2.0.0_SA_COO~C2 -- GIVEN for E5, 2026-10-07 ~09:4xZ. E3: NOT given until S14 is fixed (the crm PATH held back in any bucket,
+          tested in both) and the plan's source list prints 0 crm keys (the CTO half's two conditions).
+```
