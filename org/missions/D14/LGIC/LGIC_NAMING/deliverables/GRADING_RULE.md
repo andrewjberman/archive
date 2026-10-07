@@ -169,8 +169,17 @@ gone. The table reads the rows at this rule's base, and is never a second source
 
 **V5 KINDS** are `DATA.kind.by_type`: the kinds allowed for each of the 18 types.
 
-**V6 CADENCES** (`DATA.cadence`): `daily`, `weekly`, `monthly` or `hourly`, or `on-` followed by one or more kebab
-tokens.
+**V6 CADENCES** (`DATA.cadence`, schema v1.17): `daily`, `weekly`, `monthly` or `hourly`, an interval token, or `on-`
+followed by one or more kebab tokens (`DATA.cadence.event_token_regex`).
+- `daily` is at most once per calendar day on five or more days of the week. A weekday restriction (MON-FRI, TUE-SAT,
+  MON-SAT) is a calendar, not a cadence, and is never named; the calendar lives in the schedule's expression and in
+  `lib/trading_calendar.py`. Once a day on two to four days of the week matches no value and stays undecided.
+- A rule that fires on a fixed interval shorter than a day takes `{N}min` for N from 1 to 59, or `{N}h` for N from 2 to 23
+  (`DATA.cadence.interval_form.token_regex`), for example `15min` or `6h`. 60 minutes is `hourly` and 24 hours is `daily`,
+  never `60min`, `1h` or `24h`. `5min` and `1min` stay listed in `DATA.cadence.values` and are instances of this rule.
+- A rule with an event pattern and no schedule takes `{function}-on-{event}` (`DATA.cadence.event_form`): the function is
+  what the rule starts, the event is what it waits for, and the token is decided per rule from its target and its pattern.
+  The function is never empty.
 
 **V7 TIERS** (`DATA.key.tier`): `bronze`, `silver`, `gold`, `platinum`, `state`, `code`.
 
@@ -264,7 +273,7 @@ FORMS CHANGED BY THE v1.7 STEPS: 0 of 68
 - A type with two kinds appends the first: SQS_QUEUE appends `queue`, SNS_TOPIC appends `topic`.
 
 **R7 THE LAST SLOT, for EVENT_RULE and SCHEDULE: a cadence (V6).**
-- If the last token is a cadence, it stays.
+- If the last token is a cadence (V6, including an interval token or an `on-{event}` run), it stays.
 - Otherwise, if an `on-` run or a cadence token appears elsewhere in the name, it moves to the end.
 - Otherwise `{cadence}` is appended (`DATA.grade.placeholder`: the schedule fills it; row `LGIC_NAMING-W1-S3`).
 
@@ -446,7 +455,7 @@ These gaps are filed as rows on the project channel, not settled here:
   {"name": "irpt-export-dlq", "type": "SQS_QUEUE", "verdict": "CONFORMANT", "canonical_form": "irpt-export-dlq", "why": "R1.a irpt; R4 none; R5 export; R6 dlq is one of SQS_QUEUE's two kinds; V-3"},
   {"name": "etfs-reports-alerts", "type": "SNS_TOPIC", "verdict": "CONFORMANT", "canonical_form": "etfs-reports-alerts", "why": "R1.a etfs; R4 none; R5 reports; R6 alerts is one of SNS_TOPIC's two kinds; V-3"},
   {"name": "Inflection-SilverChain-DimConversionFailure", "type": "CW_ALARM", "verdict": "OUT-OF-PATTERN", "canonical_form": "{system}-inf-silver-chain-dim-conversion-failure-alarm", "why": "N1 fails; N2 inflection silver chain dim conversion failure; R1.d t1 inflection is a firm, no later V1 token, so {system}; R4 scope inflection -> inf (S4 short); R6 failure is no kind, alarm appended; V-2"},
-  {"name": "pandas-pyarrow-layer", "type": "LAMBDA_LAYER", "verdict": "OUT-OF-PATTERN", "canonical_form": "{system}-pandas-pyarrow-layer", "residue_class": "library-first-layer", "why": "R1.e a LAMBDA_LAYER whose t1 pandas is in no vocabulary is a library: handled as R1.d, no later V1 token, so {system}; pandas and pyarrow stay in the function; R6 layer; V-2"},
+  {"name": "pandas-pyarrow-layer", "type": "LAMBDA_LAYER", "verdict": "NO-SYSTEM-ASKED", "canonical_form": "pandas-pyarrow-layer", "residue_class": "library-first-layer", "why": "R1.e a LAMBDA_LAYER whose t1 pandas is in no vocabulary is a library, and no system is asked of a library layer (grade.NO-SYSTEM-ASKED, C-VERDICT BF-t-2): no later V1 token, no {system} placeholder, no remedy owed; pandas and pyarrow stay in the function; R6 layer"},
   {"name": "mdpf-daily-runner", "type": "EC2_INSTANCE", "verdict": "CONFORMANT", "canonical_form": "mdpf-daily-runner", "why": "R1.a mdpf; R4 none; R5 daily; R6 runner is EC2_INSTANCE's kind; V-3"},
   {"name": "opal-stitch-produce", "type": "CODEBUILD_PROJECT", "verdict": "OUT-OF-PATTERN", "canonical_form": "opal-stitch-produce-build", "why": "R2 t2 stitch is in neither V1 nor V2, so the system is opal; R5 stitch-produce; R6 build appended; V-5"},
   {"name": "opal-cot-silver-run", "type": "SSM_DOCUMENT", "verdict": "OUT-OF-PATTERN", "canonical_form": "opal-cot-silver-run-document", "why": "R2 t2 cot is a firm, not a system, so the system is opal; R4 scope cot short, in place; R5 silver-run; R6 run is no kind, document appended; V-5"},
