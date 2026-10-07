@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~S</issued_to>
     <date>2026-10-07</date>
-    <status>held</status>
+    <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -21,8 +21,11 @@
   </objective>
 
   <context>
-    STATUS `held` until BOTH halves sign. The issuer flips it to `pending` (the GO) in the commit that cites the CTO half. Then
-    `0.0.0_AB_MSTR` merges the line, and you run the act below.
+    GO: both halves are SIGNED. The CTO half is org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_MDPF_SECCLASS_SC_e57_e61_FWD10_PRODUCER_20261007.md
+    @bdfdc93b0d. Its conditions, all carried below: the ledger names the prior sha and VersionId; the plan is 0/1/0 with
+    source_code_hash only, under CHECKPOINT_DISABLE=1; the apply runs outside 13:45Z-14:15Z; after the next 14:00Z run, the US rows
+    written count is above 0 on a day the plan lists US stocks, else same-day rollback. The pair ships together or not at all.
+    `0.0.0_AB_MSTR` merges the line, then you run the act below.
     Half: `org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_FWD10_SECTOR_OUT_20261007.md`.
   </context>
 
@@ -35,9 +38,12 @@
        VersionId (expect 2DwW9a.Pz6G7A1o.wSTshxZGZzFCVw5b). Open ONE NEVER-2 ledger entry, slug
        `secclass-e57e61-fwd10-apply-s-20261007`, naming both and the rollback (copy the VersionId back, then re-apply).
     4. `bash infra/aws/lambda/ci/build-and-upload.sh mdpf-secclass mdpf-secclass-new-security-lambda`.
-    5. Run `safe-apply` on `infra/aws/terraform/mdpf-secclass/new-security-classifier`. The plan must show exactly one in-place update,
+    5. With `CHECKPOINT_DISABLE=1` exported, run `safe-apply` on `infra/aws/terraform/mdpf-secclass/new-security-classifier`. The plan must show exactly one in-place update,
        `source_code_hash`. Any other change is a STOP: apply nothing and report.
-    6. Prove it (AC1), close the entry, and flip this order complete with the proof instance in your deliverables (CTO msg 301).
+    6. Prove it (AC1) and leave the entry OPEN on its verify leg.
+    7. VERIFY LEG (CTO condition): read the next 14:00Z run's output (log and the list under OUTPUT_PREFIX). If the plan lists US stocks
+       and the US rows written count is 0, roll back the same day per the entry. Otherwise close the entry and flip this order
+       complete, with the proof instance in your deliverables (CTO msg 301). Tell 2.0.0_SA_COO~M1 the run's counts.
   </the_act>
 
   <bounds>
