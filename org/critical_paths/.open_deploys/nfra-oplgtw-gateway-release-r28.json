@@ -1,0 +1,71 @@
+{
+  "slug": "nfra-oplgtw-gateway-release-r28",
+  "title": "NFRA_OPLGTW OG-rl-14 PHASE B: opal-gateway release 510c8cfed2 -> rel-nfra-oplgtw-r28b aa75078e1b (OG-lk-1: the audit-lake key of a record that carries no ts gains a time part, app/audit.py; OG-bi-1/2/3/4: the deploy tool deploy-to-ec2.sh itself CHANGES -- a bun cache pre-check runs before the dashboard install and the host's pip --upgrade pip line is removed; 8 files, 1 ships to the host, 7 are the laptop's deploy tool and source-only tests; no tool or route added or removed). THIS IS THE FIRST DEPLOY RUN BY THE CHANGED deploy-to-ec2.sh. Consumers moved: the one opal-gateway.service on host i-07dccb1615503ac99; the S3 artifacts opal-gateway-latest.tar.gz and opal-gateway-aa75078e1b.tar.gz in the gateway artifact bucket; the gateway's audit lake (bucket opal-mcp-audit, prefix audit/dt=<day>/) whose readers (the Glue table mcp_audit, any reader that splits or sorts the raw jsonl object keys) see, for a record with no ts (taxsma_workbook), a key with a time part where it had an empty one; no record body changes; the deploy tool deploy-to-ec2.sh used by every later gateway deploy (pre-check before bun install; no pip self-upgrade); no ECS/Lambda task family, image or tag moved. Via safe-ec2-deploy.sh from /c/tmp/og-rel24. never-widen halves SIGNED on aa75078e1b: COO 9ece15debe, CTO 8614c48050, CVO 6ac6eda0f6. Rollback per key: redeploy 510c8cfed2 from /c/tmp/og-rb22 (restores audit.py md5 384a42e5; lake objects already written keep their keys).",
+  "author": "0.9.0_WK_NFRA_OPLGTW~28",
+  "status": "OPEN",
+  "opened_at": "2026-10-07T21:39:41.332718+00:00",
+  "window_hours": 4.0,
+  "entry_path": "org/critical_paths/change_management/20261007T2139Z_nfra-oplgtw-gateway-release-r28_deploy_completion.md",
+  "legs": [
+    {
+      "id": "upload",
+      "kind": "s3-prefix",
+      "target": "opal-gateway-latest.tar.gz and opal-gateway-<release sha>.tar.gz in the gateway artifact bucket",
+      "proof_required": "deploy wrapper output line with git-ref aa75078e1b; base guard 510c8cfed2 == live",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "bun-fetch-control",
+      "kind": "verify",
+      "target": "bun install cache of the deploying account (R45, CTO half C1): entries touched since deploy start, total bytes and file count before and after, build log download lines",
+      "proof_required": "RL14_BUN_CACHE.json: entries_touched_since_start 0, bytes_before == bytes_after, files_before == files_after; any difference = fetch = roll back",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "install-verify",
+      "kind": "ec2-baked-asset",
+      "target": "opal-gateway host /opt/opal-gateway running path + .env 51 keys",
+      "proof_required": "r28_verify.sh after: md5 97 of 97 = release bytes (1 differs from live), health 200, 66 tools, 51 names with every value sha256 equal, four route arms, floor rl4.AC1 + ht.AC2",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "installed-reads",
+      "kind": "verify",
+      "target": "installed code on the host: the audit-lake key builder (fake S3 client), tools, consent, id-shape arms, portal login, real holder, host pip counts",
+      "proof_required": "RL14_READ.json + RL14_FLOOR.json from the installed tree with host digests; any rollback trigger rolls back",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "page-reads",
+      "kind": "verify",
+      "target": "each rivalfunds page: S3 status, size, digest and LastModified immediately BEFORE and AFTER the deploy",
+      "proof_required": "r28_pagetime_before.out and r28_pagetime_after.out; a size or digest difference with LastModified unmoved rolls back",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "manifest",
+      "kind": "git",
+      "target": "infra/aws/ec2/EC2_MANIFEST.json services.opal-gateway deployed_commit <release sha> previous 510c8cfed2",
+      "proof_required": "committed hash; release_note holds this release's note only",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "rollback-proven",
+      "kind": "verify",
+      "target": "rollback tree /c/tmp/og-rb22 at 510c8cfed2 equal to the live artifact, command recorded",
+      "proof_required": "diff 97 of 97 equal and verify PASS, or rolled back and re-verified",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20261007T213941Z OPENED by 0.9.0_WK_NFRA_OPLGTW~28 with 7 leg(s)"
+  ],
+  "last_red_at": null
+}
