@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e32",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md",
+    "vintage_commit": "495efa3c3267fab44b5c890062f29e559c846fb0",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e32.old-list-reclassify-set.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_set.py",
+      "kind": "script",
+      "commit_or_etag": "60fa00032c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only scans of bd-securities and etf-classifications plus the census's local held parquet builds; builds the set. No write, no model call. ruff (box 0.16.10, py39, FA) clean.",
+      "artifact_covered_by": [
+        "SC8-e32-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_RECLASSIFY_SET_20261007.tsv",
+      "kind": "config_data",
+      "commit_or_etag": "60fa00032c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10,965 rows: PRESENT 2,381, DIRECT 5,796, AI 2,785, UNPLACED-KEY 3; held 3,152 (inferred, local producer builds as-of 2026-10-05).",
+      "artifact_covered_by": [
+        "SC8-e32-AC1",
+        "SC8-e32-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_write.py",
+      "kind": "script",
+      "commit_or_etag": "60fa00032c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Dry run by default with counting wrappers on table and send; --write needs both halves SIGNED and a fresh snapshot; --rollback is a conditional delete per key. --write/--rollback exercised only against an in-memory fake table in .scratch (uncommitted); never run against AWS.",
+      "artifact_covered_by": [
+        "SC8-e32-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_OLD_LIST_RECLASSIFY_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "60fa00032c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Half request, COO and CTO halves UNSIGNED: blast radius, keys by route with counts, AI volume 2,306 calls (max 4,612), rollback per key, dry-run line.",
+      "artifact_covered_by": [
+        "SC8-e32-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC8-e32-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e32_reclassify_set_check.py -- expect: RECLASSIFY-SET ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/sc_e32_reclassify_set_check.py",
+      "expect": "RECLASSIFY-SET ok=True",
+      "output_evidence": "RECLASSIFY-SET ok=True old_rows=10965 present=2381 direct=5796 ai=2785 unplaced_key=3 held=3152 live_old=10965 fails=0 (rc=0, under timeout 120)",
+      "denominator": "10,965 of 10,965 live bd-securities keys appear exactly once (2,381+5,796+2,785+3 = 10,965); 0 fails",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC8-e32-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_write.py -- expect: puts=0 model_calls=0",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_write.py",
+      "expect": "puts=0 model_calls=0",
+      "output_evidence": "RECLASSIFY-DRY-RUN direct=5796 to_ai=2785 unplaced_key=3 present=2381 puts=0 model_calls=0 (rc=0, under timeout 120)",
+      "denominator": "10,965 set rows read; 3,507 live shared keys scanned; 5,446 distinct DIRECT keys and 2,306 distinct AI keys planned; 0 puts and 0 model calls counted at the table handle and the transport",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three mutants of the set run through the issuer's check (SET path patched to a scratch copy): (1) a DIRECT row given an invented sub-class; (2) one old key dropped; (3) a held=false non-PRESENT row swapped to the front.",
+      "expected": "ok=False in each, naming the minted sub-class, the missing key, and held-after-unheld",
+      "observed": "mut1 'FAIL direct_sub_minted:AAGIY=Invented Sub' ok=False rc=1; mut2 'FAIL missing_old_keys=1' ok=False rc=1; mut3 'FAIL held_after_unheld:ACTSX...' fails=1500 ok=False rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The set builder was run twice over the same live tables (before and after a lint-only edit); the two TSVs compared with cmp.",
+      "observed": "cmp identical (SET-IDENTICAL); AC1 and AC2 outputs identical before and after the commit.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The write, the AI run, any model call, any secret read, any --write or --rollback run against AWS.",
+      "reason": "BOUNDS: the write is the issuer's act under both signed halves; the worker's --write/--rollback limbs were tested against an in-memory fake table only."
+    },
+    {
+      "item": "The 1,046 held securities with no shared entry and no old row; the 15 old cash rows; the 3 UNPLACED-KEY rows (NAME::, The Hartford, Xometry).",
+      "reason": "Outside what the old list's set can place (rows W26-S8, W26-S6) or not keyed by a declared form (contract 0.5.0); named, not folded in."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W26-S5",
+    "MDPF_SECCLASS-W26-S6",
+    "MDPF_SECCLASS-W26-S7",
+    "MDPF_SECCLASS-W26-S8"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_set.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (commit-gate on each .py), the box's own ruff 0.16.10; no scratch venv, no install",
+      "result": "py_compile, ds-precommit, ruff and the surprise-row gate passed on commit 60fa00032c; the two new files were written to pass ruff 0.16.10 with --target-version py39 --extend-select FA"
+    }
+  ]
+}
