@@ -5,49 +5,63 @@
   "spec_ref": {
     "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-5.resource-policy-deny.md",
     "group": "OTHER",
-    "vintage_commit": "208c5d85ee"
+    "vintage_commit": "b062620452"
   },
   "assignee": "0.9.0_WK_NFRA_CTLPLN~8",
   "decomp_ref": {
     "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round4.md",
-    "vintage_commit": "208c5d85ee",
+    "vintage_commit": "b062620452",
     "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-d-5.resource-policy-deny.md"
   },
   "artifacts_produced": [
     {
-      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py",
-      "kind": "test",
-      "commit_or_etag": "ce05f0e838",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
-    },
-    {
       "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_respol_policy.json",
       "kind": "config_data",
-      "commit_or_etag": "ce05f0e838",
+      "commit_or_etag": "5e948e31af",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "DenyResourcePolicyWrites, 74 actions, 2,334 characters without whitespace; nothing applied"
+      "deploy_evidence": "sqs:SetQueueAttributes added to DenyResourcePolicyWrites (75 actions, 2,359 characters without whitespace); nothing applied; the apply is the issuer route"
     },
     {
-      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/iam.tf",
-      "kind": "config_data",
-      "commit_or_etag": "ce05f0e838",
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py",
+      "kind": "test",
+      "commit_or_etag": "5e948e31af",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "new aws_iam_policy.dell_agent_respol and its group attachment; terraform validate Success; nothing applied"
+      "deploy_evidence": "read-only derivation; the RULED-IN list carries the action with its ruling cited"
     },
     {
       "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
       "kind": "test",
-      "commit_or_etag": "ce05f0e838",
+      "commit_or_etag": "5e948e31af",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+      "deploy_evidence": "simulation only (iam:SimulateCustomPolicy); the respol block is now 13 arms"
     },
     {
-      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/read_queue_attribute_writers.py",
       "kind": "test",
-      "commit_or_etag": "ce05f0e838",
+      "commit_or_etag": "5e948e31af",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+      "deploy_evidence": "read-only: cloudtrail lookup-events (us-east-1) and a scan of the .tf files"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/queue_attribute_writers.json",
+      "kind": "config_data",
+      "commit_or_etag": "5e948e31af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the saved read: event names, times, principal ARNs, user agents, queue names, attribute NAMES only"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/iam.tf",
+      "kind": "config_data",
+      "commit_or_etag": "5e948e31af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "comment lines only; no resource changed"
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~8/PLAN_NOTE_QUEUE_ATTRIBUTE_DENY.md",
+      "kind": "doc",
+      "commit_or_etag": "5e948e31af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "plan note by reading; no plan run"
     }
   ],
   "acceptance": [
@@ -56,17 +70,17 @@
       "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py expect: ruled_allowed_caught=0 ok=True",
       "method": "test_suite",
       "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py",
-      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py` (rc 0). LAST LINE: RESPOL-DERIVED services=28 with_actions=20 none=7 unsure=1 actions=74 covered=74/74 ruled_allowed_caught=0 ok=True. NONE: application-autoscaling, cloudwatch, cur, ecs, scheduler, sts, tag. UNSURE: apigateway (row NFRA_CTLPLN-W8-S2). The statement landed in dell_respol_policy.json (2,334 characters), not dell_deploy_policy.json (4,951, byte-unchanged; 4,951 + 2,334 exceeds 6,144).",
-      "denominator": "28 allowed services (20 with actions + 7 NONE + 1 UNSURE); 74 of 74 derived actions covered; 0 of 6 ruled-allowed calls caught",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_respol_actions.py` (rc 0). LAST LINE: RESPOL-DERIVED services=28 with_actions=20 none=7 unsure=1 actions=75 covered=75/75 ruled_allowed_caught=0 ok=True. RULED-IN sqs:SetQueueAttributes (by ruling, msg 106274); five calls remain RULED-ALLOWED (sns:SetTopicAttributes, kms:CreateKey, sqs:CreateQueue, sns:CreateTopic, s3:CreateBucket). NONE: application-autoscaling, cloudwatch, cur, ecs, scheduler, sts, tag. UNSURE: apigateway (row NFRA_CTLPLN-W8-S2).",
+      "denominator": "28 allowed services (20 with actions + 7 NONE + 1 UNSURE); 75 of 75 derived actions covered; 0 of 5 ruled-allowed calls caught",
       "status": "PASS"
     },
     {
       "criterion_id": "CT4d5-AC2",
-      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=11/11 all_ok=True",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=13/13 all_ok=True (expectation moved to 13/13 by the amendment)",
       "method": "test_suite",
       "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
-      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py` (rc 0). LAST LINE: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=11/11 all_ok=True. Fourth block: s3:PutBucketPolicy, lambda:AddPermission, kms:PutKeyPolicy, kms:CreateGrant, secretsmanager:PutResourcePolicy, sns:AddPermission, sqs:AddPermission, logs:PutResourcePolicy, ecr:SetRepositoryPolicy each -> explicitDeny (9 of 9); sqs:SetQueueAttributes and sns:SetTopicAttributes -> allowed (2 of 2). The four first-block arms (s3 PutBucketPolicy, lambda AddPermission, kms PutKeyPolicy, secretsmanager PutResourcePolicy) now require explicitDeny instead of implicitDeny (row NFRA_CTLPLN-W8-S1).",
-      "denominator": "22 of 22 allowed, 19 of 19 denied, 5 of 5 passrole, 8 of 8 protected, 11 of 11 respol arms",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py` (rc 0). LAST LINE: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=13/13 ssm_ok=9/9 routes_ok=5/5 all_ok=True. Fourth block: ten explicitDeny arms (the nine policy-writing actions and sqs:SetQueueAttributes) and three allowed arms (sqs:CreateQueue, sqs:TagQueue, sns:SetTopicAttributes). sqs:TagQueue is an arm the amendment did not name (row NFRA_CTLPLN-W8-S4).",
+      "denominator": "22 of 22 allowed, 19 of 19 denied, 5 of 5 passrole, 8 of 8 protected, 13 of 13 respol arms",
       "status": "PASS"
     },
     {
@@ -74,16 +88,25 @@
       "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py expect: policy_size_ok=True ok=True",
       "method": "test_suite",
       "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
-      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py` (rc 0; terraform init -backend=false had been warmed once outside the bound, 5.5 s, provider already cached). LAST LINE: IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=8/8 policy_size_ok=True ok=True. Characters without whitespace: dell1_bus 276, dell2_bus 276, dell_create 3998, dell_deploy 4951, dell_respol 2334, limit 6144. render_passrole.py --check: PASSROLE-RENDER applied=0 named=0 wildcard=0 in_sync=True ok=True. derive_protected_functions.py --check: PROTECTED-CENSUS functions=233 regions=17 refused_regions=0 protected=10 by_authorizer=1 by_edge=5 ruled_in=4 unruled=0 in_sync=True ok=True.",
-      "denominator": "8 of 8 names from the builder; 5 of 5 policy documents within 6144 characters; 2 of 2 renderer checks in_sync=True",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py` (rc 0). LAST LINE: IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=11/11 policy_size_ok=True ok=True. dell_respol_policy.json chars_no_whitespace=2359 of 6144. render_passrole.py --check: PASSROLE-RENDER applied=0 named=0 wildcard=0 in_sync=True ok=True. derive_protected_functions.py --check: PROTECTED-CENSUS functions=233 regions=17 refused_regions=0 protected=10 by_authorizer=1 by_edge=5 ruled_in=4 unruled=0 in_sync=True ok=True. check_identity.py was not edited.",
+      "denominator": "11 of 11 names from the builder; every policy document within 6144 characters; 2 of 2 renderer checks in_sync=True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CT4d5-AC4",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/read_queue_attribute_writers.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/queue_attribute_writers.json expect: QUEUE-ATTR-WRITERS creates_by_terraform= (and ok=True)",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/read_queue_attribute_writers.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/queue_attribute_writers.json",
+      "output_evidence": "The live read ran once outside the bound (--live, us-east-1 only, 90-day CloudTrail event history, auto-paginated and counted client-side, 1 page each; positive control: 28 SQS-source events visible, 20 CreateQueue, 5 SetQueueAttributes, 2 TagQueue, 1 PurgeQueue). The criterion run as `timeout 120 python ... --from-file ...` (rc 0). LAST LINE: QUEUE-ATTR-WRITERS creates_by_terraform=18 create_followed_by_set=3 set_not_near_create=2 queue_resources=23 separate_policy_resources=9 roots_with_separate=6 create_needs_set=False ok=True. 18 of 18 Terraform creates carried attributes inside the create call; the 3 followed creates are in roots declaring a separate aws_sqs_queue_policy (globgrph by literal-name match, nfra-agentbus-alyssa01 by a root-name heuristic); 15 of 18 not followed; a native Grep of the four resource kinds agrees (23 / 9 / 0 / 0). Other regions UNREAD.",
+      "denominator": "20 CreateQueue (18 by Terraform) and 5 SetQueueAttributes events in us-east-1; 548 .tf files scanned, 13 roots with a queue resource",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "the Deny statement file removed (dell_respol_policy.json moved aside for one run, then restored; git status clean of it afterwards)",
-      "expected": "covered=0/74 and ok=False, so AC1 discriminates",
-      "observed": "RESPOL-DERIVED services=28 with_actions=20 none=7 unsure=1 actions=74 covered=0/74 ruled_allowed_caught=0 ok=False",
+      "description": "the added action removed from dell_respol_policy.json for one run (bytes restored and compared identical afterwards)",
+      "expected": "covered=74/75 ok=False and respol_ok=12/13 all_ok=False",
+      "observed": "RESPOL-DERIVED ... actions=75 covered=74/75 ruled_allowed_caught=0 ok=False ; POLICY-SIM ... respol_ok=12/13 ... all_ok=False",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -95,23 +118,26 @@
   "declared_exclusions": [
     {
       "item": "terraform apply, plan against the backend, any IAM write",
-      "reason": "order BOUNDS: apply nothing; the only AWS calls were iam:SimulateCustomPolicy and the function listing of derive_protected_functions.py --check"
+      "reason": "order BOUNDS: the policy is live; only the repository file changed; AWS calls were cloudtrail lookup-events, iam:SimulateCustomPolicy and the listings of derive_protected_functions.py --check"
     },
     {
-      "item": "the exercised refusal on a Dell",
-      "reason": "the order: run after the order by the issuer's route"
+      "item": "CloudTrail regions other than us-east-1",
+      "reason": "order: us-east-1 first and say plainly the others are unread; one region per lookup call"
     }
   ],
   "surprises": [
     "NFRA_CTLPLN-W8-S1",
-    "NFRA_CTLPLN-W8-S2"
+    "NFRA_CTLPLN-W8-S2",
+    "NFRA_CTLPLN-W8-S3",
+    "NFRA_CTLPLN-W8-S4",
+    "NFRA_CTLPLN-W8-S5"
   ],
   "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~8/NFRA_CTLPLN.TO-CT-d-5.resource-policy-deny.proof_of_spec.json",
   "compiler_tools": [
     {
       "tool": "terraform",
-      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity validate",
-      "result": "Success! The configuration is valid."
+      "invocation": "tests/check_identity.py runs terraform validate on the root (CHECKPOINT_DISABLE=1, no download)",
+      "result": "IDENTITY-STATIC validate=ok"
     }
   ]
 }
