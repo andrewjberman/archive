@@ -1,0 +1,109 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ba-19",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-19.chatter-phase-coverage-read.md",
+  "group": "OTHER",
+  "vintage_commit": "df9574dfd4"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "df9574dfd4",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-19.chatter-phase-coverage-read.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~285",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~285/PHASE_COVERAGE.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "6 cold invokes of OVpDhfwD attributed to the millisecond; 7 route=chatter emit sites, 11 with the nested ranking lines; 3 free cuts; PC inputs",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~285/PHASE_COVERAGE.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the tables in plain words: emit map, attribution, local profile, free cuts, card inputs",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~285/profile_chatter.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "fresh-process perf_counter profile of the unlabelled spans; run 3 times plus --full; no lib/ edit",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "3 or more cold invokes, each attributed to the millisecond; a closed label set with real emit sites; the free cuts listed or stated exhausted; R77 BA19 COVERAGE: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba19.py\" --cell coverage; echo \"exit=$?\"",
+   "output_evidence": "cold invokes 6; invokes whose attribution does not sum to the Duration 0 e.g. []\nPASS C1 every cold millisecond is attributed (sum equals Duration within 1 ms, 3 or more cold invokes) 6 of 6\n   labels 10; used but unlisted []; listed with no emit site []; bad emit sites 0\nPASS C2 the label set is closed and every label has a real emit site 11 sites\nPASS C3 the free cuts are listed, or stated exhausted with the residual cuts 3; exhausted False; residual 522.0\nR77 BA19 COVERAGE: YES\nexit=0",
+   "denominator": "6 of 6 cold invokes sum to the Duration within 1 ms; 10 labels, 11 emit sites, 0 bad; 3 free cuts",
+   "status": "PASS",
+   "expect": "(?s)PASS C1 .*PASS C2 .*PASS C3 .*R77 BA19 COVERAGE: YES\\s+exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "1769 MB, one instance, a sourced price and the monthly figure by the stated arithmetic; R77 BA19 INPUTS: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba19.py\" --cell inputs; echo \"exit=$?\"",
+   "output_evidence": "PASS C1 memory 1769 MB and one instance 1769 MB x 1\nPASS C2 the price carries its source docs/briefs/fe-driven-lambda-keep-warm-feasibility-20260603.md:89 (provisioned c\nPASS C3 the monthly figure is the stated arithmetic stated 18.9167; computed 18.916704066796875\nR77 BA19 INPUTS: YES\nexit=0",
+   "denominator": "3 of 3 clauses PASS",
+   "status": "PASS",
+   "expect": "(?s)PASS C1 .*PASS C2 .*PASS C3 .*R77 BA19 INPUTS: YES\\s+exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "6 cold invokes from one burst; per-invoke outside_ms from Duration less route=chatter phases, cross-checked by CloudWatch event timestamps",
+   "observed": "outside 758-1,004 ms; before first phase 734-1,000 ms; after serialize 3-4 ms",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "One cold invoke's outside_ms raised by 5 ms in a copy of PHASE_COVERAGE.json (--file), so its attribution no longer sums to the Duration.",
+   "expected": "R77 BA19 COVERAGE: NO, exit=1, C1 5 of 6",
+   "observed": "FAIL C1 ... 5 of 6 (sum 2861.0 vs Duration 2855.97); R77 BA19 COVERAGE: NO; exit=1",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Validating any free cut on the deployed function",
+   "reason": "order bound 1: a read, no deploy, no configuration change; the cuts are estimates."
+  },
+  {
+   "item": "Flipping the task order's <status>",
+   "reason": "the issuer's flip (order section 5)."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W285-S1"
+ ],
+ "session_log": "N/A -- no session-log path in this worker's paths. Worktree C:/tmp/r77-285 on wk-AMGT_RESAPP-285.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~285 <0.9.0_WK_AMGT_RESAPP~285@opal.agent>\" -F .scratch/msg1.txt -- <paths>",
+   "result": "see COMMITS in the report"
+  }
+ ]
+}
