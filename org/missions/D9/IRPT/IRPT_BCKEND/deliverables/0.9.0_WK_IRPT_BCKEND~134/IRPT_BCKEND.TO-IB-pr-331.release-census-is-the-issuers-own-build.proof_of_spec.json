@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-331",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-331.release-census-is-the-issuers-own-build.md",
+    "group": "OTHER",
+    "vintage_commit": "27b47e8ef1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "27b47e8ef1",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-331.release-census-is-the-issuers-own-build.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~134",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/release-census.py",
+      "kind": "script",
+      "commit_or_etag": "89fd22d65a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only: git show at the pin plus aws lambda get-function; no upload, no lambda update, no source-map or builder edit",
+      "artifact_covered_by": [
+        "IB61-3-AC1",
+        "IB61-3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/tests/test_release_census.py",
+      "kind": "test",
+      "commit_or_etag": "89fd22d65a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 offline pytest tests, in-memory zip pairs and a temp git repo, no AWS",
+      "artifact_covered_by": [
+        "IB61-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~134/release_census_irpt-ycharts-generate_f36a8cdefd.txt",
+      "kind": "doc",
+      "commit_or_etag": "89fd22d65a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "full output of the one run on irpt-ycharts-generate --pin f36a8cdefd: changed_members=4",
+      "artifact_covered_by": [
+        "IB61-3-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB61-3-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-3-AC1 -> IB61-3-AC1 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-3-AC1",
+      "output_evidence": "IB61-3-AC1 PASS | OK: 10 passed in 0.65s | rc=0",
+      "denominator": "10 of 10 pytest tests passed; test names carry 'planted' (2 of 10); 0 census .json names in the tool",
+      "expect": "^IB61-3-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB61-3-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-3-AC2 -> IB61-3-AC2 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-3-AC2",
+      "output_evidence": "FAIL: changed_members=4, expected 19 (the issuer's re-census at f36a8cdefd) | IB61-3-AC2 FAIL | rc=1",
+      "denominator": "tool output 4 changed of 114 built / 114 live members; the order expects 19",
+      "expect": "^IB61-3-AC2 PASS",
+      "status": "FAIL",
+      "status_reason": "The tool's honest output at the pin is 4 (canonical_profile_reads.py, loaders.py, maintained_sources.py, served.py); the 15 fixtures/templates members are byte-identical to live in the blobs at f36a8cdefd. Not tuned to 19; row IRPT_BCKEND-W134-S1."
+    },
+    {
+      "criterion_id": "IB61-G-134",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-G-134 -> IB61-G-134 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r61/p61_cells.py\" . IB61-G-134",
+      "output_evidence": "IB61-G-134 PASS | OK: 4 changed path(s), all inside slot ~134's grant | rc=0",
+      "denominator": "4 of 4 changed paths inside the grant",
+      "expect": "^IB61-G-134 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base 6e462d3499: release-census.py and test_release_census.py are absent.",
+      "expected": "IB61-3-AC1 and IB61-3-AC2 FAIL at base (no tool); IB61-G-134 PASS",
+      "observed": "the checker's own first branch fails when either file is absent (FAIL: tool or test absent); base not checked out in this session",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "IB61-3-AC1 and IB61-G-134 run once after the commit; the tool run on the pin twice (changed_members=4 both times)",
+      "observed": "identical output",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-W134-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> IB61-3-AC1,IB61-3-AC2,IB61-G-134",
+      "result": "see final report"
+    }
+  ]
+}
