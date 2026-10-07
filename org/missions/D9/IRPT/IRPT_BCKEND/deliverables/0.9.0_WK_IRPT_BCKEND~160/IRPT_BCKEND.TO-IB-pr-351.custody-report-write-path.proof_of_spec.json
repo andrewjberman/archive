@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-351",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "6115baf2e7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "6115baf2e7",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-351.custody-report-write-path.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~160",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/custody_write.py",
+      "kind": "script",
+      "commit_or_etag": "b4073d3a57",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nothing deployed; no AWS call; release is the issuer's after the drain",
+      "artifact_covered_by": [
+        "IB70-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_custody_write.py",
+      "kind": "test",
+      "commit_or_etag": "b4073d3a57",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nothing deployed; test only",
+      "artifact_covered_by": [
+        "IB70-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB70-1-AC1",
+      "criterion_verbatim": "IB70-1-AC1 -- the custody write test (round trip through retained_export.resolve, the refusals) passes; the reports suite and test_submit_custody_report pass. Base: FAIL (no test).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r70/p70_cells.py\" . IB70-1-AC1",
+      "output_evidence": "OK: reports suite 120 passed in 4.68s; custody submit 13 passed in 1.44s\nIB70-1-AC1 PASS\nrc=0",
+      "denominator": "120 of 120 reports-suite tests (19 in test_custody_write.py); 13 of 13 test_submit_custody_report tests",
+      "status": "PASS",
+      "expect": "IB70-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB70-G-160",
+      "criterion_verbatim": "IB70-G-160 -- a GUARD: your commits touch only your grant. Base: PASS.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r70/p70_cells.py\" . IB70-G-160",
+      "output_evidence": "OK: 2 changed path(s), all inside slot ~160's grant\nIB70-G-160 PASS\nrc=0 (run after commit b4073d3a57; re-run after the proof commit, see session_log)",
+      "denominator": "2 of 2 changed paths inside the grant (run at the code commit)",
+      "status": "PASS",
+      "expect": "IB70-G-160 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "custody_write.py with the _check_document(document) call replaced by pass (the as_of_date refusal removed)",
+      "expected": "test_custody_write.py fails",
+      "observed": "8 failed, 11 passed in 2.06s",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "tests/test_custody_write.py run twice after restoring the file",
+      "observed": "19 passed in 1.93s; 19 passed in 2.02s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy, AWS write, production caller of persist_custody_report",
+      "reason": "order bound: build and test only; no caller is wired by this cell"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~160/IRPT_BCKEND.TO-IB-pr-351.custody-report-write-path.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python p70_cells.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r70/p70_cells.py\" . <criterion id>",
+      "result": "IB70-1-AC1 PASS; IB70-G-160 PASS, rc=0 each"
+    }
+  ]
+}
