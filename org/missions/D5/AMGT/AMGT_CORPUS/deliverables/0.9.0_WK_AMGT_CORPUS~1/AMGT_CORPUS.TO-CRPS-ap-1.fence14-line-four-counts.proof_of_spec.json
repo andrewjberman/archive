@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-ap-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ap-1.fence14-line-four-counts.md",
+    "group": "OTHER",
+    "vintage_commit": "6d7cd1fe3c9fa7e7db71d3f646b872675b9d4082"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "6d7cd1fe3c9fa7e7db71d3f646b872675b9d4082",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-ap-1.fence14-line-four-counts.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/backlog.py",
+      "kind": "script",
+      "commit_or_etag": "a68d1ff831399cf58222dc096e02ee4da8db41b4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_print_fence14_line prints resolved/ambiguous/empty-or-workbook-only/unresolved-with-reason, sum of all four, folders_read; returns sum == folders_read; fourth-class tag fence14_unresolved; FENCE14_OUTSIDE value unresolved-with-reason. No classification change.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_backlog_fence14.py",
+      "kind": "test",
+      "commit_or_etag": "a68d1ff831399cf58222dc096e02ee4da8db41b4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three literal lines and the tag prefix updated; one new test (folders_read one above records returns False).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round40/ap1_check.py\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round40/ap1_check.py\"",
+      "output_evidence": "first line: fence14 resolved 1 ambiguous 1 empty-or-workbook-only 1 unresolved-with-reason 1 sum 4 folders_read 4\nap1 build 1/1 control 2/2",
+      "denominator": "build 1 of 1, control 2 of 2; four hand-built folders, sum 4 of 4.",
+      "expect": "(?m)^ap1 build 1/1 control 2/2$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest lib/research/corpus/tests/test_backlog_fence14.py lib/research/corpus/tests/test_backlog_fence_names.py -q -p no:cacheprovider --color=no",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest lib/research/corpus/tests/test_backlog_fence14.py lib/research/corpus/tests/test_backlog_fence_names.py -q -p no:cacheprovider --color=no",
+      "output_evidence": ".............                                                            [100%]\n13 passed in 0.56s",
+      "denominator": "13 of 13 tests passed, 0 failed.",
+      "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The issuer's ap1_check.py control arm: the real _print_fence14_line on records with folders_read one above the record count, and the fourth-class folder name check.",
+      "expected": "returns False on the short count; the fourth-class folder is still printed by name (control 2/2).",
+      "observed": "ap1 build 1/1 control 2/2",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 run under the literal invocations after the last edit.",
+      "observed": "AC1 build 1/1 control 2/2; AC2 13 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "backlog module not run live",
+      "reason": "Order bound 2: the module was not run; the check calls the print function on hand-built records."
+    },
+    {
+      "item": "edit method",
+      "reason": "Edits were applied with a python heredoc script rather than Edit/Write (bound 5 says Edit/Write tools); the diff is the order's items 1-5 only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ap1_check.py",
+      "invocation": "PYTHONPATH=. python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round40/ap1_check.py",
+      "result": "rc 0; ap1 build 1/1 control 2/2"
+    },
+    {
+      "tool": "pytest fence14 + fence_names",
+      "invocation": "PYTHONPATH=. python -m pytest lib/research/corpus/tests/test_backlog_fence14.py lib/research/corpus/tests/test_backlog_fence_names.py -q -p no:cacheprovider --color=no",
+      "result": "rc 0; 13 passed"
+    }
+  ]
+}
