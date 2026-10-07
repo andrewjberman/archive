@@ -1,0 +1,108 @@
+"""OG-rl-11 host program (OG-up-1 on the host): the registered tool count, the read-only status tool answering for a known execution id, and the real-send path's inline-wait bound.
+Run by r25_ssm_prog.py as a SEPARATE process (env -i, installed venv, cwd = the gateway dir being tested; staged = a host scratch copy carrying the release bytes, installed tree
+untouched; never the running service). Modes (argv[1]): before (live code: tool count) | rehearsal (staged release bytes) | after (installed release code).
+argv[2] = the served release sha; argv[3] = the tool count BEFORE the release (65). The known execution id arrives in the process environment (R25_EXEC_ID, an SSM parameter) and is
+NEVER printed (the runner redacts it from the output). /opt/opal-gateway/.env is never read here.
+
+What it does: registers the enabled integrations on the FastMCP surface exactly as the service does (ENABLED_INTEGRATIONS read from the running service's process environment, never
+.env) with MOCK_GRAPH=1 (no Graph token is ever minted here), counts the tools, then calls the registered `opal_data_refresh_status` tool THROUGH the registered wrapper
+(run_integration_tool) with the tier gate and the entitlement lookup stood in by no-ops and the audit sink silenced (a caller tier cannot be minted without a real principal; the tool's
+OWN code -- the portal service login with the service secret, one GET of the status route, one GET of the served manifest -- is the real one). It makes GET requests and the portal
+login POST (/auth/login) only: it never calls opal_data_refresh_upload and never POSTs /trigger. No grant, state store, .env or secret is written."""
+import asyncio
+import hashlib
+import json
+import os
+import subprocess
+import sys
+
+GW = os.environ.get("OG_GW_DIR", "/opt/opal-gateway")
+mode = sys.argv[1] if len(sys.argv) > 1 else "before"
+served = sys.argv[2] if len(sys.argv) > 2 else ""
+tools_before = int(sys.argv[3]) if len(sys.argv) > 3 else None
+staged = GW != "/opt/opal-gateway"
+sys.path.insert(0, GW)
+
+pid = subprocess.check_output(["systemctl", "show", "opal-gateway", "-p", "MainPID", "--value"]).decode().strip()
+enabled = ""
+for kv in open("/proc/%s/environ" % pid, "rb").read().split(bytes([0])):
+    if kv.startswith(b"ENABLED_INTEGRATIONS="):
+        enabled = kv.split(b"=", 1)[1].decode("utf-8", "replace")
+os.environ["ENABLED_INTEGRATIONS"] = enabled
+os.environ["MOCK_GRAPH"] = "1"
+
+from mcp.server.fastmcp import FastMCP  # noqa: E402
+from app import tools, integrations  # noqa: E402
+from app.integrations.opal_portal import integration as portal  # noqa: E402
+
+integrations.register_enabled(tools.mcp, enabled.split())
+names = sorted(t.name for t in asyncio.run(FastMCP.list_tools(tools.mcp)))
+print("R25_TOOLS count=%d has_opal_data_refresh_upload=%s has_opal_data_refresh_status=%s module_md5=%s staged=%s"
+      % (len(names), "opal_data_refresh_upload" in names, "opal_data_refresh_status" in names,
+         hashlib.md5(open(portal.__file__, "rb").read()).hexdigest()[:8], staged))
+wait = None
+if hasattr(portal, "POST_TRIGGER_SETTLE_S") and hasattr(portal, "STATUS_READ_TIMEOUT_S"):
+    wait = portal.POST_TRIGGER_SETTLE_S + portal.STATUS_READ_TIMEOUT_S
+print("R25_INLINE_WAIT post_trigger_settle_s=%s status_read_timeout_s=%s max_inline_wait_s=%s resend_window_s=%s"
+      % (getattr(portal, "POST_TRIGGER_SETTLE_S", None), getattr(portal, "STATUS_READ_TIMEOUT_S", None), wait, getattr(portal, "RESEND_WINDOW_S", None)))
+if mode == "before":
+    print("R25_BEFORE tools=%d status_tool_registered=%s" % (len(names), "opal_data_refresh_status" in names))
+    sys.exit(0)
+
+status_tool, status_value, terminal, displayed_date_present = "NOT REGISTERED", None, None, None
+if "opal_data_refresh_status" in names:
+    from app import audit, data_entitlement, guard
+    guard.enforce_min_tier = lambda *a, **k: None            # stand-in: a caller tier needs a real principal
+    data_entitlement.tool_denial = lambda tool, principal=None, store=None: None   # stand-in: no principal, no grant lookup (both the server's and the wrapper's call)
+    audit.log_call = lambda *a, **k: None                    # no audit write from a rehearsal
+    exec_id = os.environ["R25_EXEC_ID"]
+    try:
+        res = asyncio.run(tools.mcp.call_tool("opal_data_refresh_status", {"execution_id": exec_id}))
+        doc = None
+        if isinstance(res, tuple) and len(res) == 2 and isinstance(res[1], dict):
+            doc = res[1]
+        else:
+            blocks = res if isinstance(res, (list, tuple)) else getattr(res, "content", [])
+            for b in blocks:
+                t = getattr(b, "text", None)
+                if t:
+                    try:
+                        doc = json.loads(t)
+                        break
+                    except Exception:  # noqa: BLE001
+                        pass
+        if isinstance(doc, dict) and isinstance(doc.get("result"), dict) and "status" not in doc:
+            doc = doc["result"]
+        if not isinstance(doc, dict):
+            status_tool = "UNPARSED RESULT"
+        elif doc.get("error"):
+            status_tool = ("error: " + str(doc["error"]))[:200]
+        elif doc.get("status") in ("UNKNOWN", None):
+            status_tool = "status UNKNOWN: " + str(doc.get("status_note"))[:120]
+        else:
+            status_tool, status_value, terminal = "OK", doc.get("status"), doc.get("terminal")
+            displayed_date_present = bool(doc.get("displayed_date"))
+    except Exception as exc:  # noqa: BLE001 -- the type name only (a message could carry the execution id)
+        status_tool = "ERR:" + type(exc).__name__
+        import traceback
+        for fr in traceback.extract_tb(exc.__traceback__)[-6:]:   # file:line and function only; the message goes through the runner's redaction
+            print("R25_TRACE %s:%s in %s" % (os.path.relpath(fr.filename, GW) if fr.filename.startswith(GW) else os.path.basename(fr.filename), fr.lineno, fr.name))
+        print("R25_TRACE_MSG %s" % str(exc)[:200])
+print("R25_STATUS_TOOL answer=%s status_value=%s terminal=%s displayed_date_present=%s" % (status_tool.replace(" ", "_"), status_value, terminal, displayed_date_present))
+
+body = {"served_release": served, "installed_code": not staged, "tools_before": tools_before, "tools_after": len(names), "status_tool": status_tool,
+        "status_value": status_value, "max_inline_wait_s": wait, "confirm_true_run": False, "grants_written": 0}
+s = json.dumps(body, sort_keys=True)
+dig = hashlib.sha256(s.encode("utf-8")).hexdigest()
+if staged:
+    print("RL11S_REHEARSAL_BODY " + s)
+    print("RL11S_REHEARSAL_DIGEST " + dig)
+    # STEP-7 STAND-IN ONLY: the same body with installed_code flipped to true (a staged run is not the installed code), so rl11.AC2's expected-PASS form can be exercised on the
+    # release tree before GO. Phase B's record is the installed-code run, never this line.
+    b2 = dict(body, installed_code=True)
+    s2 = json.dumps(b2, sort_keys=True)
+    print("STEP7_STANDIN RL11S_BODY " + s2)
+    print("STEP7_STANDIN RL11S_DIGEST " + hashlib.sha256(s2.encode("utf-8")).hexdigest())
+else:
+    print("RL11S_BODY " + s)
+    print("RL11S_DIGEST " + dig)
