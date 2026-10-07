@@ -17,37 +17,29 @@
     {
       "path_or_key": "lib/research/corpus/dossier.py",
       "kind": "script",
-      "commit_or_etag": "763e1e9885",
+      "commit_or_etag": "a5bf4bd87699e59636e34264e3859b84d457a725",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "_resolve_section_field refuses a block with no text beyond its lead line; METHOD_VERSION /6; --short-passage-census N added (not run, reads S3).",
+      "deploy_evidence": "AMENDMENT 2: _section_block_items lets the unnamed item directly after the lead continue the block (docx and pdf; a named lead still ends it); the absent reason reads 'heading is followed by a table and no prose' when the stored tables show an all-empty table whose cells fit the empty items after the lead, else 'heading has no prose following it'; --section-recompose-census added (read-only, not run, reads S3). METHOD_VERSION stays /6.",
       "artifact_covered_by": ["AC1", "AC2"]
     },
     {
       "path_or_key": "lib/research/corpus/tests/test_dossier_heading_only_round40.py",
       "kind": "test",
-      "commit_or_etag": "763e1e9885",
+      "commit_or_etag": "a5bf4bd87699e59636e34264e3859b84d457a725",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "10 tests: docx heading-only, docx heading then next lead, pdf heading-only, A heading-only then B real, both heading-only, inline passage unchanged, heading then body unchanged, _is_prose, census scan, CLI flag.",
-      "artifact_covered_by": ["AC2"]
-    },
-    {
-      "path_or_key": "lib/research/corpus/tests/test_dossier_method_bump.py",
-      "kind": "test",
-      "commit_or_etag": "763e1e9885",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "constant /6; stored /5 with equal inputs writes; stored /6 with equal inputs writes nothing.",
+      "deploy_evidence": "20 tests: the 10 inherited (reason wording updated) plus docx bold first item, second unnamed heading ends, named lead after the lead ends, pdf flagged first item (predicate asserted, bold and size variants), pdf second flagged line ends, table reason, no-prose reason, recompose scan counts, recompose census CLI on stubs (no put), recompose flag registered.",
       "artifact_covered_by": ["AC2"]
     }
   ],
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "ap6_check.py -- expect (?m)^ap6 build 2/2 control 2/2$",
+      "criterion_verbatim": "ap6_check.py -- expect (?m)^ap6 build 4/4 control 2/2$",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round40/ap6_check.py\"",
-      "output_evidence": "ap6 build 2/2 control 2/2",
-      "denominator": "build 2 of 2 arms, control 2 of 2 arms",
-      "expect": "(?m)^ap6 build 2/2 control 2/2$",
+      "output_evidence": "ap6 build 4/4 control 2/2",
+      "denominator": "build 4 of 4 arms, control 2 of 2 arms",
+      "expect": "(?m)^ap6 build 4/4 control 2/2$",
       "status": "PASS"
     },
     {
@@ -55,38 +47,38 @@
       "criterion_verbatim": "pytest test_dossier.py test_dossier_case_body.py test_dossier_method_bump.py test_dossier_heading_only_round40.py -- expect (?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python -m pytest lib/research/corpus/tests/test_dossier.py lib/research/corpus/tests/test_dossier_case_body.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_dossier_heading_only_round40.py -q -p no:cacheprovider --color=no",
-      "output_evidence": "35 passed in 0.99s\nAfter AMENDMENT 1 the three pinned literals read /6; extra run of test_dossier_case_unit.py + test_dossier_case_positional.py: 24 passed in 0.18s.",
-      "denominator": "35 of 35 tests passed",
+      "output_evidence": "45 passed in 2.21s",
+      "denominator": "45 of 45 tests passed",
       "expect": "(?m)^[0-9]+ passed(, [0-9]+ warnings?)? in [0-9.]+s$",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "The pre-change dossier.py (git show HEAD, base 6d7cd1fe3c) swapped in and ap6_check.py run against it; the new file restored afterwards.",
-      "expected": "build arms FAIL (heading-only blocks served as values), control arms still pass.",
-      "observed": "ap6 build 0/2 control 2/2 on the base file; ap6 build 2/2 control 2/2 on the new file.",
+      "description": "The first-item skip (idx == start + 1 -> continue) disabled in both the docx and pdf branches of _section_block_items (edited to idx == -1), then ap6_check.py and the new test file run; the skip restored afterwards.",
+      "expected": "arm b3 FAILS and the new tests for the bold first item, the pdf flagged first item, the second heading and the census CLI FAIL.",
+      "observed": "ap6 build 3/4 control 2/2 (b3 None); 5 failed, 15 passed in the new test file; with the skip restored ap6 build 4/4 control 2/2 and 20 passed.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "ap6_check.py run twice on the final file.",
-      "observed": "ap6 build 2/2 control 2/2 both runs.",
+      "method": "ap6_check.py run on the final file.",
+      "observed": "ap6 build 4/4 control 2/2.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [],
-  "surprises": ["AMGT_CORPUS-Z-W2-S21"],
+  "surprises": ["AMGT_CORPUS-Z-W2-S21", "AMGT_CORPUS-Z-W2-S22", "AMGT_CORPUS-Z-W2-S23"],
   "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "ap6_check.py (AC1)",
       "invocation": "python ap6_check.py",
-      "result": "ap6 build 2/2 control 2/2"
+      "result": "ap6 build 4/4 control 2/2"
     },
     {
       "tool": "pytest (AC2)",
       "invocation": "python -m pytest test_dossier.py test_dossier_case_body.py test_dossier_method_bump.py test_dossier_heading_only_round40.py",
-      "result": "35 passed in 0.99s"
+      "result": "45 passed in 2.21s"
     }
   ]
 }
