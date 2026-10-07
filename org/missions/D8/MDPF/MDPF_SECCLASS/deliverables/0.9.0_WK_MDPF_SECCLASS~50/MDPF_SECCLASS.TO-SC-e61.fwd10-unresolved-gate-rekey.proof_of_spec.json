@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e61",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "54e82922e47b25c09bf52ea44b261c8628f74a7b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R10.md",
+    "vintage_commit": "3a11e67c2064aca8ae0375a7f4c2d5578b22b93c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e61.fwd10-unresolved-gate-rekey.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~50",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-secclass/new-security-classifier/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "37fdf53bdc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Blob e025665470 identical to c0eb742061's; is_unresolved_us() re-keyed on gics_sector/sub_asset_class of the planned item. Release port onto ae61f93efe; no deploy.",
+      "artifact_covered_by": [
+        "SC10-e61-AC1",
+        "SC10-e61-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-secclass/new-security-classifier/tests/test_new_security_classifier.py",
+      "kind": "script",
+      "commit_or_etag": "37fdf53bdc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Blob ea072ab52c identical to c0eb742061's; adds test_a_new_us_stock_with_no_sub_class_and_a_resolved_sector_is_written. 25 passed.",
+      "artifact_covered_by": [
+        "SC10-e61-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/rivalfunds_classification.py",
+      "kind": "script",
+      "commit_or_etag": "37fdf53bdc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Blob d3363dba79 identical to a23415cd44's (SC-e-57 module: sector to gics_sector only). The base the re-keyed gate reads.",
+      "artifact_covered_by": [
+        "SC10-e61-AC1",
+        "SC10-e61-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_rivalfunds_classification.py",
+      "kind": "script",
+      "commit_or_etag": "37fdf53bdc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Blob 80ceae6163 identical to a23415cd44's. Control suite _shared/tests 214 passed.",
+      "artifact_covered_by": [
+        "SC10-e61-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC10-e61-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/mdpf-secclass/new-security-classifier/tests/test_new_security_classifier.py -- expect PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/mdpf-secclass/new-security-classifier/tests/test_new_security_classifier.py",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=25 passed in 0.69s (rc=0)",
+      "denominator": "25 of 25 tests passed, 0 failed, 0 skipped",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC10-e61-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e61_us_no_subclass_written.py -- expect SC-E61 ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_e61_us_no_subclass_written.py",
+      "expect": "SC-E61 ok=True",
+      "output_evidence": "SC-E61 ok=True resolved_is_unresolved=False unresolved_is_unresolved=True (rc=0)",
+      "denominator": "2 of 2 arms: resolved arm False, unresolved difference-control arm True",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Difference control inside AC2: an unresolved bare-ticker item (no gics_sector, no sub_asset_class) must still be unresolved; the pre-re-key rule is what the resolved arm would trip (base 4cb237fe22 printed resolved_is_unresolved=True, 7 of 24 tests failed).",
+      "expected": "unresolved_is_unresolved=True with resolved_is_unresolved=False",
+      "observed": "SC-E61 ok=True resolved_is_unresolved=False unresolved_is_unresolved=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 check and AC1 pytest run twice back to back from the worktree root.",
+      "observed": "Identical both times: SC-E61 ok=True resolved_is_unresolved=False unresolved_is_unresolved=True; PYTEST-OK 25 passed. Control suites: _shared/tests 214 passed, sector-writer/tests 29 passed. Equality: 4 of 4 worktree blobs identical to a23415cd44 / c0eb742061.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy, Lambda build/upload, Terraform, table writes, push.",
+      "reason": "BOUNDS: LOCAL release port; the e57 release act is the issuer's."
+    }
+  ],
+  "surprises": [],
+  "session_log": "Equality read (blob hash x4), commit 37fdf53bdc, AC1/AC2 and control suites run from the worktree root C:/Dev/dry_e57 on branch secclass-r12-rel-e57e61.",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate)",
+      "result": "pre-commit gate clean 4 of 4 file(s); naming-gate PASS"
+    }
+  ]
+}
