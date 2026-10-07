@@ -107,9 +107,15 @@ CELLS = [
      "Bloomberg refuses 4 of the 6 names divergence.py asks for (probe of one name, 3 requests, 2026-10-07 15:17Z).",
      ["You do not run the scores producer: a store write is the issuer's act."],
      "CTO ruling msg 31087; AMGT_CORPUS msg 31085."),
+    ("bb-23", "GROUP_F_NOTES.md", "## F1", "the-build-takes-two-packages-from-the-deployed-zip", 307, "worker",
+     "THE BUILD TAKES PYARROW AND LINUX RPDS-PY FROM OPAL'S OWN DEPLOYED ZIP, NEVER A DOWNLOAD",
+     "None of the build's 8 pinned wheels is on this box; the deployed zip on disk hashes to the live CodeSha256 and holds both packages (147 files).",
+     ["You do NOT run the build script, `pip`, `terraform` or any AWS write. One AWS read (the function's configuration) is made by the check.",
+      "No fallback: nothing you write may fetch pyarrow or rpds-py for the Lambda's platform, under any flag."],
+     "CTO ruling msg 31206 (two terms). ADDED MID-ROUND by that ruling: decomposition s.86e ADDENDUM 1."),
 ]
 
-RISK = {"bb-20": "WORLD"}
+RISK = {"bb-20": "WORLD", "bb-23": "WORLD"}
 NO_ADAPTER_LINE = ("bb-4", "bb-13", "bb-15", "bb-7", "bb-1", "bb-16", "bb-21", "bb-22")
 
 FORBIDDEN = ("identity, unresolved, security key, crosswalk, dossier, landed, model block, estate, stage, input ledger or bronze")
@@ -182,6 +188,9 @@ def order_text(cell, portal_ref):
     if cid == "bb-17":
         bound_lines[1] = ("You are the ONLY writer of `lib/research/api/scoped_amgt.py` this round. Edit no module another cell built: "
                           "if one is wrong, file a row and say so in your report.")
+    if cid == "bb-23":
+        bound_lines[0] = "Write only the paths below. No deploy, no build run, no store write, no vendor call, no download of any kind."
+        bound_lines[1] = "`upload_verified.sh`, `content_diff.py` and every `.tf` file in the folder are READ, never edited."
     if cid == "bb-20":
         bound_lines[0] = "Write only the paths below. No deploy, no `terraform` command, no upload, no store write, no vendor call."
         bound_lines[1] = "A line-ending change and nothing else: no file's content changes once carriage returns are set aside."
