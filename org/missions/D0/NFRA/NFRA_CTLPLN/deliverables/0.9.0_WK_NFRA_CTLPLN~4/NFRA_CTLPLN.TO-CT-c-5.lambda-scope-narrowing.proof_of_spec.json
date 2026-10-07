@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-c-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-c-5.lambda-scope-narrowing.md",
+    "group": "OTHER",
+    "vintage_commit": "48910c0e33"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~4",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round3.md",
+    "vintage_commit": "48910c0e33",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-c-5.lambda-scope-narrowing.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py",
+      "kind": "test",
+      "commit_or_etag": "7d7eeb391a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_deploy_policy.json",
+      "kind": "config_data",
+      "commit_or_etag": "7d7eeb391a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/protected_functions.json",
+      "kind": "config_data",
+      "commit_or_etag": "7d7eeb391a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the ten protected ARNs and the rule that caught each; nothing applied"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/protected_functions_listing.json",
+      "kind": "config_data",
+      "commit_or_etag": "7d7eeb391a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the saved census (233 functions, 17 regions) and the ruled-out names, under tests/ where the naming gate does not grade strings"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "kind": "test",
+      "commit_or_etag": "7d7eeb391a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the apply is the issuer's route"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT3c5-AC1",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py --check expect: refused_regions=0 protected=10 (AMENDMENT 3: the line also reads in_sync=True ok=True)",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py --check",
+      "output_evidence": "Run live as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_protected_functions.py --check` (rc 0, about 30 s). LAST LINE: PROTECTED-CENSUS functions=233 regions=17 refused_regions=0 protected=10 by_authorizer=1 by_edge=5 ruled_in=4 unruled=0 in_sync=True ok=True. in_sync=True ok=True stated as the amendment requires. Per-region counts: us-east-1=232, us-east-2=1, the other 15 regions 0 (no REFUSED line). Protected, with the rule: auth-validator-edge (b); cache-control-injector (b); public-data-router (b); shared-advisor-router (b); shared-advisor-router-response (b); opal-portal-rest-authorizer (a); opal-portal-authorizer (c); opalinvest-auth-handler (c); trade-auth-handler (c); trade-authorizer (c). CANDIDATE-UNRULED: none (unruled=0).",
+      "denominator": "233 functions listed in 17 regions (0 refused); 10 protected = 1 authorizer target + 5 edge + 4 ruled-in; 5 ruled-out names kept in the saved listing under tests/",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CT3c5-AC2",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 all_ok=True",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py` (rc 0). LAST LINE: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 all_ok=True. Third block: PROTECTED-ARMS rules with no function in the census: none; chosen opal-portal-rest-authorizer(a), auth-validator-edge(b), opal-portal-authorizer(c); lambda:UpdateFunctionCode and UpdateFunctionConfiguration on each -> explicitDeny (6 of 6); UpdateFunctionCode on access-anomaly-scanner (not protected) -> allowed; CreateFunction on ctlpln-new-function -> allowed. First block's new arms: apigateway:GET on /apis -> allowed; apigateway:GET on the bare /apikeys -> implicitDeny (graded implicitDeny, row NFRA_CTLPLN-W4-S11: the simulator matches no statement for that ARN with or without the Deny); the uncounted APIKEY-ITEM-PROBE on /apikeys/x -> explicitDeny. Caveat stated: the /apikeys arm alone does not prove the Deny.",
+      "denominator": "22 of 22 allowed, 19 of 19 denied, 5 of 5 passrole (rendered copy), 8 of 8 protected arms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CT3c5-AC3",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py expect: policy_size_ok=True ok=True",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py` (rc 0). LAST LINE: IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=7/7 policy_size_ok=True ok=True. Policy characters without whitespace: dell1_bus 276, dell2_bus 276, dell_create 3998, dell_deploy 4951, each of the limit 6144. No dell_protect_policy.json was needed.",
+      "denominator": "7 of 7 names from the builder; 4 of 4 policy documents within 6144 characters",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the second renderer over the same file: render_passrole.py --check after the deploy policy gained the two statements",
+      "expected": "in_sync=True (the two renderers keep each other's statements byte-identical)",
+      "observed": "PASSROLE-RENDER applied=0 named=0 wildcard=0 in_sync=True ok=True; the rendered-copy block inside the simulation also read in_sync=True with the new statements present",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the cloud evaluator and the census are deterministic over fixed input; the census was run live twice (write step from the saved listing, check step live) and agreed on 233 functions and 10 protected",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform apply, plan against the backend, any IAM write",
+      "reason": "order BOUNDS: apply nothing; AWS calls were read-only (simulation, function, region, authorizer and distribution listings)"
+    },
+    {
+      "item": "tests/protected_ruled_out.json as a separate file",
+      "reason": "its path is not in the order's grant; the ruled-out names are stored inside tests/protected_functions_listing.json under the key ruled_out"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W4-S11"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~4/NFRA_CTLPLN.TO-CT-c-5.lambda-scope-narrowing.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "terraform",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity validate",
+      "result": "Success! The configuration is valid."
+    }
+  ]
+}

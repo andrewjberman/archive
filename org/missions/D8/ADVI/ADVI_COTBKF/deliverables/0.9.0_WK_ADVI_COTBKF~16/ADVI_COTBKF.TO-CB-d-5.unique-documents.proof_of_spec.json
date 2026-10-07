@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-d-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-d-5.unique-documents.md",
+    "group": "OTHER",
+    "vintage_commit": "cb14894875"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~16",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round4.md",
+    "vintage_commit": "cb14894875",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-d-5.unique-documents.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_documents.py",
+      "kind": "script",
+      "commit_or_etag": "5cdcd38735",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DS-lane script, candidate commit (rule 13); --apply unit-tested on a stub S3 and never run; S3 READS only (index, three central directories by range reads); no S3 write, no vendor call"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_documents.py",
+      "kind": "test",
+      "commit_or_etag": "5cdcd38735",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fixture zips + stub S3, no AWS; 7 tests"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~16/CB4d5_sample_plan_rows.json",
+      "kind": "config_data",
+      "commit_or_etag": "00ff8af48d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three planned rows from the AC2 run: one STMT, one TXRP, one document held in three archives; the plan parquet sits uncommitted under .scratch/advi_cotbkf/documents_plan/"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~16/CB4d5-AC2_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "00ff8af48d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdout and rc of the AC2 run"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB4d5-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_documents.py expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_documents.py",
+      "output_evidence": "7 passed in 0.72s (timeout 120, rc 0): range reader inflates a deflated 5 MB member correctly from block and exact-range reads; a document in two archives is planned and written once (source = first path); a CRC mismatch and an absent member are REFUSED and never written; one file name with two CRCs gives two keys; --apply writes each once, skips identical, refuses a DIFFERENT existing object and then withholds documents.parquet; keys are builder output; a doubled document id turns every_document_once False",
+      "denominator": "7 of 7 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "CB4d5-AC2",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_documents.py --plan --out .scratch/advi_cotbkf/documents_plan expect: DOCUMENTS-PLAN unique=11119 every_document_once=True sources_verified=11119 refused=0 keys_unique=True",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_documents.py --plan --out .scratch/advi_cotbkf/documents_plan",
+      "output_evidence": "DOCUMENTS-PLAN unique=11119 every_document_once=True sources_verified=11119 refused=0 keys_unique=True bytes=1795905639 (timeout 120, rc 0, 20 s wall: the index object plus three central directories by range reads, no cache used, no archive downloaded)",
+      "denominator": "11,119 of 11,119 index rows planned once and verified; 11,119 distinct target keys; first source path per document (HJH/4XF/HKE by paths order); 0 refused",
+      "status": "PASS",
+      "expect": "DOCUMENTS-PLAN unique=11119 every_document_once=True sources_verified=11119 refused=0 keys_unique=True"
+    },
+    {
+      "criterion_id": "CB4d5-AC3",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 after the issuer's apply: one statement and one tax form found by account and date in the documents table and opened (FWD-5's DONE WHEN)",
+      "method": "manual_read_with_citation",
+      "invocation": "after the issuer's --apply: query documents.parquet by account and doc_date for one STMT and one TXRP and open the written PDFs (sample planned rows: org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~16/CB4d5_sample_plan_rows.json)",
+      "output_evidence": "not yet applicable: --apply is the issuer's act and was not run; the plan lists, for example, STMT account B3S-605713 doc_date 2025-06-30 (53,495 B) and TXRP account B3S-605598 doc_date 2025-02-09 (25,223 B)",
+      "denominator": "n/a (no apply run)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the oracle is 3.0.0_SA_CVO at L9 after the issuer's apply; this record carries the output and no verdict",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant control named by the order; the tests carry their own difference controls (CRC mismatch, absent member, different existing object, doubled id)",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC2 run twice (before and after the build_plan -> make_plan rename), stdout compared",
+      "observed": "identical DOCUMENTS-PLAN line both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~16/ADVI_COTBKF.TO-CB-d-5.unique-documents.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_documents.py",
+      "result": "7 passed in 0.72s"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_CUSTDY.TO-CU-a-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.md",
+  "group": "OTHER",
+  "vintage_commit": "30f94c3ab1"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_CUSTDY/decompositions/IRPT_CUSTDY_DECOMP.md",
+  "vintage_commit": "30f94c3ab1",
+  "to_ref": "org/missions/D9/IRPT/IRPT_CUSTDY/task-orders/IRPT_CUSTDY.TO-CU-a-3.security-descriptions.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_CUSTDY~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/irpt_custody/security_descriptions.py",
+   "kind": "script",
+   "commit_or_etag": "cd7a564791",
+   "artifact_covered_by": [
+    "CU3-AC1",
+    "CU3-AC2"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Local library and CLI; the order's grant is the repo file only, no AWS, no deploy."
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/irpt_custody/tests/test_security_descriptions.py",
+   "kind": "test",
+   "commit_or_etag": "cd7a564791",
+   "artifact_covered_by": [
+    "CU3-AC1"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Pytest file; runs locally, no deploy."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CU3-AC1",
+   "criterion_verbatim": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_security_descriptions.py -- expect: passed",
+   "method": "test_suite",
+   "invocation": "python -m pytest -q data/assets/scripts/gold/irpt_custody/tests/test_security_descriptions.py",
+   "expect": "passed",
+   "output_evidence": "5 passed in 0.05s (rc 0)",
+   "denominator": "5 of 5 tests passed: known ticker gets table class+sector, unknown is undescribed with nulls, missing symbol undescribed, order and input keys preserved and input not mutated, empty list returns empty list.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CU3-AC2",
+   "criterion_verbatim": "python data/assets/scripts/gold/irpt_custody/security_descriptions.py --self-test -- expect: SECURITY-DESCRIBE-SELFTEST known_ok=True unknown_marked=True order_kept=True",
+   "method": "command",
+   "invocation": "python data/assets/scripts/gold/irpt_custody/security_descriptions.py --self-test",
+   "expect": "SECURITY-DESCRIBE-SELFTEST known_ok=True unknown_marked=True order_kept=True",
+   "output_evidence": "SPY\tclass=equity\tsector=US Large Cap\tdescribed=True\nZZZZ\tclass=None\tsector=None\tdescribed=False\nAGG\tclass=fixed_income\tsector=Investment Grade\tdescribed=True\nNone\tclass=None\tsector=None\tdescribed=False\nGLD\tclass=commodities\tsector=Gold\tdescribed=True\nSECURITY-DESCRIBE-SELFTEST known_ok=True unknown_marked=True order_kept=True  (rc 0)",
+   "denominator": "5 fixture holdings: 3 known to the real table (SPY, AGG, GLD, each compared to ETF_CLASSIFICATIONS and ETF_SECTOR_MAPPING directly), 1 unknown ticker (ZZZZ), 1 with no symbol; the unknown rows are the difference control.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "With SPY deleted from the real classification table in-process, the identical describe() call on SPY returns nulls and described=false, so the known-ticker assertion can fail.",
+   "expected": "class None, sector None, described False, source NONE",
+   "observed": "MUTANT SPY removed from table -> None None False NONE",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input --self-test runs, md5 of full stdout compared",
+   "observed": "27c032369df941038211fceffdf4f24a both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A sector for every classified ticker",
+   "reason": "The sector map is narrower than the class map; a classified ticker with no sector row returns sector null and described true (the class is known). Not widened: the order says never guess."
+  },
+  {
+   "item": "History and sub-asset class",
+   "reason": "The order fixes four added keys (class, sector, described, description_source); get_sub_asset_class defaults to a guessed class for unknown tickers, so it is not used."
+  }
+ ],
+ "surprises": [],
+ "session_log": "2026-10-07, worktree C:/tmp/wk-irpt-custdy-3, branch wk-IRPT_CUSTDY-3, based on CLOUD @30f94c3ab1. PUSH STATE: LOCAL. Built describe() + CLI over etf_classification's get_asset_class/get_sector with default None. First commit attempt was blocked by commit-gate (missing future-annotations in the test file); fixed and recommitted as cd7a564791.",
+ "compiler_tools": [
+  {
+   "tool": "Read",
+   "invocation": "etf_classification.py lines 1-1011 and 1336-1430",
+   "result": "get_asset_class(ticker, default) returns default for an unknown ticker and logs a WARNING; default is 'equity' unless overridden, so the describer passes None. get_sector(ticker, default) returns default ('Other') unless overridden. get_sub_asset_class guesses 'US Large Cap'/'Intermediate' for unknown tickers, so it is not used. The table is module-level dicts (ETF_CLASSIFICATIONS, ETF_SECTOR_MAPPING), no AWS."
+  }
+ ]
+}

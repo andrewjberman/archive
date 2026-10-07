@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e52",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "90f99888cd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "5d70aab6c9",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e52.perfrp-class-labels.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~37",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/AdvisorIntelligence/_shared/perfrp/PerfrpAllocation.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "e73c493e",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Portal commit e73c493e on branch wk-MDPF_SECCLASS-37-portal (stacked on 49756da7), not pushed. CLASS_LABELS before: equity, fixed_income, alternatives, cash. After: cash, fixed_income, equity, structured, alternatives, commodities (Structured, Commodities added). classLabel() fallback and isResidue() untouched, so residue and unknown tokens still render verbatim and nothing is dropped."
+    },
+    {
+      "path_or_key": "portal/src/pages/AdvisorIntelligence/__tests__/mdpf-secclass/perfrp-class-labels.test.ts",
+      "kind": "test",
+      "commit_or_etag": "e73c493e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New, 4 tests, every name carries six_class_label. Renders the real PerfrpAllocationSummary and PerfrpAllocationDetail with react-dom/server (already installed) and reads the printed text."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC9-e52-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py src/pages/AdvisorIntelligence/__tests__/mdpf-secclass/perfrp-class-labels.test.ts six_class_label -- expect: PORTAL-TESTS ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py src/pages/AdvisorIntelligence/__tests__/mdpf-secclass/perfrp-class-labels.test.ts six_class_label",
+      "output_evidence": "PORTAL-TESTS ok=True pass=4 fail=0 rc=0 file=src/pages/AdvisorIntelligence/__tests__/mdpf-secclass/perfrp-class-labels.test.ts filter=six_class_label",
+      "denominator": "4 of 4 six_class_label tests passed, 0 failed (each of six classes prints its label in Summary and Detail with no raw token; all six together; residue tokens NO-CLASSIFICATION-ROW and UNCLASSIFIED-LOUD verbatim; unknown token some_future_class rendered not dropped). Importers: the edited map is module-private (CLASS_LABELS not exported), consumed only by classLabel inside this file.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC9-e52-AC2",
+      "criterion_verbatim": "JUDGMENT (3.0.0_SA_CVO): the card's class names read as the same names the other mix screens show.",
+      "method": "manual_read_with_citation",
+      "invocation": "none: a judgment criterion carries no invocation",
+      "output_evidence": "No verdict recorded by the worker. Instrument output relevant to it: the six labels equal composition.ts CANONICAL_LABELS_WITH_CASH for the six classes (Cash, Fixed Income, Equity, Structured, Alternatives, Commodities). The screens were not read.",
+      "denominator": "n/a",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: graded by 3.0.0_SA_CVO at L9, never self-graded by the worker."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Delete the structured label entry from CLASS_LABELS, rerun AC1, then restore.",
+      "expected": "AC1 fails",
+      "observed": "PORTAL-TESTS ok=False pass=2 fail=2 rc=1; restored, ok=True pass=4 fail=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "portal_named_tests.py run twice on the committed tree (first run and after mutant restore).",
+      "observed": "PORTAL-TESTS ok=True pass=4 fail=0 rc=0 each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Typecheck, lint, the wider suites, reading the other mix screens, push to portal DEV.",
+      "reason": "BOUNDS: drain checks and the issuer's landing; not in the criterion."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/portal_named_tests.py",
+  "compiler_tools": [
+    {
+      "tool": "git commit (portal worktree)",
+      "invocation": "git commit --author 0.9.0_WK_MDPF_SECCLASS~37 -F <msgfile> in portal/ on branch wk-MDPF_SECCLASS-37-portal",
+      "result": "commit e73c493e; plain git commit used in the nested portal worktree, not safe-commit.sh"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECHIST.TO-SH-t2",
+  "firm": "MDPF",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECHIST/decompositions/MDPF_SECHIST_DECOMP.md",
+    "vintage_commit": "f8a41e7902",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECHIST/task-orders/MDPF_SECHIST.TO-SH-t2.gold-reads-backfill-rows.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECHIST/prd/MDPF_SECHIST_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f8a41e7902"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECHIST~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/gold/test_etf_positioning_backfill_rows.py",
+      "kind": "test",
+      "commit_or_etag": "3f51eeb355",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline pytest file (fake in-memory S3); not deployed. LOCAL build, no S3, no gold run.",
+      "artifact_covered_by": [
+        "SH1-t2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECHIST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Record artifact; row MDPF_SECHIST-W2-S1 appended."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SH1-t2-AC1",
+      "criterion_verbatim": "both named tests pass against the real load_history and compute_returns: a year of rows in one partition yields all eight windows, one row yields 1D only.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R1_CHECKS/sh_t2_gold_tests.py",
+      "output_evidence": "test_backfill_rows_in_topup_fill_all_windows PASSED; test_single_row_only_1d_control PASSED; 2 passed in 0.97s; GOLD-TESTS-OK (rc=0)",
+      "denominator": "2 of 2 named tests passed",
+      "status": "PASS",
+      "expect": "GOLD-TESTS-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The difference control is test_single_row_only_1d_control: the same fake S3 and partition path with only the 2026-10-06 row present; it asserts every window except 1D is null, so the all-windows test cannot pass for a reason other than the rows present.",
+      "expected": "With one row only 1D is non-null; with a year of rows all eight are non-null.",
+      "observed": "Both held in the same run: control PASSED (7 windows null, 1D non-null), all-windows test PASSED (8 of 8 non-null, 1D equals the as-of row).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The criterion invocation was run twice (initial and after the ruff import-sort fix); fixtures are fixed dates and a deterministic return series, no clock, no network.",
+      "observed": "2 passed both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Sibling tests test_etf_positioning_upgrade_forward.py and test_etf_positioning_per_fund_asof.py as a regression run",
+      "reason": "Both fail at import on a clean worktree (etf_classifications_dynamodb not on path; row MDPF_SECHIST-W2-S1). No production code was edited, so there is nothing for them to regress; the other two siblings pass rc=0."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECHIST-W2-S1"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECHIST/deliverables/0.9.0_WK_MDPF_SECHIST~2/MDPF_SECHIST.TO-SH-t2.gold-reads-backfill-rows.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (via the criterion script)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECHIST_H1/R1_CHECKS/sh_t2_gold_tests.py",
+      "result": "2 passed; GOLD-TESTS-OK"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_SECHIST~2 <0.9.0_WK_MDPF_SECHIST~2@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "3f51eeb355 (test file); proof commit follows"
+    }
+  ]
+}
