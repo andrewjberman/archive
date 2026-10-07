@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~RV</issued_to>
     <date>2026-10-07</date>
-    <status>staged -- written 2026-10-07 06:2xZ, NOT sent: Andrew wind-down for a reboot (0.0.0_AB_MSTR~Z msg of 06:24Z) arrived before the GO; the issuer releases it after the relaunch</status>
+    <status>complete -- merged @80bcd69f78 at 09:54Z; REPORT 1 (@2e50c18d45) and REPORT 2 (@a00f5c1b83) read; issuer's own runs: GUARD-3A PASS and GUARD-3B PASS from the merged tree, and the FIRST LIVE READ on 2026-10-07: the 07:00 ET vehicle's log reads "all 13 custom CIX series reach the as-of 2026-10-06" with LastTaskResult 0, and the 07:30 ET checker LastTaskResult 0; NEVER-2 entry closed @d75142de44; the hand-run send path (row OPAL_BBGTML-Z-S12) continues under TO-GUARD-4</status>
     <project_code>OPAL_BBGTML</project_code>
   </metadata>
 <risk>WORLD</risk>

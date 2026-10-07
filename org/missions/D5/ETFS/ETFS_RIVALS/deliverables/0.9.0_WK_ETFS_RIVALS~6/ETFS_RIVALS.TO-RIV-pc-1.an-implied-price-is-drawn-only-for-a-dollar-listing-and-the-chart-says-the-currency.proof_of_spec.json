@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-pc-1.an-implied-price-is-drawn-only-for-a-dollar-listing-and-the-chart-says-the-currency",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "2e96271d1f",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-pc-1.an-implied-price-is-drawn-only-for-a-dollar-listing-and-the-chart-says-the-currency.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "2e96271d1f"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/price_series.py",
+      "kind": "script",
+      "commit_or_etag": "e9965690ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round 16 repair cell; no S3 write, no deploy; checks and tests run on fixtures and a local sink",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/publish_page.py",
+      "kind": "script",
+      "commit_or_etag": "e9965690ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one key added to the chart object; local sink only",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/render.py",
+      "kind": "script",
+      "commit_or_etag": "e9965690ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CHART_SCRIPT edit; still one bare inline script",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r15pc1_currency.py",
+      "kind": "script",
+      "commit_or_etag": "e9965690ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 unit tests, no network",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r15ps1_price_series.py",
+      "kind": "script",
+      "commit_or_etag": "e9965690ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fixtures plant a USD currency row; no assertion changed",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/co-1.AC1.py",
+      "kind": "script",
+      "commit_or_etag": "e9965690ad",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fixture plants G4 USD rows; SEC_KEYS gains currency; no assertion changed",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the series reads the stored quote currency; a dollar listing keeps its holding-implied points; a non-dollar or unknown one carries market closes only, with the non-dollar gap reason; control: the fixture frames hold the planted values",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/pc-1.AC1.py",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "output_evidence": "series() error: None | keys returned: ['AAA_US_Equity', 'CCC_US_Equity', 'DDD_US_Equity', 'JJJ_JP_Equity', 'LLL_LN_Equity', 'NNN_US_Equity', 'XXX_LN_Equity']\n  AAA_US_Equity: currency 'USD' | points [(100.0, 'm'), (100.0, 'i'), (100.0, 'i'), (100.0, 'i')] | gaps []\n  DDD_US_Equity: currency 'USD' | points [(100.0, 'i'), (100.0, 'i'), (100.0, 'i'), (100.0, 'i')] | gaps []\n  JJJ_JP_Equity: currency 'JPY' | points [(15400.0, 'm'), (None, None), (None, None), (None, None)] | gaps [('2026-09-02', '2026-09-04')]\n  LLL_LN_Equity: currency 'GBp' | points [(None, None), (None, None), (812.0, 'm'), (None, None)] | gaps [('2026-09-01', '2026-09-02'), ('2026-09-04', '2026-09-04')]\n  XXX_LN_Equity: currency 'USD' | points [(9.5, 'm'), (100.0, 'i'), (100.0, 'i'), (100.0, 'i')] | gaps []\n  NNN_US_Equity: currency None | points [(None, None), (None, None), (None, None), (None, None)] | gaps [('2026-09-01', '2026-09-04')]\n  CCC_US_Equity: currency 'USD' | points [(50.0, 'm'), (100.0, 'i'), (100.0, 'i'), (100.0, 'i')] | gaps []\nOK:   (a) every key carries its stored quote currency (the newest G4 row that has one; None when none is stored)\nOK:   (b) a listing stored as USD keeps its holding-implied points on days without a close (a London listing stored as USD included; a row with no close still gives the currency; the newest row wins over an older EUR one)\nOK:   (c) a listing stored as JPY or GBp, and a key with no stored currency, carries no holding-implied point: a day without a close is None / None\nOK:   (d) their gaps are exactly the runs of None days with the non-dollar reason; a dollar key has no gap\ncalendar days: ['2026-09-01', '2026-09-02', '2026-09-03', '2026-09-04'] | G4 rows planted: 7 | G1 rows: 28\nOK:   (e) control: the fixture frames hold the planted closes, currencies and reports in the stages' own columns, and the trading calendar reads the window as the 4 expected days\nAC1 RESULT: PASS 0 failures\nexit=0\n",
+      "denominator": "5 of 5 checks OK ((a)-(e)); 7 of 7 fixture keys carry the expected currency",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the chart object carries each security's currency, the page's one script reads it, and ps-1.AC1, co-1.AC1, co-1.AC2, md-1.AC1 and md-1.AC2 still end PASS; control: the page publishes on the fixture",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/pc-1.AC2.py",
+      "expect": "AC2 RESULT: PASS 0 failures",
+      "output_evidence": "TXUE: securities 11 | currency values ['USD']\nBASG: securities 10 | currency values ['USD']\nOK:   (a) every security of each fund's chart object carries \"currency\": \"USD\" on the dollar fixture\nCHART_SCRIPT chars: 6096 | reads .currency: True | says 'currency not on file': True\nOK:   (b) the page's one script reads the object's currency and names the case where none is stored\n  ps-1.AC1: AC1 RESULT: PASS 0 failures\n  co-1.AC1: AC1 RESULT: PASS 0 failures\n  co-1.AC2: AC2 RESULT: PASS 0 failures\n  md-1.AC1: AC1 RESULT: PASS 0 failures\n  md-1.AC2: AC2 RESULT: PASS 0 failures\nOK:   (c) ps-1.AC1, co-1.AC1, co-1.AC2, md-1.AC1 and md-1.AC2 still end PASS 0 failures\npublish: OK | objects parsed: {'TXUE': True, 'BASG': True}\nOK:   (d) control: the page publishes on the fixture and both chart objects are written and parse\nAC2 RESULT: PASS 0 failures\nexit=0\n",
+      "denominator": "4 of 4 checks OK ((a)-(d)); 5 of 5 earlier checks end PASS 0 failures; 2 of 2 chart objects carry currency USD on all 21 securities",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "on the real day's chart objects no security's curve joins two currencies, and a reader of a non-US security's dialog can tell which currency the prices are in.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment criterion: graded by 3.0.0_SA_CVO~RV on the issuer's real run; no invocation by the worker",
+      "expect": "judgment",
+      "judgment": true,
+      "output_evidence": "No real-day run by the worker (no S3, no vendor). Fixture evidence only: pc-1.AC1 shows JPY, GBp and unknown keys with market closes only and the non-dollar gap reason; pc-1.AC2 shows the chart object carries currency and CHART_SCRIPT reads .currency and says 'currency not on file'.",
+      "denominator": "N/A -- judgment, graded on the real day's 13 chart objects by the CVO",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "3.0.0_SA_CVO~RV at L9 on the issuer's real run is the oracle"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not planted: pc-1.AC1 and pc-1.AC2 carry their own control arms ((e) and (d)) and both failed at base by their docstrings.",
+      "expected": "AC1 (a),(c),(d) and AC2 (a),(b) FAIL before the build.",
+      "observed": "before the price_series edit pc-1.AC1 was not run green; with it AC1 and AC2 end PASS 0 failures; package suite 849 passed, 2 skipped, 0 failed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "pc-1.AC1 and pc-1.AC2 each run at least twice during the build.",
+      "observed": "same verdict lines each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the status flip to the issuer."
+    },
+    {
+      "item": "co-1.AC2, md-1.AC1, md-1.AC2 fixture edits",
+      "reason": "The three end PASS 0 failures unedited, so the grant to plant G4 rows in them was not used."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W6-S3"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~6 <0.9.0_WK_ETFS_RIVALS~6@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "e9965690ad (the surprise-row gate refused once: my first id Z-W6-S1 was already taken by an earlier worker 6; renamed Z-W6-S3, then landed)"
+    }
+  ]
+}
