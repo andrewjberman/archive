@@ -17,7 +17,7 @@
     "mutant": {
       "description": "the package-on arm (case 8) is the control of the package-off arms; the 2009 and 2028 raises are the negative arms of the 2015 and 2012 answers; the 18-year per-year equality asserts three special closures a rule-based list misses",
       "expected": "package off: uncovered year raises, covered holiday closed; package on: unchanged",
-      "observed": "as expected, 8 of 8",
+      "observed": "as expected: 8 of 8 (package on); 7 of 7 skipped=1 (simulated absent); scratch copy with a wrong expectation gave ok=False in both modes",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
@@ -60,25 +60,27 @@
     {
       "path_or_key": "lib/tests/test_nyse_fallback_equals_package.py",
       "kind": "test",
-      "commit_or_etag": "4b766e4e2d",
+      "commit_or_etag": "2b69ed5bcd",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "repo-local commit; nothing deployed, no push",
       "artifact_covered_by": [
         "CTk1-AC1",
         "CTk1-AC2",
-        "CTk1-AC3"
+        "CTk1-AC3",
+        "CTk1-AC4"
       ]
     },
     {
       "path_or_key": "lib/tests/test_trading_calendar_fail_closed.py",
       "kind": "test",
-      "commit_or_etag": "4b766e4e2d",
+      "commit_or_etag": "2b69ed5bcd",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "repo-local commit; nothing deployed, no push",
       "artifact_covered_by": [
         "CTk1-AC1",
         "CTk1-AC2",
-        "CTk1-AC3"
+        "CTk1-AC3",
+        "CTk1-AC4"
       ]
     },
     {
@@ -105,23 +107,33 @@
     },
     {
       "criterion_id": "CTk1-AC2",
-      "criterion_verbatim": "python lib/tests/test_trading_calendar_fail_closed.py expect: CALENDAR-FAIL-CLOSED cases=8/8 ok=True",
+      "criterion_verbatim": "python lib/tests/test_trading_calendar_fail_closed.py expect: CALENDAR-FAIL-CLOSED cases=8/8 skipped=0 ok=True",
       "method": "command",
       "invocation": "python lib/tests/test_trading_calendar_fail_closed.py",
-      "output_evidence": "PASS: 2015-01-01 not a trading day (fallback)\nPASS: 2012-10-29 not a trading day (storm)\nPASS: 2015-01-02 is a trading day\nPASS: 2009 date raises naming 2009\nPASS: 2028 date raises naming 2028\nPASS: range 2009-12-30..2010-01-05 raises\nPASS: calendar_source() reads 2010-2027\nPASS: package ON: 2009 date answers without raising\nCALENDAR-FAIL-CLOSED cases=8/8 ok=True\nrc=0",
-      "denominator": "8 of 8 cases (package off: 2015-01-01 closed, 2012-10-29 closed, 2015-01-02 open, 2009 raises, 2028 raises, range from 2009-12-30 raises, source string 2010-2027; package on: 2009 answers)",
+      "output_evidence": "mode: as installed; fresh module provenance: NYSE/pandas_market_calendars\nPASS: 2015-01-01 not a trading day (fallback)\nPASS: 2012-10-29 not a trading day (storm)\nPASS: 2015-01-02 is a trading day\nPASS: 2009 date raises naming 2009\nPASS: 2028 date raises naming 2028\nPASS: range 2009-12-30..2010-01-05 raises\nPASS: calendar_source() reads 2010-2027\nPASS: package ON: 2009 date answers without raising\nCALENDAR-FAIL-CLOSED cases=8/8 skipped=0 ok=True\nrc=0",
+      "denominator": "8 of 8 cases ran, 0 skipped (package present on this box)",
       "status": "PASS",
-      "expect": "CALENDAR-FAIL-CLOSED cases=8/8 ok=True"
+      "expect": "CALENDAR-FAIL-CLOSED cases=8/8 skipped=0 ok=True"
     },
     {
       "criterion_id": "CTk1-AC3",
       "criterion_verbatim": "python -m pytest lib/tests/test_trading_calendar.py -q -p no:cacheprovider --color=no expect: 22 passed",
       "method": "command",
       "invocation": "python -m pytest lib/tests/test_trading_calendar.py -q -p no:cacheprovider --color=no",
-      "output_evidence": "......................                                                   [100%]\n22 passed in 1.56s\nrc=0",
+      "output_evidence": "......................                                                   [100%]\n22 passed in 1.49s\nrc=0",
       "denominator": "22 of 22 tests pass; no test asserted the old provenance string, none edited",
       "status": "PASS",
       "expect": "22 passed"
+    },
+    {
+      "criterion_id": "CTk1-AC4",
+      "criterion_verbatim": "python lib/tests/test_trading_calendar_fail_closed.py --simulate-package-absent expect: CALENDAR-FAIL-CLOSED cases=7/7 skipped=1 ok=True",
+      "method": "command",
+      "invocation": "python lib/tests/test_trading_calendar_fail_closed.py --simulate-package-absent",
+      "output_evidence": "mode: SIMULATED package absent; fresh module provenance: NYSE/hardcoded-fallback-2010-2027\nSKIPPED package-on case: pandas_market_calendars is not installed on this box\nPASS: 2015-01-01 not a trading day (fallback)\nPASS: 2012-10-29 not a trading day (storm)\nPASS: 2015-01-02 is a trading day\nPASS: 2009 date raises naming 2009\nPASS: 2028 date raises naming 2028\nPASS: range 2009-12-30..2010-01-05 raises\nPASS: calendar_source() reads 2010-2027\nCALENDAR-FAIL-CLOSED cases=7/7 skipped=1 ok=True\nrc=0",
+      "denominator": "7 of 7 cases ran, 1 skipped (package-on case); fresh module provenance read as NYSE/hardcoded-fallback-2010-2027; a deliberate wrong expectation in a scratch copy gave ok=False in both modes (8/8 -> 7/8, 7/7 -> 6/7)",
+      "status": "PASS",
+      "expect": "CALENDAR-FAIL-CLOSED cases=7/7 skipped=1 ok=True"
     }
   ],
   "surprises": [
