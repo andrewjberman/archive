@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e50",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1ca9e97fc9094a2225d33d00695b994a34dff056"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "5d70aab6c90ed80a62a4a9262a552fbf4d1ebd83",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e50.old-list-held-census-and-set-v2.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~36",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/old_list_census_held.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "census under ruling 2.4's held definition plus the V2 set re-planned under the contract bound; read-only AWS, no model call",
+      "artifact_covered_by": [
+        "SC9-e50-AC1",
+        "SC9-e50-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_CENSUS_HELD_20261007.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "denominator 10965, held 2655, not_held 8310, claim inferred; as-of 49financial 2026-10-05, cottonwood 2026-10-05, inflection 2026-10-02",
+      "artifact_covered_by": [
+        "SC9-e50-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_RECLASSIFY_SET_V2_20261007.tsv",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10965 rows: DIRECT 5811 (incl. 15 cash), AI 2770, PRESENT 2381, UNPLACED-KEY 3",
+      "artifact_covered_by": [
+        "SC9-e50-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC9-e50-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/old_list_held_census_check.py census -- expect: OLD-LIST-HELD-CENSUS ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/old_list_held_census_check.py census",
+      "expect": "OLD-LIST-HELD-CENSUS ok=True",
+      "output_evidence": "OLD-LIST-HELD-CENSUS ok=True live=10965 held=2655 problems=[] (rc=0)",
+      "denominator": "denominator 10965 of 10965 live bd-securities rows; held 2655 + not_held 8310 = 10965",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC9-e50-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/old_list_held_census_check.py set -- expect: OLD-LIST-SET-V2 ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/old_list_held_census_check.py set",
+      "expect": "OLD-LIST-SET-V2 ok=True",
+      "output_evidence": "OLD-LIST-SET-V2 ok=False rows=10965 live=10965 cash_planned=15 problems=['bound:ADC', 'bound:AG', 'bound:AGI'] (rc=1)",
+      "denominator": "10965 of 10965 old keys once; 5811 of 5811 DIRECT rows inside the bound; 2770 AI rows carry no class by design and fail the check as written (row MDPF_SECCLASS-W36-S4)",
+      "status": "FAIL",
+      "status_reason": "The check grades every AI row's sub_asset_class against the contract list; an AI row has no verdict before the model runs, so 2,770 blank AI rows fail it. Not met as written; test not weakened; row MDPF_SECCLASS-W36-S4."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Order dry run at base 5d70aab6c9: AC1 FAIL (missing=OLD_LIST_CENSUS_HELD_*.json), AC2 FAIL (missing=OLD_LIST_RECLASSIFY_SET_V2_*.tsv).",
+      "expected": "AC1 and AC2 fail before the build",
+      "observed": "AC1 passes after the build; AC2 fails for a different reason (2770 blank AI rows), not for the missing file.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "old_list_census_held.py run twice over the same live scans and the same builds",
+      "observed": "identical lines: denominator=10965 held=2655 not_held=8310; set by_route DIRECT 5811 AI 2770 UNPLACED-KEY 3 PRESENT 2381 both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The served-bytes held grade, any table write, any model call, any package install or download, any upload of a producer build.",
+      "reason": "BOUNDS and ruling 2.9: dell1 grades held as inferred; the served read is a laptop seat's act."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-W36-S4",
+    "MDPF_SECCLASS-W36-S5",
+    "MDPF_SECCLASS-W36-S6"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <paths>",
+      "result": "see commit"
+    }
+  ]
+}
