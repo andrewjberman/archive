@@ -48,7 +48,9 @@ GRANTS = {
             "infra/aws/lambda/investor-reporting/directory/tests/test_search_readers_overage.py", CH, TO + "338.",
             P + "/deliverables/0.9.0_WK_IRPT_BCKEND~140/"),
     "141": (IDS + "/", CH, TO + "339.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~141/"),
-    "142": (CH, TO + "340.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~142/"),
+    "142": ("infra/aws/lambda/investor-reporting/intake/uploads.py",
+            "infra/aws/lambda/investor-reporting/intake/tests/test_uploads_refusal_class.py",
+            CH, TO + "340.", P + "/deliverables/0.9.0_WK_IRPT_BCKEND~142/"),
 }
 
 
