@@ -189,13 +189,25 @@ def main():
         if "AI" in (security.get("ticker_aliases") or []):
             fail.append("%s carries the ticker form AI" % key)
     no_name = []
+    carried_as_form = []
+    needs_brand = []
     for key, raw in legal_names.items():
         if key not in after_by:
             continue
         cleaned = us.clean_legal_name(raw)[0]
-        if cleaned.casefold() not in folded(after_by[key]["aliases"]):
-            no_name.append((key, cleaned))
-    out("IDENTITY NAME NOT AMONG ALIASES: %d  %s" % (len(no_name), no_name))
+        forms = after_by[key].get("ticker_aliases") or []
+        if cleaned.casefold() in folded(after_by[key]["aliases"]):
+            continue
+        if cleaned in forms:  # AMENDMENT 1: case-sensitive equality with an exact-case ticker form
+            carried_as_form.append((key, cleaned))
+        else:
+            needs_brand.append({"security_key": key, "legal_name": cleaned, "exact forms": forms})
+    out("IDENTITY NAME CARRIED AS AN EXACT-CASE TICKER FORM: %d  %s" % (len(carried_as_form), carried_as_form))
+    out("NEEDS A WHOLE-BRAND ENTRY: %d" % len(needs_brand))
+    for item in needs_brand:
+        out("  {security_key: %s, legal_name: %r, exact forms: %s}"
+            % (item["security_key"], item["legal_name"], item["exact forms"]))
+    out("IDENTITY NAME NOT AMONG ALIASES NOR EXACT FORMS (fails the list): %d  %s" % (len(no_name), no_name))
     for key, cleaned in no_name:
         fail.append("%s: identity name %r is not among its aliases" % (key, cleaned))
 
