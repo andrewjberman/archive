@@ -25,6 +25,11 @@ the branch, the tests and the never-widen pair text below.
 - Owed before the build ships: `tests/test_resident_worker.py -k release` (5 cases), the whole `ycharts/generate/tests`,
   and `tests/run_offline_suite.py`.
 
+**Where the fitz legs run (laptop `1.0.0_SA_CTO` ruling 106216, relayed by `0.0.0_AB_MSTR~DELL2` msg 536):** no cp314 PyMuPDF wheel
+exists, and the laptop runs PyMuPDF 1.27.1 under Python 3.12.10. Two legs therefore run on the laptop by relay: this
+release's `ycharts/generate` tests, and E-Y4 leg 2. For each one, `2.0.0_SA_COO~G2` sends the laptop one command at a named
+commit, the commit that carries the applied patch, and names the dell2 seat that receives the result file.
+
 ## Never-widen pair text (blast radius)
 
 **Property moved:** the SQS visibility timeout of a message on the generation queue after a read-back refusal.
