@@ -45,3 +45,70 @@ tells `2.0.0_SA_COO~X` the time before the put.
 ## C2 -- the served read before and after (owed at the act)
 
 One covered name with a universe-sourced peer, its peers block through the scoped API; `resolve()` on five universe-sourced keys.
+
+---
+
+# THE ACT RAN (2026-10-07 13:15:47Z) -- BRANCH A: `OK: uploaded`, 242 records; C2 read (a); the act stands
+
+Everything above was written before the put. C1 is answered above (branch a). This section is the act.
+
+## C3 -- timing
+
+`2.0.0_SA_COO~X` reported the 13:00Z AMGT_CORPUS fire READ (msg 30936, 13:14Z: `already_current 0 pulled 96 rc 0`, ended 13:13Z,
+the induction step `pool_puts 0`), on its statement @bcffc028d5 that the fire reads the pool crosswalk. The put ran after that
+read. `2.0.0_SA_COO~X` was told the time first (this seat's msg at 13:15:05Z).
+
+## The base, re-read at 13:15:22Z, immediately before
+
+6 keys under `crosswalk/v1/`, newest `2026-09-29.json`, ONE version `cFEovcK7Oye9K7PFrckMAbELVJW_xj02` (599,016 B);
+`2026-10-07.json` absent; `universe/v1/` 3 keys, newest `2026-10-06.json`; `registrations.json` 71 rows; `lib/research/identity`
+clean in the shared tree at fde4a80cc5.
+
+## The put
+
+`python -m lib.research.identity.crosswalk --as-of 2026-10-07 --write-pool`, started 13:15:47Z, rc 0, done 13:15:49Z:
+`OK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-10-07.json ContentLength=745570 document-sha256=4c965620...c0efc5 schema-version=1 records=242 MEASURED=242 UNRESOLVED=0`
+
+## Read-back of the WRITTEN object (not the run's own line)
+
+| read | value | predicted in the read @2568bc92a2 |
+|---|---|---|
+| object | 745,570 B, **VersionId `1b0PNH1yqkGnLoyRbOHwEZTxBleOBxib`**, LastModified 13:15:52Z, metadata sha matches the run's | -- |
+| records | 242 | 242 |
+| added keys | `BE_US_Equity`, `DG_US_Equity`, `ED_US_Equity`, `GEV_US_Equity`, `MRNA_US_Equity` | the same five |
+| served keys missing | 0 | 0 |
+| fields changed on the 237 | `provenance` 231, `source_row` 191, `raw_identifier` 158; no other field | the same three counts |
+| `raw_identifier` pattern (old = new + " Equity") | 158 of 158 | 158 of 158 |
+| `source_row.folder` changes | 0 | 0 |
+| keys under the prefix | 7, newest `crosswalk/v1/2026-10-07.json` | -- |
+
+Every number equals the prediction. The object is the one the pair signed.
+
+## C2 -- the served read through the live route, before and after (same script, same name)
+
+`POOL_REMINT_C2_BEFORE_20261007.json` (12:32:47Z, pool 2026-09-29, 237) and `POOL_REMINT_C2_AFTER_20261007.json` (13:16:19Z,
+pool 2026-10-07, 242), by `checks/r77_pool_remint_c2_read.py` on `2317_TT_Equity`:
+
+| read | before | after |
+|---|---|---|
+| `/overlay` status | 200 | 200 |
+| peer identities (key, resolution), 13 | -- | the SAME list, 13 of 13 |
+| the peers block, sha256 | `c10b919f...` | EQUAL |
+| `resolve("2602335D_US_Equity")`, `MSFT_US_Equity`, `PLTR_US_Equity` | MEASURED, `<root> US Equity` | MEASURED, `<root> US` |
+| `resolve("BE_US_Equity")`, `GEV_US_Equity` | UNRESOLVED | **MEASURED**, `<root> US Equity` |
+| control `AMD_US_Equity` | MEASURED, `AMD US Equity` | MEASURED, `AMD US` |
+| negative control `CSCO_US_Equity` (in neither object) | UNRESOLVED | UNRESOLVED |
+
+Branch (a) of C2: 200 both times, the same peer keys and resolutions, and the only differences are the `raw_identifier` form and
+the two added names becoming keyed. No peer that was keyed is now unkeyed.
+
+**One limit, stated:** the served peers block is byte-EQUAL, so the deployed route did not show even the `raw_identifier` change
+on this name's peers. Either that block is built from a stored peer set, or a warm container still holds the earlier pool; this
+read does not say which, and a cold start was not forced. The pool-side `resolve()` reads are from this seat's process, on the new
+object. The peers block of a name that has one of the five added names as a peer was not read (no covered name was searched for
+one).
+
+## Rollback target for the NEXT same-day put (ba-23)
+
+`crosswalk/v1/2026-10-07.json` VersionId `1b0PNH1yqkGnLoyRbOHwEZTxBleOBxib` is the object to restore by copy-object if ba-23's put
+is wrong. The 2026-09-29 object is untouched (one version, `cFEovcK7...`).
