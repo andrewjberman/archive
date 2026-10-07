@@ -1,0 +1,41 @@
+{
+ "driver": "entry",
+ "event": {
+  "pathParameters": {
+   "exportId": "${EXPORT_A}"
+  },
+  "receipt_fixture": {
+   "$include": "infra/aws/lambda/investor-reporting/_contracts/fixtures/ExportReceipt.valid.json",
+   "$instance": true,
+   "$patch": {
+    "artifact.storage_bucket": "opal-data-fixture",
+    "artifact.storage_key": "firms/49financial/generations/${EXPORT_A}/artifact.pdf",
+    "download_route.route": "/api/scoped/investor-reporting/export/${EXPORT_A}/download",
+    "export_ref.export_id": "${EXPORT_A}",
+    "facts.account_ids": [
+     "${A1}",
+     "${A2}"
+    ],
+    "timestamps.created_at": "2026-10-02T09:00:00Z",
+    "timestamps.released_at": "2026-10-02T09:01:00Z"
+   }
+  }
+ },
+ "expect": {
+  "data_contains": [
+   "${EXPORT_A}",
+   "${A1}"
+  ],
+  "outcome": "SERVED"
+ },
+ "fixture_schema": "irpt-gated-route-fixture/1",
+ "function": "irpt-export-render",
+ "notes": "the receipt is the entry's own offline seam (`receipt_fixture`, the object `_load_receipt` would read from the bound firm's S3 prefix). A contract-shaped receipt names no account (ExportReceipt.facts is closed), so the entry's `facts.account_ids` coverage branch is exercised with the ids this fixture adds; the foreign_object case is refused NOT_FOUND on purpose (refused whole, indistinguishable from absent).",
+ "operation": "export-receipt",
+ "principal_class": "ALLOWED: FIRM_ADVISOR ADV-A-0001 of 49financial, grant A1+A2+A3",
+ "request_contract": [
+  "docs/contracts/investor-reporting/v1/routes.json#GET /api/scoped/investor-reporting/export/{exportId}",
+  "docs/contracts/investor-reporting/v1/ExportReceipt.schema.json"
+ ],
+ "route": "GET /api/scoped/investor-reporting/export/{exportId}"
+}
