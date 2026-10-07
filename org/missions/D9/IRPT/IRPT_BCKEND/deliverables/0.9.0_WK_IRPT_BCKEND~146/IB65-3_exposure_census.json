@@ -1,0 +1,24 @@
+{
+ "log_groups": [
+  "/aws/lambda/irpt-export-render"
+ ],
+ "serving_function": "irpt-export-render (API Gateway opal-portal-data-proxy-api $default stage routes GET /api/scoped/investor-reporting/export/{exportId}, GET .../{exportId}/download and POST .../export all AWS_PROXY to this one function; no other function serves export reads; the stage has no access-log setting)",
+ "window": "2026-09-24T23:38:48Z/2026-10-06T01:36:40Z (first/last retained event of /aws/lambda/irpt-export-render; group retention 14 days). Fail-open window served: source 4356085122 (2026-09-11T16:44:51Z) through the live function (LastModified 2026-10-06T01:35:28Z, CodeSha256 exDoi/uo5e..., deploy 8ae7ad4a), still open at read time 2026-10-07T12:09Z; deploys d165f160, 4635d40c and 8ae7ad4a each carry the `if not named: return True, 0, 0` branch.",
+ "events_scanned": {
+  "/aws/lambda/irpt-export-render": 531
+ },
+ "invocations_scanned": {
+  "/aws/lambda/irpt-export-render": 141
+ },
+ "invocation_outcomes": {
+  "export-receipt refused (logged irpt_error)": 15,
+  "submit-export refused (logged irpt_error)": 13,
+  "submit-export accepted or async-leg line": 13,
+  "silent (no application line)": 100,
+  "total_invocations": 141
+ },
+ "count": 0,
+ "cross_scope_reads": [],
+ "blocking_row": "",
+ "limits": "COUNT 0 IS 'NONE IDENTIFIED', NOT 'NONE OCCURRED'. The function logs ONLY refusals (irpt_error with a correlation id, operation and public_reason_code) and the submit/async accept lines; a SUCCESSFUL export-receipt or export-download read writes no application line at all, and no line anywhere records the caller's identity, the caller's permitted_account_set, the receipt's named accounts, or whether _covered took the `if not named` branch. 15 logged export-receipt invocations were REFUSED (7 NOT_FOUND, 4 NOT_AUTHORIZED, 2 DEPENDENCY_UNAVAILABLE, 1 NOT_READY, 1 FIRM_BINDING): none is an admission. The other 100 of 141 invocations are SILENT and cannot be classified from the log (operation unknown); ~96 sit in two scripted bursts on 2026-10-03 (~2 s cadence, ~0.4 s each) and 4 pairs around deploys on 2026-10-05/06 (inferred probes, not proven), and any of them could be a successful read. Whether such a read had an empty covered set for a caller outside the export's accounts needs the receipt's facts (firm bucket, denied to this identity, row S347) and the caller's scope at read time (not retained); neither is in a log. Logs before 2026-09-24T23:38:48Z are gone (14-day retention) while the fail-open source dates from 2026-09-11, so about 13 days of the window (2026-09-11..09-24) are UNOBSERVABLE; there is no deploy record for irpt-export-render before 2026-10-04T21:55:07Z in infra/aws/terraform/investor-reporting/CHANGELOG.json. Exposure is also narrower than 'any caller': the guard still binds the firm (the receipt key is built from the verified firm) and only receipts whose facts name no account_ids/accountIds/covered_account_ids reach the branch, so the exposed population is a same-firm advisor holding an export id whose receipt carries no account list. A probe of /aws/lambda/opal-portal-authorizer (13,688 events, timed out before completing, so NOT counted as scanned) showed no line naming an export and that function does not log request paths. No WAF or CloudFront request log was read; those do not record the authorization decision."
+}
