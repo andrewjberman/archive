@@ -21,8 +21,11 @@
  *   - the plant was seen ([data-r49-plant] present is implied by the FAIL; a PASS means the plant did not land or the clause is blind).
  * The CONTROL is the same copy with an injected element that violates nothing (Lato 14 px, weight 400, black on white, no radius, no
  * shadow): all eight clause cells read PASS on it. A clause whose control cell is not PASS proves nothing, so that pair is refused.
- * Prints one line per clause, then "EVERY CLAUSE FAILS ITS PLANTED PAGE BESIDE A CLEAN CONTROL: <k> of 8 clauses"; exit 0 only at 8 of 8
- * with the control clean. No network; writes only under the scratch root.
+ * A NINTH pair grades FWD-20's "the three states of FWD-19 present" (run.fwd19_designedStates): see STRIP_ERROR_JS below. It is two
+ * full six-state sweep runs, about nine minutes each.
+ * Prints one line per clause, then "EVERY CLAUSE FAILS ITS PLANTED PAGE BESIDE A CLEAN CONTROL: <k> of 9 clauses" (the denominator
+ * shrinks, and says FILTERED, under PLANTS49_ONLY); exit 0 only when every pair passes and the control is clean. An unfiltered run
+ * takes about 23 minutes. No network; writes only under the scratch root.
  */
 'use strict'
 const { spawnSync } = require('node:child_process')
