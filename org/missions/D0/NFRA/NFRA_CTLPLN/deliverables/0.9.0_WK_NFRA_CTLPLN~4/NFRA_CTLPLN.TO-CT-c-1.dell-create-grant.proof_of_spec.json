@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-c-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-c-1.dell-create-grant.md",
+    "group": "OTHER",
+    "vintage_commit": "2abeda287a"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~4",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round3.md",
+    "vintage_commit": "2abeda287a",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-c-1.dell-create-grant.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_create_policy.json",
+      "kind": "config_data",
+      "commit_or_etag": "d452dcffe5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the IAM-creating apply is the issuer's route at site Z"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/iam.tf",
+      "kind": "config_data",
+      "commit_or_etag": "d452dcffe5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the IAM-creating apply is the issuer's route at site Z"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_resource_kinds.py",
+      "kind": "test",
+      "commit_or_etag": "d452dcffe5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the IAM-creating apply is the issuer's route at site Z"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "kind": "test",
+      "commit_or_etag": "d452dcffe5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the IAM-creating apply is the issuer's route at site Z"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
+      "kind": "test",
+      "commit_or_etag": "d452dcffe5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform and static/simulation tests only; nothing applied, no AWS write; the IAM-creating apply is the issuer's route at site Z"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT3c1-AC1",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_resource_kinds.py expect: uncovered=0 ok=True",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_resource_kinds.py",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_resource_kinds.py`: KINDS-DERIVED projects=10 roots=12 kinds=62 grant=52 iam=5 held_access=4 not_aws=1 uncovered=0 ok=True (rc 0). Negative control: the same derivation against dell_deploy_policy.json alone gives uncovered=49 ok=False (rc 1).",
+      "denominator": "52 of 52 GRANT kinds have their create action allowed; 52+5+4+1 = 62 kinds; 10 Dell-placed projects, 12 roots",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CT3c1-AC2",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect: POLICY-SIM allowed_ok=17/17 denied_ok=17/17 all_ok=True",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py`: POLICY-SIM allowed_ok=17/17 denied_ok=17/17 all_ok=True (rc 0). Decisions returned: the nine original IAM/cloudtrail/s3/dynamodb denials and iam:PassRole, iam:CreateRole are explicitDeny; the two sqs:ReceiveMessage denials, s3:PutBucketPolicy, lambda:AddPermission, kms:PutKeyPolicy, secretsmanager:PutResourcePolicy are implicitDeny.",
+      "denominator": "17 of 17 allowed, 17 of 17 denied (dell1 effective set: both group policies + dell1_bus_policy.json in one simulate_custom_policy call)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CT3c1-AC3",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py expect: names_from_builder=7/7 policy_size_ok=True ok=True",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
+      "output_evidence": "Run as `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py`: init rc=0; validate rc=0: Success! The configuration is valid. | IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=7/7 policy_size_ok=True ok=True (rc 0, 7.5 s). Policy characters without whitespace against 6,144: dell_deploy_policy.json 2929, dell_create_policy.json 3250, dell1_bus_policy.json 276, dell2_bus_policy.json 276. terraform init was warmed once outside the bound (7.5 s; the provider was already in the plugin cache, .terraform.lock.hcl unchanged), then run under timeout 120 for this record.",
+      "denominator": "7 of 7 names equal builder output; 4 of 4 policy documents within 6,144",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "derivation run against the deploy policy alone (create policy withheld)",
+      "expected": "uncovered > 0, ok=False",
+      "observed": "uncovered=49 ok=False, rc 1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the cloud evaluator is deterministic over fixed input",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform apply, plan against the backend, any IAM write",
+      "reason": "order BOUNDS: apply nothing; the only AWS call is the read-only iam:SimulateCustomPolicy"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W4-S1",
+    "NFRA_CTLPLN-W4-S2",
+    "NFRA_CTLPLN-W4-S3",
+    "NFRA_CTLPLN-W4-S4",
+    "NFRA_CTLPLN-W4-S5"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~4/NFRA_CTLPLN.TO-CT-c-1.dell-create-grant.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "terraform",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity validate",
+      "result": "Success! The configuration is valid."
+    }
+  ]
+}
