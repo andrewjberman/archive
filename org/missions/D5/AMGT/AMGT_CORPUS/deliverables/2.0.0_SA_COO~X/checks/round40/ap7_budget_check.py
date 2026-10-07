@@ -5,10 +5,12 @@ RIVALFUNDS_BBG_BUDGET_DIR, so the Terminal machine's real ledger is never writte
   python ap7_budget_check.py        (from the repository root, PYTHONPATH=.)
 
 Prints `ap7b build <b>/2 control <c>/2`.
-  build    b1  `model_block_pull.record_fire_budget(calls=768, security_fields=13824, figures=66879, stamp="20261007T130000Z")`
+  build    b1  `model_block_pull.record_fire_budget(calls=768, security_fields=13824, figures=66879, records=4224,
+               stamp="20261007T130000Z")`
                appends ONE line to the day's ledger through `bbg_budget.record`: mode "amgt-model-block", rows 66879 (the
                largest of the three, until the collector's unit is named), and a batch_id that carries calls=768,
-               security_fields=13824, figures=66879 and the word naming which of them `rows` is;
+               security_fields=13824, figures=66879, records=4224 (returned records, the ledger's own unit, CTO ruling msg 31310)
+               and the word naming which of them `rows` is;
            b2  `bbg_budget.spent()` for today then reads 66879 more than before.
   control  c1  with the ledger directory unwritable (a path under a FILE), the call returns False and raises nothing: a fire is
                never blocked by bookkeeping;
@@ -48,7 +50,7 @@ before = budget.spent()
 detail = "record_fire_budget is not defined"
 if callable(fn):
     try:
-        ok = fn(calls=768, security_fields=13824, figures=66879, stamp="20261007T130000Z")
+        ok = fn(calls=768, security_fields=13824, figures=66879, records=4224, stamp="20261007T130000Z")
         files = sorted(f for f in os.listdir(tmp) if f.endswith(".jsonl"))
         lines = []
         for f in files:
@@ -59,7 +61,8 @@ if callable(fn):
             line = lines[0]
             bid = str(line.get("batch_id", ""))
             b1 = 1 if (line.get("mode") == "amgt-model-block" and line.get("rows") == 66879 and "calls=768" in bid
-                       and "security_fields=13824" in bid and "figures=66879" in bid and "rows_unit=" in bid) else 0
+                       and "security_fields=13824" in bid and "figures=66879" in bid and "records=4224" in bid
+                       and "rows_unit=" in bid) else 0
         b2 = 1 if budget.spent() - before == 66879 else 0
     except Exception as exc:
         detail = "raised %s: %s" % (type(exc).__name__, exc)
@@ -68,7 +71,7 @@ if callable(fn):
         fh.write("x")
     os.environ["RIVALFUNDS_BBG_BUDGET_DIR"] = os.path.join(blocker, "under_a_file")
     try:
-        c1 = 1 if fn(calls=1, security_fields=1, figures=1, stamp="20261007T130001Z") is False else 0
+        c1 = 1 if fn(calls=1, security_fields=1, figures=1, records=1, stamp="20261007T130001Z") is False else 0
     except Exception as exc:
         detail += " | unwritable ledger raised %s" % type(exc).__name__
 calls = 1 + math.ceil(len(mbp.HIST_FIELDS) / float(mbp.HIST_FIELDS_PER_REQUEST)) + len(mbp.FORECAST_OVERRIDES)
