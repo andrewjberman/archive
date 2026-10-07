@@ -9,6 +9,11 @@ Prints "<id> PASS" or "<id> FAIL" as the last line. Finishes inside 120 s (reads
               new_export_ready true with admitted_read_log_lines >= 1; performance_ready and analysis_ready true; live_entry_sha256
               starts fc241d806ecc; outside_principal_refused true and opal_caller_served true; ledger_closed true; rolled_back false.
               Base: FAIL (no file).
+              AMENDMENT 1 (issuer ruling on row S382, CTO REC msg 757): new_export_ready, performance_ready and analysis_ready may
+              read "OPEN-BY-DESIGN" (no authenticated Opal principal exists to submit a new export without an auth-plane write the
+              order forbids); then admitted_read_log_lines may be 0 and open_leg_discharge must name the discharge (the first
+              real Opal export read with its irpt_export_read_admitted line). The exposure arms (outside_principal_refused,
+              opal_caller_served, existing_export_refused) stay strictly true.
 """
 import base64
 import json
@@ -21,8 +26,9 @@ F = P + "/deliverables/0.7.0_AE_CloudOps~I/IB68-1_release_after_reads.json"
 PIN = "b921635dad"
 NINE = {"entry.py", "receipt.py", "bundle.py", "finalize_on_read.py", "handler.py", "retained_export.py", "narrative_submit.py",
         "submit_service.py", "submit_installed.py"}
-TRUE_KEYS = ("existing_export_refused", "new_export_ready", "performance_ready", "analysis_ready", "outside_principal_refused",
-             "opal_caller_served", "ledger_closed")
+TRUE_KEYS = ("existing_export_refused", "outside_principal_refused", "opal_caller_served", "ledger_closed")
+OPEN_OK_KEYS = ("new_export_ready", "performance_ready", "analysis_ready")
+OPEN = "OPEN-BY-DESIGN"
 
 
 def main():
@@ -49,7 +55,14 @@ def main():
     for k in TRUE_KEYS:
         if d.get(k) is not True:
             fail("%s is %r" % (k, d.get(k)))
-    if not isinstance(d.get("admitted_read_log_lines"), int) or d["admitted_read_log_lines"] < 1:
+    opened = [k for k in OPEN_OK_KEYS if d.get(k) == OPEN]
+    for k in OPEN_OK_KEYS:
+        if d.get(k) is not True and d.get(k) != OPEN:
+            fail("%s is %r" % (k, d.get(k)))
+    if opened:
+        if not str(d.get("open_leg_discharge", "")).strip():
+            fail("%s OPEN-BY-DESIGN without open_leg_discharge" % opened)
+    elif not isinstance(d.get("admitted_read_log_lines"), int) or d["admitted_read_log_lines"] < 1:
         fail("no admitted-read log line")
     if d.get("replan_changes") != 0:
         fail("replan_changes %r" % d.get("replan_changes"))
@@ -64,7 +77,7 @@ def main():
     built = str(d.get("built_sha", ""))
     if built not in (live, base64.b64decode(live).hex()):
         fail("built %r != live CodeSha256 %r" % (built, live))
-    print("OK: pin %s, 9 of 9 members, live CodeSha256 == built, every after-read holds" % PIN)
+    print("OK: pin %s, 9 of 9 members, live CodeSha256 == built, exposure arms hold; open by design: %s" % (PIN, opened or "none"))
     print("%s PASS" % cid)
 
 
