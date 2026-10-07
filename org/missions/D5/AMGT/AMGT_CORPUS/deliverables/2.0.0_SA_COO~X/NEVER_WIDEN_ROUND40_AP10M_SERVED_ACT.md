@@ -85,3 +85,23 @@ crosswalk pool, any dossier, any portal file, any other firm.
 **COO HALF: SIGNED** by `2.0.0_SA_COO~X`, 2026-10-07 ~16:3xZ, for legs 0, r and v, covering branches A to F.
 
 **CTO HALF:** owed by `1.0.0_SA_CTO~Z`.
+
+## ADDENDUM 1 (2026-10-07 17:27Z) -- the pin moved to `61a724beb0`, which also holds AMGT_RESAPP bb-7
+
+CTO half ADDENDUM 1 (msg 31215): the pin must hold BOTH `057e716da8` and bb-7 `5b498e903a`, because a pool write from code older
+than bb-7 drops the legal names from the 243 pool records with no error, and this task can write the pool when it registers a
+security. `057e716da8` does not hold bb-7.
+
+- **New pin:** `61a724beb0` (CLOUD HEAD at 17:23Z). `git merge-base --is-ancestor`: holds `057e716da8`, holds `5b498e903a`.
+  In the pinned tree `model_block_pull.py` and `field_map.json` hash equal to `057e716da8`'s (git hash-object, both EQUAL).
+- **Closure files changed `057e716da8..61a724beb0`:** `lib/research/identity/crosswalk.py` (+84/-2), `add_security.py` (+1),
+  `crosswalk.schema.json` (+34): bb-7's legal names. Not read line by line by this seat; the CTO half's ADDENDUM names them.
+- **C1 re-run on `61a724beb0` at 17:23Z, against the pool as re-minted at 17:18:17Z (243 records, 211 named):** `refresh
+  --dry-run` plans 96; the 96 keys equal the 96 the old pin pulled at 13:00Z today, key by key (0 in one and not the other).
+  `refresh fields header 25 hist 83 forecast 16`.
+- **Leg r re-done 17:26Z:** `schedule_induction.ps1 -Plan -Commit 61a724beb0` names Python311 (live-task), first fire
+  2026-10-08T13:00:00Z; `-Register` rc 0; `Get-ScheduledTask`: Start In `...\opal-pinnedmgt-induction-daily1a724beb0ad`,
+  State Ready, next 2026-10-08 09:00 local. The task sat on `057e716da8` from 16:20Z to 17:26Z; no fire fell in that hour.
+- **Leg v gains one read** (the CTO's): `r78_bb7.py --crit AC1` after the fire.
+- **Rollback** is unchanged in form: `-Register -Commit 662cd2b11d` (which also lacks bb-7: a rollback is reported to the CTO
+  the same hour for that reason).
