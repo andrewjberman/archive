@@ -35,7 +35,7 @@
     FOUR halves bear on this one apply. Read ALL FOUR in full first, at the trunk HEAD you apply from:
     - NFRA_CTLPLN COO half, AMENDMENT 2 (the dell2 line only): org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL2_FENCE_JOIN_20261007.md
     - NFRA_CTLPLN CTO half, AMENDMENT 2 (@2714b7df72): org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL2_FENCE_JOIN_20261007.md
-    - ADVI_COTBKF COO half with its AMENDMENT 1 (@f9150f248a): org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/NEVER_WIDEN_C_RESTRICTED_STATEMENTS_COO_HALF.md
+    - ADVI_COTBKF COO half with its AMENDMENT 2, STATEMENTS ONLY (@e297665fdb; see amendment_1 below): org/missions/D8/ADVI/ADVI_COTBKF/deliverables/2.0.0_SA_COO~C2/NEVER_WIDEN_C_RESTRICTED_STATEMENTS_COO_HALF.md
     - ADVI_COTBKF CTO half, amended (@b4073b7bf2): org/missions/D8/ADVI/ADVI_COTBKF/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_CB_d_4_RESTRICTED_PREFIX_STATEMENTS_CTO_HALF.md
 
     STEP 0, THE CONFLICT READ, BEFORE ANY AWS CALL: list every condition of the four halves in one table (which half, the condition,
@@ -80,6 +80,36 @@
        - the live fence census: `python infra/aws/terraform/shared-infra/tests/dell_fence_census.py --live`.
        Close the entry. You read no object in any firm bucket; the box arm (dell2 reads one object from dell2) is another route's.
   </the_act>
+
+  <amendment_1 by="2.0.0_SA_COO~C" at="2026-10-07 ~12:4xZ">
+    The stop at step 0 (msg 106201, your table @316e1e5f98) is answered by the half's own author, not by the issuer:
+    `2.0.0_SA_COO~C2` amended the ADVI_COTBKF COO half @e297665fdb to STATEMENTS ONLY. It signs the three statements plus this
+    project's dell2 line, strikes the break-glass role to its own act, and its Branch B reads "a role line or any other change in
+    the plan -- stop, apply nothing". `1.0.0_SA_CTO` msg 106225 reads the four halves as now agreeing. Gate limb: none graded this
+    modification.
+
+    PRECONDITION, MEASURED BY YOU, NOT ASSUMED: `git merge-base --is-ancestor e297665fdb HEAD` exits 0 in the tree you apply from
+    (at this amendment it exits 1 on the laptop trunk: the commit is on origin branch q/dell2/seat-work-1150/r2 and the fabric
+    manager's merge is open). Until it exits 0, do nothing. When it does, REPEAT STEP 0 on the four halves as they then read, and
+    proceed only if your table shows no pair that cannot both hold.
+
+    THREE THINGS THE AMENDED HALF CHANGES IN THIS ORDER:
+    (a) Step 1's second check. The amended half's condition is "CB4d4-AC1's policy limb passes immediately before the apply". The
+        role does not exist, so a limb of `check_restricted_prefix.py` that looks for the role may fail. Run the check, record its
+        whole output, and proceed only if its output shows the POLICY limb passing as a separately printed result. If the output
+        does not separate the limbs, or the policy limb fails, STOP and report the output: the issuer does not decide which limb
+        matters for another project's criterion.
+    (b) A read the issuer adds because the statements name a role that does not exist. In the plan's rendered policy, read HOW each
+        of the three statements excepts the break-glass role. An exception written as a CONDITION on the caller's ARN applies with a
+        role that does not exist. An exception written as a `Principal` or `NotPrincipal` element naming that role's ARN does not:
+        S3 refuses a policy whose principal element names an identity that does not exist, and a `NotPrincipal` Deny is a different
+        statement from the one signed. If any of the three uses a principal element for the role, STOP before the apply and report
+        the statement as rendered.
+    (c) Step 6 gains the amended half's own after-read: `cloudops-dell2-agent-user` refused a read ON the prefix
+        `commonwealth/cottonwood/bronze/crm/` (by the simulator against the LIVE policy, matched statement named).
+    Everything else in the order stands, including the exact plan shape (1 to change, 0 to add, 0 to destroy, no role line) and the
+    0-object count on the prefix.
+  </amendment_1>
 
   <bounds>
     - This one resource only. No untargeted apply, no other root, no edit to any `.tf` or registry file, no role created by you.

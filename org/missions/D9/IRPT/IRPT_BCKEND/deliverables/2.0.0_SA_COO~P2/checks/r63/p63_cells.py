@@ -69,7 +69,7 @@ def main():
         if flagged:
             fail("still written test.failing: %s" % flagged)
         bun = "bun"
-        rc, out = _run([bun, "test", "src/pages/InvestorReporting/__tests__/ir-62-overage/"], root / "portal")
+        rc, out = _run([bun, "--no-install", "test", "src/pages/InvestorReporting/__tests__/ir-62-overage/"], root / "portal")
         m = re.search(r"(\d+) pass", out)
         f = re.search(r"(\d+) fail", out)
         if rc or not m or (f and int(f.group(1)) > 0):

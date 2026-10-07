@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e43",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "90f99888cd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "5d70aab6c9",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e43.resolve-tickers-canonical-first.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~33",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/classification/resolve_tickers.py",
+      "kind": "script",
+      "commit_or_etag": "a84955405a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New method canonical_name (1.0), method 1b: after bd_feed, before bd_securities_exact; read-only etf-classifications scan keeping rows carrying name. No deploy, no --upload, no vendor call; ruff clean through commit-gate.",
+      "artifact_covered_by": ["SC9-e43-AC1"]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/classification/tests/test_resolve_tickers_canonical_first.py",
+      "kind": "script",
+      "commit_or_etag": "a84955405a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 tests, S3, DynamoDB and yfinance stubbed (yfinance stub raises on any use).",
+      "artifact_covered_by": ["SC9-e43-AC1"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/RESOLVE_TICKERS_GAP_20261007.md",
+      "kind": "doc",
+      "commit_or_etag": "a84955405a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "asset_name_raw 10904 and name_aliases 6 old-list rows (of 10,965), 0 of 3,507 canonical rows carry either; CANONICAL-FIRST-HITS 142 of 4,615 distinct held names (claim inferred, row W25-S1).",
+      "artifact_covered_by": ["SC9-e43-AC2"]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/resolve_tickers_switch_check.py",
+      "kind": "script",
+      "commit_or_etag": "a84955405a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only DynamoDB scans (bd-securities, etf-classifications); writes one local md; no upload.",
+      "artifact_covered_by": ["SC9-e43-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC9-e43-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py data/black_diamond/scripts/classification/tests/test_resolve_tickers_canonical_first.py -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py data/black_diamond/scripts/classification/tests/test_resolve_tickers_canonical_first.py",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=6 passed in 1.12s (rc=0)",
+      "denominator": "6 of 6 tests passed: canonical name before old list (method label canonical_name, ticker AAPL not the old list's OLDT), old-list-only name by bd_securities_exact, name in neither falls through, NAME::/CUSIP:/ambiguous canonical rows not resolved, scan keeps only rows carrying name",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC9-e43-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/issuer_check_sc_e43.py -- expect: SC-E43-GAP ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/issuer_check_sc_e43.py",
+      "expect": "SC-E43-GAP ok=True",
+      "output_evidence": "SC-E43-GAP ok=True attributes=2 canonical_first_hits=142 file=RESOLVE_TICKERS_GAP_20261007.md (rc=0)",
+      "denominator": "2 of 2 attribute sections; old-list scan 10,965 bd-securities rows (asset_name_raw 10,904; name_aliases 6); canonical scan 3,507 etf-classifications rows (0 carry either); 142 canonical-first hits of 4,615 distinct held names (inferred)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy of resolve_tickers.py with the canonical_name call replaced by `canon = {}`, run against a copy of the test file in .scratch (uncommitted).",
+      "expected": "PYTEST-BAD: the canonical-first tests fail",
+      "observed": "PYTEST-BAD rc=1 summary=2 failed, 4 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both criteria re-run on the committed tree after the commit.",
+      "observed": "PYTEST-OK 6 passed; SC-E43-GAP ok=True canonical_first_hits=142, identical to the pre-commit run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A real run of resolve_tickers.py (with or without --upload) and any yfinance call.",
+      "reason": "BOUNDS: no S3 or table write, no vendor call; the tests stub yfinance and the dry run never reached that path (row S11 carries the vendor check for a real run)."
+    },
+    {
+      "item": "The served per-firm Holdings objects as the held-names source.",
+      "reason": "Unreadable from this device (row MDPF_SECCLASS-W25-S1); the held names come from the producer's own local build as-of 2026-10-05, claim inferred."
+    }
+  ],
+  "surprises": ["MDPF_SECCLASS-W33-S1"],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/resolve_tickers_switch_check.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on the .py files)",
+      "result": "ruff clean after clearing three pre-existing findings in resolve_tickers.py and one in the new test; commit a84955405a landed"
+    }
+  ]
+}
