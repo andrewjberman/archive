@@ -101,6 +101,8 @@ function load(rel, names, consts) {
     // AMENDMENT (row AMGT_CORPUS-Z-W5-S8): the shared locator helper is REAL code the cells' words depend on, so it is
     // loaded, not stubbed. It is a pure module (no imports of its own that matter here).
     if (/(^|\/)dossierLocator$/.test(name)) return realModule('dossierLocator.ts')
+    // AMENDMENT 2 of ap-4: the helper lives in reasonWords.ts (a module the page's own harness loaders already resolve).
+    if (/(^|\/)reasonWords$/.test(name) && fs.existsSync(path.join(portalRoot, 'src', 'pages', 'SecurityAnalysis', 'reasonWords.ts'))) return realModule('reasonWords.ts')
     return stubModule
   }
   vm.runInNewContext(out, { module: mod, exports: mod.exports, require: req, console, React })
