@@ -1,0 +1,267 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ba-20",
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-20.the-code-redeploy.md",
+  "vintage_commit": "471a980737"
+ },
+ "assignee": "0.7.0_AE_CloudOps~A",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "genre": "DEPLOY",
+ "risk_class": "WORLD",
+ "scope": "ONE code redeploy of opal-amgt-scoped-api carrying every round-77 build cell (ba-1..ba-3, ba-6..ba-12, ba-14..ba-18, ba-25) plus ONE gateway route swap (POST /api/scoped/amgt/refresh removed, GET /api/scoped/amgt/resolve added), then ONE snapshot event. No memory change, no IAM change, no S3 delete, no vendor or SEC call, no shared-branch push, no portal promote.",
+ "status": "COMPLETE",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-20.the-code-redeploy.md",
+  "group": "OTHER",
+  "vintage_commit": "471a980737"
+ },
+ "go_message": "msg 30546 from 2.0.0_SA_COO~Z at 2026-10-07T04:05:23Z, acked READ by this seat. It names the order, the build commit 14a36147bd, both halves, the CONTENT-DIFF shape (CHANGED 8 + ADDED 8), the one admitted route swap, the one snapshot event, and that r77_deployed_cells.txt holds THREE lines so AC1 reads 3 of 3. The order's own ISSUER GO stanza is the spec and carries the same figures.",
+ "never_widen_pair": {
+  "coo_half": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/NEVER_WIDEN_HALF_COO_BA20.md @b0bb011946 -- the live working-tree bytes were hashed against the blob at that pin (05c2af4c34da21390ccdbf9f4e812ab3c9fc4661 both sides), so the half read here IS the half signed.",
+  "cto_half": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND77_BA20_CTO_HALF.md @90de9b291b, VERDICT SIGNED, conditions 1-6 -- live bytes hashed against the blob at that pin (84a282a062d28c3e25dc0f1da02ea5028163430d both sides). As in round 76 the GO stanza cites it as 'ledger/...': the file is under the PROJECT ledger org/missions/D5/AMGT/AMGT_RESAPP/ledger/, not org/tier0/ledger/.",
+  "conditions_this_cell_owns": "1 (UNTARGETED plan, memory_size 1769, NEVER-2 opened before the apply), 2 (the bytes moved), 3 (the deployed reads), 6 (exactly one snapshot invoke, stamp read, rows EQUAL). Conditions 4 (the Refresh control pressed once on DEV) and 5 (/resolve through the gateway) are explicitly carried by ba-24's walk, not by this cell -- see declared_exclusions."
+ },
+ "rollback": "NAMED PER KEY AND NOT TAKEN, because every criterion read YES. CODE: the prior artifact version AEDyCJJPpYRRIfJEWYFRaXxP9g5nRYsw (ContentLength 41965684, content-sha256 OVpDhfwDG3BzKE++wDxMlFA6JrwpTnH3FiHC+NrzsrE=, LastModified 2026-10-06T20:03:40Z), restored through the module by ONE code-only safe-apply -- and the pair binds the code and the route list to roll back TOGETHER, never one without the other. SNAPSHOT OBJECT: a copy-object of VersionId JG_6dEHiqJz..PozaZFTXiUFGezcwPky (ContentLength 2889391, LastModified 2026-10-06T20:18:24Z), NEVER an S3 delete. Both BEFORE values were measured on the exact keys before the writes (head-object on each), not reconstructed afterwards.",
+ "controls": {
+  "the_build_was_pinned_by_EQUALITY_and_the_pin_was_proved_load_bearing": {
+   "description": "The order forbids building 'at or after' 14a36147bd. An ancestry test would admit HEAD. The control is to build in a worktree whose rev-parse EQUALS the pin, and to measure whether the distinction could have changed the artifact.",
+   "expected_landed": "the build tree's rev-parse equals the pin exactly, AND a diff of the packaged inputs between the pin and HEAD is printed so the pin's necessity is measured rather than assumed",
+   "expected_not_landed": "a build from the shared tree at HEAD, or a pin defended only by merge-base --is-ancestor",
+   "observed": "Built in the detached worktree C:/tmp/ba20-build-14a36147bd, rev-parse 14a36147bdacb15cf40867e5801ec7931a469df1, git status --porcelain EMPTY. The pin is LOAD-BEARING and not ceremony: git diff --stat 14a36147bd..HEAD over the packaged inputs reads 5 files changed, 375 insertions(+), 12 deletions(-) in lib/opal_data_harvest/ (backfill_driver.py, publishers.py, transport.py and two tests) -- and lib.opal_data_harvest is a SECOND CLOSURE ROOT of this artifact, so a build at HEAD would have carried files the pair's table does not list and the act would have STOPped. The terraform module itself is byte-identical at the pin and at HEAD (git diff --stat over infra/aws/terraform/harvest/ is empty, working tree clean), which is why the apply could run from the shared tree while the BUILD could not.",
+   "status": "PASS"
+  },
+  "the_content_diff_was_matched_by_IDENTITY_not_only_by_count": {
+   "description": "'CHANGED 8 + ADDED 8' is satisfiable by the wrong 16 files. A count match would pass a rider from another project this round.",
+   "expected_landed": "all 16 moved paths are enumerated and matched one-for-one against the pair's table",
+   "expected_not_landed": "the summary counts are compared and the per-file lines are never read",
+   "observed": "The build's own content_diff run was captured through `tail -120`, which kept the SUMMARY and cut the per-file lines -- a range-limited read is not a read, so content_diff.py was re-run read-only on the same zip and all 16 moved paths were printed and matched BY NAME against the COO half's table: CHANGED api/scoped_amgt.py, api/top_band.py, print/render_pack.py, lists/data/publishers.json, lists/data/social_accounts.json, scores/divergence.py, scores/peers_v.py, harvest/bloomberg.py; ADDED api/name_search.py, api/translated_text.py, filings/__init__.py, filings/section_coverage.py, filings/table_class.py, freshness/stale_rule.py, freshness/page_body.py, lists/owner_line.py. 8 of 8 and 8 of 8, REMOVED 0, no rider.",
+   "status": "PASS"
+  },
+  "the_uploaded_bytes_ARE_the_bytes_that_were_diffed": {
+   "description": "The build script re-builds on the upload path. Trusting determinism would mean the artifact graded by content_diff and the artifact uploaded are two different runs' outputs.",
+   "expected_landed": "ONE build; the zip that content_diff read is the zip uploaded, and the same sha256 is carried from the local file through the S3 read-back to the deployed CodeSha256",
+   "expected_not_landed": "a second build for the upload with byte-identity assumed, or an upload whose sha is never joined to the diffed file",
+   "observed": "One --build-only build produced /c/tmp/ba20-r77-14a36147bd.zip; the module's own upload_verified() (sourced, the same uploader every build-and-upload*.sh uses) sent THAT file. The sha256 chain is unbroken: local file MkM9Kf37nmI+thEmZR+ij8ybbxGrHxqtsonjyI7N5eg= -> S3 read-back content-sha256 MkM9Kf37nmI+thEmZR+ij8ybbxGrHxqtsonjyI7N5eg= with ContentLength 41981131 -> deployed CodeSha256 MkM9Kf37nmI+thEmZR+ij8ybbxGrHxqtsonjyI7N5eg= with CodeSize 41981131.",
+   "status": "PASS"
+  },
+  "the_plan_was_read_UNTARGETED_before_the_apply_and_the_lambda_attribute_set_was_read_not_just_the_resource_count": {
+   "description": "'1 to add, 1 to change, 1 to destroy' is consistent with an in-place change that also moves memory_size, which the pair forbids.",
+   "expected_landed": "the plan is saved and applied as the SAME plan, every address is enumerated, and the in-place resource's moved ATTRIBUTES are read to confirm memory_size is absent from the diff",
+   "expected_not_landed": "an apply on a re-planned diff, a -target, or a verdict read from the Plan: line alone",
+   "observed": "terraform plan -out=ba20.tfplan, UNTARGETED: 'Plan: 1 to add, 1 to change, 1 to destroy' over exactly three addresses (route GET /api/scoped/amgt/resolve created; route POST /api/scoped/amgt/refresh destroyed, because its key is not in the for_each map; module.scoped_amgt_api.aws_lambda_function.this updated in-place). The lambda's moved attributes are exactly last_modified, s3_object_version (AEDyCJJPpYRRIfJEWYFRaXxP9g5nRYsw -> VHwcuot4i70V2evVL44EBgQc0BcAtScd) and source_code_hash; memory_size is NOT in the diff and the post-apply read confirms 1769. That saved plan file is what safe-apply applied.",
+   "status": "PASS"
+  },
+  "the_route_swap_was_verified_on_the_SERVED_plane_not_only_in_terraform_output": {
+   "description": "terraform's own output is the producer's self-report. The pair fixes a non-greedy route count, which is a property of the live API.",
+   "expected_landed": "the live gateway is read and the count and both route keys are confirmed there",
+   "expected_not_landed": "the terraform output list accepted as the served state",
+   "observed": "apigatewayv2 get-routes on api 7k3ed8px20 (113 routes total) reads 19 scoped-amgt routes: 18 non-greedy -- exactly the number the COO half fixes -- plus the one greedy security/{proxy+}. POST /api/scoped/amgt/refresh ABSENT, GET /api/scoped/amgt/resolve PRESENT. The comp-tool rail routes raw API-GW inspection to comp-routes, which was run first and is DESIRED-plane (it parses api-gateway.tf and returned 0 scoped-amgt hits), so it cannot answer a served-plane question; the aws read was taken under an audited '# rail-checked:' marker naming that reason.",
+   "status": "PASS"
+  },
+  "the_open_deploys_sweep_covered_every_live_worktree_and_each_amgt_hit_was_measured_world_done": {
+   "description": "A shared-tree read of .open_deploys/ cannot see a branch-side writer, and an entry a device left OPEN proves only that THAT device saw no completion.",
+   "expected_landed": "every live worktree is listed and swept with a printed denominator, and any hit on this function is settled by measuring the ARTIFACT, not by reading the entry's status field",
+   "expected_not_landed": "a sweep of the shared tree only, or an open entry treated as a live hold without measurement",
+   "observed": "git worktree list --porcelain: denominator 80 worktrees, each swept with git ls-tree -r HEAD over org/critical_paths/.open_deploys/. The shared tree carries 20 entries and ZERO of them name opal-amgt-scoped-api (each entry's bytes were read, not just its filename). The only amgt-resapp-r76-az5 entry sits in a stale nested scratch copy (C:/tmp/wk-oplgtw-r23-28/.scratch/x23) whose HEAD predates az-5's close cad400c0b3, and that close IS an ancestor of the shared HEAD; the artifact read settles it world-done, because the function was serving az-5's own output OVpDhfwDG3BzKE++wDxMlFA6JrwpTnH3FiHC+NrzsrE= when this act began. No hold.",
+   "status": "PASS"
+  },
+  "the_snapshot_producers_self_report_was_joined_to_the_object": {
+   "description": "The invoke returns a body naming an etag. A producer's self-report is not the served state.",
+   "expected_landed": "the key is head-object'd before and after, and the response etag is matched against the stored object",
+   "expected_not_landed": "the response body quoted as the proof that the snapshot was written",
+   "observed": "BEFORE: ContentLength 2889391, LastModified 2026-10-06T20:18:24Z, VersionId JG_6dEHiqJz..PozaZFTXiUFGezcwPky -- byte-for-byte the pair's rollback row, confirmed live on the exact key before the write. ONE invoke, payload exactly {\"amgt_scheduled_action\": \"refresh_freshness_snapshot\"} (55 B, one line), StatusCode 200, no FunctionError; stamp generated_at 2026-10-07T04:51Z, rows 302, etag 94d350090ad1d28cb74fb0ec2e4781b7. AFTER: ContentLength 3658085, LastModified 2026-10-07T04:51:31Z, VersionId USWeSyyD402yOpMpAHWZLz_ld1si4dms, ETag 94d350090ad1d28cb74fb0ec2e4781b7 -- the stamp's etag IS the stored object's. rows 302 EQUAL the 302 the base served, which is CTO condition 6, and AC2's c59 then read rows EQUAL 302 of 302 against the computed view.",
+   "status": "PASS"
+  },
+  "the_cold_phase_window_was_recomputed_when_the_first_epoch_proved_wrong_by_a_year": {
+   "description": "A hand-typed epoch returned real-looking AMGT_PHASE lines. A wrong-window read is indistinguishable from a right one by the shape of its output.",
+   "expected_landed": "the window is computed from the timestamps rather than typed, and the join is confirmed against an independent instrument before any phase figure is reported",
+   "expected_not_landed": "the first phase table reported, or the error noticed and the table reused anyway",
+   "observed": "The first filter-log-events used start-time 1759812300000, which is 2025-10-07, so its AMGT_PHASE lines (mentions decode 3137-3720 ms) belonged to a year-old window and were DISCARDED, not reported. Recomputed with datetime: 1791348270000..1791348450000 (04:44:30Z..04:47:30Z) -> 708 events, 6 log streams, 6 COLD containers. The join is confirmed by a second instrument: the cold totals 3285-4582 ms equal leadpanel_cold_warm.py's own 'cold n 6 min 3285 max 4582'. On the correct window a cold container's first request is init 558-852 ms, chatter generation read 636-926 ms and chatter compute 911-1486 ms, with mentions decode 12-236 ms -- the reverse of what the wrong window suggested.",
+   "status": "PASS"
+  },
+  "a_rail_denial_was_recognised_as_aborting_its_whole_call": {
+   "description": "A comp-tool rail denial aborts the entire Bash call, so every later segment is a silent no-op and its absence reads like a clean run.",
+   "expected_landed": "the denied segment is re-run alone and the segments it silently skipped are re-run too",
+   "expected_not_landed": "the call's later segments assumed to have run because the call returned",
+   "observed": "Two denials. (1) `comp-find ... | tail` was denied for piping a census into a receiver; the search was re-run without the pipe and then abandoned for native Glob on latency grounds. (2) The apigatewayv2 read was denied and the head-object/route-count python in the SAME call never ran -- it was re-run as its own call after comp-routes was exercised and found DESIRED-plane.",
+   "status": "PASS"
+  },
+  "the_stated_SIZE_mismatch_was_resolved_by_naming_the_OBJECT_not_by_overriding_the_pair": {
+   "description": "The pair states 255,401,153 B at 97.4%. The built zip is 41,981,131 B. Reporting either number as a contradiction of the other would be a wrong-object comparison.",
+   "expected_landed": "the figure's producer is read and the pair's number is reproduced from the same accounting",
+   "expected_not_landed": "a 'size discrepancy' reported against the signed half, or the pair's figure restated without reproducing it",
+   "observed": "The build script's own accounting (build-and-upload-scoped-amgt.sh STOP LIMB 2) is package UNZIPPED plus the attached layer: 133,657,520 B over 380 entries + opal-amgt-print-deps:1 at 121,743,633 B = 255,401,153 B against the 262,144,000-byte ceiling, 97.4% used, 6,742,847 B spare. That reproduces the COO half exactly. 41,981,131 B is the compressed zip and is the right number for the S3 object and CodeSize, not for the ceiling.",
+   "status": "PASS"
+  },
+  "the_shared_index_was_freed_the_turn_the_issuer_named_it": {
+   "description": "deploy_ledger open leaves two paths STAGED in the shared tree, and a staged index refuses every other seat's safe-commit and safe-merge.",
+   "expected_landed": "the two paths are committed through safe-commit on the ask, with the staged set verified to hold nothing else",
+   "expected_not_landed": "the entry left staged until the end of the act, or committed with a contaminated index",
+   "observed": "2.0.0_SA_COO~Z reported (msg 30580, acked READ) that the open had held the index since ~04:31Z and was blocking 0.0.0_AB_MSTR~Z's pull-merge. git diff --cached --name-only read EXACTLY the two ledger paths and nothing else; safe-commit landed them at 759490bf74 under this seat's author line, msg-verify MATCH len=2043. No --force, no author override.",
+   "status": "PASS"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "CTO half condition 4 -- pressing the Refresh control once on portal DEV after the deploy",
+   "reason": "The condition names its carrier: 'the ba-24 walk carries it'. This cell's <paths> hold no portal surface and the order's bounds forbid a portal act. The CTO half already states the accepted read: useRequestRefresh is a bare mutation, the page reads only isPending and has no error surface, so a control that did nothing with a 200 does nothing with a 404 until round 45's page lands. If an error surface does appear it is a ROW and an expedite of that page change, explicitly NOT a rollback."
+  },
+  {
+   "item": "CTO half condition 5 -- /resolve through the gateway edge and the authorizer",
+   "reason": "Both halves state it: every check in this order invokes the function DIRECTLY, so the route through the edge is first exercised by ba-24's walk. What this cell CAN prove about the route it did prove on the served plane: the live route list carries GET /resolve, not POST /refresh, at 18 non-greedy routes. A failure at the edge is a row against the route with the function's direct read as the control."
+  },
+  {
+   "item": "A tag and --follow-tags push for this apply (cloud-ops deployment rule 6)",
+   "reason": "The order's bounds forbid a push of shared branches, and org/XXX.md Step 1b reserves pushes of CLOUD to 0.0.0_AB_MSTR on Andrew's word. The commits of this act are LOCAL and their push state is reported as measured, not defaulted."
+  },
+  {
+   "item": "The audit-archive integrity findings printed by the startup invoker",
+   "reason": "org/XXX.md A.2 admits only an UNOWNED class, and these are pre-existing device-hygiene classes with a standing instrument that re-surfaces them every session: four 'baseline missing' lines against the 2026-10-06T151841Z sitez archive, and one non-append edit on org/mcp/agent-spawn-audit.log (first divergence line 13871, baseline 4861410 B vs live-head 4861897 B) which is also an uncommitted modification in the shared tree. Named here rather than re-filed."
+  }
+ ],
+ "surprises": [],
+ "session_log": "0.7.0_AE_CloudOps~A, 2026-10-07 ~04:1x-05:xxZ session, AMGT_RESAPP round 77 AMGT-ba-20 -- the round-77 code redeploy of opal-amgt-scoped-api plus the one gateway route swap and the one snapshot event. Re-seated by 2.0.0_SA_COO~Z; /watcher armed, org/XXX.md A-F run, GO msg 30546 acked.",
+ "carries": "The round-77 build cells whose files the artifact moves: ba-1 and ba-2 (freshness stale_rule.py, page_body.py), ba-3 (lists owner_line.py and the two data members), ba-6 and ba-7 (the filings package enters the artifact for the first time), ba-8 (top_band), ba-9 and ba-10 (name_search, translated_text), ba-11 (the adapter: /refresh out, /resolve in, absent-axis reasons, every hookup), ba-14 and ba-16 (divergence, peers_v), ba-18 (no chart line on an undrafted thesis), ba-25 (the segments bronze request).",
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "every listed round-77 deployed check passes; R77 DEPLOYED: YES n of n with n equal to the count the GO states; and exit=0",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_deployed.py\"; echo \"exit=$?\"",
+   "method": "command",
+   "expect": "R77 DEPLOYED: YES 3 of 3[\\s\\S]*exit=0",
+   "denominator": "3 round-77 deployed checks, one per drained build cell, as r77_deployed_cells.txt lists (3 command lines in a 5-line file, the other 2 lines being comments; the GO states THREE, so n of n is 3 of 3)",
+   "output_evidence": "PASS exit=0 :: python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba11.py --crit AC1 --where deployed :: PASS C5 every served sentence carries the translation keys 210 of 210 | R77 BA11 AC1 SERVED: YES\nPASS exit=0 :: python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_served_shape.py --where deployed :: PASS C6 /thesis carries passage_coverage: sections on BA, a plain reason on a name with no filing  | R77 SERVED SHAPE: YES\nPASS exit=0 :: python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba2.py --crit AC3 --where deployed :: PASS C1 the default body still carries the read records and every row 302 rows | R77 BA2 AC3 SERVED: YES\nR77 DEPLOYED: YES 3 of 3\nexit=0",
+   "status": "PASS",
+   "status_reason": "n equals the count the GO states: the GO's stanza says r77_deployed_cells.txt holds THREE lines and the verdict reads 3 of 3. All three listed checks PASS at exit=0, including r77_served_shape's C3 owner line, the one clause never exercised before this deploy because it reads the PACKAGED list files.",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "R76 C62 and C63 SERVED: YES (unless the pair states a round-77 cell changes what they read, and then as the pair says) and R75 C59 SERVED: YES with one or more cold invokes inside the bar, on the deployed function; and exit=0",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for c in c62 c63; do PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round76/checks/r76_served.py\" --cell $c --where deployed || exit 1; done && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round75/checks/r75_served.py\" --cell c59 --where deployed; echo \"exit=$?\"",
+   "method": "command",
+   "expect": "R76 C62 SERVED: YES[\\s\\S]*R76 C63 SERVED: YES[\\s\\S]*R75 C59 SERVED: YES[\\s\\S]*exit=0",
+   "denominator": "3 cells: r76 c62, r76 c63 and r75 c59 -- c59 itself grades C1 rows-equal, C2 a 40-wide burst and C3 a read after the hold expires",
+   "output_evidence": "names 95; top_band absent 0; items 69; bad description 0; bad items 0 e.g. []; bad social 0\nPASS C1 every top band carries a one-line description or a plain reason absent 0 bad 0\nPASS C2 every item is followable and the items are most-discussed then newest 0\nPASS C3 the social half says no social source is admitted yet 0\nR76 C62 SERVED: YES\n   names 95; input_provenance absent 0; entries disagreeing with /freshness 0 e.g. []\nPASS C1 every input's provenance agrees with /freshness absent 0 bad 0\nR76 C63 SERVED: YES\n   served from snapshot: True {\"object\": \"s3://opal-data-harvest/amgt/harvest/state/freshness_snapshot/current/snapshot.json\", \"generated_at\": \"2026-10-07T04:51Z\", \"age_hours\": 0.15}; rows EQUAL (all fields but rot) 302 of 302; e.g. []\n   rot: served ['\"publishers: not stale (0/2 stale, reviewed 2026-09-10T22:42Z) | social_accounts: not stale (0/267 stale, reviewed 2026-09-10T22:42Z)\"']; rendered from the deployed /lists \"publishers: not stale (0/2 stale, reviewed 2026-09-10T22:42Z) | social_accounts: not stale (0/267 stale, reviewed 2026-\nPASS C1 the route serves the snapshot; rows equal the computed view, rot equal to the deployed register's 302 of 302\n   burst of 40: cold invokes 34 [(200, 773), (200, 823), (200, 843), (200, 848), (200, 848), (200, 857), (200, 862), (200, 896), (200, 899), (200, 904), (200, 905), (200, 905), (200, 908), (200, 913), (200, 914), (200, 915), (200, 917), (200, 920), (200, 922), (200, 932), (200, 932), (200, 933), (200, 935), (200, 937), (200, 948), (200, 950), (200, 960), (200, 968), (200, 971), (200, 981), (200, 997), (200, 1000), (200, 1000), (200, 1048)]\nPASS C2 every cold invoke answers within the bar bar 2000; 34 cold of 40\n   after 65 s idle: 1194 ms end to end, status 200; REPORT RequestId: b0817cab-6fe9-4bf2-a0eb-05062699659d\tDuration: 174.98 ms\tBilled Duration: 175 ms\tMemory Size: 1769 MB\t\nPASS C3 a read after the hold expires answers within the bar 1194 ms\nR75 C59 SERVED: YES\nexit=0\nshell_rc=0",
+   "status": "PASS",
+   "status_reason": "c62 reads YES with 69 items against the base's 3, which is exactly what the pair predicts (ba-8 changed which day the band shows, not the clauses c62 grades), so the 'unless the pair states a round-77 cell changes what they read' branch is not needed. c59's C2 produced 34 cold invokes of 40, every one 200 within the 2,000 ms bar at 773-1048 ms -- 'one or more cold invokes inside the bar' is met 34 times, and the UNMEASURED (exit 2) branch the order reserves did not arise.",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "R75 C57/C58/C61, R74 C53/C55/C56 and R71 C38 SERVED: YES on the deployed function (no regression, unless the pair names one a round-77 ruling intends); and exit=0",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for c in c57 c58 c61; do PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round75/checks/r75_served.py\" --cell $c --where deployed || exit 1; done && for c in c53 c55 c56; do PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round74/checks/r74_served.py\" --cell $c --where deployed || exit 1; done && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round71/checks/r71_latency.py\" --where deployed; echo \"exit=$?\"",
+   "method": "command",
+   "expect": "R75 C57 SERVED: YES[\\s\\S]*R75 C58 SERVED: YES[\\s\\S]*R75 C61 SERVED: YES[\\s\\S]*R74 C53 SERVED: YES[\\s\\S]*R74 C55 SERVED: YES[\\s\\S]*R74 C56 SERVED: YES[\\s\\S]*R71 C38 SERVED: YES[\\s\\S]*exit=0",
+   "denominator": "7 cells: r75 c57/c58/c61, r74 c53/c55/c56 and r71 c38",
+   "output_evidence": "BA_US_Equity: fiscal-year lines stamped 2026-10-07: 0; run date occurrences 1; on page 1 True\n   AMD_US_Equity: fiscal-year lines stamped 2026-10-07: 0; run date occurrences 1; on page 1 True\n   ASML_NA_Equity: fiscal-year lines stamped 2026-10-07: 0; run date occurrences 1; on page 1 True\nPASS C1 no fiscal-year figure is stamped with the run date {'BA_US_Equity': 0, 'AMD_US_Equity': 0, 'ASML_NA_Equity': 0}\nPASS C2 the run date appears once, on page 1 {'BA_US_Equity': (1, True), 'AMD_US_Equity': (1, True), 'ASML_NA_Equity': (1, True)}\nR75 C57 SERVED: YES\n   BA: served sentences 17; in the print 17; e.g. missing []\nPASS C1 the BA print carries every served thesis sentence 17 of 17\nPASS C2 no 'not written' line for a section the route serves []\nR75 C58 SERVED: YES\n   names 95; bad segment headings 0 e.g. []; BA headings ['Commercial Airplanes', 'Defense, Space & Security', 'Global Services']\n   table passages 3; without labels 0 e.g. []\nPASS C1 every segment row is headed by one segment name bad 0; BA 3 headings\nPASS C2 every table passage serves its row and column labels 0 of 3\nR75 C61 SERVED: YES\n   /freshness warm: min 678 ms max 877 ms status [200] covered rows 95\nPASS C1 /freshness answers warm within the bar worst 877 ms bar 2000\nR74 C53 SERVED: YES\n   gateway routes read 113; security GET routes 11; greedy ['GET /api/scoped/amgt/security/{proxy+}']\nPASS C1 the applied gateway carries a slash-capable route for overlay/thesis/peers/print missing []\nPASS C2 the function answers 200 for both slash keys on all 4 routes, raw and %2F failing []\nR74 C55 SERVED: YES\n   BA_US_Equity: pages 22 lato-share 1.00 description-headings x1 current-market-cap lines x1 internal-markers x0 {'unit': 0, 'dec': 0, 'repr': 0, 'clip': 0}\n   AMD_US_Equity: pages 24 lato-share 1.00 description-headings x1 current-market-cap lines x1 internal-markers x0 {'unit': 0, 'dec': 0, 'repr': 0, 'clip': 0}\n   ASML_NA_Equity: pages 24 lato-share 1.00 description-headings x1 current-market-cap lines x1 internal-markers x0 {'unit': 0, 'dec': 0, 'repr': 0, 'clip': 0}\nPASS C1 the brand font carries the text []\nPASS C2 no duplicated description or market-cap line []\nPASS C3 the c48 floor holds {'unit': 0, 'dec': 0, 'repr': 0, 'clip': 0}\nR74 C56 SERVED: YES\n   /lead-panel/timeseries/collected/chatter?{\"days\": \"30\"}: min 608 ms max 732 ms status [200]\n   /lead-panel/timeseries/collected/chatter?{\"days\": \"90\"}: min 483 ms max 908 ms status [200]\n   /lead-panel/timeseries/collected/chatter?{\"days\": \"365\"}: min 532 ms max 666 ms status [200]\n   /lead-panel/rankings/trending/price: min 125 ms max 225 ms status [200]\n   /lead-panel/rankings/trending/price?{\"days\": \"90\"}: min 134 ms max 144 ms status [200]\n   /lead-panel/rankings/trending/price?{\"days\": \"365\"}: min 174 ms max 264 ms status [200]\n   /lead-panel/rankings/breakout/price: min 126 ms max 140 ms status [200]\n   /lead-panel/rankings/breakout/price?{\"days\": \"90\"}: min 127 ms max 197 ms status [200]\n   /lead-panel/rankings/breakout/price?{\"days\": \"365\"}: min 166 ms max 180 ms status [200]\nPASS C1 every Lead Panel read is under 2000 ms warm reads 9 over-bar 0 e.g. []\nR71 C38 SERVED: YES\nexit=0\nshell_rc=0",
+   "status": "PASS",
+   "status_reason": "No regression on any of the seven. c61 grades segment headings over 95 names and reads YES with the ruled change in place: the pair states a refused breakdown serves no rows and therefore no heading, so ASML NA and PBR refusing does not break c61. The 'unless the pair names one a round-77 ruling intends' branch covers exactly that ruled change and nothing else was needed.",
+   "judgment": false
+  }
+ ],
+ "cold_reads": {
+  "sequencing": "leadpanel_cold_warm.py --label after ran at 2026-10-07T04:45:11Z, about 5 minutes after the apply and BEFORE the snapshot event and the AC batteries, so its cold samples came from a pool the apply had just emptied. The script re-read CodeSha256 itself and printed the NEW hash MkM9Kf37nmI+thEmZR+ij8ybbxGrHxqtsonjyI7N5eg=, which is the control that it measured the new code.",
+  "lead_panel_after": "9 reads, all status [200]. Cold (init+duration) n 6, min 3285 max 4582 ms on chatter days=30; n 0 on days 90 and 365 and on all six price reads, because the first burst warms the containers the later reads reuse. Warm bands: chatter 451-595 ms, trending price 66-206 ms, breakout price 55-246 ms. The base read cold Duration 2,580-3,137 ms (COO half).",
+  "deployed_phase_table": "From CloudWatch over the window 2026-10-07T04:44:30Z..04:47:30Z (epoch 1791348270000..1791348450000): 708 events, 6 log streams, 6 COLD containers (a REPORT carrying Init Duration). A cold container's FIRST request spends init 558-852 ms, chatter generation read 636-926 ms and chatter compute 911-1486 ms, with mentions decode 12-236 ms, names 0-1 ms and classification 6-15 ms. No phase name in the table is new.",
+  "join_control": "The window was COMPUTED from the timestamps, not typed: the first attempt used 1759812300000, which is 2025-10-07, and its phase lines were discarded rather than reported. The corrected join is confirmed by a second instrument -- the cold totals 3285-4582 ms equal the reporter's own 'cold n 6 min 3285 max 4582'.",
+  "grading": "Reported, NOT graded, as both halves and the order say. The pair states this round's cells do not touch the chatter phases, and the one graded cold bar in this act is r75 c59's 2,000 ms on /freshness, where every one of 34 cold invokes answered 200 at 773-1048 ms. Full table and the per-container AMGT_PHASE join: org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~A/LEADPANEL_AFTER_ba20.txt."
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+   "kind": "s3_object",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "commit_or_etag": "VersionId VHwcuot4i70V2evVL44EBgQc0BcAtScd, content-sha256 MkM9Kf37nmI+thEmZR+ij8ybbxGrHxqtsonjyI7N5eg=",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ],
+   "deploy_evidence": "Built in the detached worktree C:/tmp/ba20-build-14a36147bd at EXACTLY 14a36147bdacb15cf40867e5801ec7931a469df1 (string equality on rev-parse, detached, porcelain empty), 380 entries. CONTENT-DIFF files 380 / IDENTICAL 364 / CHANGED 8 / ADDED 8 / REMOVED 0 against OVpDhfwDG3BzKE++wDxMlFA6JrwpTnH3FiHC+NrzsrE=, all 16 moved paths matched BY NAME to the COO half's table with 0 files outside it. Uploaded by the module's own upload_verified (content-sha256 metadata + mandatory read-back): ContentLength 41981131, read back and matching. ACTIVATED by ONE safe-apply of the SAVED untargeted plan (1 added, 1 changed, 1 destroyed); the live CodeSha256 then read MkM9Kf37nmI+thEmZR+ij8ybbxGrHxqtsonjyI7N5eg=, which DIFFERS from the base OVpDhfwDG3BzKE++wDxMlFA6JrwpTnH3FiHC+NrzsrE= and EQUALS this object's sha -- the genre's discriminating control. MemorySize 1769 unchanged, CodeSize 41981131, LastModified 2026-10-07T04:40:17Z, runtime python3.11. The untargeted re-plan reads 'No changes.' The same apply swapped the ONE route: live get-routes on api 7k3ed8px20 reads 19 scoped-amgt routes, 18 non-greedy as the pair fixes, POST /api/scoped/amgt/refresh ABSENT (id w2ghf1j destroyed) and GET /api/scoped/amgt/resolve PRESENT (id 58ih9df created)."
+  },
+  {
+   "path_or_key": "s3://opal-data-harvest/amgt/harvest/state/freshness_snapshot/current/snapshot.json",
+   "kind": "s3_object",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "commit_or_etag": "VersionId USWeSyyD402yOpMpAHWZLz_ld1si4dms, ETag 94d350090ad1d28cb74fb0ec2e4781b7",
+   "artifact_covered_by": [
+    "AC2"
+   ],
+   "deploy_evidence": "Written by ONE invoke with payload exactly {\"amgt_scheduled_action\": \"refresh_freshness_snapshot\"} at 2026-10-07T04:51Z by the NEW code (StatusCode 200, no FunctionError). Verified independently of the producer: head-object before (ContentLength 2889391, 2026-10-06T20:18:24Z, VersionId JG_6dEHiqJz..PozaZFTXiUFGezcwPky) and after (3658085, 2026-10-07T04:51:31Z), with the stamp's etag equal to the stored object's. rows 302 both sides -- EQUAL, which is CTO condition 6 -- and c59 C1 then read it served with rows EQUAL 302 of 302 against the computed view. The daily 12:30 UTC schedule is unchanged and remains the only other writer."
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261007T0431Z_amgt-resapp-r77-ba20_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "commit_or_etag": "759490bf74",
+   "artifact_covered_by": [],
+   "deploy_evidence": "The NEVER-2 entry. Opened with 4 legs BEFORE the apply and COMMITTED together with its sentinel org/critical_paths/.open_deploys/amgt-resapp-r77-ba20.json in ONE commit, so the sentinel survives a worktree removal. Committed at 759490bf74 on 2.0.0_SA_COO~Z's ask (msg 30580) because the staged pair was holding the shared index against other seats. All four legs closed against measured evidence and the entry CLOSED; the sentinel is removed by the close, which is why the pathspec names this .md."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps~A/LEADPANEL_AFTER_ba20.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "artifact_covered_by": [],
+   "deploy_evidence": "The order's reported-not-graded leg: leadpanel_cold_warm.py --label after in full, plus the per-cold-container AMGT_PHASE join from CloudWatch with its window stated in both ISO and epoch form."
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "comp-routes api-routes",
+   "invocation": "comp-routes api-routes, before taking the live gateway read",
+   "result": "Run because the rail routes raw API-GW inspection here. It is DESIRED-plane by its own disclosure (parsed cloudfront-distribution.tf + api-gateway .tf + portal/src at working-tree HEAD, 'never a live CloudFront describe-distribution') and returned 0 scoped/amgt hits, because this API is declared in scoped-amgt-api.tf, which it does not parse. It cannot answer a served-plane route question; the aws read was taken under an audited rail-checked marker naming exactly that. GAP: comp-routes api-routes does not cover scoped-amgt-api.tf."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find --files 'build-and-upload-scoped-amgt' --limit 10",
+   "result": "Exceeded 120 s and was backgrounded; the first attempt was also rail-denied for piping into tail. The file was located with native Glob and a directory listing instead. Worth noting for the rail's cost: on this device a comp-find file lookup is slower than the native tool the rule admits."
+  },
+  {
+   "tool": "content_diff.py (the module's own)",
+   "invocation": "python infra/aws/terraform/harvest/content_diff.py --zip /c/tmp/ba20-r77-14a36147bd.zip",
+   "result": "files 380, IDENTICAL 364, CHANGED 8, ADDED 8, REMOVED 0 against OVpDhfwDG3BzKE++wDxMlFA6JrwpTnH3FiHC+NrzsrE=. Re-run read-only because the build's own run had been captured through tail -120, which kept the summary and cut the 16 per-file lines."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open --slug amgt-resapp-r77-ba20 (4 legs), then close-leg L1, L2, L3, V1, then close",
+   "result": "The NEVER-2 carrier for the act. Opened before the apply; each leg closed against measured evidence."
+  },
+  {
+   "tool": "safe-apply.sh / safe-commit.sh",
+   "invocation": "safe-apply.sh -chdir=infra/aws/terraform/harvest apply ba20.tfplan; safe-commit.sh -F <msgfile>",
+   "result": "Rule 18 and Rule 14a paths. The apply consumed the saved plan, not a re-plan. No HALT surface, no override."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this file> AC1,AC2,AC3 --governing-order <the order>",
+   "result": "FILLED AT RUN TIME BELOW"
+  }
+ ],
+ "forward_notes": [
+  {
+   "note": "The <status> flip on the order is the issuer's, as it was for az-5 (flipped at 1014126140). This instance reports; it does not self-mark the order.",
+   "owner": "2.0.0_SA_COO~Z"
+  },
+  {
+   "note": "CTO half conditions 4 and 5 are unexercised BY CONSTRUCTION and both halves say so: the Refresh control pressed once on DEV, and /resolve through the edge and the authorizer. Every check in this order invokes the function DIRECTLY. The served-plane facts this cell could establish about the route it did: 18 non-greedy routes, POST /refresh absent, GET /resolve present. An error surface on the Refresh press is a ROW and an expedite of round 45's control removal, explicitly NOT a rollback.",
+   "owner": "ba-24 walk (1.0.0_SA_CTO~Z to grade)"
+  },
+  {
+   "note": "Reported, not a defect, and not a graded bar: cold init+duration on the lead-panel chatter read moved from 2,580-3,137 ms (base) to 3,285-4,582 ms, consistent with the artifact growing by the filings package and three new modules (init alone is 558-852 ms). The one graded cold bar in this act, r75 c59's 2,000 ms on /freshness, was met by all 34 cold invokes at 773-1,048 ms. If a later round wants the lead-panel cold path back under 3 s, the phase table says the cost is chatter compute (911-1,486 ms) and chatter generation read (636-926 ms), not import time.",
+   "owner": "2.0.0_SA_COO~Z"
+  },
+  {
+   "note": "Every commit of this act is LOCAL on CLOUD. org/XXX.md reserves pushes of CLOUD to 0.0.0_AB_MSTR on Andrew's word, and this order's bounds forbid a shared-branch push, so cloud-ops deployment rule 6's tag-and-follow-tags leg is not taken here either.",
+   "owner": "0.0.0_AB_MSTR~Z"
+  },
+  {
+   "note": "comp-routes api-routes does not cover infra/aws/terraform/harvest/scoped-amgt-api.tf: it returned 0 scoped/amgt hits while 19 routes are declared and live. The rail routes raw API-GW inspection to it, so every seat asking a scoped-amgt route question will hit the same gap and take the rail-checked marker. Worth either widening the parser's input set or recording the non-application.",
+   "owner": "1.0.0_SA_CTO~Z"
+  }
+ ]
+}

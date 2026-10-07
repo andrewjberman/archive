@@ -1,0 +1,77 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ba-27",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-27.freshness-page-dev-only.md",
+  "group": "D",
+  "vintage_commit": "1d7268f6c74e00a79bfe366d39d1771012f097ee"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "1d7268f6c74e00a79bfe366d39d1771012f097ee",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ba-27.freshness-page-dev-only.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~288",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/App.tsx (portal branch wk-AMGT_RESAPP-288-portal)",
+   "kind": "frontend_component",
+   "commit_or_etag": "8ddfe409",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "Local portal branch only, nothing pushed. Merge 3a29250a of resapp-r77-ba4-freshness (504ddb3d) onto 659104f4, then mark commit 8ddfe409 adds requiresDev to the /freshness nav entry and requireDev to its route."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "C1-C3 PASS: the /freshness nav entry carries requiresDev: true and stays internal, its route carries requireDev and requireInternal, the page is still mounted; R77 BA27 AC1 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba27.py\" --crit AC1 --portal portal; echo \"exit=$?\"",
+   "output_evidence": "PASS C1, C2, C3; R77 BA27 AC1 SERVED: YES; exit=0",
+   "denominator": "1 nav entry and 1 route for /freshness",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "C1-C2 PASS (the control): Investor Reporting keeps its mark and no other page gained or lost one; R77 BA27 AC2 SERVED: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round77/checks/r77_ba27.py\" --crit AC2 --portal portal; echo \"exit=$?\"",
+   "output_evidence": "PASS C1, C2 (nav 2 with mark incl. freshness 1; routes 3 incl. freshness 1); R77 BA27 AC2 SERVED: YES; exit=0",
+   "denominator": "nav entries with the mark 2; routes with the mark 3",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "description": "Check script run against the worktree portal.",
+   "method": "Ran r77_ba27.py for AC1 and AC2; bun typecheck and bun test src/pages/Freshness/.",
+   "expected": "AC1 and AC2 YES; typecheck clean; 17 tests pass",
+   "observed": "AC1 YES, AC2 YES, tsc -b --noEmit no output, 17 pass 0 fail",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "Negative arm: the issuer's comp-adversary run at portal DEV 659104f4.",
+   "method": "r77_ba27.py AC1 against 659104f4 before the edit",
+   "expected": "AC1 FAILS at base, AC2 PASSES",
+   "observed": "Per the order's preflight, AC1 failed at base; after the edit AC1 and AC2 both YES.",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No deploy, no push",
+   "reason": "Order bounds forbid both; the candidate stays on a local portal branch."
+  }
+ ],
+ "surprises": [],
+ "session_log": "0.9.0_WK_AMGT_RESAPP~288 in C:/tmp/r77-288; no surprises.",
+ "compiler_tools": [
+  {
+   "tool": "bun",
+   "invocation": "bun run typecheck; bun test src/pages/Freshness/",
+   "result": "tsc -b --noEmit clean; 17 pass, 0 fail, 70 expect() calls"
+  }
+ ]
+}
