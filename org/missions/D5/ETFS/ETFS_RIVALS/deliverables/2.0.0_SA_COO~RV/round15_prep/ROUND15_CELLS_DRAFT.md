@@ -23,7 +23,7 @@ Chains (M = 5; file sets disjoint across chains):
 | ~1 | RIV-pd-1, RIV-pd-2, RIV-md-1 | gold_holding_contribution.py, gold_buying_trend.py; then render.py | SERVED |
 | ~2 | RIV-ps-1, RIV-tm-1, RIV-co-1 | price_series.py (new), trade_markers.py (new); then publish_page.py | SERVED |
 | ~3 | RIV-bf-1 | enrichment_bloomberg.py, bbg_budget.py | WORLD |
-| ~4 | RIV-rt-1 | infra/aws/ec2/opal-gateway/app/rivalfunds_view.py and its tests | WORLD |
+| ~4 | RIV-rt-1 | infra/aws/ec2/opal-gateway/app/rivalfunds_view.py, server.py, their tests | WORLD |
 | ~5 | RIV-pd-3 | ai_accounts.py | SERVED |
 
 ### `RIV-pd-1` -- the gold tables compute 30d / 90d / 365d as calendar days (FWD-23; F.2, F.6)
@@ -34,6 +34,12 @@ Chains (M = 5; file sets disjoint across chains):
   days (`day` here is the as-of the stage already passes). `earliest_start` follows. A fund whose history starts after the window's
   first day keeps the existing partial rule (`period_clipped`, `price_coverage`). Each table's stage detail states, for one fund,
   the old and the new R30 window (`r30_window_was`, `r30_window_is`).
+- Rulings at the cut (issuer): ONE anchor for both tables. The pure functions stay pure on the day they are handed
+  (`period_start(p, d)` and `_period_starts(d)[p]` return `d - N` calendar days); `gold_buying_trend.build` hands the three
+  rolling periods `gold_holding_contribution.as_of(<event day>)`, exactly as holding_contribution already does, so both tables'
+  R30 / R90 / R365 start on the same day. MTD / QTD / YTD keep their present anchors and starts. `r30_window_was` and
+  `r30_window_is` sit in each stage's result `detail`, each `{"fund": <id>, "start": <ISO>, "end": <ISO>}` for the first fund
+  built.
 - **Organic trigger:** the 07:00 ET marker publish's stale-table rebuild (`publish_page.produce_a1`).
 
 ### `RIV-pd-2` -- every switch on the page offers 30d | 90d 365d and opens on 30d; no QTD, YTD or MTD is displayed (FWD-23)
@@ -44,6 +50,10 @@ Chains (M = 5; file sets disjoint across chains):
   main page or audit page carries the visible text QTD, YTD, MTD, "Quarter to date", "Year to date" or "Month to date". The
   dialog keys cover R30 and R365; the security dialog's trend row prefers R365. A period that ranks nothing for the fund greys
   and says why (unchanged rule). Rows of MTD / QTD / YTD in the context are ignored, not an error.
+- Rulings at the cut (issuer): the switch's own words are short -- `render.PERIOD_SHORT = {"R30": "30d", "R90": "90d", "R365":
+  "365d"}` is what each period radio's label prints (Andrew: "30d, then | 90d and 365d"); `PERIOD_LABEL` (the long names) is
+  for table headings and dialog rows. The clause "the dialog keys cover R30 and R365" is WITHDRAWN (`_dialog_keys` has no
+  caller); the dialog lists the three periods and its buying line is the R365 trend row.
 - **Organic trigger:** the 07:00 ET marker publish.
 
 ### `RIV-pd-3` -- the AI accounts are written on the same three periods (FWD-23; F.2 last bullet)
@@ -52,6 +62,9 @@ Chains (M = 5; file sets disjoint across chains):
   `<fund>|R90|<bucket>` / `<fund>|R365|<bucket>`; no fact label names MTD, QTD or YTD; the prompt text names the three periods
   in plain words (last 30 / 90 / 365 days). `ai_accounts.PACK_PERIODS = ("R30","R90","R365")` is the one constant.
   The "not shown as current" rule for an older account is render's (round 14's badge) and is not this cell's.
+- Rulings at the cut (issuer): a "fact label" is the fact's id and its text. Periods are named to the model in words or digits
+  ("last thirty days" / "last 30 days"), consistently with the SYSTEM prompt's own number rule. `P_DIRECTION`'s "the year's
+  trend" becomes "the 365-day trend".
 - **Organic trigger:** the 09:00 ET sweep's AI step.
 
 ### `RIV-ps-1` -- one price series per security: market close first, holding-implied second, a gap with its reason third (FWD-22; C-MODAL-PRICE-SOURCE)
@@ -63,6 +76,10 @@ Chains (M = 5; file sets disjoint across chains):
   median); else `None`. Consecutive `None` days form one gap with reason `"no market close on file and no fund reported the
   holding"`. `source_words` names in plain words which sources the series uses. No vendor call, no S3 call: pure over frames.
   `load(s, keys, start, end)` reads the two tables through the sink for the publisher.
+- Rulings at the cut (issuer): a G1 row maps to a key through `gold_holding_contribution.row_keys` (the page's own key rule,
+  raw-identifier alias included), never `security_id` alone. Several lots of one security in one fund's report are summed
+  (market value and quantity) before the ratio. A key in neither frame returns all-None points and one gap over the range.
+  Point dates are ISO strings. `load(s, keys, start, end)` returns the same dict `series` returns.
 - **Organic trigger:** the publisher's chart object (RIV-co-1).
 
 ### `RIV-tm-1` -- a fund's trades in a security as sized markers (FWD-22; C-TRADE-MARKER)
@@ -75,17 +92,25 @@ Chains (M = 5; file sets disjoint across chains):
   500 bps or more, linear in bps between; `span` = `window_trading_days > 1`; trades of one side sharing one window are ONE
   marker with `n_trades` counted and `usd` / `bps` summed. A REFUSED window yields no marker. `words(marker) -> str` reads
   "Bought" / "Sold", the date or "between <start> and <end>", the dollar value, the basis points of the fund, and the count.
+- Rulings at the cut (issuer): `g5_rows` is a list of row dicts (or a DataFrame, converted); `fund_mv_by_date` is keyed by
+  `datetime.date`. The fund's total reported market value includes its cash lines (it is the report's total). A refused window
+  has no G5 rows, so "no marker" is: empty rows in, `[]` out. `words()` prints dollars as `$26,000` and dates as ISO.
 - **Organic trigger:** the publisher's chart object (RIV-co-1).
 
 ### `RIV-co-1` -- the publisher writes one chart object per fund beside the page, with its size line (FWD-22; F.5 items 1 and 4)
 - Interface: `publish_page` writes `homes.page(day, "charts/<FUND>.json")` for every fund of the page, in the shape of the shared
   vocabulary, covering exactly the securities whose dialog on the rendered page carries that fund's section
-  (`render.dialog_fund_keys(html) -> {fund: [security_key, ...]}`, exported by THIS cell from a regex over the rendered HTML:
+  (`publish_page.dialog_fund_keys(html) -> {fund: [security_key, ...]}`, exported by THIS cell from a regex over the rendered HTML:
   `data-sec-dialog="<key>"` blocks and their `<section data-fund=...>` children; no render.py edit). Built from
   `price_series.load` and `trade_markers.markers`. `CHART_MAX_BYTES = 1_900_000` per object: over it, the 365-day points are
   thinned to weekly (and the object says `"thinned": true`); still over -> the object is not written and the stage prints `FAIL:
   chart object over cap for <FUND>`. The manifest gains `charts: {<FUND>: {"uri", "bytes", "securities", "markers",
   "thinned"}}`. The day's page publishes whether or not a chart object fails. Write once per revision, like audit.html.
+- Rulings at the cut (issuer): `dialog_fund_keys(html)` and `CHART_MAX_BYTES` live in `publish_page` (this cell's file) and the
+  cap is read at call time. A fund of the page with no dialog section gets NO object and no manifest entry. In the manifest
+  `securities` and `markers` are counts. Thinning keeps the last trading day of each ISO week and every day that carries a
+  marker's start or end. A fund whose object is refused has the manifest entry `{"uri": null, "bytes": <over-cap bytes>,
+  "refused": true}`. `fund_mv_by_date` is the sum of `market_value` over the fund's G1 report of that date.
 - **Organic trigger:** the 07:00 ET marker publish.
 
 ### `RIV-bf-1` -- an ad hoc Bloomberg close-price backfill over a date range, on the existing market route, under a row budget (FWD-22; F.5 card 2 answer; WORLD)
@@ -101,6 +126,12 @@ Chains (M = 5; file sets disjoint across chains):
   is skipped and counted), each row `as_of_source = "backfill"`; it records the points in the `bbg_budget` ledger with mode
   `market-range`; a tripped session stops the run with what landed stated. No file under `integrations/` changes. The live
   run is the ISSUER's act under a never-widen pair, after the day's 07:00 ET vehicle run; the worker makes NO Bloomberg call.
+- Rulings at the cut (issuer): a refusal is `status == "REFUSED"` (the module's own word). The result carries `plan: {"points",
+  "securities", "trading_days", "batches"}`; a refusal's detail names the planned points and the points left, where "left" is
+  the smaller of `max_points` and the budget remainder. Skipped dates are returned as `skipped_dates` (a list). The ledger
+  records the points REQUESTED (securities x trading days of the range), since that is what the vendor was asked for. The
+  budget read is a new `bbg_budget.check_points(points, today=None) -> None | detail` beside `check_backfill` (unchanged).
+  A tripped session returns `FAILED` naming the dates that landed.
 - **Organic trigger:** none (ad hoc by Andrew's word); the negative arm is the daily `market` mode, unchanged.
 
 ### `RIV-rt-1` -- the gateway serves a fund's chart object (FWD-22; F.5 item 2; WORLD, released by NFRA_OPLGTW)
@@ -108,8 +139,12 @@ Chains (M = 5; file sets disjoint across chains):
 - Interface: `rivalfunds_view.chart_key(day, fund)` (the page prefix + `date=<day>/charts/<FUND>.json`; `fund` must match
   `^[A-Z0-9]{1,8}$`) and handler `rivalfunds_chart` for `/rivalfunds/{day}/chart/{fund}`: 200 `application/json` with the
   object's bytes; bad day or bad fund -> 400; no object -> 404 JSON `{"error": "no chart for this fund and day"}`; over the cap
-  -> 413-class refusal as the page's; every call audit-logged with `{"day", "fund", "route": "chart"}`. The route is declared
-  in `ROUTE_CLASS` as `access-layer` and mounted in `server.py` BY THE ISSUER at the merge (a hookup, not this cell's file).
+  -> the page's own over-cap refusal; every call audit-logged with `{"day", "fund", "route": "chart"}`. The route is declared
+  in `ROUTE_CLASS` as `access-layer` and mounted in `server.py` by this cell.
+- Rulings at the cut (issuer): CORRECTION -- the over-cap refusal is the page's own (502, `rivalfunds_view.py` `_serve_day`),
+  not a 413. No viewer -> 401 as the other routes. The 200 and the 404 are audit-logged; a 400 and a 401 are not, as today.
+  The `server.py` Route and the `ROUTE_CLASS` line are THIS cell's (the lane refuses the issuer's commit there: round 13
+  AMENDMENT 1), so both files are in its paths.
 - **Organic trigger:** a signed-in click on a security modal after RIV-md-1 is served.
 
 ### `RIV-md-1` -- the security modal draws the price curve with the fund's trade markers, by the page's ONE script (FWD-22; F.7)
@@ -124,4 +159,10 @@ Chains (M = 5; file sets disjoint across chains):
   part of the curve and the marker's words on a marker, prints `source_words`. On a failed or missing object the status line
   reads "Chart could not load" and the trade list stays. `data-history=none` and HISTORY_NONE leave the dialog.
   The script lands on the SERVED page only after the chart route serves (issuer's sequencing at the deploy).
+- Rulings at the cut (issuer): the script is emitted unconditionally by `render_page`; the route-before-script order is the
+  issuer's deploy sequence, not a flag. The AUDIT page gets no chart frame and no script, and `validate_audit` /
+  `validate_fund` still refuse any script. `data-chart-fund` carries the fund ticker exactly as the route takes it. The range
+  switch is three buttons `<button data-chart-range="R30|R90|R365">` reading 30d, 90d, 365d, R30 marked current. The trade
+  list is one line per trade from `trade_markers.words` when that module is importable, else the page's own trade words; a
+  fund with no trade in the security lists none and says "No trades in the last 365 days".
 - **Organic trigger:** opening a security modal from a fund's section on the live page.
