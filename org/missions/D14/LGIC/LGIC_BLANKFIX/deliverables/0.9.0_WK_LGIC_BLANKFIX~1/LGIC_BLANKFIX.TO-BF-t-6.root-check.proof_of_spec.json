@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-t-6",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.md",
+    "vintage_commit": "f15f222030",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-t-6.root-check.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "bab3a0e453"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming_rootcheck.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A new repo module composing scope, rootmap, cadence, keyfill and the grader into one line per name; read-only over the repository; no AWS call.",
+      "introduces": [
+        "def check_root(root, map_path, not_judged=None, out=print, report_only=False):",
+        "def decide(item, ans, fourth=None):"
+      ],
+      "artifact_covered_by": [
+        "BF6-AC1",
+        "BF6-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_rootcheck.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A plain-script test over hand-made items with the modules' answers as plain data: 27 assertions.",
+      "introduces": [
+        "ROOTCHECK-TEST ok=%s cases=%d"
+      ],
+      "artifact_covered_by": [
+        "BF6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended: LGIC_BLANKFIX-W1-S3.",
+      "introduces": [
+        "LGIC_BLANKFIX-W1-S3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF6-AC1",
+      "criterion_verbatim": "BF6-AC1 -- every kind is reachable, no FIX line carries a blank, and an unfillable part is what makes the run fail.",
+      "method": "command",
+      "invocation": "python lib/tests/test_opal_naming_rootcheck.py",
+      "output_evidence": "ROOTCHECK-TEST ok=True cases=27\nrc=0 (run at worktree HEAD 67f8dafec5 plus the staged files)",
+      "denominator": "27 of 27 assertions held: six kinds, the difference control (1 with an unfillable cadence, 0 when fillable, --report-only changes no line), no FIX with a blank",
+      "status": "PASS",
+      "expect": "ROOTCHECK-TEST ok=True"
+    },
+    {
+      "criterion_id": "BF6-AC2",
+      "criterion_verbatim": "BF6-AC2 -- the real root, through the five real modules: one line per name, the counts summing to the scope's own count.",
+      "method": "command",
+      "invocation": "python lib/opal_naming_rootcheck.py infra/aws/terraform/bd-pipeline --map infra/logic/registry/root_map.json --report-only",
+      "output_evidence": "ROOTCHECK ok=True root=infra/aws/terraform/bd-pipeline items=140 right=10 fix=101 not_asked=6 pattern=1 carded=6 hole=16\nrc=0 (run at worktree HEAD 67f8dafec5 plus the staged files); without --report-only the same run exits 1 (hole=16)",
+      "denominator": "10+101+6+1+6+16 = 140 of 140 root_items(root) items; zero FIX lines carry a brace",
+      "status": "PASS",
+      "expect": "ROOTCHECK ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "check_root run with opal_naming_scope.root_items wrapped to drop its last item on the first call (the scan) and not on the second (the denominator).",
+      "expected": "ROOTCHECK ok=False",
+      "observed": "ROOTCHECK ok=False root=infra/aws/terraform/bd-pipeline items=139 right=10 fix=100 ...",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python lib/opal_naming_rootcheck.py ... --report-only run twice at the same bytes and the outputs compared with cmp. Difference control (asserted in test_opal_naming_rootcheck.py): the same item set, one cadence unfillable vs fillable -> code 1 with word None, 0 with word daily, 0 with --report-only and the same lines",
+      "observed": "141 of 141 lines identical across the two runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "names of the root that exist only in AWS",
+      "reason": "this round's run is the repository plane (the order's comp-adversary BLIND)"
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-W1-S3: the six keys AMENDMENT 1 calls raise-HOLEs are the six carded keys and print CARDED by rule 1; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/LGIC_BLANKFIX.TO-BF-t-6.root-check.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "opal_naming_rootcheck.py (this cell's artifact)",
+      "invocation": "python lib/opal_naming_rootcheck.py infra/aws/terraform/bd-pipeline --map infra/logic/registry/root_map.json --report-only",
+      "result": "ROOTCHECK ok=True root=infra/aws/terraform/bd-pipeline items=140"
+    }
+  ]
+}

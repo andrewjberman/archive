@@ -1,0 +1,38 @@
+"""OG-rl-10 host program: the opal_portal integration's own _PortalSession.token() with the real service secret, in process.
+Run by r24_ssm_prog.py as a SEPARATE process (env -i, installed venv, cwd = the gateway dir being tested, never the running service,
+never /opt/opal-gateway/.env). Modes (argv[1]): before | rehearsal | after ; argv[2] = the deployed sha (after only).
+Prints the OUTCOME only: never the token, the email, the password. No grant, state-store or .env access; the secret is read by the
+integration's own SecretsCredential (Secrets Manager, the instance role), exactly as the service reads it."""
+import hashlib
+import json
+import os
+import sys
+from urllib.parse import urlparse
+
+GW = os.environ.get("OG_GW_DIR", "/opt/opal-gateway")
+sys.path.insert(0, GW)
+mode = sys.argv[1] if len(sys.argv) > 1 else "before"
+served = sys.argv[2] if len(sys.argv) > 2 else ""
+from app.integrations.opal_portal import integration as mod  # noqa: E402
+
+md5 = hashlib.md5(open(mod.__file__, "rb").read()).hexdigest()
+staged = os.path.abspath(mod.__file__).startswith(os.path.abspath(GW)) and GW != "/opt/opal-gateway"
+host = urlparse(mod.AUTH_API_BASE).hostname
+integ = mod.OpalPortalIntegration()
+try:
+    tok = integ._session.token()
+    login = "OK" if isinstance(tok, str) and len(tok) > 0 else "no token"
+    del tok
+except mod.IntegrationAuthError as e:
+    login = str(e)
+except Exception as e:  # noqa: BLE001 -- the type name only, never the message (a transport error can carry a URL)
+    login = "ERR:" + type(e).__name__
+print("RL10_LOGIN mode=%s login=%s" % (mode, login.replace(" ", "_")))
+print("RL10_MODULE integration.py md5 %s staged=%s file=%s" % (md5[:8], staged, os.path.relpath(mod.__file__, GW)))
+print("RL10_AUTH_HOST %s" % host)
+print("RL10_HOSTS %s" % ",".join(mod.SPEC.hosts))
+if mode == "after":
+    body = {"login": login, "auth_host": host, "installed_code": True, "served_release": served, "grants_written": 0}
+    s = json.dumps(body, sort_keys=True)
+    print("RL10_BODY " + s)
+    print("RL10_DIGEST " + hashlib.sha256(s.encode("utf-8")).hexdigest())

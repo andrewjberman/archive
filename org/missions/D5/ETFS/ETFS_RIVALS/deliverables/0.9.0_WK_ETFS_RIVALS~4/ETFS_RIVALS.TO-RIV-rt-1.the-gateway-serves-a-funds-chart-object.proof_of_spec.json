@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-rt-1.the-gateway-serves-a-funds-chart-object",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "14a683c310",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-rt-1.the-gateway-serves-a-funds-chart-object.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "14a683c310"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/rivalfunds_view.py",
+      "kind": "script",
+      "commit_or_etag": "890c0aa948",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no deploy, no gateway release, no S3 call",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tests/test_rivalfunds_view.py",
+      "kind": "script",
+      "commit_or_etag": "890c0aa948",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no deploy, no gateway release, no S3 call",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "890c0aa948",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no deploy, no gateway release, no S3 call",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py",
+      "kind": "script",
+      "commit_or_etag": "890c0aa948",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no deploy, no gateway release, no S3 call",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/rt-1.AC1.py -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/rt-1.AC1.py",
+      "output_evidence": "chart_key: rivalfunds/etfs/platinum/page/date=2026-10-06/charts/TXUE.json | page prefix: rivalfunds/etfs/platinum/page/\nOK:   (a) chart_key(day, fund) is the page prefix + date=<day>/charts/<FUND>.json\nchart: 200 | content-type: application/json | bytes equal: True | read chart key: True\nOK:   (b) GET /rivalfunds/2026-10-06/chart/TXUE serves the stored object's exact bytes as application/json\nrefusals (no viewer, bad day, lowercase, too long, slash): (401, 400, 400, 400, 400) | S3 reads during refusals: 0\nOK:   (c) no viewer 401; bad day 400; bad fund (lowercase, too long, slash) 400; no S3 read on any refusal\nmissing object: 404 {'error': 'no chart for this fund and day'}\nOK:   (d) no chart object -> 404 JSON {\"error\": \"no chart for this fund and day\"}\naudit log entries route=chart: TXUE [{'day': '2026-10-06', 'fund': 'TXUE', 'route': 'chart'}] | IDVZ [{'day': '2026-10-06', 'fund': 'IDVZ', 'route': 'chart', 'verdict': 'MISSING'}]\nOK:   (e) the 200 call and the 404 call are audit-logged with day, fund and route 'chart'\naudit page: 200 b'<html>AUDIT 2026-10-06</html>' | audit log entries route=audit: 1\nOK:   (f) control: /rivalfunds/2026-10-06/audit still serves audit.html and is audit-logged route 'audit'\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "6 of 6 checks OK ((a)-(f)); run under timeout 120 (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 run twice, the cell's test file and the route-census tests once",
+      "observed": "AC1 PASS both runs; test_rivalfunds_view.py + test_principal_cutover.py 28 passed; full gateway suite 29 failed / 604 passed against base 29 failed / 601 passed, identical failure lists",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "None named by the spec.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order status to complete",
+      "reason": "The face leaves the flip to the issuer."
+    },
+    {
+      "item": "Gateway suite at 0 failed",
+      "reason": "29 failures exist at base and are unchanged by this cell (row ETFS_RIVALS-Z-W4-S19)."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-Z-W4-S19"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~4 <0.9.0_WK_ETFS_RIVALS~4@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "890c0aa948"
+    }
+  ]
+}
