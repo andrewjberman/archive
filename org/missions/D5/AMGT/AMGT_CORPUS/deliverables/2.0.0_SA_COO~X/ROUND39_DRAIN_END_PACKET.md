@@ -1,7 +1,7 @@
 # AMGT_CORPUS round 39 -- drain-end packet (L8 input) to `3.0.0_SA_CVO~Z`
 
-**STATUS: DRAFT, NOT DELIVERED. 5 of 6 cells terminal. Pending: CRPS-ao-2 leg v only (the 2026-10-07 13:00Z scheduled fire). The
-portal is on DEV; the BA plant is made.**
+**STATUS: FINAL, 6 of 6 cells terminal. CRPS-ao-2 leg v read on the 2026-10-07 13:00Z scheduled fire (Branch A); ledger
+`amgt-corpus-r39-ao2` CLOSED. The portal is on DEV.**
 
 | | |
 |---|---|
@@ -14,7 +14,7 @@ portal is on DEV; the BA plant is made.**
 | cell | `<risk>` | state | evidence |
 |---|---|---|---|
 | `CRPS-ao-1` the refresh skip keys on the PULL date (producer) | LOCAL | DONE, drained @`662cd2b11d` | AC1 `skip build 1/1 control 2/2`; AC2 15 passed; proof VALID. `cmd_refresh` reads the newest pull-log stamp per name through one paginated listing (`_pull_log_latest_stamps`). On CLOUD after the drain: 99 related tests pass; a real `refresh --dry-run` read `already_current 96 pulled 0` (right on 10-06: all 96 were pulled that day) |
-| `CRPS-ao-2` re-pin + the BA plant + the 10-07 13:00Z fire | SERVED | **IN FLIGHT**: pair COO @`92cf1f322b` / CTO SIGNED @`1e915b121e`; ledger `amgt-corpus-r39-ao2` OPEN @`543ce6eb56`; leg r CLOSED | section 2 |
+| `CRPS-ao-2` re-pin + the BA plant + the 10-07 13:00Z fire | SERVED | DONE: pair COO @`92cf1f322b` / CTO SIGNED @`1e915b121e`; ledger `amgt-corpus-r39-ao2` CLOSED, 3 of 3 legs proven | section 2 |
 | `CRPS-ao-3` FWD-20 on the page: header-fact currency, a mark on every in-row "--", unmeasured reasons in words (+ AMENDMENT 1) | LOCAL | DONE, drained @`a66121a30f`; AMENDMENT 1 drained @`85547630d1` | AC1-AC3 `ao3 currency / marks / words build 1/1 control 1/1`; AC5 `ao7 build 1/1 control 1/1`; proof VALID. AC4 is yours (judgment) |
 | `CRPS-ao-4` FWD-21: the sheet fits FY+3 at 1440 px | LOCAL | DONE, drained @`a66121a30f` | AC1 `ao4 control 2/2`; proof VALID. AC2 is yours (judgment) |
 | `CRPS-ao-5` the real run of FWD-20/21 and the six FWD limbs | LOCAL (read) | READ @`9b0a488030` | sections 3 and 4 |
@@ -33,7 +33,7 @@ re-merge `12978b5e`, on which typecheck, the three ao3 arms, ao4, ao7 and the Mo
 | L0 | Pair signed. Andrew, ~20:13Z, to the CTO's scope question: research is outside the Bloomberg no-modify order (CTO record `ANDREW_DIRECT_20261006_201xZ_...`). `-Plan -Commit 662cd2b11d` names Python311 (live-task). Fire closure between the pins `6f6e472641..662cd2b11d`: 2 of 16 changed non-test modules (`model_block_pull.py` = ao-1 only; `build_universe.py` = RESAPP av-7/aw-6). |
 | Lr | REGISTERED 2026-10-06 ~20:2xZ. Start In `opal-pinned\amgt-induction-daily\662cd2b11df0`, Python311, next 13:00Z. CLOSED in the ledger. |
 | Lp | MADE 2026-10-07T00:10:51Z, rc 0 (held 22:09Z-23:52Z under the integrate HOLD, made after RELEASE). BA's newest derived stamp `20261007T001051Z`; newest pull-log stamp `20261006T132334Z`; same raw stamp as the prior block, 745 of 745 figures, value/unit/currency moved 0. `refresh --dry-run` on the pinned producer bytes lists `DRY-RUN REFRESH: BA_US_Equity`, `already_current 0` of 96. CLOSED @`69bc020018`. |
-| Lv | **PENDING** -- the 2026-10-07 13:00Z fire: `already_current 0 pulled 96` with BA in the REFRESH set, rc 0; then `count_ratio_currency.py --served`. This fire is FWD-22's acceptance and disarms `Z-S88`. |
+| Lv | READ, Branch A. The 2026-10-07 13:00Z fire on pin `662cd2b11d` (task LastTaskResult 0, log written 13:13Z, 107 lines): `refresh population registered 96 with_block 96 already_current 0 pulled 96 bloomberg_calls 768`, refresh rc 0, fire rc 0. 96 of 96 `REFRESH:` lines; BA at line 27, `raw 20261007T130241Z derived 20261007T130249Z`, and S3 lists that stamp as BA's newest block, after the plant `20261007T001051Z`. The plant made BA's newest DERIVED stamp today's before the fire and the fire still pulled it: the skip keys on the PULL stamp (2026-10-06 read `already_current 96 pulled 0` on the old rule). Admit: `without_block 0 pulled 0`; the induction step read `pool_puts 0`. `count_ratio_currency.py --served` at 13:16Z: `served names 96 count_ratio 34894 with_currency 0`, `money 31985 unlabelled 0`, `crc served build 1/1 control 1/1`. Evidence `evidence/r39_ao2_leg_v_fire_20261007.txt`. Not measured: how many figures the pull moved against the 10-06 blocks. |
 
 ## 3. CRPS-ao-5 -- FWD-20 and FWD-21 on the running page (`evidence/r39_ao5_walk/`)
 
@@ -77,7 +77,7 @@ own line must print four classes for "every time" is yours to grade.
 
 ## 6. Rows and findings
 
-- `Z-S88` (ARMED, owner `2.0.0_SA_COO~X`): the remedy is landed and pinned; it disarms on leg v.
+- `Z-S88` (ARMED, owner `2.0.0_SA_COO~X`): the remedy is landed and pinned, and leg v is its disarm proof (section 2, 2026-10-07 13:13Z). The disarm clock in `REMEDIATION_v3.md` is yours to write.
 - No worker filed a row this round (4 worker seats, 0 rows).
 - Row `Z-S89` (OBSERVATION, INERT, mine): two cited management values read "Management/Board 80" (`8306_JP_Equity`,
   `8316_JP_Equity`), a heading and a score rather than a passage.
