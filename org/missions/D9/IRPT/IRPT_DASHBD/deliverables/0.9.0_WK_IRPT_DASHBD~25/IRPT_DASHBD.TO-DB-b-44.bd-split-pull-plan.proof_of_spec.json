@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-44",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "46caa06641"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "46caa06641",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-44.bd-split-pull-plan.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~25",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~25/SPLIT_PULL_PLAN.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~25/bd_split_pull.py",
+      "kind": "script",
+      "commit_or_etag": "80f080e624",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline plan mode run once (S3 list/read only); run and sweep never invoked; 0 vendor calls.",
+      "artifact_covered_by": [
+        "DB26-3-AC1",
+        "DB26-3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~25/tests/test_bd_split_pull.py",
+      "kind": "test",
+      "commit_or_etag": "80f080e624",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "11 offline tests, stubbed boto3/helpers/time, naming split, --go, denominators.",
+      "artifact_covered_by": [
+        "DB26-3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~25/SPLIT_PULL_PLAN.json",
+      "kind": "config_data",
+      "commit_or_etag": "80f080e624",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "dry_run true, vendor_calls 0; 2299 requests, 4598 ranges, 0 unmapped, pull=split20261007.",
+      "artifact_covered_by": [
+        "DB26-3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~25/SPLIT_PULL_PLAN.md",
+      "kind": "doc",
+      "commit_or_etag": "80f080e624",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only summary, no client figure.",
+      "artifact_covered_by": [
+        "DB26-3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB26-3-AC1",
+      "criterion_verbatim": "DB26-3-AC1 -- the plan: 2,299 requests over the record's 2,299 accounts, 4,598 ranges split at 2025-01-09, builder landing keys under a new pull token, 0 vendor calls.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r26/p26_split_pull.py\" . DB26-3-AC1",
+      "output_evidence": "OK: 2299 requests, 2299 accounts, 4598 ranges split at 2025-01-09; pull=split20261007 (not among 1 landed); builder keys; 0 vendor calls\nDB26-3-AC1 PASS (rc 0)",
+      "denominator": "2,299 of 2,299 record accounts planned, 0 unmapped; 4,598 ranges",
+      "status": "PASS",
+      "expect": "DB26-3-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB26-3-AC2",
+      "criterion_verbatim": "DB26-3-AC2 -- the offline tests pass (at least 6) and cover the split, --go and the denominators.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r26/p26_split_pull.py\" . DB26-3-AC2",
+      "output_evidence": "OK: 11 offline tests pass\nDB26-3-AC2 PASS (rc 0)",
+      "denominator": "11 of 11 tests passed (minimum 6)",
+      "status": "PASS",
+      "expect": "DB26-3-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Tests include negative arms: a landed pull token, a repeated account, a widened plan and a missing --go each refuse.",
+      "expected": "tests pass",
+      "observed": "11 of 11 passed (at 80f080e624)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Single plan run",
+      "observed": "not re-run",
+      "status": "N/A-WITH-REASON",
+      "reason": "Single offline plan run; the run mode re-derives the plan and compares it before any call."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "run --go and sweep --go",
+      "reason": "The live pull is the issuer's act under Andrew's per-use word; this cell ran plan only."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~25/tests/test_bd_split_pull.py",
+      "result": "11 passed (80f080e624)"
+    }
+  ]
+}
