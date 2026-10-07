@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-c-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-c-1.price-need.md",
+    "group": "OTHER",
+    "vintage_commit": "e0ed51ad6a"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~8",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round3.md",
+    "vintage_commit": "e0ed51ad6a",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-c-1.price-need.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/analysis/commonwealth_price_need.py",
+      "kind": "script",
+      "commit_or_etag": "c138bbf805",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; S3 reads of the one transactions table under the default profile, no write to any store, no vendor call"
+    },
+    {
+      "path_or_key": "data/assets/scripts/analysis/tests/test_commonwealth_price_need.py",
+      "kind": "test",
+      "commit_or_etag": "c138bbf805",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; S3 reads of the one transactions table under the default profile, no write to any store, no vendor call"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~8/PRICE_NEED_20261007.csv",
+      "kind": "config_data",
+      "commit_or_etag": "c138bbf805",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; S3 reads of the one transactions table under the default profile, no write to any store, no vendor call"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~8/PRICE_NEED_20261007.json",
+      "kind": "config_data",
+      "commit_or_etag": "c138bbf805",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; S3 reads of the one transactions table under the default profile, no write to any store, no vendor call"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB3c1-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_need.py expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_need.py",
+      "output_evidence": "9 passed in 1.08s (run under timeout 120, rc 0)",
+      "denominator": "9 of 9 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "CB3c1-AC2",
+      "criterion_verbatim": "python data/assets/scripts/analysis/commonwealth_price_need.py expect: PRICE-NEED securities=4634 security_days_total=",
+      "method": "command",
+      "invocation": "python data/assets/scripts/analysis/commonwealth_price_need.py",
+      "output_evidence": "PRICE-NEED securities=4634 security_days_total=3421735 equity=1453884 etf=331153 fund=752921 fixed_income=688679 other=195098 (under timeout 120, rc 0, real 1m18s on the first threaded run and 1m44s on the re-run against the committed code; the first run, a sequential fetch, ended rc 124 at 120 s, row ADVI_COTBKF-W8-S1)",
+      "denominator": "4634 securities of the measured 4,634 distinct non-blank CUSIPs; 1,416,497 table rows read; groups equity 1830, etf 349, fund 1135, fixed_income 778, other 542 securities (sum 4634); mixed Asset_Type CUSIPs 0",
+      "status": "PASS",
+      "expect": "PRICE-NEED securities=4634 security_days_total="
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant control named by the order; the tests carry their own difference controls (a weekend and an NYSE holiday inside a span are not counted; a 1-1 Asset_Type tie resolves to the alphabetical first)",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two full runs against S3 gave the same PRICE-NEED line",
+      "observed": "PRICE-NEED securities=4634 security_days_total=3421735 equity=1453884 etf=331153 fund=752921 fixed_income=688679 other=195098 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "ADVI_COTBKF-W8-S1: the sequential read of the 14 transactions files takes 217 s and misses the 120 s bound; a threaded fetch takes 78 to 104 s"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~8/ADVI_COTBKF.TO-CB-c-1.price-need.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_need.py",
+      "result": "9 passed in 1.08s"
+    }
+  ]
+}

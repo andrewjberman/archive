@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-b-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-b-2.rdp-lock-read.md",
+    "group": "OTHER",
+    "vintage_commit": "b119ace91b"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~2",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round2.md",
+    "vintage_commit": "b119ace91b",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-b-2.rdp-lock-read.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/devices/rdp_lock_check.ps1",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only check script; runs on each box on demand, nothing deployed"
+    },
+    {
+      "path_or_key": "org/devices/rdp_reach_check.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only check script; runs on each box on demand, nothing deployed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CT2b2-AC1",
+      "criterion_verbatim": "powershell -NoProfile -ExecutionPolicy Bypass -File org/devices/rdp_lock_check.ps1 expect: all_locked=True",
+      "method": "command",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File org/devices/rdp_lock_check.ps1",
+      "output_evidence": "rule name='Remote Desktop - User Mode (TCP-In)' protocol=TCP profile=Any remote=100.64.0.0/255.192.0.0 locked=True\nrule name='Remote Desktop - User Mode (UDP-In)' protocol=UDP profile=Any remote=100.64.0.0/255.192.0.0 locked=True\nrule name='Remote Desktop - Shadow (TCP-In)' protocol=TCP profile=Any remote=100.64.0.0/255.192.0.0 locked=True\nRDP-LOCK box=laptop rules=3 locked=3 all_locked=True (rc 0)",
+      "denominator": "3 of 3 enabled Remote Desktop inbound rules locked to the tailnet range",
+      "status": "PASS",
+      "expect": "all_locked=True"
+    },
+    {
+      "criterion_id": "CT2b2-AC2",
+      "criterion_verbatim": "python org/devices/rdp_reach_check.py expect: dell1=open dell2=open",
+      "method": "command",
+      "invocation": "python org/devices/rdp_reach_check.py",
+      "output_evidence": "dell1 100.79.95.44:3389 open\ndell2 100.104.84.87:3389 open\nRDP-REACH dell1=open dell2=open checked=2 (rc 0)",
+      "denominator": "2 of 2 other boxes with a tailnet_address answered on 3389",
+      "status": "PASS",
+      "expect": "dell1=open dell2=open"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant control named by the order",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: read-only live reads",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "running the checks on the Dells themselves",
+      "reason": "run later by each Dell's seat or Andrew (order cell text)"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~2/NFRA_CTLPLN.TO-CT-b-2.rdp-lock-read.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "powershell",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File org/devices/rdp_lock_check.ps1",
+      "result": "all_locked=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/devices/rdp_reach_check.py",
+      "result": "dell1=open dell2=open checked=2"
+    }
+  ]
+}

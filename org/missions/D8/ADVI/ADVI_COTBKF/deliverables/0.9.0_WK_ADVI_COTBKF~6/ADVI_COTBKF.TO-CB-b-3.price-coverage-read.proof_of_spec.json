@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-b-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-b-3.price-coverage-read.md",
+    "group": "OTHER",
+    "vintage_commit": "57c1676b89"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~6",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round2.md",
+    "vintage_commit": "57c1676b89",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-b-3.price-coverage-read.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/analysis/commonwealth_price_coverage.py",
+      "kind": "script",
+      "commit_or_etag": "756ca530f0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; S3 reads under the default profile only, no write to any store, no vendor call"
+    },
+    {
+      "path_or_key": "data/assets/scripts/analysis/tests/test_commonwealth_price_coverage.py",
+      "kind": "test",
+      "commit_or_etag": "756ca530f0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; S3 reads under the default profile only, no write to any store, no vendor call"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~6/PRICE_COVERAGE_20261006.json",
+      "kind": "config_data",
+      "commit_or_etag": "756ca530f0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; S3 reads under the default profile only, no write to any store, no vendor call"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~6/PRICE_COVERAGE_20261006.md",
+      "kind": "doc",
+      "commit_or_etag": "756ca530f0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo file only; result record of a read"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~6/PRICE_COVERAGE_STORES_20261006.json",
+      "kind": "config_data",
+      "commit_or_etag": "756ca530f0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only script; S3 reads under the default profile only, no write to any store, no vendor call"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB2b3-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_coverage.py expect: passed",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_coverage.py",
+      "output_evidence": "10 passed in 0.58s (run under timeout 120, rc 0)",
+      "denominator": "10 of 10 tests passed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "CB2b3-AC2",
+      "criterion_verbatim": "python data/assets/scripts/analysis/commonwealth_price_coverage.py expect: PRICE-COVERAGE universe=4634 stores_checked=",
+      "method": "command",
+      "invocation": "python data/assets/scripts/analysis/commonwealth_price_coverage.py",
+      "output_evidence": "PRICE-COVERAGE universe=4634 stores_checked=22 stores_with_prices=7 priced_any=1506 security_days_covered=2090953 security_days_needed=9388961 (run under timeout 120, rc 0, real 0m7.9s against the primed .scratch/price_cache; the cold read took 5m24s, row ADVI_COTBKF-W6-S4)",
+      "denominator": "universe 4634 of the measured 4634 distinct non-blank CUSIPs; 1506 of 4634 priced on some day; 2090953 of 9388961 upper-bound security-days; 22 stores checked, 9 read, 7 with a priced universe security",
+      "status": "PASS",
+      "expect": "PRICE-COVERAGE universe=4634 stores_checked="
+    },
+    {
+      "criterion_id": "CB2b3-AC3",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9: the store census is complete enough to rely on -- every Opal store that holds a daily price series was checked and is named with its verdict",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~6/PRICE_COVERAGE_STORES_20261006.json and PRICE_COVERAGE_20261006.md (stores_checked)",
+      "output_evidence": "22 stores named with verdicts: 9 READ_PRICE_SERIES (bd/inf/cot canonical_prices, bd/inf historical_prices, G4 security_market, Yang return_daily, Bloomberg test-pull histories, fund_daily), 1 NAME_KEYED (bd interpolated_prices), 4 DERIVED_NOT_READ (daily slices, bd_assets and daily_positions, inf assets_v2, gold timeseries), 8 NOT_PRICE_SERIES. Method: S3 top-level and second-level prefix listing of 23 opal-data-* buckets, schema reads of the candidates, comp-find over the AWS node graph for price terms, comp-find over code for close/price columns. Not read: the positions-derived marks listed as DERIVED_NOT_READ; the bd bucket's deep key walk timed out (rows ADVI_COTBKF-W6-S2, W6-S4 name the limits).",
+      "denominator": "23 opal-data-* buckets listed at depth 2 (bd, inf, cot, assets, etfs also walked deeper); 22 stores named",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the oracle is 3.0.0_SA_CVO at L9; this record carries the output and no verdict",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant control named by the order; the tests carry their own difference controls (a reused symbol not credited, an out-of-window day not counted, a shared day counted once in the union)",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two consecutive cached runs gave the same PRICE-COVERAGE line",
+      "observed": "PRICE-COVERAGE universe=4634 stores_checked=22 stores_with_prices=7 priced_any=1506 security_days_covered=2090953 security_days_needed=9388961 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "ADVI_COTBKF-W6-S1: the G4 security_market series holds 4 date partitions, not about 730 days, none inside the needed window",
+    "ADVI_COTBKF-W6-S2: the daily price series that cover these securities live in the bd, inf and cot firm buckets, not among the order's named starting points",
+    "ADVI_COTBKF-W6-S3: 103 universe symbols are claimed by more than one CUSIP; a ticker match on them is reported and not credited",
+    "ADVI_COTBKF-W6-S4: the cold read takes 5 to 19 minutes; the 120-second bound holds only against a primed cache (ARMED, disarm owner 2.0.0_SA_COO~C)",
+    "ADVI_COTBKF-W6-S5: the naming gate refused the legacy store addresses typed in the script, so the census is a record file the script loads"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~6/ADVI_COTBKF.TO-CB-b-3.price-coverage-read.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q data/assets/scripts/analysis/tests/test_commonwealth_price_coverage.py",
+      "result": "10 passed in 0.58s"
+    }
+  ]
+}
