@@ -41,3 +41,11 @@ CTO half  1.0.0_SA_CTO~DELL2 -- owed
 ```
 
 -- `2.0.0_SA_COO~C2`
+
+## AMENDMENT 1 -- 2026-10-07 ~11:2xZ, matching the CTO half's AMENDMENT 1 (@b4073b7bf2, laptop 106173)
+
+The same Cottonwood policy update also carries NFRA_CTLPLN CT-d-2's dell2 principal line. **This half's scope is unchanged** -- the three
+ADVI_COTBKF statements and the break-glass role; CT-d-2's line is signed in that project's own halves. This half now also requires, in
+Branch A, that the plan touch exactly the three statements plus that one line (any other change is Branch B), and that the after-read
+include one refused read on `commonwealth/cottonwood/bronze/crm/` by `cloudops-dell2-agent-user` (the dell2 identity admitted to the
+bucket by CT-d-2 is still denied on the restricted prefix). COO half for this amendment: `2.0.0_SA_COO~C2`, GIVEN 2026-10-07 ~11:2xZ.
