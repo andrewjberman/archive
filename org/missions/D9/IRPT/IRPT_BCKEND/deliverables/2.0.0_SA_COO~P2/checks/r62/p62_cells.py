@@ -13,7 +13,8 @@ Prints "<id> PASS" or "<id> FAIL" as the last line. Every check finishes inside 
               Base: FAIL (no census).
   IB62-4-AC1  _ids: the seam file's index holds 0 'None' values, and the new test naming 'None' plus the _ids suite pass.
               Base: FAIL (826 'None').
-  IB62-1-AC2  E-P9 submit: export/tests/test_submit_client_report.py passes (names client-report) and the export suite passes.
+  IB62-1-AC2  E-P9 submit: export/tests/test_submit_client_report.py passes (names client-report) and the export suite has no
+              failure beyond the six pypdf-only tests (amendment 1, row W138-S1).
               Base: FAIL (no test).
   IB62-1-AC3  E-P9 package: render_manifest/manifest.ts lists a 'client-report' kind with a schemaVersion entry, and the portal
               render package (portal/src/pages/InvestorReporting/render/) names 'client-report'. Base: FAIL.
@@ -135,12 +136,28 @@ def main():
         last = _last(out)
         if rc or "passed" not in last or re.search(r"\d+ (failed|error)", last):
             fail("new tests: %s" % last)
-        rc, out = _run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/"],
+        rc, out = _run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rf", "tests/"],
                        root / "infra/aws/lambda/investor-reporting/export")
         last2 = _last(out)
-        if rc or re.search(r"\d+ (failed|error)", last2):
-            fail("export suite: %s" % last2)
-        print("OK: new %s; export suite %s" % (last, last2))
+        # Amendment 1 (issuer, row W138-S1): these six fail at the base too, only because pypdf is not on this box
+        # (no egress to fetch it). Any OTHER failure, or one of these failing for another reason, still fails AC2.
+        pypdf_only = {
+            "tests/test_export.py::test_the_content_hash_is_stable_and_the_validator_reads_a_real_pdf",
+            "tests/test_export.py::test_the_validator_fails_a_non_pdf_rather_than_raising",
+            "tests/test_export.py::test_the_forbidden_marker_census_is_measured_not_asserted",
+            "tests/test_export_path_b.py::test_the_receipt_names_the_frozen_as_of",
+            "tests/test_submit_async.py::test_the_marked_event_builds_and_the_handle_reaches_the_receipt",
+            "tests/test_submit_service.py::test_submit_then_first_read_after_the_render_finalizes_the_receipt",
+        }
+        failed = {}
+        for ln in out.splitlines():
+            m = re.match(r"FAILED (\S+?)(?: - (.*))?$", ln.strip())
+            if m:
+                failed[m.group(1).replace("\\", "/")] = m.group(2) or ""
+        extra = [k for k in failed if k not in pypdf_only or "pypdf" not in failed[k]]
+        if re.search(r"\d+ error", last2) or extra:
+            fail("export suite: %s; failures outside the six pypdf-only tests: %s" % (last2, extra[:6]))
+        print("OK: new %s; export suite %s (%d pypdf-only failures admitted by amendment 1)" % (last, last2, len(failed)))
     elif cid == "IB62-1-AC3":
         m = (root / "infra/aws/lambda/investor-reporting/export/render_manifest/manifest.ts").read_text(encoding="utf-8")
         if "'client-report'" not in m and '"client-report"' not in m:
