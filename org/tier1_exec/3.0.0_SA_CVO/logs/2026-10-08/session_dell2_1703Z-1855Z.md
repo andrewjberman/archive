@@ -1,4 +1,4 @@
-# Re-seat after the dell2 reboot; IRPT_BCKEND sweep 17 compiled and slugged -- 3.0.0_SA_CVO (dell2)
+# Re-seat after the dell2 reboot; eight L8/L9 compiles slugged -- 3.0.0_SA_CVO (dell2)
 
 **Date:** 2026-10-08
 **Task Order:** ad-hoc (L8/L9 compile, IRPT_BCKEND rounds 75-76 ~P + round 64 ~Y)
@@ -34,6 +34,20 @@ reconstruct state, and compile what arrived.
    (the dismissal stands because the live function has no over-age path at all); S391's "delete api/routes.json" is struck because the
    file is IB-rt-1's deliberate retirement stub. Round 64 ~Y: 0 rows, 3 of 3 repinned rows hash equal.
 3. **Slug** to `1.0.0_SA_CTO~DELL2`, delivered 17:19:47Z.
+4. **Later compiles, 17:3xZ-18:5xZ** (each slugged to `1.0.0_SA_CTO~DELL2`):
+
+   | compile | commit | finding |
+   |---|---|---|
+   | NFRA_TRNSPT r4 | 456ed16d42 | D2-S2's census must read the running gateway; repo source pages to the end |
+   | ADVI_COTBKF r19 | c83ca1f0b1, 42ebe97a39 | AC3 MET; 316067107 trades like a core sweep (232 accts), row D2-S30 |
+   | IRPT_BCKEND r65 ~Y | 69ae308272 | X-1 on-behalf branch unreachable on the served route |
+   | IRPT_BCKEND s18 | cdf801e03b | KINDS gap is a stale pin, not missing code; D2-S3 shared-tree residue ARMED |
+   | ADVI_COTBKF r20 | ea6b96a66a | AC3 MET; no custodian designation, rule (b) bounded at 16 of 163 |
+   | IRPT_BCKEND s19 | 29a1c3c259 | D2-S3 closed |
+   | IRPT_DASHBD r28 | d4b5aafcd8 | S34 qualifies branch B on 440 accounts |
+
+5. **Correction:** msgs 1177 (~T2) and 1330 (~D2) were addressed to `1.0.0_SA_CTO~DELL2`, not to this seat (get_delivery_state by id).
+   My slugs said they "never reached my ledger": true, but no broker defect. Those COOs sent no L8 request to the CVO.
 
 ## Current State
 
@@ -42,6 +56,5 @@ ARMED in IRPT_BCKEND: S334 (`1.0.0_SA_CTO`), W165-S2 (`0.0.0_AB_MSTR~DELL2`, And
 
 ## Next Steps
 
-1. [3.0.0_SA_CVO] Compile IRPT_DASHBD round 28 B when `2.0.0_SA_COO~D2` sends its packet (drain 24d088b96e is on CLOUD).
-2. [3.0.0_SA_CVO] Compile ADVI_COTBKF round 19 when `2.0.0_SA_COO~C2` drains it.
-3. [1.0.0_SA_CTO~DELL2] IB-pr-363 CTO half; rounds 75-76 analysis.
+1. [3.0.0_SA_CVO] Compile the next packets as they arrive (IRPT_BCKEND r81/r82 ~P in flight).
+2. [1.0.0_SA_CTO~DELL2] Analyses for the slugs above.
