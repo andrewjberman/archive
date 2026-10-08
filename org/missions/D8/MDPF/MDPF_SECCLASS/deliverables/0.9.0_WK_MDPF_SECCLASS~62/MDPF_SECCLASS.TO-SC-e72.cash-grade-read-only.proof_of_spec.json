@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e72",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f4b2f17d0f36d71d1eeef6430133ec234618c2c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R12.md",
+    "vintage_commit": "e6f1fdfc1fcd7773a9cd11b2864f558b7cba09b5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e72.cash-grade-read-only.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~62",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/cash_grade.py",
+      "kind": "script",
+      "commit_or_etag": "f7e463ef22",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only paginated ConsistentRead scan of etf-classifications; prints the CASH-GRADE line (counts by sub_asset_class and classified_by, V3 cash-planned keys at plan, legacy fixed_income/Cash).",
+      "artifact_covered_by": [
+        "SC12-e72-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC12-e72-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/cash_grade.py -- expect: CASH-GRADE",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/cash_grade.py",
+      "expect": "CASH-GRADE",
+      "output_evidence": "CASH-GRADE ok=False cash_rows=329 by_classified_by={'scheduled': 328, 'model': 1} v3_planned=328 v3_present_at_plan=328 fixed_income_Cash=17 by_sub_asset_class={'Cash': 310, 'T-Bill': 10, 'Money Market': 9} v3_absent=0 v3_present_wrong=0 cash_case_variants=0 table_rows=9155 scan_pages=2 v3_tsv_rows=10965 (rc=0)",
+      "denominator": "live scan: 9155 etf-classifications rows over 2 pages; 329 cash rows; 328 of 328 unique V3 cash-planned keys present at plan (0 absent, 0 wrong); 17 fixed_income/Cash rows",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Absence control: the grade reports v3_absent and v3_present_wrong separately, so a missing planned key cannot read as present.",
+      "expected": "v3_absent=0 v3_present_wrong=0 sums with v3_present_at_plan to v3_planned",
+      "observed": "328 + 0 + 0 = 328",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "cash_grade.py run twice back to back against the live table",
+      "observed": "Identical CASH-GRADE line both times (329 cash rows, 328 of 328 at plan, 17 fixed_income/Cash), rc=0 each.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to etf-classifications; any judgment of ok=False.",
+      "reason": "BOUNDS: read-only scan; the grade is reported as measured and re-run at e32's close."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W62-S1"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/cash_grade.py",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/safe-commit.sh (runs commit-gate on the .py)",
+      "result": "commit f7e463ef22 accepted"
+    }
+  ]
+}
