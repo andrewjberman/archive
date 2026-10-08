@@ -389,3 +389,49 @@ The seven audit-bucket settings (`DenyAuditTrailBucketWrites`, explicitDeny for 
 ### Simulation, this step
 
 `POLICY-SIM allowed_ok=22/22 denied_ok=15/15 passrole_ok=5/5 protected_ok=8/8 freed_allowed=72/72 freed_excluded=3 undo_freed=167/167 undo_still_denied=443 selfsim_ok=9/9 ssm_ok=15/15 routes_ok=5/5 vendor_ok=245/245 all_ok=True`. `undo_freed` (167) = 118 freed arms (the two CloudTrail actions, the two Lambda permission actions on 20 function ARNs, the three bucket and two object ACL actions, the three queue actions on four queues, each for both users) + 48 receive and send arms + 1 shape check; the 11 actions that take another resource type (2 Lambda layer-version actions and 9 S3 access-point, access-grant and multi-region actions, printed as `UNDO-INERT`) are not counted. `undo_still_denied` (443) = 14 seven-bucket-write arms + 28 CloudTrail arms + 400 protected-function arms + 1 shape check.
+
+
+## H. CELL D2 -- the Dells may SEND the command documents, and dell2's one time-boxed shell window (amendment 19; `1.0.0_SA_CTO` msgs 107113, 107120)
+
+Author: 0.9.0_WK_NFRA_CTLPLN~14. NOTHING WAS APPLIED, NO PLAN WAS RUN AGAINST THE BACKEND, NO IAM WRITE WAS MADE, NO SSM COMMAND WAS SENT, NO SECRET VALUE WAS READ. The only AWS calls were `iam:SimulateCustomPolicy` and, inside the existing selfsim arms, `iam:SimulatePrincipalPolicy` (read-only). Built on the trunk that carries step D (the routes-host Deny removed) and step E. The live documents were not compared to the repository text.
+
+### What the grant names (item 1, printed by `tests/derive_ssm_documents.py --check`, `SEND-GRANT-1a/1b/1c`)
+
+- **The 12 documents** (the module's document list, read from the census, each declared by an `aws_ssm_document` in the repository): `advi-49f-chain-dispatch`, `opal-bd-49f-session-fetch`, `opal-cot-bd-session-fetch`, `opal-cot-bronze-run`, `opal-cot-gold-run`, `opal-cot-silver-run`, `opal-inf-export-run`, `opal-inf-jwt-fetch`, `opal-inf-jwt-setup`, `opal-inf-test-login-stage1`, `opal-inf-test-login-stage2`, `opal-inf-test-login-stage3`.
+- **The 6 hosts** (host routes of the YES roles with at least one document; 6 of the 17 YES-role hosts; all 17 read YES-DELETE and all are `stopped`): `i-0090b823a4a0997e3` bd-gold-qa-runner, `i-00c7568bc510f7423` bd-transactions, `i-01003b035d2988dfb` bd-gold-layer-runner, `i-0800437d1dbb0b5cc` bd-allocations (role `bd-exporter-ec2-role`); `i-0643a5bee8a8feabf` cot-exporter (`cot-exporter-ec2-role`); `i-0ed5afded2ebd4ed4` inf-gold-layer-runner (`inf-gold-layer-ec2-role`). The other 11 (8 historical-prices-fetcher, bd-fees, bd-assets, smartx-exporter) have no document route and are not named (row `NFRA_CTLPLN-W14-S30`).
+- **The F1 host is `i-0167fd745ad906a66`** (census name `irpt-ycharts-runner`, running, role `irpt-ycharts-runner-role`, verdict NO, not one of the 6). Confirmed in the repository: `org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP.md:36` (the runner runs on the resident host), `.../round6/NEVER_WIDEN_PACKET_BRANCH_B_ANDREWS_PRINCIPAL.md:10` (the resident package installs there; F1 follows its V1), `infra/aws/terraform/investor-reporting/ycharts/resident.tf:2`, `.../F1_RUN_CARD_20261007.md:48` (the issuer reads the resident host's journal).
+
+### The expected plan with the DEFAULT (`open_dell2_f1_shell_window` false), by address
+
+| resource address | action | what |
+|---|---|---|
+| `aws_iam_policy.dell_agent_ssm_send[0]` (`cloudops-dell-agent-ssm-send-policy`) | created | statement `SendCommandDocumentsAndShellToPrivilegedHosts`: Allow `ssm:SendCommand` on 19 exact resources (12 document ARNs, `arn:aws:ssm:us-east-1::document/AWS-RunShellScript`, 6 instance ARNs); statement `ReadCommandResults`: `ssm:GetCommandInvocation`, `ssm:ListCommandInvocations`, `ssm:ListCommands`, `ssm:DescribeInstanceInformation` on `*` (these do not support resource-level scoping). 1,606 of 6,144 characters. No wildcard in a send resource; `ssm:DeleteDocument` is not granted. |
+| `aws_iam_group_policy_attachment.dell_agent_ssm_send[0]` | created | to `cloudops-dell-agents-group` |
+
+Expected: **2 to add, 0 to change, 0 to destroy**; `aws_iam_policy.dell2_ssm` does NOT change (the document is the file, byte for byte; `DenyShellDocuments` reads exactly as today). The group then holds **7 managed policies of 10** (`group managed-policy attachments=7 quota=10`; this count assumes step D is applied, 8 if it is not). The two addresses are the whole `-target` list.
+
+### The expected plan with `-var open_dell2_f1_shell_window=true` (on plan and on apply), on top of the default
+
+| resource address | action | what |
+|---|---|---|
+| `aws_iam_policy.dell2_ssm` | updated in place | the document becomes `module.routes_policy.shellwin_open_json` (1,886 of 6,144 characters; 1,048 closed). No resource is created: dell2's window is a different document in the policy dell2 already has, because the Deny of the shell-script document sits in that same policy and an Allow cannot override a Deny. |
+
+Expected with the variable: **2 to add, 1 to change, 0 to destroy**; add `-target='aws_iam_policy.dell2_ssm'`. The window document is the file with one change and three added statements (`SHELLWIN-WINDOW-DIFF ... OK`): `DenyShellDocuments` loses `arn:aws:ssm:*::document/AWS-RunShellScript` and nothing else; added `DenyStartSessionOnShellScriptDocument` (the shell-script document stays refused for sessions), `AllowShellScriptOnF1HostWhileWindowOpen` (`ssm:SendCommand` on the shell-script document and the F1 instance ARN only), and `DenyOtherPrivilegedHostsWhileShellWindowOpen` (`ssm:SendCommand` on the 6 hosts' instance ARNs, for every document). **Closing the window** is any plan or apply WITHOUT the variable (the default is false): `aws_iam_policy.dell2_ssm` is updated in place back to the file. Hard close 2026-10-09T06:00Z, on the same ledger legs as the svc-irpt window; a precondition refuses the plan if the F1 host ever becomes one of the 6.
+
+### Item 3: which IAM form gives the pairing (row `NFRA_CTLPLN-W14-S27`)
+
+`ssm:SendCommand` is authorised against the document and the instance as separate resources with the same request context. Both ARNs in one `iam:SimulateCustomPolicy` call, per-resource results read:
+- FORM 1 (the Deny leaves the shell-script document; an Allow on the shell-script document and the F1 host): dell2 + RunShellScript + F1 = allowed, but dell2 + RunShellScript + a host of the group Allow = **allowed** too (the document side is allowed by the window, the instance side by the group Allow). Not the pairing.
+- FORM 2 (FORM 1 plus a Deny of `ssm:SendCommand` on the 6 hosts' instance ARNs while open): dell2 + RunShellScript + F1 = allowed; + each of the 6 hosts = explicitDeny (`DenyOtherPrivilegedHostsWhileShellWindowOpen`); + an instance outside the Allow = implicitDeny; dell1 + RunShellScript + F1 = implicitDeny (the F1 host is not in the group Allow; dell1 is untouched by the window). Built.
+- No condition key tells the instance-side evaluation which document is in the request, so no narrower form exists. **The cost, stated plainly:** while the window is open dell2 cannot send ANY document to the 6 hosts. A restriction only, and only while open.
+
+### What a Dell can newly do, in plain words
+
+- **Both Dells, permanently once applied:** send any of the 12 command documents, and run AWS-RunShellScript (a shell), on any of the 6 stopped hosts, each running as a role the census reads YES-DELETE (production-data deletes), and read a command's result. Because the document and the instance are authorised separately, every pairing of the 19 resources is allowed (a cot document on a bd host included). Several of the 12 interpolate a free-text parameter into a shell command line (`derive_ssm_documents.py --check` PARAM lines), so a send with a crafted parameter is a command as the host's role (row `NFRA_CTLPLN-W14-S28`).
+- **dell2's standing rule** (no AWS-RunShellScript) is unchanged by the default. It is not a shell boundary once the group Allow applies, for the reason in the line above.
+- **dell2, window open only:** `ssm:SendCommand` with AWS-RunShellScript against the F1 host `i-0167fd745ad906a66` alone (a shell on the runner host, whose role the census reads NO).
+- **Still refused:** `ssm:DeleteDocument` (12 documents x 2 Dells, implicitDeny, `routes_still_refused=24`); every other shell and session document for dell2; the export render document for dell2; a document the Allow does not name against a host it does.
+
+### Simulation, this step
+
+`POLICY-SIM allowed_ok=22/22 denied_ok=15/15 passrole_ok=5/5 protected_ok=8/8 freed_allowed=72/72 freed_excluded=3 undo_freed=167/167 undo_still_denied=443 selfsim_ok=9/9 ssm_ok=15/15 sendcmd_ok=34/34 shellwin_ok=18/18 routes_freed=114/138 routes_still_refused=24 vendor_ok=245/245 all_ok=True` (run twice, outputs identical; file `NFRA_CTLPLN.TO-CT-a-1.amendment19.simulate_policy.outputs.txt`). `sendcmd_ok` counts, per user, the 12 documents to a host of the Allow (allowed), the shell-script document (dell1 allowed; dell2 explicitDeny by `DenyShellDocuments`, row `NFRA_CTLPLN-W14-S29`), `ssm:DeleteDocument` (refused), a document the Allow does not name to a host (refused), one of the 12 to an instance the Allow does not name (refused), and the result read (allowed). `shellwin_ok` counts the window-diff check and 17 arms (open and closed). `routes_freed` moved 90 to 114 and `routes_still_refused` 48 to 24 because the sends of the twelve documents now read allowed. `ssm_ok`'s arm "dell1 reads a command result" read denied at the base and reads allowed now (the group carries the read actions).
