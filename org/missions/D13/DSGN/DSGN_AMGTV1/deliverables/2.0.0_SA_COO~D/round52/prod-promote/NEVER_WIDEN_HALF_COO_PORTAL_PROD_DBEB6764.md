@@ -22,7 +22,11 @@ confirmed, so this act does not carry them. They go in a later promote once thei
 `src/pages/SecurityAnalysis` 10, `src/pages/AdvisorIntelligence` 7, `src/pages/TicketCenter` 4, `src/pages/Attribution` 2,
 `src/components/holdings` 2. One file each: `vite.config.ts`, `src/lib/chartColors.ts`, `src/contexts/AuthContext.tsx` and
 `src/api/endpoints/tickets.ts`. Six files under `scripts/`, which do not enter the bundle. `vite.config.ts` and `AuthContext.tsx` reach every page.
-`b06863fe` is an ancestor of `dbeb6764`, so nothing on PROD today is outside the range.
+~~`b06863fe` is an ancestor of `dbeb6764`~~ **CORRECTED 2026-10-08 ~18:3xZ on `1.0.0_SA_CTO~Z` msg 31951: that sentence was
+false.** `git merge-base --is-ancestor b06863fe dbeb6764` reads rc 1 (positive control `d1b21c97` rc 0, this seat's re-read).
+PROD holds five DEV->PROD merge commits of its own (`c69b4747`, `ce6f0721`, `f8c94759`, `ab3191d0`, `b06863fe`). The CTO read
+each one: its tree equals its DEV parent, 0 files, and every DEV parent is inside `dbeb6764`. So the conclusion holds: nothing
+served on PROD today is outside the range.
 
 ## 3. THE OWNERS' CONDITION (from the integrator's relays; this seat did not read the boxes' own files)
 
