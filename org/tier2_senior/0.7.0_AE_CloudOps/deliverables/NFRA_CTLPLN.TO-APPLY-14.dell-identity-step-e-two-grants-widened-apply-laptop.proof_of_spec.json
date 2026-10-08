@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "risk_class": "WORLD",
+  "firm": "FABRIC",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-14.dell-identity-step-e-two-grants-widened-apply-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-14.dell-identity-step-e-two-grants-widened-apply-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "049d81ffa6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "7dd661eb9f5f42815d2541ac729747c3d8a25cbc",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-14.dell-identity-step-e-two-grants-widened-apply-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "e80238bdab",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/dell_step_e/readback.json: 10/10 live policy documents equal saved plan; 26/26 expected decisions. org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/dell_step_e/ac2.txt: exit=0.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_deploy_policy.json",
+      "kind": "iam",
+      "commit_or_etag": "e80238bdab",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/dell_step_e/readback.json: 10/10 live policy documents equal saved plan; 26/26 expected decisions. org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/dell_step_e/ac2.txt: exit=0.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_create_policy.json",
+      "kind": "iam",
+      "commit_or_etag": "e80238bdab",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/dell_step_e/readback.json: 10/10 live policy documents equal saved plan; 26/26 expected decisions. org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/dell_step_e/ac2.txt: exit=0.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_respol_policy.json",
+      "kind": "iam",
+      "commit_or_etag": "e80238bdab",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/dell_step_e/readback.json: 10/10 live policy documents equal saved plan; 26/26 expected decisions. org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/dell_step_e/ac2.txt: exit=0.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "freed_allowed=72/72 freed_excluded=3 undo_freed=167/167",
+      "method": "command",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "output_evidence": "POLICY-SIM allowed_ok=22/22 denied_ok=15/15 passrole_ok=5/5 protected_ok=8/8 freed_allowed=72/72 freed_excluded=3 undo_freed=167/167 undo_still_denied=443 selfsim_ok=9/9 ssm_ok=15/15 routes_ok=5/5 vendor_ok=245/245 all_ok=True",
+      "denominator": "72/72 freed actions; 167/167 undo arms; 443 retained denied arms; 245/245 vendor arms; complete line preserves every denominator.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "A re-plan reads no changes.",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\"",
+      "output_evidence": "No changes. Your infrastructure matches the configuration.\nexit=0",
+      "denominator": "Whole root, no targets or variable overrides; zero changes across all managed resources.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "group_attachment_change": {
+      "description": "Read the same live group before and after, plus exact plan/live policy documents.",
+      "expected_landed": "7 attached policies, including cloudops-dell-agent-platform-secrets-policy; 10/10 documents equal plan",
+      "expected_not_landed": "6 attached policies; platform-secret policy absent",
+      "observed": "Before 6; after 7; new platform-secret policy present; 10/10 live documents match. Evidence: before-iam.json, after-iam.json, readback.json.",
+      "status": "PASS"
+    },
+    "plan_convergence": {
+      "description": "Untargeted default-variable Terraform plan before and after the one apply.",
+      "expected_landed": "No changes; exit=0",
+      "expected_not_landed": "2 to add, 3 to change, 0 to destroy; exit=2",
+      "observed": "Before exactly 2/3/0 exit=2; after No changes and exit=0. Evidence: plan-before.txt, ac2.txt.",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_E_TWO_GRANTS_WIDENED_20261008.md @9a8758bddf",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_E_TWO_GRANTS_WIDENED_20261008.md @ee3578d886"
+  },
+  "rollback": "Detach/delete new cloudops-dell-agent-platform-secrets-policy and restore saved defaults deploy v3, create v2, respol-allow v1; alternatively safe-apply root at e80238bdab^1. Saved evidence: org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/dell_step_e/before-iam.json. Cannot undo secret reads or later Dell resource-policy changes.",
+  "declared_exclusions": [
+    {
+      "item": "Dell first use / graph F1",
+      "reason": "APPLIED, not EXERCISED until each Dell supplies its own comp-kuzu query; no Dell credentials used."
+    },
+    {
+      "item": "Secret values, resource-policy API exercise, organization policies and existing resource policies",
+      "reason": "Explicit order boundary: identity simulation and metadata only; no secret value read or resource-policy call."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/dell_step_e/session.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"Inspect Dell identity Terraform policy root, apply wrapper, deployment ledger and proof-of-spec instance format\"",
+      "result": "comp-iam interface inspected; role-oriented wrapper not used for IAM users. Mandated policy simulator and single-resource AWS CLI live arms used."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to NFRA_CTLPLN.TO-APPLY-14.dell-identity-step-e-two-grants-widened-apply-laptop",
+      "result": "Exact task order bound to session."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam simulate --help",
+      "result": "Read-only interface inspection. Validation evidence is the required cell simulator (all_ok=True) and 26 live CLI arms, not this help output."
+    }
+  ],
+  "status": "APPLIED; Dell first use pending",
+  "scope": "Laptop, one safe-apply of nfra-ctlpln-identity; no source edits or push."
+}
