@@ -41,7 +41,22 @@ Seen on BA, VLO and ASML at DEV: the header's dossier section and its "Where thi
 morning on the candidate); the term filter and pillar openers on ASML as captured this morning. Nothing different from the
 candidate captures was seen; the term filter still has no real name with a matching headline (owed to the CTO, msg 31656).
 
+## FWD-20 -- the rendered-rows census (ruling 2)
+
+`checks/round40/ap8_rows_capture.py` read the /thesis payload the page reads (`read_thesis_bundle`) for all 95 names at
+19:27Z and applied the PAGE's own refusal join (`figureIdentity.ts` figureId "<scope>:<mnemonic>:<fiscal_year>" against the
+served check face, verdict REFUSE, as `ModelTab.tsx` rowRefusal does). `checks/round40/ap8_rows_census.py` counts it against
+DEV's own row specs (`modelSheet.ts` at `1cbc56a75eee`: 13 summary rows, 4 margin-history rows, 45 V3 rows). Evidence
+`evidence/r40_ap8_rows_census_20261008.txt`. The capture file itself is not committed (Andrew-direct, this folder's
+`ANDREW_DIRECT_20261008_200xZ_OPEN_CALLS_RECS_APPROVED_ON_THIS_BOX.md`); it re-generates from the capture script.
+
+**62 rows x 95 names = 5,890 cells: shown 4,719, refused 25, absent 1,146, unmapped 0.** Ruling 2's term, unmapped 0, holds.
+Two rows are absent on all 95: "Fiscal year of the financial statements" (`EQY_FUND_YEAR`, which no name returns) and "Cash
+flow per share (consensus estimate)" (`BEST_CPS`, a forecast line: the capture holds fiscal-year figures only and the page
+fills that row's E columns from the forecasts, so this census cannot see it). The rest of the absences are per-name gaps
+(dividend and valuation ratios for names with no dividend or no history). ASML's zero-dominated row reads "Minority
+(non-controlling) interest (zero in all 10 years)" (seen on the candidate; ap-5).
+
 ## NOT DONE in this drive
 
-- FWD-20's rendered-rows census (shown / refused / absent / unmapped over every covered name's Model rows): not run.
 - FWD-16's comparison extended to pillars and management over 95 names: not run.
