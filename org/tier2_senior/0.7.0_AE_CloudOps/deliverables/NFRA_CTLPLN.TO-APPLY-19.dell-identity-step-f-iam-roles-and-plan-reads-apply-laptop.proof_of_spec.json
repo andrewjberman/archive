@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-19.dell-identity-step-f-iam-roles-and-plan-reads-apply-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-19.dell-identity-step-f-iam-roles-and-plan-reads-apply-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "c8eb88e9eb1b074c85ab66e1c15d397a36ded0bd"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "db7ecaa46b",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-19.dell-identity-step-f-iam-roles-and-plan-reads-apply-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_stepf_20261008/after.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "23:24:52Z 4/1/0;10/10livearms;group9;fullreplan0",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect iamw_ok=225/225 planread_ok=422/422",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "expect": "iamw_ok=225/225 planread_ok=422/422",
+      "output_evidence": "POLICY-SIM allowed_ok=22/22 denied_ok=15/15 passrole_ok=5/5 protected_ok=8/8 freed_allowed=72/72 freed_excluded=3 undo_freed=167/167 undo_still_denied=443 selfsim_ok=9/9 ssm_ok=15/15 iamw_ok=225/225 planread_ok=422/422 sendcmd_ok=34/34 shellwin_ok=18/18 routes_freed=114/138 routes_still_refused=24 vendor_ok=245/245 all_ok=True",
+      "denominator": "225/225 IAM write arms and422/422 planread arms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "terraform root plan -detailed-exitcode expect exit=0",
+      "method": "live_read",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\"",
+      "expect": "exit=0",
+      "output_evidence": "No changes. Your infrastructure matches the configuration. exit=0",
+      "denominator": "one root full plan",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "group_attachment": {
+      "description": "Before7 after9 managed policies on Dell group",
+      "expected_landed": "9",
+      "expected_not_landed": "7",
+      "observed": "9",
+      "status": "PASS"
+    },
+    "narrow_deny": {
+      "description": "Both users role creation allowed but user/key creation explicitly denied",
+      "expected_landed": "2 role allows;4 user/key explicitDenies",
+      "expected_not_landed": "role creation denied",
+      "observed": "2 role allows;4 user/key explicitDenies",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_F_IAM_ROLES_AND_PLAN_READS_20261008.md@6734d80272",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_F_IAM_ROLES_AND_PLAN_READS_20261008.md@b51c573d66"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Under issuer rollback authority re-apply root at db7ecaa46b first parent. Does not undo roles/policies a Dell independently creates in the interval.",
+  "scope": "Step F only;exact4/1/0;no source edits;simulation-only authorization reads",
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_stepf_20261008/REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service cloudops-dell-agent",
+      "result": "No matching service;static full effective-policy simulator and singleARN live principal simulations used as ordered."
+    }
+  ]
+}
