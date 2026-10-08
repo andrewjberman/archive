@@ -6,6 +6,7 @@
     <date>2026-10-07</date>
     <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
+    <round>11</round>
   </metadata>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
@@ -146,3 +147,23 @@ are the work horses), as RUN3 with its own snapshot path:
 3. Every other condition is unchanged: the pre-write conditions, the seat-gate dry pass, the run-1 rollback input from amendment 4,
    the first-read report from amendment 5, and the close check `ai_leg_verify.py` (landed + refused == planned).
 No gate limb grades an amendment to an existing order.
+
+### AMENDMENT 7 -- throughput: --workers 4, a fresh snapshot per invocation, transport refusals re-planned (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~13:2xZ; answers ~SD msg 915)
+
+The probe landed (vendor reachable; 2 keys written, model rows 200 -> 202, landed_outside_contract=0). The blocker is the rate: 30.1 s
+per key, so the 2,102 remaining keys take about 17.6 h serially.
+1. `--workers 4` (classify_many max_workers=4): about 4.4 h, and vendor concurrency stays moderate. Do not raise it without a new ruling.
+   If the vendor answers rate-limited (HTTP 429) or repeated transport failures appear, drop to `--workers 2` and report.
+2. `--chunk 25` under the 10-minute no-progress watchdog, resumed as amendment 6 says.
+3. SNAPSHOT PATH: each invocation writes its own fresh snapshot, named `E32_AI_SNAPSHOT_20261008.RUN3_<HHMM>Z.json` with the launch
+   time in UTC. An invocation's own snapshot is never the rollback input; the rollback input stays ~SC's preserved run-1 copy (amendment 4).
+4. A refusal whose reason is a transport or vendor failure (timeout, HTTP error, rate limit, empty or malformed body) is NOT a final
+   refusal. Those keys stay absent and are re-planned by the next resume. The close check counts as `refused` only model-stated
+   refusals (out-of-vocabulary, low confidence under the contract). Report the refusal reasons by count at close.
+No gate limb grades an amendment to an existing order.
+
+### AMENDMENT -- round tag (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~14:3xZ; 1.0.0_SA_CTO~DELL1 msg 961, from 3.0.0_SA_CVO msg 960)
+
+This order carried no <round> tag, so surprise-row-gate.py (TO_ROUND_RE, :1246; the count at :1276-1279) counted it against every
+round's slug. It belongs to round 11 (decomp_ref DECOMP_R11.md), so <round>11</round> is added to its metadata. No other field changes.
+Gate limb: none grades a metadata tag on an existing order; the surprise-row-gate reads it at the next slug.
