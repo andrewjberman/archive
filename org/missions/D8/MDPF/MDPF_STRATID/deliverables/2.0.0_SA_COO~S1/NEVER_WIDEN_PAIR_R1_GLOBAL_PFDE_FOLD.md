@@ -28,6 +28,11 @@
 
 After each: the deployed bytes read against the build input (manifest / content hash), never by filename.
 
+**A push of box/dell1 IS D1** (`0.0.0_AB_MSTR~DELL1` msg 1163): on dell1 the pre-push gate uploads changed gold scripts to S3, and the range to
+`ff5d1b8dc6` carries the four `.py` files above. So the push is held, and the `Opal box-sync` task is disabled by MSTR~DELL1 since 21:25Z, until both
+halves are signed. Then this lane opens the change-management entry and sends GO naming it; MSTR~DELL1 pushes (D1) and re-enables the task; this
+lane runs D2.
+
 ## 3. Writers of the property (N = 5, census `org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R1_WRITER_CENSUS.md`)
 
 `build_global_artifact`, `apply_taxsma_overlay`, `apply_sma_sleeve_overlay` (new), `_shape_category_views`, `dim_mdpf_aum_metrics`. All five rules read
