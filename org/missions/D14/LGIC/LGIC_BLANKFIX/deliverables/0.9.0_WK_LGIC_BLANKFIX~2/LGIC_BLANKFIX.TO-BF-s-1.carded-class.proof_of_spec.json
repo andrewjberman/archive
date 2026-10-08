@@ -1,0 +1,101 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_BLANKFIX.TO-BF-s-1",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-s-1.carded-class.md",
+  "group": "OTHER",
+  "vintage_commit": "c400916848"
+ },
+ "assignee": "0.9.0_WK_LGIC_BLANKFIX~2",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round5.md",
+  "vintage_commit": "c400916848",
+  "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-s-1.carded-class.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/opal_naming_rootcheck.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "repo check only; LOCAL risk, no deploy; committed in the same commit as this instance",
+   "artifact_covered_by": [
+    "BS1-AC1",
+    "BS1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/tests/test_opal_naming_rootcheck.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "repo test only; LOCAL risk, no deploy; committed in the same commit as this instance",
+   "artifact_covered_by": [
+    "BS1-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "BS1-AC1",
+   "criterion_verbatim": "<criterion id=\"BS1-AC1\" cell_refs=\"BF-s-1\"><invocation>python lib/tests/test_opal_naming_rootcheck.py</invocation><expect>ROOTCHECK-TEST ok=True</expect></criterion>",
+   "method": "command",
+   "invocation": "python lib/tests/test_opal_naming_rootcheck.py",
+   "expect": "ROOTCHECK-TEST ok=True",
+   "output_evidence": "ROOTCHECK-TEST ok=True cases=165\nrc=0 (run under timeout 120)",
+   "denominator": "165 cases pass, 0 fail; 9 new: named_in_source with and without the call (difference control), comment/docstring/string not counted, import counted, non-Python/unparsable/nothing-asked, the real holdings path matched to its per-firm row, and a two-place and a one-place canonical HOLE against the same row with no open place FIX. Also lib/tests whole: 194 passed; every lib/tests/test_opal_naming_*.py prints ok=True (10 scripts)",
+   "status": "PASS",
+   "status_reason": "Last line ROOTCHECK-TEST ok=True, rc 0."
+  },
+  {
+   "criterion_id": "BS1-AC2",
+   "criterion_verbatim": "<criterion id=\"BS1-AC2\" cell_refs=\"BF-s-1\"><invocation>python lib/opal_naming_rootcheck.py all --map infra/logic/registry/root_map.json</invocation><expect>carded_class_holes=0</expect></criterion>",
+   "method": "command",
+   "invocation": "python lib/opal_naming_rootcheck.py all --map infra/logic/registry/root_map.json",
+   "expect": "carded_class_holes=0",
+   "output_evidence": "ALL-ROOTS ok=True roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 right=124 fix=231 not_asked=26 pattern=8 carded=0 refused=0 hole=23 carded_class_holes=5 source_bucket_holes=3 event_rule_holes=0 unknown_word_holes=3 other_holes=12\nrc=0 (run under timeout 400, from the worktree root C:/tmp/wk-blankfix-2 at c400916848 plus the uncommitted build)",
+   "denominator": "87 roots, 13 mapped, 412 items, 23 holes = 5 carded + 3 source_bucket + 0 event_rule + 3 unknown_word + 12 other; carded_class_holes 8 before this build, 5 after",
+   "status": "FAIL",
+   "status_reason": "carded_class_holes=5, not 0, a correct fail under AMENDMENT 1 item 3; not forced, lib/opal_naming_keyfill.py not edited. The five lines (python lib/opal_naming_rootcheck.py lines <root>): (1) opal-assets forwardfill_v2/ [ingest-mirror/lambda_function.py:142] bucket not read, statement names opal-data-cot and opal-data-inf, none picked; (2) opal-assets blackdiamond/cottonwood/meta/templates/ [lambda_function.py:163] key reader reads the source bucket opal-data-cot, the ruling row is under opal-data-assets; (3) investor-reporting/performance forwardfill_v2/ [tenants.py:164] bucket not read, statement names opal-data-assets and opal-data-cot; (4) investor-reporting/core quarantine/ [_keys/keys.py:114] no bucket literal in the file and none in the statement; (5) investor-reporting/narrative S3_BUCKET opal-data-news-v2 [evidence.py:58] a bucket name, answered by name_rulings.json (BF-s-4). See LGIC_BLANKFIX-W2-S13."
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the all command run twice, before and after the build",
+   "observed": "same totals on the two before-build runs; the after-build run differs by exactly the three holdings/ops lines",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "the order names no mutant control; the difference control is inside BS1-AC1",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the six opal-assets _quarantine/ lines (two open places)",
+   "reason": "No key_rulings.json _about field says what fills a place; the row is not admitted per AMENDMENT 1 item 1 (LGIC_BLANKFIX-W2-S12)"
+  },
+  {
+   "item": "ruled buckets and groups (name_rulings.json)",
+   "reason": "BF-s-4 reads that file; AMENDMENT 1 item 2"
+  }
+ ],
+ "surprises": [
+  "LGIC_BLANKFIX-W2-S12",
+  "LGIC_BLANKFIX-W2-S13",
+  "LGIC_BLANKFIX-W2-S14",
+  "LGIC_BLANKFIX-W2-S15"
+ ],
+ "session_log": "0.9.0_WK_LGIC_BLANKFIX~2 re-seat on LGIC_BLANKFIX.TO-BF-s-1 under AMENDMENT 2, worktree C:/tmp/wk-blankfix-2. Re-ran BS1-AC1 (ok=True cases=165), BS1-AC2 (carded_class_holes=5) and lib/tests (194 passed); proof moved from the ~1 deliverables folder to the ~2 folder. Build not extended. Order stays pending: BS1-AC2 FAIL.",
+ "compiler_tools": [
+  {
+   "tool": "lib/opal_naming_rootcheck.py",
+   "invocation": "all --map infra/logic/registry/root_map.json",
+   "result": "ALL-ROOTS ok=True roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 right=124 fix=231 not_asked=26 pattern=8 carded=0 refused=0 hole=23 carded_class_holes=5 source_bucket_holes=3 event_rule_holes=0 unknown_word_holes=3 other_holes=12"
+  }
+ ]
+}
