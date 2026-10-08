@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-br-3.the-runner-starts-with-the-box",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-br-3.the-runner-starts-with-the-box.md",
+    "group": "OTHER",
+    "vintage_commit": "39889dd4d7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "39889dd4d7",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-br-3.the-runner-starts-with-the-box.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~128",
+  "session_log": "Worker ~128 on wk-AMGT_HARVST-128-r74. Installer run with -Plan only; no scheduled task registered.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/install-cycle-schedule.ps1",
+      "kind": "script",
+      "commit_or_etag": "a50e37a48b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "-Plan prints 8 lines, registers nothing",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/README.md",
+      "kind": "doc",
+      "commit_or_etag": "a50e37a48b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one line in Scheduling and pacing",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "powershell -NoProfile -ExecutionPolicy Bypass -File lib/opal_data_harvest/install-cycle-schedule.ps1 -Plan -- expect: REGISTERED NOTHING (plan)",
+      "method": "command",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File lib/opal_data_harvest/install-cycle-schedule.ps1 -Plan",
+      "output_evidence": "rc 0. last line 'REGISTERED NOTHING (plan)' (expect is a regex: the parentheses group, so it matches 'REGISTERED NOTHING plan'; the literal line is in AC1.out)",
+      "denominator": "1 of 1 invocations",
+      "status": "PASS",
+      "expect": "REGISTERED NOTHING (plan)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "powershell -NoProfile -ExecutionPolicy Bypass -File lib/opal_data_harvest/install-cycle-schedule.ps1 -Plan -- expect: TIMELIMIT PT0S",
+      "method": "command",
+      "invocation": "powershell -NoProfile -ExecutionPolicy Bypass -File lib/opal_data_harvest/install-cycle-schedule.ps1 -Plan",
+      "output_evidence": "rc 0. TIMELIMIT PT0S",
+      "denominator": "1 of 1 invocations",
+      "status": "PASS",
+      "expect": "TIMELIMIT PT0S"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "powershell -NoProfile -Command \"if (Get-ScheduledTask -TaskName 'Opal Data Harvest - Continuous Cycle' -ErrorAction SilentlyContinue) { 'TASK PRESENT' } else { 'TASK ABSENT' }\" -- expect: TASK ABSENT",
+      "method": "command",
+      "invocation": "powershell -NoProfile -Command \"if (Get-ScheduledTask -TaskName 'Opal Data Harvest - Continuous Cycle' -ErrorAction SilentlyContinue) { 'TASK PRESENT' } else { 'TASK ABSENT' }\"",
+      "output_evidence": "rc 0. TASK ABSENT",
+      "denominator": "1 of 1 invocations",
+      "status": "PASS",
+      "expect": "TASK ABSENT"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "copy of the installer with plan line TIMELIMIT PT0S changed to PT2H",
+      "expected": "count of 'TIMELIMIT PT0S' lines 0",
+      "observed": "0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 are the same invocation run twice",
+      "observed": "identical 8-line output",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "order status flip",
+      "reason": "issuer flips; the order forbids the worker editing it"
+    },
+    {
+      "item": "registration of the task",
+      "reason": "forbidden in this cell; issuer registers at close"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W128-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "rc 0 at a50e37a48b"
+    }
+  ]
+}
