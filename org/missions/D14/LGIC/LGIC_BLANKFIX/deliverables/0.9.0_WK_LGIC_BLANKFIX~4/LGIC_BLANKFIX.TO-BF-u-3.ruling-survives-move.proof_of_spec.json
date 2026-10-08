@@ -18,14 +18,14 @@
   {
    "path_or_key": "lib/opal_naming_rootcheck.py",
    "kind": "script",
-   "commit_or_etag": "7c123266fa",
+   "commit_or_etag": "30304f9748",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "A repository library module; no deploy target."
   },
   {
    "path_or_key": "lib/tests/test_opal_naming_rootcheck.py",
    "kind": "test",
-   "commit_or_etag": "7c123266fa",
+   "commit_or_etag": "30304f9748",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "A plain-script test; no deploy target."
   },
@@ -43,8 +43,8 @@
    "criterion_verbatim": "BU3-AC1 -- a ruling matches on its key, and the path decides only between rulings of the same key.",
    "method": "command",
    "invocation": "python lib/tests/test_opal_naming_rootcheck.py",
-   "output_evidence": "ROOTCHECK-TEST ok=True cases=202\nrc=0",
-   "denominator": "202 of 202 cases held (194 at the base plus 8 new: one row, file moved -> matched with stale hint naming both paths and printed on the line; two rows same key, neither hint matching -> no match and the reason naming both rows; two rows, one hint matching -> that row, no stale hint; base-name hint -> that row, stale; all-roots counts and prints STALE-HINT lines; stale_hints=0 when none). pytest lib/tests: 194 passed; every lib/tests/test_opal_naming_*.py ok=True (10 of 10).",
+   "output_evidence": "ROOTCHECK-TEST ok=True cases=205\nrc=0",
+   "denominator": "205 of 205 cases held (202 plus 3 AMENDMENT 2 controls: same key in two buckets with the item's bucket known -> only its bucket's row; the other bucket's hint file does not make its row a candidate; the other bucket's row alone -> no match). pytest lib/tests: 194 passed; every lib/tests/test_opal_naming_*.py ok=True (10 of 10).",
    "status": "PASS",
    "expect": "ROOTCHECK-TEST ok=True"
   },
@@ -53,10 +53,20 @@
    "criterion_verbatim": "BU3-AC2 -- the estate run counts stale hints and prints the count at the end of its last line (AMENDMENT 1: the count is reported, not required to be 0).",
    "method": "command",
    "invocation": "python lib/opal_naming_rootcheck.py all --map infra/logic/registry/root_map.json",
-   "output_evidence": "ALL-ROOTS ok=True roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 right=124 fix=248 not_asked=32 pattern=8 carded=0 refused=0 hole=0 carded_class_holes=0 source_bucket_holes=0 event_rule_holes=0 unknown_word_holes=0 other_holes=0 stale_hints=1\nrc=0\nSTALE-HINT bd-pipeline || FIX S3Key bronze/ -> orion/inflection/bronze/; the ruling's declared_in names infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py; the key is declared in infra/aws/lambda/bd-pipeline/bd-49f-freshness-probe/lambda_function.py  [infra/aws/lambda/bd-pipeline/bd-49f-freshness-probe/lambda_function.py:74]",
-   "denominator": "stale_hints=1 of 412 items (bd-pipeline bd-49f-freshness-probe lambda_function.py:74, key bronze/, matched the opal-assets-ingest-mirror row; row LGIC_BLANKFIX-W4-S2). Every other field of the last line equals the base line. Per AMENDMENT 1 (304037a53e) the count is reported, not required to be 0; the registry row is the registry lane's to correct.",
+   "output_evidence": "ALL-ROOTS ok=True roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 right=124 fix=248 not_asked=32 pattern=8 carded=0 refused=0 hole=0 carded_class_holes=0 source_bucket_holes=0 event_rule_holes=0 unknown_word_holes=0 other_holes=0 stale_hints=0\nrc=0",
+   "denominator": "stale_hints=0 of 412 items; 0 STALE-HINT lines, so none to check by hand. The AMENDMENT 1 count of 1 (bd-49f-freshness-probe bronze/, a bd-bucket read matched to the opal-data-inf row) was the mis-pairing AMENDMENT 2 corrects. Every other field equals the base line.",
    "status": "PASS",
    "expect": "stale_hints=[0-9]+"
+  },
+  {
+   "criterion_id": "BU3-AC3",
+   "criterion_verbatim": "BU3-AC3 -- no line of a mapped root changes its answer from the round-5 saved runs (AMENDMENT 2).",
+   "method": "command",
+   "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~2/check_all_roots_round5.py",
+   "output_evidence": "ONE-LINE-FIELD stale_hints (live only)\nALL-ROOTS-R5 ok=True mapped=13 unmapped=74 items=412 hole=0 stopped=0 repeat=identical\nrc=0",
+   "denominator": "13 of 13 mapped roots, 412 of 412 items, repeat=identical.",
+   "status": "PASS",
+   "expect": "repeat=identical"
   }
  ],
  "controls": {
@@ -73,9 +83,9 @@
   }
  },
  "surprises": [
-  "LGIC_BLANKFIX-W4-S2: the estate has one stale hint (a bucket-confirmed match at the base); AMENDMENT 1 to BU3-AC2 (304037a53e) resolved the expectation to the field being present"
+  "LGIC_BLANKFIX-W4-S2: the stale hint of AMENDMENT 1 was a mis-pairing (item 1 ignored the bucket); resolved by AMENDMENT 2 and the bucket-agreement filter, stale_hints=0"
  ],
- "session_log": "0.9.0_WK_LGIC_BLANKFIX~4 on LGIC_BLANKFIX.TO-BF-u-3, worktree C:/tmp/wk-blankfix-4. Read _ruling_of, decide, run_items, all_roots. Measured the base all-run into .scratch (uncommitted). Built the key-first match (_where_file, _stale_note, STALE_MARK), printed the stale note in run_items so the FIX target the collision check groups on stays clean, counted it in all_roots. Changed the base test that asserted the old path-only match. The body of the all-run is unchanged except one STALE-HINT line. Session 2: AMENDMENT 1 read; both invocations re-run; BU3-AC2 graded against stale_hints=[0-9]+ (PASS), stale count 1 and its STALE-HINT line recorded.",
+ "session_log": "0.9.0_WK_LGIC_BLANKFIX~4 on LGIC_BLANKFIX.TO-BF-u-3, worktree C:/tmp/wk-blankfix-4. Read _ruling_of, decide, run_items, all_roots. Measured the base all-run into .scratch (uncommitted). Built the key-first match (_where_file, _stale_note, STALE_MARK), printed the stale note in run_items so the FIX target the collision check groups on stays clean, counted it in all_roots. Changed the base test that asserted the old path-only match. The body of the all-run is unchanged except one STALE-HINT line. Session 2: AMENDMENT 1 read; both invocations re-run; BU3-AC2 graded against stale_hints=[0-9]+ (PASS), stale count 1 and its STALE-HINT line recorded. Session 2 (AMENDMENT 2): the candidate filter reads bucket_of and drops a row of another bucket; three controls added; merged CLOUD; stale_hints=0, repeat=identical.",
  "compiler_tools": [
   {
    "tool": "lib/tests/test_opal_naming_rootcheck.py",
