@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-x-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "202c5125209714ca97504fed28b6373a6bf3056a",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-x-1.fabric-boxes-handler.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-x-1.fabric-boxes-handler.md",
+    "group": "OTHER",
+    "vintage_commit": "202c5125209714ca97504fed28b6373a6bf3056a"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_fabric.py",
+      "kind": "script",
+      "commit_or_etag": "06bfb80b54a11aa2d11fbfabd0e26e56ed06a16d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "GET /fabric/boxes, owner_only; threadpool, 8 fetch threads, bounded body cache (cap 20000), 503 on an unreadable store. Nothing deployed; no AWS call.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_api.py",
+      "kind": "script",
+      "commit_or_etag": "06bfb80b54a11aa2d11fbfabd0e26e56ed06a16d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One import and one Route line added; nothing else changed.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/refs/fabric_boxes.json",
+      "kind": "config_data",
+      "commit_or_etag": "06bfb80b54a11aa2d11fbfabd0e26e56ed06a16d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Roster written from org/devices/DEVICES.json devices[].name: laptop, sitez, dell1, dell2.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_fabric.py",
+      "kind": "test",
+      "commit_or_etag": "06bfb80b54a11aa2d11fbfabd0e26e56ed06a16d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five named tests plus hours validation and cache bound; 7 passed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "fabric tests: 0 failed; named tests PASSED 5 of 5 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round4/checks/x1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "fabric tests: ======================== 7 passed, 1 warning in 0.39s =========================; named tests PASSED 5 of 5\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 named tests PASSED; 7 of 7 tests in the file passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "admin suites: N passed (N>=1), 0 failed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round4/checks/x1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "admin suites: 30 passed, 3 warnings in 3.64s\nRESULT: PASS\nexit=0",
+      "denominator": "30 passed, 0 failed across 6 of 6 suites",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "fabric/boxes GET routes=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round4/checks/x1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "fabric/boxes GET routes=1\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 GET /fabric/boxes route on app.admin_api.routes",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Working-tree mutant on app/admin_fabric.py, never committed: the dedup comparison 'prev is None or rank > (...)' was replaced with 'prev is None' (first-seen wins, measured no longer preferred). AC1 was then run; the file was restored from a byte copy (git diff --quiet rc=0).",
+      "expected": "AC1 FAILs: test_counts_match_records_dedup_measured fails; named tests PASSED 4 of 5.",
+      "observed": "fabric tests: 1 failed, 6 passed; named tests PASSED 4 of 5 / RESULT: FAIL / exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 was run twice at the committed code (first run, and a rerun after the mutant was restored).",
+      "observed": "Both runs: 7 passed, named tests PASSED 5 of 5, RESULT: PASS, exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the read grant on the globgrph bucket, the page, any deploy",
+      "reason": "MP-x-3 / MP-x-2 / later cells (order section 2 item 1); every S3 read in a test is a fake client."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W5-S1: the worker's sparse cone lacks org/modules/graph, so the first commit-gate run failed closed; added to the cone, commit passed.",
+    "NFRA_MCPORTAL-Z-W5-S2: a cone-mode sparse worktree cannot commit org/missions paths via safe-commit (channel corpus, tree check, R6 inputs); the cone was widened to a non-cone pattern list and the proof commit landed with no override."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~5/session_log.MP-x-1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_admin_fabric.py -v (from the gateway dir)",
+      "result": "7 passed"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <4 paths>",
+      "result": "committed 06bfb80b54; commit-gate OK"
+    }
+  ]
+}
