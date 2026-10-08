@@ -72,7 +72,9 @@ heading_bold_then_body = docx(
 )
 pdf_dash_then_body = {
     "type": "pdf",
-    "lines": [{"text": t, "page": 0, "size": 9.96} for t in (
+    # row AMGT_CORPUS-Z-W2-S22: the dash is BOLD, as in TSM's pack, so the reader flags it as a standalone heading and this
+    # arm fails when the first-item rule is absent (with plain lines it passed with or without the rule).
+    "lines": [{"text": t, "page": 0, "size": 9.96, "bold_all": t == "-"} for t in (
         "Management", "-", PROSE, "Gross margin reached a record on high utilization and pricing across advanced nodes.",
         "Ownership", "Insiders hold five percent of the shares outstanding today per the latest filing.")],
     "section_leads": [{"name": "MANAGEMENT", "line_index": 0, "page": 0, "inline_remainder": ""},
