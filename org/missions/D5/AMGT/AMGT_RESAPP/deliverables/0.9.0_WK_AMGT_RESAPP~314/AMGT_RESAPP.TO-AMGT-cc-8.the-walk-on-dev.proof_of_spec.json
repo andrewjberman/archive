@@ -1,0 +1,118 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-cc-8",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-cc-8.the-walk-on-dev.md",
+  "group": "OTHER",
+  "vintage_commit": "bcc66b8a7e"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "5d126e533e",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-cc-8.the-walk-on-dev.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~314",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~314/WALK_ROUND79.md",
+   "kind": "doc",
+   "commit_or_etag": "d03508571e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the walk record: BLOCKED, no act walked; FWD-18, FWD-1, FWD-7 and SECTIONS each headed with the reason; 0 captures.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "d03508571e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "APPENDED rows AMGT_RESAPP-Z-W314-S1 (walker armed by another seat) and -S2 (port 5174 held by another worktree's dev server), BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "8 or more captures and a walk record naming every act; R79 CC8 WALK RECORD: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round79/checks/r79_cc8.py\"; echo \"exit=$?\"",
+   "output_evidence": "FAIL C1 the captures directory holds the floor 0 of 8\nPASS C2 the walk record names every act missing []\nR79 CC8 WALK RECORD: NO\nexit=1",
+   "denominator": "0 PNG captures against a floor of 8; 4 of 4 act tokens (FWD-18, FWD-1, FWD-7, SECTIONS) named in WALK_ROUND79.md, each with its not-walked reason",
+   "status": "FAIL",
+   "status_reason": "C1 reads 0 of 8: no act was walked (BLOCKING rows Z-W314-S1 and S2), so no capture exists; the order stays open",
+   "expect": "(?s)PASS C1 .*R79 CC8 WALK RECORD: YES\\s+exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the account reads disarmed; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .claude/skills/ui-walk/ui_walker_account.py status; echo \"exit=$?\"",
+   "output_evidence": "STATUS: row PRESENT opal-ui-walker@opal.test status=disabled role=admin userType=Dev armed=no armedBy=none; SSM ABSENT\nexit=0",
+   "denominator": "1 of 1 walker account row, read 2026-10-08T21:40:54Z (17:40 EDT) after another seat's 5-minute walk had ended; this worker armed 0 times. The same command had read armed=yes armedBy=Opal_Bloomberg:32772:636317a2 at 17:36, 17:37 and 17:38 EDT (row Z-W314-S1).",
+   "status": "PASS",
+   "expect": "(?s)status=disabled .*armed=no.*SSM ABSENT\\s+exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "judgment criterion (no invocation): the walk record org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~314/WALK_ROUND79.md",
+   "method": "manual_read_with_citation",
+   "invocation": "read org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~314/WALK_ROUND79.md",
+   "output_evidence": "WALK_ROUND79.md: no act walked. Walker status read armed by another seat (Opal_Bloomberg:32772:636317a2, node pid 30012, a 5-minute walk) three times and port 5174 was LISTENING from C:/tmp/wk-crps-r40-4/portal (pid 35236); the order says file a BLOCKING row and stop. FWD-18, FWD-1, FWD-7 and SECTIONS are each headed with that reason. 0 captures. Rows Z-W314-S1, S2.",
+   "denominator": "0 captures; 4 of 4 acts headed and not walked; 0 walker arms by this worker; 3 of 3 mid-wait status reads armed by another holder",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment criterion: the substitute oracle is the CVO's L9 read of WALK_ROUND79.md; the worker records the outputs and passes no verdict",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "r79_cc8.py run on this worker's real tree, where the walk did not happen (captures directory absent).",
+   "expected": "the check rejects it: NO and exit=1",
+   "observed": "FAIL C1 floor 0 of 8; R79 CC8 WALK RECORD: NO; exit=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "not applicable, no walk was run",
+   "observed": "no walk, no reading to repeat",
+   "status": "N/A-WITH-REASON",
+   "reason": "no walk was run, so there is no reading to repeat"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "All four acts (FWD-18, FWD-1, FWD-7, SECTIONS)",
+   "reason": "the order says to file a BLOCKING row and stop when the walker reads armed by anyone else; it did, and port 5174 was held by another worktree's server."
+  },
+  {
+   "item": "Re-walking after the contention cleared",
+   "reason": "the order's stop instruction; a re-GO is the issuer's, and the status and port both read free at 17:40 EDT."
+  },
+  {
+   "item": "Flipping the task order status",
+   "reason": "the issuer's flip (order section 5)."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W314-S1",
+  "AMGT_RESAPP-Z-W314-S2"
+ ],
+ "session_log": "N/A -- no session-log path in this worker's paths. Worktree C:/tmp/r79-308 on wk-AMGT_RESAPP-314. Scratch C:/tmp/r79-308/.scratch (uncommitted). Dev server: not started by this worker; 0 listeners read at 17:40 EDT after another seat's server (pid 35236) had stopped. Walker: never armed by this worker.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~314 <0.9.0_WK_AMGT_RESAPP~314@opal.agent>\" -F .scratch/msg1.txt -- <walk record> <investigation file>",
+   "result": "committed d03508571e"
+  }
+ ]
+}
