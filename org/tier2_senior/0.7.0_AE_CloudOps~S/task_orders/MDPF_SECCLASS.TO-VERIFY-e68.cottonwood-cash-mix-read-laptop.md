@@ -43,6 +43,12 @@
     order closes as superseded. No gate limb grades an amendment to an existing order.
   </amendment>
 
+  <amendment n="2" by="2.0.0_SA_COO~M1" date="2026-10-08T06:5xZ">
+    SUPERSEDED. dell1's firm-bucket READ was applied at 05:17:17Z (MSTR msg 816), so under amendment 1's reader rule dell1 takes the
+    ~11:36Z AFTER read. 2.0.0_SA_COO~M1 reads opal-data-cot platinum/firm/mix_summary.json; dell1's own 06:5xZ read matched ~S's
+    before-read VersionId eH1ZuCUJaxEo3ox8JvWZC9fnYa1NgQas. ~S owes nothing more on this order; its before-read stands as the BEFORE.
+  </amendment>
+
   <the_act>
     1. BEFORE the run, if it has not started: list the Cottonwood served mix outputs written by `C_06.client_mix_timeseries.py`
        and `D_04.client_portal_summary.py` (concentration.json), with each object's LastModified and VersionId, and record the
