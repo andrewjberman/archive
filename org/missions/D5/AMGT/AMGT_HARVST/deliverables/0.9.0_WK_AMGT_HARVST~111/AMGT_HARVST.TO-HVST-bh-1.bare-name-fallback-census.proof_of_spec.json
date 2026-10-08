@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bh-1.bare-name-fallback-census",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bh-1.bare-name-fallback-census.md",
+    "group": "OTHER",
+    "vintage_commit": "f19fd115f1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "f19fd115f1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bh-1.bare-name-fallback-census.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~111",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~111, branch wk-AMGT_HARVST-111-r61, TREE-OK. Read-only census of 19032 latest silver articles through pg._iter_latest_articles (S3 GET, no put). 277 fallback-only pairs over 5 empty-alias securities, 30-row sample seed 61. No product file changed, no gold built. No surprise rows. Order file not edited.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~111/bh1_fallback_census.py",
+      "kind": "script",
+      "commit_or_etag": "f19fd115f1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census script; run once from the worktree root.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~111/bh1_fallback_census.out",
+      "kind": "doc",
+      "commit_or_etag": "f19fd115f1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ends CENSUS OK.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~111/BH1_FALLBACK_SAMPLE.md",
+      "kind": "doc",
+      "commit_or_etag": "f19fd115f1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "30 rows, every row with at least one span, no verdict.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~111/BH1_FALLBACK_SAMPLE.json",
+      "kind": "doc",
+      "commit_or_etag": "f19fd115f1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same 30 rows as the md.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~111/bh1_fallback_census.out expects CENSUS OK",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~111/bh1_fallback_census.out",
+      "expect": "CENSUS OK",
+      "output_evidence": "rc 0. FALLBACK-ONLY PAIRS: 277 over 5 securities / SAMPLE: 30 of 277, seed 61 / CENSUS OK",
+      "denominator": "242 securities, 5 with an empty alias list, 19032 silver articles; 5 of 5 empty-alias securities printed; 30 of min(30, 277) sample rows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "judgment criterion HVST-bh-1: the 30-row sample for reviewer grading (no verdict from the worker)",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~111/BH1_FALLBACK_SAMPLE.md @f19fd115f1",
+      "judgment": true,
+      "output_evidence": "BH1_FALLBACK_SAMPLE.md and .json: 30 of 277 fallback-only pairs, seed 61, each row with title, url, publisher and every span of the company string (stored case or other case) with 120 characters of context. Per security: BP 8 of 8 with no span in the stored case, SAP 7 of 7, Nokia 0 of 262, GSK 0, RWE 0. No verdict is given.",
+      "denominator": "30 rows of 277 fallback-only pairs over 5 securities",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded at L9 by a reviewer, not by the worker; the oracle is the reviewer's read of each row against 'is this article about this security'."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any put, delete, gold or silver build, vendor or publisher host",
+      "reason": "Order: read-only census of S3 silver through the served iterator."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "committed f19fd115f1"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "sample drawn by random.Random(61) over pairs sorted by (security_key, article_key)",
+      "observed": "fixed seed and sort order; the S3 silver may grow between runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The fallback taken away is the mutant: a copy of the security with company empty and aliases empty, run through the same pg._security_mentions.",
+      "expected": "pairs resting on the fallback alone drop to zero mentions",
+      "observed": "GSK and RWE keep every pair through their ticker_aliases (0 fallback-only); Nokia drops 262 of 263",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  }
+}
