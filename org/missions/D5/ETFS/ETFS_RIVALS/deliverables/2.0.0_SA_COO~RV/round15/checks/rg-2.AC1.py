@@ -275,7 +275,9 @@ def run(v):
         verdicts["census"] = two["census"] == one["census"] and all(st != "arrived" for (kind, k), (st, _) in two["census"].items()
                                                                   if kind == "price")
         # the chosen object is READ, not dropped: its own securities and its parsekey arrive (a build that drops untimed objects fails here)
-        verdicts["g4for"] = two["g4for"] == one["g4for"] and sorted(two["g4for"]) == sorted([ICUSIP, IMO, SHR, SHS])
+        # issuer ruling at the cut: _g4_for on an untimed-only date keeps its OWN pre-round-25 pick (by provenance, the live object;
+        # it joins sectors, not closes) -- rg-1.AC3 arm (b) pins that; here it is printed, not graded
+        print(f"    (not graded) _g4_for securities over the pair: {sorted(two['g4for'])}")
         verdicts["parsekeys"] = (two["parsekeys"] == one["parsekeys"] and two["parsekeys"].get(CUSIP) != CUSIP_PK
                                  and two["parsekeys"].get(ICUSIP) == ICUSIP_PK)
         for name, val in verdicts.items():
@@ -287,7 +289,7 @@ def run(v):
 
     guard(v, "a", "every reader of the 2026-09-29 pair returns what it returns over the chosen (revision.newest) object alone, and the mis-dated "
                   "object's closes reach no stage (load: no close; LVO holding_implied, no Energy bucket; no NBIS line; no census price "
-                  "arrived; LVO absent from _g4_for; the CUSIP not mapped)", arm_a)
+                  "arrived; the CUSIP not mapped; _g4_for printed, graded by rg-1.AC3 arm b)", arm_a)
 
     # ---- (b) g4_rows on the named date ----------------------------------------------------------------------------------
     def arm_b():
