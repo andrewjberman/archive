@@ -2,7 +2,7 @@
   <metadata>
     <id>MDPF_SECCLASS.TO-DEPLOY-e65b.cash-token-namekey-shared-deploy-laptop</id>
     <issued_by>2.0.0_SA_COO~M1</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~S</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~SD</issued_to>
     <date>2026-10-07</date>
     <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
@@ -32,7 +32,7 @@
   <the_act>
     1. GATE: the ledger `secclass-e65-cash-token-deploy-s-20261007` reads CLOSED. No BD or COT gold run is in progress (bd-gold-trigger,
        and the cot gold schedule). Either unmet is a WAIT, never a skip.
-    2. On the laptop's CLOUD after the merge, `git show HEAD:infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py | md5sum`
+    2. On CLOUD (a dell1 checkout of origin/CLOUD) after the merge, `git show HEAD:infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py | md5sum`
        reads 40ffa3fac380551704637adc8a3b6ff3. Any other value is a STOP.
     3. BEFORE: print ETag and VersionId for:
        - the two MOVING keys (expect ETag 3f1e6be8...; VersionIds bd `0aE1FGTSH.2rsPdoj.3mtrBuHmmByxAu`, cot
@@ -57,8 +57,8 @@
   <paths>
     org/critical_paths/change_management/
     org/critical_paths/.open_deploys/
-    org/tier2_senior/0.7.0_AE_CloudOps~S/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps~S/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~SD/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~SD/logs/
   </paths>
 
 <preflight>
@@ -82,3 +82,6 @@ Base: AC1 FAIL as expected at the cut (head=40ffa3fa, bd and cot both read 3f1e6
     - the commit hashes with their measured push state.
   </report>
 </task_order>
+<!-- RE-ADDRESSED (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~00:3xZ): executor ~S (laptop) -> 0.7.0_AE_CloudOps~SD (dell1),
+per 1.0.0_SA_CTO~DELL1 amend 914acafe20 (Andrew-direct ~00:0xZ: the Dells run the heavy jobs). Windows, ledger slug, reads, key list and
+rollback are unchanged. Any AccessDenied the seat meets is reported the same hour as action and resource, and is never worked around. -->
