@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-tw-1.the-daily-leg-asks-for-owed-closes-request-off-by-default",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "21b3614f93",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-tw-1.the-daily-leg-asks-for-owed-closes-request-off-by-default.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "21b3614f93"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~19",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "f30d8018b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one branch at the end of _handler_entry (switch exactly print or ask) guards the new step; HISTORY_OWED_CAP 5000 and RIVALFUNDS_HISTORY_OWED defined; nothing deploys from a worker",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r27tw1_history_owed_leg.py",
+      "kind": "script",
+      "commit_or_etag": "f30d8018b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "11 tests: OFF values, print, ask landing, cap and refusal, misdated close; vendor and history_owed stubbed",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the switch OFF (unset, empty, \"0\"): the daily run is identical to the module at commit 361b735308 in its sink calls, client requests, printed lines and result; history_owed is not imported; the constant and the variable exist -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/tw-1.AC1.py",
+      "output_evidence": "OK: (a) switch UNSET ... vs base: IDENTICAL\nOK: (b) switch EMPTY ... vs base: IDENTICAL\nOK: (c) switch 0 ... vs base: IDENTICAL\nhistory_owed requests across the three OFF runs: 0 []\nOK: (d) rivalfunds.history_owed is never imported\nHISTORY_OWED_CAP = 5000 | source names 'RIVALFUNDS_HISTORY_OWED': True\nOK: (f) control: the OFF daily run lands its one market object\nAC1 RESULT: PASS 0 failures (rc=0)",
+      "denominator": "6 of 6 arms (a-f)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "print and ask: the printed line; the budget checked before any request and every request recorded; one new timed object per date beside the untouched one, each row with price_date; the cap and the carry; a refusal; a misdated close not written; never overwrite -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/tw-1.AC2.py",
+      "output_evidence": "OK: (a) print: HISTORY OWED: owed 12 units, 4 securities, 3 dates; asked 0 (request off); carried 12\nOK: (b) ask: HISTORY OWED: owed 12; asked 12; landed 12; carried 0 (check_points [12] before the first request)\nOK: (c) cap 5: owed 12; asked 5; landed 5; carried 7\nOK: (d) refusal: carried 12, nothing requested or landed\nOK: (e) misdated 1, landed 11\nOK: (f) never overwrite: puts onto an existing key []\nOK: (g) control\nAC2 RESULT: PASS 0 failures (rc=0)",
+      "denominator": "7 of 7 arms (a-g)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "the 2026-10-08 and later vehicle logs show the enrichment leg's lines and exit code unchanged with the switch unset",
+      "method": "manual_read_with_citation",
+      "invocation": "none (judgment, graded by 3.0.0_SA_CVO~RV on the issuer's real read)",
+      "output_evidence": "No vehicle log read: nothing deploys or merges from a worker. Nothing to read.",
+      "denominator": "0 of 0",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion graded by 3.0.0_SA_CVO~RV on the issuer's real read of the vehicle logs"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checks carry their own control arms; at base 361b735308 AC1 (e) and every AC2 arm except (g) fail by their docstrings.",
+      "expected": "base: AC1 (e) FAIL, AC2 (a)-(f) FAIL, (g) PASS",
+      "observed": "after the build AC1 and AC2 PASS 0 failures; bf-1.AC1/AC2 and bk-1.AC1/AC2/AC3 PASS 0 failures; package suite 902 passed, 2 skipped",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "checks and the suite each run after the final code commit",
+      "observed": "all arms OK",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status>",
+      "reason": "left to the issuer by the face"
+    },
+    {
+      "item": "Real-run proof of J1 and any vendor request",
+      "reason": "the issuer's real read; no vendor call, S3 or deploy from a worker"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~19 <0.9.0_WK_ETFS_RIVALS~19@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "f30d8018b2"
+    }
+  ]
+}
