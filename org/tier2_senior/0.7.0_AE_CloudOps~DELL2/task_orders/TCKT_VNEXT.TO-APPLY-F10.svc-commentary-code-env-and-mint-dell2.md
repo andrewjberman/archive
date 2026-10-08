@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-08</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -25,8 +25,9 @@
   </objective>
 
   <context>
-    STATUS IS `staged` UNTIL THE CTO HALF OF LEG D IS GIVEN. The issuer flips it to `pending` and messages you; until then, do
-    nothing.
+    LEG D CTO half GIVEN: `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_F10_D1_CODE_DEPLOY_CTO_HALF.md`
+    @a4ccfb4439 (msg 1859). Its two conditions bind: (1) your upload at step 3 must hash to OuTw3w... BEFORE the apply; (2) re-read
+    the rollback artifact version (ZBF40mIM..., content-sha256 y0UF...) at apply time and record it. Leg M only after 5(a)-(f) pass.
 
     Read in full before acting:
     - LEG D packet + COO half: `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/F10_DEPLOY/F10_D1_DEPLOY_PACKET_20261008.md`
