@@ -137,7 +137,7 @@ def lines(b):
     return [x for x in b.decode("utf-8", "replace").split("\n") if x]
 
 
-ARCHIVE_PATHS = ["docs", "infra/aws/lambda", "lib", "deck_generation"]
+ARCHIVE_PATHS = ["docs", "infra/aws/lambda", "lib", "deck_generation", "data/firm_registry.json"]
 
 
 def export_tree(rev, dest):
@@ -154,14 +154,14 @@ def export_tree(rev, dest):
 
 def run_pytest(job):
     root, path = job
-    p = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "--color=no", "-rf", path],
+    p = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "--color=no", "-rfE", path],
                        cwd=str(root), capture_output=True, timeout=110)
     text = p.stdout.decode("utf-8", "replace")
     failed = set()
     for line in text.splitlines():
-        if line.startswith("FAILED "):
-            failed.add(line[len("FAILED "):].split(" - ")[0].strip())
-    last = [ln for ln in text.splitlines() if re.search(r"(passed|failed|error)", ln)]
+        if line.startswith("FAILED ") or line.startswith("ERROR "):
+            failed.add(line.split(" ", 1)[1].split(" - ")[0].strip())
+    last = [ln for ln in text.splitlines() if re.match(r"^\d+ (passed|failed|error|errors|skipped).* in [0-9.]+s", ln.strip())]
     return path, p.returncode, failed, (last[-1].strip() if last else text.strip()[-120:])
 
 
