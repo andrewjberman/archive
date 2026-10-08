@@ -2,7 +2,7 @@
   <metadata>
     <id>MDPF_SECCLASS.TO-DEPLOY-e57e61.fwd10-producer-apply-laptop</id>
     <issued_by>2.0.0_SA_COO~M1</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~S</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~SD</issued_to>
     <date>2026-10-07</date>
     <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
@@ -30,7 +30,7 @@
   </context>
 
   <the_act>
-    1. On the laptop's CLOUD after the merge, show that `git show HEAD:infra/aws/lambda/v2_portal/_shared/rivalfunds_classification.py`
+    1. On CLOUD (a dell1 checkout of origin/CLOUD) after the merge, show that `git show HEAD:infra/aws/lambda/v2_portal/_shared/rivalfunds_classification.py`
        has blob d3363dba79 and that `.../new-security-classifier/lambda_function.py` has blob e025665470 (`git rev-parse HEAD:<path>`).
        Any other value is a STOP.
     2. TIMING: not within 13:45Z-14:15Z (the producer's 10:00 ET cron).
@@ -54,8 +54,8 @@
   <paths>
     org/critical_paths/change_management/
     org/critical_paths/.open_deploys/
-    org/tier2_senior/0.7.0_AE_CloudOps~S/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps~S/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~SD/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~SD/logs/
   </paths>
 
 <preflight>
@@ -75,3 +75,6 @@ Base: AC1 FAIL as expected at the cut (live CodeSha256 f0zhRV1F... equals the pr
     lines, AC1's output, the ledger path and close, the proof instance, commit hashes and the measured push state.
   </report>
 </task_order>
+<!-- RE-ADDRESSED (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~00:3xZ): executor ~S (laptop) -> 0.7.0_AE_CloudOps~SD (dell1),
+per 1.0.0_SA_CTO~DELL1 amend 914acafe20 (Andrew-direct ~00:0xZ: the Dells run the heavy jobs). Windows, ledger slug, reads, key list and
+rollback are unchanged. Any AccessDenied the seat meets is reported the same hour as action and resource, and is never worked around. -->
