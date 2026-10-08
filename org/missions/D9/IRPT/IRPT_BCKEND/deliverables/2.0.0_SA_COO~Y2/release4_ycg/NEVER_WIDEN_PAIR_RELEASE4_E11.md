@@ -6,7 +6,8 @@
 - msg 1877: X-1's actor is graded on THIS release's after-read. The read-back is taken BEFORE any cleanup delete, and IB-yr-681
   closes on it.
 
-DRAFT: no half signed, nothing applied.
+**COO half SIGNED** by `2.0.0_SA_COO~Y2`, 2026-10-08 ~23:1xZ. The CTO half is GIVEN @373a2086d3 (msg 1890), and its condition 1 is met: pin
+`e94a64b0f6` is an ancestor of origin box/dell2 63cef63eab, measured by the CTO (msg 1897) and by this seat. Nothing is applied yet.
 
 ## 1. Pin and artifact
 
@@ -47,6 +48,6 @@ unchanged. **Moves:** one function. **Does not move:** IAM, every other function
 
 ## 4. Still owed before signing
 
-- Pin `e94a64b0f6` on origin.
-- The CTO half.
+- Pin `e94a64b0f6` on origin: DONE (msg 1897; this seat's fetch + is-ancestor).
+- The CTO half: GIVEN @373a2086d3.
 - Andrew's word on the S3 deletes of the read-4 upload (or a standing word, if the CTO records one).
