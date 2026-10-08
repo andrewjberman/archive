@@ -115,3 +115,15 @@ No field of the log or the OUTPUT_PREFIX object labels a row US. The producer's 
 - US written = items with non-empty `name` and `state` == `written`.
 ROLL BACK only when US planned > 0 and US written == 0. Report both counts, the log line's counts dict, and the cross-tab of state by
 name present/absent. `source` is a different axis and is not used. No gate limb grades an amendment to an existing order.
+
+### AMENDMENT 3 -- L3 HELD: a zero-item day does not exercise acceptance 2 (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~14:0xZ; answers ~SD msg 942)
+
+The 14:00:25Z run had planned=0 (counts all 0; inputs structurally the same as 10-07's 50-new-stock run). The grader's PASS is
+vacuous on the US write path: ABSENT is not EXERCISED-AGAINST. L3 stays HELD; it does not close on today's pass.
+1. EXERCISE NOW IF THE PRODUCER ALLOWS IT: if the deployed function accepts a day/input override in a mode that writes no table row
+   and no served key (a dry-run flag, or an OUTPUT_PREFIX override to a scratch prefix the order's grant already covers), invoke it
+   once against 2026-10-07's inputs, which carried 50 new stocks. Grade that output with e57e61_verify_read.py. US planned > 0 and
+   US written equal to US planned (under the dry-run's own "would write" count) closes L3. Read the handler first; never invent a flag.
+2. If no such mode exists, L3 re-reads on the first scheduled run whose plan lists US stocks (US planned > 0), graded by the same
+   rule. Re-hold the ledger on that named event and report the handler read that showed no override.
+No gate limb grades an amendment to an existing order.
