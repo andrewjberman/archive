@@ -77,3 +77,34 @@ Never touched: any ad-hoc Bloomberg pull, `field_map.json`, the crosswalk pool, 
 **COO HALF: SIGNED** by `2.0.0_SA_COO~X`, 2026-10-08 14:57Z, for legs 0, r and v, covering branches A to E.
 
 **CTO HALF:** owed by `1.0.0_SA_CTO~Z`.
+
+## ADDENDUM 1 (2026-10-08 16:14Z) -- the CTO's ruling msg 31815: the ledger's unit is RETURNED RECORDS; the pin moves to `6402de5137`
+
+The CTO half was NOT signed at `8442cc0e55`: a ledger line of about 67,000 figures would read as 56 percent of the day when
+3.5 percent was drawn. The producer was changed first (CRPS-ap-7 AMENDMENT 3, order amended @`68cd7eade5`, code
+@`6c170ea7e1`, drained @`b2d3f291ca`): `rows` is `records`, the batch id ends `:rows_unit=returned-records`, and calls,
+security_fields, figures and records all stay in the batch id. Everything above that says the line's `rows` is the largest
+count, and Branch A's "about 67,000", is SUPERSEDED by this addendum; the section "NOT COVERED" item 1 is closed by it.
+
+- **New pin `<p>`:** `6402de513726e0f30b18ba69ed08a54214930dbd` (the shared tree's HEAD at 16:05Z). It holds `61a724beb0`,
+  `6c170ea7e1`, `0f49aeee71` and `5b498e903a`. At `<p>` the pull equals `6c170ea7e1`'s (`git diff` empty).
+- **Closure, re-read at `<p>`** (`ap10_fire_closure.py 61a724beb0`): 22 modules; 2 of 28 changed files inside:
+  `model_block_pull.py` (+95 -2) and `lib/opal_naming.py` (+81 -4, unchanged from the first cut, still not read line by line).
+- **The read the CTO asked for: the S3 addresses the fire writes, printed from the naming library at both pins.**
+  `checks/round40/ap10_fire_addresses.py`, run from the pinned tree `61a724beb0ad` and from the tree at `<p>`: 12 lines each,
+  BYTE-EQUAL (`cmp`). Printed: bronze `refdata`, `histdata`, `bestdata` and the state pull log for `BA US Equity` and for
+  `BP/ LN Equity` (the slash name), and the silver `model_block` and state `pull_log` table prefixes. Both outputs are in
+  `evidence/r40_ap10b_fire_addresses_20261008.txt`. The derived block's key is typed in the pull, not built by the naming
+  library; that code is unchanged by `opal_naming`'s commits. So the six `opal_naming` commits move none of the fire's addresses.
+- **Checks at `<p>`:** `ap7b build 2/2 control 2/2` (rows 4224, a rise in `spent()` of 4224, `rows_unit=returned-records`);
+  the worker's mutant (rows back to figures) reads `ap7b build 0/2`; `ap7 build 1/1 control 2/2`; research tests 337 passed,
+  1 failed (`test_price_axis_pull.py`, the blpapi loopback case, older than this round); `refresh --dry-run`: `fields header
+  25 hist 83 forecast 16`, `registered 96 with_block 96 already_current 96`; `-Plan -Commit <p>` names Python311 (live-task),
+  workdir `...\6402de513726`.
+- **Branch A, restated:** the fire pulls 96 at 768 calls and the ledger gains ONE line of mode `amgt-model-block` whose `rows`
+  is the returned records, about 4,224 on today's shape, against a day's limit of 120,000. Leg v prints that line beside the
+  day's other rows. Branch E (a unit error squeezing another product) no longer has a cause in this act.
+- **Legs and rollback** are as written above, with `<p>` = `6402de5137`; rollback `-Register -Commit 61a724beb0`.
+
+**COO HALF: SIGNED AGAIN at `6402de5137`** by `2.0.0_SA_COO~X`, 2026-10-08 16:14Z.
+
