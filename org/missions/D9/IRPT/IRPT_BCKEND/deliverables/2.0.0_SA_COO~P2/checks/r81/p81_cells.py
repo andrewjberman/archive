@@ -8,9 +8,11 @@ Prints "<id> PASS" or "<id> FAIL" as the last line.
               start_live_codesha = 03p2eIEK... (the rollback target); built_sha == the packet's idanP8nX... == live CodeSha256 (re-read
               live here); post_census_changed_members 0; replan_changes 0; build_tree_clean true; ledger_closed true; rolled_back
               false. Base: FAIL (no file).
-  IB81-1-AC2  the same file's retained-read regression (CTO half condition 1): pre_read and post_read name one existing retained
-              ANALYSIS or PERFORMANCE report, both answered ok, with the same report_id, revision and body_sha256, and
-              type_error false. Base: FAIL (no file).
+  IB81-1-AC2  AMENDMENT 1 (CTO half AMENDMENT 1 @49efddd80c, row D2-W176-S1): the file's `replay` record: one irpt-x10-v1 ANALYSIS
+              or PERFORMANCE fixture reserved by the LIVE zip's code path; the LIVE and BUILT zips' repository.get return identical
+              bytes (same result_sha256), neither refuses nor raises; the negative control (an altered policy_sha256) is refused by
+              BOTH; the three repository/retention suites passed; and replay_commit is an ancestor of ledger_open_commit (the
+              record was committed before the apply). Base: FAIL (no file).
 """
 import base64
 import json
@@ -44,18 +46,30 @@ def main():
         fail("pin %r" % d.get("pin"))
 
     if cid == "IB81-1-AC2":
-        a, b = d.get("pre_read") or {}, d.get("post_read") or {}
-        if a.get("report_kind") not in ("ANALYSIS", "PERFORMANCE"):
-            fail("pre_read report_kind %r" % a.get("report_kind"))
-        for side, r in (("pre_read", a), ("post_read", b)):
-            if r.get("ok") is not True:
-                fail("%s not ok: %r" % (side, r.get("outcome")))
-        for k in ("report_kind", "report_id", "revision", "body_sha256"):
-            if not a.get(k) or a.get(k) != b.get(k):
-                fail("%s differs or is empty: pre %r post %r" % (k, a.get(k), b.get(k)))
-        if d.get("type_error") is not False:
-            fail("type_error is %r" % d.get("type_error"))
-        print("OK: retained %s read back by reference, same report_id, revision and body before and after" % a["report_kind"])
+        rp = d.get("replay") or {}
+        if rp.get("fixture_family") not in ("ANALYSIS", "PERFORMANCE") or rp.get("policy_revision") != "irpt-x10-v1":
+            fail("fixture %r under %r" % (rp.get("fixture_family"), rp.get("policy_revision")))
+        if rp.get("reserved_by") != "live":
+            fail("fixture reserved_by %r, not the live code path" % rp.get("reserved_by"))
+        lv, bt = rp.get("live") or {}, rp.get("built") or {}
+        for side, r in (("live", lv), ("built", bt)):
+            if r.get("ok") is not True or r.get("raised") or r.get("refused"):
+                fail("%s replay not clean: %r" % (side, r))
+        if not lv.get("result_sha256") or lv.get("result_sha256") != bt.get("result_sha256"):
+            fail("result differs: live %r built %r" % (lv.get("result_sha256"), bt.get("result_sha256")))
+        nc = rp.get("negative_control") or {}
+        if nc.get("live_refused") is not True or nc.get("built_refused") is not True:
+            fail("negative control (altered policy_sha256) not refused by both: %r" % nc)
+        suites = rp.get("suites") or {}
+        if len(suites) != 3 or not all(str(v).startswith("passed") or " passed" in str(v) for v in suites.values()):
+            fail("suites %r" % suites)
+        import subprocess as _sp
+        rc = _sp.run(["git", "merge-base", "--is-ancestor", str(rp.get("replay_commit", "x")), str(d.get("ledger_open_commit", "y"))],
+                     cwd=str(root), capture_output=True).returncode
+        if rc != 0:
+            fail("replay_commit %r is not an ancestor of ledger_open_commit %r" % (rp.get("replay_commit"), d.get("ledger_open_commit")))
+        print("OK: %s fixture under irpt-x10-v1, live == built %s..., negative control refused by both, 3 suites passed, replay committed before the apply"
+              % (rp["fixture_family"], lv["result_sha256"][:12]))
         print("%s PASS" % cid)
         return
 
