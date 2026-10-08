@@ -1,0 +1,112 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_BLANKFIX.TO-BF-u-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round6.md",
+  "vintage_commit": "297921e56a",
+  "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-u-2.nothing-to-name-entry.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-u-2.nothing-to-name-entry.md",
+  "group": "OTHER",
+  "vintage_commit": "297921e56a"
+ },
+ "assignee": "0.9.0_WK_LGIC_BLANKFIX~4",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/opal_naming_rootmap.py",
+   "kind": "script",
+   "commit_or_etag": "cdb29d4e44",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A repository library module; no deploy target."
+  },
+  {
+   "path_or_key": "lib/opal_naming_rootcheck.py",
+   "kind": "script",
+   "commit_or_etag": "cdb29d4e44",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A repository library module; no deploy target."
+  },
+  {
+   "path_or_key": "lib/tests/test_opal_naming_rootmap.py",
+   "kind": "test",
+   "commit_or_etag": "cdb29d4e44",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A plain-script test; no deploy target."
+  },
+  {
+   "path_or_key": "lib/tests/test_opal_naming_rootcheck.py",
+   "kind": "test",
+   "commit_or_etag": "cdb29d4e44",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A plain-script test; no deploy target."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "BU2-AC1",
+   "criterion_verbatim": "BU2-AC1 -- the loader reads the entry and refuses each malformed form.",
+   "method": "command",
+   "invocation": "python lib/tests/test_opal_naming_rootmap.py",
+   "output_evidence": "ROOTMAP-TEST ok=True assertions=46\nrc=0",
+   "denominator": "46 of 46 assertions held (30 at the base plus 16 new: the entry read and resolved to None; the second why value; names with another value; why outside the two values; why missing; evidence empty; evidence missing; each of the six forbidden fields (6); a why with no names).",
+   "status": "PASS",
+   "expect": "ROOTMAP-TEST ok=True"
+  },
+  {
+   "criterion_id": "BU2-AC2",
+   "criterion_verbatim": "BU2-AC2 -- the difference control: nothing-to-name on an empty root, stopped on a root with names.",
+   "method": "command",
+   "invocation": "python lib/tests/test_opal_naming_rootcheck.py",
+   "output_evidence": "ROOTCHECK-TEST ok=True cases=209\nrc=0",
+   "denominator": "209 of 209 cases held (205 plus 4 new on a temporary map: all-roots on a root with no names reads NOTHING-TO-NAME, completed; the same entry on a root with 3 names reads STOPPED with the reason, counted under stopped; check_root prints NOTHING-TO-NAME on an empty root; check_root stops with the reason on a root with names).",
+   "status": "PASS",
+   "expect": "ROOTCHECK-TEST ok=True"
+  },
+  {
+   "criterion_id": "BU2-AC3",
+   "criterion_verbatim": "BU2-AC3 -- the estate still runs whole with the entries the registry's lane has landed.",
+   "method": "command",
+   "invocation": "python lib/opal_naming_rootcheck.py all --map infra/logic/registry/root_map.json",
+   "output_evidence": "ALL-ROOTS ok=True roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 right=124 fix=248 not_asked=32 pattern=8 carded=0 refused=0 hole=0 carded_class_holes=0 source_bucket_holes=0 event_rule_holes=0 unknown_word_holes=0 other_holes=0 stale_hints=0\nrc=0",
+   "denominator": "13 of 13 mapped roots completed, 0 stopped, 412 of 412 items; the registry holds no names: none entry, so the live run prints 0 NOTHING-TO-NAME and 0 STOPPED lines. stale_hints=0, not the 1 the order foresaw: BU3 AMENDMENT 2 (bucket agreement, 30304f9748) removed the mis-pairing that counted it. Other tests: pytest lib/tests 194 passed; every lib/tests/test_opal_naming_*.py ok=True (10 of 10); check_all_roots_round5.py repeat=identical.",
+   "status": "PASS",
+   "expect": "ALL-ROOTS ok=True"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the same names: none entry on a root with no names and on a root with names, on a temporary map",
+   "expected": "NOTHING-TO-NAME / STOPPED",
+   "observed": "both held in ROOTCHECK-TEST ok=True cases=209",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the three invocations run once each after the final edit",
+   "observed": "ok=True each",
+   "status": "STABLE"
+  }
+ },
+ "surprises": [],
+ "session_log": "0.9.0_WK_LGIC_BLANKFIX~4 on LGIC_BLANKFIX.TO-BF-u-2, worktree C:/tmp/wk-blankfix-4. Read load_map, resolve, check_root, all_roots and every other reader of a map entry (rootcheck check_root and all_roots, keyfill cmd_dir/cmd_crossfirm/crossfirm_rows via .get, scope _map_dirs via .get). Built nothing_to_name and the load_map branch in rootmap; NOTHING-TO-NAME and STOPPED in all_roots and check_root; extended both tests.",
+ "compiler_tools": [
+  {
+   "tool": "lib/tests/test_opal_naming_rootmap.py",
+   "invocation": "python lib/tests/test_opal_naming_rootmap.py",
+   "result": "ROOTMAP-TEST ok=True assertions=46"
+  },
+  {
+   "tool": "lib/tests/test_opal_naming_rootcheck.py",
+   "invocation": "python lib/tests/test_opal_naming_rootcheck.py",
+   "result": "ROOTCHECK-TEST ok=True cases=209"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "infra/logic/ and every file outside the order's paths",
+   "reason": "The order grants no edit there; the registry holds no names: none entry yet"
+  }
+ ]
+}
