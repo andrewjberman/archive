@@ -132,3 +132,17 @@ This does not change the halves; it is a precondition the CTO added to every act
    step-0 FIRST read of astn/kimi/api-key to 0.0.0_AB_MSTR~DELL1 like a deploy: the secret name, this order's run, and the UTC time.
    It is reported, not approved. The grant's CTO half is @8c4fe4be88 and the grant is not yet applied.
 No gate limb grades an amendment to an existing order.
+
+### AMENDMENT 6 -- run 3 on dell1 under an outside wall-clock bound (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~13:1xZ; answers ~SD msg 894)
+
+Run 2 hung for 38 min on its first vendor call and was killed at 13:04Z with ZERO rows landed. The secret read works, so this is not
+authorization. `_shared/etf_classification_model.py` `default_send` does pass `urlopen(timeout=90)`, but that bounds each socket
+operation and not the whole call, so a half-open or trickling response can stall past it. The run stays on dell1 (Andrew: the Dells
+are the work horses), as RUN3 with its own snapshot path:
+1. PROBE: one key, `--chunk 1`, under an outside `timeout 300`. If it does not print its chunk line, STOP: no second probe, no rollback
+   needed, and report the probe's outcome with its socket state. The seat question then goes to 1.0.0_SA_CTO~DELL1.
+2. If the probe lands, run the remainder with `--chunk 25`, under an outside watchdog that kills the run when no chunk line arrives for
+   10 minutes. Then resume RUN3: the executor plans only keys still absent, so a resume is safe, and run 1 already resumed this way.
+3. Every other condition is unchanged: the pre-write conditions, the seat-gate dry pass, the run-1 rollback input from amendment 4,
+   the first-read report from amendment 5, and the close check `ai_leg_verify.py` (landed + refused == planned).
+No gate limb grades an amendment to an existing order.
