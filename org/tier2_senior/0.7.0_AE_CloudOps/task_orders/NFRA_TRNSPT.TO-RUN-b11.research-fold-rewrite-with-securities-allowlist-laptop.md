@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_TRNSPT</project_code>
   </metadata>
 <risk>SERVED</risk>
@@ -14,6 +14,12 @@
 <owned_cells>TR-b-11</owned_cells>
 <decomp_context>dell2's round 11 (on origin box/dell2; reaches the laptop tree at the next box pass): "TR-b-11 | E2: re-fold and re-write the 29 Research objects (laptop write, as round 9), read back on the stored bytes". dell2 `2.0.0_SA_COO~T2` msg 1667, relay `org/tier0_exec/0.0.0_AB_MSTR/deliverables/RELAY_DELL2_TRNSPT_TR_B11_RUN_ASK_2127Z.md`; dell2 CTO round-10 analysis @8ce4b5098e E2.</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~21:5xZ). Run 2026-10-08T21:50:48Z from 9f8dddcb9b: exactly the 29 keys before and after, 29/29 new
+    VersionIds, priors saved; stored read-back 20,473 rows / 3,644 held out / rewipe 0, as dell2 expected. Issuer live read: 29
+    objects, written 21:50:27Z-21:50:29Z. Proof VALID (@7ab319f1ad). No delete.
+  </closure>
 
   <objective>
     Re-run dell2's research fold once, from dell2's commit `9f8dddcb9b`, under the laptop identity: it OVERWRITES the same 29
