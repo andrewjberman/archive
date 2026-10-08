@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-691",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-691.statement-submission-custody-revision.md",
+    "group": "OTHER",
+    "vintage_commit": "128b6f7db1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R69_Y.md",
+    "vintage_commit": "128b6f7db1",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-691.statement-submission-custody-revision.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~220",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/custody_submission.py",
+      "kind": "script",
+      "commit_or_etag": "128b6f7db1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "probe + additional_policy_revisions in submit(); no deploy, rides ~Y2's next release",
+      "artifact_covered_by": [
+        "Y69-1-AC1",
+        "Y69-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y69-1-AC1",
+      "criterion_verbatim": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_submission_revision.py",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_submission_revision.py",
+      "output_evidence": "3 passed in 2.20s (rc=0)",
+      "denominator": "3 of 3 tests",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y69-1-AC2",
+      "criterion_verbatim": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_composition.py infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_entry.py infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_retained.py",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_composition.py infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_entry.py infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_retained.py",
+      "output_evidence": "FAILED 2 of 68 (2 failed, 64 passed, 2 skipped; base 66 passed, 2 skipped)",
+      "denominator": "2 failed of 68 collected",
+      "expect": "passed",
+      "status": "FAIL",
+      "status_reason": "Regression: 2 tests in test_custody_retained.py fail after the edit because their fixture reporting_policy never raises ValueError for an unregistered revision; fixing the fixture is outside this order's paths. Row IRPT_BCKEND-D2-W220-S1."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 against base custody_submission.py",
+      "expected": "2 of 3 fail",
+      "observed": "2 failed, 1 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- offline deterministic fakes, no clock or network",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-D2-W220-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_custody_submission_revision.py",
+      "result": "3 passed"
+    }
+  ]
+}
