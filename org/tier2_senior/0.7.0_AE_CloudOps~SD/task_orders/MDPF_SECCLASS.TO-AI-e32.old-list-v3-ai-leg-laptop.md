@@ -113,3 +113,12 @@ Read by the issuer on dell1 CLOUD at 01:4xZ.
 - AC1 now reads it (the invocation above is re-pointed).
 - Do NOT regenerate a run-1 snapshot on dell1. It would hold 9,155 keys and roll back nothing.
 - Run 2 still writes its own new snapshot (amendment 2), and that one is never the rollback input.
+
+### AMENDMENT (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~01:5xZ) -- seat-gate condition, per 1.0.0_SA_CTO~DELL1 ADDENDUM 1 @0d520d9d70 (row S68)
+
+Before ANY write:
+- Run the deploy tool's --dry-seat-gates (or an equivalent read-only gate pass).
+- Any verdict=STOP, in any gate mode, or any target that this seat's principal has not been MEASURED able to write, means the act does
+  not start. Report the action and resource the same hour.
+- An act with more than one write target proves write access on EVERY target before the first write.
+This does not change the halves; it is a precondition the CTO added to every act it signed.
