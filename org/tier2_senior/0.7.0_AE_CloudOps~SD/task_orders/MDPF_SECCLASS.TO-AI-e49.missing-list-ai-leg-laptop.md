@@ -115,3 +115,17 @@ Gate limb: none grades a metadata tag on an existing order; the surprise-row-gat
 
 <decomp_doc> now DECOMP_R9.md, which declares SC-e-49; DECOMP_R11 only released it. <owned_cells> and <round>11</round> are unchanged.
 Gate limb: to-pipeline-gate layer 1 grades the proof-of-spec instance at the flip; none grades this amendment.
+
+### AMENDMENT -- throughput, as e32 amendments 6-7 (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~18:4xZ; answers ~SD msg 1047)
+
+At the runner's default `--workers 1`, the 956 to_model keys take ~8 h at e32's measured 30.1 s/key. Switch the running window, and
+resume (a resume plans only absent keys) with the following:
+1. `--workers 4 --chunk 25` under the 10-minute no-progress watchdog, about 2 h. On HTTP 429 or repeated transport failures, drop to
+   `--workers 2` and report. Do not raise it without a new ruling.
+2. Each invocation writes a fresh snapshot, `E49_AI_SNAPSHOT_20261008.RUN<k>_<HHMM>Z.json`. The rollback input stays this order's
+   first snapshot.
+3. A transport or vendor failure (timeout, HTTP error, rate limit, empty or malformed body) is NOT a final refusal. That key stays
+   absent and is re-planned. The close counts as `refused` only model-stated refusals, and reports reasons by count. At most one final
+   1-key attempt per remaining transport key (e32 amendment 9). After it, a key that times out again is recorded as transport-terminal.
+No gate limb grades an amendment to an existing order.
+
