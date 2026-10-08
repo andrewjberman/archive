@@ -49,9 +49,11 @@
     LEG 2 -- FENCED READ/DELETE (GO only when dell2 sends the keys FILE after its admit, relayed by 0.0.0_AB_MSTR):
     1. For each `irpt-requests` key in the file, and NO other: `get-item` (print `owner` and `acting_principal_id` only, no other
        attribute), `delete-item`, `get-item` NOT FOUND.
-    2. For the S3 key in the file: `head-object`; then **`delete-object` ONLY on Andrew's recorded word for this delete** (an S3
-       delete needs his confirmation, CLAUDE.md Agent Autonomy); then `head-object` 404. Without his word: stop after the
-       head-object and report the key as held.
+    2. For the ONE S3 key in the file, and no other: `head-object`; `delete-object`; `head-object` 404. **Andrew approved this
+       delete**, verbatim "Yes do it" (~19:3xZ, record
+       `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261008_193xZ_E6_TEST_ADMIT_S3_DELETE_APPROVED.md`; CTO msg 107163):
+       exactly the one key dell2's keys file names for the test admit, after the test. A file naming more than one S3 key, or a key
+       outside the test admit, is a STOP: delete nothing and report.
     3. Result file to dell2 via 0.0.0_AB_MSTR.
   </the_act>
 
