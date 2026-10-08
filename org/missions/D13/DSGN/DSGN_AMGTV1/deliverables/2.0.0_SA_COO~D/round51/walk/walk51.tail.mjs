@@ -27,6 +27,7 @@ function R51_PROBE() {
     input_ledgers: ledgerEls.length,
     research_pack_lines: pick(/research pack/i),
     research_team_report_lines: pick(/research-team report|research team's report/i),
+    research_team_pack_lines: lines.filter((l) => /research team's (most recent )?packs?\b/i.test(l)),
     pillars,
     model_tab_tail: tabPanel ? clean(tabPanel.innerText).slice(-700) : null,
     model_tab_headings: tabPanel ? [...tabPanel.querySelectorAll('h3, h4, p.uppercase, p[class*="uppercase"]')].map((e) => clean(e.innerText)).filter(Boolean) : [],
@@ -162,7 +163,7 @@ try {
       const pillars = views.thesis.pillars
       const f = []
       for (const p of pillars) if (/research pack/i.test(p.text)) f.push(`the pillars line says "research pack": "${p.text}"`)
-      const perView = Object.fromEntries(Object.entries(views).map(([k, v]) => [k, { research_pack: v.research_pack_lines, research_team_report: v.research_team_report_lines }]))
+      const perView = Object.fromEntries(Object.entries(views).map(([k, v]) => [k, { research_pack: v.research_pack_lines, research_team_report: v.research_team_report_lines, research_team_pack: v.research_team_pack_lines }]))
       const servedPack = [...stringsWith(thesis, /research pack/i, 'thesis'), ...stringsWith(ov, /research pack/i, 'overlay')]
       const nPack = Object.values(perView).reduce((s, v) => s + v.research_pack.length, 0)
       const nTeam = Object.values(perView).reduce((s, v) => s + v.research_team_report.length, 0)
