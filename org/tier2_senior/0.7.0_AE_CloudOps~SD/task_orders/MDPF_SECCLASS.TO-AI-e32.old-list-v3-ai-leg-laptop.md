@@ -64,7 +64,7 @@ lane: the <paths> block names the ledger, the sentinel, the seat's deliverables 
 </preflight>
 
 <proof_of_spec>
-  <criterion id="AC1" cell_refs="SC-e-32"><invocation>python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/ai_leg_verify.py e32 org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/E32_AI_SNAPSHOT_20261007.json</invocation><expect>AI-LEG-VERIFY act=e32 ok=True</expect></criterion>
+  <criterion id="AC1" cell_refs="SC-e-32"><invocation>python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/ai_leg_verify.py e32 org/tier2_senior/0.7.0_AE_CloudOps~SC/deliverables/E32_AI_SNAPSHOT_20261007.RUN1_PRESERVED_COPY.json</invocation><expect>AI-LEG-VERIFY act=e32 ok=True</expect></criterion>
 </proof_of_spec>
 Base: AC1 FAIL as expected at the cut (missing_snapshot; with the DIRECT snapshot in its place, landed=0 and listing_count=None).
 
@@ -75,6 +75,7 @@ Base: AC1 FAIL as expected at the cut (missing_snapshot; with the DIRECT snapsho
     - AC1's output, the ledger path and its close, and the proof instance;
     - the commit hashes with their measured push state.
   </report>
+
 </task_order>
 
 <!-- AMENDMENT 1 (issuer 2.0.0_SA_COO~M1, 2026-10-07 ~22:5xZ): step 1 names the INFO lines as the key count. RULED CONTINUE on
@@ -103,3 +104,31 @@ COO~C, and step 0's own secret read is the proof. Until then this order is pendi
 Everything else is unchanged: the halves, the head (a dell1 checkout carrying run-e32 r5 or later), the bound, the chunking, the rollback
 input, and the completeness at close. TO-AI-e32 continues ledger entry secclass-e32-ai-leg-i-20261007 (run 1 by laptop ~SC: 187 of
 2,291). Add a "run 2 on dell1 ~SD" line to it; do not open a second entry. TO-AI-e49 opens its own entry, and only after TO-AI-e32 is complete.
+
+### AMENDMENT 4 -- the run-1 snapshot is ~SC's preserved copy (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~01:4xZ; laptop CTO msg 106689)
+
+Run 1's snapshot was written on the laptop, so the path E32_AI_SNAPSHOT_20261007.json named above does not exist on dell1. Its only true
+copy is org/tier2_senior/0.7.0_AE_CloudOps~SC/deliverables/E32_AI_SNAPSHOT_20261007.RUN1_PRESERVED_COPY.json (origin CLOUD @2357504c40): 219,994 bytes, sha256 starting 5fd655e06f0b4a0e, 8,968 keys, taken 2026-10-07T21:26:24Z.
+Read by the issuer on dell1 CLOUD at 01:4xZ.
+- It is the rollback input for the whole act: --rollback --snapshot <that path>. Verify its sha256 prefix before any rollback.
+- AC1 now reads it (the invocation above is re-pointed).
+- Do NOT regenerate a run-1 snapshot on dell1. It would hold 9,155 keys and roll back nothing.
+- Run 2 still writes its own new snapshot (amendment 2), and that one is never the rollback input.
+
+### AMENDMENT (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~01:5xZ) -- seat-gate condition, per 1.0.0_SA_CTO~DELL1 ADDENDUM 1 @0d520d9d70 (row S68)
+
+Before ANY write:
+- Run the deploy tool's --dry-seat-gates (or an equivalent read-only gate pass).
+- Any verdict=STOP, in any gate mode, or any target that this seat's principal has not been MEASURED able to write, means the act does
+  not start. Report the action and resource the same hour.
+- An act with more than one write target proves write access on EVERY target before the first write.
+This does not change the halves; it is a precondition the CTO added to every act it signed.
+
+### AMENDMENT 5 -- S66 verdict and the first-secret-read report (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~07:0xZ)
+
+1. S66 (CTO round-12 addendum 1 @e5befb00f1 item 1): the close check is `R12_CHECKS/ai_leg_verify.py` at @cedc99ac58 or later. It
+   reads ok only when landed + refused == planned. A partial leg reads ok=False, and that is not a pass.
+2. Laptop 1.0.0_SA_CTO msg 106758 rule (2), relayed in 0.0.0_AB_MSTR~DELL1 msg 827: when the Dell secrets grant applies, report the
+   step-0 FIRST read of astn/kimi/api-key to 0.0.0_AB_MSTR~DELL1 like a deploy: the secret name, this order's run, and the UTC time.
+   It is reported, not approved. The grant's CTO half is @8c4fe4be88 and the grant is not yet applied.
+No gate limb grades an amendment to an existing order.

@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e70",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e6f1fdfc1fcd7773a9cd11b2864f558b7cba09b5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R12.md",
+    "vintage_commit": "e6f1fdfc1fcd7773a9cd11b2864f558b7cba09b5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e70.unplaced-key-census.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~63",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/firm_held_unplaced_census.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census script: S3 get on each firm's served holdings snapshot, DynamoDB consistent scans of etf-classifications and bd-securities; no write, invoke or model call.",
+      "artifact_covered_by": [
+        "SC12-e70b-AC1",
+        "SC12-e70b-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/FIRM_HELD_UNPLACED_CENSUS_20261008.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census output: per firm provenance (bucket, key, VersionId, LastModified), held 1270/1828/1601, absent 65/380/464, routes and every absent key with amount.",
+      "artifact_covered_by": [
+        "SC12-e70b-AC1",
+        "SC12-e70b-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC12-e70b-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/firm_held_unplaced_census.py -- expect: FIRM-HELD-CENSUS ok=True firms=3",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/firm_held_unplaced_census.py",
+      "expect": "FIRM-HELD-CENSUS ok=True firms=3",
+      "output_evidence": "FIRM-HELD-CENSUS ok=True firms=3 held=1270/1828/1601 absent=65/380/464 usd=71540299.00/4385210.72/584829.98 e70_still_absent=37 missing_from_widened=0 (rc=0)",
+      "denominator": "3 of 3 firms read from the newest served snapshot (cottonwood opal-data-cottonwood date=2026-10-06 VersionId xqKVI6RQHUAmgTeOTLGsHNpRJULlCGy.; 49financial opal-data-49financial date=2026-10-06 VersionId 211H9E5Nvo0rPqhxI_54Gl1EHo1oYlJs; inflection opal-data-inflection date=2026-10-06 VersionId 7TYSARhjp7ZjUL85igndvWQKWRgRFGWv); 509 absent keys (65+380+464), each with exactly one route; table denominator 9155 rows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC12-e70b-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/firm_held_unplaced_census.py -- expect: missing_from_widened=0",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/firm_held_unplaced_census.py",
+      "expect": "missing_from_widened=0",
+      "output_evidence": "FIRM-HELD-CENSUS ok=True firms=3 held=1270/1828/1601 absent=65/380/464 usd=71540299.00/4385210.72/584829.98 e70_still_absent=37 missing_from_widened=0 (rc=0)",
+      "denominator": "99 first-census entries, all 99 still held; 62 now matched by a NAME:: row (PRESENT), 37 still absent; 0 of the 37 missing from the widened absent set",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "The invocation run three times in this worktree",
+      "observed": "identical FIRM-HELD-CENSUS line each run",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "First run tested the 99 entries' absence by key and CUSIP only (narrower than the order's four forms) against the widened set.",
+      "expected": "the control can fire",
+      "observed": "missing_from_widened=62 (rc=0, ok=True): the control fired; the absence test was then aligned to the order's four match forms (ticker, CUSIP:, NAME::, BLOOMBERG:), giving 37 still absent and 0 missing",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write of a key, row, contract change or code beyond the census script and its JSON.",
+      "reason": "BOUNDS: read-only cell."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W63-S1",
+    "MDPF_SECCLASS-D1-W63-S2"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <paths>",
+      "result": "see report (LOCAL on wk-MDPF_SECCLASS-63)"
+    }
+  ]
+}
