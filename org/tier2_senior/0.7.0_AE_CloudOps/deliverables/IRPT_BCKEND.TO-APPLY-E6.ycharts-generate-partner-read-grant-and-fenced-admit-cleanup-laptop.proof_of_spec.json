@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "IRPT_BCKEND.TO-APPLY-E6.ycharts-generate-partner-read-grant-and-fenced-admit-cleanup-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/IRPT_BCKEND.TO-APPLY-E6.ycharts-generate-partner-read-grant-and-fenced-admit-cleanup-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "39ab7ddd70"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/release2_ycg/NEVER_WIDEN_PAIR_RELEASE2_E6.md",
+    "vintage_commit": "8c11ac4ff1",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/IRPT_BCKEND.TO-APPLY-E6.ycharts-generate-partner-read-grant-and-fenced-admit-cleanup-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/generate.tf",
+      "kind": "terraform",
+      "commit_or_etag": "51f4545acd",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Live AC1 get-role-policy carries exact new statement on three partner tables",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/irpt_e6_20261008/Y67-1_laptop_cleanup_result.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "All four exact keys NOT_FOUND after; one retained row existed before; S3 deletion skipped404",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "aws iam get-role-policy irpt-ycharts-generate-role irpt-ycharts-generate expect ReadPartnerProfileRowForOnBehalfAdvisor",
+      "method": "live_read",
+      "invocation": "aws iam get-role-policy --role-name irpt-ycharts-generate-role --policy-name irpt-ycharts-generate --query PolicyDocument",
+      "expect": "ReadPartnerProfileRowForOnBehalfAdvisor",
+      "output_evidence": "Sid ReadPartnerProfileRowForOnBehalfAdvisor EffectAllow Action dynamodb:GetItem; resources opal-partner-49financial,cottonwood,inflection only",
+      "denominator": "one added statement, three exact tables, existing statements unchanged",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "grant_presence": {
+      "description": "New partner profile GetItem Sid before vs after",
+      "expected_landed": "ReadPartnerProfileRowForOnBehalfAdvisor present",
+      "expected_not_landed": "Sid absent",
+      "observed": "ReadPartnerProfileRowForOnBehalfAdvisor present",
+      "status": "PASS"
+    },
+    "cleanup": {
+      "description": "Exact retention test row exists before and absent after",
+      "expected_landed": "RETENTION row NOT_FOUND",
+      "expected_not_landed": "RETENTION row EXISTS",
+      "observed": "RETENTION row NOT_FOUND",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/release2_ycg/NEVER_WIDEN_PAIR_RELEASE2_E6.md@8c11ac4ff1",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_IRPT_BCKEND_E6_LAPTOP_LEGS_20261008.md@10dae3bf03"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Leg1 pre-grant IAM policy preserved for targeted restore if authorized. Leg2 exact test keys only; no S3 object was deleted.",
+  "scope": "All three laptop legs complete; one present DDB retention row removed; S3 absent delete skipped",
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/codex_e6_d2_apply.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service irpt-ycharts-generate",
+      "result": "Role mapped; exact live before/after addition verified"
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to IRPT_BCKEND.TO-APPLY-E6.ycharts-generate-partner-read-grant-and-fenced-admit-cleanup-laptop",
+      "result": "Exact seat task context set"
+    }
+  ]
+}
