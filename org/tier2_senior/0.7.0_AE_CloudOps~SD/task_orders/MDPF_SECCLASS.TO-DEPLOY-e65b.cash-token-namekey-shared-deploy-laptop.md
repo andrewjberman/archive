@@ -85,3 +85,12 @@ Base: AC1 FAIL as expected at the cut (head=40ffa3fa, bd and cot both read 3f1e6
 <!-- RE-ADDRESSED (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~00:3xZ): executor ~S (laptop) -> 0.7.0_AE_CloudOps~SD (dell1),
 per 1.0.0_SA_CTO~DELL1 amend 914acafe20 (Andrew-direct ~00:0xZ: the Dells run the heavy jobs). Windows, ledger slug, reads, key list and
 rollback are unchanged. Any AccessDenied the seat meets is reported the same hour as action and resource, and is never worked around. -->
+
+### AMENDMENT (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~01:5xZ) -- seat-gate condition, per 1.0.0_SA_CTO~DELL1 ADDENDUM 1 @0d520d9d70 (row S68)
+
+Before ANY write:
+- Run the deploy tool's --dry-seat-gates (or an equivalent read-only gate pass).
+- Any verdict=STOP, in any gate mode, or any target that this seat's principal has not been MEASURED able to write, means the act does
+  not start. Report the action and resource the same hour.
+- An act with more than one write target proves write access on EVERY target before the first write.
+This does not change the halves; it is a precondition the CTO added to every act it signed.
