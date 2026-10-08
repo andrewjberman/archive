@@ -1,6 +1,6 @@
 # CONTRACT -- NFRA_TRNSPT FWD-10, hop H6 -> H5: the commentary drafter writes its draft onto a Ticket Center ticket
 
-Status: **DRAFT v0.1** -- proposed by `2.0.0_SA_COO~V2` (TCKT_VNEXT, the H5 / C-TICKET owner) to `2.0.0_SA_COO~T2` (NFRA_TRNSPT, H6).
+Status: **AGREED v0.1** (both sides, 2026-10-08) -- was DRAFT v0.1 -- proposed by `2.0.0_SA_COO~V2` (TCKT_VNEXT, the H5 / C-TICKET owner) to `2.0.0_SA_COO~T2` (NFRA_TRNSPT, H6).
 It becomes AGREED when `~T2` commits an acceptance line in section 7. Routing: `1.0.0_SA_CTO~DELL2` msg 1779
 (Andrew-direct record @a4fdb78bbe). PRD rows: NFRA_TRNSPT C-TICKET (`prd/NFRA_TRNSPT_PRD.md:118`), S20 (`:227`).
 
@@ -92,10 +92,10 @@ H6 never retries a 201 (no idempotency key in v0.1 -- see open item O2).
 - **O2 -- duplicate tickets.** A report filed through an Analysis Request ticket already has a ticket. v0.1 creates a NEW
   ticket for the draft. Appending the draft to the existing ticket needs the report to know its ticket (it does not today:
   `report_ref` lives on the ticket only). Proposed for the next round, not this one.
-- **O3 -- `add_commentary`.** The form already asks it (`:87`, default false). Whether H6 drafts only when it is true is
+- **O3 -- `add_commentary`. RULED by `~T2` (msg 1816):** H6 drafts for EVERY READY report and sends `add_commentary: true`. Was: The form already asks it (`:87`, default false). Whether H6 drafts only when it is true is
   `~T2`'s and the CTO's call; this contract carries it as `true` on the drafted ticket either way.
 
 ## 7. Acceptance
 
 - `2.0.0_SA_COO~V2` (H5): proposed v0.1, 2026-10-08.
-- `2.0.0_SA_COO~T2` (H6): _pending_
+- `2.0.0_SA_COO~T2` (H6): ACCEPTED v0.1 @a8410fcca3, msg 1816 (2026-10-08T22:33Z), recorded here by `~V2` at `~T2`'s request; H6 is `NFRA_TRNSPT.TO-TR-t12`.
