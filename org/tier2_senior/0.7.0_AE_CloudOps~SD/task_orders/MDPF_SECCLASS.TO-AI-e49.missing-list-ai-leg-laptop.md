@@ -11,7 +11,7 @@
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
-<decomp_doc>org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R11.md</decomp_doc> (round 11), "Issuer acts": the release of cell `SC-e-49` (FWD-15); its DIRECT leg landed on dell1 (ledger secclass-e49-direct-leg-m1-20261007 CLOSED @f31f9d63bf, 278/278).
+<decomp_doc>org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md</decomp_doc> (declares SC-e-49 at :58; released in round 11, DECOMP_R11.md "Issuer acts"): the release of cell `SC-e-49` (FWD-15); its DIRECT leg landed on dell1 (ledger secclass-e49-direct-leg-m1-20261007 CLOSED @f31f9d63bf, 278/278).
 <owned_cells>SC-e-49</owned_cells>
 </decomp_ref>
 
@@ -110,3 +110,8 @@ No gate limb grades an amendment to an existing order.
 This order carried no <round> tag, so surprise-row-gate.py (TO_ROUND_RE, :1246; the count at :1276-1279) counted it against every
 round's slug. It belongs to round 11 (decomp_ref DECOMP_R11.md), so <round>11</round> is added to its metadata. No other field changes.
 Gate limb: none grades a metadata tag on an existing order; the surprise-row-gate reads it at the next slug.
+
+### AMENDMENT -- the face names the decomp that DECLARES the cell (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~18:2xZ; answers ~SD msg 1041, row D1-S10)
+
+<decomp_doc> now DECOMP_R9.md, which declares SC-e-49; DECOMP_R11 only released it. <owned_cells> and <round>11</round> are unchanged.
+Gate limb: to-pipeline-gate layer 1 grades the proof-of-spec instance at the flip; none grades this amendment.
