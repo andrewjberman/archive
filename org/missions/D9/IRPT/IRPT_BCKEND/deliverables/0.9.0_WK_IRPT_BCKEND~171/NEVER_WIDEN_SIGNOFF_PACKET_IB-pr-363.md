@@ -64,6 +64,8 @@ and are out of this order's grant, so they ship as they are today.
 
 ## The two after-reads (after release, by the later release order)
 
+Both are `custody-report-read` operations (the routes.json `operation` of the new route).
+
 1. **Other-firm read is REFUSED.** As a principal of firm X, `GET /api/scoped/investor-reporting/custody-report/{reportId of a report owned by firm Y}?revision=<rev>`
    returns `OBJECT_NOT_COVERED` and no body of firm Y's report. Pass = the refusal code and no report content.
 2. **Opal read by ref returns it.** As an Opal principal, `GET /api/scoped/investor-reporting/custody-report/{reportId}?revision=<rev>` for one existing custody report
