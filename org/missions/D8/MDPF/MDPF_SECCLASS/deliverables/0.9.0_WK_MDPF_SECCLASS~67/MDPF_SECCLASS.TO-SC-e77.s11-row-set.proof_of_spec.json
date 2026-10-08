@@ -60,14 +60,13 @@
     },
     {
       "criterion_id": "SC15-e77-AC2",
-      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py -- expect: refused_present=1 refused_stale=0 puts=0 (Amendment 1 and 2: the one refused key is RAL)",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py -- expect: refused_stale=0 puts=0 (Amendment 3, commit 12a119410b: a fixed refused_present count cannot hold while e49 lands group-B tickers)",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py",
-      "expect": "refused_present=1 refused_stale=0 puts=0",
-      "output_evidence": "REFUSED_PRESENT OXYWS live=equity/Energy by='mdpf-secclass-model' / REFUSED_PRESENT RAL live=equity/Information Technology by='mdpf-secclass-model' / S11-ROWS-DRY-RUN new=104 remap=34 refused_present=2 refused_stale=0 puts=0 (rc=1, run 2026-10-08 ~20:2xZ on commit b184ed51a3). Expected refused_present=1 with RAL the only refused key; OXYWS (group B, $4,958, same class equity as the set's line) was landed by the e49 model runner at 2026-10-08T20:08:38Z, after Amendment 1. Not weakened; row MDPF_SECCLASS-D1-W67-S3. refused_stale=0 and puts=0 hold; the 23 new REMAP lines all planned (remap=34, none stale).",
-      "denominator": "138 of 140 lines planned (104 NEW + 34 REMAP); 2 NEW refused present (RAL, OXYWS); 0 refused stale; 0 mutating calls",
-      "status": "FAIL",
-      "status_reason": "Dry run reads refused_present=2 (OXYWS and RAL), expected 1 with RAL the only refused key (Amendments 1 and 2). OXYWS was landed by the e49 model runner at 2026-10-08T20:08:38Z, same class as the set's NEW line. Test not weakened; issuer to amend AC2 to admit OXYWS or drop the line; row MDPF_SECCLASS-D1-W67-S3."
+      "expect": "refused_stale=0 puts=0",
+      "output_evidence": "REFUSED_PRESENT OXYWS live=equity/Energy by='mdpf-secclass-model' / REFUSED_PRESENT RAL live=equity/Information Technology by='mdpf-secclass-model' / S11-ROWS-DRY-RUN new=104 remap=34 refused_present=2 refused_stale=0 puts=0 (rc=1, re-run 2026-10-08 on worktree HEAD 12a119410b, set and writer unchanged since b184ed51a3). Both REFUSED_PRESENT keys carry live asset_class equity, equal to the set's NEW line class (OXYWS equity, RAL equity), so each is a no-op, not a re-plan; the issuer reads these lines before signing (Amendment 3).",
+      "denominator": "138 of 140 lines planned (104 NEW + 34 REMAP); 2 NEW refused present (OXYWS, RAL; live class equals set class); 0 refused stale; 0 mutating calls",
+      "status": "PASS"
     },
     {
       "criterion_id": "SC15-e77-AC3",
@@ -89,7 +88,7 @@
     },
     "determinism": {
       "method": "AC1-AC3 run once each after the final edit of the set, writer and half",
-      "observed": "AC1 ok=True 106/106 remap=34 (rc=0); AC2 new=104 remap=34 refused_present=2 (OXYWS, RAL) refused_stale=0 puts=0 (rc=1); AC3 HALF-READY (rc=0); run twice after the final edit of the set and half, identical",
+      "observed": "AC1 ok=True 106/106 remap=34 (rc=0); AC2 new=104 remap=34 refused_present=2 (OXYWS, RAL) refused_stale=0 puts=0 (rc=1); AC3 HALF-READY (rc=0); re-run after Amendment 3 at 12a119410b, identical to the prior run",
       "status": "STABLE"
     }
   },
