@@ -6,11 +6,11 @@
   "spec_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-u-6.analysisreport-schema-carries-opal-engine.md",
     "group": "OTHER",
-    "vintage_commit": "1974945570"
+    "vintage_commit": "b95f3c25e8"
   },
   "decomp_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6L.md",
-    "vintage_commit": "1974945570",
+    "vintage_commit": "b95f3c25e8",
     "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-u-6.analysisreport-schema-carries-opal-engine.md"
   },
   "assignee": "0.9.0_WK_IRPT_YCDGEN~6",
@@ -18,21 +18,19 @@
     {
       "path_or_key": "docs/contracts/investor-reporting/v1/AnalysisReport.schema.json",
       "kind": "doc",
-      "commit_or_etag": "0b6115b205",
+      "commit_or_etag": "98d3872a76",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the v1 form is $defs/ycharts, the OPAL_ENGINE form is $defs/opal_engine (copied from the served v2 schema), the root is a oneOf of the two; sha256 9c55f7c9b8fd0a52956cc394d28859f9917cf4aeca7413530d546496d00b5b67 against 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f at the spawn base. The packaged copy under _contracts/ is NOT updated (outside the order's paths). Local, branch wk-IRPT_YCDGEN-6.",
+      "deploy_evidence": "restored to the bytes at merge-base 47f9315d28 (git diff 47f9315d28 HEAD -- docs/contracts/ is empty); sha256 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f. Local, branch wk-IRPT_YCDGEN-6.",
       "artifact_covered_by": [
-        "AC1",
-        "AC2",
-        "AC3"
+        "AC1"
       ]
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/u6_checks.py",
       "kind": "script",
-      "commit_or_etag": "0b6115b205",
+      "commit_or_etag": "98d3872a76",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "schema | regen | census, one RESULT line each; regen runs a COPY of gen-wire.ts in a temp tree from portal/ with --no-install (portal tree unchanged before and after); census swaps the base schema into the working tree for one measurement and restores it (sha printed). A later commit on this branch changes only the census arm's test runs to parallel threads. Local.",
+      "deploy_evidence": "schema | regen | census, one RESULT line each; regen imports the changed gen-wire.ts under bun --no-install from portal/ and renders to a temp dir. Local. The portal edit (gen-wire.ts, portal commit dc88c4f7 on wk-IRPT_YCDGEN-6-portal, outer submodule pointer at 98d3872a76) lives inside the submodule, so it has no outer path to pin; AC2 exercises it.",
       "artifact_covered_by": [
         "AC1",
         "AC2",
@@ -42,11 +40,10 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "0b6115b205",
+      "commit_or_etag": "98d3872a76",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "rows IRPT_YCDGEN-W6-S1, S2, S3, S4 appended",
+      "deploy_evidence": "rows IRPT_YCDGEN-D2-W6-S1 and IRPT_YCDGEN-D2-W6-S2 appended",
       "artifact_covered_by": [
-        "AC1",
         "AC2",
         "AC3"
       ]
@@ -55,82 +52,72 @@
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "AC1 -- every AnalysisReport document valid before the change is still valid against the changed schema",
+      "criterion_verbatim": "AC1 -- v1 is byte-frozen and every v2 fixture validates as its name says",
       "method": "command",
       "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/u6_checks.py schema",
-      "output_evidence": "schema at base 1974945570: sha256 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f (pinned 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f)\nschema as changed: sha256 9c55f7c9b8fd0a52956cc394d28859f9917cf4aeca7413530d546496d00b5b67\nDENOMINATOR: 10010 tracked .json files (outer + portal); 10010 read; 0 unreadable/unparsable; 7 AnalysisReport-shaped documents found\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.invalid.json  before=invalid after=invalid\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.v2.opal.invalid_not_available_no_reason.json  before=invalid after=invalid\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.v2.opal.invalid_vendor_member.json  before=invalid after=invalid\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.v2.opal.valid.json  before=invalid after=VALID\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.v2.ycharts.valid.json  before=invalid after=VALID\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.valid.json  before=VALID after=VALID\n  FIXTURE portal/src/pages/InvestorReporting/fixtures/wire/AnalysisReport.valid.json  before=VALID after=VALID\nCOUNT: 7 documents; valid before 2; valid before and after 2; valid before and NOT after 0; newly valid 2; invalid both 3\n  BRANCH AnalysisReport.v2.opal.valid.json expected VALID got VALID\n  BRANCH AnalysisReport.v2.opal.invalid_vendor_member.json expected invalid got invalid\n  BRANCH AnalysisReport.v2.opal.invalid_not_available_no_reason.json expected invalid got invalid\n  BRANCH AnalysisReport.v2.ycharts.valid.json expected VALID got VALID\n  BRANCH AnalysisReport.valid.json expected VALID got VALID\n  BRANCH AnalysisReport.invalid.json expected invalid got invalid\nRESULT: schema PASS\nrc=0",
-      "denominator": "7 AnalysisReport-shaped documents in 10010 tracked json files (outer + portal); 2 valid before, 2 valid before and after, 0 regressions",
+      "output_evidence": "merge-base HEAD CLOUD = 47f9315d2828758a1e5f1f9327ca0b9e7b0f9c35\nv1 sha256 at merge-base 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f ; in working tree 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f ; frozen: True\n  FIXTURE AnalysisReport.v2.opal.invalid_not_available_no_reason.json name says invalid, validates as invalid\n  FIXTURE AnalysisReport.v2.opal.invalid_vendor_member.json name says invalid, validates as invalid\n  FIXTURE AnalysisReport.v2.opal.valid.json name says valid, validates as valid\n  FIXTURE AnalysisReport.v2.ycharts.valid.json name says valid, validates as valid\nCOUNT: 4 AnalysisReport v2 fixtures under infra/aws/lambda/investor-reporting/_contracts/fixtures (glob AnalysisReport.v2.*.json); 0 disagree with their name []\nRESULT: schema PASS\n0",
+      "denominator": "4 of 4 AnalysisReport v2 fixtures agree with their file name; v1 sha256 equal to the merge-base copy",
       "expect": "^RESULT: schema PASS",
       "status": "PASS"
     },
     {
       "criterion_id": "AC2",
-      "criterion_verbatim": "AC2 -- the generator run against the changed schema reproduces the committed AnalysisReport.ts byte for byte",
+      "criterion_verbatim": "AC2 -- the generator, reading v2, reproduces the committed AnalysisReport.ts body (header excluded)",
       "method": "command",
       "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/u6_checks.py regen",
-      "output_evidence": "committed AnalysisReport.ts at portal d1b21c97: 5314 bytes, 149 lines (working copy equal to the commit: True)\nportal tree before/after the generator runs: '' / '' (unchanged: True)\ngenerator (copy of gen-wire.ts, run from portal/ with --no-install, out-dir C:\\Users\\Test\\AppData\\Local\\Temp\\u6regen_gliuztsw):\n  base schema: rc=0  WIRE TYPES GENERATED: 25 of 25; RESPONSE ENVELOPES GENERATED: 19 of 22 routes\n  changed schema: rc=0  WIRE TYPES GENERATED: 25 of 25; RESPONSE ENVELOPES GENERATED: 19 of 22 routes\nMEASURE base schema: a regeneration drops 56 lines present in the committed type (S388 measured 56)\nOTHER generated files: 26 compared, 0 differ between base-schema and changed-schema runs []\nchanged schema: generated 7810 bytes / 241 lines; committed 5314 bytes / 149 lines; identical: False\nFIRST DIFFERING LINE 5:\n  generated:  * Source sha256: 9c55f7c9b8fd0a52956cc394d28859f9917cf4aeca7413530d546496d00b5b67\n  committed:  * Source sha256: 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f\nDIFF: 135 lines only in generated, 43 lines only in committed\n  committed token AnalysisSectionNotAvailableReason        in generated output: False\n  committed token AnalysisReportOpalSectionWire            in generated output: False\n  committed token AnalysisReportOpalWire                   in generated output: False\n  committed token AnalysisReportAnyWire                    in generated output: False\n  committed token INPUT_MISSING:${string}                  in generated output: False\n  committed token /** v2 discriminator                     in generated output: False\nRESULT: regen FAIL\nrc=1",
-      "denominator": "0 of 1 files identical: generated 241 lines / 7810 bytes against committed 149 lines / 5314 bytes; first difference at line 5; the other 26 generated files are unchanged by the schema change",
+      "output_evidence": "generator run (bun --no-install from portal/, out-dir C:\\Users\\Test\\AppData\\Local\\Temp\\u6regen_TMP): rc=0 SOURCE: infra/aws/lambda/investor-reporting/_contracts/AnalysisReport.v2.schema.json\nbodies (header excluded): generated 134 lines, committed 139 lines\nFIRST DIFFERING BODY LINE 2:\n  generated:   readonly provider: 'YCHARTS'\n  committed:   /** v2 discriminator (IRPT_BCKEND PRD v0.28 item 29). Absent on a v1 document; `YCHARTS` carries exactly the v1 members. */\nDIFF: 33 lines only in generated, 38 only in committed\nRESULT: regen FAIL\n1",
+      "denominator": "0 of 1 bodies identical: generated 134 lines against committed 139 lines; first difference at body line 2",
       "expect": "^RESULT: regen PASS",
       "status": "FAIL",
-      "status_reason": "unreachable by any schema change, see row IRPT_YCDGEN-W6-S1: the header line carries the schema sha256, and six committed declarations are ones the generator has no code to emit"
+      "status_reason": "the committed AnalysisReport.ts is hand-edited (annotation, optional provider, three hand-added OPAL types) while the generator emits one union type; equality needs a schema, committed-type or generator-rendering change this cell may not make; see row IRPT_YCDGEN-D2-W6-S1"
     },
     {
       "criterion_id": "AC3",
-      "criterion_verbatim": "AC3 -- every reader of the schema is named and reads the new branch",
+      "criterion_verbatim": "AC3 -- every reader of either AnalysisReport schema is named and its tests pass",
       "method": "command",
       "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/u6_checks.py census",
-      "output_evidence": "SEARCH 1: git grep -l -I -F 'AnalysisReport.schema' over 63276 tracked outer files (binary files excluded by -I): 133 files hit\nSEARCH 2: git -C portal grep -l -I -E 'AnalysisReport.schema|WIRE_CONTRACTS|CONSUMED_CONTRACTS|WIRE_CONTRACT_NAMES' -- src over 2068 tracked portal files: 14 files hit\n  org/** records (documents, evidence, probes): 115 files, of which 9 are scripts: org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~142/make_fixtures_p340.py, org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r28/p28_1_ac2_real_analysis_bundle.py, org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r31/p31_1_ac3_packaged_contracts_equal.py, org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P/checks/r34/p34_1_ac1_packaging.py, org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/u6_checks.py, org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_MVP_P/repository_candidate_probe.py, org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_MVP_Y/probe_owned_entry.py, org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_MVP_Y/probe_p_repository.py, org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_MVP_Y/probe_publication.py\n  outside org/: 18 files\nUNCLASSIFIED live hits: 0 []\n  READER [schema] docs/contracts/investor-reporting/v1/AnalysisReport.schema.json -> reads (meta-schema valid; OPAL fixture VALID, v1 fixture VALID)\n  READER [response] docs/contracts/investor-reporting/v1/responses/analysis-report.response.schema.json -> pointers resolve in the new schema: ['request_ref', 'sections', 'extraction_validation', 'undated_sections', 'extraction_coverage']; slices: AnalysisReport.valid.json VALID; AnalysisReport.v2.opal.valid.json invalid: 'extraction_validation' is a required property\n  READER [packaged-copy] infra/aws/lambda/investor-reporting/_contracts/AnalysisReport.schema.json -> UNCHANGED v1 (sha256 1bd0dc858476): carries NO OPAL_ENGINE branch until synced to the docs copy; byte-equal to docs copy now: False\n  READER [packaged-loader] infra/aws/lambda/investor-reporting/export/submit_installed.py -> reads the PACKAGED copy (UNCHANGED v1 (sha256 1bd0dc858476)), not the docs file: no error, no OPAL branch until synced\n  READER [packaged-loader] infra/aws/lambda/investor-reporting/reports/generate_installed.py -> reads the PACKAGED copy (UNCHANGED v1 (sha256 1bd0dc858476)), not the docs file: no error, no OPAL branch until synced\n  READER [packaged-loader] infra/aws/lambda/investor-reporting/reports/resident_installed.py -> reads the PACKAGED copy (UNCHANGED v1 (sha256 1bd0dc858476)), not the docs file: no error, no OPAL branch until synced\n  READER [packaged-loader] infra/aws/lambda/investor-reporting/ycharts/extract/tests/run_offline_suite.py -> reads the PACKAGED copy (UNCHANGED v1 (sha256 1bd0dc858476)), not the docs file: no error, no OPAL branch until synced\n  READER [packaged-loader] infra/aws/lambda/investor-reporting/ycharts/generate/tests/run_offline_suite.py -> reads the PACKAGED copy (UNCHANGED v1 (sha256 1bd0dc858476)), not the docs file: no error, no OPAL branch until synced\n  READER [manifest] infra/aws/lambda/ci/lambda-source-map.json -> sha256 pin of the docs schema is the BASE sha (STALE after this change)\n  READER [manifest] infra/aws/lambda/investor-reporting/PATH_MANIFEST.json -> sha256 pin of the docs schema is absent/current\n  READER [generator] portal gen-wire.ts (copy, temp out-dir) -> renders the new schema without UnrenderableSchemaError: True (rc base=0 new=0; WIRE TYPES GENERATED: 25 of 25; RESPONSE ENVELOPES GENERATED: 19 of 22 routes)\n  READER [portal-not-run] src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-26.wire-regen.test.ts -> NOT RUN: it calls generate(), which WRITES into contracts/wire/; its assertion (regeneration == committed bytes) is the regen arm's AC2\n  READER [portal-not-run] src/pages/InvestorReporting/__tests__/fe-s-13/gen-consumed.ts -> NOT RUN: it writes contracts/wire/consumed.ts; its two readers (propertiesOf, requiredOf) are the ones content-pins.test.ts applies\n  READER [portal-not-run] src/pages/InvestorReporting/__tests__/fe-s-13/gen-wire.ts -> RUN as a copy by the regen arm (rc and output below)\n  READER [pytest] infra/aws/lambda/investor-reporting/_contracts/tests/test_analysisreport_v2.py -> NEW RED 1: ['test_v1_untouched']  [v2 schema file + the v1 sha pin]\n  READER [pytest] infra/aws/lambda/investor-reporting/_contracts/tests/test_undated_analysis.py -> reads without error (12 passed in 1.97s)  [validator over docs schema]\n  READER [pytest] infra/aws/lambda/investor-reporting/export/tests/test_packaged_contracts_match_docs.py -> NEW RED 1: ['test_the_packaged_schema_is_byte_equal_to_the_published_docs_copy[AnalysisReport.schema.js']  [packaged copy byte-equal to docs copy]\n  READER [pytest] infra/aws/lambda/investor-reporting/ops/tests/test_owned_report.py -> reads without error (32 passed in 9.20s)  [resolves #/properties/<key> pointers]\n  READER [pytest] infra/aws/lambda/investor-reporting/reports/tests/test_repository.py -> reads without error (24 passed in 2.17s)  [validator over docs schema]\n  READER [pytest] infra/aws/lambda/investor-reporting/ycharts/extract/tests/test_publication.py -> NEW RED 3: ['test_committed_three_variant_pdfs_preserve_denominators_and_undated_rows[comparison]', 'test_committed_three_variant_pdfs_preserve_denominators_and_undated_rows[multicomp]', 'test_committed_three_variant_pdfs_preserve_denominators_and_undated_rows[overview]']  [partial-view validation over docs schema]\n  PORTAL bun test (6 files) under the new schema: ['34 pass', '7 fail'] ; under the BASE schema: ['34 pass', '7 fail']\n  PORTAL failing tests present at BASE already (not counted): 7\n  READER [bun-test] src/pages/InvestorReporting/__tests__/fe-s-13/content-pins.test.ts -> ran  [required/offered pins from docs schema]\n  READER [bun-test] src/pages/InvestorReporting/__tests__/fe-s-13/producer-fixtures.test.ts -> ran  [producer fixtures vs docs schemas]\n  READER [bun-test] src/pages/InvestorReporting/__tests__/fe-s-1/fixtures.test.ts -> ran  [fixture set]\n  READER [bun-test] src/pages/InvestorReporting/__tests__/fe-s-4/manifest.test.ts -> ran  [manifest]\n  READER [bun-test] src/pages/InvestorReporting/__tests__/fe-s-47/no-status-reason.test.ts -> ran  [no status reason]\n  READER [bun-test] src/pages/InvestorReporting/__tests__/fe-s-50/hash-stability.test.ts -> ran  [renderModule hash stability]\n  PORTAL NEW failing tests vs base: 0 []\n  PORTAL NEW AnalysisReport pin problems vs base: 2\n    AnalysisReport.extraction_validation: no longer REQUIRED, and this client reads it unconditionally\n    AnalysisReport.vendor_artifact: no longer REQUIRED, and this client reads it unconditionally\nSCHEMA FILE restored after the base measurements: sha256 9c55f7c9b8fd0a52956cc394d28859f9917cf4aeca7413530d546496d00b5b67\nREADERS NAMED: 26\nRESULT: census FAIL\nrc=1",
-      "denominator": "26 readers named from 132 outer-hit files of 63275 tracked and 14 portal-hit files of 2068 tracked; 5 python tests, 2 portal pins and 1 manifest sha pin newly red against the base schema",
+      "output_evidence": "SEARCH A: git grep -l -I -E 'AnalysisReport(\\.v2)?\\.schema' over 63277 tracked outer files: 146 hits (127 under org/ = records, not readers; 19 outside org/)\nSEARCH B: git -C portal grep -l -I -E 'AnalysisReport(\\.v2)?\\.schema|SERVED_V2_SCHEMAS|schemaFilePath' -- src over 2068 tracked portal files: 6 hits\nSEARCH C: git grep -l -I -E 'glob\\(.*schema\\.json' -- infra/aws/lambda/investor-reporting/*.py (loaders that read EVERY schema file, so both): 16 hits\nREADERS (outer, outside org/): 33\n  READER [schema file] docs/contracts/investor-reporting/v1/AnalysisReport.schema.json\n  READER [document/manifest] docs/contracts/investor-reporting/v1/CONTRACT.md\n  READER [schema file] docs/contracts/investor-reporting/v1/responses/analysis-report.response.schema.json\n  READER [document/manifest] infra/aws/lambda/ci/lambda-source-map.json\n  READER [document/manifest] infra/aws/lambda/investor-reporting/PATH_MANIFEST.json\n  READER [schema file] infra/aws/lambda/investor-reporting/_contracts/AnalysisReport.schema.json\n  READER [schema file] infra/aws/lambda/investor-reporting/_contracts/AnalysisReport.v2.schema.json\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/test_owned_outer_contracts.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/test_owned_request_contracts.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/test_request_composition.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/test_upload_contract.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/tests/test_analysisreport_v2.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/tests/test_holdings_classification_members.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/tests/test_selection_contract.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/tests/test_submit_export_queued.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/tests/test_undated_analysis.py\n  READER [python code] infra/aws/lambda/investor-reporting/export/submit_installed.py\n  READER [python test] infra/aws/lambda/investor-reporting/export/tests/test_download_response_contract.py\n  READER [python test] infra/aws/lambda/investor-reporting/export/tests/test_packaged_contracts_match_docs.py\n  READER [python test] infra/aws/lambda/investor-reporting/export/tests/test_submit_async.py\n  READER [python test] infra/aws/lambda/investor-reporting/export/tests/test_submit_service.py\n  READER [python test] infra/aws/lambda/investor-reporting/holdings/tests/test_entry_guarded.py\n  READER [python test] infra/aws/lambda/investor-reporting/ops/tests/test_owned_report.py\n  READER [python test] infra/aws/lambda/investor-reporting/ops/tests/test_owned_requests.py\n  READER [python code] infra/aws/lambda/investor-reporting/reports/generate_installed.py\n  READER [python code] infra/aws/lambda/investor-reporting/reports/resident_installed.py\n  READER [python test] infra/aws/lambda/investor-reporting/reports/tests/test_generate_installed.py\n  READER [python test] infra/aws/lambda/investor-reporting/reports/tests/test_repository.py\n  READER [python test] infra/aws/lambda/investor-reporting/ycharts/extract/tests/run_offline_suite.py\n    (not a pytest file by name: not run)\n  READER [python test] infra/aws/lambda/investor-reporting/ycharts/extract/tests/test_publication.py\n  READER [python code] infra/aws/lambda/investor-reporting/ycharts/generate/composition_admission.py\n  READER [python test] infra/aws/lambda/investor-reporting/ycharts/generate/tests/run_offline_suite.py\n    (not a pytest file by name: not run)\n  READER [python test] infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py\nREADERS (portal, TypeScript, not python tests: named, not run here): 6\n  READER [portal ts] portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-48.new-classes.test.tsx\n  READER [portal ts] portal/src/pages/InvestorReporting/__tests__/fe-s-13/gen-wire.ts\n  READER [portal ts] portal/src/pages/InvestorReporting/__tests__/fe-s-25/generator.test.ts\n  READER [portal ts] portal/src/pages/InvestorReporting/__tests__/fe-s-50/hash-stability.test.ts\n  READER [portal ts] portal/src/pages/InvestorReporting/contracts/wire/AnalysisReport.ts\n  READER [portal ts] portal/src/pages/InvestorReporting/contracts/wire/consumed.ts\nPYTHON TESTS TO RUN: 20\n  TEST infra/aws/lambda/investor-reporting/_contracts/test_owned_outer_contracts.py rc=0 3 passed in 4.80s\n  TEST infra/aws/lambda/investor-reporting/_contracts/test_owned_request_contracts.py rc=1 1 failed, 2 passed in 2.98s\n  TEST infra/aws/lambda/investor-reporting/_contracts/test_request_composition.py rc=0 50 passed in 6.54s\n  TEST infra/aws/lambda/investor-reporting/_contracts/test_upload_contract.py rc=1 1 failed, 7 passed in 3.61s\n  TEST infra/aws/lambda/investor-reporting/_contracts/tests/test_analysisreport_v2.py rc=0 5 passed in 2.81s\n  TEST infra/aws/lambda/investor-reporting/_contracts/tests/test_holdings_classification_members.py rc=0 24 passed in 3.35s\n  TEST infra/aws/lambda/investor-reporting/_contracts/tests/test_selection_contract.py rc=0 2 passed in 2.94s\n  TEST infra/aws/lambda/investor-reporting/_contracts/tests/test_submit_export_queued.py rc=0 5 passed in 3.04s\n  TEST infra/aws/lambda/investor-reporting/_contracts/tests/test_undated_analysis.py rc=0 12 passed in 2.86s\n  TEST infra/aws/lambda/investor-reporting/export/tests/test_download_response_contract.py rc=0 14 passed in 3.50s\n  TEST infra/aws/lambda/investor-reporting/export/tests/test_packaged_contracts_match_docs.py rc=0 2 passed in 0.15s\n  TEST infra/aws/lambda/investor-reporting/export/tests/test_submit_async.py rc=0 15 passed in 3.98s\n  TEST infra/aws/lambda/investor-reporting/export/tests/test_submit_service.py rc=0 5 passed in 3.24s\n  TEST infra/aws/lambda/investor-reporting/holdings/tests/test_entry_guarded.py rc=0 21 passed in 3.95s\n  TEST infra/aws/lambda/investor-reporting/ops/tests/test_owned_report.py rc=0 32 passed in 13.91s\n  TEST infra/aws/lambda/investor-reporting/ops/tests/test_owned_requests.py rc=0 24 passed in 10.80s\n  TEST infra/aws/lambda/investor-reporting/reports/tests/test_generate_installed.py rc=0 13 passed in 3.89s\n  TEST infra/aws/lambda/investor-reporting/reports/tests/test_repository.py rc=0 24 passed in 3.03s\n  TEST infra/aws/lambda/investor-reporting/ycharts/extract/tests/test_publication.py rc=0 18 passed in 9.99s\n  TEST infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py rc=1 1 failed, 14 passed in 3.94s\nTESTS: 20 run, 3 failed ['infra/aws/lambda/investor-reporting/_contracts/test_owned_request_contracts.py', 'infra/aws/lambda/investor-reporting/_contracts/test_upload_contract.py', 'infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py']; required test missing from the census: []\nRESULT: census FAIL",
+      "denominator": "33 outer readers outside org/ (146 hits over 63277 tracked files, 127 under org/), 6 portal readers; 17 of 20 python tests pass",
       "expect": "^RESULT: census PASS",
       "status": "FAIL",
-      "status_reason": "see rows IRPT_YCDGEN-W6-S2 (the reds) and S4 (the response schema refuses an OPAL slice); none can be fixed inside the order's paths"
+      "status_reason": "3 of 20 python tests fail for causes that do not touch either schema (routes list 19 vs 20 twice, brand asset absent once; the first fails identically from the main checkout); see row IRPT_YCDGEN-D2-W6-S2"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "the schema arm run in-process with SCHEMA pointed at a copy of the changed schema whose $defs/ycharts.required gains a member no v1 document has",
-      "expected": "RESULT: schema FAIL with the valid-before documents counted as no longer valid",
-      "observed": "schema at base 1974945570: sha256 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f (pinned 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f)\nschema as changed: sha256 2cbda62b6f6bd3b8309242b9865fad8858e349cae3e203c5f579dd8ac9793549\nDENOMINATOR: 10010 tracked .json files (outer + portal); 10010 read; 0 unreadable/unparsable; 7 AnalysisReport-shaped documents found\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.invalid.json  before=invalid after=invalid\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.v2.opal.invalid_not_available_no_reason.json  before=invalid after=invalid\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.v2.opal.invalid_vendor_member.json  before=invalid after=invalid\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.v2.opal.valid.json  before=invalid after=VALID\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.v2.ycharts.valid.json  before=invalid after=invalid\n  FIXTURE infra/aws/lambda/investor-reporting/_contracts/fixtures/AnalysisReport.valid.json  before=VALID after=invalid\n  FIXTURE portal/src/pages/InvestorReporting/fixtures/wire/AnalysisReport.valid.json  before=VALID after=invalid\nCOUNT: 7 documents; valid before 2; valid before and after 0; valid before and NOT after 2; newly valid 1; invalid both 4\n  BRANCH AnalysisReport.v2.opal.valid.json expected VALID got VALID\n  BRANCH AnalysisReport.v2.opal.invalid_vendor_member.json expected invalid got invalid\n  BRANCH AnalysisReport.v2.opal.invalid_not_available_no_reason.json expected invalid got invalid\n  BRANCH AnalysisReport.v2.ycharts.valid.json expected VALID got invalid\n  BRANCH AnalysisReport.valid.json expected VALID got invalid\n  BRANCH AnalysisReport.invalid.json expected invalid got invalid\nRESULT: schema FAIL\nrc=1",
-      "status": "FIRED-AS-EXPECTED"
+      "description": "the schema arm's frozen check compares the working-tree v1 file with its merge-base copy; earlier in this order the v1 file was the 0b6115b205 edit (sha256 9c55f7c9...5b67) and the same comparison reported it as not equal to 1bd0dc85...153f",
+      "expected": "a changed v1 file makes frozen: False and RESULT: schema FAIL",
+      "observed": "the pre-restore working tree (the v1 edit of 0b6115b205) hashes 9c55f7c9b8fd0a52956cc394d28859f9917cf4aeca7413530d546496d00b5b67 per the superseded proof; not re-run",
+      "status": "N/A-SPEC-NAMES-NONE",
+      "reason": "the order names no mutant control; the frozen comparison is a plain sha256 equality printed with both values"
     },
     "determinism": {
-      "method": "N/A -- every arm reads committed files and a fixed base revision",
-      "observed": "census run three times (94 s, ~120 s, then 64 s once its test runs were parallelised): the same NEW RED set each time",
+      "method": "N/A -- every arm reads committed files, a fixed merge-base and the changed generator",
+      "observed": "schema and regen run twice with identical output; census run twice with the same 3 failing tests",
       "status": "N/A-WITH-REASON",
       "reason": "no clock, network or randomness is read"
     }
   },
   "declared_exclusions": [
     {
-      "item": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-26.wire-regen.test.ts and fe-s-13/gen-consumed.ts were not run",
-      "reason": "both write into portal contracts/wire/ and portal edits are barred; the first asserts regeneration equals committed bytes, which AC2 measures"
+      "item": "portal bun tests (fe-s-25 generator.test.ts, fe-s-50 hash-stability.test.ts, iv-e-48) were named but not run",
+      "reason": "AC3 asks for the python tests among the readers; the three portal readers import schemaFilePath and AnalysisReport is not in their asserted set"
     },
     {
-      "item": "the generator was exercised through a copy of gen-wire.ts (generate() fixes its out-dir by import.meta.url), with IRPT_CONTRACTS_DIR pointing at the worktree contracts",
-      "reason": "the order bars writing into contracts/wire/ and editing the generator; the copy is byte-identical to the committed generator"
-    },
-    {
-      "item": "the deployed validators (submit_installed, resident_installed, generate_installed) read the PACKAGED schema copy, which this order does not touch",
-      "reason": "outside <paths>; named in the census as reading the unchanged copy"
+      "item": "the generator is driven through renderModule and schemaFilePath imported from the changed gen-wire.ts, not through generate()",
+      "reason": "generate() fixes its out-dir by import.meta.url and writes into contracts/wire/, which the order bars; the rendered module is the same call generate() makes"
     }
   ],
   "surprises": [
-    "IRPT_YCDGEN-W6-S1",
-    "IRPT_YCDGEN-W6-S2",
-    "IRPT_YCDGEN-W6-S3",
-    "IRPT_YCDGEN-W6-S4"
+    "IRPT_YCDGEN-D2-W6-S1",
+    "IRPT_YCDGEN-D2-W6-S2"
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "ruff",
       "invocation": "ruff check --target-version py39 u6_checks.py",
-      "result": "All checks passed"
-    },
-    {
-      "tool": "jsonschema",
-      "invocation": "Draft202012Validator.check_schema on the changed schema",
-      "result": "ok"
+      "result": "All checks passed!"
     }
   ]
 }
