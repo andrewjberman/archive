@@ -4,13 +4,13 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~E</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
-<decomp_doc>org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round4.md</decomp_doc> (round 4), "The issuer's acts after the drain": a further apply leg of cell `CT-a-1` (the Dell identity root; its AMENDMENTS 11 to 13 built this step).
+<decomp_doc>org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md</decomp_doc> (workstream ACCESS, where cell `CT-a-1` is defined; the earlier text named round4.md, which holds no CT-a cell: row NFRA_CTLPLN-S30), the issuer's acts after the drain: a further apply leg of cell `CT-a-1` (the Dell identity root; its AMENDMENTS 11 to 13 built this step).
 <owned_cells>CT-a-1</owned_cells>
 </decomp_ref>
 
