@@ -18,8 +18,11 @@ has been deployed.
 | member | built / live | owner / half | what it does |
 |---|---|---|---|
 | `uploads.py` | 47f89e0b4660 / f88bdb902789 | Y (IB-yr-631 @b7dc881c10) | an OPAL_GLOBAL filer, home opal-capital, whose `allowedFirmIds` names the owner firm may create an upload for that firm; the record gains `acting_principal_id` |
-| `interactive_access.py` | c28d9a74c9af / bba07a3f4eeb | ~P (IB-pr-354 @c101699a71) | `current()` carries `allowedFirmIds` for an OPAL_GLOBAL subject; `authorize_current` admits on-behalf only where the uploads rule does; "ALL" never admits |
-| `generate_installed.py` | d878d10731f4 / f761837e870f | ~P (IB-pr-358 @c246d6a180) | passes the profile reader to the upload door |
+| `interactive_access.py` | c28d9a74c9af / bba07a3f4eeb | ~P (IB-pr-354 @c101699a71) | `current()` adds `allowedFirmIds` to an OPAL_GLOBAL row only, from the injected profile reader (row email must equal the subject; trimmed, sorted, "ALL" dropped); absent / empty / ALL-only / failed read / no reader = no field (fail closed); stripped from every retained owner. `authorize_current`'s admission rule is UNCHANGED; the on-behalf admit is uploads.py's, reading this field |
+| `generate_installed.py` | d878d10731f4 / f761837e870f | ~P (IB-pr-358 @c246d6a180) | `compose_upload` passes `ports["get_user"]` as `profile_reader`, cached once per subject per request; a failed read re-raises (fail closed); no new client |
+
+**P half CONFIRMED as shipped:** `2.0.0_SA_COO~P2` msg 1322 (diff `3f29017cfc..f7a9d0b34f`: interactive_access.py +32/-2,
+generate_installed.py +20/-1).
 
 No other member changes, so release 1's riders (E-Y4, the ~G2 members, IB-pr-357) are already live and do not ride here.
 
@@ -73,6 +76,6 @@ every branch.
 ## Still owed before signing
 
 - **Andrew (not holding this release, msg 1320):** the real filer entitlement, meaning which person files for which firms.
-- **~P2:** a diff-read note on IB-pr-354 and IB-pr-358 as they ship here (the form of release 1's msg 1125).
+- **~P2:** DONE (msg 1322), recorded above.
 - **Pin on origin:** `f7a9d0b34f` reaches origin CLOUD with the dell2 drain.
 - **The CTO's signature.**
