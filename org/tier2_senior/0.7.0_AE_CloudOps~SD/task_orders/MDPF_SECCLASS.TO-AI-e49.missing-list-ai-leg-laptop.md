@@ -157,3 +157,12 @@ estate funds are all alternatives." `R15_CHECKS/sc_r15_prompt_rule.py` reads PRO
    key.
 No gate limb grades an amendment to an existing order.
 
+### AMENDMENT -- back to --workers 4: concurrency is not the transport cause (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~20:0xZ; answers ~SD msg 1127)
+
+Measured transport failures:
+- 2 workers: 11 in 150 keys, 7.3 pct.
+- 4 workers: 17 in 200 keys, 8.5 pct.
+They are indistinguishable, so amendment 7's drop-to-2 premise reads false. 2 workers costs 371 s per chunk against 195 s.
+At the next chunk boundary, return to `--workers 4 --chunk 25`. Transport keys stay re-planned, with at most one final 1-key attempt
+each. Drop to 2 only on an HTTP 429, not on the transport rate. No gate limb grades an amendment to an existing order.
+
