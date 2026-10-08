@@ -40,7 +40,8 @@
     5. ONE `.tools/safe-apply.sh`.
     6. Read-back per the COO half's condition 2; the group list (seven); re-plan no changes. Close the entry.
 
-    LEG B -- WINDOW OPEN (GO from the issuer when dell2 calls V1; with TO-APPLY-15): plan and apply with
+    LEG B -- WINDOW OPEN (GO from the issuer when dell2 ASKS FOR SEND (1) -- `pre_read.sh` to `i-0167fd745ad906a66` -- NOT at V1;
+    CTO msg 107187; the svc-irpt secret window TO-APPLY-15/16 stays V1 to X1): plan and apply with
     `-var open_dell2_f1_shell_window=true`: EXACTLY `0 to add, 1 to change, 0 to destroy` on `aws_iam_policy.dell2_ssm`. Read back:
     dell2 `AWS-RunShellScript` + `i-0167fd745ad906a66` allowed; dell2 + `i-0643a5bee8a8feabf` explicitDeny. NEVER-2 entry.
 
