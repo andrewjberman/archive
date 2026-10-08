@@ -1,9 +1,9 @@
 # X-1 filer entitlement -- never-widen pair DRAFT (COO half): one Opal person files on behalf of the partner firms
 
-**Drafted by** `2.0.0_SA_COO~Y2`, 2026-10-08 ~19:1xZ. **Authority:** Andrew-direct ~18:5xZ, VERBATIM "Alyssa can file on behalf of
+**COO half SIGNED by** `2.0.0_SA_COO~Y2`, 2026-10-08 ~19:0xZ (drafted ~19:0xZ; CTO half GIVEN @7b8ba60fa9). **Authority:** Andrew-direct ~18:5xZ, VERBATIM "Alyssa can file on behalf of
 all partner firms" (`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261008_185xZ_ALYSSA_FILES_ON_BEHALF_OF_ALL_PARTNER_FIRMS.md`
 @d78ef1df76; CTO msg 1436: an explicit list, never "ALL"; CTO signs its half). Separate from the E6 release pair (CTO msg 1444).
-DRAFT: no half signed, nothing written. The person is named here only as the record names her; every key is an opaque id.
+Both halves signed; written per section 5 (result in section 6). The person is named here only as the record names her; every key is an opaque id.
 
 ## 1. The row and its before-read (read ~19:0xZ, `scan` of `opal-users-v2` SK=PROFILE, 83 items scanned, 1 match)
 
@@ -15,7 +15,7 @@ DRAFT: no half signed, nothing written. The person is named here only as the rec
 
 ## 2. The one write
 
-`update-item` on that key: `SET allowedFirmIds = ["49financial", "cottonwood", "inflection"]` (a DynamoDB list of strings, the shape
+`update-item` on that key: `SET allowedFirmIds = ["49financial", "cottonwood", "inflection", "opal-capital", "demo", "mockadv"]` (a DynamoDB list of strings, the shape
 `interactive_access.py` and `uploads.py` read), with `ConditionExpression attribute_not_exists(allowedFirmIds)` so it cannot
 overwrite a value written since the before-read. No other field. **Rollback:** `REMOVE allowedFirmIds` (back to ABSENT), read back.
 
@@ -41,6 +41,14 @@ overwrite a value written since the before-read. No other field. **Rollback:** `
 also names the firms she generates for today (at least `opal-capital`; and `demo`/`mockadv` if she uses them), which
 `uploads.py` still refuses as an on-behalf owner (`INPUT_ACCESS_DENIED` for opal-capital/global), or (ii) the narrowing is
 accepted and recorded. This seat recommends (i) with `opal-capital` added, and holds the write until the CTO rules.
+
+**RULED (CTO msg 1447, half @7b8ba60fa9): (i), widened.** The list is the six firms in section 2, so nothing she generates for
+today narrows (narrowing b is removed). On-behalf reach stays the three partner firms: `uploads.py` refuses opal-capital as an
+owner, and E6's grant excludes `demo`/`mockadv`. Narrowing (a) stands by design (E5).
+
+**Registry pseudo-block check (~19:0xZ):** `data/firm_registry.json` `pseudo` holds one entry, `global` (kind `aggregate`, "NOT a
+firm"; the mdpf all-firms channel). It is not a data firm she generates for, so it does not join the list. `firms` holds 5 enabled
+entries (3 client, `mockadv` test, `demo` demo), all on the list.
 
 ## 5. Order and after-reads
 
