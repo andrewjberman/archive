@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>cancelled</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -13,6 +13,17 @@
 <decomp_doc>org/tier1_exec/1.0.0_SA_CTO/deliverables/FAST_FIX_RULINGS_20261008_162xZ.md</decomp_doc> graph item F3 (ACCEPTED by 1.0.0_SA_CTO; "needs a live 0.7.0_AE_CloudOps seat"), from the list `org/tier1_exec/4.0.0_SA_CRO/deliverables/GRAPH_COHERENCE_FAST_FIXES_20261008.md` row F3 @6418d9ab13. A fast-fix act on Andrew's ~16:0xZ order, cut by this lane on 1.0.0_SA_CTO direction msg 106983.
 <owned_cells>F3</owned_cells>
 </decomp_ref>
+
+  <cancellation>
+    CANCELLED 2026-10-08 ~16:4xZ by the issuer on 1.0.0_SA_CTO msg 107002: graph F3 is withdrawn in the ruling file. Its
+    premise was false: 4.0.0_SA_CRO msgs 106999/107000 read the projection manifests live and the nightly full rebuild
+    published every night 10-04 to 10-08; "last full 10-04" came from a marker field each incremental overwrites. STOP sent
+    to 0.7.0_AE_CloudOps at 16:44:57Z. The seat confirmed at 16:45:32Z (msg 107003): NO FIRE, no cloud object changed, no
+    ledger opened. Its read: rule opal-globgrph-derive-runner-nightly ENABLED cron(0 2 * * ? *) (item2a.tf:439-442) ->
+    globgrph-derive-runner:9 -> projection-worker:6; full-fallback published with POINTER_PUT_OK on 10-05 02:27:24Z
+    (29478 nodes), 10-06 02:26:42Z (29517), 10-07 02:28:24Z (29531); pointer at cancel = 10-08T12:54:23.609381+00:00,
+    LastModified 12:55:07Z, SHA256 7d8160ec6b8fe37c3ac84c081ac8d4de55e5f42de02b5f2d709efbb8e1c19a14.
+  </cancellation>
 
   <objective>
     Run the estate graph's nightly FULL rebuild once, ad hoc, and find out why the 2026-10-07 nightly full rebuild did not
