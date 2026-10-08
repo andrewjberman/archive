@@ -47,7 +47,8 @@
        census and leaves the root unmodified (measured). A failing line is a STOP.
     2. BEFORE: save the LIVE documents of `cloudops-dell-agent-create-policy` and `cloudops-dell-agent-respol-policy` (default
        versions) and the Dell agent group's attached-policy list, each with SHA-256.
-    3. Plan, untargeted.
+    3. Plan, TARGETED at exactly the five resources named below (AMENDMENT 1 at the foot of this order): pass five
+       `-target` flags, one per resource, and no other.
        - EXACTLY `2 to add, 1 to change, 2 to destroy`, these five and no other: `aws_iam_policy.dell_agent_vendor_secrets[0]`
          and its group attachment created; `aws_iam_policy.dell_agent_create` updated in place; `aws_iam_policy.dell_agent_respol`
          and its group attachment destroyed. The created policy holds exactly ONE action (`secretsmanager:GetSecretValue`) on
@@ -59,14 +60,14 @@
          in the plan, a wildcard in the new statement -> apply NOTHING; report the plan as read and stop.
     4. Open ONE NEVER-2 ledger entry naming the laptop, the saved documents by path and hash, both halves, and the rollback
        per key as the COO half states it.
-    5. ONE apply through `.tools/safe-apply.sh`, untargeted.
+    5. ONE apply through `.tools/safe-apply.sh` with the SAME five `-target` flags.
     6. Read-back LIVE with `aws iam simulate-principal-policy` on EACH Dell user, each arm with its matched statement named:
        `secretsmanager:GetSecretValue` on the ARNs of `blackdiamond/49f/session`, `astn/kimi/api-key` and `openai-api-key`
        -> allowed; on `opal/auth/jwt-private-key`, `opalinvest/admin-seed`, `gateway/mail/bearer` and
        `blackdiamond/49f/otp-gateway-token` -> refused; `sqs:SetQueueAttributes` -> allowed; `s3:PutBucketPolicy` -> refused;
        one routes arm refused as before; `iam:SimulatePrincipalPolicy` on its own user allowed and on the other Dell's user
-       refused (pass the context key `aws:username`). The group's attached-policy list read live. A re-plan reads no changes.
-       Close the entry. APPLIED, not EXERCISED, until the Dells' own reads.
+       refused (pass the context key `aws:username`). The group's attached-policy list read live. A re-plan WITH THE SAME FIVE TARGETS reads no changes (an
+       untargeted re-plan will read plan 2's two resources as to-add: expected). Close the entry. APPLIED, not EXERCISED, until the Dells' own reads.
   </the_act>
 
   <bounds>
@@ -90,7 +91,7 @@ lane: the <paths> block names the ledger, the sentinel and the seat's own delive
 
 <proof_of_spec>
   <criterion id="AC1" cell_refs="CT-a-1"><invocation>python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py</invocation><expect>vendor_ok=235/235 all_ok=True</expect></criterion>
-  <criterion id="AC2" cell_refs="CT-a-1"><invocation>terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo "exit=$?"</invocation><expect>exit=0</expect></criterion>
+  <criterion id="AC2" cell_refs="CT-a-1"><invocation>terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode -target='aws_iam_policy.dell_agent_vendor_secrets[0]' -target='aws_iam_group_policy_attachment.dell_agent_vendor_secrets[0]' -target=aws_iam_policy.dell_agent_create -target=aws_iam_policy.dell_agent_respol -target=aws_iam_group_policy_attachment.dell_agent_respol; echo "exit=$?"</invocation><expect>exit=0</expect></criterion>
 </proof_of_spec>
 
   <report>
@@ -101,4 +102,17 @@ lane: the <paths> block names the ledger, the sentinel and the seat's own delive
     proof-of-spec instance path and its check result; commit hashes and the measured push state. Leave the status flip to
     the issuer.
   </report>
+
+## AMENDMENT 1 (2.0.0_SA_COO~C, 2026-10-08 ~07:2xZ) -- the apply is TARGETED at the five signed resources (the applier's STOP of msg 106815 was right)
+
+The issuer merged the cell's next pass (plan 2's Allow) into the trunk before this plan had applied, so an untargeted plan
+read seven resources; `0.7.0_AE_CloudOps~E` stopped at step 3 and applied nothing. That was the correct reading of branch B
+and the error is the issuer's. The act is now targeted at exactly:
+`aws_iam_policy.dell_agent_vendor_secrets[0]`, `aws_iam_group_policy_attachment.dell_agent_vendor_secrets[0]`,
+`aws_iam_policy.dell_agent_create`, `aws_iam_policy.dell_agent_respol`, `aws_iam_group_policy_attachment.dell_agent_respol`.
+The issuer's targeted plan at ~07:1xZ: `2 to add, 1 to change, 2 to destroy`, 66 secret ARNs, zero occurrences of `respol_allow`.
+Added to the STOP conditions of step 3: the string `respol_allow` anywhere in the plan, or any sixth resource. The COO half
+carries CORRECTION 1 to the same effect; the GO for this amendment names the CTO's concurrence. Steps 3, 5 and 6 and criterion
+AC2 are edited above accordingly. Gate limb: none graded this modification. Row NFRA_CTLPLN-S25 is disarmed by this amendment
+and the correction: the unsigned Allow cannot ride a plan targeted at five other resources.
 </task_order>

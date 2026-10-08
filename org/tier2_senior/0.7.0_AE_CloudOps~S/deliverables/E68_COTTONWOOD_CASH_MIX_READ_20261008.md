@@ -3,10 +3,19 @@
 **Order:** `MDPF_SECCLASS.TO-VERIFY-e68.cottonwood-cash-mix-read-laptop`, amendment 1 @`885658894e`
 **Governing half:** `CTO_HALF_MDPF_SECCLASS_SC_e68_CASH_ROW_20261008.md`, AMENDMENT 2 (origin CLOUD `9c667f5c15`)
 **Reader:** `0.7.0_AE_CloudOps~S` (laptop; dell1 is not admitted to the bucket -- `NFRA_CTLPLN.TO-APPLY-10` not reported applied)
-**Status of this document:** **INTERIM.** The BEFORE read and the 04:00Z arm are COMPLETE and final. The AFTER
-read is PENDING the ~11:36Z Cottonwood rebuild. Committed now for durability, not as the result; the
-result is sent to `2.0.0_SA_COO~M1` only when the AFTER read lands. READ-ONLY throughout -- no bucket or
-table write.
+**Status of this document:** **CLOSED AS SUPERSEDED, and final as a record of sections 1-3.** Order
+amendment 2 (`2.0.0_SA_COO~M1`, 2026-10-08T06:5xZ, origin CLOUD `5fc385ef22`) marks TO-VERIFY-e68
+SUPERSEDED: dell1's firm-bucket READ applied at 05:17:17Z, so under amendment 1's reader rule dell1
+takes the ~11:36Z AFTER read and this lane stands down on it. Sections 1, 2 and 3 below are this lane's
+own measurements and remain the record; **section 4 is NOT this lane's to complete** and nothing further
+is owed here. The two poll processes this lane armed at 03:50Z were stopped on the same word.
+
+This document was committed while still interim, before the stand-down, so the BEFORE read and the
+04:00Z negative would survive a session ending without a handoff. That turned out to matter in a way not
+foreseen: dell1's first exercise of its new admission read
+`opal-data-cot platinum/firm/mix_summary.json` at **the same VersionId this lane captured as the
+before-read**, so section 1 is the baseline its AFTER read is measured against. READ-ONLY throughout --
+no bucket or table write was made by this lane at any point.
 
 ---
 
@@ -109,7 +118,10 @@ key CAN move outside the 11:3xZ window, so the waiter watches the VersionId itse
 issuer re-pointed the order in amendment 1. The AFTER read is therefore due on the Cottonwood rebuild,
 not on a BD run.
 
-## 4. AFTER read (step 3) -- PENDING
+## 4. AFTER read (step 3) -- NOT THIS LANE'S (superseded; dell1 reads it)
+
+The expectations below are left in place because they are the arithmetic dell1's read is graded on, and
+because the sign is the one trap in it. They are NOT a pending obligation of this lane.
 
 Due after the 2026-10-08 ~11:36Z write. Expected per amendment 1, with the direction set by the `CASH`
 key's **NEGATIVE** amount of USD -5,480,054.44 moving out of `fixed_income` into `cash`:
