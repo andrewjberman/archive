@@ -38,6 +38,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import sys
 
 import boto3
@@ -64,6 +65,16 @@ def main():
            "note": ("arm (c) is drivable only against a genuinely over-age directory; the deployed "
                     "entry.py has no directory_fixture injection point (security change)")}
 
+    # AGE ON THE TRADING-DAY FRONTIER, never a weekday subtraction (CLAUDE.md: one frontier,
+    # lib/trading_calendar.py). The first version of this script computed no age at all and left
+    # `over_age` empty, so it could only ever answer NOT_DRIVABLE -- a verdict that would have
+    # looked like a measurement. Fixed before first use.
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                    *([os.pardir] * 7) ) )
+    sys.path.insert(0, "lib")
+    import trading_calendar as tc  # noqa: E402
+
+    today = dt.date.today()
     over_age = []
     for firm, bucket in sorted(FIRMS.items()):
         row = {"bucket": bucket, "latest_key": LATEST}
@@ -72,12 +83,20 @@ def main():
             as_of = latest.get("as_of_business_date") or latest.get("as_of")
             row["as_of_business_date"] = as_of
             row["directory_revision"] = latest.get("directory_revision")
+            if as_of:
+                behind = tc.trading_days_behind(dt.date.fromisoformat(str(as_of)[:10]), today)
+                row["trading_days_behind"] = behind
+                row["ceiling"] = MAX_AGE_TRADING_DAYS
+                row["over_age"] = behind > MAX_AGE_TRADING_DAYS
+                if row["over_age"]:
+                    over_age.append(firm)
+            else:
+                row["over_age"] = None
+                row["note"] = "no as_of on latest.json -- age CANNOT be computed, which is the CALENDAR_UNAVAILABLE/UNCERTAIN arm, not an over-age one"
         except Exception as exc:  # noqa: BLE001
             row["error"] = "%s: %s" % (type(exc).__name__, exc)
         res["firms"][firm] = row
 
-    # The AGE is computed by the estate's ONE frontier, never by a weekday subtraction. Run this
-    # on the laptop where lib/trading_calendar.py is importable; the laptop seat fills this in.
     res["age_basis"] = "freshness_basis: trading-day-frontier (lib/trading_calendar.py)"
     res["drivable_firms"] = over_age
     res["verdict"] = "NOT_DRIVABLE" if not over_age else "DRIVABLE"

@@ -40,6 +40,25 @@ FIRMS = {"49financial": "opal-data-bd",
          "cottonwood": "opal-data-cot"}
 
 
+def _candidate_keys(event_date, firm, fired_results):
+    """The event-date key, plus the key the fire itself says it wrote for this firm.
+
+    The fire's own payload carries manifest_key per firm -- the authoritative answer to "where did
+    it land" -- so it is tried FIRST when present, and the event-date key is the fallback for a
+    --no-fire read.
+    """
+    keys = []
+    for r in fired_results or []:
+        if r.get("firm_id") == firm and r.get("manifest_key"):
+            keys.append(r["manifest_key"])
+    keys.append("%s/%s/manifest.json" % (PREFIX, event_date))
+    out = []
+    for k in keys:
+        if k not in out:
+            out.append(k)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--business-date", required=True,
@@ -65,25 +84,54 @@ def main():
                        "payload_sha_len": len(payload),
                        "payload": json.loads(payload) if payload.strip().startswith(("{", "[")) else payload}
 
+    fired_results = ((res.get("fire") or {}).get("payload") or {})
+    fired_results = fired_results.get("results") if isinstance(fired_results, dict) else None
+
     s3 = boto3.client("s3")
     ok = 0
+    # TWO CORRECTIONS after the first real run (2026-10-08, row IRPT_BCKEND-D2-S13):
+    #  1. READY is the envelope STATE, not a top-level `reason_code`. The manifest nests
+    #     {state, public_reason_code, operation.revision} under `envelope`; the first version of
+    #     this reader asked for m["reason_code"] and therefore scored a genuinely READY firm as
+    #     not-ready. The predicate is now state == "READY".
+    #  2. THE MANIFEST KEY IS THE MANIFEST'S OWN as_of_business_date, NOT THE EVENT'S
+    #     business_date. put_manifest does manifest_key(manifest["as_of_business_date"]), and that
+    #     as_of follows the SOURCE completion date. Measured: a driven fire for 2026-10-08 wrote
+    #     cottonwood's manifest under _refresh/2026-10-07/. So a firm whose source lags is read at
+    #     its own key, and looking only under <event date> returns NoSuchKey on a manifest that
+    #     was in fact written. Both the event-date key and the firm's own as_of key are tried, and
+    #     which one answered is RECORDED.
     for firm, bucket in sorted(FIRMS.items()):
-        key = "%s/%s/manifest.json" % (PREFIX, d)
-        row = {"bucket": bucket, "key": key}
-        try:
-            body = s3.get_object(Bucket=bucket, Key=key)["Body"].read()
-            m = json.loads(body)
+        row = {"bucket": bucket, "keys_tried": []}
+        m, used = None, None
+        for cand in _candidate_keys(d, firm, fired_results):
+            row["keys_tried"].append(cand)
+            try:
+                m = json.loads(s3.get_object(Bucket=bucket, Key=cand)["Body"].read())
+                used = cand
+                break
+            except Exception as exc:  # noqa: BLE001 -- the error IS the reading
+                row.setdefault("errors", {})[cand] = "%s: %s" % (type(exc).__name__, exc)
+        row["key_read"] = used
+        if m is not None:
+            # THE STORED MANIFEST IS FLAT. Measured on the real artifact 2026-10-08: its top-level
+            # keys are state / reason_code / directory_revision / as_of_business_date / delta /
+            # notes. It is NOT the invoke response's nested {envelope:{state, public_reason_code,
+            # operation.revision}} shape, so a reader written against the invoke payload finds
+            # None. READY is the STATE; reason_code is the ACCOUNTING verdict beside it
+            # (REFRESH_COMPLETED_WITH_ADDITIONS on a healthy fire), and the first version of this
+            # reader compared reason_code to "READY" and scored a READY firm as not-ready.
+            row["state"] = m.get("state")
             row["reason_code"] = m.get("reason_code")
             row["directory_revision"] = m.get("directory_revision")
             row["as_of_business_date"] = m.get("as_of_business_date")
+            row["source_completion_date"] = m.get("source_completion_date")
             # counts only -- a manifest is a durable log and carries no client entries
             row["delta_counts"] = m.get("delta")
-            row["ready"] = (m.get("reason_code") == "READY"
-                            and bool(str(m.get("directory_revision") or "").strip()))
-            if row["ready"]:
-                ok += 1
-        except Exception as exc:  # noqa: BLE001 -- the error IS the reading
-            row["error"] = "%s: %s" % (type(exc).__name__, exc)
+            row["notes"] = m.get("notes")
+            row["ready"] = (row["state"] == "READY"
+                            and bool(str(row["directory_revision"] or "").strip()))
+        else:
             row["ready"] = False
         res["firms"][firm] = row
 
