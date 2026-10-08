@@ -132,8 +132,12 @@ none ran). It is OPEN-WITH-NOTHING-LANDED, not half-landed: there is nothing to 
 
 Reproduced from `org/critical_paths/change_management/20261008T0123Z_secclass-e65b-namekey-deploy-s-20261007_deploy_completion.md`
 as it stands at commit `27302e4624`, because that entry's next ledger write will discard it.
-e65b is HELD by issuer ruling msg 737 until Andrew's item 2 (the dell1 firm-data limits) lifts the
-`opal-data-cot/code/gold/*` deny; it does not return to a laptop seat.
+e65b is HELD by issuer ruling msg 737 until Andrew lifts limit ITEM 5 -- the policy
+`cloudops-dell-agent-routes-host-policy` -- which is what actually carries the
+`opal-data-cot/code/gold/*` deny; item 2's grant does NOT lift it (issuer correction msg 763,
+laptop CTO 106705). That matches this seat's own measurement: the deny found at the half-land
+was statement `DenyRoutesToPrivilegedRolesPrefixes` in that same policy. It does not return to a
+laptop seat, and no act that moves two firms' copies starts before item 5 lifts.
 
 ## ATTEMPT 1 FAILED CLOSED -- .tools/aws.cmd resolves no AWS CLI on dell1 (0.7.0_AE_CloudOps~SD, 20261008T013112Z)
 
