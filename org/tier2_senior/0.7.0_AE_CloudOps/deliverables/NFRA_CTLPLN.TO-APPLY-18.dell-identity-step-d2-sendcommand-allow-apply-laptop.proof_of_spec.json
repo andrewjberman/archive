@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-18.dell-identity-step-d2-sendcommand-allow-apply-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-18.dell-identity-step-d2-sendcommand-allow-apply-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "5f8f28f19d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "5f8f28f19d",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-18.dell-identity-step-d2-sendcommand-allow-apply-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/d2_legA_20261008/live-simulations.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "11 live arms passed; group seven; no-change replan",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect sendcmd_ok=34/34 shellwin_ok=18/18",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "expect": "sendcmd_ok=34/34 shellwin_ok=18/18",
+      "output_evidence": "POLICY-SIM allowed_ok=22/22 denied_ok=15/15 passrole_ok=5/5 protected_ok=8/8 freed_allowed=72/72 freed_excluded=3 undo_freed=167/167 undo_still_denied=443 selfsim_ok=9/9 ssm_ok=15/15 sendcmd_ok=34/34 shellwin_ok=18/18 routes_freed=114/138 routes_still_refused=24 vendor_ok=245/245 all_ok=True",
+      "denominator": "34/34 send commands and18/18 shell window arms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "terraform root plan -detailed-exitcode expect exit=0",
+      "method": "live_read",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\"",
+      "expect": "exit=0",
+      "output_evidence": "No changes. Your infrastructure matches the configuration. exit=0",
+      "denominator": "one root full plan",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "attachment": {
+      "description": "Group attachment count before and after the sole apply",
+      "expected_landed": "7",
+      "expected_not_landed": "6",
+      "observed": "7",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D2_SENDCOMMAND_AND_F1_SHELL_WINDOW_20261008.md@298e731471",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D2_SENDCOMMAND_AND_F1_SHELL_WINDOW_20261008.md@ac2c6e852d"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Detach and delete only cloudops-dell-agent-ssm-send-policy under issuer rollback authority if live readback fails.",
+  "scope": "Leg A only",
+  "declared_exclusions": [
+    {
+      "item": "Legs B/C",
+      "reason": "Separate issuer GO and X1/deadline after opening; window stays closed."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/codex_e6_d2_apply.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service cloudops-dell-agent",
+      "result": "No matching service; explicit static simulator and live IAM simulator used per TO."
+    }
+  ]
+}

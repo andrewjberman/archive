@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-i-9",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-9.per-chat-cursors-and-paging.md",
+    "group": "OTHER",
+    "vintage_commit": "c912dd6c72"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~37",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.inbound6.md",
+    "vintage_commit": "c912dd6c72",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-9.per-chat-cursors-and-paging.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/tenant.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed"
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_inbound_poll_cursors.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit gate or test; nothing deployed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTi9-AC1",
+      "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_poll_cursors.py expect: POLL-CURSORS ok=True",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_poll_cursors.py",
+      "output_evidence": "ARM late_preview ok=True {'new_got': ['a1'], 'base_missed': True}\nARM many_chats ok=True {'events': 1, 'chat_pages': 3}\nARM many_messages ok=True {'delivered': 130, 'message_pages': 3, 'events_after_second_poll': 1}\nARM migration ok=True {'delivered': ['newer']}\nARM first_run ok=True {'events': 0, 'cursors': 3}\nARM one_chat_fails ok=True {'delivered': ['c1', 'c3'], 'c2_cursor_unchanged': True}\nPOLL-CURSORS ok=True arms=6/6 base_missed_late=True\nrc=0",
+      "denominator": "6 of 6 arms; late_preview difference control: base tenant.py loaded from git c912dd6c72 misses the late chat's message, new code delivers it",
+      "status": "PASS",
+      "expect": "POLL-CURSORS ok=True"
+    },
+    {
+      "criterion_id": "CTi9-AC2",
+      "criterion_verbatim": "python -m pytest -q -p no:cacheprovider data/transcripts/scripts/tests/test_teams_chat_tenant.py && echo TENANT-SUITE ok=True expect: TENANT-SUITE ok=True",
+      "method": "command",
+      "invocation": "python -m pytest -q -p no:cacheprovider data/transcripts/scripts/tests/test_teams_chat_tenant.py && echo TENANT-SUITE ok=True",
+      "output_evidence": "...................                                                      [100%]\n19 passed in 0.23s\nTENANT-SUITE ok=True\nrc=0",
+      "denominator": "19 of 19 existing tenant cases pass",
+      "status": "PASS",
+      "expect": "TENANT-SUITE ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "late_preview arm runs the same two-poll scenario against the base function",
+      "expected": "base misses the late message; new code delivers it",
+      "observed": "base_missed_late=True; new delivered a1",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: fake gateway, fixed clock",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~37/NFRA_CTLPLN.TO-CT-i-9.per-chat-cursors-and-paging.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_poll_cursors.py",
+      "result": "POLL-CURSORS ok=True arms=6/6 base_missed_late=True"
+    }
+  ]
+}
