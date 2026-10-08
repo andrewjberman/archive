@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-53",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "dd8541bb97"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "dd8541bb97",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-53.fee-census.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~34",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~34/TIEOUT_COMPOUND_E1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~34/tieout_compound.py",
+      "kind": "script",
+      "commit_or_etag": "d6ddc0e2a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Reader override (compounded gross); ran locally, S3 reads only, 0 vendor calls.",
+      "artifact_covered_by": [
+        "DB30-4-AC2",
+        "DB30-4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~34/test_tieout_compound.py",
+      "kind": "test",
+      "commit_or_etag": "d6ddc0e2a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 offline tests pass, chain test included.",
+      "artifact_covered_by": [
+        "DB30-4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~34/TIEOUT_COMPOUND_E1.json",
+      "kind": "config_data",
+      "commit_or_etag": "d6ddc0e2a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9,078 graded segments; before 5,416/3,662; after 7,459/1,619.",
+      "artifact_covered_by": [
+        "DB30-4-AC2",
+        "DB30-4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~34/TIEOUT_COMPOUND_E1.md",
+      "kind": "doc",
+      "commit_or_etag": "d6ddc0e2a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only summary, no account number, name or balance.",
+      "artifact_covered_by": [
+        "DB30-4-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB30-4-AC1",
+      "criterion_verbatim": "DB30-4-AC1 -- see the order's criteria (R30 compound check).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r30/p30_compound.py\" . DB30-4-AC1",
+      "output_evidence": "OK: 5 tests pass, a 'chain' test included\nDB30-4-AC1 PASS",
+      "denominator": "5 of 5 tests pass in test_tieout_compound.py; 2 chain-related tests (chain, additive does-not-chain)",
+      "status": "PASS",
+      "expect": "DB30-4-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB30-4-AC2",
+      "criterion_verbatim": "DB30-4-AC2 -- see the order's criteria (R30 compound check).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r30/p30_compound.py\" . DB30-4-AC2",
+      "output_evidence": "OK: 9078 segments; within before 5416 -> after 7459 (share 0.8217); outside 3662 -> 1619\nDB30-4-AC2 PASS",
+      "denominator": "9,078 of 9,078 round-18 graded segments; before 5,416/3,662 read from round 18's record; after 7,459/1,619 equals the row tally; share 0.8217",
+      "status": "PASS",
+      "expect": "DB30-4-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB30-4-AC3",
+      "criterion_verbatim": "DB30-4-AC3 -- see the order's criteria (R30 compound check).",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r30/p30_compound.py\" . DB30-4-AC3",
+      "output_evidence": "OK: 1619 misses named: {'UNEXPLAINED': 1203, 'FLOW_TIMING': 370, 'INCOME_DATE': 40, 'MISSING_PRICE': 1, 'COVERAGE_DAYS': 5}\nDB30-4-AC3 PASS",
+      "denominator": "1,619 of 1,619 after-outside rows carry a closed-set reason; by-reason counts sum to 1,619",
+      "status": "PASS",
+      "expect": "DB30-4-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The additive form is the negative arm of the chain test: the same synthetic account that chains on the compounded basis misses by about 5e-4 on the additive basis. The unmodified round-18 build was re-run from the same cache and reproduced its record (5,416 within, 3,662 outside).",
+      "expected": "compounded chains within 1e-9; additive does not; round 18 reproduced",
+      "observed": "5 of 5 tests passed; round 18 reproduced 5,416 / 3,662 with by-reason FLOW_TIMING 333, MISSING_PRICE 1, INCOME_DATE 44, COVERAGE_DAYS 5, UNEXPLAINED 3,279",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Single run over the landed pull and the served gold, cached; not re-run against S3 a second time.",
+      "observed": "not re-measured",
+      "status": "N/A-WITH-REASON",
+      "reason": "Inputs are landed pull=20261004 and the served gold read once; the order asks for one re-grade."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Cause of the 181 WITHIN-to-OUTSIDE reversals",
+      "reason": "Not asked by the order; counted and filed as row IRPT_DASHBD-W34-S2."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W34-S1",
+    "IRPT_DASHBD-W34-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~34/test_tieout_compound.py",
+      "result": "5 passed"
+    }
+  ]
+}
