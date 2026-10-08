@@ -18,26 +18,33 @@
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/S11_ROW_SET_20261008.tsv",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "a68c03e440",
       "deployed_state": "STAGED-AWAITING-GATE",
       "deploy_evidence": "117 lines: 106 NEW (25 group B by ticker, 81 group D by name_key), 11 REMAP; 20 rule=andrew-alternatives lines; each carries a one-phrase evidence; LOCAL file, nothing written to any table",
-      "artifact_covered_by": ["SC15-e77-AC1", "SC15-e77-AC2"]
+      "artifact_covered_by": [
+        "SC15-e77-AC1",
+        "SC15-e77-AC2"
+      ]
     },
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "a68c03e440",
       "deployed_state": "STAGED-AWAITING-GATE",
       "deploy_evidence": "dry run by default with a counter of every mutating call (puts=0 asserted); NEW = put on attribute_not_exists(ticker); REMAP = conditional update on the current class; --write needs --half (both headings SIGNED) and --snapshot; --rollback guarded by updated_by + class; --write and --rollback --write never run",
-      "artifact_covered_by": ["SC15-e77-AC2"]
+      "artifact_covered_by": [
+        "SC15-e77-AC2"
+      ]
     },
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_S11_ROWS_20261008.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "a68c03e440",
       "deployed_state": "STAGED-AWAITING-GATE",
       "deploy_evidence": "half request: the act, each line's before and after, the candidate served-mix delta from the trace's dollars (USD 5,820,645.24 out of unclassified), rollback per key; COO and CTO halves UNSIGNED",
-      "artifact_covered_by": ["SC15-e77-AC3"]
+      "artifact_covered_by": [
+        "SC15-e77-AC3"
+      ]
     }
   ],
   "acceptance": [
@@ -47,20 +54,19 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/sc_r15_rows_set.py",
       "expect": "S11-ROW-SET ok=True",
-      "output_evidence": "S11-ROW-SET ok=True bd=106 covered=106 new=106 remap=11 rule_rows=20 bad=0 first_bad=[] (rc=0). Whether each class and each rule mark is right is graded by 3.0.0_SA_CVO at L9, not here.",
+      "output_evidence": "S11-ROW-SET ok=True bd=106 covered=106 new=106 remap=11 rule_rows=20 bad=0 first_bad=[] (rc=0, re-run this session). Whether each class and each rule mark is right is graded by 3.0.0_SA_CVO at L9, not here.",
       "denominator": "106 of 106 B/D securities covered once as NEW; 11 REMAP lines; 20 rule rows (9 NEW + 11 REMAP)",
       "status": "PASS"
     },
     {
       "criterion_id": "SC15-e77-AC2",
-      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py -- expect: refused_present=0 refused_stale=0 puts=0",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py -- expect: refused_present=1 refused_stale=0 puts=0 (as amended by TO Amendment 1, commit ef7d71687f)",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py",
-      "expect": "refused_present=0 refused_stale=0 puts=0",
-      "output_evidence": "REFUSED_PRESENT RAL live=equity/Information Technology by='mdpf-secclass-model' / S11-ROWS-DRY-RUN new=105 remap=11 refused_present=1 refused_stale=0 puts=0 (rc=1). RAL (group B, $70) was landed by the model runner at 2026-10-08T19:01:52Z, after the trace was cut; AC1 requires RAL as a NEW line, so AC1 and AC2 cannot both hold. Refusal clause: test not weakened, set not edited; row MDPF_SECCLASS-D1-W67-S1.",
-      "denominator": "116 of 117 lines planned (105 NEW + 11 REMAP); 1 NEW refused present; 0 mutating calls",
-      "status": "FAIL",
-      "status_reason": "Premise failed: the live table gained a model row for RAL at 2026-10-08T19:01:52Z, after the trace was cut, so the dry run reads refused_present=1 where the criterion expects 0. AC1 requires every B/D key (RAL included) as a NEW line, so the two criteria conflict on this one key. Refusal clause applied: nothing weakened, order left open; see MDPF_SECCLASS-D1-W67-S1."
+      "expect": "refused_present=1 refused_stale=0 puts=0",
+      "output_evidence": "REFUSED_PRESENT RAL live=equity/Information Technology by='mdpf-secclass-model' / S11-ROWS-DRY-RUN new=105 remap=11 refused_present=1 refused_stale=0 puts=0 (rc=1; the writer exits 1 whenever any key is refused, and the amended expectation is the output line). The only REFUSED_PRESENT line names RAL; no other key refused. RAL ($70) was landed by the model runner at 2026-10-08T19:01:52Z after the trace was cut, same class as this set gives it (Amendment 1; row MDPF_SECCLASS-D1-W67-S1).",
+      "denominator": "116 of 117 lines planned (105 NEW + 11 REMAP); 1 NEW refused present (RAL); 0 refused stale; 0 mutating calls",
+      "status": "PASS"
     },
     {
       "criterion_id": "SC15-e77-AC3",
@@ -82,7 +88,7 @@
     },
     "determinism": {
       "method": "AC1-AC3 run once each after the final edit of the set, writer and half",
-      "observed": "AC1 ok=True 106/106; AC2 new=105 remap=11 refused_present=1 puts=0; AC3 HALF-READY",
+      "observed": "AC1 ok=True 106/106 (rc=0); AC2 new=105 remap=11 refused_present=1 (RAL only) refused_stale=0 puts=0 (rc=1); AC3 HALF-READY (rc=0); re-run after Amendment 1",
       "status": "STABLE"
     }
   },
