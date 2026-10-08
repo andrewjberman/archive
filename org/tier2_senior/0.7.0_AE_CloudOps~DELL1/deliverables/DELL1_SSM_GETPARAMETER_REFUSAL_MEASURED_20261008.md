@@ -77,18 +77,73 @@ already SEE it -- it is 1 of the 17. Only reading its VALUE is refused. There is
 | Resource (minimum) | `arn:aws:ssm:us-east-1:313476888478:parameter/mdpf/custody_source` |
 | Shape | ADDITIVE identity-based Allow. No Deny exists to remove. |
 | Blast radius | one action, one parameter, one principal. Rollback = delete the statement. |
-| Not needed | parameter creation (it exists); `DescribeParameters` (already held); any KMS grant unless the parameter is `SecureString` -- **UNMEASURED**, see below |
+| Not needed | parameter creation (it exists); `DescribeParameters` (already held); **any KMS grant -- the parameter is `type = "String"`, NOT `SecureString`** (measured from source, below) |
 
-## Held, not claimed
+### READ ONLY -- do not widen this cell to a write
 
-1. **Is `/mdpf/custody_source` a `SecureString`?** If yes the grant also needs `kms:Decrypt` on its key. I
-   cannot read the parameter's TYPE without the very action I am denied, and `describe-parameters` output was
-   consumed for the name census only. **UNMEASURED.** Whoever cuts the cell must settle it, or the grant lands
-   and the call still fails.
-2. **"dell1 cannot plan mdpf-pipeline"** is the record's claim, carried from the laptop. I did NOT run
-   `terraform plan` on `infra/aws/terraform/mdpf-pipeline/`, so I have not reproduced it and do not assert it.
-   The refusal above is necessary for that plan to fail; whether it is the ONLY refusal in the way is
-   **UNMEASURED** -- a plan can stack several. Reading one refusal does not enumerate them.
-3. Nothing here was applied. This seat holds no IAM write and asked for none.
+`lambdas.tf:25` is explicit that the parameter's VALUE is operationally controlled: the `bd -> schwab`
+co-activation flip is a served-critical cutover done by `aws ssm put-parameter` in a coordinated window under
+never-widen + CVO co-sign, with `lifecycle.ignore_changes = [value]` so a later apply does not drift-revert it.
+Terraform needs only to READ the parameter. **The cell is `ssm:GetParameter`. It must not carry
+`ssm:PutParameter`** -- that would hand this seat a served-critical cutover the record does not grant it.
 
-**Claim field:** every value above is `measured` except the two rows named `UNMEASURED`.
+---
+
+## Both previously-held rows, now CLOSED by measurement
+
+### 1. SecureString / `kms:Decrypt` -- CLOSED, no KMS leg needed
+
+The parameter is Terraform-managed, so its TYPE is readable from source without the denied action:
+
+```
+infra/aws/terraform/mdpf-pipeline/lambdas.tf:25  resource "aws_ssm_parameter" "mdpf_custody_source"
+  name = "/mdpf/custody_source"
+  type = "String"          <-- NOT SecureString
+```
+
+So `ssm:GetParameter` alone is sufficient. **No `kms:Decrypt` statement is required.** Read from the build
+input rather than from the API I am denied -- the sound route when the instrument you would reach for is the
+very thing refused.
+
+### 2. "dell1 cannot plan mdpf-pipeline" -- CLOSED, REPRODUCED, and it is the ONLY refusal
+
+Ran the read-only plan (`terraform plan -input=false -lock=false`; binary resolved on PATH, not the baked
+`.tools/terraform.exe`, which does not exist on every device):
+
+```
+Plan: 0 to add, 1 to change, 0 to destroy
+Error: reading SSM Parameter (/mdpf/custody_source): ... AccessDeniedException ...
+  with aws_ssm_parameter.mdpf_custody_source, on lambdas.tf line 25
+```
+
+**The record's claim is confirmed on this box, and the plan is right-sized by it:** refresh completed across
+every other resource in the module and Terraform produced a full execution plan before failing on this ONE
+error. Exactly one refusal is in the way. Granting `ssm:GetParameter` on this one parameter is therefore
+expected to let the plan complete -- which is read from the plan's own behavior, not predicted from the
+module's shape.
+
+---
+
+## Off-task observation, recorded not acted on
+
+The same plan shows a PENDING IN-PLACE CHANGE unrelated to the refusal:
+
+```
+~ aws_s3_object.mdpf_route_bindings   (id: config/mdpf/route_bindings.yaml)
+    content-sha256: 98f5e9c5...d923 -> 37eb8451...e21c2
+    source_hash:    650f893a...b078 -> f94e8e4c...721d
+~ output mdpf_route_bindings_sha256   (same pair)
+```
+
+The repo's `route_bindings.yaml` differs from the deployed object. **Not diagnosed and not applied** -- this
+seat holds no order on it, and an apply here would move a served config object. Named so it is not lost; it
+belongs to whoever owns MDPF route bindings. Whether this is intended-but-unlanded or genuine drift is
+UNMEASURED by me.
+
+---
+
+**Claim field:** every value in this file is `measured`. Two rows previously carried `UNMEASURED` and are now
+closed above. The one remaining `UNMEASURED` is named inline: the cause of the `route_bindings` delta.
+
+**Nothing was applied.** The only acts were reads: three AWS reads, one read-only `terraform plan`
+(`-lock=false`, no state lock taken), and one source read. This seat holds no IAM write and asked for none.
