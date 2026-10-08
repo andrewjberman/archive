@@ -1,0 +1,44 @@
+PASS case 1 required on the real tree | KIT-REQUIRED files=845 unparsed=0 modules=147 stdlib=70 local=56 third_party=21 distributions=20 not_installed_here=1 ok=True
+    ok   last line ok=True with unparsed=0
+    ok   pandas_market_calendars module is OPTIONAL
+    ok   pandas-market-calendars is a required distribution (OPTIONAL)
+    ok   ruff is a required distribution with kind=tool
+    ok   the scan counted the tracked files
+PASS case 2 installed then compare on this box | KIT-COMPARE device=laptop python=3.12.10 required=21 present=20 missing=1 version_differs=0 hard_missing=0 ok=False
+    ok   installed ran (rc 0)
+    ok   compare missing agrees with required's not_installed_here (1)
+    ok   ok matches missing==0
+    ok   version_differs=0 on the box that made the list
+    ok   installed refuses when AGENTBUS_DEVICE is unset
+PASS case 3 compare on a box lacking two pure distributions | KIT-COMPARE device=standin1 python=3.12.10 required=21 present=19 missing=2 version_differs=0 hard_missing=1 ok=False
+    ok   two pure-Python distributions were found to remove: ['beautifulsoup4', 'requests']
+    ok   compare reads missing=2
+    ok   the two named MISSING
+    ok   version-mismatch arm: VERSION-DIFFERS=1, missing=0, ok=True
+PASS case 4 pack for that box | KIT-PACK target=standin1 missing=2 packed=2 dependencies=0 unpackable=0 bytes=172465 ok=True
+    ok   pack last line ok=True, missing=2
+    ok   artifacts and MANIFEST.json written, one wheel per missing distribution
+    ok   every manifest SHA-256 and size matches its file
+    ok   each manifest row carries how it was obtained
+    ok   the written wheels pass pip's --no-index --dry-run self-check
+PASS case 5 install verification: tampered artifact refused | KIT-INSTALL device=standin1 verified=1/2 installed=0 missing_after=1 ok=False
+    ok   tampered pack: install refuses (rc 1, ok=False)
+    ok   verified=1/2 (the one flipped byte is the only failure)
+    ok   names the SHA-256 mismatch
+    ok   no pip command was run
+    ok   control: the untampered pack verifies 2/2 and the dry-run is ok
+    ok   control: the dry-run command carries --no-index and --dry-run
+    ok   an unlisted wheel in the directory refuses the install
+    ok   a pack for another device refuses
+PASS case 6 every pip command carries --no-index | 2 pip argv recorded
+    ok   every built pip command string carries --no-index (4 built)
+    ok   every pip argv actually run carried --no-index (2 run)
+    ok   the only pip subcommand in the sources is install
+    ok   no source names an index URL, pip download or pip wheel
+    ok   no pip run was a real install (each was --dry-run)
+PASS case 7 a different python and a missing compiled distribution: pack refuses | KIT-PACK target=standin2 missing=1 packed=0 dependencies=0 unpackable=0 bytes=0 ok=False
+    ok   different python (3.9) + missing compiled ruff: pack refuses (rc 1)
+    ok   refusal writes nothing (no MANIFEST.json, no wheel)
+    ok   refusal last line ok=False packed=0
+    ok   control: different python + only a pure distribution missing is packed, ok=True
+KIT-TEST cases=7/7 ok=True
