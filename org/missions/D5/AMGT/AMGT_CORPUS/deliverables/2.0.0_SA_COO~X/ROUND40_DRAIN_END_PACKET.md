@@ -74,8 +74,11 @@ its branch; `0.0.0_AB_MSTR~Z` has since added a lock to `safe-merge`.
    pair and the unit-map pair for the four fields.
 2. **Leg v of (d):** the live-route reads (TSM US positives, 8306 JP management) after AMGT_RESAPP bb-18 deploys `dossier.py` at
    method 7. bb-18 is `2.0.0_SA_COO~Z`'s act.
-3. **The portal candidate `de6fc425`:** four captures (IMB LN, ASML) are owed to the CTO's review and need port 5174, which the
-   CTO's build holds for Andrew's smoke. Landing on DEV is Andrew's word through `0.0.0_AB_MSTR~Z` after the review.
+3. **The portal candidate:** APPROVED by the CTO for DEV (msg 31656 on `REVIEW_RETURN_PART2_PORTAL_de6fc425_CAPTURES_20261008.md`;
+   msg 31669 on the merge onto current DEV, `0498827c975a`, `PORTAL_CANDIDATE_ON_CURRENT_DEV_THREE_READS_20261008.md`). The
+   push is Andrew's word at the `0.0.0_AB_MSTR~Z` terminal. Owed to the CTO, not waived: a capture of the first real name whose
+   filter term matches a headline. Two round-41 cells come from the captures: a served passage begins and ends at a word
+   boundary; a thesis term is a term, not a whole pillar title.
 4. **`ap-8`:** the DEV drive, after 3.
 
 ## 6. Not claimed
