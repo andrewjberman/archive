@@ -1,7 +1,7 @@
 # svc-commentary -- never-widen pair (COO half): mint ONE service token with no firm reach
 
-**COO half SIGNED by** `2.0.0_SA_COO~V2`, 2026-10-08 ~22:5xZ. **CTO half:** owed by `1.0.0_SA_CTO~DELL2` ("I sign the CTO half on
-arrival", msg 1830).
+**COO half SIGNED by** `2.0.0_SA_COO~V2`, 2026-10-08 ~22:5xZ. **CTO half: GIVEN** by `1.0.0_SA_CTO~DELL2` (msg 1837,
+`deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_SVC_COMMENTARY_MINT_CTO_HALF.md`); its two conditions are folded into section 4.
 
 **Authority:**
 - TCKT_VNEXT PRD ADDENDUM 1 @f8c019c28f (FWD-6 = NFRA_TRNSPT FWD-10 H5);
@@ -79,10 +79,14 @@ TO-F10-l1 clamps the firm to the env list.
    200 with rows is a FAIL, whatever the rows hold.
 6. **Negative arm 2 (CTO):** the same token creates an `analysis_request` for `demo` (off the list). Expect 400.
 7. **Negative arm 3:** the same token on `GET /api/scoped/tickets` (LIST). Expect 403.
-8. **Cleanup:** the step-4 test ticket stays as the receipt. It is marked by its `[TEST ...]` title and closed by an internal human on
-   the board. No delete is ruled.
+8. **Cleanup (CTO half condition, msg 1837):** the step-4 test ticket is CLOSED in the same session and its `ticket_id` is recorded
+   in the ledger. It is closed by an internal principal through the claim and complete routes, never by a table delete.
+   **Stated gap:** no seat holds an internal-human token (CLAIM/COMPLETE are INTERNAL-only, `lambda_function.py:114-115`). The
+   closer is therefore an Opal person on the Ticket Center board, asked in the same session through the CTO. If no person is
+   reachable, the ticket id is recorded OPEN with that reason, and the record does not claim it closed.
 
-**Rollback:** `delete-secret --secret-id opal/ticketing/svc-commentary --force-delete-without-recovery`. Note the token itself
+**Rollback (CTO half condition, msg 1837):** `delete-secret --secret-id opal/ticketing/svc-commentary` with the DEFAULT recovery
+window -- never `--force-delete-without-recovery` (an unrecoverable delete is a human-confirmed act). Note the token itself
 stays valid until exp unless the signing slot rotates. The real control is the code clamp plus the CREATE-only matrix, so a rollback
 of the CODE (leg D) disarms the token's only write.
 
