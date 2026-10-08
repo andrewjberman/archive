@@ -7,8 +7,9 @@ double import of uploads.UploadRefused when collected together (7 false failures
 
   IB79-1-AC1  the test file T imports `served` (the real guarded entry) and `pytest -k served_admits_listed_firm` on T collects >= 1
               test and passes. Base: FAIL (no file).
-  IB79-1-AC2  `pytest -k served_refuses` on T collects the four named negative arms (unlisted_firm, all, non_internal,
-              owner_opal_capital) and passes. Base: FAIL (no file).
+  IB79-1-AC2  `pytest -k served_refuses` on T collects the eight named negative arms (unlisted_firm, all, non_internal,
+              owner_opal_capital; AMENDMENT 1: advisor_email_absent, advisor_profile_absent, advisor_profile_disabled,
+              advisor_of_other_firm) and passes. Base: FAIL (no file).
   IB79-1-AC3  each existing guard / scope / uploads suite in SUITES passes, each in its own process. Base: PASS (the
               no-regression arm; 10 + 77 tests across the files, read 2026-10-08 ~18:1xZ).
 """
@@ -19,7 +20,10 @@ from pathlib import Path
 
 LAMBDA = "infra/aws/lambda/investor-reporting"
 T = "_authz/tests/test_served_on_behalf_create.py"
-NEG = ("served_refuses_unlisted_firm", "served_refuses_all", "served_refuses_non_internal", "served_refuses_owner_opal_capital")
+# AMENDMENT 1 (CTO ruling msg 1402, row D2-W174-S1): four more arms on the advisor-email lookup key.
+NEG = ("served_refuses_unlisted_firm", "served_refuses_all", "served_refuses_non_internal", "served_refuses_owner_opal_capital",
+       "served_refuses_advisor_email_absent", "served_refuses_advisor_profile_absent",
+       "served_refuses_advisor_profile_disabled", "served_refuses_advisor_of_other_firm")
 SUITES = ("_authz/tests/test_guarded_entries.py", "_scope/tests/test_interactive_access.py",
           "_scope/tests/test_interactive_access_on_behalf.py", "intake/tests/test_uploads.py",
           "intake/tests/test_uploads_on_behalf.py", "intake/tests/test_upload_door_reads_allowed_firms.py")
