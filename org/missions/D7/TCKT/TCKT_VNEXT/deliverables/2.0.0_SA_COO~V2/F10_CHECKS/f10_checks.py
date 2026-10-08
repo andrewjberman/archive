@@ -27,10 +27,17 @@ NAMES = {
                       "test_household_optional_declared_in_type_definition", "test_svc_commentary_household_absent_stores_no_placeholder"],
     "f10-security": ["test_created_by_is_token_subject_not_body", "test_body_asserted_identity_ignored_on_create",
                      "test_no_authorizer_context_denied", "test_firm_outside_allowed_refused_for_svc_commentary"],
+    "f10-package-auth": ["test_package_written_by_named_principal", "test_package_principal_empty_refuses_everyone",
+                         "test_package_refused_for_humans_and_svc_commentary", "test_package_principal_read_from_type_definition"],
+    "f10-package-rules": ["test_package_refused_other_type", "test_package_refused_completed_ticket", "test_package_refused_firm_mismatch",
+                          "test_package_second_write_needs_prior_attached_at", "test_package_refuses_extra_or_empty_field",
+                          "test_package_not_in_dl_notice"],
 }
+PACKAGE_TESTS = Path("infra/aws/lambda/ticket_center/tests/test_package_route.py")
 
 
-def _pytest(names):
+def _pytest(names, tests=TESTS):
+    TESTS = tests
     if not TESTS.exists():
         return False, "absent: %s" % TESTS.as_posix()
     src = TESTS.read_text(encoding="utf-8")
@@ -65,7 +72,10 @@ def main(argv):
         return 2
     sub = argv[0]
     token = sub.upper()
-    ok, why = _regress() if sub == "f10-regress" else _pytest(NAMES[sub])
+    if sub == "f10-regress":
+        ok, why = _regress()
+    else:
+        ok, why = _pytest(NAMES[sub], PACKAGE_TESTS if sub.startswith("f10-package") else TESTS)
     print("%s-%s %s" % (token, "OK" if ok else "FAIL", why))
     return 0 if ok else 1
 
