@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-16.svc-irpt-reader-dell2-window-REMOVE-apply-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-16.svc-irpt-reader-dell2-window-REMOVE-apply-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "0526f605f6b47d939f23fcd5aa67954d96e3772c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "5f8f28f19d",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-16.svc-irpt-reader-dell2-window-REMOVE-apply-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/svc_irpt_remove_20261008/after.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Live equals signed BEFORE under set rule; bothDells explicitDeny,walker allowed",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "get-resource-policy returns WalkerReadsByExplicitArn; parsed BEFORE equality and all3 decisions",
+      "method": "live_read",
+      "invocation": "aws secretsmanager get-resource-policy --secret-id arn:aws:secretsmanager:us-east-1:313476888478:secret:irpt/svc-irpt-analysis/password-rfHf9l --query ResourcePolicy --output text",
+      "expect": "WalkerReadsByExplicitArn",
+      "output_evidence": "WalkerReadsByExplicitArn; signed BEFORE equality PASS; cloudops-dell2-agent-user explicitDeny;cloudops-dell1-agent-user explicitDeny;Andrew_Berman allowed",
+      "denominator": "1 resource policy,3/3 simulation arms",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "reader_window": {
+      "description": "dell2 simulated against live policy before vs after",
+      "expected_landed": "explicitDeny",
+      "expected_not_landed": "allowed",
+      "observed": "explicitDeny",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md@0e800098a7",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md@7aab22d727"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Signed BEFORE policy is final closed state. Pair requires retry BEFORE once and report immediately if removal verification fails. Successful readback and3/3 simulations here.",
+  "scope": "REMOVE complete; secret reader window closed",
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/codex_svc_irpt_window.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to NFRA_CTLPLN.TO-APPLY-16.svc-irpt-reader-dell2-window-REMOVE-apply-laptop",
+      "result": "Exact task context set"
+    },
+    {
+      "tool": "comp-iam equivalent mandated AWS simulation",
+      "invocation": "aws iam simulate-principal-policy --action-names secretsmanager:GetSecretValue --resource-policy <live policy> --resource-arns <exact one secret>",
+      "result": "Three principals with individual CallerArn/PrincipalArn context; explicitDeny,explicitDeny,allowed. No value read."
+    }
+  ]
+}
