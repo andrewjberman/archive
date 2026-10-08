@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_TRNSPT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -13,6 +13,11 @@
 <decomp_doc>org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R9.md</decomp_doc> round 9, cell TR-x-9 (dell2 decomposition R9 ruling 5; dell2 CTO analysis @08ff07562f and ruling 1542), the one act dell2 cannot do: dell2 `2.0.0_SA_COO~T2` msg 1554, relay `org/tier0_exec/0.0.0_AB_MSTR/deliverables/RELAY_DELL2_TRNSPT_KMS_ENCRYPT_ASK_20261008_2028Z.md`.
 <owned_cells>TR-x-9</owned_cells>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~21:0xZ). Run 2026-10-08T20:42:22Z: 29 objects written and verified; issuer live count 29. Proof VALID
+    after the decomp_doc repair (@0074e521aa). Temp extract retained pending Andrew's word on its deletion.
+  </closure>
 
   <objective>
     Run dell2's research fold once, from dell2's commit, under the laptop identity (which can encrypt with the transcripts KMS

@@ -27,6 +27,9 @@
     document back WITHOUT waiting for any answer (steps 1-6 as written; at step 1, a live policy equal to the ADD file is the
     expected start), read it back, then report to 2.0.0_SA_COO~C and 1.0.0_SA_CTO. This is the one case where the trigger is
     the clock, not a GO.
+    SET RULE (issuer ruling 2026-10-08 ~21:0xZ, after the 21:01:00Z rollback): AWS may store a Principal.AWS list and an
+    ArnNotEquals value list in a different order. IAM evaluates both as unordered sets, so every comparison of a live policy
+    with a signed file compares THOSE TWO LISTS AS SETS; every other part of the parsed JSON must be equal.
   </context>
 
   <the_act>

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -13,6 +13,12 @@
 <decomp_doc>org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md</decomp_doc> (workstream ACCESS, cell `CT-a-1`, the Dell identity), an issuer's act on `1.0.0_SA_CTO` msgs 107091 and 107099: the laptop writes the policy a Dell cannot (dell2 ledger `irpt-ycdgen-f1-svc-20261008`).
 <owned_cells>CT-a-1</owned_cells>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~21:0xZ). First put 21:01:00Z rolled back (Principal list reordered by AWS; exact-match check); issuer
+    set rule; retry put 2026-10-08T21:04:07Z, read back by the issuer live: dell2 allowed, dell1 explicitDeny. Proof VALID
+    (commit 1b5da75554). The window closes by TO-APPLY-16 at X1 or 2026-10-09T06:00Z.
+  </closure>
 
   <objective>
     Leg ADD of a time-boxed window: set the resource policy of ONE secret, `arn:aws:secretsmanager:us-east-1:313476888478:secret:irpt/svc-irpt-analysis/password-rfHf9l`, to the signed document
@@ -23,6 +29,9 @@
     The policy is held by no Terraform root (written by hand; N = 1 writer). Halves: COO
     `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md`; CTO `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md` (@7aab22d727, SIGNED). Trigger: dell2 2.0.0_SA_COO~G2 says its ledger leg V1 closed (relayed by 0.0.0_AB_MSTR); not before NFRA_CTLPLN cell 1's apply. The GO
     comes from the issuer when dell2 calls it; do not act on any other signal. YOU READ NO SECRET VALUE.
+    SET RULE (issuer ruling 2026-10-08 ~21:0xZ, after the 21:01:00Z rollback): AWS may store a Principal.AWS list and an
+    ArnNotEquals value list in a different order. IAM evaluates both as unordered sets, so every comparison of a live policy
+    with a signed file compares THOSE TWO LISTS AS SETS; every other part of the parsed JSON must be equal.
   </context>
 
   <the_act>
