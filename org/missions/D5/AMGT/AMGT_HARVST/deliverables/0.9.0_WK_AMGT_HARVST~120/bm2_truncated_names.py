@@ -152,7 +152,26 @@ def analyse():
             "other_changed": other, "r47_keys": r47_keys}
 
 
+def _refuse_live_collector_pointer(path):
+    """Row AMGT_HARVST-Z-W120-S3, disarmed by row AMGT_HARVST-Z-S105 (2.0.0_SA_COO~H): a file that
+    lib/opal_data_harvest/config.json names is the LIVE collector list, and re-running this record script would silently
+    revert the repairs made to it after this script ran. Writing it is refused."""
+    root = os.path.dirname(os.path.abspath(__file__))
+    while not os.path.exists(os.path.join(root, "lib", "opal_data_harvest", "config.json")):
+        parent = os.path.dirname(root)
+        if parent == root:
+            return
+        root = parent
+    with open(os.path.join(root, "lib", "opal_data_harvest", "config.json"), encoding="utf-8") as handle:
+        config = json.load(handle)
+    target = os.path.normcase(os.path.abspath(path))
+    for value in config.values():
+        if isinstance(value, str) and target == os.path.normcase(os.path.abspath(os.path.join(root, value))):
+            raise SystemExit("REFUSED: %s is a live collector pointer in config.json (row AMGT_HARVST-Z-W120-S3)" % path)
+
+
 def write_identity(result):
+    _refuse_live_collector_pointer(NEW_IDENTITY)
     doc = _load(NEW_IDENTITY)
     if [r["security_key"] for r in doc["records"]] != [r["security_key"] for r in result["after"]]:
         raise SystemExit("ERROR: record order or keys differ from the file being rewritten")
