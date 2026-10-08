@@ -1,0 +1,63 @@
+# irpt-ycharts-generate RELEASE 2 -- never-widen pair DRAFT (TCKT_VNEXT X-1, both halves)
+
+**Deployer:** `2.0.0_SA_COO~Y2`, the function's lane. **Ruling:** `1.0.0_SA_CTO~DELL2` msg 1089 ("Release 2 (later): X-1's
+repin cell plus the smoke test, under its own pair. It also waits on the filer entitlement"); msgs 925/944 (ONE pair for
+both X-1 halves). Derived from `../x1_release/NEVER_WIDEN_PAIR_DRAFT.md` @f0056a55a4. DRAFT: no half is signed and nothing
+has been deployed.
+
+## Pin and artifact
+
+- **Pin:** dell2 CLOUD `f7a9d0b34f` (the IB-yr-641 drain). LOCAL on dell2 when drafted; origin CLOUD read `838362db08`
+  (ls-remote). The pin must be on origin before signing.
+- **Built artifact (BUILD_ONLY at f7a9d0b34f, gates passed, run by this seat 2026-10-08 ~17:2xZ):**
+  `798Lgqw25X1am7uCjdgYdTSOY90saT2k3n8H01eOBJ0=` (100 members; import-closure OK, 63 .py).
+- **Live now / ROLLBACK:** `ZspX0qD2bCkFVoi3X8W0cBiPlHY37utqPysuLXMeduI=` (release 1, LastModified 2026-10-08T10:06:18Z).
+
+## Every changed member (`release-census.py irpt-ycharts-generate --pin f7a9d0b34f`; changed_members=3; `CENSUS_f7a9d0b34f.txt`)
+
+| member | built / live | owner / half | what it does |
+|---|---|---|---|
+| `uploads.py` | 47f89e0b4660 / f88bdb902789 | Y (IB-yr-631 @b7dc881c10) | an OPAL_GLOBAL filer, home opal-capital, whose `allowedFirmIds` names the owner firm may create an upload for that firm; the record gains `acting_principal_id` |
+| `interactive_access.py` | c28d9a74c9af / bba07a3f4eeb | ~P (IB-pr-354 @c101699a71) | `current()` carries `allowedFirmIds` for an OPAL_GLOBAL subject; `authorize_current` admits on-behalf only where the uploads rule does; "ALL" never admits |
+| `generate_installed.py` | d878d10731f4 / f761837e870f | ~P (IB-pr-358 @c246d6a180) | passes the profile reader to the upload door |
+
+No other member changes, so release 1's riders (E-Y4, the ~G2 members, IB-pr-357) are already live and do not ride here.
+
+## The route and the principal classes it changes
+
+**Route:** the Analysis upload creation path, the POST that reaches `intake/uploads.py` `create`, served by
+`irpt-ycharts-generate`.
+
+| principal class | before | after |
+|---|---|---|
+| OPAL_GLOBAL, home opal-capital, `allowedFirmIds` lists the owner firm | refused (UPLOAD_CREATOR_MUST_BE_CURRENT_ACTOR / UPLOAD_ACTOR_ATTRIBUTION) | **ADMITTED**; the record names the actor and the owner firm |
+| OPAL_GLOBAL, the firm not listed, or `allowedFirmIds` = "ALL" or absent | refused | refused (same code) |
+| non-internal principal, another firm | refused | refused (same code) |
+| any principal, owner firm opal-capital or global | refused (INPUT_ACCESS_DENIED) | refused (same code) |
+| a principal filing for its own firm (the ordinary case) | admitted | admitted, unchanged |
+
+Exactly one class widens. **Moves:** one function, `irpt-ycharts-generate` (`irpt-status`, `irpt-export-render` and
+`irpt-performance-adapter` do not package the new `interactive_access.py` blob, ~P2 msg 1021). **Does not move:** the
+resident host and every other function.
+
+## After-reads (each branch named)
+
+1. **Admit:** the named OPAL_GLOBAL filer, whose `allowedFirmIds` explicitly lists one partner firm, creates an upload for
+   that firm. The stored record shows `acting_principal_id` = the filer and `owner.firm_id` = the firm.
+2. **Refuse (a):** the same filer, for a firm NOT on its list, is refused with its existing code.
+3. **Refuse (b):** an ordinary advisor filing for another firm is refused, as before.
+4. **Refuse (c):** any filer naming owner opal-capital is refused, as before.
+5. **No regression:** an ordinary principal filing for its own firm is admitted as before, and one ordinary authorized
+   Analysis request answers as before (READY path, no new refusal).
+6. **Import closure:** one direct IAM invoke of `{"irpt_import_census": true}` returns `failed: {}`.
+7. **Equality:** the deployed CodeSha256 equals the built `798Lgqw2...`; then the source map is recorded at that hash.
+
+If any of 1-7 fails, roll back to `ZspX0qD2...` in the same session.
+
+## Still owed before signing
+
+- **Andrew:** the real filer entitlement, meaning which OPAL_GLOBAL principal carries an `allowedFirmIds` naming which firm
+  (CTO msg 944). After-read 1 needs it.
+- **~P2:** a diff-read note on IB-pr-354 and IB-pr-358 as they ship here (the form of release 1's msg 1125).
+- **Pin on origin:** `f7a9d0b34f` reaches origin CLOUD with the dell2 drain.
+- **The CTO's signature.**
