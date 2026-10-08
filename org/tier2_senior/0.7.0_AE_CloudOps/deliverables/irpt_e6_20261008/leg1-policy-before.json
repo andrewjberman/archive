@@ -1,0 +1,188 @@
+﻿{
+    "RoleName": "irpt-ycharts-generate-role",
+    "PolicyName": "irpt-ycharts-generate",
+    "PolicyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/irpt-ycharts-generate",
+                    "arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/irpt-ycharts-generate:*"
+                ],
+                "Sid": "WriteOwnLogStream"
+            },
+            {
+                "Action": [
+                    "s3:PutObject"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:s3:::opal-data-ycharts/firms/49financial/generations/*",
+                    "arn:aws:s3:::opal-data-ycharts/firms/cottonwood/generations/*",
+                    "arn:aws:s3:::opal-data-ycharts/firms/inflection/generations/*"
+                ],
+                "Sid": "PutVendorArtifactUnderEnumeratedGenerationsPrefixesOnly"
+            },
+            {
+                "Action": [
+                    "secretsmanager:GetSecretValue",
+                    "secretsmanager:DescribeSecret"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:secretsmanager:us-east-1:313476888478:secret:ycharts/session/current-*"
+                ],
+                "Sid": "ReadTheFencedSessionByNameOnly"
+            },
+            {
+                "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:dynamodb:us-east-1:313476888478:table/irpt-jobs"
+                ],
+                "Sid": "JobStateAndIntentClaims"
+            },
+            {
+                "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:dynamodb:us-east-1:313476888478:table/irpt-requests"
+                ],
+                "Sid": "AttemptRows"
+            },
+            {
+                "Action": [
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage",
+                    "sqs:GetQueueAttributes"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:sqs:us-east-1:313476888478:irpt-generation"
+                ],
+                "Sid": "ConsumeTheGenerationQueue"
+            },
+            {
+                "Action": [
+                    "sqs:SendMessage"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:sqs:us-east-1:313476888478:irpt-generation"
+                ],
+                "Sid": "SubmitToTheGenerationQueue"
+            },
+            {
+                "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:GetObjectVersion"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/original_holdings/*",
+                    "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/original_holdings/*",
+                    "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/original_holdings/*"
+                ],
+                "Sid": "RetainOriginalHoldingsUploadsOnly"
+            },
+            {
+                "Action": [
+                    "s3:GetObject",
+                    "s3:GetObjectVersion"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/normalized_portfolios/*",
+                    "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/normalized_portfolios/*",
+                    "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/normalized_portfolios/*"
+                ],
+                "Sid": "ReadNormalizedPortfolioInputsOnly"
+            },
+            {
+                "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:GetObjectVersion"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/request_compositions/*",
+                    "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/request_compositions/*",
+                    "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/request_compositions/*"
+                ],
+                "Sid": "RetainRequestCompositionsOnly"
+            },
+            {
+                "Action": [
+                    "kms:Decrypt",
+                    "kms:GenerateDataKey"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111"
+                ],
+                "Sid": "UseSystemKeyForTheEvidenceBucketAndTables"
+            },
+            {
+                "Action": [
+                    "dynamodb:Query"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:dynamodb:us-east-1:313476888478:table/opal-users-v2/index/email-index"
+                ],
+                "Sid": "ReadCanonicalUserProfileByEmailIndexAndKey"
+            },
+            {
+                "Action": [
+                    "dynamodb:GetItem"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:dynamodb:us-east-1:313476888478:table/opal-users-v2"
+                ],
+                "Sid": "ReadCanonicalUserProfileRow"
+            },
+            {
+                "Action": [
+                    "kms:Decrypt"
+                ],
+                "Condition": {
+                    "StringEquals": {
+                        "kms:EncryptionContext:aws:dynamodb:tableName": "opal-users-v2",
+                        "kms:ViaService": "dynamodb.us-east-1.amazonaws.com"
+                    }
+                },
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:kms:us-east-1:313476888478:key/64f25291-4015-42c5-ad41-40e42325deb7"
+                ],
+                "Sid": "DecryptCanonicalUsersTableViaDynamoOnly"
+            },
+            {
+                "Action": [
+                    "dynamodb:Scan"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:dynamodb:us-east-1:313476888478:table/etf-classifications"
+                ],
+                "Sid": "ScanEtfClassificationsForComparisonNames"
+            }
+        ]
+    }
+}
