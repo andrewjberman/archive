@@ -48,8 +48,8 @@
        targeted reads no changes. Report the applied time; dell2 then deploys its code.
 
     LEG 2 -- FENCED READ/DELETE (GO only when dell2 sends the keys FILE after its admit, relayed by 0.0.0_AB_MSTR):
-    1. For each `irpt-requests` key in the file, and NO other: `get-item` (print `owner` and `acting_principal_id` only, no other
-       attribute), `delete-item`, `get-item` NOT FOUND.
+    1. For each `irpt-requests` key in the file, and NO other: `get-item` (print ONLY whether it exists, and a sha256 prefix of
+       `owner` and of `acting_principal_id` -- NEVER an email, name or raw id; CTO msg 107348 after the 2026-10-08 exposure), `delete-item`, `get-item` NOT FOUND.
     2. For the ONE S3 key in the file, and no other: `head-object`; `delete-object`; `head-object` 404. **Andrew approved this
        delete**, verbatim "Yes do it" (~19:3xZ, record
        `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261008_193xZ_E6_TEST_ADMIT_S3_DELETE_APPROVED.md`; CTO msg 107163):
