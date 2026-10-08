@@ -6,6 +6,7 @@
     <date>2026-10-07</date>
     <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
+    <round>11</round>
   </metadata>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
@@ -160,3 +161,9 @@ per key, so the 2,102 remaining keys take about 17.6 h serially.
    refusal. Those keys stay absent and are re-planned by the next resume. The close check counts as `refused` only model-stated
    refusals (out-of-vocabulary, low confidence under the contract). Report the refusal reasons by count at close.
 No gate limb grades an amendment to an existing order.
+
+### AMENDMENT -- round tag (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~14:3xZ; 1.0.0_SA_CTO~DELL1 msg 961, from 3.0.0_SA_CVO msg 960)
+
+This order carried no <round> tag, so surprise-row-gate.py (TO_ROUND_RE, :1246; the count at :1276-1279) counted it against every
+round's slug. It belongs to round 11 (decomp_ref DECOMP_R11.md), so <round>11</round> is added to its metadata. No other field changes.
+Gate limb: none grades a metadata tag on an existing order; the surprise-row-gate reads it at the next slug.
