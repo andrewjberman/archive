@@ -17,16 +17,16 @@
     {
       "path_or_key": "org/devices/intake/intake_check.py",
       "kind": "script",
-      "commit_or_etag": "83d4663834",
+      "commit_or_etag": "ac4be99a77",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "CT5e3-AC2, AC3: verbs check, release, pack, selftest-unsigned, selftest-av; check 7 reads the Windows Security Center (read-only PowerShell query, 30 s bound), writes <file>.scan-copy beside the held file, waits, re-reads both, always removes the copy; MpCmdRun and OPAL_INTAKE_SCANNER are gone; standard library only; no member of a wheel is installed, imported or executed; no request leaves the machine; no antivirus setting touched; ruff py39 clean"
+      "deploy_evidence": "AMENDMENT 3: check 3 reads direct_url.json (editable install = not a copy; checks 3 and 6 not_applicable with the reason); check 6 counts a .py with no counterpart on disk as missing (all missing -> not_applicable; else compared/missing/differ, failed only on differ>0); check 8 refuses the --approved-by file as a signature and requires a line beginning CHECK 8 SIGNED or SIGNED, check 8; pack --released-only writes held_back into MANIFEST.json (intake_receive.py reads only manifest files); standard library only; no member of a wheel installed, imported or executed; no request leaves the machine; ruff py39 clean via the commit gate"
     },
     {
       "path_or_key": "org/devices/intake/test_intake_check.py",
       "kind": "script",
-      "commit_or_etag": "83d4663834",
+      "commit_or_etag": "ac4be99a77",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "CT5e3-AC1: 46 cases, 46 passed, 0 skipped, including 18 check-7, scan-copy and selftest-av cases on a Security Center stand-in (OPAL_INTAKE_AV_JSON, wait 0) and ONE case that reads the REAL Security Center and runs the real on-access read with the default 20 s wait (about 21 s of the 27 s run)"
+      "deploy_evidence": "CT5e3-AC1: 53 cases, 53 passed, 0 skipped: 8 new for AMENDMENT 3 (editable install; every .py missing; some missing; one present file differing; approval file as signature both ways and the phrase rule; the two real CTO files in a temporary directory; pack --released-only with receive verify; its edges) and one earlier case replaced (an added .py absent on disk is now missing, row W6-S17)"
     }
   ],
   "acceptance": [
@@ -35,8 +35,8 @@
       "criterion_verbatim": "python org/devices/intake/test_intake_check.py expect: INTAKE-CHECK-TEST cases= (every case passing: the line must read ok=True)",
       "method": "command",
       "invocation": "python org/devices/intake/test_intake_check.py",
-      "output_evidence": "REAL-SECURITY-CENTER: products=Windows Defender state=393472 hex=0x060100 realtime=off definitions=current; Little Dog Tech Managed Antivirus Antimalware state=266240 hex=0x041000 realtime=on definitions=current | verdict=passed waited=20s took=20.5s copy_cleanup=removed | summary=on-access scan by Little Dog Tech Managed Antivirus Antimalware, state enabled and current; file present and unchanged after 20 s; no on-demand verdict available\nINTAKE-CHECK-TEST cases=46/46 skipped=0 ok=True\n(rc 0, under timeout 120; whole file about 27 s; the real case waited 20 s and its copy was removed)",
-      "denominator": "46 cases: 46 passed, 0 failed, 0 skipped; 18 of them concern check 7, the scan copy or selftest-av (stand-in), 1 reads the real Security Center",
+      "output_evidence": "CHECK8-REAL-FILES: signature/rpds=passed | signature/click=failed | approval/rpds=failed | approval/click=failed | approval-as-both/rpds=failed | approval-as-both/click=failed\nPACK-RELEASED-ONLY-VERIFY: INTAKE-VERIFY pack=packout wheels=1 verified=1 checked=1 stray=0 ok=True\nREAL-SECURITY-CENTER: ... verdict=passed waited=20s took=21.2s copy_cleanup=removed ...\nINTAKE-CHECK-TEST cases=53/53 skipped=0 ok=True\n(rc 0, under timeout 120)",
+      "denominator": "53 cases: 53 passed, 0 failed, 0 skipped; 1 reads the real Security Center; 1 copies and reads the two real CTO files",
       "status": "PASS",
       "expect": "INTAKE-CHECK-TEST cases="
     },
@@ -45,7 +45,7 @@
       "criterion_verbatim": "python org/devices/intake/intake_check.py selftest-unsigned expect: c8=unsigned verdict=not_checked (the difference control: on a synthetic clean file the tool cannot reach checked without the CTO's signature file)",
       "method": "command",
       "invocation": "python org/devices/intake/intake_check.py selftest-unsigned",
-      "output_evidence": "INTAKE-CHECK batch=selftest-batch file=selftestpkg-1.0.0-cp312-cp312-win_amd64.whl c1=passed c2=passed c3=passed c4=passed c5=not_applicable c6=passed c7=passed c8=unsigned verdict=not_checked\n(rc 0, under timeout 120; checks 1 to 7 passed or not_applicable, check 8 unsigned, no scanner stub)",
+      "output_evidence": "INTAKE-CHECK batch=selftest-batch file=selftestpkg-1.0.0-cp312-cp312-win_amd64.whl c1=passed c2=passed c3=passed c4=passed c5=not_applicable c6=passed c7=passed c8=unsigned verdict=not_checked\n(rc 0, under timeout 120; re-run after the AMENDMENT 3 edits)",
       "denominator": "1 of 1 synthetic clean wheel; check 7 read the stand-in answer (OPAL_INTAKE_AV_JSON-style file, wait 0) and passed; the overall verdict is still not_checked",
       "status": "PASS",
       "expect": "c8=unsigned verdict=not_checked"
@@ -55,7 +55,7 @@
       "criterion_verbatim": "python org/devices/intake/intake_check.py selftest-av expect: INTAKE-AV products=[0-9]+ active= (a new verb that reads the REAL Security Center and prints one line INTAKE-AV products=<n> active=<names or NONE> realtime=<on|off> definitions=<current|out_of_date|unknown> ok=<True|False>)",
       "method": "command",
       "invocation": "python org/devices/intake/intake_check.py selftest-av",
-      "output_evidence": "INTAKE-AV products=2 active=Little Dog Tech Managed Antivirus Antimalware realtime=on definitions=current ok=True\n(rc 0, under timeout 120; the REAL query: Windows Defender 393472 = 0x060100 -> off; Little Dog Tech Managed Antivirus Antimalware 266240 = 0x041000 -> on, definitions current)",
+      "output_evidence": "INTAKE-AV products=2 active=Little Dog Tech Managed Antivirus Antimalware realtime=on definitions=current ok=True\n(rc 0, under timeout 120; re-run after the AMENDMENT 3 edits; the REAL query)",
       "denominator": "2 products registered; 1 on and current; ok=True. The line matches the format the amendment fixes.",
       "status": "PASS",
       "expect": "INTAKE-AV products=[0-9]+ active="
@@ -65,7 +65,7 @@
     "mutant": {
       "description": "the same synthetic clean wheel and fetch record, with one defect planted at a time: signature absent; one byte flipped; a differing .py; an added .pth; a release two days old; an unread attestation; a changed file after the check record; a hand-edited verdict; and for check 7: the product off, definitions out of date, unknown bytes, no product, an unreadable stand-in, the held file changed or removed during the wait, the copy removed or changed during the wait, a hook that raises, a refused removal, a leftover copy in holding or release",
       "expected": "each defect reads failed or unsigned on its own check and the overall verdict not_checked; the unplanted control reads checked and releases; a leftover scan copy is refused by release, check and pack",
-      "observed": "46 of 46 cases passed: every planted defect read as expected and the control read checked",
+      "observed": "53 of 53 cases passed: every planted defect read as expected and the control read checked",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -86,19 +86,25 @@
     {
       "item": "the public index and the fetch, receive and closure tools",
       "reason": "not this cell; no request was made; fetch records in the tests are hand-written in THE SEAM's format (row NFRA_CTLPLN-W6-S12)"
+    },
+    {
+      "item": "org/devices/intake/test_intake_seam.py ok=True",
+      "reason": "the seam test's stand-in signature has no signing line, so check 8 refuses it and the seam run reads ok=False; it is outside this order's paths (row NFRA_CTLPLN-W6-S16)"
     }
   ],
   "surprises": [
     "NFRA_CTLPLN-W6-S11",
     "NFRA_CTLPLN-W6-S12",
-    "NFRA_CTLPLN-W6-S13"
+    "NFRA_CTLPLN-W6-S13",
+    "NFRA_CTLPLN-W6-S16",
+    "NFRA_CTLPLN-W6-S17"
   ],
   "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~6/NFRA_CTLPLN.TO-CT-e-3.checks-and-record.proof_of_spec.json",
   "compiler_tools": [
     {
       "tool": "python",
       "invocation": "python org/devices/intake/test_intake_check.py",
-      "result": "INTAKE-CHECK-TEST cases=46/46 skipped=0 ok=True"
+      "result": "INTAKE-CHECK-TEST cases=53/53 skipped=0 ok=True"
     },
     {
       "tool": "python",
