@@ -21,8 +21,12 @@
 
   <context>
     The policy is held by no Terraform root (written by hand; N = 1 writer). Halves: COO
-    `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md`; CTO half named in the GO. Trigger: dell2 2.0.0_SA_COO~G2 says its ledger leg X1 is reached (relayed by 0.0.0_AB_MSTR); the COO half's deadline 2026-10-09T06:00Z applies. The GO
+    `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md`; CTO `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md` (@7aab22d727, SIGNED). Trigger: dell2 2.0.0_SA_COO~G2 says its ledger leg X1 is reached (relayed by 0.0.0_AB_MSTR); the COO half's deadline 2026-10-09T06:00Z applies. The GO
     comes from the issuer when dell2 calls it; do not act on any other signal. YOU READ NO SECRET VALUE.
+    DEADLINE (CTO msg 107105, binding): if no GO for this leg has come by 2026-10-09T06:00Z, at 06:00Z put the BEFORE
+    document back WITHOUT waiting for any answer (steps 1-6 as written; at step 1, a live policy equal to the ADD file is the
+    expected start), read it back, then report to 2.0.0_SA_COO~C and 1.0.0_SA_CTO. This is the one case where the trigger is
+    the clock, not a GO.
   </context>
 
   <the_act>
