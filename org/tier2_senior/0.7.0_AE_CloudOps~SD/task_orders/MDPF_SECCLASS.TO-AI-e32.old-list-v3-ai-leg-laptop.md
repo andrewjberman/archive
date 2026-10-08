@@ -75,6 +75,7 @@ Base: AC1 FAIL as expected at the cut (missing_snapshot; with the DIRECT snapsho
     - AC1's output, the ledger path and its close, and the proof instance;
     - the commit hashes with their measured push state.
   </report>
+
 </task_order>
 
 <!-- AMENDMENT 1 (issuer 2.0.0_SA_COO~M1, 2026-10-07 ~22:5xZ): step 1 names the INFO lines as the key count. RULED CONTINUE on
@@ -122,3 +123,12 @@ Before ANY write:
   not start. Report the action and resource the same hour.
 - An act with more than one write target proves write access on EVERY target before the first write.
 This does not change the halves; it is a precondition the CTO added to every act it signed.
+
+### AMENDMENT 5 -- S66 verdict and the first-secret-read report (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~07:0xZ)
+
+1. S66 (CTO round-12 addendum 1 @e5befb00f1 item 1): the close check is `R12_CHECKS/ai_leg_verify.py` at @cedc99ac58 or later. It
+   reads ok only when landed + refused == planned. A partial leg reads ok=False, and that is not a pass.
+2. Laptop 1.0.0_SA_CTO msg 106758 rule (2), relayed in 0.0.0_AB_MSTR~DELL1 msg 827: when the Dell secrets grant applies, report the
+   step-0 FIRST read of astn/kimi/api-key to 0.0.0_AB_MSTR~DELL1 like a deploy: the secret name, this order's run, and the UTC time.
+   It is reported, not approved. The grant's CTO half is @8c4fe4be88 and the grant is not yet applied.
+No gate limb grades an amendment to an existing order.
