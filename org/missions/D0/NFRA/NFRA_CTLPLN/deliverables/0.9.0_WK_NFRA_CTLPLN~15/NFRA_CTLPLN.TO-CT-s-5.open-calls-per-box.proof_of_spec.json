@@ -1,0 +1,106 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CTLPLN.TO-CT-s-5",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-s-5.open-calls-per-box.md",
+  "group": "OTHER",
+  "vintage_commit": "89410e3c49"
+ },
+ "assignee": "0.9.0_WK_NFRA_CTLPLN~15",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.seats1.md",
+  "vintage_commit": "89410e3c49",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-s-5.open-calls-per-box.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/open-calls.py",
+   "kind": "script",
+   "commit_or_etag": "f24862b44c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a CTO seat runs; nothing is deployed."
+  },
+  {
+   "path_or_key": ".tools/tests/test_open_calls.py",
+   "kind": "test",
+   "commit_or_etag": "f24862b44c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on temporary directories; nothing is deployed."
+  },
+  {
+   "path_or_key": ".claude/skills/open-calls/SKILL.md",
+   "kind": "config_data",
+   "commit_or_etag": "f24862b44c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A skill text read by seats; nothing is deployed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CTs5-AC1",
+   "criterion_verbatim": "python .tools/tests/test_open_calls.py expect: OPEN-CALLS-TEST cases= (every case passing: the line must read ok=True)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_open_calls.py",
+   "output_evidence": "timeout 120 rc=0, 2 s wall. LAST line: OPEN-CALLS-TEST cases=19/19 ok=True. Covers add/list/close on a temporary OPAL_STATE_ROOT, a write to another box's list refused, a CROSS-BOX call refused closure with no file, with an ACKED file, with a CLOSED-BOTH file that does not name it, and closed with its own CLOSED-BOTH file, --all naming every box with no file as ABSENT, and an unknown key (top-level, row, wrong device) refused.",
+   "denominator": "19 of 19 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CTs5-AC2",
+   "criterion_verbatim": "python .tools/open-calls.py scope --selftest expect: CALL-SCOPE-SELFTEST cases= (each kind of cross-box hit is measured and a clear case reads OWN-BOX: the line must read ok=True)",
+   "method": "test_suite",
+   "invocation": "python .tools/open-calls.py scope --selftest",
+   "output_evidence": "timeout 120 rc=0, under 1 s wall. LAST line: CALL-SCOPE-SELFTEST cases=18/18 ok=True. Fixtures: one clear case reads OWN-BOX with every reading clear (the difference control); a PATHS hit (another box's write set; another project's home on the same box); a PLACEMENT hit (a project placed elsewhere; an unresolvable box); a RESOURCES hit (a bucket two boxes' roots both declare; an unreadable root; a backend bucket is NOT a false hit); a SHARED hit (a trunk path, CLAUDE.md, a registry-marked bucket, a bucket named only in a policy ARN); WORLD alone stays OWN-BOX.",
+   "denominator": "18 of 18 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CTs5-AC3",
+   "criterion_verbatim": "python .tools/open-calls.py scope --project NFRA_CTLPLN --roots infra/aws/terraform/shared-infra expect: verdict=CROSS-BOX (the difference control on a real case: this project's fence root declares the firm buckets every box's projects read, so it cannot read OWN-BOX)",
+   "method": "test_suite",
+   "invocation": "python .tools/open-calls.py scope --project NFRA_CTLPLN --roots infra/aws/terraform/shared-infra",
+   "output_evidence": "timeout 120 rc=0, 3 s wall. LAST line: CALL-SCOPE project=NFRA_CTLPLN device=laptop paths=hit placement=clear resources=hit shared=hit risk=SERVED verdict=CROSS-BOX. Read: 34 live projects, 8 non-terminal orders of this project, 1 Terraform root; shared-infra is named by NFRA_REPORT (sitez) and declares names also declared by roots named by AMGT_HARVST/NFRA_MCPINDEX (sitez) and IRPT_BCKEND (dell2); registry-marked shared buckets are opal-data-assets and opal-data-portal-v2 (tiers.json). The clear counterpart is selftest case 1 and test case 'untouched path reads OWN-BOX' (a scratch order naming one path nobody owns reads OWN-BOX).",
+   "denominator": "1 of 1 real root read; 34 live projects, 1 Terraform root",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control: the same tool, a project and an order whose only path is one nobody owns (a scratch order in the test), against the fence root of the same project.",
+   "expected": "the untouched path reads verdict=OWN-BOX and the fence root reads verdict=CROSS-BOX",
+   "observed": "test case 'the measured scope is saved on the call and an untouched path reads OWN-BOX' passes (verdict=OWN-BOX); AC3 prints verdict=CROSS-BOX for the fence root",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The three criteria were run twice (once before the build commit, once after) against the same tree.",
+   "observed": "identical last lines: 19/19, 18/18 and the same CALL-SCOPE line",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a resource shared in practice that no Terraform declares",
+   "reason": "BLIND by construction: the resources reading sees only names a Terraform root declares in a top-level resource block (and bucket names in policy ARNs for the shared set)"
+  },
+  {
+   "item": "the live org/devices/state/<device>/open_calls.json",
+   "reason": "no file is created on the real tree: the CTO of the box writes it by running add; an empty file would read as 'no open calls', which absence must not"
+  },
+  {
+   "item": ".tools/crossbox-call.py",
+   "reason": "belongs to cell CT-s-6 and is not in this tree; close matches a cross-box file by its id or by the call id appearing in its text or body, and --crossbox names one explicitly"
+  }
+ ],
+ "surprises": [
+  "NFRA_CTLPLN-W15-S1"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~15/NFRA_CTLPLN.TO-CT-s-5.open-calls-per-box.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/open-calls.py .tools/tests/test_open_calls.py",
+   "result": "All checks passed!"
+  }
+ ]
+}

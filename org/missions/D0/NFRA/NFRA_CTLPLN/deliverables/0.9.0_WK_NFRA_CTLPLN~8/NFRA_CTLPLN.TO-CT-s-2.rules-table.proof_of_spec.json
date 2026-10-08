@@ -1,0 +1,99 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CTLPLN.TO-CT-s-2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-s-2.rules-table.md",
+  "group": "OTHER",
+  "vintage_commit": "5391a1892c"
+ },
+ "assignee": "0.9.0_WK_NFRA_CTLPLN~8",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.seats1.md",
+  "vintage_commit": "5391a1892c",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-s-2.rules-table.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/ref/SEAT_RULES.json",
+   "kind": "config_data",
+   "commit_or_etag": "a5f0d3a546",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A data file read by the checker; nothing is deployed. Not changed by AMENDMENT 1."
+  },
+  {
+   "path_or_key": ".tools/seat-rules-check.py",
+   "kind": "script",
+   "commit_or_etag": "7d70d39189",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a seat runs; nothing is deployed."
+  },
+  {
+   "path_or_key": ".tools/tests/test_seat_rules_check.py",
+   "kind": "test",
+   "commit_or_etag": "7d70d39189",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test; nothing is deployed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CTs2-AC1",
+   "criterion_verbatim": "python .tools/seat-rules-check.py exercise expect: pairs_covered=24/24 probes_pass=[0-9]+ probes_pending=0 probes_fail=0 probes_unread=0 needs_andrew=3 ok=True (every seat kind has a rule in each of the three areas, and every probe of an existing gate passes: the same line must read probes_fail=0 ... ok=True)",
+   "method": "test_suite",
+   "invocation": "python .tools/seat-rules-check.py exercise",
+   "output_evidence": "timeout 120 rc=0, 117 s wall (EXERCISE elapsed=115.8s probes=58 workers=16 hook_bound=90s other_bound=60s), processor load 82 before and 76 after. LAST line: SEAT-RULES rules=47 gate=25 skill=11 launcher=11 pairs_covered=24/24 probes_pass=58 probes_pending=0 probes_fail=0 probes_unread=0 needs_andrew=3 ok=True. The same last line on four other runs (171 s, 162 s, 148 s at load 59 to 96; 101 s at load 9). The margin under timeout 120 is 3 s at load 82 and the first three runs would have been killed at that bound (rows NFRA_CTLPLN-W8-S14 and W8-S15). git status --porcelain identical before and after.",
+   "denominator": "24 of 24 kind-by-area pairs covered; 58 of 58 probe runs pass, 0 fail, 0 unread, 0 pending",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CTs2-AC2",
+   "criterion_verbatim": "python .tools/tests/test_seat_rules_check.py expect: SEAT-RULES-TEST cases= (the checker fails on a planted false rule: the line must read ok=True with every case passing)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_seat_rules_check.py",
+   "output_evidence": "timeout 120 rc=0, 48 s wall. LAST line: SEAT-RULES-TEST cases=26/26 ok=True. Six new cases: a probe that sleeps past its bound reads UNREAD with ok=False; the retry runs exactly once (2 runs); a probe that times out once and then finishes passes on the retry; a probe that finishes without the refusal reads FAIL and is not retried (1 run); the bound is per mechanism and a negative bound is refused; probes of one hook form one sequential group. The planted-false-rule case still reads false=FAIL control=PASS.",
+   "denominator": "26 of 26 cases pass",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Planted false rule: a GATE rule claiming a manager is refused on a path the lane table admits it on; a hook probe expecting a deny for 'git status --short'; a probe command that sleeps 30 s against a 3 s bound.",
+   "expected": "the first two probes FAIL (finished, refusal absent); the third reads UNREAD, is retried once, and the summary line carries ok=False",
+   "observed": "planted_false_rule_fails_and_control_passes: false=FAIL control=PASS; a_hook_that_admits_where_a_refusal_is_claimed_fails: FAIL; a_probe_that_sleeps_past_its_bound_reads_unread_and_not_ok: UNREAD runs=2 probes_unread=1 ok=False",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the full exercise was run five times on the amended tool, 171 s, 162 s, 148 s, 101 s and 117 s (timeout 120)",
+   "observed": "probes_pass=58 probes_pending=0 probes_fail=0 probes_unread=0 ok=True each time; the time varies with the processor load of other seats (9 to 96 percent)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "any push, commit, merge, rebase, terraform, aws write, broker send or seat start by a probe",
+   "reason": "order RULES: nothing run may change the live fabric; every hook probe is a JSON stand-in on standard input run in a temporary directory holding a hand-written scratch repo, every other probe reads or calls one pure function"
+  },
+  {
+   "item": "whether the Deny in dell_deploy_policy.json is applied live (R-AWSDEVOPS-7)",
+   "reason": "no request leaves this machine; the probe reads the declared policy file and the rule text says so"
+  }
+ ],
+ "surprises": [
+  "NFRA_CTLPLN-W8-S9",
+  "NFRA_CTLPLN-W8-S10",
+  "NFRA_CTLPLN-W8-S11",
+  "NFRA_CTLPLN-W8-S12",
+  "NFRA_CTLPLN-W8-S13",
+  "NFRA_CTLPLN-W8-S14",
+  "NFRA_CTLPLN-W8-S15"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~8/NFRA_CTLPLN.TO-CT-s-2.rules-table.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/seat-rules-check.py .tools/tests/test_seat_rules_check.py",
+   "result": "All checks passed!"
+  }
+ ]
+}

@@ -1,0 +1,160 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Query",
+                "dynamodb:ConditionCheckItem"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:dynamodb:us-east-1:313476888478:table/teams-global-chat-assist-table",
+            "Sid": "ObjectState"
+        },
+        {
+            "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:ChangeMessageVisibility",
+                "sqs:SendMessage"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:sqs:us-east-1:313476888478:teams-global-chat-assist-queue.fifo",
+            "Sid": "Mailbox"
+        },
+        {
+            "Action": [
+                "scheduler:CreateSchedule",
+                "scheduler:UpdateSchedule",
+                "scheduler:DeleteSchedule",
+                "scheduler:GetSchedule"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:scheduler:us-east-1:313476888478:schedule/default/ldo001-*",
+            "Sid": "OwnAlarms"
+        },
+        {
+            "Action": [
+                "iam:PassRole"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "iam:PassedToService": "scheduler.amazonaws.com"
+                }
+            },
+            "Effect": "Allow",
+            "Resource": "arn:aws:iam::313476888478:role/teams-global-chat-assist-alarm-role",
+            "Sid": "HandTheAlarmRoleToScheduler"
+        },
+        {
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/teams-global-chat-assist-handler-lambda:*",
+                "arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/teams-global-chat-assist-ingress-lambda:*"
+            ],
+            "Sid": "OwnLogs"
+        },
+        {
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-transcripts/teams/transcripts/bronze/chat_messages/*",
+                "arn:aws:s3:::opal-data-transcripts/teams/transcripts/silver/chat_threads/*",
+                "arn:aws:s3:::opal-data-transcripts/teams/transcripts/state/chat_assist/*"
+            ],
+            "Sid": "ArchiveObjects"
+        },
+        {
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "teams/transcripts/bronze/chat_messages/*",
+                        "teams/transcripts/silver/chat_threads/*",
+                        "teams/transcripts/state/chat_assist/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-transcripts",
+            "Sid": "ArchiveListing"
+        },
+        {
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:secretsmanager:us-east-1:313476888478:secret:gateway/teams/bearer-93ZHiU",
+                "arn:aws:secretsmanager:us-east-1:313476888478:secret:teams/global/owner-phone-9syPJ6",
+                "arn:aws:secretsmanager:us-east-1:313476888478:secret:astn/kimi/api-key-WV6Jlp"
+            ],
+            "Sid": "Secrets"
+        },
+        {
+            "Action": [
+                "sms-voice:SendTextMessage"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:sms-voice:us-east-1:313476888478:phone-number/phone-0e98f7739a16415c83d951336a7da12a",
+            "Sid": "TextAndrewFromTheTollFreeNumber"
+        },
+        {
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-portal-v2/daily-reports/*",
+            "Sid": "ReadTheDaysSprintPage"
+        },
+        {
+            "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:sqs:us-east-1:313476888478:agentbus-ajbdev-sitez-to-laptop.fifo",
+            "Sid": "TellTheLaptopMstrOnTheBus"
+        },
+        {
+            "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:sqs:us-east-1:313476888478:agentbus-ajbdev-laptop-to-sitez.fifo",
+            "Sid": "TellTheSiteZMstrOnTheBus"
+        },
+        {
+            "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:sqs:us-east-1:313476888478:agentbus-global-dell1-queue.fifo",
+            "Sid": "TellDell1OnTheBus"
+        },
+        {
+            "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:sqs:us-east-1:313476888478:agentbus-global-dell2-queue.fifo",
+            "Sid": "TellDell2OnTheBus"
+        }
+    ],
+    "Version": "2012-10-17"
+}

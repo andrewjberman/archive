@@ -1,0 +1,60 @@
+==============================================================================================================
+opal-data-49financial   old scoped prefix = irpt/49financial/platinum/holdings/
+==============================================================================================================
+  statements 7 -> 4   AFTER sha256 536f9bcbbf4e2a460662215adbce1ad50bc2b593d79250552e1537bfb49f355f
+  surviving Sids: ['DenyForeignFirmPrincipals', 'DenyPerformanceAdapterAnyOtherAction', 'DenyPerformanceAdapterReadsOutsideTheHoldingsGold', 'DenyPerformanceAdapterListingOutsideTheHoldingsGold']
+  V1 live == saved MINUS exactly the three statements: True   (planted-mutant control: False, must be False)
+     removed Sids measured: ['DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ListingOutsidePrefix', 'DenyScopedExemption1ObjectsOutsidePrefix']
+  V2 WIDENED arms (dell1, LIVE document, identity side = dell1 live attached policies)
+     get OUTSIDE the old prefix       s3:GetObject           -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+     PUT OUTSIDE the old prefix       s3:PutObject           -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+     ListBucket with NO prefix        s3:ListBucket          -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+  V4 unchanged-principal arms
+     dell2 get outside the prefix     s3:GetObject           -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+     unlisted opal-gateway-role       s3:GetObject           -> explicitDeny   OK   [matched ['ResourcePolicy']]
+          ATTRIBUTED by leave-one-out to: ['DenyForeignFirmPrincipals']
+
+==============================================================================================================
+opal-data-cottonwood   old scoped prefix = irpt/cottonwood/platinum/holdings/
+==============================================================================================================
+  statements 7 -> 4   AFTER sha256 c8bcfff63d725e021bae9a7749b51392e90a4b6bbc8a6a5530211ae6744ec294
+  surviving Sids: ['DenyForeignFirmPrincipals', 'DenyRestrictedReadExceptReaders', 'DenyRestrictedListExceptReaders', 'DenyRestrictedWriteExceptBreakglass']
+  V1 live == saved MINUS exactly the three statements: True   (planted-mutant control: False, must be False)
+     removed Sids measured: ['DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ListingOutsidePrefix', 'DenyScopedExemption1ObjectsOutsidePrefix']
+  V2 WIDENED arms (dell1, LIVE document, identity side = dell1 live attached policies)
+     get OUTSIDE the old prefix       s3:GetObject           -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+     PUT OUTSIDE the old prefix       s3:PutObject           -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+     ListBucket with NO prefix        s3:ListBucket          -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+  V3 cross-project arm -- the restricted CRM prefix must STILL refuse dell1
+     get on the restricted prefix     s3:GetObject           -> explicitDeny   OK   [matched ['ResourcePolicy']]
+          ATTRIBUTED by leave-one-out to: ['DenyRestrictedReadExceptReaders']
+     PUT on the restricted prefix     s3:PutObject           -> explicitDeny   OK   [matched ['ResourcePolicy']]
+          ATTRIBUTED by leave-one-out to: ['DenyRestrictedWriteExceptBreakglass']
+     list the restricted prefix       s3:ListBucket          -> explicitDeny   OK   [matched ['ResourcePolicy']]
+          ATTRIBUTED by leave-one-out to: ['DenyRestrictedListExceptReaders']
+  V4 unchanged-principal arms
+     dell2 get outside the prefix     s3:GetObject           -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+     unlisted opal-gateway-role       s3:GetObject           -> explicitDeny   OK   [matched ['ResourcePolicy']]
+          ATTRIBUTED by leave-one-out to: ['DenyForeignFirmPrincipals']
+
+==============================================================================================================
+opal-data-inflection   old scoped prefix = irpt/inflection/platinum/holdings/
+==============================================================================================================
+  statements 4 -> 1   AFTER sha256 a14b7106896479adb09b6359f1e4803b34304a9ce0d21e95c5fbd5a1e52d9510
+  surviving Sids: ['DenyForeignFirmPrincipals']
+  V1 live == saved MINUS exactly the three statements: True   (planted-mutant control: False, must be False)
+     removed Sids measured: ['DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ListingOutsidePrefix', 'DenyScopedExemption1ObjectsOutsidePrefix']
+  V2 WIDENED arms (dell1, LIVE document, identity side = dell1 live attached policies)
+     get OUTSIDE the old prefix       s3:GetObject           -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+     PUT OUTSIDE the old prefix       s3:PutObject           -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+     ListBucket with NO prefix        s3:ListBucket          -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+  V4 unchanged-principal arms
+     dell2 get outside the prefix     s3:GetObject           -> allowed        OK   [matched ['cloudops-dell-agent-deploy-policy']]
+     unlisted opal-gateway-role       s3:GetObject           -> explicitDeny   OK   [matched ['ResourcePolicy']]
+          ATTRIBUTED by leave-one-out to: ['DenyForeignFirmPrincipals']
+
+==============================================================================================================
+SUMMARY opal-data-49financial    {'v1': True, 'v1_mutant_false': True, 'v2': True, 'v2_n': 3, 'v3': None, 'v3_n': 0, 'v4': True}
+SUMMARY opal-data-cottonwood     {'v1': True, 'v1_mutant_false': True, 'v2': True, 'v2_n': 3, 'v3': True, 'v3_n': 3, 'v4': True}
+SUMMARY opal-data-inflection     {'v1': True, 'v1_mutant_false': True, 'v2': True, 'v2_n': 3, 'v3': None, 'v3_n': 0, 'v4': True}
+READBACK10 ok=True
