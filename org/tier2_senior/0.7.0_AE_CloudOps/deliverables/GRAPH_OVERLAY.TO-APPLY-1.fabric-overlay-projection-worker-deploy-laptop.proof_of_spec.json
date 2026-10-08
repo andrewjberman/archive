@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "GRAPH_OVERLAY.TO-APPLY-1.fabric-overlay-projection-worker-deploy-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/GRAPH_OVERLAY.TO-APPLY-1.fabric-overlay-projection-worker-deploy-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "0b0180e42a"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/globgrph/projection.tf",
+      "kind": "terraform",
+      "commit_or_etag": "afcc4ed645",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "safe-apply refused before mutation; live worker remains6 old digest",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "comp-kuzu MATCH FabricNode per-type counts returns VINTAGE newer than deploy; positive fabric count and estate295xx",
+      "method": "live_read",
+      "invocation": "comp-kuzu \"MATCH (n:FabricNode) RETURN n.node_type, count(*)\"",
+      "expect": "VINTAGE:",
+      "output_evidence": "NOT RUN: activation refused before cloud mutation; pointer unchanged at2026-10-08T12:54:23.609381+00:00; no post-deploy VINTAGE exists",
+      "denominator": "one served publish required, zero after activation because activation did not occur",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Requires naming gate fix, issuer re-GO, successful worker apply, and next branch-marker publish."
+    }
+  ],
+  "controls": {
+    "image_build": {
+      "description": "New ECR immutable digest built, not yet activated",
+      "expected_landed": "sha256:d3037f32c0143855a283f5e997fa83d8f09fc23755608c190896ab0adfd3f3b1",
+      "expected_not_landed": "sha256:17ccc9b01855138e2abd0c36938c62a21ffd0730bf7886b9758a5317b4d24d04",
+      "observed": "sha256:d3037f32c0143855a283f5e997fa83d8f09fc23755608c190896ab0adfd3f3b1",
+      "status": "PASS"
+    },
+    "worker_activation": {
+      "description": "Worker actual immutable image distinguishes activation",
+      "expected_landed": "d3037f32c014",
+      "expected_not_landed": "17ccc9b01855",
+      "observed": "17ccc9b01855; unchanged revision6",
+      "status": "FAIL"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_FABRIC_OVERLAY_SERVED_GRAPH_20261008.md@0b0180e42a",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_FABRIC_OVERLAY_SERVED_GRAPH_20261008.md@1d61e96831"
+  },
+  "risk_class": "WORLD",
+  "rollback": "No activation landed; all families/Pipe/pointer unchanged. On later authorized deployment, worker GLOBGRPH_FABRIC_OVERLAY=0 or saved digest/pointer restores prior behavior.",
+  "scope": "Image built; activation STOPPED by naming gate and issuer107262",
+  "declared_exclusions": [
+    {
+      "item": "Worker activation and first served publish",
+      "reason": "safe-apply naming refusal; issuer107262 HOLD until fix lands and new GO"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-10-08/codex_overlay_stopped.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-schedule",
+      "invocation": "comp-schedule --owner 0.7.0_AE_CloudOps",
+      "result": "PARTIAL_OR_BLIND budget C1; not clearance"
+    },
+    {
+      "tool": "comp-trigger",
+      "invocation": "comp-trigger globgrph --days 2",
+      "result": "152 rules34schedules scanned;5matches; derive nightly02:00Z; excludes S3 notifications"
+    }
+  ],
+  "status": "STOPPED-NOT-DEPLOYED"
+}
