@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-DEPLOY-e42.a07-canonical-first-deploy-laptop",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "88c7018366"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md",
+    "vintage_commit": "88c7018366",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~S/task_orders/MDPF_SECCLASS.TO-DEPLOY-e42.a07-canonical-first-deploy-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~S",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-49financial/_code/a07_dim_asset_classification.py",
+      "kind": "s3_object",
+      "commit_or_etag": "4092c5b80469ab780040a842eebe13cb",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "UPLOADED 2026-10-07T13:44:30Z by this seat, ONE run of .tools/safe-deploy.sh from a scratch worktree detached at q/dell1/secclass-r9-held-32/r1 b0132b22a8 (the shared laptop CLOUD did not then carry the candidate). Gate output: 'DEPLOYED [advi] ... -> _code/', 'VERIFY OK comp-pipescript deployed', 'OK: safe-deploy gate PASS -- all 1 file(s) deployed and verified'. The upload plan was the ONE key (file_to_s3_target advi; second_targets_for []; shipped_artifacts []; bundle None). MOVED ETag 9202d701c552d4fb38a40f975f0eae9e -> 4092c5b80469ab780040a842eebe13cb, 34,289 B -> 39,316 B. ROLLBACK HANDLE VersionId 72tSRnxMSKkBdtgAJZtqQcHeebqACIl1 re-verified live at 2026-10-08T07:3xZ, still returning ETag 9202d701c552d4fb38a40f975f0eae9e at 34,289 B.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/e42_a07_etag_check.py -- expect: E42-A07 ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R11_CHECKS/e42_a07_etag_check.py",
+      "expect": "E42-A07 ok=True",
+      "output_evidence": "E42-A07 ok=True candidate=4092c5b80469ab780040a842eebe13cb live=4092c5b80469ab780040a842eebe13cb",
+      "denominator": "RE-RUN at 2026-10-08T12:0xZ for this instance rather than quoted from the deploy session, because the key's IsLatest MOVED in between: it now reads VersionId 7wzSt1JzOCzNiPpAiEF1Tqqbrcwq4elj at 2026-10-07T16:31:18Z where the ledger's L1 recorded CQXT.gVFAKyhpUWVt3Vwt48F3IiIER3x at 13:44:30Z. The ETag and size are IDENTICAL across both (4092c5b8..., 39,316 B), so that event minted a VERSION and not CONTENT -- another seat's safe-deploy shipping the NEW key _code/tests/test_a07_canonical_first.py (single version 3IPTlGM9..., 16:31:23Z) re-uploaded this carrier byte-identically alongside it, the same mechanism the e65 ledger's leg L3 documented. AC1 compares content, so it is unaffected and re-reads ok=True. NO OTHER KEY MOVED at the act: of 84 keys under _code/ at the time (denominator printed), a07 was the only one with a 2026-10-07 LastModified, the next most recent being _code/perfrp_firm_pin.py at 2026-09-30T07:36:19Z. The prefix now holds 86 keys, 4 stamped 10-07 after 16:25Z (the pair above, plus d06_firm_mix_summary.py and its test at 17:59Z) -- all later than this act and accounted to other seats.",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "safe-deploy.sh",
+      "invocation": ".tools/safe-deploy.sh data/assets/scripts/gold/runners_49f/a07_dim_asset_classification.py (ONE run, from the scratch worktree root)",
+      "result": "OK rc=0 -- 'OK: safe-deploy gate PASS -- all 1 file(s) deployed and verified'"
+    },
+    {
+      "tool": "comp-pipescript deployed",
+      "invocation": "comp-pipescript deployed (via the safe-deploy gate's own VERIFY leg)",
+      "result": "OK -- MATCH row '[advi:gold] a07_dim_asset_classification.py MATCH basis: raw bytes (working tree and S3 object are byte-identical)'; summary 1 MATCH, 0 STALE, 0 MISSING_ON_S3; ANSWER-STATE PRESENT_WITH_ZERO_RESULTS; DENOMINATOR [gold] s3://opal-data-49financial/_code/ filter matched 1 of 73"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg --slug secclass-e42-a07-deploy-s-20261007",
+      "result": "OK -- entry opened BEFORE the act with 2 legs, window 30h; L1 closed on the upload proof. L2 was closed and the entry CLOSED by the issuer 2.0.0_SA_COO~M1 in e1b98c193b, not by this seat (amendment 1 moved that read to dell1)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CONDITION 4, the post-run comparison, which the order made a ROLLBACK trigger: every class move on the first chain run after the upload compared against A07_SWITCH_BEFORE_AFTER_20261007.json, with 'any move the JSON does not list' stopping the close. This leg was READ BY dell1 under amendment 1 and RULED by 1.0.0_SA_CTO~DELL1; it is recorded here, not claimed as this seat's measurement.",
+      "expected": "the switch effective with canonical-* labels in the source census, every listed move at plan, and no unlisted move",
+      "observed": "L2 RULED PASS, ruling 2a8ca734d2 (row D1-S7), on the 09:47Z 49F production chain run for date 10-07 -- NOT the 12:45Z floor the order named, but the S3 silver-accelerator arm, the second of the two firing paths on the same dispatch Lambda. The switch took effect: 4,006 of 4,135 classified with canonical-* labels in the source census. Of the request's 163 listed moves 162 land at plan; the 163rd is CASH, now cash by SC-e-68's signed write. THE READ FOUND 55 MOVES THE JSON DOES NOT LIST, which under the order's literal text is a rollback; the CTO ruled PASS instead because each is a canonical-ticker read EQUAL to its current etf-classifications row, landed after the JSON was built by acts signed under their own halves (e32/e49 DIRECT, the AI model rows, scheduled rows), so rolling a07 back 'would remove correct reads'. The ruling re-grades condition 4 on (a) every listed move at plan or explained by a later signed write and (b) every unlisted move equal to its live table row, and records the cause in its author's own words: 'This was my specification error: the condition froze a population that later signed acts were always going to move.'",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The candidate bytes were resolved by CONTENT at the pin rather than by filename or commit message: git show 88c7018366:data/assets/scripts/gold/runners_49f/a07_dim_asset_classification.py piped to md5sum.",
+      "observed": "4092c5b80469ab780040a842eebe13cb at the pin, equal to the deployed ETag and to the candidate md5 the ledger named; the file resolves at that path in that commit",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Ledger leg L2's read -- the chain run's A5-A07-SOURCE-CENSUS line, the mix totals, and the move comparison.",
+      "reason": "NOT THIS SEAT'S. Amendment 1 moved it to dell1 once dell1's firm-bucket READ applied at 05:17:17Z; 2.0.0_SA_COO~M1 took it and 1.0.0_SA_CTO~DELL1 ruled it. This seat retained only the flip and the ROLLBACK, and the rollback never triggered because the ruling graded the 55 unlisted moves as signed writes read faithfully."
+    },
+    {
+      "item": "The d06/d08 mix-total limb of conditions 6 and 7.",
+      "reason": "RULED NOT APPLICABLE to 49 Financial by 2a8ca734d2: 'no 49F served mix exists while the d06 twin is unpublished (e55 half, condition 3)'. This seat had prepped that limb and relayed its instruments to dell1 at 07:06Z; the ruling retires it for this firm."
+    },
+    {
+      "item": "A one-row arithmetic gap in the ruling's own move count, UNRECONCILED and recorded rather than smoothed.",
+      "reason": "The ruling and the ledger close both say the JSON lists 163 moves (162 at plan + CASH). A07_SWITCH_BEFORE_AFTER_20261007.json reads 164 on three independent counts -- its `changed` field, the sum of `changed_by_class_move`, and the number of rows carrying changed=true -- and the COO half's own table says 'all 164'. So 164 - 162 - 1 leaves ONE listed move unaccounted in the ruling's arithmetic. The ledger is CLOSED and L2 RULED PASS by the seat that owns that judgment, so this instance does not reopen it and the flip is not held on it; the gap is named here and raised once to 1.0.0_SA_CTO so the record is not silently inconsistent. Also noted: the JSON's CASH row predicted equity -> fixed_income, which is neither its before class nor where it actually landed (cash, by e68), and its cottonwood figure -5,480,054.44 is the number CTO half e68 AMENDMENT 3 later traced to this same `inferred` local build and retired as not describing served output."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~S/logs/2026-10-08/session_close_2215-0055Z.md"
+}
