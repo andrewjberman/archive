@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-i-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-1.teams-request-text-and-offer.md",
+    "group": "OTHER",
+    "vintage_commit": "544c5c0cd6"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~31",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.inbound1.md",
+    "vintage_commit": "544c5c0cd6",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-1.teams-request-text-and-offer.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/assist.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "work_request, WORK_SYSTEM, offer_text work branch, DEVICES from NAMES; repo-local, not deployed, no outside call run",
+      "artifact_covered_by": [
+        "CTi1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/tenant.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "on_chat_messages stores work; on_job_open offered_to/offered_at; early award on offered boxes; award text with reading time; on_job_complete grade refusal; not deployed",
+      "artifact_covered_by": [
+        "CTi1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/gen_bus_devices.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--write / --check of NAMES.json bus_devices against org/devices/DEVICES.json",
+      "artifact_covered_by": [
+        "CTi1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/NAMES.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bus_devices added (4 boxes), no other key touched",
+      "artifact_covered_by": [
+        "CTi1-AC1",
+        "CTi1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_inbound_cloud.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 cases, every outside call faked"
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~31/INBOUND_CLOUD_DEPLOY_NOTES.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the two queue policy statements and the deploy carry list; no Terraform edited"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTi1-AC1",
+      "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_cloud.py expect: INBOUND-CLOUD-TEST ok=True",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_cloud.py",
+      "output_evidence": "(run as timeout 120 python ..., rc 0) INBOUND-CLOUD-TEST ok=True cases=9/9\nCases: work text is one text with WORK REQUESTED by / Recommend: / #dev; no-work text byte-identical to today's shape; six non-JSON or invalid model answers byte-identical to today's shape; 160-character bounds; packaged boxes equal NAMES bus_devices; four-box offer, three bids do not award and the fourth does, award text names box, cpu, memory and read time; unavailable bid never wins and an all-unavailable round parks; no grade / FAIL / graded by the doer / graded by a non-reviewer each leave status working, draft nothing, text the refusing line; a good grade reaches verify and keeps the grade.",
+      "denominator": "9 of 9 cases pass",
+      "status": "PASS",
+      "expect": "INBOUND-CLOUD-TEST ok=True"
+    },
+    {
+      "criterion_id": "CTi1-AC2",
+      "criterion_verbatim": "python data/transcripts/scripts/teams_chat/gen_bus_devices.py --check expect: BUS-DEVICES ok=True",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/teams_chat/gen_bus_devices.py --check",
+      "output_evidence": "(run as timeout 120 python ..., rc 0) BUS-DEVICES ok=True boxes=4 in_register=4 in_names=4\nBefore --write the same check read ok=False in_names=0 (the negative arm).",
+      "denominator": "4 of 4 register boxes present in NAMES.json bus_devices with equal queue names",
+      "status": "PASS",
+      "expect": "BUS-DEVICES ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the difference control is inside AC1: a message that asks for nothing and six invalid model answers must give today's text byte for byte, against the work case that must not",
+      "expected": "markers absent in the control cases, present in the work case",
+      "observed": "graded inside AC1 (cases 1 to 3)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: every outside call is a stand-in with a fixed answer",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a real model answer to WORK_SYSTEM, a real text, a real bus send to dell1/dell2",
+      "reason": "the order forbids any call that leaves the machine; the prompt's output shape is graded only against stand-in answers"
+    },
+    {
+      "item": "the box half of the seam (.tools/remote-job.py sending reviewer, brief_sha256, coo, grade)",
+      "reason": "another worker's cell"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W31-S1",
+    "NFRA_CTLPLN-W31-S2",
+    "NFRA_CTLPLN-W31-S3"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~31/NFRA_CTLPLN.TO-CT-i-1.teams-request-text-and-offer.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_cloud.py",
+      "result": "INBOUND-CLOUD-TEST ok=True cases=9/9"
+    }
+  ]
+}
