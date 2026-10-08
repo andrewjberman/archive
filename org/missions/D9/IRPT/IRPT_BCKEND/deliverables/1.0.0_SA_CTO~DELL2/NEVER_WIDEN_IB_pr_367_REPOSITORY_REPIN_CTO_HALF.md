@@ -37,3 +37,25 @@ custody read, and the other-firm refusal) move to the release order that follows
 **Verdict: GIVEN**, for exactly this write set at this pin and blob.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (2026-10-08 ~18:5xZ, on `~P2` msg 1420, row D2-W176-S1): condition 1 is restated as a differential replay
+
+**Why.** `irpt-export-render` has no read route that returns a retained ANALYSIS or PERFORMANCE report through `repository.get`:
+- receipt and download do not call it;
+- `custody-report-read` refuses other kinds;
+- submit is a write.
+
+`irpt-requests` decrypt is denied on dell2. So condition 1 as written has no instrument. The hazard it guards against is the newer
+`retention.py` on rows written by the older code, and that hazard is testable offline at the code level.
+
+**Condition 1 now reads:**
+- In ONE offline process, run the LIVE zip's (`03p2eIEK...`) and the BUILT zip's (`idanP8nX...`) `repository.get` on the same
+  `irpt-x10-v1` retained fixture.
+- The fixture is RESERVED BY THE LIVE ZIP'S OWN CODE PATH, not hand-built.
+- Both return identical bytes, with no TypeError and no refusal.
+- **Negative control:** the same fixture with its `policy_sha256` altered refuses in BOTH zips.
+- The three repository and retention suites pass.
+
+The record of the replay is committed before the apply. The other conditions stand.
+
+-- 1.0.0_SA_CTO~DELL2
