@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-v-6.analysisreport-wire-type-is-generated-from-v2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-v-6.analysisreport-wire-type-is-generated-from-v2.md",
+    "group": "OTHER",
+    "vintage_commit": "eb9071c489"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6L.md",
+    "vintage_commit": "eb9071c489",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-v-6.analysisreport-wire-type-is-generated-from-v2.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/v6_checks.py",
+      "kind": "script",
+      "commit_or_etag": "ff62b41d58",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "typecheck | tests, one RESULT line each; tests runs the InvestorReporting suite at portal d1b21c97 and at HEAD in two temporary trees (the suite's generator tests write into contracts/wire/). Local.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ff62b41d58",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_YCDGEN-D2-W6-S3 (ruled by the issuer; order amended @eb9071c489). The portal edits are portal commits 5edaa0b5 (AnalysisReport.ts regenerated; adapt.ts, contracts/index.ts, coverage.test.ts migrated) and 1c306eb3 (gen-wire.ts isPlainObjectBody union rule; AnalysisReport.ts regenerated as a type alias; wire/index.ts and wire/responses.ts name the generated union), outer pointer at af196209af; they live inside the submodule, so they have no outer path to pin. Render diff before/after the gen-wire.ts edit over 25 documents + responses.ts + index.ts = 27 files: 1 differs (AnalysisReport.ts, line 12 interface -> type), 26 byte-equal.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- the generator's AnalysisReport body equals the committed one (header excluded)",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/u6_checks.py regen",
+      "output_evidence": "generator run (bun --no-install from portal/, out-dir C:\\Users\\Test\\AppData\\Local\\Temp\\u6regen_TMP): rc=0 SOURCE: infra/aws/lambda/investor-reporting/_contracts/AnalysisReport.v2.schema.json\nbodies (header excluded): generated 134 lines, committed 134 lines\nRESULT: regen PASS\nrc=0",
+      "denominator": "1 of 1 bodies identical: generated 134 lines, committed 134 lines",
+      "expect": "^RESULT: regen PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the portal typecheck passes with the migrated consumers",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/v6_checks.py typecheck",
+      "output_evidence": "portal HEAD 1c306eb3 ; bun --no-install run typecheck: rc=0 ; 0 error line(s)\nRESULT: typecheck PASS\nrc=0",
+      "denominator": "0 error lines over the whole portal tsc -b --noEmit",
+      "expect": "^RESULT: typecheck PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- every portal InvestorReporting test that passes at d1b21c97 still passes",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/v6_checks.py tests",
+      "output_evidence": "trees built under C:\\Users\\Test\\AppData\\Local\\Temp\\v6tests_TMP (base = portal d1b21c97 archive, head = portal working tree at 1c306eb3); suite = src/pages/InvestorReporting\nbase d1b21c97: bun rc=1 ; 981 tests: 900 pass, 73 fail, 8 skip\nhead 1c306eb3: bun rc=1 ; 981 tests: 900 pass, 73 fail, 8 skip\ngreen at d1b21c97: 900 ; of those not green at head: 0 ; green at head and not at base: 0\nRESULT: tests PASS\nrc=0",
+      "denominator": "900 tests green at d1b21c97; 900 of them green at HEAD; 0 regressed",
+      "expect": "^RESULT: tests PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A -- the order names no mutant control",
+      "expected": "N/A -- none named",
+      "observed": "N/A -- none named",
+      "status": "N/A-SPEC-NAMES-NONE",
+      "reason": "the order names no mutant control"
+    },
+    "determinism": {
+      "method": "N/A -- every arm reads committed files or runs a fixed suite at two fixed revisions",
+      "observed": "typecheck and tests each ran twice with the same counts (35 errors; 900/899 green, 1 regression)",
+      "status": "N/A-WITH-REASON",
+      "reason": "no clock, network or randomness is read"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "renderResponses keeps its own startsWith/endsWith interface test",
+      "reason": "AMENDMENT 1 limits the fix to the union rule in renderModule; no response envelope is a union today (the render diff shows responses.ts byte-equal before and after)"
+    },
+    {
+      "item": "contracts/wire/ExportBundle.ts, ExportReceipt.ts, HoldingsSnapshot.ts, index.ts and responses.ts differ from the generator's output at d1b21c97",
+      "reason": "found when the suite rewrote them in the real tree (row S3); restored from HEAD; only the AnalysisReport names in index.ts and responses.ts were edited, as AMENDMENT 1 allows"
+    },
+    {
+      "item": "src/api/endpoints/investor-reporting.ts was not edited",
+      "reason": "it names AnalysisReportWire only as a type argument, which the union satisfies; the typecheck reports no error there"
+    }
+  ],
+  "surprises": [
+    "IRPT_YCDGEN-D2-W6-S3"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 v6_checks.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "tsc",
+      "invocation": "bun --no-install run typecheck",
+      "result": "0 errors"
+    }
+  ]
+}

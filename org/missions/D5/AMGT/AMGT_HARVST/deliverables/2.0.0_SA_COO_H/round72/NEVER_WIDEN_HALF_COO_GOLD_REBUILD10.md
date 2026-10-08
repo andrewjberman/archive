@@ -48,12 +48,25 @@ Dry run started 12:43:06Z, verdict 13:27:33Z, `gold_rebuild10.signing.out` / `.j
 The act's counts WILL differ: the leg adds silver between the dry run and the act. The act runs the gate again and then the
 rule on what it writes; a count that differs is expected, a rule that breaks stops the act.
 
-**Read and NOT explained by this seat:**
-- Of the 3,646 added pairs, 3,548 are on securities whose list entry did not move. They can only come from new silver. I did
-  not count the new silver articles, so "new silver accounts for all of them" is an inference, not a measurement.
-- 97 added pairs are on `GSK_LN_Equity`, which the rule lists as fallback. Not read why.
-- 14,644 daily rows change in class (a) while the daily row count stays 68,002. The class allows it (a touched security);
-  the size is large and I did not read which fields moved.
+**AMENDMENT 1 (2026-10-08 ~15:5xZ, on `1.0.0_SA_CTO~Z` msg 31812): the two figures read from rows.** A second build through
+the same capturing client (`gold_rebuild10.dump.py`, 14:56Z to ~15:35Z, PUTS SENT 0) kept the served and built rows of both
+tables; `gold_rebuild10.reads.py` read them, output `gold_rebuild10.reads.out`. Its counts are later than the dry run's
+because the leg kept collecting (mention built 52,129, added 3,774).
+
+- **The daily changes, by field.** 18,532 daily rows changed. By the group of fields that moved: rolling sums only 11,998;
+  coverage only 3,805; rolling and coverage 2,477; an own-day count with rolling 141; own-day, rolling and coverage 111.
+  Rows per field: `cumulative_ytd` 14,727; `publishers_covered` and its codes 6,393; `data_status` 6,349;
+  `trailing_30d_sum` 4,802; `baseline_30d_sum` 4,747; `trailing_7d_sum` 1,445; `articles_total`, `mention_count_total` and
+  `mention_score` 252 each. So the large number is a year-to-date sum carrying forward from the 252 days that gained a pair.
+- **THE STOP TEST of msg 31812: 0.** An own-day count field moved on 252 (security, day) rows; every one is a day on which
+  that security had a pair added, gone or re-counted (3,198 such cells). None moved without one.
+- **`GSK_LN_Equity`'s 97 added pairs:** all 97 are Seeking Alpha articles fetched on 2026-10-08, all on the form `GSK`
+  alone, mention count 1 in the ten printed. Pairs served 471, built 568. They are new silver from today's leg, not a
+  matcher change. Ten titles with their forms are in the reads output for `3.0.0_SA_CVO~Z`'s hand read; several read as
+  sector round-ups that name GSK once.
+
+**Still an inference, named as one:** of the added pairs, those on securities whose list entry did not move come from new
+silver; I did not count new silver articles per security.
 
 ## TERM THREE -- BNP (row AMGT_HARVST-Z-W112-S1), printed again
 
@@ -65,15 +78,16 @@ open, now 2 rather than 3, and still not explained.
 
 - **Writers of the served parts, N = 2:** `publication_gold.build_mention` and `build_daily`, each run once by the act.
 - **Readers:** whatever reads the latest part under the two prefixes (the research application's news read).
-- **Rollback, per key:** delete the one part the act wrote under each prefix; the latest part is then rebuild #9's
-  (`part-20261008T055319Z.parquet`, `part-20261008T061255Z.parquet`). The act's record names both written keys.
+- **Rollback, per key (AMENDMENT 1, msg 31812): NOT a delete.** Rebuild #9's two parts
+  (`part-20261008T055319Z.parquet`, `part-20261008T061255Z.parquet`) are written again, byte for byte, as the newest part
+  under each prefix, so a reader's latest part is rebuild #9's content. The act's record names both written keys.
 
 ## BOTH BRANCHES
 
 - **Gate HOLDS and VERIFY HOLDS:** done; ledger closed; row Z-S102 can close; `HVST-bk-3` (the second feed walk) is spawned.
 - **Gate BROKEN:** nothing is written.
 - **VERIFY BROKEN after a write:** the two written parts are named to `1.0.0_SA_CTO~Z` in the same session with the breaking
-  keys; the rollback above is taken only on its word, since a delete is not mine to take alone.
+  keys; the rollback above is taken only on its word.
 
 ## CONDITIONS
 

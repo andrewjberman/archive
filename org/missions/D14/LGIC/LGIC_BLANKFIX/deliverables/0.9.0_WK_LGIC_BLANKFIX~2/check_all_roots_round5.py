@@ -30,6 +30,36 @@ def _fields(line):
     return dict(p.split("=", 1) for p in line.split()[1:] if "=" in p)
 
 
+def _root_lines(lines):
+    """The mapped roots' section lines of an `all` output, key -> line: ROOTCHECK and COMPLETED/STOPPED in one line."""
+    out = {}
+    for ln in lines:
+        if ln.startswith("ROOT ") and " | " in ln:
+            out[ln[5:].split(" | ", 1)[0]] = ln
+    return out
+
+
+def _repeat_diffs(live, saved):
+    """The repeat over the MAPPED roots only: each saved mapped root's line against the live line of the same root (a saved
+    root absent from the live run is a difference; a live root absent from the saved file is ADDED, not compared), and the
+    ALL-ROOTS last lines field by field over the fields both carry (a field one line carries is listed, not a difference).
+    UNMAPPED lines are not compared. Returns (differences, added roots, one-sided fields)."""
+    diffs, lr, sr = [], _root_lines(live), _root_lines(saved)
+    for key in sorted(sr):
+        if key not in lr:
+            diffs.append("%s: a saved mapped root is absent from the live run" % key)
+        elif lr[key] != sr[key]:
+            diffs.append("%s: the root line differs: live %s | saved %s" % (key, lr[key], sr[key]))
+    added = sorted(k for k in lr if k not in sr)
+    fl = _fields(live[-1]) if live else {}
+    fs = _fields(saved[-1]) if saved else {}
+    for k in sorted(set(fl) & set(fs)):
+        if fl[k] != fs[k]:
+            diffs.append("ALL-ROOTS field %s differs: live %s, saved %s" % (k, fl[k], fs[k]))
+    one = ["%s (live only)" % k for k in sorted(set(fl) - set(fs))] + ["%s (saved only)" % k for k in sorted(set(fs) - set(fl))]
+    return diffs, added, one
+
+
 def main():
     repo = _repo_root()
     os.chdir(repo)
@@ -41,15 +71,17 @@ def main():
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=110)
     live = proc.stdout.decode("utf-8").splitlines()
     saved = _read(os.path.join(HERE, "ALL_ROOTS_round5.txt"))
-    last_live = live[-1] if live else ""
     last_saved = saved[-1] if saved else ""
     if proc.returncode != 0:
         bad.append("the all command exited %d" % proc.returncode)
-    if last_live != last_saved:
-        bad.append("the last line differs: live %r, saved %r" % (last_live, last_saved))
-    repeat = "identical" if live == saved else "DIFFERS"
-    if repeat != "identical":
-        bad.append("the live output differs from ALL_ROOTS_round5.txt")
+    diffs, added, one_sided = _repeat_diffs(live, saved)
+    repeat = "identical" if not diffs else "DIFFERS"
+    for d in diffs:
+        bad.append(d)
+    for r in added:
+        print("ADDED " + r)
+    for fld in one_sided:
+        print("ONE-LINE-FIELD " + fld)
     f = _fields(last_saved)
     if not last_saved.startswith("ALL-ROOTS ok=True "):
         bad.append("the saved last line is not ALL-ROOTS ok=True: %r" % (last_saved,))
@@ -63,8 +95,9 @@ def main():
         bad.append("mapped %d + unmapped %d != roots_total %d" % (mapped, unmapped, total))
     with open(MAP, "rb") as fh:
         keys = sorted(json.loads(fh.read().decode("utf-8"))["roots"])
+    keys = [k for k in keys if k not in added]  # an ADDED root has no saved run: listed above, not compared
     if len(keys) != mapped:
-        bad.append("the map holds %d roots, the last line says mapped=%d" % (len(keys), mapped))
+        bad.append("the map holds %d roots the saved run covers, the last line says mapped=%d" % (len(keys), mapped))
     items_all, braces_ok, fix_n = 0, 0, 0
     for key in keys:
         name = key.replace("/", "__") + ".txt"

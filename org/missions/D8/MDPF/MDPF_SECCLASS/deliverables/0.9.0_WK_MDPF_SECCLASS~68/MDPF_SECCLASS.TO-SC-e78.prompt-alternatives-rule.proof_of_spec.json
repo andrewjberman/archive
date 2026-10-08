@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e78",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e6f1fdfc1fcd7773a9cd11b2864f558b7cba09b5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R15.md",
+    "vintage_commit": "e6f1fdfc1fcd7773a9cd11b2864f558b7cba09b5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e78.prompt-alternatives-rule.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~68",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classification_model.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "build_prompt instruction gains one sentence at line 96: 'Hedge funds, private funds and real estate funds are all alternatives.'; vocabulary, JSON shape and data-object rule unchanged; LOCAL commit only, no deploy",
+      "artifact_covered_by": [
+        "SC15-e78-AC1",
+        "SC15-e78-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_prompt_alternatives_rule.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "7 tests: rule sentence pinned, three phrases plus alternatives, exactly once, name/ticker never in instruction (control), null name/ticker, vocabulary and JSON shape unchanged, ASCII",
+      "artifact_covered_by": [
+        "SC15-e78-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC15-e78-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/sc_r15_prompt_rule.py -- expect: PROMPT-RULE ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/sc_r15_prompt_rule.py",
+      "expect": "PROMPT-RULE ok=True",
+      "output_evidence": "PROMPT-RULE ok=True hedge=True private=True real_estate=True alternatives=True data_only=True (rc=0)",
+      "denominator": "5 of 5 checks True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC15-e78-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=356 passed in 1.36s",
+      "denominator": "356 passed, 0 failed (the base control was 349; the new file adds 7)",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <paths>",
+      "result": "see report (LOCAL on wk-secclass-r15-68)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "test_name_and_ticker_never_enter_the_instruction_text and test_null_name_and_ticker_stay_in_the_data_object_only: a probe name and ticker must appear only in the trailing JSON object.",
+      "expected": "name and ticker absent from instruction text",
+      "observed": "both tests pass; AC1 data_only=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 run once each after the final edit",
+      "observed": "AC1 ok=True 5/5; AC2 356 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Lambda redeploy of _shared, any AWS call, model call or push.",
+      "reason": "BOUNDS: LOCAL build only; a redeploy follows in the deploy lane."
+    }
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md"
+}
