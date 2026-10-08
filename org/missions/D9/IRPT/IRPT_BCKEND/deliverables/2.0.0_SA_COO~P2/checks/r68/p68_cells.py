@@ -69,8 +69,11 @@ def main():
     if not str(d.get("live_entry_sha256", "")).startswith("fc241d806ecc"):
         fail("live entry.py sha %r" % d.get("live_entry_sha256"))
     aws = str(root / ".tools" / "aws")
-    r = subprocess.run(["bash", aws, "lambda", "get-function-configuration", "--function-name", "irpt-export-render", "--query",
-                        "CodeSha256", "--output", "text"], capture_output=True, timeout=100)
+    # Row S384: never bare "bash" from python -- on Windows it resolves to the System32 WSL stub. Resolve Git Bash.
+    sys.path.insert(0, str(root / ".tools"))
+    from git_bash_resolver import bash_argv
+    r = subprocess.run(bash_argv(aws, "lambda", "get-function-configuration", "--function-name", "irpt-export-render", "--query",
+                                 "CodeSha256", "--output", "text"), capture_output=True, timeout=100)
     live = r.stdout.decode("utf-8", "replace").strip()
     if r.returncode or not live:
         fail("live CodeSha256 unreadable rc %d" % r.returncode)
