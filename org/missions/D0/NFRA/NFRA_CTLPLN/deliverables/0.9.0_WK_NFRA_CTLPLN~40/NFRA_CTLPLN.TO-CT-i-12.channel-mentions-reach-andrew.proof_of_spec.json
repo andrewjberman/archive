@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-i-12",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-12.channel-mentions-reach-andrew.md",
+    "group": "OTHER",
+    "vintage_commit": "8f0db50042"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~40",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.inbound6.md",
+    "vintage_commit": "8f0db50042",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-12.channel-mentions-reach-andrew.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/assist.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three Gateway read methods (teams, channels, channel_messages); repo-local, not deployed, no outside call run",
+      "artifact_covered_by": [
+        "CTi12-AC1",
+        "CTi12-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/channel_mentions.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "poll and on_channel_mention; not yet hooked into tenant.py (the issuer's merge); repo-local, no outside call run",
+      "artifact_covered_by": [
+        "CTi12-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_inbound_channel_mentions.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "seven-arm script with injected fakes; no network",
+      "artifact_covered_by": [
+        "CTi12-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTi12-AC1",
+      "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_channel_mentions.py expect: CHANNEL-MENTIONS ok=True",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_channel_mentions.py",
+      "output_evidence": "(run as timeout 120 python ..., rc 0)\nARM post_mention ok=True\nARM reply_mention ok=True\nARM not_him ok=True\nARM once ok=True\nARM first_run ok=True\nARM budget ok=True\nARM handler ok=True\nCHANNEL-MENTIONS ok=True arms=7/7\nNegative control: with _mentions_me forced True the same script printed reply_mention ok=False, not_him ok=False and CHANNEL-MENTIONS ok=False arms=5/7.",
+      "denominator": "7 of 7 arms pass",
+      "status": "PASS",
+      "expect": "CHANNEL-MENTIONS ok=True"
+    },
+    {
+      "criterion_id": "CTi12-AC2",
+      "criterion_verbatim": "python -m pytest -q -p no:cacheprovider data/transcripts/scripts/tests/test_teams_chat_tenant.py data/transcripts/scripts/tests/test_teams_chat_assist.py && echo ASSIST-SUITE ok=True expect: ASSIST-SUITE ok=True",
+      "method": "command",
+      "invocation": "python -m pytest -q -p no:cacheprovider data/transcripts/scripts/tests/test_teams_chat_tenant.py data/transcripts/scripts/tests/test_teams_chat_assist.py && echo ASSIST-SUITE ok=True",
+      "output_evidence": "(run as timeout 120 python ..., rc 0) 65 passed in 0.55s\nASSIST-SUITE ok=True",
+      "denominator": "65 of 65 tests pass",
+      "status": "PASS",
+      "expect": "ASSIST-SUITE ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the difference control is inside AC1 (not_him arm): four non-mention posts give no event, the same post with his id added gives one; plus the forced-True mutant above",
+      "expected": "no event for the four negatives, one for the control",
+      "observed": "graded inside AC1",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: every outside call is a stand-in with a fixed answer and a fixed clock",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a real gateway, Graph, S3, ldo or text call",
+      "reason": "the order forbids any call that leaves the machine; everything is injected"
+    },
+    {
+      "item": "the tenant.py hookups (poll in ingress, route entry for teams.channel_mention)",
+      "reason": "the order forbids editing tenant.py; the issuer adds two lines at the merge"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~40/NFRA_CTLPLN.TO-CT-i-12.channel-mentions-reach-andrew.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_channel_mentions.py",
+      "result": "CHANNEL-MENTIONS ok=True arms=7/7"
+    }
+  ]
+}
