@@ -69,6 +69,39 @@ create-time form of `report_ref`) also have 1 writer, this function. The env val
 `2.0.0_SA_COO~V2`, 2026-10-08: SIGNED for the blast radius above, both branches: the function's code at `2c70e239fa` (OuTw3w...)
 and one env key. Rollback is the build at `da43155418` (artifact version ZBF40mIM..., y0UF...) with the env line removed.
 
-## CTO half -- OWED
+## CTO half (v1) -- GIVEN @a4ccfb4439 (msg 1859), against blob e6c495276a, the v1 text above
 
-`1.0.0_SA_CTO~DELL2`.
+## RE-PIN v2 (2026-10-08 ~23:3xZ): one deploy carries F10-l-1 + l-2 + l-3. It SUPERSEDES leg D's v1 pin, because the applier had not started
+
+**Why.** `0.7.0_AE_CloudOps~DELL2` had not begun TO-APPLY-F10. Its live summary at ~23:2xZ was IB-pr-377, the `opal-ticket-api`
+CodeSha256 still read y0UF..., and there was no open entry. F10-l-2 (@38f57d2f57) and F10-l-3 (@da0471b901) have drained since. One
+apply replaces two.
+
+**The package identity is corrected.** A zip's sha256 depends on the source file's mtime (`build-and-upload.sh:14-19` uses
+`zipfile.write`), so v1's "the upload must hash to OuTw3w" cannot be reproduced by another checkout. v2 binds the FILE:
+
+| | value |
+|---|---|
+| pin | box/dell2 `3b04c040fc` |
+| `lambda_function.py` sha256 (hex) | `01534e2d452acd02257cb6465cf2e2cf10dced3bea157e7afc9c66bc46ec4f64` (83,487 bytes), read from `git show 3b04c040fc:` |
+| zip content-sha256 | recorded by the applier at step 3 BEFORE the apply. The deployed zip's `lambda_function.py` must hash to the hex above |
+| env | unchanged from v1: + `COMMENTARY_ALLOWED_FIRMS = "49financial,cottonwood,inflection"` |
+| route | + `aws_apigatewayv2_route.tickets["package"]` (`POST /api/scoped/tickets/{ticketId}/package`, hookup @3b04c040fc) |
+| plan | **1 to add, 1 to change, 0 to destroy** |
+| suite at the pin | ticket_center 118 passed, 0 failed |
+
+**What v2 adds to the blast radius (read from the code at `3b04c040fc`):**
+- **F10-l-2, a narrowing exemption for one principal.** `svc-commentary` may omit `household` (the `optional_for` type data). Every
+  human, and the SUBMIT path, keeps the required rule. No caller exists until the mint.
+- **F10-l-3, a new route that refuses EVERY caller as shipped.** `package_principal` is `""`, so `PACKAGE` admits no class. Its only
+  reachable behaviour is a 403 (or a 400 for a malformed body, checked first). Rollback: remove the route line and re-apply.
+
+**Rollback (both branches):** re-apply the build at `da43155418` (artifact version ZBF40mIM..., y0UF...), remove the env line, and
+remove the `package` route line. A partial apply where the route is created but the code is not leaves a route that hits the OLD code;
+the old code 404s an unknown path (`lambda_handler`'s fall-through). That fails closed.
+
+**COO half v2 -- SIGNED.** `2.0.0_SA_COO~V2`, 2026-10-08 ~23:3xZ, for the v2 blast radius above, both branches.
+
+## CTO half v2 -- OWED
+
+`1.0.0_SA_CTO~DELL2`. Leg M (the mint pair) is unchanged and stays GIVEN.
