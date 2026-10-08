@@ -11,7 +11,7 @@ Each proof instance reads VALID (rc=0) when checked from inside its own worktree
 ## The candidate
 
 Portal branch `dsgn-amgtv1-r53-candidate` at **84e13d0f**: base DEV 38cc0ecf + 2b8cbe4c + be3c3547 (cherry-pick of d3e2d791) +
-84e13d0f (cherry-pick of 2c8562a0). 9 files, product and harness. DEV is still 38cc0ecf (ls-remote read ~22:2xZ), so the candidate
+84e13d0f (cherry-pick of 2c8562a0). 10 files, +315 -10, product, harness and the Freshness test (corrected from "9" on the CTO's diff read, msg 32088). DEV is still 38cc0ecf (ls-remote read ~22:2xZ), so the candidate
 fast-forwards DEV.
 
 Read on the candidate (slot ~116 tree):
@@ -71,3 +71,12 @@ ink, the page shows:
 1. CTO review of candidate 84e13d0f.
 2. ONE DEV push on Andrew's word, by the integrator.
 3. Rows S25 and S26 are candidates for the next DSGN round. S24 goes to AMGT_RESAPP's issuer.
+
+## CTO verdict (msg 32088, ~22:4xZ)
+
+APPROVED for DEV. The push is one fast-forward of DEV 38cc0ecf to 84e13d0f, on Andrew's word; the ask went to 0.0.0_AB_MSTR~Z at
+~22:4xZ. The CTO added one finding for round 54: a Seeking Alpha cell whose served state is no_record still carries
+data-state="collected", because `collected` is set true for every served sentence. It should carry the served state instead.
+
+**Round-54 list as it stands:** that finding, S25 (the day cells wrap), and S26 (the "Research pack" header). S24 goes to AMGT_RESAPP's
+issuer.
