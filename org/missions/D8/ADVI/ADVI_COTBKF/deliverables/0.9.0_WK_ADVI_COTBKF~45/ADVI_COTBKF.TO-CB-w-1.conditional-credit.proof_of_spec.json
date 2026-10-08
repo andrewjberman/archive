@@ -37,6 +37,17 @@
       ]
     },
     {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_daily_returns.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local derivation; nothing deployed, no S3 write",
+      "artifact_covered_by": [
+        "CB23w1-AC1",
+        "CB23w1-AC2"
+      ]
+    },
+    {
       "path_or_key": "data/assets/scripts/silver/commonwealth_sweep_regrade.py",
       "kind": "script",
       "commit_or_etag": "PENDING-THIS-COMMIT",
@@ -93,8 +104,8 @@
       "criterion_verbatim": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_cash_leg.py expect: passed",
       "method": "command",
       "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_cash_leg.py",
-      "output_evidence": "21 passed in 2.4s (rc 0): the 9 round-22 tests, the 5 round-23 tests (conditional is the default, r19 and repaired stay selectable; a funding sale WITH an existing CFNCASH leg gets no second credit, value 1000 vs 1400 under repaired; a sale WITHOUT one is still credited; only a credit-signed row equal to the proceeds suppresses it; the condition is per account-day) and 7 AMENDMENT 1 tests: (a) a sale of a security valued the day before is credited, one unpriced the day before is not (value 600 vs 1000 under repaired), valued_day_before needs a holding and a price, only valued sales enter the proceeds; (c) a CFNCASH row of any type equal to a same-day sweep sale suppresses the credit, an unequal amount / another day / no sweep sale beside it does not, vendor_sweep_leg_days is per account-day. Mutants: vendor_sweep_leg_days dropped from the skip set: 1 failed, 20 passed; the valued() filter removed: 2 failed, 19 passed; both restored, 21 passed. Full silver tests: 549 passed, 11 skipped (rc 0). ruff check --target-version py39 on the four edited files: All checks passed.",
-      "denominator": "21 of 21 tests passed",
+      "output_evidence": "23 passed in 3.2s (rc 0): the 9 round-22 tests; the 5 round-23 tests (conditional is the default, r19 and repaired selectable; a funding sale WITH an existing CFNCASH leg gets no second credit, value 1000 vs 1400 under repaired; WITHOUT one it is credited; only a credit-signed row equal to the proceeds suppresses it; per account-day); condition (c) tests (a CFNCASH row of any type equal to a same-day sweep sale suppresses the credit; unequal / other day / no sweep sale do not; vendor_sweep_leg_days per account-day); and the AMENDMENT 2 tests: a sale of a security valued the day before is credited (value 1000, ret 0, no blank reason); a sale of a security unvalued the day before (unpriced Monday, and, separately, never held) is NOT credited (value 600 vs 1000 under repaired) and the day's return is NaN with blank_reason UNVALUED_FUNDING_SALE; a day dropped by (b) is not blanked whatever its valuation; a day with any unvalued sale is blank, not part-credited. Mutants: the blank day not removed from the credit set: 2 failed, 21 passed; the blank_days write removed from daily_returns: 2 failed, 21 passed; both restored, 23 passed. Full silver tests (python -m pytest -q data/assets/scripts/silver/tests): 551 passed, 11 skipped (rc 0). ruff check --target-version py39 on the five edited files: All checks passed.",
+      "denominator": "23 of 23 tests passed",
       "status": "PASS"
     },
     {
@@ -102,17 +113,17 @@
       "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_sweep_regrade.py --before-list v1 --after-list v1 --before-cash-leg r19 --after-cash-leg conditional --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~45 expect: regressions=0",
       "method": "command",
       "invocation": "python data/assets/scripts/silver/commonwealth_sweep_regrade.py --before-list v1 --after-list v1 --before-cash-leg r19 --after-cash-leg conditional --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~45",
-      "output_evidence": "SWEEP-REGRADE sweeps=2 rejected=517 double_drop_months=8 fixed=0 months_before=2057/1522/79014 months_after=2058/1525/79010 control_same=True regressions=1 movers_back=0 (rc 0, 5m17s: the real run takes longer than a 120 s bound, so it ran under timeout 1500). The expectation regressions=0 is NOT met: B3S748567 2025-07 remains. The 23 are classed double_credit=0, vendor_cfncash_leg_of_sweep_sale=13, sold_security_not_valued_day_before=9, other:credit_kept_by_every_condition=1; 22 of 23 are now MATCH; round 22's 25 recovered movers are 0 of 25 MATCH (lost to condition (a)); control 642 of 642 unchanged. Variants (same invocation, scratch driver, not shipped): (a)+(b): regressions=14 movers_back=0; (b)+(c): regressions=10 movers_back=25. Refusal clause applied: test not weakened; row ADVI_COTBKF-D2-W45-S2.",
-      "denominator": "regressions=1 of 23 round-22 regressions remain; 0 of 25 recovered movers kept; control_same=True (642 of 642)",
+      "output_evidence": "SWEEP-REGRADE sweeps=2 rejected=517 double_drop_months=8 fixed=0 months_before=2057/1522/79014 months_after=2058/1525/79010 control_same=True regressions=1 movers_back=0 (rc 0, 5m47s: the real run takes longer than a 120 s bound, so it ran under timeout 1500). The expectation regressions=0 is NOT met: B3S748567 2025-07 remains (sold fund 316067107 is held and priced 1.00, so no condition touches its four credits, sum 11875.70; the parked core candidate, row D2-S30). The 23 are classed vendor_cfncash_leg_of_sweep_sale=13, unvalued_funding_sale=9, other:credit_kept_by_every_condition=1 (double_credit=0); 22 of 23 are now MATCH. Round 22's 25 by new verdict: MATCH 0, DIFF 25, UNGRADABLE 0 (the blank is on credit days already UNPRICED: 2110 of 2111 relabeled, no verdict moved). Variant table in sweep_regrade.md: repaired 23/25, (b)+(c) 10/25, (a)+(b) 14/0, (a)+(b)+(c) 1/0, (a')+(b)+(c) 1/0 (regressions/movers_back). Refusal clause applied: test not weakened; row ADVI_COTBKF-D2-W45-S3.",
+      "denominator": "regressions=1 of 23 round-22 regressions remain; 0 of 25 recovered movers MATCH (25 DIFF); control_same=True (642 of 642)",
       "status": "FAIL",
-      "status_reason": "regressions=1, expected regressions=0: B3S748567 2025-07 (credits on the sale of money-market fund 316067107 pass every condition); and the shipped rule loses round 22's 25 recovered movers to condition (a); see ADVI_COTBKF-D2-W45-S2"
+      "status_reason": "regressions=1, expected regressions=0: B3S748567 2025-07 (credits on the sale of held, priced fund 316067107 pass every condition); and round 22's 25 recovered movers are DIFF under the shipped rule (not credited); see ADVI_COTBKF-D2-W45-S3"
     },
     {
       "criterion_id": "CB23w1-AC3",
       "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the 23 are classed with evidence rows and sum to 23; the rule is one general condition; round 22's 25 recovered movers are still MATCH and the non-sweep control is unchanged.",
       "method": "manual_read_with_citation",
       "invocation": "read data/assets/scripts/silver/commonwealth_sweeps.py (carried_days, vendor_sweep_leg_days, funding_credit_rows, with_sweep_cash), commonwealth_daily_valuation.py valued_day_before; org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~45/sweep_regrade.md sections 'Round 22's 23 regressions' and 'The control'; trace_0QF879352.md",
-      "output_evidence": "output produced: the rule is three row-type conditions applied to every account (a valued the day before, b credit-signed CFNCASH row equal to the proceeds, c CFNCASH row of any type equal to a same-day sweep sale); the md classes the 23 (double_credit 0, vendor_cfncash_leg_of_sweep_sale 13, sold_security_not_valued_day_before 9, other 1; sum 23) with each month's credit days, kept or dropped, that day's CFNCASH rows and the reason; shows 22 of 23 MATCH, 0 of 25 recovered movers still MATCH (lost to (a)), control_same=True; trace_0QF879352.md holds the one-month trace and the measured variants; no verdict given",
+      "output_evidence": "output produced: the rule is three conditions over transaction rows and the valuation, applied to every account ((b) credit-signed CFNCASH row equal to the proceeds, (c) CFNCASH row of any type equal to a same-day sweep sale, (a') a sold security not valued the day before blanks the credit day with reason UNVALUED_FUNDING_SALE, never credited, never skipped); the md classes the 23 (double_credit 0, vendor_cfncash_leg_of_sweep_sale 13, unvalued_funding_sale 9, other 1; sum 23) with each month's credit days, kept or dropped, that day's CFNCASH rows and the reason; 22 of 23 MATCH; round 22's 25: 0 MATCH, 25 DIFF, 0 UNGRADABLE (named); control_same=True; the md's AMENDMENT 2 section holds the five-row variant table and the traced cause of B3S748567 2025-07; trace_0QF879352.md holds the one-month trace; no verdict given",
       "denominator": "23 regressions and 25 recovered movers read by the grader",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "judgment": true,
@@ -122,13 +133,13 @@
   "controls": {
     "determinism": {
       "method": "the r19 BEFORE arm is the chain at the cut; the AFTER arm of every variant run shares caches and the same transactions",
-      "observed": "months_before 2057/1522/79014 equals round 19's after arm in every run; control 642 of 642 in all four runs",
+      "observed": "months_before 2057/1522/79014 equals round 19's after arm in every run; control 642 of 642 in all five runs",
       "status": "STABLE"
     },
     "mutant": {
-      "description": "vendor_sweep_leg_days dropped from the skip set; the valued() filter removed from funding_credit_rows; each run against the real test file",
-      "expected": "the (c) and (a) tests fail",
-      "observed": "1 failed, 20 passed; 2 failed, 19 passed; restored, 21 passed",
+      "description": "the blank day left in the credit set (_funding_days); the blank_days write removed from daily_returns; each run against the real test file",
+      "expected": "the (a') tests fail",
+      "observed": "2 failed, 21 passed; 2 failed, 21 passed; restored, 23 passed",
       "status": "FIRED-AS-EXPECTED"
     }
   },
@@ -139,18 +150,19 @@
     },
     {
       "item": "a rule that reaches regressions=0 with the 25 kept",
-      "reason": "none found among (a), (b), (c) and their combinations; B3S748567 2025-07 passes every condition and (a) cannot separate the 9 from the 25; row ADVI_COTBKF-D2-W45-S2"
+      "reason": "none found among (a), (a'), (b), (c) and their combinations; B3S748567 2025-07 passes every condition and (a)/(a') cannot separate the 9 from the 25; rows ADVI_COTBKF-D2-W45-S2, ADVI_COTBKF-D2-W45-S3"
     }
   ],
   "surprises": [
     "ADVI_COTBKF-D2-W45-S1",
-    "ADVI_COTBKF-D2-W45-S2"
+    "ADVI_COTBKF-D2-W45-S2",
+    "ADVI_COTBKF-D2-W45-S3"
   ],
   "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~45/ADVI_COTBKF.TO-CB-w-1.conditional-credit.proof_of_spec.json",
   "compiler_tools": [
     {
       "tool": "ruff",
-      "invocation": "ruff check --target-version py39 commonwealth_sweeps.py commonwealth_daily_valuation.py commonwealth_sweep_regrade.py tests/test_commonwealth_cash_leg.py",
+      "invocation": "ruff check --target-version py39 commonwealth_sweeps.py commonwealth_daily_valuation.py commonwealth_sweep_regrade.py commonwealth_daily_returns.py tests/test_commonwealth_cash_leg.py",
       "result": "All checks passed"
     }
   ]

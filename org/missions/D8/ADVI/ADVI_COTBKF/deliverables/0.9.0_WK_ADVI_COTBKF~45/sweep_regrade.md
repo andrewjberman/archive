@@ -700,7 +700,7 @@ Verdict moves (before -> after, months):
 | 0QF878981 | 2024-06 | core | -0.88 | -0.8874 | 1.2105 | DIFF | DIFF | 1.2105 | 2.0905 |
 | B3S808045 | 2024-07 | core | -0.08 | -0.0415 | -0.0234 | DIFF | DIFF | -0.0234 | 0.0566 |
 | D49143350 | 2023-11 | core | -4.59 | -4.6175 | -5.3344 | DIFF | DIFF | -5.3344 | -0.7444 |
-| D49143350 | 2026-02 | core | 2.05 | 2.0179 | -16.069 | DIFF | DIFF | -16.0567 | -18.1067 |
+| D49143350 | 2026-02 | core | 2.05 | 2.0179 | -16.069 | DIFF | DIFF | -16.069 | -18.119 |
 | RGY003722 | 2026-01 | core | 0.02 | 0.0118 | 0.0988 | DIFF | DIFF | 0.0955 | 0.0755 |
 | RGY004220 | 2024-10 | core | -0.0 | 0.0329 | 0.1609 | DIFF | DIFF | 0.1609 | 0.1609 |
 | RGY005498 | 2025-02 | core | 0.06 | 0.0995 | 0.1518 | DIFF | DIFF | 0.1518 | 0.0918 |
@@ -876,7 +876,7 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 |---|---|---|---|---|---|---|---|---|---|---|
 | 0QF878981 | 2024-06 | core | other:sweep_trade_day | -0.88 | MATCH | DIFF | DIFF | DIFF | 1.2105 | 2.0905 |
 | B3S808045 | 2024-07 | core | other:sweep_trade_day | -0.08 | MATCH | DIFF | DIFF | DIFF | -0.0234 | 0.0566 |
-| D49143350 | 2026-02 | core | other:sweep_trade_day | 2.05 | MATCH | DIFF | DIFF | DIFF | -16.0567 | -18.1067 |
+| D49143350 | 2026-02 | core | other:sweep_trade_day | 2.05 | MATCH | DIFF | DIFF | DIFF | -16.069 | -18.119 |
 | RGY003722 | 2026-01 | core | other:sweep_trade_day | 0.02 | MATCH | DIFF | DIFF | DIFF | 0.0955 | 0.0755 |
 | RGY004220 | 2024-10 | core | other:sweep_trade_day | -0.0 | MATCH | DIFF | DIFF | DIFF | 0.1609 | 0.1609 |
 | RGY005498 | 2025-02 | core | other:sweep_trade_day | 0.06 | MATCH | DIFF | DIFF | DIFF | 0.1518 | 0.0918 |
@@ -1044,7 +1044,7 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 |---|---|---|---|---|---|---|
 | 0QF878981 | 2024-06 | core | other:sweep_trade_day | DIFF | 1.2105 | -0.88 |
 | B3S808045 | 2024-07 | core | other:sweep_trade_day | DIFF | -0.0234 | -0.08 |
-| D49143350 | 2026-02 | core | other:sweep_trade_day | DIFF | -16.0567 | 2.05 |
+| D49143350 | 2026-02 | core | other:sweep_trade_day | DIFF | -16.069 | 2.05 |
 | RGY003722 | 2026-01 | core | other:sweep_trade_day | DIFF | 0.0955 | 0.02 |
 | RGY004220 | 2024-10 | core | other:sweep_trade_day | DIFF | 0.1609 | -0.0 |
 | RGY005498 | 2025-02 | core | other:sweep_trade_day | DIFF | 0.1518 | 0.06 |
@@ -1209,18 +1209,18 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 
 ## Round 22's 23 regressions (MATCH under r19, DIFF under repaired), classed, and their result in this re-grade
 
-Read from 0.9.0_WK_ADVI_COTBKF~43 (r19 -> repaired). Each is classed by what the conditional rule does to its credit days (first class that applies): `double_credit` = a credit day dropped by (b), a credit-signed CFNCASH row of the same account-day equals the sale proceeds within 0.01; `vendor_cfncash_leg_of_sweep_sale` = a day dropped by (c), a CFNCASH row of any type equals a same-day listed-sweep sale; `sold_security_not_valued_day_before` = a day cut by (a), a sold security was not held and priced the trading day before; `other:<name>` = none of these. Counts: other:credit_kept_by_every_condition=1, sold_security_not_valued_day_before=9, vendor_cfncash_leg_of_sweep_sale=13; total 23.
+Read from 0.9.0_WK_ADVI_COTBKF~43 (r19 -> repaired). Each is classed by what the conditional rule does to its credit days (first class that applies): `double_credit` = a credit day dropped by (b), a credit-signed CFNCASH row of the same account-day equals the sale proceeds within 0.01; `vendor_cfncash_leg_of_sweep_sale` = a day dropped by (c), a CFNCASH row of any type equals a same-day listed-sweep sale; `unvalued_funding_sale` = a day blanked by (a'), a sold security was not held and priced the trading day before (the day's return is blank, the month UNGRADABLE); `other:<name>` = none of these. Counts: other:credit_kept_by_every_condition=1, unvalued_funding_sale=9, vendor_cfncash_leg_of_sweep_sale=13; total 23.
 
 Under this arm: 22 of 23 are MATCH, 1 are not.
 
 | account | month | class | now | computed | reported | credit days up to the month (day, credited, kept, CFNCASH rows that day, reason dropped or cut) |
 |---|---|---|---|---|---|---|
-| 0QF879130 | 2025-05 | sold_security_not_valued_day_before | MATCH | 0.2965 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_sale_100000.0} |
-| 0QF879130 | 2025-06 | sold_security_not_valued_day_before | MATCH | 0.2857 | 0.31 | 2017-08-04 25000.0 dropped [none] {unvalued_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_sale_100000.0} |
-| 0QF879130 | 2025-07 | sold_security_not_valued_day_before | MATCH | 0.2967 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_sale_100000.0} |
-| 0QF879130 | 2025-08 | sold_security_not_valued_day_before | MATCH | 0.2963 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_sale_100000.0} |
-| 0QF879130 | 2025-09 | sold_security_not_valued_day_before | MATCH | 0.2802 | 0.3 | 2017-08-04 25000.0 dropped [none] {unvalued_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_sale_100000.0} |
-| 0QF879130 | 2025-10 | sold_security_not_valued_day_before | MATCH | 0.2811 | 0.3 | 2017-08-04 25000.0 dropped [none] {unvalued_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_sale_100000.0} |
+| 0QF879130 | 2025-05 | unvalued_funding_sale | MATCH | 0.2965 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| 0QF879130 | 2025-06 | unvalued_funding_sale | MATCH | 0.2857 | 0.31 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| 0QF879130 | 2025-07 | unvalued_funding_sale | MATCH | 0.2967 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| 0QF879130 | 2025-08 | unvalued_funding_sale | MATCH | 0.2963 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| 0QF879130 | 2025-09 | unvalued_funding_sale | MATCH | 0.2802 | 0.3 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| 0QF879130 | 2025-10 | unvalued_funding_sale | MATCH | 0.2811 | 0.3 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
 | 0QF879352 | 2023-05 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0678 | 0.07 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
 | 0QF879352 | 2023-06 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0665 | 0.08 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
 | 0QF879352 | 2023-08 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0454 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
@@ -1234,14 +1234,44 @@ Under this arm: 22 of 23 are MATCH, 1 are not.
 | 0QF879352 | 2024-08 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0451 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
 | 0QF879352 | 2024-09 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0451 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
 | 0QF879352 | 2024-11 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0429 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| B3S691415 | 2023-10 | sold_security_not_valued_day_before | MATCH | 0.072 | 0.07 | 2019-03-19 20000.0 dropped [none] {unvalued_sale_20000.0} / 2019-07-08 6000.0 dropped [none] {unvalued_sale_6000.0} / 2020-03-13 25000.0 dropped [none] {unvalued_sale_25000.0} / 2020-08-13 70627.31 dropped [none] {unvalued_sale_70627.31} |
+| B3S691415 | 2023-10 | unvalued_funding_sale | MATCH | 0.072 | 0.07 | 2019-03-19 20000.0 dropped [none] {unvalued_funding_sale_20000.0} / 2019-07-08 6000.0 dropped [none] {unvalued_funding_sale_6000.0} / 2020-03-13 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2020-08-13 70627.31 dropped [none] {unvalued_funding_sale_70627.31} |
 | B3S748567 | 2025-07 | other:credit_kept_by_every_condition | DIFF | 0.0535 | 0.12 | 2025-03-28 4871.6 kept [none] / 2025-04-29 4711.88 kept [none] / 2025-05-28 1514.07 kept [none] / 2025-06-27 778.15 kept [none] |
-| B3S808881 | 2025-01 | sold_security_not_valued_day_before | MATCH | 0.1791 | 0.22 | 2023-09-28 75000.0 dropped [none] {unvalued_sale_75000.0} / 2024-04-18 78000.0 dropped [none] {unvalued_sale_78000.0} / 2024-10-10 80000.0 dropped [none] {unvalued_sale_80000.0} |
-| B3S808882 | 2025-01 | sold_security_not_valued_day_before | MATCH | 0.1791 | 0.22 | 2023-09-28 75000.0 dropped [none] {unvalued_sale_75000.0} / 2024-04-18 78000.0 dropped [none] {unvalued_sale_78000.0} / 2024-10-10 80000.0 dropped [none] {unvalued_sale_80000.0} |
+| B3S808881 | 2025-01 | unvalued_funding_sale | MATCH | 0.1791 | 0.22 | 2023-09-28 75000.0 dropped [none] {unvalued_funding_sale_75000.0} / 2024-04-18 78000.0 dropped [none] {unvalued_funding_sale_78000.0} / 2024-10-10 80000.0 dropped [none] {unvalued_funding_sale_80000.0} |
+| B3S808882 | 2025-01 | unvalued_funding_sale | MATCH | 0.1791 | 0.22 | 2023-09-28 75000.0 dropped [none] {unvalued_funding_sale_75000.0} / 2024-04-18 78000.0 dropped [none] {unvalued_funding_sale_78000.0} / 2024-10-10 80000.0 dropped [none] {unvalued_funding_sale_80000.0} |
 
 ### Round 22's 25 recovered movers (round-19 movers MATCH under repaired): still MATCH under this arm: 0 of 25
 
 Lost: 0QF879238/2017-07 (DIFF), 0QF879238/2017-08 (DIFF), 0QF879238/2017-09 (DIFF), 0QF879238/2017-10 (DIFF), 0QF879238/2017-12 (DIFF), 0QF879238/2018-01 (DIFF), 0QF879238/2018-02 (DIFF), 0QF879238/2018-03 (DIFF), 0QF879238/2018-04 (DIFF), 0QF879238/2018-05 (DIFF), 0QF879238/2018-06 (DIFF), B3S605725/2018-01 (DIFF), B3S804888/2024-02 (DIFF), B3S804888/2024-08 (DIFF), B3S804888/2025-02 (DIFF), B3S804888/2025-08 (DIFF), D49141608/2019-02 (DIFF), D49141608/2019-03 (DIFF), D49141608/2019-04 (DIFF), D49141608/2019-05 (DIFF), D49141608/2019-06 (DIFF), D49141608/2019-07 (DIFF), D49141608/2019-08 (DIFF), D49141608/2019-09 (DIFF), D49141714/2019-02 (DIFF)
+
+By new verdict: MATCH=0, DIFF=25, UNGRADABLE=0, ABSENT=0
+
+| account | month | new verdict |
+|---|---|---|
+| 0QF879238 | 2017-07 | DIFF |
+| 0QF879238 | 2017-08 | DIFF |
+| 0QF879238 | 2017-09 | DIFF |
+| 0QF879238 | 2017-10 | DIFF |
+| 0QF879238 | 2017-12 | DIFF |
+| 0QF879238 | 2018-01 | DIFF |
+| 0QF879238 | 2018-02 | DIFF |
+| 0QF879238 | 2018-03 | DIFF |
+| 0QF879238 | 2018-04 | DIFF |
+| 0QF879238 | 2018-05 | DIFF |
+| 0QF879238 | 2018-06 | DIFF |
+| B3S605725 | 2018-01 | DIFF |
+| B3S804888 | 2024-02 | DIFF |
+| B3S804888 | 2024-08 | DIFF |
+| B3S804888 | 2025-02 | DIFF |
+| B3S804888 | 2025-08 | DIFF |
+| D49141608 | 2019-02 | DIFF |
+| D49141608 | 2019-03 | DIFF |
+| D49141608 | 2019-04 | DIFF |
+| D49141608 | 2019-05 | DIFF |
+| D49141608 | 2019-06 | DIFF |
+| D49141608 | 2019-07 | DIFF |
+| D49141608 | 2019-08 | DIFF |
+| D49141608 | 2019-09 | DIFF |
+| D49141714 | 2019-02 | DIFF |
 
 
 ## The control: months with no listed position
@@ -1249,5 +1279,33 @@ Lost: 0QF879238/2017-07 (DIFF), 0QF879238/2017-08 (DIFF), 0QF879238/2017-09 (DIF
 A month graded MATCH or DIFF (before or after) of an account with no listed-sweep (or listed core-position) transaction on or before the month's end (a CUSIP listed in either arm counts): 642 months, 642 with the same verdict and the same computed return (to 1e-09 pct points): control_same=True.
 
 The literal in-month reading (graded months of an account-month with no listed-sweep row IN that month, including months after an earlier sweep trade whose cash leg persists): 919 months, 892 unchanged, 27 moved. Those that moved are accounts whose value now carries the sweep trade's cash leg.
+
+## CB-w-1 AMENDMENT 2: the rule as shipped, the variants measured beside it, and what is still MATCH -> DIFF
+
+Rule as shipped (`conditional`, the default): the funding credit is posted on a credit day only where (b) no credit-signed CFNCASH row equals the sale proceeds and (c) no CFNCASH row of any type equals a same-day listed-sweep sale; where (a') a sale of that day was of a security not valued in the account the day before (not held, or held without a price: `valued_day_before`), the credit is NOT posted, the day is not skipped, and its return is BLANK with the reason `UNVALUED_FUNDING_SALE` (`unvalued_funding_days` -> `daily_returns(blank_days=)`), the month then UNGRADABLE by the chain rule. Condition (a) of AMENDMENT 1 (skip the credit) is withdrawn.
+
+### The variants, each measured with the AC2 invocation (r19 -> variant, list v1 both arms; scratch drivers patched `funding_credit_rows`, caches shared; control_same=True and control 642 of 642 in every run)
+
+| variant | credit days posted (of 2703) | blank days | months_after (MATCH/DIFF/UNGRADABLE) | regressions | movers_back | round 22's 25 | of the 23, MATCH now |
+|---|---|---|---|---|---|---|---|
+| round 22 `repaired` (no condition) | 2703 | 0 | 2103/1520/78970 | 23 | 25 | 25 MATCH | 0 |
+| (b)+(c), no (a) | 2671 | 0 | 2116/1507/78970 | 10 | 25 | 25 MATCH | 13 |
+| (a)+(b), as AMENDMENT 1 first ordered | not recorded | 0 | 2045/1538/79010 | 14 | 0 | 0 MATCH | 9 |
+| (a)+(b)+(c), AMENDMENT 1 as shipped (skip) | 793 (partial-S days included) | 0 | 2058/1525/79010 | 1 | 0 | 0 MATCH | 22 |
+| (a')+(b)+(c), AMENDMENT 2 (this run, shipped) | 560 | 2111 | 2058/1525/79010 | 1 | 0 | 0 MATCH, 25 DIFF, 0 UNGRADABLE | 22 |
+
+No variant is chosen by its result: the shipped rule is the one AMENDMENT 2 states. The two rows with condition (a) or (a') differ from (b)+(c) in exactly one thing, the 25.
+
+### Why the blank leaves the verdicts where AMENDMENT 1 left them (measured on this run's `after` values)
+
+- 2111 credit days survive (b) and (c) with an unvalued funding sale: these are the blank days. 2110 of them are on the account's value grid, and on all 2110 the return was ALREADY blank under the same values (reason UNPRICED: the previous day's value is blank because the sold security is held without a price); the blank only renames the reason to UNVALUED_FUNDING_SALE. The 2111th lies outside the account's value span.
+- Months holding a blank day: 1797, all UNGRADABLE already. None of the 23 regressions' months and none of round 22's 25 months holds a blank day: the credit days are in EARLIER months, and what the missing credit changes is the LEVEL carried into the later months, which a one-day blank does not reach.
+- So the 25 do not become UNGRADABLE: 0 MATCH, 25 DIFF, 0 UNGRADABLE (named in the table under "Round 22's 25"). Not crediting those sales leaves their accounts' level where r19 had it (DIFF, as in round 19); crediting them restores it (MATCH under `repaired`/(b)+(c)) but cannot be told from the 9 that it inflates (0QF879130, B3S691415, B3S808881, B3S808882), per row ADVI_COTBKF-D2-W45-S2.
+
+### Every month still MATCH -> DIFF between the arms: 1
+
+| account | month | class | traced cause |
+|---|---|---|---|
+| B3S748567 | 2025-07 | other:credit_kept_by_every_condition | funding security 316067107 (Fidelity Government Cash Reserves, the parked core candidate of row D2-S30, off in list v1) IS held and priced (bought 45000 on 2024-05-02, price 1.00 from the silver price store, position 5322.27 -> 3080.46 across the four sales) so (a') does not blank it; its four sales 2025-03-28 4871.60, 2025-04-29 4711.88, 2025-05-28 1514.07, 2025-06-27 778.15 (sum 11875.70) each pay a same-day sweep buy of the same amount with no CFNCASH row that day, so (b) and (c) drop nothing. The credit keeps the fund's 11875.70 in the account (value 2025-07-31: r19 9816.72, credited 21692.42), but the vendor's reported return has the r19 base (about 9.8k: reported 0.12 pct, computed 0.0535). That is consistent with the vendor not carrying this fund in the performance base (an inference, not a measured fact): it is the core-position candidate, which list v1 does not declare (no custodian designation is citable, D2-S30). No condition over transaction row types separates it from the 25 or from a sale of any other held, priced fund. |
 
 SWEEP-REGRADE sweeps=2 rejected=517 double_drop_months=8 fixed=0 months_before=2057/1522/79014 months_after=2058/1525/79010 control_same=True regressions=1 movers_back=0
