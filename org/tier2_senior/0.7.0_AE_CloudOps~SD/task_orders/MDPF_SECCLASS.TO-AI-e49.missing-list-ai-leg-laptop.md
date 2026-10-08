@@ -138,7 +138,8 @@ state it.
 1. Let the running chunk finish, then stop the run. Do not start the next chunk. Record the landed / refused / remaining counts.
 2. Resume only when this order carries a further amendment naming the prompt commit that states the rule. A resume plans only absent
    keys, so nothing landed is lost.
-3. Report, read-only, the rows this run has already landed whose name reads as a hedge, private or real estate fund and whose class
-   is not alternatives (name and class). Do not rewrite them; the issuer re-plans them.
+3. Report, read-only, EVERY model-landed row in etf-classifications (e32 and e49 alike, about 1,532 model rows; per 1.0.0_SA_CTO~DELL1
+   msg 1066) whose name reads as a hedge, private or real estate fund and whose class is not alternatives. Give key, name and class, as a
+   TSV in your deliverables. Do not rewrite them; they are remapped under the D1-S11 fix's pair.
 No gate limb grades an amendment to an existing order.
 
