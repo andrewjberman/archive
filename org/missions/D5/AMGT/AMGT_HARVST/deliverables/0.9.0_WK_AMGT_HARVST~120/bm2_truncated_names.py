@@ -1,3 +1,4 @@
+# The FINAL rank_universe_20261008.json and rank_universe_identity_20261008.json are built by 0.9.0_WK_AMGT_HARVST~121/bn1_names_made_whole.py in ONE run; this script is kept as the record of how they were first made, and re-running it reverts the final files.
 """HVST-bm-2: the stored company names cut at 30 characters, printed, and the cut ones repaired in the NEW identity file.
 
 LOCAL only: reads the round-47 identity file, the bm-1 identity file and snapshot, `lib/research/identity/registrations.json`,

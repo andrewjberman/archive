@@ -1,3 +1,4 @@
+# The FINAL rank_universe_20261008.json and rank_universe_identity_20261008.json are built by 0.9.0_WK_AMGT_HARVST~121/bn1_names_made_whole.py in ONE run; this script is kept as the record of how they were first made, and re-running it reverts the final files.
 """HVST-bm-1 (round 68): reconcile the three security universes and write the missing identity records as NEW files.
 
 The three sets (join key for every one: the pool `security_key`, e.g. `CAT_US_Equity`):
