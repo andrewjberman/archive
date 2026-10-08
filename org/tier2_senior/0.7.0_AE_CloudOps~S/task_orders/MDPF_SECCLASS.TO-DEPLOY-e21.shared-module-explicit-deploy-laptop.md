@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~S</issued_to>
     <date>2026-10-07</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>MDPF_SECCLASS</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -83,3 +83,10 @@ Base: AC1 FAIL as expected at the cut (`ok=False trunk=3a033c04... bd=05c924d5..
     state. The issuer runs its own read-back and flips the status.
   </report>
 </task_order>
+
+### AMENDMENT -- CLOSED SUPERSEDED (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~12:3xZ; answers laptop ~S via laptop CTO msg 106920 / MSTR msg 886)
+
+This order's act was never taken as this order. Its outcome was delivered by the TO-DEPLOY-e65 deploy:
+code/gold/lib/_shared/etf_classification.py reads ETag 3a033c04678f1c96d116b641545b17bb, 73,461 bytes, in both opal-data-bd and
+opal-data-cot, equal to trunk (~S's measurement). So this order closes SUPERSEDED by TO-DEPLOY-e65, not complete, and no proof
+instance is owed. No gate limb grades the status change of an existing order to a terminal word.
