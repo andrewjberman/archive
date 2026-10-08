@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-i-11",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-11.gateway-channel-read-routes.md",
+    "group": "OTHER",
+    "vintage_commit": "311d55e652"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~39",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.inbound6.md",
+    "vintage_commit": "311d55e652",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-11.gateway-channel-read-routes.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/teams_route.py",
+      "kind": "script",
+      "commit_or_etag": "4d722ff458",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit on the worker branch wk-NFRA_CTLPLN-39; nothing deployed, no push, no terraform, no AWS call",
+      "artifact_covered_by": [
+        "CTi11-AC1",
+        "CTi11-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "4d722ff458",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit on the worker branch wk-NFRA_CTLPLN-39; nothing deployed, no push, no terraform, no AWS call",
+      "artifact_covered_by": [
+        "CTi11-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_teams_route.py",
+      "kind": "test",
+      "commit_or_etag": "4d722ff458",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit on the worker branch wk-NFRA_CTLPLN-39; nothing deployed, no push, no terraform, no AWS call",
+      "artifact_covered_by": [
+        "CTi11-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~39/CHANNEL_READ_SCOPES_MEASURED.md",
+      "kind": "doc",
+      "commit_or_etag": "863e37d1f9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit on the worker branch wk-NFRA_CTLPLN-39; nothing deployed, no push, no terraform, no AWS call",
+      "artifact_covered_by": [
+        "CTi11-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTi11-AC1",
+      "criterion_verbatim": "CTi11-AC1 -- the built behaviour and its bound in one run: the new cases (shapes, refusals, mentions, no names in the audit) and the 14 existing cases (14 passed at the base, issuer's dry run) all pass.",
+      "method": "command",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/opal-gateway/tests/test_teams_route.py && echo ROUTE-SUITE ok=True",
+      "expect": "ROUTE-SUITE ok=True",
+      "output_evidence": "21 passed in 2.84s; ROUTE-SUITE ok=True (rc=0) [run under timeout 120, after AMENDMENT 1]",
+      "denominator": "21 of 21 cases pass: the 14 existing cases (two with one list entry changed, row W39-S2), 6 cases from the first pass, and 1 case added by AMENDMENT 1 (test_list_paths_carry_no_top_and_channel_messages_do); one first-pass assertion changed, row W39-S4",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTi11-AC2",
+      "criterion_verbatim": "CTi11-AC2 -- the issuer's contract check (read it; do not edit it): the allowlist admits the three new GET paths, refuses a neighbour path and any new POST, and the app mounts the three contract routes GET-only. It fails at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~R/checks/check_ct_i_11_contract.py\"",
+      "expect": "CONTRACT-CT-i-11 ok=True",
+      "output_evidence": "CONTRACT-CT-i-11 ok=True (rc=0) [run under timeout 120, after AMENDMENT 1]",
+      "denominator": "13 of 13 CHECK lines ok=True (3 get-allows, 3 post-refuses, 1 get-refuses members, 3 mounted, 3 get-only)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTi11-AC3",
+      "criterion_verbatim": "CTi11-AC3 -- JUDGMENT, never self-graded: CHANNEL_READ_SCOPES_MEASURED.md names, from the code, the scopes requested and the scopes the three paths need, and which are missing.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~39/CHANNEL_READ_SCOPES_MEASURED.md",
+      "judgment": true,
+      "output_evidence": "Section 1: requested lists config.py:61-69 (GRAPH_SCOPES) and :98-103 (READ_ONLY_GRAPH_SCOPES) with the selection path token_broker.py:141-147, :162-177, :192-229. Section 2: Team.ReadBasic.All, Channel.ReadBasic.All, ChannelMessage.Read.All per path. Section 3: no needed scope missing from either base list; graph_scope_map.py:98-99 caller map omits two of them (row NFRA_CTLPLN-W39-S1). Section 4: live consent not readable.",
+      "denominator": "3 of 3 Graph paths with a needed scope and a source; 2 of 2 request lists checked",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the worker records the output and no verdict; 3.0.0_SA_CVO grades it"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the issuer's contract check fails at the base (the three paths are absent), which is the difference control for CTi11-AC2",
+      "expected": "base: CONTRACT-CT-i-11 ok=False; built: ok=True",
+      "observed": "built: ok=True; the base run was not repeated by this worker",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the suite and the check were each run after AMENDMENT 1",
+      "observed": "re-run after AMENDMENT 1: 21 passed; ok=True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a deploy, terraform, safe-apply, any AWS call, any live Graph call, reading the live consent",
+      "reason": "the order forbids all of them; the live scope consent and Graph's acceptance of the query options are therefore not measured, and the measured file and row W39-S3 say so"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W39-S1: graph_scope_map.py caller map for teams_route omits Team.ReadBasic.All and Channel.ReadBasic.All",
+    "NFRA_CTLPLN-W39-S2: two existing test list entries held the path this cell makes live; changed",
+    "NFRA_CTLPLN-W39-S3: page_size becomes $top on /me/joinedTeams and /teams/{id}/channels; Graph's acceptance not measured; resolved by AMENDMENT 1 (no $top on those two paths)",
+    "NFRA_CTLPLN-W39-S4: AMENDMENT 1 made one first-pass assertion ($top=50 on /me/joinedTeams) false as written; changed"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~39/NFRA_CTLPLN.TO-CT-i-11.gateway-channel-read-routes.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/opal-gateway/tests/test_teams_route.py",
+      "result": "21 passed"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~R/checks/check_ct_i_11_contract.py",
+      "result": "CONTRACT-CT-i-11 ok=True"
+    }
+  ]
+}
