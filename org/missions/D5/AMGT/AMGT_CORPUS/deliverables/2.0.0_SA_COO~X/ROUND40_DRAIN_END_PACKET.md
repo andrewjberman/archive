@@ -34,12 +34,12 @@ rule the CTO ruled in msg 31382 (drop only a one- or two-word fragment after a s
 | act | pair | ledger | state |
 |---|---|---|---|
 | (m) re-pin the daily task so the fire carries the four dispersion fields | COO half + ADDENDUM 1 / CTO half `60cf78f1b0` + ADDENDUM 1 | `amgt-corpus-r40-ap10m` | leg r closed (task on `61a724beb0`); **leg v OPEN**: the 2026-10-08 13:00Z fire |
-| (d) write the dossiers at method 6 | `14c896b419` / `b39724f085` | `amgt-corpus-r40-ap10d` | leg w closed `263b50310e` (95 written); **leg v OPEN**: live-route reads after AMGT_RESAPP bb-18 |
+| (d) write the dossiers at method 6 | `14c896b419` / `b39724f085` | `amgt-corpus-r40-ap10d` | CLOSED `8294e9dfb6`: leg w `263b50310e` (95 written); leg v read 2026-10-08 08:00Z on the deployed function: 8306 JP and 8316 JP management ABSENT with a reason, TSM US management served. Positives, negatives, special items, why-we-own and company description are served by NO route (CTO ruling msg 31622: an AMGT_RESAPP round-79 cell) |
 | (d2) write the dossiers at method 7 | `2a1561085e` / `f9f8334ef6` | `amgt-corpus-r40-ap10d2` | CLOSED `94a90adc3a`: `names 95 written 95 existed 0`; pick method 7 for 95 of 95; 950 fields re-compose with 0 changes; `total_short 0` |
 
 The CVO's two reads of the dossier values are already on file: the 25 gained passages at method 6 (`32c6593acf`) and the
-method-7 re-read (`09c91edcc2`, C1 MET, relayed in msg 31458). Nothing served has moved from (d) or (d2): the live route reads
-method 5 until bb-18.
+method-7 re-read (`09c91edcc2`, C1 MET, relayed in msg 31458). AMGT_RESAPP bb-18 deployed the reader at method 7 on 2026-10-08 (closed 07:54Z); the live route now
+serves the method-7 management, pillars, fund-of-record, last-stated-position and pack-shape fields.
 
 **Known-truncated, served as stored (CTO ruling msg 31382):** LLY US negatives, NU US positives, NU US negatives, QXO US
 negatives, UNH US negatives, SHOP CN management. The cell that reads across page breaks is first in round 41.
