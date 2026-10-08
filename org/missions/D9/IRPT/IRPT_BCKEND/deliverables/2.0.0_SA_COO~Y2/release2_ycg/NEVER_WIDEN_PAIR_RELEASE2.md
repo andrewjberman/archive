@@ -40,9 +40,24 @@ Exactly one class widens. **Moves:** one function, `irpt-ycharts-generate` (`irp
 `irpt-performance-adapter` do not package the new `interactive_access.py` blob, ~P2 msg 1021). **Does not move:** the
 resident host and every other function.
 
+## Write set and rollback, per key
+
+Ruled by `1.0.0_SA_CTO~DELL2` msg 1320 (msg 944 (2)): after-read 1 runs with a TEST filer, so the test principal is part of
+this act's write set.
+
+| key | written by | rollback |
+|---|---|---|
+| Lambda `irpt-ycharts-generate` code | the release (`798Lgqw2...`) | `ZspX0qD2...` |
+| ONE test user profile in `opal-users-v2` (`SK = PROFILE`; email a dedicated test address; `userType`/home making it OPAL_GLOBAL, home opal-capital; `allowedFirmIds` = a list of exactly ONE partner firm). Created only after the code equality read (after-read 7). Its exact item is written to `TEST_FILER_ITEM.json` beside this file before the put. | this seat, one `put-item` | `delete-item` on the same `PK`/`SK`, always run after the reads, pass or fail; a `get-item` reading NOT FOUND closes the leg |
+| the upload record(s) the admit read creates for that firm | the admit after-read | deleted with the test user; their keys are recorded in `RELEASE2_AFTER_READS.md` before deletion |
+
+The test principal's `allowedFirmIds` never holds "ALL", never names opal-capital, and never names more than one firm.
+No real person's row is written or changed. Which real person files for which firms stays Andrew's grant, on the act list,
+and does not hold this release.
+
 ## After-reads (each branch named)
 
-1. **Admit:** the named OPAL_GLOBAL filer, whose `allowedFirmIds` explicitly lists one partner firm, creates an upload for
+1. **Admit:** the TEST OPAL_GLOBAL filer above, whose `allowedFirmIds` explicitly lists one partner firm, creates an upload for
    that firm. The stored record shows `acting_principal_id` = the filer and `owner.firm_id` = the firm.
 2. **Refuse (a):** the same filer, for a firm NOT on its list, is refused with its existing code.
 3. **Refuse (b):** an ordinary advisor filing for another firm is refused, as before.
@@ -52,12 +67,12 @@ resident host and every other function.
 6. **Import closure:** one direct IAM invoke of `{"irpt_import_census": true}` returns `failed: {}`.
 7. **Equality:** the deployed CodeSha256 equals the built `798Lgqw2...`; then the source map is recorded at that hash.
 
-If any of 1-7 fails, roll back to `ZspX0qD2...` in the same session.
+If any of 1-7 fails, roll back to `ZspX0qD2...` in the same session. The test user and its upload records are removed in
+every branch.
 
 ## Still owed before signing
 
-- **Andrew:** the real filer entitlement, meaning which OPAL_GLOBAL principal carries an `allowedFirmIds` naming which firm
-  (CTO msg 944). After-read 1 needs it.
+- **Andrew (not holding this release, msg 1320):** the real filer entitlement, meaning which person files for which firms.
 - **~P2:** a diff-read note on IB-pr-354 and IB-pr-358 as they ship here (the form of release 1's msg 1125).
 - **Pin on origin:** `f7a9d0b34f` reaches origin CLOUD with the dell2 drain.
 - **The CTO's signature.**
