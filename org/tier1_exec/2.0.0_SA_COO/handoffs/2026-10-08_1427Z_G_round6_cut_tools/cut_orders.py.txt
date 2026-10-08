@@ -1,0 +1,484 @@
+"""Cut the six LGIC_BLANKFIX round-1 task orders (issuer 2.0.0_SA_COO~G). Run from the repo root."""
+import os
+
+HOME = "org/missions/D14/LGIC/LGIC_BLANKFIX"
+INV = HOME + "/surprise-channel/investigations/INVESTIGATION_v1.md"
+DECOMP = HOME + "/decompositions/LGIC_BLANKFIX_DECOMP.md"
+ROOT = "infra/aws/terraform/bd-pipeline"
+SRC = "infra/aws/lambda/bd-pipeline"
+PROPOSAL = HOME + "/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/ROOT_MAP_PROPOSED.json"
+
+COMMON_READ = ("You READ and never edit: `lib/opal_naming.py`, `lib/tests/test_opal_naming.py`, `org/standards/NAMING_SCHEMA.json`, "
+               "every file under `infra/logic/registry/`, every file under `" + ROOT + "/` and `" + SRC + "/`, "
+               "`infra/aws/lambda/ci/lambda-source-map.json`, `" + DECOMP + "`.")
+
+SHARED_FACTS = """**What the check is.** `python lib/opal_naming.py census --repo` reads names from the repository and grades each with
+`grade(name, type) -> (verdict, canonical)`. `census_repo()` (`lib/opal_naming.py`) returns `(items, stats)`; each item is a dict
+`{"plane": "repo", "type": <node type>, "current": <the name>, "where": "<repo-relative file>:<line>"}`. A canonical form may carry a
+blank written in braces: `{system}`, `{cadence}`, `{source}`, `{scope}`. `grade()` raises `opal_naming.RaiseDefect` for a name it
+cannot place. Import the library with `sys.path.insert(0, "lib")` then `import opal_naming`. Python 3.9 syntax only; ASCII only
+in code and output; no new dependency.
+
+**The root of this round** is `""" + ROOT + """/` read together with the Lambda source folders it deploys (at the cut:
+`""" + SRC + """/`). Measured at the cut on the repository plane: the root's `.tf` files give 96 graded names, 12 with a
+`{system}` blank and 9 with a `{cadence}` blank; the source folder gives 37 graded names, 16 with a `{source}/{scope}` blank, and 6
+names skipped by the cards in `org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/NOT_JUDGED_R13.json`."""
+
+
+def order(cell, slug, slot, status, title, outcome, depends, cell_text, criteria, crit_notes, bounds_extra, paths, read_line,
+          report, adversary, base_line, extra_face=""):
+    to_id = "LGIC_BLANKFIX.TO-%s" % cell
+    serial = "0.9.0_WK_LGIC_BLANKFIX~%d" % slot
+    ids = [c[0] for c in criteria]
+    crit_xml = []
+    for (cid, inv, exp), note in zip(criteria, crit_notes):
+        crit_xml.append('<criterion id="%s" cell_refs="%s"><invocation>%s</invocation><expect>%s</expect></criterion>\n`%s` -- %s\n'
+                        % (cid, cell, inv, exp, cid, note))
+    inst = "%s/deliverables/%s/%s.%s.proof_of_spec.json" % (HOME, serial, to_id, slug)
+    body = """# TO %(to_id)s -- round 1 %(cell)s: %(title)s
+
+<to_id>%(to_id)s</to_id>
+<project>LGIC_BLANKFIX</project>
+<issued_to>%(serial)s</issued_to>
+<issued_by>2.0.0_SA_COO~G</issued_by>
+<issued_date>2026-10-07</issued_date>
+<status>%(status)s</status>
+<direct_act>false</direct_act>
+<risk>LOCAL</risk>
+<worker_class>worker</worker_class>
+<placeholders>NONE</placeholders>
+<round>1</round>
+<workstream>~G</workstream>
+
+**Directive:** D14 | **Fabric:** laptop | **Decomp cell:** `%(cell)s` (`decompositions/LGIC_BLANKFIX_DECOMP.md`) | **outcome_ref:** %(outcome)s |
+**depends_on:** %(depends)s
+
+---
+
+## WORKER FACE
+
+### CONTEXT
+
+%(shared)s
+
+### THE CELL
+
+%(cell_text)s
+%(extra_face)s
+### ACCEPTANCE
+
+%(crit)s
+<expected_criteria>%(ids)s</expected_criteria>
+
+Each invocation's LAST printed line is the line the expectation is matched against; print it exactly once, with `ok=True` only when
+every assertion behind it held and `ok=False` otherwise.
+
+## BOUNDS
+
+- **Grant.** The paths block below plus your deliverables folder and this order's file.
+- **No edit outside the grant.** No AWS call, no network call, no `terraform` command, no registry edit, no rename of any resource.
+%(bounds_extra)s- **Refusal clause.** If a criterion cannot be met as written, stop, write the reason in your report and a surprise row (id
+  `LGIC_BLANKFIX-W%(slot)d-S<k>`, `surfaced_at` = `date -u +%%FT%%TZ` at filing) in the investigation file, and do not weaken the test or
+  the expected value. A fact in this order that the repository contradicts is also one row; keep working on what it does not block.
+
+<paths>
+%(paths)s
+%(inv)s
+</paths>
+
+The block is your WRITE grant. %(read_line)s
+
+<decomp_ref>
+<decomp_doc>%(decomp)s</decomp_doc> (round 1), cell `%(cell)s`.
+<owned_cells>%(cell)s</owned_cells>
+</decomp_ref>
+
+<proof_of_spec>
+Criterion ids: %(ids_sp)s. Instance at
+`%(inst)s`,
+validated with `python .tools/proof-of-spec-check.py <instance> %(ids)s` BEFORE the flip.
+</proof_of_spec>
+
+**REPORT:** %(report)s
+
+---
+
+## RECORD FACE
+
+<preflight>
+comp-schedule: DECLARED-NOT-APPLICABLE thread round; the lens runs on the enrichment round that touches its surface.
+comp-iam: DECLARED-NOT-APPLICABLE the cell reads policy names from .tf text and grants, attaches and simulates nothing.
+comp-adversary: RUN -- %(adversary)s
+lane: the <paths> block IS the grant (worker RULING 1).
+</preflight>
+
+Source: PRD v0.2 @47ef4c98cc section 2 (THREAD); decomposition round 1 @f15f222030. %(base_line)s
+""" % dict(to_id=to_id, cell=cell, title=title, serial=serial, status=status, outcome=outcome, depends=depends,
+           shared=SHARED_FACTS, cell_text=cell_text.strip("\n"), extra_face=extra_face, crit="\n".join(crit_xml),
+           ids=",".join(ids), ids_sp=", ".join(ids), bounds_extra=bounds_extra, slot=slot, paths="\n".join(paths), inv=INV,
+           read_line=read_line, decomp=DECOMP, inst=inst, report=report, adversary=adversary, base_line=base_line)
+    path = "%s/task-orders/%s.%s.md" % (HOME, to_id, slug)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(body)
+    print(path)
+
+
+# ---------------------------------------------------------------- BF-t-1
+order(
+    "BF-t-1", "root-scope-and-pick", 1, "pending",
+    "the root scope -- the names the check reads for one Terraform root, and the pick of the round's root",
+    "FWD-1", "none",
+    """
+`BF-t-1`, the thread's hops 1 (Pick) and 2 (Run). Today the check has no way to read one root: it reads the whole repository. You
+build the scope and you record which root the round runs on.
+
+**Build** `lib/opal_naming_scope.py` (a new module; do not edit `lib/opal_naming.py`):
+
+1. `root_items(root) -> (items, stats)`. `root` is a repo-relative Terraform root folder such as `""" + ROOT + """`
+   (a trailing slash is accepted). `items` is the subset of `opal_naming.census_repo()`'s items that belong to the root, in
+   `census_repo()`'s order: every item whose `where` file is under the root folder, plus every item whose `where` file is under a
+   Lambda source folder the root deploys. `stats` is a dict with `root`, `tf_files` (the count of the root's `.tf` files that gave
+   an item or were read), `source_dirs` (the list of source folders tied to the root) and `source_dir_basis` (a dict, one entry per
+   source folder, naming the evidence that ties it to the root). Derive the tie from the repository, never from a typed list:
+   read how the root's own `.tf` files point at Lambda source (for example a `source_dir`, `filename` or `path.module` reference
+   into `infra/aws/lambda/`), and read `infra/aws/lambda/ci/lambda-source-map.json`. Where two kinds of evidence disagree, or a
+   source folder is claimed by two roots, say so in `source_dir_basis` and file one row. An unknown root raises `ValueError`.
+2. `root_table() -> list[dict]`: one dict per Terraform root under `infra/aws/terraform/` that has at least one item, with `root`,
+   `items`, `group_a`, `group_b`, `group_c`, `group_d`, `pattern`, `raising`, `carded`. Grade each item with `opal_naming.grade()`
+   (catch `RaiseDefect`: it counts under `raising`); apply the card file named above (an item whose `("repo", current)` matches a
+   card's `("plane", "name")` counts under `carded` and is not graded). An item whose name carries `{`, `%s` or `*` counts under
+   `pattern` and in no group. Otherwise a graded item whose canonical carries `{system}` is group A when its type is
+   `LAMBDA_LAYER`, or its name is one PascalCase token with no hyphen, or its first token is in `systems.json`
+   `refused_keys.purpose_word`; else group B. A canonical carrying `{cadence}` (and no `{system}`) is group C. A canonical carrying
+   any other blank is group D.
+3. A command line: `python lib/opal_naming_scope.py items ROOT` prints one line per item (`type`, `current`, `where`) and a last line
+   `SCOPE-ITEMS ok=True root=... items=N tf_items=N source_items=N source_dirs=N`. `python lib/opal_naming_scope.py table` prints
+   the table and a last line `SCOPE-TABLE ok=True roots=N items=N assigned=N unassigned=N`, where `assigned + unassigned` equals
+   the length of `census_repo()`'s items (an item under no root and no tied source folder is unassigned; a source folder tied to
+   two roots is assigned to neither and counted unassigned), and `ok=False` when the sum does not hold. `python
+   lib/opal_naming_scope.py pick` prints, for each root that holds at least one item in EACH of groups A, B, C and D, its row, then
+   the pick: the qualifying root with the fewest items. Last line
+   `SCOPE-PICK ok=True root=... items=N group_a=N group_b=N group_c=N group_d=N qualifying=N`, `ok=False` when no root qualifies.
+
+**Build** `lib/tests/test_opal_naming_scope.py`, runnable as a plain script. It asserts on the REAL repository, not a fixture:
+every item `root_items("""" + ROOT + """")` returns has its `where` under the root or under a folder in `stats["source_dirs"]`; the count
+equals an independent filter of `census_repo()`'s items by those same prefixes; a root with no tied source folder returns only
+items under itself; an unknown root raises `ValueError`. Last line `SCOPE-TEST ok=True assertions=N`.
+
+**Record the pick** in your report: the `SCOPE-PICK` line whole. The issuer expected `bd-pipeline`; if the pick is another root,
+that is a finding to report, not a defect to fix.
+""",
+    [("BF1-AC1", "python lib/tests/test_opal_naming_scope.py", "SCOPE-TEST ok=True"),
+     ("BF1-AC2", "python lib/opal_naming_scope.py table", "SCOPE-TABLE ok=True"),
+     ("BF1-AC3", "python lib/opal_naming_scope.py pick", "SCOPE-PICK ok=True")],
+    ["the scope returns exactly the root's names, checked against the real `census_repo()` (the seam's real neighbour).",
+     "every repository name is assigned to one root or counted unassigned; the sum is the denominator.",
+     "at least one root holds all four groups, and the pick is printed with its counts."],
+    "",
+    ["lib/opal_naming_scope.py", "lib/tests/test_opal_naming_scope.py"],
+    COMMON_READ + " You also read every `.tf` file under `infra/aws/terraform/` to tie source folders to roots.",
+    "the three last lines whole; `stats[\"source_dir_basis\"]` for the picked root; the list of unassigned items' folders with counts; commits.",
+    "a scope that silently drops the Lambda sources and so never shows a storage key (the cut's base measurement: 110 of 111 key blanks sit in source files; AC1's independent filter and AC3's group_d bound it); a typed folder list standing in for a derived tie (the face asks for the evidence per folder); a source folder claimed by two roots counted twice (assigned to neither, counted, one row); BLIND: a Lambda whose source is tied to its root only at deploy time by a script outside the .tf files.",
+    "Base dry-run at the cut: BF1-AC1, BF1-AC2, BF1-AC3 base FAIL as expected (files absent).",
+)
+
+# ---------------------------------------------------------------- BF-t-2 (staged)
+order(
+    "BF-t-2", "fourth-verdict", 2, "pending",
+    "the fourth verdict -- a kind of name that is not asked for a system says so",
+    "FWD-1 (hop 3), FWD-3", "none (the verdict value is ruled: CTO msg 106198, record @bab3a0e453)",
+    """
+`BF-t-2`, the thread's hop 3. Andrew ruled on 2026-09-21 that an AWS service name is never a system, and that the ruling extends to
+inline policy names and library layers; the check "gives these their own verdict instead of failing them against the registry".
+Today `grade()` returns `OUT-OF-PATTERN` with a `{system}` blank for them. `org/standards/NAMING_SCHEMA.json` `grade.verdicts`
+lists three values: `CONFORMANT`, `ALIAS`, `OUT-OF-PATTERN`.
+
+**THE VALUE is `NO-SYSTEM-ASKED`**, ratified by `1.0.0_SA_CTO` (msg 106198); its record is
+`org/missions/D14/LGIC/LGIC_BLANKFIX/prd/C_VERDICT_FOURTH_VALUE_RECORD.md` -- read it first. Use that spelling exactly. The ruling
+adds: a `NO-SYSTEM-ASKED` name carries no `{system}` placeholder in its canonical form; and the membership count the issuer
+measured (106 of the 141 repository-plane names that carry a `{system}` blank at the cut: 84 purpose-word, 19 PascalCase, 3
+layers) was not re-run by the CTO, so you re-read it and your proof carries the number.
+
+**The population (group A).** A name whose first token is in `infra/logic/registry/systems.json` `refused_keys.purpose_word`; a
+policy name that is one PascalCase token with no hyphen; a `LAMBDA_LAYER` name -- in each case only when no later token and no
+`resources.json` row resolves a system (today's `{system}` outcome in `_slots()`, rules R1.d and R1.e). A name whose first token is
+in any OTHER refused list (for example `generic_noun`: `pipeline-chain`, `gold-layer-trigger`) is group B and is NOT moved: it
+still returns `OUT-OF-PATTERN` with `{system}`.
+
+**Build:**
+
+1. `lib/opal_naming.py`: `grade(name, type)` returns the fourth value for a group-A name. Its canonical form is the form the grammar
+   gives WITHOUT a system slot and with no blank in it (for `s3-access`, type `IAM_POLICY`: the tokens the rules keep, then the
+   kind). The signature stays `(name, type) -> (verdict, canonical)`. The census's report table gains the fourth column.
+2. `org/standards/NAMING_SCHEMA.json`: the value added to `grade.verdicts` with one sentence of meaning beside the other values,
+   and the two sentences that deny a fourth (`grade.not_graded`, `grade.unplaceable`) corrected to say four. Bump `version` and add
+   one `changelog` line naming this order. Nothing else in the schema moves.
+3. `.tools/naming-gate.py` and `.tools/naming-apply-gate.py`: read how each handles a verdict today and make each handle the fourth
+   value as a name that is NOT refused for lacking a system; each gate's own `--self-test` gains one arm for it and still passes.
+4. `lib/tests/test_opal_naming_fourth_verdict.py`, runnable as a plain script with three modes:
+   - no argument: four real group-A names of three kinds (`s3-access` IAM_POLICY, `cloudwatch-metrics` IAM_POLICY,
+     `AdditionalPermissions` IAM_POLICY, one `LAMBDA_LAYER` name you take from `census_repo()`) each return the fourth value with a
+     canonical carrying no `{`; and the DIFFERENCE CONTROL in the same run: `pipeline-chain` IAM_POLICY and `gold-layer-trigger`
+     IAM_POLICY still return `OUT-OF-PATTERN` with `{system}` in the canonical; and the schema lists exactly four verdicts; and
+     the membership re-read: over `census_repo()`'s items (cards in `NOT_JUDGED_R13.json` applied, raising names skipped), the count
+     of names that now return `NO-SYSTEM-ASKED` and the count that still carry `{system}`.
+     Last line `VERDICT4-TEST ok=True group_a=N control=N repo_no_system_asked=N repo_system_blank=N`.
+   - `--suite`: runs `python -m pytest lib/tests/test_opal_naming.py -q -p no:cacheprovider --color=no`, collects the failing test
+     ids, and compares them with THE SIX THAT FAIL AT THE BASE (below). Last line
+     `VERDICT4-SUITE ok=True failed=N outside_base=0`, `ok=False` when any failing id is outside the six.
+   - `--gates`: runs each gate's `--self-test`. Last line `VERDICT4-GATES ok=True naming_gate=PASS apply_gate=PASS`.
+
+**The six tests that fail at the base** (measured at the cut, before any edit; they are not yours to fix and not yours to break
+further): `test_grade_agrees_with_every_worked_case` for the cases `inf-silver-chain|LAMBDA`, `opal-portal-data-proxy-api|API_GW`,
+`Inflection-SilverChain-DimConversionFailure|CW_ALARM`, `wsb-49f-model-aua-pull-daily|SCHEDULE`, `inf/otp-relay/token|SECRET`; and
+`test_lambda_plane_consumers_is_import_aware_not_a_bare_substring`. Where a worked case in `lib/tests/test_opal_naming.py` records
+`OUT-OF-PATTERN` for a group-A name, update that case to the fourth value and list each one you changed in your report.
+
+**Other readers of a verdict, outside your grant.** `lib/opal_lgctfm.py`, `.tools/safe-apply.sh`,
+`infra/logic/render_naming_section.py` and `infra/logic/registry/exemptions.json` each mention a verdict value. Read each; for any
+that would mishandle the fourth value, file one row naming the file and line. Do not edit them.
+""",
+    [("BF2-AC1", "python lib/tests/test_opal_naming_fourth_verdict.py", "VERDICT4-TEST ok=True"),
+     ("BF2-AC2", "python lib/tests/test_opal_naming_fourth_verdict.py --suite", "VERDICT4-SUITE ok=True"),
+     ("BF2-AC3", "python lib/tests/test_opal_naming_fourth_verdict.py --gates", "VERDICT4-GATES ok=True")],
+    ["group-A names take the fourth value with no blank, and group-B names in the same run do not (the difference control).",
+     "the library's own suite shows no failure outside the six that fail at the base.",
+     "both naming gates still pass their self-tests with the new arm."],
+    "- `python lib/opal_naming.py generate` output is NOT committed by you; if your edit changes a generated file's content, say so in the report (the issuer regenerates at the merge).\n",
+    ["lib/opal_naming.py", "lib/tests/test_opal_naming.py", "lib/tests/test_opal_naming_fourth_verdict.py",
+     "org/standards/NAMING_SCHEMA.json", ".tools/naming-gate.py", ".tools/naming-apply-gate.py"],
+    "You READ and never edit: every file under `infra/logic/`, `lib/opal_lgctfm.py`, `.tools/safe-apply.sh`, `org/missions/D14/LGIC/LGIC_BLANKFIX/prd/C_VERDICT_FOURTH_VALUE_RECORD.md`, `org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/NOT_JUDGED_R13.json`, `" + DECOMP + "`.",
+    "the three last lines whole; the diff stat; each worked case changed; each outside reader and what it does with the fourth value; whether any generated file's content moves; commits.",
+    "a fourth value that swallows group B and hides names that do need a system (the difference control is in AC1's own run); a gate that starts refusing or stops refusing every name (both self-tests, AC3); a schema edit wider than one row (the face bounds it; the diff stat is in the report); a worker repairing the six base failures to make the suite green (the face names them as not its own); BLIND: a reader that builds the verdict string at run time.",
+    "Base dry-run at the cut: BF2-AC1, BF2-AC2, BF2-AC3 base FAIL as expected (file absent). Beside them, ran at the cut: `python -m pytest lib/tests/test_opal_naming.py -q` -> 6 failed, 87 passed (row LGIC_BLANKFIX-S1). The decomposition cut this cell STAGED on the CTO's record; the record landed before the issuance (msg 106198, @bab3a0e453), so the order is issued pending.",
+)
+
+# ---------------------------------------------------------------- BF-t-3
+order(
+    "BF-t-3", "root-map-reader", 3, "pending",
+    "the root map -- one entry says which system, firm and source a root's names belong to",
+    "FWD-1 (hop 4), FWD-7 (thin)", "none",
+    """
+`BF-t-3`, the thread's hop 4. Andrew ruled on 2026-09-21 that the registry's name-to-system rows are to be compiled from a small
+handwritten map of Terraform root to system, with only genuine exceptions written by hand. No such map and no reader exist. You
+build the reader and you PROPOSE the entry for this round's root. You do not write the registry: the map file is landed by another
+seat from your proposal.
+
+**Facts you need.** `infra/logic/registry/resources.json` holds handwritten rows of the shape `{name, type, system, evidence}`; a
+row fills the `{system}` blank for a name whose own words resolve no system. `infra/logic/registry/systems.json` holds the system
+keys and `scopes.json` the firms. The schema's rule SY1 (`org/standards/NAMING_SCHEMA.json`, `system.vendor_through_tiers`): a
+resource that builds a firm's data from ONE vendor's feed is that vendor's integration (system = the vendor key, for example
+`blackdiamond`); a resource that combines feeds takes the product that owns the combination (for example `advi`). So one root can
+hold more than one system: the map gives the root's default and names the exceptions.
+
+**Build** `lib/opal_naming_rootmap.py` (a new module; do not edit `lib/opal_naming.py`):
+
+1. `load_map(path) -> dict`. The file is JSON: `{"_about": "...", "roots": {"<root folder name>": {"system": "...", "scope": "...",
+   "source": "...", "evidence": "...", "exceptions": [{"name": "...", "type": "...", "system": "...", "evidence": "..."}]}}}`.
+   `system` must be a key of `systems.json`, `scope` a firm form `scopes.json` knows, `source` a source the key grammar knows
+   (read how `opal_naming.key()` validates a source and use the same check); a value that is none of these raises `ValueError`
+   naming the root and the field. The path is always an argument; bake no default path.
+2. `resolve(map, root, name, type) -> dict | None`: `None` when the root has no entry; else `{"system", "scope", "source",
+   "basis"}` where `basis` is `"exception"` when `(name, type)` matches an exception (its `system` replaces the default) and
+   `"root-default"` otherwise.
+3. A command line: `python lib/opal_naming_rootmap.py reference ROOT --map PATH` takes every name `opal_naming.census_tf_names()`
+   finds in the root's `.tf` files that ALSO has a row in `resources.json` (the reference answers), and compares the row's system
+   with `resolve()`'s. Prints one line per name and a last line `ROOTMAP-REFERENCE ok=True root=... rows=N agree=N disagree=0`;
+   `ok=False` when any disagrees or `rows` is 0. `python lib/opal_naming_rootmap.py views --map PATH` runs
+   `opal_naming.generate()` into two temporary folders, once as the repository stands and once with the map file copied into a
+   temporary copy of the registry folder, and compares every generated file byte for byte. Last line
+   `ROOTMAP-VIEWS ok=True files=N changed=0`; `ok=False` when any file differs (a registry-side file that moves a generated view is
+   a deploy, and the issuer must know before the file lands).
+
+**Write the proposal** at `""" + PROPOSAL + """`: the map file with ONE root, `bd-pipeline`.
+Derive its default system, firm and source from the root's own `.tf` and Lambda code (which vendor's feed it ingests, for which
+firm) and from the registry rows that already place names of this root; every existing row whose system differs from the default
+becomes an exception with that row's evidence. State in `evidence` what you read. Where SY1 leaves a name's system undecided on
+the evidence in the repository, do not guess: leave it out of the exceptions and list it in your report.
+
+**Build** `lib/tests/test_opal_naming_rootmap.py`, runnable as a plain script, on a small map it writes to a temporary folder: a
+name listed as an exception resolves to the exception's system, and THE SAME name with the exception removed resolves to the root
+default (the difference control); an unknown root resolves to `None`; an unknown system key raises. Last line
+`ROOTMAP-TEST ok=True assertions=N`.
+""",
+    [("BF3-AC1", "python lib/tests/test_opal_naming_rootmap.py", "ROOTMAP-TEST ok=True"),
+     ("BF3-AC2", "python lib/opal_naming_rootmap.py reference infra/aws/terraform/bd-pipeline --map " + PROPOSAL, "ROOTMAP-REFERENCE ok=True"),
+     ("BF3-AC3", "python lib/opal_naming_rootmap.py views --map " + PROPOSAL, "ROOTMAP-VIEWS ok=True")],
+    ["the reader resolves a default and an exception, and the exception changes the answer.",
+     "the proposed entry reproduces every registry row that already places a name of the root (the real neighbour).",
+     "the map file moves no generated view. A fourth criterion is not needed."],
+    "- You do not create or edit any file under `infra/logic/`. The proposal lives in your deliverables folder only.\n",
+    ["lib/opal_naming_rootmap.py", "lib/tests/test_opal_naming_rootmap.py"],
+    COMMON_READ,
+    "the three last lines whole; the proposal's path and its `bd-pipeline` entry printed; the count of reference rows and of exceptions; every name SY1 left undecided, with what evidence is missing; commits.",
+    "a map entry that contradicts rows Andrew already approved (AC2 compares against every such row of the root, and refuses a zero denominator); a reader that bakes the proposal's path so the fixture becomes the product (the path is an argument; the face says so); a registry-side file that silently moves a shipped generated view (AC3); a guessed system for a name SY1 does not decide (listed, not guessed); BLIND: names of the root that live only in AWS and not in the .tf files.",
+    "Base dry-run at the cut: BF3-AC1, BF3-AC2, BF3-AC3 base FAIL as expected (files absent).",
+)
+
+# ---------------------------------------------------------------- BF-t-4
+order(
+    "BF-t-4", "cadence-word", 4, "pending",
+    "the cadence word -- a schedule's own expression gives its word, or the row is listed with the reason",
+    "FWD-1 (hop 5), FWD-4 (thin)", "none",
+    """
+`BF-t-4`, the thread's hop 5. The grammar ends a schedule's or an event rule's name with a cadence word. Where the current name
+carries none, `grade()` prints `{cadence}`. The schema says that blank is filled "from the schedule". Nobody has measured whether a
+schedule's own expression is enough to choose the word. You build the reader and you make that measurement.
+
+**Facts you need.** The cadence vocabulary is `opal_naming._vocab().cadences`; at the cut it is `1min`, `5min`, `daily`, `hourly`,
+`monthly`, `weekly` (read it from the library, do not type it). `opal_naming.census_tf_names(path, text)` returns the names a `.tf`
+file declares with their type and `where`; the types here are `EVENT_RULE` and `SCHEDULE`. A resource's expression is its
+`schedule_expression` attribute (`rate(...)` or `cron(...)`); an event rule may instead carry only an `event_pattern`. In the root
+at the cut: `rate(15 minutes)` at `bd-49f-interim.tf:151`, several weekday-only crons (`MON-FRI`, `MON-SAT`), and one rule with an
+`event_pattern` and no schedule at `bd-49f-session-chain.tf:246`.
+
+**Build** `lib/opal_naming_cadence.py` (a new module; do not edit `lib/opal_naming.py`):
+
+1. `word_for(expression) -> (word or None, basis)`. A word is returned ONLY when the expression fires on exactly that word's
+   period with no other restriction: `rate(1 minute)` -> `1min`; `rate(5 minutes)` -> `5min`; once an hour, every hour, every day
+   -> `hourly`; once a day, every day of the week -> `daily`; once a week -> `weekly`; once a month -> `monthly`. Anything else
+   returns `None` with a `basis` that says why in plain words (for example "every 15 minutes: no cadence word for this period",
+   "weekdays only: not every day"). `None` input (no schedule) returns `None` with the basis "no schedule expression".
+2. `cadences(root) -> list[dict]`: one dict per `EVENT_RULE` or `SCHEDULE` name `census_tf_names()` finds in the root's `.tf`
+   files, with `type`, `current`, `where`, `expression` (the literal, or `None`), `word`, `basis`, and `has_event_pattern`. Find
+   the expression in the SAME resource block as the name. An expression that is not one literal string (a variable, a local) is
+   `expression: None` with the basis "expression is not a literal".
+3. A command line: `python lib/opal_naming_cadence.py root ROOT` prints one line per row and a last line
+   `CADENCE-ROOT ok=True root=... rows=N decided=N undecided=N`, `ok=True` when `rows` equals the count of `EVENT_RULE` and
+   `SCHEDULE` names `census_tf_names()` gives for the root's files (computed independently in the command) and
+   `decided + undecided == rows`. `python lib/opal_naming_cadence.py estate` does the same over every root under
+   `infra/aws/terraform/` and prints, last, `CADENCE-ESTATE ok=True rows=N decided=N undecided=N`, then nothing.
+
+**Build** `lib/tests/test_opal_naming_cadence.py`, runnable as a plain script: a table of expressions and expected words covering
+each of the six words, plus at least four that must return `None` (`rate(15 minutes)`, a `MON-FRI` cron, a twice-a-day cron, no
+expression). Last line `CADENCE-TEST ok=True cases=N`.
+
+**The measurement** (PRD contract C-CADENCE): in your report, the `CADENCE-ESTATE` line, and for the root every undecided row with
+its expression and basis. You add no word to the vocabulary and you edit no schema: a row the expression cannot decide is LISTED.
+""",
+    [("BF4-AC1", "python lib/tests/test_opal_naming_cadence.py", "CADENCE-TEST ok=True"),
+     ("BF4-AC2", "python lib/opal_naming_cadence.py root infra/aws/terraform/bd-pipeline", "CADENCE-ROOT ok=True")],
+    ["the word is given only for an exact period, and four near-misses give none.",
+     "every schedule and event rule of the root is read, the count checked against the real `census_tf_names()`."],
+    "",
+    ["lib/opal_naming_cadence.py", "lib/tests/test_opal_naming_cadence.py"],
+    COMMON_READ + " You also read every `.tf` file under `infra/aws/terraform/` for the estate measurement.",
+    "both last lines and the `CADENCE-ESTATE` line whole; every undecided row of the root with its expression and basis; commits.",
+    "a word chosen by rounding (a weekday cron called daily, a 15-minute rate called 5min) so that a person reading the schedule would disagree (the face fixes exact-period-only and AC1 carries four near-misses); a row dropped because its expression is a variable (listed with its basis; AC2's count is checked against census_tf_names); an expression read from a neighbouring resource block; BLIND: a schedule whose live expression differs from its .tf text.",
+    "Base dry-run at the cut: BF4-AC1, BF4-AC2 base FAIL as expected (files absent).",
+)
+
+# ---------------------------------------------------------------- BF-t-5 (staged on BF-t-3)
+order(
+    "BF-t-5", "key-classes", 3, "staged",
+    "the key classes -- each storage key of the root is a whole address, a legacy store, a pattern, or listed",
+    "FWD-1 (hop 6), FWD-4 and FWD-8 (thin)", "BF-t-3 merged (the root's map entry); handed by continuation",
+    """
+`BF-t-5`, the thread's hop 6. For a storage key written in Lambda source, `grade()` prints the canonical key with `{source}` and
+`{scope}` blanks (for `gold/trigger-pending.json`: `{source}/{scope}/gold/trigger-pending.json`). The schema says those blanks are
+filled "from the bucket". Nobody has classified these rows. You build the classifier.
+
+**Facts you need.** The items are `census_repo()` items of type `S3Key` (and `S3_BUCKET`) whose `where` is under a Lambda source
+folder of the root; at the cut `""" + SRC + """/` holds 16 such rows with a blank, one of them `silver/%s/`.
+`infra/logic/registry/legacy_addresses.json` lists stores that keep a legacy address (read its `_about` and how
+`opal_naming._on_list()` / `_legacy_list()` match a key against it; reuse those functions). The root's map entry (module
+`lib/opal_naming_rootmap.py`, merged before this order is handed: `load_map(path)`, `resolve(map, root, name, type)`) gives the
+root's `source` and `scope`. `opal_naming._VAR_RE` is the library's own test for a variable segment (`{...}`, `*`, `%s`).
+
+**Build** `lib/opal_naming_keyfill.py` (a new module; do not edit `lib/opal_naming.py` or `lib/opal_naming_rootmap.py`):
+
+1. `fill_keys(items, root_entry) -> list[dict]`: for each item whose graded canonical carries a blank other than `{system}` or
+   `{cadence}`, one dict with `type`, `current`, `where`, `class`, `canonical` (or `None`) and `basis`. The classes, tested in this
+   order so they are disjoint:
+   - `PATTERN`: the CURRENT name has a variable segment (`_VAR_RE` matches). `canonical` is `None`; `basis` names the variable.
+   - `LEGACY`: the key matches an entry of `legacy_addresses.json`. `canonical` is the current key; `basis` names the entry.
+   - `ADDRESS`: `root_entry` is not `None`; `canonical` is the graded canonical with `{source}` and `{scope}` replaced by the
+     entry's `source` and `scope`. If any `{` remains after the replacement the row is `UNDECIDED`, not `ADDRESS`.
+   - `UNDECIDED`: none of the above; `canonical` is `None`; `basis` says what is missing.
+   An item `grade()` raises on is skipped and counted. A key whose own path names a different firm or source than the root entry
+   (for example a `cot` file under a 49 Financial root) is `UNDECIDED` with that conflict as its basis: do not fill it.
+2. A command line: `python lib/opal_naming_keyfill.py dir SOURCE_DIR --root ROOT_NAME --map PATH` filters `census_repo()`'s items to
+   those whose `where` is under `SOURCE_DIR`, resolves the root entry from the map, prints one line per classified row, and a last
+   line `KEYFILL-DIR ok=True dir=... rows=N address=N legacy=N pattern=N undecided=N raising=N`; `ok=True` when the four classes sum
+   to `rows`, `rows` equals an independent count of the folder's graded items carrying such a blank, and no `ADDRESS` canonical
+   contains `{`, `%s` or `*`.
+
+**Build** `lib/tests/test_opal_naming_keyfill.py`, runnable as a plain script: one case per class on small hand-made items; and the
+DIFFERENCE CONTROL: the same plain key classed `ADDRESS` with a root entry and `UNDECIDED` with `root_entry=None`. Last line
+`KEYFILL-TEST ok=True cases=N`.
+""",
+    [("BF5-AC1", "python lib/tests/test_opal_naming_keyfill.py", "KEYFILL-TEST ok=True"),
+     ("BF5-AC2", "python lib/opal_naming_keyfill.py dir infra/aws/lambda/bd-pipeline --root bd-pipeline --map " + PROPOSAL, "KEYFILL-DIR ok=True")],
+    ["each class is reachable, and the root entry is what turns a listed key into a whole address.",
+     "every blank key of the root's source folder is classed, and no printed address has a hole."],
+    "",
+    ["lib/opal_naming_keyfill.py", "lib/tests/test_opal_naming_keyfill.py"],
+    COMMON_READ + " You also read `lib/opal_naming_rootmap.py` and `" + PROPOSAL + "`.",
+    "both last lines whole; the root's rows by class, every `UNDECIDED` row with its basis; commits.",
+    "a pattern printed as a complete address (PATTERN is tested first; AC2 refuses any ADDRESS carrying a variable); a cot key filled with the 49 Financial firm because it sits in this folder (the face names the conflict case as UNDECIDED; cross-firm law); a legacy store given a new address it is not meant to move to (LEGACY is tested before ADDRESS); BLIND: which bucket a key is used with at run time -- the class is decided from the repository text and the map, not from a live read.",
+    "Base dry-run at the cut: BF5-AC1, BF5-AC2 base FAIL as expected (files absent). STAGED on BF-t-3's merge; handed to slot ~3 by continuation.",
+)
+
+# ---------------------------------------------------------------- BF-t-6 (staged on all)
+order(
+    "BF-t-6", "root-check", 1, "staged",
+    "the root check -- one line per name of the root, every line one of six kinds",
+    "FWD-1", "BF-t-1, BF-t-2, BF-t-3, BF-t-4, BF-t-5 merged; handed by continuation",
+    """
+`BF-t-6`, the thread's hops 2 (Run) and 7 (Read). An engineer runs the check on one root and reads one line per name. You compose
+the five modules merged before this order is handed into that one run.
+
+**The modules you call** (all under `lib/`, merged at HEAD when you start; read each before you call it and report any that does
+not match the line below):
+- `opal_naming_scope.root_items(root) -> (items, stats)`: the root's names, with `stats["source_dirs"]`.
+- `opal_naming.grade(name, type) -> (verdict, canonical)`: four verdicts; the fourth is the one named in the schema's
+  `grade.verdicts` beside `CONFORMANT`, `ALIAS`, `OUT-OF-PATTERN` (read its spelling from `org/standards/NAMING_SCHEMA.json`; do
+  not type it).
+- `opal_naming_rootmap.load_map(path)`, `resolve(map, root_name, name, type) -> dict | None` with `system`, `scope`, `source`.
+- `opal_naming_cadence.cadences(root) -> list[dict]` with `current`, `where`, `word`, `basis`.
+- `opal_naming_keyfill.fill_keys(items, root_entry) -> list[dict]` with `current`, `where`, `class`, `canonical`, `basis`.
+
+**Build** `lib/opal_naming_rootcheck.py` (a new module; edit none of the five):
+
+`check_root(root, map_path, not_judged=None, out=print, report_only=False) -> int`. For every item of the root, in order, print
+exactly ONE line `KIND type current -> detail  [where]`, the kind decided by the first test that applies:
+
+1. `CARDED`: `("repo", current)` is in the card list (`not_judged`, default: the repository's own
+   `org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/NOT_JUDGED_R13.json`). Detail: "skipped by a card the
+   repository holds". The run writes no card and takes none from outside the repository.
+2. `PATTERN`: the current name has a variable segment (`opal_naming._VAR_RE`), or `fill_keys` classed it `PATTERN`. Detail: "a code
+   pattern, not a name" and the variable.
+3. `HOLE`: `grade()` raises. Detail: the raise text.
+4. `RIGHT`: verdict `CONFORMANT`. Detail: the name.
+5. `NOT-ASKED`: the fourth verdict. Detail: "this kind of name is not asked to carry a system" and the canonical.
+6. Otherwise the name is wrong (`ALIAS` or `OUT-OF-PATTERN`). Complete the canonical: replace `{system}` from `resolve()`'s
+   `system`; replace `{cadence}` from the `cadences()` row with the same `where` when its `word` is not `None`; for a key, take
+   `fill_keys`'s `canonical` when its class is `ADDRESS`, and print kind `RIGHT` with detail "legacy store, keeps its address" when
+   its class is `LEGACY`. If the completed form carries no `{`: `FIX`, detail the complete correct name. If a `{` remains: `HOLE`,
+   detail the partial form and, in plain words, what could not be filled and why (the cadence row's `basis`, the key row's `basis`,
+   or "no map entry for this root").
+
+Last line `ROOTCHECK ok=True root=... items=N right=N fix=N not_asked=N pattern=N carded=N hole=N`; `ok=True` when the six counts
+sum to `items` and `items` equals `len(root_items(root)[0])`. Return 1 when `hole > 0` and `report_only` is false, else 0. Command
+line: `python lib/opal_naming_rootcheck.py ROOT --map PATH [--report-only]`, exit code = the return value.
+
+**Build** `lib/tests/test_opal_naming_rootcheck.py`, runnable as a plain script, calling `check_root`'s line-deciding function on
+hand-made items with the five modules' answers supplied as plain data: one case per kind; no `FIX` line containing `{`; and the
+DIFFERENCE CONTROL: the same item set returns 1 with one unfillable cadence and 0 when that cadence is fillable. Last line
+`ROOTCHECK-TEST ok=True cases=N`.
+
+`HOLE` lines are EXPECTED on this root at the cut (a 15-minute rate, weekday crons and one pattern-only rule have no cadence word).
+Do not suppress them and do not invent a word: print them. Report every `HOLE` line whole.
+""",
+    [("BF6-AC1", "python lib/tests/test_opal_naming_rootcheck.py", "ROOTCHECK-TEST ok=True"),
+     ("BF6-AC2", "python lib/opal_naming_rootcheck.py infra/aws/terraform/bd-pipeline --map " + PROPOSAL + " --report-only", "ROOTCHECK ok=True")],
+    ["every kind is reachable, no FIX line carries a blank, and an unfillable part is what makes the run fail.",
+     "the real root, through the five real modules: one line per name, the counts summing to the scope's own count."],
+    "- The hookup `census --root` in `lib/opal_naming.py` is NOT yours: the issuer adds it at the merge.\n",
+    ["lib/opal_naming_rootcheck.py", "lib/tests/test_opal_naming_rootcheck.py"],
+    COMMON_READ + " You also read `lib/opal_naming_scope.py`, `lib/opal_naming_rootmap.py`, `lib/opal_naming_cadence.py`, `lib/opal_naming_keyfill.py` and `" + PROPOSAL + "`.",
+    "both last lines whole; every `HOLE` and every `CARDED` line whole; the count per kind; any module whose behaviour did not match this face; commits.",
+    "a line with a blank printed as FIX (rule 6 and AC1 refuse it); a name dropped so the list looks clean (AC2: the six counts sum to the scope's own item count); a hole hidden by --report-only (the flag changes the exit code only, never a line; the difference control in AC1 runs without it); a card written for the run (the face forbids it; FWD-5); BLIND: names of the root that exist only in AWS -- this round's run is the repository plane.",
+    "Base dry-run at the cut: BF6-AC1, BF6-AC2 base FAIL as expected (files absent). STAGED on the other five merges; handed to slot ~1 by continuation.",
+)

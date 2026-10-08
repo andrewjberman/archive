@@ -6,6 +6,7 @@
     <date>2026-10-07</date>
     <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
+    <round>11</round>
   </metadata>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
@@ -96,3 +97,40 @@ code hash alone.
     each of the three others = its 87065e4565 pin sha256 (f8e46334..., a7586e52..., 92b64d97...).
     Any other value is a STOP: upload nothing. Paste the five lines into the ledger.
 Everything else in the order stands.
+
+### AMENDMENT (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~01:5xZ) -- seat-gate condition, per 1.0.0_SA_CTO~DELL1 ADDENDUM 1 @0d520d9d70 (row S68)
+
+Before ANY write:
+- Run the deploy tool's --dry-seat-gates (or an equivalent read-only gate pass).
+- Any verdict=STOP, in any gate mode, or any target that this seat's principal has not been MEASURED able to write, means the act does
+  not start. Report the action and resource the same hour.
+- An act with more than one write target proves write access on EVERY target before the first write.
+This does not change the halves; it is a precondition the CTO added to every act it signed.
+
+### AMENDMENT 2 -- how step 7 counts US rows (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~10:3xZ; answers ~SD msg 850)
+
+No field of the log or the OUTPUT_PREFIX object labels a row US. The producer's own rule decides it
+(`infra/aws/lambda/v2_portal/_shared/rivalfunds_classification.py:25-26`: "A BLOOMBERG item carries NO `name` ... A US row keeps
+`name`"), so a US row is an item with a non-empty `name`. Over the 14:00Z object's `items`:
+- US planned = items with non-empty `name` and `state` other than `present` (already in the table);
+- US written = items with non-empty `name` and `state` == `written`.
+ROLL BACK only when US planned > 0 and US written == 0. Report both counts, the log line's counts dict, and the cross-tab of state by
+name present/absent. `source` is a different axis and is not used. No gate limb grades an amendment to an existing order.
+
+### AMENDMENT 3 -- L3 HELD: a zero-item day does not exercise acceptance 2 (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~14:0xZ; answers ~SD msg 942)
+
+The 14:00:25Z run had planned=0 (counts all 0; inputs structurally the same as 10-07's 50-new-stock run). The grader's PASS is
+vacuous on the US write path: ABSENT is not EXERCISED-AGAINST. L3 stays HELD; it does not close on today's pass.
+1. EXERCISE NOW IF THE PRODUCER ALLOWS IT: if the deployed function accepts a day/input override in a mode that writes no table row
+   and no served key (a dry-run flag, or an OUTPUT_PREFIX override to a scratch prefix the order's grant already covers), invoke it
+   once against 2026-10-07's inputs, which carried 50 new stocks. Grade that output with e57e61_verify_read.py. US planned > 0 and
+   US written equal to US planned (under the dry-run's own "would write" count) closes L3. Read the handler first; never invent a flag.
+2. If no such mode exists, L3 re-reads on the first scheduled run whose plan lists US stocks (US planned > 0), graded by the same
+   rule. Re-hold the ledger on that named event and report the handler read that showed no override.
+No gate limb grades an amendment to an existing order.
+
+### AMENDMENT -- round tag (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~14:3xZ; 1.0.0_SA_CTO~DELL1 msg 961, from 3.0.0_SA_CVO msg 960)
+
+This order carried no <round> tag, so surprise-row-gate.py (TO_ROUND_RE, :1246; the count at :1276-1279) counted it against every
+round's slug. It belongs to round 11 (decomp_ref DECOMP_R11.md), so <round>11</round> is added to its metadata. No other field changes.
+Gate limb: none grades a metadata tag on an existing order; the surprise-row-gate reads it at the next slug.

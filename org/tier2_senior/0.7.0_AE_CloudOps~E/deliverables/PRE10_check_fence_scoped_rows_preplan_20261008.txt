@@ -1,0 +1,171 @@
+caller: { "UserId": "AIDAUR7FNW6PEXHN2JIOH", "Account": "313476888478", "Arn": "arn:aws:iam::313476888478:user/Andrew_Berman" }
+scratch directory (outside the repository): C:\Users\ANDREW~1\AppData\Local\Temp\wk6scopedtw_695u2
+== TODAY: validator on the real registry: 0 refusal(s) in total, 0 touching exemption rows; rows accepted 32 of 32 (of which 0 scoped row(s) already present)
+registry since d5516cb074^ (the commit before the first scoped row landed): rows gained per bucket {'opal-data-49financial': 1, 'opal-data-cottonwood': 1, 'opal-data-inflection': 1}; every earlier row unchanged and in place: True (no problem); scoped rows among them: 0; unscoped rows admitted since (read from the registry diff; each must be a declared pair in dell_fence_join_pairs.json: True): [('opal-data-49financial', 'cloudops-dell1-agent-user'), ('opal-data-cottonwood', 'cloudops-dell1-agent-user'), ('opal-data-inflection', 'cloudops-dell1-agent-user')]
+scratch states: pre-rows registry = git d5516cb074^; stripped = today's registry minus every scoped row (0 scoped row(s) removed); with = today's registry plus the synthetic fixture rows (3 scoped row(s) in it; the synthetic principal arn:aws:iam::313476888478:user/wk-ctlpln-synthetic-scoped-probe-user)
+(14 scratch roots built, evaluated and planned in 4 s; every Terraform call CHECKPOINT_DISABLE=1, no provider, no AWS)
+plan in the provider-less scratch root: pre-rows registry (old module) rc=0, stripped (new module) rc=0, today's (new module) rc=0, control with-state rc=0 (control: the plan runs)
+-- every rendered bucket policy: the pinned pre-change module + fence files (06c783b92b) over the registry at d5516cb074^ (the render before the first scoped row landed) against the edited module + fence files over today's registry with every scoped row removed. `unchanged_today` means: unchanged EXCEPT the principals the registry has since admitted unscoped ([('opal-data-49financial', 'cloudops-dell1-agent-user'), ('opal-data-cottonwood', 'cloudops-dell1-agent-user'), ('opal-data-inflection', 'cloudops-dell1-agent-user')]); the comparison takes exactly those ARNs out of the after-policy's admitted list and requires the parsed policies equal:
+   aws_s3_bucket_policy.lgic_firm[cottonwood]      admitted list before=6 after=7 (+1: ['cloudops-dell1-agent-user'])  before sha256[:16]=7e0c332c5a2819df  after-minus-those-ARNs=7e0c332c5a2819df  EQUAL
+   aws_s3_bucket_policy.lgic_firm[inflection]      admitted list before=6 after=7 (+1: ['cloudops-dell1-agent-user'])  before sha256[:16]=90c8b437bcef0d44  after-minus-those-ARNs=90c8b437bcef0d44  EQUAL
+   aws_s3_bucket_policy.opal_data_49financial      admitted list before=20 after=21 (+1: ['cloudops-dell1-agent-user'])  before sha256[:16]=974c4a0734e77cdf  after-minus-those-ARNs=974c4a0734e77cdf  EQUAL
+   (diagnostic, the code change alone: old module + fence files vs new, both over the stripped registry: all IDENTICAL)
+fence_exemption_arns, new module over the stripped registry == old module over the pre-rows registry + exactly the ARNs admitted since, in order: True (32 ARNs over 7 buckets, sha256[:16] 3864784a988f7e8c); == the Python rendering of the same rows: True; today's registry, old module == new module (a scoped row's ARN stays in the list): True
+fence_scoped_statements with every scoped row removed: 0 statement(s) over 7 bucket keys (every value an empty list: True); on today's registry: 0 statement(s) for 0 scoped row(s)
+== SCOPED: validator on the with-state registry (today's + the synthetic fixture rows, 3 scoped row(s)): 0 refusal(s)
+   opal-data-49financial: 1 synthetic scoped row(s), as ruled (actions ['s3:GetObject', 's3:ListBucket', 's3:GetBucketLocation'], prefix irpt/<firm>/platinum/holdings/, synthetic ARN): True; 3 statement(s) rendered ['DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ObjectsOutsidePrefix', 'DenyScopedExemption1ListingOutsidePrefix']; 3/3 at the tail of the fence file's rendered policy; synthetic principal in the fence's admitted list: True
+   opal-data-cottonwood: 1 synthetic scoped row(s), as ruled (actions ['s3:GetObject', 's3:ListBucket', 's3:GetBucketLocation'], prefix irpt/<firm>/platinum/holdings/, synthetic ARN): True; 3 statement(s) rendered ['DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ObjectsOutsidePrefix', 'DenyScopedExemption1ListingOutsidePrefix']; 3/3 at the tail of the fence file's rendered policy; synthetic principal in the fence's admitted list: True
+   opal-data-inflection: 1 synthetic scoped row(s), as ruled (actions ['s3:GetObject', 's3:ListBucket', 's3:GetBucketLocation'], prefix irpt/<firm>/platinum/holdings/, synthetic ARN): True; 3 statement(s) rendered ['DenyScopedExemption1AnyOtherAction', 'DenyScopedExemption1ObjectsOutsidePrefix', 'DenyScopedExemption1ListingOutsidePrefix']; 3/3 at the tail of the fence file's rendered policy; synthetic principal in the fence's admitted list: True
+the cottonwood statements as rendered (the module's fence_scoped_statements):
+[
+  {
+    "Condition": {
+      "ArnLike": {
+        "aws:PrincipalArn": [
+          "arn:aws:iam::313476888478:user/wk-ctlpln-synthetic-scoped-probe-user"
+        ]
+      }
+    },
+    "Effect": "Deny",
+    "NotAction": [
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:GetBucketLocation"
+    ],
+    "Principal": "*",
+    "Resource": [
+      "arn:aws:s3:::opal-data-cottonwood",
+      "arn:aws:s3:::opal-data-cottonwood/*"
+    ],
+    "Sid": "DenyScopedExemption1AnyOtherAction"
+  },
+  {
+    "Action": [
+      "s3:GetObject"
+    ],
+    "Condition": {
+      "ArnLike": {
+        "aws:PrincipalArn": [
+          "arn:aws:iam::313476888478:user/wk-ctlpln-synthetic-scoped-probe-user"
+        ]
+      }
+    },
+    "Effect": "Deny",
+    "NotResource": [
+      "arn:aws:s3:::opal-data-cottonwood/irpt/cottonwood/platinum/holdings/*"
+    ],
+    "Principal": "*",
+    "Sid": "DenyScopedExemption1ObjectsOutsidePrefix"
+  },
+  {
+    "Action": [
+      "s3:ListBucket"
+    ],
+    "Condition": {
+      "ArnLike": {
+        "aws:PrincipalArn": [
+          "arn:aws:iam::313476888478:user/wk-ctlpln-synthetic-scoped-probe-user"
+        ]
+      },
+      "StringNotLike": {
+        "s3:prefix": [
+          "irpt/cottonwood/platinum/holdings/*"
+        ]
+      }
+    },
+    "Effect": "Deny",
+    "Principal": "*",
+    "Resource": [
+      "arn:aws:s3:::opal-data-cottonwood"
+    ],
+    "Sid": "DenyScopedExemption1ListingOutsidePrefix"
+  }
+]
+(31 simulator calls, 31 answered from the cache, 0 made, in 0 s)
+-- arms on opal-data-49financial (scratch document = saved policy + rendered admitted list + rendered statements)
+   1 scoped GetObject under the prefix                  allowed       expected allowed       OK
+   2 scoped GetObject outside the prefix                explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   3 scoped PutObject under the prefix                  explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   4 scoped ListBucket, s3:prefix = the prefix          allowed       expected allowed       OK
+   5 scoped ListBucket, NO s3:prefix in the request     explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   5f scoped ListBucket, s3:prefix = empty string       explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   6 scoped GetBucketLocation                           allowed       expected allowed       OK
+   7 scoped GetObjectVersion under the prefix           explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   8 unscoped-row principal GetObject outside the prefix allowed       expected allowed       OK
+-- arms on opal-data-cottonwood (scratch document = saved policy + rendered admitted list + rendered statements)
+   1 scoped GetObject under the prefix                  allowed       expected allowed       OK
+   2 scoped GetObject outside the prefix                explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   3 scoped PutObject under the prefix                  explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   4 scoped ListBucket, s3:prefix = the prefix          allowed       expected allowed       OK
+   5 scoped ListBucket, NO s3:prefix in the request     explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   5f scoped ListBucket, s3:prefix = empty string       explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   6 scoped GetBucketLocation                           allowed       expected allowed       OK
+   7 scoped GetObjectVersion under the prefix           explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   8 unscoped-row principal GetObject outside the prefix allowed       expected allowed       OK
+   C1 CONTROL plain admission: scoped ListBucket, no s3:prefix allowed       expected allowed       OK
+   C2 CONTROL plain admission: scoped ListBucket, empty prefix allowed       expected allowed       OK
+   C3 CONTROL plain admission: scoped PutObject under it allowed       expected allowed       OK
+   C4 CONTROL principal in no row: GetObject under the prefix explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+-- arms on opal-data-inflection (scratch document = saved policy + rendered admitted list + rendered statements)
+   1 scoped GetObject under the prefix                  allowed       expected allowed       OK
+   2 scoped GetObject outside the prefix                explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   3 scoped PutObject under the prefix                  explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   4 scoped ListBucket, s3:prefix = the prefix          allowed       expected allowed       OK
+   5 scoped ListBucket, NO s3:prefix in the request     explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   5f scoped ListBucket, s3:prefix = empty string       explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   6 scoped GetBucketLocation                           allowed       expected allowed       OK
+   7 scoped GetObjectVersion under the prefix           explicitDeny  expected explicitDeny  OK by=Resource Policy:ResourcePolicy
+   8 unscoped-row principal GetObject outside the prefix allowed       expected allowed       OK
+== REFUSALS: a control and seven cases, each its own scratch registry = the control with ONE defect planted (control: the with-state registry gives 0 validator refusal(s), module plan rc=0)
+   1 an unknown key                                     validator: REFUSED ['opal-data-cottonwood[6].bogus_key: not a key an exemptions row carries (closed set: principal, arn, reaso'] | module (plan in a scratch root): REFUSED rc=1
+   2 actions without prefix                             validator: REFUSED ['opal-data-cottonwood[6].actions: actions and prefix come together or not at all'] | module (plan in a scratch root): REFUSED rc=1
+   3 a prefix without the trailing /                    validator: REFUSED ['opal-data-cottonwood[6].prefix: a literal key prefix ending in /, no leading / and no * or ?'] | module (plan in a scratch root): REFUSED rc=1
+   4 an action outside the closed set (PutObject)       validator: REFUSED ['opal-data-cottonwood[6].actions: a non-empty list drawn from the closed read set s3:GetObject, s3:ListB'] | module (plan in a scratch root): REFUSED rc=1
+   5 a prefix whose firm segment is another firm's      validator: REFUSED ["opal-data-cottonwood[6].prefix: its second path segment must be the firm token of this bucket ('cotton"] | module (plan in a scratch root): not refused (rc=0) -- the module has no rule for this case
+   6 a wildcard principal on a scoped row               validator: REFUSED ['opal-data-cottonwood[6].arn: a scoped row names exactly one principal by its exact ARN (no * or ?)'] | module (plan in a scratch root): REFUSED rc=1
+   7 two rows for one principal in one bucket           validator: REFUSED ["opal-data-cottonwood[8].principal: 'arn:aws:iam::313476888478:user/wk-ctlpln-synthetic-scoped-probe-user'"] | module (plan in a scratch root): not refused (rc=0) -- the module has no rule for this case
+   more actions outside the closed set, validator (each from the accepted control): {'GetObjectVersion': 'REFUSED', 'ListBucketVersions': 'REFUSED', 'DeleteObject': 'REFUSED', 's3:*': 'REFUSED'}
+   the module's own plan-time rules (a second defence): refuses cases ['1', '2', '3', '4', '6']; the validator-only cases are 5 and 7
+   case 1 module text: Error: Module output value precondition failed on ..\modules\opal_name\main.tf line 193, in output "fence_exemption_arns": 193: condition = length(local.fence_unknown_row_keys) == 0 ├──────────────── │ local.fence_unknown_row_keys is tuple with 1 element infra/logic/registry/exemptions.json carries a row key this module does not know, and an unknown key would be rendered as a FULL admission, so the plan is refused. The closed set is principal, arn, reason, signoff_ref, actions, prefix. Offending bucket[row].key: op
+== the synthetic scoped rows this check adds to a scratch copy of the registry (one under each bucket key; never written to the repository):
+  under key opal-data-49financial:
+{
+  "principal": "wk-ctlpln-synthetic-scoped-probe-user",
+  "arn": "arn:aws:iam::313476888478:user/wk-ctlpln-synthetic-scoped-probe-user",
+  "reason": "SYNTHETIC fixture principal of check_fence_scoped_rows.py (no such user): reads irpt/49financial/platinum/holdings/* in opal-data-49financial and nothing else.",
+  "signoff_ref": "scratch fixture, never in the repository registry",
+  "actions": [
+    "s3:GetObject",
+    "s3:ListBucket",
+    "s3:GetBucketLocation"
+  ],
+  "prefix": "irpt/49financial/platinum/holdings/"
+}
+  under key opal-data-cottonwood:
+{
+  "principal": "wk-ctlpln-synthetic-scoped-probe-user",
+  "arn": "arn:aws:iam::313476888478:user/wk-ctlpln-synthetic-scoped-probe-user",
+  "reason": "SYNTHETIC fixture principal of check_fence_scoped_rows.py (no such user): reads irpt/cottonwood/platinum/holdings/* in opal-data-cottonwood and nothing else.",
+  "signoff_ref": "scratch fixture, never in the repository registry",
+  "actions": [
+    "s3:GetObject",
+    "s3:ListBucket",
+    "s3:GetBucketLocation"
+  ],
+  "prefix": "irpt/cottonwood/platinum/holdings/"
+}
+  under key opal-data-inflection:
+{
+  "principal": "wk-ctlpln-synthetic-scoped-probe-user",
+  "arn": "arn:aws:iam::313476888478:user/wk-ctlpln-synthetic-scoped-probe-user",
+  "reason": "SYNTHETIC fixture principal of check_fence_scoped_rows.py (no such user): reads irpt/inflection/platinum/holdings/* in opal-data-inflection and nothing else.",
+  "signoff_ref": "scratch fixture, never in the repository registry",
+  "actions": [
+    "s3:GetObject",
+    "s3:ListBucket",
+    "s3:GetBucketLocation"
+  ],
+  "prefix": "irpt/inflection/platinum/holdings/"
+}
+(elapsed 14 s)
+FENCE-SCOPED rows_today=32 unchanged_today=True scoped_rendered=9/9 sim_ok=31/31 refusals_ok=7/7 unknown_key_refused_by=validator+module ok=True

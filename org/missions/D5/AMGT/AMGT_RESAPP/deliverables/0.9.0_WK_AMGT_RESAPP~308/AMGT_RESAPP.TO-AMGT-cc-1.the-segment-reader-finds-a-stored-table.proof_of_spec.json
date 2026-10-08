@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-cc-1.the-segment-reader-finds-a-stored-table",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "b5f90bbf8d003f807db54764839a8e7095c4d32e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "5d126e533e099ffa430e7c819cde3a2b9d013833",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-cc-1.the-segment-reader-finds-a-stored-table.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~308",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/segment_table.py",
+      "kind": "script",
+      "commit_or_etag": "ceb7da64f0af604037450853c488f5ca0f10c6c8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: MAX_READ 20; walk newest first, one body at a time, stop at first table; REASON_NOT_ALL_READ when objects unread. Library code, no deploy.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_segment_table.py",
+      "kind": "test",
+      "commit_or_etag": "ceb7da64f0af604037450853c488f5ca0f10c6c8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: 17 original tests kept, one assertion changed (5 to 7), reasons list extended, 4 plant tests added. 21 passed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PASS P1.*PASS P2.*PASS P3.*PASS P4.*PASS P5.*R79 CC1 AC1 SERVED: YES.*exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round79/checks/r79_cc1.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS P1 served status 'served' rows 2 bodies read 7\nPASS P2 bodies read 1\nPASS P3 MAX_READ 20\nPASS P4 bodies read 20 of 24; reason says older ones were not looked at\nPASS P5 round-78 answers kept\nR79 CC1 AC1 SERVED: YES\nexit=0",
+      "denominator": "5 of 5 checks PASS",
+      "status": "PASS",
+      "expect": "PASS P1.*PASS P2.*PASS P3.*PASS P4.*PASS P5.*R79 CC1 AC1 SERVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "PASS S1.*PASS S2.*R79 CC1 AC2 SERVED: YES.*exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round79/checks/r79_cc1.py\" --crit AC2 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS S1 AMD source 20261007T115113Z.json; bodies read 2, needed 2, in the folder 4\nPASS S2 85 of 85\nR79 CC1 AC2 SERVED: YES\nexit=0",
+      "denominator": "85 of 85 stored names",
+      "status": "PASS",
+      "expect": "PASS S1.*PASS S2.*R79 CC1 AC2 SERVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "PASS B1.*R79 CC1 AC3 SERVED: YES.*exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round79/checks/r79_cc1.py\" --crit AC3 --where local; echo \"exit=$?\"",
+      "output_evidence": "21 passed in 0.32s\nPASS B1 round-78 cases present 17 of 17 rc=0\nR79 CC1 AC3 SERVED: YES\nexit=0",
+      "denominator": "17 of 17 round-78 cases present; 21 passed",
+      "status": "PASS",
+      "expect": "PASS B1.*R79 CC1 AC3 SERVED: YES.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base reader (5 objects, two passes) fails every build criterion of the check script per the order's preflight.",
+      "expected": "P1-P4 FAIL at base",
+      "observed": "Not re-run at base; the issuer's preflight recorded it. Built code passes P1-P5.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check script and test file run once each",
+      "observed": "21 passed; checks PASS",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "test_harvest_prefixes.py::test_ii_registry_hash_matches",
+      "reason": "One failure in lib/research/api/tests/ (1 failed, 832 passed), a registry hash assertion in a file not touched by this order."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~308/AMGT_RESAPP.TO-AMGT-cc-1.the-segment-reader-finds-a-stored-table.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/ -q",
+      "result": "1 failed, 832 passed (the failure is test_harvest_prefixes registry hash, untouched file)"
+    }
+  ]
+}

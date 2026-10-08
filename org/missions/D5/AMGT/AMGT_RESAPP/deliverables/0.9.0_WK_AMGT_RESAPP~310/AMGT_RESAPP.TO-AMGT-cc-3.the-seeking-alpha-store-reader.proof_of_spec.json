@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-cc-3.the-seeking-alpha-store-reader",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "b2fd93edbfcac44856c7f40058e328e37c352ae6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "b2fd93edbfcac44856c7f40058e328e37c352ae6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-cc-3.the-seeking-alpha-store-reader.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~310",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/freshness/collector_read.py",
+      "kind": "script",
+      "commit_or_etag": "c68dde3c719b8b5cd6ce7624aad99b3fc108779e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new module, one listing per call, never raises",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/freshness/tests/test_collector_read.py",
+      "kind": "test",
+      "commit_or_etag": "c68dde3c719b8b5cd6ce7624aad99b3fc108779e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "16 plant tests on a fake client, passing",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "on a fake store, two companies read with their newest article date, a no-article record reads checked, no folder reads no_record, a malformed object is counted and named, the slash name is found, a failed listing and a failed body read unreadable with no date, one listing per call, the cap holds; F0-F11 PASS; R79 CC3 AC1 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round79/checks/r79_cc3.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS F0 the module imports and loads neither the harvest store module nor pyarrow []\nPASS F0b still neither after a call []\nPASS F1 two companies with records read as read, dated by the greatest stored article time AAA read 2026-10-07T01:32:41Z; BBB read 2026-10-06T11:58:00Z; missing fields []\nPASS F2 a company whose only record holds no article reads as checked, with no date checked Seeking Alpha was checked on 2026-10-07 and no article is held for this company.\nPASS F3 a company with no folder reads no_record, never not collected no_record No Seeking Alpha collection record is held for this company yet.\nPASS F4 a malformed object is counted, named and not used as a date EEE no_record rejected 1; FFF read 2026-10-06T05:59:00Z rejected 1; named 2\nPASS F5 the slash name is found under its slash-safe folder read 2026-10-07T04:27:21Z\nPASS F7 one listing per call, bodies fetched for covered folders only, no other client method touched listings 1; gets 13 of 13 wanted; uncovered fetched False; other calls []\nPASS F11 a company over the cap has only its newest records fetched, and is named cap 5; GGG read 2026-10-07T00:00:00Z records 5; capped ['GGG_US_Equity']\nPASS F9 the September pilot object under the old tables never becomes a date DDD None\nPASS F6 a listing that raises does not raise out: every company reads unreadable, none has a date states ['unreadable']; read_completed False\nPASS F8 a body that cannot be fetched makes that one company unreadable and leaves the others BBB unreadable; AAA read; read_completed False; failed 1\nPASS F10 compact_stamp gives the stamp form the other columns use, and None for no date ('20261007T013241Z', None, None)\nR79 CC3 AC1 SERVED: YES\nexit=0",
+      "denominator": "13 of 13 F clauses (F0, F0b, F1-F11) PASS",
+      "status": "PASS",
+      "expect": "SERVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "on the real store the read finishes, 95 of 95 covered names have a state, each equals the check's own recount (90 or more compared, 0 differ), 23 or more hold a record and 11 or more read a date, no date is 2026-09-11; R1-R6 PASS; R79 CC3 AC2 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round79/checks/r79_cc3.py\" --crit AC2 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS R1 the function returns on the real store without raising, and its read finished objects listed 109; bodies read 25; rejected 0; reason None\nPASS R2 every covered name has a state: read, checked or no_record, a date only on read 95 of 95 covered; states {'no_record': 70, 'checked': 13, 'read': 12}\nPASS R3 the module's bucket and prefix equal the builder's ('opal-data-harvest', 'seeking-alpha/harvest/state/job_record/') against ('opal-data-harvest', 'seeking-alpha/harvest/state/job_record/')\nPASS R4 state and date equal this check's own recount on every name whose folder did not change compared 95 of 95 (folders that changed during the run: 0); differ 0 []; objects 109 then 109\nPASS R5 the counts are at or above the floor measured at the cut with a record 25 (floor 23); read 12 (floor 11); checked 13; no_record 70\nPASS R6 no date is the pilot's 2026-09-11; BABA, BA and COST read at or after the cut's dates pilot-dated []; [('BABA_US_Equity', 'read', '2026-10-06T23:15:47Z'), ('BA_US_Equity', 'read', '2026-10-07T01:33:47Z'), ('COST_US_Equity', 'read', '2026-10-07T11:27:36Z')]\nR79 CC3 AC2 SERVED: YES\nexit=0",
+      "denominator": "6 of 6 R clauses PASS; 95 of 95 covered names",
+      "status": "PASS",
+      "expect": "SERVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the freshness test folder passes and collector_record.py and the schema file hold the bytes of the cut; B1-B2 PASS; R79 CC3 AC3 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round79/checks/r79_cc3.py\" --crit AC3 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS B1 the freshness test folder passes 48 passed in 0.25s\nPASS B2 lib/research/freshness/collector_record.py holds the bytes of the cut blob 848e4f19a677 pinned 848e4f19a677\nPASS B2 lib/research/freshness/seeking_alpha_job_record.schema.json holds the bytes of the cut blob 1040d31b7f27 pinned 1040d31b7f27\nR79 CC3 AC3 SERVED: YES\nexit=0",
+      "denominator": "3 of 3 B clauses PASS",
+      "status": "PASS",
+      "expect": "SERVED: YES.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A listing that raises and a body fetch that raises must make companies unreadable with no date (tests rule 12 and rule 13; check F6 and F8).",
+      "expected": "unreadable entry with last_read None",
+      "observed": "F6 and F8 PASS: unreadable, no date, others unchanged.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1-AC3 and the freshness test folder run in this session; AC2 compared 95 of 95 names against the check's own recount.",
+      "observed": "48 passed; AC1-AC3 SERVED: YES",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the hookup of collector_read into scoped_amgt / build_view / page_body",
+      "reason": "Out of bounds: another cell connects it; this order builds the reader only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~310/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh lib/research/freshness/collector_read.py lib/research/freshness/tests/test_collector_read.py",
+      "result": "COMPILE-OK (run by safe-commit.sh at commit c68dde3c71)"
+    }
+  ]
+}

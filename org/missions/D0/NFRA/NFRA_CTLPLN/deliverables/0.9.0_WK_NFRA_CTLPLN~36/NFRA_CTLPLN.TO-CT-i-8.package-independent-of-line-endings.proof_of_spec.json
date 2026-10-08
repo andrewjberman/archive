@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-i-8",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-8.package-independent-of-line-endings.md",
+    "group": "OTHER",
+    "vintage_commit": "dbd75257ee"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~36",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.inbound5.md",
+    "vintage_commit": "dbd75257ee",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-8.package-independent-of-line-endings.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/teams-chat-assist/build.sh",
+      "kind": "script",
+      "commit_or_etag": "55bb163a4c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit on the worker branch wk-NFRA_CTLPLN-36; nothing deployed, no push, no terraform, no AWS call",
+      "artifact_covered_by": [
+        "CTi8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/teams-chat-assist/tests/test_build_reproducible.py",
+      "kind": "test",
+      "commit_or_etag": "55bb163a4c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit on the worker branch wk-NFRA_CTLPLN-36; nothing deployed, no push, no terraform, no AWS call",
+      "artifact_covered_by": [
+        "CTi8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~36/PACKAGE_LINE_ENDINGS_MEASURED.md",
+      "kind": "doc",
+      "commit_or_etag": "55bb163a4c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit on the worker branch wk-NFRA_CTLPLN-36; nothing deployed, no push, no terraform, no AWS call",
+      "artifact_covered_by": [
+        "CTi8-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTi8-AC1",
+      "criterion_verbatim": "CTi8-AC1 -- the built behaviour and its difference control in one run: the real build script on CRLF inputs and on LF inputs gives one package.",
+      "method": "command",
+      "invocation": "python infra/aws/lambda/teams-chat-assist/tests/test_build_reproducible.py",
+      "expect": "PACKAGE-REPRODUCIBLE ok=True",
+      "output_evidence": "PACKAGE-REPRODUCIBLE ok=True crlf_sha=42659e79f3f8 lf_sha=42659e79f3f8 worktree_sha=42659e79f3f8 files=28 (rc=0, 19 s) [run under timeout 120]",
+      "denominator": "3 of 3 builds equal (CRLF copy, LF copy, unmodified worktree), 28 of 28 package files in each; difference control: the OLD build.sh on the same CRLF and LF copies gave d142c653452e vs 42659e79f3f8 (different)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTi8-AC2",
+      "criterion_verbatim": "CTi8-AC2 -- JUDGMENT, never self-graded: PACKAGE_LINE_ENDINGS_MEASURED.md names the files that differed and their cause from reads, and states what the change does to the next deploy's hash.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~36/PACKAGE_LINE_ENDINGS_MEASURED.md",
+      "judgment": true,
+      "output_evidence": "Sections 2 and 4 of the file: differing files infra/logic/registry/remediations.json and infra/logic/registry/scopes.json (2 of 28; w/crlf in the shared tree, w/lf here, i/lf in both; no attribute; core.autocrlf false in both trees); package SHA-256 before and after in this worktree 42659e79f3f8b7ef1512398703e0d2cac9ef2e6ce871e4601a686606f3d23f47 both; next-deploy paragraph in section 4.",
+      "denominator": "28 of 28 package sources read in each of 2 trees",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: the worker records the output and no verdict; 3.0.0_SA_CVO grades it"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant; the difference control is the build itself: the test converts one input copy to CRLF and one to LF, asserts they differ on disk, and the unchanged build.sh (git show HEAD of the file at dbd75257ee) gave different hashes on the same two copies",
+      "expected": "old script: CRLF hash != LF hash; new script: equal",
+      "observed": "old script d142c653452e (CRLF) vs 42659e79f3f8 (LF); new script 42659e79f3f8 for both",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "three builds of three input roots in one run, plus separate runs before the commit and after it, all printed 42659e79f3f8",
+      "observed": "same hash on every run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a deploy, terraform, safe-apply, any AWS call, reading the live function's source_code_hash",
+      "reason": "the order forbids all of them; whether the live package was built from CRLF inputs is therefore not measured, and the measured file says so"
+    },
+    {
+      "item": "transcripts-pull/build.sh",
+      "reason": "outside the order's paths; read only and filed as row NFRA_CTLPLN-W36-S2"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W36-S1: bare 'bash' from Python is the WSL stub; the test resolves Git Bash through .tools/git_bash_resolver.py",
+    "NFRA_CTLPLN-W36-S2: transcripts-pull/build.sh has the same pattern (read), and the shared tree's two CRLF registry files do not show in git status"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~36/NFRA_CTLPLN.TO-CT-i-8.package-independent-of-line-endings.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python infra/aws/lambda/teams-chat-assist/tests/test_build_reproducible.py",
+      "result": "PACKAGE-REPRODUCIBLE ok=True crlf_sha=42659e79f3f8 lf_sha=42659e79f3f8 worktree_sha=42659e79f3f8 files=28"
+    }
+  ]
+}

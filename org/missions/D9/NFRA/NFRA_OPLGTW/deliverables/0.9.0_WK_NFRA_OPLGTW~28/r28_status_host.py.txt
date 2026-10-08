@@ -1,0 +1,151 @@
+"""OG-rl-14 host program (the A1 execution-id shape check on the host): one REFUSED id and one ACCEPTED id on the registered status tool.
+Run by r28_ssm_prog.py as a SEPARATE process (env -i, installed venv, cwd = the gateway dir being tested; staged = a host scratch copy carrying the release bytes, installed
+tree untouched; never the running service). Modes (argv[1]): before (installed live code: only whether the check exists; NO status call, because live code formats an id
+straight into the URL path) | rehearsal (staged release bytes) | after (installed release code). argv[2] = the served release sha.
+The ACCEPTED id (the known 2026-10-07 ~01:26Z execution) arrives in the process environment (R28_EXEC_ID, an SSM parameter) and is NEVER printed (the runner redacts it).
+The REFUSED id is the synthetic string 'r28/refused-id' (a slash). Both go through the registered wrapper (run_integration_tool) with the tier gate, the entitlement lookup and the audit
+sink stood in by no-ops (a caller tier needs a real principal); the tool's OWN code is the real one. httpx.get and httpx.post are wrapped to COUNT calls on the refused id.
+It makes the portal service login POST and GET requests ONLY for the accepted id: it never calls opal_data_refresh_upload and never POSTs /trigger. No grant, state store, .env or
+secret is written; /opt/opal-gateway/.env is never read here. Prints booleans, status words and counts; never an id, a token or a credential."""
+import asyncio
+import hashlib
+import json
+import os
+import subprocess
+import sys
+
+GW = os.environ.get("OG_GW_DIR", "/opt/opal-gateway")
+mode = sys.argv[1] if len(sys.argv) > 1 else "before"
+served = sys.argv[2] if len(sys.argv) > 2 else ""
+staged = GW != "/opt/opal-gateway"
+sys.path.insert(0, GW)
+
+pid = subprocess.check_output(["systemctl", "show", "opal-gateway", "-p", "MainPID", "--value"]).decode().strip()
+enabled = ""
+for kv in open("/proc/%s/environ" % pid, "rb").read().split(bytes([0])):
+    if kv.startswith(b"ENABLED_INTEGRATIONS="):
+        enabled = kv.split(b"=", 1)[1].decode("utf-8", "replace")
+os.environ["ENABLED_INTEGRATIONS"] = enabled
+os.environ["MOCK_GRAPH"] = "1"
+
+from mcp.server.fastmcp import FastMCP  # noqa: E402
+from app import tools, integrations  # noqa: E402
+from app.integrations.opal_portal import integration as portal  # noqa: E402
+
+integrations.register_enabled(tools.mcp, enabled.split())
+names = sorted(t.name for t in asyncio.run(FastMCP.list_tools(tools.mcp)))
+has_check = hasattr(portal, "_check_execution_id")
+print("R28_TOOLS count=%d has_status=%s id_shape_check_present=%s module_md5=%s staged=%s"
+      % (len(names), "opal_data_refresh_status" in names, has_check, hashlib.md5(open(portal.__file__, "rb").read()).hexdigest()[:8], staged))
+if mode == "before":
+    print("R28_STATUS_BEFORE id_shape_check_present=%s (no status call is made on code without the check)" % has_check)
+    sys.exit(0)
+
+from app import audit, data_entitlement, guard  # noqa: E402
+guard.enforce_min_tier = lambda *a, **k: None
+data_entitlement.tool_denial = lambda tool, principal=None, store=None: None
+audit.log_call = lambda *a, **k: None
+
+calls = {"get": 0, "post": 0}
+_get, _post = portal.httpx.get, portal.httpx.post
+
+
+seen = {}
+
+
+def _cget(*a, **k):
+    calls["get"] += 1
+    r = _get(*a, **k)
+    if a and str(a[0]).endswith(portal.MANIFEST_PATH):      # r28: the manifest GET the tool itself made (its header and its generated_at)
+        seen["h"] = dict(k.get("headers") or {})
+        try:
+            seen["generated_at"] = r.json().get("generated_at")
+        except Exception:  # noqa: BLE001
+            seen["generated_at"] = None
+    return r
+
+
+def _cpost(*a, **k):
+    calls["post"] += 1
+    return _post(*a, **k)
+
+
+def run(eid):
+    """The registered tool's answer as a dict (or {'raised': <type name>})."""
+    try:
+        res = asyncio.run(tools.mcp.call_tool("opal_data_refresh_status", {"execution_id": eid}))
+    except Exception as exc:  # noqa: BLE001 -- the type name only (a message could carry the id)
+        return {"raised": type(exc).__name__}
+    doc = None
+    if isinstance(res, tuple) and len(res) == 2 and isinstance(res[1], dict):
+        doc = res[1]
+    else:
+        for b in (res if isinstance(res, (list, tuple)) else getattr(res, "content", [])):
+            t = getattr(b, "text", None)
+            if t:
+                try:
+                    doc = json.loads(t)
+                    break
+                except Exception:  # noqa: BLE001
+                    pass
+    if isinstance(doc, dict) and isinstance(doc.get("result"), dict) and "status" not in doc:
+        doc = doc["result"]
+    return doc if isinstance(doc, dict) else {"unparsed": True}
+
+
+portal.httpx.get, portal.httpx.post = _cget, _cpost
+refused_id = "r28/refused-id"
+d = run(refused_id)
+txt = json.dumps(d)
+refused = ("execution_id" in txt) and (bool(d.get("error")) or "raised" in d) and calls["get"] == 0 and calls["post"] == 0
+print("R28_STATUS_REFUSED outcome=%s names_execution_id=%s http_get=%d http_post=%d"
+      % ("refused" if refused else "NOT REFUSED", "execution_id" in txt, calls["get"], calls["post"]))
+refused_http = calls["get"] + calls["post"]
+
+# AMENDMENT A4 (CTO half C2): a second refused id, one containing a dot (synthetic string); 0 requests.
+dg0, dp0 = calls["get"], calls["post"]
+d = run("r28.refused-id")
+txt = json.dumps(d)
+refused_dot = ("execution_id" in txt) and (bool(d.get("error")) or "raised" in d) and calls["get"] == dg0 and calls["post"] == dp0
+print("R28_STATUS_REFUSED_DOT outcome=%s names_execution_id=%s http_get=%d http_post=%d"
+      % ("refused" if refused_dot else "NOT REFUSED", "execution_id" in txt, calls["get"] - dg0, calls["post"] - dp0))
+refused_dot_http = (calls["get"] - dg0) + (calls["post"] - dp0)
+
+exec_id = os.environ["R28_EXEC_ID"]
+g0, p0 = calls["get"], calls["post"]
+d = run(exec_id)
+displayed_date = d.get("displayed_date") if isinstance(d.get("displayed_date"), str) else None
+accepted, status_value, terminal = "NOT OK", None, None
+if d.get("error") or "raised" in d or "unparsed" in d:
+    accepted = ("error: " + str(d.get("error", d.get("raised", "unparsed"))))[:160]
+elif d.get("status") in ("UNKNOWN", None):
+    accepted = "status UNKNOWN: " + str(d.get("status_note"))[:100]
+else:
+    accepted, status_value, terminal = "OK", d.get("status"), d.get("terminal")
+print("R28_STATUS_ACCEPTED outcome=%s status_value=%s terminal=%s http_get=%d http_post=%d (the portal login POST + the status GET + the manifest GET)"
+      % (accepted.replace(" ", "_"), status_value, terminal, calls["get"] - g0, calls["post"] - p0))
+
+body = {"served_release": served, "installed_code": not staged, "status_id_refused": {"id_shape": "contains a slash", "outcome": "refused" if refused else "NOT REFUSED", "http_requests": refused_http},
+        "status_id_refused_dot": {"id_shape": "contains a dot", "outcome": "refused" if refused_dot else "NOT REFUSED", "http_requests": refused_dot_http},
+        "status_id_accepted": {"id": "the known 2026-10-07 ~01:26Z execution (not printed)", "outcome": accepted, "status_value": status_value, "terminal": terminal}, "grants_written": 0}
+# r28 (order OG-rl-14, the floor): the status tool's displayed_date against the served manifest's generated_at. One independent GET of the manifest with the bearer header the tool sent.
+mg = None
+if seen.get("h"):
+    try:
+        _mr = _get(portal.PORTAL_FRONT_DOOR + portal.MANIFEST_PATH, headers=seen["h"], timeout=30)
+        mg = _mr.json().get("generated_at") if _mr.status_code == 200 else None
+    except Exception:  # noqa: BLE001
+        mg = None
+body["displayed_date"] = displayed_date
+body["manifest_generated_at"] = mg if isinstance(mg, str) else None
+body["manifest_generated_at_seen_by_tool"] = seen.get("generated_at") if isinstance(seen.get("generated_at"), str) else None
+body["displayed_date_equals_manifest_generated_at"] = bool(displayed_date) and displayed_date == body["manifest_generated_at"]
+print("R28_STATUS_DISPLAYED displayed_date=%s manifest_generated_at=%s seen_by_tool=%s equal=%s" % (displayed_date, body["manifest_generated_at"], body["manifest_generated_at_seen_by_tool"], body["displayed_date_equals_manifest_generated_at"]))
+s = json.dumps(body, sort_keys=True)
+dig = hashlib.sha256(s.encode("utf-8")).hexdigest()
+if staged:
+    print("RL14ID_REHEARSAL_BODY " + s)
+    print("RL14ID_REHEARSAL_DIGEST " + dig)
+else:
+    print("RL14ID_BODY " + s)
+    print("RL14ID_DIGEST " + dig)

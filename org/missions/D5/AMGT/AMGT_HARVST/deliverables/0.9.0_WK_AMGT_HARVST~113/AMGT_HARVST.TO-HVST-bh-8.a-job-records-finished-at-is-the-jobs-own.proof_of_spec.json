@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bh-8.a-job-records-finished-at-is-the-jobs-own",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bh-8.a-job-records-finished-at-is-the-jobs-own.md",
+    "group": "OTHER",
+    "vintage_commit": "4d0e54fbba"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "4d0e54fbba",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bh-8.a-job-records-finished-at-is-the-jobs-own.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~113",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~113 on wk-AMGT_HARVST-113-r61. Local code and stub S3 client plants only; no S3 call, no collector run, no emitter run against .runtime.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/job_record.py",
+      "kind": "script",
+      "commit_or_etag": "f9d664f996",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "job_finished_at(job, run_finished_at): job.get('finished_at') or run_finished_at; the one helper both writers call",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/worker.py",
+      "kind": "script",
+      "commit_or_etag": "f9d664f996",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "write_run_record: jobs[] entry gains finished_at = result.get('finished_at'); _write_job_records calls job_record.job_finished_at",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/emit_job_records.py",
+      "kind": "script",
+      "commit_or_etag": "f9d664f996",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "plan: finished_at = job_record.job_finished_at(job, run['finished_at'])",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_bh8_job_finished_at.py",
+      "kind": "test",
+      "commit_or_etag": "f9d664f996",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "six tests: plants (i) emitter and live writer, (ii) old-shape negative control, (iii) live-then-emit one address, (iv) mutant, (v) run record entry",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_bh8_job_finished_at.py -rA --tb=line -p no:cacheprovider -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_bh8_job_finished_at.py -rA --tb=line -p no:cacheprovider",
+      "output_evidence": "rc 0. '6 passed in 3.18s'",
+      "denominator": "6 passed of 6 collected, 0 failed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_bf1_job_record.py lib/opal_data_harvest/test_ba1_stopped_pair_is_retried.py lib/opal_data_harvest/test_az1_alias_set.py lib/research/freshness/tests -q -p no:cacheprovider -- expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_bf1_job_record.py lib/opal_data_harvest/test_ba1_stopped_pair_is_retried.py lib/opal_data_harvest/test_az1_alias_set.py lib/research/freshness/tests -q -p no:cacheprovider",
+      "output_evidence": "rc 0. '68 passed in 3.16s'",
+      "denominator": "68 passed, 0 failed (no existing assertion changed)",
+      "status": "PASS",
+      "expect": "passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "job_finished_at replaced by a function returning the run's value always",
+      "expected": "plant (i)'s two jobs get one finished_at and one address",
+      "observed": "test_iv_mutant_a_helper_that_always_returns_the_runs_value_gives_one_finished_at_for_both passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (once before and once after commit)",
+      "observed": "6 passed; 68 passed both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "order status flip",
+      "reason": "issuer flips; the order forbids the worker editing it"
+    },
+    {
+      "item": "config.json seeking_alpha_job_record.enabled and the schema file",
+      "reason": "unchanged by the order"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "rc 0 at f9d664f996 (first attempt blocked by ruff F401 on two unused imports in the new test file, fixed before the commit)"
+    }
+  ]
+}

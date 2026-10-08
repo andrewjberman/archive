@@ -1,0 +1,40 @@
+live CodeSha256 before: +s6R0/rcpQ6lJgYsX2JtxfgoFoCmiaozTtMreyyymTQ=
+
+== 1. C4: an as-of date in 2009 on the rankings route ==
+  default window                     status 200  FunctionError None  as_of_date '2009-06-01'  requested_as_of '2009-06-01'  stale_trading_days None  rows 0
+     keys ['as_of_date', 'axis', 'coverage_vintage', 'dated', 'empty_reason', 'generated_at', 'generation_id', 'generation_row_count', 'payload_hash', 'ranking_reason', 'ranking_status', 'read_attempts']; reason 'no generation pointer at TRENDING_PRICE#2009-06-01 / _CURRENT: no committed ranking exists for this date -- this is not an empty membership'
+  90-day window                      status 200  FunctionError None  as_of_date '2026-10-06'  requested_as_of '2026-10-07'  stale_trading_days 1  rows 94
+     keys ['as_of_date', 'axis', 'coverage_vintage', 'dated', 'empty_reason', 'generated_at', 'generation_id', 'generation_row_count', 'payload_hash', 'ranking_reason', 'ranking_status', 'read_attempts']; reason ''
+  90-day window, no as_of (control)  status 200  FunctionError None  as_of_date '2026-10-06'  requested_as_of '2026-10-07'  stale_trading_days 1  rows 94
+     keys ['as_of_date', 'axis', 'coverage_vintage', 'dated', 'empty_reason', 'generated_at', 'generation_id', 'generation_row_count', 'payload_hash', 'ranking_reason', 'ranking_status', 'read_attempts']; reason ''
+
+== 2. bb-4: /thesis officers for a slash name ==
+  BP/_LN_Equity    status 200  FunctionError None  officers 10  source None
+     Marguerite Eileen O'Neill "Meg" -- Chief Executive Officer
+     Katherine Anne Thomson "Kate" -- Chief Financial Officer
+     Sonya Adams -- Exec VP:People & Culture
+  NG/_LN_Equity    status 200  FunctionError None  officers 9  source None
+     Zoe A Yujnovich -- Chief Executive Officer
+     Andrew Agg "Andy" -- Chief Financial Officer
+     Alice Delahunty -- Chief Technology & Innovation Officer
+
+== 3. bb-7: name search by legal name ==
+  q=apple      status 200  FunctionError None  answer 'candidates'  candidates 1 [('AAPL_US_Equity', 'Apple Inc')]
+  q=microsoft  status 200  FunctionError None  answer 'candidates'  candidates 1 [('MSFT_US_Equity', 'Microsoft Corp')]
+  q=Lenovo     status 200  FunctionError None  answer 'candidates'  candidates 1 [('992_HK_Equity', 'Lenovo 992 HK')]
+
+live CodeSha256 after: +s6R0/rcpQ6lJgYsX2JtxfgoFoCmiaozTtMreyyymTQ=
+
+== THE ISSUER'S READING (2.0.0_SA_COO~Z, 2026-10-08 ~08:1xZ), on the live function +s6R0/rc (applied 07:19:32Z) ==
+C4 (the 2009 as-of date): branch (a), a plain answer, no 500. On the default window the request's date is used and the route
+  answers 200 with a reason that no committed ranking exists for that date; stale_trading_days is None there (the staleness
+  read runs only when a pointer is found). On the 90-day window, the branch that reaches the unguarded call site, the request's
+  as-of is NOT read: the date comes from the calendar's own window end (requested_as_of 2026-10-07) or the stored fallback
+  (as_of_date 2026-10-06), and the answer equals the control with no as_of. So no request can hand that call site a year
+  outside 2010-2027; only the clock or a stored pointer date can. Not a blocking row for round 79. The dated hazard stands as
+  filed: row NFRA_CTLPLN-Z-S3 (the frontier leaves the range on 2028-01-01).
+C5, bb-4 (slash-name officers): BP/ LN serves 10 officers and NG/ LN serves 9, each led by its chief executive then its chief
+  financial officer (bb-3's rank is visible on both).
+C5, bb-7 (legal-name search): 'apple' lists AAPL_US_Equity as 'Apple Inc'; 'microsoft' lists MSFT_US_Equity as 'Microsoft Corp';
+  'Lenovo' still lists 992_HK_Equity. Before this deploy 'apple' and 'microsoft' answered nothing.
+Not read here: the gateway (every read is a direct invoke); the page (the walk, bb-19).

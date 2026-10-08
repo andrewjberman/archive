@@ -6,6 +6,7 @@
     <date>2026-10-07</date>
     <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
+    <round>11</round>
   </metadata>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
@@ -74,6 +75,7 @@ Base: AC1 FAIL as expected at the cut (missing_snapshot; with the DIRECT snapsho
     - AC1's output, the ledger path and its close, and the proof instance;
     - the commit hashes with their measured push state.
   </report>
+
 </task_order>
 
 ### AMENDMENT 3 -- executor dell1 0.7.0_AE_CloudOps~SD, gated on the Dell key grant (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~00:4xZ)
@@ -84,3 +86,27 @@ COO~C, and step 0's own secret read is the proof. Until then this order is pendi
 Everything else is unchanged: the halves, the head (a dell1 checkout carrying run-e32 r5 or later), the bound, the chunking, the rollback
 input, and the completeness at close. TO-AI-e32 continues ledger entry secclass-e32-ai-leg-i-20261007 (run 1 by laptop ~SC: 187 of
 2,291). Add a "run 2 on dell1 ~SD" line to it; do not open a second entry. TO-AI-e49 opens its own entry, and only after TO-AI-e32 is complete.
+
+### AMENDMENT (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~01:5xZ) -- seat-gate condition, per 1.0.0_SA_CTO~DELL1 ADDENDUM 1 @0d520d9d70 (row S68)
+
+Before ANY write:
+- Run the deploy tool's --dry-seat-gates (or an equivalent read-only gate pass).
+- Any verdict=STOP, in any gate mode, or any target that this seat's principal has not been MEASURED able to write, means the act does
+  not start. Report the action and resource the same hour.
+- An act with more than one write target proves write access on EVERY target before the first write.
+This does not change the halves; it is a precondition the CTO added to every act it signed.
+
+### AMENDMENT 4 -- S66 verdict and the first-secret-read report (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~07:0xZ)
+
+1. S66 (CTO round-12 addendum 1 @e5befb00f1 item 1): the close check is `R12_CHECKS/ai_leg_verify.py` at @cedc99ac58 or later. It
+   reads ok only when landed + refused == planned. A partial leg reads ok=False, and that is not a pass.
+2. Laptop 1.0.0_SA_CTO msg 106758 rule (2), relayed in 0.0.0_AB_MSTR~DELL1 msg 827: when the Dell secrets grant applies, report the
+   step-0 FIRST read of astn/kimi/api-key to 0.0.0_AB_MSTR~DELL1 like a deploy: the secret name, this order's run, and the UTC time.
+   It is reported, not approved. The grant's CTO half is @8c4fe4be88 and the grant is not yet applied.
+No gate limb grades an amendment to an existing order.
+
+### AMENDMENT -- round tag (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~14:3xZ; 1.0.0_SA_CTO~DELL1 msg 961, from 3.0.0_SA_CVO msg 960)
+
+This order carried no <round> tag, so surprise-row-gate.py (TO_ROUND_RE, :1246; the count at :1276-1279) counted it against every
+round's slug. It belongs to round 11 (decomp_ref DECOMP_R11.md), so <round>11</round> is added to its metadata. No other field changes.
+Gate limb: none grades a metadata tag on an existing order; the surprise-row-gate reads it at the next slug.

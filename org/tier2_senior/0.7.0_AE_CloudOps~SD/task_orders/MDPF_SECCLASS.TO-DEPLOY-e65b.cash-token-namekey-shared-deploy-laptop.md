@@ -6,6 +6,7 @@
     <date>2026-10-07</date>
     <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
+    <round>11</round>
   </metadata>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
@@ -85,3 +86,18 @@ Base: AC1 FAIL as expected at the cut (head=40ffa3fa, bd and cot both read 3f1e6
 <!-- RE-ADDRESSED (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~00:3xZ): executor ~S (laptop) -> 0.7.0_AE_CloudOps~SD (dell1),
 per 1.0.0_SA_CTO~DELL1 amend 914acafe20 (Andrew-direct ~00:0xZ: the Dells run the heavy jobs). Windows, ledger slug, reads, key list and
 rollback are unchanged. Any AccessDenied the seat meets is reported the same hour as action and resource, and is never worked around. -->
+
+### AMENDMENT (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~01:5xZ) -- seat-gate condition, per 1.0.0_SA_CTO~DELL1 ADDENDUM 1 @0d520d9d70 (row S68)
+
+Before ANY write:
+- Run the deploy tool's --dry-seat-gates (or an equivalent read-only gate pass).
+- Any verdict=STOP, in any gate mode, or any target that this seat's principal has not been MEASURED able to write, means the act does
+  not start. Report the action and resource the same hour.
+- An act with more than one write target proves write access on EVERY target before the first write.
+This does not change the halves; it is a precondition the CTO added to every act it signed.
+
+### AMENDMENT -- round tag (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~14:3xZ; 1.0.0_SA_CTO~DELL1 msg 961, from 3.0.0_SA_CVO msg 960)
+
+This order carried no <round> tag, so surprise-row-gate.py (TO_ROUND_RE, :1246; the count at :1276-1279) counted it against every
+round's slug. It belongs to round 11 (decomp_ref DECOMP_R11.md), so <round>11</round> is added to its metadata. No other field changes.
+Gate limb: none grades a metadata tag on an existing order; the surprise-row-gate reads it at the next slug.
