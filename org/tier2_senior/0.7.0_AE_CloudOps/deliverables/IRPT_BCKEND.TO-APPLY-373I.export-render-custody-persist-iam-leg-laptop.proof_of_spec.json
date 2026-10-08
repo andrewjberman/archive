@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "IRPT_BCKEND.TO-APPLY-373I.export-render-custody-persist-iam-leg-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/IRPT_BCKEND.TO-APPLY-373I.export-render-custody-persist-iam-leg-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "8b1c0f9726"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R68_Y.md",
+    "vintage_commit": "4e455af9e69d68067747a0f7947d5f7ad4252d6a",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/IRPT_BCKEND.TO-APPLY-373I.export-render-custody-persist-iam-leg-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/custody_373i_20261008/after.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "CloudTrail22:47:14Z;policy matches;11/11 simulations;code unchanged;replan0",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "targeted plan exit=0",
+      "method": "live_read",
+      "invocation": "terraform -chdir=infra/aws/terraform/investor-reporting/export plan -input=false -no-color -lock=false -detailed-exitcode -target=aws_iam_role_policy.export_render_custody_persist; echo \"exit=$?\"",
+      "expect": "exit=0",
+      "output_evidence": "No changes. Your infrastructure matches the configuration. exit=0",
+      "denominator": "one authorized targeted replan",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "tenant_partition": {
+      "description": "PutItem for served tenant allowed while unserved refused",
+      "expected_landed": "served allowed; unserved implicitDeny",
+      "expected_not_landed": "served implicitDeny",
+      "observed": "served allowed; unserved implicitDeny",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/NEVER_WIDEN_SIGNOFF_PACKET_IB-pr-373_IAM_LEG.md@7c08fe294e",
+    "cto_half": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_IB_pr_373_IAM_LEG_CTO_HALF.md@5f65b4f40e"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Remove only custody_persist_iam.tf resource; under issuer rollback authority safe-apply exact0/0/1 at this address; all five statements removed together.",
+  "scope": "One inline IAM policy; no route or code deploy",
+  "declared_exclusions": [
+    {
+      "item": "Real persist through route",
+      "reason": "Dell2 owns after its separate route order; IAM simulation is APPLIED not EXERCISED."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/custody_373i_20261008/REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service irpt-export-render",
+      "result": "Existing grant floor only; rendered new policy inspected independently and AccessAnalyzer0findings."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam simulate irpt-export-render-role dynamodb:PutItem arn:aws:dynamodb:us-east-1:313476888478:table/irpt-requests --context dynamodb:LeadingKeys=stringList:49financial",
+      "result": "ALLOWED APPLIED; contextless first invocation correctly NOT-DECIDABLE. Separate SDK singleARN positive/negative controls11/11."
+    }
+  ]
+}
