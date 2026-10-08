@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_STRATID.TO-ST-t2",
+  "phase": "BUILD-GENERAL",
+  "firm": "MDPF",
+  "assignee": "0.9.0_WK_MDPF_STRATID~2",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-ST-t2.per-firm-basis-at-global.md",
+    "group": "OTHER",
+    "vintage_commit": "f3cc1552bf"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/decompositions/MDPF_STRATID_DECOMP.md",
+    "vintage_commit": "412b4ce03d",
+    "to_ref": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-ST-t2.per-firm-basis-at-global.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Registry tables and a pure-read function added on the worker branch; not deployed (the order is a registry build, deploy owned by DS)."
+    },
+    {
+      "path_or_key": "data/mdpf/tests/stratid/test_stratid_basis.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Six named tests, all PASSED under st_t2_tests.py."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ST1-t2-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R1_CHECKS/st_t2_tests.py -- the six named tests pass.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R1_CHECKS/st_t2_tests.py",
+      "expect": "T2-OK",
+      "output_evidence": "6 passed in 0.45s (pfde_cottonwood_is_additive_at_global, firm_population_inside_defaults_carve_out, undeclared_firm_population_is_not_counted, member_firm_row_overrides_firm_default, import_refuses_an_invalid_firm_row, global_scope_basis_of_pfde_is_additive); final line T2-OK; rc=0 (run under timeout 120; imports data/mdpf/scripts/gold/mdpf_category_registry.py)",
+      "denominator": "6 of 6 named tests PASSED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ST1-t2-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R1_CHECKS/st_t2_regress.py -- the TaxSMA Cottonwood-into-Global fold tests (readers of sma_basis_of) still pass.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R1_CHECKS/st_t2_regress.py",
+      "expect": "T2-REGRESS-OK",
+      "output_evidence": "11 passed in 20.83s; final line T2-REGRESS-OK; rc=0 (run under timeout 120; imports data/mdpf/scripts/gold/mdpf_category_registry.py)",
+      "denominator": "11 of 11 tests in data/mdpf/tests/taxsma/test_taxsma_cot_global_fold.py PASSED",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Changed ONLY the ('pfde','cottonwood') row from SMA_BASIS_ADDITIVE to SMA_BASIS_CARVE_OUT in the registry, reran the test file, then restored the file (git diff stat back to +49 lines).",
+      "expected": "test_pfde_cottonwood_is_additive_at_global fails; the import-refusal test, which anchors on the source row text, also fails.",
+      "observed": "2 failed, 4 passed: test_pfde_cottonwood_is_additive_at_global (assert 'carve_out' == 'additive') and test_import_refuses_an_invalid_firm_row (anchor missing). Restored file: 6 passed.",
+      "method": "command",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "Pure table reads, no clock, no S3, no AWS.",
+      "expected": "identical result on rerun",
+      "observed": "AC1 run twice (6 passed both times); AC2 passed 11 of 11.",
+      "method": "command",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Consumers of sma_global_basis_of (the additive-sleeve fold into Global)",
+      "reason": "Cell ST-t-3's scope, not this order."
+    },
+    {
+      "item": "Population declarations for cottonwood and inflection",
+      "reason": "Issuer ruling R1/R2: undeclared this round."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.9.0_WK_MDPF_STRATID~2/MDPF_STRATID.TO-ST-t2.per-firm-basis-at-global.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest via _pytest_named.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R1_CHECKS/st_t2_tests.py",
+      "result": "T2-OK"
+    }
+  ]
+}

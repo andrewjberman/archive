@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~SD</issued_to>
     <date>2026-10-07</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDPF_SECCLASS</project_code>
     <round>11</round>
   </metadata>
@@ -176,5 +176,20 @@ SC-e-78 prompt, so it is FINAL per msg 1100. The runner plans on absence, so it 
    The other 4 of the 47 have landed since the file was written.
 3. At the next chunk boundary, resume with `--exclude org/tier2_senior/0.7.0_AE_CloudOps~SD/deliverables/E49_TWICE_REFUSED_FINAL_20261008.json`
    plus `--workers 4 --chunk 25`. At close, the excluded keys count as model-stated refused.
+No gate limb grades an amendment to an existing order.
+
+### AMENDMENT -- the close: AC1 admits the one transport-terminal key and the six keys SC-e-77 took (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~21:4xZ; answers ~SD msg 1175)
+
+The floor is measured @f81718aa17: `AI-LEG-VERIFY act=e49 ok=False planned=956 landed=771 refused_final=178 refused_transport=1
+problems=6 snapshot_keys_gone=0 multi_asset=0 listing_count=model_rows=2303`. 771 + 178 + 1 + 6 = 956 EXACT, and
+landed_outside_contract=0 on every chunk.
+AC1's expectation is amended, as e32 amendment 9 did. It reads `ok=True`, OR `ok=False` whose ONLY problems are both of:
+(a) refused_transport=1 on PZIEX, after its one final attempt (transport-terminal);
+(b) 6 problems that are exactly ASFYX, BINC, GSRTX, PQTIX, SCGK1 and SCII1.
+Those six are present as rows SC-e-77 wrote under its own signed pair (@ff2a70df28; updated_by mdpf-secclass-s11-rows, sub-class
+absent). The contract's `absent` clause admits a row with no sub-class. The closed-list bound applies to DIRECT and AI verdicts, which
+those rows are not. In addition, planned=956 must be EXACT and snapshot_keys_gone=0.
+Close the order and its ledger on that line, with the reasons by count: 63 second-pass line, 20 landed, 2 present via SC-e-77, 41
+refused again.
 No gate limb grades an amendment to an existing order.
 
