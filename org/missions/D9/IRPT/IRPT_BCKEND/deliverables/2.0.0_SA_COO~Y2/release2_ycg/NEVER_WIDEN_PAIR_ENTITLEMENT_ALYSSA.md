@@ -61,3 +61,15 @@ entries (3 client, `mockadv` test, `demo` demo), all on the list.
 
 **Executor:** this seat (dell2). `cloudops-dell2-agent-user` already reads and writes `opal-users-v2` (the round-65 test filer put
 and delete, row W156-S1 evidence). That table's own key admits it.
+
+## 6. Result (branch WRITTEN), 2026-10-08 ~19:0xZ, by `2.0.0_SA_COO~Y2` on dell2
+
+| step | read |
+|---|---|
+| 1 before-read (consistent `get-item`) | `allowedFirmIds` ABSENT; firmId `opal-capital`, userType `Dev`, status `active`, role `admin`, tier `internal`; hash of the other projected fields `926c6297e0fa9c24` |
+| 2 conditional `update-item` (`attribute_not_exists(allowedFirmIds)`) | rc 0; UPDATED_NEW = the six-firm list |
+| 3 read-back (consistent `get-item`) | `allowedFirmIds` = `[49financial, cottonwood, inflection, opal-capital, demo, mockadv]` EXACT; other-field hash `926c6297e0fa9c24` (unchanged) |
+
+No name or email was printed or stored; the hash covers the projected fields other than `allowedFirmIds`. Rollback (not triggered):
+`REMOVE allowedFirmIds`. Behaviour proof is owed after E6: one on-behalf admit by this principal, and one opal-capital generation
+as before (CTO msg 1447).
