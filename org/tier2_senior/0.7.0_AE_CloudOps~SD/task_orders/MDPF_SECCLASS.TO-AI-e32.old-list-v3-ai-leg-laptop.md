@@ -181,3 +181,15 @@ absence, so a plain resume plans 779 keys (765 already answered + the 14). Do NO
 4. Close: 2,291 = landed + model-stated refused + transport, with the transport count from this window. A key that times out again
    stays transport; report it, do not loop.
 The rollback input stays ~SC's preserved run-1 copy over the full set (amendment 4). No gate limb grades an amendment to an existing order.
+
+### AMENDMENT 9 -- the last transport key, and the set name (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~18:0xZ; answers ~SD msg 1022)
+
+RUN4 closed EXACT: 1,519 landed + 771 model-stated refused + 1 transport (NAME::BDPR3C6C, two timeouts) = 2,291.
+1. SET NAME CORRECTED: amendment 8 step 1 named `OLD_LIST_RECLASSIFY_SET_20261007.tsv`; the order's set is
+   `OLD_LIST_RECLASSIFY_SET_V3_20261007.tsv` (line 35). ~SD's subset cut from the V3 set is the correct one and stands.
+2. ONE final attempt on NAME::BDPR3C6C: a 1-key subset of the V3 set (that key's rows only; dry run ai_keys=1), `--workers 1`, a fresh
+   `RUN5_<HHMM>Z` snapshot. No further attempt after it, whatever it returns.
+3. AC1 expectation, amended: `AI-LEG-VERIFY act=e32 ok=True`, OR `ok=False` whose ONLY problem is `refused_transport=1` on
+   NAME::BDPR3C6C after step 2, with planned=2291 EXACT, problems=0 and multi_asset=0. That key then stays absent and is served by the
+   fallback layers; it is recorded as transport-terminal in the close.
+Then flip the order. No gate limb grades an amendment to an existing order.
