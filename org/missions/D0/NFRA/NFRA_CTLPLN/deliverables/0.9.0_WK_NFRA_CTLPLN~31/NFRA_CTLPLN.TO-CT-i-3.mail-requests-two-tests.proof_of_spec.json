@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-i-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-3.mail-requests-two-tests.md",
+    "group": "OTHER",
+    "vintage_commit": "544c5c0cd6"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~31",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.inbound1.md",
+    "vintage_commit": "544c5c0cd6",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-3.mail-requests-two-tests.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/mail_requests.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "firm_domains, considered, on_mail_messages, ROUTE, --check-domains; repo-local, not deployed, no outside call run",
+      "artifact_covered_by": [
+        "CTi3-AC1",
+        "CTi3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_inbound_mail.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "11 cases, model and every send faked, invented senders and domains",
+      "artifact_covered_by": [
+        "CTi3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_teams_chat_jobs.py",
+      "kind": "test",
+      "commit_or_etag": "78aa45095f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1: three cases brought to the CT-i-1 contract, own commit 78aa45095f; 7 test files 127 passed 0 failed"
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~31/MAIL_ROUTE_MEASURED.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "step 1: route allowances, what clause 9 needs, the five firms' recorded domains, reply-by-mail paragraph"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTi3-AC1",
+      "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_mail.py expect: INBOUND-MAIL-TEST ok=True",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_mail.py",
+      "output_evidence": "(run as timeout 120 python ..., rc 0) INBOUND-MAIL-TEST ok=True cases=11/11 model_calls_on_failed=0\nCases: listed domain + Andrew + work = one text '#M... Mail - Pat Invented, invented-firm' with WORK REQUESTED by; unlisted domain and no-Andrew each yield no text and ZERO fake-model calls; Andrews / mandrew / andrewish / Andrew_x do not count, ANDREW, / andrew / Andrew's / (Andrew) do; passing message asking for nothing yields no text; sub-domain and upper-case domain pass, four look-alikes do not; no_sender and no_body reasons; failed message body and subject appear in no state, once-store, log line or text; mixed batch; retried event texts once; ROUTE entry.",
+      "denominator": "11 of 11 cases pass; 0 model calls across the failed-message cases",
+      "status": "PASS",
+      "expect": "INBOUND-MAIL-TEST ok=True"
+    },
+    {
+      "criterion_id": "CTi3-AC2",
+      "criterion_verbatim": "python data/transcripts/scripts/teams_chat/mail_requests.py --check-domains expect: MAIL-DOMAINS ok=True",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/teams_chat/mail_requests.py --check-domains",
+      "output_evidence": "(run as timeout 120 python ..., rc 1) MAIL-DOMAINS ok=False firms=3/5 typed=0\nThree firms load from the real records (49financial, cottonwood, inflection; 1 domain each). Alongside and Opal have no recorded mail domain in the firm records: rows NFRA_CTLPLN-W31-S4 and S5, BLOCKING for those firms only. Negative control on the typed count: a file holding a domain literal reads typed=2.",
+      "denominator": "3 of 5 firms have a recorded domain; 2 BLOCKING rows filed; typed=0",
+      "status": "FAIL",
+      "expect": "MAIL-DOMAINS ok=True",
+      "status_reason": "Left FAIL as the order directs: two BLOCKING rows were filed (W31-S4 Alongside, W31-S5 Opal), so the issuer rules. Beside it, the run with the count of BLOCKING rows: python data/transcripts/scripts/teams_chat/mail_requests.py --check-domains --expect-missing 2 -> rc 0, last line 'MAIL-DOMAINS ok=True firms=3/5 typed=0'."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the difference control is inside AC1: the same message from an unlisted domain, and with no Andrew in the body, must reach the model zero times against the passing case that must reach it once",
+      "expected": "model calls 0 on failed, 1 on passing",
+      "observed": "graded inside AC1 (cases 1 to 4, 6, 7, 8)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: every outside call is a stand-in with a fixed answer",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a real read of the mailbox through the gateway, a real model answer, a real text",
+      "reason": "the order forbids any call that leaves the machine; the gateway route cannot serve this read today (row W31-S6)"
+    },
+    {
+      "item": "reply by mail",
+      "reason": "not built here; MAIL_ROUTE_MEASURED.md section 4 says what it would need"
+    },
+    {
+      "item": "adding ROUTE to tenant.ROUTES",
+      "reason": "the issuer adds the one entry at the merge; tenant.py is outside the paths"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W31-S4",
+    "NFRA_CTLPLN-W31-S5",
+    "NFRA_CTLPLN-W31-S6",
+    "NFRA_CTLPLN-W31-S7"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~31/NFRA_CTLPLN.TO-CT-i-3.mail-requests-two-tests.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_mail.py",
+      "result": "INBOUND-MAIL-TEST ok=True cases=11/11 model_calls_on_failed=0"
+    }
+  ]
+}
