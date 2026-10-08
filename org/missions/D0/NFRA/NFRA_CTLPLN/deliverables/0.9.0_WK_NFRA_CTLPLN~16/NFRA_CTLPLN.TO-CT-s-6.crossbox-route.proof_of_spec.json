@@ -1,0 +1,98 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CTLPLN.TO-CT-s-6",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-s-6.crossbox-route.md",
+  "group": "OTHER",
+  "vintage_commit": "89410e3c49"
+ },
+ "assignee": "0.9.0_WK_NFRA_CTLPLN~16",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.seats1.md",
+  "vintage_commit": "89410e3c49",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-s-6.crossbox-route.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/crossbox-call.py",
+   "kind": "script",
+   "commit_or_etag": "3203ee7f19",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local tool a seat runs; it prints and reads bus lines and sends nothing. Nothing is deployed."
+  },
+  {
+   "path_or_key": ".tools/tests/test_crossbox_call.py",
+   "kind": "test",
+   "commit_or_etag": "3203ee7f19",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local test on temporary directories that it removes; nothing is deployed."
+  },
+  {
+   "path_or_key": ".claude/skills/agentbus/SKILL.md",
+   "kind": "config_data",
+   "commit_or_etag": "3203ee7f19",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A skill text read by seats: one new section appended at the end; nothing is deployed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CTs6-AC1",
+   "criterion_verbatim": "python .tools/tests/test_crossbox_call.py expect: CROSSBOX-TEST cases= (every case passing: the line must read ok=True)",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_crossbox_call.py",
+   "output_evidence": "timeout 120 rc=0, about 24 s wall. LAST line: CROSSBOX-TEST cases=57/57 ok=True. Covers the 21 selftest cases as separate assertions, the inbox file's header fields and filename pattern against org/mcp/server.py _deliver_to_one, the file landing in the directory org/mcp/inbox-watch.sh resolves (its own resolution lines run in Git Bash, the watcher not started), an order for a serial with no agent folder or no inbox refused with 'no such seat on this box', an unknown key and a missing key refused, the command line end to end (exit 0, 3, 5), the two existing readers (crossbox-deploy-check.py, open-calls.py) reading a file this tool wrote, and the SEAT_RULES.json probe for this cell run and matched against its expect regex.",
+   "denominator": "57 of 57 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CTs6-AC2",
+   "criterion_verbatim": "python .tools/crossbox-call.py --selftest expect: CROSSBOX-SELFTEST cases= (the exchange between two stand-in boxes, including half-closed and sent-not-acked: the line must read ok=True)",
+   "method": "test_suite",
+   "invocation": "python .tools/crossbox-call.py --selftest",
+   "output_evidence": "timeout 120 rc=0, about 23 s wall. LAST line: CROSSBOX-SELFTEST cases=21/21 ok=True. Two scratch git checkouts stand for two boxes (device names read from the register, two scratch directories removed at the end): uncommitted body refused; own box refused; open, line, sent; status reads 'SENT, NOT ACKED (sent 5 min ago'; receive before the pull reads PULL-FIRST and writes nothing; a line with the id altered and one with the seat altered refused; receive lands one file in the seat's inbox and a second receive does not deliver again; the sending box cannot ack; ack prints the reply line; acked records it; one side closed reads 'HALF-CLOSED (from only)' and the REAL open-calls.py reader refuses the call; merge folds the other box's fields in; both recorded reads CLOSED-BOTH and the real open-calls.py reader accepts it; the sending box reads CLOSED-BOTH after its merge; an unknown key refused.",
+   "denominator": "21 of 21 cases pass",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Difference control: the same call read by the real .tools/open-calls.py reader when only one side is closed and when both are.",
+   "expected": "half-closed: no file found (refused); both closed: the file name returned",
+   "observed": "selftest cases the-open-calls-close-reader-refuses-a-half-closed-call (None) and the-open-calls-close-reader-accepts-CLOSED-BOTH (the file name) both pass; test case 'a call whose file is not CLOSED-BOTH is not settled' passes",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Both criteria were run twice against the same tree (once before the build commit, once for the record).",
+   "observed": "identical last lines: 57/57 and 21/21",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a real exchange between two machines over the agent bus",
+   "reason": "BLIND by construction (the order's preflight): this seat sends nothing on the bus and cannot reach another box. The bus is replaced by handing the printed line across in the test; each box runs and reads back its own real exchange."
+  },
+  {
+   "item": "the watcher picking up the file",
+   "reason": "the watcher is not started (the order forbids it). The test runs the watcher's own directory-resolution lines in Git Bash and shows the file lands in the directory it reads, with the *.md name pattern its loop globs."
+  },
+  {
+   "item": "a live file under org/devices/crossbox/",
+   "reason": "none is created in the real tree: a cross-box file is a record of a real call a CTO opens, and an invented one would read as an open call to .tools/crossbox-deploy-check.py"
+  }
+ ],
+ "surprises": [
+  "NFRA_CTLPLN-W16-S1",
+  "NFRA_CTLPLN-W16-S2"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~16/NFRA_CTLPLN.TO-CT-s-6.crossbox-route.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/crossbox-call.py .tools/tests/test_crossbox_call.py",
+   "result": "All checks passed!"
+  }
+ ]
+}
