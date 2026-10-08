@@ -23,7 +23,10 @@
     Root `infra/aws/terraform/nfra-ctlpln-identity/`, trunk containing merge 52ca9d65b1. Measured by the issuer ~19:3xZ: default
     `2 to add, 0 to change, 0 to destroy`; with the window `2 to add, 1 to change, 0 to destroy`. Halves: COO
     `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D2_SENDCOMMAND_AND_F1_SHELL_WINDOW_20261008.md`;
-    CTO named in the GO. YOU SEND NO COMMAND: read-back by simulation only.
+    CTO `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D2_SENDCOMMAND_AND_F1_SHELL_WINDOW_20261008.md`
+    (@ac2c6e852d, SIGNED). YOU SEND NO COMMAND: read-back by simulation only. The applied-time note to dell2 and dell1 (via
+    0.0.0_AB_MSTR) carries the CTO's rule verbatim: "a Dell reports EVERY send to one of the 6 hosts after the fact, by bus
+    (document, host, purpose); a send that writes a firm data bucket or the state bucket stays under the step-C before-rule."
   </context>
 
   <the_act>
