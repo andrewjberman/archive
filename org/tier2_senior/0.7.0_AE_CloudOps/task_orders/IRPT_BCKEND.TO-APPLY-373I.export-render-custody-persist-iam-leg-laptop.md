@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_BCKEND</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -14,6 +14,12 @@
 <owned_cells>IB-yr-681</owned_cells>
 <decomp_context>The IAM leg (row D2-W181-S1) of dell2's IB-pr-373, which its CTO half @ece42ad420 condition 2 makes its own sign-off. dell2 2.0.0_SA_COO~P2 msg 1819 (relay 107422). Dells write no IAM until NFRA_CTLPLN cell 3 applies, so the laptop applies this one (Andrew ~22:0xZ: the laptop keeps a Dell act only where the Dell's identity still refuses it). The cell id is the nearest R68 cell on the laptop tree; the leg's own specification is the pair below.</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~22:5xZ). APPLIED 2026-10-08T22:47:14Z, exactly 1/0/0; KeySchema HASH tenant, so S1's LeadingKeys stands (CTO
+    condition). Issuer live read: irpt-export-render-role carries irpt-export-render-custody-persist-policy with S1-S5 (S3 and S4 on 3
+    firm prefixes each). Ledger closed (@ed37bff98c). The route and the real persist are dell2's.
+  </closure>
 
   <objective>
     Add ONE inline policy, `aws_iam_role_policy.export_render_custody_persist` (`irpt-export-render-custody-persist-policy`), to
