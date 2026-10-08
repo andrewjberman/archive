@@ -32,8 +32,9 @@
   <the_act>
     The apply runs only when BOTH never-widen halves are SIGNED. ONE go; the issuer's GO names the CTO half and the trunk hash.
     - COO half: org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_E_TWO_GRANTS_WIDENED_20261008.md (@9a8758bddf)
-    - CTO half: named in the GO.
-    Read both in full first and carry every condition of both.
+    - CTO half: org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_E_TWO_GRANTS_WIDENED_20261008.md (@ee3578d886)
+    Read both in full first and carry every condition of both. The CTO half's condition 2 (both Dell fabric managers told the
+    extended before-rule) is the issuer's: the GO is sent only after 0.0.0_AB_MSTR confirms that relay.
 
     THE COMMIT: the shared tree at its HEAD on CLOUD, which must contain the hash in the GO. Show `git status --porcelain --
     infra/aws/terraform/nfra-ctlpln-identity/` is empty.
