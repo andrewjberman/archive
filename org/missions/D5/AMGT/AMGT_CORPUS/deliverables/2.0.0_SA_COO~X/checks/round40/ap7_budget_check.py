@@ -7,11 +7,11 @@ RIVALFUNDS_BBG_BUDGET_DIR, so the Terminal machine's real ledger is never writte
 Prints `ap7b build <b>/2 control <c>/2`.
   build    b1  `model_block_pull.record_fire_budget(calls=768, security_fields=13824, figures=66879, records=4224,
                stamp="20261007T130000Z")`
-               appends ONE line to the day's ledger through `bbg_budget.record`: mode "amgt-model-block", rows 66879 (the
-               largest of the three, until the collector's unit is named), and a batch_id that carries calls=768,
-               security_fields=13824, figures=66879, records=4224 (returned records, the ledger's own unit, CTO ruling msg 31310)
-               and the word naming which of them `rows` is;
-           b2  `bbg_budget.spent()` for today then reads 66879 more than before.
+               appends ONE line to the day's ledger through `bbg_budget.record`: mode "amgt-model-block", rows 4224 (RETURNED
+               RECORDS, the ledger's one unit: CTO ruling msg 31815, AMENDMENT 3; a line of 66879 figures would tell every
+               later leg that 56 percent of the day is gone when 3.5 percent is), and a batch_id that carries calls=768,
+               security_fields=13824, figures=66879, records=4224 and `rows_unit=returned-records`;
+           b2  `bbg_budget.spent()` for today then reads 4224 more than before.
   control  c1  with the ledger directory unwritable (a path under a FILE), the call returns False and raises nothing: a fire is
                never blocked by bookkeeping;
            c2  the Bloomberg calls per name are still 8 (the amendment adds no request).
@@ -60,10 +60,10 @@ if callable(fn):
         if ok is True and len(lines) == 1:
             line = lines[0]
             bid = str(line.get("batch_id", ""))
-            b1 = 1 if (line.get("mode") == "amgt-model-block" and line.get("rows") == 66879 and "calls=768" in bid
+            b1 = 1 if (line.get("mode") == "amgt-model-block" and line.get("rows") == 4224 and "calls=768" in bid
                        and "security_fields=13824" in bid and "figures=66879" in bid and "records=4224" in bid
-                       and "rows_unit=" in bid) else 0
-        b2 = 1 if budget.spent() - before == 66879 else 0
+                       and "rows_unit=returned-records" in bid) else 0
+        b2 = 1 if budget.spent() - before == 4224 else 0
     except Exception as exc:
         detail = "raised %s: %s" % (type(exc).__name__, exc)
     blocker = os.path.join(tmp, "a_file")
