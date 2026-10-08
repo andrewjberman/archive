@@ -31,6 +31,18 @@
     opal-data-bd silver/prices landing (MSTR msg 785).
   </context>
 
+
+  <amendment n="1" by="2.0.0_SA_COO~M1" date="2026-10-08T05:2xZ">
+    The run is re-pointed. Cottonwood's mix is rebuilt by cot-bd-session-trigger on i-0643a5bee8a8feabf (document
+    opal-cot-gold-run), which writes platinum/firm/mix_summary.json at ~11:35-11:40Z daily. No Black Diamond gold run
+    rebuilds it, so the 04:00Z read was NOT-YET (this seat's 04:55Z read, msg 802). The BEFORE read is the one already
+    taken: VersionId eH1ZuCUJ..., total 568,707,320.21, fixed_income 192,850,764.91, cash 23,242,866.75. The AFTER read is due
+    after the 2026-10-08 ~11:36Z write. Expected AFTER: total 568,707,320.21 within USD 1.00, cash 17,762,812.31, fixed_income
+    198,330,819.35 (the CASH key's USD -5,480,054.44 moves from fixed_income to cash). Read mix_summary.json plus the C_06, D_03
+    and D_04 outputs, as step 1 lists them. If dell1's firm-bucket read (item 2) applies first, dell1 takes the read and this
+    order closes as superseded. No gate limb grades an amendment to an existing order.
+  </amendment>
+
   <the_act>
     1. BEFORE the run, if it has not started: list the Cottonwood served mix outputs written by `C_06.client_mix_timeseries.py`
        and `D_04.client_portal_summary.py` (concentration.json), with each object's LastModified and VersionId, and record the
