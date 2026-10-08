@@ -181,6 +181,27 @@
    "commit_or_etag": "f7b668e9c5",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "passes respol_data to the provider-less console render and returns respol_json"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/dell_create_policy.json",
+   "kind": "config_data",
+   "commit_or_etag": "b7214cceab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AMENDMENT 11: statement ReadPublicAmiParameter (ssm:GetParameter on one public parameter ARN, empty account field); nothing applied, no plan"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+   "kind": "test",
+   "commit_or_etag": "b7214cceab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AMENDMENT 11: six arms in ssm_arms (ssm_ok 9 -> 15); iam:SimulateCustomPolicy only"
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~14/PLAN_NOTE_DELL_VENDOR_SECRETS.md",
+   "kind": "doc",
+   "commit_or_etag": "b7214cceab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AMENDMENT 11: section D; the create policy change now adds two statements"
   }
  ],
  "acceptance": [
@@ -189,28 +210,28 @@
    "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check expect: unresolved=0",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check",
-   "output_evidence": "Amendment 10 run at HEAD f7b668e9c5: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check`, rc 0 in 3 seconds. LAST line: SSM-DOCS declared=16 unresolved=0 resident_fixed=0 resident_free_text=2 export_render=1 other=13 unsure_params=2 in_policy=2 ok=True. Unchanged by this amendment (the file was not touched); unsure_params=2 reported.",
+   "output_evidence": "Amendment 11 run at HEAD b7214cceab (build commit), `timeout 120 ` under a bound, rc 0. LAST line: SSM-DOCS declared=16 unresolved=0 resident_fixed=0 resident_free_text=2 export_render=1 other=13 unsure_params=2 in_policy=2 ok=True. Unchanged by this amendment.",
    "denominator": "16 of 16 declared documents read; 0 unresolved; 0 resident_fixed, 2 resident_free_text, 1 export_render, 13 other; 2 of 2 granted documents in the policy",
    "status": "PASS",
    "expect": "unresolved=0"
   },
   {
    "criterion_id": "CTa1-AC2",
-   "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect: ssm_ok=9/9 routes_ok=5/5 vendor_ok=[0-9]+/[0-9]+ all_ok=True",
+   "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect: ssm_ok=[0-9]+/[0-9]+ routes_ok=5/5 vendor_ok=[0-9]+/[0-9]+ all_ok=True",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
-   "output_evidence": "Amendment 10 run at HEAD f7b668e9c5: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py`, rc 0 in 18 seconds (no stall, no retry). LAST line: POLICY-SIM allowed_ok=22/22 denied_ok=15/15 passrole_ok=5/5 protected_ok=8/8 freed_allowed=70/70 freed_excluded=5 selfsim_ok=9/9 ssm_ok=9/9 routes_ok=5/5 vendor_ok=235/235 all_ok=True. The freed block (item 4) is now: freed_allowed=70/70 = every in_allow action of the data reads allowed for BOTH Dell users on a representative resource of its service (effective set = group policies + the user's per-user policies + the Terraform-built Allow + the two routes Deny documents); freed_excluded=5 = every excluded action reads its stated decision for both users: iam:UpdateAssumeRolePolicy explicitDeny by DenyEveryIamWrite, cloudtrail:DeleteResourcePolicy and cloudtrail:PutResourcePolicy explicitDeny by DenyCloudTrailWrites, secretsmanager:DeleteResourcePolicy and secretsmanager:PutResourcePolicy implicitDeny. Control (the same request without the new Allow): no in_allow action reads explicitDeny and only sqs:SetQueueAttributes reads allowed (the create policy), so the Allow adds 69. The routes arms (5/5), pass-role (5/5), protected (8/8), self-simulate (9/9), ssm (9/9), allowed (22/22), denied (15/15) and secrets (235/235) blocks are unchanged. The ten protected functions do NOT read explicitDeny for lambda:AddPermission (item 4 expected it): they read allowed for both users; reported, not counted, and filed as row NFRA_CTLPLN-W14-S15. The CANUNDO lines (item 2(e)) are in the plan note.",
-   "denominator": "allowed 22/22, denied 15/15, passrole 5/5, protected 8/8, freed_allowed 70/70 (70 in_allow actions x both users), freed_excluded 5 of 5 (5 excluded actions x both users), selfsim 9/9, ssm 9/9, routes 5/5, vendor 235/235",
+   "output_evidence": "Amendment 11 run at HEAD b7214cceab (build commit), `timeout 120 ` under a bound, rc 0. LAST line: POLICY-SIM allowed_ok=22/22 denied_ok=15/15 passrole_ok=5/5 protected_ok=8/8 freed_allowed=70/70 freed_excluded=5 selfsim_ok=9/9 ssm_ok=15/15 routes_ok=5/5 vendor_ok=235/235 all_ok=True. The six new arms (SSM-ARM 10-15): ssm:GetParameter on the exact ARN arn:aws:ssm:us-east-1::parameter/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64 reads allowed for dell1 and for dell2; on .../al2023-ami-kernel-6.1-x86_64 and on arn:aws:ssm:us-east-1:313476888478:parameter/anything reads implicitDeny for both users. The statement ReadPublicAmiParameter is in dell_create_policy.json; its reader is investor-reporting/ycharts/instance.tf line 40 (data aws_ssm_parameter, which calls ssm:GetParameter). Other blocks unchanged.",
+   "denominator": "allowed 22/22, denied 15/15, passrole 5/5, protected 8/8, freed_allowed 70/70, freed_excluded 5 of 5, selfsim 9/9, ssm 15/15 (9 before + 6 new arms), routes 5/5, vendor 235/235",
    "status": "PASS",
-   "expect": "ssm_ok=9/9 routes_ok=5/5 vendor_ok=[0-9]+/[0-9]+ all_ok=True"
+   "expect": "ssm_ok=[0-9]+/[0-9]+ routes_ok=5/5 vendor_ok=[0-9]+/[0-9]+ all_ok=True"
   },
   {
    "criterion_id": "CTa1-AC3",
    "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py expect: policy_size_ok=True ok=True",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
-   "output_evidence": "Amendment 10 run at HEAD f7b668e9c5: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py`, rc 0 in 8 seconds. LAST line: IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=12/12 policy_size_ok=True ok=True. terraform init -backend=false and validate rc 0 (Success! The configuration is valid); 12 of 12 names MATCH the builder (the new one: cloudops-dell-agent-respol-allow-policy); every policy document within 6,144 characters whitespace not counted, the new respol-allow document (module output) 2,195; the group holds `group managed-policy attachments=6 quota=10`. The names_from_builder count moved from 11/11 to 12/12; the order's expectation text `names_from_builder=9/9` is stale (row W14-S13) and the stable part `policy_size_ok=True ok=True` matches.",
-   "denominator": "12 of 12 names from the builder; 9 policy documents (5 files and 4 module outputs; the respol data file is not a policy) within 6144 characters; respol-allow 2195, secrets 5968; 6 of 10 group attachments",
+   "output_evidence": "Amendment 11 run at HEAD b7214cceab (build commit), `timeout 120 ` under a bound, rc 0. LAST line: IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=12/12 policy_size_ok=True ok=True. dell_create_policy.json chars_no_whitespace=4339 limit=6144 OK. names_from_builder stays 12/12 (no new name); the order's text names_from_builder=9/9 is stale (row W14-S13); the stable part policy_size_ok=True ok=True matches.",
+   "denominator": "12 of 12 names from the builder; 9 policy documents within 6144 characters; dell_create_policy.json 4339 whitespace not counted; 6 of 10 group attachments",
    "status": "PASS",
    "expect": "policy_size_ok=True ok=True"
   },
@@ -219,7 +240,7 @@
    "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json expect: unread=0",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json",
-   "output_evidence": "Amendment 10 run at HEAD f7b668e9c5: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json`, rc 0 in 3 seconds. LAST line: ROLE-CENSUS functions=233 tasks=9 hosts=33 roles=175 read=175 unread=0 yes_iam=1 yes_trail=0 yes_delete=9 yes_any=10 no=165 resident_host_role=NO ok=True. Unchanged by this amendment.",
+   "output_evidence": "Amendment 11 run at HEAD b7214cceab (build commit), `timeout 120 ` under a bound, rc 0. LAST line: ROLE-CENSUS functions=233 tasks=9 hosts=33 roles=175 read=175 unread=0 yes_iam=1 yes_trail=0 yes_delete=9 yes_any=10 no=165 resident_host_role=NO ok=True. Unchanged by this amendment.",
    "denominator": "175 of 175 roles read; 0 unread; 10 YES, 165 NO",
    "status": "PASS",
    "expect": "unread=0"
@@ -229,7 +250,7 @@
    "criterion_verbatim": "python infra/aws/terraform/transcripts/tests/check_transcripts_dell_decrypt.py expect: TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/transcripts/tests/check_transcripts_dell_decrypt.py",
-   "output_evidence": "Amendment 10 run at HEAD f7b668e9c5: `timeout 120 python infra/aws/terraform/transcripts/tests/check_transcripts_dell_decrypt.py`, rc 1 in 8 seconds (exit 1 by design: the line reads ok=False, as at every earlier pass of this order, because the simulator does not model the KMS key-policy rule). LAST line: TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True statements_added=1 ok=False. The expected text TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True is on the line. Unchanged by this amendment. Note for the signers: the Allow of this amendment lets a Dell call kms:PutKeyPolicy and kms:CreateGrant on this key (plan note, section What this Allow can undo, case iv).",
+   "output_evidence": "Amendment 11 run at HEAD b7214cceab (build commit), `timeout 120 ` under a bound, rc 1. LAST line: TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True statements_added=1 ok=False. rc 1 by design (statements_added=1 makes ok=False); the expected text is on the line. Unchanged by this amendment.",
    "denominator": "2 of 2 Dell users decrypt allowed; 10 of 10 write arms refused under the KMS rule; 1 statement added",
    "status": "PASS",
    "expect": "TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True"
@@ -239,7 +260,7 @@
    "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json expect: VENDOR-SECRETS secrets=",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json",
-   "output_evidence": "Amendment 10 run at HEAD f7b668e9c5: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json`, rc 0 in 2 seconds. LAST line: VENDOR-SECRETS secrets=114 referenced=114 dell_projects=15 placement_inferred=False vendor=35 client_session=32 granted=66 ok=True blocked_by_key=1 platform_key=28 other=19. Unchanged by this amendment (66 granted, 28 platform keys and 19 unplaced withheld, 1 blocked by its key).",
+   "output_evidence": "Amendment 11 run at HEAD b7214cceab (build commit), `timeout 120 ` under a bound, rc 0. LAST line: VENDOR-SECRETS secrets=114 referenced=114 dell_projects=15 placement_inferred=False vendor=35 client_session=32 granted=66 ok=True blocked_by_key=1 platform_key=28 other=19. Unchanged by this amendment.",
    "denominator": "114 of 114 listed secrets classed exactly once (35 + 32 + 28 + 19); 66 GRANTED under the account default key; 1 BLOCKED-BY-KEY; 15 Dell-placed projects (information only)",
    "status": "PASS",
    "expect": "VENDOR-SECRETS secrets="
