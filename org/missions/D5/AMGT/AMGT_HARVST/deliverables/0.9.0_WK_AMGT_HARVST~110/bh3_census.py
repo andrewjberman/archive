@@ -62,13 +62,24 @@ def main():
     finally:
         os.unlink(handle.name)
     after_secs, after_sum = us.build()
+    nosym = dict(rule)
+    nosym["ticker_anchors"] = [{k: v for k, v in e.items() if k != "symbol_anchors"} for e in entries]
+    handle2 = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8")
+    try:
+        json.dump(nosym, handle2)
+        handle2.close()
+        nosym_secs, _nosym_sum = us.build(rule_path=handle2.name)
+    finally:
+        os.unlink(handle2.name)
+    nosym_csl = next(s for s in nosym_secs if s["security_key"] == KEY)
     before = {s["security_key"]: s for s in before_secs}
     after = {s["security_key"]: s for s in after_secs}
     S = len(after_secs)
     src = (after_sum.get("universe") or {}).get("source")
     fb = (after_sum.get("universe") or {}).get("fallback_reason")
     print("SECURITIES SOURCE: universe_securities.build() -> %s (fallback_reason=%s)" % (src, fb))
-    print("BEFORE: build() with ticker_anchors removed from the rule file; AFTER: build()")
+    print("BEFORE: build() with ticker_anchors removed from the rule file; AFTER: build(); NO-SYMBOL: build() with each entry's symbol_anchors removed")
+    print("SYMBOL ANCHORS: %s" % json.dumps(after[KEY].get("ticker_anchor_symbols")))
     print("ANCHORS: %s" % json.dumps(after[KEY].get("ticker_anchor_aliases")))
     if set(before) != set(after) or len(before_secs) != S:
         fails.append("before/after security sets differ (%d vs %d)" % (len(before_secs), S))
@@ -90,7 +101,7 @@ def main():
         fails.append("graded set is %d good / %d Carlisle, not 39 / 3" % (len(good_keys), len(carlisle_keys)))
 
     p0 = p1 = 0
-    dropped, gained = [], []
+    dropped, gained, recovered = [], [], []
     by_key = {}
     for i, art in enumerate(articles, 1):
         if i % 2000 == 0:
@@ -100,6 +111,8 @@ def main():
         by_key[art["article_key"]] = (b, a)
         p0 += 1 if b else 0
         p1 += 1 if a else 0
+        if a and not pg._security_mentions(art, nosym_csl)["mention_count"]:
+            recovered.append(art)
         if b and not a:
             dropped.append(art)
         if a and not b:
@@ -113,6 +126,12 @@ def main():
         fails.append("%d pairs GAINED on %s" % (len(gained), KEY))
         for art in gained:
             print(asc("  GAINED %s" % art["article_key"]))
+
+    print("RECOVERED BY A SYMBOL ANCHOR: %d" % len(recovered))
+    for art in recovered:
+        print(asc("  %s | %s" % (art["article_key"], art.get("title"))))
+        for line in spans(art):
+            print(asc("      " + line))
 
     dropped_keys = {art["article_key"] for art in dropped}
     present = {art["article_key"] for art in articles}
