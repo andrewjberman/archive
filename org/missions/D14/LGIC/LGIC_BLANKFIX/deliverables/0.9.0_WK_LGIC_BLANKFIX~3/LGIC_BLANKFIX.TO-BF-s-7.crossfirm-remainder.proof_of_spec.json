@@ -1,0 +1,91 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_BLANKFIX.TO-BF-s-7",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round5.md",
+  "vintage_commit": "b59bf45411",
+  "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-s-7.crossfirm-remainder.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "47ef4c98cc"
+ },
+ "assignee": "0.9.0_WK_LGIC_BLANKFIX~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/opal_naming_keyfill.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A repository library module with no deploy target; nothing runs it outside the command line."
+  },
+  {
+   "path_or_key": "lib/tests/test_opal_naming_keyfill.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A plain-script test; no deploy target."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "BS7-AC1",
+   "criterion_verbatim": "BS7-AC1 -- each reason is reachable, and a path naming its own source is not a cross-firm refusal.",
+   "method": "command",
+   "invocation": "python lib/tests/test_opal_naming_keyfill.py",
+   "output_evidence": "KEYFILL-TEST ok=True cases=64\nrc=0",
+   "denominator": "64 of 64 cases held (47 before this build), covering: the four reasons through the firm check (bucket-names-no-firm, bucket-not-read, bucket-chosen-at-run-time, no-path-word-names-a-firm) and the difference control between an unread bucket with and without a firm word; the source test (a Schwab path in a firm's bucket not refused, the same path under a root of another source not refused, a Cottonwood master in 49 Financial's bucket refused, a source other than a product bucket's one source refused and that source not); RULED (a canonical ruling, a none-owed ruling, the same key in another bucket not ruled, the registry file read when none is passed); the real crossfirm sweep (sum, one line per key, closed reasons, table, cot keys RULED, Schwab key not refused)",
+   "status": "PASS",
+   "expect": "KEYFILL-TEST ok=True"
+  },
+  {
+   "criterion_id": "BS7-AC2",
+   "criterion_verbatim": "BS7-AC2 -- the real sweep: every key is checked, ruled, refused or unchecked with one named reason.",
+   "method": "command",
+   "invocation": "python lib/opal_naming_keyfill.py crossfirm --map infra/logic/registry/root_map.json",
+   "output_evidence": "KEYFILL-CROSSFIRM ok=True roots=13 keys=79 checked=47 ruled=11 unchecked=21 refused=0\nrc=0",
+   "denominator": "79 of 79 keys: 47 checked + 11 ruled + 21 unchecked + 0 refused = 79; the 21 unchecked by reason: bucket-names-no-firm 16 (opal-data-assets), bucket-not-read 5 (1 no literal, 1 two candidates opal-data-assets/opal-data-cot, 3 two candidates opal-data-cot/opal-data-inf), bucket-chosen-at-run-time 0 (the five run-time keys of the IRPT roots are RULED by the per-firm rows)",
+   "status": "PASS",
+   "expect": "ruled="
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The BS7-AC2 sweep run with the key rulings held out (cmd_crossfirm with key_rulings={}).",
+   "expected": "the two bd-pipeline code/bronze/cot_bronze_ingest.py keys are REFUSED again and ruled reads 0",
+   "observed": "KEYFILL-CROSSFIRM ok=True roots=13 keys=79 checked=56 ruled=0 unchecked=21 refused=2",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Both criterion invocations were run twice (once while building, once at the final read) and the last lines compared.",
+   "observed": "KEYFILL-TEST ok=True cases=64; KEYFILL-CROSSFIRM ok=True roots=13 keys=79 checked=47 ruled=11 unchecked=21 refused=0 -- identical both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the bucket-chosen-at-run-time reason on the real sweep",
+   "reason": "It counts 0 on the 79 real keys because every key whose file shows a per-firm variable is answered by a per-firm key ruling and so is RULED; the reason is reached by the test case that passes the variable to the firm check."
+  }
+ ],
+ "surprises": [
+  "LGIC_BLANKFIX-W3-S4",
+  "LGIC_BLANKFIX-W3-S5"
+ ],
+ "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "lib/opal_naming_keyfill.py",
+   "invocation": "python lib/opal_naming_keyfill.py crossfirm --map infra/logic/registry/root_map.json",
+   "result": "KEYFILL-CROSSFIRM ok=True roots=13 keys=79 checked=47 ruled=11 unchecked=21 refused=0"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> BS7-AC1,BS7-AC2",
+   "result": "run before the complete flip; exit code is the verdict"
+  }
+ ]
+}
