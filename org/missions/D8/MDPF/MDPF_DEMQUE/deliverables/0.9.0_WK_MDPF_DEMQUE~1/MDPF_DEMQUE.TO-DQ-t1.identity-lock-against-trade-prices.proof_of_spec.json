@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t1",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t1.identity-lock-against-trade-prices.md",
+    "group": "OTHER",
+    "vintage_commit": "6dc65d8cba"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "6dc65d8cba",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t1.identity-lock-against-trade-prices.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/lock.py",
+      "kind": "script",
+      "commit_or_etag": "64983dec04",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy; local module and read-only probe CLI",
+      "artifact_covered_by": ["DQ1-t1-AC1", "DQ1-t1-AC2"]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_lock.py",
+      "kind": "test",
+      "commit_or_etag": "64983dec04",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest file on synthetic frames, not deployed",
+      "artifact_covered_by": ["DQ1-t1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ1-t1-AC1",
+      "criterion_verbatim": "the lock rule, by the six named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t1_tests.py",
+      "output_evidence": "6 passed in 0.45s (all six named tests PASSED by name); LOCK-OK, rc=0. Base per the order: LOCK-BAD no file.",
+      "denominator": "6 of 6 required tests passed by name (6 of 6 collected)",
+      "status": "PASS",
+      "expect": "LOCK-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ1-t1-AC2",
+      "criterion_verbatim": "the seam against the real Commonwealth transactions: five PROBE lines, at least one with trades > 0.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t1_seam.py",
+      "output_evidence": "PROBE cusip=00162Q866 symbol=AMLP trades=206; 006947841 symbol=- trades=5; 01883A107 symbol=NFJ trades=67; 03834A103 symbol=AREX trades=3; 04020E190 symbol=- trades=3; SEAM-OK probe_lines=5 with_trades=5, rc=0. Base per the order: SEAM-BAD rc=127 probe_lines=0.",
+      "denominator": "5 of 5 PROBE lines printed; 5 of 5 with trades > 0 (read over all 14 parquet parts of date=2026-06-23)",
+      "status": "PASS",
+      "expect": "SEAM-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of lock.py (.scratch/mut, uncommitted) with the earliest-third requirement forced true (early_ok = True)",
+      "expected": "test_recycled_ticker_rejected_on_early_third FAILS; the other five still pass",
+      "observed": "1 failed, 5 passed: FAILED test_recycled_ticker_rejected_on_early_third (assert 'LOCKED' == 'REJECTED:PRICE_MISMATCH')",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice (before and after the S3 address was moved to opal_naming.address())",
+      "observed": "LOCK-OK on both; SEAM-OK with identical five PROBE lines on both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Yahoo or Bloomberg call, any write, any deploy, __init__.py in the demque folder",
+      "reason": "order BOUNDS: no vendor call, no write; the issuer adds __init__.py at the merge"
+    },
+    {
+      "item": "candidate sources other than C1 (Commonwealth Symbol)",
+      "reason": "order: C1 is the only one this round builds"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~1/MDPF_DEMQUE.TO-DQ-t1.identity-lock-against-trade-prices.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit lock.py + test_demque_lock.py",
+      "result": "first attempt refused by the naming gate on a hand-typed S3 key; passed after the address was built with lib/opal_naming.address(); commit 64983dec04"
+    }
+  ]
+}
