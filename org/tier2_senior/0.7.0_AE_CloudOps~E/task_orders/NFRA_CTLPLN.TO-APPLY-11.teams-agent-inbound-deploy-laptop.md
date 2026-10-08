@@ -19,6 +19,10 @@
     to the two Dell bus queues: ONE targeted apply of ONE module, `module.ldo_001`, in the root `infra/aws/terraform/transcripts/`.
     QUEUE POSITION, ruled by `1.0.0_SA_CTO` (msgs 106725, 106772): this order runs AFTER the two access applies already ahead
     of it on this seat (TO-APPLY-10; identity plan 1). Do not start it before them.
+    AMENDMENT 1 (issuer, 2026-10-08 ~07:2xZ, on `1.0.0_SA_CTO` ruling msg 106821, which re-rules condition 2 of the CTO half):
+    "The two acts share no root; the order was a queue, not a dependency. NFRA_CTLPLN's Teams-agent order runs now on
+    0.7.0_AE_CloudOps~E, ahead of plan 1, and plan 1 follows when its GO arrives." TO-APPLY-10 is applied and closed. The
+    queue gate above is CLEARED: this order runs NOW. Every other condition and stop of both halves stands unchanged.
   </objective>
 
   <context>
