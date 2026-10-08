@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_STRATID.TO-ST-t1",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-ST-t1.sleeve-overlap-at-intake.md",
+    "group": "OTHER",
+    "vintage_commit": "f3cc1552bf"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/decompositions/MDPF_STRATID_DECOMP.md",
+    "vintage_commit": "f3cc1552bf",
+    "to_ref": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-ST-t1.sleeve-overlap-at-intake.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_STRATID~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/build_cottonwood_mdpf_slice.py",
+      "kind": "script",
+      "commit_or_etag": "58772c1e86",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: read-only AWS only; every deploy is the issuer's, at the drain",
+      "artifact_covered_by": [
+        "ST1-t1-AC1",
+        "ST1-t1-AC2",
+        "ST1-t1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/tests/test_cottonwood_sma_overlap.py",
+      "kind": "test",
+      "commit_or_etag": "58772c1e86",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest file, not deployed",
+      "artifact_covered_by": [
+        "ST1-t1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ST1-t1-AC1",
+      "criterion_verbatim": "the four named tests pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R1_CHECKS/st_t1_tests.py",
+      "output_evidence": "test_overlap_zero_when_no_sleeve_account_has_a_model PASSED; test_overlap_counts_dollars_of_sleeve_accounts_with_a_model PASSED; test_overlap_none_when_assignments_absent_for_date PASSED; test_overlap_field_aligned_to_dates PASSED; 5 passed in 0.69s; T1-OK (rc=0). Base per the order: T1-BAD no file.",
+      "denominator": "4 of 4 named tests passed by name (5 of 5 collected in the file)",
+      "status": "PASS",
+      "expect": "T1-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "ST1-t1-AC2",
+      "criterion_verbatim": "the existing test_cottonwood_custom_and_sma.py still passes (no served figure moved).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R1_CHECKS/st_t1_regress.py",
+      "output_evidence": "27 passed in 0.59s; T1-REGRESS-OK (rc=0)",
+      "denominator": "27 of 27 collected tests in test_cottonwood_custom_and_sma.py passed",
+      "status": "PASS",
+      "expect": "T1-REGRESS-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "ST1-t1-AC3",
+      "criterion_verbatim": "the seam probe: measure_sma_overlap on the real silver for the served slice's last date returns a well-formed pfde row (read-only S3).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R1_CHECKS/st_t1_live.py",
+      "output_evidence": "date=2026-10-07 result={\"divz\": {\"sleeve_accounts\": 1, \"overlap_accounts\": 1, \"overlap_dollars\": 1369406.08}, \"pfde\": {\"sleeve_accounts\": 4, \"overlap_accounts\": 0, \"overlap_dollars\": 0.0}}; LIVE-OK (rc=0). pfde sleeve_accounts 4 equals the served account_count 4; divz overlap_dollars 1369406.08 equals the served divz model_value for 2026-10-07.",
+      "denominator": "1 of 1 served last date probed; 2 of 2 served SMA members (pfde, divz) returned a row",
+      "status": "PASS",
+      "expect": "LIVE-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In a scratch copy of the slice (.scratch/mut, uncommitted) the overlap branch `if has_model:` was replaced by `if False:`, so no sleeve account ever counts as overlapping; the new tests were run against that module",
+      "expected": "test_overlap_counts_dollars_of_sleeve_accounts_with_a_model and the stub-S3 reader test FAIL; the zero, absent and alignment tests still pass",
+      "observed": "2 failed, 3 passed: FAILED test_overlap_counts_dollars_of_sleeve_accounts_with_a_model (overlap_dollars 0.0 vs 70.0), FAILED test_the_reader_resolves_the_assignment_date_and_values_the_sleeve (0.0 vs 200.0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the three check scripts were run twice (before and after the commit): same tokens both times",
+      "observed": "T1-OK / T1-REGRESS-OK / LIVE-OK on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "S3 write, --upload run, Lambda invoke, deploy of the slice",
+      "reason": "order BOUNDS: read-only AWS only; the deploy is the issuer's"
+    },
+    {
+      "item": "rebalancer_schemas.py, the matcher, the registry, data/mdpf/",
+      "reason": "order BOUNDS: not touched"
+    }
+  ],
+  "surprises": [
+    "MDPF_STRATID-D1-W1-S1: the default-None path omits overlap_model_value because the existing exact-dict assertion in test_cottonwood_custom_and_sma.py would fail on a fifth key",
+    "MDPF_STRATID-D1-W1-S2: compose_cottonwood_leg re-aligns overlap_model_value to the composed axis (two lines, same file)",
+    "MDPF_STRATID-D1-W1-S3: test_cottonwood_pair_identity_cents.py (6 failures) and a live test in test_cottonwood_aua.py fail in this tree; neither imports the edited file"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.9.0_WK_MDPF_STRATID~1/MDPF_STRATID.TO-ST-t1.sleeve-overlap-at-intake.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest test_cottonwood_slice_rekey.py test_cottonwood_custom_and_sma.py test_cottonwood_sma_overlap.py",
+      "invocation": "python -m pytest -q data/assets/scripts/gold/tests/test_cottonwood_slice_rekey.py data/assets/scripts/gold/tests/test_cottonwood_custom_and_sma.py data/assets/scripts/gold/tests/test_cottonwood_sma_overlap.py",
+      "result": "the other slice test files pass alongside the new one (the 6 pair-identity failures are in a file that does not import the slice; see S3)"
+    }
+  ]
+}
