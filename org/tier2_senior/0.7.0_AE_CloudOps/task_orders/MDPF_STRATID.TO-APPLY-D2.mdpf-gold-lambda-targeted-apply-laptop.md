@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDPF_STRATID</project_code>
   </metadata>
 <risk>SERVED</risk>
@@ -14,6 +14,12 @@
 <owned_cells>ST-t-3</owned_cells>
 <decomp_context>dell1's decomposition (on origin box/dell1; reaches the laptop tree at the next box pass): ST-t-3, "deployed by the issuer at the drain under the C-GLOBAL-PAIR". Leg D2 of dell1's ledger mdpf-stratid-r1-global-pfde-fold. dell1 1.0.0_SA_CTO~DELL1 msg 1189, relay org/tier0_exec/0.0.0_AB_MSTR/deliverables/RELAY_DELL1_STRATID_D2_APPLY_ASK_2145Z.md; 1.0.0_SA_CTO msg 107370 (agreed).</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~22:1xZ). APPLIED 2026-10-08T22:05:33Z: exact build (1,712,878 bytes, d203dce7...), targeted 0/1/0, re-plan 0.
+    Issuer live read: CodeSha256 0gPc5/kUo+sE8BnvhKg5wO+IXiDCB4vRK5cvy1ac+2I=, LastModified 22:05:33Z. Ledger closed (@2957141668).
+    The next scheduled run is dell1's acceptance.
+  </closure>
 
   <objective>
     Apply D2 of dell1's MDPF_STRATID R1: move `mdpf-gold-lambda` to the package built from pin `148f715f8c`, by a targeted Terraform
