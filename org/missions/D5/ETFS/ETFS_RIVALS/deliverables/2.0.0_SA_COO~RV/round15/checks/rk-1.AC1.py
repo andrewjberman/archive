@@ -1,4 +1,4 @@
-"""RIV-rd-1 AC1 (PRD v0.19 C-OWED-GRAIN, G.4; CTO ruling R13; row ETFS_RIVALS-Z-S71 and worker row Z-W15-S2): THE READER READS A CLOSE ONLY
+"""RIV-rk-1 AC1 (PRD v0.19 C-OWED-GRAIN, G.4; CTO ruling R13; row ETFS_RIVALS-Z-S71 and worker row Z-W15-S2): THE READER READS A CLOSE ONLY
 ON ITS OWN TRADING DAY. The shared G4 reader (`gold_holding_contribution.g4_rows` / `g4_window`, read by `price_series.load` and every
 stage) (1) lets a row's price group (`px_close`, `total_return_index`, `currency`, `as_of`, `source`, `as_of_source`, `price_date`) take
 part in the merge only where the row's `price_date` column is null or absent, or equals the partition date -- a row whose non-null
