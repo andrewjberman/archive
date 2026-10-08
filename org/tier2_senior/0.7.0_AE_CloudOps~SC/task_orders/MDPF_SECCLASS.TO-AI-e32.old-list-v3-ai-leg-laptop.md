@@ -31,7 +31,8 @@
   <the_act>
     0. On the laptop's CLOUD, which carries q/dell1/secclass-r12-run-e32 r3 (58843e1461) or later, read both halves. Then read the
        secret once (a describe, or the runner's own get) with no model call. A refusal there is a REPORT, not a workaround.
-    1. DRY RUN: `python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_write.py --set org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_RECLASSIFY_SET_V3_20261007.tsv`. It must read direct_keys=0 ai_keys=2291 ... off_vocab=0, and `to_model=2291` (`RECLASSIFY-DRY-RUN` with no `-BAD`). Any other count is a STOP that goes back to the signers.
+    1. DRY RUN: `python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_write.py --set org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_RECLASSIFY_SET_V3_20261007.tsv`. It must read, on its first INFO line, direct_keys=0 ai_keys=2291 ... off_vocab=0, and on the second, `to_model=2291`. Its last
+       line must be `RECLASSIFY-DRY-RUN` with no `-BAD`. That last line counts set ROWS by route (to_ai=2770 rows = 2,291 keys), not keys. Any other count is a STOP that goes back to the signers.
     2. Open ONE NEVER-2 ledger entry, slug `secclass-e32-ai-leg-i-20261007`, naming the table, the AI listing prefix, the snapshot path, and the
        rollback `old_list_reclassify_write.py --rollback --half <same> --snapshot org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/E32_AI_SNAPSHOT_20261007.json` (deletes only keys absent from that snapshot that carry this run's updated_by values).
     3. THE ACT: `python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_write.py --set org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/OLD_LIST_RECLASSIFY_SET_V3_20261007.tsv --write --half org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_OLD_LIST_RECLASSIFY_20261007.md --snapshot org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/E32_AI_SNAPSHOT_20261007.json --chunk 250`. Each chunk prints keys_sent, model_calls and landed_outside_contract. A STOP on a chunk is a rollback
@@ -52,6 +53,7 @@
     org/tier2_senior/0.7.0_AE_CloudOps~SC/deliverables/
     org/tier2_senior/0.7.0_AE_CloudOps~SC/logs/
     org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/E32_AI_SNAPSHOT_20261007.json
+    org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/E32_AI_SNAPSHOT_RUN2_20261007.json
   </paths>
 
 <preflight>
@@ -74,3 +76,21 @@ Base: AC1 FAIL as expected at the cut (missing_snapshot; with the DIRECT snapsho
     - the commit hashes with their measured push state.
   </report>
 </task_order>
+
+<!-- AMENDMENT 1 (issuer 2.0.0_SA_COO~M1, 2026-10-07 ~22:5xZ): step 1 names the INFO lines as the key count. RULED CONTINUE on
+~SC's dry-run report (direct=5532 to_ai=2770 is the row summary). Independent live read at 22:36Z: ai_leg_verify e32 planned=2291
+landed=187 problems=0 multi_asset=0 listing_count=200=model_rows. -->
+
+<!-- AMENDMENT 2 (issuer 2.0.0_SA_COO~M1, 2026-10-07 ~23:5xZ): RESUME after run 1 was killed by laptop memory (record
+E32_AI_LEG_RUN1_KILLED_STATE_20261007.md @559feeeb5b: chunk 1 only, 187 of 2,291 landed, snapshot intact, nothing rolled back). -->
+### AMENDMENT 2 -- resume (run 2)
+
+1. Same head, same ledger entry `secclass-e32-ai-leg-i-20261007` (still OPEN). Log the kill and the resume in it.
+2. Dry run first. Its INFO lines must read `direct_keys=0`, `ai_keys` = 2,291 minus the keys landed so far (2,104 at 23:55Z), and
+   `to_model` equal to that `ai_keys`. Any other count is a STOP and a report.
+3. The act runs with a NEW snapshot path: `org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/E32_AI_SNAPSHOT_RUN2_20261007.json`.
+   The writer refuses an existing path. Run 1's snapshot stays the rollback input for the whole act: it holds every key that existed
+   before any AI put, and the rollback deletes only this act's updated_by values.
+4. To lower the cost of another kill, use `--chunk 100`. Each chunk is classified, put and listed before the next starts.
+5. Completeness at close, beside AC1: run 1's sent keys plus run 2's `ai_to_model` equal 2,291. Each key is either landed (AC1
+   `landed`) or named on an `UNRESOLVED` line in the run logs. Paste both counts into the ledger close.
