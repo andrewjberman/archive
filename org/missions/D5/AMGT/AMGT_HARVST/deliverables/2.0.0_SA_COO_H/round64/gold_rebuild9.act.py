@@ -57,6 +57,14 @@ def verify(before_m, before_d, after_m, after_d, as_of):
                    named_removals=named)
 
 
+def bnp_counts(rows):
+    """CTO half C2 (@d4eb3dc22f): BNP_FP_Equity's pair count, and the pairs whose only matched form is the ticker form."""
+    mine = [r for r in rows if r.get("security_key") == "BNP_FP_Equity"]
+    only = [r for r in mine if list(r.get("match_forms") or []) == ["BNP"]]
+    return {"pairs": len(mine), "pairs_on_the_form_BNP_alone": len(only),
+            "keys_on_the_form_alone": sorted(r.get("article_key") for r in only)}
+
+
 def finish(record, rc):
     path = os.path.join(HERE, "gold_rebuild9.act_%s.json" % record["stamp"])
     json.dump(record, open(path, "w", encoding="utf-8"), indent=1, default=str)
@@ -89,6 +97,7 @@ def main():
     record["before"] = {"mention_rows": len(bm), "mention_digest": a32.digest(bm), "daily_rows": len(bd),
                         "daily_digest": a32.digest(bd), "mention_part": a32.newest_part(pg.GOLD_TABLE),
                         "daily_part": a32.newest_part(pg.GOLD_DAILY_TABLE)}
+    record["bnp_before"] = bnp_counts(bm)
     print("BEFORE: mention %d rows, daily %d rows; parts %s | %s" % (
         len(bm), len(bd), record["before"]["mention_part"], record["before"]["daily_part"]))
     sys.stdout.flush()
@@ -118,6 +127,8 @@ def main():
     record["after"] = {"mention_rows": len(am), "mention_digest": a32.digest(am), "daily_rows": len(ad),
                        "daily_digest": a32.digest(ad), "mention_part": a32.newest_part(pg.GOLD_TABLE),
                        "daily_part": a32.newest_part(pg.GOLD_DAILY_TABLE)}
+    record["bnp_after"] = bnp_counts(am)
+    print("BNP_FP_Equity: before %s after %s" % (record["bnp_before"], record["bnp_after"]))
     verdict = verify(bm, bd, am, ad, as_of)
     record["verify"] = verdict
     print("VERIFY:", json.dumps({k: v for k, v in verdict.items()
