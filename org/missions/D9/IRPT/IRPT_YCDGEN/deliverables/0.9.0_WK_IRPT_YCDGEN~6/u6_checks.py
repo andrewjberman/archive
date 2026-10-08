@@ -444,17 +444,19 @@ def arm_census():
         line("portal-not-run", k, why)
 
     # --- 5. executable readers: run under the NEW schema; a red that the BASE schema does not show is a FAIL
-    results_new = {}
-    for t in py_tests:
-        results_new[t] = run_pytest(t)
+    from concurrent.futures import ThreadPoolExecutor
     pt_files = list(portal_tests)
-    pnew = run_bun_tests(pt_files)
+    with ThreadPoolExecutor(max_workers=8) as pool:  # independent processes, each reading the schema only
+        futs = {t: pool.submit(run_pytest, t) for t in py_tests}
+        fut_bun = pool.submit(run_bun_tests, pt_files)
+        results_new = {t: f.result() for t, f in futs.items()}
+        pnew = fut_bun.result()
     red_py = [t for t, r in results_new.items() if r[1] or r[0] not in (0,)]
-    base_py, pbase = {}, None
-    with base_schema_in_place():
-        for t in red_py:
-            base_py[t] = run_pytest(t)
-        pbase = run_bun_tests(pt_files)
+    with base_schema_in_place(), ThreadPoolExecutor(max_workers=8) as pool:
+        futs = {t: pool.submit(run_pytest, t) for t in red_py}
+        fut_bun = pool.submit(run_bun_tests, pt_files)
+        base_py = {t: f.result() for t, f in futs.items()}
+        pbase = fut_bun.result()
     for t, why in py_tests.items():
         n, b = results_new[t], base_py.get(t, (0, set(), "clean under the new schema"))
         new_red = sorted(n[1] - b[1])
