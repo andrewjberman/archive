@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-s-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-s-1.sweep-is-cash.md",
+    "group": "OTHER",
+    "vintage_commit": "c954f11b92"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~40",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round19.md",
+    "vintage_commit": "c954f11b92",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-s-1.sweep-is-cash.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_sweeps.py",
+      "kind": "script",
+      "commit_or_etag": "8c795be6d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local derivation; nothing deployed, no S3 write"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_sweep_regrade.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local derivation; nothing deployed, no S3 write"
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_sweeps.py",
+      "kind": "test",
+      "commit_or_etag": "8c795be6d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local derivation; nothing deployed, no S3 write"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~40/sweep_regrade.md",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local run; nothing deployed, no S3 write"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB19s1-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_sweeps.py expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_sweeps.py",
+      "output_evidence": "8 passed in 1.56s (rc 0): a sweep-funded withdrawal moves the value once and the day return is 0; before the list the same withdrawal dropped the value twice; a FDIC-like CUSIP not on the list is not cash; sweep by/sl are INTERNAL with the list version; a no-sweep account grades identically before and after; the list is declared with sources; the census accounts for every flagged CUSIP; sweep cash legs credit a sale and debit a purchase. The whole silver suite: 500 passed, 11 skipped (rc 0).",
+      "denominator": "8 of 8 tests passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB19s1-AC2",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_sweep_regrade.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~40 expect: control_same=True",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_sweep_regrade.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~40",
+      "output_evidence": "SWEEP-REGRADE sweeps=2 rejected=517 double_drop_months=74 fixed=42 months_before=1685/1931/78977 months_after=2057/1522/79014 control_same=True (rc 0)",
+      "denominator": "control: 642 of 642 graded months of accounts with no listed-sweep row on or before the month had the same verdict and computed return; 74 double-drop months of 106 single-flow lo months of the lo/over 10% class; 520 flagged CUSIPs accounted (2 sweeps, 1 cash balance, 517 rejected, 0 unaccounted); BEFORE reproduced round 18 exactly (months=82593 match=1685 diff=1931 ungradable=78977)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB19s1-AC3",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the sweep list reads as a declared list: every CUSIP on it is a bank sweep by its stated source, and no rejected candidate should have been on it.",
+      "method": "manual_read_with_citation",
+      "invocation": "read data/assets/scripts/silver/commonwealth_sweeps.py (SWEEPS, REJECT_REASONS, CANDIDATES_REJECTED) and org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~40/sweep_regrade.md (the list, the census, the rejected candidates by class)",
+      "output_evidence": "outputs produced: SWEEPS = FDIC66606 ('Bank Deposit Sweep Program', 143,357 rows) and FDIC66853 ('Advisory Retirement Sweep Program', 80,939 rows), each with its vendor Security_Description as source; CFNCASH is cash but not a sweep; 517 rejected candidates in 8 classes (CD, MMF, CASHMGMT, MERGER, BANKISSUER, UITCASH, INSURED, FUNDNAME), each with its description and reason; no verdict given",
+      "denominator": "2 listed sweeps and 517 rejected candidates to be read by the grader",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion; graded by 3.0.0_SA_CVO at L9, never self-graded"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "commonwealth_sweeps.with_sweep_cash replaced by the identity (a sweep sale/purchase gets no cash leg), run against the real test file",
+      "expected": "test_sweep_funded_withdrawal_moves_the_value_once fails",
+      "observed": "1 failed, 7 passed: assert np.float64(2000.0) == 1000.0 +- 0.001 (the deposit counted on both the cash and the sweep line)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC2 invocation run twice in full: BEFORE months=82593 match=1685 diff=1931 ungradable=78977 (equal to round 18's real run) and AFTER 2057/1522/79014 both times; the no-sweep control (642 of 642 graded months of accounts with no listed-sweep row on or before the month) is the AC2 expectation itself",
+      "observed": "identical SWEEP-REGRADE grade counts in both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "UNGRADABLE months",
+      "reason": "79,014 months after (78,977 before) are not graded: a month with a blank day is never filled; 41 graded months became ungradable after the list (DIFF 31, MATCH 10) and 4 ungradable months became graded"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~40/ADVI_COTBKF.TO-CB-s-1.sweep-is-cash.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 data/assets/scripts/silver/commonwealth_sweeps.py data/assets/scripts/silver/commonwealth_sweep_regrade.py data/assets/scripts/silver/commonwealth_flows.py data/assets/scripts/silver/commonwealth_daily_valuation.py data/assets/scripts/silver/commonwealth_daily_returns.py data/assets/scripts/silver/tests/test_commonwealth_sweeps.py",
+      "result": "All checks passed"
+    }
+  ]
+}

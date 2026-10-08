@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-u-6.analysisreport-schema-carries-opal-engine",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-u-6.analysisreport-schema-carries-opal-engine.md",
+    "group": "OTHER",
+    "vintage_commit": "eb9071c489"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6L.md",
+    "vintage_commit": "eb9071c489",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-u-6.analysisreport-schema-carries-opal-engine.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "docs/contracts/investor-reporting/v1/AnalysisReport.schema.json",
+      "kind": "doc",
+      "commit_or_etag": "af196209af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "restored to the bytes at merge-base 47f9315d28 (git diff 47f9315d28 HEAD -- docs/contracts/ is empty); sha256 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f. Local, branch wk-IRPT_YCDGEN-6.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/u6_checks.py",
+      "kind": "script",
+      "commit_or_etag": "af196209af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "schema | regen | census, one RESULT line each; regen imports the changed gen-wire.ts under bun --no-install from portal/ and renders to a temp dir; census runs the reader python tests on a git-archive export of CLOUD and of HEAD and passes when none is newly red (u-6 AMENDMENT 2). Local.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "af196209af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_YCDGEN-D2-W6-S1 and IRPT_YCDGEN-D2-W6-S2 appended",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- v1 is byte-frozen and every v2 fixture validates as its name says",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/u6_checks.py schema",
+      "output_evidence": "merge-base HEAD CLOUD = 47f9315d2828758a1e5f1f9327ca0b9e7b0f9c35\nv1 sha256 at merge-base 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f ; in working tree 1bd0dc85847690b277e3a3011bcbe500a02820792cd53a38a1201fc3c55d153f ; frozen: True\n  FIXTURE AnalysisReport.v2.opal.invalid_not_available_no_reason.json name says invalid, validates as invalid\n  FIXTURE AnalysisReport.v2.opal.invalid_vendor_member.json name says invalid, validates as invalid\n  FIXTURE AnalysisReport.v2.opal.valid.json name says valid, validates as valid\n  FIXTURE AnalysisReport.v2.ycharts.valid.json name says valid, validates as valid\nCOUNT: 4 AnalysisReport v2 fixtures under infra/aws/lambda/investor-reporting/_contracts/fixtures (glob AnalysisReport.v2.*.json); 0 disagree with their name []\nRESULT: schema PASS\nrc=0",
+      "denominator": "4 of 4 AnalysisReport v2 fixtures agree with their file name; v1 sha256 equal to the merge-base copy",
+      "expect": "^RESULT: schema PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the generator, reading v2, reproduces the committed AnalysisReport.ts body (header excluded)",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/u6_checks.py regen",
+      "output_evidence": "generator run (bun --no-install from portal/, out-dir C:\\Users\\Test\\AppData\\Local\\Temp\\u6regen_TMP): rc=0 SOURCE: infra/aws/lambda/investor-reporting/_contracts/AnalysisReport.v2.schema.json\nbodies (header excluded): generated 134 lines, committed 134 lines\nRESULT: regen PASS\nrc=0",
+      "denominator": "1 of 1 bodies identical: generated 134 lines, committed 134 lines (header excluded); generator = gen-wire.ts at portal 1c306eb3 (union rule fixed under YCD-v-6 AMENDMENT 1)",
+      "expect": "^RESULT: regen PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- every reader of either AnalysisReport schema is named and no reader test is newly red against CLOUD",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~6/u6_checks.py census",
+      "output_evidence": "SEARCH A: git grep -l -I -E 'AnalysisReport(\\.v2)?\\.schema' over 63280 tracked outer files: 147 hits (128 under org/ = records, not readers; 19 outside org/)\nSEARCH B: git -C portal grep -l -I -E 'AnalysisReport(\\.v2)?\\.schema|SERVED_V2_SCHEMAS|schemaFilePath' -- src over 2068 tracked portal files: 6 hits\nSEARCH C: git grep -l -I -E 'glob\\(.*schema\\.json' -- infra/aws/lambda/investor-reporting/*.py (loaders that read EVERY schema file, so both): 16 hits\nREADERS (outer, outside org/): 33\n  READER [schema file] docs/contracts/investor-reporting/v1/AnalysisReport.schema.json\n  READER [document/manifest] docs/contracts/investor-reporting/v1/CONTRACT.md\n  READER [schema file] docs/contracts/investor-reporting/v1/responses/analysis-report.response.schema.json\n  READER [document/manifest] infra/aws/lambda/ci/lambda-source-map.json\n  READER [document/manifest] infra/aws/lambda/investor-reporting/PATH_MANIFEST.json\n  READER [schema file] infra/aws/lambda/investor-reporting/_contracts/AnalysisReport.schema.json\n  READER [schema file] infra/aws/lambda/investor-reporting/_contracts/AnalysisReport.v2.schema.json\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/test_owned_outer_contracts.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/test_owned_request_contracts.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/test_request_composition.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/test_upload_contract.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/tests/test_analysisreport_v2.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/tests/test_holdings_classification_members.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/tests/test_selection_contract.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/tests/test_submit_export_queued.py\n  READER [python test] infra/aws/lambda/investor-reporting/_contracts/tests/test_undated_analysis.py\n  READER [python code] infra/aws/lambda/investor-reporting/export/submit_installed.py\n  READER [python test] infra/aws/lambda/investor-reporting/export/tests/test_download_response_contract.py\n  READER [python test] infra/aws/lambda/investor-reporting/export/tests/test_packaged_contracts_match_docs.py\n  READER [python test] infra/aws/lambda/investor-reporting/export/tests/test_submit_async.py\n  READER [python test] infra/aws/lambda/investor-reporting/export/tests/test_submit_service.py\n  READER [python test] infra/aws/lambda/investor-reporting/holdings/tests/test_entry_guarded.py\n  READER [python test] infra/aws/lambda/investor-reporting/ops/tests/test_owned_report.py\n  READER [python test] infra/aws/lambda/investor-reporting/ops/tests/test_owned_requests.py\n  READER [python code] infra/aws/lambda/investor-reporting/reports/generate_installed.py\n  READER [python code] infra/aws/lambda/investor-reporting/reports/resident_installed.py\n  READER [python test] infra/aws/lambda/investor-reporting/reports/tests/test_generate_installed.py\n  READER [python test] infra/aws/lambda/investor-reporting/reports/tests/test_repository.py\n  READER [python test] infra/aws/lambda/investor-reporting/ycharts/extract/tests/run_offline_suite.py\n    (not a pytest file by name: not run)\n  READER [python test] infra/aws/lambda/investor-reporting/ycharts/extract/tests/test_publication.py\n  READER [python code] infra/aws/lambda/investor-reporting/ycharts/generate/composition_admission.py\n  READER [python test] infra/aws/lambda/investor-reporting/ycharts/generate/tests/run_offline_suite.py\n    (not a pytest file by name: not run)\n  READER [python test] infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py\nREADERS (portal, TypeScript, not python tests: named, not run here): 6\n  READER [portal ts] portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-48.new-classes.test.tsx\n  READER [portal ts] portal/src/pages/InvestorReporting/__tests__/fe-s-13/gen-wire.ts\n  READER [portal ts] portal/src/pages/InvestorReporting/__tests__/fe-s-25/generator.test.ts\n  READER [portal ts] portal/src/pages/InvestorReporting/__tests__/fe-s-50/hash-stability.test.ts\n  READER [portal ts] portal/src/pages/InvestorReporting/contracts/wire/AnalysisReport.ts\n  READER [portal ts] portal/src/pages/InvestorReporting/contracts/wire/consumed.ts\nPYTHON TESTS TO RUN: 20\nTREE CLOUD = git archive CLOUD (3f64c8cd2c) of ['docs', 'infra/aws/lambda', 'lib', 'deck_generation', 'data/firm_registry.json'] : 10553 files\nTREE HEAD = git archive HEAD (af196209af) of ['docs', 'infra/aws/lambda', 'lib', 'deck_generation', 'data/firm_registry.json'] : 10520 files\n  TEST infra/aws/lambda/investor-reporting/_contracts/test_owned_outer_contracts.py  CLOUD: ...                                                                      [100%]\n\n3 passed in 4.73s | HEAD: ...                                                                      [100%]\n\n3 passed in 4.73s\n  TEST infra/aws/lambda/investor-reporting/_contracts/test_owned_request_contracts.py  CLOUD: _request_contracts.py::test_public_routes_are_declared_against_the_installed_status_handler\n\n1 failed, 2 passed in 2.73s | HEAD: _request_contracts.py::test_public_routes_are_declared_against_the_installed_status_handler\n\n1 failed, 2 passed in 2.87s\n  TEST infra/aws/lambda/investor-reporting/_contracts/test_request_composition.py  CLOUD: ..................................................                       [100%]\n\n50 passed in 6.42s | HEAD: ..................................................                       [100%]\n\n50 passed in 6.32s\n  TEST infra/aws/lambda/investor-reporting/_contracts/test_upload_contract.py  CLOUD: d_contract.py::test_route_denominators_are_measured_and_upload_is_declared_against_generate\n\n1 failed, 7 passed in 3.58s | HEAD: d_contract.py::test_route_denominators_are_measured_and_upload_is_declared_against_generate\n\n1 failed, 7 passed in 3.73s\n  TEST infra/aws/lambda/investor-reporting/_contracts/tests/test_analysisreport_v2.py  CLOUD: .....                                                                    [100%]\n\n5 passed in 2.63s | HEAD: .....                                                                    [100%]\n\n5 passed in 2.79s\n  TEST infra/aws/lambda/investor-reporting/_contracts/tests/test_holdings_classification_members.py  CLOUD: ........................                                                 [100%]\n\n24 passed in 3.13s | HEAD: ........................                                                 [100%]\n\n24 passed in 3.37s\n  TEST infra/aws/lambda/investor-reporting/_contracts/tests/test_selection_contract.py  CLOUD: ..                                                                       [100%]\n\n2 passed in 2.91s | HEAD: ..                                                                       [100%]\n\n2 passed in 2.78s\n  TEST infra/aws/lambda/investor-reporting/_contracts/tests/test_submit_export_queued.py  CLOUD: .....                                                                    [100%]\n\n5 passed in 2.95s | HEAD: .....                                                                    [100%]\n\n5 passed in 2.81s\n  TEST infra/aws/lambda/investor-reporting/_contracts/tests/test_undated_analysis.py  CLOUD: ............                                                             [100%]\n\n12 passed in 2.74s | HEAD: ............                                                             [100%]\n\n12 passed in 2.73s\n  TEST infra/aws/lambda/investor-reporting/export/tests/test_download_response_contract.py  CLOUD: ..............                                                           [100%]\n\n14 passed in 3.32s | HEAD: ..............                                                           [100%]\n\n14 passed in 3.36s\n  TEST infra/aws/lambda/investor-reporting/export/tests/test_packaged_contracts_match_docs.py  CLOUD: ..                                                                       [100%]\n\n2 passed in 0.15s | HEAD: ..                                                                       [100%]\n\n2 passed in 0.16s\n  TEST infra/aws/lambda/investor-reporting/export/tests/test_submit_async.py  CLOUD: ...............                                                          [100%]\n\n15 passed in 3.66s | HEAD: ...............                                                          [100%]\n\n15 passed in 3.77s\n  TEST infra/aws/lambda/investor-reporting/export/tests/test_submit_service.py  CLOUD: .....                                                                    [100%]\n\n5 passed in 3.02s | HEAD: .....                                                                    [100%]\n\n5 passed in 3.16s\n  TEST infra/aws/lambda/investor-reporting/holdings/tests/test_entry_guarded.py  CLOUD: ings/tests/test_entry_guarded.py::test_a_selected_account_missing_from_the_snapshot_is_still_refused\n\n21 errors in 0.97s | HEAD: ings/tests/test_entry_guarded.py::test_a_selected_account_missing_from_the_snapshot_is_still_refused\n\n21 errors in 1.04s\n  TEST infra/aws/lambda/investor-reporting/ops/tests/test_owned_report.py  CLOUD: ................................                                         [100%]\n\n32 passed in 14.61s | HEAD: ................................                                         [100%]\n\n32 passed in 15.01s\n  TEST infra/aws/lambda/investor-reporting/ops/tests/test_owned_requests.py  CLOUD: ........................                                                 [100%]\n\n24 passed in 10.57s | HEAD: ........................                                                 [100%]\n\n24 passed in 10.96s\n  TEST infra/aws/lambda/investor-reporting/reports/tests/test_generate_installed.py  CLOUD: .............                                                            [100%]\n\n13 passed in 3.60s | HEAD: .............                                                            [100%]\n\n13 passed in 3.59s\n  TEST infra/aws/lambda/investor-reporting/reports/tests/test_repository.py  CLOUD: ........................                                                 [100%]\n\n24 passed in 2.75s | HEAD: ........................                                                 [100%]\n\n24 passed in 2.82s\n  TEST infra/aws/lambda/investor-reporting/ycharts/extract/tests/test_publication.py  CLOUD: ..................                                                       [100%]\n\n18 passed in 11.04s | HEAD: ..................                                                       [100%]\n\n18 passed in 11.32s\n  TEST infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py  CLOUD: ucer.py::test_document_validates_v2_and_binds_to_the_run_record_and_the_artifact\n\n10 failed, 3 passed, 2 errors in 7.86s | HEAD: ucer.py::test_document_validates_v2_and_binds_to_the_run_record_and_the_artifact\n\n10 failed, 3 passed, 2 errors in 8.05s\nRED ON BOTH CLOUD AND HEAD (same failing set, not newly red): 4 test file(s)\nTESTS: 20 run on each of CLOUD and HEAD, 0 newly red []; required test missing from the census: []\nRESULT: census PASS\nrc=0",
+      "denominator": "33 outer readers outside org/ (146 hits over 63277 tracked files), 6 portal readers named; 20 python reader tests run on CLOUD and on HEAD exports, 0 newly red; 4 test files red on both",
+      "expect": "^RESULT: census PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the schema arm's frozen check compares the working-tree v1 file with its merge-base copy; earlier in this order the v1 file was the 0b6115b205 edit (sha256 9c55f7c9...5b67) and the same comparison reported it as not equal to 1bd0dc85...153f",
+      "expected": "a changed v1 file makes frozen: False and RESULT: schema FAIL",
+      "observed": "the pre-restore working tree (the v1 edit of 0b6115b205) hashes 9c55f7c9b8fd0a52956cc394d28859f9917cf4aeca7413530d546496d00b5b67 per the superseded proof; not re-run",
+      "status": "N/A-SPEC-NAMES-NONE",
+      "reason": "the order names no mutant control; the frozen comparison is a plain sha256 equality printed with both values"
+    },
+    "determinism": {
+      "method": "N/A -- every arm reads committed files, a fixed merge-base and the changed generator",
+      "observed": "schema and regen run twice with identical output; census run twice with the same 3 failing tests",
+      "status": "N/A-WITH-REASON",
+      "reason": "no clock, network or randomness is read"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal bun tests (fe-s-25 generator.test.ts, fe-s-50 hash-stability.test.ts, iv-e-48) are named in the census but not run by it",
+      "reason": "AC3 asks for the python reader tests; the portal suite is graded by YCD-v-6 AC3"
+    },
+    {
+      "item": "the generator is driven through renderModule and schemaFilePath imported from the changed gen-wire.ts, not through generate()",
+      "reason": "generate() fixes its out-dir by import.meta.url and writes into contracts/wire/; the rendered module is the same call generate() makes"
+    },
+    {
+      "item": "the CLOUD and HEAD exports are git archives of docs, infra/aws/lambda, lib, deck_generation and data/firm_registry.json",
+      "reason": "enough for the 20 reader tests to run; the same pathspecs on both sides, so a test red from a missing path is red on both and is not newly red"
+    }
+  ],
+  "surprises": [
+    "IRPT_YCDGEN-D2-W6-S1",
+    "IRPT_YCDGEN-D2-W6-S2"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 u6_checks.py",
+      "result": "All checks passed!"
+    }
+  ]
+}

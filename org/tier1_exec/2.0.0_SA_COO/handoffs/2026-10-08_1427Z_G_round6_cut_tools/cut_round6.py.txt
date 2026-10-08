@@ -1,0 +1,350 @@
+"""Cut LGIC_BLANKFIX round 6: the decomposition, six task orders, row S9, the issuance message (issuer 2.0.0_SA_COO~G)."""
+import json, os, sys
+
+here = os.path.dirname(os.path.abspath(__file__))
+NOW = sys.argv[1]
+src = open(os.path.join(here, "cut_orders.py"), encoding="utf-8").read().split("# ---------------------------------------------------------------- BF-t-1")[0]
+src = (src.replace('"/decompositions/LGIC_BLANKFIX_DECOMP.md"', '"/decompositions/LGIC_BLANKFIX_DECOMP.round6.md"')
+          .replace("-- round 1 %(cell)s:", "-- round 6 %(cell)s:")
+          .replace("<round>1</round>", "<round>6</round>")
+          .replace("<issued_date>2026-10-07</issued_date>", "<issued_date>2026-10-08</issued_date>")
+          .replace("(`decompositions/LGIC_BLANKFIX_DECOMP.md`)", "(`decompositions/LGIC_BLANKFIX_DECOMP.round6.md`)")
+          .replace("(round 1), cell", "(round 6), cell")
+          .replace("thread round; the lens runs on the enrichment round that touches its surface.", "no schedule is created or changed.")
+          .replace("Source: PRD v0.2 @47ef4c98cc section 2 (THREAD); decomposition round 1 @f15f222030.",
+                   "Source: ROUND_ANALYSIS.round5.md @34ba4c1c90 (the CTO's enrichment list E1 to E5); decomposition round 6."))
+exec(src)
+
+ANALYSIS = HOME + "/ledger/ROUND_ANALYSIS.round5.md"
+MAP = "infra/logic/registry/root_map.json"
+REC = HOME + "/deliverables/2.0.0_SA_COO~G/ALL_ROOTS_round5_second_seat.txt"
+ALLCMD = "python lib/opal_naming_rootcheck.py all --map " + MAP
+SHARED_FACTS = """**Where the project stands.** `python lib/opal_naming.py census --all-roots` (the same as `""" + ALLCMD + """`)
+runs every Terraform root the root map covers and prints the denominator of roots first. At the round-5 close it read
+`roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 right=124 fix=248 not_asked=32 pattern=8 carded=0 refused=0
+hole=0`; the whole output is `""" + REC + """`. One line per name: `KIND type current -> detail  [where]`, kinds `RIGHT`, `FIX`,
+`NOT-ASKED`, `PATTERN`, `CARDED`, `REFUSED`, `HOLE`. Each unmapped root is printed `UNMAPPED <root> names=N`. The CTO's reading is
+`""" + ANALYSIS + """` -- read it first.
+Modules, under `lib/`: `opal_naming.py` (`grade`, `census_repo`, the `census` command), `opal_naming_scope.py` (the roots and their
+names), `opal_naming_rootmap.py` (`load_map`, `resolve`), `opal_naming_cadence.py`, `opal_naming_keyfill.py` (`fill_keys`,
+`bucket_of`), `opal_naming_policyrole.py`, `opal_naming_rootcheck.py` (`decide`, `check_root`, `_ruling_of`, the `lines`, `keys` and
+`all` commands). The registry is `infra/logic/registry/` (`root_map.json`, `key_rulings.json`, `name_rulings.json`,
+`event_rules.json`, `legacy_addresses.json`, `resources.json`, `systems.json`); only `4.0.0_SA_CRO` writes it. Read the modules
+your cell touches or calls before you build. Import with `sys.path.insert(0, "lib")`. Python 3.9 syntax only; ASCII only in code
+and output; no new dependency; no AWS call and no network call. The bar: `python -m pytest lib/tests -q -p no:cacheprovider`
+passes whole at the base (194 passed), and every `lib/tests/test_opal_naming_*.py` script prints `ok=True` at the base EXCEPT
+`test_opal_naming_keyfill.py`, which is red (row `LGIC_BLANKFIX-S7`; cell `BF-u-4` repairs it). None may newly fail after your
+build. A test you write asserts relations and the rows it needs by name, never a typed total of repository names, roots or
+registry rows: those move every day, and the registry's lane is adding map entries during this round."""
+COMMON = ("You READ and never edit anything outside the block: in particular every file under `infra/logic/`, the saved runs and "
+          "traces, `" + ANALYSIS + "`, `" + DECOMP + "`, and the `lib/` modules your block does not name.")
+DELIV = "- Your whole build lives in your deliverables folder, which the tree convention grants; the block below names only the investigation file.\n"
+
+
+def cut(n, slug, slot, status, title, outcome, depends, text, crits, notes, paths, report, adversary, extra_bounds=""):
+    cell = "BF-u-%d" % n
+    base = "Base dry-run at the cut: " + "; ".join("%s base %s" % (c[0], c[3]) for c in crits) + "."
+    order(cell, slug, slot, status, title, outcome, depends, text, [c[:3] for c in crits], notes, extra_bounds, paths, COMMON,
+          report, adversary, base)
+    return HOME + "/task-orders/LGIC_BLANKFIX.TO-%s.%s.md" % (cell, slug)
+
+
+def add_judgment(path, mech_ids, jid, cell, text):
+    t = open(path, encoding="utf-8").read()
+    old = "<expected_criteria>%s</expected_criteria>" % ",".join(mech_ids)
+    assert t.count(old) == 1, old
+    allids = ",".join(mech_ids + [jid])
+    t = t.replace(old, '<criterion id="%s" cell_refs="%s" judgment="true"/>\n`%s` (judgment) -- %s You record the artifacts\' paths and NO verdict.\n\n<expected_criteria>%s</expected_criteria>' % (jid, cell, jid, text, allids))
+    t = t.replace("Criterion ids: %s." % ", ".join(mech_ids), "Criterion ids: %s, %s (judgment: recorded UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming `3.0.0_SA_CVO`)." % (", ".join(mech_ids), jid))
+    t = t.replace("<instance> %s`" % ",".join(mech_ids), "<instance> %s`" % allids)
+    t = t.replace("- **Refusal clause.**", "- The judgment criterion gets its artifact paths and NO verdict from you.\n- **Refusal clause.**", 1)
+    assert t.count(allids) >= 2
+    open(path, "w", encoding="utf-8", newline="\n").write(t)
+
+
+ROOTCHECK = ["lib/opal_naming_rootcheck.py", "lib/tests/test_opal_naming_rootcheck.py"]
+ROOTMAP = ["lib/opal_naming_rootmap.py", "lib/tests/test_opal_naming_rootmap.py"]
+
+# u-1 -- E1: sort the 74 unmapped roots; draft entries for the registry's lane
+D1 = HOME + "/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/"
+cut(1, "sort-unmapped-roots", 1, "pending", "the 74 unmapped roots sorted -- nothing to name, or the entry the registry's lane needs to map them",
+    "FWD-7, FWD-2", "none",
+    """
+`BF-u-1` (item E1). 74 of 87 Terraform roots are not in the root map, so the check prints no line for any name they declare. The CTO:
+"Sort the 74 by whether they declare any stored name (a root with no bucket, key, table or rule is mapped as 'nothing to name' in one
+entry), then map those that do, the largest first. Each new entry is one line of the root map." The map is written only by
+`4.0.0_SA_CRO`; your cell gives that seat what it needs to write the entries. You build nothing in `lib/`.
+
+1. Write `""" + D1 + """sort_unmapped_roots.py`. It takes the unmapped roots from the check's own `all` command (run it; do not
+   keep a second list of roots), and for each root reads its names from `opal_naming_scope` (the same enumeration the `all`
+   command counts) and counts them by type. It puts each root in ONE class, by a rule you write down in the script:
+   `nothing-to-name` (the scope gives the root no name at all), `no-stored-name` (it has names, none of them a bucket, a stored-file
+   key, a table or a rule), `to-map` (anything else). The CTO's sentence covers the first and third; the second is named so it is
+   counted and shown, never folded into either: say in your report what its names are, by type.
+2. It prints one line per root (class, root, names by type), a table of class counts, and saves both as
+   `""" + D1 + """UNMAPPED_ROOTS_round6.txt`.
+3. Write, for the registry's lane, `""" + D1 + """MAP_ENTRIES_FOR_RULING_round6.md`: one section per `to-map` and
+   `no-stored-name` root, largest first by name count, headed `### <root>`. Each section gives what a map entry needs -- `system`
+   (a `systems.json` key), `scope` (a scope `scopes.json` knows), `source` (a `systems.json` key) -- and for EACH field either the
+   value the root's own files decide, with the file and line that decide it, or `UNDECIDED` and what was read that does not decide
+   it. Read the existing entries in `""" + MAP + """` and their `evidence` sentences for how a value is decided; read
+   the root's `.tf` files and the Lambda source folders it deploys. A value is never taken from a folder's name alone. List also
+   the names a default would place wrongly (candidate exceptions), each with its evidence. One table at the top lists the
+   `nothing-to-name` roots.
+4. The script's last line: `UNMAPPED-SORTED ok=True roots_total=N mapped=N unmapped=N nothing_to_name=N no_stored_name=N to_map=N
+   sections=N`; `ok=True` when the three classes sum to `unmapped`, `mapped + unmapped == roots_total` as the live `all` command
+   prints them, and `sections` (the `### ` headings in the ruling file) equals `no_stored_name + to_map`.
+""",
+    [("BU1-AC1", "python " + D1 + "sort_unmapped_roots.py", "UNMAPPED-SORTED ok=True", "FAIL as expected (file absent)")],
+    ["every unmapped root is in one class, the count is the live run's, and every root to map has its section."],
+    [], "the last line whole; the class table; the no-stored-name roots and their names by type; the ten largest to-map roots with each field decided or UNDECIDED; the ruling file's path; commits.",
+    "a field filled from a folder's spelling so no UNDECIDED appears (each value names the file and line that decide it); a root dropped so the classes sum (the classes are counted against the live unmapped count); a second list of roots that drifts from the check's (the face forbids it); BLIND: names that live only in AWS -- the repository plane.",
+    DELIV)
+
+# u-2 -- E1: the reader for a nothing-to-name entry (STAGED on the registry's shape)
+cut(2, "nothing-to-name-entry", 4, "staged", "a root-map entry that says a root has nothing to name -- read, counted as mapped, and refused where the root does name something",
+    "FWD-7, FWD-9", "BF-u-3 merged on this slot; the registry's shape for such an entry landed by 4.0.0_SA_CRO; handed by AMENDMENT 1",
+    """
+`BF-u-2` (item E1). The CTO: a root that declares nothing to name "is mapped as 'nothing to name' in one entry". Today
+`opal_naming_rootmap.load_map` refuses any entry without a non-empty `system`, `scope` and `source`, so no such entry can exist.
+
+**THE SHAPE.** `4.0.0_SA_CRO` defines the entry's shape in `""" + MAP + """` (its `_about`) first. The commit and the field are
+named in AMENDMENT 1, written into this order before it is handed to you. If this order reaches you with no AMENDMENT 1, stop and
+report.
+
+**Build**, to that shape:
+1. `lib/opal_naming_rootmap.py`: `load_map` accepts the entry and refuses a malformed one with the root and field named, as it does
+   for every other field.
+2. `lib/opal_naming_rootcheck.py`: the `all` command counts such a root as MAPPED and prints it `NOTHING-TO-NAME <root>` with its
+   name count from the scope; when the scope gives that root one or more names, the root is NOT passed: it prints `STOPPED` with
+   the reason "the map says nothing to name and the root names N" and is counted under `stopped`. `ok` keeps its present meaning.
+3. The DIFFERENCE CONTROL, on a temporary map the tests write: the same entry on a root with no names reads `NOTHING-TO-NAME`; on a
+   root with names it reads `STOPPED`. Extend both tests.
+""",
+    [("BU2-AC1", "python lib/tests/test_opal_naming_rootmap.py", "ROOTMAP-TEST ok=True", "PASS as expected (ran: ROOTMAP-TEST ok=True assertions=30; extended by the cell)"),
+     ("BU2-AC2", "python lib/tests/test_opal_naming_rootcheck.py", "ROOTCHECK-TEST ok=True", "PASS as expected (ran: ROOTCHECK-TEST ok=True cases=194; extended by the cell)"),
+     ("BU2-AC3", ALLCMD, "ALL-ROOTS ok=True", "PASS as expected (ran: ALL-ROOTS ok=True ... hole=0; the control that the estate still runs whole)")],
+    ["the loader reads the entry and refuses a malformed one.", "the difference control: nothing-to-name on an empty root, stopped on a root with names.", "the estate still runs whole with the entries the registry's lane has landed."],
+    ROOTMAP + ROOTCHECK, "the three last lines whole; the NOTHING-TO-NAME and STOPPED lines of the live run; commits.",
+    "an entry that silences a root which does name things (the root is stopped and counted, and the difference control shows it); a malformed entry read as nothing to name (the loader refuses it); BLIND: roots whose names live only in AWS.")
+
+# u-3 -- E2: a ruling row survives a file move
+cut(3, "ruling-survives-move", 4, "pending", "a key ruling survives a file move -- matched on the key, the path a hint, a stale hint printed",
+    "FWD-2", "none",
+    """
+`BF-u-3` (item E2; row `LGIC_BLANKFIX-S6`). A `key_rulings.json` row with `declared_in` matches only when the file that declares
+the key is one of the listed repository paths (`_ruling_of` in `lib/opal_naming_rootcheck.py`). When IRPT_BCKEND moved
+`backfill_covered_account_ids.py` into `export/tools/`, the `firms/` row stopped matching and the line printed as a hole until the
+registry's lane retyped the path. The CTO: "Match on the key itself, with the path as a hint."
+
+**Build** in `lib/opal_naming_rootcheck.py`:
+1. The candidates for an item are the `declared_in` rows whose key equals the item's key. One candidate: it matches, whatever the
+   path. Several: the one whose `declared_in` holds the item's file; else the one whose `declared_in` holds a file of the same base
+   name; else none, and the line says "several key rulings carry this key and no hint names this file", naming the rows. The
+   per-firm rows (`bucket_per`, `bucket_from`) and the (bucket, key) match keep their present order and meaning.
+2. A STALE HINT is a match where the item's file is not in the row's `declared_in`. The line still prints its answer, and adds
+   "the ruling's declared_in names <path>; the key is declared in <file>". The `all` command counts them: one field `stale_hints=N`
+   added at the END of its `ALL-ROOTS` last line (no other field moves), and one `STALE-HINT` line per case before it.
+3. The DIFFERENCE CONTROL in the test, on a registry the test writes to a temporary folder: one row, file moved -> matched with the
+   stale hint; two rows with the same key, file moved, neither hint matching -> no match and the reason; two rows, one hint matching
+   -> that row, no stale hint.
+""",
+    [("BU3-AC1", "python lib/tests/test_opal_naming_rootcheck.py", "ROOTCHECK-TEST ok=True", "PASS as expected (ran: ROOTCHECK-TEST ok=True cases=194; extended by the cell)"),
+     ("BU3-AC2", ALLCMD, "stale_hints=0", "FAIL as expected (ran: the last line carries no stale_hints field)")],
+    ["a ruling matches on its key, and the path decides only between rulings of the same key.", "the estate run counts stale hints; none at the cut, since every declared_in path exists (4.0.0_SA_CRO, msg 106778)."],
+    ROOTCHECK, "both last lines whole; the before-and-after of the all command's last line; every STALE-HINT line; commits.",
+    "a key matched to a ruling written for another file of the same key (several candidates fall back only to a same-base-name hint, else no match with the reason); a moved file silently matched with nothing printed (the stale hint is printed and counted); BLIND: a key whose spelling changes when its file moves.")
+
+# u-4 -- E3: the red test
+cut(4, "red-keyfill-test", 3, "pending", "the key reader's red test -- the real-file case finds its file by what it declares, not by a typed path",
+    "the pipeline's own gate", "none",
+    """
+`BF-u-4` (item E3; row `LGIC_BLANKFIX-S7`). `python lib/tests/test_opal_naming_keyfill.py` prints `KEYFILL-TEST ok=False cases=86`
+on the trunk: the case at line 464 types `investor-reporting/export/backfill_covered_account_ids.py`, and IRPT_BCKEND moved that file
+to `investor-reporting/export/tools/` (commit 8d66fb03da). The case is about the reader, not the path.
+
+**Build** in `lib/tests/test_opal_naming_keyfill.py` only: the real-file case finds its file by what it declares -- the source file
+under `infra/aws/lambda/investor-reporting/export/` whose text holds the key literal the case asserts on (`firms/`) and whose base
+name the case names -- and fails with a clear message if none or more than one file matches. Then look at every OTHER case of this
+test that types a repository path: list each in your report and say whether it would break on a move the same way; repair those in
+the same manner only where the repair keeps the case's assertion unchanged. No reader code changes.
+""",
+    [("BU4-AC1", "python lib/tests/test_opal_naming_keyfill.py", "KEYFILL-TEST ok=True", "FAIL as expected (ran: FAIL: REAL FILE: firms/ ... unreadable: FileNotFoundError; KEYFILL-TEST ok=False cases=86)")],
+    ["the key reader's test passes on the trunk with no typed path to the moved file."],
+    ["lib/tests/test_opal_naming_keyfill.py"], "the last line whole; each case that types a path, and what you did with it; the diff stat; commits.",
+    "an assertion loosened so the case passes (the face keeps every assertion unchanged); the path simply retyped to the new home (the face asks for a lookup by what the file declares); BLIND: tests in other files that type paths.")
+
+# u-5 -- E4: the repeat check over mapped lines only
+D9 = HOME + "/deliverables/0.9.0_WK_LGIC_BLANKFIX~2/"
+cut(5, "repeat-mapped-lines", 2, "pending", "the repeat check compares the mapped roots' lines only -- an unmapped root's growth no longer reads as a difference",
+    "FWD-9", "none",
+    """
+`BF-u-5` (item E4; row `LGIC_BLANKFIX-S8`). `python """ + D9 + """check_all_roots_round5.py` reads `repeat=DIFFERS` on the trunk:
+it compares the whole live output with `""" + D9 + """ALL_ROOTS_round5.txt`, and one line differs --
+`UNMAPPED infra/aws/terraform/nfra-ctlpln-identity names=10` against `names=11`, a name another project added to a root the map does
+not cover. The mapped totals are identical.
+
+**Build** in that script (your slot's own deliverable from round 5):
+1. The repeat compares, root by root, the section of each MAPPED root in the saved file with the same root's section in the live
+   run: its `ROOTCHECK` line, its `COMPLETED`/`STOPPED` line and its name lines. `UNMAPPED` lines are not compared.
+2. A root mapped in the live run and absent from the saved file is listed `ADDED <root>` and not compared; a saved mapped root
+   absent from the live run is a difference. The registry's lane is adding map entries during this round, so both can happen.
+3. The `ALL-ROOTS` last lines are compared field by field over the fields BOTH lines carry; a field only one line carries is
+   listed and is not a difference (cell `BF-u-3` adds one, `stale_hints`).
+4. `repeat=identical` when no compared section or field differs; else `repeat=DIFFERS` and each difference printed whole. The last
+   line keeps its present form and every other check the script makes now.
+""",
+    [("BU5-AC1", "python " + D9 + "check_all_roots_round5.py", "ALL-ROOTS-R5 ok=True", "FAIL as expected (ran: ALL-ROOTS-R5 ok=False ... repeat=DIFFERS)")],
+    ["the repeat holds over the mapped roots while the unmapped ones grow."],
+    [], "the last line whole; every ADDED root and every field only one line carries; what the compare was and is; commits.",
+    "a compare loosened until nothing differs (mapped sections and shared fields are still compared, and a missing saved root is a difference); the saved file rewritten to match the live run (it is not in your grant to change; the script reads it); BLIND: a change inside a mapped root made by a registry edit -- it is a real difference and must print.",
+    DELIV)
+
+# u-6 -- E5: the FWD-5 design (STAGED on the CRO's patterns and the CTO's answer)
+D6 = HOME + "/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/"
+p6 = cut(6, "fwd5-design", 1, "staged", "the design of the check run before anything is written -- from the estate's past patterns, design only",
+    "FWD-5 (or FWD-6: AMENDMENT 1 names which)", "BF-u-1 merged on this slot; 4.0.0_SA_CRO's file of past patterns; 1.0.0_SA_CTO's answer on the outcome; handed by AMENDMENT 1",
+    """
+`BF-u-6` (item E5). The CTO: "FWD-5: run it with nothing written first, now that a clean run exists to protect: the check, run before
+any name is written, refuses a new stored name the canon would print as FIX. Design only in round 6; `4.0.0_SA_CRO` gives past
+patterns for a pre-write refusal in this estate before the cell is cut." The PRD's FWD-5 and FWD-6 read differently from that
+sentence (row `LGIC_BLANKFIX-S9`); AMENDMENT 1 names the outcome this design serves and the path of the patterns file. If this order
+reaches you with no AMENDMENT 1, stop and report.
+
+**Build: a design, no code.** Write `""" + D6 + """FWD5_DESIGN_round6.md` with these sections, each a `## ` heading:
+`Outcome` (the PRD text of the outcome AMENDMENT 1 names, quoted with its line numbers), `Past patterns` (each pattern of the
+CRO's file you use or reject, and why), `Where it runs`, `The decision rule`, `What it refuses and what it lets through` (with a
+deliberately wrong and a deliberately right example from the live run's lines), `The exercise that would prove it`, `What it does
+not cover`. Every repository path it cites must exist. Then write `""" + D6 + """check_fwd5_design.py`: it checks the seven
+headings are present in that order and that every backticked repository path in the file exists, and prints
+`FWD5-DESIGN ok=True headings=7 paths=N missing=0`.
+""",
+    [("BU6-AC1", "python " + D6 + "check_fwd5_design.py", "FWD5-DESIGN ok=True", "FAIL as expected (file absent)")],
+    ["the design has its seven parts and cites only paths that exist."],
+    [], "the last line whole; the design's decision rule in one paragraph; each pattern used or rejected; commits.",
+    "a design that restates the CTO's sentence without reading the estate's patterns (one section answers each pattern); a cited file that does not exist (the check counts missing paths); BLIND: whether the design can be built in one round -- that is the CTO's reading.",
+    DELIV)
+add_judgment(p6, ["BU6-AC1"], "BU6-AC2", "BF-u-6",
+             "`3.0.0_SA_CVO` reads the design against the outcome's ACCEPT: could it be built and exercised as written, and does its exercise hold a negative arm?")
+
+# row S9
+inv = HOME + "/surprise-channel/investigations/INVESTIGATION_v1.md"
+r = {"id": "LGIC_BLANKFIX-S9", "project": "LGIC_BLANKFIX", "fabric": "laptop", "surfaced_by": "2.0.0_SA_COO~G", "surfaced_at": NOW,
+     "one_line": "The round-5 analysis's item E5 is labelled FWD-5 but describes a refusal at the moment a name is written, which is FWD-6's ACCEPT in the PRD.",
+     "class": "OBSERVATION", "hazard_standing": "INERT",
+     "grounding": {"status": "GROUNDED", "evidence": [
+         HOME + "/ledger/ROUND_ANALYSIS.round5.md:39 -- 'FWD-5: run it with nothing written first ... the check, run before any name is written, refuses a new stored name the canon would print as FIX'",
+         HOME + "/prd/LGIC_BLANKFIX_PRD.md:59-64 -- FWD-5: a person who has never run the check follows written instructions on a fresh copy and it finishes, where today it stops until they write a list of names to skip",
+         HOME + "/prd/LGIC_BLANKFIX_PRD.md:66-71 -- FWD-6: whoever creates a name the check cannot place hears about it when they create it",
+         HOME + "/ledger/ROUND_ANALYSIS.round4.md:47 -- FWD-5 (run it with nothing written first) and FWD-6 (the creator hears at creation) named as two outcomes"]},
+     "disposition": "UNDER_INVESTIGATION",
+     "spec_asserts": "PRD v0.2 FWD-5: anyone can run the check from start to finish without writing anything for it first (no skip list). FWD-6: the creator of an unplaceable name hears at creation.",
+     "world_is": "The analysis's E5 joins FWD-5's words ('nothing written first') to FWD-6's mechanism (a refusal before a name is written). Read as written, the design cell would serve FWD-6 under FWD-5's id. Not decided by the issuer: asked of 1.0.0_SA_CTO (msg sent at the cut). BF-u-6 is cut STAGED and its AMENDMENT 1 names the outcome."}
+with open(inv, "a", encoding="utf-8", newline="\n") as fh:
+    fh.write("\n## LGIC_BLANKFIX-S9 -- item E5 is labelled FWD-5 and describes FWD-6\n\n```json\n" + json.dumps(r, indent=2) + "\n```\n")
+
+open(HOME + "/decompositions/LGIC_BLANKFIX_DECOMP.round6.md", "w", encoding="utf-8", newline="\n").write("""# LGIC_BLANKFIX decomposition -- ROUND 6, breadth and the round-5 reds: six cells from the CTO's list E1 to E5 (issuer 2.0.0_SA_COO~G; cut 2026-10-08)
+
+**Status: CUT for one issuance** (the issuance commit carries the `fanout:` line). FROZEN at the cut.
+
+**Cut on:** PRD v0.2 @47ef4c98cc, ADMITTED; `ledger/ROUND_ANALYSIS.round5.md` @34ba4c1c90 (`1.0.0_SA_CTO`, msg 106949), on
+`3.0.0_SA_CVO`'s slug (msg 106948): FWD-9 REALIZED; FWD-2 NOT_REALIZED, clean over the 13 mapped roots, 74 of 87 unmapped; the list
+E1 to E5; no PRD addendum. Earlier rounds' decompositions are frozen and unchanged.
+
+**Round 5 at this cut (measured):** 9 of 9 orders complete, 9 of 9 proof instances VALID. `census --all-roots`:
+`roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 ... hole=0`. `pytest lib/tests`: 194 passed. Two reds: the
+key reader's test (S7) and the repeat compare (S8). 74 unmapped roots hold 1,522 names; 24 print names=0; the largest
+`inf-pipeline` (364), `shared-infra` (144), `smartx-pipeline` (117).
+
+## Rule 24 record
+
+Domain: the five items of the analysis's ENRICHMENT LIST, by subtraction from that printed list. Every item has a cell; E1 has two,
+because its two acts have different writers and one waits on the registry.
+
+| item | cell | state at the cut |
+|---|---|---|
+| E1 map the next roots: the sort and the entries for the registry's lane | `BF-u-1` | cut, spawns now |
+| E1 map the next roots: the reader for a nothing-to-name entry | `BF-u-2` | STAGED on `4.0.0_SA_CRO`'s shape and `BF-u-3` |
+| E2 a ruling row survives a file move | `BF-u-3` | cut, spawns now |
+| E3 the red test | `BF-u-4` | cut, spawns now |
+| E4 the repeat check over mapped lines | `BF-u-5` | cut, spawns now |
+| E5 the FWD-5 design | `BF-u-6` | STAGED on `4.0.0_SA_CRO`'s patterns, `1.0.0_SA_CTO`'s answer on the outcome (row S9), and `BF-u-1` |
+
+The map entries themselves are written by `4.0.0_SA_CRO` (C-REGISTRY), not by a cell: `BF-u-1` hands that seat the sort and the
+drafts at its drain. W2-S2 stays OPEN and is not cut (the analysis, line 41).
+
+Same grain; one intent each. Status vocabulary `NOT_EVALUATED`, `PASS`, `FAIL`, `REFUSED`; every cell `NOT_EVALUATED` at the cut.
+
+**One schema this cut authors: the class of an unmapped root** (`BF-u-1`). Domain: every root the `all` command prints `UNMAPPED`.
+Values `nothing-to-name` (the scope gives it no name), `no-stored-name` (names, none a bucket, stored-file key, table or rule),
+`to-map` (the remainder), tested in that order so they are disjoint and exhaustive. Same grain (one root). One intent (what the
+registry's lane writes for it). State: no value maps a root by itself; each needs the registry's entry. `no-stored-name` exists
+because the CTO's sentence names two cases and the census holds a third; it is counted and shown, never folded.
+
+## The cells
+
+| cell | what | serves | placement | risk | status |
+|---|---|---|---|---|---|
+| `BF-u-1` | the 74 unmapped roots sorted; a drafted entry per root to map, each field decided by a file and line or UNDECIDED | FWD-7, FWD-2 | laptop | LOCAL | NOT_EVALUATED |
+| `BF-u-2` | the loader reads a nothing-to-name entry; the run counts it mapped, and stops a root that names something | FWD-7, FWD-9 | laptop | LOCAL | NOT_EVALUATED, STAGED |
+| `BF-u-3` | a key ruling matches on its key, the path a hint; stale hints printed and counted | FWD-2 | laptop | LOCAL | NOT_EVALUATED |
+| `BF-u-4` | the key reader's test finds its real file by what it declares | the pipeline's gate | laptop | LOCAL | NOT_EVALUATED |
+| `BF-u-5` | the repeat check compares mapped roots' sections and shared fields only | FWD-9 | laptop | LOCAL | NOT_EVALUATED |
+| `BF-u-6` | the design of the check run before anything is written, from past patterns (judgment, `3.0.0_SA_CVO`) | FWD-5 or FWD-6 | laptop | LOCAL | NOT_EVALUATED, STAGED |
+
+## Dependency edges
+
+- `BF-u-3 -> BF-u-2`: both write the root check; one after the other on slot `~4`.
+- `BF-u-3 -> BF-u-5`: the repeat compare must tolerate the field `BF-u-3` adds (its face says so; no wait).
+- `BF-u-1 -> BF-u-6`: same slot.
+- `BF-u-1 -> (4.0.0_SA_CRO writes the entries)`: outside the cells; the issuer's real run at the close reads whatever has landed.
+
+`fanout: 4 of 4 chains, cap 8`: slot `~1` takes `BF-u-1`, then `BF-u-6`; slot `~2` takes `BF-u-5`; slot `~3` takes `BF-u-4`; slot
+`~4` takes `BF-u-3`, then `BF-u-2`.
+
+## Write sets
+
+- **BF-u-1**, **BF-u-6**, **BF-u-5:** the slot's deliverables folder only (`BF-u-5` edits its slot's round-5 script there).
+- **BF-u-3**, then **BF-u-2:** `lib/opal_naming_rootcheck.py` and its test; `BF-u-2` also `lib/opal_naming_rootmap.py` and its test.
+- **BF-u-4:** `lib/tests/test_opal_naming_keyfill.py`.
+- Disjoint across live cells. No cell writes `infra/logic/**`.
+
+## Battery
+
+`comp-schedule`, `comp-iam`: `DECLARED-NOT-APPLICABLE` -- no cell creates a schedule or grants anything, and no cell calls AWS.
+`comp-adversary`: `RUN` per cell, on each order's record face.
+
+## The issuer's acts in and after the drain
+
+1. **To `4.0.0_SA_CRO`, at `BF-u-1`'s drain:** the sort and the drafted entries, as paths. Each commit of entries that seat names
+   is read at the close.
+2. **AMENDMENT 1 on `BF-u-2`** when the shape lands; **AMENDMENT 1 on `BF-u-6`** when the patterns file and the CTO's answer land.
+3. **Hygiene at each merge:** `python -m pytest lib/tests -q`, every `lib/tests/test_opal_naming_*.py` script, `.tools/commit-gate.sh`
+   on the touched files.
+4. **The real run** at the close, by this seat: `census --all-roots` over whatever the map then covers, committed under
+   `deliverables/2.0.0_SA_COO~G/`; holes on newly mapped roots are the next round's data, reported whole by class.
+""")
+
+pj = HOME + "/project.json"
+j = json.load(open(pj, encoding="utf-8"))
+if not any(d.get("round") == 6 for d in j["decompositions"]):
+    j["decompositions"].append({"path": HOME + "/decompositions/LGIC_BLANKFIX_DECOMP.round6.md", "round": 6})
+    j["decomposition_lineage"].append({"round": 6, "date": "2026-10-08", "author": "2.0.0_SA_COO~G"})
+open(pj, "w", encoding="utf-8", newline="\n").write(json.dumps(j, indent=2) + "\n")
+
+open(os.path.join(here, "msg_r6.txt"), "w", encoding="utf-8", newline="\n").write("""to(LGIC_BLANKFIX round 6, 2.0.0_SA_COO~G): ONE issuance -- six cells from the CTO's E1 to E5: the 74 unmapped roots sorted and drafted for the registry's lane, a nothing-to-name entry, rulings that survive a file move, the red test, the repeat check, the FWD-5 design
+
+fanout: 4 of 4 chains, cap 8, reason: the decomposition's chains -- slot ~1 BF-u-1 then BF-u-6; slot ~2 BF-u-5; slot ~3 BF-u-4; slot ~4 BF-u-3 then BF-u-2
+
+Cut on ledger/ROUND_ANALYSIS.round5.md @34ba4c1c90 (1.0.0_SA_CTO, msg 106949): FWD-9 REALIZED; FWD-2 clean over 13 mapped roots, 74 of 87 unmapped; list E1 to E5; no PRD addendum.
+
+Pending now: BF-u-1 (E1 sort and drafts), BF-u-3 (E2), BF-u-4 (E3), BF-u-5 (E4).
+Staged: BF-u-2 (E1 reader) on 4.0.0_SA_CRO's shape for a nothing-to-name entry (asked, msg sent) and BF-u-3; BF-u-6 (E5 design) on 4.0.0_SA_CRO's patterns file (asked) and 1.0.0_SA_CTO's answer on whether E5 serves FWD-5 or FWD-6 (asked; row S9).
+
+Base dry-runs, each run by the issuer at the cut and recorded on its order's record face.
+
+Decomposition: decompositions/LGIC_BLANKFIX_DECOMP.round6.md; project.json lists it. Row LGIC_BLANKFIX-S9.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+""")
+print("round 6 cut")

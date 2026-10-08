@@ -1,0 +1,102 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_BLANKFIX.TO-BF-u-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round6.md",
+  "vintage_commit": "297921e56a",
+  "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-u-3.ruling-survives-move.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-u-3.ruling-survives-move.md",
+  "group": "OTHER",
+  "vintage_commit": "297921e56a"
+ },
+ "assignee": "0.9.0_WK_LGIC_BLANKFIX~4",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/opal_naming_rootcheck.py",
+   "kind": "script",
+   "commit_or_etag": "30304f9748",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A repository library module; no deploy target."
+  },
+  {
+   "path_or_key": "lib/tests/test_opal_naming_rootcheck.py",
+   "kind": "test",
+   "commit_or_etag": "30304f9748",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A plain-script test; no deploy target."
+  },
+  {
+   "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "7c123266fa",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "One row appended (W4-S1); no existing row edited."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "BU3-AC1",
+   "criterion_verbatim": "BU3-AC1 -- a ruling matches on its key, and the path decides only between rulings of the same key.",
+   "method": "command",
+   "invocation": "python lib/tests/test_opal_naming_rootcheck.py",
+   "output_evidence": "ROOTCHECK-TEST ok=True cases=205\nrc=0",
+   "denominator": "205 of 205 cases held (202 plus 3 AMENDMENT 2 controls: same key in two buckets with the item's bucket known -> only its bucket's row; the other bucket's hint file does not make its row a candidate; the other bucket's row alone -> no match). pytest lib/tests: 194 passed; every lib/tests/test_opal_naming_*.py ok=True (10 of 10).",
+   "status": "PASS",
+   "expect": "ROOTCHECK-TEST ok=True"
+  },
+  {
+   "criterion_id": "BU3-AC2",
+   "criterion_verbatim": "BU3-AC2 -- the estate run counts stale hints and prints the count at the end of its last line (AMENDMENT 1: the count is reported, not required to be 0).",
+   "method": "command",
+   "invocation": "python lib/opal_naming_rootcheck.py all --map infra/logic/registry/root_map.json",
+   "output_evidence": "ALL-ROOTS ok=True roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 right=124 fix=248 not_asked=32 pattern=8 carded=0 refused=0 hole=0 carded_class_holes=0 source_bucket_holes=0 event_rule_holes=0 unknown_word_holes=0 other_holes=0 stale_hints=0\nrc=0",
+   "denominator": "stale_hints=0 of 412 items; 0 STALE-HINT lines, so none to check by hand. The AMENDMENT 1 count of 1 (bd-49f-freshness-probe bronze/, a bd-bucket read matched to the opal-data-inf row) was the mis-pairing AMENDMENT 2 corrects. Every other field equals the base line.",
+   "status": "PASS",
+   "expect": "stale_hints=[0-9]+"
+  },
+  {
+   "criterion_id": "BU3-AC3",
+   "criterion_verbatim": "BU3-AC3 -- no line of a mapped root changes its answer from the round-5 saved runs (AMENDMENT 2).",
+   "method": "command",
+   "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~2/check_all_roots_round5.py",
+   "output_evidence": "ONE-LINE-FIELD stale_hints (live only)\nALL-ROOTS-R5 ok=True mapped=13 unmapped=74 items=412 hole=0 stopped=0 repeat=identical\nrc=0",
+   "denominator": "13 of 13 mapped roots, 412 of 412 items, repeat=identical.",
+   "status": "PASS",
+   "expect": "repeat=identical"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the test's difference control on a registry written to a temporary folder: one row file moved, two rows neither hint matching, two rows one hint matching",
+   "expected": "stale / no match with reason / row without stale hint",
+   "observed": "all three held in ROOTCHECK-TEST ok=True cases=202",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "python lib/tests/test_opal_naming_rootcheck.py run twice",
+   "observed": "ROOTCHECK-TEST ok=True cases=202 both times",
+   "status": "STABLE"
+  }
+ },
+ "surprises": [
+  "LGIC_BLANKFIX-W4-S2: the stale hint of AMENDMENT 1 was a mis-pairing (item 1 ignored the bucket); resolved by AMENDMENT 2 and the bucket-agreement filter, stale_hints=0"
+ ],
+ "session_log": "0.9.0_WK_LGIC_BLANKFIX~4 on LGIC_BLANKFIX.TO-BF-u-3, worktree C:/tmp/wk-blankfix-4. Read _ruling_of, decide, run_items, all_roots. Measured the base all-run into .scratch (uncommitted). Built the key-first match (_where_file, _stale_note, STALE_MARK), printed the stale note in run_items so the FIX target the collision check groups on stays clean, counted it in all_roots. Changed the base test that asserted the old path-only match. The body of the all-run is unchanged except one STALE-HINT line. Session 2: AMENDMENT 1 read; both invocations re-run; BU3-AC2 graded against stale_hints=[0-9]+ (PASS), stale count 1 and its STALE-HINT line recorded. Session 2 (AMENDMENT 2): the candidate filter reads bucket_of and drops a row of another bucket; three controls added; merged CLOUD; stale_hints=0, repeat=identical.",
+ "compiler_tools": [
+  {
+   "tool": "lib/tests/test_opal_naming_rootcheck.py",
+   "invocation": "python lib/tests/test_opal_naming_rootcheck.py",
+   "result": "ROOTCHECK-TEST ok=True cases=202"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "infra/logic/ and every file outside the order's paths",
+   "reason": "The order grants no edit there; stale_hints=1 is reported, not cured by a registry edit"
+  }
+ ]
+}

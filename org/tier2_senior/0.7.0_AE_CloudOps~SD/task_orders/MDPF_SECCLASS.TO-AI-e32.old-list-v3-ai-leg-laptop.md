@@ -4,15 +4,15 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~SD</issued_to>
     <date>2026-10-07</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDPF_SECCLASS</project_code>
     <round>11</round>
   </metadata>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
-<decomp_doc>org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R11.md</decomp_doc> (round 11), "Issuer acts": the release of cells `SC-e-32`/`SC-e-50`, old-list set V3; its DIRECT leg landed on dell1 (ledger secclass-e32-old-list-v3-write-m1-20261007 CLOSED @dd4fc38213, 5182/5182).
-<owned_cells>SC-e-32, SC-e-50</owned_cells>
+<decomp_doc>org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md</decomp_doc> (declares SC-e-32 at :67; released in round 11, DECOMP_R11.md "Issuer acts"): the release of cells `SC-e-32`/`SC-e-50`, old-list set V3; its DIRECT leg landed on dell1 (ledger secclass-e32-old-list-v3-write-m1-20261007 CLOSED @dd4fc38213, 5182/5182).
+<owned_cells>SC-e-32</owned_cells>
 </decomp_ref>
 
   <objective>
@@ -167,3 +167,36 @@ No gate limb grades an amendment to an existing order.
 This order carried no <round> tag, so surprise-row-gate.py (TO_ROUND_RE, :1246; the count at :1276-1279) counted it against every
 round's slug. It belongs to round 11 (decomp_ref DECOMP_R11.md), so <round>11</round> is added to its metadata. No other field changes.
 Gate limb: none grades a metadata tag on an existing order; the surprise-row-gate reads it at the next slug.
+
+### AMENDMENT 8 -- re-plan ONLY the 14 transport keys, through a subset set file (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~17:4xZ; answers ~SD msg 1014)
+
+The 1326Z window closed EXACT at 2,291: 1,512 landed + 765 model-stated refused + 14 transport (KIMI_TIMEOUT). The runner plans on
+absence, so a plain resume plans 779 keys (765 already answered + the 14). Do NOT re-send the 765.
+1. From the preserved logs, take the 14 keys whose UNRESOLVED reason is a transport failure (the same set `ai_leg_verify.py
+   --unresolved-log` counts as non-final). Write `E32_TRANSPORT14_SET_20261008.tsv` beside the RUN3 snapshots: the header plus the rows of
+   `OLD_LIST_RECLASSIFY_SET_20261007.tsv` whose `shared_key` is one of the 14, byte-for-byte, no other rows. It is a subset of the signed
+   set, so the signed halves still cover it.
+2. Dry run with `--set <that file>`: it must read ai_keys=14 and direct=0. Any other count: stop and report, no write.
+3. Write with `--set <that file> --workers 2 --chunk 25`, a fresh `E32_AI_SNAPSHOT_20261008.RUN4_<HHMM>Z.json`, same half and watchdog.
+4. Close: 2,291 = landed + model-stated refused + transport, with the transport count from this window. A key that times out again
+   stays transport; report it, do not loop.
+The rollback input stays ~SC's preserved run-1 copy over the full set (amendment 4). No gate limb grades an amendment to an existing order.
+
+### AMENDMENT 9 -- the last transport key, and the set name (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~18:0xZ; answers ~SD msg 1022)
+
+RUN4 closed EXACT: 1,519 landed + 771 model-stated refused + 1 transport (NAME::BDPR3C6C, two timeouts) = 2,291.
+1. SET NAME CORRECTED: amendment 8 step 1 named `OLD_LIST_RECLASSIFY_SET_20261007.tsv`; the order's set is
+   `OLD_LIST_RECLASSIFY_SET_V3_20261007.tsv` (line 35). ~SD's subset cut from the V3 set is the correct one and stands.
+2. ONE final attempt on NAME::BDPR3C6C: a 1-key subset of the V3 set (that key's rows only; dry run ai_keys=1), `--workers 1`, a fresh
+   `RUN5_<HHMM>Z` snapshot. No further attempt after it, whatever it returns.
+3. AC1 expectation, amended: `AI-LEG-VERIFY act=e32 ok=True`, OR `ok=False` whose ONLY problem is `refused_transport=1` on
+   NAME::BDPR3C6C after step 2, with planned=2291 EXACT, problems=0 and multi_asset=0. That key then stays absent and is served by the
+   fallback layers; it is recorded as transport-terminal in the close.
+Then flip the order. No gate limb grades an amendment to an existing order.
+
+### AMENDMENT 10 -- the face names the decomp that DECLARES the cell (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~18:2xZ; answers ~SD msg 1038, row D1-S10)
+
+<decomp_ref> named DECOMP_R11 (the round that released the cells), whose id space is SC-e-65/66, so no proof-of-spec instance could join.
+Shape (i) of row D1-S10: <decomp_doc> now DECOMP_R8.md, which declares SC-e-32, and <owned_cells> narrows to SC-e-32, the only cell
+AC1 grades. SC-e-50 (DECOMP_R9, the census and set refresh) is not owned by this order; its output is the V3 set this order consumed.
+<round>11</round> stays. Gate limb: to-pipeline-gate layer 1 grades the proof-of-spec instance at the flip; none grades this amendment.

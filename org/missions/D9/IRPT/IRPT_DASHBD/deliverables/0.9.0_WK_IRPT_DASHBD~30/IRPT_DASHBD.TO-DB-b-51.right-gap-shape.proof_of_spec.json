@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-51",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "316736121d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "316736121d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-51.right-gap-shape.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~30",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~30/RIGHT_GAP_E2.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~30/right_gap_e2.py",
+      "kind": "script",
+      "commit_or_etag": "b67b7b9376",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Run against S3 (reads only; 566 served partitions); re-run from the local cache gave a byte-identical RIGHT_GAP_E2.json (sha256 -c OK). 0 vendor calls.",
+      "artifact_covered_by": [
+        "DB29-2-AC1",
+        "DB29-2-AC2",
+        "DB29-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~30/RIGHT_GAP_E2.json",
+      "kind": "config_data",
+      "commit_or_etag": "b67b7b9376",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "population 1528, control 2220, 5 drivers + 1 undefined, top driver carried_days.",
+      "artifact_covered_by": [
+        "DB29-2-AC1",
+        "DB29-2-AC2",
+        "DB29-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~30/RIGHT_GAP_E2.md",
+      "kind": "doc",
+      "commit_or_etag": "b67b7b9376",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts and statistics only; no account number, name or balance.",
+      "artifact_covered_by": [
+        "DB29-2-AC1",
+        "DB29-2-AC2",
+        "DB29-2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB29-2-AC1",
+      "criterion_verbatim": "DB29-2-AC1 -- the population is exactly the E2 set; the gap's median, p10 and p90 equal the check's recomputation; the length correlation is printed. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r29/p29_round29.py\" . DB29-2-AC1",
+      "output_evidence": "OK: 1528 misses outside S34; gap pp median 0.567 p10 0.374 p90 0.764; corr with right-half days -0.145\nDB29-2-AC1 PASS (rc 0)",
+      "denominator": "1,528 of 1,528 E2 accounts in the population (set equality with the record's right.tied false and recompose.within true); 3 of 3 gap statistics within 0.01",
+      "status": "PASS",
+      "expect": "DB29-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB29-2-AC2",
+      "criterion_verbatim": "DB29-2-AC2 -- at least three Opal components carry a numeric correlation; `top_driver` is the one with the largest absolute correlation. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r29/p29_round29.py\" . DB29-2-AC2",
+      "output_evidence": "OK: top driver carried_days (corr -0.144) of ['external_flow', 'income_received', 'market_value_eod', 'day_quality', 'carried_days']\nDB29-2-AC2 PASS (rc 0)",
+      "denominator": "5 of 6 components carry a numeric corr over 1,528 accounts each (fee_amount constant zero, listed under drivers_undefined, row W30-S1); needs >= 3",
+      "status": "PASS",
+      "expect": "DB29-2-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB29-2-AC3",
+      "criterion_verbatim": "DB29-2-AC3 -- the control runs over exactly the 2,220 left-half ties with the top driver's statistic; `signature_absent` follows the stated rule. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r29/p29_round29.py\" . DB29-2-AC3",
+      "output_evidence": "OK: control over 2220 left-half ties: carried_days corr -0.042 vs -0.144; signature_absent True (printed, not graded)\nDB29-2-AC3 PASS (rc 0)",
+      "denominator": "2,220 of 2,220 left-half ties in the control; 1 of 1 top-driver statistic",
+      "status": "PASS",
+      "expect": "DB29-2-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE",
+      "reason": "The order names no mutant control; base FAIL is the issuer's dry-run."
+    },
+    "determinism": {
+      "method": "Re-ran right_gap_e2.py from the local S3 read cache and sha256-checked RIGHT_GAP_E2.json",
+      "observed": "byte-identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "causal reading of the gap and of carried_days",
+      "reason": "The order asks for the shape and a correlation screen from Opal's side only; corr is not cause, and the top |corr| is small (0.144)."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W30-S1: fee_amount is zero on every served day of the E2 right halves; its corr is undefined and it is listed under drivers_undefined",
+    "IRPT_DASHBD-W30-S2: round 18's read_gold fixes its column list, so the further components were read by a sibling reader in right_gap_e2.py"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "right_gap_e2.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~30/right_gap_e2.py . --cache .scratch/gold.pkl",
+      "result": "OK: population 1528 control 2220; gap median 0.567 p10 0.374 p90 0.764; top carried_days -0.144; control -0.042 absent True (b67b7b9376)"
+    }
+  ]
+}

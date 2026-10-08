@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-t6",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t6.repair-act-and-missing-mark.md",
+    "group": "OTHER",
+    "vintage_commit": "f0da37597a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "f0da37597a",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-t6.repair-act-and-missing-mark.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_HEALGAP~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/repair.py",
+      "kind": "script",
+      "commit_or_etag": "b176a7c4fd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: offline/dry-run only; --execute and the deploy are the issuer's",
+      "artifact_covered_by": [
+        "HG2-t6-AC1",
+        "HG2-t6-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/mark_missing.py",
+      "kind": "script",
+      "commit_or_etag": "b176a7c4fd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: offline/dry-run only; --execute and the deploy are the issuer's",
+      "artifact_covered_by": [
+        "HG2-t6-AC1",
+        "HG2-t6-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/test_healgap_repair.py",
+      "kind": "test",
+      "commit_or_etag": "b176a7c4fd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest file, not deployed",
+      "artifact_covered_by": [
+        "HG2-t6-AC1",
+        "HG2-t6-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG2-t6-AC1",
+      "criterion_verbatim": "the five named tests in `test_healgap_repair.py` pass: manifest before fetch, past date refused with reason, exactly the missing feeds named, mark payload, no feed key written.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R2_CHECKS/hg_t6_tests.py",
+      "output_evidence": "test_healgap_repair.py::test_manifest_printed_before_any_fetch PASSED; ::test_dry_run_never_invokes PASSED; ::test_repair_refuses_a_past_date_with_reason PASSED; ::test_repair_names_exactly_the_missing_feeds PASSED; ::test_missing_mark_payload_names_feed_and_reason PASSED; ::test_missing_mark_never_writes_a_feed_key PASSED; 6 passed in 0.46s; REPAIR-OK (rc=0). Base per the order: REPAIR-BAD no file.",
+      "denominator": "5 of 5 required tests passed by name (6 of 6 collected in the file)",
+      "status": "PASS",
+      "expect": "REPAIR-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "HG2-t6-AC2",
+      "criterion_verbatim": "dry-run against the real bucket: a past date is REFUSED, today gives a MANIFEST or NOTHING-TO-REPAIR, and the mark dry-run names exactly the eleven days.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R2_CHECKS/hg_t6_dryrun.py",
+      "output_evidence": "[past] rc=2 REFUSED date=2026-09-01 reason=the source serves current state only; a past date would land today's data under 2026-09-01; [today 2026-10-08] rc=0 NOTHING-TO-REPAIR date=2026-10-08; [mark] rc=0 11 WOULD-MARK lines 2026-08-31..2026-09-10 feed=rebalancer_model_detail, no WROTE; DRYRUN-OK (rc=0, run twice, same result). Read-only s3:ListBucket only; --execute never passed.",
+      "denominator": "3 of 3 dry-run legs held; 11 of 11 days named",
+      "status": "PASS",
+      "expect": "DRYRUN-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy (.scratch/mut, since deleted) with repair.py's past-date refusal disabled and mark_missing._put_mark's feed-prefix refusal disabled",
+      "expected": "test_repair_refuses_a_past_date_with_reason and test_missing_mark_never_writes_a_feed_key FAIL; the other four still pass",
+      "observed": "2 failed, 4 passed: FAILED test_repair_refuses_a_past_date_with_reason (assert 0 == 2), FAILED test_missing_mark_never_writes_a_feed_key (DID NOT RAISE RuntimeError)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "hg_t6_dryrun.py run twice, hg_t6_tests.py run twice (before and after the naming-gate edit replacing the literal runner name with lf.PRODUCER)",
+      "observed": "REPAIR-OK on both; DRYRUN-OK on both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "--execute path against AWS (Lambda invoke, S3 mark write), deploy",
+      "reason": "order BOUNDS: no AWS write, no Lambda invoke; the issuer's drain act. The invoke and mark write are exercised against in-memory fakes in the tests only"
+    },
+    {
+      "item": "lambda_function.py",
+      "reason": "HG-t-3's write set; imported for constants and _land only, not edited"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.9.0_WK_MDPF_HEALGAP~5/MDPF_HEALGAP.TO-HG-t6.repair-act-and-missing-mark.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <the 3 files>",
+      "result": "pre-commit gate clean for 3 of 3 file(s), ruff all checks passed"
+    }
+  ]
+}
