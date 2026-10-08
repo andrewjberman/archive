@@ -1,0 +1,93 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_BLANKFIX.TO-BF-s-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round5.md",
+  "vintage_commit": "b59bf45411",
+  "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-s-2.source-owned-bucket.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "47ef4c98cc"
+ },
+ "assignee": "0.9.0_WK_LGIC_BLANKFIX~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/opal_naming_keyfill.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A repository library module with no deploy target; nothing runs it outside the command line."
+  },
+  {
+   "path_or_key": "lib/tests/test_opal_naming_keyfill.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A plain-script test; no deploy target."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "BS2-AC1",
+   "criterion_verbatim": "BS2-AC1 -- the registry's mark is what completes a source-owned bucket's name.",
+   "method": "command",
+   "invocation": "python lib/tests/test_opal_naming_keyfill.py",
+   "output_evidence": "KEYFILL-TEST ok=True cases=86\nrc=0",
+   "denominator": "86 of 86 cases held (64 before this build; 22 added, each reader rule with its DIFFERENCE CONTROL: a dict field read with a bucket vs read with none vs read with two buckets; the bucket of the key's own dict or call vs two buckets in it; a parameter whose call sites all name one bucket, two buckets, a site passing args.bucket, no call site; a key constant used where no bucket is named; a function called for the per-firm bucket vs not asked vs not called, and the row matched through it; and the eight real keys of the amendment read from their real files)",
+   "status": "PASS",
+   "expect": "KEYFILL-TEST ok=True"
+  },
+  {
+   "criterion_id": "BS2-AC2",
+   "criterion_verbatim": "BS2-AC2 -- over every mapped root no hole of this class remains.",
+   "method": "command",
+   "invocation": "python lib/opal_naming_rootcheck.py all --map infra/logic/registry/root_map.json",
+   "output_evidence": "ALL-ROOTS ok=True roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 right=124 fix=234 not_asked=26 pattern=8 carded=0 refused=0 hole=20 carded_class_holes=2 source_bucket_holes=3 event_rule_holes=0 unknown_word_holes=3 other_holes=12\nrc=0",
+   "denominator": "3 of 412 items are holes of the source_bucket class (the S3_BUCKET opal-data-ycharts line in investor-reporting/core s3.tf:20, investor-reporting/export handler.py:62, investor-reporting/intake poller.py:62), 13 of 13 mapped roots completed, 0 stopped; the same 3 before this build",
+   "status": "FAIL",
+   "status_reason": "source_bucket_holes=3, expected 0. AMENDMENT 1 of the order says this count is closed by BF-s-4's reader (the registry answers a source-named bucket with a row in name_rulings.json), not by this cell, so the criterion can still fail here and that is a correct outcome. This build did not move it: 3 before, 3 after.",
+   "expect": "source_bucket_holes=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The same keys with the reader's evidence removed: the test's DIFFERENCE CONTROL cases (a field read with no bucket, two buckets in the key's own dict, two call sites naming different buckets, the function not asked for or not called).",
+   "expected": "each reads the other answer: the dict's own bucket, no bucket, no bucket, no run-time claim",
+   "observed": "KEYFILL-TEST ok=True cases=86 (every DIFFERENCE CONTROL case printed OK:)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Both criterion invocations and the per-root count were run twice (once while building, once at the final read) and the last lines compared.",
+   "observed": "KEYFILL-TEST ok=True cases=86; ALL-ROOTS ok=True roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 right=124 fix=234 not_asked=26 pattern=8 carded=0 refused=0 hole=20 carded_class_holes=2 source_bucket_holes=3 event_rule_holes=0 unknown_word_holes=3 other_holes=12 -- identical both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the count of HOLE lines whose text says the bucket was not read, per root",
+   "reason": "The all-roots command prints only the 'other' holes by line, so the count was taken by running check_root over each of the 13 mapped roots and counting HOLE lines containing 'the bucket was not read'. Before: investor-reporting/core 1, export 1, holdings 2, ops 1, performance 1, opal-assets 1 (7 in all; the other 7 roots 0). After: core 1 (quarantine/), export 1 (firms/); the other 11 roots 0 (2 in all). The all-roots totals moved only as: carded_class_holes 8 to 2, hole 26 to 20, fix 228 to 234, every other count unchanged. The meta/templates/ hole (opal-assets) carried no such text before; it was a wrong read (row LGIC_BLANKFIX-W3-S6) and is also closed."
+  }
+ ],
+ "surprises": [
+  "LGIC_BLANKFIX-W3-S6",
+  "LGIC_BLANKFIX-W3-S7",
+  "LGIC_BLANKFIX-W3-S8"
+ ],
+ "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "lib/opal_naming_rootcheck.py",
+   "invocation": "python lib/opal_naming_rootcheck.py all --map infra/logic/registry/root_map.json",
+   "result": "ALL-ROOTS ok=True roots_total=87 mapped=13 unmapped=74 completed=13 stopped=0 items=412 right=124 fix=234 not_asked=26 pattern=8 carded=0 refused=0 hole=20 carded_class_holes=2 source_bucket_holes=3 event_rule_holes=0 unknown_word_holes=3 other_holes=12"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> BS2-AC1,BS2-AC2",
+   "result": "run before the commit; exit code is the verdict; the order stays pending because BS2-AC2 is FAIL"
+  }
+ ]
+}

@@ -96,3 +96,12 @@ code hash alone.
     each of the three others = its 87065e4565 pin sha256 (f8e46334..., a7586e52..., 92b64d97...).
     Any other value is a STOP: upload nothing. Paste the five lines into the ledger.
 Everything else in the order stands.
+
+### AMENDMENT (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~01:5xZ) -- seat-gate condition, per 1.0.0_SA_CTO~DELL1 ADDENDUM 1 @0d520d9d70 (row S68)
+
+Before ANY write:
+- Run the deploy tool's --dry-seat-gates (or an equivalent read-only gate pass).
+- Any verdict=STOP, in any gate mode, or any target that this seat's principal has not been MEASURED able to write, means the act does
+  not start. Report the action and resource the same hour.
+- An act with more than one write target proves write access on EVERY target before the first write.
+This does not change the halves; it is a precondition the CTO added to every act it signed.

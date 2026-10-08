@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e70",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e6f1fdfc1fcd7773a9cd11b2864f558b7cba09b5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R12.md",
+    "vintage_commit": "e6f1fdfc1fcd7773a9cd11b2864f558b7cba09b5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e70.unplaced-key-census.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~60",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/unplaced_key_census.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census script; reads the three FWD15_AI_PLAN files, no AWS call, no table write.",
+      "artifact_covered_by": [
+        "SC12-e70-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/UNPLACED_KEY_CENSUS_20261008.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census output: 99 entries, 3 firms, 13 (firm,pattern) groups, signed USD 77,296,036.56.",
+      "artifact_covered_by": [
+        "SC12-e70-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/UNPLACED_KEY_PROPOSAL_20261008.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Proposal only: manual-entry route 91.67% of USD, existing contract form 7.76%, not a key-form question 0.57%.",
+      "artifact_covered_by": [
+        "SC12-e70-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC12-e70-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/unplaced_key_census.py -- expect: UNPLACED-CENSUS ok=True total=99",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/unplaced_key_census.py",
+      "expect": "UNPLACED-CENSUS ok=True total=99",
+      "output_evidence": "UNPLACED-CENSUS ok=True total=99 firms=3 patterns=13 usd=77296036.56 (rc=0)",
+      "denominator": "99 of 99 UNPLACED-KEY entries in exactly one group (49financial 3, cottonwood 87, inflection 9; 0 duplicate firm+key; 0 in 'other')",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 run twice in this worktree",
+      "observed": "identical output line both runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Copied the script and the three plan files to .scratch/mut and removed one inflection UNPLACED-KEY entry, then ran the copy.",
+      "expected": "ok=False total=98",
+      "observed": "UNPLACED-CENSUS ok=False total=98 firms=3 patterns=13 usd=77218008.59 (rc=1); the real script then reads ok=True total=99",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write of a key, row, contract change or code beyond the census script.",
+      "reason": "BOUNDS: read-only cell; the proposal is a proposal."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <paths>",
+      "result": "see report (LOCAL on wk-MDPF_SECCLASS-60)"
+    }
+  ]
+}

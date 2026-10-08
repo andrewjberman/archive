@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e68",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e6f1fdfc1f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R12.md",
+    "vintage_commit": "e6f1fdfc1f",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e68.cash-row-to-cash.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~58",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/cash_row_write.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "dry run by default with a guarded client (puts=0); --write needs a half with both headings SIGNED (refused rc=4 on the UNSIGNED request); --rollback dry-run read against a scratch snapshot; LOCAL commit only, no table write",
+      "artifact_covered_by": [
+        "SC12-e68-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CASH_ROW_20261008.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "half request, both halves UNSIGNED; served mix delta per firm, firm buckets marked UNREAD with the seat that can read, both branches, rollback by snapshot, 10 writers counted",
+      "artifact_covered_by": [
+        "SC12-e68-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC12-e68-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/cash_row_write.py -- expect: CASH-ROW-DRY-RUN write=1",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/cash_row_write.py",
+      "expect": "CASH-ROW-DRY-RUN write=1",
+      "output_evidence": "CASH-ROW-DRY-RUN write=1 current=fixed_income/Ultra Short Duration classified_by=legacy puts=0 (rc=0)",
+      "denominator": "1 of 1 row (key CASH) plans the conditional update; puts=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC12-e68-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CASH_ROW_20261008.md -- expect: HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_CASH_ROW_20261008.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_CASH_ROW_20261008.md (rc=0)",
+      "denominator": "1 of 1 half request: 0 slots, 0 of 4 required markers missing",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh ... -- <paths>",
+      "result": "see report"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative arm: --write against the UNSIGNED half request",
+      "expected": "refused, nothing written",
+      "observed": "PRECONDITION half: NOT MET - COO half is not SIGNED; REFUSED: nothing written (rc=4)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 run after the final edit of both files",
+      "observed": "AC1 write=1 puts=0; AC2 HALF-READY",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any table write, deploy, upload or push.",
+      "reason": "BOUNDS: dry run only; the write is the issuer's act under the signed pair."
+    }
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/cash_row_write.py"
+}
