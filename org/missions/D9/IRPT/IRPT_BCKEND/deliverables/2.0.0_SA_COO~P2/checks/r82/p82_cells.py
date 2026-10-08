@@ -53,7 +53,7 @@ def main():
     if cid == "IB82-1-AC2":
         # AMENDMENT 1 (row D2-W177-S1): with no irpt-custody-x10-v1 row in the registry, PERFORMANCE/ANALYSIS still compose.
         rc, last2 = pytest(rep, T, "-k", "x10_composes_without_custody_row")
-        if rc != 0 or not re.search(r"[1-9]\d* passed", last2):
+        if rc != 0 or not re.search(r"\b[1-9]\d* passed", last2):
             fail("-k x10_composes_without_custody_row rc %d: %s" % (rc, last2))
         print("  -k x10_composes_without_custody_row: %s" % last2)
         for e in EXISTING:
