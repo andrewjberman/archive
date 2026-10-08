@@ -29,7 +29,7 @@
   <the_act>
     The apply runs only when BOTH never-widen halves are SIGNED. ONE go; the issuer's GO names the CTO half and the HEAD.
     - COO half: org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D_ROUTES_HOST_DENY_OFF_20261008.md
-    - CTO half: named in the GO.
+    - CTO half: org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D_ROUTES_HOST_DENY_OFF_20261008.md (@297921e56a, SIGNED)
     Read both in full first and carry every condition of both.
 
     1. Load /cloud-ops. Show `git status --porcelain -- infra/aws/terraform/nfra-ctlpln-identity/` is empty. Run and record the
@@ -49,6 +49,8 @@
        function named in `cloudops-dell-agent-routes-fn-policy` (explicitDeny by it); `iam:CreateRole` (explicitDeny). The
        group's attached-policy list read live (six expected). A re-plan reads no changes. Close the entry. APPLIED, not
        EXERCISED, until a Dell's own first use.
+    7. The applied-time report to dell2 (via 0.0.0_AB_MSTR) says, in these words: "ssm:SendCommand on the 12 documents stays
+       refused until cell D2 applies" (CTO msg 107113).
   </the_act>
 
   <bounds>
