@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -14,6 +14,11 @@
 <owned_cells>CT-a-1</owned_cells>
 <decomp_context>The apply leg of cell 3 (AMENDMENT 20, merged @db7ecaa46b): item 4 (IAM roles and policies, PassRole) and the Dells' plan reads.</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~23:3xZ). APPLIED 2026-10-08T23:24:52Z, exactly 4/1/0, re-plan 0, ledger closed (@99813ad6ab). Issuer live read:
+    9 group policies; iam:CreateRole allowed and iam:CreateUser explicitDeny for dell1 and dell2. The Dells now apply their own IAM.
+  </closure>
 
   <objective>
     Apply STEP F on the Dell identity root: two new group policies (IAM roles/policies + PassRole; read-only plan reads) and their
