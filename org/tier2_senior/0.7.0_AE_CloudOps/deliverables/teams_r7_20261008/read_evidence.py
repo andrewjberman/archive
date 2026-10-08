@@ -1,4 +1,4 @@
-"""TO19 read-only AWS evidence; never emits message/cursor contents or signed URLs."""
+"""TO20 read-only AWS evidence; never emits message/cursor contents or signed URLs."""
 
 import base64
 import datetime as dt
@@ -165,6 +165,7 @@ def ingress():
     counts = {}
     steps = {}
     polls = 0
+    channel_failed_polls = 0
     lines = 0
     control = 0
     for row in events("/aws/lambda/" + FN[1], start, end):
@@ -182,6 +183,8 @@ def ingress():
         if event == "ingress_step_failed":
             step = d.get("step", "unknown")
             steps[step] = steps.get(step, 0) + 1
+        if event == "channel_poll" and d.get("failed"):
+            channel_failed_polls += 1
     result = {
         "start_utc": start.isoformat(),
         "end_utc": end.isoformat(),
@@ -190,6 +193,7 @@ def ingress():
         "events": counts,
         "failed_steps": steps,
         "polls_with_new_fields": polls,
+        "channel_failed_polls": channel_failed_polls,
         "gate_clear": polls > 0 and steps.get("chats", 0) == 0 and control > 0,
     }
     save("after-ingress-counts.json", result)
