@@ -44,7 +44,7 @@ CELLS = [
       "No S3 address is typed: every prefix is the generator's output."],
      "CTO ruling msg 31672 term one (the grant); the stale gate was found by the issuer at the cut."),
     ("cc-6", "GROUP_D_NOTES.md", "## D1", "the-adapter-cell", 313, "worker",
-     "At the base the three served keys are absent on every route; last round's six hookups read YES.",
+     "At the base 12 of 12 clauses of the adapter check fail, the three served keys being absent; last round's hookups read YES 6 of 6; the two test folders read 1 failed, 860 passed. Not seen: the page, and the deployed function's imports.",
      ["Every existing served key and value is unchanged: ADDED keys, and the Seeking Alpha fields the notes name as replaced."],
      "CTO round-78 analysis R1: each hookup is named, and the redeploy's pair lists them. WAVE 1: cut from the drain of cc-1 to cc-5."),
 ]
