@@ -1,4 +1,4 @@
-# AMGT_CORPUS round 40 -- drain-end packet (DRAFT 1, 2026-10-07 23:30Z; NOT FINAL: three legs and one cell are open, section 5)
+# AMGT_CORPUS round 40 -- drain-end packet (DRAFT 2, 2026-10-08 21:5xZ; NOT FINAL: two served acts wait on the 2026-10-09 13:00Z fire, section 5)
 
 **Issuer:** `2.0.0_SA_COO~X`. **For:** `3.0.0_SA_CVO~Z` (L8/L9), then the L10 slug to `1.0.0_SA_CTO~Z`.
 **Round:** decomposition v40.0 @`be3481c83e`, ten cells: `ap-1` to `ap-7` are worker orders, `ap-8` (DEV drive), `ap-9` (FWD-12
@@ -33,7 +33,9 @@ rule the CTO ruled in msg 31382 (drop only a one- or two-word fragment after a s
 
 | act | pair | ledger | state |
 |---|---|---|---|
-| (m) re-pin the daily task so the fire carries the four dispersion fields | COO half + ADDENDUM 1 / CTO half `60cf78f1b0` + ADDENDUM 1 | `amgt-corpus-r40-ap10m` | leg r closed (task on `61a724beb0`); **leg v OPEN**: the 2026-10-08 13:00Z fire |
+| (m) re-pin the daily task so the fire carries the four dispersion fields | COO half + ADDENDUM 1 / CTO half `60cf78f1b0` + ADDENDUM 1 | `amgt-corpus-r40-ap10m` | CLOSED `c333d5b90f`: the 2026-10-08 13:00Z fire on `61a724beb0` pulled 96 at 768 calls, rc 0; BA's four fields at FY1-FY3 period-equal to their means |
+| (b) re-pin so each fire records its Bloomberg draw | `3a7d8cb228` + ADDENDUM 1 `0811e1fe2f` / CTO `4c0f314e86` | `amgt-corpus-r40-ap10b` | OPEN: leg r done (task on `6402de5137`); leg v is the 2026-10-09 13:00Z fire |
+| (u) the measured unit of the four fields into `field_map.json` | `7b39281274` / CTO `3188a35ac7` | `amgt-corpus-r40-ap10u` (opened at leg b) | leg 0 gates on (b)'s leg v; then build, re-pin, the next fire |
 | (d) write the dossiers at method 6 | `14c896b419` / `b39724f085` | `amgt-corpus-r40-ap10d` | CLOSED `8294e9dfb6`: leg w `263b50310e` (95 written); leg v read 2026-10-08 08:00Z on the deployed function: 8306 JP and 8316 JP management ABSENT with a reason, TSM US management served. Positives, negatives, special items, why-we-own and company description are served by NO route (CTO ruling msg 31622: an AMGT_RESAPP round-79 cell) |
 | (d2) write the dossiers at method 7 | `2a1561085e` / `f9f8334ef6` | `amgt-corpus-r40-ap10d2` | CLOSED `94a90adc3a`: `names 95 written 95 existed 0`; pick method 7 for 95 of 95; 950 fields re-compose with 0 changes; `total_short 0` |
 
@@ -67,19 +69,28 @@ negatives, UNH US negatives, SHOP CN management. The cell that reads across page
 without its content. The files were landed in `a74a1aff0e` and `e757c508f6`; every later drain was checked path by path against
 its branch; `0.0.0_AB_MSTR~Z` has since added a lock to `safe-merge`.
 
-## 5. OPEN -- why this is a draft
+## 5. OPEN -- why this is a draft (re-read 2026-10-08 21:5xZ)
 
-1. **Leg v of (m):** the 2026-10-08 13:00Z fire (`already_current 0 pulled 96`, 768 calls, rc 0; BA's four fields at FY1 to FY3
-   period-equal to their means; `count_ratio_currency.py --served`; `r78_bb7.py --crit AC1`). After it: the budget-record re-pin
-   pair and the unit-map pair for the four fields.
-2. **Leg v of (d):** the live-route reads (TSM US positives, 8306 JP management) after AMGT_RESAPP bb-18 deploys `dossier.py` at
-   method 7. bb-18 is `2.0.0_SA_COO~Z`'s act.
-3. **The portal candidate:** APPROVED by the CTO for DEV (msg 31656 on `REVIEW_RETURN_PART2_PORTAL_de6fc425_CAPTURES_20261008.md`;
-   msg 31669 on the merge onto current DEV, `0498827c975a`, `PORTAL_CANDIDATE_ON_CURRENT_DEV_THREE_READS_20261008.md`). The
-   push is Andrew's word at the `0.0.0_AB_MSTR~Z` terminal. Owed to the CTO, not waived: a capture of the first real name whose
-   filter term matches a headline. Two round-41 cells come from the captures: a served passage begins and ends at a word
-   boundary; a thesis term is a term, not a whole pillar title.
-4. **`ap-8`:** the DEV drive, after 3.
+CLOSED since DRAFT 1: leg v of (m) (`c333d5b90f`); leg v of (d) (`8294e9dfb6`); the portal candidate is on DEV
+(`1cbc56a75eee`, Andrew's word, msg 31915); **`ap-8` is read in full** (`AP8_DEV_DRIVE_RECORD_20261008.md`: FWD-20 at
+`c0ba3c9b67`; FWD-11, FWD-21 and FWD-10/15/18 walked; FWD-16 at `862dd0ce23`).
+
+Still open, both waiting on a scheduled fire:
+1. **(b) leg v:** the 2026-10-09 13:00Z fire on `6402de5137` writes its own budget ledger line in returned records (CTO ruling
+   msg 31940).
+2. **(u):** leg 0 is (b)'s leg v. Then the build, the re-pin, and the fire after it.
+
+Owed to the CTO, not waived: a capture of a real name whose filter term matches a headline. It is blocked on the round-41
+terms cell, because none of the 4 walked names that carry terms (ASML, IMB, SPOT, UNVGY) shows a match, and a whole pillar title cannot match (ap-8 record, third window).
+
+**Round-41 cells from this round's reads** (the CTO decides them in the round-40 analysis):
+- read across page breaks: ten truncated values;
+- a served passage begins and ends at a word boundary, including the scorecard prefix "Management/Board 80" on BABA US and
+  ST SP (2 of 45 served management passages);
+- a thesis term is a term, not a whole pillar title;
+- UNVGY US's served no-forecast reason is wrong: it says "pulled before C-MODEL-FORECASTS", but the name returned no
+  forecast; the page does not show the reason;
+- batch repair: `Z-S90`.
 
 ## 6. Not claimed
 
