@@ -7,7 +7,8 @@ Prints "<id> PASS" or "<id> FAIL" as the last line. Each pytest run is its own p
   IB82-1-AC1  in T, `-k custody_under_custody_policy` passes (>= 1 test): a CUSTODY_REPORT is reserved and read back under
               irpt-custody-x10-v1 while PERFORMANCE and ANALYSIS stay under irpt-x10-v1. Base: FAIL (no file).
   IB82-1-AC2  in T, `-k x10_retained_reads_back_unchanged` passes (>= 1 test), AND reports/tests/test_repository.py,
-              test_retained_repository.py and test_retention.py each pass alone (the regression arm). Base: FAIL (no file;
+              test_retained_repository.py and test_retention.py each pass alone (the regression arm); AMENDMENT 1: and
+              `-k x10_composes_without_custody_row` passes (no custody row in the registry breaks no other family). Base: FAIL (no file;
               the three existing files pass at base: 24, 21 and test_retained_repository).
   IB82-1-AC3  in T, `-k unregistered_kind_refuses` passes (>= 1 test). Base: FAIL (no file).
 """
@@ -50,6 +51,11 @@ def main():
         fail("-k %s rc %d: %s" % (K[cid], rc, last))
     print("OK: -k %s: %s" % (K[cid], last))
     if cid == "IB82-1-AC2":
+        # AMENDMENT 1 (row D2-W177-S1): with no irpt-custody-x10-v1 row in the registry, PERFORMANCE/ANALYSIS still compose.
+        rc, last2 = pytest(rep, T, "-k", "x10_composes_without_custody_row")
+        if rc != 0 or not re.search(r"[1-9]\d* passed", last2):
+            fail("-k x10_composes_without_custody_row rc %d: %s" % (rc, last2))
+        print("  -k x10_composes_without_custody_row: %s" % last2)
         for e in EXISTING:
             rc, last = pytest(rep, e)
             if rc != 0:
