@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-i-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-5.mail-parties-and-seam-test.md",
+    "group": "OTHER",
+    "vintage_commit": "35e45bf678"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~33",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.inbound3.md",
+    "vintage_commit": "35e45bf678",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-5.mail-parties-and-seam-test.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/mail_requests.py",
+      "kind": "script",
+      "commit_or_etag": "8b7788a834",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit; nothing deployed",
+      "artifact_covered_by": [
+        "CTi5-AC1",
+        "CTi5-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_inbound_mail.py",
+      "kind": "test",
+      "commit_or_etag": "8b7788a834",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit; nothing deployed",
+      "artifact_covered_by": [
+        "CTi5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_inbound_seam.py",
+      "kind": "test",
+      "commit_or_etag": "8b7788a834",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo-local commit; nothing deployed",
+      "artifact_covered_by": [
+        "CTi5-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTi5-AC1",
+      "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_mail.py expect: INBOUND-MAIL-TEST ok=True cases=(1[5-9]|[2-9][0-9])/",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_mail.py",
+      "output_evidence": "(run as timeout 120 python ..., rc 0) INBOUND-MAIL-TEST ok=True cases=15/15 model_calls_on_failed=0\nThe 11 existing cases pass unchanged; four added on invented registry content: a considered party's measured domain is admitted (and firm_of names it); a party with considered false is not; a domain whose claim is inferred, held or absent is not (the measured one beside it is); a missing or unparsed mail-parties record leaves the two injected firms working.",
+      "denominator": "15 of 15 cases pass",
+      "status": "PASS",
+      "expect": "INBOUND-MAIL-TEST ok=True cases=(1[5-9]|[2-9][0-9])/"
+    },
+    {
+      "criterion_id": "CTi5-AC2",
+      "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_seam.py expect: INBOUND-SEAM-TEST ok=True",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_seam.py",
+      "output_evidence": "(run as timeout 120 python ..., rc 0) INBOUND-SEAM-TEST ok=True cases=8/8\nThe real .tools/remote-job.py (subprocess, --dry-run, temporary lock and liveness file via a runner that replaces LOCK, device_name, measure and make_runtime, as test_remote_job_review.py does; see row NFRA_CTLPLN-W33-S1) printed four bid envelopes, an accept envelope with a real brief file and a complete envelope after a real grade PASS by 3.0.0_SA_CVO~Q; each payload went through on_job_bid / on_job_accepted / on_job_complete. Bid recorded with its reviewer; four bids award the lowest load; accepted job reads working; graded completion reaches verify with the grade kept. Difference controls: the tool refuses an ungraded complete (rc 2, no envelope); the cloud refuses the same payload with its grade removed and leaves the job working. The real .tools/.remote-job.json is unchanged (absent before and after).",
+      "denominator": "8 of 8 cases pass",
+      "status": "PASS",
+      "expect": "INBOUND-SEAM-TEST ok=True"
+    },
+    {
+      "criterion_id": "CTi5-AC3",
+      "criterion_verbatim": "python data/transcripts/scripts/teams_chat/mail_requests.py --check-domains --expect-missing 1 expect: MAIL-DOMAINS ok=True firms=4/5 typed=0",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/teams_chat/mail_requests.py --check-domains --expect-missing 1",
+      "output_evidence": "(run as timeout 120 python ..., rc 0) MAIL-DOMAINS ok=True firms=4/5 typed=0\nPer-party lines (counts only): 49financial domains=1, cottonwood domains=1, inflection domains=1, opal domains=1; 'firms with no recorded domain: 1 (expected 1)' -- alongside, considered false, claim absent.",
+      "denominator": "4 of 5 parties load; 1 named missing",
+      "status": "PASS",
+      "expect": "MAIL-DOMAINS ok=True firms=4/5 typed=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "difference controls are inside AC1 (considered false / non-measured claim not admitted) and AC2 (ungraded complete refused by the tool and, with grade removed, by the cloud)",
+      "expected": "not admitted; refused on both sides",
+      "observed": "graded inside AC1 and AC2",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: every outside call is a stand-in; the box tool's reads are fixed",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "NFRA_CTLPLN-W33-S1"
+  ],
+  "declared_exclusions": [
+    {
+      "item": "any send to the bus, the cloud, a gateway, a mailbox, a model, a text or AWS; a non-dry-run use of the real .tools/.remote-job.json",
+      "reason": "the order forbids anything that leaves the machine; the box tool ran on a temporary lock with a stand-in sender"
+    },
+    {
+      "item": "editing remote-job.py, tenant.py or mail_parties.json",
+      "reason": "outside the order's paths; no disagreement between the halves was found, so no repair was owed"
+    }
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~33/NFRA_CTLPLN.TO-CT-i-5.mail-parties-and-seam-test.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_seam.py",
+      "result": "INBOUND-SEAM-TEST ok=True cases=8/8"
+    }
+  ]
+}
