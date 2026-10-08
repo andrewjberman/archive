@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-w-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-w-1.conditional-credit.md",
+    "group": "OTHER",
+    "vintage_commit": "2f36abe2ee"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~45",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round23.md",
+    "vintage_commit": "2f36abe2ee",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-w-1.conditional-credit.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_sweeps.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local derivation; nothing deployed, no S3 write",
+      "artifact_covered_by": ["CB23w1-AC1", "CB23w1-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_daily_valuation.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local derivation; nothing deployed, no S3 write",
+      "artifact_covered_by": ["CB23w1-AC1", "CB23w1-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_sweep_regrade.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local derivation; nothing deployed, no S3 write",
+      "artifact_covered_by": ["CB23w1-AC2"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_commonwealth_cash_leg.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local derivation; nothing deployed, no S3 write",
+      "artifact_covered_by": ["CB23w1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~45/sweep_regrade.md",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local derivation; nothing deployed, no S3 write",
+      "artifact_covered_by": ["CB23w1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~45/month_grades_after.parquet",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only local derivation; nothing deployed, no S3 write",
+      "artifact_covered_by": ["CB23w1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB23w1-AC1",
+      "criterion_verbatim": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_cash_leg.py expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest -q data/assets/scripts/silver/tests/test_commonwealth_cash_leg.py",
+      "output_evidence": "14 passed in 1.58s (rc 0): the 9 existing tests plus 5 new: conditional is the default and r19/repaired stay selectable; a funding sale WITH an existing CFNCASH leg (li 400 beside a 400 sale) gets no second credit (value 1000 under conditional, 1400 under repaired); a funding sale WITHOUT one is still credited (value 1000, return 0); only a credit-signed CFNCASH row equal to the sale proceeds suppresses the credit (LOX equal suppresses; lo equal, li of 399 and repaired do not); the condition is per account-day. Mutant (carried_days forced to return an empty set): 2 failed, 12 passed; restored, 14 passed. Full silver tests: 542 passed, 11 skipped. ruff check --target-version py39 on the four edited files: All checks passed.",
+      "denominator": "14 of 14 tests passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB23w1-AC2",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_sweep_regrade.py --before-list v1 --after-list v1 --before-cash-leg r19 --after-cash-leg conditional --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~45 expect: regressions=0",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_sweep_regrade.py --before-list v1 --after-list v1 --before-cash-leg r19 --after-cash-leg conditional --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~45",
+      "output_evidence": "SWEEP-REGRADE sweeps=2 rejected=517 double_drop_months=8 fixed=0 months_before=2057/1522/79014 months_after=2103/1520/78970 control_same=True regressions=23 movers_back=25 (rc 0; caches copied from the shared tree's warm ones). The expectation regressions=0 is NOT met: the conditional rule drops 0 of 2703 funding credits, so the result equals round 22's. The 23 are classed double_credit=0, other:cfncash_row_not_the_sale_cash=13, other:no_cfncash_row_on_credit_day=10; round 22's 25 recovered movers are 25 of 25 still MATCH; control 642 of 642 unchanged. Refusal clause applied: test not weakened, rule not widened; row ADVI_COTBKF-D2-W45-S1.",
+      "denominator": "regressions=23 of 23 round-22 regressions remain; 25 of 25 recovered movers kept; control_same=True",
+      "status": "FAIL",
+      "status_reason": "regressions=23, expected regressions=0: the double-credit lead is falsified (0 of 23; the conditional rule drops 0 of 2703 funding credits), so no CFNCASH-row condition removes the regressions; refusal clause applied, see ADVI_COTBKF-D2-W45-S1"
+    },
+    {
+      "criterion_id": "CB23w1-AC3",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: the 23 are classed with evidence rows and sum to 23; the rule is one general condition; round 22's 25 recovered movers are still MATCH and the non-sweep control is unchanged.",
+      "method": "manual_read_with_citation",
+      "invocation": "read data/assets/scripts/silver/commonwealth_sweeps.py carried_days, funding_credit_rows and with_sweep_cash; org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~45/sweep_regrade.md sections 'Round 22's 23 regressions' and 'The control'",
+      "output_evidence": "output produced: one condition in carried_days (a credit-signed CFNCASH row on the same account-day equal to the sale proceeds within 0.01); the md classes the 23 (double_credit 0, other:cfncash_row_not_the_sale_cash 13, other:no_cfncash_row_on_credit_day 10; sum 23) with each month's credit days and that day's CFNCASH rows, shows 0 of 23 MATCH, 25 of 25 recovered movers still MATCH, control_same=True; no verdict given",
+      "denominator": "23 regressions and 25 recovered movers read by the grader",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion; graded by 3.0.0_SA_CVO at L9, never self-graded"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the r19 BEFORE arm is the chain at the cut; the conditional AFTER arm is compared with round 22's persisted repaired arm",
+      "observed": "months_after 2103/1520/78970 equals round 22's repaired arm; months_before 2057/1522/79014 equals round 19's after arm",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "carried_days forced to return an empty set (the conditional rule disabled), run against the real test file",
+      "expected": "the no-second-credit tests fail",
+      "observed": "2 failed, 12 passed; restored, 14 passed",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a wider condition than the order's (skip any credit day that carries any CFNCASH row)",
+      "reason": "tried in a scratch probe only: it removes the 13 months of 0QF879352 (whose CFNCASH rows are lo withdrawals, not the sale's cash) and leaves 10 regressions, so it does not reach regressions=0 either and was not shipped; see row ADVI_COTBKF-D2-W45-S1"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W45-S1"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~45/ADVI_COTBKF.TO-CB-w-1.conditional-credit.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 commonwealth_sweeps.py commonwealth_daily_valuation.py commonwealth_sweep_regrade.py tests/test_commonwealth_cash_leg.py",
+      "result": "All checks passed"
+    }
+  ]
+}
