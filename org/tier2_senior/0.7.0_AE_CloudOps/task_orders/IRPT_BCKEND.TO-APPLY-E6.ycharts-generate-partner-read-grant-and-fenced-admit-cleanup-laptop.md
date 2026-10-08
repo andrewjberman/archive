@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_BCKEND</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -14,6 +14,12 @@
 <owned_cells>IB-yr-671</owned_cells>
 <decomp_context>dell2's R67 (on origin box/dell2; reaches the laptop tree at the next integrate) cuts E6 as cell IB-yr-671, whose text names this order's leg 2 ("the admit's records are deleted by the laptop's leg 2"). The laptop legs are that cell's support acts; the pair NEVER_WIDEN_PAIR_RELEASE2_E6.md @8c11ac4ff1 sections 3 and 6.2 is their specification.</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~21:4xZ). Leg 0 dry probe PASS ~20:13Z; leg 1 grant APPLIED 2026-10-08T20:25:33Z (issuer read-back live:
+    GetItem on the 3 partner tables, demo absent); leg 2 cleanup 20:57:48Z (RETENTION# row deleted; 4 keys absent; S3 object never
+    written, no delete ran). Evidence forward-redacted @99abbd98c2 (row NFRA_CTLPLN-S35). Proof VALID against R67 IB-yr-671 (@f974b403ce).
+  </closure>
 
   <objective>
     The three laptop legs of dell2 `2.0.0_SA_COO~Y2`'s IRPT_BCKEND release 2 E6: (0) the fenced-delete dry probe now;
