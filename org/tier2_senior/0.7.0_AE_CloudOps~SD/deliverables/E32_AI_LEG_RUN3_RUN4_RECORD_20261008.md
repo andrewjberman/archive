@@ -182,7 +182,49 @@ seat's -- stated in the close report, with no gate invented on either side. The 
 take: accept `transport=1` as the terminal close (which is what amendment 8's own sentence reads like),
 or authorise ONE further attempt on that single key. This seat does neither unasked.
 
-## 8. What is NOT closed by this window
+## 8. RUN5 -- the last key answers, and the leg closes ok=True
+
+AMENDMENT 9 @`31f7cf0bea` ruled one final 1-key attempt and corrected the set name (section 3's
+deviation was ruled CORRECT: "~SD's subset cut from the V3 set is the correct one and stands").
+
+1-key subset: `org/tier2_senior/0.7.0_AE_CloudOps~SD/deliverables/E32_TRANSPORT1_BDPR3C6C_SET_20261008.tsv`
+-- 121 bytes, sha256 `d6979299dbb69737`, header + the single V3 row for that key. Written into THIS
+seat's deliverables, not the COO's: amendment 9 names no path, and the COO deliverables dir is lane
+BASE_EXEC, which refused this seat on the five files of section 9. Dry run read `ai_keys=1 direct_keys=0
+now_present=0`, `to_model=1`, no `-BAD`.
+
+RUN5 launched 17:58Z, `--workers 1`, fresh `E32_AI_SNAPSHOT_20261008.RUN5_1758Z.json`, exited
+17:59:50Z `rc=0 watchdog_killed=False` -- about 90 seconds.
+
+**IT DID NOT TIME OUT. The vendor answered, and the answer is a MODEL-STATED refusal:**
+
+```
+UNRESOLVED NAME::BDPR3C6C: no class (The name 'BDPR3C6C' appears to be an opaque identifier
+(resembling a partial CUSIP or internal security code) with no descriptive text indicating security
+type, issuer, sector, coupon, or fund strategy. The ticker 'NAME::BDPR3C6C' adds no additional
+information. There is no basis to classify this security into any of the six asset classes.)
+```
+
+That reading was available in the set file before the call: this key's `clean_name` is the literal
+string `BDPR3C6C`. There is no name to classify, which is why it is the one key of the fourteen the
+model had nothing to say about. Its two earlier `KIMI_TIMEOUT`s look like the vendor stalling on a
+zero-information prompt rather than a network fault -- an observation, not a measured cause.
+
+`is_final_refusal` grades `no class (` NOT followed by `refused:` as FINAL, so the key moves from
+`refused_transport` to `refused_final` and the plan closes:
+
+```
+AI-LEG-VERIFY act=e32 ok=True planned=2291 landed=1519 refused_final=772 refused_transport=0
+  unresolved=772 problems=0 first=[] snapshot_keys_gone=0 multi_asset=0
+  model_rows=1532 listing_count=1532 listing=mdpf/global/gold/ai_classified_securities/date=2026-10-08/index.json
+```
+
+**1,519 + 772 = 2,291 EXACT, `ok=True`.** This satisfies AC1 as ORIGINALLY written -- amendment 9's
+widened expectation (`ok=False` whose only problem is `refused_transport=1`) was NOT needed and is not
+invoked. The four logs are passed probe -> RUN3 -> RUN4 -> RUN5 because the tool takes the LAST reason
+per key: newest-first would have graded this key on RUN4's timeout and held the leg open.
+
+## 9. What is NOT closed by this window
 
 - **Deployment Rules 4 and 6** for `mdpf-secclass-new-security-lambda` stay surfaced-not-actioned:
   `last_deployed_commit` still reads `none` and no version tag was cut. The tag needs a shared-branch
