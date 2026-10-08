@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_HEALGAP.TO-HG-d3",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-d3.fwd1-exercise-induced-morning-failure.md",
+    "group": "OTHER",
+    "vintage_commit": "14ca26c231"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_HEALGAP/decompositions/MDPF_HEALGAP_DECOMP.md",
+    "vintage_commit": "474ec88e5a",
+    "to_ref": "org/missions/D8/MDPF/MDPF_HEALGAP/task-orders/MDPF_HEALGAP.TO-HG-d3.fwd1-exercise-induced-morning-failure.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~F",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/critical_paths/change_management/20261007T1736Z_mdpf-healgap-hg-d3-fwd1-exercise-20261008_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "f2cce52172",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 entry, opened 2026-10-07T17:36:20Z by the prior ~F session with 5 legs and a 24h window and committed at f2cce52172 (now on origin/CLOUD) together with leg L1's proof; legs L2 through L5 were closed by THIS session and ride the instance commit. All 5 legs carry measured proof and the entry is CLOSED with its sentinel removed. L1 the arm (put 2026-10-07T17:40:36Z, read back 17:41:52Z, and the cot-bronze-complete re-attempt input verified UNTOUCHED in the same read). L2 the restore, carrying AMENDMENT 2: it landed 2026-10-08T06:08:46Z inside the 06:05Z-06:20Z window but was NOT made by this seat, and the leg claims the act, its time, its window and its tool while claiming NO actor. L3 the targeted plan reading no change. L4 the three graded criteria. L5 condition 4 MET. The commit uses an exact pathspec: other seats' entries and sentinels were modified in the same shared working tree throughout and are kept out, which is the hazard row MDPF_HEALGAP-S6 names.",
+      "artifact_covered_by": [
+        "HG1-d3-AC1",
+        "HG1-d3-AC2",
+        "HG1-d3-AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/blackdiamond/cottonwood/meta/2026-10-08-complete.json",
+      "kind": "s3_object",
+      "commit_or_etag": "9a5ae9fcf186b4c5c13545a23540a00b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "THE HEAL'S OWN OUTPUT, written by the machine and by no seat: ETag 9a5ae9fcf186b4c5c13545a23540a00b, ContentLength 11909, LastModified 2026-10-08T11:32:25Z (s3api, so UTC). It did NOT exist at this seat's 11:31Z read (HeadObject 404), because the 06:00Z pull of D failed three times on the induced auth lapse and wrote nothing. It appeared after EventBridge rule cot-bronze-complete fired the HG-d2 re-attempt target at 11:32:06Z and the runner completed a real vendor pull in 17832.30 ms. This is the artifact FWD-1 is about and NO act of this seat produced it -- which is the outcome, not a gap in the evidence.",
+      "artifact_covered_by": [
+        "HG1-d3-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "HG1-d3-AC1",
+      "criterion_verbatim": "the 06:00Z pull of D failed as induced and wrote nothing before 11:00Z (D = 2026-10-08; if the GO lands after 05:50Z on D, the issuer amends D in the GO commit).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R1_CHECKS/hg_fwd1_exercise.py --failed 2026-10-08",
+      "output_evidence": "FAILED-OK induced lines=3 bronze keys before 11:00Z=0 date=2026-10-08 (rc=0), graded 2026-10-08T13:00:42Z. The check is a conjunction of two independent reads and refuses on either: logs:FilterLogEvents over /aws/lambda/cot-rebalancer-runner between 06:00Z and 06:30Z of D with filterPattern INDUCED auth-lapse must return at least one event, and no bronze key of D under any of the three feed prefixes may carry a LastModified before 11:00Z. Read directly from the same log group, the underlying detail: ONE 06:00Z fire produced THREE attempts under the single RequestId 346eaa7d-c480-4c25-9716-6ae2408f2c53 at 06:00:42Z, 06:01:49Z and 06:03:46Z -- the retry=2 HG-d1 set -- each ending [ERROR] RuntimeError: BD GET /auth/token -> HTTP 401: INDUCED auth-lapse (MDPF_HEALGAP FWD-1 exercise; no secret read, no vendor call), raised at lambda_function.py:485, which is BEFORE any secret read or vendor call. So the failure is the induced one and not an incidental outage.",
+      "denominator": "3 of 3 induced-failure lines found in the 06:00Z-06:30Z window (one per attempt of the single fire); 0 of the bronze keys of D across all 3 feed prefixes (rebalancer_models, rebalancer_accounts, rebalancer_model_detail) carry a LastModified before 11:00Z",
+      "status": "PASS",
+      "expect": "FAILED-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "HG1-d3-AC2",
+      "criterion_verbatim": "D healed the same day with nobody acting: a complete-stamp written after 11:00Z naming all three feeds, each feed non-empty.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R1_CHECKS/hg_fwd1_exercise.py --healed 2026-10-08",
+      "output_evidence": "HEALED-OK date=2026-10-08 stamp_at=2026-10-08T11:32:25+00:00 keys={rebalancer_models: 1, rebalancer_accounts: 5, rebalancer_model_detail: 93} (rc=0), graded 2026-10-08T13:00:44Z. The check refuses on five separate grounds: the stamp key absent, its LastModified outside D 11:00Z-23:59Z, the stamp's types set not exactly the three feeds, rebalancer_model_detail count not greater than zero, or any feed with zero non-empty bronze keys for D. NOBODY ACTED is measured, not assumed: between the 06:08:46Z restore and this read the only act on the runner was EventBridge rule cot-bronze-complete firing its HG-d2 re-attempt target at 11:32:06Z, and that invocation (RequestId 21eb2c0c-ea27-485c-9e4a-8f4639d51f08, Duration 17832.30 ms) logged a REAL vendor pull rather than a skip: verdict BRONZE-COMPLETE, as_of 2026-10-08, models 71, accounts 992, model_details 93, gates pagination_integrity PASS and count_reconcile DISCLOSED-MISMATCH over 54 strategies checked. The runner also emitted its own designed disclosure, WARN: count-reconcile mismatch on 1 of 54 strategy(ies) -- CARRIED, not fatal, for strategy Core | Satellite 60 (roster 12, observed 11); that is the DISCLOSED-MISMATCH gate working as built, recorded here so it is not later mistaken for a defect of the heal. This seat made ZERO AWS writes.",
+      "denominator": "5 of 5 grounds the check tests were satisfied; 3 of 3 feeds named in the stamp's types and 3 of 3 non-empty for D (1 + 5 + 93 = 99 bronze keys, against 97 on the normal day 2026-10-07); 1 of 1 invocation of the runner between the restore and the read",
+      "status": "PASS",
+      "expect": "HEALED-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "HG1-d3-AC3",
+      "criterion_verbatim": "the 06:00Z rule's target is back to `{\"mode\":\"pull\"}`. A fourth criterion would be redundant: the reader's page read is the issuer's at close.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_HEALGAP_G1/R1_CHECKS/hg_fwd1_exercise.py --restored",
+      "output_evidence": "AMENDMENT 1, 2026-10-08T14:2xZ -- THE ACTOR IS FOUND AND IT IS THIS SEAT'S OWN FAIL-SAFE. The text below this paragraph was written when the actor was unknown; it is superseded on that one point and correct on every other. Measured by this seat, reading the file itself rather than taking the report: C:/Users/AndrewBerman/AppData/Local/Temp/claude/C--Users-AndrewBerman-Desktop-ajb-workspace/393fd2b5-feaa-49dd-81e2-9376e8701755/tasks/bv5miebw8.output, 414 bytes, mtime 06:08Z, reads FAILSAFE-WOKE 2026-10-08T06:08:40Z current_input={mode:pull,induce:auth-lapse} / FAILSAFE-ACTING the induce input is still live -- performing the order's second put-targets / FailedEntryCount 0 / FAILSAFE-PUT_UTC=2026-10-08T06:08:45Z / FAILSAFE-READBACK {mode:pull} / FAILSAFE-RESTORED-BY-SCRIPT -- the seat still owes HG1-d3-AC3, the no-change plan and the ledger record. That is the idempotent fail-safe the PRIOR ~F session armed in-session for exactly this step; FAILSAFE-PUT_UTC 06:08:45Z matches the CloudTrail PutTargets at 06:08:46Z to the second and explains the laptop v1 user agent this instance already measured. So OWNER (1) OF CTO RULING 106485 DID ACT, through the mechanism its own session armed, and the restore is attributed. What was wrong in the superseded text is the conclusion that no seat's mechanism made it; what was right is every measured fact, including that no LIVE seat made it -- the prior session had been killed at 23:5xZ and the fail-safe outlived both that close and the harness's own reported kill of it at 20:2xZ. Its sibling 06:03Z wake task really did die ([killed], 10 bytes), so the two were reported identically and behaved differently. Hazard SPENT, measured: a Win32_Process census for the prior session id and for put-targets|hg_d3|FAILSAFE|cot-rebalancer-runner-daily returns zero rows. Filed as row MDPF_HEALGAP-S12, which also records that a CLOSED deploy-ledger entry cannot carry this correction (close removes the sentinel and close-leg then refuses the slug, measured), so ledger leg L2's text stands as written at close and this instance plus row S12 are the carriers. Andrew at dell1 ~13:1xZ, relayed in 0.0.0_AB_MSTR msg 106939: \"i did not do it by hand ... look into it regardless\". ---- SUPERSEDED TEXT FOLLOWS ---- RESTORED-OK daily target input={mode:pull} (rc=0), first read by this seat at 2026-10-08T10:49Z and graded again at 13:00:46Z, byte-identical. The check refuses unless the rule carries EXACTLY ONE target whose Input parses to exactly {mode: pull}, so it grades the target COUNT as well as the value. This seat's own direct read at 10:48:14Z agrees: aws events list-targets-by-rule --rule cot-rebalancer-runner-daily returns one target, Id cot-rebalancer-runner-daily, Arn arn:aws:lambda:us-east-1:313476888478:function:cot-rebalancer-runner unchanged, Input {mode:pull}. WHO restored it is NOT claimed here: CloudTrail carries exactly two PutTargets on this rule since 2026-10-07T17:00Z -- the arm at 17:40:39Z and the restore at 2026-10-08T06:08:46Z, inside the order's 06:05Z-06:20Z window -- and none of the three named fallback owners made it (dell1's 2.0.0_SA_COO~G1 read NOOP-ALREADY-RESTORED at 06:10:09Z; 1.0.0_SA_CTO read it restored at 06:14:12Z and made no put on this rule at any time; this ~F session was dead overnight). The call's user agent identifies the TOOL: aws-cli/1.44.44 Python 3.12.10 Windows 10.0.26100, byte-identical to this laptop's own shim (.tools/aws --version at 12:1xZ -> aws-cli/1.44.44 Python/3.12.10 Windows/10.0.26100 awscrt/0.31.3 botocore/1.43.0) and NOT dell1's aws-cli 2.37.9. So the put came from this laptop's v1 shim; the ACTOR remains unattributed and is carried as row MDPF_HEALGAP-D1-S3.",
+      "denominator": "1 of 1 target on the rule read, and its Input compared whole; 2 of 2 PutTargets calls on this rule in CloudTrail since 2026-10-07T17:00Z accounted for; 3 of 3 named fallback owners excluded by their own reads",
+      "status": "PASS",
+      "expect": "RESTORED-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was planted and none was needed: this order IS a planted mutant on the live plane. The induced auth lapse is a deliberate production failure of one morning's pull, so the discriminating NEGATIVE arm is the same two checks run against a day that was not induced. This seat ran them against 2026-10-07, the immediately preceding normal day, with the same script on the same plane.",
+      "expected": "On a normal day HG1-d3-AC1 must read FAILED-BAD (no induced line in the 06:00-06:30Z window) and HG1-d3-AC2 must read HEALED-BAD (the stamp written 06:00:58Z, before the 11:00Z cutoff) -- the order states exactly this as its control. If either criterion passed on a normal day it would be a tautology and would prove nothing about D.",
+      "observed": "Both fired as expected: --failed 2026-10-07 -> FAILED-BAD no INDUCED auth-lapse line in the runner log 2026-10-07 06:00-06:30Z (rc=1), and --healed 2026-10-07 -> HEALED-BAD stamp LastModified 2026-10-07T06:00:58+00:00 outside 2026-10-07 11:00Z-23:59Z (rc=1). So each criterion separates the induced-and-healed day from a normal one on its own, and the pair separates the two halves of the outcome: a day can fail AC1 for not having failed, or fail AC2 for having succeeded too early. A second, unconstructed negative arm sits in the artifact record: the complete-stamp for D did not exist at 11:31Z (HeadObject 404) and existed at 11:32:25Z, so the heal's output was observed crossing from absent to present with no seat acting.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every criterion was invoked TWICE against the live plane: once as an informational pre-read as soon as the fact under it had settled (AC3 at 10:49Z, AC1 at 11:3xZ once the 11:00Z cutoff had passed and the 06:00-06:30Z log window was closed, AC2 at 11:49:26Z after the stamp landed), and once as the graded run inside the order's own read gate at 13:00:42Z-13:00:46Z. The pre-reads are declared rather than hidden: they changed no state, none was used as the grade, and they existed so that a BAD reading would have left hours before the 18:00Z branch (B) deadline instead of minutes.",
+      "observed": "run 1 and run 2 are BYTE-IDENTICAL on all three criteria, including the stamp timestamp, the three per-feed key counts and the induced-line count. The condition-4 read is a separate instrument (S3 LastModified, not this check script) and was taken once, at 13:01:58Z.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the two put-targets of acts 1 and 2 as acts OF THIS SESSION",
+      "reason": "AMENDED 2026-10-08T14:2xZ. Neither put-targets was made by THIS session and the instance still does not claim them -- but both are now attributed to this SEAT. Act 1's arm was the prior ~F session's at 2026-10-07T17:40:36Z (ledger leg L1 at commit f2cce52172). Act 2's restore at 06:08:46Z was made by the idempotent fail-safe that the same prior session armed, which outlived both the harness's reported kill of it at 20:2xZ and the session's close at 23:5xZ, and whose own output file records the put at 06:08:45Z. So owner (1) of CTO ruling 106485 acted by its armed mechanism rather than at its 06:03Z wake, and the earlier reading -- actor not identified among the fabric's seats, operator's own terminal inferred -- is SUPERSEDED. See HG1-d3-AC3's output_evidence for the measurement and row MDPF_HEALGAP-S12 for the hazard it exposes; row MDPF_HEALGAP-D1-S3 (2.0.0_SA_COO~G1) keeps its own disposition, which is its owner's to move."
+    },
+    {
+      "item": "the branch (B) remedy -- one {mode:pull} invoke of cot-rebalancer-runner for D",
+      "reason": "Its trigger never fired. Branch (B) applies only if HG1-d3-AC2 reads BAD after 18:00Z; AC2 read HEALED-OK at 11:49Z and again at 13:00:44Z. So no invoke was made, the order's one-invoke budget is unspent, and FWD-1 is REALIZED for D=2026-10-08 rather than reported NOT realized."
+    },
+    {
+      "item": "the reader's page read -- a human or portal read of the Cottonwood models for D",
+      "reason": "HG1-d3-AC3's own text assigns it: a fourth criterion would be redundant, the reader's page read is the issuer's at close. It is not among <expected_criteria> and this seat does not substitute an S3 read for it. OWNER: 2.0.0_SA_COO~G1."
+    },
+    {
+      "item": "gold blackdiamond/cottonwood/gold/dim_model_portfolio/date=2026-10-08/ as part of condition 4",
+      "reason": "Condition 4's own instrument is the newest silver/gold write time for D UNDER THE EXISTING on_success CHAIN, and gold is not on that chain: it is written by data/assets/scripts/gold/build_dim_model_portfolio.py from the EC2 mdpf-daily-runner (mdpf-daily-dispatch.sh:554), while the runner's on_success destination is opal-assets-silver-blackdiamond. Condition 4 is therefore graded MET on the chain's newest write for D, 2026-10-08T11:46:08Z, with the four model silver tables at 11:32:29Z-11:32:33Z. Gold had ZERO objects for D at the 13:01:58Z read; its last ten partitions landed at 13:30:39Z-13:30:42Z on nine of ten days, so it arrives just after the condition's line every day, healed or not. Filed as row MDPF_HEALGAP-S11 for the issuer to decide the successor wording; NOT treated as a condition-4 failure here, and not fixed here."
+    },
+    {
+      "item": "AC3 of both HG-d2 never-widen halves -- the next normal day's ~11:32Z fire read as SKIP-IDEMPOTENT",
+      "reason": "It belongs to the issuer by both halves' text and is not among this order's criteria. It also cannot be read on D: on 2026-10-08 the ~11:32Z fire was the HEAL, a real pull, which is exactly what this order exists to cause. The earliest normal-day read is 2026-10-09. OWNER: 2.0.0_SA_COO~G1."
+    },
+    {
+      "item": "any terraform apply, IAM change, S3 write, or a second rule touched",
+      "reason": "The order's BOUNDS allow only two put-targets on cot-rebalancer-runner-daily and, on branch (B) only, one Lambda invoke. This session made ZERO AWS writes of any kind: its only AWS calls were reads (events list-targets-by-rule and list-rules, logs filter-log-events, s3api list-objects-v2 and head-object, cloudtrail lookup-events) plus one READ-ONLY terraform plan. No apply ran, so Deployment Rule 4's source-map parity loop has nothing to close and record-terraform-deploy.sh was correctly not invoked."
+    },
+    {
+      "item": "a HALTGT pass as evidence of not having been halted",
+      "reason": "ADHC_HALTGT / LD-0267: the checkpoint reads only unread files directly under inbox/<serial>/, so this seat's live inbox Monitor moves every message before that gate can see it, and a ~lane seat is unhaltable regardless. No apply ran here in any case, so the gate was never reached. Recorded as uninformative rather than cited as a control."
+    }
+  ],
+  "surprises": [
+    "MDPF_HEALGAP-D1-S3: the step-2 restore landed at 06:08:46Z inside the window from an actor none of the three named owners claimed at the time; this seat first narrowed it to this laptop's aws v1 shim by user agent, and then identified it outright as this seat's own armed fail-safe (see MDPF_HEALGAP-S12). D1-S3's disposition is its owner's to move; this instance does not move it.",
+    "MDPF_HEALGAP-S11: condition 4's 13:30Z service line sits 39 to 42 seconds inside gold dim_model_portfolio's own daily arrival, so a condition-4 read widened to gold returns MISSED on nine of the last ten days with no failure present; graded MET here on the on_success chain the condition actually names.",
+    "MDPF_HEALGAP-S12: the fail-safe that made the 06:08:46Z restore outlived a harness-reported kill AND its session's close and wrote to production about 10 hours later with no live seat, registered nowhere a reader could attribute it from; hazard SPENT (process census returns zero) but the practice recurs, disarm owner 1.0.0_SA_CTO."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_HEALGAP/deliverables/0.7.0_AE_CloudOps~F/REPORT_TO_HG_D3_20261008.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py close-leg --slug mdpf-healgap-hg-d3-fwd1-exercise-20261008 --leg-id L2|L3|L4|L5 ... ; then close",
+      "result": "All four remaining legs closed against measured proof and the entry CLOSED, 5 of 5 legs proven. Worth recording for the next reader: close-leg OVERWRITES a leg that is already closed and appends a new log line rather than refusing, so an amendment is possible and auditable -- L2 was closed three times as the actor question resolved and the entry's log carries all three. That was read from the source (cmd_close_leg, lines 438-451) before being relied on, not assumed. AMENDED: measured after the close that an entry CLOSED is no longer amendable by this tool at all -- close removes the sentinel, _load exits on the missing state file, and close-leg refuses the slug outright, while the docstring puts a hand-edit of the entry .md outside the tool's world. So a fact that arrives after the close cannot reach the ledger: leg L2's text stands as written and the correction lives in this instance, the report and row MDPF_HEALGAP-S12."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> HG1-d3-AC1,HG1-d3-AC2,HG1-d3-AC3 --governing-order <order>",
+      "result": "See the validation line in the report. A POSITIVE CONTROL was run first on this box against the known-good HG-d2 instance and returned VALID (rc=0), so a failure here would have been this instance's and not the checker's."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D8/MDPF/MDPF_HEALGAP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "Run before the commit, and its result read for what it actually proves: it reported 0 new row(s) of 15 total checked while the worktree file carries 16 rows, because the gate reads the STAGED INDEX and never the worktree (its _schema and _blob are explicit). So that run is NOT evidence row S11 passes -- it is evidence the gate was looking at HEAD. S11 was instead validated directly against org/surprise_channel/schemas/investigation_item.schema.json with jsonschema: VALID. The gate grades it for real at commit. Its standing corpus pass ran clean: 263 documents, 9167 rows, 4 known legacy failures, 0 new."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'dim_model_portfolio' --limit 12 -- data infra",
+      "result": "Answered the condition-4 question that decided its verdict: the gold writer is data/assets/scripts/gold/build_dim_model_portfolio.py, invoked from the EC2 mdpf-daily-runner at mdpf-daily-dispatch.sh:554, so gold is NOT on the bronze->silver on_success chain condition 4 names. Denominator printed: 78 hits across 14447 files. Also used to establish that the audit-archive INTEGRITY finding at startup A.2 is a long-owned class (211 hits, including the CTO's own shrink-is-real record), so it was NOT re-filed."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read .tools/deploy_ledger.py / .tools/proof-of-spec-check.py / .tools/surprise-row-gate.py --for \"...\"",
+      "result": "Used to read three tool contracts BEFORE relying on them rather than after being surprised by them: that close-leg overwrites, that a surprises entry is a STRING opening with its row id (the self-test fixture at line 2186 settled it), and that the row gate validates against the staged index. Its UNREAD LEDGER was taken as a real statement of what was skipped."
+    },
+    {
+      "tool": "comp-estate",
+      "invocation": "comp-estate --resource dim_model_portfolio",
+      "result": "ANSWER-STATE SUBJECT_ABSENT_FROM_CORPUS across 135 measured chains -- a clean negative, correctly NOT read as no producer exists; comp-find then found the producer. Recorded because an absence from this tool is a fact about its corpus, not about the estate."
+    },
+    {
+      "tool": "terraform (v1.15.8, resolved on PATH)",
+      "invocation": "CHECKPOINT_DISABLE=1 terraform -chdir=infra/aws/terraform/opal-assets plan -target=aws_cloudwatch_event_target.cot_rebalancer_runner_daily -no-color",
+      "result": "No changes. Your infrastructure matches the configuration. -- CTO half condition 3. .tools/terraform.exe does not exist on this laptop, the device fact the prior session recorded; MSYS_NO_PATHCONV was left unset throughout."
+    },
+    {
+      "tool": "to-check.py",
+      "invocation": "python .tools/to-check.py --all --assignee 0.7.0_AE_CloudOps~F",
+      "result": "1 active TO, this one, PENDING, issued by 2.0.0_SA_COO~G1; 4714 faces scanned. The three orders get_agent_status lists as pending for this serial are BASE-folder-scoped and are not this lane's, per CLAUDE.md rule 22a's ROSTER trap."
+    }
+  ]
+}

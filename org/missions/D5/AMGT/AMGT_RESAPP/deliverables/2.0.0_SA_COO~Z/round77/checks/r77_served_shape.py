@@ -30,7 +30,11 @@ def _event(path, query=None):
 
 
 def _segments(bundle):
-    """The served segment breakdown: the first dict in the /thesis body carrying both `rows` and `source`."""
+    """The served segment breakdown: the key `segment_breakdown` where the body carries it as an object; else the first
+    dict in the /thesis body carrying `rows`, `source` and `reason`. Amended by the issuer 2026-10-08 (round 79): from cc-6
+    the body also carries `segment_table` with the same three keys, and the walk met it first."""
+    if isinstance(bundle, dict) and isinstance(bundle.get("segment_breakdown"), dict):
+        return bundle["segment_breakdown"]
     stack = [bundle]
     while stack:
         node = stack.pop()

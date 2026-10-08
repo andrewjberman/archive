@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-rg-1.a-dates-market-rows-are-the-union-of-all-its-objects",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "1580bfb033",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-rg-1.a-dates-market-rows-are-the-union-of-all-its-objects.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1580bfb033"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~15",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_holding_contribution.py",
+      "kind": "script",
+      "commit_or_etag": "32f3f1943f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "g4_rows / g4_window / g4_objects / _g4_merge; handler_entry moved; no deploy",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_buying_trend.py",
+      "kind": "script",
+      "commit_or_etag": "32f3f1943f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "handler_entry reads G4 through g4_window(read=_read)",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_input_census.py",
+      "kind": "script",
+      "commit_or_etag": "32f3f1943f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build reads the window through g4_window; location stays the newest object",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/price_series.py",
+      "kind": "script",
+      "commit_or_etag": "32f3f1943f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "load reads G4 through g4_window",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/publish_page.py",
+      "kind": "script",
+      "commit_or_etag": "32f3f1943f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_chart_reads reads G4 through g4_window",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_canonical_shape.py",
+      "kind": "script",
+      "commit_or_etag": "32f3f1943f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_g4_for rows are the union (g4_rows, backfill-marked merged rows left out); uri / revision / captured unchanged",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "32f3f1943f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "load_parsekeys reads the union through g4_window",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r25rg1_g4_union.py",
+      "kind": "script",
+      "commit_or_etag": "32f3f1943f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 tests",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every reader, through its real entry point on a local sink, reads the union of a two-object date (a live pull and an import): the live close, the import's sector where only the import has one, parsekeys from both; a planted top-up ADDS its security and removes none; control: three identical objects read as one -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/rg-1.AC1.py",
+      "output_evidence": "OK arms (a) (b) (c) (c2) (d) (e) (f) (g) (h); load 2026-09-29 {LVO 50.0, SHR 20.0, SHS 30.0, CUSIP 5.0, IMO None}; load_parsekeys {N97284108: 'NBIS US Equity', 037833100: 'AAPL US Equity'}\nAC1 RESULT: PASS 0 failures",
+      "denominator": "9 of 9 arms OK; rc 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the rule on g4_rows and through the readers: non-backfill over backfill, live over import, later capture time, later as_of, name last; the price group travels whole from the row that has the close; descriptive fields coalesce; an object lacking a column does not break the read; one row per security and date -- expect: AC2 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/rg-1.AC2.py",
+      "output_evidence": "OK arms (a) (b) (c) (o) (d) (e) (f) (g) (h) (i); discovered function rivalfunds.gold_holding_contribution.g4_rows; 3 rows for the three-object date\nAC2 RESULT: PASS 0 failures",
+      "denominator": "10 of 10 arms OK; rc 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "every other table still reads one object per date; _g4_for's recorded uri and revision are as today; seven neighbouring checks still PASS -- expect: AC3 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/rg-1.AC3.py",
+      "output_evidence": "OK arms (a) (b) and the seven neighbours ps-1.AC1 bk-1.AC1 bk-1.AC2 bk-1.AC3 co-1.AC1 pm-1.AC3 pk-1.AC1 each rc 0 PASS 0 failures; _g4_for uri market-20260929-53bc393958bd.parquet revision 20260929-53bc393958bd\nAC3 RESULT: PASS 0 failures",
+      "denominator": "9 of 9 arms OK; rc 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "on the real day the tables and charts of every fund read 2026-09-29 from its market closes; each figure that moves against the served page is named and explained by a close that was unused before; nothing moves on a date that had one object or identical objects",
+      "method": "manual_read_with_citation",
+      "invocation": "none (judgment, graded by 3.0.0_SA_CVO~RV on the issuer's real run)",
+      "output_evidence": "No graded run by the worker; no S3 read, by the order.",
+      "denominator": "0 of 0",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion graded by 3.0.0_SA_CVO~RV on the issuer's real run"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Each check file carries its own control arms (rg-1.AC1 h and g, rg-1.AC2 c and i); the base state fails by their docstrings.",
+      "expected": "rg-1.AC1 FAIL 8 and rg-1.AC2 FAIL 8 at base; control arms PASS",
+      "observed": "with the build all three PASS; 33 of 34 round15 check files PASS 0 failures (mr-1.AC1 belongs to another cell and fails at base); package suite 885 passed, 2 skipped, 0 failed",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "checks and suite run after the last code change",
+      "observed": "all arms OK on the re-run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "left to the issuer by the face"
+    },
+    {
+      "item": "rg-1 J1 (the real day's before / after figures)",
+      "reason": "judgment, graded by 3.0.0_SA_CVO~RV on the issuer's real run"
+    }
+  ],
+  "surprises": ["ETFS_RIVALS-Z-W15-S1", "ETFS_RIVALS-Z-W15-S2"],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~15 <0.9.0_WK_ETFS_RIVALS~15@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "32f3f1943f"
+    }
+  ]
+}

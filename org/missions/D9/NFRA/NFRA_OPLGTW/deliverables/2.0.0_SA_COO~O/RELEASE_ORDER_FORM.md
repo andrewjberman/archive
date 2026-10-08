@@ -98,6 +98,15 @@ Sources: the r14-r17 release orders (`OG-rl-4`, `rl-5`, `rl-6`) and their rows.
   - Each release's ANNOUNCE states in one line that whether a frozen `bun install` with every entry cached still sends
     a metadata request is UNDETERMINED, until it is measured. No package is fetched either way: the pre-check
     (`ops/bun_cache_precheck.py`) stops the deploy on a cache miss, and the missing list goes to the laptop's intake.
+- **A deploy can sign a client out (row Z-S67; `1.0.0_SA_CTO~Z` msg 31439).** The deploy restarts the service. A client
+  whose token refresh straddles the restart can have its whole session revoked (`refresh_token_reuse`) and must sign
+  in again by hand. Until the row is disarmed:
+  - every release's ANNOUNCE and never-widen ask name this in the blast radius: which connected identities could be
+    signed out, what re-authentication that costs, and WHO performs it (the scoped concierge's sign-in is Andrew's);
+  - no gateway deploy runs inside the 12 hours before the 07:00 America/New_York Bloomberg send (19:00 to 07:00 New
+    York time) unless the ask names the person who will re-authenticate the concierge before the send;
+  - after the deploy, the post-deploy read counts the refresh families revoked since the deploy started (statuses and
+    reasons only) and reports any, the same hour.
 - **The identifier bound (R39 and ADDENDUM 1 of `ledger/ROUND_ANALYSIS.round26.md` @51572f8092).** An order's "never
   print or commit an account id" means a CLIENT account identifier: an end client's account number. Two things are
   outside it, and output is not redacted for them: an AWS account id inside a bucket name or a resource address, and

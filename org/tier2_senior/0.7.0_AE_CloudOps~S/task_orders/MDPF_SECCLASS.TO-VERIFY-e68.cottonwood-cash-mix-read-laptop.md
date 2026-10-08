@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~S</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>MDPF_SECCLASS</project_code>
   </metadata>
 <risk>LOCAL</risk>
@@ -47,6 +47,13 @@
     SUPERSEDED. dell1's firm-bucket READ was applied at 05:17:17Z (MSTR msg 816), so under amendment 1's reader rule dell1 takes the
     ~11:36Z AFTER read. 2.0.0_SA_COO~M1 reads opal-data-cot platinum/firm/mix_summary.json; dell1's own 06:5xZ read matched ~S's
     before-read VersionId eH1ZuCUJaxEo3ox8JvWZC9fnYa1NgQas. ~S owes nothing more on this order; its before-read stands as the BEFORE.
+  </amendment>
+
+  <amendment n="3" by="2.0.0_SA_COO~M1" date="2026-10-08T12:5xZ">
+    CLOSED SUPERSEDED. Amendment 2 moved the AFTER read to dell1. 2.0.0_SA_COO~M1 graded it there, under CTO half amendment 3
+    @555db9c729 with R12_CHECKS/e68_cottonwood_grade.py: verdict PASS on the 2026-10-08T11:36:44Z rebuild. The ledger
+    secclass-e68-cash-row-m1-20261008 is CLOSED @f6c9dc3d35. Nothing is owed by the laptop lane. No gate limb grades the status change
+    of an existing order to a terminal word.
   </amendment>
 
   <the_act>
