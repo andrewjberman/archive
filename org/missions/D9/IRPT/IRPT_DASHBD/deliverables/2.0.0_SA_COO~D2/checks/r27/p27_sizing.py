@@ -7,7 +7,8 @@ Usage: python <this file> <repo_root> <criterion_id>
               (or, when stopped at the wall cap, `stopped_at_cap` true with `accounts_run` < population and the cap stated);
               `wall_seconds` and `peak_mb` per stage (returns, class, lots) and in total; `limits` {timeout_s: 900, memory_mb: 2048};
               `per_account_seconds` {p50, p95, p99, max}; `verdict` FITS only when total wall <= 900 and peak <= 2048 and the run was
-              not stopped, else BREACH with `breach` naming each limit exceeded and by how much. Base: FAIL.
+              not stopped, else BREACH with `breach` naming each limit exceeded and by how much. AMENDMENT 1: when the lots stage
+              REFUSED (`lots_stage_completed` false, `lots_refused.reason_class` named) the tail may be null and the verdict is BREACH. Base: FAIL.
   DB27-2-AC2  the run measured the handler at HEAD: `handler_sha256` and `producer_sha256` equal the sha256 of
               infra/aws/lambda/investor-reporting/reporting-gold/handler.py and
               data/assets/scripts/gold/irpt_reporting/account_activity_lots.py at the repo root. Base: FAIL.
@@ -52,14 +53,17 @@ def main():
         if w is None or m is None or [s for s in ("returns", "class", "lots") if not (stages.get(s) or {}).get("wall_seconds") is not None]:
             fail("total %r or stages %r incomplete" % (tot, sorted(stages)))
         tail = r.get("per_account_seconds") or {}
-        if [k for k in ("p50", "p95", "p99", "max") if tail.get(k) is None]:
+        refused = r.get("lots_stage_completed") is False and bool((r.get("lots_refused") or {}).get("reason_class"))
+        # Amendment 1: a lots stage that REFUSED has no per-account samples; the tail may be null only on that branch, named.
+        if [k for k in ("p50", "p95", "p99", "max") if tail.get(k) is None] and not refused:
             fail("per_account_seconds %r" % tail)
-        fits = (not stopped) and float(w) <= 900 and float(m) <= 2048
+        fits = (not stopped) and (not refused) and float(w) <= 900 and float(m) <= 2048
         v = r.get("verdict")
         if v != ("FITS" if fits else "BREACH") or (v == "BREACH" and not r.get("breach")):
             fail("verdict %r disagrees with wall %s s, peak %s MB, stopped %s" % (v, w, m, stopped))
-        print("OK: %d of %d accounts; wall %.1f s, peak %.0f MB vs 900 s / 2048 MB; tail p95 %s s, max %s s; %s %s" % (
-            run, pop, float(w), float(m), tail["p95"], tail["max"], v, r.get("breach") or ""))
+        print("OK: %d of %d accounts; wall %.1f s, peak %.0f MB vs 900 s / 2048 MB; tail p95 %s s, max %s s; %s %s%s" % (
+            run, pop, float(w), float(m), tail.get("p95"), tail.get("max"), v, r.get("breach") or "",
+            "; lots stage REFUSED: %s" % r["lots_refused"]["reason_class"] if refused else ""))
     elif cid == "DB27-2-AC2":
         got = {"handler_sha256": hashlib.sha256((root / HANDLER).read_bytes()).hexdigest(),
                "producer_sha256": hashlib.sha256((root / PRODUCER).read_bytes()).hexdigest()}
