@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_STRATID.TO-ST-t4",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-ST-t4.eclipse-sleeve-name-census.md",
+    "group": "OTHER",
+    "vintage_commit": "f3cc1552bf"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/decompositions/MDPF_STRATID_DECOMP.md",
+    "vintage_commit": "f3cc1552bf",
+    "to_ref": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-ST-t4.eclipse-sleeve-name-census.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_STRATID~3",
+  "session_log": "TO-ST-t4, cell ST-t-4, round 1 of MDPF_STRATID. Worker 0.9.0_WK_MDPF_STRATID~3 on branch wk-MDPF_STRATID-3 in worktree C:/dev/wk-stratid-3 cut from f3cc1552bf. PUSH STATE: LOCAL, never pushed. Read-only against S3 (GetObject/List on opal-data-assets eclipse/inflection and opal-data-etfs config/etf_universe.json); no AWS write, no code edit. The census scanned 4 silver tables x 132 partitions (528 reads), name columns incl. modelDetail children, latest 2026-10-08 distinct names 1363 (history 1418). Result: zero ticker or full-name matches; 13 Opal-only names on the latest date. No surprise row was filed: nothing in the order failed or differed from the premise.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.9.0_WK_MDPF_STRATID~3/ECLIPSE_SLEEVE_NAME_CENSUS.md",
+      "kind": "doc",
+      "artifact_covered_by": [
+        "ST1-t4-AC1",
+        "ST1-t4-AC2"
+      ],
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A read-only census document, not a deployed surface. Carries SOURCE, DENOMINATOR, RESULT lines, the match table and the stated blindness list."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ST1-t4-AC1",
+      "criterion_verbatim": "the census document exists with its SOURCE, DENOMINATOR and RESULT lines.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R1_CHECKS/st_t4_census.py",
+      "expect": "CENSUS-OK",
+      "output_evidence": "denominator=1363\nCENSUS-OK\n(rc=0)",
+      "denominator": "1363 distinct names scanned on 2026-10-08 (1418 over 132 partitions); 3 of 3 required lines present",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ST1-t4-AC2",
+      "criterion_verbatim": "JUDGMENT (graded by 3.0.0_SA_CVO at L9, not by you): the census read the table(s) that actually carry Eclipse sleeve names, and its RESULT follows from its table.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.9.0_WK_MDPF_STRATID~3/ECLIPSE_SLEEVE_NAME_CENSUS.md (sections 'Where the names live', 'Matches', 'Not read')",
+      "output_evidence": "RESULT: NONE-FOUND over DENOMINATOR: 1363; tables read: fact_models, fact_model_composition, fact_portfolios_full, fact_portfolios_simple (eclipse/inflection/silver, 132 partitions each); ticker matches 0, full-name matches 0, Opal-only 13 on latest date; holdings not readable (stated blindness).",
+      "denominator": "4 tables of 4 in eclipse/inflection/silver, 9 name columns",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: graded by 3.0.0_SA_CVO at L9, not self-graded by the worker"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Pattern positive control and checker negative control. The ticker/full-name regexes used by the census were run on planted names; and the document with its RESULT line deleted was tested against the checker's own RESULT regex.",
+      "expected": "planted 'Client Sleeve DIVZ', 'divz income', 'IDVZ_Model', 'Pathfinder Disciplined Equity', 'Pathfinder Focused Opportunities' match; 'XDIVZ' (not a whole word) and 'Opal DIV SMA' do not; the RESULT-less copy has no RESULT line.",
+      "observed": "'Client Sleeve DIVZ' True, 'divz income' True, 'IDVZ_Model' True, 'XDIVZ' False, 'Opal DIV SMA' False, 'Pathfinder Disciplined Equity' full-name True, 'Pathfinder Focused Opportunities' full-name True; RESULT-less copy: RESULT line present False. So a zero cannot be a dead scanner.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC1 invocation was run twice back to back and the captures compared with diff -q. This shows the AC1 checker is deterministic over the document, not that the S3 tables are immutable (Eclipse silver gains a partition daily).",
+      "observed": "two runs, rc 0 and rc 0, diff -q reports no difference.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Holdings-level search (a sleeve holding DIVZ/IDVZ/PFDE/PFOE under a client-style name)",
+      "reason": "The order asks for NAME census; no read Eclipse silver table carries per-portfolio holdings. Stated as a blindness in the census, not a zero."
+    },
+    {
+      "item": "Bronze JSON beyond model_composition_28.json; reconstructed/, _history/, _meta/, eclipse_membership_map/",
+      "reason": "Silver is derived from bronze; the names in scope live in silver. Listed, not read."
+    },
+    {
+      "item": "Any build, rule or code edit",
+      "reason": "The order is read-only and builds nothing."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "comp-read/Read",
+      "invocation": "Read data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py lines 286-535",
+      "result": "Showed ECLIPSE_SILVER readers: _read_partition, _eclipse_models_for_date using fact_portfolios_full columns id, modelId, model, totalValue, isDeleted; led to the four silver tables."
+    },
+    {
+      "tool": "aws s3 (read-only)",
+      "invocation": "aws s3 ls s3://opal-data-assets/eclipse/inflection/silver/ and boto3 list_objects_v2/get_object on the four fact_* prefixes",
+      "result": "4 tables, 132 date partitions each, 2026-05-15 to 2026-10-08."
+    }
+  ]
+}
