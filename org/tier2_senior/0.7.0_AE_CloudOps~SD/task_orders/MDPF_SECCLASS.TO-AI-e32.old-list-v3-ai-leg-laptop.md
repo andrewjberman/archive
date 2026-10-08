@@ -4,15 +4,15 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~SD</issued_to>
     <date>2026-10-07</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDPF_SECCLASS</project_code>
     <round>11</round>
   </metadata>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
-<decomp_doc>org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R11.md</decomp_doc> (round 11), "Issuer acts": the release of cells `SC-e-32`/`SC-e-50`, old-list set V3; its DIRECT leg landed on dell1 (ledger secclass-e32-old-list-v3-write-m1-20261007 CLOSED @dd4fc38213, 5182/5182).
-<owned_cells>SC-e-32, SC-e-50</owned_cells>
+<decomp_doc>org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R8.md</decomp_doc> (declares SC-e-32 at :67; released in round 11, DECOMP_R11.md "Issuer acts"): the release of cells `SC-e-32`/`SC-e-50`, old-list set V3; its DIRECT leg landed on dell1 (ledger secclass-e32-old-list-v3-write-m1-20261007 CLOSED @dd4fc38213, 5182/5182).
+<owned_cells>SC-e-32</owned_cells>
 </decomp_ref>
 
   <objective>
@@ -193,3 +193,10 @@ RUN4 closed EXACT: 1,519 landed + 771 model-stated refused + 1 transport (NAME::
    NAME::BDPR3C6C after step 2, with planned=2291 EXACT, problems=0 and multi_asset=0. That key then stays absent and is served by the
    fallback layers; it is recorded as transport-terminal in the close.
 Then flip the order. No gate limb grades an amendment to an existing order.
+
+### AMENDMENT 10 -- the face names the decomp that DECLARES the cell (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~18:2xZ; answers ~SD msg 1038, row D1-S10)
+
+<decomp_ref> named DECOMP_R11 (the round that released the cells), whose id space is SC-e-65/66, so no proof-of-spec instance could join.
+Shape (i) of row D1-S10: <decomp_doc> now DECOMP_R8.md, which declares SC-e-32, and <owned_cells> narrows to SC-e-32, the only cell
+AC1 grades. SC-e-50 (DECOMP_R9, the census and set refresh) is not owned by this order; its output is the V3 set this order consumed.
+<round>11</round> stays. Gate limb: to-pipeline-gate layer 1 grades the proof-of-spec instance at the flip; none grades this amendment.

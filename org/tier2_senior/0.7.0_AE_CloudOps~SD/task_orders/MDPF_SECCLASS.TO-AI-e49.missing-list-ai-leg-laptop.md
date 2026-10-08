@@ -11,7 +11,7 @@
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
-<decomp_doc>org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R11.md</decomp_doc> (round 11), "Issuer acts": the release of cell `SC-e-49` (FWD-15); its DIRECT leg landed on dell1 (ledger secclass-e49-direct-leg-m1-20261007 CLOSED @f31f9d63bf, 278/278).
+<decomp_doc>org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R9.md</decomp_doc> (declares SC-e-49 at :58; released in round 11, DECOMP_R11.md "Issuer acts"): the release of cell `SC-e-49` (FWD-15); its DIRECT leg landed on dell1 (ledger secclass-e49-direct-leg-m1-20261007 CLOSED @f31f9d63bf, 278/278).
 <owned_cells>SC-e-49</owned_cells>
 </decomp_ref>
 
@@ -110,3 +110,50 @@ No gate limb grades an amendment to an existing order.
 This order carried no <round> tag, so surprise-row-gate.py (TO_ROUND_RE, :1246; the count at :1276-1279) counted it against every
 round's slug. It belongs to round 11 (decomp_ref DECOMP_R11.md), so <round>11</round> is added to its metadata. No other field changes.
 Gate limb: none grades a metadata tag on an existing order; the surprise-row-gate reads it at the next slug.
+
+### AMENDMENT -- the face names the decomp that DECLARES the cell (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~18:2xZ; answers ~SD msg 1041, row D1-S10)
+
+<decomp_doc> now DECOMP_R9.md, which declares SC-e-49; DECOMP_R11 only released it. <owned_cells> and <round>11</round> are unchanged.
+Gate limb: to-pipeline-gate layer 1 grades the proof-of-spec instance at the flip; none grades this amendment.
+
+### AMENDMENT -- throughput, as e32 amendments 6-7 (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~18:4xZ; answers ~SD msg 1047)
+
+At the runner's default `--workers 1`, the 956 to_model keys take ~8 h at e32's measured 30.1 s/key. Switch the running window, and
+resume (a resume plans only absent keys) with the following:
+1. `--workers 4 --chunk 25` under the 10-minute no-progress watchdog, about 2 h. On HTTP 429 or repeated transport failures, drop to
+   `--workers 2` and report. Do not raise it without a new ruling.
+2. Each invocation writes a fresh snapshot, `E49_AI_SNAPSHOT_20261008.RUN<k>_<HHMM>Z.json`. The rollback input stays this order's
+   first snapshot.
+3. A transport or vendor failure (timeout, HTTP error, rate limit, empty or malformed body) is NOT a final refusal. That key stays
+   absent and is re-planned. The close counts as `refused` only model-stated refusals, and reports reasons by count. At most one final
+   1-key attempt per remaining transport key (e32 amendment 9). After it, a key that times out again is recorded as transport-terminal.
+No gate limb grades an amendment to an existing order.
+
+### AMENDMENT -- PAUSE at the next chunk boundary for Andrew's alternatives rule (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~19:0xZ; 1.0.0_SA_CTO~DELL1 msg 1062)
+
+Andrew-direct ~19:0xZ, VERBATIM: "Hedge funds, private funds, real estate funds, all of this falls to Alternatives." Record:
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261008_190xZ_HEDGE_PRIVATE_REAL_ESTATE_FUNDS_ARE_ALTERNATIVES.md`. The CTO
+ruled that it binds this run's instructions. The model prompt (`_shared/etf_classification_model.py` `build_prompt`, :86-99) does not
+state it.
+1. Let the running chunk finish, then stop the run. Do not start the next chunk. Record the landed / refused / remaining counts.
+2. Resume only when this order carries a further amendment naming the prompt commit that states the rule. A resume plans only absent
+   keys, so nothing landed is lost.
+3. Report, read-only, EVERY model-landed row in etf-classifications (e32 and e49 alike, about 1,532 model rows; per 1.0.0_SA_CTO~DELL1
+   msg 1066) whose name reads as a hedge, private or real estate fund and whose class is not alternatives. Give key, name and class, as a
+   TSV in your deliverables. Do not rewrite them; they are remapped under the D1-S11 fix's pair.
+No gate limb grades an amendment to an existing order.
+
+### AMENDMENT -- RESUME on the prompt that states Andrew's rule (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~19:3xZ; answers ~SD msg 1067)
+
+The prompt commit is SC-e-78 @1748729797, merged on dell1 @dd6fa463d5. `build_prompt` now reads "Hedge funds, private funds and real
+estate funds are all alternatives." `R15_CHECKS/sc_r15_prompt_rule.py` reads PROMPT-RULE ok=True, and the _shared suite 356 passed.
+1. Before the first chunk, confirm the runner imports that module from this tree (`git log -1 --format=%h --
+   infra/aws/lambda/v2_portal/_shared/etf_classification_model.py` reads 1748729797 or a descendant). Run sc_r15_prompt_rule.py once and
+   record its line.
+2. Resume with `--workers 2 --chunk 25` under the watchdog. The 17 transport failures in 200 keys (8.5 pct) fired amendment 7's
+   drop-to-2. Write a fresh RUN snapshot as before.
+3. The step-3 read of earlier landed rows is superseded by SC-e-77's REMAP scan, which covers every model-landed row. Do not repeat it.
+4. Close as the throughput amendment says: model-stated refusals by count; at most one final 1-key attempt per remaining transport
+   key.
+No gate limb grades an amendment to an existing order.
+
