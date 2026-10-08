@@ -1,0 +1,122 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_VNEXT.TO-F10-l1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-F10-l1.svc-commentary-draft-write.md",
+  "group": "OTHER",
+  "vintage_commit": "ec9573835c"
+ },
+ "assignee": "0.9.0_WK_TCKT_VNEXT~3",
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_F10.md",
+  "vintage_commit": "ec9573835c",
+  "to_ref": "org/missions/D7/TCKT/TCKT_VNEXT/task-orders/TCKT_VNEXT.TO-F10-l1.svc-commentary-draft-write.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+   "kind": "script",
+   "commit_or_etag": "8ae7ed7dad",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "handler edited by path; the order forbids terraform, deploy, Lambda invocation and AWS calls; the COMMENTARY_ALLOWED_FIRMS env hookup and the svc-commentary token are the issuer's (F10-d-1 / F10-r-1)",
+   "artifact_covered_by": [
+    "F10-l1-AC1",
+    "F10-l1-AC2",
+    "F10-l1-AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ticket_center/tests/test_commentary_write.py",
+   "kind": "test",
+   "commit_or_etag": "8ae7ed7dad",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "repo-local test; in-memory table, notifiers stubbed, no network",
+   "artifact_covered_by": [
+    "F10-l1-AC1",
+    "F10-l1-AC2",
+    "F10-l1-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "F10-l1-AC1",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/F10_CHECKS/f10_checks.py f10-principal expect: F10-PRINCIPAL-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/F10_CHECKS/f10_checks.py f10-principal",
+   "output_evidence": "run under timeout 120, rc=0: F10-PRINCIPAL-OK passed=4",
+   "denominator": "4 of 4 named principal tests found by name and passed",
+   "status": "PASS",
+   "expect": "F10-PRINCIPAL-OK"
+  },
+  {
+   "criterion_id": "F10-l1-AC2",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/F10_CHECKS/f10_checks.py f10-fields expect: F10-FIELDS-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/F10_CHECKS/f10_checks.py f10-fields",
+   "output_evidence": "run under timeout 120, rc=0: F10-FIELDS-OK passed=7",
+   "denominator": "7 of 7 named field tests found by name and passed",
+   "status": "PASS",
+   "expect": "F10-FIELDS-OK"
+  },
+  {
+   "criterion_id": "F10-l1-AC3",
+   "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/F10_CHECKS/f10_checks.py f10-security expect: F10-SECURITY-OK",
+   "method": "command",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/F10_CHECKS/f10_checks.py f10-security",
+   "output_evidence": "run under timeout 120, rc=0: F10-SECURITY-OK passed=4",
+   "denominator": "4 of 4 named security tests found by name and passed",
+   "status": "PASS",
+   "expect": "F10-SECURITY-OK"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "in-process mutants against the committed handler, each run against the new test file: (1) svc-commentary firm check pointed back at _firm_allowed (token allowedFirmIds); (2) draft_commentary removed from DL_NOTICE_PROHIBITED; (3) the service_fields owner check disabled",
+   "expected": "each mutant makes its guarding test fail",
+   "observed": "mutant 1 FIRED (test_firm_outside_allowed_refused_for_svc_commentary); mutant 2 FIRED (test_draft_not_in_dl_notice); mutant 3 FIRED (test_draft_fields_refused_for_internal_human, test_draft_fields_declared_in_type_definition); handler restored byte-identical, 15 passed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the new test file and the full ticket_center suite run on the same tree after the commit",
+   "observed": "test_commentary_write.py 15 passed (three runs: 1.06s, 0.76s, 0.70s); full ticket_center suite 104 passed, 43 subtests passed",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the deployed Lambda, the COMMENTARY_ALLOWED_FIRMS env var, the svc-commentary token and the authorizer minting it",
+   "reason": "the order forbids terraform/deploy/AWS; these are F10-d-1 and F10-r-1 (the issuer's) and contract open item O1"
+  },
+  {
+   "item": "the order file text for AMENDMENT 1 (firm check)",
+   "reason": "the order's write grant for its own file is the status flip only; the amendment is implemented and tested as given in the coordinator message"
+  },
+  {
+   "item": "a real DynamoDB write of draft_commentary",
+   "reason": "the in-memory table refuses floats as DynamoDB does; the stored map holds strings only, but no real table is exercised here"
+  }
+ ],
+ "surprises": [
+  "TCKT_VNEXT-D2-W3-S1"
+ ],
+ "session_log": "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/0.9.0_WK_TCKT_VNEXT~3/TCKT_VNEXT.TO-F10-l1.svc-commentary-draft-write.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/F10_CHECKS/f10_checks.py f10-principal",
+   "result": "F10-PRINCIPAL-OK passed=4"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/F10_CHECKS/f10_checks.py f10-fields",
+   "result": "F10-FIELDS-OK passed=7"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/F10_CHECKS/f10_checks.py f10-security",
+   "result": "F10-SECURITY-OK passed=4"
+  }
+ ]
+}
