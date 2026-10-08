@@ -10,7 +10,7 @@
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
-<decomp_doc>org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round4.md</decomp_doc> (round 4), "The issuer's acts after the drain": a further apply leg of cell `CT-a-1` (the Dell identity root; its AMENDMENT 9 built this plan on Andrew's word lifting the Dells' limits).
+<decomp_doc>org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md</decomp_doc> (workstream ACCESS, where cell `CT-a-1` is defined; the earlier text named round4.md, which holds no CT-a cell: row NFRA_CTLPLN-S30), the issuer's acts after the drain: a further apply leg of cell `CT-a-1` (the Dell identity root; its AMENDMENT 9 built this plan on Andrew's word lifting the Dells' limits).
 <owned_cells>CT-a-1</owned_cells>
 </decomp_ref>
 
@@ -115,4 +115,24 @@ Added to the STOP conditions of step 3: the string `respol_allow` anywhere in th
 carries CORRECTION 1 to the same effect; the GO for this amendment names the CTO's concurrence. Steps 3, 5 and 6 and criterion
 AC2 are edited above accordingly. Gate limb: none graded this modification. Row NFRA_CTLPLN-S25 is disarmed by this amendment
 and the correction: the unsigned Allow cannot ride a plan targeted at five other resources.
+
+## AMENDMENT 2 (2.0.0_SA_COO~C, 2026-10-08 ~10:4xZ) -- this order is now STEP B: the plan reads 2 to add, 0 to change, 2 to destroy; the HOLD is lifted by the GO that names this amendment
+
+Step A (TO-APPLY-12) applied at 09:19:39Z and brought the create policy to its final text. WHERE THIS AMENDMENT AND THE TEXT
+ABOVE DIFFER, THIS AMENDMENT GOVERNS:
+- Step 1: the simulation line to expect is `undo_denied=181/181 selfsim_ok=9/9 ssm_ok=15/15 routes_ok=5/5 vendor_ok=235/235 all_ok=True`
+  (the order's earlier `ssm_ok=9/9` predates step A). The census line is unchanged; ALWAYS `--from-file`.
+- Step 2: save the live `cloudops-dell-agent-respol-policy` document and the group's attached-policy list with SHA-256; the
+  create policy is not changed by this act and need not be saved again.
+- Step 3: the same five `-target` flags, NO `-var`. EXACTLY `2 to add, 0 to change, 2 to destroy`: the secrets policy and its
+  attachment created (66 ARNs, one action, no wildcard), `aws_iam_policy.dell_agent_respol` and its attachment destroyed. ANY
+  change to `aws_iam_policy.dell_agent_create`, either `respol_allow` address, or a fifth resource is a STOP. The ten
+  withheld-name greps read zero. The issuer's plan at ~10:3xZ read exactly this (96 lines added, 104 removed).
+- Step 6 gains two arms per user: `sqs:SetQueueAttributes` on one agentbus queue -> refused, matched `DenyAgentbusQueuePolicy`
+  alone; on a non-agentbus queue name -> allowed. The group's attached-policy list is read live after the apply.
+- Criterion AC1's line now carries `vendor_ok=235/235 all_ok=True` as before; unchanged.
+- Halves: COO CORRECTION 2 (the commit of this amendment); CTO AMENDMENT 2 @0f3ff4f71d.
+- The `<decomp_ref>` now names the decomposition that defines cell CT-a-1 (row NFRA_CTLPLN-S30). If the proof checker still
+  reports a violation on it, quote the violation lines in the report: the issuer repairs the order, the applier does not.
+Gate limb: none graded this modification.
 </task_order>
