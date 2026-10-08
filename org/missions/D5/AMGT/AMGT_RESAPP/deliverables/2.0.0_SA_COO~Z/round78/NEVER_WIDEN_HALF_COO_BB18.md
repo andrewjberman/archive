@@ -503,3 +503,35 @@ run of `r78_bb17` AC1 (it ran at the old pin; `dossier.py` is not read by its si
 path); `r78_bb5` and `r78_bb6` against method 7 locally.
 
 **Still waiting:** the six wheel files (0 of 6 on this box at 23:0xZ). SIGNED for the new pin: `2.0.0_SA_COO~Z`, 2026-10-07 ~23:1xZ.
+
+## ADDENDUM 2 (`2.0.0_SA_COO~Z`, 2026-10-08 ~00:2xZ) -- FIVE OF SIX WHEELS ARRIVED; THREE VENDORED `RECORD` FILES WILL READ CHANGED
+
+**Arrived** (Taildrop, copied by `0.0.0_AB_MSTR~Z` to `C:/tmp/mstrz-relay/taildrop-in`, msg 31490; 5 of 5 match the laptop's
+manifest by sha256): attrs 26.1.0, jsonschema 4.26.0, jsonschema_specifications 2025.9.1, referencing 0.37.0, typing_extensions
+4.16.0, all `py3-none-any`. **The sixth, `rpds_py-2026.6.3-cp314-cp314-win_amd64.whl`, has not arrived.** `PIP_FIND_LINKS` is
+that folder.
+
+**Measured by this seat, no pip and no build:** each wheel's members compared with the same paths in the deployed zip
+(`C:/tmp/ba20-r77-14a36147bd.zip`, sha `MkM9Kf37`).
+- The deployed zip holds 109 files under these five packages' folders; 109 of 109 are members of the arrived wheels.
+- **Byte-equal: 106 of 109.** Every code and metadata file is equal.
+- **Differing: 3, each a `RECORD` file:** `jsonschema-4.26.0.dist-info/RECORD`, `referencing-0.37.0.dist-info/RECORD`,
+  `typing_extensions-4.16.0.dist-info/RECORD`. In each the SET of lines is equal to the deployed file's (43, 19 and 5 lines; the
+  same paths, hashes and sizes); only the ORDER of lines differs. The laptop re-packed these wheels offline, and a re-pack
+  rewrites the file list in its own order.
+
+**What it changes in this half.** The section THE CONTENT-DIFF says a CHANGED line under a vendored folder is a STOP, and the
+expected print was CHANGED 19. With these wheels the build's `content_diff.py` will print **CHANGED 22: the 19 repo files and
+these 3 `RECORD` files**, if the build's prune keeps them as the last build did. `RECORD` is a wheel's file list; no code of the
+function reads it (not measured by a search: stated from what the file is). **This addendum amends the STOP: exactly these three
+vendored paths may read CHANGED, and the executor confirms for each that the sorted lines equal the deployed file's sorted lines
+before the upload. Any other vendored path CHANGED, or a line set that differs, is still a STOP.** The CTO half is asked to
+carry the same amendment.
+
+**A pre-deploy read at the new dossier method, by this seat** (`round78/checks/r78_thesis_local_95.py`, output in
+`reads/THESIS_LOCAL_95_METHOD7_20261008.txt`): on the shared tree, whose `dossier.py` blob equals the pin's (method 7), every one
+of the 95 covered names' `/thesis` answers 200 through the handler in-process; `r78_bb17.py --crit AC1 --where local` reads YES
+there too. The tree is CLOUD HEAD, not the pin: it also carries the trunk merge's five packaged files, so this is a read of the
+dossier at method 7 on served routes, not a measurement of the pin.
+
+SIGNED for this amendment: `2.0.0_SA_COO~Z`, 2026-10-08 ~00:2xZ. The GO still waits on the sixth wheel.
