@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-sf-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~37",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/ledger/ROUND_ANALYSIS.round31.md",
+  "group": "OTHER",
+  "vintage_commit": "e43ee663be"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "edc8acefc8",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sf-1.asker-query-safe-tool.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/destructive_ops.py",
+   "kind": "script",
+   "commit_or_etag": "17b2977f4c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Built and held on the worker branch; the order bars release and deploy.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_asker_safe_tool.py",
+   "kind": "test",
+   "commit_or_etag": "17b2977f4c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Offline tests test_ogsf1_ac01..03; 3 passed.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~37/tool_class_census.json",
+   "kind": "config_data",
+   "commit_or_etag": "17b2977f4c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "registered 42, unclassified [], safe 37, destructive 7, write_class 7.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the tool is SAFE; a scoped identity's call is not write_class_denied; an unknown tool still is refused.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/sf1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "3 named tests of 3",
+   "status": "PASS",
+   "expect": "(?s)named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the issuer's own static census agrees with yours, and the tool is in SAFE_TOOLS.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/sf1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "registered in tools.py (denominator): 42\nSAFE_TOOLS 37, DESTRUCTIVE_OPS 7, TOOL_WRITE_CLASS 7\nclassified 42 of 42; unclassified 0\nopal_asker_query in SAFE_TOOLS: yes\nworker record agrees with this census: yes (record registered=42, unclassified=[])\nRESULT: PASS\nexit=0",
+   "denominator": "42 registered tools",
+   "status": "PASS",
+   "expect": "(?s)registered in tools\\.py \\(denominator\\): \\d+.*opal_asker_query in SAFE_TOOLS: yes.*worker record agrees with this census: yes.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Remove the opal_asker_query line from SAFE_TOOLS in a scratch copy and rerun the new tests.",
+   "expected": "test_ogsf1_ac01 and test_ogsf1_ac02 fail",
+   "observed": "2 failed, 1 passed: ac01 class IRREVERSIBLE_SEND not SAFE; ac02 'tier READ_ONLY may not call mutating tool'; file restored, 3 passed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "tests rerun after restore and via the AC1 script; both 3 passed",
+   "observed": "3 passed, 3 passed",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Classifying any tool other than opal_asker_query.",
+   "reason": "The census found none other unclassified before the edit (42 registered, only opal_asker_query outside the three sets)."
+  }
+ ],
+ "surprises": [],
+ "session_log": "No persisted session log for an L7 worker. Trail: this instance, commit 17b2977f4c, branch wk-NFRA_OPLGTW-32-37. No AWS or network call. Totals: test_asker_safe_tool 3 passed, test_asker_scope 4 passed, test_asker_binding 16 passed, test_tool_classification_composition 7 passed, each in its own process.",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "python -m pytest tests/<file>.py -q (one process per file)",
+   "result": "3, 4, 16, 7 passed; 0 failed"
+  }
+ ]
+}
