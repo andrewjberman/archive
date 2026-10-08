@@ -1,0 +1,44 @@
+
+====================================================================================================================
+dell1  (arn:aws:iam::313476888478:user/cloudops-dell1-agent-user)   -- NO secret VALUE is read; every secrets arm is a simulation against the ARN
+====================================================================================================================
+  GRANTED  blackdiamond/49f/session            secretsmanager:GetSecretValue    -> allowed        OK         matched ['cloudops-dell-agent-vendor-secrets-policy(IAM Policy)']
+  GRANTED  astn/kimi/api-key                   secretsmanager:GetSecretValue    -> allowed        OK         matched ['cloudops-dell-agent-vendor-secrets-policy(IAM Policy)']
+  GRANTED  openai-api-key                      secretsmanager:GetSecretValue    -> allowed        OK         matched ['cloudops-dell-agent-vendor-secrets-policy(IAM Policy)']
+  WITHHELD opal/auth/jwt-private-key           secretsmanager:GetSecretValue    -> implicitDeny   OK         matched []
+  WITHHELD opalinvest/admin-seed               secretsmanager:GetSecretValue    -> implicitDeny   OK         matched []
+  WITHHELD gateway/mail/bearer                 secretsmanager:GetSecretValue    -> implicitDeny   OK         matched []
+  WITHHELD blackdiamond/49f/otp-gateway-token  secretsmanager:GetSecretValue    -> implicitDeny   OK         matched []
+  FREED: queue attrs, NON-agentbus             sqs:SetQueueAttributes           -> allowed        OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+  STILL REFUSED: queue attrs laptop            sqs:SetQueueAttributes           -> explicitDeny   OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+  STILL REFUSED: queue attrs sitez             sqs:SetQueueAttributes           -> explicitDeny   OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+  STILL REFUSED: queue attrs dell1             sqs:SetQueueAttributes           -> explicitDeny   OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+  STILL REFUSED: queue attrs dell2             sqs:SetQueueAttributes           -> explicitDeny   OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+  STILL REFUSED: s3:PutBucketPolicy            s3:PutBucketPolicy               -> explicitDeny   OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+
+====================================================================================================================
+dell2  (arn:aws:iam::313476888478:user/cloudops-dell2-agent-user)   -- NO secret VALUE is read; every secrets arm is a simulation against the ARN
+====================================================================================================================
+  GRANTED  blackdiamond/49f/session            secretsmanager:GetSecretValue    -> allowed        OK         matched ['cloudops-dell-agent-vendor-secrets-policy(IAM Policy)']
+  GRANTED  astn/kimi/api-key                   secretsmanager:GetSecretValue    -> allowed        OK         matched ['cloudops-dell-agent-vendor-secrets-policy(IAM Policy)']
+  GRANTED  openai-api-key                      secretsmanager:GetSecretValue    -> allowed        OK         matched ['cloudops-dell-agent-vendor-secrets-policy(IAM Policy)']
+  WITHHELD opal/auth/jwt-private-key           secretsmanager:GetSecretValue    -> implicitDeny   OK         matched []
+  WITHHELD opalinvest/admin-seed               secretsmanager:GetSecretValue    -> implicitDeny   OK         matched []
+  WITHHELD gateway/mail/bearer                 secretsmanager:GetSecretValue    -> implicitDeny   OK         matched []
+  WITHHELD blackdiamond/49f/otp-gateway-token  secretsmanager:GetSecretValue    -> implicitDeny   OK         matched []
+  FREED: queue attrs, NON-agentbus             sqs:SetQueueAttributes           -> allowed        OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+  STILL REFUSED: queue attrs laptop            sqs:SetQueueAttributes           -> explicitDeny   OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+  STILL REFUSED: queue attrs sitez             sqs:SetQueueAttributes           -> explicitDeny   OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+  STILL REFUSED: queue attrs dell1             sqs:SetQueueAttributes           -> explicitDeny   OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+  STILL REFUSED: queue attrs dell2             sqs:SetQueueAttributes           -> explicitDeny   OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+  STILL REFUSED: s3:PutBucketPolicy            s3:PutBucketPolicy               -> explicitDeny   OK         matched ['cloudops-dell-agent-create-policy(IAM Policy)']
+
+====================================================================================================================
+READBACK14 arms=26 pass=26 fail=0
+READBACK14 ok=True
+
+NOTE on the refusal KIND, so no reader has to guess: a withheld secret reads implicitDeny because NO Allow
+covers it -- the live grant is 66 exact ARNs and the withheld ones are not among them (measured in V1, where
+all 66 live ARNs resolved to census names and the set equalled the signed half's 66 name for name). The old
+resource-policy Deny that used to produce explicitDeny on some of these no longer exists, which this act
+destroyed and V1 confirmed by NoSuchEntity with a positive control.
