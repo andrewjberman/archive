@@ -18,9 +18,9 @@
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/S11_ROW_SET_20261008.tsv",
       "kind": "config_data",
-      "commit_or_etag": "a68c03e440",
+      "commit_or_etag": "b184ed51a3",
       "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "117 lines: 106 NEW (25 group B by ticker, 81 group D by name_key), 11 REMAP; 20 rule=andrew-alternatives lines; each carries a one-phrase evidence; LOCAL file, nothing written to any table",
+      "deploy_evidence": "141 lines (header + 140): 106 NEW (25 group B by ticker, 81 group D by name_key), 34 REMAP (11 original + 23 liquid-alt mutual-fund lines from amendment 2); 43 rule=andrew-alternatives lines; each carries a one-phrase evidence; LOCAL file, nothing written to any table",
       "artifact_covered_by": [
         "SC15-e77-AC1",
         "SC15-e77-AC2"
@@ -39,9 +39,9 @@
     {
       "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_S11_ROWS_20261008.md",
       "kind": "doc",
-      "commit_or_etag": "a68c03e440",
+      "commit_or_etag": "b184ed51a3",
       "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "half request: the act, each line's before and after, the candidate served-mix delta from the trace's dollars (USD 5,820,645.24 out of unclassified), rollback per key; COO and CTO halves UNSIGNED",
+      "deploy_evidence": "half request: the act (34 REMAP), each line's before and after, the amendment-2 served-mix effect of the 23 liquid-alt lines (structured/Hedge to alternatives; dollars UNREAD, not in the trace), candidate delta from the trace's dollars, rollback per key; COO and CTO halves UNSIGNED",
       "artifact_covered_by": [
         "SC15-e77-AC3"
       ]
@@ -54,18 +54,18 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/sc_r15_rows_set.py",
       "expect": "S11-ROW-SET ok=True",
-      "output_evidence": "S11-ROW-SET ok=True bd=106 covered=106 new=106 remap=11 rule_rows=20 bad=0 first_bad=[] (rc=0, re-run this session). Whether each class and each rule mark is right is graded by 3.0.0_SA_CVO at L9, not here.",
-      "denominator": "106 of 106 B/D securities covered once as NEW; 11 REMAP lines; 20 rule rows (9 NEW + 11 REMAP)",
+      "output_evidence": "S11-ROW-SET ok=True bd=106 covered=106 new=106 remap=34 rule_rows=43 bad=0 first_bad=[] (rc=0, re-run on commit b184ed51a3). Whether each class and each rule mark is right is graded by 3.0.0_SA_CVO at L9, not here.",
+      "denominator": "106 of 106 B/D securities covered once as NEW; 34 REMAP lines; 43 rule rows (9 NEW + 34 REMAP)",
       "status": "PASS"
     },
     {
       "criterion_id": "SC15-e77-AC2",
-      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py -- expect: refused_present=1 refused_stale=0 puts=0 (as amended by TO Amendment 1, commit ef7d71687f)",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py -- expect: refused_stale=0 puts=0 (Amendment 3, commit 12a119410b: a fixed refused_present count cannot hold while e49 lands group-B tickers)",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py",
-      "expect": "refused_present=1 refused_stale=0 puts=0",
-      "output_evidence": "REFUSED_PRESENT RAL live=equity/Information Technology by='mdpf-secclass-model' / S11-ROWS-DRY-RUN new=105 remap=11 refused_present=1 refused_stale=0 puts=0 (rc=1; the writer exits 1 whenever any key is refused, and the amended expectation is the output line). The only REFUSED_PRESENT line names RAL; no other key refused. RAL ($70) was landed by the model runner at 2026-10-08T19:01:52Z after the trace was cut, same class as this set gives it (Amendment 1; row MDPF_SECCLASS-D1-W67-S1).",
-      "denominator": "116 of 117 lines planned (105 NEW + 11 REMAP); 1 NEW refused present (RAL); 0 refused stale; 0 mutating calls",
+      "expect": "refused_stale=0 puts=0",
+      "output_evidence": "REFUSED_PRESENT OXYWS live=equity/Energy by='mdpf-secclass-model' / REFUSED_PRESENT RAL live=equity/Information Technology by='mdpf-secclass-model' / S11-ROWS-DRY-RUN new=104 remap=34 refused_present=2 refused_stale=0 puts=0 (rc=1, re-run 2026-10-08 on worktree HEAD 12a119410b, set and writer unchanged since b184ed51a3). Both REFUSED_PRESENT keys carry live asset_class equity, equal to the set's NEW line class (OXYWS equity, RAL equity), so each is a no-op, not a re-plan; the issuer reads these lines before signing (Amendment 3).",
+      "denominator": "138 of 140 lines planned (104 NEW + 34 REMAP); 2 NEW refused present (OXYWS, RAL; live class equals set class); 0 refused stale; 0 mutating calls",
       "status": "PASS"
     },
     {
@@ -74,8 +74,8 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_S11_ROWS_20261008.md",
       "expect": "HALF-READY",
-      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_S11_ROWS_20261008.md (rc=0)",
-      "denominator": "1 of 1 half request; 0 slots, 0 missing headings",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_S11_ROWS_20261008.md (rc=0, re-run on commit b184ed51a3)",
+      "denominator": "1 of 1 half request; 0 slots, 0 missing headings; blast radius carries the 34 REMAP lines",
       "status": "PASS"
     }
   ],
@@ -83,12 +83,12 @@
     "mutant": {
       "description": "AC1 checker run from a scratch root with (a) the CMWAY line deleted from the set and (b) the CAIS PRIVATE EQUITY line's class changed from alternatives to equity while its rule mark stayed; AC2 writer: the present-key refusal fired on the live RAL row.",
       "expected": "AC1 ok=False in both mutants; AC2 refuses a present NEW key",
-      "observed": "(a) S11-ROW-SET ok=False covered=105 first_bad=[('CMWAY', 'missing-or-dup', 0)]; (b) ok=False first_bad=[('NAME::CAIS PRIVATE EQUITY CORE II LP', 'rule', 'equity')]; AC2 printed REFUSED_PRESENT RAL",
+      "observed": "(a) S11-ROW-SET ok=False covered=105 first_bad=[('CMWAY', 'missing-or-dup', 0)]; (b) ok=False first_bad=[('NAME::CAIS PRIVATE EQUITY CORE II LP', 'rule', 'equity')]; AC2 printed REFUSED_PRESENT RAL | amendment 2 re-run: dry run printed REFUSED_PRESENT for both OXYWS and RAL",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "AC1-AC3 run once each after the final edit of the set, writer and half",
-      "observed": "AC1 ok=True 106/106 (rc=0); AC2 new=105 remap=11 refused_present=1 (RAL only) refused_stale=0 puts=0 (rc=1); AC3 HALF-READY (rc=0); re-run after Amendment 1",
+      "observed": "AC1 ok=True 106/106 remap=34 (rc=0); AC2 new=104 remap=34 refused_present=2 (OXYWS, RAL) refused_stale=0 puts=0 (rc=1); AC3 HALF-READY (rc=0); re-run after Amendment 3 at 12a119410b, identical to the prior run",
       "status": "STABLE"
     }
   },
@@ -100,11 +100,16 @@
     {
       "item": "Whether each class and each rule=andrew-alternatives mark is right.",
       "reason": "JUDGMENT, graded by 3.0.0_SA_CVO at L9; recorded in the evidence column and in surprise row MDPF_SECCLASS-D1-W67-S2."
+    },
+    {
+      "item": "structured/Hedge AI rows (mdpf-secclass-model) NOT moved by amendment 2: 232 of 255 structured/Hedge rows at the 10,685-row scan (255 = 238 mdpf-secclass-model + 11 seed-script + 6 clean-names-v2; 23 moved).",
+      "reason": "(1) volatility/ETN/structured notes: CUSIP:* bank notes (BBVA, Barclays, JPM, Morgan Stanley; clean-names-v2), NAME::BLMBERG 2 US DYN PT PAR ER CLASSIC, NAME::EQ STRUCTURED CAP STRAT 16 SER B, NAME::*RUSS 2000 ANN LOCK*/MSCI EAFE / RUSSELL 2000 / S P 500 BUFFER and SHIELD annuity lines (about 45 NAME:: rows); VXX/UVXY/VIXY are seed-script. (2) listed option lines (CALL/PUT/OCC-coded and futures-option lines, about 130 NAME:: rows). (3) ETFs, not mutual funds: FTLS, PHDG, PSQ, SH, TUSC, NOVZ, BALT, AZBU/JULT/JULW/MARW/SIXF buffer ETFs, NAME::TIMOTHY PLAN MARKET NEUTRAL ETF, NAME::FRANKLIN SYSTEMATIC STYLE PREMIA ETF, NAME::JPMORGAN HEDGED EQUITY LADDERED OVERLAY ETF, NAME::PROSHARES ULTRAPRO SHORT RUSSELL2000, NAME::TRUESHARES * ETFs, FT VEST / INNOVATOR / PGIM / ALLIANZIM buffer ETFs. (4) seed-script rows (11, not AI-landed): JHQTX (JPMorgan Hedged Equity 3 Fund, a hedged-equity mutual fund) is the one that would otherwise qualify - flag for the issuer. (5) already handled earlier in the set: NAME::SHAW PARK MULTI STRATEGF OFFSHORE FUND LP, NAME::CCA EIGER OPPORTUNITY LP CAPITAL VALUES. (6) strategy not evident from the name, left for the issuer/CVO: ticker rows CRDBX, CRMVX, GENIX, HNDRX and their NAME:: twins (Potomac Defensive Bull, Potomac Managed Volatility, Gotham Enhanced Return, Horizon Defined Risk), NAME::GATEWAY A (options overlay), NAME::GUIDESTONE FUNDS DEFENSV MKT STRATS INV, NAME::TIMOTHY PLAN DEFENSIVE STRATEGIES C, NAME::KENSINGTON ACTIVE ADVANTAGE INST, NAME::INVENOMIC INSTITUTIONAL, NAME::AQR MS FUSION HV I; NAME::AQR TA DELPHI PLUS FUND LLC is a private fund LLC, not a mutual fund. (7) FT UNIT 9273 INT RATE HEDGE PORT, a unit trust. Scope note: the 23 moved lines include arbitrage, event-driven, multi-strategy and managed-futures mutual funds beyond the four named categories; the issuer may drop those lines."
     }
   ],
   "surprises": [
     "MDPF_SECCLASS-D1-W67-S1",
-    "MDPF_SECCLASS-D1-W67-S2"
+    "MDPF_SECCLASS-D1-W67-S2",
+    "MDPF_SECCLASS-D1-W67-S3"
   ],
   "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
