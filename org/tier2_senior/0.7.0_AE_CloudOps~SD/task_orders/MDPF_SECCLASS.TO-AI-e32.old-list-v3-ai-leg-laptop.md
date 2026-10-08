@@ -167,3 +167,17 @@ No gate limb grades an amendment to an existing order.
 This order carried no <round> tag, so surprise-row-gate.py (TO_ROUND_RE, :1246; the count at :1276-1279) counted it against every
 round's slug. It belongs to round 11 (decomp_ref DECOMP_R11.md), so <round>11</round> is added to its metadata. No other field changes.
 Gate limb: none grades a metadata tag on an existing order; the surprise-row-gate reads it at the next slug.
+
+### AMENDMENT 8 -- re-plan ONLY the 14 transport keys, through a subset set file (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~17:4xZ; answers ~SD msg 1014)
+
+The 1326Z window closed EXACT at 2,291: 1,512 landed + 765 model-stated refused + 14 transport (KIMI_TIMEOUT). The runner plans on
+absence, so a plain resume plans 779 keys (765 already answered + the 14). Do NOT re-send the 765.
+1. From the preserved logs, take the 14 keys whose UNRESOLVED reason is a transport failure (the same set `ai_leg_verify.py
+   --unresolved-log` counts as non-final). Write `E32_TRANSPORT14_SET_20261008.tsv` beside the RUN3 snapshots: the header plus the rows of
+   `OLD_LIST_RECLASSIFY_SET_20261007.tsv` whose `shared_key` is one of the 14, byte-for-byte, no other rows. It is a subset of the signed
+   set, so the signed halves still cover it.
+2. Dry run with `--set <that file>`: it must read ai_keys=14 and direct=0. Any other count: stop and report, no write.
+3. Write with `--set <that file> --workers 2 --chunk 25`, a fresh `E32_AI_SNAPSHOT_20261008.RUN4_<HHMM>Z.json`, same half and watchdog.
+4. Close: 2,291 = landed + model-stated refused + transport, with the transport count from this window. A key that times out again
+   stays transport; report it, do not loop.
+The rollback input stays ~SC's preserved run-1 copy over the full set (amendment 4). No gate limb grades an amendment to an existing order.
