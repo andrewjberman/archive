@@ -32,7 +32,7 @@
   <the_act>
     The apply runs only when BOTH never-widen halves are SIGNED. ONE go, no second message; the issuer's GO names the CTO half.
     - COO half: org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_PLAN_1_SECRETS_DENY_OFF_SELF_SIMULATE_20261008.md (@fa6d36f4a3)
-    - CTO half: named in the GO message.
+    - CTO half: org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_PLAN_1_SECRETS_DENY_OFF_SELF_SIMULATE_20261008.md (@8c4fe4be88)
     Read both in full first and carry every condition of both.
 
     THE COMMIT: the shared tree at its HEAD on CLOUD, which must contain 35f5f12418. Show `git status --porcelain --
@@ -41,9 +41,10 @@
     1. Load /cloud-ops. Immediately before the plan, run and record each last line:
        `python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py`
        (expect `selfsim_ok=9/9 ssm_ok=9/9 routes_ok=5/5 vendor_ok=235/235 all_ok=True`) and
-       `python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py` in its SAVED (default, not live) mode
-       (expect `secrets=114 ... granted=66 ok=True blocked_by_key=1 platform_key=28 other=19`; read the script's usage first and
-       do NOT pass a flag that re-takes the listing or rewrites the saved census). A failing line is a STOP.
+       `python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json`
+       (expect `secrets=114 ... granted=66 ok=True blocked_by_key=1 platform_key=28 other=19`). ALWAYS with `--from-file`: the
+       issuer ran it without the flag and it did not finish in 118 s (it re-takes the listing); with the flag it reads the saved
+       census and leaves the root unmodified (measured). A failing line is a STOP.
     2. BEFORE: save the LIVE documents of `cloudops-dell-agent-create-policy` and `cloudops-dell-agent-respol-policy` (default
        versions) and the Dell agent group's attached-policy list, each with SHA-256.
     3. Plan, untargeted.
@@ -71,8 +72,6 @@
   <bounds>
     - This root only, one apply. No edit to any `.tf`, policy document, census or test file.
     - `safe-apply` only. No push of a shared branch. No secret value read. No other root.
-    - The laptop's shared tree is quiet from 06:25Z to 06:45Z (1.0.0_SA_CTO msg 106747): do not commit, merge or stage there
-      in that window; an apply in flight finishes and its ledger commit waits until 06:45Z.
   </bounds>
 
   <paths>
