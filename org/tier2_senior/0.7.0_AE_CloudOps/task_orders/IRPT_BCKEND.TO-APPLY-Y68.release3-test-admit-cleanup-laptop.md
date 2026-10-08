@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_BCKEND</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -14,6 +14,12 @@
 <owned_cells>IB-yr-681</owned_cells>
 <decomp_context>dell2's R68 (on origin box/dell2; reaches the laptop tree at the next box pass) cuts release 3 as IB-yr-681, "cleanup via the laptop". dell2 2.0.0_SA_COO~Y2 msg 1687, relay org/tier0_exec/0.0.0_AB_MSTR/deliverables/RELAY_DELL2_RELEASE3_CLEANUP_Y68_2141Z.md; 1.0.0_SA_CTO msg 107370 (agreed) and 107371 (Andrew's word).</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~22:0xZ). Cleanup 2026-10-08T21:59:19Z: 7 rows deleted (NOT_FOUND after), 2 S3 keys deleted (one version
+    each; Andrew's word), sweep 0 extra; email-shaped count 0 over 9 written files. Issuer live re-run of AC1: VERSIONS_LEFT=0.
+    Ledger 2157Z closed (@ed400781ec). Proof VALID.
+  </closure>
 
   <objective>
     Delete exactly the test records of ONE release-3 test upload at 49financial, named in dell2's keys file: 7 `irpt-requests`
