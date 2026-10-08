@@ -1,0 +1,104 @@
+{
+ "schema_version": "1.0",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "b736f07a28"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "9dde8dda0f",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-md-1.mail-route-sender-domain.md"
+ },
+ "to_id": "NFRA_OPLGTW.TO-OG-md-1",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~36",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/mail_route.py",
+   "kind": "script",
+   "commit_or_etag": "15b08fdca1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on branch wk-NFRA_OPLGTW-31-36; built and held, not deployed",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/config.py",
+   "kind": "script",
+   "commit_or_etag": "15b08fdca1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on branch wk-NFRA_OPLGTW-31-36; built and held, not deployed",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+   "kind": "script",
+   "commit_or_etag": "15b08fdca1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on branch wk-NFRA_OPLGTW-31-36; bash -n clean; deploy-to-ec2.sh not run",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/deploy/mail_sender_domain_table.txt",
+   "kind": "config_data",
+   "commit_or_etag": "15b08fdca1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on branch wk-NFRA_OPLGTW-31-36; ships EMPTY (comment lines only), admits no domain",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_mail_route_domain.py",
+   "kind": "test",
+   "commit_or_etag": "15b08fdca1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "committed on branch wk-NFRA_OPLGTW-31-36; not deployed",
+   "artifact_covered_by": ["AC1"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: a listed domain is listed and fetched; every negative arm of PRD v1.9 refuses; the audit hashes the domain.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r31/checks/md1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 7 of 7; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "7 of 7 named tests passed",
+   "status": "PASS",
+   "expect": "(?s)named tests passed 7 of 7; failed/error lines 0.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the two v1.4 mail test files pass whole and lost no test.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r31/checks/md1.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "tests/test_mail_route.py: pytest rc=0 passed 11 failed/error 0; test functions at the cut 11, now 11, removed or renamed 0\ntests/test_mail_listing.py: pytest rc=0 passed 12 failed/error 0; test functions at the cut 12, now 12, removed or renamed 0\nv1.4 mail tests passed in all: 23\nRESULT: PASS\nexit=0",
+   "denominator": "11 of 11 test_mail_route.py and 12 of 12 test_mail_listing.py passed; 0 of 23 removed or renamed",
+   "status": "PASS",
+   "expect": "(?s)test_mail_route\\.py: pytest rc=0 passed (\\d+) failed/error 0; test functions at the cut \\d+, now \\d+, removed or renamed 0.*test_mail_listing\\.py: pytest rc=0 passed (\\d+) failed/error 0; test functions at the cut \\d+, now \\d+, removed or renamed 0.*RESULT: PASS.*exit=0"
+  }
+ ],
+ "declared_exclusions": [],
+ "surprises": [],
+ "session_log": "No persisted session-log path exists for an L7 worker subagent (L7 reads from git). Trail: 15b08fdca1.",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest",
+   "invocation": "md1.AC1.sh and md1.AC2.sh",
+   "result": "7 passed (test_mail_route_domain.py); 11 passed (test_mail_route.py); 12 passed (test_mail_listing.py)"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "md1.AC1.sh run in the build session and again as the criterion; pytest otherwise run once per file",
+   "observed": "7 passed both times",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "Negative control: sender_allowed and the domain-listing row check were temporarily changed from whole-domain equality to endswith, then reverted.",
+   "expected": "test_ogmd1_ac03 fails (subdomain and suffix senders admitted)",
+   "observed": "1 failed (test_ogmd1_ac03), 6 passed; file restored from backup, 7 passed after",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ }
+}

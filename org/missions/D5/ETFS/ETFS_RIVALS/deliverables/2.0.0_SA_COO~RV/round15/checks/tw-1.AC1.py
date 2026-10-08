@@ -24,7 +24,7 @@ top-level import by the module is seen.
   - (c) the same with the variable set to "0";
   - (d) across the three OFF runs `rivalfunds.history_owed` was never imported (no import request, no attribute access on the
     sentinel), and neither was it imported when the module under test was loaded;
-  - (e) the module defines `HISTORY_OWED_CAP == 5000` and its source reads the environment variable named exactly
+  - (e) the module defines `HISTORY_OWED_CAP == 20000` (amended 2026-10-08 by RIV-tc-1 AMENDMENT 1, ruling R24; was 5000) and its source reads the environment variable named exactly
     `RIVALFUNDS_HISTORY_OWED`;
   - (f) control: the OFF daily run lands its market object (one `market-*.parquet` at the report date), the recording client
     was reached, and the base reference run did the same.
@@ -313,8 +313,8 @@ def run(v):
     src = pathlib.Path(eb.__file__).read_text(encoding="utf-8")
     cap = getattr(eb, "HISTORY_OWED_CAP", None)
     print(f"HISTORY_OWED_CAP = {cap!r} | source names {ENV!r}: {ENV in src} | source names HISTORY_OWED_CAP: {'HISTORY_OWED_CAP' in src}")
-    v.check(cap == 5000 and isinstance(cap, int) and ENV in src,
-            f"(e) the module defines HISTORY_OWED_CAP == 5000 and reads the variable {ENV}")
+    v.check(cap == 20000 and isinstance(cap, int) and ENV in src,
+            f"(e) the module defines HISTORY_OWED_CAP == 20000 and reads the variable {ENV}")
 
     ctl = off["a"]
     print(f"control: OFF daily run status {ctl['status']} | market objects at {DAY}: {ctl['market']} | client requests "
