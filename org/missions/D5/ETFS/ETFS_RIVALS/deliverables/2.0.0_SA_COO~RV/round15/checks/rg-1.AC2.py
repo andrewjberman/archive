@@ -1,7 +1,7 @@
 """RIV-rg-1 AC2 (PRD v0.19 C-OWED-GRAIN, G.4; row ETFS_RIVALS-Z-S69; CTO term msg 31432 -- the AMENDED interface item 1): THE RULE on the one
 shared function. Where several objects of a date hold the same (security_id, date), the rows are ordered (a) non-backfill before
-backfill, (b) `source` not starting "import:" before an import row, (c) the later capture time in the object's name (a name with no
-time is oldest), (d) the later row `as_of`, (e) the object name descending. The merged row is built in TWO parts: THE PRICE GROUP
+backfill, (b) `source` not starting "import:" before an import row, (c) the later capture time in the object's name (every object
+that reaches the union carries one: RIV-rg-2), (d) the later row `as_of`, (e) the object name descending. The merged row is built in TWO parts: THE PRICE GROUP
 (`px_close`, `total_return_index`, `currency`, `as_of`, `source`, `as_of_source`) travels WHOLE from the first row in the order whose
 `px_close` is not null (none has a close: the first row in the order) -- a close is never combined with a currency, price date or
 price source of another object, even when its own currency is null; THE DESCRIPTIVE FIELDS (every other column) each take the
@@ -20,14 +20,14 @@ Fixture: one `local:` sink, G4 objects built with the producer's own schema (`en
 a security key per case:
   09-08 (a)  K1 close 100.0 in a non-backfill object (T10:00Z) and close 90.0 in a backfill object with the LATER name (T12:00Z); K2 only
              in the backfill object (close 80.0)
-  09-09 (b)  K1 close 100.0 in a live object T10:00Z and 95.0 in an import (`source` "import:...") T13:00Z; K2 the same pair with names
-             that carry no time (`market-20260909-53bc...` live 50.0, `market-20260909-afcd...` import 45.0)
+  09-09 (b)  K1 close 100.0 in a live object T10:00Z and 95.0 in an import (`source` "import:...") T13:00Z; K2 the same pair with the
+             later name an import (`market-20260909T101500Z-53bc...` live 50.0, `market-20260909T131500Z-afcd...` import 45.0)
   09-10 (c)  K1 100.0 in `...T10:00Z-ffffffffffff` and 101.0 in `...T14:00Z-aaaaaaaaaaaa` (the later time wins though its hash sorts
-             first); K2 50.0 in a name with no time (oldest) and 51.0 in the T14:00Z object
+             first); K2 50.0 in an EARLIER object (`...T09:00Z-ffffffffffff`) and 51.0 in the T14:00Z object
   09-11 (o)  K1 100.0 as_of 09-11 in `...T10:00Z-aaaaaaaaaaaa` and 101.0 as_of 09-10 in `...T10:00Z-bbbbbbbbbbbb` (same capture time:
              the later as_of wins); K2 identical in both but the close (200.0 / 201.0): everything ties and the name descending decides
-  09-14 (d1) K1: live without a name time, close 100.0, currency NULL, source live + import with close NULL, currency "EUR" (the import
-             name sorts later); K1b: the same shape with two live objects, the older holding currency "EUR" and no close
+  09-14 (d1) K1: live at T08:00Z, close 100.0, currency NULL, source live + import at T09:00Z with close NULL, currency "EUR" (the
+             import's time is later); K1b: the same shape with two live objects, the older holding currency "EUR" and no close
   09-15 (d2) K1: newer live object (T14:00Z) close NULL, currency NULL, source blp_client.reference_data, as_of_source "pull"; older live
              object (T10:00Z) close 100.0, currency "USD", total return 0.5, source blp_client.historical_data, as_of_source
              "historical", as_of 09-14: the group comes whole from the older row; K2: neither row has a close: the group is the newer
@@ -51,6 +51,20 @@ a security key per case:
     later capture time; a live object over an import for provenance records) on the 09-10 and 09-15 dates.
 FAIL at base 4611085187: (a), (b), (o), (d), (e), (f), (g), (h) FAIL (AC2 RESULT: FAIL 8: a, b, o, d, e, f, g, h; g and h because no shared
 function exists); (c) and (i) PASS (the later capture time already decides between two timed live objects).
+
+Amended for RIV-rg-2 (round 26; row ETFS_RIVALS-Z-S71): the merged union now reads ONLY objects whose name carries a capture time, and a
+date with timed AND untimed objects is the union of the timed only. Three fixtures relied on the union reading an untimed name; each is
+renamed with a capture time, keeping the content and the ordering each arm tests (the untimed-not-read rule is graded in rg-2.AC1, not
+here):
+  09-09 (b)  the K2 pair `market-20260909-53bc...` (live 50.0) and `market-20260909-afcd...` (import 45.0) are now
+             `market-20260909T101500Z-53bc...` and `market-20260909T131500Z-afcd...`; arm b unchanged (live beats import);
+  09-10 (c)  the K2 50.0 object `market-20260910-ffffffffffff` (a name with no time, "oldest") is now `market-20260910T090000Z-ffffffffffff`
+             (an earlier time, still the oldest); the sub-assertion "a name with no time is oldest" is DROPPED -- an untimed name no
+             longer takes part in the order -- and arm c grades "the later capture time wins" alone (K1 101.0, K2 51.0);
+  09-14 (d1) the K1 pair `market-20260914-53bc...` (live, close 100.0, currency NULL) and `market-20260914-afcd...` (import, close NULL,
+             currency "EUR") are now `market-20260914T080000Z-53bc...` and `market-20260914T090000Z-afcd...`; arm d unchanged.
+Arm i indexes planted objects by position and is unaffected (each date keeps its object count and order). No arm label changed.
+At base bff3ec2e7f (RIV-rg-1 merged, RIV-rg-2 not built): AC2 RESULT: PASS 0 failures (measured; the merged union reads timed names).
 """
 import datetime as dt
 import importlib
@@ -123,21 +137,21 @@ def plant(eb, s):
     d = "2026-09-09"
     u[d] = [put_obj(eb, s, d, "market-20260909T100000Z-aaaaaaaaaaaa.parquet", [mrow(eb, "K1", d, px=100.0, ccy="USD")]),
             put_obj(eb, s, d, "market-20260909T130000Z-bbbbbbbbbbbb.parquet", [mrow(eb, "K1", d, px=95.0, ccy="USD", source=IMP, aos=None)]),
-            put_obj(eb, s, d, "market-20260909-53bc393958bd.parquet", [mrow(eb, "K2", d, px=50.0, ccy="USD")]),
-            put_obj(eb, s, d, "market-20260909-afcd903ad844.parquet", [mrow(eb, "K2", d, px=45.0, ccy="USD", source=IMP, aos=None)])]
+            put_obj(eb, s, d, "market-20260909T101500Z-53bc393958bd.parquet", [mrow(eb, "K2", d, px=50.0, ccy="USD")]),
+            put_obj(eb, s, d, "market-20260909T131500Z-afcd903ad844.parquet", [mrow(eb, "K2", d, px=45.0, ccy="USD", source=IMP, aos=None)])]
     d = "2026-09-10"
     u[d] = [put_obj(eb, s, d, "market-20260910T100000Z-ffffffffffff.parquet", [mrow(eb, "K1", d, px=100.0, ccy="USD")]),
             put_obj(eb, s, d, "market-20260910T140000Z-aaaaaaaaaaaa.parquet",
                     [mrow(eb, "K1", d, px=101.0, ccy="USD"), mrow(eb, "K2", d, px=51.0, ccy="USD")]),
-            put_obj(eb, s, d, "market-20260910-ffffffffffff.parquet", [mrow(eb, "K2", d, px=50.0, ccy="USD")])]
+            put_obj(eb, s, d, "market-20260910T090000Z-ffffffffffff.parquet", [mrow(eb, "K2", d, px=50.0, ccy="USD")])]
     d = "2026-09-11"
     u[d] = [put_obj(eb, s, d, "market-20260911T100000Z-aaaaaaaaaaaa.parquet",
                     [mrow(eb, "K1", d, px=100.0, ccy="USD", as_of=d), mrow(eb, "K2", d, px=200.0, ccy="USD", as_of=d)]),
             put_obj(eb, s, d, "market-20260911T100000Z-bbbbbbbbbbbb.parquet",
                     [mrow(eb, "K1", d, px=101.0, ccy="USD", as_of="2026-09-10"), mrow(eb, "K2", d, px=201.0, ccy="USD", as_of=d)])]
     d = "2026-09-14"
-    u[d] = [put_obj(eb, s, d, "market-20260914-53bc393958bd.parquet", [mrow(eb, "K1", d, px=100.0, ccy=None)]),
-            put_obj(eb, s, d, "market-20260914-afcd903ad844.parquet", [mrow(eb, "K1", d, px=None, ccy="EUR", source=IMP, aos=None)]),
+    u[d] = [put_obj(eb, s, d, "market-20260914T080000Z-53bc393958bd.parquet", [mrow(eb, "K1", d, px=100.0, ccy=None)]),
+            put_obj(eb, s, d, "market-20260914T090000Z-afcd903ad844.parquet", [mrow(eb, "K1", d, px=None, ccy="EUR", source=IMP, aos=None)]),
             put_obj(eb, s, d, "market-20260914T100000Z-aaaaaaaaaaaa.parquet", [mrow(eb, "K1b", d, px=None, ccy="EUR")]),
             put_obj(eb, s, d, "market-20260914T140000Z-bbbbbbbbbbbb.parquet", [mrow(eb, "K1b", d, px=70.0, ccy=None)])]
     d = "2026-09-15"
@@ -258,7 +272,7 @@ def run(v):
         return near(got["K1"], 101.0) and near(got["K2"], 51.0)
 
     guard(v, "c", "between live objects the later capture time in the name wins (K1 101.0 though its hash sorts first; K2 51.0 over "
-                  "the name with no time)", arm_c)
+                  "the earlier object)", arm_c)
 
     # (o) as_of, then the name descending
     def arm_o():

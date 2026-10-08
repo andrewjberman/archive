@@ -50,6 +50,14 @@ names them; the live rows carry `as_of_source` "pull", the import rows `as_of_so
     date reads as it does today (`_g4_for` returns that object, `load` its closes).
 FAIL at base 4611085187: (a), (b), (c), (c2), (d), (e), (f), (g) FAIL (AC1 RESULT: FAIL 8: a, b, c, c2, d, e, f, g); (h) PASSES (from the
 unmodified base: the live closes of 09-29 are unread because the import's name wins; the top-up replaces its base).
+
+Amended for RIV-rg-2 (round 26; row ETFS_RIVALS-Z-S71): the merged union now reads ONLY objects whose name carries a capture time (a
+date with no timed object is read as the one `revision.newest` object). So the 2026-09-29 two-object fixture of arms a-f is
+renamed with capture times, keeping each object's content and the live-versus-import order the arms test: LIVE_NAME is now
+`market-20260929T101500Z-53bc393958bd.parquet` and IMPORT_NAME `market-20260929T103000Z-afcd903ad844.parquet` (they were
+`market-20260929-53bc393958bd.parquet` and `market-20260929-afcd903ad844.parquet`, which are now read as ONE object and are graded
+in rg-2.AC1). Nothing else changed: arms g and h already used timed names; no arm, assertion or row of any fixture was edited.
+At base bff3ec2e7f (RIV-rg-1 merged, RIV-rg-2 not built): AC1 RESULT: PASS 0 failures (measured; the merged union reads the timed pair).
 """
 import datetime as dt
 import io
@@ -61,7 +69,7 @@ import _common as c  # noqa: E402
 
 LIVE_SRC, IMPORT_SRC = "blp_client.reference_data", "import:bbg/2026-09-29/characteristics.parquet"
 D29 = "2026-09-29"
-LIVE_NAME, IMPORT_NAME = "market-20260929-53bc393958bd.parquet", "market-20260929-afcd903ad844.parquet"
+LIVE_NAME, IMPORT_NAME = "market-20260929T101500Z-53bc393958bd.parquet", "market-20260929T103000Z-afcd903ad844.parquet"  # timed: RIV-rg-2
 LVO, SHR, SHS, IMO = "LVO_US_Equity", "SHR_US_Equity", "SHS_US_Equity", "IMO_US_Equity"
 CUSIP, CUSIP_PK, ICUSIP, ICUSIP_PK = "N97284108", "NBIS US Equity", "037833100", "AAPL US Equity"
 PAGE, ASOF = "2026-10-05", "2026-10-02"
