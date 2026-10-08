@@ -22,7 +22,10 @@ Record `R9_READBACK_STORED.json` (this folder; counts and keys only).
      4,555 rows carry the 2,716 words. The difference is 1,839 rows. Row NFRA_TRNSPT-D2-W1-S2.
 3. **Wipe on the stored bytes:** re-running `wipe_blocks` on every stored non-held-out row finds name 0, id 0, email 0, phone 0.
 
-The laptop's own counts-and-keys file (msg 1566) has not arrived at this close; the issuer's read-back above is the grading artifact.
+The laptop's own counts-and-keys file arrived after this close (msg 1577):
+`org/tier2_senior/0.7.0_AE_CloudOps/deliverables/research_x9_20261008/RESULT_FOR_DELL2.json` @7b5996319e (origin box/laptop), verified
+20:42:22Z: before 0, after 29, keys_equal_printed TRUE, rows 20,473, held_out 4,555, rewipe 0/0/0/0, `aws:kms` on all 29, source commit
+`01e971915c`. It agrees with the issuer's read-back on every figure. The issuer's read-back remains the grading artifact.
 
 ## Rows this round
 
