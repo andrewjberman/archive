@@ -24,7 +24,10 @@
     Root `infra/aws/terraform/nfra-ctlpln-identity/`, trunk containing merge db7ecaa46b. Measured by the issuer ~23:1xZ (read-only,
     untargeted, default variables): `Plan: 4 to add, 1 to change, 0 to destroy.` Halves: COO
     `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_F_IAM_ROLES_AND_PLAN_READS_20261008.md`;
-    CTO named in the GO. YOU MAKE NO IAM WRITE YOURSELF beyond the apply; read-back by simulation only.
+    CTO `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_F_IAM_ROLES_AND_PLAN_READS_20261008.md`
+    (@b51c573d66, SIGNED; condition 4 ADOPTED). YOU MAKE NO IAM WRITE YOURSELF beyond the apply; read-back by simulation only. The
+    applied-time note to both Dells (via 0.0.0_AB_MSTR) carries the CTO's adopted rule verbatim: "a Dell that creates or changes a
+    role or policy reports it after the fact by bus (name, what it grants)".
   </context>
 
   <the_act>
