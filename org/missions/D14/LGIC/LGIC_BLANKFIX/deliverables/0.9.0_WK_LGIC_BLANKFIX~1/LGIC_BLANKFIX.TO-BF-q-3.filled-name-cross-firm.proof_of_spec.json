@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-q-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round4.md",
+    "vintage_commit": "9c73d8bfa7",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-q-3.filled-name-cross-firm.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9c73d8bfa7"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming_keyfill.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_firm_check(): a key's path word is compared with the firm of its own bucket whatever the root entry's fills; bucket unread or firmless falls back to the entry's scope when the entry may give one, else the class is kept and the basis says the firm could not be checked and why. A filled address is checked after the fill (_address_firm vs the bucket's firm). New command crossfirm. fill_keys output over the 13 mapped roots: 9 of 129 rows changed, all wording only (two cot_bronze_ingest.py rows keep class and text; seven fills-root UNDECIDED rows gain an unchecked sentence); no class changed.",
+      "introduces": [
+        "_firm_check",
+        "_address_firm",
+        "cmd_crossfirm"
+      ],
+      "artifact_covered_by": [
+        "BQ3-AC1",
+        "BQ3-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_keyfill.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "40 cases (was 28): the fills difference control, the filled-address check, the unread-bucket fallback and the unchecked basis, and the crossfirm command over the real map.",
+      "introduces": [
+        "FILLS DIFFERENCE CONTROL (cross-firm)"
+      ],
+      "artifact_covered_by": [
+        "BQ3-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BQ3-AC1",
+      "criterion_verbatim": "BQ3-AC1 -- the cross-firm check holds under `fills`, and a filled firm is checked against the bucket's.",
+      "method": "command",
+      "invocation": "python lib/tests/test_opal_naming_keyfill.py",
+      "output_evidence": "KEYFILL-TEST ok=True cases=40\nrc=0 (base: cases=28)",
+      "denominator": "40 of 40 cases held; python -m pytest lib/tests -q -p no:cacheprovider: 194 passed",
+      "status": "PASS",
+      "expect": "KEYFILL-TEST ok=True"
+    },
+    {
+      "criterion_id": "BQ3-AC2",
+      "criterion_verbatim": "BQ3-AC2 -- every stored file of every mapped root is checked or says why it could not be.",
+      "method": "command",
+      "invocation": "python lib/opal_naming_keyfill.py crossfirm --map infra/logic/registry/root_map.json",
+      "output_evidence": "KEYFILL-CROSSFIRM ok=True roots=13 keys=79 checked=31 unchecked=48 refused=3\nrc=0 (base: no such command)",
+      "denominator": "79 of 79 stored files (type S3Key) of 13 of 13 mapped roots are checked (31) or unchecked with a reason (48); 31 + 48 = 79. Refused 3: bd-pipeline schwab/08242234/silver/fact_rps (source word) and two code/bronze/cot_bronze_ingest.py. Unchecked by root: opal-assets 31, investor-reporting/core 4, holdings 3, performance 3, directory 2, export 2, narrative 1, ops 1, reporting-publish 1; bd-pipeline, cot-pipeline 0.",
+      "status": "PASS",
+      "expect": "KEYFILL-CROSSFIRM ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the test run with _firm_check replaced by round 3's behaviour (no check when the entry has fills)",
+      "expected": "KEYFILL-TEST ok=False",
+      "observed": "FAIL: FILLS: PATH NAMES ANOTHER FIRM THAN ITS BUCKET'S IS REFUSED; FAIL: BUCKET UNREAD: ROOT SCOPE STANDS IN; FAIL: BUCKET UNREAD, ENTRY GIVES NO FIRM: CLASS KEPT, UNCHECKED SAID\nKEYFILL-TEST ok=False cases=40",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "fill_keys over the 13 mapped roots before and after the build, rows compared one by one",
+      "observed": "9 of 129 rows differ, text only, no class differs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "per-firm key rulings (bucket_per, bucket_from)",
+      "reason": "this module does not read key rulings; a stored file whose bucket is chosen at run time reads as bucket-not-read and is counted unchecked with the bucket-not-read reason; another order builds their reader"
+    },
+    {
+      "item": "the post-fill firm check as an end-to-end path",
+      "reason": "with a scope-giving entry the early bucket-versus-scope refusal fires first, so the post-fill check is a guard exercised in the test by replacing _address_firm; the helper itself is tested directly"
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-W1-S11"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/LGIC_BLANKFIX.TO-BF-q-3.filled-name-cross-firm.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "opal_naming_keyfill.py crossfirm",
+      "invocation": "python lib/opal_naming_keyfill.py crossfirm --map infra/logic/registry/root_map.json",
+      "result": "KEYFILL-CROSSFIRM ok=True roots=13 keys=79 checked=31 unchecked=48 refused=3"
+    }
+  ]
+}

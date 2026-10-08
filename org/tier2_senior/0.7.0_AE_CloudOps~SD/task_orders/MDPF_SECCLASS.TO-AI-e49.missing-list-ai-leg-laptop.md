@@ -2,7 +2,7 @@
   <metadata>
     <id>MDPF_SECCLASS.TO-AI-e49.missing-list-ai-leg-laptop</id>
     <issued_by>2.0.0_SA_COO~M1</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~SC</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~SD</issued_to>
     <date>2026-10-07</date>
     <status>pending</status>
     <project_code>MDPF_SECCLASS</project_code>
@@ -30,7 +30,7 @@
   </context>
 
   <the_act>
-    0. On the laptop's CLOUD, which carries q/dell1/secclass-r12-run-e32 r3 (58843e1461) or later, read both halves. Then read the
+    0. On CLOUD (a dell1 checkout), which carries q/dell1/secclass-r12-run-e32 r3 (58843e1461) or later, read both halves. Then read the
        secret once (a describe, or the runner's own get) with no model call. A refusal there is a REPORT, not a workaround.
     1. DRY RUN: `python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/e49_ai_write.py`. It must read `E49-AI-DRY-RUN ... runner_direct=0 ... ok=True`, keys=1061, with to_model at or under 1,049 (the e32 act lands up to 157 of these keys first, and the runner skips a present key).
     2. Open ONE NEVER-2 ledger entry, slug `secclass-e49-ai-leg-i-20261007`, naming the table, the AI listing prefix, the snapshot path, and the
@@ -50,8 +50,8 @@
   <paths>
     org/critical_paths/change_management/
     org/critical_paths/.open_deploys/
-    org/tier2_senior/0.7.0_AE_CloudOps~SC/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps~SC/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~SD/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~SD/logs/
     org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/E49_AI_SNAPSHOT_20261007.json
   </paths>
 
@@ -75,3 +75,12 @@ Base: AC1 FAIL as expected at the cut (missing_snapshot; with the DIRECT snapsho
     - the commit hashes with their measured push state.
   </report>
 </task_order>
+
+### AMENDMENT 3 -- executor dell1 0.7.0_AE_CloudOps~SD, gated on the Dell key grant (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~00:4xZ)
+
+Andrew-direct ~00:0xZ: "the whole point of the dell boxes is to run the heavy jobs there". Laptop CTO msg 106657 and CTO~DELL1 amend
+914acafe20 move this act to a dell1 seat. GATE: start only after the Dell group can read astn/kimi/api-key. The grant cell runs at laptop
+COO~C, and step 0's own secret read is the proof. Until then this order is pending and makes no model call.
+Everything else is unchanged: the halves, the head (a dell1 checkout carrying run-e32 r5 or later), the bound, the chunking, the rollback
+input, and the completeness at close. TO-AI-e32 continues ledger entry secclass-e32-ai-leg-i-20261007 (run 1 by laptop ~SC: 187 of
+2,291). Add a "run 2 on dell1 ~SD" line to it; do not open a second entry. TO-AI-e49 opens its own entry, and only after TO-AI-e32 is complete.

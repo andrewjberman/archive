@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-q-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round4.md",
+    "vintage_commit": "9c73d8bfa7",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-q-2.runtime-bucket-keys.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9c73d8bfa7"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming_keyfill.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "runtime_bucket(item, text, names): a string constant of the item's source file that is an upper-case *_BUCKET_MAP name, or one a registry row asks for by name, shows a per-firm run-time bucket; the basis names the line and file. bucket_of() adds that to its basis when it reads no bucket. crossfirm over the 13 mapped roots unchanged: roots=13 keys=79 checked=31 unchecked=48 refused=3.",
+      "introduces": [
+        "runtime_bucket",
+        "_string_constants",
+        "_item_text"
+      ],
+      "artifact_covered_by": [
+        "BQ2-AC1",
+        "BQ2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_naming_rootcheck.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "load_key_rulings keys a per-firm row (bucket_per firm, bucket_from) as ('per:'+variable, key) and refuses a row with both or neither of bucket and the per-firm pair. _ruling_of matches a per-firm row on the key AND the declaring file naming bucket_from; no row but a run-time variable seen gives a reason that says the bucket is chosen at run time and names the variable. _ruling_line prints FIX with the canonical form, {scope} kept, and a plain sentence. stray_braces admits exactly {scope} on a per-firm row, in decide() (else HOLE) and in lines_check (else FAIL). investor-reporting/directory: hole=2 -> hole=0 (fix 3 -> 5). bd-pipeline count line unchanged.",
+      "introduces": [
+        "stray_braces",
+        "_is_per_firm"
+      ],
+      "artifact_covered_by": [
+        "BQ2-AC1",
+        "BQ2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_keyfill.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "47 cases (was 40 at BF-q-3 merge): run-time variable recognised with its line, bucket_of basis, difference control (file without the variable), variable asked for by name, docstring not evidence, literal bucket still read, the real handler.py.",
+      "introduces": [
+        "RUNTIME BUCKET DIFFERENCE CONTROL"
+      ],
+      "artifact_covered_by": [
+        "BQ2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_rootcheck.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "138 cases: per-firm row matched and printed FIX with {scope}; the same key with no answer is a HOLE naming the variable; the file not naming the variable matches nothing; {scope} admitted on a per-firm row and refused on the same row not per-firm; loader refusals; the lines command on the real root and with the brace let through.",
+      "introduces": [
+        "the same {scope} on a row that is not per-firm is refused"
+      ],
+      "artifact_covered_by": [
+        "BQ2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BQ2-AC1",
+      "criterion_verbatim": "BQ2-AC1 -- a run-time bucket is recognised, and the registry's answer is what fills the line.",
+      "method": "command",
+      "invocation": "python lib/tests/test_opal_naming_keyfill.py",
+      "output_evidence": "KEYFILL-TEST ok=True cases=47\nrc=0 (base: cases=28 at the cut; 40 at BF-q-3). Companion: python lib/tests/test_opal_naming_rootcheck.py -> ROOTCHECK-TEST ok=True cases=138",
+      "denominator": "47 of 47 cases held; python -m pytest lib/tests -q -p no:cacheprovider: 194 passed",
+      "status": "PASS",
+      "expect": "KEYFILL-TEST ok=True"
+    },
+    {
+      "criterion_id": "BQ2-AC2",
+      "criterion_verbatim": "BQ2-AC2 -- the second root prints no hole.",
+      "method": "command",
+      "invocation": "python lib/opal_naming_rootcheck.py infra/aws/terraform/investor-reporting/directory --map infra/logic/registry/root_map.json --report-only",
+      "output_evidence": "ROOTCHECK ok=True root=infra/aws/terraform/investor-reporting/directory items=18 right=13 fix=5 not_asked=0 pattern=0 carded=0 refused=0 hole=0\nrc=0 (base: fix=3 hole=2)",
+      "denominator": "18 of 18 names decided; the two stored-file lines (handler.py:53, refresh.py:71) are FIX with {scope} kept; python lib/opal_naming_rootcheck.py lines on the root: ROOTCHECK-LINES ok=True hole=0",
+      "status": "PASS",
+      "expect": "hole=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the rootcheck test run with opal_naming_keyfill.runtime_bucket replaced by a reader that sees no variable",
+      "expected": "ROOTCHECK-TEST ok=False",
+      "observed": "FAIL: the lines command admits {scope} on the per-firm lines: ... hole=2\nROOTCHECK-TEST ok=False cases=138",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the bd-pipeline root run (report-only) before and after the build, last line compared",
+      "observed": "identical: ROOTCHECK ok=True root=infra/aws/terraform/bd-pipeline items=142 right=9 fix=118 not_asked=12 pattern=3 carded=0 refused=0 hole=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live value of IRPT_DIRECTORY_BUCKET_MAP on the deployed function",
+      "reason": "no AWS call is allowed; the check reads the source file only, so which bucket each firm gets is not read"
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-W1-S12"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/LGIC_BLANKFIX.TO-BF-q-2.runtime-bucket-keys.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "opal_naming_keyfill.py crossfirm",
+      "invocation": "python lib/opal_naming_keyfill.py crossfirm --map infra/logic/registry/root_map.json",
+      "result": "KEYFILL-CROSSFIRM ok=True roots=13 keys=79 checked=31 unchecked=48 refused=3"
+    }
+  ]
+}
