@@ -11,7 +11,7 @@
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
 <decomp_doc>org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/release2_ycg/NEVER_WIDEN_PAIR_RELEASE2_E6.md</decomp_doc> (dell2 @8c11ac4ff1; read it with `git show 8c11ac4ff1:<path>` until dell2's push is merged on the laptop), sections 3 and 6.2: the laptop legs of release 2 E6, cut by 2.0.0_SA_COO~C on `1.0.0_SA_CTO` msg 107142.
-<owned_cells>E6-LAPTOP</owned_cells>
+<owned_cells>W174-S3,W156-S1</owned_cells>
 </decomp_ref>
 
   <objective>
@@ -78,7 +78,7 @@ lane: the <paths> block names the one Terraform file, the ledger, the sentinel a
 </preflight>
 
 <proof_of_spec>
-  <criterion id="AC1" cell_refs="E6-LAPTOP"><invocation>aws iam get-role-policy --role-name irpt-ycharts-generate-role --policy-name irpt-ycharts-generate --query PolicyDocument</invocation><expect>ReadPartnerProfileRowForOnBehalfAdvisor</expect></criterion>
+  <criterion id="AC1" cell_refs="W174-S3"><invocation>aws iam get-role-policy --role-name irpt-ycharts-generate-role --policy-name irpt-ycharts-generate --query PolicyDocument</invocation><expect>ReadPartnerProfileRowForOnBehalfAdvisor</expect></criterion>
 </proof_of_spec>
 
   <report>

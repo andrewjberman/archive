@@ -23,6 +23,9 @@
     The policy is held by no Terraform root (written by hand; N = 1 writer). Halves: COO
     `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md`; CTO `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md` (@7aab22d727, SIGNED). Trigger: dell2 2.0.0_SA_COO~G2 says its ledger leg V1 closed (relayed by 0.0.0_AB_MSTR); not before NFRA_CTLPLN cell 1's apply. The GO
     comes from the issuer when dell2 calls it; do not act on any other signal. YOU READ NO SECRET VALUE.
+    SET RULE (issuer ruling 2026-10-08 ~21:0xZ, after the 21:01:00Z rollback): AWS may store a Principal.AWS list and an
+    ArnNotEquals value list in a different order. IAM evaluates both as unordered sets, so every comparison of a live policy
+    with a signed file compares THOSE TWO LISTS AS SETS; every other part of the parsed JSON must be equal.
   </context>
 
   <the_act>
