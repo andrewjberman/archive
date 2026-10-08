@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_TRNSPT.TO-RUN-b11.research-fold-rewrite-with-securities-allowlist-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_TRNSPT.TO-RUN-b11.research-fold-rewrite-with-securities-allowlist-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "40e54f5a0614575c5273b46df1be70ec438adc11"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R11.md",
+    "vintage_commit": "7fa942c9ba0bf357f2ac413bb2bfb3320ad827b7",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_TRNSPT.TO-RUN-b11.research-fold-rewrite-with-securities-allowlist-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/research_b11_20261008/RESULT_FOR_DELL2.json",
+      "kind": "doc",
+      "commit_or_etag": "38acf0c577",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "RESEARCH-VERIFY objects=29 rows=20473 held_out_rows=3644 rewipe_counts={\"email\": 0, \"id\": 0, \"name\": 0, \"phone\": 0}",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "List exact29 research silver objects with newer VersionIds than saved ones",
+      "method": "live_read",
+      "invocation": "aws s3api list-objects-v2 --bucket opal-data-transcripts --prefix teams/transcripts/silver/research_meeting/ --query \"length(Contents)\"",
+      "expect": "29",
+      "output_evidence": "29 client-side count across auto-paginated list; exact prior keyset;29/29 new VersionIds",
+      "denominator": "29 keys before and29 after",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "version_change": {
+      "description": "Stored version IDs before vs after on literal29keys",
+      "expected_landed": "29 changed versions",
+      "expected_not_landed": "0 changed versions",
+      "observed": "29 changed versions",
+      "status": "PASS"
+    }
+  },
+  "risk_class": "SERVED",
+  "rollback": "Copy each saved prior VersionId back over same key only on issuer request; no deletes.",
+  "scope": "One pinned rerun; exact29 keys newversions; counts match",
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/research_b11_20261008/REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to NFRA_TRNSPT.TO-RUN-b11.research-fold-rewrite-with-securities-allowlist-laptop",
+      "result": "Exact context set"
+    },
+    {
+      "tool": "comp-pipescript",
+      "invocation": "comp-pipescript deployed research_fold.py --pipeline transcripts; comp-pipescript postdeps research_fold.py --pipeline transcripts --firm global",
+      "result": "Coverage gap: transcripts/global not accepted; no clean claim. Pinned module and readback used as order requires."
+    }
+  ],
+  "never_widen_pair": {
+    "coo_half": "N/A: issuer TO literal29-key write set, NEVER-1 non-application",
+    "cto_half": "N/A: no IAM scope change; same literal29 versioned keys"
+  }
+}

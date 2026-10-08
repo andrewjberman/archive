@@ -57,6 +57,52 @@ fills that row's E columns from the forecasts, so this census cannot see it). Th
 (dividend and valuation ratios for names with no dividend or no history). ASML's zero-dominated row reads "Minority
 (non-controlling) interest (zero in all 10 years)" (seen on the candidate; ap-5).
 
+## FWD-16 -- the 2026-09-29 comparison extended to pillars and management (ruling 6), read ~21:3xZ
+
+`checks/round40/ap8_fwd16_census.py`, evidence `evidence/r40_ap8_fwd16_census_20261008.txt`. For each name, BEFORE is the
+dossier stored on 2026-09-29 (gold never overwrites; method 4 on 95 of 95), AFTER is the object the served reader picks today
+(method 7 on 95 of 95). Pillars compare on title and text (`terms` came after the base date). Grouped by today's `pack_shape`.
+**95 of 95 compared, 0 without a 09-29 object.**
+
+| slot | kept | none both dates | changed | lost |
+|---|---|---|---|---|
+| pillars | 46 (pdf 32, docx 10, mixed 4) | 49 | 0 | **0** |
+| management | 41 | 48 | 4 | **2** |
+| cases (the control) | 34 (pdf 32, mixed 2) | 61 | 0 | **0** |
+
+- The cases column matches the 2026-10-06 case census (102 of 285 slots = 34 names x 3). The control holds.
+- **The 2 lost:** 8306 JP and 8316 JP (docx). On 09-29 both held only `Management/Board 80` (19 characters). Today both are
+  ABSENT with a reason. That is the `Z-S89` remediation working, not a lost passage.
+- **The 4 changed, read by content:** AZN LN (11 -> 429 characters) and SHOP CN (10 -> 330) held only the heading on 09-29 and
+  carry the passage now. SPOT US and ST SP keep the same opening and lose only a trailing fragment ("Supporting
+  documentation:", "Asdsa"), the trim the CTO ruled in msg 31382.
+- **Reading:** no PDF-only name lost a pillar, a management passage or a case it recovered on 09-29. The docx control
+  recovers everything it recovered before except the two scorecard values the round meant to remove. ACCEPT ("not poorer
+  for having been filed as a PDF") holds on this population.
+- **Finding, the BABA class (round 41):** **2 of 45** served management passages open with a scorecard heading and its
+  score: BABA US and ST SP (`Management/Board 80 ...` glued to real prose). This is the same text `Z-S89` removed when it
+  stood alone. It belongs with the round-41 cell "a served passage begins and ends at a word boundary".
+
+## Third window, 21:29Z-21:40Z (CTO msg 32006): FWD-21 walked; the term filter looked for
+
+Port 5174 held from 21:28Z to 21:40Z, served from the same tree `1cbc56a75eee`. DEV is at `38cc0ecf8cdf`, but its five newer
+commits touch only IRPT wire files and none of the Security Analysis page. Two walks: `tmp/ui-walk/20261008T212943Z` (UNVGY
+US) and `tmp/ui-walk/20261008T213438Z` (BA, NVDA, SPOT US). Each ended DISARMED (login refused, HTTP 401). The server was
+stopped (0 listeners); `status` reads `status=disabled armed=no; SSM ABSENT`.
+
+- **FWD-21, UNVGY US Model tab (shot 010):** the sheet shows fiscal 2016 to 2025 and the team's three cases at 2026E-2030E.
+  The page says in its own words: "2026E, 2027E, 2028E: no consensus estimates are served for this name; the model block
+  carries fiscal years 2016 to 2025" (`ModelTab.tsx:598`). That is true. The served payload's wrong reason ("raw stamp ...
+  pulled before C-MODEL-FORECASTS") **is not shown** on the walked page: 0 hits in the walk's 7 output files. The page half
+  of ruling 4 holds. The wrong text is a served-text defect only, for the producer (round 41).
+- **The term filter (msg 31656), still no real match:** SPOT US shows three terms, each "0 of 9 headlines". Two are whole
+  pillar titles ("Attractive industry trends, large and growing market opportunity", "Strong competitive positioning and
+  durable moat"); the third is "ARPU". UNVGY US shows four terms at "0 of 1", among them the same two titles and "price". BA
+  US carries no team terms block (10-K view). NVDA US reads "We do not cover this company yet". So none of the 4 walked names
+  that carry terms (SPOT and UNVGY now, ASML and IMB this morning) shows a filter term matching a headline. A whole pillar title cannot match one, which is
+  the evidence for the round-41 cell "a thesis term is a term, not a whole pillar title". The capture stays owed until that
+  cell lands.
+
 ## NOT DONE in this drive
 
-- FWD-16's comparison extended to pillars and management over 95 names: not run.
+- The filter capture on a real matching headline: blocked on the round-41 terms cell (above).
