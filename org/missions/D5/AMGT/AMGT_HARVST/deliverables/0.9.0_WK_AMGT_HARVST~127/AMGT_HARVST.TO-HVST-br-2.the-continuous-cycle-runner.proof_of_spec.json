@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-br-2.the-continuous-cycle-runner",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-br-2.the-continuous-cycle-runner.md",
+    "group": "OTHER",
+    "vintage_commit": "39889dd4d7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "39889dd4d7",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-br-2.the-continuous-cycle-runner.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~127",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~127, branch wk-AMGT_HARVST-127-r74, TREE-OK, base 39889dd4d7. Built lib/opal_data_harvest/cycle_runner.py (backfill_driver.main called IN-PROCESS, one call per cycle; already_held read from runtime_root/run_records/<run_id>.json, len(keys_skipped_as_held), for the run ids the driver's checkpoint holds) and test_br2_cycle_runner.py (12 tests: plants i-vii plus default order, loop, idle, dry-run; fake driver = backfill_driver.drive over a stub collector; plant iii runs the real Worker over test_n1's offline bbg fixtures and counting RoutedInner). backfill_driver.py UNCHANGED. Mutant: with the run-record read stubbed to [] plant iii fails (1, 0, True) != (1, 2, True). No real job, no publisher, S3 or network call, no subprocess; the shared .runtime untouched. Row AMGT_HARVST-Z-W127-S1 (the --idle-seconds argument). Order file not edited, status not flipped (issuer flips).",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/cycle_runner.py",
+      "kind": "script",
+      "commit_or_etag": "ad829c5290",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "python -m lib.opal_data_harvest.cycle_runner --dry-run prints CYCLE PLAN per publisher (pairs 242) and NETWORK CALLS 0; ft refused exit 2 naming FWD-18.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_br2_cycle_runner.py",
+      "kind": "test",
+      "commit_or_etag": "ad829c5290",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 passed: nothing new, sign_in_refused then next publisher, held article counted with no body request, ft refused, floor, stop file x2, raising driver, default order, loop, idle, dry-run; no network, no subprocess.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "301945614a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row AMGT_HARVST-Z-W127-S1 appended inside the first fenced array (354 rows parse).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest/test_br2_cycle_runner.py -rA --tb=line -p no:cacheprovider expects passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_br2_cycle_runner.py -rA --tb=line -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "rc 0. 12 passed in 3.09s",
+      "denominator": "12 of 12 tests",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.opal_data_harvest.cycle_runner --dry-run --state-dir .scratch/br2_dry expects NETWORK CALLS 0",
+      "method": "command",
+      "invocation": "python -m lib.opal_data_harvest.cycle_runner --dry-run --state-dir .scratch/br2_dry",
+      "expect": "NETWORK CALLS 0",
+      "output_evidence": "rc 0. CYCLE PLAN bbg floor 2026-10-07 pairs 242 | CYCLE PLAN wsj ... pairs 242 | CYCLE PLAN barrons ... pairs 242 | CYCLE PLAN sa ... pairs 242 | NETWORK CALLS 0",
+      "denominator": "4 of 4 publishers planned; 242 pairs each; state dir not created",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider expects passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/opal_data_harvest -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "rc 0. 775 passed, 3 skipped, 120 warnings, 6 subtests passed in 87.48s",
+      "denominator": "775 passed + 3 skipped, 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any real collector job, publisher call, S3 call, upload, or touch of the shared .runtime, config.json, identity files or aliases; any schedule registration",
+      "reason": "Order preflight: LOCAL code and tests with the package's fakes; the schedule is cell HVST-br-3."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W127-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "committed ad829c5290 (ruff blocked one unused import first, removed) and 301945614a"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 command run three times (build, post-fix, AC run)",
+      "observed": "12 passed each time",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "In held_in_run_record the list read of keys_skipped_as_held was replaced by an empty list.",
+      "expected": "plant iii fails: already_held 0 instead of 2",
+      "observed": "1 failed, 11 passed: assert (1, 0, True) == (1, 2, True); file restored, 12 passed",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  }
+}
