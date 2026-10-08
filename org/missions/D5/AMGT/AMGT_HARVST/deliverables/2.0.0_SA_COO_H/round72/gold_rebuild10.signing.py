@@ -2,8 +2,9 @@
 
 It builds mention and daily with the list FILE the act will pass (`securities.universe.r72.json` beside this script), through
 the capturing client (PUTS SENT 0), and applies `gold_rebuild10_rule.rule` against the served snapshot (rebuild #9, built
-from `round64/securities.universe.r64.json`). It checks that the list file equals what `universe_securities.build()` yields
-at this HEAD, and prints whether it equals rebuild #9's list (this rebuild changes the matcher, not the list). It prints
+from `round64/securities.universe.r64.json`). AMENDMENT 1 (`1.0.0_SA_CTO~Z` R28, msg 31945): the list is FROZEN at the one rebuild #9 was served
+from, and the gate requires the list file to equal THAT file; what `universe_securities.build()` yields at this HEAD is printed
+for information only (the collector pointer moved at 203db573d4 and the builder reads it; that list move is rebuild #11). It prints
 BNP's pair counts (row AMGT_HARVST-Z-W112-S1). Prints `RULE (rebuild #10): HOLDS` only when the rule holds, the list check
 passes and no put was sent. `--write-list` first writes the list file from `build()`. Writes `gold_rebuild10.signing.json`.
 """
@@ -127,7 +128,7 @@ def main():
         print("  OTHER %s fields %s" % (key, fields))
     for row in v["mention_unexplained_sample"]:
         print("  UNEXPLAINED %s" % row)
-    holds = v["holds"] and list_equal and puts == 0
+    holds = v["holds"] and same_as_served and puts == 0
     print("RULE (rebuild #10): %s" % ("HOLDS" if holds else "BROKEN"))
     print("PUTS SENT: %d" % puts)
     return 0 if holds else 1

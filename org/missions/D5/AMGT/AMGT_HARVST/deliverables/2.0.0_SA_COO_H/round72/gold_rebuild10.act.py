@@ -79,7 +79,7 @@ def main():
     stamp = now.strftime("%Y%m%dT%H%M%SZ")
     as_of = now.date().isoformat()
     named_doc = json.load(open(NAMED, encoding="utf-8"))
-    record = {"stamp": stamp, "as_of": as_of, "universe_file": R64, "served_universe_file": R60, "rebuild": 9,
+    record = {"stamp": stamp, "as_of": as_of, "universe_file": R64, "served_universe_file": R60, "rebuild": 10,
               "gate_only": gate_only,
               # CTO msg 31571 term 1 and ADDENDUM 2: what goes, by key, and what is stated and not graded.
               "named_removals": named_doc["rows"], "named_removal_classes": named_doc["classes"],
@@ -107,7 +107,7 @@ def main():
     print("\n".join(record["gate"]))
     sys.stdout.flush()
     if gate.returncode != 0 or HOLDS not in gate.stdout or "PUTS SENT: 0" not in gate.stdout:
-        record["result"] = "STOP: the rebuild-#9 dry-run rule does not hold; nothing written"
+        record["result"] = "STOP: the rebuild-#10 dry-run rule does not hold; nothing written"
         print(record["result"])
         return finish(record, 1)
     if gate_only:
