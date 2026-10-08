@@ -1,0 +1,41 @@
+========================================================================================================
+V1  cloudops-dell-agent-respol-allow-policy, LIVE document
+========================================================================================================
+  statements: 1 ['AllowResourcePolicyChanges']
+  V1 content: True -- one statement, Effect Allow, Resource *, 70 distinct actions, per-service breakdown equal to the signed table, no iam:/secretsmanager:/cloudtrail:
+  per-service, live vs signed: cloudfront=2/2 codebuild=2/2 dynamodb=2/2 ec2=12/12 ecr=4/4 events=2/2 kms=4/4 lambda=4/4 logs=5/5 rds=2/2 route53=2/2 s3=14/14 ses=5/5 sns=2/2 sqs=3/3 ssm=3/3 wafv2=2/2
+  mutant: an iam: action planted                                   -> False, must be False  (71 actions, not 70)
+  mutant: a secretsmanager: action planted                         -> False, must be False  (71 actions, not 70)
+  mutant: a cloudtrail: action planted                             -> False, must be False  (71 actions, not 70)
+  mutant: one action dropped (70 -> 69)                            -> False, must be False  (69 actions, not 70)
+  mutant: the 14 s3 actions replaced by s3:* x14 (count kept at 70) -> False, must be False  (actions are not distinct (57 unique))
+  mutant: Resource narrowed off *                                  -> False, must be False  (Resource is ['arn:aws:s3:::*'], not *)
+
+  group attachments BEFORE (5) / AFTER (6)
+  added: ['cloudops-dell-agent-respol-allow-policy']  removed: []
+  five -> six with exactly one addition and nothing removed: True
+
+========================================================================================================
+V1 (continued)  SWAP mutants -- the count stays 70, so the forbidden-service and breakdown limbs
+                have to fire on their own. The earlier three were caught by the count first, which
+                did NOT demonstrate those limbs; these do.
+========================================================================================================
+  SWAP one s3 action for iam:UpdateAssumeRolePolicy (count stays 70) -> False, must be False  (FORBIDDEN service present: ['iam'])
+  SWAP one s3 action for secretsmanager:PutResourcePolicy (count stays 70) -> False, must be False  (FORBIDDEN service present: ['secretsmanager'])
+  SWAP one s3 action for cloudtrail:PutResourcePolicy (count stays 70) -> False, must be False  (FORBIDDEN service present: ['cloudtrail'])
+  SWAP one s3 action for an extra kms action (count 70, no forbidden service) -> False, must be False  (actions are not distinct)
+
+  and the unmutated document still reads: (True, '70 distinct, no forbidden service, breakdown equal to the signed table')
+
+
+  THE BREAKDOWN LIMB, fired on its own. First attempt used sns:AddPermission, which is ALREADY in
+  the policy, so distinctness caught it and the breakdown limb was still not demonstrated -- that
+  over-claim was removed from this file rather than left standing. A genuinely absent action is
+  needed, so one is chosen by subtraction from the live list:
+  candidates checked against the live list: 7; absent: ['sns:SetTopicAttributes', 'route53:DisassociateVPCFromHostedZone']
+  SWAP s3:PutBucketPolicy -> sns:SetTopicAttributes  (count stays 70, all distinct, no forbidden service;
+       s3 14->13 and sns 2->3, so ONLY the per-service comparison can catch it)
+    -> False, must be False   (BREAKDOWN: {'s3': (13, 14), 'sns': (3, 2)})
+
+  So all four limbs are independently demonstrated: count, distinctness, forbidden-service, breakdown.
+  The unmutated live document reads True -- 70 distinct, no forbidden service, breakdown equal to the signed table
