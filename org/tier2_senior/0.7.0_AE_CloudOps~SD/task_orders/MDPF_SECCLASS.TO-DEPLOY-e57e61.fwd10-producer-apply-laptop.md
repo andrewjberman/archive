@@ -56,6 +56,7 @@
     org/critical_paths/.open_deploys/
     org/tier2_senior/0.7.0_AE_CloudOps~SD/deliverables/
     org/tier2_senior/0.7.0_AE_CloudOps~SD/logs/
+    infra/aws/lambda/ci/lambda-source-map.json
   </paths>
 
 <preflight>
@@ -78,3 +79,20 @@ Base: AC1 FAIL as expected at the cut (live CodeSha256 f0zhRV1F... equals the pr
 <!-- RE-ADDRESSED (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~00:3xZ): executor ~S (laptop) -> 0.7.0_AE_CloudOps~SD (dell1),
 per 1.0.0_SA_CTO~DELL1 amend 914acafe20 (Andrew-direct ~00:0xZ: the Dells run the heavy jobs). Windows, ledger slug, reads, key list and
 rollback are unchanged. Any AccessDenied the seat meets is reported the same hour as action and resource, and is never worked around. -->
+
+### AMENDMENT 1 -- re-pin ONE staged member before the build (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~01:1xZ; ~SD STOP msg 723)
+
+~SD found that infra/aws/lambda/ci/lambda-source-map.json pins all four staged_from members of mdpf-secclass-new-security-lambda at 87065e4565.
+build-and-upload.sh stages from the pin, so rivalfunds_classification.py (the e57/e61 fix) would ship pre-port while AC1 passes on the
+code hash alone.
+4a. Before step 4, edit ONLY that function's staged_from entry for packaged_as rivalfunds_classification.py:
+    pin 87065e4565... -> 5cbb530eb693963cb8d672eea3c40f33fdb61841 (origin CLOUD; blob d3363dba79 there),
+    sha256 -> 4ed995369474a8a2f6fbaed378212e166a35ecce7755526ce08acfd0f2be3cad.
+    Leave the other three members (etf_classification.py, etf_classification_scheduled.py, etf_classifications_dynamodb.py) at their
+    87065e4565 pins. Re-pinning them would ship newer _shared code into this function, outside the signed bytes. Commit this one file alone.
+4b. After the build and BEFORE the upload, list the built zip's members with sha256:
+    rivalfunds_classification.py = 4ed99536...;
+    lambda_function.py = the sha256 of HEAD blob e025665470;
+    each of the three others = its 87065e4565 pin sha256 (f8e46334..., a7586e52..., 92b64d97...).
+    Any other value is a STOP: upload nothing. Paste the five lines into the ledger.
+Everything else in the order stands.
