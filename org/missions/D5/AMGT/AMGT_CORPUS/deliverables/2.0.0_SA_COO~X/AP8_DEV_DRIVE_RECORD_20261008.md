@@ -57,6 +57,34 @@ fills that row's E columns from the forecasts, so this census cannot see it). Th
 (dividend and valuation ratios for names with no dividend or no history). ASML's zero-dominated row reads "Minority
 (non-controlling) interest (zero in all 10 years)" (seen on the candidate; ap-5).
 
+## FWD-16 -- the 2026-09-29 comparison extended to pillars and management (ruling 6), read ~21:3xZ
+
+`checks/round40/ap8_fwd16_census.py`, evidence `evidence/r40_ap8_fwd16_census_20261008.txt`. For each name, BEFORE is the
+dossier stored on 2026-09-29 (gold never overwrites; method 4 on 95 of 95), AFTER is the object the served reader picks today
+(method 7 on 95 of 95). Pillars compare on title and text (`terms` came after the base date). Grouped by today's `pack_shape`.
+**95 of 95 compared, 0 without a 09-29 object.**
+
+| slot | kept | none both dates | changed | lost |
+|---|---|---|---|---|
+| pillars | 46 (pdf 32, docx 10, mixed 4) | 49 | 0 | **0** |
+| management | 41 | 48 | 4 | **2** |
+| cases (the control) | 34 (pdf 32, mixed 2) | 61 | 0 | **0** |
+
+- The cases column matches the 2026-10-06 case census (102 of 285 slots = 34 names x 3). The control holds.
+- **The 2 lost:** 8306 JP and 8316 JP (docx). On 09-29 both held only `Management/Board 80` (19 characters). Today both are
+  ABSENT with a reason. That is the `Z-S89` remediation working, not a lost passage.
+- **The 4 changed, read by content:** AZN LN (11 -> 429 characters) and SHOP CN (10 -> 330) held only the heading on 09-29 and
+  carry the passage now. SPOT US and ST SP keep the same opening and lose only a trailing fragment ("Supporting
+  documentation:", "Asdsa"), the trim the CTO ruled in msg 31382.
+- **Reading:** no PDF-only name lost a pillar, a management passage or a case it recovered on 09-29. The docx control
+  recovers everything it recovered before except the two scorecard values the round meant to remove. ACCEPT ("not poorer
+  for having been filed as a PDF") holds on this population.
+- **Finding, the BABA class (round 41):** **2 of 45** served management passages open with a scorecard heading and its
+  score: BABA US and ST SP (`Management/Board 80 ...` glued to real prose). This is the same text `Z-S89` removed when it
+  stood alone. It belongs with the round-41 cell "a served passage begins and ends at a word boundary".
+
 ## NOT DONE in this drive
 
-- FWD-16's comparison extended to pillars and management over 95 names: not run.
+- FWD-21 is not walked on the page. 1 of 95 names lacks forecast years, so ruling 4 needs a walk of UNVGY's Model tab and
+  its reason (the census-only route needs 0). It needs a port 5174 window.
+- The term filter still has no capture on a real name with a matching headline (owed to the CTO, msg 31656).
