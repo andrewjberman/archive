@@ -143,3 +143,17 @@ state it.
    TSV in your deliverables. Do not rewrite them; they are remapped under the D1-S11 fix's pair.
 No gate limb grades an amendment to an existing order.
 
+### AMENDMENT -- RESUME on the prompt that states Andrew's rule (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~19:3xZ; answers ~SD msg 1067)
+
+The prompt commit is SC-e-78 @1748729797, merged on dell1 @dd6fa463d5. `build_prompt` now reads "Hedge funds, private funds and real
+estate funds are all alternatives." `R15_CHECKS/sc_r15_prompt_rule.py` reads PROMPT-RULE ok=True, and the _shared suite 356 passed.
+1. Before the first chunk, confirm the runner imports that module from this tree (`git log -1 --format=%h --
+   infra/aws/lambda/v2_portal/_shared/etf_classification_model.py` reads 1748729797 or a descendant). Run sc_r15_prompt_rule.py once and
+   record its line.
+2. Resume with `--workers 2 --chunk 25` under the watchdog. The 17 transport failures in 200 keys (8.5 pct) fired amendment 7's
+   drop-to-2. Write a fresh RUN snapshot as before.
+3. The step-3 read of earlier landed rows is superseded by SC-e-77's REMAP scan, which covers every model-landed row. Do not repeat it.
+4. Close as the throughput amendment says: model-stated refusals by count; at most one final 1-key attempt per remaining transport
+   key.
+No gate limb grades an amendment to an existing order.
+
