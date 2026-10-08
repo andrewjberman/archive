@@ -166,3 +166,15 @@ They are indistinguishable, so amendment 7's drop-to-2 premise reads false. 2 wo
 At the next chunk boundary, return to `--workers 4 --chunk 25`. Transport keys stay re-planned, with at most one final 1-key attempt
 each. Drop to 2 only on an HTTP 429, not on the transport rate. No gate limb grades an amendment to an existing order.
 
+### AMENDMENT -- exclude the twice-refused FINAL keys from every plan (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~20:3xZ; answers ~SD msg 1133)
+
+`E49_TWICE_REFUSED_FINAL_20261008.json` (~SD deliverables) lists 47 keys. Each was model-refused in run 2 and again in run 3 under the
+SC-e-78 prompt, so it is FINAL per msg 1100. The runner plans on absence, so it re-asked them on every restart.
+1. `R12_CHECKS/e49_ai_write.py` gains `--exclude <json>`. It drops those keys from the plan only, never from the rollback.
+2. Dry run at ~20:3xZ with `--exclude` on that file:
+   `E49-AI-DRY-RUN ... present_now=309 excluded_final=43 to_model=709 runner_direct=0 ... ok=True`.
+   The other 4 of the 47 have landed since the file was written.
+3. At the next chunk boundary, resume with `--exclude org/tier2_senior/0.7.0_AE_CloudOps~SD/deliverables/E49_TWICE_REFUSED_FINAL_20261008.json`
+   plus `--workers 4 --chunk 25`. At close, the excluded keys count as model-stated refused.
+No gate limb grades an amendment to an existing order.
+
