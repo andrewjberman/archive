@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CTLPLN.TO-CT-s-7",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-s-7.seat-list-per-box.md",
+  "group": "OTHER",
+  "vintage_commit": "89410e3c49"
+ },
+ "assignee": "0.9.0_WK_NFRA_CTLPLN~17",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.seats1.md",
+  "vintage_commit": "89410e3c49",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-s-7.seat-list-per-box.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/seat-list.py",
+   "kind": "script",
+   "commit_or_etag": "ff5e6ea8a7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "repo-local read tool; writes one file (this box's seats.json) only when `write` is run; nothing deployed, no AWS call, no bus send"
+  },
+  {
+   "path_or_key": ".tools/tests/test_seat_list.py",
+   "kind": "script",
+   "commit_or_etag": "ff5e6ea8a7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "fixture tests in temporary directories; each removes the files it made"
+  },
+  {
+   "path_or_key": ".claude/skills/fabric-check/SKILL.md",
+   "kind": "doc",
+   "commit_or_etag": "ff5e6ea8a7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one added bullet pointing at `seat-list.py show --all`; no tool of the skill changed"
+  },
+  {
+   "path_or_key": ".claude/skills/sequence/SKILL.md",
+   "kind": "doc",
+   "commit_or_etag": "ff5e6ea8a7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "capacity bullet now reads the device register seat_limit; one added bullet pointing at `seat-list.py show --all`; no tool of the skill changed"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CTs7-AC1",
+   "criterion_verbatim": "python .tools/tests/test_seat_list.py expect: SEAT-LIST-TEST cases= (every case passing: the line must read ok=True)",
+   "method": "command",
+   "invocation": "python .tools/tests/test_seat_list.py",
+   "output_evidence": "SEAT-LIST-TEST cases=29/29 ok=True\n(rc 0, under timeout 120; the 29 cases are listed PASS above that line)",
+   "denominator": "29 of 29 fixture cases pass: a COO on each of the three drives, a COO with no drive and no order (NOTHING), a STALE seat, a box with no reviewer (ABSENT), a project code that is no project row (UNRESOLVED), a serial that never committed (NEVER), a base serial and its lane as two seats, show --all with one file absent and one stale, one box refusing to write another's file, an unknown key refused, plus the HOLD and lapsed-lease and Holds/Struck/shorthand reads",
+   "status": "PASS",
+   "expect": "SEAT-LIST-TEST cases="
+  },
+  {
+   "criterion_id": "CTs7-AC2",
+   "criterion_verbatim": "python .tools/seat-list.py write expect: SEAT-LIST device= (the same line must read ok=True; its coo= count is compared by the issuer with the live seats at the drain)",
+   "method": "command",
+   "invocation": "python .tools/seat-list.py write",
+   "output_evidence": "SEAT-LIST device=laptop seats=9 coo=3 working=8 idle=1 nothing=0 reviewer=present ok=True\n(rc 0, about 3 s under timeout 120, run from the linked worktree with AGENTBUS_DEVICE=laptop at 2026-10-08 05:12:47Z; sources read from the main worktree. The three COO rows are 2.0.0_SA_COO~C, ~G, ~R)",
+   "denominator": "9 of 9 seats registered in the broker liveness file at that moment, each with exactly one doing; 3 COO of those 9; 4 boxes in the device register, 1 written (this box's file only)",
+   "status": "PASS",
+   "expect": "SEAT-LIST device="
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the tests are the control: each case builds a fixture where the named reading differs (a lease HOLD and a lapsed lease read NONE; a longer author name is not matched; a Holds/Struck LIVE_ARMS row arms nothing) and asserts the tool tells them apart",
+   "expected": "29 of 29 cases pass",
+   "observed": "29 of 29 cases pass",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the fixture tests carry a fixed clock (fixture file `now`) and fixed git-log text, so the 29 cases do not depend on the live fabric",
+   "observed": "two runs read 29/29 ok=True",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "what a seat does between commits, and a drive no lease and no LIVE_ARMS row names",
+   "reason": "BLIND by the order's preflight; doing is measured from drive, open orders and commits only"
+  },
+  {
+   "item": "any box's seats.json other than this box's",
+   "reason": "a box's file reaches this tree when that box commits it and the manager lands it; show --all names each absent or old file rather than reading around it"
+  },
+  {
+   "item": "this machine's seats.json from the AC2 run was not committed",
+   "reason": "the file is a point-in-time snapshot written from a linked worktree; the issuer re-runs write at the drain for the live count"
+  }
+ ],
+ "surprises": [
+  "NFRA_CTLPLN-W17-S1",
+  "NFRA_CTLPLN-W17-S2"
+ ],
+ "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~17/NFRA_CTLPLN.TO-CT-s-7.seat-list-per-box.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/seat-list.py write",
+   "result": "SEAT-LIST device=laptop seats=9 coo=3 working=8 idle=1 nothing=0 reviewer=present ok=True"
+  }
+ ]
+}
