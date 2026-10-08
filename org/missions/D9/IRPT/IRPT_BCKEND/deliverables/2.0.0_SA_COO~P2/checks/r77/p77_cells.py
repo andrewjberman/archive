@@ -91,14 +91,21 @@ def main():
     built = str(d.get("built_sha", ""))
     if built not in (live, base64.b64decode(live).hex()):
         fail("built %r != live CodeSha256 %r" % (built, live))
-    r = subprocess.run(bash_argv(aws, "apigatewayv2", "get-routes", "--api-id", API_ID, "--query", "Items[].RouteKey",
-                                 "--output", "json"), capture_output=True, timeout=50)
+    # AMENDMENT 2 (row D2-W172-S4): the unfiltered 6,368-byte route list crashes python -> bash .tools/aws -> aws.exe
+    # (0xC0000005) on dell2; the query filters server-side to the one route key, and the total count is read separately.
+    r = subprocess.run(bash_argv(aws, "apigatewayv2", "get-routes", "--api-id", API_ID, "--query",
+                                 "Items[?RouteKey=='%s'].RouteKey" % ROUTE, "--output", "json"), capture_output=True, timeout=50)
     if r.returncode:
-        fail("get-routes rc %d" % r.returncode)
+        fail("get-routes (filtered) rc %d" % r.returncode)
     keys = json.loads(r.stdout.decode("utf-8", "replace") or "[]")
-    if ROUTE not in keys:
-        fail("route %r not live (%d routes read)" % (ROUTE, len(keys)))
-    print("OK: pin %s, 3 of 3 members, live CodeSha256 == built, route live (%d routes read), replans 0, ledger closed" % (PIN, len(keys)))
+    n = subprocess.run(bash_argv(aws, "apigatewayv2", "get-routes", "--api-id", API_ID, "--query", "length(Items)",
+                                 "--output", "text"), capture_output=True, timeout=50)
+    # length(Items) under the CLI's auto-pagination prints one count PER PAGE (rule 22a); the total is their sum.
+    pages = n.stdout.decode("utf-8", "replace").split() if n.returncode == 0 else []
+    total = str(sum(int(x) for x in pages)) if pages and all(x.isdigit() for x in pages) else "unread rc %d" % n.returncode
+    if keys != [ROUTE]:
+        fail("route %r not live (filtered read %r; %s routes on the api)" % (ROUTE, keys, total))
+    print("OK: pin %s, 3 of 3 members, live CodeSha256 == built, route live (1 match of %s routes), replans 0, ledger closed" % (PIN, total))
     print("%s PASS" % cid)
 
 
