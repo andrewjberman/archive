@@ -19,7 +19,9 @@ from pathlib import Path
 
 P = "org/missions/D9/IRPT/IRPT_BCKEND"
 F = P + "/deliverables/0.9.0_WK_IRPT_BCKEND~158/Y67-1_release2_after_reads.json"
-LAPTOP = P + "/deliverables/0.9.0_WK_IRPT_BCKEND~158/Y67-1_laptop_cleanup_result.json"
+# AMENDMENT 1 (issuer, ~21:0xZ): the laptop result lives in the issuer folder (TREE_DELIVERABLES owner-in-path), as a
+# normalized copy of the laptop leg-2 result @0ca54dbc3d.
+LAPTOP = P + "/deliverables/2.0.0_SA_COO~Y2/r67/Y67-1_laptop_cleanup_result.json"
 FN = "irpt-ycharts-generate"
 BUILT = "Un0wVZqjqpwKhpYyFeBRW3fVFddrlHR0BtHjYuP5eNY="
 ROLLBACK = "ZspX0qD2bCkFVoi3X8W0cBiPlHY37utqPysuLXMeduI="
