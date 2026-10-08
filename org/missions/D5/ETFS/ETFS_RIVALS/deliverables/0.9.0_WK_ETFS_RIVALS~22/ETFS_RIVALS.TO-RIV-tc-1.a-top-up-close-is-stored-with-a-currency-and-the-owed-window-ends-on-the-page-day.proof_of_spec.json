@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-tc-1.a-top-up-close-is-stored-with-a-currency-and-the-owed-window-ends-on-the-page-day",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "17b8415e51",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-tc-1.a-top-up-close-is-stored-with-a-currency-and-the-owed-window-ends-on-the-page-day.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "17b8415e51"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~22",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "fcb3d76903",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_history_owed (the branch the switch opens) calls owed() with the page day, reads stored currencies, does one CRNCY lookup inside the budget check; HISTORY_OWED_CAP 20000; the switch-OFF path is not edited; nothing deploys from a worker",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r28tc1_topup_currency_and_page_day.py",
+      "kind": "script",
+      "commit_or_etag": "fcb3d76903",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 tests; vendor hooks and history_owed stubbed, budget ledger in a temp dir",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_r27tw1_history_owed_leg.py",
+      "kind": "script",
+      "commit_or_etag": "fcb3d76903",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one assertion changed: HISTORY_OWED_CAP == 5000 -> 20000 (order item 6)",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the window ends on the page day; stored currencies used and only the missing ones looked up, in one CRNCY request before any history request and inside the budget check; a failed lookup sends nothing more; the printed clauses; price_date kept; the switch-OFF run unchanged -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round15/checks/tc-1.AC1.py",
+      "output_evidence": "OK (a) owed() day in print ['2026-10-05'], in ask ['2026-10-05']\nOK (b) CRNCY requests 0, check_points [13], 13 of 13 rows with stored currency\nOK (c) one CRNCY request for S3 S4 S5, check_points [16], records [3,3,5,5]\nOK (d) CRNCY request raised: 0 history requests, 0 new objects, carried 13\nOK (e) ask line 'currency lookups 3'; print line 'currency lookups 3 (not sent)'\nOK (f) 13 of 13 units, price_date = partition\nOK (g) tw-1.AC1.py rc 0, 'AC1 RESULT: PASS 0 failures'\nOK (h) control\nAC1 RESULT: PASS 0 failures (rc=0)",
+      "denominator": "8 of 8 arms (a-h)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "the first scheduled vehicle run after the merge shows the enrichment leg's lines and exit code unchanged with the switch unset",
+      "method": "manual_read_with_citation",
+      "invocation": "none (judgment, graded by 3.0.0_SA_CVO~RV on the issuer's real read)",
+      "output_evidence": "No vehicle log read: nothing deploys or merges from a worker. Nothing to read.",
+      "denominator": "0 of 0",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion graded by 3.0.0_SA_CVO~RV on the issuer's real read of the vehicle logs"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The check carries its own control arm (h); at base round 27 arms a-e fail by the check's docstring.",
+      "expected": "base: tc-1.AC1 (a)-(e) FAIL, (f)-(h) PASS",
+      "observed": "after the build tc-1.AC1, tw-1.AC1, tw-1.AC2, bf-1.AC1/AC2, bk-1.AC1/AC2/AC3 each end PASS 0 failures; package suite 922 passed, 3 skipped",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the checks and the suite each run after the final code commit",
+      "observed": "all arms OK",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status>",
+      "reason": "left to the issuer by the face"
+    },
+    {
+      "item": "Real-run proof of J1 and any vendor request",
+      "reason": "the issuer's real read; no vendor call, S3 or deploy from a worker"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~22 <0.9.0_WK_ETFS_RIVALS~22@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "fcb3d76903"
+    }
+  ]
+}
