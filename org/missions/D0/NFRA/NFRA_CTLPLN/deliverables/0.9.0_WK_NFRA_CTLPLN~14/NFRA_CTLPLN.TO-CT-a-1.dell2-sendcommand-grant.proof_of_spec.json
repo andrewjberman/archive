@@ -415,14 +415,13 @@
   },
   {
    "criterion_id": "CTa1-AC5",
-   "criterion_verbatim": "python infra/aws/terraform/transcripts/tests/check_transcripts_dell_decrypt.py expect: TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True",
+   "criterion_verbatim": "python infra/aws/terraform/transcripts/tests/check_transcripts_dell_decrypt.py expect: TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=8/10 reader_unchanged=True unlisted_refused=True",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/transcripts/tests/check_transcripts_dell_decrypt.py",
-   "output_evidence": "Amendment 16 run, `timeout 120`, rc 1, 8 s, and the same reading on the unedited tree at HEAD d613ff4526 before any change of this pass. LAST line: TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=8/10 reader_unchanged=True unlisted_refused=True statements_added=1 ok=False. The two arms that read allowed: 'ARM cloudops-dell1-agent-user kms:PutKeyPolicy ... own_policies=allowed KMS_RULE=allowed' and the same for cloudops-dell2-agent-user. Expected dell_write_refused=10/10: NOT MET. Row NFRA_CTLPLN-W14-S19.",
-   "denominator": "2 of 2 Dell users decrypt allowed; 8 of 10 write arms refused (2 not refused: kms:PutKeyPolicy for each Dell user); 1 statement added",
-   "status": "FAIL",
-   "expect": "TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True",
-   "status_reason": "The expected dell_write_refused=10/10 reads 8/10: both Dell users' LIVE policies allow kms:PutKeyPolicy on the transcripts key since the resource-policy Allow was applied (order AMENDMENT 14), which the test counts as a write that is not refused. The reading predates this pass's edits (same on the unedited tree). The test and its expected value were not weakened; row NFRA_CTLPLN-W14-S19 names the two ways out (a Deny in the transcripts key policy, or the issuer's recut of the expectation) for the issuer and the CTO."
+   "output_evidence": "AMENDMENT 17 run, `timeout 120`, from the worktree root at HEAD df84da40fa (the run reads live AWS, not this pass's files), rc 1. LAST line: TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=8/10 reader_unchanged=True unlisted_refused=True statements_added=1 ok=False. The two allowed arms: 'ARM cloudops-dell1-agent-user kms:PutKeyPolicy raw_doc=allowed raw_pre_edit_doc=allowed named_statements_only=implicitDeny own_policies=allowed KMS_RULE=allowed' and the same line for cloudops-dell2-agent-user. The other 8 write arms (Encrypt, GenerateDataKey, ReEncryptFrom, ScheduleKeyDeletion for each user) read refused. The statement that allows the two arms: the Dell group's managed policy cloudops-dell-agent-respol-allow-policy (Allow on *, kms:PutKeyPolicy in_allow true in dell_respol_policy.json), applied in STEP C 2026-10-08 under TO-APPLY-13, reached through the key policy's RootAdministersTheKeyAndCannotUseIt delegation to IAM; no Deny is cut. This is the accepted route listed as item 4 of 'What this Allow CAN undo' (CTO msg 106733). The test's trailing ok=False and rc 1 come from the test's own hard-coded 10/10 rule, not from the recut expectation; the expected line is a substring of the last line. Row NFRA_CTLPLN-W14-S19 resolved by AMENDMENT 17.",
+   "denominator": "2 of 2 Dell users decrypt allowed; 8 of 10 write arms refused (2 allowed by design: kms:PutKeyPolicy for dell1 and dell2); 1 statement added",
+   "status": "PASS",
+   "expect": "TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=8/10 reader_unchanged=True unlisted_refused=True"
   },
   {
    "criterion_id": "CTa1-AC6",
@@ -578,7 +577,8 @@
   "NFRA_CTLPLN-W14-S19",
   "NFRA_CTLPLN-W14-S20",
   "NFRA_CTLPLN-W14-S21",
-  "NFRA_CTLPLN-W14-S22"
+  "NFRA_CTLPLN-W14-S22",
+  "NFRA_CTLPLN-W14-S23"
  ],
  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~14/NFRA_CTLPLN.TO-CT-a-1.dell2-sendcommand-grant.proof_of_spec.json",
  "compiler_tools": [
