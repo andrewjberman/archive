@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-375",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-375.pcs-persisted-by-and-content-binding.md",
+    "group": "OTHER",
+    "vintage_commit": "1f14f0db5e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "1f14f0db5e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-375.pcs-persisted-by-and-content-binding.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~183",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/custody_persist.py",
+      "kind": "script",
+      "commit_or_etag": "6a0226dc02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "passes the verified caller's principal id and the retained composition's content hash to the writer; nothing built, uploaded or applied",
+      "artifact_covered_by": [
+        "IB87-2-AC1",
+        "IB87-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/custody_write.py",
+      "kind": "script",
+      "commit_or_etag": "6a0226dc02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "optional persisted_by and composition_sha256 parameters; stamps the record provenance and refuses an unbound or differently bound document; nothing built, uploaded or applied",
+      "artifact_covered_by": [
+        "IB87-2-AC1",
+        "IB87-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/export/tests/test_custody_writer_composed.py",
+      "kind": "test",
+      "commit_or_etag": "6a0226dc02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "54 offline tests: 44 existing (persist-path tests carry the declared hash) plus 5 persisted_by and 5 content_bound, one negative control each",
+      "artifact_covered_by": [
+        "IB87-2-AC1",
+        "IB87-2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB87-2-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r87/p87_cells.py\" . IB87-2-AC1 -> IB87-2-AC1 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r87/p87_cells.py\" . IB87-2-AC1",
+      "output_evidence": "IB87-2-AC1 PASS | rc=0 | OK: -k persisted_by: 5 passed, 49 deselected in 1.58s",
+      "denominator": "5 of 5 selected persisted_by tests passed, 0 failed (of 54 in the file)",
+      "expect": "^IB87-2-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB87-2-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r87/p87_cells.py\" . IB87-2-AC2 -> IB87-2-AC2 PASS",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r87/p87_cells.py\" . IB87-2-AC2",
+      "output_evidence": "IB87-2-AC2 PASS | rc=0 | OK: -k content_bound: 5 passed, 49 deselected in 1.68s; OK: -k <whole file>: 54 passed in 2.18s",
+      "denominator": "5 of 5 selected content_bound tests passed and 54 of 54 tests in the whole file passed, 0 failed",
+      "expect": "^IB87-2-AC2 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Code mutants, never committed, restored byte-identical: (1) custody_persist.py passes persisted_by=None, composition_sha256=None (the field and the binding removed); (2) custody_write.py _check_binding call replaced by pass (the binding check removed).",
+      "expected": "the non-control persisted_by tests fail in mutant 1; the non-control content_bound tests fail in mutant 2",
+      "observed": "mutant 1: 3 failed, 1 passed of 4 selected persisted_by tests; mutant 2: 3 failed, 1 passed of 4 selected content_bound tests; restored: 10 passed (persisted_by or content_bound)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the whole test file run twice against the same tree (by hand, and inside AC2)",
+      "observed": "54 passed both runs",
+      "status": "STABLE"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-D2-W183-S1",
+    "IRPT_BCKEND-D2-W183-S2"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> IB87-2-AC1,IB87-2-AC2",
+      "result": "see final report"
+    }
+  ]
+}
