@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-i-13",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-13.agent-never-silent.md",
+    "group": "OTHER",
+    "vintage_commit": "159dad0a43"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~41",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.inbound7.md",
+    "vintage_commit": "159dad0a43",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-13.agent-never-silent.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/tenant.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "draft_key/assign_seq, Refusal + refuse_eod, PRUNE_AFTER_S; repo-local, not deployed, no outside call run",
+      "artifact_covered_by": [
+        "CTi13-AC1",
+        "CTi13-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/mail_requests.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "mail offer key carries the item's number; repo-local, not deployed",
+      "artifact_covered_by": [
+        "CTi13-AC1",
+        "CTi13-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/assist.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "kimi(): doubled budget on a cut-off, KIMI_MAX_TOKENS_CAP, kimi_attempt log line; repo-local, not deployed",
+      "artifact_covered_by": [
+        "CTi13-AC1",
+        "CTi13-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_inbound_silent_paths.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nine-arm script with injected fakes; no network; base tenant.py read from git into a throwaway module",
+      "artifact_covered_by": [
+        "CTi13-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTi13-AC1",
+      "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_silent_paths.py expect: SILENT-PATHS ok=True",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_silent_paths.py",
+      "output_evidence": "(run as timeout 120 python ...)\nARM second_draft ok=True\nARM second_send ok=True\nARM legacy_pending ok=True\nARM mail_second ok=True\nARM eod_link_restored ok=True\nARM eod_redraft_refused ok=True\nARM eod_first_refused ok=True\nARM prune ok=True\nARM kimi_budget ok=True\nSILENT-PATHS ok=True arms=9/9 base_texts_second_draft=1\nrc=0\nNegative controls (draft_key forced to the old (tag, version) form; mail key forced to the old form): second_draft=False, second_send=False, mail_second=False. Base tenant.py (09ed3ed8ce) sends 1 text in the second_draft sequence where the new code sends 2.",
+      "denominator": "9 of 9 arms pass (8 original + kimi_budget from AMENDMENT 1)",
+      "status": "PASS",
+      "expect": "SILENT-PATHS ok=True"
+    },
+    {
+      "criterion_id": "CTi13-AC2",
+      "criterion_verbatim": "python \"org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~R/checks/check_agent_suites.py\" expect: AGENT-SUITE ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~R/checks/check_agent_suites.py\"",
+      "output_evidence": "(run as timeout 120 python ...)\npytest: 127 passed in 0.73s\nmail_reply: INBOUND-MAIL-REPLY-TEST ok=True cases=9/9\nAGENT-SUITE ok=True pytest_rc=0 mail_reply_rc=0\nrc=0\nNo existing case was changed: none asserts an old key string, a raise from _eod_draft, or the max_tokens of a retry.",
+      "denominator": "127 of 127 pytest cases and 9 of 9 mail-reply cases pass (the base's own counts)",
+      "status": "PASS",
+      "expect": "AGENT-SUITE ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the difference control is inside AC1 (arm second_draft: base tenant.py sends one text, the new code two) plus the forced old-key mutants named in AC1",
+      "expected": "base 1 text, new 2 texts; old-key mutants fail second_draft, second_send, mail_second",
+      "observed": "base_texts_second_draft=1, new=2; mutants False/False/False",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: every outside call is a stand-in with a fixed answer and a fixed clock",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a real gateway, Graph, S3, ldo, model or text call",
+      "reason": "the order forbids any call that leaves the machine; everything is injected"
+    },
+    {
+      "item": "ldo.py, post_format.py, End of Day and job run-once keys",
+      "reason": "the order forbids changing them; the End of Day key (per-day tag) and job keys are not affected"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~41/NFRA_CTLPLN.TO-CT-i-13.agent-never-silent.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_silent_paths.py",
+      "result": "SILENT-PATHS ok=True arms=9/9 base_texts_second_draft=1"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~R/checks/check_agent_suites.py",
+      "result": "AGENT-SUITE ok=True pytest_rc=0 mail_reply_rc=0"
+    }
+  ]
+}
