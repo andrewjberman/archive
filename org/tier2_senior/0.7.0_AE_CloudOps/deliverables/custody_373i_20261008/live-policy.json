@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "dynamodb:PutItem"
+      ],
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "dynamodb:LeadingKeys": [
+            "49financial",
+            "inflection",
+            "cottonwood"
+          ]
+        }
+      },
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:313476888478:table/irpt-requests"
+      ],
+      "Sid": "S1PutCustodyIndexAndRetentionRowsInServedFirmPartitions"
+    },
+    {
+      "Action": [
+        "kms:GenerateDataKey",
+        "kms:Encrypt"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "kms:EncryptionContext:aws:dynamodb:tableName": "irpt-requests",
+          "kms:ViaService": "dynamodb.us-east-1.amazonaws.com"
+        }
+      },
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111"
+      ],
+      "Sid": "S2EncryptIndexWritesViaDynamoOnly"
+    },
+    {
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:GetObjectVersion"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:s3:::opal-data-irpt/irpt/49financial/platinum/custody_reports/*",
+        "arn:aws:s3:::opal-data-irpt/irpt/inflection/platinum/custody_reports/*",
+        "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/platinum/custody_reports/*"
+      ],
+      "Sid": "S3WriteAndVerifyCustodyReportsOnly"
+    },
+    {
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/request_compositions/*",
+        "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/request_compositions/*",
+        "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/request_compositions/*"
+      ],
+      "Sid": "S4ReadRetainedRequestCompositionsOnly"
+    },
+    {
+      "Action": [
+        "kms:GenerateDataKey",
+        "kms:Decrypt"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "s3.us-east-1.amazonaws.com"
+        },
+        "StringLike": {
+          "kms:EncryptionContext:aws:s3:arn": [
+            "arn:aws:s3:::opal-data-irpt/irpt/49financial/platinum/custody_reports/*",
+            "arn:aws:s3:::opal-data-irpt/irpt/inflection/platinum/custody_reports/*",
+            "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/platinum/custody_reports/*",
+            "arn:aws:s3:::opal-data-irpt/irpt/49financial/state/request_compositions/*",
+            "arn:aws:s3:::opal-data-irpt/irpt/inflection/state/request_compositions/*",
+            "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/state/request_compositions/*"
+          ]
+        }
+      },
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111"
+      ],
+      "Sid": "S5KmsForThoseTwoPrefixesViaS3Only"
+    }
+  ]
+}
