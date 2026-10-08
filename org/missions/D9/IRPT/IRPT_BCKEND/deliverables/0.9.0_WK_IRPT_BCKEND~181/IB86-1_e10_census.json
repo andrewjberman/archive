@@ -1,0 +1,73 @@
+{
+  "cell": "IB-pr-373",
+  "function": "irpt-export-render",
+  "pin": "9238309ecacede4d3f71a366cf8e12772eafd3eb",
+  "entry_point": "irpt-export-render: the guarded Entry's operation custody-report-persist (route POST /api/scoped/investor-reporting/custody-report, a DECLARED row in routes.json behind the portal's CUSTOM authorizer), served by entry.lambda_handler -> the Entry -> custody_persist.custody_report_persist. entry.py carries no irpt_custody_persist path and no marked-event branch.",
+  "trigger": "(a) the guarded Entry: a DECLARED route row plus an operation, an Opal principal verified by the authorizer (ports['principal'] = InteractiveAccess.current over the verified headers; the operation refuses any principal_class other than OPAL_GLOBAL). The request names {retained_request: {artifact_id}, document, provenance} and nothing else. Owner and accounts: the owner the artifact repository admits for the producer's retained custody submission (REQUEST_COMPOSITION artifact, custody-owner-v1) under retained_export.authorizer, the rule custody-report-read reads under; accepted source evidence: that artifact's own retention_ref. Chosen over (b) a schedule: the unit of work is one retained custody submission named by an Opal operator, there is no server-side index of unpersisted submissions to scan, and a schedule needs a Terraform rule plus a lambda permission (outside this grant).",
+  "census_invocation": "python infra/aws/lambda/ci/release-census.py irpt-export-render --pin 9238309ecacede4d3f71a366cf8e12772eafd3eb",
+  "census_header": "function=irpt-export-render pin=9238309eca built_members=66 live_members=64; changed_members=5",
+  "changed_members": [
+    {
+      "member": "entry.py",
+      "state": "changed",
+      "built": "39c3ac4495a8",
+      "live": "b32032d38b94",
+      "owner_commit": "d34a46f37d",
+      "why": "adds ROUTES['POST /api/scoped/investor-reporting/custody-report'] = custody-report-persist, the operation (lazy import of custody_persist) and the CustodyPersistRefused / CustodyWriteRefused reason mappings (INVALID_INPUT). No marked-event branch. Staged row moved cf6839fe38 -> d34a46f37d; the blob equals HEAD's."
+    },
+    {
+      "member": "infra/logic/registry/reporting_policies.json",
+      "state": "changed",
+      "built": "dc0eccfde861",
+      "live": "407a80608dec",
+      "owner_commit": "b4d98a4fe3",
+      "why": "E8 ACTIVE flip: irpt-custody-x10-v1 state PENDING_ENFORCEMENT -> ACTIVE, enforcement_ref null -> 0a57f3c0e9 (authored 0c35aeeaa8, merged b4d98a4fe3); a two-line diff against the packaged blob, every other row byte-identical. Without it retention refuses every custody persist. Staged row moved 8530114ff9 -> b4d98a4fe3; the blob equals HEAD's."
+    },
+    {
+      "member": "submit_installed.py",
+      "state": "changed",
+      "built": "aa7f2dd306d2",
+      "live": "5140a8acaa86",
+      "owner_commit": "d34a46f37d",
+      "why": "composes an 'artifacts' port beside 'reports' (retained_artifacts over the same repositories builder, same table, bytes and authorizer) so a retained request can be loaded by reference; retained_reports unchanged in behaviour. Source-dir member (files[]), blob at P equals d34a46f37d's."
+    },
+    {
+      "member": "custody_persist.py",
+      "state": "added",
+      "built": "dec22ae51b93",
+      "live": "-",
+      "owner_commit": "d34a46f37d",
+      "why": "The guarded operation (new module in the source dir, files[]): loads the retained request by reference, derives owner/accounts/evidence from it, persists through custody_write, reads back. Imports only members already in the zip plus custody_write."
+    },
+    {
+      "member": "custody_write.py",
+      "state": "added",
+      "built": "9e3aa49d485d",
+      "live": "-",
+      "owner_commit": "d34a46f37d",
+      "why": "The writer (IB-pr-351, reports/custody_write.py), packaged by no function until now; changed in this cell only by the optional retention_dependencies parameter. New staged row from d34a46f37d; the blob equals HEAD's."
+    }
+  ],
+  "build_only": {
+    "invocation": "BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting irpt-export-render",
+    "head_at_build": "9238309ecacede4d3f71a366cf8e12772eafd3eb",
+    "porcelain_before": "",
+    "rc": 0,
+    "tree_clean": true,
+    "tree_clean_after": true,
+    "built_sha256": "rNjtTwcmhpNdHUV7VcO1cRPcC1wHaANm1oIP+Xvf6Ek=",
+    "built_sha256_hex": "acd8ed4f072686935d1d457b55c3b57113dc0b5c07680366d6820ff97bdfe849",
+    "built_size_bytes": 414177,
+    "built_members": 66,
+    "residue": "git status --porcelain printed 0 lines before and after; scratch lives outside the worktree; the kept /tmp/lambda-artifact-irpt-export-render.zip was copied to scratch and removed. Nothing uploaded; artifact_sha256 in the source map is untouched."
+  },
+  "rollback": {
+    "live_CodeSha256": "PbyqmHBQpr4DC76qt0noBfoqKVleydNaJ7s2qsx5mT0=",
+    "live_CodeSize": 408932,
+    "live_LastModified": "2026-10-08T20:18:09Z",
+    "artifact_s3_key": "s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-export-render.zip",
+    "artifact_s3_version": "LefrKSE11JIR93JOh.1RP5cSIUrqKfI_",
+    "artifact_s3_version_written": "2026-10-08T20:13:51Z",
+    "read_at": "2026-10-08T21:4xZ (this session; the downloaded live zip's sha256 equals CodeSha256)"
+  }
+}
