@@ -1,139 +1,196 @@
-# PLAN NOTE -- the Dell group reads every secret a Dell-placed project's program reads by name (NFRA_CTLPLN.TO-CT-a-1, amendment 8)
+# PLAN NOTE -- three Dell limits lifted in ONE plan: secrets, the resource-policy Deny, self-simulate (NFRA_CTLPLN.TO-CT-a-1, amendment 9)
 
-Author: 0.9.0_WK_NFRA_CTLPLN~14. Supersedes the amendment-5 and amendment-7 versions of this note. NOTHING WAS APPLIED. NO SECRET VALUE WAS READ: this pass made no Secrets Manager call at all (it worked from the saved census, which was taken with `list-secrets` only: names, ARNs, descriptions, tags, dates, key id), and the repository was searched for names and the code lines that read them. Authority: 1.0.0_SA_CTO msg 106646 on Andrew's word ("the Dell boxes are the work horses; laptop is control plane"): "the grant widens to every secret a Dell-placed project's own code reads by name, vendor or internal, from the census already taken; openai-api-key stays out". Census: `infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json` (listing taken 2026-10-07T21:00:45Z; 114 secrets, all in us-east-1, none in the other 16 enabled regions; 15 Dell-placed projects; placement not inferred).
+Author: 0.9.0_WK_NFRA_CTLPLN~14. Supersedes the amendment-8 version of this note. NOTHING WAS APPLIED, NO PLAN WAS RUN AGAINST THE BACKEND, NO IAM WRITE WAS MADE. NO SECRET VALUE WAS READ: this pass made no Secrets Manager call at all; the classification works from the saved listing (`tests/vendor_secrets_census.json`, taken 2026-10-07T21:00:45Z with `list-secrets`: names, descriptions, tags, key ids, dates) and from the code that uses each secret. Authority: Andrew-direct ~00:4xZ "lets start with lifting 1 2 3 6" (`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261008_004xZ_LIFT_FOUR_DELL_LIMITS_SECRETS_FIRM_DATA_RESOURCE_POLICIES_PUSH.md`) and `1.0.0_SA_CTO` msg 106669.
 
-## What the apply would show, by reading
+## What the ONE apply would show -- by reading the configuration, NOT from a plan
 
-One `aws_iam_policy.dell_agent_vendor_secrets[0]` and one `aws_iam_group_policy_attachment.dell_agent_vendor_secrets[0]` to `cloudops-dell-agents-group`: 2 to add, 0 to change, 0 to destroy, in the existing `nfra-ctlpln-identity` root. ONE policy, not two: the document is 930 characters against the 6,144 limit (a Terraform precondition refuses an oversize document). It has one statement, `ReadSecretsDellProjectsReadByName`, Effect Allow, Action `secretsmanager:GetSecretValue` and nothing else, Resource the 9 exact ARNs in the table below (the full ARN of the listing with its six-character suffix; no wildcard; each matches exactly one listed secret; no listed secret outside the 9 is matched). The group then carries 6 managed policies; the limit is 10. It applies to BOTH Dell users (the group), not to one box. The policy keeps its amendment-5 name `cloudops-dell-agent-vendor-secrets-policy` although it now also carries internal credentials; renaming is a separate step. All 9 secrets use the account default key, so no `kms:Decrypt` is needed and no key policy is touched. The only secret under a customer-managed key (`schwab/sdd/session`) is read by no Dell project and is not in the set.
+Read from the configuration and the diff of this commit; no `terraform plan` was run. Relative to the state the previous pass left (the root as of its amendment 8):
 
-## FIRST: the high-consequence secrets in the grant (7 of the 9)
+| change | resource | action |
+|---|---|---|
+| A secrets | `aws_iam_policy.dell_agent_vendor_secrets[0]` (`cloudops-dell-agent-vendor-secrets-policy`, 66 exact secret ARNs, 5968 characters of 6,144) | created |
+| A secrets | `aws_iam_group_policy_attachment.dell_agent_vendor_secrets[0]` to `cloudops-dell-agents-group` | created |
+| B resource-policy Deny | `aws_iam_policy.dell_agent_respol` (`cloudops-dell-agent-respol-policy`) | destroyed |
+| B resource-policy Deny | `aws_iam_group_policy_attachment.dell_agent_respol` | destroyed |
+| C self-simulate | `aws_iam_policy.dell_agent_create` (`cloudops-dell-agent-create-policy`): one statement `SimulateOwnPolicyOnly` added to its document | updated in place |
 
-None of the 9 is a private signing key, an administrator seed or an administrator credential: the portal and render private JWT keys, `opalinvest/admin-seed` and `opalinvest/jwt-secret` are NOT granted (see the not-granted section). But 7 of the 9 let their holder ACT AS the firm or as a signed-in user at an outside service, and two of them (the Black Diamond sessions) belong to client firms' accounts. Each is read by a program inside a Dell-placed project's code surface; the signers are asked to read this list as the content of the widening.
+Expected: 2 to add, 1 to change, 2 to destroy. The group then holds five managed policies (deploy, create, routes-fn, routes-host, secrets) against the quota of ten; the split rule is not needed (one policy fits). WHAT THIS NOTE CANNOT SAY: whether the earlier, merged work of this order (the two routes Deny policies, the dell2 SSM policy and the other per-user policies) is already applied. I did not read the backend. If any of it is not applied, the plan will show those as additional creates; that is not part of this change. The simulator and the configuration are read, not planned.
 
-- `blackdiamond/49f/session` (dell2; read by IRPT_BCKEND, e.g. infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py:87). It is the saved logged-in session (cookie bundle) of the 49F Black Diamond DataMining account; a machine holding it can act as that signed-in user at Black Diamond and read that client firm's reporting data until the session expires or is rotated.
-- `blackdiamond/cot/session` (dell1/dell2; read by IRPT_BCKEND, MDPF_HEALGAP, e.g. infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/lambda_function.py:99). It is the saved logged-in session (.bd.identity cookie) of the Cottonwood Black Diamond account; a machine holding it can act as that signed-in user at Black Diamond and read that client firm's reporting data until the session expires or is rotated.
-- `ycharts/session/current` (dell2; read by IRPT_BCKEND, e.g. infra/aws/lambda/investor-reporting/ycharts/session/broker.py:108). It is the saved logged-in YCharts session (session id, CSRF token, WAF token and load-balancer cookies); a machine holding it can act as the firm's signed-in YCharts user until the token expires (about 96 hours).
-- `ycharts/login/credentials` (dell2; read by IRPT_BCKEND, e.g. infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:989). It holds the username and password of the firm's YCharts report-automation login; a machine holding it can sign in to YCharts as the firm from anywhere, with no session needed.
-- `ycharts/credentials` (dell2; read by IRPT_BCKEND, e.g. infra/aws/lambda/ycharts-session-capture/index.mjs:119). It holds the username and password of the firm's legacy YCharts login (interim recon credential); a machine holding it can sign in to YCharts as the firm from anywhere.
-- `gateway/mail/bearer` (dell2; read by NFRA_TRNSPT, e.g. data/transcripts/scripts/outlook/gateway_mail.py:61). It is the bearer token for the firm's own gateway mail read route (/hx/mail); a machine holding it can call that route as an authorised caller and read the messages and PDF attachments it serves (the route admits sender-table messages only).
-- `opal/auth/origin-verify` (dell2; read by IRPT_BCKEND, e.g. infra/aws/users/lambda/portal-authorizer/originVerify.mjs:62). It is the shared secret the portal's auth handler and authorizer require to accept a request as having come through the firm's own CloudFront front door; a machine holding it can make requests that those components accept as coming from that front door, so it can skip the edge's checks.
+## A. SECRETS -- the new rule, over all 114 listed secrets
 
-Not in that list: `astn/kimi/api-key` (a vendor API key; holding it spends the firm's Kimi quota, it signs in as nobody) and `opal/auth/irpt-render-jwt-public-key` (a public verification key).
+Four classes, one each, by NAME, DESCRIPTION, TAGS and the code that uses the secret, whether or not a Dell project's code names it today. Result: **VENDOR-CREDENTIAL 35, CLIENT-SESSION 32, PLATFORM-KEY 28, OTHER 19** (sum 114). **GRANTED 66** = those of the first two classes under the account's default key; **BLOCKED-BY-KEY 1** (`schwab/sdd/session`). The grant is ONE statement `ReadVendorCredentialsAndClientSessions`, `secretsmanager:GetSecretValue` only, on 66 exact ARNs (full ARN with the six-character suffix, no wildcard; each entry matches exactly one listed secret, and no listed secret outside the granted set is matched: simulation line `VENDOR-ONE-TO-ONE`). Document size: 5968 characters of 6,144 (whitespace not counted), so it is NOT split; headroom is 176 characters, so one or two further granted secrets will need the split, which is by class (one policy per granted class). The listing is of 2026-10-07T21:00:45Z; a secret created since is not in the grant, and a secret scheduled for deletion is not returned by `list-secrets`, so none was seen. Take the census again (`derive_vendor_secrets.py --live`) before the apply if the date matters.
 
-What this grant does NOT change, stated plainly: the group's create policy (`dell_create_policy.json`, unchanged) already lets a Dell WRITE a secret (`secretsmanager:PutSecretValue`; the simulation shows it allowed with and without the new document for both users). So a Dell could already overwrite any of these 9, including the public verification key, without reading it. This grant adds the READ only. Whether a given use of a vendor or client-firm account is one Andrew allowed for a given project stays the rule the seats follow; IAM cannot tell a permitted call from a forbidden one. The cross-firm rule (CLAUDE.md section 5: no pipeline tree references another firm's data) is a question for the signers, not one this policy answers: the two Black Diamond session secrets are client-firm tenant sessions, which is why the earlier pass classed them UNSURE; their reading programs are IRPT_BCKEND's (dell2) and, for the Cottonwood one, MDPF_HEALGAP's (dell1).
+Differences from the previous (amendment 8) grant of 9: IN now: 60 more, including `openai-api-key` (ruled IN by msg 106669). OUT now: `gateway/mail/bearer` (PLATFORM-KEY), `opal/auth/origin-verify` (PLATFORM-KEY), `opal/auth/irpt-render-jwt-public-key` (OTHER: a public key).
 
-## Every granted secret (9)
+### GRANTED -- client sessions and logins (31 in the grant, 32 in the class)
 
-"Earlier class" is the amendment-5 classification, kept as information (VENDOR / NOT-VENDOR / UNSURE); it no longer decides the grant. "Reader" is the line of code that fetches the secret (file:line); "name held at" is the join line where the program names it. A reader is a call to the secrets service for that name, or the passing of that name to a function that makes the call; checked by `derive_vendor_secrets.py --verify-readers` (13 of 13 reader lines carry their token, 13 of 13 name lines carry the literal).
+- `aaii/credentials` -- cookie bundle (captured session) for aaii.com; description
+- `astn/ft/credentials` -- Financial Times subscription login; description
+- `astn/ft/session` -- Financial Times authenticated session cookie bundle; description
+- `blackdiamond/49f/credentials` -- 49 Financial's Black Diamond login (username and password); description
+- `blackdiamond/49f/session` -- 49 Financial's Black Diamond captured session; description
+- `blackdiamond/cot/credentials` -- Cottonwood's Black Diamond login; description
+- `blackdiamond/cot/session` -- Cottonwood's Black Diamond session cookie; description
+- `bloomberg/session` -- Bloomberg.com parked session bundle; description and tag kind=site-session
+- `bloomberg/terminal/login` -- Bloomberg Terminal sign-in for the daily-pull seat (a vendor login used to pull data); description
+- `conferenceboard/credentials` -- cookie bundle (captured session) for conference-board.org; description
+- `dowjones/barrons/session` -- Barron's session; no description, the name places it as a captured session
+- `dowjones/credentials` -- shared WSJ and Barron's subscriber login; description
+- `dowjones/wsj/session` -- WSJ session; no description, the name places it as a captured session
+- `opal/bd/cottonwood/credentials` -- Black Diamond portal login for the Cottonwood tenant; description
+- `opal/bd/credentials` -- Black Diamond portal login credentials; description
+- `orion/credentials` -- Orion Advisor platform login; description
+- `orion/eclipse_jwt/current` -- captured Eclipse session JWT of the Orion platform; description
+- `orion/jwt/current` -- captured Orion Advisor session JWT; description
+- `schwab/sdd-credentials` -- Schwab SDD login (user id and password), the custodian's portal; description
+- `schwab/sdd/session` **(NOT in the grant: blocked by key)** -- Schwab SI2/SDD standing session blob (custodian session); description. Under a customer-managed key: left out as blocked-by-key
+- `seeking-alpha/credentials` -- Seeking Alpha sign-in; description and tag kind=site-login
+- `seeking-alpha/session` -- Seeking Alpha parked session bundle; description
+- `smartx/cookie/current` -- SmartX session cookie slot; description
+- `smartx/credentials/password` -- SmartX password; description
+- `smartx/credentials/username` -- SmartX username; description
+- `smartx/credentials/yaliu-bundle` -- SmartX account-tier credential bundle; description
+- `smartx/credentials/yang-shared` -- a person's SmartX login shared with the firm; description and tag Vendor=SmartX
+- `smartx/jwt/current` -- SmartX parked session JWT; description
+- `ycharts/credentials` -- YCharts platform login; description
+- `ycharts/login/credentials` -- YCharts report-automation login; description
+- `ycharts/session/current` -- YCharts captured session cookie bundle; description
+- `ycharts/session/research-20260911` -- YCharts session-transport experiment (captured session, no login password); description
 
-| # | secret | earlier class | Dell box | project | reader (file:line) | name held at | what holding the value lets a box do |
-|---|---|---|---|---|---|---|---|
-| 1 | `astn/kimi/api-key` | VENDOR | DELL1/DELL2 | IRPT_BCKEND, MDPF_SECCLASS | infra/aws/lambda/investor-reporting/ycharts/generate/kimi_port.py:68<br>infra/aws/ec2/bd-cot-auto-login/bd_49f_auto_login.js:249<br>infra/aws/lambda/v2_portal/yang_pipeline/classify-residual-model.py:101 | infra/aws/ec2/bd-cot-auto-login/bd_49f_auto_login.js:239<br>infra/aws/lambda/investor-reporting/ycharts/generate/kimi_port.py:19<br>infra/aws/lambda/v2_portal/yang_pipeline/classify-residual-model.py:79 | A vendor API key (Moonshot AI / Kimi chat-completions): a machine holding it can make Kimi calls that are billed to the firm; it is not a login and cannot sign in as a person. |
-| 2 | `blackdiamond/49f/session` | UNSURE | DELL2 | IRPT_BCKEND | infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py:87 | infra/aws/lambda/investor-reporting/performance/tenants.py:145 | It is the saved logged-in session (cookie bundle) of the 49F Black Diamond DataMining account; a machine holding it can act as that signed-in user at Black Diamond and read that client firm's reporting data until the session expires or is rotated. |
-| 3 | `blackdiamond/cot/session` | UNSURE | DELL1/DELL2 | IRPT_BCKEND, MDPF_HEALGAP | infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/lambda_function.py:99<br>infra/aws/lambda/investor-reporting/performance/bd_live.py:44 | infra/aws/lambda/cot-pipeline/cot-rebalancer-runner/lambda_function.py:64<br>infra/aws/lambda/investor-reporting/performance/tenants.py:163 | It is the saved logged-in session (.bd.identity cookie) of the Cottonwood Black Diamond account; a machine holding it can act as that signed-in user at Black Diamond and read that client firm's reporting data until the session expires or is rotated. |
-| 4 | `gateway/mail/bearer` | NOT-VENDOR | DELL2 | NFRA_TRNSPT | data/transcripts/scripts/outlook/gateway_mail.py:61 | data/transcripts/scripts/outlook/gateway_mail.py:39 | It is the bearer token for the firm's own gateway mail read route (/hx/mail); a machine holding it can call that route as an authorised caller and read the messages and PDF attachments it serves (the route admits sender-table messages only). |
-| 5 | `opal/auth/irpt-render-jwt-public-key` | NOT-VENDOR | DELL2 | IRPT_BCKEND | infra/aws/lambda-edge/auth-validator-edge/render_auth.mjs:68 | infra/aws/lambda-edge/auth-validator-edge/render_auth.mjs:38 | A public RSA key used only to VERIFY render tokens: reading it lets a machine check tokens, not sign them. (Writing is a separate matter; see the note under the high-consequence section.) |
-| 6 | `opal/auth/origin-verify` | NOT-VENDOR | DELL2 | IRPT_BCKEND | infra/aws/users/lambda/portal-authorizer/originVerify.mjs:62 | infra/aws/users/lambda/portal-authorizer/originVerify.mjs:31 | It is the shared secret the portal's auth handler and authorizer require to accept a request as having come through the firm's own CloudFront front door; a machine holding it can make requests that those components accept as coming from that front door, so it can skip the edge's checks. |
-| 7 | `ycharts/credentials` | UNSURE | DELL2 | IRPT_BCKEND | infra/aws/lambda/ycharts-session-capture/index.mjs:119 | infra/aws/lambda/ycharts-session-capture/index.mjs:96 | It holds the username and password of the firm's legacy YCharts login (interim recon credential); a machine holding it can sign in to YCharts as the firm from anywhere. |
-| 8 | `ycharts/login/credentials` | VENDOR | DELL2 | IRPT_BCKEND | infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:989 | infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js:113 | It holds the username and password of the firm's YCharts report-automation login; a machine holding it can sign in to YCharts as the firm from anywhere, with no session needed. |
-| 9 | `ycharts/session/current` | UNSURE | DELL2 | IRPT_BCKEND | infra/aws/lambda/investor-reporting/ycharts/session/broker.py:108<br>infra/aws/lambda/ycharts-session-probe/lambda_function.py:210 | infra/aws/lambda/investor-reporting/ycharts/session/broker.py:63<br>infra/aws/lambda/ycharts-session-probe/lambda_function.py:77 | It is the saved logged-in YCharts session (session id, CSRF token, WAF token and load-balancer cookies); a machine holding it can act as the firm's signed-in YCharts user until the token expires (about 96 hours). |
+### GRANTED -- vendor credentials (35)
 
-Per-reader detail (project, box, and how the name reaches the call) is in the census under `decisions[<secret>].readers[].how`. Three points a reviewer should see:
+- `FredApiKey` -- St. Louis Fed FRED data API key; no description, the name and data/yang_macros_re/adapters/fred_adapter.py:6 place it
+- `ai/claude-api-key` -- model-provider API key; the name says Claude and the description says an OpenAI key for the SmartX exporter AI fallback; a vendor key either way
+- `anthropic-api-key` -- Anthropic API key; no description, the name and infra/aws/lambda/exec-summary-generator/config.py:32 place it
+- `astn/brightdata/residential-proxy` -- Bright Data residential proxy credential (host:port:user:pass per bd_49f_auto_login.js:27)
+- `astn/kimi/api-key` -- Moonshot AI (Kimi) API key; description
+- `brightdata-api-key` -- Bright Data Web Unlocker API key; description
+- `find-dualbiz/bright-data/serp` -- Bright Data SERP API zone credential; description
+- `find-insure/bright-data/api-key` -- Bright Data Crawler API key; description and tag Provider=BrightData
+- `find-insure/bright-data/scraping-browser-creds` -- Bright Data scraping-browser zone credentials; description and tag Provider=BrightData
+- `find-insure/job-board/builtin/api-key` -- Built In job-board credentials; description and tag Provider
+- `find-insure/job-board/efinancialcareers/api-key` -- eFinancialCareers job-board credentials; description and tag Provider
+- `find-insure/job-board/glassdoor/api-key` -- Glassdoor job-board credentials; description and tag Provider
+- `find-insure/job-board/indeed/api-key` -- Indeed job-board credentials; description and tag Provider
+- `find-insure/job-board/insurancejobs/api-key` -- InsuranceJobs.com job-board credentials; description and tag Provider
+- `find-insure/job-board/linkedin-jobs/api-key` -- LinkedIn Jobs job-board credentials; description and tag Provider
+- `find-insure/job-board/wellfound/api-key` -- Wellfound job-board credentials; description and tag Provider
+- `find-insure/job-board/ziprecruiter/api-key` -- ZipRecruiter job-board credentials; description and tag Provider
+- `find-insure/lusha-ai/api-key` -- Lusha API key; description and tag Provider=LushaAI
+- `massive-api-key` -- Massive market-data API key; description
+- `msci-api-credentials` -- MSCI Index API credentials (basic auth); description
+- `multi-threadv2` -- OpenAI API key for the Corporeal multi-thread runtime; description
+- `nopecha/api-key` -- NopeCHA captcha-solving service API key; description and tag kind=vendor-api-key
+- `ocilar/credentials` -- Ocilar hCaptcha solver API key; description
+- `opal/opalai/analyst-claude-oauth-token` -- Claude Code OAuth token for the Opal_AI analyst runtime (a model provider's account token); description. Judgment call: it signs in as one named account at the vendor, it does not act as Opal's platform
+- `opal/openai/andrew-fideles` -- OpenAI key under the opal/openai/ namespace; no description, the name places it (one of five siblings)
+- `opal/openai/aws-lambda-ki` -- OpenAI key under the opal/openai/ namespace; no description, the name places it
+- `opal/openai/layer3-curation` -- OpenAI key; no description, the name and infra/aws/scripts/analyze_openai_costs.py:74 place it
+- `opal/openai/market-update` -- OpenAI key under the opal/openai/ namespace; no description, the name places it
+- `opal/openai/news-trending` -- OpenAI key; the code reads it as OPENAI_SECRET (infra/aws/lambda/keyword_intelligence_generator/lambda_function.py:46)
+- `openai-api-key` -- OpenAI API key; name (ruling: msg 106669 says it is IN)
+- `price_discovery` -- OpenAI API key for price-discovery ticker mapping; description
+- `quo/api-key` -- Quo (messaging provider) API key; description and tag kind=api-key
+- `rivalfunds/openai-api-key` -- copy of openai-api-key for the ETFS_RIVALS accounts; description and tag copy_of
+- `seeking-alpha/bright-data-api-key` -- Bright Data API key for the Seeking Alpha scraper; description
+- `twilio/credentials` -- Twilio account SID, auth token and phone number (messaging provider); description
 
-- `blackdiamond/49f/session`: the name is held in IRPT_BCKEND's `performance/tenants.py:145`; the program that fetches it by that default name is the 49F reporting-pull helper `infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py:45,87`, which IRPT_BCKEND's `performance/bd_adapter.py:52-60` loads (HELPER_SOURCE). That helper file is outside the census join, so this one grant rests on a reader found by following the code from a joined file, plus the measured refusal in CTO msg 106631 (a Dell run aborted on AccessDenied for this secret under IRPT_DASHBD's read-only pull). IRPT_DASHBD's own join rows for the secret are registries only (`lambda-source-map.json`, `root_map.json`), so the rule puts it in the set through IRPT_BCKEND, not IRPT_DASHBD.
-- `ycharts/credentials` is read only by the legacy capture lambda `ycharts-session-capture/index.mjs:96,119`, which the current runner (`ycharts_session.js:111`) calls LEGACY and superseded; the rule still puts it in the set because a program of IRPT_BCKEND reads it by name. A person may rule it out as legacy.
-- `opal/auth/irpt-render-jwt-public-key` and `opal/auth/origin-verify` are read by Lambda@Edge / authorizer code (`render_auth.mjs`, `originVerify.mjs`) that sits under IRPT_BCKEND's task-order paths; these are the portal's own edge components. Whether a Dell box ever runs them is not shown by the census, only that a Dell-placed project's paths contain the program.
+### PLATFORM-KEY -- NOT granted (28); what holding each would let a box do
 
-## Not granted, by reason (105 of 114)
+- `blackdiamond/49f/otp-gateway-token` -- Lets a box fetch the one-time sign-in codes of the 49 Financial Black Diamond account from the firm's own gateway, which completes that account's multi-factor sign-in.
+- `blackdiamond/cot/otp-gateway-token` -- Lets a box fetch the one-time sign-in codes of the Cottonwood Black Diamond account from the firm's own gateway, which completes that account's multi-factor sign-in.
+- `gateway/global/taxsma-workbook-token` -- Lets a box call the gateway's tax-workbook route as an authorised caller and read what it serves.
+- `gateway/mail/bearer` -- Lets a box call the gateway's mail route (/hx/mail) as an authorised caller and read the mail it serves. (The previous plan granted this one.)
+- `gateway/principals/rosters` -- Gateway read secret created for the principal rosters: lets a box read the gateway's list of authorised principals; kept PLATFORM-KEY because it could not be placed more narrowly.
+- `gateway/teams/bearer` -- Lets a box call the gateway's Teams route as an authorised caller.
+- `gateway/transcripts/bearer` -- Lets a box call the gateway's transcripts route as an authorised caller and read what it serves.
+- `inf/otp-relay/token` -- Lets a box pass the gate of the firm's one-time-code relay service and read or post codes through it.
+- `irpt/svc-irpt-analysis/password` -- Lets a box sign in as the firm's IRPT Analysis service account, with whatever that account may do.
+- `opal/auth/irpt-render-jwt-private-key` -- Lets a box mint render tokens that the firm's edge accepts as genuine, which is acting as the render service.
+- `opal/auth/jwt-private-key` -- Lets a box sign portal login tokens for any user, administrators included.
+- `opal/auth/origin-verify` -- Lets a box call the portal's origin directly and skip the edge's checks (the CloudFront origin-verification secret). (The previous plan granted this one.)
+- `opal/mcp/graph-read-token` -- Lets a box read the firm's estate-graph service as an authorised caller.
+- `opal/mcp/ms-ingest-token` -- Lets a box call the gateway's /ms/* ingest endpoint as an authorised caller.
+- `opal/mcp/opal-gateway-blackdiamond-reader-external-id` -- Is the external id of the gateway's Black Diamond read role; a box holding it can satisfy that role's trust condition when assuming it.
+- `opal/mcp/opal-gateway-fernet` -- Lets a box decrypt, read and forge the gateway's cached tokens and OAuth state.
+- `opal/mcp/opal-gateway-jwt` -- Lets a box sign tokens that the gateway accepts as its own authorisation server.
+- `opal/mcp/opal-gateway-schwab-account-ref-key` -- Lets a box compute and verify the gateway's keyed references to the custodian's accounts.
+- `opal/mcp/opal-gateway-schwab-reader-external-ids` -- Are the external ids of the gateway's Schwab reader roles; a box holding them can satisfy those roles' trust condition when assuming them.
+- `opal/mcp/opalbloomberg-login` -- Lets a box sign in to the firm's directory as the gateway's Bloomberg identity (the multi-factor code still goes to Andrew).
+- `opal/portal/svc-data-refresh` -- Lets a box call the firm's m365 gateway as the portal's data-refresh service.
+- `opal/pseudonym/49financial` -- Lets a box reverse or recreate the pseudonyms of one client firm's data.
+- `opal/pseudonym/opal-capital` -- Lets a box reverse or recreate the pseudonyms of the firm's own data.
+- `opal/ticketing/svc-analyst-intake` -- Lets a box create and list tickets in the firm's ticket API as the analyst-intake service.
+- `opalinvest/admin-seed` -- Lets a box create or sign in as the portal's administrator.
+- `opalinvest/jwt-secret` -- Lets a box sign portal login tokens for any user (the shared signing secret).
+- `schwab/anonymization-key` -- Lets a box reverse or recreate the Schwab data's anonymised identifiers.
+- `schwab/ec2-credentials` -- Lets a box log in as Windows Administrator on the firm's Schwab EC2 box.
 
-### Excluded by ruling (1)
+### OTHER -- NOT granted (19); for a person to rule
 
-- `openai-api-key` (earlier class VENDOR): 1.0.0_SA_CTO msg 106620: the whitelist line scopes OpenAI to one project, need is not shown, and a read is undone only by rotation; msg 106646 (amendment 8) keeps it out: 'openai-api-key stays out'. It has program readers in MDPF_SECCLASS (dell1) that the rule would otherwise grant; the ruling overrides. The RULINGS table in the head of `derive_vendor_secrets.py` carries it (name, ruling, message id), so it survives a re-run. The simulation shows it refused for both Dell users.
+- `blackdiamond/49f/otp-relay` -- transient relay of a one-time code (a bridge value), neither a login nor a session; a person rules
+- `blackdiamond/cot/otp-relay` -- transient relay of a one-time code (a bridge value), neither a login nor a session; a person rules
+- `estate-report/github-token` -- read-only GitHub token for the firm's own repository (description, tags): a credential for the firm's own source, not a vendor data pull; doubt resolves to OTHER
+- `find-insure/job-board/placeholder` -- namespace reservation (description, Provider=Reserved): holds no credential
+- `github-token` -- no description; the code (.tools/comp-deadgrant.py, the daily-agenda generator) shows a GitHub token for private repositories, whose scope cannot be placed
+- `google-cse-config` -- configuration bundle with no description (Google Custom Search); not placeable as a key
+- `google/andrew-goldengate/credentials` -- a Google account login (identity account used for sign-in-with-Google flows), not a vendor data credential; doubt resolves to OTHER
+- `google/officialmadeaux/credentials` -- a Google account login (identity account used for sign-in-with-Google automation), not a vendor data credential; doubt resolves to OTHER
+- `opal/auth/irpt-render-jwt-public-key` -- a public key (RS256 verification); description
+- `opal/auth/jwt-public-key` -- a public key (RS256 verification); description
+- `opal/external-apis` -- configuration bundle with no description; not placeable
+- `opal/finbert/config` -- configuration bundle with no description; not placeable
+- `opal/mcp/opal-gateway-graph` -- the firm's own directory (Entra) application credential for the gateway's Graph client; description
+- `opal/mcp/opal-gateway-login` -- the firm's own directory (Entra) application credential for the gateway's login; description
+- `opal/portal/config` -- configuration bundle with no description; not placeable
+- `opal/smartx/config` -- configuration bundle with no description; not placeable
+- `opal/smartx/qa-models` -- configuration bundle with no description; not placeable
+- `teams/global/owner-phone` -- Andrew's mobile number (description): personal data, not a credential
+- `twilio/recovery-code` -- Twilio account recovery code: an account-reset item, not a key or a sign-in; doubt resolves to OTHER
 
-### Blocked by key (0)
+### Where I chose the cautious class
 
-None. All 9 granted secrets use the account default key (`KmsKeyId` absent in the saved listing).
+`opal/auth/origin-verify` (AMENDMENT 9 lists "an origin-verify value" under OTHER; the issuer's dispatch says PLATFORM-KEY; both are not granted, I used PLATFORM-KEY under the doubt rule); `gateway/principals/rosters` (PLATFORM-KEY by doubt); `estate-report/github-token`, `github-token`, both Google account logins, `twilio/recovery-code`, the two one-time-code relays, the placeholder reservation and the configuration bundles (OTHER). Judgment calls that went the OTHER way (granted): `opal/opalai/analyst-claude-oauth-token` (a model provider's account token, VENDOR-CREDENTIAL), `smartx/credentials/yang-shared` (a person's vendor login shared with the firm, CLIENT-SESSION), the five `opal/openai/*` keys and `FredApiKey` (no description; classed by name and the code that reads them), and `bloomberg/terminal/login` (CLIENT-SESSION).
 
-### Reader unclear (7) -- for a person to rule; NOT granted
+## B. THE RESOURCE-POLICY DENY COMES OFF
 
-- `astn/brightdata/residential-proxy` (earlier class VENDOR): bd_49f_auto_login.js:27 names it in a comment; the program reads the id from the BD_PROXY_SECRET_ID environment variable (:289, :294), whose value is set in secret-ids.env (a configuration file): no literal name reaches a read call in program text
-- `blackdiamond/49f/credentials` (earlier class UNSURE): bd_49f_auto_login.js:25 names it in a comment; the program builds the name at run time from the firm id (:238, `blackdiamond/${firm}/credentials`) or reads BD_CREDENTIALS_SECRET_ID: no literal name reaches a read call
-- `gateway/teams/bearer` (earlier class NOT-VENDOR): opal-gateway/app/config.py:251 names it in a comment; deploy-to-ec2.sh:263 reads it by name but is an inventory file the census excludes (17 distinct secrets) and is not shown to be MDPF_TAXSMA's own program
-- `opal/auth/irpt-render-jwt-private-key` (earlier class NOT-VENDOR): _render_identity/mint.py:17-19 and :70-72 say in comments that the module makes no Secrets Manager call and that the secret is not yet provisioned: a comment, not a reader
-- `opal/external-apis` (earlier class UNSURE): portal/etl/.../opal-portal-volatility-fetcher/lambda_function.py:43,:84 reads it by name, but the file reaches IRPT_BCKEND only through the one-segment task-order path entry portal/ (the whole portal tree): not shown to be the project's own program
-- `opal/portal/config` (earlier class UNSURE): portal/scripts/setup-env.sh:13,:77 reads it by name, but the file reaches IRPT_BCKEND only through the one-segment task-order path entry portal/ (the whole portal tree): not shown to be the project's own program
-- `orion/credentials` (earlier class UNSURE): performance/tenants.py:170 holds the name in the INF route record (session_secret_id); nothing in the performance package reads that field for the INF route (orion_live.py:41 reads orion/jwt/current through jwt_freshness.SM_SECRET_ID instead): no reader found
+Removed: `aws_iam_policy.dell_agent_respol` and its group attachment (`iam.tf`), `dell_respol_policy.json`, `tests/derive_respol_actions.py`; the resource-policy block of `tests/simulate_policy.py` is now its mirror (the `FREED` arms). Kept untouched: the routes Deny (`routes.tf`, `modules/routes_policy/`), `DenyPassRoleExceptNamed`, `DenyProtectedFunctions`, `DenyApiKeyReads`, and `tests/read_queue_attribute_writers.py` with its saved file.
 
-If a person rules any of these in, the change is one entry in `READERS` (or one ruling) in `derive_vendor_secrets.py`, then `--reclass`; the policy follows from the census.
+What each of the 75 formerly denied actions reads for a Dell user NOW (simulation, both users identical). Nothing is asserted allowed: an action no Allow covers stays refused.
 
-### Named only in a project's documents (21)
+- dell1 kms:PutKeyPolicy on arn:aws:kms:us-east-1:313476888478:key/x -> implicitDeny now; with the removed Deny added back -> explicitDeny OK
+- dell1 lambda:AddPermission on arn:aws:lambda:us-east-1:313476888478:function:x -> implicitDeny now; with the removed Deny added back -> explicitDeny OK
+- dell1 s3:PutBucketPolicy on arn:aws:s3:::opal-x-test -> implicitDeny now; with the removed Deny added back -> explicitDeny OK
+- dell1 sqs:SetQueueAttributes on arn:aws:sqs:us-east-1:313476888478:agentbus-x -> allowed now; with the removed Deny added back -> explicitDeny OK
 
-`FredApiKey`, `aaii/credentials`, `ai/claude-api-key`, `conferenceboard/credentials`, `find-dualbiz/bright-data/serp`, `github-token`, `google-cse-config`, `massive-api-key`, `msci-api-credentials`, `multi-threadv2`, `opal/finbert/config`, `opal/mcp/graph-read-token`, `opal/mcp/ms-ingest-token`, `opal/openai/andrew-fideles`, `opal/openai/aws-lambda-ki`, `opal/openai/market-update`, `opal/pseudonym/49financial`, `opal/pseudonym/opal-capital`, `opal/smartx/qa-models`, `twilio/credentials`, `twilio/recovery-code`
+- FREED-COUNT dell1 of 75 former actions now read: allowed=1, explicitDeny=3, implicitDeny=71
+- FREED-COUNT dell2 of 75 former actions now read: allowed=1, explicitDeny=3, implicitDeny=71
+- FREED-LIST dell1 allowed: sqs:SetQueueAttributes
+- FREED-LIST dell1 explicitDeny: cloudtrail:DeleteResourcePolicy cloudtrail:PutResourcePolicy iam:UpdateAssumeRolePolicy
+- FREED-LIST dell2 allowed: sqs:SetQueueAttributes
+- FREED-LIST dell2 explicitDeny: cloudtrail:DeleteResourcePolicy cloudtrail:PutResourcePolicy iam:UpdateAssumeRolePolicy
 
-### Named by a Dell project's files, but no program reads them (23)
+So the Deny's removal newly lets a Dell do exactly ONE thing the Deny blocked: `sqs:SetQueueAttributes` (the create policy allows it on any queue), which can change a queue's access policy. Every other former action still reads implicitDeny (no Allow covers it: for example `s3:PutBucketPolicy`, `kms:PutKeyPolicy`, `lambda:AddPermission`, all the ses, sns, ecr, logs, ec2-sharing and secret-policy actions) or explicitDeny by another statement that stays (`iam:UpdateAssumeRolePolicy` by `DenyEveryIamWrite`; `cloudtrail:PutResourcePolicy` and `cloudtrail:DeleteResourcePolicy` by `DenyCloudTrailWrites`). This means lifting the Deny alone does not let a Dell write a bucket, key or function policy: that would need an Allow added in a later step. A Dell that changes a resource policy does so under its own box's never-widen pair; the laptop is told and steps in on an overlap.
 
-The references are Terraform IAM grants, schedules, registries, manifests, environment files, fixtures or tests; none is a reading program.
+The control on each line ("with the removed Deny added back -> explicitDeny") adds the removed statement inline to the same request, proving the arm reads the old behaviour. Routes, pass-role, protected-function and API-key arms read exactly as before: the per-arm lines of those blocks (PASSROLE 5, PROTECTED 9, ROUTES-ARM 5, APIKEY probe, ALLOWED 22, SSM-ARM 10, and the remaining DENIED arms) are identical, line for line, to the previous pass's run; the four resource-policy DENIED arms that used to read explicitDeny (s3:PutBucketPolicy, lambda:AddPermission, kms:PutKeyPolicy, secretsmanager:PutResourcePolicy) are no longer asserted (denied_ok moves from 19/19 to 15/15).
 
-`anthropic-api-key`, `blackdiamond/cot/credentials`, `blackdiamond/cot/otp-gateway-token`, `blackdiamond/cot/otp-relay`, `find-insure/bright-data/api-key`, `gateway/global/taxsma-workbook-token`, `gateway/principals/rosters`, `opal/auth/jwt-private-key`, `opal/auth/jwt-public-key`, `opal/bd/cottonwood/credentials`, `opal/bd/credentials`, `opal/mcp/opal-gateway-graph`, `opal/openai/news-trending`, `opal/smartx/config`, `opalinvest/admin-seed`, `opalinvest/jwt-secret`, `orion/jwt/current`, `price_discovery`, `seeking-alpha/bright-data-api-key`, `seeking-alpha/session`, `smartx/credentials/password`, `smartx/credentials/username`, `ycharts/session/research-20260911`
+## C. SELF-SIMULATE
 
-This group includes the firm's portal JWT private and public keys, `opalinvest/admin-seed` and `opalinvest/jwt-secret` (named only in portal-auth `iam.tf`), and the gateway rosters and workbook token (named only in manifests and IAM): a program of the portal reads them, but not one of the 15 Dell-placed projects' programs, by the census.
+One statement `SimulateOwnPolicyOnly` in the group's create policy: Allow `iam:SimulatePrincipalPolicy` on `arn:aws:iam::313476888478:user/${aws:username}`. One statement serves both users; neither can simulate the other or any role. Simulation (context key `aws:username` set per user):
 
-### Named by no Dell-placed project at all (53)
+- SELFSIM-ARM 01 dell1 simulates ITSELF: iam:SimulatePrincipalPolicy on user/cloudops-dell1-agent-user -> allowed (want allowed) OK
+- SELFSIM-ARM 02 dell1 simulates the OTHER Dell user (dell2): iam:SimulatePrincipalPolicy on user/cloudops-dell2-agent-user -> implicitDeny (want refused) OK
+- SELFSIM-ARM 03 dell1 simulates a ROLE: iam:SimulatePrincipalPolicy on role/x -> implicitDeny (want refused) OK
+- SELFSIM-ARM 04 dell1 simulates itself WITHOUT the statement (control): iam:SimulatePrincipalPolicy on user/cloudops-dell1-agent-user -> implicitDeny (want refused) OK
+- SELFSIM-ARM 05 dell2 simulates ITSELF: iam:SimulatePrincipalPolicy on user/cloudops-dell2-agent-user -> allowed (want allowed) OK
+- SELFSIM-ARM 06 dell2 simulates the OTHER Dell user (dell1): iam:SimulatePrincipalPolicy on user/cloudops-dell1-agent-user -> implicitDeny (want refused) OK
+- SELFSIM-ARM 07 dell2 simulates a ROLE: iam:SimulatePrincipalPolicy on role/x -> implicitDeny (want refused) OK
+- SELFSIM-ARM 08 dell2 simulates itself WITHOUT the statement (control): iam:SimulatePrincipalPolicy on user/cloudops-dell2-agent-user -> implicitDeny (want refused) OK
+- SELFSIM-SHAPE statements named SimulateOwnPolicyOnly=1; action iam:SimulatePrincipalPolicy; resource arn:aws:iam::313476888478:user/${aws:username}; no wildcard OK
 
-`astn/ft/credentials`, `astn/ft/session`, `blackdiamond/49f/otp-gateway-token`, `blackdiamond/49f/otp-relay`, `bloomberg/session`, `bloomberg/terminal/login`, `brightdata-api-key`, `dowjones/barrons/session`, `dowjones/credentials`, `dowjones/wsj/session`, `estate-report/github-token`, `find-insure/bright-data/scraping-browser-creds`, `find-insure/job-board/builtin/api-key`, `find-insure/job-board/efinancialcareers/api-key`, `find-insure/job-board/glassdoor/api-key`, `find-insure/job-board/indeed/api-key`, `find-insure/job-board/insurancejobs/api-key`, `find-insure/job-board/linkedin-jobs/api-key`, `find-insure/job-board/placeholder`, `find-insure/job-board/wellfound/api-key`, `find-insure/job-board/ziprecruiter/api-key`, `find-insure/lusha-ai/api-key`, `gateway/transcripts/bearer`, `google/andrew-goldengate/credentials`, `google/officialmadeaux/credentials`, `inf/otp-relay/token`, `irpt/svc-irpt-analysis/password`, `nopecha/api-key`, `ocilar/credentials`, `opal/mcp/opal-gateway-blackdiamond-reader-external-id`, `opal/mcp/opal-gateway-fernet`, `opal/mcp/opal-gateway-jwt`, `opal/mcp/opal-gateway-login`, `opal/mcp/opal-gateway-schwab-account-ref-key`, `opal/mcp/opal-gateway-schwab-reader-external-ids`, `opal/mcp/opalbloomberg-login`, `opal/opalai/analyst-claude-oauth-token`, `opal/openai/layer3-curation`, `opal/portal/svc-data-refresh`, `opal/ticketing/svc-analyst-intake`, `orion/eclipse_jwt/current`, `quo/api-key`, `rivalfunds/openai-api-key`, `schwab/anonymization-key`, `schwab/ec2-credentials`, `schwab/sdd-credentials`, `schwab/sdd/session`, `seeking-alpha/credentials`, `smartx/cookie/current`, `smartx/credentials/yaliu-bundle`, `smartx/credentials/yang-shared`, `smartx/jwt/current`, `teams/global/owner-phone`
+## What this does NOT do / limits
 
-Also noted: `orion/jwt/current` is read by IRPT_BCKEND's `performance/orion_live.py:41` through the constant `jwt_freshness.SM_SECRET_ID`, whose literal sits in files the census join does not hold for any Dell project; it is in the no-program-reader group above and is left out as a reader the census does not show.
-
-## How the set was derived, and how placement was established
-
-Placement: 15 projects, from each project row's `placement` field (13), one directive placement line (1) and the CTO placement record (1); `placement_inferred=False`. DELL1: MDPF_HEALGAP, MDPF_SECCLASS, MDPF_SECHIST, MDPF_TAXSMA. DELL2: ADVI_BILLING, ADVI_COTBKF, ADVI_PERFRP, DSGN_IRPTV1, IRPT_BCKEND, IRPT_CUSTDY, IRPT_DASHBD, IRPT_YCDGEN, NFRA_OPSWKF, NFRA_TRNSPT, OPAL_TICKET_VNEXT. The census `placement.projects` carries the evidence line for each. A project's code surface is the union of the `<paths>` of its task orders; a file under that surface that names a listed secret is a join row. The census recorded per join file only a suffix-based `program` flag (a scripting-language file that is not a test or fixture), which includes comments and constants, so the reader distinction was RE-DERIVED from the repository: each of the 13 recorded reader entries was read, and the line that makes the call is cited. A secret with a program file but no such entry is READER-UNCLEAR, not granted. An attribution that rested only on the one-segment path entry `portal/` (the whole portal tree) was not treated as IRPT_BCKEND's own code: that is why `opal/external-apis` and `opal/portal/config` are unclear although a portal program reads each.
-
-Blind spots, stated: (1) a project with no task order has no code surface, so its secrets are not seen; (2) a secret name built at run time is not seen (the census counted 74 dynamic call sites with no literal name); (3) the census is the listing at 2026-10-07T21:00:45Z: a secret created or recreated since has a different or absent ARN, and because every entry is an exact ARN with its suffix, a recreated secret FAILS CLOSED (not matched) until the census is re-taken; (4) placement is the register TARGET: a project may still run on its former box until its round boundary; (5) the grant is on the group, so both Dells get all 9 even where only one box's project reads it.
-
-## The simulation (cloud evaluator, `iam:SimulateCustomPolicy`, no apply, no secret read)
-
-Every granted secret was tested, not a sample: the set is 9, so the criterion's fixed set and the full run are the same run (it takes about 15 seconds, well inside the 120-second bound). It covers a vendor key (`astn/kimi/api-key`), internal bearer tokens (`gateway/mail/bearer`, `opal/auth/origin-verify`), session secrets (both Black Diamond sessions, `ycharts/session/current`) and credentials (the two YCharts logins); no private signing key is granted. Each arm below ran for BOTH Dell users and for the Dell effective set with and without the new document.
-
-```
-VENDOR-ARM 01 granted secret astn/kimi/api-key: dell1 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 02 granted secret blackdiamond/49f/session: dell1 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 03 granted secret blackdiamond/cot/session: dell1 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 04 granted secret gateway/mail/bearer: dell1 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 05 granted secret opal/auth/irpt-render-jwt-public-key: dell1 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 06 granted secret opal/auth/origin-verify: dell1 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 07 granted secret ycharts/credentials: dell1 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 08 granted secret ycharts/login/credentials: dell1 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 09 granted secret ycharts/session/current: dell1 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 10 EXCLUDED-BY-RULING secret openai-api-key: dell1 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 11 secret only a document names: FredApiKey: dell1 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 12 secret no Dell program reads (references are IAM, registry, manifest or fixture): anthropic-api-key: dell1 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 13 secret whose reader is unclear: astn/brightdata/residential-proxy: dell1 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 14 unrelated secret no Dell project names: astn/ft/credentials: dell1 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 15 granted secret name with a wrong ARN suffix: dell1 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 16 PutSecretValue on granted secret astn/kimi/api-key, as today: dell1 PutSecretValue -> allowed; without the secrets document -> allowed OK
-VENDOR-ARM 17 granted secret astn/kimi/api-key: dell2 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 18 granted secret blackdiamond/49f/session: dell2 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 19 granted secret blackdiamond/cot/session: dell2 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 20 granted secret gateway/mail/bearer: dell2 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 21 granted secret opal/auth/irpt-render-jwt-public-key: dell2 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 22 granted secret opal/auth/origin-verify: dell2 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 23 granted secret ycharts/credentials: dell2 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 24 granted secret ycharts/login/credentials: dell2 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 25 granted secret ycharts/session/current: dell2 GetSecretValue -> allowed; without the secrets document -> implicitDeny OK
-VENDOR-ARM 26 EXCLUDED-BY-RULING secret openai-api-key: dell2 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 27 secret only a document names: FredApiKey: dell2 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 28 secret no Dell program reads (references are IAM, registry, manifest or fixture): anthropic-api-key: dell2 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 29 secret whose reader is unclear: astn/brightdata/residential-proxy: dell2 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 30 unrelated secret no Dell project names: astn/ft/credentials: dell2 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 31 granted secret name with a wrong ARN suffix: dell2 GetSecretValue -> implicitDeny; without the secrets document -> implicitDeny OK
-VENDOR-ARM 32 PutSecretValue on granted secret astn/kimi/api-key, as today: dell2 PutSecretValue -> allowed; without the secrets document -> allowed OK
-VENDOR-ONE-TO-ONE entries=9 each_matches_exactly_one=True wildcards=False listed_secrets_outside_the_granted_set_matched=0 actions=['secretsmanager:GetSecretValue'] built_equals_census_grant=True chars=930 OK
-POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=13/13 ssm_ok=9/9 routes_ok=5/5 vendor_ok=33/33 all_ok=True
-```
-
-Reading the arms: the 9 granted secrets are `allowed` for each user and `implicitDeny` without the new document (so the Allow is the new document's); `openai-api-key` is refused for both users; a secret only a document names (`FredApiKey`), a secret whose references are no program's read (`anthropic-api-key`), a reader-unclear secret (`astn/brightdata/residential-proxy`), an unrelated secret (`astn/ft/credentials`) and a granted name with a wrong suffix are all refused; `PutSecretValue` on a granted secret is `allowed` both with and without the document, i.e. as today (the create policy allows it; this cell does not change it).
-
-## What the grant does not do
-
-It lets a Dell read these 9 secrets. It does not rotate or limit them, it does not decide whether a given call to a vendor or a client firm's account is one Andrew allowed for a given project, and it does not change who can write a secret. It reads a secret only through `GetSecretValue`: no list, no describe beyond what the group already has. Nothing here was applied.
-
+- Reads only: the live SSM documents were not compared; no Secrets Manager call; the backend was not read.
+- The grant lets a box READ the credential. Whether a given vendor call is one Andrew allowed for a given project stays the rule seats follow. `openai-api-key` is readable now; the whitelist line that scopes it to one project is unchanged.
+- The create policy still lets a Dell WRITE a secret (`PutSecretValue`): the simulation shows the same decision with and without the secrets document.
+- D (dell2's SSM parameter read) is not in this pass.
