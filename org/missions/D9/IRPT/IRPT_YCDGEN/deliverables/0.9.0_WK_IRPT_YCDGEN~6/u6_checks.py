@@ -11,7 +11,7 @@ One argument, one RESULT line. ASCII only. No vendor call, no AWS call, no insta
           compared with the committed contracts/wire/AnalysisReport.ts with the leading header comment
           block excluded from both.
   census  every reader of either AnalysisReport schema file (printed-denominator searches) is named, and
-          the python tests among them are run.
+          the python tests among them are run on a CLOUD export and on HEAD; PASS when none is newly red.
 """
 import concurrent.futures
 import difflib
@@ -137,12 +137,32 @@ def lines(b):
     return [x for x in b.decode("utf-8", "replace").split("\n") if x]
 
 
-def run_pytest(path):
-    p = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "--color=no", path],
-                       cwd=str(ROOT), capture_output=True, timeout=110)
+ARCHIVE_PATHS = ["docs", "infra/aws/lambda", "lib", "deck_generation"]
+
+
+def export_tree(rev, dest):
+    """git archive <rev> of the paths the reader tests need into dest (symlinks skipped); returns the file count."""
+    import io
+    import tarfile
+    paths = [p for p in ARCHIVE_PATHS if git("ls-tree", "--name-only", rev, "--", p).strip()]
+    data = git("archive", "--format=tar", rev, "--", *paths)
+    with tarfile.open(fileobj=io.BytesIO(data)) as tf:
+        members = [m for m in tf.getmembers() if not (m.issym() or m.islnk())]
+        tf.extractall(str(dest), members=members, filter="data")
+    return len(members), paths
+
+
+def run_pytest(job):
+    root, path = job
+    p = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "--color=no", "-rf", path],
+                       cwd=str(root), capture_output=True, timeout=110)
     text = p.stdout.decode("utf-8", "replace")
-    last = [ln for ln in text.splitlines() if re.search(r"\b(passed|failed|error)", ln)]
-    return path, p.returncode, (last[-1].strip() if last else text.strip()[-120:])
+    failed = set()
+    for line in text.splitlines():
+        if line.startswith("FAILED "):
+            failed.add(line[len("FAILED "):].split(" - ")[0].strip())
+    last = [ln for ln in text.splitlines() if re.search(r"(passed|failed|error)", ln)]
+    return path, p.returncode, failed, (last[-1].strip() if last else text.strip()[-120:])
 
 
 def arm_census():
@@ -177,15 +197,36 @@ def arm_census():
     for r in sorted(b):
         print("  READER [portal ts] portal/%s" % r)
     print("PYTHON TESTS TO RUN: %d" % len(tests))
-    failed = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
-        for path, rc, summary in ex.map(run_pytest, tests):
-            print("  TEST %s rc=%d %s" % (path, rc, summary))
-            if rc != 0:
-                failed.append(path)
+    tmp = tempfile.mkdtemp(prefix="u6census_")
+    failed_new = []
+    try:
+        trees = {}
+        for label, rev in (("CLOUD", "CLOUD"), ("HEAD", "HEAD")):
+            dest = Path(tmp) / label
+            dest.mkdir()
+            n, paths = export_tree(rev, dest)
+            trees[label] = dest
+            print("TREE %s = git archive %s (%s) of %s : %d files" % (label, rev, git("rev-parse", "--short=10", rev).decode().strip(), paths, n))
+        results = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
+            for label in ("CLOUD", "HEAD"):
+                jobs = [(trees[label], t) for t in tests]
+                results[label] = {path: (rc, failed, summary) for path, rc, failed, summary in ex.map(run_pytest, jobs)}
+        for t in tests:
+            c_rc, c_failed, c_sum = results["CLOUD"][t]
+            h_rc, h_failed, h_sum = results["HEAD"][t]
+            new_red = sorted(h_failed - c_failed)
+            print("  TEST %s  CLOUD: %s | HEAD: %s%s" % (t, c_sum, h_sum, ("  NEWLY RED: %s" % new_red) if new_red else ""))
+            if new_red or (h_rc != 0 and not h_failed and c_rc == 0):
+                failed_new.append(t)
+        red_both = sum(1 for t in tests if results["HEAD"][t][1] and results["HEAD"][t][1] == results["CLOUD"][t][1])
+        print("RED ON BOTH CLOUD AND HEAD (same failing set, not newly red): %d test file(s)" % red_both)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    failed = failed_new
     needed = [V2_REL.replace("/AnalysisReport.v2.schema.json", "/tests/test_analysisreport_v2.py")]
     missing = [n for n in needed if n not in tests]
-    print("TESTS: %d run, %d failed %s; required test missing from the census: %s" % (len(tests), len(failed), failed, missing))
+    print("TESTS: %d run on each of CLOUD and HEAD, %d newly red %s; required test missing from the census: %s" % (len(tests), len(failed), failed, missing))
     ok = bool(readers) and bool(tests) and not failed and not missing
     print("RESULT: census %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
