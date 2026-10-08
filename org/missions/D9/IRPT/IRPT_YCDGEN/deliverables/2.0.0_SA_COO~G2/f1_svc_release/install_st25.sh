@@ -4,13 +4,13 @@ set -u
 # package back. Sent through Systems Manager by host_read.py. No vendor call. Operator 2.0.0_SA_COO~G2.
 NEW=3cf5d52a7b-st25
 KEY=ec2/investor-reporting-ycharts/resident/resident_host_install_$NEW.sh
-VER=lrMO.Fq4usTTy.vsB67UKPvE4MU.Tlos
+VER=lrMO.Fq4usTTy.vsB67UKPvE4MU.Tlos  # the staged version; fetched by key (the host role holds GetObject, not GetObjectVersion); the sha256 below binds the bytes
 WANT=86fe9deee41cbf88d8244adad49ee98878f22fa4863ee3d7d31f0ff68630560b
 T=/tmp/resident_host_install_$NEW.sh
 R=/opt/irpt-resident
 UNIT=irpt-analysis-resident.service
 Q=https://sqs.us-east-1.amazonaws.com/313476888478/irpt-generation
-aws s3api get-object --bucket opal-313476888478-lambda-artifacts --key "$KEY" --version-id "$VER" $T --region us-east-1 >/dev/null || { echo "ERROR: fetch failed; nothing moved"; exit 30; }
+aws s3 cp "s3://opal-313476888478-lambda-artifacts/$KEY" $T --only-show-errors --region us-east-1 || { echo "ERROR: fetch failed; nothing moved"; exit 30; }
 [ "$(sha256sum $T | cut -d' ' -f1)" = "$WANT" ] || { echo "ERROR: the fetched script is not the signed bytes; nothing moved"; rm -f $T; exit 31; }
 echo "D2 install script sha256 verified on the host at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 bash $T
