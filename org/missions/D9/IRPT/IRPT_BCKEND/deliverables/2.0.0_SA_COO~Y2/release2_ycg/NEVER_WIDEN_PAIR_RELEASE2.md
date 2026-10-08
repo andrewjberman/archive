@@ -1,5 +1,9 @@
 # irpt-ycharts-generate RELEASE 2 -- never-widen pair DRAFT (TCKT_VNEXT X-1, both halves)
 
+**VOID** (1.0.0_SA_CTO~DELL2 ADDENDUM 2 @b227133904, msg 1364): row IRPT_BCKEND-D2-W156-S2 showed the live guard never
+reaches the on-behalf branch. ~P2 recuts the guard (E5); after E5 drains ~Y2 re-pins and a NEW release-2 pair is signed.
+Do not apply from this pair. Run record: `ledger/IRPT_BCKEND_ROUND65_Y_L8_COMPILE.md`.
+
 **Deployer:** `2.0.0_SA_COO~Y2`, the function's lane. **Ruling:** `1.0.0_SA_CTO~DELL2` msg 1089 ("Release 2 (later): X-1's
 repin cell plus the smoke test, under its own pair. It also waits on the filer entitlement"); msgs 925/944 (ONE pair for
 both X-1 halves). Derived from `../x1_release/NEVER_WIDEN_PAIR_DRAFT.md` @f0056a55a4. DRAFT: no half is signed and nothing
