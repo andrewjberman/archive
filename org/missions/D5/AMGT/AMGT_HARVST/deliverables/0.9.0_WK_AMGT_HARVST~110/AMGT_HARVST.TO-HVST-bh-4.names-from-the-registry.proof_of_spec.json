@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-bh-4.names-from-the-registry",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bh-4.names-from-the-registry.md",
+    "group": "OTHER",
+    "vintage_commit": "5a2dcea4a9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "5a2dcea4a9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-bh-4.names-from-the-registry.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~110",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~110, branch wk-AMGT_HARVST-110-r61, TREE-OK. Registry name join added to universe_securities.py (order: pool, identity map, registry, key); 8 plants; census over 19032 silver articles (S3 GET only). No existing assertion changed. No surprise rows. Order file not edited.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/universe_securities.py",
+      "kind": "script",
+      "commit_or_etag": "f970fa1950",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "load_registry_names, registry_names param, names_from_registry and registry_name_join in the summary, build(registry_join=).",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_bh4_registry_names.py",
+      "kind": "test",
+      "commit_or_etag": "f970fa1950",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 plants (i-vii plus an unparseable-file plant), no network.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~110/bh4_census.py",
+      "kind": "script",
+      "commit_or_etag": "f970fa1950",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BEFORE = build(registry_join=False); AFTER = build(); real pg._security_mentions.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~110/bh4_census.out",
+      "kind": "doc",
+      "commit_or_etag": "f970fa1950",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DENOMINATOR: securities 242, silver articles 19032; NAMES FROM REGISTRY: 3; OTHER SECURITIES CHANGED: 0 of 242; CENSUS OK.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/harvest/tests/test_bh4_registry_names.py -rA --tb=line -p no:cacheprovider expects passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_bh4_registry_names.py -rA --tb=line -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "rc 0. 8 passed in 0.14s",
+      "denominator": "8 of 8 tests",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~110/bh4_census.out expects CENSUS OK",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~110/bh4_census.out",
+      "expect": "CENSUS OK",
+      "output_evidence": "rc 0. DENOMINATOR: securities 242, silver articles 19032 | NAMES FROM REGISTRY: 3 | CAT_US_Equity pairs before 79 after 85 gained 6; mention_count before 108 after 227 | CSL_AU_Equity pairs 42 -> 42; mention_count 52 -> 52 | 6861_JP_Equity pairs 0 -> 0; mention_count 0 -> 0 | OTHER SECURITIES CHANGED: 0 of 242 | last line CENSUS OK",
+      "denominator": "19032 silver articles, 242 securities, 3 of 3 named",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m pytest lib/research/harvest lib/opal_data_harvest/test_az1_alias_set.py -q -p no:cacheprovider expects passed",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/harvest lib/opal_data_harvest/test_az1_alias_set.py -q -p no:cacheprovider",
+      "expect": "passed",
+      "output_evidence": "rc 0. 427 passed in 4.50s",
+      "denominator": "427 of 427 tests",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any put, delete, gold or silver build, vendor call, or regeneration of a list file under deliverables/2.0.0_SA_COO_H/",
+      "reason": "Order: LOCAL code and plants plus a read-only S3 GET census."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit gate via .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "committed f970fa1950"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "census BEFORE (registry_join=False) vs AFTER over the same 242 securities and 19032 articles",
+      "observed": "only the 3 named securities differ; OTHER SECURITIES CHANGED 0 of 242",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Plant (ii) is the negative control: a registry fixture lacking the key.",
+      "expected": "the security keeps its key as its name",
+      "observed": "company and aliases stay the key; test passes",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  }
+}
