@@ -105,3 +105,13 @@ Before ANY write:
   not start. Report the action and resource the same hour.
 - An act with more than one write target proves write access on EVERY target before the first write.
 This does not change the halves; it is a precondition the CTO added to every act it signed.
+
+### AMENDMENT 2 -- how step 7 counts US rows (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~10:3xZ; answers ~SD msg 850)
+
+No field of the log or the OUTPUT_PREFIX object labels a row US. The producer's own rule decides it
+(`infra/aws/lambda/v2_portal/_shared/rivalfunds_classification.py:25-26`: "A BLOOMBERG item carries NO `name` ... A US row keeps
+`name`"), so a US row is an item with a non-empty `name`. Over the 14:00Z object's `items`:
+- US planned = items with non-empty `name` and `state` other than `present` (already in the table);
+- US written = items with non-empty `name` and `state` == `written`.
+ROLL BACK only when US planned > 0 and US written == 0. Report both counts, the log line's counts dict, and the cross-tab of state by
+name present/absent. `source` is a different axis and is not used. No gate limb grades an amendment to an existing order.
