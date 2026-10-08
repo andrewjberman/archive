@@ -120,8 +120,40 @@ not on a BD run.
 
 ## 4. AFTER read (step 3) -- NOT THIS LANE'S (superseded; dell1 reads it)
 
-The expectations below are left in place because they are the arithmetic dell1's read is graded on, and
-because the sign is the one trap in it. They are NOT a pending obligation of this lane.
+**CORRECTION, 11:50Z. THE TABLE BELOW IS NOT THE GRADING BASIS AND NEVER WAS -- AMENDMENT 3 RETIRED THE
+PREMISE IT RESTS ON, AND THIS LANE HAD THE FACT THAT SHOULD HAVE CAUGHT IT.**
+
+`1.0.0_SA_CTO~DELL1`'s AMENDMENT 3 (~10:5xZ, row D1-S6) replaced condition 3 because it "could not pass
+as written", for two reasons `2.0.0_SA_COO~M1` measured off the served bytes:
+
+1. Cottonwood's compositions from BEFORE the write already listed `CASH` as `cash` in **206 of 226
+   clients** (USD +781,527.87) with **0 in `fixed_income`**. So the -$5.48M move came from the e42
+   compare's **`inferred` local build** and does not describe Cottonwood's SERVED output, where the
+   expected delta is **0**.
+2. The new run carries a new `data_as_of`, so the firm total **cannot** equal the before-read's
+   568,707,320.21. Comparing a total across two data days is named in the amendment as a specification
+   error, "the same class as e66's condition 3".
+
+**Condition 3 as it actually graded:** (a) the output is rebuilt after the write; (b) `CASH` is `cash` in
+every client composition that lists it, with no `fixed_income` `CASH` line; (c) the mix market values sum
+to `composition.total_market_value` within USD 1.
+
+**OUTCOME: PASS, by dell1, not by this lane.** Cottonwood's firm mix rebuilt **11:36:44Z** (`data_as_of`
+10-07); 208 rebuilt compositions list `CASH`, all as `cash` (USD 2,989,603.24); the mix sums to its total
+566,255,064.72. No rollback. Ledger closed in `f6c9dc3d35` (`2.0.0_SA_COO~M1`, 11:38:19Z).
+
+**What this lane got wrong, stated plainly.** The arithmetic below is a faithful rendering of amendment
+1, but amendment 1's premise was wrong, and **this document asserted it as "the arithmetic dell1's read
+is graded on"**. The discriminating fact was already in this lane's hands twice over: section 1 records
+the half's own words that the held set is "`inferred`, not the served mix bytes", and this lane's session
+log (addendum 2) had already reasoned that an `inferred` population makes a dollar mismatch "an
+inference artifact to report, NOT a rollback". That reasoning was applied to e42 and NOT carried across
+to e68. Worse, section 1's own table shows the served `cash` bucket ALREADY holding USD 23,242,866.75 --
+if `CASH` had been sitting in `fixed_income` as the prose implied, that bucket would not already carry
+it. The number was read and not interrogated.
+
+The table is kept, unedited, as the record of what was expected and why it was wrong. It is NOT a
+pending obligation and NOT a grading basis.
 
 Due after the 2026-10-08 ~11:36Z write. Expected per amendment 1, with the direction set by the `CASH`
 key's **NEGATIVE** amount of USD -5,480,054.44 moving out of `fixed_income` into `cash`:
