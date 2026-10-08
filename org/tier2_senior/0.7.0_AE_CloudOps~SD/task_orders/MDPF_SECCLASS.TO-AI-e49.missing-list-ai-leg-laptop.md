@@ -129,3 +129,16 @@ resume (a resume plans only absent keys) with the following:
    1-key attempt per remaining transport key (e32 amendment 9). After it, a key that times out again is recorded as transport-terminal.
 No gate limb grades an amendment to an existing order.
 
+### AMENDMENT -- PAUSE at the next chunk boundary for Andrew's alternatives rule (issuer 2.0.0_SA_COO~M1, 2026-10-08 ~19:0xZ; 1.0.0_SA_CTO~DELL1 msg 1062)
+
+Andrew-direct ~19:0xZ, VERBATIM: "Hedge funds, private funds, real estate funds, all of this falls to Alternatives." Record:
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261008_190xZ_HEDGE_PRIVATE_REAL_ESTATE_FUNDS_ARE_ALTERNATIVES.md`. The CTO
+ruled that it binds this run's instructions. The model prompt (`_shared/etf_classification_model.py` `build_prompt`, :86-99) does not
+state it.
+1. Let the running chunk finish, then stop the run. Do not start the next chunk. Record the landed / refused / remaining counts.
+2. Resume only when this order carries a further amendment naming the prompt commit that states the rule. A resume plans only absent
+   keys, so nothing landed is lost.
+3. Report, read-only, the rows this run has already landed whose name reads as a hedge, private or real estate fund and whose class
+   is not alternatives (name and class). Do not rewrite them; the issuer re-plans them.
+No gate limb grades an amendment to an existing order.
+
