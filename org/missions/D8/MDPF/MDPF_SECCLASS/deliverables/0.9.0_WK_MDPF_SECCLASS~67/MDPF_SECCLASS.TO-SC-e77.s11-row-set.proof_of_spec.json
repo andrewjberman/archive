@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e77",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f4b2f17d0f36d71d1eeef6430133ec234618c2c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R15.md",
+    "vintage_commit": "f9e0c2ca7476cf3ad7e6f4f9d86432f0b6cb5c48",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e77.s11-row-set.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~67",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/S11_ROW_SET_20261008.tsv",
+      "kind": "config_data",
+      "commit_or_etag": "a68c03e440",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "117 lines: 106 NEW (25 group B by ticker, 81 group D by name_key), 11 REMAP; 20 rule=andrew-alternatives lines; each carries a one-phrase evidence; LOCAL file, nothing written to any table",
+      "artifact_covered_by": [
+        "SC15-e77-AC1",
+        "SC15-e77-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py",
+      "kind": "script",
+      "commit_or_etag": "a68c03e440",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "dry run by default with a counter of every mutating call (puts=0 asserted); NEW = put on attribute_not_exists(ticker); REMAP = conditional update on the current class; --write needs --half (both headings SIGNED) and --snapshot; --rollback guarded by updated_by + class; --write and --rollback --write never run",
+      "artifact_covered_by": [
+        "SC15-e77-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_S11_ROWS_20261008.md",
+      "kind": "doc",
+      "commit_or_etag": "a68c03e440",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "half request: the act, each line's before and after, the candidate served-mix delta from the trace's dollars (USD 5,820,645.24 out of unclassified), rollback per key; COO and CTO halves UNSIGNED",
+      "artifact_covered_by": [
+        "SC15-e77-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC15-e77-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/sc_r15_rows_set.py -- expect: S11-ROW-SET ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/sc_r15_rows_set.py",
+      "expect": "S11-ROW-SET ok=True",
+      "output_evidence": "S11-ROW-SET ok=True bd=106 covered=106 new=106 remap=11 rule_rows=20 bad=0 first_bad=[] (rc=0, re-run this session). Whether each class and each rule mark is right is graded by 3.0.0_SA_CVO at L9, not here.",
+      "denominator": "106 of 106 B/D securities covered once as NEW; 11 REMAP lines; 20 rule rows (9 NEW + 11 REMAP)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC15-e77-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py -- expect: refused_present=1 refused_stale=0 puts=0 (as amended by TO Amendment 1, commit ef7d71687f)",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py",
+      "expect": "refused_present=1 refused_stale=0 puts=0",
+      "output_evidence": "REFUSED_PRESENT RAL live=equity/Information Technology by='mdpf-secclass-model' / S11-ROWS-DRY-RUN new=105 remap=11 refused_present=1 refused_stale=0 puts=0 (rc=1; the writer exits 1 whenever any key is refused, and the amended expectation is the output line). The only REFUSED_PRESENT line names RAL; no other key refused. RAL ($70) was landed by the model runner at 2026-10-08T19:01:52Z after the trace was cut, same class as this set gives it (Amendment 1; row MDPF_SECCLASS-D1-W67-S1).",
+      "denominator": "116 of 117 lines planned (105 NEW + 11 REMAP); 1 NEW refused present (RAL); 0 refused stale; 0 mutating calls",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC15-e77-AC3",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_S11_ROWS_20261008.md -- expect: HALF-READY",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_M/R20_CHECKS/r20_half_ready.py org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_S11_ROWS_20261008.md",
+      "expect": "HALF-READY",
+      "output_evidence": "HALF-READY NEVER_WIDEN_HALF_REQUEST_SECCLASS_S11_ROWS_20261008.md (rc=0)",
+      "denominator": "1 of 1 half request; 0 slots, 0 missing headings",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 checker run from a scratch root with (a) the CMWAY line deleted from the set and (b) the CAIS PRIVATE EQUITY line's class changed from alternatives to equity while its rule mark stayed; AC2 writer: the present-key refusal fired on the live RAL row.",
+      "expected": "AC1 ok=False in both mutants; AC2 refuses a present NEW key",
+      "observed": "(a) S11-ROW-SET ok=False covered=105 first_bad=[('CMWAY', 'missing-or-dup', 0)]; (b) ok=False first_bad=[('NAME::CAIS PRIVATE EQUITY CORE II LP', 'rule', 'equity')]; AC2 printed REFUSED_PRESENT RAL",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1-AC3 run once each after the final edit of the set, writer and half",
+      "observed": "AC1 ok=True 106/106 (rc=0); AC2 new=105 remap=11 refused_present=1 (RAL only) refused_stale=0 puts=0 (rc=1); AC3 HALF-READY (rc=0); re-run after Amendment 1",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any AWS write (--write, --rollback --write), deploy or push.",
+      "reason": "BOUNDS: AWS is read-only for this worker; the table write is the issuer's act under the never-widen pair; the dry run asserts puts=0."
+    },
+    {
+      "item": "Whether each class and each rule=andrew-alternatives mark is right.",
+      "reason": "JUDGMENT, graded by 3.0.0_SA_CVO at L9; recorded in the evidence column and in surprise row MDPF_SECCLASS-D1-W67-S2."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W67-S1",
+    "MDPF_SECCLASS-D1-W67-S2"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F msg -- <paths>",
+      "result": "see report (LOCAL on wk-secclass-r15-67)"
+    }
+  ]
+}
