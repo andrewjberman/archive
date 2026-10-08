@@ -31,7 +31,7 @@
   <the_act>
     The apply runs only when BOTH never-widen halves are SIGNED. ONE go; the issuer's GO names the CTO half.
     - COO half: org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_A_DENIES_FIRST_20261008.md
-    - CTO half: named in the GO message.
+    - CTO half: org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_A_DENIES_FIRST_20261008.md (@0f3ff4f71d)
     Read both in full first and carry every condition of both.
 
     THE COMMIT: the shared tree at its HEAD on CLOUD, which must contain 5cff7df18d. Show `git status --porcelain --
