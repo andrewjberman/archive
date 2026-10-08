@@ -1,0 +1,85 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-45",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "46d677dfc0"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "46d677dfc0",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-45.bd-split-pull-run.md"
+ },
+ "assignee": "2.0.0_SA_COO~D2",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/relay/SPLIT_PULL_RUN.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/relay/SPLIT_PULL_RUN.json",
+   "kind": "config_data",
+   "commit_or_etag": "d3dedd80a4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Run record of the one live pull (2026-10-08T12:37:21Z, dell2): 2,299 LANDED, 0 FAILED, aborted null, 2,305 vendor calls; no credential, bearer or response body in it. The 2,299 objects it names were listed under s3://opal-data-assets/blackdiamond/49financial/bronze/reporting_performance/pull=split20261007/ and matched by key (AC2).",
+   "artifact_covered_by": [
+    "DB27-1-AC1",
+    "DB27-1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB27-1-AC1",
+   "criterion_verbatim": "DB27-1-AC1 -- the returned record: not aborted; landed + FAILED close over the plan's 2,299 with FAILED <= 105; no call outside the plan.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r27/p27_pull_run.py\" . DB27-1-AC1",
+   "output_evidence": "OK: 2299 landed, 0 FAILED of 2299 planned; aborted null\nDB27-1-AC1 PASS (rc 0)",
+   "denominator": "2,299 of 2,299 planned accounts",
+   "status": "PASS",
+   "expect": "DB27-1-AC1 PASS"
+  },
+  {
+   "criterion_id": "DB27-1-AC2",
+   "criterion_verbatim": "DB27-1-AC2 -- S3: the keys under pull=split20261007 equal the record's landed accounts.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r27/p27_pull_run.py\" . DB27-1-AC2",
+   "output_evidence": "OK: 2299 keys under s3://opal-data-assets/blackdiamond/49financial/bronze/reporting_performance/pull=split20261007/ equal the record's landed accounts\nDB27-1-AC2 PASS (rc 0)",
+   "denominator": "2,299 listed keys against 2,299 landed accounts",
+   "status": "PASS",
+   "expect": "DB27-1-AC2 PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The runner refuses without --go, on a re-derived plan mismatch, on counts other than 2,299/4,598, and on any key already under the prefix (11 offline tests at 80f080e624).",
+   "expected": "tests pass",
+   "observed": "11 of 11 passed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "one live run under a per-use word",
+   "observed": "not re-run",
+   "status": "N/A-WITH-REASON",
+   "reason": "Andrew's word covers one pull; a second run is barred."
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "sweep --go",
+   "reason": "0 FAILED; nothing to sweep."
+  },
+  {
+   "item": "the tie-out of the split figures",
+   "reason": "The next cell of workstream BD, cut on this drain."
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "aws s3 list-objects-v2 (boto3 paginator)",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r27/p27_pull_run.py\" . DB27-1-AC2",
+   "result": "2,299 keys"
+  }
+ ]
+}
