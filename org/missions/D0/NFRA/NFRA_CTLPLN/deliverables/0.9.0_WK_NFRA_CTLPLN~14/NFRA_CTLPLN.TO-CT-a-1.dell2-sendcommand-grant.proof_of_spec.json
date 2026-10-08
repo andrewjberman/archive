@@ -78,53 +78,11 @@
    "deploy_evidence": "the plan note"
   },
   {
-   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py",
-   "kind": "test",
-   "commit_or_etag": "a4d23c25bf",
-   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "census script: secretsmanager list-secrets in 17 regions (names, ARNs, descriptions, tags, dates, key id) and nothing else on that service; no secret value is read by any call; --from-file re-derives the last line with no AWS call"
-  },
-  {
-   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json",
-   "kind": "config_data",
-   "commit_or_etag": "a4d23c25bf",
-   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "114 secrets (all us-east-1), 15 Dell-placed projects, 40 joined secrets: 4 VENDOR, 13 NOT-VENDOR, 23 UNSURE; header with command, read time, caller; saved from one --live run outside the 120 s bound"
-  },
-  {
-   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/modules/routes_policy/",
-   "kind": "terraform",
-   "commit_or_etag": "a4d23c25bf",
-   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "pure module gains variable vendor_census and outputs vendor_policy_json/count/chars and vendor_secret_count; the Allow is built from the census classification and the listing ARNs; no provider, no resource"
-  },
-  {
-   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/iam.tf",
-   "kind": "terraform",
-   "commit_or_etag": "a4d23c25bf",
-   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "aws_iam_policy.dell_agent_vendor_secrets[0] (name from the naming builder) with three preconditions, and aws_iam_group_policy_attachment.dell_agent_vendor_secrets[0]; nothing applied, no plan against the backend; no dell_vendor_secrets_policy.json was created (the CTO-ruled census-built form)"
-  },
-  {
    "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/routes.tf",
    "kind": "terraform",
    "commit_or_etag": "a4d23c25bf",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "module call gains vendor_census = local.vendor_census"
-  },
-  {
-   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/render_routes_policy.py",
-   "kind": "test",
-   "commit_or_etag": "a4d23c25bf",
-   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "the provider-less renderer also passes the vendor census and returns vendor_json; ROUTES-RENDER last line unchanged"
-  },
-  {
-   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
-   "kind": "test",
-   "commit_or_etag": "a4d23c25bf",
-   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "eighth block: 18 secret arms (4 vendor x 2 users allowed with the Allow implicitDeny without it; NOT-VENDOR, UNSURE, outside-every-project and wrong-suffix denied; PutSecretValue same with and without) plus one one-to-one check = 19; iam:SimulateCustomPolicy only"
   },
   {
    "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
@@ -139,6 +97,48 @@
    "commit_or_etag": "4ffb28726b",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "the plan note"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py",
+   "kind": "test",
+   "commit_or_etag": "415e715da1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "RULINGS table, 13 READERS entries, decide_all/apply_decisions/reclass/verify_readers; read-only (list-secrets in --live only); nothing applied"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json",
+   "kind": "config_data",
+   "commit_or_etag": "415e715da1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "decisions for all 114 secrets, grant = 9 exact ARNs; re-applied to the saved listing with --reclass, no AWS call"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/modules/routes_policy/main.tf",
+   "kind": "terraform",
+   "commit_or_etag": "415e715da1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "vendor locals now read decisions[*].granted; statement ReadSecretsDellProjectsReadByName; nothing applied"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/iam.tf",
+   "kind": "terraform",
+   "commit_or_etag": "415e715da1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "comment and policy description only; resource, name, attachment and preconditions unchanged; nothing applied"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+   "kind": "test",
+   "commit_or_etag": "415e715da1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "eighth block rewritten for amendment 8 (vendor_ok=33/33); iam:SimulateCustomPolicy only"
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~14/PLAN_NOTE_DELL_VENDOR_SECRETS.md",
+   "kind": "doc",
+   "commit_or_etag": "415e715da1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "rewritten: high-consequence secrets first, every granted secret with reader file:line, not-granted by reason"
   }
  ],
  "acceptance": [
@@ -147,7 +147,7 @@
    "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check expect: unresolved=0",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check",
-   "output_evidence": "Amendment 6 re-run: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check` (rc 0). LAST LINE: SSM-DOCS declared=16 unresolved=0 resident_fixed=0 resident_free_text=2 export_render=1 other=13 unsure_params=2 in_policy=2 ok=True. ok=True is stated with unsure_params=2.",
+   "output_evidence": "Amendment 8 run: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_ssm_documents.py --check` (rc 0). LAST LINE: SSM-DOCS declared=16 unresolved=0 resident_fixed=0 resident_free_text=2 export_render=1 other=13 unsure_params=2 in_policy=2 ok=True. ok=True is stated with unsure_params=2 (unchanged by amendment 8).",
    "denominator": "16 of 16 declared documents read; 0 unresolved; 0 resident_fixed, 2 resident_free_text, 1 export_render, 13 other; 2 of 2 granted documents in the policy",
    "status": "PASS",
    "expect": "unresolved=0"
@@ -157,8 +157,8 @@
    "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect: ssm_ok=9/9 routes_ok=5/5 vendor_ok=[0-9]+/[0-9]+ all_ok=True",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
-   "output_evidence": "Amendment 6 run: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py` (rc 0). LAST LINE: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=13/13 ssm_ok=9/9 routes_ok=5/5 vendor_ok=19/19 all_ok=True. re.search of the expectation (a regular expression) against that line matches.",
-   "denominator": "allowed 22/22, denied 19/19, passrole 5/5, protected 8/8, respol 13/13, ssm 9/9, routes 5/5, vendor 19/19",
+   "output_evidence": "Amendment 8 run: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py` (rc 0). LAST LINE: POLICY-SIM allowed_ok=22/22 denied_ok=19/19 passrole_ok=5/5 protected_ok=8/8 respol_ok=13/13 ssm_ok=9/9 routes_ok=5/5 vendor_ok=33/33 all_ok=True. Ran in about 15 seconds. Every existing count is unchanged; vendor_ok=33/33 = 32 arms (9 granted secrets allowed for each of dell1 and dell2 and the same request without the new document implicitDeny; openai-api-key refused for both; one documents-only secret, one no-program-reader secret, one reader-unclear secret, one unrelated secret and a granted name with a wrong suffix refused for both; PutSecretValue as today for both) plus 1 one-to-one check. re.search of the expectation (a regular expression) against that line matches.",
+   "denominator": "allowed 22/22, denied 19/19, passrole 5/5, protected 8/8, respol 13/13, ssm 9/9, routes 5/5, vendor 33/33 (9 granted x 2 users allowed, 2 openai refused, 10 refused for 5 other reasons, 2 PutSecretValue unchanged, 1 one-to-one: 9 entries, each matches exactly one listed secret, 0 outside the set matched)",
    "status": "PASS",
    "expect": "ssm_ok=9/9 routes_ok=5/5 vendor_ok=[0-9]+/[0-9]+ all_ok=True"
   },
@@ -167,8 +167,8 @@
    "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py expect: policy_size_ok=True ok=True",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py",
-   "output_evidence": "Amendment 6 re-run: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py` (rc 0). LAST LINE: IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=12/12 policy_size_ok=True ok=True.",
-   "denominator": "12 of 12 names from the builder; 9 of 9 policy documents (6 files and 3 module outputs) within 6144 characters",
+   "output_evidence": "Amendment 8 run: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/check_identity.py` (rc 0). LAST LINE: IDENTITY-STATIC validate=ok no_access_key=True names_from_builder=12/12 policy_size_ok=True ok=True. The vendor-secrets document is ONE policy (930 characters of 6144), so the name count does not move (12 of 12 from the builder).",
+   "denominator": "12 of 12 names from the builder; 9 of 9 policy documents (6 files and 3 module outputs) within 6144 characters; the secrets document is 930",
    "status": "PASS",
    "expect": "policy_size_ok=True ok=True"
   },
@@ -177,7 +177,7 @@
    "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json expect: unread=0",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json",
-   "output_evidence": "Amendment 6 re-run: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json` (rc 0, no AWS call). LAST LINE: ROLE-CENSUS functions=233 tasks=9 hosts=33 roles=175 read=175 unread=0 yes_iam=1 yes_trail=0 yes_delete=9 yes_any=10 no=165 resident_host_role=NO ok=True.",
+   "output_evidence": "Amendment 8 run: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_reached_roles.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/reached_roles_census.json` (rc 0). LAST LINE: ROLE-CENSUS functions=233 tasks=9 hosts=33 roles=175 read=175 unread=0 yes_iam=1 yes_trail=0 yes_delete=9 yes_any=10 no=165 resident_host_role=NO ok=True. No AWS call.",
    "denominator": "175 of 175 roles read; 0 unread; 10 YES, 165 NO",
    "status": "PASS",
    "expect": "unread=0"
@@ -187,8 +187,8 @@
    "criterion_verbatim": "python infra/aws/terraform/transcripts/tests/check_transcripts_dell_decrypt.py expect: TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/transcripts/tests/check_transcripts_dell_decrypt.py",
-   "output_evidence": "Amendment 6 run: `timeout 120 python infra/aws/terraform/transcripts/tests/check_transcripts_dell_decrypt.py`. THE INVOCATION EXITS NON-ZERO (rc 1) AND THE LINE ENDS ok=False, as AMENDMENT 6 states: the check's pre-apply guard (the live key policy equals the pre-edit render) is false now that the change is applied (the line before the arms reads: live key policy (kms get-key-policy) statements=3 equals the pre-edit render (one-element lists normalised as KMS stores them): False). LAST LINE: TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True statements_added=1 ok=False. The four results the cell proves are on the line and the expectation text is contained in it.",
-   "denominator": "2 of 2 Dell users decrypt allowed; 10 of 10 write arms refused under the KMS rule; 3 statements after vs 2 before; 1 added; live key policy holds 3 statements, not the pre-edit 2",
+   "output_evidence": "Amendment 8 run: `timeout 120 python infra/aws/terraform/transcripts/tests/check_transcripts_dell_decrypt.py` (rc 1). LAST LINE: TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True statements_added=1 ok=False. THE INVOCATION EXITS NON-ZERO (rc 1) AND THE LINE ENDS ok=False, as AMENDMENT 6 states: the check's pre-apply guard (the live key policy equals the pre-edit render) is false now that the change is applied. The four results the cell proves are on the line and the expectation text is contained in it.",
+   "denominator": "2 of 2 Dell users decrypt allowed; 10 of 10 write arms refused under the KMS rule; 1 statement added",
    "status": "PASS",
    "expect": "TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=10/10 reader_unchanged=True unlisted_refused=True"
   },
@@ -197,22 +197,22 @@
    "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json expect: VENDOR-SECRETS secrets=",
    "method": "test_suite",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json",
-   "output_evidence": "Amendment 6 re-run: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json` (rc 0, no AWS call, no secret value read). LAST LINE: VENDOR-SECRETS secrets=114 referenced=114 dell_projects=15 placement_inferred=False vendor=4 not_vendor=13 unsure=23 granted=4 ok=True.",
-   "denominator": "114 of 114 listed secrets read by name; 114 referenced anywhere, 0 not; 15 Dell-placed projects; 40 joined secrets each with exactly one class (4 VENDOR, 13 NOT-VENDOR, 23 UNSURE); 4 granted, 0 blocked by key",
+   "output_evidence": "Amendment 8 run: `timeout 120 python infra/aws/terraform/nfra-ctlpln-identity/tests/derive_vendor_secrets.py --from-file infra/aws/terraform/nfra-ctlpln-identity/tests/vendor_secrets_census.json` (rc 0). LAST LINE: VENDOR-SECRETS secrets=114 referenced=114 dell_projects=15 placement_inferred=False vendor=4 not_vendor=13 unsure=23 granted=9 ok=True excluded=1 reader_unclear=7 blocked_by_key=0. No AWS call, no repository read, no secret value read. granted=9 counts the secrets the amendment-8 rule puts in the grant (a program of a Dell-placed project reads each by name); vendor=4 not_vendor=13 unsure=23 are the EARLIER class counts of the 40 joined secrets and do not move; the trailing fields are the secrets left out by ruling (1: openai-api-key), by unclear reader (7) and by key (0).",
+   "denominator": "114 of 114 listed secrets decided (9 GRANTED, 1 EXCLUDED-BY-RULING, 0 BLOCKED-BY-KEY, 7 READER-UNCLEAR, 23 NO-PROGRAM-READER, 21 DOCUMENTS-ONLY, 53 NOT-JOINED); 15 Dell-placed projects; 13 of 13 reader entries verified against the repository (--verify-readers); 9 of 9 granted under the account default key",
    "status": "PASS",
    "expect": "VENDOR-SECRETS secrets="
   }
  ],
  "controls": {
   "mutant": {
-   "description": "(amendment 3) scratch copy of main.tf with kms:Encrypt added to the DellAgentUsersDecryptOnly Action list, read through TRANSCRIPTS_MAIN_TF ;; (amendment 5) scratch copy of the vendor census with anthropic-api-key (a vendor key named only by IAM grants, no program of a Dell project reads it) re-classed VENDOR ;; (amendment 5) scratch copy of the vendor census with anthropic-api-key (a vendor key named only by IAM grants, no program of a Dell project reads it) re-classed VENDOR",
-   "expected": "check_transcripts_dell_decrypt.py reads ok=False because a write arm is no longer refused ;; derive_vendor_secrets.py --from-file reads ok=False and names VENDOR-WITHOUT-PROGRAM ;; derive_vendor_secrets.py --from-file reads ok=False and names VENDOR-WITHOUT-PROGRAM",
-   "observed": "TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=8/10 reader_unchanged=True unlisted_refused=True statements_added=1 ok=False (rc 1); kms:Encrypt KMS_RULE=allowed for both users ;; VENDOR-SECRETS secrets=114 referenced=114 dell_projects=15 placement_inferred=False vendor=5 not_vendor=13 unsure=22 granted=4 ok=False (rc 1); the line before it: VENDOR-WITHOUT-PROGRAM ['anthropic-api-key'] ;; VENDOR-SECRETS secrets=114 referenced=114 dell_projects=15 placement_inferred=False vendor=5 not_vendor=13 unsure=22 granted=4 ok=False (rc 1); the line before it: VENDOR-WITHOUT-PROGRAM ['anthropic-api-key']",
+   "description": "(amendment 3) scratch copy of main.tf with kms:Encrypt added to the DellAgentUsersDecryptOnly Action list, read through TRANSCRIPTS_MAIN_TF ;; (amendment 5) scratch copy of the vendor census with anthropic-api-key (a vendor key named only by IAM grants, no program of a Dell project reads it) re-classed VENDOR ;; (amendment 5) scratch copy of the vendor census with anthropic-api-key (a vendor key named only by IAM grants, no program of a Dell project reads it) re-classed VENDOR ;; (amendment 8) scratch copy of the vendor census whose grant section also lists openai-api-key (a ruling-excluded secret)",
+   "expected": "check_transcripts_dell_decrypt.py reads ok=False because a write arm is no longer refused ;; derive_vendor_secrets.py --from-file reads ok=False and names VENDOR-WITHOUT-PROGRAM ;; derive_vendor_secrets.py --from-file reads ok=False and names VENDOR-WITHOUT-PROGRAM ;; derive_vendor_secrets.py --from-file reads ok=False because the saved grant differs from the one re-derived from the decisions",
+   "observed": "TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=8/10 reader_unchanged=True unlisted_refused=True statements_added=1 ok=False (rc 1); kms:Encrypt KMS_RULE=allowed for both users ;; VENDOR-SECRETS secrets=114 referenced=114 dell_projects=15 placement_inferred=False vendor=5 not_vendor=13 unsure=22 granted=4 ok=False (rc 1); the line before it: VENDOR-WITHOUT-PROGRAM ['anthropic-api-key'] ;; VENDOR-SECRETS secrets=114 referenced=114 dell_projects=15 placement_inferred=False vendor=5 not_vendor=13 unsure=22 granted=4 ok=False (rc 1); the line before it: VENDOR-WITHOUT-PROGRAM ['anthropic-api-key'] ;; VENDOR-SECRETS secrets=114 referenced=114 dell_projects=15 placement_inferred=False vendor=4 not_vendor=13 unsure=23 granted=9 ok=False excluded=1 reader_unclear=7 blocked_by_key=0 (rc 1); the line before it: GRANT 10 ARNs",
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
-   "method": "check_transcripts_dell_decrypt.py run twice, stdout hashed with sha256sum ;; (amendment 5) derive_vendor_secrets.py --from-file run twice, stdout hashed with sha256 ;; (amendment 5) derive_vendor_secrets.py --from-file run twice, stdout hashed with sha256",
-   "observed": "identical: da428055cc851c0b2c8a716ee1ee9b0950d26d93a0beb0b8350325d4b319a735 both runs ;; identical: 96b6c9f67d9fbf61e00c68ef48c4e4cf4157a220c0843bdbd61530cf60d4ec73 both runs ;; identical: 96b6c9f67d9fbf61e00c68ef48c4e4cf4157a220c0843bdbd61530cf60d4ec73 both runs",
+   "method": "check_transcripts_dell_decrypt.py run twice, stdout hashed with sha256sum ;; (amendment 5) derive_vendor_secrets.py --from-file run twice, stdout hashed with sha256 ;; (amendment 5) derive_vendor_secrets.py --from-file run twice, stdout hashed with sha256 ;; (amendment 8) derive_vendor_secrets.py --from-file run twice on the amended census, stdout hashed with sha256",
+   "observed": "identical: da428055cc851c0b2c8a716ee1ee9b0950d26d93a0beb0b8350325d4b319a735 both runs ;; identical: 96b6c9f67d9fbf61e00c68ef48c4e4cf4157a220c0843bdbd61530cf60d4ec73 both runs ;; identical: 96b6c9f67d9fbf61e00c68ef48c4e4cf4157a220c0843bdbd61530cf60d4ec73 both runs ;; identical: ed346701628f32a48ee53426a0865132df2e6ed7dc8f52ed777d53ba6e7bbc8e both runs",
    "status": "STABLE"
   }
  },
@@ -254,8 +254,20 @@
    "reason": "the join reads literal names in files a project's task orders write; a secret named only at run time, or by a project with no code surface, is not seen"
   },
   {
-   "item": "whether a granted program is ever run from a Dell, and whether a given vendor call is one Andrew allowed for a given project",
-   "reason": "the census shows the project's code needs the key; the vendor-call rule stays the seats'; VEW-2 scopes OpenAI to ETFS_RIVALS (row NFRA_CTLPLN-W14-S8)"
+   "item": "the portal submodule was read from the base checkout working tree (HEAD 481b3bcc), not the gitlink pin, and secrets scheduled for deletion are not returned by list-secrets",
+   "reason": "a task worktree carries no portal/; list-secrets omits planned deletion by default"
+  },
+  {
+   "item": "no secret value was read, by any identity: no get-secret-value, no batch-get-secret-value, no get-random-password; descriptions and tags in the census are metadata from list-secrets",
+   "reason": "order amendment 5 rule above all others; the only Secrets Manager call is list-secrets"
+  },
+  {
+   "item": "which projects run on a Dell now: the placement lines are TARGET boxes; a live project moves at its next round boundary",
+   "reason": "no register records where a project runs today (rows NFRA_CTLPLN-W14-S7); ADVI_COTBKF is DELL1 in the layout table and DELL2 in its project.json"
+  },
+  {
+   "item": "Secrets Manager call sites that name no literal secret (74 in code areas; 18 distinct files in Dell projects' paths) and projects with no task-order paths (ADVI_BILLING, NFRA_OPSWKF, OPAL_TICKET_VNEXT, ADVI_PERFRP)",
+   "reason": "the join reads literal names in files a project's task orders write; a secret named only at run time, or by a project with no code surface, is not seen"
   },
   {
    "item": "the portal submodule was read from the base checkout working tree (HEAD 481b3bcc), not the gitlink pin, and secrets scheduled for deletion are not returned by list-secrets",
@@ -274,32 +286,20 @@
    "reason": "the join reads literal names in files a project's task orders write; a secret named only at run time, or by a project with no code surface, is not seen"
   },
   {
-   "item": "whether a granted program is ever run from a Dell, and whether a given vendor call is one Andrew allowed for a given project",
-   "reason": "the census shows the project's code needs the key; the vendor-call rule stays the seats'; VEW-2 scopes OpenAI to ETFS_RIVALS (row NFRA_CTLPLN-W14-S8)"
-  },
-  {
    "item": "the portal submodule was read from the base checkout working tree (HEAD 481b3bcc), not the gitlink pin, and secrets scheduled for deletion are not returned by list-secrets",
    "reason": "a task worktree carries no portal/; list-secrets omits planned deletion by default"
   },
   {
-   "item": "no secret value was read, by any identity: no get-secret-value, no batch-get-secret-value, no get-random-password; descriptions and tags in the census are metadata from list-secrets",
-   "reason": "order amendment 5 rule above all others; the only Secrets Manager call is list-secrets"
+   "item": "whether a granted program is ever run from a Dell, and whether a given vendor or client-firm call is one Andrew allowed for a given project",
+   "reason": "the census shows only that a program inside a Dell-placed project's task-order code surface reads the secret by name; IAM cannot tell a permitted use from a forbidden one"
   },
   {
-   "item": "which projects run on a Dell now: the placement lines are TARGET boxes; a live project moves at its next round boundary",
-   "reason": "no register records where a project runs today (rows NFRA_CTLPLN-W14-S7); ADVI_COTBKF is DELL1 in the layout table and DELL2 in its project.json"
+   "item": "seven secrets with a program file but no read call by that name (astn/brightdata/residential-proxy, blackdiamond/49f/credentials, gateway/teams/bearer, opal/auth/irpt-render-jwt-private-key, opal/external-apis, opal/portal/config, orion/credentials) are NOT granted",
+   "reason": "order amendment 8: when a reader cannot be told the secret is not granted and is listed READER-UNCLEAR for a person to rule; reasons are in the plan note and the census"
   },
   {
-   "item": "Secrets Manager call sites that name no literal secret (74 in code areas; 18 distinct files in Dell projects' paths) and projects with no task-order paths (ADVI_BILLING, NFRA_OPSWKF, OPAL_TICKET_VNEXT, ADVI_PERFRP)",
-   "reason": "the join reads literal names in files a project's task orders write; a secret named only at run time, or by a project with no code surface, is not seen"
-  },
-  {
-   "item": "whether a granted program is ever run from a Dell, and whether a given vendor call is one Andrew allowed for a given project",
-   "reason": "the census shows the project's code needs the key; the vendor-call rule stays the seats'; VEW-2 scopes OpenAI to ETFS_RIVALS (row NFRA_CTLPLN-W14-S8)"
-  },
-  {
-   "item": "the portal submodule was read from the base checkout working tree (HEAD 481b3bcc), not the gitlink pin, and secrets scheduled for deletion are not returned by list-secrets",
-   "reason": "a task worktree carries no portal/; list-secrets omits planned deletion by default"
+   "item": "the census join does not hold the reader of blackdiamond/49f/session (infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py:45,87); it was found by following IRPT_BCKEND's performance/bd_adapter.py:52-60 from the joined tenants.py:145",
+   "reason": "stated in the plan note and in row NFRA_CTLPLN-W14-S11; the measured refusal in CTO msg 106631 corroborates the need"
   }
  ],
  "surprises": [
@@ -312,7 +312,8 @@
   "NFRA_CTLPLN-W14-S7",
   "NFRA_CTLPLN-W14-S8",
   "NFRA_CTLPLN-W14-S9",
-  "NFRA_CTLPLN-W14-S10"
+  "NFRA_CTLPLN-W14-S10",
+  "NFRA_CTLPLN-W14-S11"
  ],
  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~14/NFRA_CTLPLN.TO-CT-a-1.dell2-sendcommand-grant.proof_of_spec.json",
  "compiler_tools": [
@@ -355,6 +356,16 @@
    "tool": "iam simulate-custom-policy",
    "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py (eighth block)",
    "result": "vendor_ok=19/19"
+  },
+  {
+   "tool": "terraform",
+   "invocation": "terraform console in a provider-less scratch root outside the repository (init -backend=false), CHECKPOINT_DISABLE=1, with the module and the two censuses (render_routes_policy.py)",
+   "result": "VENDOR-POLICY chars_no_whitespace=930 limit=6144 secrets=9; the module count (9) equals summary.granted (9); summary.ok true; listing_errors 0; no provider installed"
+  },
+  {
+   "tool": "iam simulate-custom-policy",
+   "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py (eighth block, amendment 8)",
+   "result": "vendor_ok=33/33"
   }
  ]
 }
