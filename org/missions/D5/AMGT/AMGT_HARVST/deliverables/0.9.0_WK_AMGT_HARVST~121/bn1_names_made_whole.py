@@ -82,7 +82,26 @@ def dump(value):
     return json.dumps(value, indent=2, ensure_ascii=True) + "\n"
 
 
+def _refuse_live_collector_pointer(path):
+    """Row AMGT_HARVST-Z-W120-S3, disarmed by row AMGT_HARVST-Z-S105 (2.0.0_SA_COO~H): a file that
+    lib/opal_data_harvest/config.json names is the LIVE collector list, and re-running this record script would silently
+    revert the repairs made to it after this script ran. Writing it is refused."""
+    root = os.path.dirname(os.path.abspath(__file__))
+    while not os.path.exists(os.path.join(root, "lib", "opal_data_harvest", "config.json")):
+        parent = os.path.dirname(root)
+        if parent == root:
+            return
+        root = parent
+    with open(os.path.join(root, "lib", "opal_data_harvest", "config.json"), encoding="utf-8") as handle:
+        config = json.load(handle)
+    target = os.path.normcase(os.path.abspath(path))
+    for value in config.values():
+        if isinstance(value, str) and target == os.path.normcase(os.path.abspath(os.path.join(root, value))):
+            raise SystemExit("REFUSED: %s is a live collector pointer in config.json (row AMGT_HARVST-Z-W120-S3)" % path)
+
+
 def write_text(path, text):
+    _refuse_live_collector_pointer(path)
     with open(path, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(text)
 
