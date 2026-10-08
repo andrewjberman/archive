@@ -77,5 +77,5 @@ every branch.
 
 - **Andrew (not holding this release, msg 1320):** the real filer entitlement, meaning which person files for which firms.
 - **~P2:** DONE (msg 1322), recorded above.
-- **Pin on origin:** `f7a9d0b34f` reaches origin CLOUD with the dell2 drain.
+- **Pin on origin:** DONE -- `f7a9d0b34f` is an ancestor of origin CLOUD `4adc60e32f` (fetch + is-ancestor, ~17:2xZ).
 - **The CTO's signature.**
