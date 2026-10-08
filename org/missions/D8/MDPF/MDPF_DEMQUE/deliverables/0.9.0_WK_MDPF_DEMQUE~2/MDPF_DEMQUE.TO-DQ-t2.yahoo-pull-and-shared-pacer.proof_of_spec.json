@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t2",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t2.yahoo-pull-and-shared-pacer.md",
+    "group": "OTHER",
+    "vintage_commit": "6dc65d8cba"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~2",
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "6dc65d8cba",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t2.yahoo-pull-and-shared-pacer.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/yahoo_pull.py",
+      "kind": "script",
+      "commit_or_etag": "a4d66d27fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL-risk build order; no deploy in scope (order BOUNDS: no AWS call, no deploy)",
+      "artifact_covered_by": [
+        "DQ1-t2-AC1",
+        "DQ1-t2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_yahoo.py",
+      "kind": "test",
+      "commit_or_etag": "a4d66d27fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL-risk build order; no deploy in scope (order BOUNDS: no AWS call, no deploy)",
+      "artifact_covered_by": [
+        "DQ1-t2-AC1",
+        "DQ1-t2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ1-t2-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t2_tests.py expect: YAHOO-OK",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t2_tests.py",
+      "output_evidence": "Run as `timeout 120 python ...dq_t2_tests.py` from the worktree root (rc 0): collected 6 items; test_as_traded_close_undoes_later_splits PASSED, test_empty_answer_is_failure_never_prices PASSED, test_refusal_stops_the_day_and_checkpoints PASSED, test_resume_skips_symbols_already_done PASSED, test_daily_cap_stops_drawing PASSED, test_gap_doubles_after_a_pushback_day PASSED; 6 passed; final line YAHOO-OK.",
+      "denominator": "6 of 6 named tests PASSED",
+      "status": "PASS",
+      "expect": "YAHOO-OK"
+    },
+    {
+      "criterion_id": "DQ1-t2-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t2_seam.py expect: YSEAM-OK",
+      "method": "live_read",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t2_seam.py",
+      "output_evidence": "Run as `timeout 120 python ...dq_t2_seam.py` from the worktree root (rc 0), ONE real Yahoo request, no retry needed: PROBE symbol=AAPL status=OK rows=11548 splits=5 as_traded_2020-08-28=499.23 ; YSEAM-OK rows=11548 splits=5 as_traded=499.23.",
+      "denominator": "1 of 1 live requests succeeded (0 retries); rows 11548 > 9000, splits 5 >= 1, 499.23 vs 499.23 = 0.00% off (limit 2%)",
+      "status": "PASS",
+      "expect": "YSEAM-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "copy of yahoo_pull.py in .scratch/mut with the split multiplication replaced by *= 1.0 (a pull that forgets the split), run against the same test file",
+      "expected": "test_as_traded_close_undoes_later_splits fails",
+      "observed": "1 failed, 5 passed: test_as_traded_close_undoes_later_splits - assert np.float64(125.0) == 500.0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: AC1 is stubbed and fixed-input; AC2 is one live vendor request whose value (499.23, a past close) is fixed history",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "__init__.py in data/mdpf/scripts/demque/",
+      "reason": "order says the issuer adds it"
+    },
+    {
+      "item": "any deploy, AWS call, Bloomberg call, timer or background task",
+      "reason": "order BOUNDS; Yahoo used for the single AC2 probe only"
+    },
+    {
+      "item": "DQ-t-3 (second order in this slot)",
+      "reason": "the issuer hands it over by continuing the worker; not started"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~2/MDPF_DEMQUE.TO-DQ-t2.yahoo-pull-and-shared-pacer.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate (py_compile + ds-precommit + ruff)",
+      "invocation": "bash .tools/safe-commit.sh ... -- data/mdpf/scripts/demque/yahoo_pull.py data/mdpf/scripts/demque/test_demque_yahoo.py",
+      "result": "first attempt BLOCKED on an unused import in the test file (fixed); second attempt committed a4d66d27fb"
+    }
+  ]
+}
