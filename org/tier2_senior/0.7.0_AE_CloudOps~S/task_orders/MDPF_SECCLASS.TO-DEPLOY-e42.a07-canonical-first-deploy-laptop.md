@@ -27,6 +27,15 @@
     and the 164-key list `A07_SWITCH_BEFORE_AFTER_20261007.json` beside it.
   </context>
 
+  <amendment n="1" by="2.0.0_SA_COO~M1" date="2026-10-08T06:5xZ">
+    Ledger leg L2's read (the 2026-10-08T12:45Z advi-49f-gold-floor run: the A5-A07-SOURCE-CENSUS line, the d06/d08 mix totals, and
+    every class move compared against A07_SWITCH_BEFORE_AFTER_20261007.json) moves to dell1. 2.0.0_SA_COO~M1 takes it, because dell1's
+    firm-bucket READ was applied at 05:17:17Z (laptop CTO msg 106788, MSTR msg 816) and the laptop CTO named this seat. dell1 records the
+    read in the ledger leg and sends 0.7.0_AE_CloudOps~S the path. ~S keeps two acts. (1) The status flip with its proof instance, after
+    the read lands (CTO round-12 addendum 1 item 3). (2) The ROLLBACK, if the read finds a move the JSON does not list, because dell1 is
+    still barred from writing a code prefix (limit item 5). No gate limb grades an amendment to an existing order.
+  </amendment>
+
   <the_act>
     BOTH halves are SIGNED for exactly this upload; read both in full first and carry every condition (eight):
     - COO half: in the request above (2.0.0_SA_COO~M1).

@@ -1,0 +1,2039 @@
+{
+ "generated_by": "dell_fence_census.py --live",
+ "caller": "arn:aws:iam::313476888478:user/Andrew_Berman",
+ "n": 24,
+ "dells": {
+  "dell1": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+  "dell2": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user"
+ },
+ "buckets": [
+  {
+   "bucket": "opal-data-49financial",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "DenyForeignFirmPrincipals",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+       "arn:aws:s3:::opal-data-49financial",
+       "arn:aws:s3:::opal-data-49financial/*"
+      ],
+      "Condition": {
+       "ArnNotLike": {
+        "aws:PrincipalArn": [
+         "arn:aws:iam::313476888478:role/*-49f-*",
+         "arn:aws:iam::313476888478:role/aws-service-role/resource-explorer-2.amazonaws.com/AWSServiceRoleForResourceExplorer",
+         "arn:aws:iam::313476888478:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport",
+         "arn:aws:iam::313476888478:role/aws-service-role/trustedadvisor.amazonaws.com/AWSServiceRoleForTrustedAdvisor",
+         "arn:aws:iam::313476888478:role/bd-exporter-ec2-role",
+         "arn:aws:iam::313476888478:role/infrastructure-ops-lambda-role",
+         "arn:aws:iam::313476888478:role/infrastructure-snapshot-role",
+         "arn:aws:iam::313476888478:role/opal-advi-stitch-landing-role",
+         "arn:aws:iam::313476888478:role/opal-drift-producer-codebuild-role",
+         "arn:aws:iam::313476888478:role/opal-globgrph-derive-runner-task",
+         "arn:aws:iam::313476888478:role/opal-globgrph-incremental-updater",
+         "arn:aws:iam::313476888478:role/opal-news-lambda-role",
+         "arn:aws:iam::313476888478:role/partners-lambda-role",
+         "arn:aws:iam::313476888478:role/security-sweep-dedicated-role",
+         "arn:aws:iam::313476888478:user/Andrew_Berman",
+         "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+         "arn:aws:iam::313476888478:user/Opal_Terminal",
+         "arn:aws:iam::313476888478:role/irpt-holdings-role",
+         "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+         "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+         "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+        ]
+       }
+      }
+     },
+     {
+      "Sid": "DenyPerformanceAdapterAnyOtherAction",
+      "Effect": "Deny",
+      "Principal": "*",
+      "NotAction": [
+       "s3:GetObject",
+       "s3:ListBucket"
+      ],
+      "Resource": [
+       "arn:aws:s3:::opal-data-49financial",
+       "arn:aws:s3:::opal-data-49financial/*"
+      ],
+      "Condition": {
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+       }
+      }
+     },
+     {
+      "Sid": "DenyPerformanceAdapterReadsOutsideTheHoldingsGold",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "NotResource": "arn:aws:s3:::opal-data-49financial/irpt/49financial/gold/holdings_performance_daily/*",
+      "Condition": {
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+       }
+      }
+     },
+     {
+      "Sid": "DenyPerformanceAdapterListingOutsideTheHoldingsGold",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::opal-data-49financial",
+      "Condition": {
+       "StringNotLike": {
+        "s3:prefix": "irpt/49financial/gold/holdings_performance_daily/*"
+       },
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+       }
+      }
+     },
+     {
+      "Sid": "DenyScopedExemption1AnyOtherAction",
+      "Effect": "Deny",
+      "Principal": "*",
+      "NotAction": [
+       "s3:GetObject",
+       "s3:ListBucket",
+       "s3:GetBucketLocation"
+      ],
+      "Resource": [
+       "arn:aws:s3:::opal-data-49financial",
+       "arn:aws:s3:::opal-data-49financial/*"
+      ],
+      "Condition": {
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+       }
+      }
+     },
+     {
+      "Sid": "DenyScopedExemption1ObjectsOutsidePrefix",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "NotResource": "arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/holdings/*",
+      "Condition": {
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+       }
+      }
+     },
+     {
+      "Sid": "DenyScopedExemption1ListingOutsidePrefix",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::opal-data-49financial",
+      "Condition": {
+       "StringNotLike": {
+        "s3:prefix": "irpt/49financial/platinum/holdings/*"
+       },
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+       }
+      }
+     }
+    ]
+   },
+   "error": null,
+   "class": "FENCED",
+   "admitted_lens": [
+    21
+   ],
+   "fence_statements": [
+    {
+     "sid": "DenyForeignFirmPrincipals",
+     "kind": "ArnNotLike:aws:PrincipalArn",
+     "admitted": [
+      "arn:aws:iam::313476888478:role/*-49f-*",
+      "arn:aws:iam::313476888478:role/aws-service-role/resource-explorer-2.amazonaws.com/AWSServiceRoleForResourceExplorer",
+      "arn:aws:iam::313476888478:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport",
+      "arn:aws:iam::313476888478:role/aws-service-role/trustedadvisor.amazonaws.com/AWSServiceRoleForTrustedAdvisor",
+      "arn:aws:iam::313476888478:role/bd-exporter-ec2-role",
+      "arn:aws:iam::313476888478:role/infrastructure-ops-lambda-role",
+      "arn:aws:iam::313476888478:role/infrastructure-snapshot-role",
+      "arn:aws:iam::313476888478:role/opal-advi-stitch-landing-role",
+      "arn:aws:iam::313476888478:role/opal-drift-producer-codebuild-role",
+      "arn:aws:iam::313476888478:role/opal-globgrph-derive-runner-task",
+      "arn:aws:iam::313476888478:role/opal-globgrph-incremental-updater",
+      "arn:aws:iam::313476888478:role/opal-news-lambda-role",
+      "arn:aws:iam::313476888478:role/partners-lambda-role",
+      "arn:aws:iam::313476888478:role/security-sweep-dedicated-role",
+      "arn:aws:iam::313476888478:user/Andrew_Berman",
+      "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+      "arn:aws:iam::313476888478:user/Opal_Terminal",
+      "arn:aws:iam::313476888478:role/irpt-holdings-role",
+      "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+      "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+      "arn:aws:iam::313476888478:role/irpt-performance-adapter-role"
+     ],
+     "extra_conditions": []
+    }
+   ],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "explicitDeny",
+      "matched": [
+       "Resource Policy:ResourcePolicy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/shared-infra/s3-49financial.tf",
+    "line": 122,
+    "resource": "aws_s3_bucket_policy.opal_data_49financial",
+    "how": "bucket-resource-literal"
+   }
+  },
+  {
+   "bucket": "opal-data-assets",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "DenyParquetUnderBronze17a",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:PutObject",
+      "Resource": [
+       "arn:aws:s3:::opal-data-assets/*/bronze/*.parquet",
+       "arn:aws:s3:::opal-data-assets/bronze/*.parquet"
+      ]
+     },
+     {
+      "Sid": "AllowMdpfPortalCloudFrontOACRead",
+      "Effect": "Allow",
+      "Principal": {
+       "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": "s3:GetObject",
+      "Resource": [
+       "arn:aws:s3:::opal-data-assets/json/mdpf/global/aggregate-aua-timeseries.json",
+       "arn:aws:s3:::opal-data-assets/json/mdpf/49financial/aggregate-aua-timeseries.json",
+       "arn:aws:s3:::opal-data-assets/json/mdpf/inflection/aggregate-aua-timeseries.json",
+       "arn:aws:s3:::opal-data-assets/json/mdpf/49financial/account-distribution.json",
+       "arn:aws:s3:::opal-data-assets/json/mdpf/inflection/account-distribution.json",
+       "arn:aws:s3:::opal-data-assets/json/portfolios/account-distribution.json",
+       "arn:aws:s3:::opal-data-assets/json/portfolios/non_model_assets.json",
+       "arn:aws:s3:::opal-data-assets/json/portfolios/aum-metrics.json",
+       "arn:aws:s3:::opal-data-assets/json/portfolios/aum-timeseries.json"
+      ],
+      "Condition": {
+       "StringEquals": {
+        "AWS:SourceArn": "arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH"
+       }
+      }
+     }
+    ]
+   },
+   "error": null,
+   "class": "NO-FENCE",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/opal-assets/monolith.tf",
+    "line": 233,
+    "resource": "aws_s3_bucket_policy.monolith",
+    "how": "bucket-resource-local-literal (monolith.tf)"
+   }
+  },
+  {
+   "bucket": "opal-data-astn",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  },
+  {
+   "bucket": "opal-data-bd",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "AllowCloudFrontOACReadGold",
+      "Effect": "Allow",
+      "Principal": {
+       "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::opal-data-bd/gold/*",
+      "Condition": {
+       "StringEquals": {
+        "AWS:SourceArn": "arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH"
+       }
+      }
+     },
+     {
+      "Sid": "AllowScopedAdvisorOAI",
+      "Effect": "Allow",
+      "Principal": {
+       "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E139998VWH0PD"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::opal-data-bd/*"
+     }
+    ]
+   },
+   "error": null,
+   "class": "NO-FENCE",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/bd-pipeline/opal-data-bd.tf",
+    "line": 88,
+    "resource": "aws_s3_bucket_policy.opal_data_bd",
+    "how": "bucket-resource-literal"
+   }
+  },
+  {
+   "bucket": "opal-data-cot",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "AllowCloudFrontOACReadGold",
+      "Effect": "Allow",
+      "Principal": {
+       "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::opal-data-cot/gold/*",
+      "Condition": {
+       "StringEquals": {
+        "AWS:SourceArn": "arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH"
+       }
+      }
+     },
+     {
+      "Sid": "AllowScopedAdvisorOAI",
+      "Effect": "Allow",
+      "Principal": {
+       "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E139998VWH0PD"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::opal-data-cot/*"
+     }
+    ]
+   },
+   "error": null,
+   "class": "NO-FENCE",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "UNDECLARED"
+   }
+  },
+  {
+   "bucket": "opal-data-cottonwood",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "DenyForeignFirmPrincipals",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+       "arn:aws:s3:::opal-data-cottonwood",
+       "arn:aws:s3:::opal-data-cottonwood/*"
+      ],
+      "Condition": {
+       "ArnNotLike": {
+        "aws:PrincipalArn": [
+         "arn:aws:iam::313476888478:role/*-cot-*",
+         "arn:aws:iam::313476888478:user/Andrew_Berman",
+         "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+         "arn:aws:iam::313476888478:user/Opal_Terminal",
+         "arn:aws:iam::313476888478:role/irpt-holdings-role",
+         "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+         "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+        ]
+       }
+      }
+     },
+     {
+      "Sid": "DenyRestrictedReadExceptReaders",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": [
+       "s3:GetObject*",
+       "s3:GetObjectVersion*",
+       "s3:GetObjectAttributes",
+       "s3:GetObjectTagging"
+      ],
+      "Resource": "arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/*",
+      "Condition": {
+       "ArnNotLike": {
+        "aws:PrincipalArn": [
+         "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+         "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role"
+        ]
+       }
+      }
+     },
+     {
+      "Sid": "DenyRestrictedListExceptReaders",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:ListBucket*",
+      "Resource": "arn:aws:s3:::opal-data-cottonwood",
+      "Condition": {
+       "StringLike": {
+        "s3:prefix": [
+         "commonwealth/cottonwood/bronze/crm/",
+         "commonwealth/cottonwood/bronze/crm/*"
+        ]
+       },
+       "ArnNotLike": {
+        "aws:PrincipalArn": [
+         "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+         "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role"
+        ]
+       }
+      }
+     },
+     {
+      "Sid": "DenyRestrictedWriteExceptBreakglass",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": [
+       "s3:PutObject*",
+       "s3:DeleteObject*",
+       "s3:RestoreObject"
+      ],
+      "Resource": "arn:aws:s3:::opal-data-cottonwood/commonwealth/cottonwood/bronze/crm/*",
+      "Condition": {
+       "ArnNotLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role"
+       }
+      }
+     },
+     {
+      "Sid": "DenyScopedExemption1AnyOtherAction",
+      "Effect": "Deny",
+      "Principal": "*",
+      "NotAction": [
+       "s3:GetObject",
+       "s3:ListBucket",
+       "s3:GetBucketLocation"
+      ],
+      "Resource": [
+       "arn:aws:s3:::opal-data-cottonwood",
+       "arn:aws:s3:::opal-data-cottonwood/*"
+      ],
+      "Condition": {
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+       }
+      }
+     },
+     {
+      "Sid": "DenyScopedExemption1ObjectsOutsidePrefix",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "NotResource": "arn:aws:s3:::opal-data-cottonwood/irpt/cottonwood/platinum/holdings/*",
+      "Condition": {
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+       }
+      }
+     },
+     {
+      "Sid": "DenyScopedExemption1ListingOutsidePrefix",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::opal-data-cottonwood",
+      "Condition": {
+       "StringNotLike": {
+        "s3:prefix": "irpt/cottonwood/platinum/holdings/*"
+       },
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+       }
+      }
+     }
+    ]
+   },
+   "error": null,
+   "class": "FENCED",
+   "admitted_lens": [
+    7,
+    2,
+    2,
+    1
+   ],
+   "fence_statements": [
+    {
+     "sid": "DenyForeignFirmPrincipals",
+     "kind": "ArnNotLike:aws:PrincipalArn",
+     "admitted": [
+      "arn:aws:iam::313476888478:role/*-cot-*",
+      "arn:aws:iam::313476888478:user/Andrew_Berman",
+      "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+      "arn:aws:iam::313476888478:user/Opal_Terminal",
+      "arn:aws:iam::313476888478:role/irpt-holdings-role",
+      "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+      "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+     ],
+     "extra_conditions": []
+    },
+    {
+     "sid": "DenyRestrictedReadExceptReaders",
+     "kind": "ArnNotLike:aws:PrincipalArn",
+     "admitted": [
+      "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+      "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role"
+     ],
+     "extra_conditions": []
+    },
+    {
+     "sid": "DenyRestrictedListExceptReaders",
+     "kind": "ArnNotLike:aws:PrincipalArn",
+     "admitted": [
+      "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+      "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role"
+     ],
+     "extra_conditions": [
+      "StringLike:s3:prefix"
+     ]
+    },
+    {
+     "sid": "DenyRestrictedWriteExceptBreakglass",
+     "kind": "ArnNotLike:aws:PrincipalArn",
+     "admitted": [
+      "arn:aws:iam::313476888478:role/cloudops-cot-restricted-breakglass-role"
+     ],
+     "extra_conditions": []
+    }
+   ],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "explicitDeny",
+      "matched": [
+       "Resource Policy:ResourcePolicy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf",
+    "line": 142,
+    "resource": "aws_s3_bucket_policy.lgic_firm",
+    "how": "for_each-over-scopes.json-registry"
+   }
+  },
+  {
+   "bucket": "opal-data-demo",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "AllowCloudFrontOACReadPlatinum",
+      "Effect": "Allow",
+      "Principal": {
+       "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::opal-data-demo/platinum/*",
+      "Condition": {
+       "StringEquals": {
+        "AWS:SourceArn": "arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH"
+       }
+      }
+     },
+     {
+      "Sid": "AllowScopedAdvisorOAI",
+      "Effect": "Allow",
+      "Principal": {
+       "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E139998VWH0PD"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::opal-data-demo/*"
+     }
+    ]
+   },
+   "error": null,
+   "class": "NO-FENCE",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/shared-infra/s3.tf",
+    "line": 267,
+    "resource": "aws_s3_bucket_policy.opal_data_demo",
+    "how": "bucket-resource-literal"
+   }
+  },
+  {
+   "bucket": "opal-data-etfs",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  },
+  {
+   "bucket": "opal-data-harvest",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  },
+  {
+   "bucket": "opal-data-imo",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  },
+  {
+   "bucket": "opal-data-inf",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "AllowScopedAdvisorOAI",
+      "Effect": "Allow",
+      "Principal": {
+       "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E139998VWH0PD"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::opal-data-inf/*"
+     },
+     {
+      "Sid": "AllowCFDistributionGold",
+      "Effect": "Allow",
+      "Principal": {
+       "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::opal-data-inf/gold/*",
+      "Condition": {
+       "StringEquals": {
+        "AWS:SourceArn": "arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH"
+       }
+      }
+     }
+    ]
+   },
+   "error": null,
+   "class": "NO-FENCE",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "UNDECLARED"
+   }
+  },
+  {
+   "bucket": "opal-data-inflection",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "DenyForeignFirmPrincipals",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+       "arn:aws:s3:::opal-data-inflection",
+       "arn:aws:s3:::opal-data-inflection/*"
+      ],
+      "Condition": {
+       "ArnNotLike": {
+        "aws:PrincipalArn": [
+         "arn:aws:iam::313476888478:role/*-inf-*",
+         "arn:aws:iam::313476888478:user/Andrew_Berman",
+         "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+         "arn:aws:iam::313476888478:user/Opal_Terminal",
+         "arn:aws:iam::313476888478:role/irpt-holdings-role",
+         "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+         "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+        ]
+       }
+      }
+     },
+     {
+      "Sid": "DenyScopedExemption1AnyOtherAction",
+      "Effect": "Deny",
+      "Principal": "*",
+      "NotAction": [
+       "s3:GetObject",
+       "s3:ListBucket",
+       "s3:GetBucketLocation"
+      ],
+      "Resource": [
+       "arn:aws:s3:::opal-data-inflection",
+       "arn:aws:s3:::opal-data-inflection/*"
+      ],
+      "Condition": {
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+       }
+      }
+     },
+     {
+      "Sid": "DenyScopedExemption1ObjectsOutsidePrefix",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "NotResource": "arn:aws:s3:::opal-data-inflection/irpt/inflection/platinum/holdings/*",
+      "Condition": {
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+       }
+      }
+     },
+     {
+      "Sid": "DenyScopedExemption1ListingOutsidePrefix",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::opal-data-inflection",
+      "Condition": {
+       "StringNotLike": {
+        "s3:prefix": "irpt/inflection/platinum/holdings/*"
+       },
+       "ArnLike": {
+        "aws:PrincipalArn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+       }
+      }
+     }
+    ]
+   },
+   "error": null,
+   "class": "FENCED",
+   "admitted_lens": [
+    7
+   ],
+   "fence_statements": [
+    {
+     "sid": "DenyForeignFirmPrincipals",
+     "kind": "ArnNotLike:aws:PrincipalArn",
+     "admitted": [
+      "arn:aws:iam::313476888478:role/*-inf-*",
+      "arn:aws:iam::313476888478:user/Andrew_Berman",
+      "arn:aws:iam::313476888478:user/Andrew_Berman_Console",
+      "arn:aws:iam::313476888478:user/Opal_Terminal",
+      "arn:aws:iam::313476888478:role/irpt-holdings-role",
+      "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+      "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+     ],
+     "extra_conditions": []
+    }
+   ],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "explicitDeny",
+      "matched": [
+       "Resource Policy:ResourcePolicy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf",
+    "line": 142,
+    "resource": "aws_s3_bucket_policy.lgic_firm",
+    "how": "for_each-over-scopes.json-registry"
+   }
+  },
+  {
+   "bucket": "opal-data-irpt",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "DenyInsecureTransport",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+       "arn:aws:s3:::opal-data-irpt",
+       "arn:aws:s3:::opal-data-irpt/*"
+      ],
+      "Condition": {
+       "Bool": {
+        "aws:SecureTransport": "false"
+       }
+      }
+     }
+    ]
+   },
+   "error": null,
+   "class": "NO-FENCE",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/investor-reporting/core/reporting_storage.tf",
+    "line": 45,
+    "resource": "aws_s3_bucket_policy.reporting_tls",
+    "how": "registry scope = reporting_policies.json product_scope"
+   }
+  },
+  {
+   "bucket": "opal-data-mdpf",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  },
+  {
+   "bucket": "opal-data-news-av",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  },
+  {
+   "bucket": "opal-data-news-v2",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  },
+  {
+   "bucket": "opal-data-pm",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  },
+  {
+   "bucket": "opal-data-portal-v2",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "AllowCloudFrontOAI",
+      "Effect": "Allow",
+      "Principal": {
+       "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity EU39UXW7CMSI5"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::opal-data-portal-v2/*"
+     },
+     {
+      "Sid": "AllowCloudFrontOACPublicData",
+      "Effect": "Allow",
+      "Principal": {
+       "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": "s3:GetObject",
+      "Resource": [
+       "arn:aws:s3:::opal-data-portal-v2/json/*",
+       "arn:aws:s3:::opal-data-portal-v2/json-tiered/*",
+       "arn:aws:s3:::opal-data-portal-v2/platinum/mdpf/*",
+       "arn:aws:s3:::opal-data-portal-v2/platinum/etfs/*"
+      ],
+      "Condition": {
+       "StringEquals": {
+        "AWS:SourceArn": "arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH"
+       }
+      }
+     },
+     {
+      "Sid": "AllowAdvisorRouterOAIPlatinumAdvi",
+      "Effect": "Allow",
+      "Principal": {
+       "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E139998VWH0PD"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::opal-data-portal-v2/platinum/advi/*"
+     }
+    ]
+   },
+   "error": null,
+   "class": "NO-FENCE",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/shared-infra/s3-portal-v2-import.tf",
+    "line": 111,
+    "resource": "aws_s3_bucket_policy.portal_v2",
+    "how": "bucket-resource-literal"
+   }
+  },
+  {
+   "bucket": "opal-data-portfolio",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  },
+  {
+   "bucket": "opal-data-security",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "DenyInsecureTransport",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+       "arn:aws:s3:::opal-data-security",
+       "arn:aws:s3:::opal-data-security/*"
+      ],
+      "Condition": {
+       "Bool": {
+        "aws:SecureTransport": "false"
+       }
+      }
+     },
+     {
+      "Sid": "AllowCloudFrontAccessLogDelivery",
+      "Effect": "Allow",
+      "Principal": {
+       "Service": "delivery.logs.amazonaws.com"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::opal-data-security/waf-logs/cloudfront-access/*",
+      "Condition": {
+       "StringEquals": {
+        "s3:x-amz-acl": "bucket-owner-full-control",
+        "aws:SourceAccount": "313476888478"
+       }
+      }
+     },
+     {
+      "Sid": "AllowALBAccessLogDelivery",
+      "Effect": "Allow",
+      "Principal": {
+       "Service": "logdelivery.elasticloadbalancing.amazonaws.com"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::opal-data-security/waf-logs/alb-opal-gateway/*",
+      "Condition": {
+       "StringEquals": {
+        "s3:x-amz-acl": "bucket-owner-full-control",
+        "aws:SourceAccount": "313476888478"
+       }
+      }
+     }
+    ]
+   },
+   "error": null,
+   "class": "NO-FENCE",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/opsec/s3.tf",
+    "line": 86,
+    "resource": "aws_s3_bucket_policy.data_security",
+    "how": "bucket-resource-literal"
+   }
+  },
+  {
+   "bucket": "opal-data-security-access-logs",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "AllowS3ServerAccessLogDelivery",
+      "Effect": "Allow",
+      "Principal": {
+       "Service": "logging.s3.amazonaws.com"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::opal-data-security-access-logs/*",
+      "Condition": {
+       "StringEquals": {
+        "aws:SourceAccount": "313476888478"
+       },
+       "ArnLike": {
+        "aws:SourceArn": [
+         "arn:aws:s3:::opal-data-security",
+         "arn:aws:s3:::opal-security-evidence"
+        ]
+       }
+      }
+     }
+    ]
+   },
+   "error": null,
+   "class": "NO-FENCE",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/opsec/s3_access_logs.tf",
+    "line": 89,
+    "resource": "aws_s3_bucket_policy.access_logs",
+    "how": "bucket-resource-literal"
+   }
+  },
+  {
+   "bucket": "opal-data-trade-submissions",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  },
+  {
+   "bucket": "opal-data-transcripts",
+   "policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+     {
+      "Sid": "DenyAnyRequestNotOverTLS",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+       "arn:aws:s3:::opal-data-transcripts",
+       "arn:aws:s3:::opal-data-transcripts/*"
+      ],
+      "Condition": {
+       "Bool": {
+        "aws:SecureTransport": "false"
+       }
+      }
+     },
+     {
+      "Sid": "DenyAWriteUnderAnyOtherKey",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::opal-data-transcripts/*",
+      "Condition": {
+       "StringNotEqualsIfExists": {
+        "s3:x-amz-server-side-encryption-aws-kms-key-id": "arn:aws:kms:us-east-1:313476888478:key/44a2284f-1e14-4ea1-b6cb-f6121bfde35a"
+       }
+      }
+     }
+    ]
+   },
+   "error": null,
+   "class": "NO-FENCE",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": "infra/aws/terraform/transcripts/main.tf",
+    "line": 157,
+    "resource": "aws_s3_bucket_policy.transcripts",
+    "how": "registry scope key = this root's directory name"
+   }
+  },
+  {
+   "bucket": "opal-data-ycharts",
+   "policy": null,
+   "error": null,
+   "class": "NO-POLICY",
+   "admitted_lens": [],
+   "fence_statements": [],
+   "dell": {
+    "dell1": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    },
+    "dell2": {
+     "arn": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+     "reading": "ADMITTED",
+     "denied_by": [],
+     "evaluator": {
+      "decision": "allowed",
+      "matched": [
+       "IAM Policy:cloudops-dell-agent-deploy-policy"
+      ],
+      "missing_context": [],
+      "error": null
+     }
+    }
+   },
+   "declared": {
+    "file": null,
+    "line": null,
+    "how": "n/a: NO-POLICY"
+   }
+  }
+ ],
+ "placement": {
+  "projects": [
+   {
+    "project": "DSGN_IRPTV1",
+    "dell": "dell2",
+    "status": "active",
+    "buckets": {},
+    "tokens_not_a_bucket": {}
+   },
+   {
+    "project": "ADVI_BILLING",
+    "dell": "dell2",
+    "status": "active",
+    "buckets": {},
+    "tokens_not_a_bucket": {}
+   },
+   {
+    "project": "ADVI_COTBKF",
+    "dell": "dell2",
+    "status": "active",
+    "buckets": {
+     "opal-data-49financial": 2,
+     "opal-data-assets": 22,
+     "opal-data-bd": 8,
+     "opal-data-cot": 4,
+     "opal-data-cottonwood": 9,
+     "opal-data-etfs": 1,
+     "opal-data-inf": 8
+    },
+    "tokens_not_a_bucket": {
+     "opal-data-asset": 1
+    }
+   },
+   {
+    "project": "MDPF_HEALGAP",
+    "dell": "dell1",
+    "status": "active",
+    "buckets": {
+     "opal-data-assets": 1,
+     "opal-data-cot": 2
+    },
+    "tokens_not_a_bucket": {}
+   },
+   {
+    "project": "MDPF_SECCLASS",
+    "dell": "dell1",
+    "status": "active",
+    "buckets": {
+     "opal-data-49financial": 2,
+     "opal-data-bd": 18,
+     "opal-data-cot": 7,
+     "opal-data-etfs": 11,
+     "opal-data-inf": 2,
+     "opal-data-mdpf": 2
+    },
+    "tokens_not_a_bucket": {}
+   },
+   {
+    "project": "MDPF_SECHIST",
+    "dell": "dell1",
+    "status": "active",
+    "buckets": {
+     "opal-data-etfs": 3
+    },
+    "tokens_not_a_bucket": {}
+   },
+   {
+    "project": "IRPT_BCKEND",
+    "dell": "dell2",
+    "status": "active",
+    "buckets": {
+     "opal-data-49financial": 11,
+     "opal-data-assets": 10,
+     "opal-data-bd": 14,
+     "opal-data-cot": 10,
+     "opal-data-cottonwood": 12,
+     "opal-data-inf": 13,
+     "opal-data-inflection": 15,
+     "opal-data-mdpf": 7,
+     "opal-data-news-v2": 2,
+     "opal-data-portal-v2": 5,
+     "opal-data-ycharts": 10
+    },
+    "tokens_not_a_bucket": {
+     "opal-data-cottonwoodcapital": 2,
+     "opal-data-inflectionwealth": 2,
+     "opal-data-schwab": 1
+    }
+   },
+   {
+    "project": "IRPT_CUSTDY",
+    "dell": "dell2",
+    "status": "active",
+    "buckets": {
+     "opal-data-49financial": 8,
+     "opal-data-assets": 11,
+     "opal-data-bd": 9
+    },
+    "tokens_not_a_bucket": {}
+   },
+   {
+    "project": "IRPT_DASHBD",
+    "dell": "dell2",
+    "status": "active",
+    "buckets": {
+     "opal-data-49financial": 9,
+     "opal-data-assets": 15,
+     "opal-data-portal-v2": 1
+    },
+    "tokens_not_a_bucket": {}
+   },
+   {
+    "project": "IRPT_YCDGEN",
+    "dell": "dell2",
+    "status": "active",
+    "buckets": {
+     "opal-data-assets": 1,
+     "opal-data-bd": 1,
+     "opal-data-cottonwood": 7,
+     "opal-data-etfs": 3,
+     "opal-data-irpt": 18
+    },
+    "tokens_not_a_bucket": {}
+   },
+   {
+    "project": "NFRA_OPSWKF",
+    "dell": "dell2",
+    "status": "active",
+    "buckets": {},
+    "tokens_not_a_bucket": {}
+   },
+   {
+    "project": "NFRA_TRNSPT",
+    "dell": "dell2",
+    "status": "active",
+    "buckets": {
+     "opal-data-transcripts": 8
+    },
+    "tokens_not_a_bucket": {}
+   }
+  ],
+  "per_dell_union": {
+   "dell2": {
+    "opal-data-49financial": {
+     "projects": [
+      "ADVI_COTBKF",
+      "IRPT_BCKEND",
+      "IRPT_CUSTDY",
+      "IRPT_DASHBD"
+     ],
+     "files": 30
+    },
+    "opal-data-assets": {
+     "projects": [
+      "ADVI_COTBKF",
+      "IRPT_BCKEND",
+      "IRPT_CUSTDY",
+      "IRPT_DASHBD",
+      "IRPT_YCDGEN"
+     ],
+     "files": 59
+    },
+    "opal-data-bd": {
+     "projects": [
+      "ADVI_COTBKF",
+      "IRPT_BCKEND",
+      "IRPT_CUSTDY",
+      "IRPT_YCDGEN"
+     ],
+     "files": 32
+    },
+    "opal-data-cot": {
+     "projects": [
+      "ADVI_COTBKF",
+      "IRPT_BCKEND"
+     ],
+     "files": 14
+    },
+    "opal-data-cottonwood": {
+     "projects": [
+      "ADVI_COTBKF",
+      "IRPT_BCKEND",
+      "IRPT_YCDGEN"
+     ],
+     "files": 28
+    },
+    "opal-data-etfs": {
+     "projects": [
+      "ADVI_COTBKF",
+      "IRPT_YCDGEN"
+     ],
+     "files": 4
+    },
+    "opal-data-inf": {
+     "projects": [
+      "ADVI_COTBKF",
+      "IRPT_BCKEND"
+     ],
+     "files": 21
+    },
+    "opal-data-inflection": {
+     "projects": [
+      "IRPT_BCKEND"
+     ],
+     "files": 15
+    },
+    "opal-data-mdpf": {
+     "projects": [
+      "IRPT_BCKEND"
+     ],
+     "files": 7
+    },
+    "opal-data-news-v2": {
+     "projects": [
+      "IRPT_BCKEND"
+     ],
+     "files": 2
+    },
+    "opal-data-portal-v2": {
+     "projects": [
+      "IRPT_BCKEND",
+      "IRPT_DASHBD"
+     ],
+     "files": 6
+    },
+    "opal-data-ycharts": {
+     "projects": [
+      "IRPT_BCKEND"
+     ],
+     "files": 10
+    },
+    "opal-data-irpt": {
+     "projects": [
+      "IRPT_YCDGEN"
+     ],
+     "files": 18
+    },
+    "opal-data-transcripts": {
+     "projects": [
+      "NFRA_TRNSPT"
+     ],
+     "files": 8
+    }
+   },
+   "dell1": {
+    "opal-data-assets": {
+     "projects": [
+      "MDPF_HEALGAP"
+     ],
+     "files": 1
+    },
+    "opal-data-cot": {
+     "projects": [
+      "MDPF_HEALGAP",
+      "MDPF_SECCLASS"
+     ],
+     "files": 9
+    },
+    "opal-data-49financial": {
+     "projects": [
+      "MDPF_SECCLASS"
+     ],
+     "files": 2
+    },
+    "opal-data-bd": {
+     "projects": [
+      "MDPF_SECCLASS"
+     ],
+     "files": 18
+    },
+    "opal-data-etfs": {
+     "projects": [
+      "MDPF_SECCLASS",
+      "MDPF_SECHIST"
+     ],
+     "files": 14
+    },
+    "opal-data-inf": {
+     "projects": [
+      "MDPF_SECCLASS"
+     ],
+     "files": 2
+    },
+    "opal-data-mdpf": {
+     "projects": [
+      "MDPF_SECCLASS"
+     ],
+     "files": 2
+    }
+   }
+  }
+ }
+}
