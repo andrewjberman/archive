@@ -1,0 +1,556 @@
+# Investor Reporting -- `directory` root, the SHARED schedule file. Cell IB-s-12 adds
+# `irpt-holdings-snapshot` here; IB-s-4 (handed only after THIS cell merges, per the
+# issuer's own re-sequencing) adds the directory refresh schedule beside it. ONE file,
+# TWO cells, sequenced so no second worktree ever holds this root's state at once.
+#
+# irpt-holdings-snapshot IS A REGISTERED TRIGGER SLOT, APPLIED DISABLED. It is NOT wired
+# to a live compute target: `data/assets/scripts/gold/investor_reporting/
+# holdings_snapshot.py` is a GOLD SCRIPT, not a Lambda function, and no Lambda or EC2
+# dispatch target for it exists yet -- creating one is outside this cell's DELIVERABLE
+# (the runner + its schedule REGISTRATION, not a new compute surface). The target below
+# is an INERT, id-only SQS message to the ALREADY-APPLIED `irpt-generation` queue
+# (IB-s-17's core root) naming the schedule's own intent; nothing currently consumes that
+# message for this purpose, and DISABLED means nothing fires it regardless. This is the
+# same discipline as the standing bound: "a scheduler this project creates is the
+# product's own trigger and is applied DISABLED where its first fire would be a vendor
+# call" -- generalised here to "where its first fire would reach compute this cell never
+# confirmed exists", which is the sharper and more honest reading for a script with no
+# deployed runtime target (row IRPT_BCKEND-W2-S5: the rule-13 code deploy for this
+# runner's SIBLING, directory_runner.py, is a first-mint that could not complete through
+# the push gate; this runner inherits the identical hazard and is recorded as such in
+# this order's own surprise row, never silently assumed deployed).
+#
+# NO ALARM, NO SNS TOPIC, NO SES SEND. An SQS send is not a notification: nothing reads
+# this queue for an alerting purpose, and this project builds no alarm machinery.
+
+data "terraform_remote_state" "core" {
+  backend = "s3"
+  config = {
+    bucket = "opal-313476888478-terraform-state"
+    key    = "investor-reporting/core/tfstate"
+    region = "us-east-1"
+  }
+}
+
+data "aws_iam_policy_document" "irpt_holdings_snapshot_scheduler_assume" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["scheduler.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "irpt_holdings_snapshot_scheduler" {
+  name               = "irpt-holdings-snapshot-scheduler-role"
+  description        = "IRPT cell IB-s-12: EventBridge Scheduler role for the irpt-holdings-snapshot trigger slot. Grants ONLY sqs:SendMessage on the one queue this schedule targets."
+  assume_role_policy = data.aws_iam_policy_document.irpt_holdings_snapshot_scheduler_assume.json
+}
+
+data "aws_iam_policy_document" "irpt_holdings_snapshot_scheduler" {
+  # CTO R4 row 2 (2.0.0_SA_COO~M): the slot now fires the holdings dispatch (holdings_refresh.tf). The queue's only
+  # consumer rejected this message (~P msg 100955: resident_worker.py:262-270 routes resolve_upload only).
+  statement {
+    sid       = "InvokeTheHoldingsDispatchOnly"
+    effect    = "Allow"
+    actions   = ["lambda:InvokeFunction"]
+    resources = [module.irpt_holdings_refresh.function_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "irpt_holdings_snapshot_scheduler" {
+  name   = "irpt-holdings-snapshot-scheduler-policy"
+  role   = aws_iam_role.irpt_holdings_snapshot_scheduler.id
+  policy = data.aws_iam_policy_document.irpt_holdings_snapshot_scheduler.json
+}
+
+resource "aws_scheduler_schedule" "irpt_holdings_snapshot" {
+  name        = "irpt-holdings-snapshot"
+  description = "IRPT B12 (IB-s-12): the production trigger for the holdings snapshot gold runner. R4 ENABLED under signed halves (COO 8d601db072, CTO f541e1cbf0, CRO 283d590379): one validated Holdings publication per firm per weekday."
+  group_name  = "default"
+  state       = "ENABLED"
+  # After the directory refresh (09:30 America/New_York), inside the runner's up window (12:52Z-16:41Z).
+  schedule_expression          = "cron(15 10 ? * MON-FRI *)"
+  schedule_expression_timezone = "America/New_York"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  target {
+    arn      = module.irpt_holdings_refresh.function_arn
+    role_arn = aws_iam_role.irpt_holdings_snapshot_scheduler.arn
+    input = jsonencode({
+      kind = "irpt_holdings_refresh"
+      note = "R4: ENABLED under signed halves (COO 8d601db072, CTO f541e1cbf0, CRO 283d590379)"
+    })
+  }
+}
+
+output "holdings_snapshot_schedule_name" {
+  value       = aws_scheduler_schedule.irpt_holdings_snapshot.name
+  description = "irpt-holdings-snapshot -- R4 ENABLED under signed halves (COO 8d601db072, CTO f541e1cbf0, CRO 283d590379), a live trigger for the holdings snapshot gold runner"
+}
+
+output "holdings_snapshot_schedule_state" {
+  value       = aws_scheduler_schedule.irpt_holdings_snapshot.state
+  description = "Must read ENABLED; R4 step 4 (IB-mr-201) flipped it under signed halves."
+}
+
+# =============================================================================
+# Cell IB-s-4 -- THE DIRECTORY REFRESH SCHEDULE AND THE LAMBDA IT FIRES
+# =============================================================================
+#
+# WHY THE FUNCTION IS DECLARED IN THIS FILE AND NOT IN lambda.tf: lambda.tf belongs to IB-s-1,
+# and a schedule with a target is ONE unit with ONE owner. Splitting the target from the trigger
+# would put two cells on one resource pair, which is the thing this root's own header warns
+# about.
+#
+# ENABLED, DELIBERATELY, AND THE BOUND IS SATISFIED RATHER THAN WAIVED. The standing bound
+# applies a scheduler DISABLED "where its first fire would be a vendor call". This schedule's
+# first fire reaches ONE Lambda that reads Opal-owned S3 objects and writes one manifest under
+# the firm's own `investor-reporting/` prefix. No Black Diamond, Orion, YCharts or SmartX client
+# is in that function's import closure at all -- its two modules import the standard library and
+# boto3 -- so the condition the bound names is ABSENT, not overridden. Compare the sibling
+# `irpt-holdings-snapshot` above, which IS disabled because its target compute does not exist.
+#
+# WHAT A FIRE ACTUALLY DOES, RE-STATED BY CELL IB-rt-6 BECAUSE IT CHANGED. It resolves the
+# business date, asks whether the last expected fire produced a manifest, reads back the command
+# the LAST fire dispatched, accounts for any artifact that landed, HANDS THE NEXT BUILD TO THE
+# mdpf DAILY-RUNNER BY SSM, and returns a StatusEnvelope. It still does not run the gold runner
+# in the Lambda -- that runner needs pandas and reads four silver/gold planes -- but round 1's
+# reason for NOT_WIRED (row W1-S8: no landed artifact on the shared home) is CLEARED: the bundle
+# is minted and this function dispatches to it.
+#
+# AND WHAT STILL CANNOT HAPPEN, MEASURED AND NOT ASSUMED (row IRPT_BCKEND-W2-S49, BLOCKING):
+# `mdpf-daily-runner-ec2-role` is AccessDenied on 5 of the 9 prefixes the directory runner reads
+# and on 3 of 3 firm destination prefixes, measured from the host's own identity. So a
+# dispatched build presently fails ON THE HOST and lands nothing anywhere. That is READ BACK by
+# the next fire and recorded -- it is not a wrong artifact and it is not a silent success. The
+# remedy is an IAM change on a shared host role in a root this cell does not own.
+#
+# NO ALARM, NO SNS TOPIC, NO SES SEND, NO NOTIFICATION. Nothing here notifies anyone.
+
+module "irpt_directory_refresh" {
+  source = "../../modules/yang-lambda"
+
+  function_name = "irpt-directory-refresh"
+  artifact_key  = "investor-reporting/irpt-directory-refresh.zip"
+  role_arn      = aws_iam_role.irpt_directory_refresh.arn
+
+  handler     = "refresh.lambda_handler"
+  runtime     = "python3.12"
+  timeout     = 60
+  memory_size = 512
+
+  # Pure stdlib + boto3. No layer: IB-s-13's shared layer carries jsonschema, and this function
+  # deliberately does not validate contracts at runtime -- the tests do, where the dependency is.
+  layers = []
+
+  environment_variables = {
+    IRPT_DIRECTORY_BUCKET_MAP = jsonencode(local.firm_bucket_map)
+    IRPT_DIRECTORY_PREFIX     = local.directory_prefix
+
+    # CELL IB-rt-6 -- THE BUILD DISPATCH. Both halves are required by refresh.py's
+    # `dispatch_configured()` and NEITHER HAS A DEFAULT IN THE CODE: a function that cannot name
+    # the host it dispatches to, or the bundle that host must pull, records NOT_WIRED rather
+    # than guessing at an instance id.
+    IRPT_DIRECTORY_RUNNER_INSTANCE_ID = local.irpt_runner_instance_id
+    IRPT_DIRECTORY_BUNDLE_URI         = local.irpt_runner_bundle_uri
+
+    # CELL IB-rtc-6 (R-44) -- {firm_id: source-principal ARN}, from principal_49f.tf. refresh.py hands
+    # a firm's ARN to the runner for THAT firm's build only; a firm absent here reads on the host role.
+    IRPT_DIRECTORY_SOURCE_ROLE_MAP = jsonencode(local.irpt_source_role_map)
+  }
+
+  log_retention_days = 14
+  system_tag         = "InvestorReporting"
+
+  # TIMEOUT DELIBERATELY UNCHANGED AT 60s. The dispatch SENDS AND RETURNS: it makes one
+  # describe, at most one get-command-invocation, two small S3 reads, one send_command and one
+  # put per firm. Raising the timeout would be the tell that something in here waits, and
+  # nothing does -- the build's outcome is read by a LATER fire, from the command's own record.
+
+  tags = {
+    Cell    = "IB-s-4"
+    Project = "IRPT_BCKEND"
+  }
+}
+
+# -- WHERE THE TWO DISPATCH VALUES COME FROM, and why one is derived and one is typed ---------
+locals {
+  # DERIVED, never typed: infra/aws/ec2/EC2_MANIFEST.json is the estate's ONE EC2 enumeration
+  # and it names this host. If the runner is ever replaced, this root plans a change on the next
+  # apply instead of dispatching at a dead instance id.
+  irpt_ec2_manifest        = jsondecode(file("${path.module}/../../../ec2/EC2_MANIFEST.json"))
+  irpt_runner_instance_id  = local.irpt_ec2_manifest.services["mdpf-daily-runner"].instance_id
+  irpt_runner_instance_arn = "arn:aws:ec2:us-east-1:${data.aws_caller_identity.current.account_id}:instance/${local.irpt_runner_instance_id}"
+
+  # TYPED, and the copy is DISCLOSED rather than pretended away. The ONE authority for this key
+  # is `.tools/safe_deploy_core.py` (BUNDLES -> mdpf -> investor_reporting: bucket
+  # "opal-data-mdpf", s3_key "code/scripts/.../investor-reporting.tar.gz"), which is PYTHON and
+  # cannot be read by Terraform. A duplicated fact is a defect whose latency ends at the next
+  # grant, so where the copy cannot be deleted it is MECHANICALLY CHECKED: this cell's battery
+  # asserts this string equals the spec's, and a divergence fails the arm rather than dispatching
+  # a host at a bundle nobody mints.
+  irpt_runner_bundle_uri = "s3://opal-data-mdpf/code/scripts/assets_gold/investor_reporting/investor-reporting.tar.gz"
+}
+
+# -- the function's role: read the directory, write ONLY the refresh manifests ----------------
+resource "aws_iam_role" "irpt_directory_refresh" {
+  name               = "irpt-directory-refresh-role"
+  description        = "IRPT cell IB-s-4: irpt-directory-refresh. Reads the firm buckets investor-reporting/directory/* prefixes and writes ONLY the refresh manifests beneath them."
+  assume_role_policy = data.aws_iam_policy_document.assume.json
+}
+
+locals {
+  # The write grant is NARROWER than the read grant and is derived from the same registry, so a
+  # new firm is covered on the next plan and no firm name is typed here.
+  refresh_manifest_arns = [
+    for b in local.firm_buckets : "arn:aws:s3:::${b}/${local.directory_prefix}/_refresh/*"
+  ]
+
+  # The BUCKET arns (not object arns): a list is authorized against the bucket, with the prefix
+  # carried in a condition. Same derivation, same firm registry, no name typed.
+  firm_bucket_arns = [for b in local.firm_buckets : "arn:aws:s3:::${b}"]
+}
+
+data "aws_iam_policy_document" "irpt_directory_refresh" {
+  statement {
+    sid       = "ReadFirmDirectoryPrefixOnly"
+    effect    = "Allow"
+    actions   = ["s3:GetObject"]
+    resources = local.directory_object_arns
+  }
+
+  # PutObject ONLY, and ONLY under _refresh/. No delete and no overwrite of a directory artifact.
+  statement {
+    sid       = "WriteRefreshManifestsOnly"
+    effect    = "Allow"
+    actions   = ["s3:PutObject"]
+    resources = local.refresh_manifest_arns
+  }
+
+  # ---------------------------------------------------------------------------------------
+  # THE ABSENCE ORACLE (cell IB-rt-6, row IRPT_BCKEND-W2-S50 -- measured in production, not
+  # reasoned about). This role had NO ListBucket by design: "the manifest key is computed from
+  # the business date, never discovered". That design is UNCHANGED and this grant does not
+  # weaken it -- the calendar still chooses the date and the code still computes the key.
+  #
+  # WHAT IT FIXES: S3 answers a GetObject on a MISSING key with 403 AccessDenied, NOT 404, when
+  # the caller cannot list the bucket. So the first real fire of this function raised on its own
+  # first read for all three firms and wrote nothing: a genuine absence arrived wearing a
+  # denial's face, and the classifier refused to call it absence -- correctly, because it cannot
+  # tell them apart. Two instruments agreed on the cause: the live invoke returned
+  # manifest_read_error=AccessDenied for 3 of 3 firms, and simulate-principal-policy (single
+  # ARN, exact grain) reported s3:GetObject on that exact manifest key ALLOWED while
+  # s3:ListBucket on the bucket was implicitDeny.
+  #
+  # WHY THIS IS NOT A WIDENING. The condition binds the list to EXACTLY the prefix the GetObject
+  # statement above already grants -- the function may now list precisely the set it may already
+  # read, and not one key more. Both values are DERIVED from `local.directory_prefix`, so a
+  # prefix change moves the read grant and the list grant together instead of leaving one behind.
+  # ---------------------------------------------------------------------------------------
+  statement {
+    sid       = "ListExactlyWhatItMayAlreadyRead"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = local.firm_bucket_arns
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values = [
+        "${local.directory_prefix}/*",
+        "${local.directory_prefix}/",
+      ]
+    }
+  }
+
+  statement {
+    sid       = "OwnLogStreamOnly"
+    effect    = "Allow"
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = ["arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/irpt-directory-refresh:*"]
+  }
+
+  # =========================================================================================
+  # CELL IB-rt-6 -- THE BUILD DISPATCH. FOUR STATEMENTS, AND THE SPLIT IS NOT COSMETIC:
+  # ssm:SendCommand and ec2:StartInstances DO support resource-level permissions and are
+  # pinned to the ONE instance (and the ONE AWS-owned document) this cell may reach;
+  # ssm:GetCommandInvocation, ssm:DescribeInstanceInformation and ec2:DescribeInstances DO NOT
+  # support resource-level permissions at all, so their "*" is the IAM plane's own limit and is
+  # declared as such rather than left looking like a careless wildcard. Separating them makes
+  # the difference READABLE in the policy document instead of only in a reviewer's memory.
+  #
+  # WHAT IS DELIBERATELY ABSENT: no ssm:CancelCommand, no ssm:SendCommand on any other instance,
+  # no ec2:StopInstances and no ec2:TerminateInstances. This function starts a host it finds
+  # stopped and NEVER stops one -- the mdpf daily chain owns that lifecycle and a refresh that
+  # shut the box down could kill a chain run mid-flight (the accrual bridge's own header says
+  # exactly this). No iam:PassRole: the command runs under the instance's own profile.
+  # =========================================================================================
+  statement {
+    sid     = "DispatchTheDirectoryBuildToOneRunnerOnly"
+    effect  = "Allow"
+    actions = ["ssm:SendCommand"]
+    resources = [
+      local.irpt_runner_instance_arn,
+      "arn:aws:ssm:us-east-1::document/AWS-RunShellScript",
+    ]
+  }
+
+  statement {
+    sid     = "StartThatRunnerNeverStopIt"
+    effect  = "Allow"
+    actions = ["ec2:StartInstances"]
+    # ONE instance. A refresh that could start an arbitrary instance is a different blast radius
+    # from one that can wake the runner it already dispatches to.
+    resources = [local.irpt_runner_instance_arn]
+  }
+
+  statement {
+    sid    = "ReadBackTheCommandsThisFunctionSent"
+    effect = "Allow"
+    # THE PERISHABILITY GRANT. Without this the cell could dispatch and never learn the outcome,
+    # and a REFRESH_DISPATCHED manifest would sit at RUNNING forever. These three actions carry
+    # NO resource-level support in IAM (AWS service reference: "resource types: none"), so the
+    # wildcard is the plane's, not this policy's laxity, and all three are READ-ONLY.
+    actions = [
+      "ssm:GetCommandInvocation",
+      "ssm:DescribeInstanceInformation",
+      "ec2:DescribeInstances",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "irpt_directory_refresh" {
+  name   = "irpt-directory-refresh-policy"
+  role   = aws_iam_role.irpt_directory_refresh.id
+  policy = data.aws_iam_policy_document.irpt_directory_refresh.json
+}
+
+# -- the scheduler's own role: invoke exactly one function ------------------------------------
+data "aws_iam_policy_document" "irpt_directory_refresh_scheduler_assume" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["scheduler.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "irpt_directory_refresh_scheduler" {
+  name               = "irpt-directory-refresh-scheduler-role"
+  description        = "IRPT cell IB-s-4: EventBridge Scheduler role for irpt-directory-refresh. Grants ONLY lambda:InvokeFunction on that one function."
+  assume_role_policy = data.aws_iam_policy_document.irpt_directory_refresh_scheduler_assume.json
+}
+
+data "aws_iam_policy_document" "irpt_directory_refresh_scheduler" {
+  statement {
+    sid       = "InvokeTheRefreshFunctionOnly"
+    effect    = "Allow"
+    actions   = ["lambda:InvokeFunction"]
+    resources = [module.irpt_directory_refresh.function_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "irpt_directory_refresh_scheduler" {
+  name   = "irpt-directory-refresh-scheduler-policy"
+  role   = aws_iam_role.irpt_directory_refresh_scheduler.id
+  policy = data.aws_iam_policy_document.irpt_directory_refresh_scheduler.json
+}
+
+# -- the schedule ------------------------------------------------------------------------------
+#
+# THE CADENCE IS MEASURED, THEN DECLARED. Every source this directory is built from completes
+# T-1: IB-s-1 measured 49F and COT selecting 2026-09-09 while the calendar expected last trading
+# day was 2026-09-10, and INF selecting 2026-09-10 the same morning. A trading-day cadence is
+# therefore the right shape, and 09:00 ET is where the brief puts it -- context, not an SLA.
+# MON-FRI, not `rate(1 day)`: Friday IS Monday's answer, and a calendar-day cadence fires twice
+# into a closed market every week.
+#
+# The expression is pinned to a ZONE rather than left in UTC, so the fire does not walk an hour
+# at the DST boundary. The harness cannot prove that -- see this cell's S4-AC3 judgment, which
+# says so rather than implying otherwise.
+#
+# 09:30, NOT 09:00 -- INSIDE THE RUNNER HOST'S UP WINDOW (row IRPT_BCKEND-S126, 2026-09-25). The
+# build is dispatched by SSM to the shared mdpf daily-runner, which mdpf-feeder-trigger starts at
+# 12:52Z and ec2-auto-shutdown-enforcer stops at 16:41Z (CloudTrail 09-22..09-25). A 09:00 ET
+# (13:00Z) fire landed eight minutes after the start, before SSM read Online, and failed
+# HAND_OVER_RUNNER_OFFLINE at all three firms; refresh.py then ends the fire and the next one is a
+# day later, after the stop. 09:30 ET is 13:30Z in EDT and 14:30Z in EST: inside 12:52Z-16:41Z
+# either way, 38 minutes after the start.
+
+resource "aws_scheduler_schedule" "irpt_directory_refresh" {
+  name                         = "irpt-directory-refresh"
+  description                  = "IRPT B4 (IB-s-4): the directory refresh. Fires every trading weekday at 09:30 America/New_York (inside the runner host up window, row S126), invoking irpt-directory-refresh. Opal-owned sources only -- no vendor call is reachable from this function, which is why it is ENABLED."
+  group_name                   = "default"
+  state                        = "ENABLED"
+  schedule_expression          = "cron(0/7 9 ? * MON-FRI *)"
+  schedule_expression_timezone = "America/New_York"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  target {
+    arn      = module.irpt_directory_refresh.function_arn
+    role_arn = aws_iam_role.irpt_directory_refresh_scheduler.arn
+    input = jsonencode({
+      kind = "irpt_directory_refresh"
+      note = "scheduled refresh; the build is dispatched to the mdpf daily-runner by SSM (cell IB-rt-6) and its outcome is read back by a later fire"
+    })
+  }
+}
+
+# THE S335 RETRY -- a SECOND FIRE TEN MINUTES AFTER THE FIRST (row IRPT_BCKEND-S335, CTO RULINGS batch
+# 264 @f49b5958b0, "(a) a second schedule at 13:40Z, same target and input").
+#
+# WHY: refresh.py issues ONE SSM start when the runner host is not Online and ends the fire with
+# HAND_OVER_RUNNER_OFFLINE, on the START-THEN-NEXT-FIRE design -- a later fire finds the host up. The
+# only later fire was a day away, so the refresh failed every day from 2026-09-29 at all three firms
+# and the directory stayed on the 09-25 build. This schedule is that later fire: the same function,
+# role and input kind, 09:40 America/New_York, so the zone keeps the 10-minute gap across DST (13:40Z
+# in EDT, 14:40Z in EST, inside the runner host's 12:52Z-16:41Z window). The first schedule above is
+# unchanged. If the host is already Online and the 09:30 build is running, this fire reads that run
+# rather than starting another (refresh.py owns that rule).
+
+resource "aws_scheduler_schedule" "irpt_directory_refresh_retry" {
+  name                         = "irpt-directory-refresh-retry-daily"
+  description                  = "IRPT S335 retry: a second directory refresh fire every trading weekday at 09:40 America/New_York, 10 minutes after irpt-directory-refresh, invoking the same function so a host the first fire had to start is Online for the second. Opal-owned sources only -- no vendor call is reachable."
+  group_name                   = "default"
+  state                        = "ENABLED"
+  schedule_expression          = "cron(40 9 ? * MON-FRI *)"
+  schedule_expression_timezone = "America/New_York"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  target {
+    arn      = module.irpt_directory_refresh.function_arn
+    role_arn = aws_iam_role.irpt_directory_refresh_scheduler.arn
+    input = jsonencode({
+      kind = "irpt_directory_refresh"
+      note = "S335 retry: the second scheduled refresh, 10 minutes after the first; the first fire starts the runner host when it is not Online and this fire finds it up (CTO batch 264)"
+    })
+  }
+}
+
+output "directory_refresh_schedule_name" {
+  value       = aws_scheduler_schedule.irpt_directory_refresh.name
+  description = "irpt-directory-refresh -- ENABLED, trading-weekday cadence"
+}
+
+output "directory_refresh_schedule_state" {
+  value       = aws_scheduler_schedule.irpt_directory_refresh.state
+  description = "Must read ENABLED; S4-AC1 arm (g) grades it live."
+}
+
+output "directory_refresh_retry_schedule_name" {
+  value       = aws_scheduler_schedule.irpt_directory_refresh_retry.name
+  description = "irpt-directory-refresh-retry-daily -- the S335 second fire, 09:40 America/New_York"
+}
+
+output "directory_refresh_retry_schedule_state" {
+  value       = aws_scheduler_schedule.irpt_directory_refresh_retry.state
+  description = "Must read ENABLED."
+}
+
+output "directory_refresh_function_name" {
+  value       = module.irpt_directory_refresh.function_name
+  description = "the function the schedule invokes -- the zip Terraform ships, NOT the shared-home gold script"
+}
+
+# =============================================================================
+# B7 part 2 (option B) -- THREE CONCURRENT KEEP-WARM FIRES for irpt-directory-search per 5-minute
+# tick (4.0.0_SA_CRO, 2026-09-24; CTO 100230 "OPTION B GO ... an EventBridge/scheduler rule with the
+# same function as three concurrent targets")
+#
+# NAME: irpt-directory-keepwarm-5min. The SCHEDULE grammar ends in a cadence token; "5min" is the
+# registry row added to org/standards/NAMING_SCHEMA.json cadence.values for this schedule (CTO ruling
+# IRPT-LISTING-SPEED-PIN-GO-20260924), never a hand-typed workaround.
+# =============================================================================
+#
+# Speed brief e4b28c17c4 s.2.3 lever B7, approved by Andrew 2026-09-23 ("I like all your recs, yes go
+# ahead", @6fc3f5f785); CTO assignment IRPT-LISTING-SPEED-ASSIGNMENT-20260924 item A: "B7 keep-warm on
+# the IRPT routes (a scheduled ping is not a monitor; Andrew approved always-on in the same word)".
+# Measured cause (brief s.2.2 row 4): 18% of irpt-directory-search calls were cold starts at 2.3-6.7 s
+# each, multiplied by the page's fan-out of three parallel browses. Measured after the single ping
+# (Andrew's HAR 04:32Z): the first browse of a fan-out was warm and the second and third were not,
+# because ONE ping keeps ONE container. Hence three.
+#
+# WHY A RULE WITH THREE TARGETS AND NOT THREE SCHEDULES: three `rate(5 minutes)` Scheduler schedules
+# each start their clock at creation, so they fire minutes apart and each fire lands on the one
+# container the previous fire just freed. An EventBridge rule dispatches ALL its targets at the
+# same match, so the three fires are concurrent -- and each fire HOLDS its container for
+# `irpt_warm_hold_ms` (served.py warm branch, capped at 2000) so a 2 ms answer cannot let Lambda
+# reuse one container for all three. The hold is carried in the target input, so raising it is a
+# plan on this file, never a code change.
+#
+# WHAT A FIRE DOES: invokes irpt-directory-search DIRECTLY with {"irpt_warm": true, ...}. served.py's
+# lambda_entry answers {"warm": true, "function": ...} BEFORE the boundary, the authorizer chain or
+# any S3 read, so the fire keeps one initialised container resident and touches no data. The marker
+# cannot be reached through the HTTP API (API Gateway builds the event's top level itself), so a
+# browser caller cannot produce a warm event.
+#
+# THE RECEIPT: one `{"event": "irpt_warm", "slot": n, ...}` log line per fire, so a tick reads as
+# three lines in THREE DISTINCT log streams (a log stream is a container). Fewer distinct streams
+# than three on a tick = the hold is too short for that tick's dispatch jitter; raise the input.
+#
+# NOT A MONITOR, NOT AN ALARM: nothing reads the answer, nothing is notified, no metric is graded.
+# Cost: rate(5 minutes) x 3 = 864 fires/day of ~0.5 s each at 1769 MB, about 0.03 USD/day.
+# ENABLED, and the standing bound is satisfied rather than waived: the fire reaches one Lambda whose
+# warm branch reads nothing and whose import closure holds no vendor client.
+#
+# REPLACES the single Scheduler schedule + its invoke-only role from the first cut of this block
+# (5886d0b9bd, applied 04:21Z): that shape sustains one container, and the rule below sustains three
+# on its own, so keeping both would only put a fourth, differently-timed fire into every tick.
+
+resource "aws_cloudwatch_event_rule" "irpt_directory_keepwarm" {
+  name                = "irpt-directory-keepwarm-5min"
+  description         = "IRPT B7 option B: three concurrent keep-warm fires for irpt-directory-search every 5 minutes, one per target. The function answers before the boundary and reads nothing; not a monitor, nothing is notified."
+  schedule_expression = "rate(5 minutes)"
+  state               = "ENABLED"
+}
+
+resource "aws_cloudwatch_event_target" "irpt_directory_keepwarm" {
+  count = 3
+
+  rule      = aws_cloudwatch_event_rule.irpt_directory_keepwarm.name
+  target_id = "irpt-directory-keepwarm-slot-${count.index + 1}"
+  arn       = module.irpt_directory_search.function_arn
+
+  input = jsonencode({
+    irpt_warm         = true
+    irpt_warm_slot    = count.index + 1
+    irpt_warm_hold_ms = 500
+  })
+}
+
+# The rule's permission to invoke the function: EventBridge rules invoke Lambda by resource policy,
+# not by an assumed role, and the source_arn pins it to THIS rule -- no other rule, bus or account
+# gains an invoke on irpt-directory-search from this statement.
+resource "aws_lambda_permission" "irpt_directory_keepwarm_events" {
+  statement_id  = "AllowIrptDirectoryKeepwarmRule"
+  action        = "lambda:InvokeFunction"
+  function_name = module.irpt_directory_search.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.irpt_directory_keepwarm.arn
+}
+
+output "directory_keepwarm_rule_state" {
+  value       = aws_cloudwatch_event_rule.irpt_directory_keepwarm.state
+  description = "Must read ENABLED; three targets per fire keep three irpt-directory-search containers resident."
+}
+
+output "directory_keepwarm_target_count" {
+  value       = length(aws_cloudwatch_event_target.irpt_directory_keepwarm)
+  description = "Must read 3 -- one warm fire per target per tick."
+}
+

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -13,6 +13,12 @@
 <decomp_doc>org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md</decomp_doc> (workstream ACCESS, cell `CT-a-1`), the apply legs of cell D2 (AMENDMENT 19).
 <owned_cells>CT-a-1</owned_cells>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~22:4xZ). Leg A APPLIED 2026-10-08T20:29:25Z (group SendCommand Allow); leg B OPEN 20:49:58Z on dell2's
+    send (1); leg C CLOSED 22:34:24Z on dell2's X1 (22:27Z). Issuer live read after leg C: dell2 AWS-RunShellScript explicitDeny
+    (DenyShellDocuments). The 2026-10-09T06:00Z hard close is retired. Ledgers closed; proofs VALID (leg C @55112a7de6).
+  </closure>
 
   <objective>
     LEG A: apply the group SendCommand Allow (window CLOSED). LEG B and LEG C: open and close dell2's F1 shell window on dell2's
