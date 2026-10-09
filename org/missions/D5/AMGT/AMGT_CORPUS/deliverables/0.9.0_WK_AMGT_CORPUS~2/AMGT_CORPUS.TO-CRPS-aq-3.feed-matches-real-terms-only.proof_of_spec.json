@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-aq-3",
+  "genre": "BUILD",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-aq-3.feed-matches-real-terms-only.md",
+    "group": "OTHER",
+    "vintage_commit": "a7e43b022b3e2d8be9ca096086f5b950e5c514a8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "a7e43b022b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-aq-3.feed-matches-real-terms-only.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/components/HeaderBrief.tsx",
+      "kind": "script",
+      "commit_or_etag": "3af36f28f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed in the nested portal worktree on branch wk-AMGT_CORPUS-41-portal at 3af36f28f8f9514f38aa437c62be943c8e117b81 (parent c96efe17, portal origin/DEV); not pushed, not deployed (order bound: DEV landing follows the CTO render review). Adds exported realPillarTerms(pillars) = distinct terms.slice(1) in order, [] when only titles, null for null/undefined/[]; FeedList renders a p[data-feed-terms-absent] sentence when terms is an array that yields no term, renders exactly as before when terms is undefined; HeaderBrief prop pillarTerms widened to string[] | null and passed as pillarTerms ?? undefined.",
+      "introduces": [
+        "realPillarTerms",
+        "data-feed-terms-absent"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/NewsTab.tsx",
+      "kind": "script",
+      "commit_or_etag": "3af36f28f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same portal commit 3af36f28f8f9514f38aa437c62be943c8e117b81; the pillarTerms line now reads realPillarTerms(thesis.data?.dossier_fields?.thesis_pillars) and the import adds realPillarTerms; nothing else changed in the file.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round41/page_check41.cjs\" aq3 portal -- expect (?m)^aq3 build 3/3 control 1/1$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round41/page_check41.cjs\" aq3 portal",
+      "output_evidence": "aq3 b1 imb true title-only true no-pillars true\naq3 b2 term-count true no-title true absent-element true absent-words true\naq3 b3 NewsTab uses realPillarTerms true\naq3 build 3/3 control 1/1\nexit code 0 (React key warnings on stderr omitted, pre-existing noise)",
+      "denominator": "3 of 3 build limbs and 1 of 1 control; the pre-change base read 0/3 control 1/1 per the order",
+      "expect": "(?m)^aq3 build 3/3 control 1/1$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs > /dev/null 2>&1; echo \"tabs rc=$?\" -- expect (?m)^tabs rc=0$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs > /dev/null 2>&1; echo \"tabs rc=$?\"",
+      "output_evidence": "tabs rc=0",
+      "denominator": "1 of 1 harness run, exit code 0",
+      "expect": "(?m)^tabs rc=0$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 (JUDGMENT, graded by the CVO at L9 on the issuer's real read of a name with real terms AND a headline in the window): a reader can follow a theme the team named into the news, and a name with no real term is not shown a filter that cannot match.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; 3.0.0_SA_CVO grades it at L9 on the issuer's real read. No verdict is asserted here.",
+      "output_evidence": "Hand-built render evidence only (no real name read by the worker): AC1 b2 shows FeedList with terms [net debt] carries one data-feed-term=net debt with count 1 and no filter for the pillar title; terms [] carries data-feed-terms-absent with the sentence 'The research team's thesis pillars carry no term to filter the news.' and no data-feed-term.",
+      "denominator": "0 verdicts asserted",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round41/page_check41.cjs\" aq3 portal   # the read that produced the RECORD; the criterion itself carries no <invocation> (judgment)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In HeaderBrief.tsx, realPillarTerms changed from (p.terms ?? []).slice(1) to .slice(0) (the pillar title would be a filter again), AC1 re-run, then the file restored byte for byte from a saved copy.",
+      "expected": "aq3 b1 false for the IMB and title-only cases and the build score drops below 3/3.",
+      "observed": "aq3 b1 imb false title-only false no-pillars true; aq3 build 2/3 control 1/1. File restored afterwards; AC1 re-confirmed 3/3 control 1/1 on the committed bytes. CONTROL FIRED-AS-EXPECTED True.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice on the same bytes (before and after the mutant round trip).",
+      "observed": "AC1: aq3 build 3/3 control 1/1 both runs. AC2: tabs rc=0 both runs (plus the mutant-restored state verified by git status showing only the two intended portal files modified).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any push of the portal branch, any deploy, any real-name read of the news feed",
+      "reason": "BOUNDS 2 of the order: no push, no deploy, no AWS, Bloomberg or vendor call; the DEV landing follows the CTO's render review and the real-name read is the issuer's close read (AC3)."
+    },
+    {
+      "item": "Typecheck as an acceptance criterion",
+      "reason": "Not a criterion of the order; run per section 5 item 1 anyway: bun run typecheck (tsc -b --noEmit) inside portal/ exit code 0."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "page_check41.cjs aq3 (AC1)",
+      "invocation": "node org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round41/page_check41.cjs aq3 portal",
+      "result": "rc 0; aq3 build 3/3 control 1/1"
+    },
+    {
+      "tool": "tabs.harness.cjs (AC2)",
+      "invocation": "node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs",
+      "result": "rc 0"
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "cd portal && bun run typecheck",
+      "result": "rc 0 (tsc -b --noEmit)"
+    }
+  ]
+}
