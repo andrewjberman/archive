@@ -1,0 +1,229 @@
+{
+ "task_order": "IRPT_DASHBD.TO-DB-b-87",
+ "worker": "0.9.0_WK_IRPT_DASHBD~62",
+ "row": "IRPT_DASHBD-S40",
+ "repeat_census": {
+  "day": "2026-10-08",
+  "pairs": 8,
+  "rows_in_pairs": 16,
+  "accounts_with_a_repeat": 8,
+  "rows_read": 35834,
+  "population_accounts": 7620,
+  "groups_identical_in_every_column": 0,
+  "current_key": [
+   "firm",
+   "account_id",
+   "business_date",
+   "lot_id",
+   "quantity",
+   "proceeds"
+  ],
+  "differing_columns_union": [
+   "disallowed_loss_amount",
+   "gain_loss_dollars",
+   "gain_loss_percentage",
+   "original_purchase_price",
+   "transaction_cost",
+   "transaction_cost_per_share",
+   "transaction_gain_loss_dollars",
+   "transaction_gain_loss_pct",
+   "w_s"
+  ],
+  "per_pair": [
+   {
+    "account_hash": "20434e99",
+    "rows": 2,
+    "differing_columns": [
+     "original_purchase_price",
+     "gain_loss_dollars",
+     "gain_loss_percentage",
+     "w_s",
+     "disallowed_loss_amount",
+     "transaction_cost",
+     "transaction_cost_per_share",
+     "transaction_gain_loss_dollars",
+     "transaction_gain_loss_pct"
+    ]
+   },
+   {
+    "account_hash": "41055d55",
+    "rows": 2,
+    "differing_columns": [
+     "gain_loss_dollars",
+     "gain_loss_percentage",
+     "w_s",
+     "disallowed_loss_amount"
+    ]
+   },
+   {
+    "account_hash": "d22d114d",
+    "rows": 2,
+    "differing_columns": [
+     "gain_loss_dollars",
+     "gain_loss_percentage",
+     "w_s",
+     "disallowed_loss_amount"
+    ]
+   },
+   {
+    "account_hash": "a86d68ff",
+    "rows": 2,
+    "differing_columns": [
+     "gain_loss_dollars",
+     "gain_loss_percentage",
+     "w_s",
+     "disallowed_loss_amount"
+    ]
+   },
+   {
+    "account_hash": "e38d0759",
+    "rows": 2,
+    "differing_columns": [
+     "original_purchase_price",
+     "gain_loss_dollars",
+     "gain_loss_percentage",
+     "w_s",
+     "disallowed_loss_amount",
+     "transaction_cost",
+     "transaction_cost_per_share",
+     "transaction_gain_loss_dollars",
+     "transaction_gain_loss_pct"
+    ]
+   },
+   {
+    "account_hash": "3f23e504",
+    "rows": 2,
+    "differing_columns": [
+     "gain_loss_dollars",
+     "gain_loss_percentage",
+     "w_s",
+     "disallowed_loss_amount"
+    ]
+   },
+   {
+    "account_hash": "c52b30cf",
+    "rows": 2,
+    "differing_columns": [
+     "gain_loss_dollars",
+     "gain_loss_percentage",
+     "w_s",
+     "disallowed_loss_amount"
+    ]
+   },
+   {
+    "account_hash": "9efafb04",
+    "rows": 2,
+    "differing_columns": [
+     "original_purchase_price",
+     "gain_loss_dollars",
+     "gain_loss_percentage",
+     "w_s",
+     "disallowed_loss_amount",
+     "transaction_cost",
+     "transaction_cost_per_share",
+     "transaction_gain_loss_dollars",
+     "transaction_gain_loss_pct"
+    ]
+   }
+  ],
+  "output_columns_differing_within_every_pair": [
+   "realized_gain"
+  ],
+  "meaning": "each pair is one lot split in two by a wash sale (w_s, a disallowed loss on one half only): same quantity, proceeds and cost basis, a different gain. Accounts are sha256-hashed (8 hex).",
+  "source": "S3 reads only, the producer's own read_day over the custodian realized-lot partition of 2026-10-08, filtered to the handler's population; counts and column names only",
+  "script": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~62/repeat_census_r41.py"
+ },
+ "decision": "EXTEND_KEY",
+ "decision_why": "every pair differs on real lot attributes (not 0 of 8 identical), so the producer's rule keeps both rows and extends the key by the minimal real attribute; realized_gain is the only column of account_lot_realized that separates all 8 pairs (cost_basis and the rest are equal within every pair).",
+ "new_key": [
+  "firm",
+  "account_id",
+  "business_date",
+  "lot_id",
+  "quantity",
+  "proceeds",
+  "realized_gain"
+ ],
+ "new_key_added_column": "realized_gain",
+ "contract": "org/standards/IRPT_DASHBD_ACCOUNT_LOT_REALIZED_CONTRACT.json primary_key equals new_key",
+ "rule24_record": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~62/rule24_realized_gain_key.md",
+ "refusal": "realized_rows() still refuses by name: 'identical in every column' for a true duplicate row, and 'repeats with the same closing date, quantity, proceeds and gain: the key is not unique' for a repeat of the whole new key with another column differing",
+ "output_unique_under_new_key": {
+  "2026-10-07": {
+   "rows": 3245,
+   "duplicates_under_new_key": 0,
+   "duplicates_under_old_key": 0
+  },
+  "2026-10-08": {
+   "rows": 35834,
+   "duplicates_under_new_key": 0,
+   "duplicates_under_old_key": 8
+  }
+ },
+ "kit_runs": {
+  "2026-10-07": {
+   "accounts": 7620,
+   "population": 7620,
+   "refusals": 0,
+   "lots_rows": 569121,
+   "lots_rows_by_table": {
+    "account_lot_realized": 3245,
+    "account_lot_unrealized_daily": 565876,
+    "account_activity_daily": 6897
+   },
+   "peak_mb": 1685.5,
+   "peak_basis": "process peak_wset (Windows peak working set) from the start of the process",
+   "total_s": 545.47,
+   "lots_stage_s": 421.25,
+   "returns_stage_s": 36.65,
+   "class_stage_s": 82.31,
+   "stopped_at_cap": false,
+   "local_exit_head": null,
+   "refusal_lines_in_log": 0
+  },
+  "2026-10-08": {
+   "accounts": 7620,
+   "population": 7620,
+   "refusals": 0,
+   "lots_rows": 578380,
+   "lots_rows_by_table": {
+    "account_lot_realized": 35834,
+    "account_lot_unrealized_daily": 542546,
+    "account_activity_daily": 6901
+   },
+   "peak_mb": 1698.6,
+   "peak_basis": "process peak_wset (Windows peak working set) from the start of the process",
+   "total_s": 561.89,
+   "lots_stage_s": 431.99,
+   "returns_stage_s": 40.51,
+   "class_stage_s": 83.36,
+   "stopped_at_cap": false,
+   "local_exit_head": null,
+   "refusal_lines_in_log": 0
+  }
+ },
+ "refusals_counted_as": "lines matching REFUSED, LOTS_SKIPPED or CLASS_SKIPPED in each run's log: 0 and 0",
+ "runtime": {
+  "pandas": "2.2.3",
+  "numpy": "1.26.4",
+  "pyarrow": "14.0.2",
+  "python": "3.12.10",
+  "kit": "C:/opal-inbound/kit-py312-dashbd/kit-py312-dashbd-20261009.zip (7 wheels + pin file), venv in .scratch/kitvenv; boto3, botocore, s3transfer, jmespath, urllib3, psutil, pytest and their pure-python deps (pygments, pluggy, iniconfig, packaging, colorama) side-loaded by .pth from copies of dell2's Roaming Python312 site-packages (rows W44-S1, W46-S2); pandas_market_calendars deliberately NOT side-loaded",
+  "runner": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~50/kit_run_day.py -> ~31/lots_750_run.py default batch -> ~27/batched_e2_run.py (handler.local over the population, workers 12), one day at a time, run in sequence"
+ },
+ "tests": {
+  "passed": 46,
+  "failed": 0,
+  "skipped": 1,
+  "file": "data/assets/scripts/gold/irpt_reporting/tests/test_account_activity_lots.py",
+  "new_test": "data/assets/scripts/gold/irpt_reporting/tests/test_account_activity_lots.py::test_a_repeat_pair_with_the_same_id_quantity_and_proceeds_but_other_gain_is_kept_whole_row_each",
+  "run_on": "the pandas 2.2.3 kit (python -m pytest <file>)",
+  "changed_test": "test_the_same_lot_id_date_quantity_proceeds_and_gain_with_other_columns_differing_still_refuses_true_duplicate_key (was ..._and_proceeds_...; it differed in gain, now a key column, so it differs in acquired_date)",
+  "whole_folder": {
+   "kit_pandas_2.2.3": "93 passed, 4 failed, 1 skipped -- the 4 are test_account_return_daily_none.py, known row IRPT_DASHBD-W46-S1, not this producer's test"
+  }
+ },
+ "rows": [
+  "IRPT_DASHBD-W62-S1"
+ ]
+}
