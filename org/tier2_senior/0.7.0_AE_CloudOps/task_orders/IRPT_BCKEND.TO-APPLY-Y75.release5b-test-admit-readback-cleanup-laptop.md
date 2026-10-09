@@ -30,13 +30,27 @@
     Everything else is unchanged: the same approval (@35fabf20c8), the same 9 keys, opaque refs only, and an email count of 0.
   </amendment>
 
+  <amendment>
+    AMENDMENT 2 (issuer, 2026-10-09 ~09:5xZ) -- RE-GO with keys v3 and the owner rule dell2 Y2 ruled. AMENDMENT 1 STOPPED at 09:40Z,
+    correctly: the owner object has no email field (fields: advisor_id, firm_id, ownership_fingerprint, principal_class, principal_id,
+    schema_version). dell2 2.0.0_SA_COO~Y2 msg 3041 (relay 0.0.0_AB_MSTR msg 107912), verbatim: "The label comes from principal_id, which
+    carries the email in this system." The keys file is now
+    `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/r75/Y75-1_admit_keys_v3.json` @4bcebfcb09 (on CLOUD). The issuer checked
+    that it names the SAME 9 admit_keys, s3_versions, upload_id and advisor label as v2. Step 2's owner test is now exactly:
+    owner_is_advisor = (firm_id == "49financial") AND (principal_class == "FIRM_ADVISOR") AND
+                       ("adv-" + sha256(lowercase(principal_id)).hexdigest()[:12] == the file's `advisor`).
+    Return `owner_checks` as THREE BOOLEANS (firm, class, label) beside the other two read-back booleans. No email, principal id or hash is
+    echoed. Any False is the finding: nothing is deleted. All True means the 9 deletes, under the approval @35fabf20c8. Everything else is
+    unchanged.
+  </amendment>
+
   <objective>
     READ-BACK FIRST, then delete exactly the test records of ONE release-5b test upload named in dell2's keys file: 7 `irpt-requests`
     rows and 2 `opal-data-irpt` objects (every version). dell2 cannot decrypt key `7f4d3042-...`.
   </objective>
 
   <context>
-    Keys file: `git show b2603a97c0:org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/r75/Y75-1_admit_keys_v2.json` (on CLOUD
+    Keys file: `git show 4bcebfcb09:org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/r75/Y75-1_admit_keys_v3.json` (on CLOUD
     4662035082): `admit_keys` = 7 entries of kind ddb (table irpt-requests) + 2 of kind s3 (bucket opal-data-irpt), and `s3_versions` (2)
     -- the issuer read the counts ~09:1xZ. **The S3 deletes are APPROVED** under Andrew's word to `1.0.0_SA_CTO~DELL2` ("i would accept your
     discretion on all three"), whose ruling 1 approves exactly the objects listed in `Y75-1_admit_keys.json`, deleted after read-back 4, and
@@ -85,7 +99,7 @@ lane: the <paths> block names the ledger, the sentinel and the seat's own delive
 </preflight>
 
 <proof_of_spec>
-  <criterion id="AC1" cell_refs="APPLY-Y75"><invocation>python -c "import json,subprocess as s,boto3;k=json.loads(s.check_output(['git','show','b2603a97c0:org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/r75/Y75-1_admit_keys_v2.json']));c=boto3.client('s3');print('VERSIONS_LEFT=%d'%sum(len([v for v in c.list_object_versions(Bucket=x['bucket'],Prefix=x['key']).get('Versions',[]) if v['Key']==x['key']]) for x in k['admit_keys'] if x['kind']=='s3'))"</invocation><expect>VERSIONS_LEFT=0</expect></criterion>
+  <criterion id="AC1" cell_refs="APPLY-Y75"><invocation>python -c "import json,subprocess as s,boto3;k=json.loads(s.check_output(['git','show','4bcebfcb09:org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/r75/Y75-1_admit_keys_v3.json']));c=boto3.client('s3');print('VERSIONS_LEFT=%d'%sum(len([v for v in c.list_object_versions(Bucket=x['bucket'],Prefix=x['key']).get('Versions',[]) if v['Key']==x['key']]) for x in k['admit_keys'] if x['kind']=='s3'))"</invocation><expect>VERSIONS_LEFT=0</expect></criterion>
 </proof_of_spec>
   AC1 counts versions of exactly the 2 named keys (never the wider prefix, which holds other uploads); the row also states the 7 DDB
   keys read NOT_FOUND after delete.
