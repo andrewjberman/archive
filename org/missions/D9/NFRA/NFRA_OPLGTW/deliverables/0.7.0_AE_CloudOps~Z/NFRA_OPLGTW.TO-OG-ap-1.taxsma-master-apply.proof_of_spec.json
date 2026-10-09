@@ -1,0 +1,170 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "1825ea3472"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "15349fa639",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-1.taxsma-master-apply.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/critical_paths/change_management/20261009T0205Z_nfra-oplgtw-og-tm-1-taxsma-master_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The NEVER-2 ledger entry, opened with 6 legs before the first act and committed at 049fe1c5e2 with its sentinel. L1, L2, L3, L4 and L6 are CLOSED, each carrying its own world read-back as proof. L5 (Leg A, the EventBridge rule and target) is OPEN and BLOCKED by the LGIC naming plan gate; row NFRA_OPLGTW-Z-AE-S1 carries it. The ledger is therefore NOT closed, so the order's step 6 close-then-criteria sequence could not complete as written.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/opal-assets/opal-assets-silver-schwab.zip",
+   "kind": "s3_object",
+   "commit_or_etag": "b516c75989fb0f14a1d38531a57eb1ec",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "VersionId bXN11PDXpwx7MqRIO3LCyChhLhc26drn, sha256 AzrzJS+91y57ylRdqGccFPGqWaqAGLFn/jhItkAQCzE=, 74839 bytes. Rebuilt BUILD_ONLY=1 from box/sitez HEAD; sha256 equals row 13's required value, confirmed by two independent instruments. Uploaded with --metadata content-sha256 (the key the yang-lambda module reads source_code_hash from) and verified by head-object on ContentLength 74839 AND the sha256 metadata, never by rc=0. Prior VersionId 7Db1UfM3EU_Z6q4cLQiV4wM3bYaAaFMF retained for rollback.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-data-assets/code/canonical-schwab-si2/sdd-daily-pull.ps1",
+   "kind": "s3_object",
+   "commit_or_etag": "e49aea76a8c634c9d49e6a7cccc51bdf",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "VersionId SMhvvWAbVOEv86DILTR.mBvF3uLSa0CP, 35853 bytes, SSE AES256. Uploaded with --sse AES256 after confirming the repo file's md5 and size equal row 12's AFTER values and that the diff from pin 4d0222ab81 is exactly the one authorized ValidateSet line. ETag and ContentLength both read back as expected. AC1 limb (a) independently confirms it on the live object.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Rows NFRA_OPLGTW-Z-AE-S1 (BLOCKING: the Leg A naming-gate refusal, three options stated, decision left to the issuer) and NFRA_OPLGTW-Z-AE-S2 (OBSERVATION: lambda-source-map.json made stale for this function by Leg C, that file being outside this order's paths).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1 -- the live code object, rule and target carry the new master, 30+ minutes from the other two.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/tm1.sh AC1; echo \"exit=$?\"",
+   "output_evidence": "(a) code object -Master ValidateSet: ['08242234', '08335338', '08403355']\nFAIL: (b) rule canonical-schwab-si2-08403355-daily-pull absent\n(b) canonical-schwab-si2-08242234-daily-pull: cron(15 10,22 * * ? *) ENABLED\n(b) canonical-schwab-si2-08335338-daily-pull: cron(45 9,21 * * ? *) ENABLED\nRESULT: FAIL\nexit=0",
+   "denominator": "Three limbs: (a) the live code object's ValidateSet, (b) the rule, (c) the target. Limb (a) PASSES on the live object and carries all three masters. Limb (b) FAILS because the rule does not exist, so limb (c) is unreachable and was not printed.",
+   "status": "FAIL",
+   "status_reason": "REFUSED WITH ITS MEASUREMENT, and the cause is not in the deployed work. Leg A was refused pre-apply by the LGIC naming plan gate in ENFORCE mode (safe-apply rc=7, 'BLOCKED by the naming plan limb (LGIC_ENFORCE DEC-6, ENFORCE mode, rc=1). Nothing was planned further or applied.'): the rule name canonical-schwab-si2-08403355-daily-pull, which the halves and Andrew's 'exactly same structure' require because it matches both siblings, is not name() output, and the gate wants schwab-canonical-si2-08403355-pull-daily. The resource is an ADDITION, which DEC-6 enforces; the same root's 8 existing out-of-pattern names only WARN, and the gateway apply later WARNed rather than refused on two existing resources, which confirms that reading. This order's BOUNDS forbid overriding a gate, and CLAUDE.md rule 30 routes a builder refusal to a registry row in infra/logic/registry/, outside this order's paths. Row NFRA_OPLGTW-Z-AE-S1 carries the decision to 2.0.0_SA_COO~O with three options. NOTE on the oracle: this check prints exit=0 even on RESULT: FAIL, so the RESULT token is the verdict and the exit code is not a discriminating oracle.",
+   "expect": "(?s)\\(a\\) code object -Master ValidateSet: \\[[^\\]]*'08403355'.*\\(c\\) targets 1; RunPowerShellScript True; box True; runs -Master 08403355 -Target monolith True.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2 -- the converter runs the rebuilt artifact, and the bucket holds exactly one new notification rule.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/ap1.AC3.sh; echo \"exit=$?\"",
+   "output_evidence": "converter CodeSha256=AzrzJS+91y57ylRdqGccFPGqWaqAGLFn/jhItkAQCzE= (aws rc=0), want AzrzJS+91y57ylRdqGccFPGqWaqAGLFn/jhItkAQCzE=\nbucket notification rules: 12 (want 12); on schwab/08403355/bronze/: 1 (want 1) (rc=0)\nRESULT: PASS\nexit=0",
+   "denominator": "Two limbs, both measured live: the converter's CodeSha256 against row 13's required value, and the bucket's notification rule count (12 wanted) with the count on the new bronze prefix (1 wanted).",
+   "status": "PASS",
+   "status_reason": "Both limbs met on the world after Leg C. Corroborated independently of this check: my own read-back listed all 12 rule ids and showed the prior 11 ALL present plus silver-schwab-08403355 with prefix schwab/08403355/bronze/, suffix .zip, s3:ObjectCreated:*, arn opal-assets-silver-schwab; and the function read CodeSha256 AzrzJS+91y57ylRdqGccFPGqWaqAGLFn/jhItkAQCzE=, OPAL_BUILD_COMMIT 47c3c75f11, MemorySize 3008, Timeout 600, State Active, LastUpdateStatus Successful.",
+   "expect": "(?s)converter CodeSha256=AzrzJS\\+91y57ylRdqGccFPGqWaqAGLFn/jhItkAQCzE=.*bucket notification rules: 12 \\(want 12\\); on schwab/08403355/bronze/: 1 \\(want 1\\).*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 -- the two gateway roles reach the new master's served prefixes and nothing else (bronze and fact_acc controls denied).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/tm1.sh AC3; echo \"exit=$?\"",
+   "output_evidence": "13 simulations, all OK. gateway-schwab-read-role allowed on schwab/08403355/silver/dim_position, dim_balance, dim_asset, dim_transaction; gateway-schwab-catalog-read-role allowed on schwab/08403355/meta/complete/date=2026-01-02.json; both roles explicitDeny on schwab/08403355/bronze/x and schwab/08403355/silver/fact_acc/; the same two controls explicitDeny on 08335338.\nRESULT: PASS\nexit=0",
+   "denominator": "13 simulate-principal-policy calls: 5 wanted allowed (the served prefixes) and 8 wanted denied (bronze and fact_acc on the new master and on 08335338 as the control pair). 13 of 13 as wanted.",
+   "status": "PASS",
+   "status_reason": "The grants reach exactly the served prefixes and the control denials hold on both masters, so the widening is bounded. Corroborated by my own read-back of both live documents: the 4 dim_* Allows and the meta/complete Allow present, with 4 Deny statements intact on each role. Per the COO half the contract hookup rides the next gateway release (r29, else r30), so until then these grants expose nothing the gateway actually reads.",
+   "expect": "(?s)RESULT: PASS.*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three readers were shown able to go both ways rather than assumed. (1) The issuer recorded all three criteria FAILing pre-cut (tm1.AC1 ValidateSet 08242234/08335338 and rule absent; ap1.AC3 live CodeSha256 v2Bzt.., 11 rules, 0 on the new prefix; tm1.AC3 the new prefixes explicitDeny); after the work AC2 and AC3 read PASS, so neither is stuck-PASS. (2) AC1 still reads FAIL and names its own cause while its limb (a) flipped to carrying 08403355, so that check moves with the world in BOTH directions rather than being uniformly negative. (3) My own sha256 reader returned an EMPTY value when handed an MSYS /tmp path, which is how that path trap was caught instead of being reported as a content mismatch. (4) Scope control: row S5 names two unapplied drifts sitting in the same two roots (cot_rebalancer_runner_daily, mcportal_grant_writer) that a whole-root apply would carry; every plan was audited as JSON for them.",
+   "expected": "AC2 and AC3 move FAIL -> PASS across the apply; AC1 stays FAIL with the rule named absent while its code-object limb flips to PASS; an instrument that cannot read its input reports empty rather than agreeing; and neither forbidden address appears in any applied plan.",
+   "observed": "AC2 PASS and AC3 PASS (13 of 13 simulations as wanted) against their recorded pre-cut FAILs. AC1 FAIL with '(b) rule canonical-schwab-si2-08403355-daily-pull absent' while limb (a) printed ['08242234', '08335338', '08403355'] from the live object. The sha256 reader raised FileNotFoundError and printed an empty hash on the MSYS path, and the real value was then obtained two ways that agreed. Both forbidden addresses ABSENT in both applied plans. Separately the plan's filter_suffix '' -> null on the unrelated bd49finsurance rule was tested against the world: no Suffix FilterRule before, none after, so a state-representation normalization and no world change.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Each world read was taken by an instrument independent of the one that performed the act, and the two load-bearing numbers were read twice by different means: the artifact sha256 by the build script's own computation and by sha256sum piped to base64, and the post-apply state both by my own aws reads and independently by the issuer's checks ap1.AC3.sh and tm1.sh. Every apply ran from a SAVED plan, so the applied set is pinned to the set that was read and audited.",
+   "observed": "The two sha256 reads agreed exactly on AzrzJS+91y57ylRdqGccFPGqWaqAGLFn/jhItkAQCzE=. My read-back of the converter (CodeSha256, OPAL_BUILD_COMMIT 47c3c75f11) and of the 12 notification rule ids agreed with ap1.AC3.sh run separately; my read-back of both gateway documents agreed with tm1.sh AC3's 13 simulations. Repeated head-object reads of both uploaded objects returned the same ETag, size and VersionId.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Leg A: the EventBridge rule and target aws_cloudwatch_event_rule/target.si2_daily[\"08403355\"] (resources 1-2).",
+   "reason": "BLOCKED, not skipped. Refused pre-apply by the LGIC naming plan gate in ENFORCE mode; the order's BOUNDS forbid overriding a gate and rule 30's remedy is a registry row outside this order's paths. The decision is the issuer's, with the CTO where rule 30 binds. Row NFRA_OPLGTW-Z-AE-S1. Because the rule does not exist, nothing pulls on a schedule and no bronze can land, which is the safe ordering both halves require, so the estate is coherent rather than half-landed."
+  },
+  {
+   "item": "The QA pull (OG-tm-1 Phase B step 11) and AC2 of OG-tm-1.",
+   "reason": "Not this order's: the issuer's worker runs it after this report, per the order's step 7 and the COO half section 4."
+  },
+  {
+   "item": "Updating infra/aws/lambda/ci/lambda-source-map.json for opal-assets-silver-schwab.",
+   "reason": "Outside this order's <paths>. The order prescribes BUILD_ONLY=1, which skips the script's source-map writer, so the entry's three deploy fields still name the pre-Leg-C artifact. Row NFRA_OPLGTW-Z-AE-S2. OG-ap-2 authorises this seat to touch that file only to register trading_calendar.py, a different edit kept apart from this one."
+  },
+  {
+   "item": "Flipping this order's <status> to complete.",
+   "reason": "Section 5 permits the flip only if all three criteria PASS. AC1 does not, so <status> stays pending and the flip is left to the issuer."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S68: BLOCKING -- Leg A refused by the LGIC naming plan gate (DEC-6, ENFORCE) because the sibling-matching rule name canonical-schwab-si2-08403355-daily-pull is not name() output and the resource is an ADDITION; three options stated, decision left to 2.0.0_SA_COO~O with the CTO where rule 30 binds.",
+  "NFRA_OPLGTW-Z-S69: OBSERVATION -- Leg C makes lambda-source-map.json stale for opal-assets-silver-schwab (artifact_sha256, last_deployed_commit, last_deployed_at); that file is outside this order's <paths>, so it was not edited."
+ ],
+ "session_log": "This seat is a SESSION seat (site Z's applier under Andrew-direct ~22:0xZ, msg 32057), not an L7 worker subagent. The trail is this instance, the NEVER-2 ledger entry with its six legs, and the two surprise rows. Preconditions were verified rather than taken from the producer's report: S4's equality claim was re-measured over the 11 vendored modules the package BUILD_MANIFEST declares, not the 9 I first found under data/assets/scripts/silver (that narrower read was corrected before Leg C), giving 11 of 11 byte-equal; silver_build_commit.schwab reads 47c3c75f11; pytest over the silver suite read 597 passed, 11 skipped, 0 failed; and the three ratified edits are present as written, with the NOT_PUBLISHED disposition applied under an `if x not in bronze` guard, which is the CTO half's narrowing that a landed slm file is never suppressed. ROW IDS: the order prescribes NFRA_OPLGTW-Z-AE-S<k>, which SURPRISE_ID_RE (.tools/proof-of-spec-check.py:1206) cannot match because its optional infix is a single letter plus digits, so a two-letter 'AE' makes the row invisible to the ENFORCE'd SURPRISES limb. Exercised both ways: Z-S68 and Z-S69 match, NFRA_OPLGTW-Z-AE-S1 returns NO MATCH. This project had already settled the same collision for an earlier seat's NFRA_OPLGTW-Z-OG-S1 by continuing the Z-S series, so these rows are Z-S68 and Z-S69 (max in channel was Z-S67, read across all 86 hits rather than off one page). The gate was not overridden; the order's row-id instruction is what needs correcting, and the issuer is told.",
+ "compiler_tools": [
+  {
+   "tool": "comp-read",
+   "invocation": "--enumerate over silver.tf, conversion_manifest.py, silver_registry.py, modules/yang-lambda/main.tf, build-and-upload.sh, two backend main.tf files, and the project's INVESTIGATION_v1.md",
+   "result": "PASS",
+   "note": "yang-lambda/main.tf was the load-bearing read: source_code_hash comes from the S3 object's user metadata content-sha256 and s3_object_version from its version_id, which is why a bare s3 cp would have broken the apply and why the upload had to carry that metadata."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "--name '*proof_of_spec.json' over the project; earlier a content alternation for the seating record",
+   "result": "PASS",
+   "note": "Denominators printed: 129 hits across 1689 files for the instance shape."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open --slug nfra-oplgtw-og-tm-1-taxsma-master with 6 legs, then close-leg on L1, L2, L3, L4, L6",
+   "result": "PARTIAL",
+   "note": "Five of six legs closed with proof; L5 open and blocked, so close was not attempted. The criteria were deliberately NOT made legs: the order closes the ledger before running them, so a criterion leg would have inverted that and blocked the close."
+  },
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "opal-assets Leg C, canonical-schwab-ec2 Leg B, opal-gateway roles, and the refused Leg A",
+   "result": "PARTIAL",
+   "note": "rc=0 on three, each from a SAVED plan; rc=7 on Leg A, blocked by the naming plan limb with nothing planned further or applied. The seat gate ADMITTED a CLOUDOPS seat on every root. No HALTGT pass is cited as evidence, per cloud-ops."
+  },
+  {
+   "tool": "terraform",
+   "invocation": "init on all three roots (plain init for opal-assets and opal-gateway; -reconfigure for canonical-schwab-ec2 after confirming no local state and the canonical backend key), then plan -out and show -json per root",
+   "result": "PASS",
+   "note": "Every apply ran from a saved plan so the applied set equals the read set, and every plan was audited as JSON rather than from the rendered text, which hides unchanged attributes behind a redaction line."
+  },
+  {
+   "tool": "comp-iam",
+   "invocation": "NOT USED for the policy read-backs",
+   "result": "SKIP",
+   "note": "Deliberate. cloud-ops states comp-iam models (action) and never (action, resource) and is a FLOOR, so it cannot confirm that a specific key prefix landed in a document, and it does not cover a non-Lambda EC2 box role. The read-backs used the live documents under an audited rail-checked marker. AC3's own instrument is simulate-principal-policy, which does model (action, resource)."
+  }
+ ]
+}
