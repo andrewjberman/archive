@@ -1,0 +1,22 @@
+NAME:: key census (TO-SH-t11, FWD-6) -- read only, 2026-10-09
+NAME:: rows=5673 writers=3
+
+SCAN: etf-classifications, full paginated scan (ConsistentRead, 3 pages), 11361 rows total, 5673 with ticker starting NAME:: (matches CRO note 5,673 of 11,361). Unattributable: 0.
+ATTRIBUTION: by the row's own updated_by tag, matched to the code that sets that tag.
+
+WRITER 1  updated_by=mdpf-secclass-old-list-reclassify   rows=4303 (classified_by=scheduled)
+  org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/old_list_reclassify_write.py:55 (RUN_UPDATED_BY); put wrapper adds identifier_namespace by key prefix :89-102
+WRITER 2  updated_by=mdpf-secclass-model   rows=1257 (classified_by=model)
+  tag set at infra/aws/lambda/v2_portal/yang_pipeline/classify-residual-model.py:81 and infra/aws/lambda/v2_portal/yang_pipeline/write-model-rows.py:54 (also org/.../R10_CHECKS/old_list_reclassify_write.py:56 MODEL_UPDATED_BY). The row does not say which of these code paths wrote it; counted as one writer by tag. NAME:: key->NAME namespace mapping: classify-residual-model.py:153-158.
+WRITER 3  updated_by=mdpf-secclass-s11-rows   rows=113 (88 classified_by=scheduled, 25 classified_by=model)
+  org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R15_CHECKS/s11_rows_write.py:49 (UPDATED_BY); put_item at :173; NAME:: key branch :122
+Sum: 4303 + 1257 + 113 = 5673.
+
+NOT A WRITER INTO etf-classifications: data/black_diamond/scripts/classification/classify_bd_securities.py:70 (builds NAME::{normalized_name}) and data/black_diamond/scripts/gold/B_01b.classify_new_securities.py:151, E_18.detect_new_securities.py:185 (key builders) write bd-securities / feed plans; all 5673 live rows carry one of the three tags above, none carries a bd-securities tag.
+READERS/skippers only: resolve_tickers.py:227/250/281/339/415, backfill_name_aliases.py:63/69, etf_classification_scheduled.py:416, etf_classifier.py:255.
+
+HOP FINDING (question 3): no hop carries a NAME:: key to the pull label or to gold's join.
+  - etf_positioning_gold.py:668-672 _strip_bbg_security acts on the Bloomberg 'security' column of history/chars/fund_daily (lines 791, 1143, 1158); its tickers come from config/etf_universe.json (line 88, load_universe 402-414).
+  - Live s3://opal-data-etfs/config/etf_universe.json: 4 tickers, 0 contain NAME, a space or a colon.
+  - etf_positioning_gold.py has no DynamoDB / etf-classifications read (no match), so NAME:: rows never reach its join.
+  (A NAME:: key with spaces would be cut at the first space by _strip_bbg_security, but nothing feeds it one.)
