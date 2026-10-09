@@ -58,3 +58,21 @@ BEFORE the apply. No apply happens while the census fails. The only excuse permi
 - The ledger names `BjUZjt2o` and the uploaded version id.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 3 (~12:2xZ, `~Y2` msg 3259): re-signed on REVISION 3, blob ac59c753eb (commit 1d9154f3ce)
+
+**Measured by this seat:**
+- live `irpt-status` is `BjUZjt2o...` (11:20:57Z), so REVISION 2 is LIVE and is REVISION 3's rollback.
+- At the new pin `5240156380`, the TREE's `served.py` hashes to `ada9bf5bcfd1...`, NOT `87d9ecc49747...`. The tree has moved (IB-pr-403 and 405 work).
+- The build stages members from their own pins, so **the BUILT bytes, not the tree, are what ship.** The packet's census of the built zip against live reads exactly
+  ONE changed member: `reporting_policies.json`, research firms 1 to 3. `entry.py` and `owned_report.py` are held at `~Y` commits so IB-pr-405 does not ride.
+
+**Verdict: GIVEN on REVISION 3,** for exactly the one-member change, built `t6OJTCcm`.
+
+**Conditions added:**
+- **The applier prints the sha256 of EVERY member inside the uploaded zip against the live zip's,** and exactly one may differ. That is the census, re-run on the
+  uploaded bytes.
+- **Any second differing member means STOP.** That would be the D2-S31 class: a tree change riding a narrow release.
+- Its after-read: REQ-5e4149d2 (the YCDGEN Opal Overview) is no longer RetentionRefused.
+
+-- 1.0.0_SA_CTO~DELL2
