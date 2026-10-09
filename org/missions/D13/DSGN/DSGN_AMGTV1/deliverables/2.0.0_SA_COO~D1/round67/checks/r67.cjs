@@ -52,7 +52,16 @@ const G = {
       [{ ticker: '000660', name: 'SK hynix Inc.', ticker_reason: 'This listing has only an exchange number; we have no company match for it yet.', identity: { resolution: 'UNRESOLVED' } }, 'SK hynix Inc.'],
       [{ ticker: '0700', name: 'Tencent Holdings Ltd', security_key: '700_HK_Equity', identity: { resolution: 'MEASURED', security_key: '700_HK_Equity' } }, '700 HK'],
       [{ ticker: 'INTC', name: 'Intel Corporation', display_name: 'Intel Corporation', identity: { resolution: 'MEASURED', security_key: 'INTC_US_Equity' } }, 'INTC US'],
-      [{ ticker: 'XYZ', name: 'Plain Co', display_name: 'Plain Company', identity: null }, 'Plain Company'],
+      // AMENDMENT 2 (the close walk tmp/ui-walk/20261009T151252Z shot 014, and the BA fixture): nearly every served peer is UNRESOLVED
+      // with a good exchange ticker ("DE", "ETN", "INTC"), so an unresolved member keeps its served ticker. Only an all-digit exchange
+      // number or a SEDOL-shaped id (6-7 chars starting B, SEDOL alphabet: digits and consonants, no vowels) prints the name instead.
+      [{ ticker: 'DE', name: 'Deere & Company', identity: { resolution: 'UNRESOLVED', raw_identifier: 'DE' } }, 'DE'],
+      [{ ticker: 'INTC', name: 'Intel Corporation', identity: { resolution: 'UNRESOLVED' } }, 'INTC'],
+      [{ ticker: 'XYZ', name: 'Plain Co', display_name: 'Plain Company', identity: null }, 'XYZ'],
+      [{ ticker: 'B7GJP7', name: 'Zhongji Innolight Co., Ltd.', identity: { resolution: 'UNRESOLVED' } }, 'Zhongji Innolight Co., Ltd.'],
+      [{ ticker: 'BMZNGH', name: 'Hygon Information Technology Co., Ltd.', identity: { resolution: 'UNRESOLVED' } }, 'Hygon Information Technology Co., Ltd.'],
+      [{ ticker: 'BABA', name: 'Alibaba Group', identity: { resolution: 'UNRESOLVED' } }, 'BABA'],
+      [{ ticker: null, name: 'No Ticker Co', identity: { resolution: 'UNRESOLVED' } }, 'No Ticker Co'],
     ];
     for (const [m, want] of cases) {
       let got; try { got = fn(m); } catch (e) { got = 'THREW ' + e.message; }
@@ -104,8 +113,16 @@ push('ONE FORMAT IN THE TABLE', G.oneFormat(read('tabs/PeersTab.tsx')));
   const okPrice = (v, fmt, c) => { const s = v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); return c ? `${c} ${s}` : `${s} currency not stated`; };
   if (G.price(okPrice).length) p.push('the clean price formatter refused');
   if (!G.price((v, fmt, c) => `${c} ${v.toFixed(2)}`).length) p.push('the round-66 price formatter admitted');
-  const okTicker = (m) => { const id = m.identity || {}; const key = m.security_key || id.security_key; return id.resolution === 'MEASURED' && key ? key.replace(/_Equity$/, '').replace(/_/g, ' ') : (m.display_name || m.name); };
-  if (G.ticker(okTicker).length) p.push('the clean ticker rule refused');
+  const okTicker = (m) => {
+    const id = m.identity || {}; const key = m.security_key || id.security_key;
+    if (id.resolution === 'MEASURED' && key) return key.replace(/_Equity$/, '').replace(/_/g, ' ');
+    const t = m.ticker;
+    if (!t || /^\d+$/.test(t) || /^B[0-9BCDFGHJKLMNPQRSTVWXYZ]{5,6}$/.test(t)) return m.display_name || m.name;
+    return t;
+  };
+  if (G.ticker(okTicker).length) p.push('the clean ticker rule refused: ' + G.ticker(okTicker).join('; '));
+  const measuredOnly = (m) => { const id = m.identity || {}; const key = m.security_key || id.security_key; return id.resolution === 'MEASURED' && key ? key.replace(/_Equity$/, '').replace(/_/g, ' ') : (m.display_name || m.name); };
+  if (!G.ticker(measuredOnly).length) p.push('the first round-67 build (MEASURED-or-name, which hid DE/INTC) admitted');
   if (!G.ticker((m) => (/^\d+$/.test(m.ticker) ? m.ticker_reason : m.ticker)).length) p.push('the round-66 ticker rule admitted');
   const okHead = (label, codes) => { const m = String(label).replace(/\s*\([^)]*\)\s*$/, ''); const set = new Set(codes); return set.size === 1 && !set.has(null) ? `${m} (${codes[0]})` : `${m} (local)`; };
   if (G.heading(okHead).length) p.push('the clean heading refused');
