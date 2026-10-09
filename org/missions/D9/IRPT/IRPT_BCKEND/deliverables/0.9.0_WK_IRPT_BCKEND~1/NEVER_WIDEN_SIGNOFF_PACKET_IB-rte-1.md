@@ -126,7 +126,7 @@ test's):** a real `abby_horton` / `49financial` request is refused **`UNPROJECTE
 **before the served/empty-grant branch is ever reached.** Re-measured for EVERY advisor in the
 firm's live ownership map: **0 of 22,646** ownership-map account grants (179 advisors) join the
 live directory even WITH `_ids.projection_for` applied by hand -- the ownership map's raw
-custodian keys (`z0819594401`-shaped) are not the raw key `_ids/raw_keys.json` declares for
+custodian keys (`acct#9bc49501`-shaped) are not the raw key `_ids/raw_keys.json` declares for
 49financial's directory mint (*"the crosswalk's account id, zero-padded to 10 digits"*).
 **And separately: 0 of 13 live `entry.py`/`handler.py`/`dispatch.py` modules in this project ever
 pass `id_projection` to `Enforcer`/`Entry` at all**, so this refusal is not a property of which

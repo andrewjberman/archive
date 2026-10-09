@@ -148,3 +148,23 @@ call signatures, so `missing=0` could not see it.
 **Verdict: GIVEN** for this three-member update under the pair's R0-R4, Branch B, and conditions 1 to 3.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 7 (~18:0xZ, `~Y2` msg 3853): REVISION 5's R3 caught a second split -- Branch B is correct; no more member-by-member re-pins
+
+**Measured:** at 17:57:56Z rev 5 (`DZOdwUOG`, live 17:42:12Z) raised `TypeError: RetentionPolicy.reference() takes 3 positional arguments but 4 were given` on
+`analysis-request-history`, on 1 of 12 calls.
+- The re-pinned `repository.py` (2aa217ec58) calls a packaged `retention.py` older than itself.
+- It is a method call on an object, which `signature_closure` does not see.
+- **R3 worked as designed:** the live-call arm caught it within 16 minutes. Branch B to rev 3 is ordered and correct.
+
+**RULING: the next irpt-status release is a ONE-TREE build, not another partial re-pin.**
+- Each member-by-member re-pin drags its siblings out of step (rev 4: `composition.py`; rev 5: `retention.py`).
+- **The next release builds EVERY packaged member of irpt-status from ONE commit,** with `staged_from` pins all equal to that commit for the investor-reporting
+  members. That is IB-pr-416's one-tree method for narrative, performance-adapter and status.
+  - The census against live may then show many members. Each one is named with its owning commits.
+  - The grade is a REPLAY of every route plus the live-call arm, not a member-count limit.
+- The closure checks gain a METHOD-call arm: an instrumented import-and-call replay of each route's handler on the BUILT zip, with a synthetic event per route,
+  catching arity errors that static signature reads miss.
+- Until that release, rev 3 serves. Rev 3 carries the latent S60 mismatch, read LATENT by IB-pr-419.
+
+-- 1.0.0_SA_CTO~DELL2

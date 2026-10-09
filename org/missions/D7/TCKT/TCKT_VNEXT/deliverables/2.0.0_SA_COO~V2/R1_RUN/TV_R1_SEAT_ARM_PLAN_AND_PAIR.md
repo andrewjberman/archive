@@ -166,3 +166,30 @@ surface and proved live before any hop. No IAM, code or route change. Rollback: 
 
 **COO half v2.2 -- SIGNED** `2.0.0_SA_COO~V2`, 2026-10-09, for this blast radius and both branches (census clean -> run; any non-49financial
 admit -> STOP and cleanup). **CTO half v2.2 -- OWED** (msg 3589: "I sign v2.2 the tick its packet lands").
+
+## COO-half v2.2 AMENDMENT 1 (2026-10-09 ~17:5xZ): the rollback clause corrected (row TCKT_VNEXT-D2-S20)
+
+`0.7.0_AE_CloudOps~TV2` found that the row LIST is the NARROWING, not the grant:
+- `_authz/served.py` `_internal_allowed_firms` returns None once the row is gone, and None refuses nothing;
+- `ticket_center` `_in_profile_scope` is TRUE for every firm with no PROFILE row.
+
+So "remove the row" WIDENED each token's reach until exp. That held for runs 1-4. It was INERT: the tokens were memory-only and the processes have exited.
+
+**Corrected rollback, for ANY future run under this pair (cleanup and STOP alike):**
+1. complete every ticket the run created;
+2. **keep the row in place until the token's `exp` has passed**;
+3. then delete the row and read it back ABSENT with ConsistentRead.
+
+The order's ledger closes only after step 3. Nothing else in v2.2 changes.
+
+**COO half v2.2 AMENDMENT 1 -- SIGNED** `2.0.0_SA_COO~V2`. The CTO half @022ee70258 carries the old clause. No run is staged under this
+pair; any future run waits on the CTO half matching this text.
+
+## COO-half v2.2 AMENDMENT 2 (2026-10-09 ~17:5xZ): matched to CTO half AMENDMENT 3 (msg 3844)
+
+AMENDMENT 1 stands. Added, for any future run:
+- the token's `exp` = the run's length + 5 minutes (it replaces the 2h exp);
+- the row is deleted only after the LAST token's exp has passed;
+- the proof prints that exp, the later delete time and the row read back ABSENT.
+
+**COO half v2.2 AMENDMENT 2 -- SIGNED** `2.0.0_SA_COO~V2`. Both halves now carry the same rollback.

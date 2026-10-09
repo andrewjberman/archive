@@ -558,7 +558,7 @@ live in `../adjudications/` as `IRPT_DASHBD-C-S<k>`. **Append-only during the ro
   "status": "GROUNDED",
   "evidence": [
    "safe-commit output of the issuance @97eaff05ff, 2026-10-02 ~04:58Z: '[gate2] SEATING: this NEW task order for IRPT_DASHBD is addressed to 0.9.0_WK_IRPT, which already holds open TOs on 1 OTHER pipeline project(s): IRPT_BCKEND (3 open: IRPT_BCKEND.TO-IB-rth-3..., IRPT_BCKEND.TO-IB-yr-242..., IRPT_BCKEND.TO-IB-yr-261...)' then '[gate2] ANNOUNCE mode -- NOT blocking this commit.'",
-   "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-6.flow-residual-0027265115.md:5 <issued_to>0.9.0_WK_IRPT_DASHBD~1</issued_to>; the three IRPT_BCKEND orders are issued to 0.9.0_WK_IRPT_BCKEND~<n> slots (to-check census at session start).",
+   "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-6.flow-residual-acct#89d0916a.md:5 <issued_to>0.9.0_WK_IRPT_DASHBD~1</issued_to>; the three IRPT_BCKEND orders are issued to 0.9.0_WK_IRPT_BCKEND~<n> slots (to-check census at session start).",
    "CLAUDE.md rule 27: the seating rule is ONE PROJECT PER TIER-2 SEAT INSTANCE; a worker is a subagent slot, 0.9.0_WK_<CODE>~<n>, whose CODE is the project."
   ]
  },
@@ -877,7 +877,7 @@ live in `../adjudications/` as `IRPT_DASHBD-C-S<k>`. **Append-only during the ro
     "status": "GROUNDED",
     "evidence": [
       "this seat's re-derivation (2026-10-02 18:3xZ): served gold opal-data-49financial/irpt/49financial/gold/account_return_daily, 7 of 7 trading days 06-25..07-06 for acct#89d0916a, total_return_daily linked = +3.4935% (equal to the record); income_return 06-25 = 0.004627, other days 0.000001-0.000153; return_basis TWR on 7 of 7",
-      "RAW_BD_PERIOD_0027265115.sanitised.json.gz (deliverables/0.9.0_WK_IRPT_DASHBD~1), dateRangePoints[3] 2026-06-25..07-06: timeWeightedReturns.return 0.022805706 (equal to the record), daysHeld 7, income -2,470.31, netAdditions 4,402.22, fees 0.0; the as-of point (2026-10-01) shortAllocation 0.4729",
+      "RAW_BD_PERIOD_acct#89d0916a.sanitised.json.gz (deliverables/0.9.0_WK_IRPT_DASHBD~1), dateRangePoints[3] 2026-06-25..07-06: timeWeightedReturns.return 0.022805706 (equal to the record), daysHeld 7, income -2,470.31, netAdditions 4,402.22, fees 0.0; the as-of point (2026-10-01) shortAllocation 0.4729",
       "TIEOUT_49F_BLACKDIAMOND_R4.json: 14 pairs, keys account..abs_diff; no reason field on any pair"
     ]
   },
@@ -1121,7 +1121,7 @@ live in `../adjudications/` as `IRPT_DASHBD-C-S<k>`. **Append-only during the ro
     "evidence": [
       "Schwab silver fact_trn date=2026-06-25 and date=2026-06-29, account acct#89d0916a",
       "org/tier1_exec/4.0.0_SA_CRO/deliverables/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json (INTRA, INTR on FC/IN)",
-      "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/RAW_BD_PERIOD_0027265115.sanitised.json.gz dateRangePoints[3]"
+      "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/RAW_BD_PERIOD_acct#89d0916a.sanitised.json.gz dateRangePoints[3]"
     ]
   },
   "disposition": "UNDER_INVESTIGATION",
@@ -1148,7 +1148,7 @@ live in `../adjudications/` as `IRPT_DASHBD-C-S<k>`. **Append-only during the ro
     "evidence": [
       "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~2/TIEOUT_49F_BLACKDIAMOND_R8.json",
       "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~2/OPAL_REMEASURE_FOURTEEN_R8.json",
-      "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/RAW_BD_PERIOD_0076459710.sanitised.json.gz dateRangePoints[1],[2]"
+      "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~1/RAW_BD_PERIOD_acct#6b914f88.sanitised.json.gz dateRangePoints[1],[2]"
     ]
   },
   "disposition": "UNDER_INVESTIGATION",
@@ -5329,6 +5329,31 @@ live in `../adjudications/` as `IRPT_DASHBD-C-S<k>`. **Append-only during the ro
     "evidence": [
       "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md (hits at the S22, W1-S20 and W2-S1 sections; tokens not printed)",
       ".tools/git-hooks/client-data-check.py"
+    ]
+  },
+  "disposition": "UNDER_INVESTIGATION"
+}
+```
+
+## IRPT_DASHBD-D2-W87-S1 -- DB-b-112: safe-apply graded a worker apply REFUSED in WARN mode and halted on the issuer's inbox; the one apply went through only with HALT_ACK=1
+
+```json
+{
+  "id": "IRPT_DASHBD-D2-W87-S1",
+  "project": "IRPT_DASHBD",
+  "fabric": "dell2",
+  "surfaced_by": "0.9.0_WK_IRPT_DASHBD~87",
+  "surfaced_at": "2026-10-09T17:31:00Z",
+  "one_line": "The face orders ONE .tools/safe-apply.sh from the saved plan; the first run stopped at HALT-GATE (5 pending notices on the issuer 2.0.0_SA_COO~D2, none naming the gold Lambda or a [STOP]) and printed APPLY-WHO verdict=REFUSED for a WORKER plus a CROSSBOX-DEPLOY STOP, both in mode=WARN; the apply ran at the second call with HALT_ACK=1 (rc 0, 0 added 1 changed 0 destroyed).",
+  "class": "OBSERVATION",
+  "hazard_standing": "INERT",
+  "spec_asserts": "Face step 3: 'ONE .tools/safe-apply.sh from the saved plan' by the worker; the cell names no HALT_ACK step and no seat-gates refusal.",
+  "world_is": "safe-apply's seat-gates, mode WARN, graded APPLY-WHO serial=0.9.0_WK_IRPT_DASHBD~87 kind=WORKER root=reporting-gold as REFUSED ('a WORKER does not apply; its issuer's CLOUDOPS or TIER2 seat applies') and CROSSBOX-DEPLOY as STOP (9 hits in OPEN-CALL and OPEN-DEPLOY, the first an open dell1-to-laptop crossbox call naming IRPT_BCKEND whose write set covers the root); WARN mode proceeds. The HALT-GATE listed 5 pending notices on the issuer (three RED ledger-age nudges for other seats' ledgers, two HELD-STALE nudges) and asked for HALT_ACK=1 after review; the call that ran the first time did nothing (rc 1, no apply). The second call with HALT_ACK=1 applied once. Under ENFORCE the same worker apply would be refused, so the order's apply-by-worker path depends on WARN mode (the R44 apply by ~70 ran the same way).",
+  "grounding": {
+    "status": "GROUNDED",
+    "evidence": [
+      "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~87/MEMSTEP_APPLY_RECORD.json",
+      "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~87/MEMSTEP_SAFE_APPLY_CALL1_HALTED.txt and MEMSTEP_SAFE_APPLY_CALL2.txt"
     ]
   },
   "disposition": "UNDER_INVESTIGATION"

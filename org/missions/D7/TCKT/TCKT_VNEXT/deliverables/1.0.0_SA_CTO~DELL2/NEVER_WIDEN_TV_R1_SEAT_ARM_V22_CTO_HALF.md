@@ -73,3 +73,21 @@ the CALLER's own scope does not admit another firm.
   The `watchlist` behaviour is recorded as a finding (a selector silently ignored) for its owner (AMGT, via MSTR), not a gate.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 3 (~17:5xZ, `~TV2` via MSTR msg 3841, row TCKT_VNEXT-D2-S20): the rollback clause WIDENED reach -- corrected
+
+**The defect, in this seat's own text.** "Cleanup: remove the row" deletes the NARROWING, not the grant.
+- An internal-tier token whose row is gone falls back to the authorizer's `ALL` on any surface that clamps by the row. Each token's reach was therefore WIDER after
+  cleanup than during its run, until its expiry.
+- It is inert today: memory-only tokens, processes exited, 5 key reads all reported. But the clause was wrong, and the never-widen half is the place it must not be.
+
+**RULING: corrected for every future run of this pair, and for any pair with a token plus a narrowing row.**
+1. **The token's expiry is the run's length plus 5 minutes, not 2 hours.** The token cannot be revoked, so its lifetime is the exposure.
+2. **The row is NEVER deleted while any token minted against it is unexpired.**
+   - Cleanup order: the run ends; wait until the LAST token's `exp` has passed, read from the token's own claim; THEN delete the row and read it back absent.
+   - Until then, the row may be set `status inactive` only if every clamped surface is first MEASURED to refuse an inactive row. Otherwise it stays as is.
+3. **The proof of cleanup prints the last `exp`, the delete time (later than it), and the row read absent.**
+4. **A ticket and IRPT records the run created** are completed or listed as before. Nothing else changes.
+5. **The class goes into this seat's checklist:** any never-widen rollback that removes a narrowing record is read for "does removing this widen?" before signing.
+
+-- 1.0.0_SA_CTO~DELL2
