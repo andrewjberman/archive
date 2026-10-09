@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-x-2.dell-click-route-receive-run-and-blocked-download",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/task_orders/NFRA_CTLPLN.TO-CT-x-2.dell-click-route-receive-run-and-blocked-download.md",
+    "group": "OTHER",
+    "vintage_commit": "757deb87c2"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CT1",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.thread6.md",
+    "vintage_commit": "fcbd1dc88d",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/task_orders/NFRA_CTLPLN.TO-CT-x-2.dell-click-route-receive-run-and-blocked-download.md"
+  },
+  "controls": {
+    "mutant": {
+      "description": "The negative arm of the CLICK read: the SAME import, with the SAME venv interpreter, run immediately BEFORE the index-free install of the delivered wheel. Without it, 'CLICK 8.3.1' could be a read of the box's own click (dell1 runs 8.5.0) leaking into the environment rather than evidence about the delivered file. A second, independent arm is pip's dist-info provenance: direct_url.json names a file:/// source carrying the signed digest for this install, and reads ABSENT for the box's 8.5.0 (the shape of an index install) -- one instrument, two opposite verdicts. A third arm is the --no-index flag itself, exercised with the wheel absent: it REFUSED with 'Could not find a version that satisfies the requirement click==8.3.1 (from versions: none)', so index-free is really index-free and step 3's requests=0 is not vacuous.",
+      "expected": "before the install the import must FAIL (ModuleNotFoundError: No module named 'click'); after it, and only then, CLICK 8.3.1",
+      "observed": "FIRED AS EXPECTED. Before: ModuleNotFoundError: No module named 'click'. After: CLICK 8.3.1. Provenance arm: direct_url.json url file:///<temp>/x2_pack/click-8.3.1-py3-none-any.whl, archive_info.hash sha256=981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6, equal to the CTO-signed check record's held_sha256; the same file is ABSENT for the box's click 8.5.0. --no-index arm: refused as quoted above.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the act installs ONE artifact pinned by sha256 into a freshly created environment and reads one version string. There is no run-to-run variance to compare. The sha256 of the delivered file was computed twice (once at the Downloads path as delivered, once at the pack copy that was actually installed) and was identical both times, which is the only repeated measurement the act contains.",
+      "observed": "sha256 read twice, identical both times: 981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the genre DEPLOY claim the governing order's <proof_genre>DEPLOY</proof_genre> would permit",
+      "reason": "DELIBERATELY NOT CLAIMED, and the issuer should know why. The schema's DEPLOY branch requires never_widen_pair with a coo_half and a cto_half, 'each half as path@commit'. This cell moves NO served output and ran under NO never-widen sign-off, so no such pair exists. Writing one would fabricate a sign-off that nobody gave -- strictly worse than declining the genre. This instance is therefore genre BUILD, whose {mutant, determinism} controls the evidence actually fits (the mutant's job is done by the before/after isolation arm). If the issuer wants the DEPLOY genre recorded, the order's proof_genre or the schema's DEPLOY requirements need to meet somewhere, and that is the issuer's and the schema owner's call, not this seat's."
+    },
+    {
+      "item": "the receiving tool's own receipt (intake_receive.py verify / prove)",
+      "reason": "Both REFUSE the delivery: the wheel arrived LOOSE and a pack requires <name>, <name>.check.json, <name>.delivery.txt and MANIFEST.json. Captured verbatim in the receive file, rc=1 and ok=False on both verbs. No MANIFEST was authored on the receiver to force a pass, because the MANIFEST is the SENDING machine's attestation and a receiver-written one would verify the receiver's own copy against its own hashes -- a circular pass indistinguishable in the record from a real receipt. Row NFRA_CTLPLN-D1-S5."
+    },
+    {
+      "item": "dell1's own interpreter, and every other package on it",
+      "reason": "AMENDMENT 1 forbids installing into the box interpreter (it would downgrade click 8.5.0 to 8.3.1 and unsatisfy huggingface_hub's core requirement click>=8.4.2,<9.0.0). The install was confined to a throwaway venv, deleted after this proof was written; the box still reports click 8.5.0, verified after cleanup. Row NFRA_CTLPLN-D1-S3."
+    },
+    {
+      "item": "what click does at run time beyond the single import",
+      "reason": "The order's comp-adversary line declares this BLIND. One import and one version read; no click-driven program was exercised. The requesting lane had no command to run (see CTx2-AC2)."
+    },
+    {
+      "item": "every egress channel other than pip-over-https to pypi.org, and every box other than dell1",
+      "reason": "Step 4 exercised one protocol path on one host once. It does not establish that all egress is open on dell1, nor anything about the other boxes. Rows NFRA_CTLPLN-D1-S1 and NFRA_CTLPLN-D1-S2."
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A RECORD, not code: deployed to no runtime, and the acts it records touched only a throwaway venv that is deleted (dell1's own interpreter is unchanged and still reports click 8.5.0). Contents, steps 1-3 in order: the verify refusal (INTAKE-VERIFY ok=False), the prove refusal (INTAKE-PROVE refused=1 ok=False), the index-free venv install (Successfully installed click-8.3.1) with its dist-info provenance, the requesting-lane determination with step 2's command and output (CLICK 8.3.1), and the whole-line DOWNLOADS-TODAY requests=0."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.blocked-download.txt",
+      "kind": "doc",
+      "commit_or_etag": "2008d30670",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A RECORD, not code: committed at 2008d30670 and deployed nowhere; the wheel the recorded run downloaded was deleted the same turn with an absence control printed, and nothing was installed from it. Contents: the verdict line (the bare negative token on its own line), the full pip output showing rc=0 and an 11 kB wheel saved, the temp-folder denominator of 3 entries, the targeted delete plus its test -e CONFIRMED ABSENT control, and the grader-trap section explaining why the expected token is never emitted in the file."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTx2-AC1",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt expect: DOWNLOADS-TODAY requests=0",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt",
+      "output_evidence": "the file carries, on its own whole line, 'DOWNLOADS-TODAY requests=0'. It is derived from the install's verbose log: 'verbose log lines total: 4', 'lines carrying http(s)://: 0'. The file also records the honest limit on that count -- 0 of 4 log lines is a thin denominator, because a local-wheel install barely logs -- and names the two independent readings that carry the conclusion instead: --no-index was passed and was separately proved to REFUSE on this box with the wheel absent, and the installed dist's direct_url.json names a file:/// source carrying the CTO-signed digest.",
+      "denominator": "4 verbose log lines scanned for http(s)://, 0 matched; corroborated by 2 independent readings (the --no-index negative control, and dist-info provenance)",
+      "status": "PASS",
+      "expect": "DOWNLOADS-TODAY requests=0"
+    },
+    {
+      "criterion_id": "CTx2-AC2",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt expect: CLICK 8.3.1",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt",
+      "output_evidence": "the file carries 'CLICK 8.3.1', the output of the import run with the VENV interpreter after the index-free install, preceded by click's own DeprecationWarning about __version__ (the package's text, not a failure). AMENDMENT 1 moved this criterion's invocation from a live import to this file, because the venv is deleted after the proof is written. The mutant control establishes the line is evidence about the delivered wheel and not about the box: the same import in the same interpreter raised ModuleNotFoundError immediately before the install. THE LANE'S COMMAND WAS NOT FOUND, and the order's fallback was used: the batch file's row 2 names click as being for 'both Dells (the one closure member the Python 3.12 kit could not re-pack: an editable install on the laptop)', so the requester is the Python 3.12 kit CLOSURE, not a seat lane carrying an ordinary command.",
+      "denominator": "1 import, 1 interpreter (the venv's, created with no system site packages), measured twice -- before and after the install",
+      "status": "PASS",
+      "expect": "CLICK 8.3.1"
+    },
+    {
+      "criterion_id": "CTx2-AC3",
+      "criterion_verbatim": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.blocked-download.txt expect: BLOCKED <what stopped it>",
+      "method": "command",
+      "invocation": "cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.blocked-download.txt",
+      "output_evidence": "the file's verdict line is the bare negative token on its own line. The download SUCCEEDED: 'python -m pip download --no-deps -d <temp> six==1.16.0 --index-url https://pypi.org/simple' returned rc=0 and saved an 11 kB wheel. Nothing stopped the request -- no proxy refusal, no DNS failure, no reset, no index restriction -- so nothing named the laptop route either. The wheel and its folder were deleted the same turn with a test -e absence control printed, and nothing was installed. The expected token does not occur in the file, and the file deliberately never emits that byte sequence even while discussing it.",
+      "denominator": "1 host (dell1), 1 protocol path (pip over https to pypi.org), 1 package, 1 run; 3 temp-folder entries after the run, of which 1 was a real wheel",
+      "status": "FAIL",
+      "status_reason": "The world did not comply, and the order says this failure IS the finding: 'a NOT-BLOCKED line fails the criterion, and that failure is the finding', reaffirmed in AMENDMENT 1 ('Step 4 stands as written: it has already run, and it is NOT-BLOCKED (row D1-S1). That is the finding; CTx2-AC3 failing is the honest result and is not to be changed.'). The cell executed exactly as written; dell1 is simply not stopped from downloading from the public internet, so FWD-18 is not met on this box. Filed as row NFRA_CTLPLN-D1-S1. A GRADER TRAP worth naming: the expected token is a SUBSTRING of the negative verdict token, so a naive substring or grep match would report this criterion as PASS on the very output that proves it failed. The deliverable is written to defeat that (bare verdict token on its own line; the expected byte sequence never emitted anywhere in the file), and a grader should anchor at line start and require the whole line.",
+      "expect": "BLOCKED "
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-D1-S1",
+    "NFRA_CTLPLN-D1-S2",
+    "NFRA_CTLPLN-D1-S3",
+    "NFRA_CTLPLN-D1-S4",
+    "NFRA_CTLPLN-D1-S5"
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CT1/logs/2026-10-09/startup_0655-0730Z_ct1_seating_zero_orders_held.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'click-8.3.1*' --limit 10",
+      "result": "2 hit(s) across 80216 file(s): the laptop's .check.json and .fetch.json only -- established the wheel had NOT arrived, before the crossbox message named its path"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find '\"id\": \"NFRA_CTLPLN-D1-S' org --limit 10",
+      "result": "MEASURED zero across 53694 files -- established these are the project's first D1-coordinate rows, so S1 was the free index"
+    },
+    {
+      "tool": "intake_receive.py",
+      "invocation": "AGENTBUS_DEVICE=dell1 python org/devices/intake/intake_receive.py verify --from <pack>; then prove --from <pack> --scratch <new dir>",
+      "result": "BOTH REFUSED, rc=1: 'PACK-DEFECT: MANIFEST.json absent'; INTAKE-VERIFY wheels=1 verified=0 checked=0 stray=2 ok=False; INTAKE-PROVE wheels=1 installed=0 imported=0 refused=1 ok=False -- the route's receiving half could not be exercised on a loose delivery (row NFRA_CTLPLN-D1-S5)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> CTx2-AC1,CTx2-AC2,CTx2-AC3 --governing-order <the order>",
+      "result": "used iteratively; a first draft claimed genre DEPLOY and was refused for, among other things, a missing never_widen_pair -- which this cell genuinely does not have, so the genre was dropped rather than the pair invented (see declared_exclusions)"
+    }
+  ]
+}
