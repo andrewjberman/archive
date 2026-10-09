@@ -182,7 +182,7 @@ def ac_6_2(root, cid):
 def ac_1_1(root, cid):
     """AB-e-1: five probes recorded with a status and a class each; the ledger named in the record is closed."""
     try:
-        rec = _load(root, D + "/0.7.0_AE_CloudOps~DELL2/AB_E1_PROBES.json")
+        rec = _load(root, D + "/0.7.0_AE_CloudOps~AB2/AB_E1_PROBES.json")
     except Exception as exc:  # noqa: BLE001
         return _fail(cid, "%s: %s" % (type(exc).__name__, exc))
     probes = rec.get("probes") or []
