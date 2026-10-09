@@ -3,6 +3,10 @@
 
     python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_audit_in_commit.py
 
+ADJUSTED BY BF-y-2 (the arms the binding legitimately changes): C2 now expects msg_sha256 = the sha256 of the message file the arm
+wrote (was empty); C9 and C10 hand the gate the message (--message-file) and their hand-written row carries that message's hash
+(the control is unchanged: row on disk only -> IGNORED; the same row staged -> OVERRIDDEN). Every other arm is unchanged.
+
 WHAT RUNS. The way exercise_override.py (BF-x-4) runs, and nothing in the repository is written. Each arm builds its own temporary
 git repository (outside the repository) from byte copies of .tools/naming-gate.py, .tools/naming-apply-gate.py, lib/*.py
 (lib/opal_naming_rootcheck.py replaced by the BF-x-3 recorder: FIX for the hand-built name "irpt-directory-newjob", RIGHT for any
@@ -18,7 +22,7 @@ touched. The commits are READ BACK: `git show --stat` and the blob at the landed
 ARMS (placement switch PRESENT in the temporary tree, the older switch ABSENT):
   C1  override line, a name the canon cannot place       -> lands; `git show --stat` of the landed commit lists the audit file AND
                                                            the .tf; the committed file = the seed row + exactly one new row
-  C2  the row's shape as built                           -> keys utc, author, id, reason, names, msg_sha256 (empty); names holds the name
+  C2  the row's shape as built                           -> keys utc, author, id, reason, names, msg_sha256 (sha256 of the message); names holds the name
   C3  C1's id against the gate's OVERRIDDEN line         -> the output carries `NAMING OVERRIDDEN` and `OVERRIDDEN (audited, id <the row's id>)`
   C4  C1's tree afterwards                               -> the audit file on disk = the committed blob (clean); no .log file written
   C5  the SAME name, NO override line (difference control) -> refused (rc=1), nothing lands, the audit file's disk, index and HEAD bytes
@@ -113,8 +117,9 @@ def commit_limb(t, names, message, older_on, place_on=True):
     return rc, out
 
 
-def gate_direct(t, name, env):
-    """Run the gate itself over the staged .tf addition (no safe-commit). (rc, text)."""
+def gate_direct(t, name, env, message=None):
+    """Run the gate itself over the staged .tf addition (no safe-commit). `message` (BF-y-2): the text handed as --message-file.
+    (rc, text)."""
     sw.set_switch(t, "naming-gate.enforce", False)
     sw.set_switch(t, "naming-place.enforce", True)
     sw.write(os.path.join(t, TF_REL), BASE_TF + BLOCK % name)
@@ -128,8 +133,13 @@ def gate_direct(t, name, env):
     e["OPAL_AGENT_SERIAL"] = AUTHOR
     e["STUB_REC"] = os.path.join(t, "stub.rec")
     e.update(env)
-    p = subprocess.run([sys.executable, os.path.join(t, ".tools", "naming-gate.py"), "--diff", dfile, "--post-from-index"],
-                       cwd=t, env=e, capture_output=True)
+    cmd = [sys.executable, os.path.join(t, ".tools", "naming-gate.py"), "--diff", dfile, "--post-from-index"]
+    if message is not None:
+        mfile = os.path.join(t, "gate.msg")
+        with open(mfile, "wb") as fh:
+            fh.write(message.encode("utf-8"))
+        cmd += ["--message-file", mfile]
+    p = subprocess.run(cmd, cwd=t, env=e, capture_output=True)
     return p.returncode, p.stdout.decode("utf-8", "replace") + p.stderr.decode("utf-8", "replace")
 
 
@@ -193,9 +203,11 @@ def main():
             landing_real and rc == 0 and "LANDED" in out and head1 != head0 and AUDIT_REL in stat1 and TF_REL in stat1
             and len(rows1) == 2 and rows1[0] is not None and rows1[0].get("id") == "seed-id" and rows1[1] is not None)
         row = rows1[1] if len(rows1) == 2 and rows1[1] else {}
-        arm("C2 the row's shape as built", "keys %s in that order; msg_sha256 empty; names holds %s; author %s" % (KEYS, BAD_NAME, AUTHOR),
+        want_sha = hashlib.sha256((base_msg + line).encode("utf-8")).hexdigest()
+        arm("C2 the row's shape as built (BF-y-2: msg_sha256 = sha256 of the message file)",
+            "keys %s in that order; msg_sha256 = %s; names holds %s; author %s" % (KEYS, want_sha, BAD_NAME, AUTHOR),
             "keys %s; msg_sha256=%r; names=%r; author=%r" % (list(row.keys()), row.get("msg_sha256"), row.get("names"), row.get("author")),
-            list(row.keys()) == KEYS and row.get("msg_sha256") == "" and row.get("names") == [BAD_NAME]
+            list(row.keys()) == KEYS and row.get("msg_sha256") == want_sha and row.get("names") == [BAD_NAME]
             and row.get("author") == AUTHOR and row.get("reason") == REASON and str(row.get("utc", "")).endswith("Z"))
         rid = row.get("id", "")
         arm("C3 the row's id against the gate's OVERRIDDEN line",
@@ -264,12 +276,14 @@ def main():
         # ---- C9 / C10: the gate reads the index
         t = seeded_tree(td, "t6")
         now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        hand = json.dumps({"utc": now, "author": AUTHOR, "id": "hand-row", "reason": REASON, "names": [BAD_NAME], "msg_sha256": ""},
+        hand_msg = base_msg + line
+        hand = json.dumps({"utc": now, "author": AUTHOR, "id": "hand-row", "reason": REASON, "names": [BAD_NAME],
+                           "msg_sha256": hashlib.sha256(hand_msg.encode("utf-8")).hexdigest()},
                           separators=(",", ":")) + "\n"
         p = os.path.join(t, *AUDIT_REL.split("/"))
         with open(p, "a", encoding="utf-8", newline="\n") as fh:
             fh.write(hand)
-        rc9, out9 = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "hand-row"})
+        rc9, out9 = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "hand-row"}, hand_msg)
         arm("C9 the gate directly: the row is on disk and not staged", "rc=1, IGNORED 'no audit row has id' (the index copy holds the seed only), NAMING-PLACE line",
             "rc=%d, IGNORED %s, no-row-in-index %s, NAMING-PLACE %s" % (
                 rc9, "printed" if "NAMING-PLACE-OVERRIDE: IGNORED" in out9 else "absent",
@@ -278,7 +292,7 @@ def main():
             rc9 == 1 and "NAMING-PLACE-OVERRIDE: IGNORED" in out9 and "no audit row has id hand-row" in out9 and "NAMING-PLACE: REFUSE" in out9)
         # stage the file: the hand row now rides the index copy the gate reads
         gitq(t, "add", "-f", "--", AUDIT_REL)
-        rc10, out10 = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "hand-row"})
+        rc10, out10 = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "hand-row"}, hand_msg)
         arm("C10 the same row once staged (control of C9)", "rc=0, OVERRIDDEN printed",
             "rc=%d, OVERRIDDEN %s" % (rc10, "printed" if "NAMING OVERRIDDEN " in out10 else "absent"),
             rc10 == 0 and "NAMING OVERRIDDEN " in out10)

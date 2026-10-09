@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""exercise_override -- the audited override for the placement step (LGIC_BLANKFIX BF-x-4, row W1-S21), AS ADJUSTED BY BF-y-1.
+"""exercise_override -- the audited override for the placement step (LGIC_BLANKFIX BF-x-4, row W1-S21), AS ADJUSTED BY BF-y-1 AND BF-y-2.
 
     python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~1/exercise_override.py
 
@@ -10,7 +10,13 @@ as it was) WITH THE ARMS THE CELL LEGITIMATELY CHANGES ADJUSTED, each named here
               gate reads the index copy.
   O12         was "naming-place.enforce absent"; the real switch has been PRESENT since 4d2bfc6dfd, so the arm now compares the
               repository's switch file and audit file before and after (this arm failed at the base for that reason, before BF-y-1).
-Every other arm (O2, O3, O4, O6, O8, O9, O10, O11) is unchanged.
+BF-y-2 (the override is bound to the commit message; the 600 s window is retired) adjusts three more arms, named:
+  O7          was "a fresh row passes, an hour-old row is IGNORED". The age window no longer exists, so the arm is now: a row whose
+              msg_sha256 is the handed message's hash passes (also when an hour old); a FORGED row -- valid-looking, fresh, a
+              different message's hash -- is IGNORED. The control is the same row text with only the hash changed.
+  O6, O8      the gate is now handed the message (--message-file) as safe-commit.sh hands it; O8's row carries the right hash and a
+              different name, so it still fails for the reason the arm names (the row covers only what it lists).
+Every other arm (O2, O3, O4, O9, O10, O11) is unchanged.
 
 WHAT RUNS. The same way exercise_switch_on.py (BF-x-3) runs: nothing in the repository is run in place and nothing is written in
 it. One temporary tree (outside the repository) holds byte copies of .tools/naming-gate.py, .tools/naming-apply-gate.py, lib/*.py
@@ -28,7 +34,7 @@ ARMS (placement switch PRESENT in the temporary tree, older switch ABSENT, unles
   O4  NAMING_PLACE_OVERRIDE set by hand to an id with no row      -> blocked (the commit limb), no audit line
   O5  NAMING_PLACE_OVERRIDE set by hand to O1's REAL, fresh id    -> blocked (safe-commit unsets any inherited value; it is the only setter)
   O6  the gate run directly with a hand-set variable              -> rc=1, `NAMING-PLACE-OVERRIDE: IGNORED`, the refusal stands
-  O7  the gate run directly with an audit row older than the window -> rc=1, IGNORED (control of O1's pass: same row, fresh)
+  O7  the gate run directly: the right-hash row (fresh, then an hour old) passes; a FORGED row (another message's hash) -> rc=1, IGNORED
   O8  the gate run directly with a fresh audit row that names a different name -> rc=1 (the row covers only what it lists)
   O9  override line, placement switch ABSENT                      -> passes, and NO audit line (nothing was refused)
   O10 override line, an older-limb REFUSE, older switch ON        -> blocked by the older limb (the override is not for it)
@@ -113,8 +119,9 @@ def commit_limb(t, name, message, older_on, place_on, extra_env=None):
     return rc, out
 
 
-def gate_direct(t, name, env):
-    """Run the gate itself over a staged addition (no safe-commit), with `env` added. (rc, text)."""
+def gate_direct(t, name, env, message=None):
+    """Run the gate itself over a staged addition (no safe-commit), with `env` added and `message` handed as --message-file
+    (BF-y-2; None hands none). (rc, text)."""
     sw.set_switch(t, "naming-gate.enforce", False)
     sw.set_switch(t, "naming-place.enforce", True)
     stage(t, name)
@@ -127,16 +134,22 @@ def gate_direct(t, name, env):
     e["OPAL_AGENT_SERIAL"] = AUTHOR
     e["STUB_REC"] = os.path.join(t, "stub.rec")
     e.update(env)
-    p = subprocess.run([sys.executable, os.path.join(t, ".tools", "naming-gate.py"), "--diff", dfile, "--post-from-index"],
-                       cwd=t, env=e, capture_output=True)
+    cmd = [sys.executable, os.path.join(t, ".tools", "naming-gate.py"), "--diff", dfile, "--post-from-index"]
+    if message is not None:
+        mfile = os.path.join(t, "gate.msg")
+        with open(mfile, "wb") as fh:
+            fh.write(message.encode("utf-8"))
+        cmd += ["--message-file", mfile]
+    p = subprocess.run(cmd, cwd=t, env=e, capture_output=True)
     unstage(t)
     return p.returncode, p.stdout.decode("utf-8", "replace") + p.stderr.decode("utf-8", "replace")
 
 
-def write_audit(t, ident, when, reason, names):
-    """Append one JSON audit row and STAGE the file (the gate reads the index copy)."""
+def write_audit(t, ident, when, reason, names, message=""):
+    """Append one JSON audit row (msg_sha256 = sha256 of `message`, empty when none) and STAGE the file (the gate reads the index copy)."""
     line = json.dumps({"utc": when.strftime("%Y-%m-%dT%H:%M:%SZ"), "author": AUTHOR, "id": ident, "reason": reason,
-                       "names": [n for n in names.split(",") if n], "msg_sha256": ""}, separators=(",", ":")) + "\n"
+                       "names": [n for n in names.split(",") if n],
+                       "msg_sha256": hashlib.sha256(message.encode("utf-8")).hexdigest() if message else ""}, separators=(",", ":")) + "\n"
     p = os.path.join(t, AUDIT_REL)
     os.makedirs(os.path.dirname(p), exist_ok=True)
     with open(p, "a", encoding="utf-8", newline="\n") as fh:
@@ -202,25 +215,32 @@ def main():
             rc == 1 and "REACHED-END" not in out and len(audit_lines(t)) == n_before and bool(o1_id))
         # O6: gate direct, hand-set variable, no row
         reset_audit(t)
-        rc, out = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "forged-by-hand"})
+        rc, out = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "forged-by-hand"}, base_msg + line)
         arm("O6 the gate directly, variable set by hand", "rc=1, IGNORED printed, NAMING-PLACE line",
             "rc=%d, IGNORED %s, NAMING-PLACE %s" % (rc, "printed" if "NAMING-PLACE-OVERRIDE: IGNORED" in out else "absent",
                                                   "printed" if "NAMING-PLACE: REFUSE" in out else "absent"),
             rc == 1 and "NAMING-PLACE-OVERRIDE: IGNORED" in out and "NAMING-PLACE: REFUSE" in out)
         # O7: a fresh row passes the gate directly (the control), an old one does not
         now = datetime.datetime.now(datetime.timezone.utc)
-        write_audit(t, "fresh", now, REASON, BAD_NAME)
-        rc_f, out_f = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "fresh"})
-        write_audit(t, "old", now - datetime.timedelta(seconds=3600), REASON, BAD_NAME)
-        rc, out = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "old"})
-        arm("O7 the gate directly: the same audit row fresh, then an hour old", "fresh rc=0 OVERRIDDEN; old rc=1 IGNORED",
-            "fresh rc=%d %s; old rc=%d %s" % (rc_f, "OVERRIDDEN" if "NAMING OVERRIDDEN " in out_f else "no OVERRIDDEN", rc,
-                                              "IGNORED" if "NAMING-PLACE-OVERRIDE: IGNORED" in out else "not ignored"),
-            rc_f == 0 and "NAMING OVERRIDDEN " in out_f and rc == 1 and "NAMING-PLACE-OVERRIDE: IGNORED" in out)
+        msg7 = base_msg + line
+        write_audit(t, "fresh", now, REASON, BAD_NAME, msg7)
+        rc_f, out_f = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "fresh"}, msg7)
+        write_audit(t, "old", now - datetime.timedelta(seconds=3600), REASON, BAD_NAME, msg7)
+        rc_o, out_o = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "old"}, msg7)
+        write_audit(t, "forged", now, REASON, BAD_NAME, "build(x): ANOTHER commit\n\n" + line)
+        rc, out = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "forged"}, msg7)
+        arm("O7 the gate directly: the right-hash row fresh and an hour old, then a FORGED row (another message's hash)",
+            "fresh rc=0 OVERRIDDEN; hour-old rc=0 OVERRIDDEN (window retired); forged rc=1 IGNORED 'bound to a different message'",
+            "fresh rc=%d %s; hour-old rc=%d %s; forged rc=%d %s" % (
+                rc_f, "OVERRIDDEN" if "NAMING OVERRIDDEN " in out_f else "no OVERRIDDEN",
+                rc_o, "OVERRIDDEN" if "NAMING OVERRIDDEN " in out_o else "no OVERRIDDEN", rc,
+                "IGNORED" if "NAMING-PLACE-OVERRIDE: IGNORED" in out and "bound to a different message" in out else "not ignored"),
+            rc_f == 0 and "NAMING OVERRIDDEN " in out_f and rc_o == 0 and "NAMING OVERRIDDEN " in out_o and rc == 1
+            and "NAMING-PLACE-OVERRIDE: IGNORED" in out and "bound to a different message" in out)
         # O8: fresh row for a different name
-        write_audit(t, "other", now, REASON, "some-other-name")
-        rc, out = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "other"})
-        arm("O8 the gate directly: a fresh row that lists a different name", "rc=1 blocked, NAMING-PLACE line",
+        write_audit(t, "other", now, REASON, "some-other-name", msg7)
+        rc, out = gate_direct(t, BAD_NAME, {"NAMING_PLACE_OVERRIDE": "other"}, msg7)
+        arm("O8 the gate directly: a right-hash row that lists a different name", "rc=1 blocked, NAMING-PLACE line",
             "rc=%d, NAMING-PLACE %s" % (rc, "printed" if "NAMING-PLACE: REFUSE" in out else "absent"),
             rc == 1 and "NAMING-PLACE: REFUSE" in out)
         # O9: switch absent, line present
