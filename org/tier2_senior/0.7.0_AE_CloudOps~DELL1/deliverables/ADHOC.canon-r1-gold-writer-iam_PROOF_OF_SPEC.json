@@ -1,0 +1,191 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "ADHOC.canon-r1-gold-writer-iam",
+  "firm": "MDPF",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/task_orders/ADHOC.canon-r1-gold-writer-iam.md",
+    "group": "OTHER",
+    "vintage_commit": "1b6307da22"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DELL1",
+  "never_widen_pair": {
+    "coo_half": "NONE OWED -- the order's own context states it: 'These are new principals with no reader yet, so no served key moves and no never-widen pair is owed. The change is reported after the fact.' The act creates three roles and two policies and moves no object.",
+    "cto_half": "NONE OWED, same line. The governing authorities are instead PRD MDPF_CANON v2.9 CONTRACTS 'the firm gold writer' (CTO ruling (a), msg 2995) and the CVO's L6 condition (msg 3000), both cited in the order's context.",
+    "read_before_first_live_act": "The order was read verbatim at its pin before the first live act, and scope item 1 ('do not edit any file') was honoured: no file in infra/ was touched by this order. The after-the-fact report (scope item 4) was sent to 0.0.0_AB_MSTR~DELL1 at 20261009T193739Z, naming the three roles, their trust, their grants and the gold Lambda's new policy.",
+    "amendment": "NONE. The order was executed as issued; no criterion was re-cut and no scope item was amended."
+  },
+  "risk_class": "WORLD",
+  "rollback": "Every resource in this act is a CREATE, so rollback is a targeted destroy of the same seven addresses and nothing else: terraform destroy -target aws_iam_role_policy.gw_49f -target aws_iam_role_policy.gw_inf -target aws_iam_role_policy.gw_cot -target aws_iam_role_policy.mdpf_gold_writers -target aws_iam_role.gw_49f -target aws_iam_role.gw_inf -target aws_iam_role.gw_cot in infra/aws/terraform/mdpf-pipeline (policies before roles). NOTHING DEPENDS ON THEM YET, which is the order's own reason the change is reported after the fact: the gold Lambda's env (the three GOLD_WRITER_ROLE_ARN_*) was deliberately NOT applied here and rides the later code redeploy, so no running code resolves these ARNs and a destroy strands no caller. The one pre-existing principal this act touched is mdpf-gold-lambda-role, where rollback is delete-role-policy --policy-name mdpf-gold-writer-assume-policy; its other three inline policies (mdpf-gold-scoped, mdpf-gold-taxsma-policy, mdpf-gold-etf-universe-policy) are untouched by that delete and were read live before and after.",
+  "scope": "MDPF_CANON round 1 cell CN-a-1 (built by 0.9.0_WK_MDPF_CANON~1 @1f1360cbfb, drained @c57820d3b9), applied as one targeted IAM apply because the round-1 issuance @155ac2ce67 is closed to new order files. Seven resources created: aws_iam_role.gw_49f / gw_inf / gw_cot (names from module.gw_*_role_name, i.e. name() output -- mdpf-49f-gold-writer-role, mdpf-inf-gold-writer-role, mdpf-cot-gold-writer-role), their three aws_iam_role_policy, and aws_iam_role_policy.mdpf_gold_writers on the pre-existing aws_iam_role.mdpf_gold_lambda. IAM ONLY: no code, no env, no Lambda, no object moved, no bucket policy edited.",
+  "status": "COMPLETE. C1-C6 all PASS. The ledger reads CLOSED with both legs proven and the sentinel unlinked. C4's named invocation could not be exercised from this box (iam:SimulatePrincipalPolicy is denied for any policy source but this seat's own) and was answered with the committed identity-policy evaluator, discriminating in both directions; that substitution is declared here, in the ledger proof, and on surprise row MDPF_CANON-D1-S2.",
+  "go_message": "2.0.0_SA_COO~D1, the order file itself (ADHOC, delivered to this lane's task_orders). The cross-order collision with MDPF_STRATID.TO-APPLY-R2's pending L4 was surfaced to both issuers and both ruled within two minutes: 2.0.0_SA_COO~S1 re-pointed R2's L4 at 55c3cc4642, and 2.0.0_SA_COO~D1 answered 'Do not hold order 2'.",
+  "controls": {
+    "c4_evaluator_discriminates_in_both_directions": {
+      "description": "The substitute evaluator used for C4 is only evidence if it can answer differently for two different keys. So each arm was run with the OPPOSITE key as its control, in separate invocations, and the evaluator prints the matching statements rather than a bare verdict -- an evaluator that answered one way for everything would be indistinguishable from a correct one.",
+      "expected_landed": "target own-firm gold key -> allowed, matched only by GoldWriterPutGet; control own-firm platinum key -> implicitDeny; and in the mirrored run, target the OTHER firm's gold key -> implicitDeny with the own-firm gold key as the allowed control",
+      "expected_not_landed": "both keys returning the same verdict in either run, i.e. DISCRIMINATES: False -- which is exactly what the FIRST negative control attempt produced earlier today on MDPF_HEALGAP (a nonexistent bucket read implicitDeny like the target), and why that control was discarded rather than reported",
+      "observed": "canon_r1_c4_arm1_arm2.out: 'DISCRIMINATES: True (target allowed vs control implicitDeny)' / 'VERDICT: allowed'. canon_r1_c4_arm3.out: 'DISCRIMINATES: True (target implicitDeny vs control allowed)' / 'VERDICT: implicitDeny'. Both arms print the statements that matched, and the allowed arm matched GoldWriterPutGet alone.",
+      "status": "PASS"
+    },
+    "no_lambda_in_the_plan_checked_not_assumed": {
+      "description": "The order forbids touching aws_lambda_function.mdpf_gold, because its env carries the three GOLD_WRITER_ROLE_ARN_* and rides a later redeploy. A -target list is an instruction, not a proof that nothing else moved, so the plan JSON was swept for the resource type instead of inferred from the target flags.",
+      "expected_landed": "zero aws_lambda_function entries anywhere in terraform show -json of the graded planfile, and the gold Lambda's environment unchanged",
+      "expected_not_landed": "any aws_lambda_function resource_change, which would mean the env moved ahead of MDPF_STRATID's word",
+      "observed": "8 resource_changes, 7 create, 1 no-op; the seven creates are exactly the seven addresses the order names; zero aws_lambda_function of any address in the plan.",
+      "status": "PASS"
+    },
+    "names_are_builder_output_not_typed": {
+      "description": "Rule 30 and the order's context both require the role names to be name() output rather than hand-typed. This is the same limb that REFUSED a typed firm name on MDPF_HEALGAP R2-1 earlier today, so it was read rather than assumed.",
+      "expected_landed": "the plan-time naming limb grades these as additions built from the registry and prints PASS, and each live role name equals the module output",
+      "expected_not_landed": "a WARN or REFUSE on any of the three new names, or a live name differing from module.gw_*_role_name",
+      "observed": "'[naming-plan-gate] NAMING-PLAN: PASS 8 graded' -- PASS, not WARN, in contrast to the WARN the same limb gives the pre-existing legacy policy names in this root. The three live roles came back as mdpf-49f-gold-writer-role, mdpf-inf-gold-writer-role, mdpf-cot-gold-writer-role, each equal to its plan after-state.",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "arn:aws:iam::313476888478:role/mdpf-49f-gold-writer-role",
+      "kind": "aws_resource",
+      "commit_or_etag": "c57820d3b9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "get-role after the apply: one trust statement, Effect Allow, Action sts:AssumeRole, Principal AWS arn:aws:iam::313476888478:role/mdpf-gold-lambda-role and nothing else. list-role-policies: exactly one, mdpf-49f-gold-writer-policy. get-role-policy: 2 statements -- GoldWriterPutGet with s3:PutObject and s3:GetObject on arn:aws:s3:::opal-data-49financial/mdpf/49financial/gold/{account_distribution,account_units,aggregate_aua_timeseries,aum_metrics}/*, and GoldWriterListScoped with s3:ListBucket on arn:aws:s3:::opal-data-49financial conditioned StringLike s3:prefix on exactly those four prefixes. No platinum, no state, no wildcard resource, no second firm's bucket, no third statement."
+    },
+    {
+      "path_or_key": "arn:aws:iam::313476888478:role/mdpf-inf-gold-writer-role",
+      "kind": "aws_resource",
+      "commit_or_etag": "c57820d3b9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same three reads, same shape, on its OWN firm only: trust names role/mdpf-gold-lambda-role alone; one inline policy mdpf-inf-gold-writer-policy; Put/Get on arn:aws:s3:::opal-data-inflection/mdpf/inflection/gold/{the four}/* and a ListBucket on arn:aws:s3:::opal-data-inflection conditioned on those four prefixes."
+    },
+    {
+      "path_or_key": "arn:aws:iam::313476888478:role/mdpf-cot-gold-writer-role",
+      "kind": "aws_resource",
+      "commit_or_etag": "c57820d3b9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same three reads, same shape, on its OWN firm only: trust names role/mdpf-gold-lambda-role alone; one inline policy mdpf-cot-gold-writer-policy; Put/Get on arn:aws:s3:::opal-data-cottonwood/mdpf/cottonwood/gold/{the four}/* and a ListBucket on arn:aws:s3:::opal-data-cottonwood conditioned on those four prefixes. The firm name here is module and locals output, not typed -- the same spelling that the naming commit limb refused as a hand-kept carrier on MDPF_HEALGAP R2-1 this morning (row MDPF_HEALGAP-D1-S9)."
+    },
+    {
+      "path_or_key": "arn:aws:iam::313476888478:role/mdpf-gold-lambda-role inline policy mdpf-gold-writer-assume-policy",
+      "kind": "aws_resource",
+      "commit_or_etag": "c57820d3b9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The policy NAME was resolved from the live role rather than assumed from the Terraform address: list-role-policies on mdpf-gold-lambda-role returns four, of which mdpf-gold-writer-assume-policy is the one this act added; the other three (mdpf-gold-scoped, mdpf-gold-taxsma-policy, mdpf-gold-etf-universe-policy) pre-date it, the last two created by this same seat earlier today under MDPF_STRATID.TO-APPLY-W2-a. get-role-policy reads exactly 2 statements: GoldWriterAssumeScopedRoles with sts:AssumeRole on exactly the three gold-writer role ARNs and no fourth, and GoldCompositePutGet with s3:PutObject and s3:GetObject on exactly arn:aws:s3:::opal-data-mdpf/mdpf/global/gold/{account_distribution,account_units,aggregate_aua_timeseries,aum_metrics}/*."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "ROUND 1 GOLD WRITERS: 6 of 6 arms (the source applied is the source graded)",
+      "method": "command",
+      "invocation": "python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round1/checks/r1_iam.py\"",
+      "output_evidence": "'ROUND 1 GOLD WRITERS: 6 of 6 arms', every arm PASS -- including PLANTED, the arm whose job is to refuse platinum, state, wildcard and typed-bucket grants, and ADMITTED, which grades the firm buckets' DenyForeignFirmPrincipals against the name() roles from the source. RUN BEFORE THE APPLY, not after, because the criterion's parenthesis is the whole point: the source graded is the source applied. No file was edited between the grade and the apply (scope item 1), and the applied source is box/dell1 HEAD carrying the drain @c57820d3b9.",
+      "denominator": "6 of 6 arms graded; 0 arms skipped",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "7 to add, 0 to change, 0 to destroy; no aws_lambda_function in the plan",
+      "method": "command",
+      "invocation": "the targeted plan in infra/aws/terraform/mdpf-pipeline on the seven resources of scope item 2",
+      "output_evidence": "'Plan: 7 to add, 0 to change, 0 to destroy', and graded per attribute rather than from that summary line: 8 resource_changes, 7 create, 1 no-op, the seven creates being exactly aws_iam_role.gw_49f / gw_inf / gw_cot, aws_iam_role_policy.gw_49f / gw_inf / gw_cot and aws_iam_role_policy.mdpf_gold_writers. SECOND HALF CHECKED EXPLICITLY: zero aws_lambda_function entries anywhere in the plan, so the gold Lambda's env is untouched and still rides the later code redeploy. ONE PREREQUISITE NOT IN THE ORDER: the first plan failed with seven 'Module not installed' errors because the merge added the module gw_*_role_name blocks after this root was last inited; terraform init -input=false installed them from local disk at ../modules/opal_name and printed 'Reusing previous version of hashicorp/aws from the dependency lock file' plus 'Using previously-installed hashicorp/aws v5.100.0', so NO PROVIDER WAS FETCHED -- an init with zero egress, unlike the dd-4 case earlier today which needed an amendment for a provider fetch. Applied through .tools/safe-apply.sh with the GRADED planfile: 'Apply complete! Resources: 7 added, 0 changed, 0 destroyed', rc=0.",
+      "denominator": "8 resource_changes read; 7 create, 1 no-op, 0 update, 0 delete; 0 aws_lambda_function of any address",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "each trust names role/mdpf-gold-lambda-role only; each policy grants Put/Get on its own firm bucket's mdpf/{firm}/gold/{the four}/* and a ListBucket conditioned on those prefixes, nothing else",
+      "method": "command",
+      "invocation": ".tools/aws iam get-role --role-name mdpf-49f-gold-writer-role (and -inf-, -cot-); .tools/aws iam get-role-policy on each role's one inline policy",
+      "output_evidence": "Every value taken from the LIVE principals, not from the plan or the source. TRUST: each of the three carries exactly ONE statement -- Effect Allow, Action sts:AssumeRole, Principal AWS arn:aws:iam::313476888478:role/mdpf-gold-lambda-role, and nothing else. POLICY: exactly ONE inline policy each, named by the module convention (mdpf-49f-gold-writer-policy, mdpf-inf-gold-writer-policy, mdpf-cot-gold-writer-policy), each with exactly 2 statements. GoldWriterPutGet grants s3:PutObject and s3:GetObject on the four artifacts under its OWN firm bucket and firm scope -- 49f on opal-data-49financial/mdpf/49financial/gold/, inf on opal-data-inflection/mdpf/inflection/gold/, cot on opal-data-cottonwood/mdpf/cottonwood/gold/, each with account_distribution, account_units, aggregate_aua_timeseries and aum_metrics. GoldWriterListScoped grants s3:ListBucket on its own bucket conditioned StringLike s3:prefix on exactly those same four prefixes. THE 'NOTHING ELSE' HALF WAS READ AS A SUBTRACTION, not as a forward list: no platinum, no state, no wildcard resource, no second firm's bucket, no third statement, no second inline policy, no attached managed policy.",
+      "denominator": "3 of 3 roles read live; 3 trust policies, 3 inline policies, 6 statements total, 0 extra statements and 0 extra policies found",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "allowed / implicitDeny / implicitDeny, in that order (its own firm's gold only)",
+      "method": "command",
+      "invocation": "The order's named invocation (.tools/aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::313476888478:role/mdpf-49f-gold-writer-role ...) was RUN AS WRITTEN and REFUSED, so the three arms were read instead with python \"org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/identity_policy_eval.py\" over the role's live identity policy, one arm per invocation with the opposite key as its control.",
+      "output_evidence": "THE NAMED INSTRUMENT IS DENIED TO THIS BOX: iam:SimulatePrincipalPolicy returns AccessDenied for any policy source but this seat's own, the error naming the caller arn:aws:iam::313476888478:user/cloudops-dell1-agent-user and the action; the same action against this seat's OWN ARN returns a verdict, so the refusal is scoped to the policy source rather than the API being unreachable. This is the THIRD WORLD-risk order today blocked at this step (rows MDPF_HEALGAP-D1-S10 / D1-S11, and now MDPF_CANON-D1-S2). THE SUBSTITUTE'S ARMS CAME OUT IN THE ORDER C4 REQUIRES: own-firm gold (opal-data-49financial/mdpf/49financial/gold/aum_metrics/date=2026-10-09/data.parquet) -> allowed, matched ONLY by GoldWriterPutGet; own-firm PLATINUM (.../mdpf/49financial/platinum/aum_metrics/aum-metrics.json) -> implicitDeny, no statement matching, so platinum stays closed; ANOTHER FIRM's gold (opal-data-inflection/mdpf/inflection/gold/aum_metrics/date=2026-10-09/data.parquet) -> implicitDeny, no statement matching, so cross-firm stays closed. DISCRIMINATION PROVEN IN BOTH DIRECTIONS: 'DISCRIMINATES: True (target allowed vs control implicitDeny)' and 'DISCRIMINATES: True (target implicitDeny vs control allowed)', captured at deliverables/canon_r1_c4_arm1_arm2.out and canon_r1_c4_arm3.out. DECLARED LIMIT, so no verdict is read wider than it is: the substitute evaluates IDENTITY-BASED policies only. It did NOT evaluate the firm buckets' live DenyForeignFirmPrincipals bucket policies; the order's context asserts those admit each name() role unedited (FWD-6) and C1's ADMITTED arm graded that from the source before the apply, but this seat did not re-read those bucket policies on the live plane.",
+      "denominator": "3 of 3 arms read, each in its own invocation; 2 of 2 discrimination controls True; 1 named instrument refused, with a positive control proving the refusal is policy-source-scoped",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C5",
+      "criterion_verbatim": "sts:AssumeRole on exactly the three gold-writer role ARNs; Put/Get on arn:aws:s3:::opal-data-mdpf/mdpf/global/gold/{the four}/*",
+      "method": "command",
+      "invocation": ".tools/aws iam get-role-policy --role-name mdpf-gold-lambda-role --policy-name (the live name of aws_iam_role_policy.mdpf_gold_writers)",
+      "output_evidence": "The policy NAME was resolved from the live role rather than assumed from the Terraform address (the criterion itself says 'the live name of aws_iam_role_policy.mdpf_gold_writers'): list-role-policies returns FOUR, of which mdpf-gold-writer-assume-policy is the one this act added; the other three are mdpf-gold-scoped, mdpf-gold-taxsma-policy and mdpf-gold-etf-universe-policy, the last two created by this same seat earlier today under MDPF_STRATID.TO-APPLY-W2-a, so the denominator is printed rather than the new policy being read as the role's only one. It carries exactly 2 statements: GoldWriterAssumeScopedRoles with sts:AssumeRole on exactly the three gold-writer role ARNs and no fourth, and GoldCompositePutGet with s3:PutObject and s3:GetObject on exactly arn:aws:s3:::opal-data-mdpf/mdpf/global/gold/{account_distribution,account_units,aggregate_aua_timeseries,aum_metrics}/*. The composite bucket is opal-data-mdpf, i.e. address() output via the existing local.mdpf_bucket, not the scope_bucket global map entry -- the divergence the worker already filed as MDPF_CANON-D1-W1-S1.",
+      "denominator": "4 inline policies on the role, 1 added by this act and named; 2 of 2 statements read; 3 of 3 AssumeRole ARNs matched with 0 extra",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C6",
+      "criterion_verbatim": "this order's ledger CLOSED, every leg proven",
+      "method": "command",
+      "invocation": "python .tools/deploy_ledger.py check",
+      "output_evidence": "'OK: CLOSED deploy ledger mdpf-canon-r1-gold-writer-iam-dell1-20261009 -- all 2 legs proven; sentinel removed', after 'OK: leg L1 closed. Remaining open: [L2]' and 'OK: leg L2 closed. Remaining open: NONE'. VERIFIED THREE WAYS rather than taken from the close's own sentence: the slug appears 0 times in deploy_ledger.py check; the sentinel org/critical_paths/.open_deploys/mdpf-canon-r1-gold-writer-iam-dell1-20261009.json is unlinked (0 hits); and the entry's own log tail reads '20261009T193725Z CLOSED -- all 2 legs proven'. L1 (activation) carries C2's plan-and-apply proof, L2 (verify) carries C3, C4 and C5.",
+      "denominator": "2 of 2 legs closed with proof; 0 open; 1 sentinel expected gone, 0 found; slug count in check = 0",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "aws_lambda_function.mdpf_gold and its three GOLD_WRITER_ROLE_ARN_* environment variables",
+      "reason": "Excluded by the order's scope item 2 in terms: 'Do NOT target aws_lambda_function.mdpf_gold: its env rides the later code redeploy, which waits on MDPF_STRATID's word.' Checked as a control rather than merely omitted from the -target list -- zero aws_lambda_function entries in the plan."
+    },
+    {
+      "item": "The firm buckets' live DenyForeignFirmPrincipals bucket policies",
+      "reason": "Not read on the live plane by this order. The order's context asserts they admit each name() role unedited because each role is name() output with its firm in the scope slot (FWD-6), and C1's ADMITTED arm grades that from the source; no criterion of this order asks for a live bucket-policy read, and the substitute evaluator used for C4 declares that it evaluates identity-based policies only."
+    },
+    {
+      "item": "Any exercise of the new roles -- no sts:assume-role, no PutObject, no object written or read",
+      "reason": "Nothing reads these roles yet, by design: the gold Lambda cannot assume them until the env lands in the later redeploy. ABSENT is not EXERCISED-AGAINST, so this instance claims only what was read: the policy documents and the evaluator's verdicts, never that a write succeeded."
+    },
+    {
+      "item": "git tag and push of a pipeline version tag (cloud-ops rule 6)",
+      "reason": "Not done by this order. This is a targeted IAM apply inside the mdpf-pipeline root with no file change and no version to bump; the order's scope names the ledger and two reports as its record surfaces and no tag."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-S2 (filed by this seat): C4's named invocation, iam:SimulatePrincipalPolicy, is denied to the dell1 CloudOps principal for every policy source but its own, so C4 was answered with the committed identity_policy_eval.py substitute. INERT; disarm_owner 1.0.0_SA_CTO~DELL1. Third recurrence today; the standing gap stays MDPF_HEALGAP-D1-S11's.",
+    "MDPF_CANON-D1-W1-S1 (the worker's, pre-existing and READ by this order rather than re-filed): the cell names the composite bucket as the scope_bucket global entry, which maps to opal-data-portal-v2, while address('mdpf','global','gold',...) puts it in opal-data-mdpf. The applied source uses local.mdpf_bucket, so the live grant reads opal-data-mdpf -- C5 confirms it on the live plane, which is the measurement that row was waiting for.",
+    "MDPF_CANON-D1-S1 (the issuer's, pre-existing, NOT touched here): three pre-existing failures in data/mdpf/scripts/gold/tests/test_global_fold_flag2.py at box/dell1. No criterion of this order runs those tests and this act changes no Python."
+  ],
+  "forward_notes": [
+    "The three roles exist and nothing assumes them yet. The thread closes only when the gold Lambda's env carries the three GOLD_WRITER_ROLE_ARN_* -- that is ADHOC.canon-r1-gold-redeploy-backfill, this lane's next order, which 2.0.0_SA_COO~S1 unblocked by re-pointing MDPF_STRATID.TO-APPLY-R2's L4 at pin 55c3cc4642.",
+    "An end-to-end exercise of the grant (assume-role plus a real PutObject to one firm's gold prefix, and a refused PutObject to another firm's) is still unexercised. Until then the per-firm isolation is proven from the policy documents and the identity-policy evaluator, never from a write that was attempted and refused.",
+    "The firm buckets' DenyForeignFirmPrincipals policies have not been read live against the three new role ARNs. If a later round wants that, it is one get-bucket-policy per firm bucket plus a principal match -- cheap, and it would close the one declared limit in C4's evidence.",
+    "iam:SimulatePrincipalPolicy for a policy source other than this seat's own is still not granted on dell1 (MDPF_HEALGAP-D1-S11, now also MDPF_CANON-D1-S2). Three WORLD-risk orders today used the substitute. Whoever rules it should note the substitute's limit: identity policies only, no SCP, no bucket policy, no permission boundary."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/2026-10-09/partner_roster_closed_and_r2_deployed_reading_the_gate_before_editing.md",
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open --slug mdpf-canon-r1-gold-writer-iam-dell1-20261009 ... / close-leg --leg L1 --proof ... / close-leg --leg L2 --proof ... / close / check",
+      "result": "PASS -- 2 legs opened at deploy start per NEVER-2, both closed with proof, entry CLOSED 20261009T193725Z and the sentinel unlinked. The proofs were passed from files via command substitution on a file read rather than typed inline, because an earlier order today had a Terraform local interpolation in a proof string read as a shell substitution."
+    },
+    {
+      "tool": "naming-plan-gate (inside safe-apply)",
+      "invocation": ".tools/safe-apply.sh with the graded planfile in infra/aws/terraform/mdpf-pipeline",
+      "result": "PASS 8 graded -- PASS rather than WARN, because every new name here is registry-builder output. The same limb REFUSED a typed firm name on MDPF_HEALGAP R2-1 this morning, which is why its verdict was read here rather than skipped."
+    },
+    {
+      "tool": "identity_policy_eval.py (this seat's committed substitute for the denied simulate API)",
+      "invocation": "python org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/identity_policy_eval.py over the live policy of mdpf-49f-gold-writer-role, one arm per invocation",
+      "result": "PASS -- three arms in C4's required order, DISCRIMINATES True in both directions, matching statements printed rather than a bare verdict, and its limits declared in its own output."
+    },
+    {
+      "tool": "r1_iam.py (the round's own check, the issuer's)",
+      "invocation": "python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round1/checks/r1_iam.py\"",
+      "result": "PASS -- 6 of 6 arms, run BEFORE the apply so that the source graded is the source applied."
+    }
+  ],
+  "regression_reads": {
+    "gold_lambda_untouched": "get-function-configuration on mdpf-gold-lambda was not changed by this act and the plan carried no aws_lambda_function: CodeSha256, env, memory 3008, timeout 900 and runtime python3.11 all stand where the 18:00:35Z MDPF_STRATID R2 deploy left them. The env still lacks the three GOLD_WRITER_ROLE_ARN_*, which is correct and is the next order's work.",
+    "the_roles_other_policies_unmoved": "mdpf-gold-lambda-role's three pre-existing inline policies (mdpf-gold-scoped, mdpf-gold-taxsma-policy, mdpf-gold-etf-universe-policy) were read live after the apply and are unchanged; the act ADDED a fourth rather than replacing any. The denominator is printed because reading the new policy as the role's only one is exactly how a replacement would hide.",
+    "zero_diff_replan": "A targeted re-plan on the same seven addresses after the apply reads no change, so the live principals match the source and nothing drifted between apply and read-back.",
+    "no_object_moved_and_no_bucket_policy_edited": "This act created identities only. No S3 object was written, copied or deleted, no bucket policy was edited, and no served key moved -- the reason the order owes no never-widen pair."
+  }
+}
