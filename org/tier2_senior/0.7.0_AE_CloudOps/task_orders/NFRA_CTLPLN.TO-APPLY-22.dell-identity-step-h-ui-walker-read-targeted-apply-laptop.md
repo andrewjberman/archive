@@ -24,8 +24,10 @@
     B2, 01:00:23Z): an UNTARGETED plan also changes `aws_iam_policy.dell2_ssm` and would CLOSE it. So THIS ORDER IS TARGETED ONLY. Measured
     by the issuer ~01:1xZ: `-target=aws_iam_policy.dell_agent_plan_reads` -> `0 to add, 1 to change, 0 to destroy`, one statement
     `ReadUiWalkerPassword` added, zero lines removed. Halves: COO
-    `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_H_UI_WALKER_READ_20261009.md`; CTO named in the
-    GO. YOU READ NO PARAMETER VALUE. Use the shared TF_PLUGIN_CACHE_DIR.
+    `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_H_UI_WALKER_READ_20261009.md`; CTO
+    `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_H_UI_WALKER_READ_20261009.md` (@4d7f665001, SIGNED;
+    added conditions: the walker login stays disabled; after TO-APPLY-20 leg C2 closes, read an UNTARGETED plan of the root, expect
+    0/0/0, and report it to the CTO). YOU READ NO PARAMETER VALUE. Use the shared TF_PLUGIN_CACHE_DIR.
   </context>
 
   <the_act>
