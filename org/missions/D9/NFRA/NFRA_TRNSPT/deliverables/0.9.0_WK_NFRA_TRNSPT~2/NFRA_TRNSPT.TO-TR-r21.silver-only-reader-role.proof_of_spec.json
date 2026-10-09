@@ -18,9 +18,9 @@
     {
       "path_or_key": "infra/aws/terraform/transcripts/readers.tf",
       "kind": "terraform",
-      "commit_or_etag": "0e7662674a",
+      "commit_or_etag": "881ffaef19",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Plan-only; nothing applied (no terraform plan, no AWS call). Trust admits nobody while var.silver_reader_trust_principal_arns is []. AMENDMENT 1: Deny GetObject+ListBucket on teams/transcripts/silver/research_meeting/*. Not applied."
+      "deploy_evidence": "Plan-only; nothing applied. AMENDMENT 2: trust = ONE Allow on local.silver_reader_trust_arns (var.reader_principal_arns + var.dell_agent_user_names; CTO~DELL2 msg 3248 @374553467d). AMENDMENT 1 research_meeting Deny retained."
     },
     {
       "path_or_key": "infra/aws/terraform/transcripts/main.tf",
@@ -39,9 +39,9 @@
     {
       "path_or_key": "data/transcripts/scripts/tests/test_silver_reader_role.py",
       "kind": "test",
-      "commit_or_etag": "0e7662674a",
+      "commit_or_etag": "881ffaef19",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "5 tests pass (adds test_research_meeting_prefix_denied); negative control: Deny Sid renamed -> 1 failed, 4 passed; restored -> 5 passed."
+      "deploy_evidence": "5 tests pass; negative control: trust Effect flipped to Deny -> 1 failed, 4 passed; restored -> 5 passed."
     }
   ],
   "acceptance": [
@@ -50,8 +50,8 @@
       "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R21_CHECKS/r21_checks.py r21 -- expect: R21-R21-OK",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R21_CHECKS/r21_checks.py r21",
-      "output_evidence": "R21-R21-OK 5 passed in 0.09s\nrc=0",
-      "denominator": "5 of 5 tests passed (adds test_research_meeting_prefix_denied)",
+      "output_evidence": "R21-R21-OK 5 passed in 0.10s\nrc=0",
+      "denominator": "5 of 5 tests passed (trust test now test_trust_is_the_raw_tier_readers)",
       "status": "PASS"
     }
   ],
@@ -72,8 +72,8 @@
   ],
   "controls": {
     "mutant": {
-      "description": "Negative arm: DenyResearchMeetingSilver Sid renamed in readers.tf, restored after.",
-      "expected": "test_research_meeting_prefix_denied fails.",
+      "description": "Negative arm: trust Effect Allow flipped to Deny in readers.tf, restored after.",
+      "expected": "test_trust_is_the_raw_tier_readers fails.",
       "observed": "1 failed, 4 passed; restored, 5 passed.",
       "status": "FIRED-AS-EXPECTED"
     },
