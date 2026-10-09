@@ -4,7 +4,8 @@
                       holdings_snapshot.py moved, by the FWD-14 commits 9af6811b61 + ce6e2a218e (worker ~266)
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
-  IB103-1-AC1  live irpt-narrative CodeSha256 == QiNRKpaCoX5g...; after-reads A1 ledger CLOSED stating pin cabad9008c and that sha256.
+  IB103-1-AC1  live irpt-narrative CodeSha256 == iEwSFL34... (IB-pr-409; AMENDMENT 4); after-reads A1 ledger CLOSED stating pin b8a49eee0e
+               and that sha256.
                Base: FAIL (live == es/S9azu...).
   IB103-1-AC2  A1 replay_rerun_before_ledger: >= 14 arms, all identical/expected-diff, one named no_row_internal_enforcer_scope reading
                identical. Base: FAIL (no A1).
@@ -24,7 +25,9 @@ from pathlib import Path
 D = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/"
 A1 = D + "0.7.0_AE_CloudOps~IB2/IB103-1_narrative_release_after_reads.json"
 W2 = D + "0.9.0_WK_IRPT_BCKEND~266/"
-NARR_BUILT = "QiNRKpaCoX5gIGmt8ypj34l3noLeroXqwWLprr68Pmw="
+# TO-IB-pr-401 AMENDMENTS 3-4: re-pointed to IB-pr-409 (QiNRKpaC, the IB-pr-399 build at pin cabad9008c, is VOID; row D2-S48)
+NARR_BUILT = "iEwSFL34JQJbihTmChB79GkjXwJaEl9WzMJY2sBEs4k="
+NARR_PIN = "b8a49eee0e"
 HS = "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py"
 LIVE_BEFORE = {"49financial": "3Q_W49U7kMa_xO30Q6LQE7QLsFu7ARur", "inflection": "SuRm8tIYq9AKTbRD91SxTJp2Fh80CqCo",
                "cottonwood": "NZIQjid2En9Wbe8kM8ibfsIjxjDWKEoT"}
@@ -59,7 +62,7 @@ def main():
         if got != NARR_BUILT:
             fail("narrative live %r != built" % got)
         led = load(A1).get("ledger") or {}
-        if led.get("state") != "CLOSED" or not str(led.get("pin", "")).startswith("cabad9008c") or led.get("sha256") != NARR_BUILT:
+        if led.get("state") != "CLOSED" or not str(led.get("pin", "")).startswith(NARR_PIN) or led.get("sha256") != NARR_BUILT:
             fail("ledger %r" % led)
         print("OK: narrative live == built; ledger CLOSED with pin + sha256")
     elif cid == "IB103-1-AC2":
