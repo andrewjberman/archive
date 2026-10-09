@@ -1,0 +1,104 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-f-6",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/prd/NFRA_GATSCP_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7cb6183997"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~13",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.round3.md",
+  "vintage_commit": "e19881df2d",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-f-6.continue-refuses-a-partial-commit.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/safe-merge.sh",
+   "kind": "script",
+   "artifact_covered_by": [
+    "GF6-AC1",
+    "GF6-AC2"
+   ],
+   "commit_or_etag": "fe2edcac06",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-13, not pushed; no deploy plane. _verify_staged_carried + exit 7 + header EXIT CODES + one self-test arm (29 of 29)."
+  },
+  {
+   "path_or_key": ".tools/tests/test_safe_merge_continue.py",
+   "kind": "test",
+   "artifact_covered_by": [
+    "GF6-AC1"
+   ],
+   "commit_or_etag": "fe2edcac06",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-13, not pushed. Sparse throwaway linked worktree, removed at the end with its branches."
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_GATSCP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "fe2edcac06",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: row NFRA_GATSCP-D1-W13-S1 appended."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GF6-AC1",
+   "criterion_verbatim": "the full resolution exits 0 with both files committed; the planted partial exits non-zero naming the missing path (the negative arm).",
+   "method": "command",
+   "invocation": "python .tools/tests/test_safe_merge_continue.py",
+   "output_evidence": "PASS a2 --continue exits 0 :: rc=0 | PASS a4 both resolved files and the clean one are in the commit | PASS b2 --continue exits non-zero (7) :: rc=7 | PASS b3 the REFUSED line names the unstaged path :: safe-merge: REFUSED -- the merge commit lacks 1 staged path(s): sm_continue_scratch/c2.txt | PASS c2 keep-ours control rc=0 | PASS cleanup: no scratch branch left\nSM-CONTINUE ok=True cases=14/14",
+   "denominator": "14 of 14 cases (a1-a5, b1-b6, c1-c2, cleanup)",
+   "status": "PASS",
+   "expect": "SM\\-CONTINUE ok=True"
+  },
+  {
+   "criterion_id": "GF6-AC2",
+   "criterion_verbatim": "safe-merge's self-test stays green and the fast lane keeps its tree check (a control).",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_fastlane.py\"",
+   "output_evidence": "PASS fast-lane-runs-scoped-tree-check: function_found=True wired=True\nPASS self-test-green: rc=0\nGS-T3-FASTLANE ok=True arms=2 failed=0\nsafe-merge --self-test: DENOMINATOR: 29 of 29 arm(s) passed / PASS",
+   "denominator": "2 of 2 arms; self-test 29 of 29",
+   "status": "PASS",
+   "expect": "GS\\-T3\\-FASTLANE ok=True"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The planted partial (D1-S5): both conflicts resolved, one resolved path unstaged before --continue; the pre-change script cannot produce rc 7, it exited 0.",
+   "expected": "rc 7, REFUSED line names the unstaged path only",
+   "observed": "rc=7; 'REFUSED -- the merge commit lacks 1 staged path(s): sm_continue_scratch/c2.txt'; commit kept over the old HEAD",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "N/A: the test builds fresh throwaway worktrees (2m23s a run); run once at the pin, plus the keep-ours control arm c",
+   "observed": "single run 14/14",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A driven run of the fast lane's staged-path check",
+   "reason": "The fast lane builds the merge by commit-tree from merge-tree, stages nothing separately and cannot lose a staged path; the order scopes the check to the in-tree and --continue path."
+  },
+  {
+   "item": "Refusing a path reset in both index and working copy",
+   "reason": "Indistinguishable from a keep-ours resolution; row NFRA_GATSCP-D1-W13-S1."
+  }
+ ],
+ "surprises": [
+  "NFRA_GATSCP-D1-W13-S1: lacks-check exempts a keep-ours resolution; a path reset in both index and working copy is not caught",
+  "NFRA_GATSCP-D1-W13-S2: proof-of-spec-check TOOL-ERROR on this worktree's base schema (fixed on box/dell1 at 6b65ca5a52); validated with the fixed schema applied temporarily"
+ ],
+ "session_log": "2026-10-09 ~14:0xZ. Read the two checks and safe-merge. Added _verify_staged_carried (exit 7) after the tree check on the in-tree path, a self-test arm, the header exit code; wrote the sparse-worktree test; AC1 14/14, AC2 ok=True; row W13-S1 filed; committed fe2edcac06.",
+ "compiler_tools": [
+  {
+   "tool": "bash .tools/safe-merge.sh --self-test",
+   "invocation": "bash .tools/safe-merge.sh --self-test",
+   "result": "DENOMINATOR: 29 of 29 arm(s) passed; PASS"
+  }
+ ]
+}
