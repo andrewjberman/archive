@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-x-6",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round9.md",
+    "vintage_commit": "0267c8d4f3",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-x-6.holes-on-new-roots.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "47ef4c98cc"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/check_holes_new_roots.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Copies infra/logic/registry/ to a temporary folder, merges the drafted rows (_cite stripped), validates each row and the merged copy with the registry's own readers, runs the root check over the 15 roots newly mapped at 1e660e15be on the real registry and once on the copy, prints one line per worked root, then NEW-ROOTS-FILL. The registry is never written.",
+      "introduces": [
+        "def main():",
+        "def newly_mapped():"
+      ],
+      "artifact_covered_by": [
+        "BX6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/REGISTRY_ROWS_round9.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Drafted rows for 4.0.0_SA_CRO keyed by registry file: key_rulings.json 9, name_rulings.json 28, each with a _cite; nothing under infra/logic/registry/ is written.",
+      "introduces": [
+        "key_rulings.json",
+        "name_rulings.json"
+      ],
+      "artifact_covered_by": [
+        "BX6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/HOLES_OWNED_round9.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "No OWNED line (no HOLE left on a worked root); records what the none_owed rows wait on, the two JUDGMENT tier calls, and that the 10 H8 NOT-GRADED names are older-root round-8 holes.",
+      "introduces": [
+        "Two JUDGMENT calls"
+      ],
+      "artifact_covered_by": [
+        "BX6-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BX6-AC1",
+      "criterion_verbatim": "BX6-AC1 -- holes on the new roots fall with rows the registry would accept, largest root first.",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/check_holes_new_roots.py",
+      "output_evidence": "NEW-ROOTS-FILL ok=True mapped=78 before=41 after=0 roots_worked=5 rows=37 refused=0 owned_elsewhere=0\nrc=0",
+      "denominator": "41 HOLE lines over the 15 roots newly mapped at 1e660e15be (5 of the 15 carry holes: trade-pipeline 26, imo-pipeline 8, opsec 5, 49f-value-parity 1, estate-report 1; the other 10 carry 0); 41 filled by 37 drafted rows (9 key, 28 name) with 0 refused; roots worked in descending order; estate-wide hole 51 at the base, 10 after (the round-8 H8 NOT-GRADED names on older roots, owner 1.0.0_SA_CTO, not these roots)",
+      "status": "PASS",
+      "expect": "NEW-ROOTS-FILL ok=True"
+    },
+    {
+      "criterion_id": "BX6-AC2",
+      "criterion_verbatim": "BX6-AC2 -- the cadence reader's test holds.",
+      "method": "command",
+      "invocation": "python lib/tests/test_opal_naming_cadence.py",
+      "output_evidence": "CADENCE-TEST ok=True cases=59\nrc=0",
+      "denominator": "59 of 59 cases held; lib/opal_naming_cadence.py and its test are unchanged (no HOLE line of the five worked roots carried a cadence clause)",
+      "status": "PASS",
+      "expect": "CADENCE-TEST ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "check_holes_new_roots.py run from a scratch copy whose rows file had the first drafted key ruling's canonical replaced by bogus/not-a-source/state/x.json.",
+      "expected": "NEW-ROOTS-FILL ok=False refused=1",
+      "observed": "NEW-ROOTS-FILL ok=False mapped=78 before=41 after=1 roots_worked=5 rows=36 refused=1 owned_elsewhere=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the BX6-AC1 invocation run three times at the same bytes",
+      "observed": "NEW-ROOTS-FILL ok=True mapped=78 before=41 after=0 roots_worked=5 rows=37 refused=0 owned_elsewhere=0 every time",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "whether the registry's owner rules each drafted row as drafted",
+      "reason": "the rows are drafts; only 4.0.0_SA_CRO writes infra/logic/registry/. Two tier calls are marked JUDGMENT in the rows' evidence (state for the sentinel allow list and for the estate-report trigger marker)."
+    },
+    {
+      "item": "the 10 H8 NOT-GRADED holes on older roots",
+      "reason": "round-8 list, owner 1.0.0_SA_CTO, cell BF-x-1 rules them NOT-ASKED; none is on a newly mapped root"
+    },
+    {
+      "item": "the live objects behind every drafted address",
+      "reason": "no AWS call (order BOUNDS); each row says Not read: the live objects"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/LGIC_BLANKFIX.TO-BF-x-6.holes-on-new-roots.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "check_holes_new_roots.py",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~3/check_holes_new_roots.py",
+      "result": "NEW-ROOTS-FILL ok=True mapped=78 before=41 after=0 roots_worked=5 rows=37 refused=0 owned_elsewhere=0"
+    }
+  ]
+}
