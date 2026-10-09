@@ -61,9 +61,20 @@ def ac2(record, root):
     if not rid:
         print("record names no request_id")
         return False
-    ev = aws(["logs", "filter-log-events", "--log-group-name", "/aws/lambda/" + FN,
-              "--filter-pattern", '"%s"' % rid, "--start-time", str(int(rec.get("invoked_epoch_ms", 0)) - 60000)],
-             root).get("events", [])
+    # Only START/END/REPORT lines carry the RequestId (row NFRA_OPLGTW-Z-S71). Find them, then read EVERY line of that
+    # log stream between START and END: the invocation's own output.
+    group = "/aws/lambda/" + FN
+    marks = aws(["logs", "filter-log-events", "--log-group-name", group, "--filter-pattern", '"%s"' % rid,
+                 "--start-time", str(int(rec.get("invoked_epoch_ms", 0)) - 60000)], root).get("events", [])
+    starts = [e for e in marks if e.get("message", "").startswith("START")]
+    ends = [e for e in marks if e.get("message", "").startswith(("END", "REPORT"))]
+    if not starts or not ends:
+        print("request %s: START/END not found (%d marker events)" % (rid, len(marks)))
+        return False
+    stream = starts[0]["logStreamName"]
+    t0, t1 = starts[0]["timestamp"], max(e["timestamp"] for e in ends)
+    ev = aws(["logs", "filter-log-events", "--log-group-name", group, "--log-stream-names", stream,
+              "--start-time", str(t0), "--end-time", str(t1 + 1)], root).get("events", [])
     text = "\n".join(e.get("message", "") for e in ev)
     skip = "SKIP:" in text and "is not the production T-1" in text
     disp = "dispatched: doc=" in text
