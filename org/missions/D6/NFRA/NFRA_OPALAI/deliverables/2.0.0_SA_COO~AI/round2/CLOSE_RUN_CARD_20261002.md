@@ -39,3 +39,20 @@ Every state below was measured at writing, except the two grant rows, which are 
 The held OA-t-1 / OA-t-3 parent halves merge. The `.tools/ajb.ps1` BG launch retires in the same sitting (PRD C11:
 the cutover drops nothing silently). Then OA-e-8 measures the speed stages. The CLOUD push of that merge is
 `0.0.0_AB_MSTR~Z`'s, as for any trunk push.
+
+## State re-read 2026-10-09 ~02:2xZ (2.0.0_SA_COO~AI, after the 2026-10-08 site Z reboot)
+
+The card above is unchanged; these rows supersede its measured table where they differ. Measured at writing unless marked.
+
+| item | value |
+|---|---|
+| opal_ai origin PROD and DEV | both `de5ce25fa3` (`git ls-remote`, 2026-10-09 ~01:4xZ). The card's PROD `bd7cd5d1ce` is superseded |
+| runtime checkout `C:\opal_runtime\opal_ai` | `9c0a80b8d0`, clean (0 porcelain lines). `9c0a80b8d0` is an ancestor of `de5ce25fa3`, so the launcher's fast-forward to PROD holds |
+| what that fast-forward brings | 5 files: the two shebang removals (opal_ai CI fix), the WFP installer `wall-dapi-8194-wfp.ps1` and the R1 script, and `resolve-claude.ps1` (OA-f-12). `launcher.ps1` and `launch-gate.ps1` are unchanged across `9c0a80b8d0..de5ce25fa3` |
+| DAPI 8194 wall | holds across the reboot: OA-f-11 AC4 PASS (`F11_PERSISTENCE.json`, measured 2026-10-09T01:41Z, boot 2026-10-08T20:56:05Z): Opal_Agent and Opal_MSP 8194 REFUSED, 8790 OPEN; operator 8194 OPEN. Drained @438c776cd8 |
+| Terminal | bbcomm listening on 127.0.0.1:8194 at ~01:4xZ (pid 18020) |
+| 8790 view server | not listening at ~01:4xZ (the AC4 probe started and stopped it). Whether the close run needs it up beforehand was not read this pass |
+| Alyssa Keith's portal-only asker grant | as recorded, ACTIVE (OA-g-3 @da3a2cafbe). Claim: held, not re-read this pass |
+| the sitting | not set: Andrew-direct 2026-10-06 ~21:1xZ, "nothing we can do on the call 1 at this time". Not re-asked |
+
+Nothing in the run steps changes. On Andrew's word for a time, the card runs as written.
