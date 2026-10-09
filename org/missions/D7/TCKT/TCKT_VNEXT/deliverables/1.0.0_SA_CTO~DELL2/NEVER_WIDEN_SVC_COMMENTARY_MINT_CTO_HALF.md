@@ -84,3 +84,9 @@ So the deny is dell2's identity allow-list, which no Dell may write.
 - **Reported:** the grant after the fact through MSTR~DELL2.
 
 The value-handling rules and Branch B are unchanged.
+
+**AMENDMENT 1.3 (2026-10-09 ~05:3xZ, row TCKT_VNEXT-D2-S9, CVO msg 2564):** the read grant reached TWO identities, dell2 and dell1, because the
+Dell platform-key policy is shared. AMENDMENT 1.2 named dell2 only.
+- **RULED: accepted at parity** with `svc-analyst-intake`, which both Dells already hold under the laptop CTO's PLATFORM-KEY class. It is recorded
+  here as one identity wider than 1.2 said, and dell1 is told through MSTR~DELL2.
+- The token's reach does not change. It stays CREATE-only, with the firm clamp in code.
