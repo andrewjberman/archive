@@ -36,3 +36,10 @@ key (a served-output act), and no file in the repository decides the new spellin
 `CENSUS: COMPLETE 175 judged + 0 carded + 9 ruled (live 0+0+0 of 0 nameable, repo 0+0+0 of 0) ruled=9`
 
 0 `CENSUS RAISE` lines. `python -m pytest lib/tests -q -p no:cacheprovider`: 199 passed, 1 skipped (the base's count).
+
+## AMENDMENT 1 (2026-10-09, issuer 2.0.0_SA_COO~B1): planted row removed
+
+Row 9 above (IAM_ROLE `planted-system-without-a-row-49financial-ingest-role`, contract row R-0184, evidence instrument `planted (no instrument reaches a fictional name)`)
+was REMOVED from `infra/logic/registry/name_rulings.json` under AMENDMENT 1: a plant is fictional by construction and the registry carries no row for it.
+Step 13's population now excludes the wave's self-declared plants (183 names). The other 8 rows (S3Key) stand unchanged. The final run's last line is in the
+proof instance (Q1R5-AC1), re-run after this commit.
