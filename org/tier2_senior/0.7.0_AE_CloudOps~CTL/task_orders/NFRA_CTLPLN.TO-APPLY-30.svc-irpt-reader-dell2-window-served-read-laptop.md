@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 
@@ -19,6 +19,10 @@
     WINDOW 3 (AMENDMENT 2) COMPLETE (issuer, ~16:4xZ): G2 "ADD now" 15:56:55Z after R2 MET; ADD 16:08:43Z; G2 read twice in memory, R DONE
     16:22:49Z; REMOVE 16:33:03Z, read back SET-EQUAL to BEFORE, dell2/dell1 explicitDeny. Issuer live poll: first seen 16:08:57Z, gone 16:33:39Z.
     Across the three windows: 47 min 44 s open in all, every entry closed (@e857979309).
+    WINDOW 5 (AMENDMENT 3) COMPLETE (issuer, ~18:2xZ): CTO yes msg 108068; ADD 17:57:39-17:57:43Z; G2 read twice in memory, R DONE
+    17:59:20Z; REMOVE 18:05:37Z, read back SET-EQUAL to BEFORE, dell2 allowed/dell1 explicitDeny/walker allowed on the ADD and all three
+    correct on the REMOVE. Issuer live poll: first seen 17:57:47Z, gone 18:05:46Z. Ledger closed, proof instance VALID (@00b5317a75).
+    One FAIL control, the seat's own: the put time went to G2 139 s after R DONE because proof work ran first; remedy recorded (relay first).
   </closure>
 
 <risk>WORLD</risk>
