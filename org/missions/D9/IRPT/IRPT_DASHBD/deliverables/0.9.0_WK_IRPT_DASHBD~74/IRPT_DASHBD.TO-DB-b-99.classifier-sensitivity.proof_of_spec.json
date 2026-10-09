@@ -1,0 +1,106 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-99",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e8f96f579c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "7d8eafec78",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-99.classifier-sensitivity.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_DASHBD~74",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~74/SENSITIVITY.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~74/THRESHOLDS.json",
+   "kind": "config_data",
+   "commit_or_etag": "0faca21881",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "pre-registered before any run; the rule commit",
+   "artifact_covered_by": [
+    "DB49-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~74/sensitivity.py",
+   "kind": "script",
+   "commit_or_etag": "91edf7f120",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only runner over the DB-b-98 classifier (S3 GETs); no deploy",
+   "artifact_covered_by": [
+    "DB49-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~74/SENSITIVITY.json",
+   "kind": "config_data",
+   "commit_or_etag": "91edf7f120",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record the checker reads; output_commit filled in the next commit",
+   "artifact_covered_by": [
+    "DB49-1-AC1",
+    "DB49-1-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB49-1-AC1",
+   "criterion_verbatim": "DB49-1-AC1 -- every setting's counts sum to 990, the 156 cut segments are printed, and the final classification carries claim and robustness with non-robust reasons re-graded. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r49/p49_round49.py\" . DB49-1-AC1",
+   "output_evidence": "OK: 9 settings graded; final {'FLOW_TIMING': 449, 'INCOME_DATE': 26, 'MISSING_PRICE': 1, 'COVERAGE_DAYS': 4, 'NEAR_ZERO_BASE': 156, 'DEFECT': 197, 'BOUNDARY_VALUE_GAP': 96, 'ZERO_GAIN_VENDOR_TWR': 0, 'WINDOW_ONE_DAY_SHIFT': 13, 'FLOW_CONVENTION_ENVELOPE': 3, 'UNEXPLAINED': 45}\nDB49-1-AC1 PASS",
+   "denominator": "9 of 9 settings sum to 990 (3 peak cuts x 3 dollar ties); 156 of 156 NEAR_ZERO_BASE segments at 0.01|current listed with their verdict at all 9 settings; final sums to 990; 9 of 9 non-DEFECT reasons carry claim and robust; 1 non-robust reason (ZERO_GAIN_VENDOR_TWR, spread 26 > limit 22.5) re-graded to UNEXPLAINED (45); exit code 0",
+   "status": "PASS",
+   "expect": "DB49-1-AC1 PASS"
+  },
+  {
+   "criterion_id": "DB49-1-AC2",
+   "criterion_verbatim": "DB49-1-AC2 -- the thresholds were committed before the output that graded them. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r49/p49_round49.py\" . DB49-1-AC2",
+   "output_evidence": "OK: thresholds org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~74/THRESHOLDS.json committed at 0faca21881 before output 91edf7f120\nDB49-1-AC2 PASS",
+   "denominator": "rule_commit 0faca21881 touches THRESHOLDS.json; output_commit 91edf7f120 touches SENSITIVITY.json; 1 of 1 ancestor test passed; exit code 0",
+   "status": "PASS",
+   "expect": "DB49-1-AC2 PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "ran the checker twice on the committed record",
+   "observed": "DB49-1-AC1 printed the same last line both times",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "SENSITIVITY.json with rule_commit set equal to output_commit, checked with DB49-1-AC2, then restored.",
+   "expected": "DB49-1-AC2 FAIL",
+   "observed": "FAIL: rule_commit '91edf7f120' is not a strict ancestor of output_commit '91edf7f120'; DB49-1-AC2 FAIL (rc 1)",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "whether the mechanical flag on FLOW_TIMING and INCOME_DATE satisfies the CTO's two-sided read",
+   "reason": "A judgment for the CTO; filed as row IRPT_DASHBD-D2-W74-S1."
+  },
+  {
+   "item": "vendor call, secret read, S3 write, deploy, bun, download, backend edit",
+   "reason": "Bounds of the order; none made (S3 GETs only)."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-D2-W74-S1"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "ruff via .tools/commit-gate.sh",
+   "invocation": "bash .tools/safe-commit.sh ... (py_compile + ds-precommit + ruff)",
+   "result": "blocked once on E402 in sensitivity.py; imports moved to the top; passed on the second attempt"
+  }
+ ]
+}

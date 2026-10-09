@@ -116,6 +116,20 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
     - **Cleanup** (the fresh request plus Y77's three broken requests) goes on a list for Andrew's word, built ONLY after a dependency walk (row D2-S51 rule).
     - Write `fresh_request_id`, `fresh_ticket_id` and the walk into `APPLY-Y1_after_reads.json`. Gate limb that graded this amendment: `to-pipeline-gate.py`
       GATE (viii) on a modify.
+    **AMENDMENT 4 (issuer `2.0.0_SA_COO~Y2`, 2026-10-09 ~15:3xZ): a THIRD apply, REVISION 4, on top of live rev 3.** The reader registers the research revision
+    (derived from the packaged registry, fail closed); CTO ruling AMENDMENTS 2-3, msgs 3514/3548.
+    - **Pair:** `release1/NEVER_WIDEN_PAIR_ANLREQ_RELEASE1_REV4_IRPT_STATUS.md` @86685d4180 (blob 142e1e6d2d); the COO half is signed by this amendment. CTO half
+      AMENDMENT 4 @080347139a (msg 3569), GIVEN.
+    - **Pin** `287b105600` (ON origin): `git worktree add --detach /c/dev/anl-r1d-pin 287b105600`. **Built** `VC/r14kaXm6FqaZOOFm3fT+8qngsyGI5Yr7U+DgYx64=`.
+      **Rollback** `t6OJTCcm` (record its S3 version at step 0). The ledger STATES the pin and the built sha.
+    - **R0 (CTO condition):** the per-member diff of the UPLOADED zip against live is EXACTLY `status_installed.py`; anything else is a STOP. The SHARED-ROOT STOP
+      applies: if another seat holds an open ledger or plan on the `investor-reporting/ops` root, STOP and report.
+    - **R1:** closure on the uploaded zip, missing=0. **R2:** live == `VC/r14ka`, re-plan 0, `_authz` census 22 of 22. **Only an R2 failure rolls back** (re-promote
+      rev 3's version).
+    - **R3** is `2.0.0_SA_COO~G2`'s owner read of REQ-5e4149d2 in a NEW sr1 window: codes and section names only, and a refusal is recorded with its code. Record ~G2's
+      result as read "6".
+    - Write the same after-reads file with `revision` 4 and `built_sha` VC/r14ka; checks `apply1_cells.py` are amended. Gate limb that graded this amendment:
+      `to-pipeline-gate.py` GATE (viii) on a modify.
   </steps>
 
   <acceptance>
