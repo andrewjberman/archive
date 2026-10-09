@@ -6,7 +6,7 @@ response per account; Opal's side is the producer in this worktree run locally o
 | account | window | R4 abs_diff | now abs_diff | defect | fixed |
 |---|---|---|---|---|---|
 | acct#89d0916a | 2026-06-25..07-06 | 1.2130 pp | 1.2130 pp | yes (income sign) | yes |
-| 0084073310 | 2026-08-21..10-01 | 0.7078 pp | 0.7078 pp | no (value basis) | n/a |
+| acct#ffa615d2 | 2026-08-21..10-01 | 0.7078 pp | 0.7078 pp | no (value basis) | n/a |
 | acct#89d0916a | 2026-04-09..04-30 | 0.4555 pp | 0.4555 pp | no (value basis) | n/a |
 
 ## What the S22 fix did, and did not do
@@ -26,7 +26,7 @@ Black Diamond's beginning and ending values equal Opal's value + the Schwab `mar
 at all 6 window endpoints (0.00 difference each). Opal's value is `net_mv_plus_cash` (the ratified C-VALUE); it leaves out
 `margin_balance`.
 
-- 0084073310 2026-08-21..10-01: adding margin_balance moves 0.7078 -> 0.0264 pp.
+- acct#ffa615d2 2026-08-21..10-01: adding margin_balance moves 0.7078 -> 0.0264 pp.
 - acct#89d0916a 2026-04-09..04-30: adding margin_balance moves 0.4555 -> 0.0493 pp.
 - acct#89d0916a 2026-06-25..07-06: adding margin_balance moves 1.2130 -> 0.4738 pp (0.7392 pp); then treating the 4,429.53 credit
   coded INTRA/FC/IN "MARGIN INT ADJ" on 06-25 as a flow, as Black Diamond does (netAdditions 4,402.22), moves 0.4738 -> 0.0044 pp.

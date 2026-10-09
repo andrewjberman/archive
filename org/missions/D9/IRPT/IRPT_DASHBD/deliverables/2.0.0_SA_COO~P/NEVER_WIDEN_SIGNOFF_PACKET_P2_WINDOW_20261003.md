@@ -143,7 +143,7 @@ producer's local `--upload` (`main`).
   - **MOVES:** an account-day with a margin balance, or a short DIV debit. Measured on the served accounts' tie-out record
     (`TIEOUT_49F_BLACKDIAMOND_R4.json` vs `_R8.json`, 14 pairs on 3 of the 6): 13 of 14 pairs move, by -0.74 pp to +0.73 pp.
     For example, acct#89d0916a 2026-06-25..07-06 moves from +3.4935% to +2.7544%.
-  - **UNCHANGED:** an account-day with neither. Measured: 1 of 14 (0076459710 2026-07-09..08-04, delta 0.000000).
+  - **UNCHANGED:** an account-day with neither. Measured: 1 of 14 (acct#6b914f88 2026-07-09..08-04, delta 0.000000).
   - DB-b-19's income move is NOT in R8 (claim: inferred). Its rows are the 38 short-account DIV debits, 822.51 absolute (W1-S17).
 - **The new accounts:** rows only where the producer emits, meaning a positive value on the day.
 
