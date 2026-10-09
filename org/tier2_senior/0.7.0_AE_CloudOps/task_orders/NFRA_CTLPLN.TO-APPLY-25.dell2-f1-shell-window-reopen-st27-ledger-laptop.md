@@ -24,20 +24,23 @@
   <context>
     Root `infra/aws/terraform/nfra-ctlpln-identity/`. Halves: the step D2 pair (COO
     `org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D2_SENDCOMMAND_AND_F1_SHELL_WINDOW_20261008.md`,
-    CTO @ac2c6e852d) with the CTO's consent to this reuse for the st27 ledger (named in the GO). Same send-report rule: dell2 reports every send after the fact.
+    CTO @ac2c6e852d) with the CTO's YES for this ledger (msg 107646 reply) under the STANDING CONSENT addendum to the CTO half (@5c2d9da8b2): one host,
+    targeted 0/1/0, one window at a time on a named open ledger, closed at the ledger's close leg or 4 hours after opening, whichever
+    is first, without waiting, then read back with an untargeted 0/0/0 plan; sends reported after the fact. Same send-report rule: dell2 reports every send after the fact.
     YOU SEND NO COMMAND. Use TF_PLUGIN_CACHE_DIR=C:/Users/AndrewBerman/.terraform.d/plugin-cache, and delete your Terraform scratch dir
     after leg C2's ledger closes (0.0.0_AB_MSTR msg 107626).
   </context>
 
   <the_act>
-    LEG B2 -- OPEN (GO from the issuer when dell2 says "open now", relayed by 0.0.0_AB_MSTR): plan and apply with
+    LEG B2 -- OPEN (GO from the issuer when dell2 says "open now", relayed by 0.0.0_AB_MSTR): plan and apply TARGETED (`-target=aws_iam_policy.dell2_ssm`) with
     `-var open_dell2_f1_shell_window=true`: EXACTLY `0 to add, 1 to change, 0 to destroy` on `aws_iam_policy.dell2_ssm`, or apply
     nothing. Read back: dell2 `AWS-RunShellScript` + `i-0167fd745ad906a66` both resources allowed; + `i-0643a5bee8a8feabf`
     explicitDeny. NEVER-2 entry. Report the open time to me and to dell2 via 0.0.0_AB_MSTR.
 
     LEG C2 -- CLOSE (GO when dell2 calls V1; OR at 2026-10-09T06:00Z WITHOUT waiting for any answer): a plain plan and apply:
     EXACTLY `0 to add, 1 to change, 0 to destroy` on `aws_iam_policy.dell2_ssm`. Read back: dell2 `AWS-RunShellScript` explicitDeny
-    (`DenyShellDocuments`). Close the entry. Report the close time.
+    (`DenyShellDocuments`). Then an UNTARGETED plan with default variables reads `No changes` (0/0/0). Close the entry. Report the
+    close time.
   </the_act>
 
   <bounds>
