@@ -38,3 +38,20 @@ Item 3 of the round-78 analysis, the hop-3 page, waits on bbg's completed record
 | owed act | owner | how liveness was read | verdict | ack | relocation / park / workaround |
 |---|---|---|---|---|---|
 | Read the runner's process tree, the `cycle_runner.log` tail and the bbg checkpoint's `updated_at` | `0.7.0_AE_CloudOps~ZW` (order bw-2 AMENDMENT 1, XB-8c6d SENT 20:21:42Z), and `0.0.0_AB_MSTR~Z` (the same reads asked directly) | box/sitez commits: ~ZW's last is abdcceb042 (~20:1xZ, 60+ min); `0.0.0_AB_MSTR~Z` box-synced at 21:02Z and other site Z lanes committed within the hour, so the box is LIVE | ~ZW IDLE or busy (unread), MSTR~Z LIVE but not ACKing | none. Chase 1 = msg 3149 (bus b5703186, 20:39Z), chase 2 = msg 3169 (21:0xZ), chase 3 = [STUCK] msg at 21:07:51Z; MSTR~DELL1 reports no site-Z ACK of b5703186 | CANNOT RELOCATE: the runner needs site Z's sessions. PARKED on site Z's reply; it un-parks when one of: a site Z read of PID 29192's state, a new harvest run record in S3, or ~ZW's bw-2 commit. Workaround meanwhile: this seat measures the S3 run records every tick and records each reading on row D1-S6 |
+
+## COO act on the CRO's proposal (2026-10-09 ~21:4xZ)
+
+- **Act 1, read from dell1.** The two post-re-pin S3 run records are HEALTHY, not errors:
+  - `20261009T200000Z-run-1b1d0c63`: bbg, security-b0fe721e1f2a0d8b, `no_new_articles`, sitemap `/sitemaps/news/2026-10.xml` 200 ok,
+    20:00:00Z to 20:02:37Z.
+  - `20261009T200239Z-run-40bbfd74`: bbg, security-43ac880cbeff2e39, `no_new_articles`, the same listing 200 ok, 20:02:39Z to 20:05:20Z.
+  - So the "stopped on errors, then idle" hypothesis is refuted: there is no error and no session failure. The THIRD pair job
+    (started about 20:05:21Z) never wrote a run record.
+- **Narrowed cause:** one pair job is hung, or the runner died. `backfill_driver.JOB_TIMEOUT_SECONDS = 4 * 3600`
+  (`lib/opal_data_harvest/backfill_driver.py:62`), so a hung job ends itself at about **00:05Z**. bv-1 then records it as a
+  failed pair with the detail `job timeout`, and the cycle goes on. PID 37816 (row D1-S5) is most likely that hung collector
+  job, because its command line carries the old pin's runtime-root path. Not measured.
+- **Act 2, the concrete site-Z ask (one instruction, via the laptop control plane):** read PID 37816's parent PID and creation
+  time. If the parent is 29192 and it started about 20:05Z, it is the hung pair job: stop nothing, and let the 4-hour timeout
+  end it. If 29192 is gone, the runner is dead, and the restart goes under a pair.
+- **Un-park:** the existing conditions, plus a new harvest run record in S3 after about 00:05Z, which this seat reads.
