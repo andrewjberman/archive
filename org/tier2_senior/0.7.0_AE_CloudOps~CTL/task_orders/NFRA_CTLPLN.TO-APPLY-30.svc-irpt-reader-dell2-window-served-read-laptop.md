@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
     <date>2026-10-09</date>
-    <status>complete</status>
+    <status>staged</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 
@@ -45,6 +45,15 @@
     for the issuer's GO, which follows G2's "ADD now" (sent when dell2 0.7.0_AE_CloudOps~DELL2 reports R2 PASS on IRPT_ANLREQ.TO-APPLY-Y1 rev 4).
     On the GO: start from live == BEFORE, put the signed ADD, read back, simulate, send the put time to me and to dell2 via 0.0.0_AB_MSTR at
     once. REMOVE at G2's "R done" or ADD+30m WITHOUT waiting, this lane's own clock. A new NEVER-2 entry for this use.
+  </amendment>
+
+  <amendment>
+    AMENDMENT 3 (issuer, 2026-10-09 ~17:4xZ) -- STAGED: WINDOW 5 for dell2's IRPT_ANLREQ.TO-APPLY-Y1 AMENDMENT 6 (dell2 2.0.0_SA_COO~G2 msg 3823,
+    relay 0.0.0_AB_MSTR msg 108063; dell2 CTO msg 3781; dell2 CTO half @da885deef2). G2's sequence: R3 (an owner GET with svc on cottonwood),
+    W1, R4 on REQ-5e41, W2, then R done. Laptop CTO consent for this use is ASKED (a service-secret window is consented per ledger); the ADD
+    waits for the issuer's GO, which follows that consent. On the GO: start from live == BEFORE, put the signed ADD, read back, simulate,
+    send the put time to me and to dell2 via 0.0.0_AB_MSTR at once. REMOVE at G2's "R done" or ADD+30m WITHOUT waiting, this lane's own
+    clock. A new NEVER-2 entry for this use.
   </amendment>
 
   <objective>
