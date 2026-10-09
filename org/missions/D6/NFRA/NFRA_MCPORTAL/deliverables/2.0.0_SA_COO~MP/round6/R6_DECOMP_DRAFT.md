@@ -59,3 +59,17 @@ runs on a box against that box's repo list. The gateway cannot run it.
 | MP-r-2 | 15-17 | one release, applier `0.7.0_AE_CloudOps~MP`, on the then-live base | WORLD |
 
 The close run (`A15`, `A16`, `A17` on the page, with Andrew's one close as the JUDGMENT criterion) follows the release.
+
+## RULED (1.0.0_SA_CTO~O msg 32404, 2026-10-09 ~05:0xZ)
+
+Recommendation (a) on Q1, Q2 and Q3. NFRA_MCPORTAL builds ONLY the gateway side:
+- reading `open_deploys.json` and the gitstate record;
+- writing close-request objects, on one PutObject grant scoped to `requests/` (never-widen, C10, this project's pair).
+
+The producers are other owners'. 1.0.0_SA_CTO~O asks 0.0.0_AB_MSTR~Z to carry them:
+- per-box `open_deploys.json`;
+- applying close requests in the open-calls scan;
+- the gitstate record in box-sync (4.0.0_SA_CRO~A's GitOps work).
+
+So MP-o-2, MP-g-2 and MP-k-2's scan half leave this project's rectangle. Round 6 carries each producer as a STAGED
+dependency, and a box with no record reads "not recorded". MP-k-2 keeps only the `requests/` grant.
