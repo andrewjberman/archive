@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <date>2026-10-09</date>
-<status>staged</status>
+<status>pending</status>
 <risk>LOCAL</risk>
 
 <title>provision-path-shims.sh: one named non-comp forwarder pair, ~/bin/check-inbox + check-inbox.cmd -> org/mcp/check-inbox.sh (low priority, no deadline)</title>
@@ -13,6 +13,7 @@
 STAGED (issuer, ~20:4xZ), on 1.0.0_SA_CTO msg 108124: 0.0.0_AB_MSTR first fixes org/mcp/check-inbox.sh:49-50 in its own lane so
 it reads and mints the nested inbox/<base>/~<lane>/ form, proven by org/mcp/test_ld0202_tilde_routing.py plus one live run for a ~lane serial.
 This order names that fix's commit hash here and flips to pending only after it lands. Do NOT start it while it reads staged.
+MET (issuer, ~20:5xZ): the fix landed @fd8f6c6c9b (on CLOUD 45fdf08e4f, 1.0.0_SA_CTO msg 108127); measured an ancestor of box/laptop HEAD. Pending.
 </precondition>
 
 <context>
