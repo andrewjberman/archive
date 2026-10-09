@@ -1,6 +1,12 @@
+<!-- Current activation addendum supersedes the pre-signature state below. -->
+
+CTO half b0fe20b5f6 received/read/ACKed October9 12:13 Eastern. C1-C4 accepted. The RUN.ps1 wrapper now invokes dq_t22_quote.py immediately before draw and refuses unless exit0 AND NTDQ-OK (C2); no other source changed from signed 84e2544cfe. Parsed successfully. Actual Python311 preflight returns NTDQ-OK. Deployment ledger opened at 12:13 Eastern before activation: org/critical_paths/change_management/20261009T1613Z_mdpf-demque-zq-t24_deploy_completion.md; four legs, 36-hour window.
+
+Before-task exports are adjacent OPAL_BBGTML_daily_pull.t24-before.xml and OPAL_DEMQUE_bbg_ledger_upload.t24-before.xml. Both existing tasks Ready/last result0; next scheduled07:00 and08:30 Eastern October10. One-shot name absent; host timezone Eastern Standard Time. comp-schedule again PARTIAL_OR_BLIND: C1 29302/126638, 0/6 carriers complete at30s. Direct task inspection supplies the concrete registration check; no clean global census claimed.
+
 # TO-DQ-t24 -- amended candidate ready for site-Z review
 
-**Seat:** 0.7.0_AE_CloudOps~ZQ. **State:** AC1 passed; candidate isolated on wk-demque-zq-t24; awaiting CTO~Z deployment half. Order remains pending.
+**Seat:** 0.7.0_AE_CloudOps~ZQ. **State:** AC1 passed; CTO~Z signed b0fe20b5f6; deployment started in ledger mdpf-demque-zq-t24. Order remains pending until October10 evidence.
 **archetype:** IMPLEMENT
 
 ## Authority and current result

@@ -13,6 +13,11 @@ try {
         $actual = (Get-FileHash -LiteralPath (Join-Path $repo $entry.Name) -Algorithm SHA256).Hash
         if ($actual -ne $entry.Value) { throw "Signed source/request drift: $($entry.Name)" }
     }
+    # CTO half b0fe20b5f6 C2: exercise the queue acceptance immediately before draw.
+    $quoteOutput = & $python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R7_CHECKS/dq_t22_quote.py 2>&1
+    $quoteCode = $LASTEXITCODE
+    $quoteOutput | Out-File -LiteralPath (Join-Path $PSScriptRoot 'MDPF_DEMQUE_ZQ_T24_QUOTE.log')
+    if ($quoteCode -ne 0 -or -not ($quoteOutput -match '^NTDQ-OK')) { throw 'C2 queue check did not return NTDQ-OK; no draw' }
     & $python data/mdpf/scripts/demque/bbg_backfill.py --apply *> (Join-Path $PSScriptRoot 'MDPF_DEMQUE_ZQ_T24_DRAW.log')
     $drawCode = $LASTEXITCODE
     & $python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R7_CHECKS/dq_t24_draw.py *> (Join-Path $PSScriptRoot 'MDPF_DEMQUE_ZQ_T24_AC2.log')
