@@ -3,10 +3,11 @@
                       invented id (worker ~267)
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
-  IB104-1-AC1  `pytest tests/test_holdings_49f.py -k smartx_cusip` passes >= 2 tests. Base: FAIL (0 selected).
+  IB104-1-AC1  `pytest tests/test_holdings_49f.py -k smartx_cusip` passes >= 3 tests (unique, ambiguous, absent). Base: FAIL (0 selected).
   IB104-1-AC2  test_holdings_49f.py and test_smartx_valuation.py pass in full. Base: PASS (control; 44 passed).
-  IB104-1-AC3  census K (worker ~267, a real 49F read, counts only): smartx_security_nodes == with_cusip + listed_no_cusip,
-               with_cusip >= 1, invented == 0, and the source column read is named. Base: FAIL (no K).
+  IB104-1-AC3  census K (worker ~267, a real 49F read, counts only; AMENDMENT 1, CTO ruling AMENDMENT 1 @bdf378d09c):
+               smartx_security_nodes == with_cusip + listed_ambiguous + listed_absent, with_cusip >= 1, invented == 0,
+               cusip_basis starts "joined_via_ticker(dim_asset@". Base: FAIL (no K).
 """
 import json
 import re
@@ -38,7 +39,7 @@ def main():
 
     if cid == "IB104-1-AC1":
         rc, n, last = pyt(root, T + "test_holdings_49f.py", "-k", "smartx_cusip")
-        if rc != 0 or n < 2:
+        if rc != 0 or n < 3:
             fail("-k smartx_cusip rc %d: %s" % (rc, last))
         print("OK: %s" % last)
     elif cid == "IB104-1-AC2":
@@ -51,12 +52,13 @@ def main():
         if not f.is_file():
             fail("no %s" % K)
         k = json.loads(f.read_text(encoding="utf-8"))
-        tot, wc, ln, inv = (k.get(x) for x in ("smartx_security_nodes", "with_cusip", "listed_no_cusip", "invented"))
-        if not all(isinstance(x, int) for x in (tot, wc, ln, inv)):
-            fail("counts %r" % k)
-        if tot != wc + ln or wc < 1 or inv != 0 or not k.get("source_column"):
-            fail("census %r" % {x: k.get(x) for x in ("smartx_security_nodes", "with_cusip", "listed_no_cusip", "invented", "source_column")})
-        print("OK: %d SmartX security nodes: %d CUSIP, %d listed, 0 invented" % (tot, wc, ln))
+        names = ("smartx_security_nodes", "with_cusip", "listed_ambiguous", "listed_absent", "invented")
+        tot, wc, la, lb, inv = (k.get(x) for x in names)
+        if not all(isinstance(x, int) for x in (tot, wc, la, lb, inv)):
+            fail("counts %r" % {x: k.get(x) for x in names})
+        if tot != wc + la + lb or wc < 1 or inv != 0 or not str(k.get("cusip_basis", "")).startswith("joined_via_ticker(dim_asset@"):
+            fail("census %r" % {x: k.get(x) for x in names + ("cusip_basis",)})
+        print("OK: %d SmartX security nodes: %d CUSIP via ticker, %d ambiguous, %d absent, 0 invented" % (tot, wc, la, lb))
     else:
         fail("unknown criterion %r" % cid)
     print("%s PASS" % cid)
