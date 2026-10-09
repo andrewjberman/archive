@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_CANON.TO-CN-a-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "12adb87963"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "155ac2ce67",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-a-3.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_CANON~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_backfill.py",
+      "kind": "script",
+      "commit_or_etag": "546b4e60c6",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-MDPF_CANON-3; no AWS write, no deploy grant (order bound 2.1)."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_consolidator.py",
+      "kind": "script",
+      "commit_or_etag": "546b4e60c6",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; run_class backfill wired as run_backfill(); issuer's CloudOps deploys after the drain."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py",
+      "kind": "script",
+      "commit_or_etag": "546b4e60c6",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; one PACKAGE row added."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_parquet.py",
+      "kind": "script",
+      "commit_or_etag": "546b4e60c6",
+      "artifact_covered_by": [
+        "AC4",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; _read treats AccessDenied/403 as absent (AMENDMENT 1); create-only put and 403-put-raises unchanged."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/tests/test_mdpf_gold_backfill.py",
+      "kind": "test",
+      "commit_or_etag": "546b4e60c6",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; 9 synthetic cases."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/tests/test_mdpf_gold_parquet.py",
+      "kind": "test",
+      "commit_or_etag": "546b4e60c6",
+      "artifact_covered_by": [
+        "AC2",
+        "AC4"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL; 3 cases added, one re-pointed from AccessDenied to InternalError."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: r1_backfill.py -- expect: ROUND 1 BACKFILL: 7 of 7 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round1/checks/r1_backfill.py\"; echo \"exit=$?\"",
+      "output_evidence": "ARM PASS MAP: the listing's artifact keys plan as (scope, artifact, date, source) :: 4 rows planned, each (scope, artifact, date, source)\nARM PASS SKIP: a partition already present is not planned (history never rewritten) :: the present 49financial/aum_metrics/2026-08-04 is not planned\nARM PASS IGNORE: category-views, non-model-assets, manifests, code and undated keys are never planned :: 6 noise keys ignored\nARM PASS COUNT: one n-of-m line per series with the already-present count :: 4 series lines\nARM PASS RUN: each planned row written once, in order, verdicts tallied :: four writes, in order, verdicts tallied 2/1/1\nARM PASS UNTYPED: no new-home bucket and no new s3:// address typed in the module :: no new-home bucket typed\nARM PASS WIRED: run_class \"backfill\" reaches mdpf_gold_backfill; the package ships it :: run_class \"backfill\" wired; the package ships the module\nROUND 1 BACKFILL: 7 of 7 arms\nexit=0",
+      "denominator": "7 of 7 arms",
+      "status": "PASS",
+      "expect": "ROUND 1 BACKFILL: 7 of 7 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: pytest data/mdpf/scripts/gold/tests with the three known-red test_global_fold_flag2 cases deselected -- expect: passed, with 0 failed -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest data/mdpf/scripts/gold/tests -q --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_within_window_carries_and_labels --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_beyond_window_absent_for_real --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_source_is_measured_never_interpolated; echo \"exit=$?\"",
+      "output_evidence": "126 passed, 3 deselected in 1.67s\nexit=0",
+      "denominator": "126 passed, 0 failed, 3 deselected (114 at base + 12 new)",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is JUDGMENT, graded on the issuer's real run at the round-1 close (never self-graded): the issuer's ad-hoc run_class=backfill invocation prints one n-of-m line per series, and the partitions it wrote are exactly the legacy dates not already present; asked 49 Financial's total assets on a day last month, the answer comes from the key's date alone.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment=true: no invocation; graded on the issuer's round-1 close run",
+      "output_evidence": "Wiring: mdpf_gold_consolidator.lambda_handler takes event run_class=backfill -> run_backfill(): lists the legacy dated tree and each scope's existing partitions, plan(), logs summarize() (one n-of-m line per series), run() with read_source = records_for(json body) and write = write_partition on client_for_scope(scope). Synthetic TestHandler covers exactly-the-missing-dates written, present partition untouched, daily path not run. Not run against AWS (order bound 2.1).",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round-1 close run",
+      "judgment": true
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4: r1_emit.py -- expect: ROUND 1 PARQUET WRITER: 8 of 8 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round1/checks/r1_emit.py\"; echo \"exit=$?\"",
+      "output_evidence": "ARM PASS KEYS: 16 partition URIs equal address(mdpf, scope, gold, artifact, date=..., object=data.parquet) :: 16 of 16 partition URIs equal address()\nARM PASS UNTYPED: the writer module types no s3:// and no opal-data- string :: no s3:// and no opal-data- literal in the module\nARM PASS WRITE ONCE: written, then unchanged with no second put, then conflict with the stored bytes untouched :: written, unchanged (no second put), conflict (bytes untouched)\nARM PASS ROUND TRIP: the stored object is parquet and its rows equal the records :: parquet round trip equal at mdpf/global/gold/aum_metrics/date=2026-10-08/data.parquet\nARM PASS SESSIONS: a firm scope assumes its own env ARN (unset refuses); global assumes none :: each firm assumes its env ARN; global assumes none; an unset ARN refuses\nARM PASS STATUS: run_status reads PASS only when every intended scope was built (M16) :: PASS only when every intended scope was built\nARM PASS WIRED: the consolidator imports and calls the writer; the package ships the module :: the consolidator imports and calls the writer; the package ships it\nARM PASS DENIED-ABSENT (AMENDMENT 1): a 403 read of a missing key (prefix-conditioned ListBucket) still writes create-only; a 403 put raises :: a 403 read of a missing key writes create-only; a 403 put raises\nROUND 1 PARQUET WRITER: 8 of 8 arms\nexit=0",
+      "denominator": "8 of 8 arms",
+      "status": "PASS",
+      "expect": "ROUND 1 PARQUET WRITER: 8 of 8 arms"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "r1_backfill.py at the base (module absent): 0 of 7 arms; r1_emit.py at the base: 7 of 8 (arm 8 DENIED-ABSENT) (issuer's measurements, order preflight and AMENDMENT 1).",
+      "expected": "0 of 7 and 7 of 8 before; 7 of 7 and 8 of 8 after.",
+      "observed": "7 of 7 and 8 of 8, exit=0 at 546b4e60c6.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "r1_backfill.py, r1_emit.py and the pytest line each run on the final source before and after the commit.",
+      "observed": "all green both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No AWS read or write by the worker; the legacy listing and the new-home listing run only inside the Lambda",
+      "reason": "Order bound 2.1: no AWS write; the issuer's CloudOps lane deploys and runs the ad-hoc backfill."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "r1_backfill.py",
+      "result": "ROUND 1 BACKFILL: 7 of 7 arms"
+    },
+    {
+      "tool": "python",
+      "invocation": "r1_emit.py",
+      "result": "ROUND 1 PARQUET WRITER: 8 of 8 arms"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "data/mdpf/scripts/gold/tests (3 deselected)",
+      "result": "126 passed, 3 deselected"
+    }
+  ]
+}
