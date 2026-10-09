@@ -85,6 +85,24 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
       (CTO condition). The ledger names `BjUZjt2o`.
     - The checks `apply1_cells.py` are amended to `BjUZjt2o`. Everything else stands. Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii)
       on a modify.
+    **AMENDMENT 2 (issuer `2.0.0_SA_COO~Y2`, 2026-10-09 ~12:2xZ): a SECOND apply, REVISION 3, on top of live revision 2.** CTO msgs 3245/3262, ~G2 msg 3241,
+    row IRPT_YCDGEN-D2-S20.
+    - **Why:** live `BjUZjt2o` refuses the Opal 49financial report `REQ-5e4149d2...` with `RetentionRefused 'invalid retention reference'`, because its
+      packaged `reporting_policies.json` lists research firms `[cottonwood]`.
+    - **Pair:** REVISION 3 @1d9154f3ce (blob ac59c753eb); the COO half is signed by this amendment, and the CTO RE-SIGNED it (msg 3262).
+    - **Pin** `5240156380`: `git worktree add --detach /c/dev/anl-r1c-pin 5240156380`; every step runs there. Step 0 adds
+      `merge-base --is-ancestor 5240156380 origin/box/dell2` rc 0. **Built** `t6OJTCcmOnWGVl8iglcvfGoYb3PbPJqJYqsSgJBpGdI=`. **Rollback** `BjUZjt2o...`
+      (revision 2; record its S3 version at step 0).
+    - **CTO condition (STOP rule):** print each packaged member's sha256, uploaded against live. EXACTLY `reporting_policies.json` may differ; a second
+      differing member is a STOP before the apply. Record it as read "7" (PASS when exactly one differs).
+    - **Plan:** `investor-reporting/ops -target=module.irpt_status`, the code only. No API change; the `/original` route stays exactly ONE.
+    - **Read "6":** `REQ-5e4149d2`'s owned read through irpt-status no longer refuses `RetentionRefused` (served, or a different typed refusal quoted).
+      Reads "0"-"2" are re-run for revision 3, with live `t6OJTCcm`. Reads "3"-"5" stay with the laptop spec @66b6d08b9c; they are unaffected
+      by a registry-only change.
+    - Write the result into the same `APPLY-Y1_after_reads.json` with `built_sha` `t6OJTCcm` and `revision` 3. On branch B, re-promote revision 2's
+      version. Copy `2.0.0_SA_COO~G2` on read "6" (YCDGEN FWD-1 grade).
+    - The checks `apply1_cells.py` are amended to these values (@e47eb94fa9). Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii)
+      on a modify.
   </steps>
 
   <acceptance>

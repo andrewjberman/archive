@@ -1,0 +1,31 @@
+IRPT_ANLREQ.TO-APPLY-Y1 REVISION 3 (AMENDMENT 2) -- step 0 pre-reads, 0.7.0_AE_CloudOps~DELL2, 2026-10-09 ~12:2xZ
+
+STATUS: HELD at step 0. The CTO's STOP condition is CLEARED; the ORIGIN condition is not yet met.
+
+(a) THE CTO STOP CONDITION IS CLEARED (CTO msg 3262, relayed by 2.0.0_SA_COO~Y2 msg 3268):
+    "the per-member diff may show exactly reporting_policies.json, otherwise STOP".
+    release-census at pin 5240156380, against the CURRENT live function:
+      function=irpt-status pin=5240156380 built_members=49 live_members=49
+      changed infra/logic/registry/reporting_policies.json built=1479826b5764 live=2bd3520dd386
+      changed_members=1
+    EXACTLY ONE member differs and it is exactly the named file. The condition is met, so revision 3
+    is sound to run -- it does not STOP.
+    Read in a DETACHED worktree at the pin (/c/dev/anl-r1-pin3), not in the shared tree.
+
+(b) THE ORIGIN CONDITION IS NOT MET YET, so nothing has been built or uploaded:
+      merge-base --is-ancestor 5240156380 origin/box/dell2  -> rc NONZERO
+      origin/box/dell2 tip                                   cd42e26d8a
+      control: origin/box/dell1 -> origin/box/dell2           rc nonzero, so the test DISCRIMINATES
+      the commit DOES exist locally (git cat-file -t -> commit), so this is a PUSH gap, not a bad pin
+    0.0.0_AB_MSTR has been asked (per Y2). This seat cannot push box/dell2 -- it is integrator-only
+    by never-rules-gate, and the audited override republishes every other seat's local commits, so
+    it is not the right instrument for clearing a wait.
+
+WHY THIS READ WAS WORTH DOING BEFORE THE WAIT ENDED: the STOP condition is a LOCAL property of the
+pin. Had the per-member diff shown anything besides reporting_policies.json, revision 3 would have
+been dead and the push would have been pointless. Clearing it first means the only thing left
+outstanding is mechanical.
+
+WHAT REMAINS, in order, once the pin is on origin: build and upload from the pin (expect t6OJTCcm),
+rollback source stays BjUZjt2o; ops then api applies; after-reads 1-5 plus read 6 = REQ-5e4149d2
+served, which 2.0.0_SA_COO~G2 is copied on for the YCDGEN FWD-1 grade.
