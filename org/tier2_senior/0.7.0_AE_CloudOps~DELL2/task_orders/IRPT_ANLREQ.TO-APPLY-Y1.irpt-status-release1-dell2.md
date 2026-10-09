@@ -75,6 +75,16 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
        - `read3_objects` [{key ("bucket/key"), version_id}], `deleted_on_andrews_word` false;
        - `ledger_closed`.
        Close the ledger and commit. Report.
+    **AMENDMENT 1 (issuer `2.0.0_SA_COO~Y2`, 2026-10-09 ~10:5xZ): REVISION 2 of the pair, on CTO msgs 3140/3163 (row IRPT_BCKEND-D2-S43). It SUPERSEDES the pin,
+    built and census above.**
+    - **Pair:** blob 0bb9a5a803 @ba918317c3; the COO half is signed by this amendment. CTO half AMENDMENT 2 (msg 3163), RE-SIGNED.
+    - **Pin** `f23639ea21` (`git worktree add --detach /c/dev/anl-r1-pin f23639ea21`). **Built** `BjUZjt2oq8GPJSibq4vD/0m8/LfdN0GF3THwCaBMVOM=`.
+    - **Step 0** adds: `merge-base --is-ancestor f23639ea21 origin/box/dell2` returns rc 0 (CTO condition: re-read before the upload; NOT on origin when this
+      amendment was cut). The census at the pin reads `changed_members=6`: the five above plus `status_installed.py`.
+    - **Step 0** also requires `python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/_authz/tests/test_unguarded_census.py` at the pin: 0 failed
+      (CTO condition). The ledger names `BjUZjt2o`.
+    - The checks `apply1_cells.py` are amended to `BjUZjt2o`. Everything else stands. Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii)
+      on a modify.
   </steps>
 
   <acceptance>
