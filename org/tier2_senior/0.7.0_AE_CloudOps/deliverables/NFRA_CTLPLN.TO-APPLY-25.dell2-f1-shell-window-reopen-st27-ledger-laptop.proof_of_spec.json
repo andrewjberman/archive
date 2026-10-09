@@ -21,21 +21,20 @@
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "DEPLOYED-VERIFIED",
-      "deploy_evidence": "B2 opened 2026-10-09T02:37:46Z at v6; live equals targeted plan; shell and F1 allowed; other host explicitDeny; no SSM command sent; C2 pending",
+      "deploy_evidence": "B2 opened 2026-10-09T02:37:46Z at v6; live equaled the targeted plan; C2 was superseded by TO-APPLY-26, whose standing-access apply landed at 2026-10-09T03:52:21.7867819Z and converged with an untargeted default-variable replan",
       "artifact_covered_by": ["AC1"]
     }
   ],
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "untargeted default Terraform plan exits 0 after C2",
+      "criterion_verbatim": "untargeted default Terraform plan exits 0 after the AMENDMENT 24 replacement apply",
       "method": "command",
       "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\"",
       "expect": "exit=0",
-      "output_evidence": "B2 targeted open-state replan exits 0; the governing criterion requires the untargeted default-variable close-state replan after C2",
-      "denominator": "one full untargeted root plan after C2",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "AC1 is explicitly read after C2, which triggers on dell2 V1 or at 2026-10-09T06:00Z without waiting."
+      "output_evidence": "dell2_shell_parity_20261009/replan.txt and replan-verdict.json: untargeted=true, default_variables=true, exit=0, no_changes=true after the replacement apply",
+      "denominator": "one full untargeted default-variable root plan after TO-APPLY-26",
+      "status": "PASS"
     }
   ],
   "controls": {
@@ -52,6 +51,13 @@
       "expected_not_landed": "allowed",
       "observed": "explicitDeny",
       "status": "PASS"
+    },
+    "replacement_apply": {
+      "description": "AMENDMENT 1 superseded C2 with the standing-access apply",
+      "expected_landed": "TO-APPLY-26 live v7 equals the repository policy and the untargeted default plan converges",
+      "expected_not_landed": "temporary v6 remains live or the default plan has changes",
+      "observed": "v7 equals the repository policy and the untargeted default plan exits 0 with no changes",
+      "status": "PASS"
     }
   },
   "never_widen_pair": {
@@ -59,12 +65,12 @@
     "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D2_SENDCOMMAND_AND_F1_SHELL_WINDOW_20261008.md@ac2c6e852d"
   },
   "risk_class": "WORLD",
-  "rollback": "C2 uses a plain default-variable exact 0/1/0 saved plan on only aws_iam_policy.dell2_ssm, verifies DenyShellDocuments explicitDeny, requires an untargeted default replan exit 0, closes the ledger, and deletes the scratch directory at V1 or 06:00Z.",
-  "scope": "B2 is complete for st27 under the standing-consent addendum at 5c2d9da8b2; C2 remains mandatory.",
+  "rollback": "Re-apply the NFRA_CTLPLN identity root at AMENDMENT 24 merge first parent d3918e91e4f9c1a6bc081bde6c25b7c4451617d4 using a newly reviewed exact 0/1/0 saved plan, restoring the temporary-window policy state that was live before TO-APPLY-26.",
+  "scope": "B2 completed the st27 temporary window; issuer AMENDMENT 1 superseded C2, and TO-APPLY-26 replaced the open window with standing shell parity.",
   "declared_exclusions": [
     {
-      "item": "C2 close, final AC1, and scratch deletion",
-      "reason": "They trigger on dell2 V1 or at 2026-10-09T06:00Z without waiting."
+      "item": "dell2 command execution",
+      "reason": "No SSM command was sent by this seat; Dell command sends are reported separately after the fact."
     }
   ],
   "surprises": [],
@@ -73,7 +79,7 @@
     {
       "tool": "terraform plan",
       "invocation": "targeted at aws_iam_policy.dell2_ssm with open_dell2_f1_shell_window=true, shared TF_PLUGIN_CACHE_DIR, and isolated TF_DATA_DIR",
-      "result": "pre-apply exact 0/1/0; post-apply targeted open-state exit 0 with no changes"
+      "result": "B2 pre-apply exact 0/1/0; B2 targeted open-state replan exit 0; TO-APPLY-26 replacement replan untargeted/default exit 0 with no changes"
     },
     {
       "tool": "aws iam simulate-principal-policy",
