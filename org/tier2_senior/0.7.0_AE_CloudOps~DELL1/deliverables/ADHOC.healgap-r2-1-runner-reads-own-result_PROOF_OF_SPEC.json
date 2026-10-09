@@ -19,7 +19,7 @@
   "risk_class": "WORLD",
   "rollback": "Revert commit ba88934f7b (a 7-line insertion) and re-apply the same target: the policy document returns to its three-statement form. The grant is additive and read-only, so the rollback removes one Allow and touches no written key. Trigger: any criterion failing, or the issuer withdrawing ruling H. No artifact version is involved -- aws_iam_role_policy carries no versioned object.",
   "scope": "ONE statement added to aws_iam_role_policy.cot_rebalancer_runner_write: Sid ReadOwnRunResult, Allow s3:GetObject on the runner's own blackdiamond/cottonwood/meta/*-result.json, so the runner can read an earlier run's result object and record healed_at (row MDPF_HEALGAP-D1-W3-S1, ruling R2-1). Edit, commit, targeted plan, targeted apply, live read-back, Step F report.",
-  "status": "THE ACT IS LANDED AND VERIFIED IN THE WORLD. C1, C2, C3, C4, C7, C8 PASS. C5 is UNCOMPUTABLE ON THIS BOX -- an instrument refusal, controlled -- and C6 follows it, so the ledger is deliberately HELD-SOVEREIGN-GATED rather than closed. The order is NOT flipped complete.",
+  "status": "COMPLETE. 8 of 8 criteria PASS (C5 as C5a, the half amendment A2 assigns here; C5b is the issuer's at act 3 on 2026-10-10 and is not claimed in this instance). The grant is live and verified, the ledger is CLOSED with all 3 legs proven and its sentinel unlinked, and the order is flipped complete. Two surprises were filed and both are resolved: D1-S9 (the naming limb refusing the order's own statement text) by CTO ruling H and amendment A1; D1-S10 (C5 unrunnable on this box) by amendment A2's split, with the underlying dell1 iam:SimulatePrincipalPolicy gap left standing and owned -- see row D1-S11.",
   "go_message": "2.0.0_SA_COO~G1 msg 1832 (GO after 07:10Z, acked READ), then msg 1977 (re-GO from scope 2 under amendment A1, acked READ). Scope 1's hold was honoured: the first act was at 07:10:38Z.",
   "controls": {
     "the_check_script_discriminates_in_both_directions": {
@@ -65,6 +65,13 @@
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "The NEVER-2 ledger entry, 3 legs. L1 (git) and L2 (activation) CLOSED with proof. L3 (verify) open on C5 alone; the entry is HELD-SOVEREIGN-GATED, which deploy_ledger renders 'apply legs proven, only verify open; tracked-not-stranded' rather than a half-landed RED. Its sentinel org/critical_paths/.open_deploys/healgap-r2-1-runner-reads-own-result-dell1-20261009.json rides the same commit, because the sentinel is the gate's only input."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/healgap_r2_1_c5a_identity_policy_eval.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The C5a evaluator, committed so the verdict is reproducible rather than a claim in prose. Reads every fetched identity-based policy document, applies explicit-Deny-wins / else-Allow / else-implicitDeny with IAM glob semantics, refuses to run on an empty carrier file (a hole in the denominator is not an empty policy), and prints its own discrimination check. Passed .tools/commit-gate.sh: 'OK: pre-commit gate clean for 1 of 1 file(s)'. Captured output beside it at healgap_r2_1_c5a_eval.out."
     }
   ],
   "acceptance": [
@@ -109,20 +116,19 @@
       "criterion_verbatim": "allowed / implicitDeny / explicitDeny, in that order (the -result.json grant only; the complete-stamp and the 49f tree stay closed)",
       "method": "command",
       "invocation": ".tools/aws iam simulate-principal-policy --policy-source-arn <role arn> --action-names s3:GetObject --resource-arns arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/2026-10-09-result.json arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/meta/2026-10-09-complete.json arn:aws:s3:::opal-data-assets/blackdiamond/49f/meta/2026-10-09-result.json",
-      "output_evidence": "NOT RUN. The first arm returned AccessDenied: 'User: arn:aws:iam::313476888478:user/cloudops-dell1-agent-user is not authorized to perform: iam:SimulatePrincipalPolicy on resource: arn:aws:iam::313476888478:role/cot-rebalancer-runner-role'. CONTROLLED: the same action against the caller's OWN user ARN returns 'allowed', so the grant is resource-scoped to self and the refusal is the instrument, not a statement about the target. iam:SimulateCustomPolicy is denied too, so no substitute instrument exists on this box. The three arms were deliberately planned as SEPARATE invocations because two or more --resource-arns in one call flip the held ones to implicitDeny.",
-      "denominator": "0 of 3 arms run; 2 of 2 controls run",
-      "status": "UNCOMPUTABLE",
-      "status_reason": "A missing grant on THIS seat's own principal, not a property of the deployed change. Reported as row MDPF_HEALGAP-D1-S10 and carried on the ledger hold, whose gate names the exact action and resource. Never reported as a pass: ABSENT is not EXERCISED-AGAINST."
+      "output_evidence": "GRADED AS C5a, per amendment A2 @37ce04cf93, which SPLIT this criterion after the issuer re-measured the simulate refusal at 08:0xZ: C5a is the deny arms read from the LIVE policy documents (not a simulation) and is this seat's; C5b is the ALLOW arm, EXERCISED by the issuer at MDPF_HEALGAP act 3 on 2026-10-10 via hg_r2_act3.py --repaired 2026-10-10, and A2 states it is not on this seat's ledger. C5a PASSES 4 of 4 arms. The denominator is NOT the one policy this order edited: it is ALL FIVE identity-based carriers on the principal -- 3 inline (cot-rebalancer-runner-invoke-silver-blackdiamond, cot-rebalancer-runner-session-read, cot-rebalancer-runner-write-cot) plus the 2 attached managed policies at their default versions (opal-assets-one-way-fan-in-fence v1, AWSLambdaBasicExecutionRole v1) -- 10 statements in total, because an Allow living in another carrier would falsify an implicit-deny claim scoped to one document. ARMS: the result key -> allowed, matched ONLY by write-cot/ReadOwnRunResult; a bronze/* key (A2's arm) -> implicitDeny with zero Allow and zero Deny matches; the complete-stamp (C5's ORIGINAL implicit arm, graded as well rather than dropped) -> implicitDeny; the 49f key -> explicitDeny, matched ONLY by DenyBlackdiamond49fFirmSep. THE EVALUATOR IS SHOWN TO DISCRIMINATE: 3 distinct verdicts across the 4 arms, so an always-implicitDeny or always-allow bug is excluded. DECLARED LIMIT, so the verdict is not read wider than it is: identity-based policies ONLY -- no bucket policy, SCP, permission boundary or session policy is evaluated, and a matching conditioned statement would have been REPORTED rather than silently resolved (none matched). One carrier fetch initially wrote a 0-byte file when a shell pipeline mangled the AWS-managed ARN; that hole was refetched with a corruption oracle (echo the argument back) rather than counted as an empty policy. Reproducible: deliverables/healgap_r2_1_c5a_identity_policy_eval.py, output captured at deliverables/healgap_r2_1_c5a_eval.out.",
+      "denominator": "4 of 4 arms match, over 5 identity-based carriers and 10 statements; 3 distinct verdicts",
+      "status": "PASS",
+      "status_reason": "PASS on C5a, the half amendment A2 assigns to this seat. C5b is NOT claimed here: it is the issuer's, exercised at act 3 on 2026-10-10. Recorded this way rather than as a bare C5 PASS so the instance cannot be read as evidence for an allow arm this seat never exercised."
     },
     {
       "criterion_id": "C6",
       "criterion_verbatim": "this order's ledger CLOSED, every leg proven",
       "method": "command",
       "invocation": "python .tools/deploy_ledger.py check",
-      "output_evidence": "HELD-SOVEREIGN-GATED, rendered 'apply legs proven, only verify open; tracked-not-stranded'. L1 and L2 CLOSED with proof; L3 open on C5 alone, with a named gate and a re-read EVENT. Closing it now would be precisely the DRIFT-DANGEROUS state this seat surfaced on two other entries in this same session -- an entry reading terminal over an unproven leg, a NEVER#6 bypass wearing a compliance mask.",
-      "denominator": "2 of 3 legs closed with proof; 1 held on a named gate",
-      "status": "UNCOMPUTABLE",
-      "status_reason": "Follows C5 and nothing else. It becomes computable the moment C5's three arms can run, or the issuer grades them from a box holding iam:SimulatePrincipalPolicy."
+      "output_evidence": "CLOSED, all 3 legs proven: 'OK: CLOSED deploy ledger healgap-r2-1-runner-reads-own-result-dell1-20261009 -- all 3 legs proven; sentinel removed'. Verified three ways rather than on the tool's word: deploy_ledger.py check no longer lists the slug at all (0 occurrences in the OPEN/HELD report); the sentinel org/critical_paths/.open_deploys/healgap-r2-1-runner-reads-own-result-dell1-20261009.json is UNLINKED, which is what CLOSED means (deploy_ledger.py:466, and :248 warns a live sentinel over a CLOSED entry is a hand-edit tell); and the entry's own tail reads '20261009T080507Z CLOSED -- all 3 legs proven'. The entry carries its whole history including the intermediate HELD-SOVEREIGN-GATED state and its release, so the hold is part of the record rather than erased by the close.",
+      "denominator": "3 of 3 legs closed with proof; 0 open; sentinel unlinked",
+      "status": "PASS"
     },
     {
       "criterion_id": "C7",
@@ -159,11 +165,13 @@
   ],
   "surprises": [
     "MDPF_HEALGAP-D1-S9 @20ec950171: the naming commit limb REFUSED the order's own verbatim scope-2 statement text, grading the typed 'cottonwood' a NEW hand-kept carrier. Resolved by CTO~DELL1 ruling H @1af255b7da and issuer amendment A1 @83028dca8a, which read the firm from locals.monolith_source_scopes instead. The rendered ARN is identical, so nothing about the grant changed -- only how the firm is spelled in source.",
-    "MDPF_HEALGAP-D1-S10: C5 cannot be exercised from dell1. iam:SimulatePrincipalPolicy is granted to this seat's principal only for its OWN ARN (controlled: self returns 'allowed', the runner role returns AccessDenied), and iam:SimulateCustomPolicy is absent, so there is no substitute instrument. The deployed change is unaffected; the gap is in this box's IAM parity."
+    "MDPF_HEALGAP-D1-S10: C5 cannot be exercised from dell1. iam:SimulatePrincipalPolicy is granted to this seat's principal only for its OWN ARN (controlled: self returns 'allowed', the runner role returns AccessDenied), and iam:SimulateCustomPolicy is absent, so there is no substitute instrument. The deployed change is unaffected; the gap is in this box's IAM parity.",
+    "MDPF_HEALGAP-D1-S11: the disposition of D1-S10. Amendment A2 @37ce04cf93 split C5 rather than waiting on the grant, so this order closes; the dell1 iam:SimulatePrincipalPolicy gap itself is NOT closed by that and stays owned, because it will meet the next WORLD-risk IAM order assigned to this box at its verify step."
   ],
   "forward_notes": [
     "The same naming-limb class will refuse any future NEW firm-token literal in an existing pipeline's .tf. Ruling H's one() form is the reusable remedy wherever the root already declares the firm; where it does not, the R20 declared-exception path is the mechanism's own answer and it needs Andrew's word.",
-    "healed_at should now be able to read non-null on the next run that heals an earlier missing feed. That behaviour is the issuer's to read -- this order granted the permission and deliberately did not exercise the runner."
+    "healed_at should now be able to read non-null on the next run that heals an earlier missing feed. That behaviour is the issuer's to read -- this order granted the permission and deliberately did not exercise the runner.",
+    "The dell1 iam:SimulatePrincipalPolicy gap outlives this order. A2 routed around it by splitting C5; the next WORLD-risk IAM order assigned to this box will hit it again at its verify step, not its apply step. Row D1-S11 carries it with its two acceptable remedies."
   ],
   "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/2026-10-09/four_orders_three_clock_gated_and_a_blocking_finding_measured_closed.md",
   "compiler_tools": [
