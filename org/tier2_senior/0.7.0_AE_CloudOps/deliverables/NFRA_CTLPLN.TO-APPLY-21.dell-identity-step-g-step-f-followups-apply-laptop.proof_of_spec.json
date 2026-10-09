@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-21.dell-identity-step-g-step-f-followups-apply-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-21.dell-identity-step-g-step-f-followups-apply-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "728d81b2c8ed022cedee0ddec391e86f0e4110dc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "83326afe6f",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-21.dell-identity-step-g-step-f-followups-apply-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_stepg_20261009/after.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "00:29:00Z0/2/0;12/12livearms;fullreplan0",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py expect cutover_ok=23/23",
+      "method": "test_suite",
+      "invocation": "python infra/aws/terraform/nfra-ctlpln-identity/tests/simulate_policy.py",
+      "expect": "cutover_ok=23/23",
+      "output_evidence": "POLICY-SIM allowed_ok=22/22 denied_ok=15/15 passrole_ok=5/5 protected_ok=8/8 freed_allowed=72/72 freed_excluded=3 undo_freed=167/167 undo_still_denied=443 cutover_ok=23/23 selfsim_ok=9/9 ssm_ok=15/15 iamw_ok=225/225 planread_ok=423/423 sendcmd_ok=34/34 shellwin_ok=18/18 routes_freed=114/138 routes_still_refused=24 vendor_ok=249/249 all_ok=True",
+      "denominator": "23/23 cutover arms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "terraform root plan -detailed-exitcode expect exit=0",
+      "method": "live_read",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\"",
+      "expect": "exit=0",
+      "output_evidence": "No changes. Your infrastructure matches the configuration. exit=0",
+      "denominator": "one root full plan",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "cutover_write": {
+      "description": "BothDells PutParameter beforeallowed afterexplicitDeny",
+      "expected_landed": "explicitDeny",
+      "expected_not_landed": "allowed",
+      "observed": "explicitDeny",
+      "status": "PASS"
+    },
+    "public_key_read": {
+      "description": "IRPT publickey beforeimplicitDeny afterallowed",
+      "expected_landed": "allowed",
+      "expected_not_landed": "implicitDeny",
+      "observed": "allowed",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_G_STEP_F_FOLLOWUPS_20261008.md@737a66ea46",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_STEP_G_AND_PARTNER_ROSTER_20261009.md@21a5ceab0f section1"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Under issuer rollback authority re-apply root at83326afe6f first parent, removing added secretARN and cutoverDeny.",
+  "scope": "StepG only;two policy updates;simulation-only;no secret value read",
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_stepg_20261009/REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam simulate cloudops-dell1-agent-user ssm:PutParameter arn:aws:ssm:us-east-1:313476888478:parameter/mdpf/custody_source",
+      "result": "Role resolution cannot resolve IAMuser;no verdict. Used live simulate-principal-policy with exact userARNs, one resource per call."
+    }
+  ]
+}
