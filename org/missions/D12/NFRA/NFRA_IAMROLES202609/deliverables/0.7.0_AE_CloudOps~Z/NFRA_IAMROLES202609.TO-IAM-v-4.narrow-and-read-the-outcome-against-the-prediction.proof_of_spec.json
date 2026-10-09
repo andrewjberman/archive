@@ -1,0 +1,189 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_IAMROLES202609.TO-IAM-v-4",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~Z",
+ "spec_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/prd/NFRA_IAMROLES202609_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "3cadaf52ca"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D12/NFRA/NFRA_IAMROLES202609/decompositions/NFRA_IAMROLES202609_DECOMP_R5.md",
+  "vintage_commit": "c52a275259",
+  "to_ref": "org/missions/D12/NFRA/NFRA_IAMROLES202609/task-orders/NFRA_IAMROLES202609.TO-IAM-v-4.narrow-and-read-the-outcome-against-the-prediction.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/smartx-pipeline/assets-pull-iam.tf",
+   "kind": "terraform",
+   "commit_or_etag": "e02476796b",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The narrowing itself: line 101's ReadAuthBundle Action goes from ['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret'] to ['secretsmanager:GetSecretValue']. Applied with `git apply` from worker ~13's own narrowing.patch -- never retyped -- after --check passed; 1 insertion, 1 deletion, terraform fmt -check clean. BEFORE was measured live rather than taken from PREDICTION.json: ReadAuthBundle carried both actions over 5 resources and the file's line 101 held the exact bytes the patch targets. The plan was graded from show -json by DECOMPOSING the policy document per Sid, because an IAM role policy is ONE opaque attribute in the plan and '0 add, 1 change, 0 destroy' would read identically had the change dropped a resource or widened another statement: REMOVED exactly {'ReadAuthBundle': ['secretsmanager:DescribeSecret']}, ADDED {}, and the resource sets identical across all four statements. Applied from the SAVED plan through safe-apply. AFTER, read on the world rather than from the apply's own output (which a positional head had truncated): ReadAuthBundle reads ['secretsmanager:GetSecretValue'] alone over its 5 resources, 4 statements intact, targeted re-plan 'No changes.'",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~Z/fwd5/OUTCOME.md",
+   "kind": "doc",
+   "commit_or_etag": "2cbd044a43",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The outcome record. Sections 2-3 quote the raw simulate-principal-policy JSON verbatim: the removed action reads implicitDeny on 5 of 5 ReadAuthBundle resources, and the retained action reads allowed on 5 of 5 in SEPARATE invocations, with a second control (PutSecretValue on the jwt secret, a different statement) also allowed. ONE --resource-arns per call throughout, because two or more in a single call flips the HELD ones to implicitDeny and would have manufactured the very result under test. All five ARNs were RESOLVED from list-secrets (100 listed) rather than typed as patterns, so each decision is about an object that exists. Sections 7-8 carry the observation window and the MATCHES-PREDICTION line, which was EMITTED from the observed falsifier set rather than typed. Section 9 records two instrument limits, the first because it nearly produced a false ARMED row against a healthy run.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261009T1028Z_iamroles-fwd5-narrowing_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "2cbd044a43",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The NEVER-2 ledger, opened with its sentinel BEFORE anything else (step 1) at f07f3dcc87 and CLOSED with all 3 legs proven and the sentinel removed. TF carries the plan audit and the apply; SIM the simulate read-back and its isolated control; OBS the observation window. Leg OBS was deliberately held open across the apply rather than closed on the prediction -- the ledger read 'stranded=[OBS]' for three hours by design, because the thing it proves had not happened yet.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~13/PREDICTION.json",
+   "kind": "doc",
+   "commit_or_etag": "8b4a05987c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The prediction under test, committed by IAM-v-3 (0.9.0_WK_NFRA_IAMROLES202609~13) at 8b4a05987c, 2026-10-09 09:41Z -- BEFORE the narrowing applied at e02476796b, which `git merge-base --is-ancestor 8b4a05987c e02476796b` confirms. That ordering is the whole point of FWD-5 and it is checkable from git rather than from my account of it. The file names the role, the action, the terraform file and line, predicted_breaks [], the predicted post-state, the observation window with its rule for choosing D, four falsifiers and the exact_revert. It was read as the contract for this cell rather than as background: every figure in OUTCOME.md sections 4, 7 and 8 answers a clause of it.",
+   "artifact_covered_by": [
+    "AC2",
+    "AC4"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: 1 or greater -- the removed action now reads implicitDeny on the live role, so the narrowing landed; a \"No such file\" error means it was not done.",
+   "method": "command",
+   "invocation": "grep -c '\"EvalDecision\": \"implicitDeny\"' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~Z/fwd5/OUTCOME.md",
+   "output_evidence": "5\nexit=0",
+   "denominator": "5 of the 5 ReadAuthBundle resources read implicitDeny for the removed action, one simulate invocation each. The criterion asks for 1 or greater; the record carries the full 5 rather than the minimum, because the statement grants over five resource patterns and a single one would not show the capability gone from all of them.",
+   "status": "PASS",
+   "status_reason": "The removed action reads implicitDeny on the live role, 5 of 5. The issuer recorded the base as FAIL (file absent). What makes these denies a fact about the ACTION rather than about the call is the control in section 3, run in SEPARATE invocations against the same principal and the same resources: the retained GetSecretValue reads allowed 5 of 5. Two instrument traps were honoured rather than hoped past -- one --resource-arns per call (two or more flips the HELD ones to implicitDeny and would have manufactured this result), and the ARNs resolved from list-secrets so an allowed could not be a pattern match against nothing. One limit is stated rather than hidden: a nonexistent action ALSO returns implicitDeny, and accessanalyzer validate-policy is barred here by C-ANALYZER-PRICED-FIRST and G-25, so the action name is corroborated instead by AWS having accepted this exact string inside the role's policy until this morning and by GetSecretValue returning allowed on the same call shape. implicitDeny is also the CORRECT verdict rather than explicitDeny, because an Allow was removed and no Deny was added.",
+   "expect": "(?s)\\A5\\s*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: exactly 1 -- the outcome is read against the prediction and stated either way; a `no` passes this criterion and is graded at AC4.",
+   "method": "command",
+   "invocation": "grep -c -E '^MATCHES-PREDICTION: (yes|no)$' org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.7.0_AE_CloudOps~Z/fwd5/OUTCOME.md",
+   "output_evidence": "1\nexit=0",
+   "denominator": "Exactly 1 line-anchored verdict line in the file. 4 falsifiers evaluated, 0 fired, over 103 log events on the D stream and 16 CloudTrail events.",
+   "status": "PASS",
+   "status_reason": "The outcome is read against the prediction and stated: MATCHES-PREDICTION: yes, and the line was EMITTED from the observed falsifier set by the finaliser rather than typed, so it cannot disagree with the table above it. The verdict rests on 0 of 4 firing: F1 zero AccessDenied in the D stream; F2 zero AccessDenied/UnauthorizedOperation and zero DescribeSecret events of ANY outcome -- the sharpest limb, because it fires on the CALL and not merely on a failure; F3 GetSecretValue 6, the stated baseline; F4 one ERROR line matched by signature to the standing DirtyRunError baseline that 30 of 30 prior daily runs carry, and 0 others. The read was taken at 13:32Z, after the prediction's own stated earliest_read of 13:30Z, on the FIRST scheduled run after the apply (REPORT Duration 740.3s, inside the recorded 537-859s band). F3's number is worth one more sentence because it MOVED: an earlier read at 13:17Z returned 4 with one REPORT line present, and rather than argue that 4-against-6 was mid-accumulation I re-read after the day's second invocation and it arrived at 6. A guard on the finaliser also fired usefully: it initially refused on the bare substring MATCHES-PREDICTION, which section 6 mentions in prose, and was tightened to AC2's own line-anchored predicate -- so the file now carries exactly one verdict and no prose mention can be miscounted as one.",
+   "expect": "(?s)\\A1\\s*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: `open=0` and `closed=` 1 or greater -- the deploy ledger was opened and closed for this act.",
+   "method": "command",
+   "invocation": "bash -c \"echo open=\\$(ls -a org/critical_paths/.open_deploys/ | grep -c 'iamroles-fwd5-narrowing') closed=\\$(ls org/critical_paths/change_management/ | grep -c 'iamroles-fwd5-narrowing')\"",
+   "output_evidence": "open=0 closed=1\nexit=0",
+   "denominator": "Two directory listings: 0 sentinels remaining under .open_deploys/ and 1 completion entry under change_management/. The listing uses `ls -a` rather than `ls -1`, which matters because the dotfile .unindexed_red_state.json lives in that directory and a plain listing hides it.",
+   "status": "PASS",
+   "status_reason": "The ledger was opened before anything else and closed only after every leg had its own proof. It is worth saying what the 0 is NOT: the entry was not closed early to make this read clean. Leg OBS stayed open for about three hours across the apply, and the ledger listed 'stranded=[OBS]' during that time, because the observation window had not happened yet and closing on the prediction would have been exactly the failure FWD-5 exists to prevent. All 3 legs are proven and no rollback is owed; PREDICTION.json's exact_revert (git apply -R narrowing.patch then the same safe-apply) stays available and unused.",
+   "expect": "(?s)\\Aopen=0 closed=1\\s*exit=0"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "AC4 (JUDGMENT, never self-graded): was the check believed -- the prediction on record before the change, the outcome read in the window it named, and the two agreeing (or the disagreement found, said and rolled back)?",
+   "method": "manual_read_with_citation",
+   "invocation": "NOT RUN BY THIS SEAT -- judgment, graded by 3.0.0_SA_CVO~Z",
+   "output_evidence": "Not produced. The order directs this seat to record AC4 UNVERIFIABLE-BY-INSTRUMENT naming the CVO, so no verdict is manufactured here. The material to grade is PREDICTION.json at its pre-change commit, OUTCOME.md at 2cbd044a43, and the ledger's three leg proofs.",
+   "denominator": "3 clauses to judge (prediction on record BEFORE the change; outcome read in the window it named; the two agreeing or the disagreement said); 0 graded by this seat.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Graded by 3.0.0_SA_CVO~Z. It asks whether the check was BELIEVED, which the seat that acted on the belief cannot score for itself. What I can put on the record for the grading, each checkable without taking my word: (1) PREDICTION.json was committed by IAM-v-3 at 8b4a05987c (09:41Z), BEFORE the narrowing applied at e02476796b, and `git merge-base --is-ancestor 8b4a05987c e02476796b` returns true -- that ordering is a git fact, not my account of it. I had first cited the pin approximately and the checker refused the row; the measured pin is better evidence than the approximate one. (2) The outcome was read in the window the prediction named, not a window chosen afterwards: D was selected by the prediction's own rule, and the read was taken at 13:32Z after its stated earliest_read of 13:30Z, on the first scheduled run after the apply. (3) The two agree: predicted_breaks [] against 0 of 4 falsifiers fired, and the predicted post-state matched clause by clause. THE HONEST QUALIFICATION, which belongs to the CVO's judgment rather than mine: a prediction of NO breakage is the easy case to confirm, because nothing had to be noticed for it to hold. The strongest thing I can say against my own verdict is that the observation window tests one day's runs of one consumer, and the prediction's own 90-day Access Advisor and 89-day CloudTrail evidence -- DescribeSecret 0 of 1446 management events -- is what makes one day sufficient rather than the day itself. I also recorded in OUTCOME.md section 9 that I came close to filing a FALSE finding against this healthy run from a stale stream timestamp; that is the kind of near-miss the CVO should weigh when judging whether the check was believed or merely confirmed.",
+   "expect": "Judgment criterion -- the CVO's verdict; no command expectation."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Readers were shown able to go both ways. (1) The issuer recorded the base as AC1 FAIL (file absent), AC2 FAIL, AC3 FAIL; all three moved. (2) The simulate instrument was shown able to say BOTH words about the same principal and the same resources: implicitDeny for the removed action and allowed for the retained one, in separate invocations -- so the denies are about the action rather than about the call. (3) The plan grader decomposes the policy per Sid and reports source_code_hash-style per-field movement, so a dropped resource or a widened sibling statement would have failed it; on the sibling r29 policy apply the same grader proved a field UNCHANGED, which is the inverse demonstration. (4) The observation read distinguished a complete stream from an incomplete one by the REPORT line and exited 3 when absent, and it distinguished a healthy run from a fast failure by the run's own Duration -- a distinction the stream metadata actively got wrong (6s against 802.6s). (5) The AC2 finaliser guard initially refused on a prose mention, which proves it was actually evaluating the file rather than passing by construction.",
+   "expected": "All three mechanical criteria move FAIL -> PASS; the simulate instrument returns both decisions under the right conditions; and no control passes because nothing was looked at.",
+   "observed": "AC1 5, AC2 1, AC3 open=0 closed=1. implicitDeny 5 of 5 against allowed 5 of 5 on the same resources. 0 of 4 falsifiers fired over a printed denominator of 103 log events and 16 CloudTrail events. GetSecretValue moved 4 -> 6 across two reads as the day's second invocation completed, which is the per-day baseline.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Every world read came from an instrument separate from the act, and every count was paginated to exhaustion with its denominator printed. The simulate calls were one-resource-per-invocation with the control isolated. The observation read used boto3 rather than the aws CLI deliberately: the log group name begins with a slash and MSYS path-converted it, failing the CLI's own parameter regex -- boto3 takes the string as given. Both the log plane and CloudTrail were read for the same day, so the F1/F3 and F2 limbs are independent planes answering the same question.",
+   "observed": "The two planes agree: zero AccessDenied in 103 log events and zero denied events in 16 CloudTrail events, with GetSecretValue present on both (6 in CloudTrail) and DescribeSecret absent from both. The live policy read the same narrowed statement through both my own get-role-policy and the simulate results. The run's Duration (740.3s) sits inside the prediction's independently recorded band.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "AC4, whether the check was believed.",
+   "reason": "Judgment, never self-graded, recorded UNVERIFIABLE-BY-INSTRUMENT naming 3.0.0_SA_CVO~Z. Its status_reason states the three clauses' evidence AND the strongest qualification against my own verdict, so the CVO does not have to find it."
+  },
+  {
+   "item": "Any rollback.",
+   "reason": "None was owed: 0 of 4 falsifiers fired. PREDICTION.json's exact_revert (git apply -R narrowing.patch then the same safe-apply, verified by DescribeSecret reading allowed again) stays available and unused. Step 6's rollback branch did not arm."
+  },
+  {
+   "item": "Any second narrowing, or any widening anywhere on this role.",
+   "reason": "ONE ACTION, ONE ROLE, ONE FILE. The plan grader asserted the three sibling statements' action sets and all four resource sets identical, so nothing else on the role moved in either direction."
+  },
+  {
+   "item": "accessanalyzer validate-policy, which would settle whether the removed action name is real.",
+   "reason": "Barred by C-ANALYZER-PRICED-FIRST and G-25. The gap is stated in AC1's status_reason and in OUTCOME.md section 5 rather than papered over, with the two corroborations that stand in for it."
+  },
+  {
+   "item": "The second scheduled invocation of the consumer as a separate acceptance.",
+   "reason": "Not asked for. It is reported only because it moved F3's per-day count from 4 to its 6 baseline between two reads, which is the context that makes F3's pass sound rather than marginal."
+  }
+ ],
+ "surprises": [],
+ "session_log": "This seat is a SESSION seat, not an L7 worker subagent. GO: 2.0.0_SA_COO~ZI msg 32648/32652. The cell was sequenced deliberately rather than taken in the order it arrived: its apply had a soft deadline (an apply before 13:02Z makes TODAY'S run the read instead of tomorrow's) and its role, smartx-assets-pull-role, is disjoint from the gateway work that owned the rest of the window -- so it went first, before the r29 window opened, and that choice is what let the whole cell close in one session instead of two. Both halves were verified AT HEAD and verified to NAME this role and this action rather than merely to exist. The BEFORE state was measured live rather than inherited from PREDICTION.json, and the patch was applied from worker ~13's own file rather than retyped. The plan was graded by decomposing the policy document per Sid, because the headline 0/1/0 cannot see a dropped resource. Then the cell waited, which was the substance of it: leg OBS stayed open for about three hours and the ledger listed it stranded, because closing on the prediction would have been the exact failure FWD-5 exists to prevent. The observation read was taken after the prediction's own stated clock even though its stated completeness test (the REPORT line) had been met earlier, and the extra wait paid for itself twice -- the day's second invocation landed and moved F3's count to its baseline, and an earlier reading of 4 that I would otherwise have had to argue about became a non-issue. One near-miss is recorded in OUTCOME.md section 9 because it is the most instructive thing in this cell: a stale describe_log_streams timestamp showed a 6-second span for an 802-second run, which against the prediction's 537-859s band looked exactly like a run that authenticated and exited early -- the one shape F3 cannot catch. I chased the discrepancy instead of filing it, found the run's own REPORT Duration, and did not file a false ARMED row. Nothing was applied outside the one action, one role, one file.",
+ "compiler_tools": [
+  {
+   "tool": "terraform",
+   "invocation": "init; plan -target the one policy, saved; show -json; apply the saved plan; targeted re-plan",
+   "result": "PASS",
+   "note": "Graded by a script that decomposes the policy per Sid and compares action sets, effects, conditions and resource sets, then prints REMOVED and ADDED. That is the only read that can tell 'one action dropped' from 'one resource dropped', because the whole policy is one opaque attribute in the plan."
+  },
+  {
+   "tool": "safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/smartx-pipeline apply <saved plan>",
+   "result": "PASS",
+   "note": "From a SAVED plan. comp-tagauthz PASSED and the tombstone gate read CLEAN. The naming-apply-gate WARNed on two pre-existing out-of-pattern names and refused nothing. The apply's own stdout was initially read through a positional head that truncated the verdict, so the result was taken from the WORLD instead -- the live policy and a re-plan."
+  },
+  {
+   "tool": "aws iam simulate-principal-policy",
+   "invocation": "11 invocations: the removed action on each of 5 resolved ARNs, the retained action on each of the same 5 as isolated controls, and PutSecretValue on the jwt secret",
+   "result": "PASS",
+   "note": "ONE --resource-arns per call throughout, because two or more in a single call flips the HELD ones to implicitDeny and would have manufactured the result under test; and the control is a SEPARATE invocation, because a positive control run alongside the target is disarmed by that same mode. ARNs resolved from list-secrets (100 listed) so an allowed cannot be a pattern match against a non-object."
+  },
+  {
+   "tool": "boto3 logs + cloudtrail (the observation read)",
+   "invocation": "describe_log_streams, filter_log_events and lookup_events, each paginated to exhaustion",
+   "result": "PARTIAL",
+   "note": "PARTIAL and not PASS, deliberately. The reads are sound and the verdict stands, but two limits came out of them and both are recorded in OUTCOME.md section 9: describe_log_streams' lastEventTimestamp LAGS the events and reported a 6-second span for an 802-second run, and a per-day total read between two scheduled invocations under-reports. boto3 was chosen over the aws CLI because the log group name begins with a slash and MSYS path-converted it into a value that failed the CLI's own parameter regex."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open with 3 legs, close-leg x3, close",
+   "result": "PASS",
+   "note": "Opened before anything else per step 1. Leg OBS held open for about three hours by design, and the tool's own list showed it stranded in the meantime -- the correct appearance for a verify that has not happened yet."
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "BOUND via --governing-order with the declared set, plus a wrong-set negative control",
+   "result": "PASS",
+   "note": "Run bound rather than bare, because a bare run prints its own bound ('no expected_criterion_ids given -- COVERAGE UNCHECKED')."
+  },
+  {
+   "tool": "comp-iam / Access Analyzer",
+   "invocation": "NOT USED",
+   "result": "SKIP",
+   "note": "Access Analyzer is barred by C-ANALYZER-PRICED-FIRST and G-25, and that bar is what forces the action-name corroboration in AC1's status_reason. comp-iam models (action) and never (action, resource), so it could not have answered the only question here -- whether ONE action is gone from ONE statement over five specific resources. The live simulate at resource grain is the instrument that can."
+  }
+ ]
+}

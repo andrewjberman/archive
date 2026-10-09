@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-30.svc-irpt-reader-dell2-window-served-read-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~CTL/task_orders/NFRA_CTLPLN.TO-APPLY-30.svc-irpt-reader-dell2-window-served-read-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "ecff672a79848fd8cfddce1335b0b11591e571c4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "7dd661eb9f5f42815d2541ac729747c3d8a25cbc",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~CTL/task_orders/NFRA_CTLPLN.TO-APPLY-30.svc-irpt-reader-dell2-window-served-read-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CTL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T1335Z_svc-irpt-served-read-window-laptop-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "454581f4e33ea747061f6aac2bd92327859046ca",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "OPENED 13:35Z BEFORE the ADD put; both legs closed with proof; entry CLOSED 13:49:46Z and the sentinel removed",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~CTL/deliverables/NFRA_CTLPLN_TO-APPLY-30_REPORT.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the report carries both start reads, both put times, both read-backs, all four negative controls and all six simulated decisions",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "aws secretsmanager get-resource-policy --secret-id irpt/svc-irpt-analysis/password --query ResourcePolicy --output text -> WalkerReadsByExplicitArn",
+      "method": "live_read",
+      "invocation": "aws secretsmanager get-resource-policy --secret-id irpt/svc-irpt-analysis/password --query ResourcePolicy --output text",
+      "expect": "WalkerReadsByExplicitArn",
+      "output_evidence": "read after the REMOVE put: Sid WalkerReadsByExplicitArn present (1 occurrence) with Principal.AWS = arn:aws:iam::313476888478:user/Andrew_Berman alone; the live document is SET-EQUAL to the signed BEFORE file",
+      "denominator": "1 secret resource policy, 2 statements, read whole each time (816 B at BEFORE, 944 B at ADD); cloudops-dell2-agent-user occurrences in the whole live document after REMOVE = 0, cloudops-dell1-agent-user = 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "add_start_state": {
+      "description": "LEG ADD's declared start is 'live equals BEFORE under the set rule, else STOP'; the comparator was run in both directions so a non-discriminating comparator could not read as agreement",
+      "expected_landed": "live SET-EQUAL to signed BEFORE and NOT set-equal to signed ADD",
+      "expected_not_landed": "live already set-equal to ADD (a window left open by an earlier leg) or equal to neither document",
+      "observed": "13:34:08Z: SET-EQUAL to BEFORE (rc=0); NOT SET-EQUAL to ADD (rc=1), differing in exactly 2 places -- Statement[0].Principal.AWS length 1 vs 2 and Statement[1].Condition.ArnNotEquals length 1 vs 2",
+      "status": "PASS"
+    },
+    "add_readback": {
+      "description": "The read-back after the ADD put, graded in both directions",
+      "expected_landed": "live SET-EQUAL to signed ADD and NOT set-equal to BEFORE; cloudops-dell2-agent-user present exactly twice (the Principal entry and the Deny exception)",
+      "expected_not_landed": "live still set-equal to BEFORE (the put did not land), or a document wider than the signed file",
+      "observed": "SET-EQUAL to ADD (rc=0); NOT SET-EQUAL to BEFORE (rc=1), the same 2 places inverted; dell2 occurrences 2, dell1 occurrences 0",
+      "status": "PASS"
+    },
+    "add_reachability": {
+      "description": "GetSecretValue simulated against the LIVE widened policy for the three principals the order names; any other result obliged an immediate revert",
+      "expected_landed": "dell2 allowed, dell1 explicitDeny, the walker user/Andrew_Berman allowed",
+      "expected_not_landed": "dell1 allowed (the window widened past its grant) or dell2 denied (the window did not open)",
+      "observed": "dell2 allowed, dell1 explicitDeny, user/Andrew_Berman allowed -- exactly the three required, so no revert was triggered. One --resource-arns per call",
+      "status": "PASS"
+    },
+    "remove_start_state": {
+      "description": "LEG REMOVE's declared start is 'live equals ADD under the set rule', graded in both directions",
+      "expected_landed": "live SET-EQUAL to signed ADD and NOT set-equal to BEFORE",
+      "expected_not_landed": "live already set-equal to BEFORE (someone else shut the window) or equal to neither",
+      "observed": "13:44:52Z: SET-EQUAL to ADD (rc=0); NOT SET-EQUAL to BEFORE (rc=1), the same 2 dell2 elements",
+      "status": "PASS"
+    },
+    "remove_readback": {
+      "description": "The read-back after the REMOVE put, graded in both directions plus a token census over the whole document",
+      "expected_landed": "live SET-EQUAL to signed BEFORE, NOT set-equal to ADD, and 0 occurrences of either Dell user ARN",
+      "expected_not_landed": "live still set-equal to ADD, or any residual dell2 token",
+      "observed": "SET-EQUAL to BEFORE (rc=0); NOT SET-EQUAL to ADD (rc=1); dell2 occurrences 0, dell1 occurrences 0",
+      "status": "PASS"
+    },
+    "remove_reachability": {
+      "description": "GetSecretValue simulated against the LIVE restored policy for the same three principals",
+      "expected_landed": "dell2 explicitDeny, dell1 explicitDeny, the walker allowed",
+      "expected_not_landed": "dell2 still allowed (the window still open) or the walker denied (the restore over-narrowed)",
+      "observed": "dell2 explicitDeny, dell1 explicitDeny, user/Andrew_Berman allowed -- the walker allow is the isolated positive control beside the two denies, and explicitDeny rather than implicitDeny is the NobodyElseReadsTheValue statement firing rather than an absent grant",
+      "status": "PASS"
+    },
+    "window_deadline": {
+      "description": "The REMOVE leg had to run at G2's 'R done' or at ADD+30m without waiting for any GO, with this seat holding the clock",
+      "expected_landed": "the REMOVE put lands at or before 14:07:36Z (ADD 13:37:36Z + 30m)",
+      "expected_not_landed": "the REMOVE put lands after 14:07:36Z, or the window is left open",
+      "observed": "an ADD+27m alarm was armed as a background clock at the moment of the ADD and stopped unused; the REMOVE ran on G2's REMOVE-NOW (relayed 2.0.0_SA_COO~C msg 107980) at 13:45:41Z, 21 minutes 55 seconds before the hard close. Window open 8 minutes 5 seconds",
+      "status": "PASS"
+    },
+    "no_value_read": {
+      "description": "The order forbids reading the secret value, on both legs",
+      "expected_landed": "0 GetSecretValue API calls by this seat",
+      "expected_not_landed": "any get-secret-value invocation",
+      "observed": "0 -- the only calls were get-resource-policy, put-resource-policy and iam simulate-principal-policy, none of which returns the value",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md -- the TO-APPLY-15/16 window pair, re-used for this ledger",
+    "cto_half": "the CTO half of the same window pair @7aab22d727c7c20efcca88d48663088fb0e04114, with the laptop CTO's consent for ledger irpt-ycdgen-served-read-20261009 named in the GO (msg 107976, addendum @075fab88351d6c1cd6f1d21d5da8b8e9778667c3); dell2's CTO half org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_SERVED_READ_WINDOW_CTO_HALF.md @da885deef23dc57bb48d3b727c34c925dc71c008"
+  },
+  "risk_class": "WORLD",
+  "rollback": "LEG REMOVE *is* the rollback of LEG ADD and it has run: the signed BEFORE document is live and set-equal to the signed file. Re-widening would need a fresh GO from the issuer with ADD first, which the issuer has already stated is how any retry arrives.",
+  "scope": "One secret's resource policy, widened to the signed ADD file for 8 minutes 5 seconds and restored to the signed BEFORE file. No other secret, key or principal touched; no secret value read; no file edited; no shared branch pushed.",
+  "declared_exclusions": [
+    {
+      "item": "dell2's served read itself",
+      "reason": "outside this seat's read -- the comp-adversary BLIND arm. G2 reports its own window ran 13:05:57Z-13:35:57Z and closed with NO read because the ADD had not yet landed; that timing sits with the issuer, who has stated any retry arrives as a new GO with ADD first"
+    },
+    {
+      "item": "whether a retry window is warranted",
+      "reason": "the issuer's call, not this seat's; this seat will not re-widen without a new GO"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CTL/deliverables/NFRA_CTLPLN_TO-APPLY-30_REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to NFRA_CTLPLN.TO-APPLY-30.svc-irpt-reader-dell2-window-served-read-laptop",
+      "result": "session TO_ID set race-free per seat+session"
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam gaps",
+      "result": "run once this session; zero rows name irpt/svc-irpt-analysis/password or its resource policy. comp-iam models IDENTITY policy and is BLIND to a secret RESOURCE policy by construction, so the instrument cited for this grant is iam simulate-principal-policy --resource-policy <live document>, run on both legs"
+    }
+  ]
+}
