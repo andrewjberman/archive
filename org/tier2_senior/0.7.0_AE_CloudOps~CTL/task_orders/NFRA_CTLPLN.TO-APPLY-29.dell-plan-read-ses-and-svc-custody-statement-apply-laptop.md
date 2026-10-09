@@ -2,7 +2,7 @@
   <metadata>
     <id>NFRA_CTLPLN.TO-APPLY-29.dell-plan-read-ses-and-svc-custody-statement-apply-laptop</id>
     <issued_by>2.0.0_SA_COO~C</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
     <date>2026-10-09</date>
     <status>pending</status>
     <project_code>NFRA_CTLPLN</project_code>
@@ -15,6 +15,12 @@
 <owned_cells>CT-a-1</owned_cells>
 <decomp_context>The apply leg of TO-CT-a-1 AMENDMENTS 29 and 30 (merged @97fb0b2abf): ses:DescribeConfigurationSet joins the Dells' plan-reads policy (dell2 row NFRA_OPSWKF-D2-S3), and opal/investor-reporting/svc-custody-statement joins the platform-key read (dell2 IRPT_DASHBD TO-DB-b-84 leg R).</decomp_context>
 </decomp_ref>
+
+  <amendment>
+    RE-ADDRESSED (issuer, 2026-10-09 ~11:5xZ) from base 0.7.0_AE_CloudOps to a fresh lane 0.7.0_AE_CloudOps~CTL: the base seat has been deaf
+    since 09:29Z (0.0.0_AB_MSTR msg 107944: codex bridge GREEN, three nudges unread, the window cannot be focused while the desktop is locked).
+    Text unchanged except the seat and its paths.
+  </amendment>
 
   <objective>
     Two policies updated in place, `0 to add, 2 to change, 0 to destroy`: `aws_iam_policy.dell_agent_plan_reads` gains
@@ -48,8 +54,8 @@
   <paths>
     org/critical_paths/change_management/
     org/critical_paths/.open_deploys/
-    org/tier2_senior/0.7.0_AE_CloudOps/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~CTL/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~CTL/logs/
   </paths>
 
 <preflight>

@@ -2,7 +2,7 @@
   <metadata>
     <id>NFRA_CTLPLN.TO-APPLY-28.svc-irpt-reader-dell2-window-st28-ledger-laptop</id>
     <issued_by>2.0.0_SA_COO~C</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
     <date>2026-10-09</date>
     <status>pending</status>
     <project_code>NFRA_CTLPLN</project_code>
@@ -15,6 +15,14 @@
 <decomp_context>A further use of the svc-irpt secret-reader window (TO-APPLY-23 form) for dell2's ledger irpt-ycdgen-f1-st28-20261009. dell2 2.0.0_SA_COO~G2 msg 2934 (relay 0.0.0_AB_MSTR msg 107843): V1 and W1 closed 08:46Z; F1 at 08:47:00Z got AccessDenied (explicit deny), no value read; packet st28_release/NEVER_WIDEN_PACKET_F1_ST28.md, dell2 CTO fold @f2ec32dea4. Laptop CTO consent for this ledger (a service-secret window is asked per ledger): named in the GO.</decomp_context>
 </decomp_ref>
 
+
+  <amendment>
+    RE-ADDRESSED (issuer, 2026-10-09 ~11:5xZ) from base 0.7.0_AE_CloudOps to a fresh lane 0.7.0_AE_CloudOps~CTL: the base seat has been deaf
+    since 09:29Z (0.0.0_AB_MSTR msg 107944: codex bridge GREEN, three nudges unread, the window cannot be focused while the desktop is locked).
+    Text unchanged except the seat and its paths. THE ADD LEG IS DONE (put 09:09:10Z by the base seat, ledger
+    sentinel org/critical_paths/.open_deploys/svc-irpt-st28-window-laptop-20261009.json, still OPEN): this lane runs LEG REMOVE ONLY, at dell2's X1 or by
+    13:09:10Z WITHOUT WAITING, starting from "live equals ADD" and closing the base seat's open entry.
+  </amendment>
 
   <objective>
     LEG ADD: set the resource policy of `arn:aws:secretsmanager:us-east-1:313476888478:secret:irpt/svc-irpt-analysis/password-rfHf9l` to
@@ -50,8 +58,8 @@
   <paths>
     org/critical_paths/change_management/
     org/critical_paths/.open_deploys/
-    org/tier2_senior/0.7.0_AE_CloudOps/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~CTL/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~CTL/logs/
   </paths>
 
 <preflight>
