@@ -137,4 +137,18 @@ the build takes no cap flag, so CTO condition 2 is satisfied without a forced 1.
 
 ## Push state
 
-Measured at write time, not defaulted. See the final report line.
+MEASURED 2026-10-09 ~08:3xZ with `git ls-remote` + `git fetch origin box/dell2`, then per-commit ancestry
+against `FETCH_HEAD` **with a positive control** (`HEAD~60` read ON ORIGIN, so the instrument behaves and
+a LOCAL verdict is the world rather than the tool):
+
+| commit | act | push state |
+|---|---|---|
+| `ad851387aa` | ledger OPEN | **on origin** |
+| `476f970245` | ledger CLOSED | **on origin** |
+| `c2d3f143d3` | the two surprise rows | **LOCAL** |
+| `32a8df6e8c` | this delivery | **LOCAL** |
+
+`origin/box/dell2` read `37a9fac095`. This seat does not push a shared branch -- `box/dell2` is carried by
+the box's scheduled `box-sync` and its MSTR, which is why the two earlier commits are already there. The
+two LOCAL commits need no act from this seat; they ride the next sync. Re-measure at read time: a push
+state in a document ages the moment it is written.
