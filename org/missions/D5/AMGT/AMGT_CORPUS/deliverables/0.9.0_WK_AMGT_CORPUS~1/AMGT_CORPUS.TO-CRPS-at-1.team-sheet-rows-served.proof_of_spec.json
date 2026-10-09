@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-at-1.team-sheet-rows-served",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-at-1.team-sheet-rows-served.md",
+    "group": "OTHER",
+    "vintage_commit": "2126f556af"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "2126f556af",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-at-1.team-sheet-rows-served.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/team_sheet.py",
+      "kind": "script",
+      "commit_or_etag": "2126f556af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows_for / census / --census CLI. Round 40's label-and-number rule (rows 1-400, cols 1-60, label = first string in first 4 cells, 2+ numbers, bool not a number), figure sheet = 10+ counted rows, Model NEW VERSION else Model, model_rows_beside when both carry figures, newest-of-two by source-mtime / mtime / LastModified, master by exact file name else master_absent with the PM-readable reason. S3 reads only; rows_for holds a default-client answer 600 s in-process.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "2126f556af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read_thesis_bundle sets model[\"team_sheet\"] through new _team_sheet_rows (call-time import of team_sheet; a raised read or an unresolved key serves the same field shape with class None, rows [] and a reason). No other output of the function changed. Served only after AMGT_RESAPP redeploys the scoped API (issuer's drain ask).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_team_sheet_round44.py",
+      "kind": "test",
+      "commit_or_etag": "2126f556af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 tests over an in-memory openpyxl fixture and a fake S3: label/number rule, ten-row threshold, sheet choice, model_rows_beside, newest-of-two (metadata then LastModified), master found by name, master_absent, census sum, constants equal extract's, read_thesis_bundle carries model.team_sheet, degrade on a raised read.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round44/at1_check.py\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=. python \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round44/at1_check.py\"",
+      "output_evidence": "at1 classes [('master_absent', 63), ('own_model', 11), ('own_new', 21)] sum 95 served 95\nat1 rows match 31 of 31 own-workbook names\nat1 build 2/2 control 1/1",
+      "denominator": "build 2 of 2 (classes sum 95 of 95 served; rows match 31 of 31 own-workbook names in the check's independent derivation), control 1 of 1; rc 0.",
+      "expect": "(?m)^at1 build 2/2 control 1/1$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest -q -p no:cacheprovider lib/research/corpus/tests/test_team_sheet_round44.py 2>&1 | tail -1 | sed 's/\\x1b\\[[0-9;]*m//g'",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest -q -p no:cacheprovider lib/research/corpus/tests/test_team_sheet_round44.py 2>&1 | tail -1 | sed 's/\\x1b\\[[0-9;]*m//g'",
+      "output_evidence": "12 passed in 1.30s",
+      "denominator": "12 of 12 tests passed in the one file, rc 0.",
+      "expect": "(?m)^\\d+ passed in [\\d.]+s$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "at1_check.py run in a scratch driver (.scratch/mutant_at1.py, untracked) with team_sheet._counted_labels wrapped to drop the first counted label of every sheet; no tracked file edited.",
+      "expected": "build fails: rows no longer equal the check's own derivation (rows match 0 of 31), rc 1.",
+      "observed": "at1 rows match 0 of 31 own-workbook names\nat1 build 1/2 control 1/1 (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run once under its literal invocation on the worktree after the final code commit; the --census class line and AC1's classes line agree (own_new 21, own_model 11, master_absent 63, sum 95).",
+      "observed": "census: team_sheet classes own_new 21 own_model 11 master 0 master_absent 63 sum 95 served 95; AC1: same counts.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "served objects not read",
+      "reason": "Lib half only: the field is served after AMGT_RESAPP redeploys the scoped API (issuer's drain ask); the render is CRPS-at-2."
+    },
+    {
+      "item": "master template not in the store",
+      "reason": "42 of the 63 master_absent names read master_absent because the template is not ingested (order preflight blind spot); the rest are partitions with no figure-carrying workbook. No rows are invented for them."
+    },
+    {
+      "item": "existing api tests not made hermetic for the new read",
+      "reason": "lib/research/api/tests/conftest.py is outside <paths>; row AMGT_CORPUS-D1-W1-S4."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-D1-W1-S4",
+    "AMGT_CORPUS-D1-W1-S5"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "at1_check.py",
+      "invocation": "PYTHONPATH=. python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round44/at1_check.py",
+      "result": "rc 0; at1 build 2/2 control 1/1"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider lib/research/corpus/tests/test_team_sheet_round44.py",
+      "result": "rc 0; 12 passed in 1.30s"
+    }
+  ]
+}
