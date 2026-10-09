@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_YCDGEN.TO-YCD-x-6.producer-chosen-by-accepted-acting-principal",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-x-6.producer-chosen-by-accepted-acting-principal.md",
+    "group": "OTHER",
+    "vintage_commit": "0dc9addc92"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6N.md",
+    "vintage_commit": "0dc9addc92",
+    "to_ref": "org/missions/D9/IRPT/IRPT_YCDGEN/task-orders/IRPT_YCDGEN.TO-YCD-x-6.producer-chosen-by-accepted-acting-principal.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_YCDGEN~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_producer_actor.py",
+      "kind": "script",
+      "commit_or_etag": "81a453e9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 passed, 1 xfailed (strict). Local, branch wk-IRPT_YCDGEN-8.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~8/x6_checks.py",
+      "kind": "script",
+      "commit_or_etag": "81a453e9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "census | cases | regress, one RESULT line each. Local.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "81a453e9c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_YCDGEN-D2-W8-S1 appended",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- the census names every server-recorded actor field on the upload, the submit and the accepted request, with its denominator",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~8/x6_checks.py census",
+      "output_evidence": "CENSUS 1 (actor fields, non-test .py under investor-reporting): scanned 179 files; 'acting_principal' lines: writers=1 ['intake/uploads.py:267'] ; other mentions=0 []\nCENSUS 2 (ACCEPTED analysis request record, acceptance.py DynamoAcceptance.accept): top-level fields=5 ['identity', 'owner', 'browser_sha256', 'composition_ref', 'accepted_at'] ; identity fields=6 ['tenant_firm_id', 'request_id', 'revision', 'immutable', 'ingestion_gate_revision', 'destination_policy_revision']\nCENSUS 3 (queue message / job row): queue message fields=4 ['tenant', 'request_id', 'revision', 'composition_sha256'] ; job row fields=6 ['tenant', 'job', 'state', 'outbox_state', 'request_revision', 'composition_sha256']\nCENSUS 4 (analysis SUBMIT): submission_service.submit refuses owner != submitter (ACTUAL_SUBMITTER_REQUIRED)=True ; prospect_submission builds the request owner from the VIEWER and passes (viewer, request_owner)=True ; neither writes an actor field onto the accepted record\nCENSUS 5 (UPLOAD): intake/uploads.py create() writes original['acting_principal_id'] on an on-behalf upload only=True ; the record is the UPLOAD# index row, not the accepted analysis record\nCENSUS RESULT: server-recorded actor on UPLOAD=1 (uploads.py:267); on ANALYSIS SUBMIT/accepted record/queue message/job row=0 of 21 fields (5+6+4+6); producer_for can read only record['owner']\nRESULT: census PASS\nrc=0",
+      "denominator": "1 writer of an actor field in 179 non-test .py files (intake/uploads.py:267, UPLOAD row); 0 actor fields in 21 fields of the accepted analysis record (5 top-level + 6 identity), queue message (4) and job row (6)",
+      "expect": "^RESULT: census PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- the four producer cases pass",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~8/x6_checks.py cases",
+      "output_evidence": "3 passed, 1 xfailed in 1.82s\nXFAIL tests\\test_producer_actor.py::test_owner_advisor_actor_listed_is_opal - no accepted-record actor field exists (row IRPT_YCDGEN-D2-W8-S1)\nRESULT: cases FAIL (3 of 4 producer cases pass)\nrc=1",
+      "denominator": "3 of 4 producer cases pass; case 1 (owner advisor, actor listed -> OPAL) is xfail(strict): no accepted-record actor field exists (row IRPT_YCDGEN-D2-W8-S1)",
+      "expect": "^RESULT: cases PASS",
+      "status": "FAIL",
+      "status_reason": "case 1 (owner = invented advisor, actor = listed principal -> OPAL) cannot pass: the accepted analysis request record carries no server-recorded actor, so the code arm was stopped per the cell and producer_for is unchanged; row IRPT_YCDGEN-D2-W8-S1 names the acceptance path (acceptance.py DynamoAcceptance.accept, fed from submission_service.py SubmissionService.submit)"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 -- the existing resident_worker and opal-thread tests still pass",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/0.9.0_WK_IRPT_YCDGEN~8/x6_checks.py regress",
+      "output_evidence": "56 passed, 8 skipped in 39.84s\nRESULT: regress PASS (pytest rc=0)\nrc=0",
+      "denominator": "56 passed, 8 skipped of 64 collected in test_resident_worker.py + test_opal_thread_integration.py",
+      "expect": "^RESULT: regress PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A -- the order names no mutant control",
+      "expected": "N/A -- none named",
+      "observed": "N/A -- none named",
+      "status": "N/A-SPEC-NAMES-NONE",
+      "reason": "the order names no mutant control"
+    },
+    "determinism": {
+      "method": "N/A -- every arm reads committed source or runs offline tests",
+      "observed": "census and cases ran twice with the same RESULT",
+      "status": "N/A-WITH-REASON",
+      "reason": "no clock, network or randomness is read"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "resident_worker.py producer_for is unchanged",
+      "reason": "the cell says: if the accepted analysis request carries no server-recorded actor, stop the code arm. The census found none (row IRPT_YCDGEN-D2-W8-S1); AC2 therefore FAILS on case 1 and the order stays open"
+    }
+  ],
+  "surprises": [
+    "IRPT_YCDGEN-D2-W8-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_YCDGEN/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 tests/test_producer_actor.py x6_checks.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
