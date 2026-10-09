@@ -4,10 +4,16 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <date>2026-10-09</date>
-<status>pending</status>
+<status>superseded</status>
 <risk>LOCAL</risk>
 
 <title>BD gold tests: the deploy-tool test asserts the current named-file rule, not the retired ship-everything rule (dell1 row MDPF_SECCLASS-D1-S19)</title>
+
+<closure>
+SUPERSEDED (issuer, ~21:3xZ): @9bc3787bc9 (0.9.0_WK_MDPF_SECCLASS~76, MDPF_SECCLASS SC-e-86) already rewrote the test to the
+named-file rule; measured an ancestor of box/laptop HEAD. Issuer re-run: AC1 `7 passed`. 0.8.0_AE_CloudComp verified both arms and the whole
+BD gold suite (99 passed), report @79b85d1bb3. No work was done under this order.
+</closure>
 
 <context>
 dell1 row `MDPF_SECCLASS-D1-S19`:
