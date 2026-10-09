@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-gg-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gg-5.a-per-day-price-series-on-the-timeline.md",
+    "group": "OTHER",
+    "vintage_commit": "30757238e7126eef3cfbf6bafb0a9606adb31416"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "30757238e7126eef3cfbf6bafb0a9606adb31416",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-gg-5.a-per-day-price-series-on-the-timeline.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~327",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/price/price_history.py",
+      "kind": "script",
+      "commit_or_etag": "bf470f8f41613d531f3989d01c89f52f323d964d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "library module; read-only reader of the stored price_history_px_last objects; no deploy in this order.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/timeline_api.py",
+      "kind": "script",
+      "commit_or_etag": "bf470f8f41613d531f3989d01c89f52f323d964d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "get_timeline gains optional price_loader; None leaves the body unchanged.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/price/tests/test_price_history.py",
+      "kind": "test",
+      "commit_or_etag": "bf470f8f41613d531f3989d01c89f52f323d964d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 plant tests, 14 passed.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the timeline route for the named securities carries a date-ordered per-day price series read from the stored price history; R82 TIMELINE AC1 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round82_prep/checks/r82_timeline.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "PASS T1 /timeline answered 200 with 281 chatter days\nFAIL T2 price_series: None\nFAIL T3 prices inside 2026-01-01..2026-10-08 and source named: ''\nR82 TIMELINE AC1 SERVED: NO\nexit=1\n-- same check with the issuer's wiring line simulated in a scratch wrapper (.scratch/wired.py, uncommitted: price_loader=timeline_price_loader bound onto get_timeline):\nPASS T1 /timeline answered 200 with 281 chatter days\nPASS T2 price_series: 192 points, 2026-01-02 .. 2026-10-07\nPASS T3 prices inside 2026-01-01..2026-10-08 and source named: 'stored price history (price_history_px_last): s3://opal-data-harvest/bloomberg/harvest/bro'\nR82 TIMELINE AC1 SERVED: YES\nexit=0",
+      "denominator": "3 checks (T1,T2,T3): 1 of 3 PASS as the committed tree stands (T2,T3 need scoped_amgt.py:6728 to pass the loader, which the order reserves to the issuer); 3 of 3 PASS with the wiring simulated",
+      "status": "FAIL",
+      "status_reason": "The order forbids the worker to edit scoped_amgt.py, the only place price_loader is passed, so AC1 as invoked on the worker's commit reads NO. Row AMGT_RESAPP-D1-W327-S1. Re-run at the merge once the issuer's wiring line is in.",
+      "expect": "R82 TIMELINE AC1 SERVED: YES"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The committed tree without the wiring line (the base route): get_timeline is called with no price_loader.",
+      "expected": "AC1 reads NO: no price_series key (the defect AC1 detects).",
+      "observed": "FAIL T2 price_series: None; R82 TIMELINE AC1 SERVED: NO; exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice, once unwired and once through the scratch wrapper binding the loader",
+      "observed": "unwired NO exit 1; wired YES exit 0, 192 points AMD 2026-01-02..2026-10-07",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "scoped_amgt.py wiring line",
+      "reason": "The order reserves it to the issuer at the merge (section 1 item 4)."
+    },
+    {
+      "item": "api folder pypdf failures",
+      "reason": "2 failed at the base, both No module named 'pypdf' (test_print_fiscal_year_sort.py::test_head_copy_raises_on_mixed_keys, test_print_format_rich.py::test_default_and_fmt_pdf_are_byte_identical_to_build_pack_itself); no row filed per the order."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W327-S1: AC1 reads YES only after the issuer's scoped_amgt.py wiring line (the order forbids the worker that edit)"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~327/",
+  "compiler_tools": [
+    {
+      "tool": "r82_timeline.py",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round82_prep/checks/r82_timeline.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "result": "rc 1 as committed; rc 0 with the wiring simulated"
+    }
+  ]
+}
