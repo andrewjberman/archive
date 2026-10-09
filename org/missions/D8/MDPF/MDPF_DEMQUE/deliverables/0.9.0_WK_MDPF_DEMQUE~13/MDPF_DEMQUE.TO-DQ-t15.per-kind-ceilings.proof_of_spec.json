@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t15",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t15.per-kind-ceilings.md",
+    "group": "OTHER",
+    "vintage_commit": "cfc0a4dfce"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "cfc0a4dfce",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t15.per-kind-ceilings.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~13",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/ceiling_from_ledger.py",
+      "kind": "script",
+      "commit_or_etag": "56df868c4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: local script; reads the served demand ledger with S3 ListObjectsV2/GetObject only, no deploy",
+      "artifact_covered_by": [
+        "DQ5-t15-AC1",
+        "DQ5-t15-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_ceiling.py",
+      "kind": "test",
+      "commit_or_etag": "56df868c4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest on stub ledger rows, not deployed",
+      "artifact_covered_by": [
+        "DQ5-t15-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/reserve_estimate.py",
+      "kind": "script",
+      "commit_or_etag": "56df868c4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: etf_daily_pull.py read as text, no Bloomberg call, no import",
+      "artifact_covered_by": [
+        "DQ5-t15-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_quote.py",
+      "kind": "script",
+      "commit_or_etag": "56df868c4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "model_block priced on reference + history components; test_demque_bbg.py still passes",
+      "artifact_covered_by": [
+        "DQ5-t15-AC1",
+        "DQ5-t15-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_allowance.json",
+      "kind": "config_data",
+      "commit_or_etag": "56df868c4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local config written by both tools: reference/history ceilings held 52/5858, history reserve held 40, bql ceiling 2920000 measured unchanged",
+      "artifact_covered_by": [
+        "DQ5-t15-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ5-t15-AC1",
+      "criterion_verbatim": "the three named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R5_CHECKS/dq_t15_tests.py",
+      "output_evidence": "3 passed in 0.21s; CEIL-OK, rc=0. test_demque_bbg.py and test_demque_reserve.py also pass (13 passed in all three files).",
+      "denominator": "3 of 3 required tests passed by name",
+      "status": "PASS",
+      "expect": "CEIL-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ5-t15-AC2",
+      "criterion_verbatim": "three REAL requests (reference, model_block, history) each quoted with a finish day and its claim, from the committed bbg_allowance.json after your --write runs.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R5_CHECKS/dq_t15_quotes.py",
+      "output_evidence": "reference SITEZ-SIGNIN-PREFLIGHT-REFDATA-20261009.json finish_date=2026-10-09 claim=held; model_block AMGT_RESAPP-107a-ABNB-MODEL-BLOCK.json finish_date=2026-10-13 claim=held; history DEMQUE-TR-COMPARISON-DIVIDEND-PAYERS.json finish_date=2026-10-13 claim=held; QFIN-OK 3 of 3 kinds quoted with a finish day, rc=0.",
+      "denominator": "3 of 3 request kinds quoted with a finish day",
+      "status": "PASS",
+      "expect": "QFIN-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "ceiling_from_ledger.py --write then reserve_estimate.py --write; allowance values read after",
+      "observed": "reference 52/25, history 5858/40, bql 2920000/1875; a second apply_ceilings changes nothing (idempotent, tested)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Bloomberg call, any import of integrations/bloomberg or data/etfs modules, any AWS write, any deploy",
+      "reason": "order BOUNDS"
+    },
+    {
+      "item": "model_block allowance entries",
+      "reason": "order step 3: they stay as they are (unused); model_block is priced on reference and history"
+    },
+    {
+      "item": "history reserve for the run-time universe constituents, depth backfill, price_axis_pull and enrichment_bloomberg",
+      "reason": "names per run not readable from code; named gaps in reserve_estimate history.gaps (surprise row MDPF_DEMQUE-D1-W13-S1)"
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W13-S1"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~13/MDPF_DEMQUE.TO-DQ-t15.per-kind-ceilings.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit the five demque files and the investigation file",
+      "result": "commit 56df868c4f"
+    }
+  ]
+}
