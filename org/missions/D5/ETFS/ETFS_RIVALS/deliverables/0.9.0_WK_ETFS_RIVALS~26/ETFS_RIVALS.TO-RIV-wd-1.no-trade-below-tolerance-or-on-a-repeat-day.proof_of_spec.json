@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "to_id": "ETFS_RIVALS.TO-RIV-wd-1.no-trade-below-tolerance-or-on-a-repeat-day",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "eaea218ecb",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-wd-1.no-trade-below-tolerance-or-on-a-repeat-day.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "eaea218ecb"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/gold_trade_schedule.py",
+      "kind": "script",
+      "commit_or_etag": "bcc09bb9b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1",
+        "J1"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_wd1_tolerance_and_repeat.py",
+      "kind": "test",
+      "commit_or_etag": "bcc09bb9b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the cell's interface as the check grades it -- expect: AC1 RESULT: PASS 0 failures",
+      "method": "command",
+      "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/ws2/checks/wd-1.AC1.py",
+      "expect": "AC1 RESULT: PASS 0 failures",
+      "output_evidence": "(a) rows: []\nOK   (a) unchanged 10,000 -> 10,000 under flow factor 0.97: S9 rows []\n     (b) rows: {'security_key': 'NEW_XX_Equity', 'action': 'entry', 'shares_before': 0.0, 'shares_after': 50.0, 'flow_factor': 1.0, 'discretionary_shares': 50.0, 'est_notional': 500.0}; {'security_key': 'S7_XX_Equity', 'action': 'below_tolerance', 'shares_before': 10000.0, 'shares_after': 9900.0, 'flow_factor': 1.0, 'discretionary_shares': -100.0, 'est_notional': -1000.0}; {'security_key': 'S8_XX_Equity', 'action': 'trim', 'shares_before': 10000.0, 'shares_after': 9000.0, 'flow_factor': 1.0, 'discretionary_shares': -1000.0, 'est_notional': -10000.0}; {'security_key': 'TINY_XX_Equity', 'action': 'exit', 'shares_before': 40.0, 'shares_after': 0.0, 'flow_factor': 1.0, 'discretionary_shares': -40.0, 'est_notional': -400.0}\nOK   (b) sub-tolerance trim $1,000 = 10.1 bps of $989,500: S7 rows [('below_tolerance', -1000.0)] (want none, or below_tolerance / flagged)\nOK   (b-control) above-tolerance trim S8 [('trim', -10000.0)]; small entry NEW [('entry', 500.0)]; small exit TINY [('exit', -400.0)]\n     (c) rows: []\nOK   (c) re-published report (actual date 2026-10-01 under 2026-10-02): 0 trade row(s), want 0\nAC1 RESULT: PASS 0 failures\nrc=0",
+      "denominator": "4 of 4 OK lines (a, b, b-control, c) under `timeout 120` (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "J1",
+      "criterion_verbatim": "on the issuer's real run over CGIC's 2026-09-28..2026-10-06 windows, no unchanged-count row and no sub-20-bps row is shown as a trade, and no trade sits on a day the calendar marks repeat",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "none: judgment criterion on the issuer's real run over CGIC's actual windows; this worker read no S3 object",
+      "output_evidence": "Worker-side only: wd-1.AC1 PASS 0 failures on frames; rivalfunds suite 923 passed, 6 skipped. No real CGIC window was read by this worker.",
+      "denominator": "N/A -- judgment criterion; the issuer's real run is the object",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion graded by 3.0.0_SA_CVO~RV1; the worker records output and no verdict."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "none run: the order names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "python -m pytest -q rivalfunds/tests from data/etfs/scripts, run after the final gold_trade_schedule.py edit",
+      "observed": "923 passed, 6 skipped, 0 failed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order's <status> to complete",
+      "reason": "The face leaves the flip to the issuer."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-D1-W26-S1"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~26 <0.9.0_WK_ETFS_RIVALS~26@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "bcc09bb9b1"
+    }
+  ]
+}
