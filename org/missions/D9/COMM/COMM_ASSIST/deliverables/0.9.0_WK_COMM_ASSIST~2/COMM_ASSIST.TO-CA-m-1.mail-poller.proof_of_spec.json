@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-m-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-m-1.mail-poller.md",
+    "group": "OTHER",
+    "vintage_commit": "af564065fb"
+  },
+  "assignee": "0.9.0_WK_COMM_ASSIST~2",
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round9.md",
+    "vintage_commit": "af564065fb",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-m-1.mail-poller.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/mail_poll.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo code and tests only; nothing here calls the gateway, and the minute-clock step is the issuer's at the merge"
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/assist.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["CAm1-AC1", "CAm1-AC2"],
+      "deploy_evidence": "adds MailGateway, MAIL_BEARER_SECRET and mail_gateway() only; repo code and tests only"
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_inbound_mail_poll.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo tests only; fakes injected, no network"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAm1-AC1",
+      "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_mail_poll.py expect: MAIL-POLL ok=True",
+      "method": "test_suite",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_mail_poll.py",
+      "output_evidence": "MAIL-POLL ok=True arms=8/8 (rc 0, run under timeout 120); every ARM line ok=True: first_run, new_mail (with seen-set control), pages, budget, cadence, refused, no_content_logged, domains_not_typed",
+      "denominator": "8 of 8 arms passed",
+      "status": "PASS",
+      "expect": "MAIL-POLL ok=True"
+    },
+    {
+      "criterion_id": "CAm1-AC2",
+      "criterion_verbatim": "python \"org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~R/checks/check_agent_suites.py\" expect: AGENT-SUITE ok=True",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~R/checks/check_agent_suites.py\"",
+      "output_evidence": "pytest: 127 passed; mail_reply: INBOUND-MAIL-REPLY-TEST ok=True cases=9/9; AGENT-SUITE ok=True pytest_rc=0 mail_reply_rc=0 (rc 0, run under timeout 120)",
+      "denominator": "127 of 127 pytest tests and 9 of 9 mail-reply cases passed",
+      "status": "PASS",
+      "expect": "AGENT-SUITE ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant control named by the order; the worker ran two unrecorded mutations (seen-set check disabled, call budget disabled) and the test failed as it should, then restored the file",
+      "expected": "N/A",
+      "observed": "seen-set check off: new_mail and budget FAIL (6/8); budget off: budget FAIL (7/8); restored: 8/8",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: fakes over invented input and a fixed clock; a rerun gives the same arms",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the minute-clock step in tenant.py",
+      "reason": "order rules: the issuer adds it at the merge; the worker does not edit tenant.py"
+    },
+    {
+      "item": "a live call to the gateway mail route",
+      "reason": "order rules: nothing leaves the machine; the by-id row's keys are stubbed from the route code and probed after site Z's release"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/COMM/COMM_ASSIST/deliverables/0.9.0_WK_COMM_ASSIST~2/COMM_ASSIST.TO-CA-m-1.mail-poller.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_mail_poll.py",
+      "result": "8/8 arms"
+    }
+  ]
+}

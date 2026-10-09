@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-w-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round8.md",
+    "vintage_commit": "8270fc4d29",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-w-2.uncounted-to-zero.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/prd/LGIC_BLANKFIX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "47ef4c98cc"
+  },
+  "assignee": "0.9.0_WK_LGIC_BLANKFIX~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming_scope.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only over the repository; no AWS call, no network call. scan_dir now reads a folder with a small HCL expression reader and follows module calls to repository folders; the six residual reasons are a closed set (UNCOUNTED_REASONS, REASON_WHY).",
+      "introduces": [
+        "UNCOUNTED_REASONS = (\"apply-time\", \"var-unset\", \"module-input\", \"external-module\", \"open-key-domain\", \"unevaluated\")",
+        "class _Parser(object):",
+        "class _Folder(object):",
+        "class _ModCall(object):",
+        "class _Scope(object):",
+        "def _scan_scope(scope, label, resolved, uncounted, call_anchor=None):"
+      ],
+      "artifact_covered_by": [
+        "BW2-AC1",
+        "BW2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming_scope.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The difference control on .tf text in a temporary folder (local chain, variable default, .tfvars value, module argument, for_each module, resource reference resolve; apply-time, var-unset, unevaluated, open-key-domain, external-module stay UNCOUNTED), plus the opal_name module read as HCL against opal_naming.name().",
+      "introduces": [
+        "opal_name read as HCL differs from name()",
+        "a reusable module's input"
+      ],
+      "artifact_covered_by": [
+        "BW2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~4/check_uncounted_delta.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Reads the before from ALL_ROOTS_round7.txt, runs the all command once, counts residual UNCOUNTED names by reason (unmapped roots through root_names), prints UNCOUNTED-DELTA.",
+      "introduces": [
+        "def main():"
+      ],
+      "artifact_covered_by": [
+        "BW2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BW2-AC1",
+      "criterion_verbatim": "BW2-AC1 -- the difference control: module, var, local, reference resolve; an apply-time value stays with its reason.",
+      "method": "command",
+      "invocation": "python lib/tests/test_opal_naming_scope.py",
+      "output_evidence": "SCOPE-TEST ok=True assertions=831\nrc=0",
+      "denominator": "831 of 831 assertions held, among them 9 resolved names counted once each and 8 UNCOUNTED names each with a closed-set reason in the temporary fixture, and every root scope._roots() returns checked against the repository",
+      "status": "PASS",
+      "expect": "SCOPE-TEST ok=True"
+    },
+    {
+      "criterion_id": "BW2-AC2",
+      "criterion_verbatim": "BW2-AC2 -- uncounted falls, and what remains says why the repository cannot decide it.",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~4/check_uncounted_delta.py",
+      "output_evidence": "UNCOUNTED-DELTA ok=True before=301 after=17 hole_before=285 hole_after=288 mapped=63 residual_reasons=1 bare_reasons=0\nrc=0",
+      "denominator": "17 of 301 names remain UNCOUNTED (284 resolved); all 17 carry module-input; 13 printed UNCOUNTED lines plus 4 in unmapped roots equal the live uncounted=17; 0 bare reasons; 63 of 87 roots mapped",
+      "status": "PASS",
+      "expect": "UNCOUNTED-DELTA ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "scan_dir run with opal_naming_scope._Scope.var replaced by a function that never resolves a variable (variables, defaults, tfvars and module arguments all read var-unset).",
+      "expected": "SCOPE-TEST ok=False",
+      "observed": "SCOPE-TEST ok=False fails=14 first=a variable with a default is counted at the default's line",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the uncounted dump of all 87 roots (opal_naming_scope.root_extra) run twice at the same bytes; the two outputs compared with cmp",
+      "observed": "identical, 17 UNCOUNTED lines both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "names that live only in AWS",
+      "reason": "the repository plane only; no AWS call (order BOUNDS)"
+    },
+    {
+      "item": "the 17 module-input names of the reusable module folders read by themselves",
+      "reason": "each is supplied by its call sites and is counted there; the module folder alone does not decide it"
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-W4-S6"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~4/LGIC_BLANKFIX.TO-BF-w-2.uncounted-to-zero.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "check_uncounted_delta.py",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.9.0_WK_LGIC_BLANKFIX~4/check_uncounted_delta.py",
+      "result": "UNCOUNTED-DELTA ok=True before=301 after=17 hole_before=285 hole_after=288 mapped=63 residual_reasons=1 bare_reasons=0"
+    }
+  ]
+}
