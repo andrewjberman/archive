@@ -23,7 +23,13 @@ hynix `645026`). **Answer:** NOT deploy lag -- the peer members are not identity
 raw scanner code. **Defect for round 89:** resolve peer members through the identity pool (the av-5 numeric-ticker resolution exists but
 does not reach these members).
 
+## D1-W332-S2 (2026-10-09 ~20:5xZ) -- the --splice-driver question
+
+The five stored drafts (`drafting/v1/<KEY>.json`, latest) all read `analyzer_version` opal-filings-analyze/2.1.0 and all carry
+`thesis_driver` with a series, a unit, a `source_passage_id` and a `why` (ASML: EUV system revenue recognition; NU: Total revenue P0252;
+SAP: current cloud backlog; BABA: Cloud Intelligence Group revenue P0446; PBR: total oil and gas production P0198). **Ruling: the
+provenance splice is UNNEEDED** -- analyze 2.1.0 writes the driver with its passage; D1-W332-S2 -> CLOSED (no act).
+
 ## Still to read this round
 
-Z-W212-S2 (store url coverage), Z-W266-S3 (driver-chart coverage), D1-S15 (peer subject market-cap vintage), D1-W332-S2 (the splice
-ruling).
+Z-W212-S2 (store url coverage), Z-W266-S3 (driver-chart coverage), D1-S15 (peer subject market-cap vintage).
