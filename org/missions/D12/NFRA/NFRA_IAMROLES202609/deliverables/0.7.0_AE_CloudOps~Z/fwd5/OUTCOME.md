@@ -488,3 +488,80 @@ events on D (baseline about 6/day) -- the auth path did not run; F4 an ERROR sig
 standing `DirtyRunError` baseline, which 30 of 30 prior daily runs carry. Then the `MATCHES-PREDICTION`
 line, and leg `OBS` closes. A mismatch is a finding and gets rolled back per PREDICTION.json's
 `exact_revert`; it does not get hidden.
+
+====================================================================================================
+
+## 7. Step 5 -- the observation window, read against the four falsifiers
+
+D = **2026-10-09**, by PREDICTION.json's own rule: the apply completed before that day's
+`cron(2 13 * * ? *)` fire, so D is the apply date rather than the next day. The FIRST scheduled run after
+the apply -- the discriminator the window names -- started **13:02:50Z** and its `REPORT` line reads
+`Duration: 740.3s`, inside the recorded 537-859s band, so it is a FULL-LENGTH run and not a fast failure.
+This read was taken after the stated `earliest_read` of 13:30Z, by which point the day's second scheduled
+invocation had also completed (2 `REPORT` lines).
+
+Reads taken over the D stream `2026/10/09/[$LATEST]99f10843d3cd47b4871ad00ab0e5066c` and over CloudTrail
+for Username `smartx-assets-daily-pull`, both paginated to exhaustion with denominators printed:
+
+| falsifier | what it fires on | observed | fired |
+|---|---|---|---|
+| F1 | any `AccessDenied` in the D stream | 0 of 117 log events | no |
+| F2 | CloudTrail `AccessDenied`/`UnauthorizedOperation`, **or a `DescribeSecret` event at all** | 0 denied, 0 DescribeSecret, of 16 events | no |
+| F3 | **zero** `GetSecretValue` on D (the auth path did not run) | 6 | no |
+| F4 | an ERROR signature other than the standing `DirtyRunError` | 0 other, 1 baseline, 1 total | no |
+
+CloudTrail eventName distribution on D: `{"GetSecretValue": 6, "Decrypt": 7, "CreateLogStream": 1, "GenerateDataKey": 1, "PutSecretValue": 1}`.
+
+**F2 is the sharpest of the four and it is worth saying why:** it fires on a `DescribeSecret` event *of
+any outcome*, not merely a denied one. So it would catch a caller that still attempts the removed action
+even if something else let it through -- it tests for the CALL, not just for the failure. Zero such events.
+
+**F3 did not fire, and the way its number MOVED is worth recording rather than just its final value.**
+`GetSecretValue` reads 6 on D, against a baseline the prediction states
+as 'about 6 per day'. An earlier read of the same day at 13:17Z returned **4**, with one `REPORT` line
+present; this read at 13:32Z returns 6 with **two**. Prior days each carry two scheduled invocations, so
+the 4 was a per-day total mid-accumulation and not a shortfall -- and rather than argue that, I re-read
+after the second invocation and the count arrived at the baseline exactly. The claim F3 actually tests --
+that the auth path RAN -- is independently settled by the run's own log: `[auth_bundle] OK: JWT minted via
+ROPC (credential = smartx/credentials/username)` and `OK: re-minted token written back to Secrets
+Manager`, with `PutSecretValue` 1 in CloudTrail beside it.
+
+**F4's one ERROR line is the standing baseline, matched by signature and not waved through:**
+`DirtyRunError: feed9 reconciliation ... PARTIAL identity table, not clean`, raised at
+`lambda_function.py:265` -- the same line 30 of 30 daily runs carried in the 30-day baseline (row
+NFRA_IAMROLES202609-Z-W13-S1). It sits AFTER the auth path and is a data reconciliation, unrelated to IAM.
+
+The run also did its work: 11 owned models each `OK`, `atom denominator: 10226 allocations enumerated from
+feed-5`, then the S3 phase. Nothing in it touches secret metadata.
+
+## 8. Verdict
+
+Falsifiers fired: **0 of 4** -- none.
+
+`predicted_breaks` was `[]`, and the observation agrees: no consumer broke. Taken with section 2's
+`implicitDeny` 5 of 5 and section 3's `allowed` control, both halves of the prediction now hold -- the
+capability is gone AND nothing that needed it existed.
+
+MATCHES-PREDICTION: yes
+
+## 9. Two instrument limits from this read, recorded because they nearly cost a false finding
+
+1. **`describe_log_streams`' `lastEventTimestamp` LAGS the events.** Read at 13:17Z, the D stream reported
+   `13:02:50Z -> 13:02:56Z`: a **6-second** span for a run whose events actually span 802.6s and whose
+   `REPORT` line reads 740.3s. Against a 537-859s baseline, 6 seconds looks exactly like a run that
+   authenticated and then exited early -- the one shape F3 cannot catch, because the auth path HAD run. I
+   was one step from an ARMED row against a healthy run. **The sound oracle is the run's own `REPORT`
+   Duration, never the stream envelope**, and a per-day table of those durations makes one day's number
+   legible.
+2. **A day with one `REPORT` where prior days have two is not a truncated run** -- it is a day whose second
+   scheduled invocation has not fired yet. Count invocations before reading any per-day total, which is
+   exactly what F3's 4-against-6 required.
+
+Neither limb changes the verdict; both are the reason the verdict can be trusted.
+
+## 10. Ledger
+
+Leg `OBS` closes on this read. Legs `TF` and `SIM` closed earlier with their own proofs, so ledger
+`iamroles-fwd5-narrowing` closes with all three proven and no rollback owed: PREDICTION.json's
+`exact_revert` stays available (`git apply -R narrowing.patch` then the same `safe-apply`) and is not
+needed.
