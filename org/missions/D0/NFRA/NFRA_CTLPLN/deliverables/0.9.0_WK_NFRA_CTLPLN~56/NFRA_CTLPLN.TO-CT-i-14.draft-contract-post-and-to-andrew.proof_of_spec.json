@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-i-14",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-14.draft-contract-post-and-to-andrew.md",
+    "group": "OTHER",
+    "vintage_commit": "d325011cf4"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~56",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.inbound8.md",
+    "vintage_commit": "d325011cf4",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-i-14.draft-contract-post-and-to-andrew.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/assist.py",
+      "kind": "script",
+      "commit_or_etag": "7b256d4877",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DRAFT_CONTRACT_RULE, parse_draft (strict), resolve_draft, draft_chat_reply through the contract; repo-local, not deployed",
+      "artifact_covered_by": [
+        "CTi14-AC1",
+        "CTi14-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/teams_chat/tenant.py",
+      "kind": "script",
+      "commit_or_etag": "7b256d4877",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_eod_draft, _completion_draft and draft_chat_reply callers handle refused / question / unchanged / new post; st[dialog] capped at DIALOG_TURNS=8; repo-local, not deployed",
+      "artifact_covered_by": [
+        "CTi14-AC1",
+        "CTi14-AC2"
+      ]
+    },
+    {
+      "path_or_key": "daily_reports/eod/post_format.py",
+      "kind": "script",
+      "commit_or_etag": "7b256d4877",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "addresses_andrew, appended by check_post; repo-local, not deployed",
+      "artifact_covered_by": [
+        "CTi14-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/transcripts/scripts/tests/test_draft_contract.py",
+      "kind": "test",
+      "commit_or_etag": "7b256d4877",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "nine-arm script with injected fakes; no network; base tenant.py and post_format.py read from git at 74fc19c25f into throwaway modules",
+      "artifact_covered_by": [
+        "CTi14-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTi14-AC1",
+      "criterion_verbatim": "python data/transcripts/scripts/tests/test_draft_contract.py -> expect DRAFT-CONTRACT ok=True arms=9/9 base_leaked=True",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/tests/test_draft_contract.py",
+      "output_evidence": "(run as timeout 120 python ...)\nreplay_leak base_result=redrafted base_leaked=True new_result=redraft-refused\nARM replay_leak ok=True\nARM replay_contract ok=True\nARM question ok=True\nARM unchanged_to_andrew ok=True\nARM prose_around_json ok=True\nARM chat_refused ok=True\nARM job_contract ok=True\nARM dialog ok=True\nARM check_post_backstop ok=True\nDRAFT-CONTRACT ok=True arms=9/9 base_leaked=True\nrc=0",
+      "denominator": "9 of 9 arms pass; the base's own leak shape (74fc19c25f tenant.py and post_format.py) is offered in 1 of 1 control runs",
+      "status": "PASS",
+      "expect": "DRAFT-CONTRACT ok=True arms=9/9 base_leaked=True"
+    },
+    {
+      "criterion_id": "CTi14-AC2",
+      "criterion_verbatim": "python \"org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~R/checks/check_agent_suites.py\" -> expect AGENT-SUITE ok=True",
+      "method": "command",
+      "invocation": "python \"org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~R/checks/check_agent_suites.py\"",
+      "output_evidence": "(run as timeout 120 python ...)\npytest: 127 passed in 0.43s\nmail_reply: INBOUND-MAIL-REPLY-TEST ok=False cases=8/9\nAGENT-SUITE ok=False pytest_rc=0 mail_reply_rc=1\nrc=1",
+      "denominator": "127 of 127 pytest cases pass; 8 of 9 mail-reply cases pass (the failing case is difference_control_the_same_completion_on_a_chat_job_sends_once_after_his_1)",
+      "status": "FAIL",
+      "status_reason": "Refused, not repaired: test_inbound_mail_reply.py (not in the order's paths) feeds a plain-text reply to a drafting call (COMPLETION_SYSTEM), which the strict contract refuses by design. Row NFRA_CTLPLN-W56-S1 (BLOCKING). test_inbound_cloud.py has the same defect (5/9) and is outside the suite and the paths.",
+      "expect": "AGENT-SUITE ok=True"
+    },
+    {
+      "criterion_id": "CTi14-AC3",
+      "criterion_verbatim": "python data/transcripts/scripts/tests/test_inbound_voice.py -> expect INBOUND-VOICE-TEST ok=True",
+      "method": "command",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_voice.py",
+      "output_evidence": "(run as timeout 120 python ...)\nINBOUND-VOICE-TEST ok=True cases=14/14\nrc=0",
+      "denominator": "14 of 14 voice cases pass (the base's own count)",
+      "status": "PASS",
+      "expect": "INBOUND-VOICE-TEST ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the difference control is inside AC1 (arm replay_leak): the same leaked redraft input against the BASE tenant.py and post_format.py (74fc19c25f) is offered with the sentence in it; the new code refuses it",
+      "expected": "base offers a draft containing \"can't be applied\"; new code returns redraft-refused and changes nothing",
+      "observed": "base_result=redrafted base_leaked=True new_result=redraft-refused",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: every outside call is a stand-in with a fixed answer and a fixed clock",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a real gateway, Graph, S3, ldo, model or text call",
+      "reason": "the order forbids any call that leaves the machine; everything is injected"
+    },
+    {
+      "item": "whether the live model follows the contract reliably",
+      "reason": "the order names it BLIND; measured after the deploy from the draft_contract log lines"
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W56-S1",
+    "NFRA_CTLPLN-W56-S2",
+    "NFRA_CTLPLN-W56-S3"
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~56/NFRA_CTLPLN.TO-CT-i-14.draft-contract-post-and-to-andrew.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/tests/test_draft_contract.py",
+      "result": "DRAFT-CONTRACT ok=True arms=9/9 base_leaked=True"
+    },
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~R/checks/check_agent_suites.py",
+      "result": "AGENT-SUITE ok=False pytest_rc=0 mail_reply_rc=1"
+    },
+    {
+      "tool": "python",
+      "invocation": "python data/transcripts/scripts/tests/test_inbound_voice.py",
+      "result": "INBOUND-VOICE-TEST ok=True cases=14/14"
+    }
+  ]
+}
