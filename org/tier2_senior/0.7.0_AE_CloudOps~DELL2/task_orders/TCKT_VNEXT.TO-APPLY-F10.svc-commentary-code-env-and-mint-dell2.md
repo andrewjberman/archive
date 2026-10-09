@@ -17,8 +17,8 @@
   <objective>
     Two legs, in order, both on dell2:
 
-    LEG D. Deploy `opal-ticket-api`'s code at box/dell2 `2c70e239fa` (package content-sha256
-    `OuTw3wWmtsxa5bAf/k4244hGDoCucyfb2KGd+mo3xc4=`) and ONE new environment key, `COMMENTARY_ALLOWED_FIRMS =
+    LEG D (RE-PIN v2). Deploy `opal-ticket-api`'s code at box/dell2 `3b04c040fc` (`lambda_function.py` sha256 hex
+    `01534e2d452acd02257cb6465cf2e2cf10dced3bea157e7afc9c66bc46ec4f64`), ONE new route (`package`), and ONE new environment key, `COMMENTARY_ALLOWED_FIRMS =
     "49financial,cottonwood,inflection"`, with one `safe-apply` in `infra/aws/terraform/ticket-center`.
 
     LEG M. Mint the `svc-commentary` service token, and store it as the new secret `opal/ticketing/svc-commentary`.
@@ -26,7 +26,7 @@
 
   <context>
     LEG D CTO half GIVEN: `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_F10_D1_CODE_DEPLOY_CTO_HALF.md`
-    @a4ccfb4439 (msg 1859). Its two conditions bind: (1) your upload at step 3 must hash to OuTw3w... BEFORE the apply; (2) re-read
+    @a4ccfb4439 (msg 1859). Its two conditions bind: (1) [SUPERSEDED by RE-PIN v2: a zip hash depends on mtime] record the zip content-sha256 at step 3 BEFORE the apply, and the zip's lambda_function.py must hash to 01534e2d...; (2) re-read
     the rollback artifact version (ZBF40mIM..., content-sha256 y0UF...) at apply time and record it. Leg M only after 5(a)-(f) pass.
 
     Read in full before acting:
@@ -45,18 +45,19 @@
   <steps>
     0. Open the NEVER-2 ledger entry naming the one function family on the artifact key (`opal-ticket-api`; a
        `describe-task-definition`-style sweep does not apply, because it is a Lambda: state that).
-    1. STOP 1: `git rev-parse HEAD` contains `2c70e239fa`. `git diff --name-only 2c70e239fa HEAD -- infra/aws/lambda/ticket_center
+    1. STOP 1: `git rev-parse HEAD` contains `3b04c040fc`. `git diff --name-only 3b04c040fc HEAD -- infra/aws/lambda/ticket_center
        infra/aws/terraform/ticket-center` must be empty; any change there is branch B.
     2. BEFORE, saved: CodeSha256 (expect y0UF...), LastModified, env key names (expect 7), and `opal-tickets` ItemCount.
-    3. `bash infra/aws/terraform/ticket-center/build-and-upload.sh ticket-center opal-ticket-api`. The content-sha256 must equal
-       OuTw3w...; otherwise STOP (branch B).
-    4. Plan, then `.tools/safe-apply.sh` in `infra/aws/terraform/ticket-center`. Branch A is `0 to add, 1 to change, 0 to destroy`,
+    3. `bash infra/aws/terraform/ticket-center/build-and-upload.sh ticket-center opal-ticket-api`. Record the zip content-sha256 it
+       prints. Unzip the built package (or read the S3 object) and check that `lambda_function.py` sha256 equals
+       01534e2d452acd02257cb6465cf2e2cf10dced3bea157e7afc9c66bc46ec4f64. Otherwise STOP (branch B).
+    4. Plan, then `.tools/safe-apply.sh` in `infra/aws/terraform/ticket-center`. Branch A is `1 to add, 1 to change, 0 to destroy` (the `package` route added),
        where the one change is the function's source_code_hash plus env gaining exactly COMMENTARY_ALLOWED_FIRMS. Anything else is
        branch B: STOP and report.
     5. AFTER:
-       - (a) CodeSha256 OuTw3w...;
+       - (a) CodeSha256 equals the step-3 zip content-sha256;
        - (b) 8 env keys, the new one byte-exact;
-       - (c) the deployed zip's `lambda_function.py` sha256 equals `git show 2c70e239fa:infra/aws/lambda/ticket_center/lambda_function.py`;
+       - (c) the deployed zip's `lambda_function.py` sha256 equals 01534e2d452acd02257cb6465cf2e2cf10dced3bea157e7afc9c66bc46ec4f64 (`git show 3b04c040fc:...`); the `package` route exists;
        - (d) an unauthenticated `POST /api/scoped/tickets` through the CloudFront host is refused;
        - (e) the ItemCount is unchanged;
        - (f) a 0-diff plan.
