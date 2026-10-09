@@ -17,11 +17,11 @@
   "assignee": "0.7.0_AE_CloudOps",
   "artifacts_produced": [
     {
-      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/f1_b2_20261009/after.json",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/f1_b2_20261009/c2-after.json",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "DEPLOYED-VERIFIED",
-      "deploy_evidence": "B2 opened01:00:23Z;3/3arms;C2 stilldue",
+      "deploy_evidence": "C2 closed 2026-10-09T01:43:20Z at live version v5; policy equals saved 0/1/0 close plan; DenyShellDocuments explicitDeny; untargeted default replan exit 0; no SSM command sent",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -34,25 +34,25 @@
       "method": "live_read",
       "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\"",
       "expect": "exit=0",
-      "output_evidence": "B2 open-window replanexit0;mandated default-variable close replan is owed after C2.",
+      "output_evidence": "f1_b2_20261009/c2-replan.txt and c2-replan-verdict.json: untargeted default-variable plan reports no changes and exit=0 after C2",
       "denominator": "one root full plan",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "AC1 explicitly due after C2. Close at st26 X1 or2026-10-09T06:00Z withoutwaiting."
+      "status": "PASS",
+      "status_reason": "After C2, the live policy matches the saved close plan, DenyShellDocuments is explicitDeny, and the untargeted default-variable root plan exits 0 with no changes."
     }
   ],
   "controls": {
-    "window_open": {
-      "description": "Shell document for dell2 distinguishes closed/open policy",
-      "expected_landed": "allowed",
-      "expected_not_landed": "explicitDeny",
-      "observed": "allowed",
-      "status": "PASS"
-    },
-    "otherhost": {
-      "description": "Otherhost whilewindowopen remains explicitlydenied",
+    "window_closed": {
+      "description": "Shell document for dell2 distinguishes the required closed policy from the temporary open policy",
       "expected_landed": "explicitDeny",
       "expected_not_landed": "allowed",
       "observed": "explicitDeny",
+      "status": "PASS"
+    },
+    "root_convergence": {
+      "description": "The untargeted default root plan after C2 distinguishes full convergence from a stranded window or Step H delta",
+      "expected_landed": "exit 0 with no changes",
+      "expected_not_landed": "exit 2 or any planned change",
+      "observed": "exit 0 with no changes",
       "status": "PASS"
     }
   },
@@ -61,21 +61,16 @@
     "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_NFRA_CTLPLN_DELL_IDENTITY_STEP_D2_SENDCOMMAND_AND_F1_SHELL_WINDOW_20261008.md@ac2c6e852d"
   },
   "risk_class": "WORLD",
-  "rollback": "C2: default no-var saved safeapplyexact0/1/0 atdell2_ssm;verifyDenyShellDocuments explicitDeny thenfulldefaultreplan0.",
-  "scope": "B2complete,C2pending atX1 or06:00Z",
-  "declared_exclusions": [
-    {
-      "item": "AC1 defaultclosed replan",
-      "reason": "Owed after C2;openwindow replan is not a substitute."
-    }
-  ],
+  "rollback": "The default closed policy is the completed state. If drift appears, require a plain exact 0/1/0 plan on only aws_iam_policy.dell2_ssm, safe-apply it once, verify DenyShellDocuments explicitDeny, then require an untargeted default replan exit 0.",
+  "scope": "B2 opened and C2 closed for the st26 ledger; the F1 shell window is closed and the full root is converged.",
+  "declared_exclusions": [],
   "surprises": [],
   "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/f1_b2_20261009/REPORT.md",
   "compiler_tools": [
     {
       "tool": "comp-iam",
       "invocation": "comp-iam simulate arn:aws:iam::313476888478:user/cloudops-dell2-agent-user ssm:SendCommand arn:aws:ssm:us-east-1::document/AWS-RunShellScript",
-      "result": "BeforeexplicitDeny butDENIED-UNPROVEN withouttoolcontrol;afterSDK3singleARNarms plusisolatedadmincontrol verified."
+      "result": "After C2, cloudops-dell2-agent-user is explicitDeny for AWS-RunShellScript; no SSM command was sent."
     }
   ]
 }
