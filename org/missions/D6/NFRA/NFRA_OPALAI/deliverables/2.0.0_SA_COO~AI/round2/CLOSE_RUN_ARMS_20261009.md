@@ -57,6 +57,16 @@ closes the Analyst before it serves Teams (the BG concierge serves the same acco
 checkout `C:\opal_runtime\opal_ai` reads `8cdc7b9`; a `claude.exe` (pid 8212) started 09:09:06Z under a `powershell.exe`
 started 09:09:04Z. MSTR~Z's four readings: pending.
 
+**Result, run 1 (09:09Z-09:18Z, PROD `8cdc7b9`; MSTR~Z msg 32612):** fast-forward OK; GATE: PASS (two launches); whoami
+NOT READ, because the first prompt never ran (empty input); no sign-in. Closed 09:18Z, no Teams message served. Cause: row
+Z-S64 (claude 2.1.295's variadic `--add-dir` swallowed the prompt). Repair: OA-f-9 AMENDMENT 3, opal_ai `c9983bd`.
+
+**Result, run 2 (10:0xZ, PROD `c9983bd`; MSTR~Z msg 32654):** opal_ai DEV and PROD `c9983bd` (ls-remote); runtime checkout
+fast-forwarded before launch; GATE: PASS; the command line carries `--add-dir ...\refs -- "Run your On launch steps ..."`;
+**whoami ran unattended and returned Opal Bloomberg (opalbloomberg@opalinvest.com)**, then the Analyst moved on to step 2;
+no sign-in prompt. Closed 10:06:51Z with no Teams message served. Z-S63 and Z-S64 are disarmed by row Z-S65. Step 4's
+launch path is clear; what remains for it is the post-r29 run, with the two arm message ids as the Analyst's next prompt.
+
 ## What a pass does and does not prove
 
 On PASS of both arms the card's "After a pass" acts follow: OA-t-1 r2 and OA-t-3 r2 merge, the BG launch retires (PRD
