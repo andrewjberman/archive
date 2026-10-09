@@ -21,23 +21,13 @@ r30 = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(r30)
 r18 = r30.r18
 r17 = r30.r17
+# the daily-mean fee base (daily_mean_value, fee_addback_v2) is defined once, in the project's reader of record (round 32, DB-b-60)
+_rspec = importlib.util.spec_from_file_location("tieout_reader", str(HERE.parent.parent / "tieout" / "tieout_reader.py"))
+reader = importlib.util.module_from_spec(_rspec)
+_rspec.loader.exec_module(reader)
+fee_addback_v2 = reader.fee_addback_v2
 OUT_NAME = "TIEOUT_COMPOUND_V2.json"
 TOLERANCE_PP = r30.TOLERANCE_PP
-
-
-def daily_mean_value(days):
-    """Mean of the positive served market_value_eod over the linked days; None when there is none."""
-    mvs = [d["mv"] for d in days if d.get("mv") and d["mv"] > 0]
-    return sum(mvs) / len(mvs) if mvs else None
-
-
-def fee_addback_v2(bd, days):
-    """(fees_reported, addback): fees / daily-mean value; round 30's add-back when there is no fee or no daily value."""
-    fees = bd.get("fees")
-    base = daily_mean_value(days)
-    if not fees or base is None:
-        return r18.fee_addback(bd)
-    return fees, fees / base
 
 
 def grade_segment(acct, seg, days, bd, tolerance_pp=TOLERANCE_PP):

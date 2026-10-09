@@ -1,0 +1,122 @@
+{
+ "schema_version": "1.0",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "dd8541bb97"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "dd8541bb97",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-60.reader-of-record.md"
+ },
+ "to_id": "IRPT_DASHBD.TO-DB-b-60",
+ "assignee": "0.9.0_WK_IRPT_DASHBD~38",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~38/REGRADE_E1.md",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_reader.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Reader of record; sole definer of the daily-mean fee base; S3 reads only, 0 vendor calls.",
+   "artifact_covered_by": [
+    "DB32-1-AC1",
+    "DB32-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~38/REGRADE_E1.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "9,078 segments, within 8088, reader_sha256 of the reader at this commit.",
+   "artifact_covered_by": [
+    "DB32-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~38/REGRADE_E1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Counts only.",
+   "artifact_covered_by": [
+    "DB32-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~35/tieout_compound_v2.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Imports fee_addback_v2 from the reader; TIEOUT_COMPOUND_V2.json re-run byte-identical (git shows no diff).",
+   "artifact_covered_by": [
+    "DB32-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~36/unexplained_classes.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Imports daily_mean_value and fee_base_gross from the reader (positive_only=False); UNEXPLAINED_CLASSES_E2.json/.md re-run byte-identical.",
+   "artifact_covered_by": [
+    "DB32-1-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB32-1-AC1",
+   "criterion_verbatim": "DB32-1-AC1 -- the reader of record exists and the writer census over the project tree is exactly that one file. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r32/p32_round32.py\" . DB32-1-AC1",
+   "output_evidence": "OK: writer census over 127 .py file(s) under org/missions/D9/IRPT/IRPT_DASHBD/ = 1 (org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_reader.py)\nDB32-1-AC1 PASS (rc 0)",
+   "denominator": "127 .py files under the project tree; 1 writer",
+   "status": "PASS",
+   "expect": "DB32-1-AC1 PASS"
+  },
+  {
+   "criterion_id": "DB32-1-AC2",
+   "criterion_verbatim": "DB32-1-AC2 -- the reader of record re-grades the 9,078 to within 8,088, and its sha matches HEAD. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r32/p32_round32.py\" . DB32-1-AC2",
+   "output_evidence": "OK: reader of record re-grades 9,078: within 8088 (= round 31's 8088); sha matches HEAD\nDB32-1-AC2 PASS (rc 0)",
+   "denominator": "9,078 of 9,078 graded segments; within 8,088",
+   "status": "PASS",
+   "expect": "DB32-1-AC2 PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The reader's per-segment grades were compared with round 31's TIEOUT_COMPOUND_V2.json on all 9,078 (verdict and abs_diff_pp), and ~35's and ~36's records were re-run after the import edit.",
+   "expected": "0 differing segments; both importer records unchanged",
+   "observed": "0 of 9,078 differ; v2 record and UNEXPLAINED_CLASSES_E2.json/.md show no git diff. A first ~36 run importing v2's mean unchanged DID change its record (row IRPT_DASHBD-W38-S1) and was corrected with positive_only=False.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "v2 run twice on the cached read (before and after the edit): 8088 within both times.",
+   "observed": "identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Flow-start convention",
+   "reason": "DB-b-61; FLOW_CONVENTION left at the served end-of-day behaviour here."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-W38-S1"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python -m py_compile org/missions/D9/IRPT/IRPT_DASHBD/tieout/tieout_reader.py",
+   "result": "compiles"
+  }
+ ]
+}
