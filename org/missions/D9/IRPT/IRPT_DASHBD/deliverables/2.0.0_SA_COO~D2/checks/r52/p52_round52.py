@@ -9,9 +9,10 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
               commit whose blob sha256 equals the recorded sha256 and HEAD's bytes; rollback.base_s3_version non-empty.
   DB52-1-AC2  ~80/NEVER_WIDEN_PACKET_R45_RELEASE.md carries "## Branch A", "## Branch B", "## Rollback", "## Memory headroom", "## COO half",
               "## CTO half", each half reading UNSIGNED.
-  DB52-2-AC1  ~81/BD_DATES_TWO_SIDED.json: segments covers exactly the FLOW_TIMING + INCOME_DATE count of ~74/SENSITIVITY.json final (475),
-              distinct; each verdict confirmed or UNEXPLAINED; confirmed entries carry bd_date and opal_date; bd_source names the served
-              address read; vendor_calls == 0; by_verdict sums to 475.
+  DB52-2-AC1  (AMENDMENT 1, CTO msg 3617) ~81/BD_DATES_TWO_SIDED.json in the repo carries no 10-digit token, n_segments == 475, by_verdict
+              summing to 475, and private_record {path (absolute, outside the repo), sha256}; the private record at that path matches the
+              sha256 and its segments cover exactly 475 distinct segments, each verdict confirmed or UNEXPLAINED, confirmed entries carrying
+              bd_date and opal_date; bd_source names the served address read; vendor_calls == 0.
 """
 import hashlib
 import json
@@ -70,9 +71,19 @@ def main():
                 fail("%s not UNSIGNED" % hd)
         print("OK: packet sections present; both halves UNSIGNED")
     elif cid == "DB52-2-AC1":
-        s = load(D + "74/SENSITIVITY.json")
-        want = int(s["final"]["by_reason"].get("FLOW_TIMING", 0)) + int(s["final"]["by_reason"].get("INCOME_DATE", 0))
+        # AMENDMENT 1 (CTO msg 3617): account-level evidence lives OUTSIDE the repo. The repo record carries counts and the private
+        # record's path + sha256; the check reads the private record by that path and verifies its sha256.
+        want = 475
         r = load(D + "81/BD_DATES_TWO_SIDED.json")
+        if re.search(r"(?<![0-9A-Za-z])\d{10}(?![0-9A-Za-z])", (root / (D + "81/BD_DATES_TWO_SIDED.json")).read_text(encoding="utf-8")):
+            fail("the repo record carries a 10-digit account-like token")
+        pr = r.get("private_record") or {}
+        pp = Path(str(pr.get("path") or ""))
+        if not pp.is_absolute() or not pp.is_file() or hashlib.sha256(pp.read_bytes()).hexdigest() != pr.get("sha256"):
+            fail("private_record %r missing or sha256 mismatch" % pr)
+        if r.get("n_segments") != want or sum((r.get("by_verdict") or {}).values()) != want:
+            fail("repo record n_segments %r / by_verdict %r" % (r.get("n_segments"), r.get("by_verdict")))
+        r = json.loads(pp.read_bytes().decode("utf-8"))
         segs = r.get("segments") or []
         keys = [(x.get("account"), json.dumps(x.get("segment"), sort_keys=True)) for x in segs]
         if len(segs) != want or len(set(keys)) != want:

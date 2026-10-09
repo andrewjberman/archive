@@ -59,6 +59,16 @@
         opal-capital or tier-internal caller, so "a data-refresh admit is STOP" would stop the run by construction.
   </amendment>
 
+  <amendment n="2" date="2026-10-09" source="CTO msg 3619, v2.2 half AMENDMENT 1 @133952758b; row TCKT_VNEXT-D2-S16">
+    **The HOLD lifts.** The data-refresh STOP arm is DROPPED: `data_refresh` admits any opal-capital or tier-internal caller
+    (`data_refresh/lambda_function.py:142-163`), so the filer's reach there equals every Opal staff member's.
+    - **Do NOT probe ANY data-refresh route** (it is a write path). Remove the data-refresh census arm from step 4.
+    - **After the run, prove ZERO data-refresh calls for the token's window from the logs:** the data_refresh Lambda's CloudWatch log
+      group, filtered for the filer email `tckt-fwd1-testfiler-20261009@opal.invalid` over [token iat, cleanup end]. Print the
+      log group, the window, the query and the match count (expect 0) in the trace under `data_refresh_zero_calls`.
+    Everything else in v2.2 and AMENDMENT 1 stands.
+  </amendment>
+
   <steps>
     0. Open the NEVER-2 ledger entry: the row write, the token, the run, and the cleanup legs.
     1. **STOP 1:** `python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/reread_27.py` prints `READ27 27/27`.
