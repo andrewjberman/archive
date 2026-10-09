@@ -14,14 +14,44 @@
   "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-95.r44-release-apply.md"
  },
  "assignee": "0.9.0_WK_IRPT_DASHBD~70",
- "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~70/R44_PREUPLOAD_RECORD.json",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~70/R44_APPLY_RECORD.json",
  "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~70/R44_APPLY_RECORD.json",
+   "kind": "config_data",
+   "commit_or_etag": "65eb443109",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the apply record the criterion reads: before reads, member diff, plan 0/1/0, live equal to built, replan No changes",
+   "artifact_covered_by": [
+    "DB47-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~70/R44_PLAN_OUTPUT.txt",
+   "kind": "config_data",
+   "commit_or_etag": "d250d437a5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "targeted plan output, Plan: 0 to add, 1 to change, 0 to destroy.",
+   "artifact_covered_by": [
+    "DB47-1-AC1"
+   ]
+  },
   {
    "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~70/R44_PREUPLOAD_RECORD.json",
    "kind": "config_data",
-   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "commit_or_etag": "f4096d3528",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "before reads, build-only member census (two members differ, reporting_policies.json equal live), and the list of what was not done; no upload or apply was made",
+   "deploy_evidence": "before reads and build-only census from the first attempt, kept as the stop record",
+   "artifact_covered_by": [
+    "DB47-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "arn:aws:lambda:us-east-1:313476888478:function:irpt-49f-reporting-gold-lambda",
+   "kind": "aws_resource",
+   "commit_or_etag": "oNgy4rnrduvN9N2axhsHBfe9izZKd8dZGeFGXAIh+cM=",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply rc 0 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'; get-function-configuration CodeSha256 = built; post-apply plan No changes",
    "artifact_covered_by": [
     "DB47-1-AC1"
    ]
@@ -33,34 +63,34 @@
    "criterion_verbatim": "DB47-1-AC1 -- the R44 release is live over yIAQjspL with exactly the two members, plan 0/1/0, and live equal to the build. Base: FAIL.",
    "method": "command",
    "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r47/p47_round47.py\" . DB47-1-AC1",
-   "output_evidence": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~70/R44_APPLY_RECORD.json\nDB47-1-AC1 FAIL",
-   "denominator": "0 of 1 apply records written; 0 uploads, 0 plans, 0 applies of 1 planned; live CodeSha256 unchanged at yIAQjspL; exit code 1",
-   "status": "FAIL",
-   "expect": "DB47-1-AC1 PASS",
-   "status_reason": "BLOCKING row IRPT_DASHBD-D2-W70-S1: the order's <paths> omits infra/aws/lambda/ci/lambda-source-map.json, so the re-pin commit was refused by the lane gate and the worker stopped before any upload"
+   "output_evidence": "OK: R44 applied over yIAQjspL; 2 members; live = built oNgy4rnr\nDB47-1-AC1 PASS\nexit code 0",
+   "denominator": "1 of 1 apply records read; 8 of 8 record checks passed (base, member diff = 2, status prefix 0, plan 0/1/0, live = built, replan, ledger entry); 1 upload, 1 plan, 1 apply of 1 planned",
+   "status": "PASS",
+   "expect": "DB47-1-AC1 PASS"
   }
  ],
  "controls": {
   "determinism": {
    "method": "the checker reads R44_APPLY_RECORD.json only",
-   "observed": "absent file prints the same FAIL line",
+   "observed": "re-run prints the same PASS line",
    "status": "STABLE"
   },
   "mutant": {
    "description": "The checker at the base (no record), the order's 'Base: FAIL'.",
    "expected": "DB47-1-AC1 FAIL at the base",
-   "observed": "DB47-1-AC1 FAIL (rc 1)",
+   "observed": "first run of this order printed 'FAIL: no .../R44_APPLY_RECORD.json / DB47-1-AC1 FAIL' (rc 1) before the record existed",
    "status": "FIRED-AS-EXPECTED"
   }
  },
  "declared_exclusions": [
   {
-   "item": "upload, targeted plan, safe-apply, stamp, post-apply plan, apply record",
-   "reason": "Stopped before upload on BLOCKING row IRPT_DASHBD-D2-W70-S1; nothing of the release was made."
+   "item": "first-fire sizing read (ledger leg S1) and any invoke",
+   "reason": "The order bars an invoke; the next scheduled fire is read and the leg closed by the issuer."
   }
  ],
  "surprises": [
-  "IRPT_DASHBD-D2-W70-S1"
+  "IRPT_DASHBD-D2-W70-S1",
+  "IRPT_DASHBD-D2-W70-S2"
  ],
  "compiler_tools": [
   {
