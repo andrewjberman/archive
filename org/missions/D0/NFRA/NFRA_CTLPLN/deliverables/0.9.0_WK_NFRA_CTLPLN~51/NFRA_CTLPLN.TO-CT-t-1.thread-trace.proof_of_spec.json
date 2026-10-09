@@ -1,0 +1,77 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_CTLPLN.TO-CT-t-1",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-t-1.thread-trace.md",
+  "group": "OTHER",
+  "vintage_commit": "fcbd1dc88d"
+ },
+ "assignee": "0.9.0_WK_NFRA_CTLPLN~51",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.thread6.md",
+  "vintage_commit": "fcbd1dc88d",
+  "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-t-1.thread-trace.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/thread-trace.py",
+   "kind": "script",
+   "commit_or_etag": "012b5912d1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A local read-only tool a seat runs; it reads git refs and writes nothing, nothing is deployed."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "CTt1-AC1",
+   "criterion_verbatim": "python .tools/thread-trace.py --selftest expect: THREAD-TRACE-SELFTEST cases= (every case passing; the line reads ok=True)",
+   "method": "test_suite",
+   "invocation": "python .tools/thread-trace.py --selftest",
+   "output_evidence": "timeout 120 rc=0. Case lines: PASS full thread reads 5/5 (hops=5/5 pushed_by_working_box=False elapsed=0h18m20s); PASS no grade reads 4/5 (hops=4/5, HOP 5 GRADE ABSENT, elapsed=-); PASS working box pushed CLOUD itself (hops=5/5 pushed_by_working_box=True); PASS round with no orders reads 0/5, non-zero (rc=1, hops=0/5). LAST line: THREAD-TRACE-SELFTEST cases=4/4 ok=True",
+   "denominator": "4 of 4 cases pass",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "CTt1-AC2",
+   "criterion_verbatim": "python .tools/thread-trace.py --project LGIC_BLANKFIX --round 8 --fetch expect: THREAD project=LGIC_BLANKFIX round=8 hops= (the trace of a real, closed round, as it stands, read only)",
+   "method": "test_suite",
+   "invocation": "python .tools/thread-trace.py --project LGIC_BLANKFIX --round 8 --fetch",
+   "output_evidence": "timeout 120 rc=0, 11 s wall. HOP 1 PLAN start=2026-10-08T23:30:18Z end=2026-10-08T23:30:18Z commit=8270fc4d29 by=2.0.0_SA_COO~G where=origin/box/laptop | HOP 2 WORK start=2026-10-09T00:23:30Z end=2026-10-09T03:38:27Z commit=b1b33c079b by=0.9.0_WK_LGIC_BLANKFIX~1 where=origin/box/laptop | HOP 3 PUBLISH start=2026-10-09T03:38:27Z end=2026-10-09T03:50:13Z commit=cd219e95cd by=2.0.0_SA_COO~G where=origin/box/laptop | HOP 4 INTEGRATE start=2026-10-09T03:50:13Z end=2026-10-09T04:00:29Z commit=765b046a2d by=0.0.0_AB_MSTR where=origin/CLOUD | HOP 5 GRADE start=2026-10-09T04:00:29Z end=2026-10-09T04:15:15Z commit=879a8b47a5 by=3.0.0_SA_CVO where=origin/box/laptop. LAST line: THREAD project=LGIC_BLANKFIX round=8 hops=5/5 pushed_by_working_box=False elapsed=4h44m57s",
+   "denominator": "5 of 5 hops found; 5 round-8 task orders read",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The selftest plants three false threads in a temporary repository: a round with no grade commit, a round whose integrating merge is authored by a seat that also authored the working box's commits, and a round with no orders.",
+   "expected": "4/5 with HOP 5 ABSENT; pushed_by_working_box=True; 0/5 and a non-zero exit",
+   "observed": "hops=4/5 HOP 5 GRADE ABSENT elapsed=-; hops=5/5 pushed_by_working_box=True; rc=1 hops=0/5",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the selftest and the LGIC_BLANKFIX round 8 trace were each run three times at the worktree root (before and after the commit)",
+   "observed": "identical output each time; the trace reads committed history only",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "any push, merge, rebase, terraform, aws call, broker send or seat start",
+   "reason": "order RULES: the tool runs git log, show, rev-list, merge-base and for-each-ref, plus one git fetch of origin under --fetch; the selftest writes only to a temporary directory"
+  },
+  {
+   "item": "whether a pushed_by_working_box=False reading separates two machines that share one serial",
+   "reason": "the tool compares serials, not machines (stated in its docstring as BLIND); the order asks for the author compared with the working box's seats"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~51/NFRA_CTLPLN.TO-CT-t-1.thread-trace.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 .tools/thread-trace.py",
+   "result": "All checks passed!"
+  }
+ ]
+}

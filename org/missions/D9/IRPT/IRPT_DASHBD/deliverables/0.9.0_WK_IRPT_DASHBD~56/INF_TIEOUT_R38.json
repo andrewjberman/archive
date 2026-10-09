@@ -1,0 +1,203 @@
+{
+ "record_version": "1.0",
+ "task_order": "IRPT_DASHBD.TO-DB-b-80",
+ "source": "Orion Connect position snapshots (silver api_dims positions_mv, daily account value) and Orion transactions (silver, full-history snapshot 2026-10-08), custodian Fidelity, read through the registry's routed legacy bucket alias",
+ "gross_source": "s3://opal-data-assets/orion/4698/silver/account_performance_gross/snapshot_date=2026-10-08",
+ "as_of": "2026-10-08",
+ "net_source": "s3://opal-data-inf/silver/api_dims/performance/snapshot_date=2026-10-08/data.parquet (column twr_value, landed)",
+ "grain": "account-windows (one reported return per account over the source's own window)",
+ "tolerance_pp": 0.35,
+ "accounts": 562,
+ "gross": {
+  "denominator": 562,
+  "within": 418,
+  "flow_set": [
+   "EXTERNAL_IN",
+   "EXTERNAL_OUT",
+   "INTER_ACCOUNT_IN",
+   "INTER_ACCOUNT_OUT",
+   "TAX_WITHHELD",
+   "ADVISORY_FEE"
+  ]
+ },
+ "net": {
+  "denominator": 562,
+  "within": 421,
+  "flow_set": [
+   "EXTERNAL_IN",
+   "EXTERNAL_OUT",
+   "INTER_ACCOUNT_IN",
+   "INTER_ACCOUNT_OUT",
+   "TAX_WITHHELD"
+  ]
+ },
+ "comparison": "our total_return_daily compounded over the source's window, annualised by trading days / 252, against the landed Orion figure of the same basis; absolute gap in percentage points of the annual rate; ONE sample for both bases; flows by the ratified taxonomy including its account_boundary keys (tax pair on the before-tax basis)",
+ "not_computable_link_broken": 79,
+ "flow_set_probe": {
+  "net": {
+   "nna_only": 293,
+   "with_account_boundary": 421
+  },
+  "gross": {
+   "nna_only_plus_fee": 291,
+   "with_account_boundary_plus_fee": 418
+  }
+ },
+ "taxonomy": {
+  "path": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml",
+  "version": 2,
+  "types_entries": 48,
+  "ratified_flow_descriptions": 9,
+  "declared_equals_ratified": true,
+  "account_boundary_entries": {
+   "Federal Tax Withheld": {
+    "account_boundary": "out",
+    "account_boundary_when": "before_tax_return"
+   },
+   "Internal Account Journal In": {
+    "account_boundary": "in",
+    "account_boundary_when": null
+   },
+   "Internal Account Journal Out": {
+    "account_boundary": "out",
+    "account_boundary_when": null
+   },
+   "State Tax Withheld": {
+    "account_boundary": "out",
+    "account_boundary_when": "before_tax_return"
+   }
+  },
+  "declared_equals_account_boundary_keys": true,
+  "bucket_of_declared_class": {
+   "INTER_ACCOUNT_IN": [
+    "Internal"
+   ],
+   "INTER_ACCOUNT_OUT": [
+    "Internal"
+   ],
+   "TAX_WITHHELD": [
+    "Return"
+   ],
+   "ADVISORY_FEE": [
+    "Return"
+   ],
+   "OTHER_FEE": [
+    "Return"
+   ],
+   "INCOME_CASH": [
+    "Return"
+   ]
+  }
+ },
+ "boundary_classes": [
+  {
+   "class": "INTER_ACCOUNT_JOURNAL",
+   "count": 764,
+   "accounts": 144,
+   "descriptions": [
+    "Internal Account Journal In",
+    "Internal Account Journal Out"
+   ],
+   "ratified_bucket": [
+    "Internal"
+   ],
+   "treatment": "a flow in the headline, by the ratified account_boundary key (read from the taxonomy file)",
+   "window": [
+    "2023-10-09",
+    "2026-10-08"
+   ],
+   "status_filter": [
+    "Complete"
+   ]
+  },
+  {
+   "class": "TAX_WITHHELD",
+   "count": 1855,
+   "accounts": 105,
+   "descriptions": [
+    "Federal Tax Withheld",
+    "State Tax Withheld"
+   ],
+   "ratified_bucket": [
+    "Return"
+   ],
+   "treatment": "a flow in the headline, by the ratified account_boundary key (read from the taxonomy file)",
+   "window": [
+    "2023-10-09",
+    "2026-10-08"
+   ],
+   "status_filter": [
+    "Complete"
+   ]
+  }
+ ],
+ "annualisation_probe": {
+  "calendar_days_over_365": {
+   "net": 413,
+   "gross": 417
+  },
+  "calendar_days_over_365.25": {
+   "net": 414,
+   "gross": 417
+  },
+  "trading_days_over_252": {
+   "net": 421,
+   "gross": 418
+  }
+ },
+ "unlike_for_like_pairing": {
+  "net_compounding_vs_landed_gross_within": 19,
+  "meaning": "Opal's NET compounding (fee left inside the return) against Orion's GROSS figure: the unlike-for-like pairing, printed so the gap the gross basis closes is visible"
+ },
+ "output_columns": [
+  "firm",
+  "account_id",
+  "business_date",
+  "market_value_eod",
+  "external_flow",
+  "income_received",
+  "income_return",
+  "total_return_daily",
+  "return_basis",
+  "holdings_price_return",
+  "holdings_price_return_reason",
+  "fee_amount",
+  "fee_amount_reason",
+  "day_quality",
+  "guard_state",
+  "history_scope",
+  "carried_days",
+  "method_version",
+  "schema_version"
+ ],
+ "output_rows": 423186,
+ "output_sha256": "0ef45386118f6ec3e9f9620947e86c3cb7d78c2cc304414fb392c9cccd8602aa",
+ "sample": {
+  "landed_net_rows_in_snapshot": 927,
+  "landed_net_with_value": 562,
+  "accounts_without_a_landed_gross_figure": 0,
+  "window_starts": [
+   "2023-10-09",
+   "2023-10-09"
+  ],
+  "window_end": "2026-10-08",
+  "window_trading_days_min_max": [
+   752,
+   752
+  ],
+  "calendar_days_loaded": 1106,
+  "calendar_days_with_no_snapshot_rows": [],
+  "accounts_funded_after_window_start": 0
+ },
+ "flow_totals_rows": {
+  "INCOME_CASH": 255440,
+  "ADVISORY_FEE": 15867,
+  "EXTERNAL_IN": 11809,
+  "OTHER_FEE": 10974,
+  "EXTERNAL_OUT": 4752,
+  "TAX_WITHHELD": 2868,
+  "INTER_ACCOUNT_IN": 1810,
+  "INTER_ACCOUNT_OUT": 1357
+ },
+ "hash": "sha256(irpt-r36-orion|account_id) first 16 hex"
+}

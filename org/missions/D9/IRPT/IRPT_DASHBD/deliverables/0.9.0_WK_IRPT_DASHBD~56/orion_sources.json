@@ -1,0 +1,228 @@
+{
+  "schema_version": "1.0",
+  "doc": "IRPT_DASHBD reporting adapter declaration for the ORION custody source (TO-DB-b-80, FWD-11; successor of TO-DB-b-76's declaration). The same law as the 49 Financial producer's sources.json (C-ADAPTERS): one entry per custody source, vendor codes only inside their own adapter, no firm token in this file. Orion transaction type ids and descriptions are allowed to exist ONLY here and in orion_account_return_daily.py. The firm is NOT named here: the run is given the registry key on its command line and resolves the firm and the routed legacy bucket from infra/logic/registry/scopes.json through lib/opal_naming.py lookup(). CHANGE FROM TO-DB-b-76: the account-boundary classes (the Internal Account Journal pair; Federal/State Tax Withheld) are read from the RATIFIED taxonomy's account_boundary keys (ADDENDUM 6 @fb5579ddfc), the one source of truth, and are flows in the headline; Orion's gross figure is read from the LANDED silver, never a live pull.",
+  "_reserved_keys_comment": "Every top-level key whose VALUE IS AN OBJECT and whose name is not underscore-prefixed IS A CUSTODY SOURCE.",
+  "orion_fidelity": {
+    "custodian": "fidelity",
+    "vendor": "orion",
+    "bucket_resolution": {
+      "plane": "bucket",
+      "require_routed": true,
+      "basis": "measured",
+      "comment": "The registry's firm bucket exists but holds only the irpt/ prefix; the Orion silver and gold the firm already lands are in the LEGACY bucket the registry entry's alias list names (plane bucket, routed true, lookup false). Both were listed at run time. The adapter reads the alias; it types no bucket."
+    },
+    "positions_prefix": "silver/api_dims/positions_mv/",
+    "positions_partition_form": "snapshot_date=YYYY-MM-DD/data.parquet",
+    "account_column": "account_id",
+    "account_id_zero_pad": 10,
+    "value_column": "current_value",
+    "value_basis": "held",
+    "value_comment": "C-VALUE: the account's value on a day is the SUM of current_value over every position row of that account in that day's snapshot, cash positions included (is_custodial_cash rows are rows of the same table). Orion publishes one snapshot per CALENDAR day, weekends included, so the trading calendar (lib/trading_calendar.py) stays the performance axis. A day with no row for an account makes the account-day's value ABSENT, never zero.",
+    "transactions_key_template": "silver/transactions/{snapshot}.parquet",
+    "transactions_note": "The snapshot named by the run's --end is a FULL-HISTORY file (transDate 2020-06-03 onwards, pull_date = the snapshot), so the flow term reads one object per run.",
+    "transactions_columns": [
+      "accountId",
+      "transDate",
+      "transAmount",
+      "transTypeId",
+      "trans_type_desc",
+      "status"
+    ],
+    "transactions_account_column": "accountId",
+    "transactions_date_column": "transDate",
+    "transactions_amount_column": "transAmount",
+    "transactions_type_id_column": "transTypeId",
+    "transactions_type_desc_column": "trans_type_desc",
+    "transactions_status_column": "status",
+    "accepted_status": [
+      "Complete"
+    ],
+    "accepted_status_basis": "measured",
+    "accepted_status_comment": "Pending, Rejected, Reversed and Inactive rows are not money that moved. Management Fee alone carries 2,891 Pending and 3,309 Rejected rows next to 15,044 Complete ones. The firm's own NNA producer does not filter on status; this adapter does, and the difference is stated here rather than inherited.",
+    "types": {
+      "EXTERNAL_IN": [
+        {
+          "id": 8,
+          "desc": "Client Contribution"
+        },
+        {
+          "id": 9,
+          "desc": "Employer Contribution"
+        },
+        {
+          "id": 166,
+          "desc": "Rollover Contribution"
+        },
+        {
+          "id": 39,
+          "desc": "Merge In from Other Account"
+        },
+        {
+          "id": 204,
+          "desc": "External Account Activity In"
+        }
+      ],
+      "EXTERNAL_OUT": [
+        {
+          "id": 51,
+          "desc": "Client Distribution"
+        },
+        {
+          "id": null,
+          "desc": "Cancel Account"
+        },
+        {
+          "id": 42,
+          "desc": "Merge Out to Other Account"
+        },
+        {
+          "id": 205,
+          "desc": "External Account Activity Out"
+        }
+      ],
+      "INTER_ACCOUNT_IN": [
+        {
+          "id": 172,
+          "desc": "Internal Account Journal In"
+        }
+      ],
+      "INTER_ACCOUNT_OUT": [
+        {
+          "id": 171,
+          "desc": "Internal Account Journal Out"
+        }
+      ],
+      "TAX_WITHHELD": [
+        {
+          "id": 113,
+          "desc": "Federal Tax Withheld"
+        },
+        {
+          "id": 114,
+          "desc": "State Tax Withheld"
+        }
+      ],
+      "ADVISORY_FEE": [
+        {
+          "id": 24,
+          "desc": "Management Fee"
+        },
+        {
+          "id": 110,
+          "desc": "Fee Credit"
+        }
+      ],
+      "INCOME_CASH": [
+        {
+          "id": 17,
+          "desc": "Dividend to Cash"
+        },
+        {
+          "id": 34,
+          "desc": "Long Term Gain to Cash"
+        },
+        {
+          "id": 49,
+          "desc": "Short Term Gain to Cash"
+        },
+        {
+          "id": 104,
+          "desc": "Interest Paid in Cash"
+        }
+      ],
+      "OTHER_FEE": [
+        {
+          "id": null,
+          "desc": "Trading Expense"
+        },
+        {
+          "id": null,
+          "desc": "ADR Fee"
+        },
+        {
+          "id": null,
+          "desc": "Administrative Fee"
+        },
+        {
+          "id": null,
+          "desc": "Administrative Fee Adjustment"
+        },
+        {
+          "id": null,
+          "desc": "Wire Fee"
+        }
+      ]
+    },
+    "types_comment": "EXTERNAL_IN and EXTERNAL_OUT are the firm's ratified NNA set (data/inf/scripts/silver/orion_cashflow_taxonomy.yaml v2, nna_direction in/out). INTER_ACCOUNT_IN/OUT and TAX_WITHHELD are the entries the ratified file tags with account_boundary (in/out; the tax pair also account_boundary_when before_tax_return): this block names their ids, and the run REFUSES if the file's tagged entries differ from them (drift). Direction is the CLASS, never the sign of the amount: the amount's absolute value is signed by the class, as the NNA producer does. A row's type id and description are both read and a pair that disagrees with this table is REFUSED (drift), so an id can never silently change meaning. Every other type (trades, reinvestments, exchanges, splits, trading and administrative fees, foreign tax) stays INSIDE the return.",
+    "fee_comment": "GROSS of advisory fees: Management Fee and Fee Credit are signed as stored (a fee is negative) and enter F_t as capital out, so V_t - F_t adds the fee back. OTHER_FEE (Return-bucket trading and administrative fees) is NOT added back in the headline.",
+    "income_comment": "income_received is cash income on RECEIPT over the same window as external_flow (the four INCOME_CASH types, absolute value). It is informational: the cash is already inside V_t, so it never enters F_t. Reinvested income is not counted.",
+    "large_flow_ratio": 0.1,
+    "large_flow_ratio_basis": "held",
+    "large_flow_ratio_comment": "|external_flow| / V_(t-1) at or above this flags day_quality LARGE_FLOW, a reader's warning that never removes the value. HELD, not measured: the 49 Financial producer measures its own thresholds from its own distribution, and this offline cell does not.",
+    "taxonomy": {
+      "path": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml",
+      "ratified_flow_bucket": "NNA",
+      "boundary_key": "account_boundary",
+      "boundary_qualifier_key": "account_boundary_when",
+      "boundary_basis_applied": "before_tax_return",
+      "comment": "The ratified flow set is read from this file at run time: bucket NNA with nna_direction in/out, plus every entry carrying account_boundary (in/out), the qualified ones only when the run's basis equals account_boundary_when. The types block below must name exactly those descriptions or the run REFUSES (drift)."
+    },
+    "flow_sets": {
+      "ratified_gross": [
+        "EXTERNAL_IN",
+        "EXTERNAL_OUT",
+        "INTER_ACCOUNT_IN",
+        "INTER_ACCOUNT_OUT",
+        "TAX_WITHHELD",
+        "ADVISORY_FEE"
+      ],
+      "ratified_net": [
+        "EXTERNAL_IN",
+        "EXTERNAL_OUT",
+        "INTER_ACCOUNT_IN",
+        "INTER_ACCOUNT_OUT",
+        "TAX_WITHHELD"
+      ],
+      "nna_only_reference": [
+        "EXTERNAL_IN",
+        "EXTERNAL_OUT"
+      ],
+      "boundary_classes": {
+        "INTER_ACCOUNT_JOURNAL": [
+          "INTER_ACCOUNT_IN",
+          "INTER_ACCOUNT_OUT"
+        ],
+        "TAX_WITHHELD": [
+          "TAX_WITHHELD"
+        ]
+      },
+      "other_fee_class": "OTHER_FEE"
+    }
+  },
+  "comparison": {
+    "orion_account_performance_gross": {
+      "landed_record": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~57/ORION_GROSS_SILVER.json",
+      "landed_address_key": "address",
+      "as_of_key": "as_of",
+      "object": "data.parquet",
+      "account_column": "account_id",
+      "value_column": "twr_gross_value",
+      "value_unit": "percent",
+      "fee_method_column": "fee_method",
+      "fee_method_expected": "Gross of Fees",
+      "window_start_column": "date_range_start",
+      "window_end_column": "date_range_end",
+      "source": "the LANDED silver DB-b-79 wrote (Orion Connect saved query 'Performance Dim' with feeMethod overridden to Gross Of Fees); read here, never pulled",
+      "basis": "measured"
+    },
+    "orion_account_performance_net_control": {
+      "landed_prefix": "silver/api_dims/performance/",
+      "landed_value_column": "twr_value",
+      "landed_value_unit": "fraction",
+      "comment": "The landed net-of-fees figure of the sampled snapshot, read as round 36 did; no live read."
+    },
+    "annualisation": "trading_days_over_252",
+    "annualisation_basis": "held",
+    "annualisation_comment": "Held from round 36 (chosen there by fit on the net basis). The calendar-day probes are printed beside the headline so the choice is visible on the gross basis."
+  }
+}
