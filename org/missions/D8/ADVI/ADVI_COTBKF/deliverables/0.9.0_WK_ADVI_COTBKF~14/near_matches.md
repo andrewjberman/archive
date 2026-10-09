@@ -4,9 +4,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
 
 21 near match(es).
 
-## 1. Commonwealth B3S606724 -> Cottonwood z0927980101 (score 0.786)
+## 1. Commonwealth acct#f13c4faf -> Cottonwood z0927980101 (score 0.786)
 
-- Commonwealth account B3S606724: still held positions in the 2026-06-23 positions file.
+- Commonwealth account acct#f13c4faf: still held positions in the 2026-06-23 positions file.
 - Cottonwood account z0927980101: first holdings dated 2026-09-11.
 - Score: 11 of 14 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.786; the bar is 0.800).
 - Commonwealth advisor id(s): S58.
@@ -27,9 +27,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 92203J209 (VTIFX): Commonwealth 50.071, Cottonwood 50.444 [DIFFERENT_QUANTITY]
   - 922042858 (VWO): Commonwealth 21, Cottonwood 21 [EQUAL]
 
-## 2. Commonwealth RGY007491 -> Cottonwood z0926819471 (score 0.778)
+## 2. Commonwealth acct#cfd8182f -> Cottonwood z0926819471 (score 0.778)
 
-- Commonwealth account RGY007491: left in kind (transfer-out) on 2026-05-29.
+- Commonwealth account acct#cfd8182f: left in kind (transfer-out) on 2026-05-29.
 - Cottonwood account z0926819471: first holdings dated 2026-05-29.
 - Score: 7 of 9 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.778; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 0 day(s) after the Commonwealth exit.
@@ -46,9 +46,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 91282CQH7 (no symbol): Commonwealth 5,000,000, Cottonwood 5,000,000 [EQUAL]
   - 91282CQJ3 (no symbol): Commonwealth 5,000,000, Cottonwood 5,000,000 [EQUAL]
 
-## 3. Commonwealth 0QF883612 -> Cottonwood z0927234221 (score 0.765)
+## 3. Commonwealth acct#268d9555 -> Cottonwood z0927234221 (score 0.765)
 
-- Commonwealth account 0QF883612: still held positions in the 2026-06-23 positions file.
+- Commonwealth account acct#268d9555: still held positions in the 2026-06-23 positions file.
 - Cottonwood account z0927234221: first holdings dated 2026-07-02.
 - Score: 13 of 17 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.765; the bar is 0.800).
 - Commonwealth advisor id(s): S58.
@@ -72,9 +72,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 746745405 (PEIYX): Commonwealth 228.956, Cottonwood 228.956 [EQUAL]
   - 78463V107 (GLD): Commonwealth 5, Cottonwood 5 [EQUAL]
 
-## 4. Commonwealth RGY003642 -> Cottonwood z0927303741 (score 0.765)
+## 4. Commonwealth acct#2c16c4a1 -> Cottonwood z0927303741 (score 0.765)
 
-- Commonwealth account RGY003642: still held positions in the 2026-06-23 positions file.
+- Commonwealth account acct#2c16c4a1: still held positions in the 2026-06-23 positions file.
 - Cottonwood account z0927303741: first holdings dated 2026-07-02.
 - Score: 13 of 17 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.765; the bar is 0.800).
 - Commonwealth advisor id(s): S58.
@@ -137,9 +137,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 648018745 (FFPNX): Commonwealth 398.483, Cottonwood 398.483 [EQUAL]
   - 649280740 (FNFWX): Commonwealth 67.935, Cottonwood 67.935 [EQUAL]
 
-## 8. Commonwealth 6EQ029047 -> Cottonwood z0926748301 (score 0.727)
+## 8. Commonwealth acct#982cf165 -> Cottonwood z0926748301 (score 0.727)
 
-- Commonwealth account 6EQ029047: left in kind (transfer-out) on 2023-03-15.
+- Commonwealth account acct#982cf165: left in kind (transfer-out) on 2023-03-15.
 - Cottonwood account z0926748301: first holdings dated 2026-05-22.
 - Score: 8 of 11 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.727; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 1164 day(s) after the Commonwealth exit.
@@ -184,9 +184,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 648018745 (FFPNX): Commonwealth 166.356, Cottonwood 166.356 [EQUAL]
   - 649280740 (FNFWX): Commonwealth 28.771, Cottonwood 28.771 [EQUAL]
 
-## 11. Commonwealth 0QF878980 -> Cottonwood z0926704461 (score 0.667)
+## 11. Commonwealth acct#3ea38af4 -> Cottonwood z0926704461 (score 0.667)
 
-- Commonwealth account 0QF878980: left in kind (transfer-out) on 2026-05-19.
+- Commonwealth account acct#3ea38af4: left in kind (transfer-out) on 2026-05-19.
 - Cottonwood account z0926704461: first holdings dated 2026-05-19.
 - Score: 2 of 3 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.667; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 0 day(s) after the Commonwealth exit.
@@ -197,9 +197,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 30231G102 (XOM): Commonwealth 2,200, Cottonwood 2,200 [EQUAL]
   - 571903202 (MAR): Commonwealth 98, Cottonwood 98 [EQUAL]
 
-## 12. Commonwealth 0QF879507 -> Cottonwood z0927331161 (score 0.667)
+## 12. Commonwealth acct#89146847 -> Cottonwood z0927331161 (score 0.667)
 
-- Commonwealth account 0QF879507: still held positions in the 2026-06-23 positions file.
+- Commonwealth account acct#89146847: still held positions in the 2026-06-23 positions file.
 - Cottonwood account z0927331161: first holdings dated 2026-07-21.
 - Score: 2 of 3 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.667; the bar is 0.800).
 - Commonwealth advisor id(s): S58.
@@ -209,9 +209,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 316067107 (FDRXX): Commonwealth 1,713.73, Cottonwood 48,369.65 [DIFFERENT_QUANTITY]
   - 89235MSR3 (no symbol): Commonwealth 77,000, Cottonwood 77,000 [EQUAL]
 
-## 13. Commonwealth 0QF879617 -> Cottonwood z0926725641 (score 0.667)
+## 13. Commonwealth acct#4b78b222 -> Cottonwood z0926725641 (score 0.667)
 
-- Commonwealth account 0QF879617: left in kind (transfer-out) on 2021-11-04.
+- Commonwealth account acct#4b78b222: left in kind (transfer-out) on 2021-11-04.
 - Cottonwood account z0926725641: first holdings dated 2026-05-20.
 - Score: 4 of 6 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.667; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 1658 day(s) after the Commonwealth exit.
@@ -225,9 +225,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 464288240 (ACWX): Commonwealth 257, Cottonwood 257 [EQUAL]
   - 70450Y103 (PYPL): Commonwealth 15, Cottonwood 30 [DIFFERENT_QUANTITY]
 
-## 14. Commonwealth 0QF879620 -> Cottonwood z0926725641 (score 0.667)
+## 14. Commonwealth acct#18f0a0bd -> Cottonwood z0926725641 (score 0.667)
 
-- Commonwealth account 0QF879620: left in kind (transfer-out) on 2021-10-18.
+- Commonwealth account acct#18f0a0bd: left in kind (transfer-out) on 2021-10-18.
 - Cottonwood account z0926725641: first holdings dated 2026-05-20.
 - Score: 4 of 6 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.667; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 1675 day(s) after the Commonwealth exit.
@@ -241,9 +241,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 464288240 (ACWX): Commonwealth 257, Cottonwood 257 [EQUAL]
   - 70450Y103 (PYPL): Commonwealth 15, Cottonwood 30 [DIFFERENT_QUANTITY]
 
-## 15. Commonwealth 0QF890772 -> Cottonwood z0926726081 (score 0.667)
+## 15. Commonwealth acct#760a3a43 -> Cottonwood z0926726081 (score 0.667)
 
-- Commonwealth account 0QF890772: left in kind (transfer-out) on 2019-04-08.
+- Commonwealth account acct#760a3a43: left in kind (transfer-out) on 2019-04-08.
 - Cottonwood account z0926726081: first holdings dated 2026-05-20.
 - Score: 4 of 6 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.667; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 2599 day(s) after the Commonwealth exit.
@@ -257,9 +257,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 464288240 (ACWX): Commonwealth 30, Cottonwood 30 [EQUAL]
   - 929740108 (WAB): Commonwealth 1, Cottonwood not held [NOT_HELD]
 
-## 16. Commonwealth RGY003024 -> Cottonwood z0927533711 (score 0.667)
+## 16. Commonwealth acct#ae910ae7 -> Cottonwood z0927533711 (score 0.667)
 
-- Commonwealth account RGY003024: still held positions in the 2026-06-23 positions file.
+- Commonwealth account acct#ae910ae7: still held positions in the 2026-06-23 positions file.
 - Cottonwood account z0927533711: first holdings dated 2026-09-01.
 - Score: 2 of 3 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.667; the bar is 0.800).
 - Commonwealth advisor id(s): HKJ.
@@ -269,9 +269,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 040919102 (ARKB): Commonwealth 92, Cottonwood 92 [EQUAL]
   - 922908710 (VFIAX): Commonwealth 27.516, Cottonwood 27.595 [DIFFERENT_QUANTITY]
 
-## 17. Commonwealth RGY003440 -> Cottonwood z0926726341 (score 0.667)
+## 17. Commonwealth acct#9e28763b -> Cottonwood z0926726341 (score 0.667)
 
-- Commonwealth account RGY003440: left in kind (transfer-out) on 2026-05-20.
+- Commonwealth account acct#9e28763b: left in kind (transfer-out) on 2026-05-20.
 - Cottonwood account z0926726341: first holdings dated 2026-05-20.
 - Score: 2 of 3 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.667; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 0 day(s) after the Commonwealth exit.
@@ -282,9 +282,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 220802AV4 (no symbol): Commonwealth 75,000, Cottonwood 75,000 [EQUAL]
   - 5380366P4 (no symbol): Commonwealth 100,000, Cottonwood not held [NOT_HELD]
 
-## 18. Commonwealth RGY005363 -> Cottonwood z0926704541 (score 0.667)
+## 18. Commonwealth acct#815c2172 -> Cottonwood z0926704541 (score 0.667)
 
-- Commonwealth account RGY005363: left in kind (transfer-out) on 2026-05-20.
+- Commonwealth account acct#815c2172: left in kind (transfer-out) on 2026-05-20.
 - Cottonwood account z0926704541: first holdings dated 2026-05-20.
 - Score: 2 of 3 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.667; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 0 day(s) after the Commonwealth exit.
@@ -295,9 +295,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 5380366N9 (no symbol): Commonwealth 35,000, Cottonwood not held [NOT_HELD]
   - 91282CLY5 (no symbol): Commonwealth 75,000, Cottonwood 75,000 [EQUAL]
 
-## 19. Commonwealth RGY006818 -> Cottonwood z0926628491 (score 0.667)
+## 19. Commonwealth acct#82618c57 -> Cottonwood z0926628491 (score 0.667)
 
-- Commonwealth account RGY006818: left in kind (transfer-out) on 2026-05-14.
+- Commonwealth account acct#82618c57: left in kind (transfer-out) on 2026-05-14.
 - Cottonwood account z0926628491: first holdings dated 2026-05-14.
 - Score: 2 of 3 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.667; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 0 day(s) after the Commonwealth exit.
@@ -308,9 +308,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 69344A107 (PULS): Commonwealth 7,044, Cottonwood 7,044 [EQUAL]
   - 69344A834 (PAAA): Commonwealth 6,813, Cottonwood 6,813 [EQUAL]
 
-## 20. Commonwealth RGY007437 -> Cottonwood z0926725551 (score 0.667)
+## 20. Commonwealth acct#b30b51ee -> Cottonwood z0926725551 (score 0.667)
 
-- Commonwealth account RGY007437: left in kind (transfer-out) on 2026-05-20.
+- Commonwealth account acct#b30b51ee: left in kind (transfer-out) on 2026-05-20.
 - Cottonwood account z0926725551: first holdings dated 2026-05-20.
 - Score: 2 of 3 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.667; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 0 day(s) after the Commonwealth exit.
@@ -321,9 +321,9 @@ Commonwealth accounts are being matched to the current Cottonwood accounts that 
   - 69344A107 (PULS): Commonwealth 1,509, Cottonwood 1,509 [EQUAL]
   - 69344A834 (PAAA): Commonwealth 1,459, Cottonwood 1,459 [EQUAL]
 
-## 21. Commonwealth RGY003303 -> Cottonwood z0926725031 (score 0.650)
+## 21. Commonwealth acct#435f9230 -> Cottonwood z0926725031 (score 0.650)
 
-- Commonwealth account RGY003303: left in kind (transfer-out) on 2026-06-05.
+- Commonwealth account acct#435f9230: left in kind (transfer-out) on 2026-06-05.
 - Cottonwood account z0926725031: first holdings dated 2026-05-20.
 - Score: 39 of 60 securities the Commonwealth account held have the same quantity in the Cottonwood account's first holdings (0.650; the bar is 0.800).
 - Timing: the Cottonwood account's first holdings are dated 16 day(s) BEFORE the Commonwealth exit.

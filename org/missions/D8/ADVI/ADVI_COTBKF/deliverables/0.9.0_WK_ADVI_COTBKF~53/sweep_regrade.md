@@ -608,17 +608,17 @@ Reading notes: 11 of the 11 single-flow months have a listed-sweep sale of any a
 
 | account | month | withdrawal | value drop / withdrawal | sweep sale that day | before | diff | after | diff |
 |---|---|---|---|---|---|---|---|---|
-| 0QF899639 | 2024-01 | 33300.0 | 0.902 | 33300.0 | DIFF | 2.5691 | DIFF | 2.5691 |
-| 0QF899639 | 2024-03 | 36000.0 | 0.919 | 36000.0 | DIFF | -3.016 | DIFF | -3.016 |
-| 0QF911558 | 2021-02 | 5800.0 | 1.017 | 5800.0 | DIFF | 6.7385 | DIFF | 0.0839 |
-| 0QF911558 | 2023-05 | 3485.0 | 1.003 | 3485.0 | DIFF | 0.0601 | DIFF | 0.0601 |
-| B3S605610 | 2022-11 | 20000.0 | 0.984 | 20000.0 | DIFF | 2.2108 | DIFF | 0.0991 |
-| B3S605610 | 2023-05 | 20000.0 | 0.99 | 20000.0 | DIFF | -6.2534 | DIFF | 4.2734 |
-| B3S786844 | 2023-02 | 28574.88 | 1.0 | 28574.88 | DIFF | 5.9962 | DIFF | 5.9962 |
+| acct#f74da374 | 2024-01 | 33300.0 | 0.902 | 33300.0 | DIFF | 2.5691 | DIFF | 2.5691 |
+| acct#f74da374 | 2024-03 | 36000.0 | 0.919 | 36000.0 | DIFF | -3.016 | DIFF | -3.016 |
+| acct#2d4385bf | 2021-02 | 5800.0 | 1.017 | 5800.0 | DIFF | 6.7385 | DIFF | 0.0839 |
+| acct#2d4385bf | 2023-05 | 3485.0 | 1.003 | 3485.0 | DIFF | 0.0601 | DIFF | 0.0601 |
+| acct#f0b52456 | 2022-11 | 20000.0 | 0.984 | 20000.0 | DIFF | 2.2108 | DIFF | 0.0991 |
+| acct#f0b52456 | 2023-05 | 20000.0 | 0.99 | 20000.0 | DIFF | -6.2534 | DIFF | 4.2734 |
+| acct#1f02bee1 | 2023-02 | 28574.88 | 1.0 | 28574.88 | DIFF | 5.9962 | DIFF | 5.9962 |
 | D49143349 | 2022-12 | 75000.0 | 0.999 | 75000.0 | DIFF | 1.8833 | DIFF | 1.8833 |
 | D49151054 | 2021-08 | 8055.0 | 0.992 | 8055.0 | DIFF | 9.7228 | DIFF | 9.7228 |
-| RGY004220 | 2025-04 | 264824.0 | 0.943 | 53311.8 | DIFF | 0.1692 | DIFF | 0.1692 |
-| RGY004222 | 2025-04 | 75743.0 | 0.983 | 0.69 | DIFF | 0.551 | DIFF | 0.551 |
+| acct#c0cea213 | 2025-04 | 264824.0 | 0.943 | 53311.8 | DIFF | 0.1692 | DIFF | 0.1692 |
+| acct#6834d5a2 | 2025-04 | 75743.0 | 0.983 | 0.69 | DIFF | 0.551 | DIFF | 0.551 |
 
 ## The whole grade, before and after
 
@@ -644,10 +644,10 @@ Verdict moves (before -> after, months):
 
 | account | month | BEFORE computed | AFTER computed | reported | AFTER diff |
 |---|---|---|---|---|---|
-| B3S728504 | 2023-05 | 0.1418 | 0.1813 | 0.1 | 0.0813 |
-| B3S728504 | 2023-06 | 4.8344 | 5.2399 | 4.81 | 0.4299 |
-| B3S728506 | 2023-05 | 0.1493 | 0.1894 | 0.11 | 0.0794 |
-| B3S728506 | 2023-06 | 4.8943 | 5.2853 | 4.86 | 0.4253 |
+| acct#79d02c2c | 2023-05 | 0.1418 | 0.1813 | 0.1 | 0.0813 |
+| acct#79d02c2c | 2023-06 | 4.8344 | 5.2399 | 4.81 | 0.4299 |
+| acct#4a890dd1 | 2023-05 | 0.1493 | 0.1894 | 0.11 | 0.0794 |
+| acct#4a890dd1 | 2023-06 | 4.8943 | 5.2853 | 4.86 | 0.4253 |
 
 ## The round-19 MATCH -> DIFF months (mover_classes.parquet), with their result in this re-grade
 
@@ -661,142 +661,142 @@ Verdict moves (before -> after, months):
 
 | account | month | class | reported | round-19 no-list | round-19 v1 | before (sweeps-v1-20261008, cash leg method_r26) | after (sweeps-v1-20261008, cash leg method_r28) | after computed | after diff |
 |---|---|---|---|---|---|---|---|---|---|
-| 0QF878981 | 2024-06 | core | -0.88 | -0.8874 | 1.2105 | DIFF | DIFF | -0.8239 | 0.0561 |
-| B3S808045 | 2024-07 | core | -0.08 | -0.0415 | -0.0234 | MATCH | MATCH | -0.0798 | 0.0002 |
+| acct#f6c79f45 | 2024-06 | core | -0.88 | -0.8874 | 1.2105 | DIFF | DIFF | -0.8239 | 0.0561 |
+| acct#9727ac87 | 2024-07 | core | -0.08 | -0.0415 | -0.0234 | MATCH | MATCH | -0.0798 | 0.0002 |
 | D49143350 | 2023-11 | core | -4.59 | -4.6175 | -5.3344 | DIFF | DIFF | -3.4367 | 1.1533 |
 | D49143350 | 2026-02 | core | 2.05 | 2.0179 | -16.069 | DIFF | DIFF | 2.4881 | 0.4381 |
-| RGY003722 | 2026-01 | core | 0.02 | 0.0118 | 0.0988 | MATCH | MATCH | 0.0233 | 0.0033 |
-| RGY004220 | 2024-10 | core | -0.0 | 0.0329 | 0.1609 | MATCH | MATCH | 0.0468 | 0.0468 |
-| RGY005498 | 2025-02 | core | 0.06 | 0.0995 | 0.1518 | MATCH | MATCH | 0.0645 | 0.0045 |
-| RGY005696 | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005698 | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005699 | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005700 | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005701 | 2025-04 | core | 0.09 | 0.0436 | 95.1116 | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005702 | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005703 | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY006310 | 2025-06 | core | 0.15 | 0.1042 | 99.2457 | MATCH | MATCH | 0.1533 | 0.0033 |
-| RGY008149 | 2026-05 | core | 0.03 | 0.0283 | 0.265 | MATCH | MATCH | 0.0284 | -0.0016 |
-| 0QF878956 | 2021-10 | neither | 5.51 | 5.4855 | 6.0313 | DIFF | DIFF | 5.2032 | -0.3068 |
-| 0QF878956 | 2022-03 | neither | 4.82 | 4.7791 | 5.0603 | DIFF | MATCH | 4.7777 | -0.0423 |
-| 0QF878956 | 2022-08 | neither | -1.06 | -1.0435 | -1.3538 | MATCH | MATCH | -1.027 | 0.033 |
-| 0QF878956 | 2023-12 | neither | 1.56 | 1.5886 | 1.6144 | MATCH | MATCH | 1.5676 | 0.0076 |
-| 0QF878956 | 2025-03 | neither | -7.16 | -7.1874 | -7.4127 | MATCH | MATCH | -7.1115 | 0.0485 |
-| 0QF879097 | 2020-01 | neither | 0.02 | 0.0169 | 0.0835 | MATCH | MATCH | 0.0212 | 0.0012 |
-| 0QF879097 | 2020-02 | neither | 0.02 | 0.0158 | 0.0781 | MATCH | MATCH | 0.0199 | -0.0001 |
-| 0QF879097 | 2020-11 | neither | 0.08 | 0.0654 | 0.0034 | MATCH | MATCH | 0.0808 | 0.0008 |
-| 0QF879143 | 2022-04 | neither | -1.41 | -1.3963 | -2.7833 | DIFF | DIFF | -1.1928 | 0.2172 |
-| 0QF879181 | 2021-05 | neither | 0.76 | 0.7731 | 1.3492 | DIFF | DIFF | 1.1828 | 0.4228 |
-| 0QF879181 | 2022-12 | neither | -0.04 | 0.0072 | -0.5123 | MATCH | MATCH | 0.0099 | 0.0499 |
-| 0QF879181 | 2023-07 | neither | -0.02 | -0.0182 | 0.0314 | MATCH | MATCH | -0.025 | -0.005 |
-| 0QF879181 | 2024-09 | neither | 0.13 | 0.1142 | -0.3309 | MATCH | MATCH | 0.153 | 0.023 |
-| 0QF879181 | 2025-08 | neither | 1.22 | 1.2591 | 1.974 | DIFF | DIFF | 1.6857 | 0.4657 |
-| 0QF879185 | 2017-08 | neither | 0.0 | 0.0039 | 0.0503 | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879185 | 2017-10 | neither | 0.0 | 0.0039 | 0.0502 | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879185 | 2017-12 | neither | 0.0 | 0.0039 | 0.0502 | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879185 | 2018-01 | neither | 0.01 | 0.0112 | 0.1447 | MATCH | MATCH | 0.0122 | 0.0022 |
-| 0QF879185 | 2018-02 | neither | 0.01 | 0.0106 | 0.1363 | MATCH | MATCH | 0.0115 | 0.0015 |
-| 0QF879185 | 2018-03 | neither | 0.01 | 0.013 | 0.1669 | MATCH | MATCH | 0.0141 | 0.0041 |
-| 0QF879238 | 2017-07 | neither | 0.0 | 0.002 | 0.093 | MATCH | MATCH | 0.002 | 0.002 |
-| 0QF879238 | 2017-08 | neither | 0.0 | 0.0042 | 0.1956 | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879238 | 2017-09 | neither | 0.0 | 0.0039 | 0.1854 | MATCH | MATCH | 0.004 | 0.004 |
-| 0QF879238 | 2017-10 | neither | 0.0 | 0.0042 | 0.1948 | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879238 | 2017-12 | neither | 0.0 | 0.0041 | 0.1892 | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879238 | 2018-01 | neither | 0.01 | 0.0119 | 0.5521 | MATCH | MATCH | 0.0121 | 0.0021 |
-| 0QF879238 | 2018-02 | neither | 0.01 | 0.0112 | 0.5201 | MATCH | MATCH | 0.0115 | 0.0015 |
-| 0QF879238 | 2018-03 | neither | 0.01 | 0.0137 | 0.6324 | MATCH | MATCH | 0.014 | 0.004 |
-| 0QF879238 | 2018-04 | neither | 0.02 | 0.0201 | 0.9189 | MATCH | MATCH | 0.0205 | 0.0005 |
-| 0QF879238 | 2018-05 | neither | 0.02 | 0.0207 | 0.9388 | MATCH | MATCH | 0.0212 | 0.0012 |
-| 0QF879238 | 2018-06 | neither | 0.02 | 0.0201 | 0.902 | MATCH | MATCH | 0.0205 | 0.0005 |
-| 0QF879353 | 2021-04 | neither | -3.41 | -3.4508 | -3.4979 | DIFF | DIFF | -3.5078 | -0.0978 |
-| 0QF879353 | 2021-06 | neither | -4.82 | -4.8644 | -4.9327 | DIFF | DIFF | -4.9435 | -0.1235 |
-| 0QF879353 | 2021-10 | neither | -1.39 | -1.4342 | -1.4564 | DIFF | DIFF | -1.4589 | -0.0689 |
-| 0QF879353 | 2024-05 | neither | 0.67 | 0.6758 | 0.6079 | MATCH | MATCH | 0.6889 | 0.0189 |
-| 0QF880373 | 2023-04 | neither | 1.23 | 1.2331 | 1.1523 | DIFF | DIFF | 1.1702 | -0.0598 |
-| 0QF880505 | 2021-04 | neither | 2.21 | 2.2439 | 2.2794 | DIFF | DIFF | 2.3118 | 0.1018 |
-| 0QF880505 | 2021-08 | neither | 1.0 | 1.0456 | 1.0615 | DIFF | DIFF | 1.076 | 0.076 |
-| 0QF880505 | 2021-10 | neither | 2.52 | 2.5402 | 2.5791 | DIFF | DIFF | 2.6146 | 0.0946 |
-| 0QF880505 | 2023-04 | neither | 1.0 | 1.0012 | 1.1639 | MATCH | MATCH | 1.0304 | 0.0304 |
-| 0QF880505 | 2023-07 | neither | 2.9 | 2.9077 | 3.0773 | DIFF | DIFF | 2.9899 | 0.0899 |
-| 0QF880505 | 2024-01 | neither | -0.95 | -0.9005 | -1.1563 | MATCH | MATCH | -0.9242 | 0.0258 |
-| 0QF881999 | 2025-04 | neither | 0.53 | 0.5019 | 0.8003 | MATCH | MATCH | 0.5019 | -0.0281 |
-| 0QF881999 | 2025-05 | neither | 8.21 | 8.2042 | 8.2754 | MATCH | MATCH | 8.2042 | -0.0058 |
-| 0QF911558 | 2022-03 | neither | 4.92 | 4.9078 | 4.9714 | DIFF | DIFF | 4.9941 | 0.0741 |
-| 0QF911558 | 2023-04 | neither | -1.04 | -1.0474 | -1.1362 | MATCH | MATCH | -1.068 | -0.028 |
-| B3S605725 | 2018-01 | neither | 0.18 | 0.1777 | 0.5903 | MATCH | MATCH | 0.1814 | 0.0014 |
-| B3S605725 | 2018-02 | neither | 0.01 | 0.0113 | 0.5544 | MATCH | MATCH | 0.0115 | 0.0015 |
-| B3S605725 | 2018-03 | neither | 0.01 | 0.0138 | 0.6766 | MATCH | MATCH | 0.0141 | 0.0041 |
-| B3S637112 | 2017-03 | neither | -0.09 | -0.0454 | 0.0008 | MATCH | MATCH | -0.0908 | -0.0008 |
-| B3S637931 | 2017-03 | neither | -0.09 | -0.0465 | 0.0008 | MATCH | MATCH | -0.0929 | -0.0029 |
-| B3S646239 | 2017-06 | neither | -0.1 | -0.051 | 0.0008 | MATCH | MATCH | -0.102 | -0.002 |
-| B3S652916 | 2017-09 | neither | -0.07 | -0.0372 | 0.0041 | MATCH | MATCH | -0.0743 | -0.0043 |
-| B3S669430 | 2018-07 | neither | -0.08 | -0.0404 | 0.0476 | MATCH | MATCH | -0.0808 | -0.0008 |
-| B3S669432 | 2018-07 | neither | -0.08 | -0.0404 | 0.0476 | MATCH | MATCH | -0.0808 | -0.0008 |
-| B3S670865 | 2021-07 | neither | -0.04 | -0.0173 | -0.7036 | DIFF | DIFF | -0.1154 | -0.0754 |
-| B3S670865 | 2022-01 | neither | -9.71 | -9.669 | -9.3296 | DIFF | DIFF | -9.8401 | -0.1301 |
-| B3S670865 | 2023-04 | neither | 0.65 | 0.6165 | 0.9938 | DIFF | DIFF | 0.5451 | -0.1049 |
-| B3S672332 | 2018-06 | neither | -0.08 | -0.0406 | 0.044 | MATCH | MATCH | -0.0813 | -0.0013 |
-| B3S703388 | 2020-10 | neither | -4.06 | -4.0428 | -3.7118 | MATCH | MATCH | -4.07 | -0.01 |
-| B3S703388 | 2020-12 | neither | 4.15 | 4.1387 | 3.8748 | MATCH | MATCH | 4.1661 | 0.0161 |
-| B3S703388 | 2021-01 | neither | 3.93 | 3.8931 | 4.262 | MATCH | MATCH | 3.9179 | -0.0121 |
-| B3S703388 | 2021-03 | neither | 1.7 | 1.6982 | 1.45 | MATCH | MATCH | 1.7085 | 0.0085 |
-| B3S703388 | 2021-09 | neither | -6.42 | -6.3785 | -6.5812 | MATCH | MATCH | -6.4083 | 0.0117 |
-| B3S703388 | 2021-12 | neither | 1.91 | 1.913 | 1.7259 | MATCH | MATCH | 1.9212 | 0.0112 |
-| B3S703388 | 2022-03 | neither | 3.37 | 3.3653 | 3.1712 | MATCH | MATCH | 3.381 | 0.011 |
-| B3S703388 | 2022-06 | neither | -5.26 | -5.2245 | -5.5037 | MATCH | MATCH | -5.2513 | 0.0087 |
-| B3S703388 | 2022-12 | neither | -5.66 | -5.6204 | -5.9713 | MATCH | MATCH | -5.6507 | 0.0093 |
-| B3S703388 | 2023-04 | neither | 6.46 | 6.4297 | 6.5457 | MATCH | MATCH | 6.4603 | 0.0003 |
-| B3S703388 | 2023-12 | neither | -0.55 | -0.5243 | -0.7259 | MATCH | MATCH | -0.546 | 0.004 |
-| B3S703388 | 2024-02 | neither | 3.97 | 4.0017 | 4.0695 | DIFF | DIFF | 4.1591 | 0.1891 |
-| B3S703388 | 2024-12 | neither | -0.26 | -0.2414 | -0.431 | MATCH | MATCH | -0.2583 | 0.0017 |
-| B3S728504 | 2023-05 | neither | 0.1 | 0.1307 | 0.0043 | MATCH | DIFF | 0.1813 | 0.0813 |
-| B3S728504 | 2024-07 | neither | 1.94 | 1.9751 | 1.8241 | DIFF | MATCH | 1.9886 | 0.0486 |
-| B3S728504 | 2024-11 | neither | 5.35 | 5.3014 | 5.5761 | DIFF | DIFF | 5.4413 | 0.0913 |
-| B3S728504 | 2025-01 | neither | 2.21 | 2.1652 | 2.4415 | MATCH | MATCH | 2.2206 | 0.0106 |
-| B3S728506 | 2023-05 | neither | 0.11 | 0.1379 | 0.0153 | MATCH | DIFF | 0.1894 | 0.0794 |
-| B3S728506 | 2024-07 | neither | 1.94 | 1.9836 | 1.8256 | DIFF | MATCH | 1.9889 | 0.0489 |
-| B3S728506 | 2025-01 | neither | 2.23 | 2.1802 | 2.4546 | MATCH | MATCH | 2.2339 | 0.0039 |
-| B3S728506 | 2025-05 | neither | 4.83 | 4.8549 | 5.0695 | DIFF | DIFF | 4.9152 | 0.0852 |
-| B3S739139 | 2022-07 | neither | -0.08 | -0.0493 | 0.0319 | MATCH | MATCH | -0.0821 | -0.0021 |
-| B3S739139 | 2022-10 | neither | -0.07 | -0.0518 | 0.0829 | MATCH | MATCH | -0.0729 | -0.0029 |
-| B3S739139 | 2022-11 | neither | 0.03 | 0.0247 | 0.0848 | MATCH | MATCH | 0.0348 | 0.0048 |
-| B3S739139 | 2022-12 | neither | 0.06 | 0.0452 | 0.1552 | MATCH | MATCH | 0.0637 | 0.0037 |
-| B3S739139 | 2023-01 | neither | -0.04 | -0.0259 | 0.1549 | MATCH | MATCH | -0.0364 | 0.0036 |
-| B3S739139 | 2023-02 | neither | 0.06 | 0.0409 | 0.1398 | MATCH | MATCH | 0.0575 | -0.0025 |
-| B3S752708 | 2021-06 | neither | -0.09 | -0.0468 | 0.0008 | MATCH | MATCH | -0.0936 | -0.0036 |
-| B3S765083 | 2022-04 | neither | -0.06 | -0.0299 | 0.0007 | MATCH | MATCH | -0.0609 | -0.0009 |
-| B3S765083 | 2022-07 | neither | -0.05 | -0.0241 | 0.0118 | MATCH | MATCH | -0.05 | 0.0 |
-| B3S765083 | 2023-04 | neither | -0.0 | -0.0002 | 0.0611 | MATCH | MATCH | -0.0004 | -0.0004 |
-| B3S765083 | 2023-07 | neither | 0.0 | 0.0006 | 0.0631 | MATCH | MATCH | 0.0013 | 0.0013 |
-| B3S765083 | 2023-10 | neither | -0.0 | -0.0011 | 0.063 | MATCH | MATCH | -0.0022 | -0.0022 |
-| B3S765083 | 2024-01 | neither | -0.0 | -0.0002 | 0.0628 | MATCH | MATCH | -0.0004 | -0.0004 |
-| B3S765083 | 2024-04 | neither | -0.01 | -0.0051 | 0.0605 | MATCH | MATCH | -0.0103 | -0.0003 |
-| B3S765083 | 2024-07 | neither | -0.01 | -0.0052 | 0.0624 | MATCH | MATCH | -0.0103 | -0.0003 |
-| B3S765083 | 2024-10 | neither | -0.01 | -0.0059 | 0.0618 | MATCH | MATCH | -0.0117 | -0.0017 |
-| B3S765083 | 2025-01 | neither | -0.04 | -0.0178 | 0.0359 | MATCH | MATCH | -0.0359 | 0.0041 |
-| B3S765083 | 2025-04 | neither | -0.06 | -0.0294 | 0.0172 | MATCH | MATCH | -0.0593 | 0.0007 |
-| B3S782299 | 2023-01 | neither | -0.06 | -0.029 | 0.1934 | MATCH | MATCH | -0.058 | 0.002 |
-| B3S782299 | 2023-04 | neither | -0.06 | -0.028 | 0.1797 | MATCH | MATCH | -0.056 | 0.004 |
-| B3S782299 | 2023-07 | neither | -0.07 | -0.0366 | 0.1546 | MATCH | MATCH | -0.0731 | -0.0031 |
-| B3S782299 | 2023-10 | neither | -0.09 | -0.0428 | 0.1575 | MATCH | MATCH | -0.0854 | 0.0046 |
-| B3S786844 | 2022-10 | neither | 11.87 | 11.8922 | 11.5015 | MATCH | MATCH | 11.8922 | 0.0222 |
-| B3S786844 | 2022-11 | neither | 18.29 | 18.2894 | 18.3535 | MATCH | MATCH | 18.2894 | -0.0006 |
-| B3S798436 | 2025-01 | neither | 0.92 | 0.9233 | 1.3343 | MATCH | MATCH | 0.9333 | 0.0133 |
-| B3S798436 | 2026-01 | neither | 1.68 | 1.6752 | 2.1165 | MATCH | MATCH | 1.6914 | 0.0114 |
-| B3S804864 | 2024-01 | neither | -0.3 | -0.2815 | 0.0268 | MATCH | MATCH | -0.2854 | 0.0146 |
-| B3S804888 | 2024-01 | neither | -0.3 | -0.2804 | 0.028 | MATCH | MATCH | -0.2843 | 0.0157 |
-| B3S804888 | 2024-02 | neither | 4.32 | 4.2779 | 4.813 | MATCH | MATCH | 4.3367 | 0.0167 |
-| B3S804888 | 2024-04 | neither | -3.96 | -3.9239 | -4.0511 | MATCH | MATCH | -3.974 | -0.014 |
-| B3S804888 | 2024-08 | neither | 1.79 | 1.7636 | 1.9586 | MATCH | MATCH | 1.7854 | -0.0046 |
-| B3S804888 | 2024-10 | neither | -1.6 | -1.5618 | -1.4023 | MATCH | MATCH | -1.5803 | 0.0197 |
-| B3S804888 | 2024-11 | neither | 5.25 | 5.213 | 5.7813 | MATCH | MATCH | 5.2837 | 0.0337 |
-| B3S804888 | 2025-01 | neither | 2.52 | 2.481 | 3.0843 | MATCH | MATCH | 2.5101 | -0.0099 |
-| B3S804888 | 2025-02 | neither | -1.55 | -1.5551 | -1.7189 | MATCH | MATCH | -1.5729 | -0.0229 |
-| B3S804888 | 2025-04 | neither | -0.05 | -0.0504 | 0.2743 | MATCH | MATCH | -0.051 | -0.001 |
-| B3S804888 | 2025-07 | neither | 1.24 | 1.2346 | 1.6808 | MATCH | MATCH | 1.2482 | 0.0082 |
-| B3S804888 | 2025-08 | neither | 2.52 | 2.4854 | 2.7275 | MATCH | MATCH | 2.5124 | -0.0076 |
-| B3S804888 | 2025-10 | neither | 1.44 | 1.4272 | 1.8756 | MATCH | MATCH | 1.4418 | 0.0018 |
-| B3S804888 | 2026-01 | neither | 1.76 | 1.738 | 2.218 | MATCH | MATCH | 1.7554 | -0.0046 |
+| acct#557ce060 | 2026-01 | core | 0.02 | 0.0118 | 0.0988 | MATCH | MATCH | 0.0233 | 0.0033 |
+| acct#c0cea213 | 2024-10 | core | -0.0 | 0.0329 | 0.1609 | MATCH | MATCH | 0.0468 | 0.0468 |
+| acct#7f62f16f | 2025-02 | core | 0.06 | 0.0995 | 0.1518 | MATCH | MATCH | 0.0645 | 0.0045 |
+| acct#61ebda90 | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#ce1f487c | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#16bf540c | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#177b7e48 | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#aed810ab | 2025-04 | core | 0.09 | 0.0436 | 95.1116 | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#781a748b | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#1b22f63a | 2025-04 | core | 0.09 | 0.0436 | 95.1114 | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#744c9c00 | 2025-06 | core | 0.15 | 0.1042 | 99.2457 | MATCH | MATCH | 0.1533 | 0.0033 |
+| acct#5fd6a5d4 | 2026-05 | core | 0.03 | 0.0283 | 0.265 | MATCH | MATCH | 0.0284 | -0.0016 |
+| acct#aaeb760c | 2021-10 | neither | 5.51 | 5.4855 | 6.0313 | DIFF | DIFF | 5.2032 | -0.3068 |
+| acct#aaeb760c | 2022-03 | neither | 4.82 | 4.7791 | 5.0603 | DIFF | MATCH | 4.7777 | -0.0423 |
+| acct#aaeb760c | 2022-08 | neither | -1.06 | -1.0435 | -1.3538 | MATCH | MATCH | -1.027 | 0.033 |
+| acct#aaeb760c | 2023-12 | neither | 1.56 | 1.5886 | 1.6144 | MATCH | MATCH | 1.5676 | 0.0076 |
+| acct#aaeb760c | 2025-03 | neither | -7.16 | -7.1874 | -7.4127 | MATCH | MATCH | -7.1115 | 0.0485 |
+| acct#b4db1f25 | 2020-01 | neither | 0.02 | 0.0169 | 0.0835 | MATCH | MATCH | 0.0212 | 0.0012 |
+| acct#b4db1f25 | 2020-02 | neither | 0.02 | 0.0158 | 0.0781 | MATCH | MATCH | 0.0199 | -0.0001 |
+| acct#b4db1f25 | 2020-11 | neither | 0.08 | 0.0654 | 0.0034 | MATCH | MATCH | 0.0808 | 0.0008 |
+| acct#03836058 | 2022-04 | neither | -1.41 | -1.3963 | -2.7833 | DIFF | DIFF | -1.1928 | 0.2172 |
+| acct#eea1157e | 2021-05 | neither | 0.76 | 0.7731 | 1.3492 | DIFF | DIFF | 1.1828 | 0.4228 |
+| acct#eea1157e | 2022-12 | neither | -0.04 | 0.0072 | -0.5123 | MATCH | MATCH | 0.0099 | 0.0499 |
+| acct#eea1157e | 2023-07 | neither | -0.02 | -0.0182 | 0.0314 | MATCH | MATCH | -0.025 | -0.005 |
+| acct#eea1157e | 2024-09 | neither | 0.13 | 0.1142 | -0.3309 | MATCH | MATCH | 0.153 | 0.023 |
+| acct#eea1157e | 2025-08 | neither | 1.22 | 1.2591 | 1.974 | DIFF | DIFF | 1.6857 | 0.4657 |
+| acct#1c3da532 | 2017-08 | neither | 0.0 | 0.0039 | 0.0503 | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#1c3da532 | 2017-10 | neither | 0.0 | 0.0039 | 0.0502 | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#1c3da532 | 2017-12 | neither | 0.0 | 0.0039 | 0.0502 | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#1c3da532 | 2018-01 | neither | 0.01 | 0.0112 | 0.1447 | MATCH | MATCH | 0.0122 | 0.0022 |
+| acct#1c3da532 | 2018-02 | neither | 0.01 | 0.0106 | 0.1363 | MATCH | MATCH | 0.0115 | 0.0015 |
+| acct#1c3da532 | 2018-03 | neither | 0.01 | 0.013 | 0.1669 | MATCH | MATCH | 0.0141 | 0.0041 |
+| acct#5aa91f68 | 2017-07 | neither | 0.0 | 0.002 | 0.093 | MATCH | MATCH | 0.002 | 0.002 |
+| acct#5aa91f68 | 2017-08 | neither | 0.0 | 0.0042 | 0.1956 | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#5aa91f68 | 2017-09 | neither | 0.0 | 0.0039 | 0.1854 | MATCH | MATCH | 0.004 | 0.004 |
+| acct#5aa91f68 | 2017-10 | neither | 0.0 | 0.0042 | 0.1948 | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#5aa91f68 | 2017-12 | neither | 0.0 | 0.0041 | 0.1892 | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#5aa91f68 | 2018-01 | neither | 0.01 | 0.0119 | 0.5521 | MATCH | MATCH | 0.0121 | 0.0021 |
+| acct#5aa91f68 | 2018-02 | neither | 0.01 | 0.0112 | 0.5201 | MATCH | MATCH | 0.0115 | 0.0015 |
+| acct#5aa91f68 | 2018-03 | neither | 0.01 | 0.0137 | 0.6324 | MATCH | MATCH | 0.014 | 0.004 |
+| acct#5aa91f68 | 2018-04 | neither | 0.02 | 0.0201 | 0.9189 | MATCH | MATCH | 0.0205 | 0.0005 |
+| acct#5aa91f68 | 2018-05 | neither | 0.02 | 0.0207 | 0.9388 | MATCH | MATCH | 0.0212 | 0.0012 |
+| acct#5aa91f68 | 2018-06 | neither | 0.02 | 0.0201 | 0.902 | MATCH | MATCH | 0.0205 | 0.0005 |
+| acct#04ebe1d1 | 2021-04 | neither | -3.41 | -3.4508 | -3.4979 | DIFF | DIFF | -3.5078 | -0.0978 |
+| acct#04ebe1d1 | 2021-06 | neither | -4.82 | -4.8644 | -4.9327 | DIFF | DIFF | -4.9435 | -0.1235 |
+| acct#04ebe1d1 | 2021-10 | neither | -1.39 | -1.4342 | -1.4564 | DIFF | DIFF | -1.4589 | -0.0689 |
+| acct#04ebe1d1 | 2024-05 | neither | 0.67 | 0.6758 | 0.6079 | MATCH | MATCH | 0.6889 | 0.0189 |
+| acct#015306a0 | 2023-04 | neither | 1.23 | 1.2331 | 1.1523 | DIFF | DIFF | 1.1702 | -0.0598 |
+| acct#fa488a0b | 2021-04 | neither | 2.21 | 2.2439 | 2.2794 | DIFF | DIFF | 2.3118 | 0.1018 |
+| acct#fa488a0b | 2021-08 | neither | 1.0 | 1.0456 | 1.0615 | DIFF | DIFF | 1.076 | 0.076 |
+| acct#fa488a0b | 2021-10 | neither | 2.52 | 2.5402 | 2.5791 | DIFF | DIFF | 2.6146 | 0.0946 |
+| acct#fa488a0b | 2023-04 | neither | 1.0 | 1.0012 | 1.1639 | MATCH | MATCH | 1.0304 | 0.0304 |
+| acct#fa488a0b | 2023-07 | neither | 2.9 | 2.9077 | 3.0773 | DIFF | DIFF | 2.9899 | 0.0899 |
+| acct#fa488a0b | 2024-01 | neither | -0.95 | -0.9005 | -1.1563 | MATCH | MATCH | -0.9242 | 0.0258 |
+| acct#21515eb6 | 2025-04 | neither | 0.53 | 0.5019 | 0.8003 | MATCH | MATCH | 0.5019 | -0.0281 |
+| acct#21515eb6 | 2025-05 | neither | 8.21 | 8.2042 | 8.2754 | MATCH | MATCH | 8.2042 | -0.0058 |
+| acct#2d4385bf | 2022-03 | neither | 4.92 | 4.9078 | 4.9714 | DIFF | DIFF | 4.9941 | 0.0741 |
+| acct#2d4385bf | 2023-04 | neither | -1.04 | -1.0474 | -1.1362 | MATCH | MATCH | -1.068 | -0.028 |
+| acct#ab0c6781 | 2018-01 | neither | 0.18 | 0.1777 | 0.5903 | MATCH | MATCH | 0.1814 | 0.0014 |
+| acct#ab0c6781 | 2018-02 | neither | 0.01 | 0.0113 | 0.5544 | MATCH | MATCH | 0.0115 | 0.0015 |
+| acct#ab0c6781 | 2018-03 | neither | 0.01 | 0.0138 | 0.6766 | MATCH | MATCH | 0.0141 | 0.0041 |
+| acct#92164e0d | 2017-03 | neither | -0.09 | -0.0454 | 0.0008 | MATCH | MATCH | -0.0908 | -0.0008 |
+| acct#ebb31a1c | 2017-03 | neither | -0.09 | -0.0465 | 0.0008 | MATCH | MATCH | -0.0929 | -0.0029 |
+| acct#dfa7a25c | 2017-06 | neither | -0.1 | -0.051 | 0.0008 | MATCH | MATCH | -0.102 | -0.002 |
+| acct#4040a6ea | 2017-09 | neither | -0.07 | -0.0372 | 0.0041 | MATCH | MATCH | -0.0743 | -0.0043 |
+| acct#0e2c97b9 | 2018-07 | neither | -0.08 | -0.0404 | 0.0476 | MATCH | MATCH | -0.0808 | -0.0008 |
+| acct#de79caf1 | 2018-07 | neither | -0.08 | -0.0404 | 0.0476 | MATCH | MATCH | -0.0808 | -0.0008 |
+| acct#25880078 | 2021-07 | neither | -0.04 | -0.0173 | -0.7036 | DIFF | DIFF | -0.1154 | -0.0754 |
+| acct#25880078 | 2022-01 | neither | -9.71 | -9.669 | -9.3296 | DIFF | DIFF | -9.8401 | -0.1301 |
+| acct#25880078 | 2023-04 | neither | 0.65 | 0.6165 | 0.9938 | DIFF | DIFF | 0.5451 | -0.1049 |
+| acct#8680d8f4 | 2018-06 | neither | -0.08 | -0.0406 | 0.044 | MATCH | MATCH | -0.0813 | -0.0013 |
+| acct#e29efebe | 2020-10 | neither | -4.06 | -4.0428 | -3.7118 | MATCH | MATCH | -4.07 | -0.01 |
+| acct#e29efebe | 2020-12 | neither | 4.15 | 4.1387 | 3.8748 | MATCH | MATCH | 4.1661 | 0.0161 |
+| acct#e29efebe | 2021-01 | neither | 3.93 | 3.8931 | 4.262 | MATCH | MATCH | 3.9179 | -0.0121 |
+| acct#e29efebe | 2021-03 | neither | 1.7 | 1.6982 | 1.45 | MATCH | MATCH | 1.7085 | 0.0085 |
+| acct#e29efebe | 2021-09 | neither | -6.42 | -6.3785 | -6.5812 | MATCH | MATCH | -6.4083 | 0.0117 |
+| acct#e29efebe | 2021-12 | neither | 1.91 | 1.913 | 1.7259 | MATCH | MATCH | 1.9212 | 0.0112 |
+| acct#e29efebe | 2022-03 | neither | 3.37 | 3.3653 | 3.1712 | MATCH | MATCH | 3.381 | 0.011 |
+| acct#e29efebe | 2022-06 | neither | -5.26 | -5.2245 | -5.5037 | MATCH | MATCH | -5.2513 | 0.0087 |
+| acct#e29efebe | 2022-12 | neither | -5.66 | -5.6204 | -5.9713 | MATCH | MATCH | -5.6507 | 0.0093 |
+| acct#e29efebe | 2023-04 | neither | 6.46 | 6.4297 | 6.5457 | MATCH | MATCH | 6.4603 | 0.0003 |
+| acct#e29efebe | 2023-12 | neither | -0.55 | -0.5243 | -0.7259 | MATCH | MATCH | -0.546 | 0.004 |
+| acct#e29efebe | 2024-02 | neither | 3.97 | 4.0017 | 4.0695 | DIFF | DIFF | 4.1591 | 0.1891 |
+| acct#e29efebe | 2024-12 | neither | -0.26 | -0.2414 | -0.431 | MATCH | MATCH | -0.2583 | 0.0017 |
+| acct#79d02c2c | 2023-05 | neither | 0.1 | 0.1307 | 0.0043 | MATCH | DIFF | 0.1813 | 0.0813 |
+| acct#79d02c2c | 2024-07 | neither | 1.94 | 1.9751 | 1.8241 | DIFF | MATCH | 1.9886 | 0.0486 |
+| acct#79d02c2c | 2024-11 | neither | 5.35 | 5.3014 | 5.5761 | DIFF | DIFF | 5.4413 | 0.0913 |
+| acct#79d02c2c | 2025-01 | neither | 2.21 | 2.1652 | 2.4415 | MATCH | MATCH | 2.2206 | 0.0106 |
+| acct#4a890dd1 | 2023-05 | neither | 0.11 | 0.1379 | 0.0153 | MATCH | DIFF | 0.1894 | 0.0794 |
+| acct#4a890dd1 | 2024-07 | neither | 1.94 | 1.9836 | 1.8256 | DIFF | MATCH | 1.9889 | 0.0489 |
+| acct#4a890dd1 | 2025-01 | neither | 2.23 | 2.1802 | 2.4546 | MATCH | MATCH | 2.2339 | 0.0039 |
+| acct#4a890dd1 | 2025-05 | neither | 4.83 | 4.8549 | 5.0695 | DIFF | DIFF | 4.9152 | 0.0852 |
+| acct#3b89d062 | 2022-07 | neither | -0.08 | -0.0493 | 0.0319 | MATCH | MATCH | -0.0821 | -0.0021 |
+| acct#3b89d062 | 2022-10 | neither | -0.07 | -0.0518 | 0.0829 | MATCH | MATCH | -0.0729 | -0.0029 |
+| acct#3b89d062 | 2022-11 | neither | 0.03 | 0.0247 | 0.0848 | MATCH | MATCH | 0.0348 | 0.0048 |
+| acct#3b89d062 | 2022-12 | neither | 0.06 | 0.0452 | 0.1552 | MATCH | MATCH | 0.0637 | 0.0037 |
+| acct#3b89d062 | 2023-01 | neither | -0.04 | -0.0259 | 0.1549 | MATCH | MATCH | -0.0364 | 0.0036 |
+| acct#3b89d062 | 2023-02 | neither | 0.06 | 0.0409 | 0.1398 | MATCH | MATCH | 0.0575 | -0.0025 |
+| acct#6acbfb93 | 2021-06 | neither | -0.09 | -0.0468 | 0.0008 | MATCH | MATCH | -0.0936 | -0.0036 |
+| acct#921b5169 | 2022-04 | neither | -0.06 | -0.0299 | 0.0007 | MATCH | MATCH | -0.0609 | -0.0009 |
+| acct#921b5169 | 2022-07 | neither | -0.05 | -0.0241 | 0.0118 | MATCH | MATCH | -0.05 | 0.0 |
+| acct#921b5169 | 2023-04 | neither | -0.0 | -0.0002 | 0.0611 | MATCH | MATCH | -0.0004 | -0.0004 |
+| acct#921b5169 | 2023-07 | neither | 0.0 | 0.0006 | 0.0631 | MATCH | MATCH | 0.0013 | 0.0013 |
+| acct#921b5169 | 2023-10 | neither | -0.0 | -0.0011 | 0.063 | MATCH | MATCH | -0.0022 | -0.0022 |
+| acct#921b5169 | 2024-01 | neither | -0.0 | -0.0002 | 0.0628 | MATCH | MATCH | -0.0004 | -0.0004 |
+| acct#921b5169 | 2024-04 | neither | -0.01 | -0.0051 | 0.0605 | MATCH | MATCH | -0.0103 | -0.0003 |
+| acct#921b5169 | 2024-07 | neither | -0.01 | -0.0052 | 0.0624 | MATCH | MATCH | -0.0103 | -0.0003 |
+| acct#921b5169 | 2024-10 | neither | -0.01 | -0.0059 | 0.0618 | MATCH | MATCH | -0.0117 | -0.0017 |
+| acct#921b5169 | 2025-01 | neither | -0.04 | -0.0178 | 0.0359 | MATCH | MATCH | -0.0359 | 0.0041 |
+| acct#921b5169 | 2025-04 | neither | -0.06 | -0.0294 | 0.0172 | MATCH | MATCH | -0.0593 | 0.0007 |
+| acct#3345c43a | 2023-01 | neither | -0.06 | -0.029 | 0.1934 | MATCH | MATCH | -0.058 | 0.002 |
+| acct#3345c43a | 2023-04 | neither | -0.06 | -0.028 | 0.1797 | MATCH | MATCH | -0.056 | 0.004 |
+| acct#3345c43a | 2023-07 | neither | -0.07 | -0.0366 | 0.1546 | MATCH | MATCH | -0.0731 | -0.0031 |
+| acct#3345c43a | 2023-10 | neither | -0.09 | -0.0428 | 0.1575 | MATCH | MATCH | -0.0854 | 0.0046 |
+| acct#1f02bee1 | 2022-10 | neither | 11.87 | 11.8922 | 11.5015 | MATCH | MATCH | 11.8922 | 0.0222 |
+| acct#1f02bee1 | 2022-11 | neither | 18.29 | 18.2894 | 18.3535 | MATCH | MATCH | 18.2894 | -0.0006 |
+| acct#16f4eae3 | 2025-01 | neither | 0.92 | 0.9233 | 1.3343 | MATCH | MATCH | 0.9333 | 0.0133 |
+| acct#16f4eae3 | 2026-01 | neither | 1.68 | 1.6752 | 2.1165 | MATCH | MATCH | 1.6914 | 0.0114 |
+| acct#0f2d2c45 | 2024-01 | neither | -0.3 | -0.2815 | 0.0268 | MATCH | MATCH | -0.2854 | 0.0146 |
+| acct#cce589ab | 2024-01 | neither | -0.3 | -0.2804 | 0.028 | MATCH | MATCH | -0.2843 | 0.0157 |
+| acct#cce589ab | 2024-02 | neither | 4.32 | 4.2779 | 4.813 | MATCH | MATCH | 4.3367 | 0.0167 |
+| acct#cce589ab | 2024-04 | neither | -3.96 | -3.9239 | -4.0511 | MATCH | MATCH | -3.974 | -0.014 |
+| acct#cce589ab | 2024-08 | neither | 1.79 | 1.7636 | 1.9586 | MATCH | MATCH | 1.7854 | -0.0046 |
+| acct#cce589ab | 2024-10 | neither | -1.6 | -1.5618 | -1.4023 | MATCH | MATCH | -1.5803 | 0.0197 |
+| acct#cce589ab | 2024-11 | neither | 5.25 | 5.213 | 5.7813 | MATCH | MATCH | 5.2837 | 0.0337 |
+| acct#cce589ab | 2025-01 | neither | 2.52 | 2.481 | 3.0843 | MATCH | MATCH | 2.5101 | -0.0099 |
+| acct#cce589ab | 2025-02 | neither | -1.55 | -1.5551 | -1.7189 | MATCH | MATCH | -1.5729 | -0.0229 |
+| acct#cce589ab | 2025-04 | neither | -0.05 | -0.0504 | 0.2743 | MATCH | MATCH | -0.051 | -0.001 |
+| acct#cce589ab | 2025-07 | neither | 1.24 | 1.2346 | 1.6808 | MATCH | MATCH | 1.2482 | 0.0082 |
+| acct#cce589ab | 2025-08 | neither | 2.52 | 2.4854 | 2.7275 | MATCH | MATCH | 2.5124 | -0.0076 |
+| acct#cce589ab | 2025-10 | neither | 1.44 | 1.4272 | 1.8756 | MATCH | MATCH | 1.4418 | 0.0018 |
+| acct#cce589ab | 2026-01 | neither | 1.76 | 1.738 | 2.218 | MATCH | MATCH | 1.7554 | -0.0046 |
 | D49141608 | 2019-02 | neither | 0.04 | 0.0412 | 2.2299 | MATCH | MATCH | 0.0419 | 0.0019 |
 | D49141608 | 2019-03 | neither | 0.05 | 0.0457 | 2.4237 | MATCH | MATCH | 0.0466 | -0.0034 |
 | D49141608 | 2019-04 | neither | 0.05 | 0.0443 | 2.2953 | MATCH | MATCH | 0.0452 | -0.0048 |
@@ -806,24 +806,24 @@ Verdict moves (before -> after, months):
 | D49141608 | 2019-08 | neither | 0.04 | 0.0374 | 1.7749 | MATCH | MATCH | 0.0381 | -0.0019 |
 | D49141608 | 2019-09 | neither | 0.03 | 0.0315 | 1.4675 | MATCH | MATCH | 0.0321 | 0.0021 |
 | D49141714 | 2019-02 | neither | 0.04 | 0.0416 | 3.3111 | MATCH | MATCH | 0.0421 | 0.0021 |
-| RGY004120 | 2025-04 | neither | 0.41 | 0.4142 | 0.3581 | MATCH | MATCH | 0.4142 | 0.0042 |
-| RGY004120 | 2025-10 | neither | 0.64 | 0.6038 | 1.0099 | MATCH | MATCH | 0.6039 | -0.0361 |
-| RGY004120 | 2026-01 | neither | 1.56 | 1.5626 | 1.934 | MATCH | MATCH | 1.5628 | 0.0028 |
-| RGY004256 | 2024-07 | neither | -7.76 | -7.7261 | -8.3764 | MATCH | MATCH | -7.7261 | 0.0339 |
-| RGY004256 | 2024-08 | neither | 4.62 | 4.6488 | 4.6829 | MATCH | MATCH | 4.6488 | 0.0288 |
-| RGY004256 | 2024-10 | neither | -9.03 | -8.9903 | -9.7576 | MATCH | MATCH | -8.9903 | 0.0397 |
-| RGY005018 | 2024-12 | neither | -8.02 | -7.9838 | -8.8079 | MATCH | MATCH | -7.9838 | 0.0362 |
-| RGY005018 | 2025-03 | neither | 7.66 | 7.684 | 6.8268 | MATCH | MATCH | 7.684 | 0.024 |
-| RGY005018 | 2025-04 | neither | -11.06 | -11.0556 | -11.1826 | MATCH | MATCH | -11.0556 | 0.0044 |
-| RGY005018 | 2025-06 | neither | 6.23 | 6.2553 | 5.3767 | MATCH | MATCH | 6.2553 | 0.0253 |
-| RGY005018 | 2025-07 | neither | 3.42 | 3.4191 | 3.5626 | MATCH | MATCH | 3.4191 | -0.0009 |
-| RGY005018 | 2025-09 | neither | -0.47 | -0.4562 | -1.3469 | MATCH | MATCH | -0.4562 | 0.0138 |
-| RGY005018 | 2025-10 | neither | 1.33 | 1.3311 | 1.4283 | MATCH | MATCH | 1.3311 | 0.0011 |
-| RGY005018 | 2025-12 | neither | 4.56 | 4.5619 | 3.813 | MATCH | MATCH | 4.5619 | 0.0019 |
-| RGY005018 | 2026-01 | neither | 16.79 | 16.7871 | 17.4998 | MATCH | MATCH | 16.7871 | -0.0029 |
-| RGY005018 | 2026-03 | neither | 11.58 | 11.5754 | 11.2522 | MATCH | MATCH | 11.5754 | -0.0046 |
-| RGY005018 | 2026-04 | neither | -8.79 | -8.7931 | -9.0353 | MATCH | MATCH | -8.7931 | -0.0031 |
-| RGY007351 | 2026-01 | neither | 2.76 | 2.7564 | 3.0739 | MATCH | MATCH | 2.7603 | 0.0003 |
+| acct#a011b5f7 | 2025-04 | neither | 0.41 | 0.4142 | 0.3581 | MATCH | MATCH | 0.4142 | 0.0042 |
+| acct#a011b5f7 | 2025-10 | neither | 0.64 | 0.6038 | 1.0099 | MATCH | MATCH | 0.6039 | -0.0361 |
+| acct#a011b5f7 | 2026-01 | neither | 1.56 | 1.5626 | 1.934 | MATCH | MATCH | 1.5628 | 0.0028 |
+| acct#cf292cea | 2024-07 | neither | -7.76 | -7.7261 | -8.3764 | MATCH | MATCH | -7.7261 | 0.0339 |
+| acct#cf292cea | 2024-08 | neither | 4.62 | 4.6488 | 4.6829 | MATCH | MATCH | 4.6488 | 0.0288 |
+| acct#cf292cea | 2024-10 | neither | -9.03 | -8.9903 | -9.7576 | MATCH | MATCH | -8.9903 | 0.0397 |
+| acct#65b3b3ea | 2024-12 | neither | -8.02 | -7.9838 | -8.8079 | MATCH | MATCH | -7.9838 | 0.0362 |
+| acct#65b3b3ea | 2025-03 | neither | 7.66 | 7.684 | 6.8268 | MATCH | MATCH | 7.684 | 0.024 |
+| acct#65b3b3ea | 2025-04 | neither | -11.06 | -11.0556 | -11.1826 | MATCH | MATCH | -11.0556 | 0.0044 |
+| acct#65b3b3ea | 2025-06 | neither | 6.23 | 6.2553 | 5.3767 | MATCH | MATCH | 6.2553 | 0.0253 |
+| acct#65b3b3ea | 2025-07 | neither | 3.42 | 3.4191 | 3.5626 | MATCH | MATCH | 3.4191 | -0.0009 |
+| acct#65b3b3ea | 2025-09 | neither | -0.47 | -0.4562 | -1.3469 | MATCH | MATCH | -0.4562 | 0.0138 |
+| acct#65b3b3ea | 2025-10 | neither | 1.33 | 1.3311 | 1.4283 | MATCH | MATCH | 1.3311 | 0.0011 |
+| acct#65b3b3ea | 2025-12 | neither | 4.56 | 4.5619 | 3.813 | MATCH | MATCH | 4.5619 | 0.0019 |
+| acct#65b3b3ea | 2026-01 | neither | 16.79 | 16.7871 | 17.4998 | MATCH | MATCH | 16.7871 | -0.0029 |
+| acct#65b3b3ea | 2026-03 | neither | 11.58 | 11.5754 | 11.2522 | MATCH | MATCH | 11.5754 | -0.0046 |
+| acct#65b3b3ea | 2026-04 | neither | -8.79 | -8.7931 | -9.0353 | MATCH | MATCH | -8.7931 | -0.0031 |
+| acct#ed5f47fe | 2026-01 | neither | 2.76 | 2.7564 | 3.0739 | MATCH | MATCH | 2.7603 | 0.0003 |
 
 ## The 163 round-19 movers under three verdicts (no list / sweeps-v1 unrepaired / repaired)
 
@@ -838,154 +838,154 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 
 | account | month | class | cause | reported | no list | v1 unrepaired | BEFORE arm | AFTER arm | AFTER computed | AFTER diff |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 0QF878981 | 2024-06 | core | other:sweep_trade_day | -0.88 | MATCH | DIFF | DIFF | DIFF | -0.8239 | 0.0561 |
-| B3S808045 | 2024-07 | core | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0798 | 0.0002 |
+| acct#f6c79f45 | 2024-06 | core | other:sweep_trade_day | -0.88 | MATCH | DIFF | DIFF | DIFF | -0.8239 | 0.0561 |
+| acct#9727ac87 | 2024-07 | core | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0798 | 0.0002 |
 | D49143350 | 2026-02 | core | other:sweep_trade_day | 2.05 | MATCH | DIFF | DIFF | DIFF | 2.4881 | 0.4381 |
-| RGY003722 | 2026-01 | core | other:sweep_trade_day | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0233 | 0.0033 |
-| RGY004220 | 2024-10 | core | other:sweep_trade_day | -0.0 | MATCH | DIFF | MATCH | MATCH | 0.0468 | 0.0468 |
-| RGY005498 | 2025-02 | core | other:sweep_trade_day | 0.06 | MATCH | DIFF | MATCH | MATCH | 0.0645 | 0.0045 |
-| RGY005696 | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005698 | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005699 | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005700 | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005701 | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005702 | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY005703 | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
-| RGY006310 | 2025-06 | core | other:sweep_trade_day | 0.15 | MATCH | DIFF | MATCH | MATCH | 0.1533 | 0.0033 |
-| RGY008149 | 2026-05 | core | other:sweep_trade_day | 0.03 | MATCH | DIFF | MATCH | MATCH | 0.0284 | -0.0016 |
+| acct#557ce060 | 2026-01 | core | other:sweep_trade_day | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0233 | 0.0033 |
+| acct#c0cea213 | 2024-10 | core | other:sweep_trade_day | -0.0 | MATCH | DIFF | MATCH | MATCH | 0.0468 | 0.0468 |
+| acct#7f62f16f | 2025-02 | core | other:sweep_trade_day | 0.06 | MATCH | DIFF | MATCH | MATCH | 0.0645 | 0.0045 |
+| acct#61ebda90 | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#ce1f487c | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#16bf540c | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#177b7e48 | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#aed810ab | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#781a748b | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#1b22f63a | 2025-04 | core | other:sweep_trade_day | 0.09 | MATCH | DIFF | MATCH | MATCH | 0.0872 | -0.0028 |
+| acct#744c9c00 | 2025-06 | core | other:sweep_trade_day | 0.15 | MATCH | DIFF | MATCH | MATCH | 0.1533 | 0.0033 |
+| acct#5fd6a5d4 | 2026-05 | core | other:sweep_trade_day | 0.03 | MATCH | DIFF | MATCH | MATCH | 0.0284 | -0.0016 |
 | D49143350 | 2023-11 | core | sweep_balance | -4.59 | MATCH | DIFF | DIFF | DIFF | -3.4367 | 1.1533 |
-| 0QF878956 | 2022-08 | neither | other:sweep_trade_day | -1.06 | MATCH | DIFF | MATCH | MATCH | -1.027 | 0.033 |
-| 0QF878956 | 2025-03 | neither | other:sweep_trade_day | -7.16 | MATCH | DIFF | MATCH | MATCH | -7.1115 | 0.0485 |
-| 0QF879097 | 2020-11 | neither | other:sweep_trade_day | 0.08 | MATCH | DIFF | MATCH | MATCH | 0.0808 | 0.0008 |
-| 0QF879181 | 2022-12 | neither | other:sweep_trade_day | -0.04 | MATCH | DIFF | MATCH | MATCH | 0.0099 | 0.0499 |
-| 0QF879181 | 2023-07 | neither | other:sweep_trade_day | -0.02 | MATCH | DIFF | MATCH | MATCH | -0.025 | -0.005 |
-| 0QF879181 | 2024-09 | neither | other:sweep_trade_day | 0.13 | MATCH | DIFF | MATCH | MATCH | 0.153 | 0.023 |
-| 0QF879353 | 2024-05 | neither | other:sweep_trade_day | 0.67 | MATCH | DIFF | MATCH | MATCH | 0.6889 | 0.0189 |
-| 0QF880373 | 2023-04 | neither | other:sweep_trade_day | 1.23 | MATCH | DIFF | DIFF | DIFF | 1.1702 | -0.0598 |
-| 0QF880505 | 2023-04 | neither | other:sweep_trade_day | 1.0 | MATCH | DIFF | MATCH | MATCH | 1.0304 | 0.0304 |
-| 0QF880505 | 2023-07 | neither | other:sweep_trade_day | 2.9 | MATCH | DIFF | DIFF | DIFF | 2.9899 | 0.0899 |
-| 0QF880505 | 2024-01 | neither | other:sweep_trade_day | -0.95 | MATCH | DIFF | MATCH | MATCH | -0.9242 | 0.0258 |
-| 0QF881999 | 2025-04 | neither | other:sweep_trade_day | 0.53 | MATCH | DIFF | MATCH | MATCH | 0.5019 | -0.0281 |
-| 0QF911558 | 2023-04 | neither | other:sweep_trade_day | -1.04 | MATCH | DIFF | MATCH | MATCH | -1.068 | -0.028 |
-| B3S637112 | 2017-03 | neither | other:sweep_trade_day | -0.09 | MATCH | DIFF | MATCH | MATCH | -0.0908 | -0.0008 |
-| B3S637931 | 2017-03 | neither | other:sweep_trade_day | -0.09 | MATCH | DIFF | MATCH | MATCH | -0.0929 | -0.0029 |
-| B3S646239 | 2017-06 | neither | other:sweep_trade_day | -0.1 | MATCH | DIFF | MATCH | MATCH | -0.102 | -0.002 |
-| B3S652916 | 2017-09 | neither | other:sweep_trade_day | -0.07 | MATCH | DIFF | MATCH | MATCH | -0.0743 | -0.0043 |
-| B3S669430 | 2018-07 | neither | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0808 | -0.0008 |
-| B3S669432 | 2018-07 | neither | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0808 | -0.0008 |
-| B3S670865 | 2021-07 | neither | other:sweep_trade_day | -0.04 | MATCH | DIFF | DIFF | DIFF | -0.1154 | -0.0754 |
-| B3S670865 | 2022-01 | neither | other:sweep_trade_day | -9.71 | MATCH | DIFF | DIFF | DIFF | -9.8401 | -0.1301 |
-| B3S670865 | 2023-04 | neither | other:sweep_trade_day | 0.65 | MATCH | DIFF | DIFF | DIFF | 0.5451 | -0.1049 |
-| B3S672332 | 2018-06 | neither | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0813 | -0.0013 |
-| B3S703388 | 2020-10 | neither | other:sweep_trade_day | -4.06 | MATCH | DIFF | MATCH | MATCH | -4.07 | -0.01 |
-| B3S703388 | 2020-12 | neither | other:sweep_trade_day | 4.15 | MATCH | DIFF | MATCH | MATCH | 4.1661 | 0.0161 |
-| B3S703388 | 2021-01 | neither | other:sweep_trade_day | 3.93 | MATCH | DIFF | MATCH | MATCH | 3.9179 | -0.0121 |
-| B3S703388 | 2021-03 | neither | other:sweep_trade_day | 1.7 | MATCH | DIFF | MATCH | MATCH | 1.7085 | 0.0085 |
-| B3S703388 | 2021-09 | neither | other:sweep_trade_day | -6.42 | MATCH | DIFF | MATCH | MATCH | -6.4083 | 0.0117 |
-| B3S703388 | 2021-12 | neither | other:sweep_trade_day | 1.91 | MATCH | DIFF | MATCH | MATCH | 1.9212 | 0.0112 |
-| B3S703388 | 2022-03 | neither | other:sweep_trade_day | 3.37 | MATCH | DIFF | MATCH | MATCH | 3.381 | 0.011 |
-| B3S703388 | 2022-06 | neither | other:sweep_trade_day | -5.26 | MATCH | DIFF | MATCH | MATCH | -5.2513 | 0.0087 |
-| B3S703388 | 2022-12 | neither | other:sweep_trade_day | -5.66 | MATCH | DIFF | MATCH | MATCH | -5.6507 | 0.0093 |
-| B3S703388 | 2023-12 | neither | other:sweep_trade_day | -0.55 | MATCH | DIFF | MATCH | MATCH | -0.546 | 0.004 |
-| B3S703388 | 2024-12 | neither | other:sweep_trade_day | -0.26 | MATCH | DIFF | MATCH | MATCH | -0.2583 | 0.0017 |
-| B3S728504 | 2024-07 | neither | other:sweep_trade_day | 1.94 | MATCH | DIFF | DIFF | MATCH | 1.9886 | 0.0486 |
-| B3S728506 | 2024-07 | neither | other:sweep_trade_day | 1.94 | MATCH | DIFF | DIFF | MATCH | 1.9889 | 0.0489 |
-| B3S739139 | 2022-07 | neither | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0821 | -0.0021 |
-| B3S739139 | 2022-10 | neither | other:sweep_trade_day | -0.07 | MATCH | DIFF | MATCH | MATCH | -0.0729 | -0.0029 |
-| B3S752708 | 2021-06 | neither | other:sweep_trade_day | -0.09 | MATCH | DIFF | MATCH | MATCH | -0.0936 | -0.0036 |
-| B3S765083 | 2022-04 | neither | other:sweep_trade_day | -0.06 | MATCH | DIFF | MATCH | MATCH | -0.0609 | -0.0009 |
-| B3S765083 | 2022-07 | neither | other:sweep_trade_day | -0.05 | MATCH | DIFF | MATCH | MATCH | -0.05 | 0.0 |
-| B3S765083 | 2023-04 | neither | other:sweep_trade_day | -0.0 | MATCH | DIFF | MATCH | MATCH | -0.0004 | -0.0004 |
-| B3S765083 | 2023-10 | neither | other:sweep_trade_day | -0.0 | MATCH | DIFF | MATCH | MATCH | -0.0022 | -0.0022 |
-| B3S765083 | 2024-01 | neither | other:sweep_trade_day | -0.0 | MATCH | DIFF | MATCH | MATCH | -0.0004 | -0.0004 |
-| B3S765083 | 2024-04 | neither | other:sweep_trade_day | -0.01 | MATCH | DIFF | MATCH | MATCH | -0.0103 | -0.0003 |
-| B3S765083 | 2024-07 | neither | other:sweep_trade_day | -0.01 | MATCH | DIFF | MATCH | MATCH | -0.0103 | -0.0003 |
-| B3S765083 | 2024-10 | neither | other:sweep_trade_day | -0.01 | MATCH | DIFF | MATCH | MATCH | -0.0117 | -0.0017 |
-| B3S765083 | 2025-01 | neither | other:sweep_trade_day | -0.04 | MATCH | DIFF | MATCH | MATCH | -0.0359 | 0.0041 |
-| B3S765083 | 2025-04 | neither | other:sweep_trade_day | -0.06 | MATCH | DIFF | MATCH | MATCH | -0.0593 | 0.0007 |
-| B3S782299 | 2023-01 | neither | other:sweep_trade_day | -0.06 | MATCH | DIFF | MATCH | MATCH | -0.058 | 0.002 |
-| B3S782299 | 2023-04 | neither | other:sweep_trade_day | -0.06 | MATCH | DIFF | MATCH | MATCH | -0.056 | 0.004 |
-| B3S782299 | 2023-07 | neither | other:sweep_trade_day | -0.07 | MATCH | DIFF | MATCH | MATCH | -0.0731 | -0.0031 |
-| B3S782299 | 2023-10 | neither | other:sweep_trade_day | -0.09 | MATCH | DIFF | MATCH | MATCH | -0.0854 | 0.0046 |
-| B3S786844 | 2022-10 | neither | other:sweep_trade_day | 11.87 | MATCH | DIFF | MATCH | MATCH | 11.8922 | 0.0222 |
-| B3S798436 | 2025-01 | neither | other:sweep_trade_day | 0.92 | MATCH | DIFF | MATCH | MATCH | 0.9333 | 0.0133 |
-| B3S798436 | 2026-01 | neither | other:sweep_trade_day | 1.68 | MATCH | DIFF | MATCH | MATCH | 1.6914 | 0.0114 |
-| B3S804864 | 2024-01 | neither | other:sweep_trade_day | -0.3 | MATCH | DIFF | MATCH | MATCH | -0.2854 | 0.0146 |
-| B3S804888 | 2024-01 | neither | other:sweep_trade_day | -0.3 | MATCH | DIFF | MATCH | MATCH | -0.2843 | 0.0157 |
-| B3S804888 | 2024-10 | neither | other:sweep_trade_day | -1.6 | MATCH | DIFF | MATCH | MATCH | -1.5803 | 0.0197 |
-| B3S804888 | 2025-04 | neither | other:sweep_trade_day | -0.05 | MATCH | DIFF | MATCH | MATCH | -0.051 | -0.001 |
-| B3S804888 | 2025-07 | neither | other:sweep_trade_day | 1.24 | MATCH | DIFF | MATCH | MATCH | 1.2482 | 0.0082 |
-| B3S804888 | 2025-10 | neither | other:sweep_trade_day | 1.44 | MATCH | DIFF | MATCH | MATCH | 1.4418 | 0.0018 |
-| B3S804888 | 2026-01 | neither | other:sweep_trade_day | 1.76 | MATCH | DIFF | MATCH | MATCH | 1.7554 | -0.0046 |
-| RGY004120 | 2025-04 | neither | other:sweep_trade_day | 0.41 | MATCH | DIFF | MATCH | MATCH | 0.4142 | 0.0042 |
-| RGY004120 | 2025-10 | neither | other:sweep_trade_day | 0.64 | MATCH | DIFF | MATCH | MATCH | 0.6039 | -0.0361 |
-| RGY004120 | 2026-01 | neither | other:sweep_trade_day | 1.56 | MATCH | DIFF | MATCH | MATCH | 1.5628 | 0.0028 |
-| RGY004256 | 2024-07 | neither | other:sweep_trade_day | -7.76 | MATCH | DIFF | MATCH | MATCH | -7.7261 | 0.0339 |
-| RGY004256 | 2024-10 | neither | other:sweep_trade_day | -9.03 | MATCH | DIFF | MATCH | MATCH | -8.9903 | 0.0397 |
-| RGY005018 | 2024-12 | neither | other:sweep_trade_day | -8.02 | MATCH | DIFF | MATCH | MATCH | -7.9838 | 0.0362 |
-| RGY005018 | 2025-03 | neither | other:sweep_trade_day | 7.66 | MATCH | DIFF | MATCH | MATCH | 7.684 | 0.024 |
-| RGY005018 | 2025-06 | neither | other:sweep_trade_day | 6.23 | MATCH | DIFF | MATCH | MATCH | 6.2553 | 0.0253 |
-| RGY005018 | 2025-09 | neither | other:sweep_trade_day | -0.47 | MATCH | DIFF | MATCH | MATCH | -0.4562 | 0.0138 |
-| RGY005018 | 2025-12 | neither | other:sweep_trade_day | 4.56 | MATCH | DIFF | MATCH | MATCH | 4.5619 | 0.0019 |
-| RGY005018 | 2026-03 | neither | other:sweep_trade_day | 11.58 | MATCH | DIFF | MATCH | MATCH | 11.5754 | -0.0046 |
-| RGY007351 | 2026-01 | neither | other:sweep_trade_day | 2.76 | MATCH | DIFF | MATCH | MATCH | 2.7603 | 0.0003 |
-| 0QF878956 | 2021-10 | neither | sweep_balance | 5.51 | MATCH | DIFF | DIFF | DIFF | 5.2032 | -0.3068 |
-| 0QF878956 | 2022-03 | neither | sweep_balance | 4.82 | MATCH | DIFF | DIFF | MATCH | 4.7777 | -0.0423 |
-| 0QF878956 | 2023-12 | neither | sweep_balance | 1.56 | MATCH | DIFF | MATCH | MATCH | 1.5676 | 0.0076 |
-| 0QF879097 | 2020-01 | neither | sweep_balance | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0212 | 0.0012 |
-| 0QF879097 | 2020-02 | neither | sweep_balance | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0199 | -0.0001 |
-| 0QF879143 | 2022-04 | neither | sweep_balance | -1.41 | MATCH | DIFF | DIFF | DIFF | -1.1928 | 0.2172 |
-| 0QF879181 | 2021-05 | neither | sweep_balance | 0.76 | MATCH | DIFF | DIFF | DIFF | 1.1828 | 0.4228 |
-| 0QF879181 | 2025-08 | neither | sweep_balance | 1.22 | MATCH | DIFF | DIFF | DIFF | 1.6857 | 0.4657 |
-| 0QF879185 | 2017-08 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879185 | 2017-10 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879185 | 2017-12 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879185 | 2018-01 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0122 | 0.0022 |
-| 0QF879185 | 2018-02 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0115 | 0.0015 |
-| 0QF879185 | 2018-03 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0141 | 0.0041 |
-| 0QF879238 | 2017-07 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.002 | 0.002 |
-| 0QF879238 | 2017-08 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879238 | 2017-09 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.004 | 0.004 |
-| 0QF879238 | 2017-10 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879238 | 2017-12 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
-| 0QF879238 | 2018-01 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0121 | 0.0021 |
-| 0QF879238 | 2018-02 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0115 | 0.0015 |
-| 0QF879238 | 2018-03 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.014 | 0.004 |
-| 0QF879238 | 2018-04 | neither | sweep_balance | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0205 | 0.0005 |
-| 0QF879238 | 2018-05 | neither | sweep_balance | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0212 | 0.0012 |
-| 0QF879238 | 2018-06 | neither | sweep_balance | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0205 | 0.0005 |
-| 0QF879353 | 2021-04 | neither | sweep_balance | -3.41 | MATCH | DIFF | DIFF | DIFF | -3.5078 | -0.0978 |
-| 0QF879353 | 2021-06 | neither | sweep_balance | -4.82 | MATCH | DIFF | DIFF | DIFF | -4.9435 | -0.1235 |
-| 0QF879353 | 2021-10 | neither | sweep_balance | -1.39 | MATCH | DIFF | DIFF | DIFF | -1.4589 | -0.0689 |
-| 0QF880505 | 2021-04 | neither | sweep_balance | 2.21 | MATCH | DIFF | DIFF | DIFF | 2.3118 | 0.1018 |
-| 0QF880505 | 2021-08 | neither | sweep_balance | 1.0 | MATCH | DIFF | DIFF | DIFF | 1.076 | 0.076 |
-| 0QF880505 | 2021-10 | neither | sweep_balance | 2.52 | MATCH | DIFF | DIFF | DIFF | 2.6146 | 0.0946 |
-| 0QF881999 | 2025-05 | neither | sweep_balance | 8.21 | MATCH | DIFF | MATCH | MATCH | 8.2042 | -0.0058 |
-| 0QF911558 | 2022-03 | neither | sweep_balance | 4.92 | MATCH | DIFF | DIFF | DIFF | 4.9941 | 0.0741 |
-| B3S605725 | 2018-01 | neither | sweep_balance | 0.18 | MATCH | DIFF | MATCH | MATCH | 0.1814 | 0.0014 |
-| B3S605725 | 2018-02 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0115 | 0.0015 |
-| B3S605725 | 2018-03 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0141 | 0.0041 |
-| B3S703388 | 2023-04 | neither | sweep_balance | 6.46 | MATCH | DIFF | MATCH | MATCH | 6.4603 | 0.0003 |
-| B3S703388 | 2024-02 | neither | sweep_balance | 3.97 | MATCH | DIFF | DIFF | DIFF | 4.1591 | 0.1891 |
-| B3S728504 | 2023-05 | neither | sweep_balance | 0.1 | MATCH | DIFF | MATCH | DIFF | 0.1813 | 0.0813 |
-| B3S728504 | 2024-11 | neither | sweep_balance | 5.35 | MATCH | DIFF | DIFF | DIFF | 5.4413 | 0.0913 |
-| B3S728504 | 2025-01 | neither | sweep_balance | 2.21 | MATCH | DIFF | MATCH | MATCH | 2.2206 | 0.0106 |
-| B3S728506 | 2023-05 | neither | sweep_balance | 0.11 | MATCH | DIFF | MATCH | DIFF | 0.1894 | 0.0794 |
-| B3S728506 | 2025-01 | neither | sweep_balance | 2.23 | MATCH | DIFF | MATCH | MATCH | 2.2339 | 0.0039 |
-| B3S728506 | 2025-05 | neither | sweep_balance | 4.83 | MATCH | DIFF | DIFF | DIFF | 4.9152 | 0.0852 |
-| B3S739139 | 2022-11 | neither | sweep_balance | 0.03 | MATCH | DIFF | MATCH | MATCH | 0.0348 | 0.0048 |
-| B3S739139 | 2022-12 | neither | sweep_balance | 0.06 | MATCH | DIFF | MATCH | MATCH | 0.0637 | 0.0037 |
-| B3S739139 | 2023-01 | neither | sweep_balance | -0.04 | MATCH | DIFF | MATCH | MATCH | -0.0364 | 0.0036 |
-| B3S739139 | 2023-02 | neither | sweep_balance | 0.06 | MATCH | DIFF | MATCH | MATCH | 0.0575 | -0.0025 |
-| B3S765083 | 2023-07 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0013 | 0.0013 |
-| B3S786844 | 2022-11 | neither | sweep_balance | 18.29 | MATCH | DIFF | MATCH | MATCH | 18.2894 | -0.0006 |
-| B3S804888 | 2024-02 | neither | sweep_balance | 4.32 | MATCH | DIFF | MATCH | MATCH | 4.3367 | 0.0167 |
-| B3S804888 | 2024-04 | neither | sweep_balance | -3.96 | MATCH | DIFF | MATCH | MATCH | -3.974 | -0.014 |
-| B3S804888 | 2024-08 | neither | sweep_balance | 1.79 | MATCH | DIFF | MATCH | MATCH | 1.7854 | -0.0046 |
-| B3S804888 | 2024-11 | neither | sweep_balance | 5.25 | MATCH | DIFF | MATCH | MATCH | 5.2837 | 0.0337 |
-| B3S804888 | 2025-01 | neither | sweep_balance | 2.52 | MATCH | DIFF | MATCH | MATCH | 2.5101 | -0.0099 |
-| B3S804888 | 2025-02 | neither | sweep_balance | -1.55 | MATCH | DIFF | MATCH | MATCH | -1.5729 | -0.0229 |
-| B3S804888 | 2025-08 | neither | sweep_balance | 2.52 | MATCH | DIFF | MATCH | MATCH | 2.5124 | -0.0076 |
+| acct#aaeb760c | 2022-08 | neither | other:sweep_trade_day | -1.06 | MATCH | DIFF | MATCH | MATCH | -1.027 | 0.033 |
+| acct#aaeb760c | 2025-03 | neither | other:sweep_trade_day | -7.16 | MATCH | DIFF | MATCH | MATCH | -7.1115 | 0.0485 |
+| acct#b4db1f25 | 2020-11 | neither | other:sweep_trade_day | 0.08 | MATCH | DIFF | MATCH | MATCH | 0.0808 | 0.0008 |
+| acct#eea1157e | 2022-12 | neither | other:sweep_trade_day | -0.04 | MATCH | DIFF | MATCH | MATCH | 0.0099 | 0.0499 |
+| acct#eea1157e | 2023-07 | neither | other:sweep_trade_day | -0.02 | MATCH | DIFF | MATCH | MATCH | -0.025 | -0.005 |
+| acct#eea1157e | 2024-09 | neither | other:sweep_trade_day | 0.13 | MATCH | DIFF | MATCH | MATCH | 0.153 | 0.023 |
+| acct#04ebe1d1 | 2024-05 | neither | other:sweep_trade_day | 0.67 | MATCH | DIFF | MATCH | MATCH | 0.6889 | 0.0189 |
+| acct#015306a0 | 2023-04 | neither | other:sweep_trade_day | 1.23 | MATCH | DIFF | DIFF | DIFF | 1.1702 | -0.0598 |
+| acct#fa488a0b | 2023-04 | neither | other:sweep_trade_day | 1.0 | MATCH | DIFF | MATCH | MATCH | 1.0304 | 0.0304 |
+| acct#fa488a0b | 2023-07 | neither | other:sweep_trade_day | 2.9 | MATCH | DIFF | DIFF | DIFF | 2.9899 | 0.0899 |
+| acct#fa488a0b | 2024-01 | neither | other:sweep_trade_day | -0.95 | MATCH | DIFF | MATCH | MATCH | -0.9242 | 0.0258 |
+| acct#21515eb6 | 2025-04 | neither | other:sweep_trade_day | 0.53 | MATCH | DIFF | MATCH | MATCH | 0.5019 | -0.0281 |
+| acct#2d4385bf | 2023-04 | neither | other:sweep_trade_day | -1.04 | MATCH | DIFF | MATCH | MATCH | -1.068 | -0.028 |
+| acct#92164e0d | 2017-03 | neither | other:sweep_trade_day | -0.09 | MATCH | DIFF | MATCH | MATCH | -0.0908 | -0.0008 |
+| acct#ebb31a1c | 2017-03 | neither | other:sweep_trade_day | -0.09 | MATCH | DIFF | MATCH | MATCH | -0.0929 | -0.0029 |
+| acct#dfa7a25c | 2017-06 | neither | other:sweep_trade_day | -0.1 | MATCH | DIFF | MATCH | MATCH | -0.102 | -0.002 |
+| acct#4040a6ea | 2017-09 | neither | other:sweep_trade_day | -0.07 | MATCH | DIFF | MATCH | MATCH | -0.0743 | -0.0043 |
+| acct#0e2c97b9 | 2018-07 | neither | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0808 | -0.0008 |
+| acct#de79caf1 | 2018-07 | neither | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0808 | -0.0008 |
+| acct#25880078 | 2021-07 | neither | other:sweep_trade_day | -0.04 | MATCH | DIFF | DIFF | DIFF | -0.1154 | -0.0754 |
+| acct#25880078 | 2022-01 | neither | other:sweep_trade_day | -9.71 | MATCH | DIFF | DIFF | DIFF | -9.8401 | -0.1301 |
+| acct#25880078 | 2023-04 | neither | other:sweep_trade_day | 0.65 | MATCH | DIFF | DIFF | DIFF | 0.5451 | -0.1049 |
+| acct#8680d8f4 | 2018-06 | neither | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0813 | -0.0013 |
+| acct#e29efebe | 2020-10 | neither | other:sweep_trade_day | -4.06 | MATCH | DIFF | MATCH | MATCH | -4.07 | -0.01 |
+| acct#e29efebe | 2020-12 | neither | other:sweep_trade_day | 4.15 | MATCH | DIFF | MATCH | MATCH | 4.1661 | 0.0161 |
+| acct#e29efebe | 2021-01 | neither | other:sweep_trade_day | 3.93 | MATCH | DIFF | MATCH | MATCH | 3.9179 | -0.0121 |
+| acct#e29efebe | 2021-03 | neither | other:sweep_trade_day | 1.7 | MATCH | DIFF | MATCH | MATCH | 1.7085 | 0.0085 |
+| acct#e29efebe | 2021-09 | neither | other:sweep_trade_day | -6.42 | MATCH | DIFF | MATCH | MATCH | -6.4083 | 0.0117 |
+| acct#e29efebe | 2021-12 | neither | other:sweep_trade_day | 1.91 | MATCH | DIFF | MATCH | MATCH | 1.9212 | 0.0112 |
+| acct#e29efebe | 2022-03 | neither | other:sweep_trade_day | 3.37 | MATCH | DIFF | MATCH | MATCH | 3.381 | 0.011 |
+| acct#e29efebe | 2022-06 | neither | other:sweep_trade_day | -5.26 | MATCH | DIFF | MATCH | MATCH | -5.2513 | 0.0087 |
+| acct#e29efebe | 2022-12 | neither | other:sweep_trade_day | -5.66 | MATCH | DIFF | MATCH | MATCH | -5.6507 | 0.0093 |
+| acct#e29efebe | 2023-12 | neither | other:sweep_trade_day | -0.55 | MATCH | DIFF | MATCH | MATCH | -0.546 | 0.004 |
+| acct#e29efebe | 2024-12 | neither | other:sweep_trade_day | -0.26 | MATCH | DIFF | MATCH | MATCH | -0.2583 | 0.0017 |
+| acct#79d02c2c | 2024-07 | neither | other:sweep_trade_day | 1.94 | MATCH | DIFF | DIFF | MATCH | 1.9886 | 0.0486 |
+| acct#4a890dd1 | 2024-07 | neither | other:sweep_trade_day | 1.94 | MATCH | DIFF | DIFF | MATCH | 1.9889 | 0.0489 |
+| acct#3b89d062 | 2022-07 | neither | other:sweep_trade_day | -0.08 | MATCH | DIFF | MATCH | MATCH | -0.0821 | -0.0021 |
+| acct#3b89d062 | 2022-10 | neither | other:sweep_trade_day | -0.07 | MATCH | DIFF | MATCH | MATCH | -0.0729 | -0.0029 |
+| acct#6acbfb93 | 2021-06 | neither | other:sweep_trade_day | -0.09 | MATCH | DIFF | MATCH | MATCH | -0.0936 | -0.0036 |
+| acct#921b5169 | 2022-04 | neither | other:sweep_trade_day | -0.06 | MATCH | DIFF | MATCH | MATCH | -0.0609 | -0.0009 |
+| acct#921b5169 | 2022-07 | neither | other:sweep_trade_day | -0.05 | MATCH | DIFF | MATCH | MATCH | -0.05 | 0.0 |
+| acct#921b5169 | 2023-04 | neither | other:sweep_trade_day | -0.0 | MATCH | DIFF | MATCH | MATCH | -0.0004 | -0.0004 |
+| acct#921b5169 | 2023-10 | neither | other:sweep_trade_day | -0.0 | MATCH | DIFF | MATCH | MATCH | -0.0022 | -0.0022 |
+| acct#921b5169 | 2024-01 | neither | other:sweep_trade_day | -0.0 | MATCH | DIFF | MATCH | MATCH | -0.0004 | -0.0004 |
+| acct#921b5169 | 2024-04 | neither | other:sweep_trade_day | -0.01 | MATCH | DIFF | MATCH | MATCH | -0.0103 | -0.0003 |
+| acct#921b5169 | 2024-07 | neither | other:sweep_trade_day | -0.01 | MATCH | DIFF | MATCH | MATCH | -0.0103 | -0.0003 |
+| acct#921b5169 | 2024-10 | neither | other:sweep_trade_day | -0.01 | MATCH | DIFF | MATCH | MATCH | -0.0117 | -0.0017 |
+| acct#921b5169 | 2025-01 | neither | other:sweep_trade_day | -0.04 | MATCH | DIFF | MATCH | MATCH | -0.0359 | 0.0041 |
+| acct#921b5169 | 2025-04 | neither | other:sweep_trade_day | -0.06 | MATCH | DIFF | MATCH | MATCH | -0.0593 | 0.0007 |
+| acct#3345c43a | 2023-01 | neither | other:sweep_trade_day | -0.06 | MATCH | DIFF | MATCH | MATCH | -0.058 | 0.002 |
+| acct#3345c43a | 2023-04 | neither | other:sweep_trade_day | -0.06 | MATCH | DIFF | MATCH | MATCH | -0.056 | 0.004 |
+| acct#3345c43a | 2023-07 | neither | other:sweep_trade_day | -0.07 | MATCH | DIFF | MATCH | MATCH | -0.0731 | -0.0031 |
+| acct#3345c43a | 2023-10 | neither | other:sweep_trade_day | -0.09 | MATCH | DIFF | MATCH | MATCH | -0.0854 | 0.0046 |
+| acct#1f02bee1 | 2022-10 | neither | other:sweep_trade_day | 11.87 | MATCH | DIFF | MATCH | MATCH | 11.8922 | 0.0222 |
+| acct#16f4eae3 | 2025-01 | neither | other:sweep_trade_day | 0.92 | MATCH | DIFF | MATCH | MATCH | 0.9333 | 0.0133 |
+| acct#16f4eae3 | 2026-01 | neither | other:sweep_trade_day | 1.68 | MATCH | DIFF | MATCH | MATCH | 1.6914 | 0.0114 |
+| acct#0f2d2c45 | 2024-01 | neither | other:sweep_trade_day | -0.3 | MATCH | DIFF | MATCH | MATCH | -0.2854 | 0.0146 |
+| acct#cce589ab | 2024-01 | neither | other:sweep_trade_day | -0.3 | MATCH | DIFF | MATCH | MATCH | -0.2843 | 0.0157 |
+| acct#cce589ab | 2024-10 | neither | other:sweep_trade_day | -1.6 | MATCH | DIFF | MATCH | MATCH | -1.5803 | 0.0197 |
+| acct#cce589ab | 2025-04 | neither | other:sweep_trade_day | -0.05 | MATCH | DIFF | MATCH | MATCH | -0.051 | -0.001 |
+| acct#cce589ab | 2025-07 | neither | other:sweep_trade_day | 1.24 | MATCH | DIFF | MATCH | MATCH | 1.2482 | 0.0082 |
+| acct#cce589ab | 2025-10 | neither | other:sweep_trade_day | 1.44 | MATCH | DIFF | MATCH | MATCH | 1.4418 | 0.0018 |
+| acct#cce589ab | 2026-01 | neither | other:sweep_trade_day | 1.76 | MATCH | DIFF | MATCH | MATCH | 1.7554 | -0.0046 |
+| acct#a011b5f7 | 2025-04 | neither | other:sweep_trade_day | 0.41 | MATCH | DIFF | MATCH | MATCH | 0.4142 | 0.0042 |
+| acct#a011b5f7 | 2025-10 | neither | other:sweep_trade_day | 0.64 | MATCH | DIFF | MATCH | MATCH | 0.6039 | -0.0361 |
+| acct#a011b5f7 | 2026-01 | neither | other:sweep_trade_day | 1.56 | MATCH | DIFF | MATCH | MATCH | 1.5628 | 0.0028 |
+| acct#cf292cea | 2024-07 | neither | other:sweep_trade_day | -7.76 | MATCH | DIFF | MATCH | MATCH | -7.7261 | 0.0339 |
+| acct#cf292cea | 2024-10 | neither | other:sweep_trade_day | -9.03 | MATCH | DIFF | MATCH | MATCH | -8.9903 | 0.0397 |
+| acct#65b3b3ea | 2024-12 | neither | other:sweep_trade_day | -8.02 | MATCH | DIFF | MATCH | MATCH | -7.9838 | 0.0362 |
+| acct#65b3b3ea | 2025-03 | neither | other:sweep_trade_day | 7.66 | MATCH | DIFF | MATCH | MATCH | 7.684 | 0.024 |
+| acct#65b3b3ea | 2025-06 | neither | other:sweep_trade_day | 6.23 | MATCH | DIFF | MATCH | MATCH | 6.2553 | 0.0253 |
+| acct#65b3b3ea | 2025-09 | neither | other:sweep_trade_day | -0.47 | MATCH | DIFF | MATCH | MATCH | -0.4562 | 0.0138 |
+| acct#65b3b3ea | 2025-12 | neither | other:sweep_trade_day | 4.56 | MATCH | DIFF | MATCH | MATCH | 4.5619 | 0.0019 |
+| acct#65b3b3ea | 2026-03 | neither | other:sweep_trade_day | 11.58 | MATCH | DIFF | MATCH | MATCH | 11.5754 | -0.0046 |
+| acct#ed5f47fe | 2026-01 | neither | other:sweep_trade_day | 2.76 | MATCH | DIFF | MATCH | MATCH | 2.7603 | 0.0003 |
+| acct#aaeb760c | 2021-10 | neither | sweep_balance | 5.51 | MATCH | DIFF | DIFF | DIFF | 5.2032 | -0.3068 |
+| acct#aaeb760c | 2022-03 | neither | sweep_balance | 4.82 | MATCH | DIFF | DIFF | MATCH | 4.7777 | -0.0423 |
+| acct#aaeb760c | 2023-12 | neither | sweep_balance | 1.56 | MATCH | DIFF | MATCH | MATCH | 1.5676 | 0.0076 |
+| acct#b4db1f25 | 2020-01 | neither | sweep_balance | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0212 | 0.0012 |
+| acct#b4db1f25 | 2020-02 | neither | sweep_balance | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0199 | -0.0001 |
+| acct#03836058 | 2022-04 | neither | sweep_balance | -1.41 | MATCH | DIFF | DIFF | DIFF | -1.1928 | 0.2172 |
+| acct#eea1157e | 2021-05 | neither | sweep_balance | 0.76 | MATCH | DIFF | DIFF | DIFF | 1.1828 | 0.4228 |
+| acct#eea1157e | 2025-08 | neither | sweep_balance | 1.22 | MATCH | DIFF | DIFF | DIFF | 1.6857 | 0.4657 |
+| acct#1c3da532 | 2017-08 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#1c3da532 | 2017-10 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#1c3da532 | 2017-12 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#1c3da532 | 2018-01 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0122 | 0.0022 |
+| acct#1c3da532 | 2018-02 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0115 | 0.0015 |
+| acct#1c3da532 | 2018-03 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0141 | 0.0041 |
+| acct#5aa91f68 | 2017-07 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.002 | 0.002 |
+| acct#5aa91f68 | 2017-08 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#5aa91f68 | 2017-09 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.004 | 0.004 |
+| acct#5aa91f68 | 2017-10 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#5aa91f68 | 2017-12 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0042 | 0.0042 |
+| acct#5aa91f68 | 2018-01 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0121 | 0.0021 |
+| acct#5aa91f68 | 2018-02 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0115 | 0.0015 |
+| acct#5aa91f68 | 2018-03 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.014 | 0.004 |
+| acct#5aa91f68 | 2018-04 | neither | sweep_balance | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0205 | 0.0005 |
+| acct#5aa91f68 | 2018-05 | neither | sweep_balance | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0212 | 0.0012 |
+| acct#5aa91f68 | 2018-06 | neither | sweep_balance | 0.02 | MATCH | DIFF | MATCH | MATCH | 0.0205 | 0.0005 |
+| acct#04ebe1d1 | 2021-04 | neither | sweep_balance | -3.41 | MATCH | DIFF | DIFF | DIFF | -3.5078 | -0.0978 |
+| acct#04ebe1d1 | 2021-06 | neither | sweep_balance | -4.82 | MATCH | DIFF | DIFF | DIFF | -4.9435 | -0.1235 |
+| acct#04ebe1d1 | 2021-10 | neither | sweep_balance | -1.39 | MATCH | DIFF | DIFF | DIFF | -1.4589 | -0.0689 |
+| acct#fa488a0b | 2021-04 | neither | sweep_balance | 2.21 | MATCH | DIFF | DIFF | DIFF | 2.3118 | 0.1018 |
+| acct#fa488a0b | 2021-08 | neither | sweep_balance | 1.0 | MATCH | DIFF | DIFF | DIFF | 1.076 | 0.076 |
+| acct#fa488a0b | 2021-10 | neither | sweep_balance | 2.52 | MATCH | DIFF | DIFF | DIFF | 2.6146 | 0.0946 |
+| acct#21515eb6 | 2025-05 | neither | sweep_balance | 8.21 | MATCH | DIFF | MATCH | MATCH | 8.2042 | -0.0058 |
+| acct#2d4385bf | 2022-03 | neither | sweep_balance | 4.92 | MATCH | DIFF | DIFF | DIFF | 4.9941 | 0.0741 |
+| acct#ab0c6781 | 2018-01 | neither | sweep_balance | 0.18 | MATCH | DIFF | MATCH | MATCH | 0.1814 | 0.0014 |
+| acct#ab0c6781 | 2018-02 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0115 | 0.0015 |
+| acct#ab0c6781 | 2018-03 | neither | sweep_balance | 0.01 | MATCH | DIFF | MATCH | MATCH | 0.0141 | 0.0041 |
+| acct#e29efebe | 2023-04 | neither | sweep_balance | 6.46 | MATCH | DIFF | MATCH | MATCH | 6.4603 | 0.0003 |
+| acct#e29efebe | 2024-02 | neither | sweep_balance | 3.97 | MATCH | DIFF | DIFF | DIFF | 4.1591 | 0.1891 |
+| acct#79d02c2c | 2023-05 | neither | sweep_balance | 0.1 | MATCH | DIFF | MATCH | DIFF | 0.1813 | 0.0813 |
+| acct#79d02c2c | 2024-11 | neither | sweep_balance | 5.35 | MATCH | DIFF | DIFF | DIFF | 5.4413 | 0.0913 |
+| acct#79d02c2c | 2025-01 | neither | sweep_balance | 2.21 | MATCH | DIFF | MATCH | MATCH | 2.2206 | 0.0106 |
+| acct#4a890dd1 | 2023-05 | neither | sweep_balance | 0.11 | MATCH | DIFF | MATCH | DIFF | 0.1894 | 0.0794 |
+| acct#4a890dd1 | 2025-01 | neither | sweep_balance | 2.23 | MATCH | DIFF | MATCH | MATCH | 2.2339 | 0.0039 |
+| acct#4a890dd1 | 2025-05 | neither | sweep_balance | 4.83 | MATCH | DIFF | DIFF | DIFF | 4.9152 | 0.0852 |
+| acct#3b89d062 | 2022-11 | neither | sweep_balance | 0.03 | MATCH | DIFF | MATCH | MATCH | 0.0348 | 0.0048 |
+| acct#3b89d062 | 2022-12 | neither | sweep_balance | 0.06 | MATCH | DIFF | MATCH | MATCH | 0.0637 | 0.0037 |
+| acct#3b89d062 | 2023-01 | neither | sweep_balance | -0.04 | MATCH | DIFF | MATCH | MATCH | -0.0364 | 0.0036 |
+| acct#3b89d062 | 2023-02 | neither | sweep_balance | 0.06 | MATCH | DIFF | MATCH | MATCH | 0.0575 | -0.0025 |
+| acct#921b5169 | 2023-07 | neither | sweep_balance | 0.0 | MATCH | DIFF | MATCH | MATCH | 0.0013 | 0.0013 |
+| acct#1f02bee1 | 2022-11 | neither | sweep_balance | 18.29 | MATCH | DIFF | MATCH | MATCH | 18.2894 | -0.0006 |
+| acct#cce589ab | 2024-02 | neither | sweep_balance | 4.32 | MATCH | DIFF | MATCH | MATCH | 4.3367 | 0.0167 |
+| acct#cce589ab | 2024-04 | neither | sweep_balance | -3.96 | MATCH | DIFF | MATCH | MATCH | -3.974 | -0.014 |
+| acct#cce589ab | 2024-08 | neither | sweep_balance | 1.79 | MATCH | DIFF | MATCH | MATCH | 1.7854 | -0.0046 |
+| acct#cce589ab | 2024-11 | neither | sweep_balance | 5.25 | MATCH | DIFF | MATCH | MATCH | 5.2837 | 0.0337 |
+| acct#cce589ab | 2025-01 | neither | sweep_balance | 2.52 | MATCH | DIFF | MATCH | MATCH | 2.5101 | -0.0099 |
+| acct#cce589ab | 2025-02 | neither | sweep_balance | -1.55 | MATCH | DIFF | MATCH | MATCH | -1.5729 | -0.0229 |
+| acct#cce589ab | 2025-08 | neither | sweep_balance | 2.52 | MATCH | DIFF | MATCH | MATCH | 2.5124 | -0.0076 |
 | D49141608 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | MATCH | MATCH | 0.0419 | 0.0019 |
 | D49141608 | 2019-03 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0466 | -0.0034 |
 | D49141608 | 2019-04 | neither | sweep_balance | 0.05 | MATCH | DIFF | MATCH | MATCH | 0.0452 | -0.0048 |
@@ -995,41 +995,41 @@ Read from mover_classes.parquet (causes from mover_causes.parquet). The verdict 
 | D49141608 | 2019-08 | neither | sweep_balance | 0.04 | MATCH | DIFF | MATCH | MATCH | 0.0381 | -0.0019 |
 | D49141608 | 2019-09 | neither | sweep_balance | 0.03 | MATCH | DIFF | MATCH | MATCH | 0.0321 | 0.0021 |
 | D49141714 | 2019-02 | neither | sweep_balance | 0.04 | MATCH | DIFF | MATCH | MATCH | 0.0421 | 0.0021 |
-| RGY004256 | 2024-08 | neither | sweep_balance | 4.62 | MATCH | DIFF | MATCH | MATCH | 4.6488 | 0.0288 |
-| RGY005018 | 2025-04 | neither | sweep_balance | -11.06 | MATCH | DIFF | MATCH | MATCH | -11.0556 | 0.0044 |
-| RGY005018 | 2025-07 | neither | sweep_balance | 3.42 | MATCH | DIFF | MATCH | MATCH | 3.4191 | -0.0009 |
-| RGY005018 | 2025-10 | neither | sweep_balance | 1.33 | MATCH | DIFF | MATCH | MATCH | 1.3311 | 0.0011 |
-| RGY005018 | 2026-01 | neither | sweep_balance | 16.79 | MATCH | DIFF | MATCH | MATCH | 16.7871 | -0.0029 |
-| RGY005018 | 2026-04 | neither | sweep_balance | -8.79 | MATCH | DIFF | MATCH | MATCH | -8.7931 | -0.0031 |
+| acct#cf292cea | 2024-08 | neither | sweep_balance | 4.62 | MATCH | DIFF | MATCH | MATCH | 4.6488 | 0.0288 |
+| acct#65b3b3ea | 2025-04 | neither | sweep_balance | -11.06 | MATCH | DIFF | MATCH | MATCH | -11.0556 | 0.0044 |
+| acct#65b3b3ea | 2025-07 | neither | sweep_balance | 3.42 | MATCH | DIFF | MATCH | MATCH | 3.4191 | -0.0009 |
+| acct#65b3b3ea | 2025-10 | neither | sweep_balance | 1.33 | MATCH | DIFF | MATCH | MATCH | 1.3311 | 0.0011 |
+| acct#65b3b3ea | 2026-01 | neither | sweep_balance | 16.79 | MATCH | DIFF | MATCH | MATCH | 16.7871 | -0.0029 |
+| acct#65b3b3ea | 2026-04 | neither | sweep_balance | -8.79 | MATCH | DIFF | MATCH | MATCH | -8.7931 | -0.0031 |
 
 ### Movers left not MATCH in the AFTER arm, each named: 24 (DIFF 24; other 0) (never forced)
 
 | account | month | class | cause | AFTER verdict | computed | reported |
 |---|---|---|---|---|---|---|
-| 0QF878981 | 2024-06 | core | other:sweep_trade_day | DIFF | -0.8239 | -0.88 |
+| acct#f6c79f45 | 2024-06 | core | other:sweep_trade_day | DIFF | -0.8239 | -0.88 |
 | D49143350 | 2026-02 | core | other:sweep_trade_day | DIFF | 2.4881 | 2.05 |
 | D49143350 | 2023-11 | core | sweep_balance | DIFF | -3.4367 | -4.59 |
-| 0QF880373 | 2023-04 | neither | other:sweep_trade_day | DIFF | 1.1702 | 1.23 |
-| 0QF880505 | 2023-07 | neither | other:sweep_trade_day | DIFF | 2.9899 | 2.9 |
-| B3S670865 | 2021-07 | neither | other:sweep_trade_day | DIFF | -0.1154 | -0.04 |
-| B3S670865 | 2022-01 | neither | other:sweep_trade_day | DIFF | -9.8401 | -9.71 |
-| B3S670865 | 2023-04 | neither | other:sweep_trade_day | DIFF | 0.5451 | 0.65 |
-| 0QF878956 | 2021-10 | neither | sweep_balance | DIFF | 5.2032 | 5.51 |
-| 0QF879143 | 2022-04 | neither | sweep_balance | DIFF | -1.1928 | -1.41 |
-| 0QF879181 | 2021-05 | neither | sweep_balance | DIFF | 1.1828 | 0.76 |
-| 0QF879181 | 2025-08 | neither | sweep_balance | DIFF | 1.6857 | 1.22 |
-| 0QF879353 | 2021-04 | neither | sweep_balance | DIFF | -3.5078 | -3.41 |
-| 0QF879353 | 2021-06 | neither | sweep_balance | DIFF | -4.9435 | -4.82 |
-| 0QF879353 | 2021-10 | neither | sweep_balance | DIFF | -1.4589 | -1.39 |
-| 0QF880505 | 2021-04 | neither | sweep_balance | DIFF | 2.3118 | 2.21 |
-| 0QF880505 | 2021-08 | neither | sweep_balance | DIFF | 1.076 | 1.0 |
-| 0QF880505 | 2021-10 | neither | sweep_balance | DIFF | 2.6146 | 2.52 |
-| 0QF911558 | 2022-03 | neither | sweep_balance | DIFF | 4.9941 | 4.92 |
-| B3S703388 | 2024-02 | neither | sweep_balance | DIFF | 4.1591 | 3.97 |
-| B3S728504 | 2023-05 | neither | sweep_balance | DIFF | 0.1813 | 0.1 |
-| B3S728504 | 2024-11 | neither | sweep_balance | DIFF | 5.4413 | 5.35 |
-| B3S728506 | 2023-05 | neither | sweep_balance | DIFF | 0.1894 | 0.11 |
-| B3S728506 | 2025-05 | neither | sweep_balance | DIFF | 4.9152 | 4.83 |
+| acct#015306a0 | 2023-04 | neither | other:sweep_trade_day | DIFF | 1.1702 | 1.23 |
+| acct#fa488a0b | 2023-07 | neither | other:sweep_trade_day | DIFF | 2.9899 | 2.9 |
+| acct#25880078 | 2021-07 | neither | other:sweep_trade_day | DIFF | -0.1154 | -0.04 |
+| acct#25880078 | 2022-01 | neither | other:sweep_trade_day | DIFF | -9.8401 | -9.71 |
+| acct#25880078 | 2023-04 | neither | other:sweep_trade_day | DIFF | 0.5451 | 0.65 |
+| acct#aaeb760c | 2021-10 | neither | sweep_balance | DIFF | 5.2032 | 5.51 |
+| acct#03836058 | 2022-04 | neither | sweep_balance | DIFF | -1.1928 | -1.41 |
+| acct#eea1157e | 2021-05 | neither | sweep_balance | DIFF | 1.1828 | 0.76 |
+| acct#eea1157e | 2025-08 | neither | sweep_balance | DIFF | 1.6857 | 1.22 |
+| acct#04ebe1d1 | 2021-04 | neither | sweep_balance | DIFF | -3.5078 | -3.41 |
+| acct#04ebe1d1 | 2021-06 | neither | sweep_balance | DIFF | -4.9435 | -4.82 |
+| acct#04ebe1d1 | 2021-10 | neither | sweep_balance | DIFF | -1.4589 | -1.39 |
+| acct#fa488a0b | 2021-04 | neither | sweep_balance | DIFF | 2.3118 | 2.21 |
+| acct#fa488a0b | 2021-08 | neither | sweep_balance | DIFF | 1.076 | 1.0 |
+| acct#fa488a0b | 2021-10 | neither | sweep_balance | DIFF | 2.6146 | 2.52 |
+| acct#2d4385bf | 2022-03 | neither | sweep_balance | DIFF | 4.9941 | 4.92 |
+| acct#e29efebe | 2024-02 | neither | sweep_balance | DIFF | 4.1591 | 3.97 |
+| acct#79d02c2c | 2023-05 | neither | sweep_balance | DIFF | 0.1813 | 0.1 |
+| acct#79d02c2c | 2024-11 | neither | sweep_balance | DIFF | 5.4413 | 5.35 |
+| acct#4a890dd1 | 2023-05 | neither | sweep_balance | DIFF | 0.1894 | 0.11 |
+| acct#4a890dd1 | 2025-05 | neither | sweep_balance | DIFF | 4.9152 | 4.83 |
 
 
 ## Round 22's 23 regressions (MATCH under r19, DIFF under repaired), classed, and their result in this re-grade
@@ -1040,29 +1040,29 @@ Under this arm: 23 of 23 are MATCH, 0 are not.
 
 | account | month | class | now | computed | reported | credit days up to the month (day, credited, kept, CFNCASH rows that day, reason dropped or cut) |
 |---|---|---|---|---|---|---|
-| 0QF879130 | 2025-05 | unvalued_funding_sale | MATCH | 0.3188 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
-| 0QF879130 | 2025-06 | unvalued_funding_sale | MATCH | 0.307 | 0.31 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
-| 0QF879130 | 2025-07 | unvalued_funding_sale | MATCH | 0.3187 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
-| 0QF879130 | 2025-08 | unvalued_funding_sale | MATCH | 0.3182 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
-| 0QF879130 | 2025-09 | unvalued_funding_sale | MATCH | 0.3008 | 0.3 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
-| 0QF879130 | 2025-10 | unvalued_funding_sale | MATCH | 0.3016 | 0.3 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
-| 0QF879352 | 2023-05 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.074 | 0.07 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2023-06 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.076 | 0.08 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2023-08 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0608 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2023-09 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0608 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2023-11 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0609 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2023-12 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0609 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2024-02 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0581 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2024-03 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0609 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2024-05 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.061 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2024-06 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0581 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2024-08 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0611 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2024-09 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.061 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| 0QF879352 | 2024-11 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0582 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
-| B3S691415 | 2023-10 | unvalued_funding_sale | MATCH | 0.0669 | 0.07 | 2019-03-19 20000.0 dropped [none] {unvalued_funding_sale_20000.0} / 2019-07-08 6000.0 dropped [none] {unvalued_funding_sale_6000.0} / 2020-03-13 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2020-08-13 70627.31 dropped [none] {unvalued_funding_sale_70627.31} |
-| B3S748567 | 2025-07 | other:credit_kept_by_every_condition | MATCH | 0.1182 | 0.12 | 2025-03-28 4871.6 kept [none] / 2025-04-29 4711.88 kept [none] / 2025-05-28 1514.07 kept [none] / 2025-06-27 778.15 kept [none] |
-| B3S808881 | 2025-01 | unvalued_funding_sale | MATCH | 0.2212 | 0.22 | 2023-09-28 75000.0 dropped [none] {unvalued_funding_sale_75000.0} / 2024-04-18 78000.0 dropped [none] {unvalued_funding_sale_78000.0} / 2024-10-10 80000.0 dropped [none] {unvalued_funding_sale_80000.0} |
-| B3S808882 | 2025-01 | unvalued_funding_sale | MATCH | 0.2212 | 0.22 | 2023-09-28 75000.0 dropped [none] {unvalued_funding_sale_75000.0} / 2024-04-18 78000.0 dropped [none] {unvalued_funding_sale_78000.0} / 2024-10-10 80000.0 dropped [none] {unvalued_funding_sale_80000.0} |
+| acct#c42b98c0 | 2025-05 | unvalued_funding_sale | MATCH | 0.3188 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| acct#c42b98c0 | 2025-06 | unvalued_funding_sale | MATCH | 0.307 | 0.31 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| acct#c42b98c0 | 2025-07 | unvalued_funding_sale | MATCH | 0.3187 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| acct#c42b98c0 | 2025-08 | unvalued_funding_sale | MATCH | 0.3182 | 0.32 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| acct#c42b98c0 | 2025-09 | unvalued_funding_sale | MATCH | 0.3008 | 0.3 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| acct#c42b98c0 | 2025-10 | unvalued_funding_sale | MATCH | 0.3016 | 0.3 | 2017-08-04 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2024-03-07 90000.0 dropped [none] {unvalued_funding_sale_90000.0} / 2025-04-07 100000.0 dropped [none] {unvalued_funding_sale_100000.0} |
+| acct#05dd4a9d | 2023-05 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.074 | 0.07 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2023-06 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.076 | 0.08 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2023-08 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0608 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2023-09 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0608 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2023-11 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0609 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2023-12 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0609 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2024-02 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0581 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2024-03 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0609 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2024-05 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.061 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2024-06 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0581 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2024-08 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0611 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2024-09 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.061 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#05dd4a9d | 2024-11 | vendor_cfncash_leg_of_sweep_sale | MATCH | 0.0582 | 0.06 | 2021-07-16 13000.0 dropped [lo 12788.22] {vendor_leg_of_sweep_sale} / 2021-07-20 10000.0 dropped [lo 10000.0] {vendor_leg_of_sweep_sale} / 2022-07-18 9678.95 dropped [lo 7034.39] {vendor_leg_of_sweep_sale} |
+| acct#c093546d | 2023-10 | unvalued_funding_sale | MATCH | 0.0669 | 0.07 | 2019-03-19 20000.0 dropped [none] {unvalued_funding_sale_20000.0} / 2019-07-08 6000.0 dropped [none] {unvalued_funding_sale_6000.0} / 2020-03-13 25000.0 dropped [none] {unvalued_funding_sale_25000.0} / 2020-08-13 70627.31 dropped [none] {unvalued_funding_sale_70627.31} |
+| acct#57e741a5 | 2025-07 | other:credit_kept_by_every_condition | MATCH | 0.1182 | 0.12 | 2025-03-28 4871.6 kept [none] / 2025-04-29 4711.88 kept [none] / 2025-05-28 1514.07 kept [none] / 2025-06-27 778.15 kept [none] |
+| acct#99b947c2 | 2025-01 | unvalued_funding_sale | MATCH | 0.2212 | 0.22 | 2023-09-28 75000.0 dropped [none] {unvalued_funding_sale_75000.0} / 2024-04-18 78000.0 dropped [none] {unvalued_funding_sale_78000.0} / 2024-10-10 80000.0 dropped [none] {unvalued_funding_sale_80000.0} |
+| acct#62a9544e | 2025-01 | unvalued_funding_sale | MATCH | 0.2212 | 0.22 | 2023-09-28 75000.0 dropped [none] {unvalued_funding_sale_75000.0} / 2024-04-18 78000.0 dropped [none] {unvalued_funding_sale_78000.0} / 2024-10-10 80000.0 dropped [none] {unvalued_funding_sale_80000.0} |
 
 ### Round 22's 25 recovered movers (round-19 movers MATCH under repaired): still MATCH under this arm: 25 of 25
 
@@ -1072,22 +1072,22 @@ By new verdict: MATCH=25, DIFF=0, UNGRADABLE=0, ABSENT=0
 
 | account | month | new verdict |
 |---|---|---|
-| 0QF879238 | 2017-07 | MATCH |
-| 0QF879238 | 2017-08 | MATCH |
-| 0QF879238 | 2017-09 | MATCH |
-| 0QF879238 | 2017-10 | MATCH |
-| 0QF879238 | 2017-12 | MATCH |
-| 0QF879238 | 2018-01 | MATCH |
-| 0QF879238 | 2018-02 | MATCH |
-| 0QF879238 | 2018-03 | MATCH |
-| 0QF879238 | 2018-04 | MATCH |
-| 0QF879238 | 2018-05 | MATCH |
-| 0QF879238 | 2018-06 | MATCH |
-| B3S605725 | 2018-01 | MATCH |
-| B3S804888 | 2024-02 | MATCH |
-| B3S804888 | 2024-08 | MATCH |
-| B3S804888 | 2025-02 | MATCH |
-| B3S804888 | 2025-08 | MATCH |
+| acct#5aa91f68 | 2017-07 | MATCH |
+| acct#5aa91f68 | 2017-08 | MATCH |
+| acct#5aa91f68 | 2017-09 | MATCH |
+| acct#5aa91f68 | 2017-10 | MATCH |
+| acct#5aa91f68 | 2017-12 | MATCH |
+| acct#5aa91f68 | 2018-01 | MATCH |
+| acct#5aa91f68 | 2018-02 | MATCH |
+| acct#5aa91f68 | 2018-03 | MATCH |
+| acct#5aa91f68 | 2018-04 | MATCH |
+| acct#5aa91f68 | 2018-05 | MATCH |
+| acct#5aa91f68 | 2018-06 | MATCH |
+| acct#ab0c6781 | 2018-01 | MATCH |
+| acct#cce589ab | 2024-02 | MATCH |
+| acct#cce589ab | 2024-08 | MATCH |
+| acct#cce589ab | 2025-02 | MATCH |
+| acct#cce589ab | 2025-08 | MATCH |
 | D49141608 | 2019-02 | MATCH |
 | D49141608 | 2019-03 | MATCH |
 | D49141608 | 2019-04 | MATCH |
@@ -1189,35 +1189,35 @@ The 35 of round 24's 98 regressions (MATCH under `conditional`, DIFF under `meth
 
 | account | month | unlisted rows (type x n: treatment) | reported | `method` computed | now computed | now | result |
 |---|---|---|---|---|---|---|---|
-| 0QF879184 | 2020-12 | ftax x 1: flow (rides a same-day lo) | 0.02 | -15.4624 | 0.0201 | MATCH | MATCH |
-| 0QF879187 | 2017-01 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.4536 | 0.0008 | MATCH | MATCH |
-| 0QF879187 | 2017-02 | ftax x 1: flow (rides a same-day lo) | 0.0 | -4.3138 | 0.0004 | MATCH | MATCH |
-| 0QF879431 | 2016-03 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1616 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2016-04 | ftax x 2: flow (rides a same-day lo) | 0.0 | -0.3277 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2016-06 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1656 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2016-07 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.167 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2016-08 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1684 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2016-09 | ftax x 2: flow (rides a same-day lo) | 0.0 | -0.3417 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2016-11 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1728 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2016-12 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1743 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2017-01 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1728 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2017-02 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1744 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2017-03 | ftax x 2: flow (rides a same-day lo) | 0.0 | -0.3538 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2017-05 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.179 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2017-06 | ftax x 2: flow (rides a same-day lo) | 0.0 | -0.3635 | 0.0008 | MATCH | MATCH |
-| 0QF879431 | 2017-08 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1806 | 0.0042 | MATCH | MATCH |
-| 0QF879431 | 2017-09 | ftax x 2: flow (rides a same-day lo) | 0.0 | -0.3704 | 0.0041 | MATCH | MATCH |
-| 0QF879431 | 2017-11 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.186 | 0.0041 | MATCH | MATCH |
-| 0QF879431 | 2017-12 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1878 | 0.0042 | MATCH | MATCH |
-| 0QF879431 | 2018-01 | ftax x 1: flow (rides a same-day lo) | 0.01 | -0.171 | 0.0122 | MATCH | MATCH |
-| 0QF879431 | 2018-02 | ftax x 1: flow (rides a same-day lo) | 0.01 | -0.1734 | 0.0115 | MATCH | MATCH |
-| 0QF879431 | 2018-03 | ftax x 2: flow (rides a same-day lo) | 0.01 | -0.3604 | 0.0141 | MATCH | MATCH |
-| 0QF879526 | 2016-05 | cbf x 1: flow (sourced charge) | 0.0 | -0.0578 | 0.0008 | MATCH | MATCH |
-| 0QF879526 | 2016-09 | cbf x 1: flow (sourced charge) | 0.0 | -0.2446 | 0.0025 | MATCH | MATCH |
-| 0QF879526 | 2017-03 | stp x 1: flow (sourced charge) | 0.0 | -0.0911 | 0.001 | MATCH | MATCH |
-| 0QF879526 | 2018-06 | cbf x 1: flow (sourced charge) | 0.02 | -0.0557 | 0.0215 | MATCH | MATCH |
-| 0QF927346 | 2022-05 | fco x 1: flow (sourced charge) | 0.0 | -2.0825 | 0.0008 | MATCH | MATCH |
-| H2Y365888 | 2023-09 | ftax x 1: flow (rides a same-day lo); stax x 1: flow (rides a same-day lo) | 0.07 | -1.6944 | 0.0651 | MATCH | MATCH |
+| acct#93ba00cd | 2020-12 | ftax x 1: flow (rides a same-day lo) | 0.02 | -15.4624 | 0.0201 | MATCH | MATCH |
+| acct#15327bce | 2017-01 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.4536 | 0.0008 | MATCH | MATCH |
+| acct#15327bce | 2017-02 | ftax x 1: flow (rides a same-day lo) | 0.0 | -4.3138 | 0.0004 | MATCH | MATCH |
+| acct#47bd9af5 | 2016-03 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1616 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2016-04 | ftax x 2: flow (rides a same-day lo) | 0.0 | -0.3277 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2016-06 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1656 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2016-07 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.167 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2016-08 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1684 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2016-09 | ftax x 2: flow (rides a same-day lo) | 0.0 | -0.3417 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2016-11 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1728 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2016-12 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1743 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2017-01 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1728 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2017-02 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1744 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2017-03 | ftax x 2: flow (rides a same-day lo) | 0.0 | -0.3538 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2017-05 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.179 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2017-06 | ftax x 2: flow (rides a same-day lo) | 0.0 | -0.3635 | 0.0008 | MATCH | MATCH |
+| acct#47bd9af5 | 2017-08 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1806 | 0.0042 | MATCH | MATCH |
+| acct#47bd9af5 | 2017-09 | ftax x 2: flow (rides a same-day lo) | 0.0 | -0.3704 | 0.0041 | MATCH | MATCH |
+| acct#47bd9af5 | 2017-11 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.186 | 0.0041 | MATCH | MATCH |
+| acct#47bd9af5 | 2017-12 | ftax x 1: flow (rides a same-day lo) | 0.0 | -0.1878 | 0.0042 | MATCH | MATCH |
+| acct#47bd9af5 | 2018-01 | ftax x 1: flow (rides a same-day lo) | 0.01 | -0.171 | 0.0122 | MATCH | MATCH |
+| acct#47bd9af5 | 2018-02 | ftax x 1: flow (rides a same-day lo) | 0.01 | -0.1734 | 0.0115 | MATCH | MATCH |
+| acct#47bd9af5 | 2018-03 | ftax x 2: flow (rides a same-day lo) | 0.01 | -0.3604 | 0.0141 | MATCH | MATCH |
+| acct#655e1810 | 2016-05 | cbf x 1: flow (sourced charge) | 0.0 | -0.0578 | 0.0008 | MATCH | MATCH |
+| acct#655e1810 | 2016-09 | cbf x 1: flow (sourced charge) | 0.0 | -0.2446 | 0.0025 | MATCH | MATCH |
+| acct#655e1810 | 2017-03 | stp x 1: flow (sourced charge) | 0.0 | -0.0911 | 0.001 | MATCH | MATCH |
+| acct#655e1810 | 2018-06 | cbf x 1: flow (sourced charge) | 0.02 | -0.0557 | 0.0215 | MATCH | MATCH |
+| acct#248f2de0 | 2022-05 | fco x 1: flow (sourced charge) | 0.0 | -2.0825 | 0.0008 | MATCH | MATCH |
+| acct#9d0bbc8f | 2023-09 | ftax x 1: flow (rides a same-day lo); stax x 1: flow (rides a same-day lo) | 0.07 | -1.6944 | 0.0651 | MATCH | MATCH |
 | cv18643456 | 2014-01 | ftax x 1: flow (rides a same-day lo) | 0.0 | -5.9733 | 0.0017 | MATCH | MATCH |
 | cv18643456 | 2014-02 | ftax x 1: flow (rides a same-day lo) | 0.0 | -9.9287 | 0.0017 | MATCH | MATCH |
 | cv18643456 | 2015-09 | ftax x 1: flow (rides a same-day lo) | 0.0 | -14.9997 | 0.0003 | MATCH | MATCH |
@@ -1231,149 +1231,149 @@ MATCH under this arm: 35 of 35.
 
 | account | month | unlisted rows held | `method` | now | reported |
 |---|---|---|---|---|---|
-| 0QF878956 | 2021-10 | none | DIFF 5.3811 | DIFF 5.2032 | 5.51 |
-| 0QF878956 | 2021-11 | none | DIFF 5.8491 | DIFF 5.7306 | 5.11 |
-| 0QF878956 | 2021-12 | none | DIFF 6.2452 | MATCH 5.5442 | 5.52 |
-| 0QF878956 | 2022-01 | none | DIFF 0.2712 | DIFF -0.3254 | 0.02 |
-| 0QF878956 | 2022-02 | none | DIFF -3.7862 | DIFF -3.4579 | -3.25 |
-| 0QF878956 | 2022-03 | none | DIFF 4.6996 | MATCH 4.7777 | 4.82 |
-| 0QF878956 | 2022-04 | none | DIFF -6.8315 | DIFF -7.759 | -7.82 |
-| 0QF878956 | 2022-05 | none | DIFF -0.6305 | DIFF -0.7504 | -0.33 |
-| 0QF878956 | 2022-06 | none | DIFF -4.1056 | DIFF -8.3399 | -9.59 |
-| 0QF878981 | 2020-12 | none | DIFF 9.4792 | UNGRADABLE  | 9.25 |
-| 0QF879181 | 2020-12 | none | DIFF 2.8104 | UNGRADABLE  | 3.11 |
-| 0QF880382 | 2023-12 | none | DIFF 6.5637 | UNGRADABLE  | 5.94 |
-| 0QF880505 | 2022-06 | none | DIFF -5.6667 | UNGRADABLE  | -6.5 |
-| 0QF880505 | 2023-12 | none | DIFF 6.5395 | UNGRADABLE  | 5.48 |
-| 0QF883352 | 2020-12 | none | DIFF 7.2132 | UNGRADABLE  | 7.33 |
-| 0QF911558 | 2020-11 | none | DIFF 8.4405 | MATCH 7.6587 | 7.69 |
-| 0QF911558 | 2020-12 | none | DIFF 4.1553 | DIFF 3.4134 | 3.36 |
-| 0QF911558 | 2021-01 | none | DIFF 2.8523 | MATCH 2.2164 | 2.19 |
-| 0QF911558 | 2021-02 | none | DIFF 15.0185 | DIFF 8.3639 | 8.28 |
-| 0QF911558 | 2021-03 | none | DIFF 11.1771 | DIFF 6.93 | 6.84 |
-| 0QF911558 | 2021-04 | none | DIFF -4.9002 | DIFF 2.207 | 2.26 |
-| 0QF911558 | 2021-05 | none | DIFF 8.0908 | MATCH 2.9208 | 2.89 |
-| 0QF911558 | 2021-06 | none | DIFF -8.2665 | MATCH -2.8342 | -2.82 |
-| 0QF911558 | 2021-07 | none | DIFF -1.8888 | MATCH -0.4764 | -0.43 |
-| 0QF911558 | 2021-08 | none | DIFF -0.3905 | MATCH 2.2893 | 2.31 |
-| 0QF911558 | 2021-09 | none | DIFF 0.2921 | DIFF -2.8692 | -2.95 |
-| 0QF911558 | 2021-10 | none | DIFF -2.0851 | DIFF 1.6247 | 1.69 |
-| 0QF911558 | 2021-11 | none | DIFF -5.3156 | MATCH -2.7692 | -2.75 |
-| 0QF911558 | 2021-12 | none | DIFF 2.312 | MATCH 0.2825 | 0.27 |
-| 0QF911558 | 2022-01 | none | DIFF -7.1236 | MATCH -7.7054 | -7.68 |
-| 0QF911558 | 2022-02 | none | DIFF 2.0092 | DIFF 1.6071 | 1.55 |
-| 0QF911558 | 2022-03 | none | DIFF 5.0504 | DIFF 4.9941 | 4.92 |
-| 0QF911558 | 2022-04 | none | DIFF -1.6768 | MATCH -10.3693 | -10.37 |
-| 0QF911558 | 2022-05 | none | DIFF -3.2084 | MATCH -2.7657 | -2.73 |
-| 0QF911558 | 2022-06 | none | DIFF 8.6093 | MATCH -16.2518 | -16.23 |
-| 0QF911558 | 2022-07 | none | DIFF 44.4153 | MATCH 12.3251 | 12.28 |
-| B3S605610 | 2022-11 | none | DIFF 11.3108 | DIFF 9.1991 | 9.1 |
-| B3S605610 | 2022-12 | none | DIFF -6.0093 | DIFF -5.1415 | -5.21 |
-| B3S605610 | 2023-01 | none | DIFF 11.2072 | DIFF 14.2841 | 13.6 |
-| B3S605610 | 2023-02 | none | DIFF 2.3206 | DIFF -1.8263 | -1.63 |
-| B3S605610 | 2023-03 | none | DIFF -5.9594 | DIFF -1.4599 | -1.84 |
-| B3S605610 | 2023-04 | none | DIFF 3.1643 | MATCH 0.3221 | 0.28 |
-| B3S605610 | 2023-05 | none | DIFF -5.8034 | DIFF 4.7234 | 0.45 |
-| B3S605610 | 2023-06 | none | DIFF 6.2433 | DIFF 9.422 | 9.22 |
-| B3S605610 | 2023-07 | none | DIFF 3.5785 | DIFF 1.1394 | 1.29 |
-| B3S605610 | 2023-08 | none | DIFF -0.1951 | DIFF -0.8137 | -1.09 |
-| B3S605610 | 2023-09 | none | DIFF 0.9701 | DIFF -7.5113 | -7.08 |
-| B3S605610 | 2023-10 | none | DIFF -3.8756 | DIFF 3.5361 | 3.09 |
-| B3S605610 | 2023-11 | none | DIFF 3.8452 | DIFF 10.6696 | 9.94 |
-| B3S605610 | 2023-12 | none | DIFF 1.1954 | DIFF 2.1571 | 2.05 |
-| B3S605610 | 2024-01 | none | DIFF 1.3747 | DIFF 10.5415 | 10.14 |
-| B3S605610 | 2024-02 | none | DIFF 2.0311 | DIFF 5.2468 | 4.85 |
-| B3S605610 | 2024-03 | none | DIFF 6.3224 | DIFF 2.557 | 2.68 |
-| B3S605610 | 2024-04 | none | DIFF -1.1991 | DIFF -6.5806 | -6.38 |
-| B3S605610 | 2024-05 | none | DIFF 2.7914 | DIFF 11.607 | 10.97 |
-| B3S605610 | 2024-06 | none | DIFF -0.4463 | DIFF 3.3275 | 3.17 |
-| B3S605610 | 2024-07 | none | DIFF -2.8826 | DIFF -5.6202 | -5.56 |
-| B3S605610 | 2024-08 | none | DIFF 1.2549 | DIFF 8.2305 | 7.72 |
-| B3S605610 | 2024-09 | none | DIFF -3.0145 | DIFF -0.1378 | -0.25 |
-| B3S605610 | 2024-10 | none | DIFF -1.2453 | DIFF 4.2651 | 4.1 |
-| B3S605610 | 2024-11 | none | DIFF 7.2106 | DIFF 14.4609 | 14.05 |
-| B3S605610 | 2024-12 | none | DIFF 0.8789 | MATCH 0.6061 | 0.6 |
-| B3S605610 | 2025-01 | none | DIFF 5.7396 | MATCH 8.5698 | 8.52 |
-| B3S605610 | 2025-02 | none | DIFF 3.6074 | DIFF 1.217 | 1.08 |
-| B3S605610 | 2025-03 | none | DIFF -1.1056 | MATCH -3.8995 | -3.86 |
-| B3S605610 | 2025-04 | none | DIFF -4.0307 | DIFF 14.4797 | 14.18 |
-| B3S605610 | 2025-05 | none | DIFF 7.0205 | DIFF 6.7513 | 6.58 |
-| B3S605610 | 2025-06 | none | DIFF 7.145 | MATCH 10.0648 | 10.03 |
-| B3S605610 | 2025-07 | none | DIFF -2.9401 | DIFF -11.0978 | -11.04 |
-| B3S605610 | 2025-08 | none | DIFF 7.339 | DIFF 4.9699 | 4.81 |
-| B3S605610 | 2025-09 | none | DIFF 0.0116 | MATCH -0.5782 | -0.58 |
-| B3S605610 | 2025-10 | none | DIFF -1.7346 | MATCH -5.4471 | -5.44 |
-| B3S605610 | 2025-11 | none | DIFF 276.795 | DIFF -2.515 | -2.67 |
-| B3S728504 | 2022-11 | none | DIFF 4.2238 | DIFF 4.6648 | 4.61 |
-| B3S728504 | 2022-12 | none | DIFF -2.5786 | DIFF -3.9616 | -4.35 |
-| B3S728504 | 2023-01 | none | DIFF 4.4677 | MATCH 5.5164 | 5.5 |
-| B3S728504 | 2023-02 | none | DIFF -1.9272 | DIFF -2.1931 | -2.27 |
-| B3S728504 | 2023-03 | none | DIFF 3.1032 | DIFF 2.8315 | 2.48 |
-| B3S728504 | 2023-04 | none | DIFF 0.5092 | DIFF 0.7873 | 0.73 |
-| B3S728504 | 2023-05 | none | MATCH 0.1418 | DIFF 0.1813 | 0.1 |
-| B3S728504 | 2023-06 | none | MATCH 4.8344 | DIFF 5.2399 | 4.81 |
-| B3S728504 | 2023-07 | none | DIFF 1.8977 | DIFF 2.545 | 2.45 |
-| B3S728504 | 2023-08 | none | DIFF -1.194 | MATCH -1.506 | -1.55 |
-| B3S728504 | 2023-09 | none | DIFF -2.6856 | DIFF -3.7127 | -4.03 |
-| B3S728504 | 2023-10 | none | DIFF -2.2386 | DIFF -2.4014 | -2.46 |
-| B3S728504 | 2023-11 | none | DIFF 6.8895 | DIFF 7.9005 | 7.8 |
-| B3S728504 | 2023-12 | none | DIFF 5.2546 | DIFF 5.1454 | 4.67 |
-| B3S728504 | 2024-01 | none | DIFF 0.2873 | MATCH 0.6587 | 0.66 |
-| B3S728504 | 2024-02 | none | DIFF 3.1598 | DIFF 3.841 | 3.72 |
-| B3S728504 | 2024-03 | none | DIFF 2.9899 | DIFF 2.9282 | 2.6 |
-| B3S728504 | 2024-04 | none | DIFF -3.4985 | MATCH -3.8474 | -3.89 |
-| B3S728504 | 2024-05 | none | DIFF 3.5452 | DIFF 4.0171 | 3.94 |
-| B3S728504 | 2024-06 | none | DIFF 2.3134 | DIFF 2.58 | 2.25 |
-| B3S728504 | 2024-07 | none | DIFF 2.1112 | MATCH 1.9886 | 1.94 |
-| B3S728504 | 2024-08 | none | DIFF 1.7942 | DIFF 1.9174 | 1.86 |
-| B3S728504 | 2024-09 | none | DIFF 2.4052 | DIFF 2.1569 | 1.84 |
-| B3S728504 | 2024-10 | none | DIFF 145.4343 | DIFF -1.0671 | -1.13 |
-| B3S728506 | 2022-11 | none | DIFF 4.2434 | DIFF 4.6785 | 4.62 |
-| B3S728506 | 2022-12 | none | DIFF -2.6145 | DIFF -3.9945 | -4.39 |
-| B3S728506 | 2023-01 | none | DIFF 4.5015 | MATCH 5.5434 | 5.53 |
-| B3S728506 | 2023-02 | none | DIFF -1.934 | DIFF -2.1953 | -2.27 |
-| B3S728506 | 2023-03 | none | DIFF 3.1169 | DIFF 2.8365 | 2.49 |
-| B3S728506 | 2023-04 | none | DIFF 0.5094 | DIFF 0.7895 | 0.73 |
-| B3S728506 | 2023-05 | none | MATCH 0.1493 | DIFF 0.1894 | 0.11 |
-| B3S728506 | 2023-06 | none | MATCH 4.8943 | DIFF 5.2853 | 4.86 |
-| B3S728506 | 2023-07 | none | DIFF 1.9209 | DIFF 2.5666 | 2.48 |
-| B3S728506 | 2023-08 | none | DIFF -1.2084 | MATCH -1.5161 | -1.56 |
-| B3S728506 | 2023-09 | none | DIFF -2.7037 | DIFF -3.7289 | -4.05 |
-| B3S728506 | 2023-10 | none | DIFF -2.2567 | MATCH -2.4124 | -2.46 |
-| B3S728506 | 2023-11 | none | DIFF 6.9352 | DIFF 7.9355 | 7.84 |
-| B3S728506 | 2023-12 | none | DIFF 5.2798 | DIFF 5.1598 | 4.68 |
-| B3S728506 | 2024-01 | none | DIFF 0.294 | MATCH 0.6655 | 0.66 |
-| B3S728506 | 2024-02 | none | DIFF 3.2031 | DIFF 3.8783 | 3.76 |
-| B3S728506 | 2024-03 | none | DIFF 3.0138 | DIFF 2.9438 | 2.62 |
-| B3S728506 | 2024-04 | none | DIFF -3.5221 | MATCH -3.8622 | -3.91 |
-| B3S728506 | 2024-05 | none | DIFF 3.5679 | DIFF 4.035 | 3.96 |
-| B3S728506 | 2024-06 | none | DIFF 2.3277 | DIFF 2.5918 | 2.26 |
-| B3S728506 | 2024-07 | none | DIFF 2.1159 | MATCH 1.9889 | 1.94 |
-| B3S728506 | 2024-08 | none | DIFF 1.799 | DIFF 1.9212 | 1.86 |
-| B3S728506 | 2024-09 | none | DIFF 2.417 | DIFF 2.1627 | 1.85 |
-| B3S728506 | 2024-10 | none | DIFF 146.3785 | DIFF -1.0616 | -1.12 |
-| B3S728793 | 2021-08 | none | DIFF 2.2478 | MATCH 3.9168 | 3.87 |
-| B3S728793 | 2021-09 | none | DIFF 1.0963 | DIFF 2.6025 | 2.15 |
-| B3S728793 | 2021-10 | none | DIFF 7.1908 | DIFF 19.9111 | 20.12 |
-| B3S728793 | 2021-11 | none | DIFF -3.3409 | DIFF -0.2845 | 0.48 |
-| B3S728793 | 2021-12 | none | DIFF -3.5494 | UNGRADABLE  | -3.93 |
-| B3S735941 | 2020-12 | none | DIFF -46.3353 | MATCH -0.3719 | -0.37 |
-| B3S763288 | 2022-03 | none | DIFF -60.1071 | DIFF 10.9657 | 11.37 |
-| B3S763288 | 2022-04 | none | DIFF -14.79 | MATCH -18.7022 | -18.71 |
-| B3S763288 | 2022-05 | none | DIFF 0.5784 | DIFF -0.2526 | -0.83 |
-| B3S763288 | 2022-06 | none | DIFF 30.9912 | MATCH -5.8557 | -5.86 |
-| B3S763288 | 2022-07 | none | DIFF 45.2117 | MATCH 10.6101 | 10.65 |
-| B3S777026 | 2022-04 | none | DIFF -0.769 | DIFF -2.7325 | -2.58 |
-| B3S777026 | 2022-05 | none | DIFF -2.3115 | MATCH -2.3761 | -2.37 |
-| B3S793726 | 2025-08 | none | DIFF 35.6799 | DIFF 0.6997 | -0.15 |
-| B3S793726 | 2025-11 | none | DIFF 12.5832 | DIFF 2.9946 | 2.22 |
-| B3S793726 | 2026-02 | none | DIFF 23.1503 | DIFF 4.1427 | 3.1 |
-| B3S804864 | 2023-12 | none | DIFF 5.6937 | UNGRADABLE  | 5.1 |
-| B3S804888 | 2023-12 | none | DIFF 5.6954 | UNGRADABLE  | 5.1 |
-| RGY004120 | 2025-12 | none | DIFF 11.2855 | UNGRADABLE  | 1.65 |
-| RGY005498 | 2025-12 | none | DIFF 11.2247 | UNGRADABLE  | 1.64 |
-| RGY005715 | 2025-12 | none | DIFF 11.185 | UNGRADABLE  | 1.64 |
-| RGY006999 | 2025-12 | none | DIFF 11.0976 | UNGRADABLE  | 1.62 |
+| acct#aaeb760c | 2021-10 | none | DIFF 5.3811 | DIFF 5.2032 | 5.51 |
+| acct#aaeb760c | 2021-11 | none | DIFF 5.8491 | DIFF 5.7306 | 5.11 |
+| acct#aaeb760c | 2021-12 | none | DIFF 6.2452 | MATCH 5.5442 | 5.52 |
+| acct#aaeb760c | 2022-01 | none | DIFF 0.2712 | DIFF -0.3254 | 0.02 |
+| acct#aaeb760c | 2022-02 | none | DIFF -3.7862 | DIFF -3.4579 | -3.25 |
+| acct#aaeb760c | 2022-03 | none | DIFF 4.6996 | MATCH 4.7777 | 4.82 |
+| acct#aaeb760c | 2022-04 | none | DIFF -6.8315 | DIFF -7.759 | -7.82 |
+| acct#aaeb760c | 2022-05 | none | DIFF -0.6305 | DIFF -0.7504 | -0.33 |
+| acct#aaeb760c | 2022-06 | none | DIFF -4.1056 | DIFF -8.3399 | -9.59 |
+| acct#f6c79f45 | 2020-12 | none | DIFF 9.4792 | UNGRADABLE  | 9.25 |
+| acct#eea1157e | 2020-12 | none | DIFF 2.8104 | UNGRADABLE  | 3.11 |
+| acct#8b1d7784 | 2023-12 | none | DIFF 6.5637 | UNGRADABLE  | 5.94 |
+| acct#fa488a0b | 2022-06 | none | DIFF -5.6667 | UNGRADABLE  | -6.5 |
+| acct#fa488a0b | 2023-12 | none | DIFF 6.5395 | UNGRADABLE  | 5.48 |
+| acct#2f705c61 | 2020-12 | none | DIFF 7.2132 | UNGRADABLE  | 7.33 |
+| acct#2d4385bf | 2020-11 | none | DIFF 8.4405 | MATCH 7.6587 | 7.69 |
+| acct#2d4385bf | 2020-12 | none | DIFF 4.1553 | DIFF 3.4134 | 3.36 |
+| acct#2d4385bf | 2021-01 | none | DIFF 2.8523 | MATCH 2.2164 | 2.19 |
+| acct#2d4385bf | 2021-02 | none | DIFF 15.0185 | DIFF 8.3639 | 8.28 |
+| acct#2d4385bf | 2021-03 | none | DIFF 11.1771 | DIFF 6.93 | 6.84 |
+| acct#2d4385bf | 2021-04 | none | DIFF -4.9002 | DIFF 2.207 | 2.26 |
+| acct#2d4385bf | 2021-05 | none | DIFF 8.0908 | MATCH 2.9208 | 2.89 |
+| acct#2d4385bf | 2021-06 | none | DIFF -8.2665 | MATCH -2.8342 | -2.82 |
+| acct#2d4385bf | 2021-07 | none | DIFF -1.8888 | MATCH -0.4764 | -0.43 |
+| acct#2d4385bf | 2021-08 | none | DIFF -0.3905 | MATCH 2.2893 | 2.31 |
+| acct#2d4385bf | 2021-09 | none | DIFF 0.2921 | DIFF -2.8692 | -2.95 |
+| acct#2d4385bf | 2021-10 | none | DIFF -2.0851 | DIFF 1.6247 | 1.69 |
+| acct#2d4385bf | 2021-11 | none | DIFF -5.3156 | MATCH -2.7692 | -2.75 |
+| acct#2d4385bf | 2021-12 | none | DIFF 2.312 | MATCH 0.2825 | 0.27 |
+| acct#2d4385bf | 2022-01 | none | DIFF -7.1236 | MATCH -7.7054 | -7.68 |
+| acct#2d4385bf | 2022-02 | none | DIFF 2.0092 | DIFF 1.6071 | 1.55 |
+| acct#2d4385bf | 2022-03 | none | DIFF 5.0504 | DIFF 4.9941 | 4.92 |
+| acct#2d4385bf | 2022-04 | none | DIFF -1.6768 | MATCH -10.3693 | -10.37 |
+| acct#2d4385bf | 2022-05 | none | DIFF -3.2084 | MATCH -2.7657 | -2.73 |
+| acct#2d4385bf | 2022-06 | none | DIFF 8.6093 | MATCH -16.2518 | -16.23 |
+| acct#2d4385bf | 2022-07 | none | DIFF 44.4153 | MATCH 12.3251 | 12.28 |
+| acct#f0b52456 | 2022-11 | none | DIFF 11.3108 | DIFF 9.1991 | 9.1 |
+| acct#f0b52456 | 2022-12 | none | DIFF -6.0093 | DIFF -5.1415 | -5.21 |
+| acct#f0b52456 | 2023-01 | none | DIFF 11.2072 | DIFF 14.2841 | 13.6 |
+| acct#f0b52456 | 2023-02 | none | DIFF 2.3206 | DIFF -1.8263 | -1.63 |
+| acct#f0b52456 | 2023-03 | none | DIFF -5.9594 | DIFF -1.4599 | -1.84 |
+| acct#f0b52456 | 2023-04 | none | DIFF 3.1643 | MATCH 0.3221 | 0.28 |
+| acct#f0b52456 | 2023-05 | none | DIFF -5.8034 | DIFF 4.7234 | 0.45 |
+| acct#f0b52456 | 2023-06 | none | DIFF 6.2433 | DIFF 9.422 | 9.22 |
+| acct#f0b52456 | 2023-07 | none | DIFF 3.5785 | DIFF 1.1394 | 1.29 |
+| acct#f0b52456 | 2023-08 | none | DIFF -0.1951 | DIFF -0.8137 | -1.09 |
+| acct#f0b52456 | 2023-09 | none | DIFF 0.9701 | DIFF -7.5113 | -7.08 |
+| acct#f0b52456 | 2023-10 | none | DIFF -3.8756 | DIFF 3.5361 | 3.09 |
+| acct#f0b52456 | 2023-11 | none | DIFF 3.8452 | DIFF 10.6696 | 9.94 |
+| acct#f0b52456 | 2023-12 | none | DIFF 1.1954 | DIFF 2.1571 | 2.05 |
+| acct#f0b52456 | 2024-01 | none | DIFF 1.3747 | DIFF 10.5415 | 10.14 |
+| acct#f0b52456 | 2024-02 | none | DIFF 2.0311 | DIFF 5.2468 | 4.85 |
+| acct#f0b52456 | 2024-03 | none | DIFF 6.3224 | DIFF 2.557 | 2.68 |
+| acct#f0b52456 | 2024-04 | none | DIFF -1.1991 | DIFF -6.5806 | -6.38 |
+| acct#f0b52456 | 2024-05 | none | DIFF 2.7914 | DIFF 11.607 | 10.97 |
+| acct#f0b52456 | 2024-06 | none | DIFF -0.4463 | DIFF 3.3275 | 3.17 |
+| acct#f0b52456 | 2024-07 | none | DIFF -2.8826 | DIFF -5.6202 | -5.56 |
+| acct#f0b52456 | 2024-08 | none | DIFF 1.2549 | DIFF 8.2305 | 7.72 |
+| acct#f0b52456 | 2024-09 | none | DIFF -3.0145 | DIFF -0.1378 | -0.25 |
+| acct#f0b52456 | 2024-10 | none | DIFF -1.2453 | DIFF 4.2651 | 4.1 |
+| acct#f0b52456 | 2024-11 | none | DIFF 7.2106 | DIFF 14.4609 | 14.05 |
+| acct#f0b52456 | 2024-12 | none | DIFF 0.8789 | MATCH 0.6061 | 0.6 |
+| acct#f0b52456 | 2025-01 | none | DIFF 5.7396 | MATCH 8.5698 | 8.52 |
+| acct#f0b52456 | 2025-02 | none | DIFF 3.6074 | DIFF 1.217 | 1.08 |
+| acct#f0b52456 | 2025-03 | none | DIFF -1.1056 | MATCH -3.8995 | -3.86 |
+| acct#f0b52456 | 2025-04 | none | DIFF -4.0307 | DIFF 14.4797 | 14.18 |
+| acct#f0b52456 | 2025-05 | none | DIFF 7.0205 | DIFF 6.7513 | 6.58 |
+| acct#f0b52456 | 2025-06 | none | DIFF 7.145 | MATCH 10.0648 | 10.03 |
+| acct#f0b52456 | 2025-07 | none | DIFF -2.9401 | DIFF -11.0978 | -11.04 |
+| acct#f0b52456 | 2025-08 | none | DIFF 7.339 | DIFF 4.9699 | 4.81 |
+| acct#f0b52456 | 2025-09 | none | DIFF 0.0116 | MATCH -0.5782 | -0.58 |
+| acct#f0b52456 | 2025-10 | none | DIFF -1.7346 | MATCH -5.4471 | -5.44 |
+| acct#f0b52456 | 2025-11 | none | DIFF 276.795 | DIFF -2.515 | -2.67 |
+| acct#79d02c2c | 2022-11 | none | DIFF 4.2238 | DIFF 4.6648 | 4.61 |
+| acct#79d02c2c | 2022-12 | none | DIFF -2.5786 | DIFF -3.9616 | -4.35 |
+| acct#79d02c2c | 2023-01 | none | DIFF 4.4677 | MATCH 5.5164 | 5.5 |
+| acct#79d02c2c | 2023-02 | none | DIFF -1.9272 | DIFF -2.1931 | -2.27 |
+| acct#79d02c2c | 2023-03 | none | DIFF 3.1032 | DIFF 2.8315 | 2.48 |
+| acct#79d02c2c | 2023-04 | none | DIFF 0.5092 | DIFF 0.7873 | 0.73 |
+| acct#79d02c2c | 2023-05 | none | MATCH 0.1418 | DIFF 0.1813 | 0.1 |
+| acct#79d02c2c | 2023-06 | none | MATCH 4.8344 | DIFF 5.2399 | 4.81 |
+| acct#79d02c2c | 2023-07 | none | DIFF 1.8977 | DIFF 2.545 | 2.45 |
+| acct#79d02c2c | 2023-08 | none | DIFF -1.194 | MATCH -1.506 | -1.55 |
+| acct#79d02c2c | 2023-09 | none | DIFF -2.6856 | DIFF -3.7127 | -4.03 |
+| acct#79d02c2c | 2023-10 | none | DIFF -2.2386 | DIFF -2.4014 | -2.46 |
+| acct#79d02c2c | 2023-11 | none | DIFF 6.8895 | DIFF 7.9005 | 7.8 |
+| acct#79d02c2c | 2023-12 | none | DIFF 5.2546 | DIFF 5.1454 | 4.67 |
+| acct#79d02c2c | 2024-01 | none | DIFF 0.2873 | MATCH 0.6587 | 0.66 |
+| acct#79d02c2c | 2024-02 | none | DIFF 3.1598 | DIFF 3.841 | 3.72 |
+| acct#79d02c2c | 2024-03 | none | DIFF 2.9899 | DIFF 2.9282 | 2.6 |
+| acct#79d02c2c | 2024-04 | none | DIFF -3.4985 | MATCH -3.8474 | -3.89 |
+| acct#79d02c2c | 2024-05 | none | DIFF 3.5452 | DIFF 4.0171 | 3.94 |
+| acct#79d02c2c | 2024-06 | none | DIFF 2.3134 | DIFF 2.58 | 2.25 |
+| acct#79d02c2c | 2024-07 | none | DIFF 2.1112 | MATCH 1.9886 | 1.94 |
+| acct#79d02c2c | 2024-08 | none | DIFF 1.7942 | DIFF 1.9174 | 1.86 |
+| acct#79d02c2c | 2024-09 | none | DIFF 2.4052 | DIFF 2.1569 | 1.84 |
+| acct#79d02c2c | 2024-10 | none | DIFF 145.4343 | DIFF -1.0671 | -1.13 |
+| acct#4a890dd1 | 2022-11 | none | DIFF 4.2434 | DIFF 4.6785 | 4.62 |
+| acct#4a890dd1 | 2022-12 | none | DIFF -2.6145 | DIFF -3.9945 | -4.39 |
+| acct#4a890dd1 | 2023-01 | none | DIFF 4.5015 | MATCH 5.5434 | 5.53 |
+| acct#4a890dd1 | 2023-02 | none | DIFF -1.934 | DIFF -2.1953 | -2.27 |
+| acct#4a890dd1 | 2023-03 | none | DIFF 3.1169 | DIFF 2.8365 | 2.49 |
+| acct#4a890dd1 | 2023-04 | none | DIFF 0.5094 | DIFF 0.7895 | 0.73 |
+| acct#4a890dd1 | 2023-05 | none | MATCH 0.1493 | DIFF 0.1894 | 0.11 |
+| acct#4a890dd1 | 2023-06 | none | MATCH 4.8943 | DIFF 5.2853 | 4.86 |
+| acct#4a890dd1 | 2023-07 | none | DIFF 1.9209 | DIFF 2.5666 | 2.48 |
+| acct#4a890dd1 | 2023-08 | none | DIFF -1.2084 | MATCH -1.5161 | -1.56 |
+| acct#4a890dd1 | 2023-09 | none | DIFF -2.7037 | DIFF -3.7289 | -4.05 |
+| acct#4a890dd1 | 2023-10 | none | DIFF -2.2567 | MATCH -2.4124 | -2.46 |
+| acct#4a890dd1 | 2023-11 | none | DIFF 6.9352 | DIFF 7.9355 | 7.84 |
+| acct#4a890dd1 | 2023-12 | none | DIFF 5.2798 | DIFF 5.1598 | 4.68 |
+| acct#4a890dd1 | 2024-01 | none | DIFF 0.294 | MATCH 0.6655 | 0.66 |
+| acct#4a890dd1 | 2024-02 | none | DIFF 3.2031 | DIFF 3.8783 | 3.76 |
+| acct#4a890dd1 | 2024-03 | none | DIFF 3.0138 | DIFF 2.9438 | 2.62 |
+| acct#4a890dd1 | 2024-04 | none | DIFF -3.5221 | MATCH -3.8622 | -3.91 |
+| acct#4a890dd1 | 2024-05 | none | DIFF 3.5679 | DIFF 4.035 | 3.96 |
+| acct#4a890dd1 | 2024-06 | none | DIFF 2.3277 | DIFF 2.5918 | 2.26 |
+| acct#4a890dd1 | 2024-07 | none | DIFF 2.1159 | MATCH 1.9889 | 1.94 |
+| acct#4a890dd1 | 2024-08 | none | DIFF 1.799 | DIFF 1.9212 | 1.86 |
+| acct#4a890dd1 | 2024-09 | none | DIFF 2.417 | DIFF 2.1627 | 1.85 |
+| acct#4a890dd1 | 2024-10 | none | DIFF 146.3785 | DIFF -1.0616 | -1.12 |
+| acct#c753e42f | 2021-08 | none | DIFF 2.2478 | MATCH 3.9168 | 3.87 |
+| acct#c753e42f | 2021-09 | none | DIFF 1.0963 | DIFF 2.6025 | 2.15 |
+| acct#c753e42f | 2021-10 | none | DIFF 7.1908 | DIFF 19.9111 | 20.12 |
+| acct#c753e42f | 2021-11 | none | DIFF -3.3409 | DIFF -0.2845 | 0.48 |
+| acct#c753e42f | 2021-12 | none | DIFF -3.5494 | UNGRADABLE  | -3.93 |
+| acct#117ad748 | 2020-12 | none | DIFF -46.3353 | MATCH -0.3719 | -0.37 |
+| acct#dba683c4 | 2022-03 | none | DIFF -60.1071 | DIFF 10.9657 | 11.37 |
+| acct#dba683c4 | 2022-04 | none | DIFF -14.79 | MATCH -18.7022 | -18.71 |
+| acct#dba683c4 | 2022-05 | none | DIFF 0.5784 | DIFF -0.2526 | -0.83 |
+| acct#dba683c4 | 2022-06 | none | DIFF 30.9912 | MATCH -5.8557 | -5.86 |
+| acct#dba683c4 | 2022-07 | none | DIFF 45.2117 | MATCH 10.6101 | 10.65 |
+| acct#eeab73e8 | 2022-04 | none | DIFF -0.769 | DIFF -2.7325 | -2.58 |
+| acct#eeab73e8 | 2022-05 | none | DIFF -2.3115 | MATCH -2.3761 | -2.37 |
+| acct#f78e8ecd | 2025-08 | none | DIFF 35.6799 | DIFF 0.6997 | -0.15 |
+| acct#f78e8ecd | 2025-11 | none | DIFF 12.5832 | DIFF 2.9946 | 2.22 |
+| acct#f78e8ecd | 2026-02 | none | DIFF 23.1503 | DIFF 4.1427 | 3.1 |
+| acct#0f2d2c45 | 2023-12 | none | DIFF 5.6937 | UNGRADABLE  | 5.1 |
+| acct#cce589ab | 2023-12 | none | DIFF 5.6954 | UNGRADABLE  | 5.1 |
+| acct#a011b5f7 | 2025-12 | none | DIFF 11.2855 | UNGRADABLE  | 1.65 |
+| acct#7f62f16f | 2025-12 | none | DIFF 11.2247 | UNGRADABLE  | 1.64 |
+| acct#8148a2c4 | 2025-12 | none | DIFF 11.185 | UNGRADABLE  | 1.64 |
+| acct#cce36d1f | 2025-12 | none | DIFF 11.0976 | UNGRADABLE  | 1.62 |
 
 Control months (no listed position) that differ between the arms: 0, of which 0 are among the 35 above. They differ because the new treatment applies to a CFNCASH row whether or not the account holds a listed sweep.
 
@@ -1386,7 +1386,7 @@ The ledger of every posting of an account (sweep + CFNCASH, one cash position) a
 - months holding a row of an UNLISTED CHARGE/TAX type (the table does not name it; default kept): 0 (none)
 - months holding a dividend row (dv, dvlt or dvst, dated by its pay date): 4
 - months holding neither: 0
-- accounts: 2; the largest: B3S728504 2, B3S728506 2
+- accounts: 2; the largest: acct#79d02c2c 2, acct#4a890dd1 2
 
 ### Every MATCH -> DIFF month with ONE named cause: 4 (traced from the month's own rows, nothing forced, no treatment changed)
 
@@ -1396,10 +1396,10 @@ Counts per cause (sum 4): cash_leg_difference:cash_leg_difference 4
 
 | account | month | computed before | computed after | reported | cause | trace |
 |---|---|---|---|---|---|---|
-| B3S728504 | 2023-05 | 0.1418 | 0.1813 | 0.1 | cash_leg_difference:cash_leg_difference | cash_leg_difference 2023-05-02: the arms' account value differs by -136.95 more on this day than the day before; 11% of the month's daily-return difference |
-| B3S728504 | 2023-06 | 4.8344 | 5.2399 | 4.81 | cash_leg_difference:cash_leg_difference | cash_leg_difference 2023-06-26: the arms' account value differs by -40.79 more on this day than the day before; 21% of the month's daily-return difference |
-| B3S728506 | 2023-05 | 0.1493 | 0.1894 | 0.11 | cash_leg_difference:cash_leg_difference | cash_leg_difference 2023-05-02: the arms' account value differs by -159.19 more on this day than the day before; 11% of the month's daily-return difference |
-| B3S728506 | 2023-06 | 4.8943 | 5.2853 | 4.86 | cash_leg_difference:cash_leg_difference | cash_leg_difference 2023-06-26: the arms' account value differs by -47.22 more on this day than the day before; 21% of the month's daily-return difference |
+| acct#79d02c2c | 2023-05 | 0.1418 | 0.1813 | 0.1 | cash_leg_difference:cash_leg_difference | cash_leg_difference 2023-05-02: the arms' account value differs by -136.95 more on this day than the day before; 11% of the month's daily-return difference |
+| acct#79d02c2c | 2023-06 | 4.8344 | 5.2399 | 4.81 | cash_leg_difference:cash_leg_difference | cash_leg_difference 2023-06-26: the arms' account value differs by -40.79 more on this day than the day before; 21% of the month's daily-return difference |
+| acct#4a890dd1 | 2023-05 | 0.1493 | 0.1894 | 0.11 | cash_leg_difference:cash_leg_difference | cash_leg_difference 2023-05-02: the arms' account value differs by -159.19 more on this day than the day before; 11% of the month's daily-return difference |
+| acct#4a890dd1 | 2023-06 | 4.8943 | 5.2853 | 4.86 | cash_leg_difference:cash_leg_difference | cash_leg_difference 2023-06-26: the arms' account value differs by -47.22 more on this day than the day before; 21% of the month's daily-return difference |
 
 ## The 163 round-19 movers re-counted by verdict (round 24)
 
@@ -1410,22 +1410,22 @@ AFTER verdict of the 163: MATCH 139, DIFF 24, UNGRADABLE 0, ABSENT 0.
 
 | account | month | verdict | computed | reported | diff | cause |
 |---|---|---|---|---|---|---|
-| 0QF879238 | 2017-07 | MATCH | 0.002 | 0.0 | 0.002 | MATCH |
-| 0QF879238 | 2017-08 | MATCH | 0.0042 | 0.0 | 0.0042 | MATCH |
-| 0QF879238 | 2017-09 | MATCH | 0.004 | 0.0 | 0.004 | MATCH |
-| 0QF879238 | 2017-10 | MATCH | 0.0042 | 0.0 | 0.0042 | MATCH |
-| 0QF879238 | 2017-12 | MATCH | 0.0042 | 0.0 | 0.0042 | MATCH |
-| 0QF879238 | 2018-01 | MATCH | 0.0121 | 0.01 | 0.0021 | MATCH |
-| 0QF879238 | 2018-02 | MATCH | 0.0115 | 0.01 | 0.0015 | MATCH |
-| 0QF879238 | 2018-03 | MATCH | 0.014 | 0.01 | 0.004 | MATCH |
-| 0QF879238 | 2018-04 | MATCH | 0.0205 | 0.02 | 0.0005 | MATCH |
-| 0QF879238 | 2018-05 | MATCH | 0.0212 | 0.02 | 0.0012 | MATCH |
-| 0QF879238 | 2018-06 | MATCH | 0.0205 | 0.02 | 0.0005 | MATCH |
-| B3S605725 | 2018-01 | MATCH | 0.1814 | 0.18 | 0.0014 | MATCH |
-| B3S804888 | 2024-02 | MATCH | 4.3367 | 4.32 | 0.0167 | MATCH |
-| B3S804888 | 2024-08 | MATCH | 1.7854 | 1.79 | -0.0046 | MATCH |
-| B3S804888 | 2025-02 | MATCH | -1.5729 | -1.55 | -0.0229 | MATCH |
-| B3S804888 | 2025-08 | MATCH | 2.5124 | 2.52 | -0.0076 | MATCH |
+| acct#5aa91f68 | 2017-07 | MATCH | 0.002 | 0.0 | 0.002 | MATCH |
+| acct#5aa91f68 | 2017-08 | MATCH | 0.0042 | 0.0 | 0.0042 | MATCH |
+| acct#5aa91f68 | 2017-09 | MATCH | 0.004 | 0.0 | 0.004 | MATCH |
+| acct#5aa91f68 | 2017-10 | MATCH | 0.0042 | 0.0 | 0.0042 | MATCH |
+| acct#5aa91f68 | 2017-12 | MATCH | 0.0042 | 0.0 | 0.0042 | MATCH |
+| acct#5aa91f68 | 2018-01 | MATCH | 0.0121 | 0.01 | 0.0021 | MATCH |
+| acct#5aa91f68 | 2018-02 | MATCH | 0.0115 | 0.01 | 0.0015 | MATCH |
+| acct#5aa91f68 | 2018-03 | MATCH | 0.014 | 0.01 | 0.004 | MATCH |
+| acct#5aa91f68 | 2018-04 | MATCH | 0.0205 | 0.02 | 0.0005 | MATCH |
+| acct#5aa91f68 | 2018-05 | MATCH | 0.0212 | 0.02 | 0.0012 | MATCH |
+| acct#5aa91f68 | 2018-06 | MATCH | 0.0205 | 0.02 | 0.0005 | MATCH |
+| acct#ab0c6781 | 2018-01 | MATCH | 0.1814 | 0.18 | 0.0014 | MATCH |
+| acct#cce589ab | 2024-02 | MATCH | 4.3367 | 4.32 | 0.0167 | MATCH |
+| acct#cce589ab | 2024-08 | MATCH | 1.7854 | 1.79 | -0.0046 | MATCH |
+| acct#cce589ab | 2025-02 | MATCH | -1.5729 | -1.55 | -0.0229 | MATCH |
+| acct#cce589ab | 2025-08 | MATCH | 2.5124 | 2.52 | -0.0076 | MATCH |
 | D49141608 | 2019-02 | MATCH | 0.0419 | 0.04 | 0.0019 | MATCH |
 | D49141608 | 2019-03 | MATCH | 0.0466 | 0.05 | -0.0034 | MATCH |
 | D49141608 | 2019-04 | MATCH | 0.0452 | 0.05 | -0.0048 | MATCH |
@@ -1522,79 +1522,79 @@ Source: C:/dev/wk-cotbkf-53/org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_
 
 | account | month | round-27 cause | reported | BEFORE computed | BEFORE | AFTER computed | AFTER | AFTER diff |
 |---|---|---|---|---|---|---|---|---|
-| 0QF878956 | 2021-12 | price:split | 5.52 | 6.2452 | DIFF | 5.5442 | MATCH | 0.0242 |
-| 0QF878956 | 2022-04 | price:split | -7.82 | -6.8315 | DIFF | -7.759 | DIFF | 0.061 |
-| 0QF878981 | 2023-10 | price:distribution | -9.08 | -9.0068 | DIFF | -9.0068 | DIFF | 0.0732 |
-| 0QF880373 | 2022-03 | price:distribution | 3.25 | 4.1814 | DIFF | 4.1814 | DIFF | 0.9314 |
-| 0QF880505 | 2020-10 | price:distribution | -0.74 | -0.612 | DIFF | -0.612 | DIFF | 0.128 |
-| 0QF880505 | 2021-02 | price:distribution | 3.01 | 3.104 | DIFF | 3.104 | DIFF | 0.094 |
-| 0QF880505 | 2021-10 | price:distribution | 2.52 | 2.6146 | DIFF | 2.6146 | DIFF | 0.0946 |
-| 0QF880505 | 2022-01 | price:distribution | -1.29 | -1.3432 | DIFF | -1.3432 | DIFF | -0.0532 |
-| 0QF880505 | 2022-03 | price:distribution | 0.11 | 0.4016 | DIFF | 0.4016 | DIFF | 0.2916 |
-| 0QF880505 | 2024-03 | price:distribution | 3.67 | 4.0485 | DIFF | 4.0485 | DIFF | 0.3785 |
-| 0QF911558 | 2020-11 | price:split | 7.69 | 8.4405 | DIFF | 7.6587 | MATCH | -0.0313 |
-| 0QF911558 | 2020-12 | price:split | 3.36 | 4.1553 | DIFF | 3.4134 | DIFF | 0.0534 |
-| 0QF911558 | 2021-01 | price:split | 2.19 | 2.8523 | DIFF | 2.2164 | MATCH | 0.0264 |
-| 0QF911558 | 2021-03 | price:split | 6.84 | 11.1771 | DIFF | 6.93 | DIFF | 0.09 |
-| 0QF911558 | 2021-04 | price:split | 2.26 | -4.9002 | DIFF | 2.207 | DIFF | -0.053 |
-| 0QF911558 | 2021-05 | price:split | 2.89 | 8.0908 | DIFF | 2.9208 | MATCH | 0.0308 |
-| 0QF911558 | 2021-06 | price:split | -2.82 | -8.2665 | DIFF | -2.8342 | MATCH | -0.0142 |
-| 0QF911558 | 2021-07 | price:split | -0.43 | -1.8888 | DIFF | -0.4764 | MATCH | -0.0464 |
-| 0QF911558 | 2021-08 | price:split | 2.31 | -0.3905 | DIFF | 2.2893 | MATCH | -0.0207 |
-| 0QF911558 | 2021-09 | price:split | -2.95 | 0.2921 | DIFF | -2.8692 | DIFF | 0.0808 |
-| 0QF911558 | 2021-10 | price:split | 1.69 | -2.0851 | DIFF | 1.6247 | DIFF | -0.0653 |
-| 0QF911558 | 2021-11 | price:split | -2.75 | -5.3156 | DIFF | -2.7692 | MATCH | -0.0192 |
-| 0QF911558 | 2021-12 | price:split | 0.27 | 2.312 | DIFF | 0.2825 | MATCH | 0.0125 |
-| 0QF911558 | 2022-01 | price:split | -7.68 | -7.1236 | DIFF | -7.7054 | MATCH | -0.0254 |
-| 0QF911558 | 2022-04 | price:split | -10.37 | -1.6768 | DIFF | -10.3693 | MATCH | 0.0007 |
-| 0QF911558 | 2022-05 | price:split | -2.73 | -3.2084 | DIFF | -2.7657 | MATCH | -0.0357 |
-| 0QF911558 | 2022-06 | price:split | -16.23 | 8.6093 | DIFF | -16.2518 | MATCH | -0.0218 |
-| 0QF911558 | 2022-07 | price:split | 12.28 | 44.4153 | DIFF | 12.3251 | MATCH | 0.0451 |
-| 0QF925881 | 2023-12 | price:distribution | 0.8 | 1.801 | DIFF | 1.801 | DIFF | 1.001 |
-| B3S605610 | 2022-12 | price:split | -5.21 | -6.0093 | DIFF | -5.1415 | DIFF | 0.0685 |
-| B3S605610 | 2023-02 | price:split | -1.63 | 2.3206 | DIFF | -1.8263 | DIFF | -0.1963 |
-| B3S605610 | 2023-03 | price:split | -1.84 | -5.9594 | DIFF | -1.4599 | DIFF | 0.3801 |
-| B3S605610 | 2023-04 | price:split | 0.28 | 3.1643 | DIFF | 0.3221 | MATCH | 0.0421 |
-| B3S605610 | 2023-06 | price:split | 9.22 | 6.2433 | DIFF | 9.422 | DIFF | 0.202 |
-| B3S605610 | 2023-07 | price:split | 1.29 | 3.5785 | DIFF | 1.1394 | DIFF | -0.1506 |
-| B3S605610 | 2023-09 | price:split | -7.08 | 0.9701 | DIFF | -7.5113 | DIFF | -0.4313 |
-| B3S605610 | 2023-10 | price:split | 3.09 | -3.8756 | DIFF | 3.5361 | DIFF | 0.4461 |
-| B3S605610 | 2024-01 | price:split | 10.14 | 1.3747 | DIFF | 10.5415 | DIFF | 0.4015 |
-| B3S605610 | 2024-03 | price:split | 2.68 | 6.3224 | DIFF | 2.557 | DIFF | -0.123 |
-| B3S605610 | 2024-04 | price:split | -6.38 | -1.1991 | DIFF | -6.5806 | DIFF | -0.2006 |
-| B3S605610 | 2024-05 | price:split | 10.97 | 2.7914 | DIFF | 11.607 | DIFF | 0.637 |
-| B3S605610 | 2024-06 | price:split | 3.17 | -0.4463 | DIFF | 3.3275 | DIFF | 0.1575 |
-| B3S605610 | 2024-07 | price:split | -5.56 | -2.8826 | DIFF | -5.6202 | DIFF | -0.0602 |
-| B3S605610 | 2024-08 | price:split | 7.72 | 1.2549 | DIFF | 8.2305 | DIFF | 0.5105 |
-| B3S605610 | 2024-09 | price:split | -0.25 | -3.0145 | DIFF | -0.1378 | DIFF | 0.1122 |
-| B3S605610 | 2024-10 | price:split | 4.1 | -1.2453 | DIFF | 4.2651 | DIFF | 0.1651 |
-| B3S605610 | 2024-11 | price:split | 14.05 | 7.2106 | DIFF | 14.4609 | DIFF | 0.4109 |
-| B3S605610 | 2025-01 | price:split | 8.52 | 5.7396 | DIFF | 8.5698 | MATCH | 0.0498 |
-| B3S605610 | 2025-02 | price:split | 1.08 | 3.6074 | DIFF | 1.217 | DIFF | 0.137 |
-| B3S605610 | 2025-03 | price:split | -3.86 | -1.1056 | DIFF | -3.8995 | MATCH | -0.0395 |
-| B3S605610 | 2025-04 | price:split | 14.18 | -4.0307 | DIFF | 14.4797 | DIFF | 0.2997 |
-| B3S605610 | 2025-06 | price:split | 10.03 | 7.145 | DIFF | 10.0648 | MATCH | 0.0348 |
-| B3S605610 | 2025-07 | price:split | -11.04 | -2.9401 | DIFF | -11.0978 | DIFF | -0.0578 |
-| B3S605610 | 2025-08 | price:split | 4.81 | 7.339 | DIFF | 4.9699 | DIFF | 0.1599 |
-| B3S605610 | 2025-10 | price:split | -5.44 | -1.7346 | DIFF | -5.4471 | MATCH | -0.0071 |
-| B3S605610 | 2025-11 | price:split | -2.67 | 276.795 | DIFF | -2.515 | DIFF | 0.155 |
-| B3S728504 | 2023-01 | price:split | 5.5 | 4.4677 | DIFF | 5.5164 | MATCH | 0.0164 |
-| B3S728504 | 2023-08 | price:split | -1.55 | -1.194 | DIFF | -1.506 | MATCH | 0.044 |
-| B3S728504 | 2024-10 | price:split | -1.13 | 145.4343 | DIFF | -1.0671 | DIFF | 0.0629 |
-| B3S728506 | 2023-01 | price:split | 5.53 | 4.5015 | DIFF | 5.5434 | MATCH | 0.0134 |
-| B3S728506 | 2023-08 | price:split | -1.56 | -1.2084 | DIFF | -1.5161 | MATCH | 0.0439 |
-| B3S728506 | 2024-10 | price:split | -1.12 | 146.3785 | DIFF | -1.0616 | DIFF | 0.0584 |
-| B3S728793 | 2021-10 | price:split | 20.12 | 7.1908 | DIFF | 19.9111 | DIFF | -0.2089 |
-| B3S763288 | 2022-04 | price:split | -18.71 | -14.79 | DIFF | -18.7022 | MATCH | 0.0078 |
-| B3S763288 | 2022-06 | price:split | -5.86 | 30.9912 | DIFF | -5.8557 | MATCH | 0.0043 |
-| B3S763288 | 2022-07 | price:split | 10.65 | 45.2117 | DIFF | 10.6101 | MATCH | -0.0399 |
-| B3S777026 | 2022-04 | price:split | -2.58 | -0.769 | DIFF | -2.7325 | DIFF | -0.1525 |
-| B3S777026 | 2022-05 | price:split | -2.37 | -2.3115 | DIFF | -2.3761 | MATCH | -0.0061 |
-| B3S793726 | 2025-11 | flow_value | 2.22 | 12.5832 | DIFF | 2.9946 | DIFF | 0.7746 |
-| RGY004120 | 2025-12 | price:distribution | 1.65 | 11.2855 | DIFF |  | UNGRADABLE |  |
-| RGY005498 | 2025-12 | price:distribution | 1.64 | 11.2247 | DIFF |  | UNGRADABLE |  |
-| RGY005715 | 2025-12 | price:distribution | 1.64 | 11.185 | DIFF |  | UNGRADABLE |  |
-| RGY006999 | 2025-12 | price:distribution | 1.62 | 11.0976 | DIFF |  | UNGRADABLE |  |
+| acct#aaeb760c | 2021-12 | price:split | 5.52 | 6.2452 | DIFF | 5.5442 | MATCH | 0.0242 |
+| acct#aaeb760c | 2022-04 | price:split | -7.82 | -6.8315 | DIFF | -7.759 | DIFF | 0.061 |
+| acct#f6c79f45 | 2023-10 | price:distribution | -9.08 | -9.0068 | DIFF | -9.0068 | DIFF | 0.0732 |
+| acct#015306a0 | 2022-03 | price:distribution | 3.25 | 4.1814 | DIFF | 4.1814 | DIFF | 0.9314 |
+| acct#fa488a0b | 2020-10 | price:distribution | -0.74 | -0.612 | DIFF | -0.612 | DIFF | 0.128 |
+| acct#fa488a0b | 2021-02 | price:distribution | 3.01 | 3.104 | DIFF | 3.104 | DIFF | 0.094 |
+| acct#fa488a0b | 2021-10 | price:distribution | 2.52 | 2.6146 | DIFF | 2.6146 | DIFF | 0.0946 |
+| acct#fa488a0b | 2022-01 | price:distribution | -1.29 | -1.3432 | DIFF | -1.3432 | DIFF | -0.0532 |
+| acct#fa488a0b | 2022-03 | price:distribution | 0.11 | 0.4016 | DIFF | 0.4016 | DIFF | 0.2916 |
+| acct#fa488a0b | 2024-03 | price:distribution | 3.67 | 4.0485 | DIFF | 4.0485 | DIFF | 0.3785 |
+| acct#2d4385bf | 2020-11 | price:split | 7.69 | 8.4405 | DIFF | 7.6587 | MATCH | -0.0313 |
+| acct#2d4385bf | 2020-12 | price:split | 3.36 | 4.1553 | DIFF | 3.4134 | DIFF | 0.0534 |
+| acct#2d4385bf | 2021-01 | price:split | 2.19 | 2.8523 | DIFF | 2.2164 | MATCH | 0.0264 |
+| acct#2d4385bf | 2021-03 | price:split | 6.84 | 11.1771 | DIFF | 6.93 | DIFF | 0.09 |
+| acct#2d4385bf | 2021-04 | price:split | 2.26 | -4.9002 | DIFF | 2.207 | DIFF | -0.053 |
+| acct#2d4385bf | 2021-05 | price:split | 2.89 | 8.0908 | DIFF | 2.9208 | MATCH | 0.0308 |
+| acct#2d4385bf | 2021-06 | price:split | -2.82 | -8.2665 | DIFF | -2.8342 | MATCH | -0.0142 |
+| acct#2d4385bf | 2021-07 | price:split | -0.43 | -1.8888 | DIFF | -0.4764 | MATCH | -0.0464 |
+| acct#2d4385bf | 2021-08 | price:split | 2.31 | -0.3905 | DIFF | 2.2893 | MATCH | -0.0207 |
+| acct#2d4385bf | 2021-09 | price:split | -2.95 | 0.2921 | DIFF | -2.8692 | DIFF | 0.0808 |
+| acct#2d4385bf | 2021-10 | price:split | 1.69 | -2.0851 | DIFF | 1.6247 | DIFF | -0.0653 |
+| acct#2d4385bf | 2021-11 | price:split | -2.75 | -5.3156 | DIFF | -2.7692 | MATCH | -0.0192 |
+| acct#2d4385bf | 2021-12 | price:split | 0.27 | 2.312 | DIFF | 0.2825 | MATCH | 0.0125 |
+| acct#2d4385bf | 2022-01 | price:split | -7.68 | -7.1236 | DIFF | -7.7054 | MATCH | -0.0254 |
+| acct#2d4385bf | 2022-04 | price:split | -10.37 | -1.6768 | DIFF | -10.3693 | MATCH | 0.0007 |
+| acct#2d4385bf | 2022-05 | price:split | -2.73 | -3.2084 | DIFF | -2.7657 | MATCH | -0.0357 |
+| acct#2d4385bf | 2022-06 | price:split | -16.23 | 8.6093 | DIFF | -16.2518 | MATCH | -0.0218 |
+| acct#2d4385bf | 2022-07 | price:split | 12.28 | 44.4153 | DIFF | 12.3251 | MATCH | 0.0451 |
+| acct#afda5d61 | 2023-12 | price:distribution | 0.8 | 1.801 | DIFF | 1.801 | DIFF | 1.001 |
+| acct#f0b52456 | 2022-12 | price:split | -5.21 | -6.0093 | DIFF | -5.1415 | DIFF | 0.0685 |
+| acct#f0b52456 | 2023-02 | price:split | -1.63 | 2.3206 | DIFF | -1.8263 | DIFF | -0.1963 |
+| acct#f0b52456 | 2023-03 | price:split | -1.84 | -5.9594 | DIFF | -1.4599 | DIFF | 0.3801 |
+| acct#f0b52456 | 2023-04 | price:split | 0.28 | 3.1643 | DIFF | 0.3221 | MATCH | 0.0421 |
+| acct#f0b52456 | 2023-06 | price:split | 9.22 | 6.2433 | DIFF | 9.422 | DIFF | 0.202 |
+| acct#f0b52456 | 2023-07 | price:split | 1.29 | 3.5785 | DIFF | 1.1394 | DIFF | -0.1506 |
+| acct#f0b52456 | 2023-09 | price:split | -7.08 | 0.9701 | DIFF | -7.5113 | DIFF | -0.4313 |
+| acct#f0b52456 | 2023-10 | price:split | 3.09 | -3.8756 | DIFF | 3.5361 | DIFF | 0.4461 |
+| acct#f0b52456 | 2024-01 | price:split | 10.14 | 1.3747 | DIFF | 10.5415 | DIFF | 0.4015 |
+| acct#f0b52456 | 2024-03 | price:split | 2.68 | 6.3224 | DIFF | 2.557 | DIFF | -0.123 |
+| acct#f0b52456 | 2024-04 | price:split | -6.38 | -1.1991 | DIFF | -6.5806 | DIFF | -0.2006 |
+| acct#f0b52456 | 2024-05 | price:split | 10.97 | 2.7914 | DIFF | 11.607 | DIFF | 0.637 |
+| acct#f0b52456 | 2024-06 | price:split | 3.17 | -0.4463 | DIFF | 3.3275 | DIFF | 0.1575 |
+| acct#f0b52456 | 2024-07 | price:split | -5.56 | -2.8826 | DIFF | -5.6202 | DIFF | -0.0602 |
+| acct#f0b52456 | 2024-08 | price:split | 7.72 | 1.2549 | DIFF | 8.2305 | DIFF | 0.5105 |
+| acct#f0b52456 | 2024-09 | price:split | -0.25 | -3.0145 | DIFF | -0.1378 | DIFF | 0.1122 |
+| acct#f0b52456 | 2024-10 | price:split | 4.1 | -1.2453 | DIFF | 4.2651 | DIFF | 0.1651 |
+| acct#f0b52456 | 2024-11 | price:split | 14.05 | 7.2106 | DIFF | 14.4609 | DIFF | 0.4109 |
+| acct#f0b52456 | 2025-01 | price:split | 8.52 | 5.7396 | DIFF | 8.5698 | MATCH | 0.0498 |
+| acct#f0b52456 | 2025-02 | price:split | 1.08 | 3.6074 | DIFF | 1.217 | DIFF | 0.137 |
+| acct#f0b52456 | 2025-03 | price:split | -3.86 | -1.1056 | DIFF | -3.8995 | MATCH | -0.0395 |
+| acct#f0b52456 | 2025-04 | price:split | 14.18 | -4.0307 | DIFF | 14.4797 | DIFF | 0.2997 |
+| acct#f0b52456 | 2025-06 | price:split | 10.03 | 7.145 | DIFF | 10.0648 | MATCH | 0.0348 |
+| acct#f0b52456 | 2025-07 | price:split | -11.04 | -2.9401 | DIFF | -11.0978 | DIFF | -0.0578 |
+| acct#f0b52456 | 2025-08 | price:split | 4.81 | 7.339 | DIFF | 4.9699 | DIFF | 0.1599 |
+| acct#f0b52456 | 2025-10 | price:split | -5.44 | -1.7346 | DIFF | -5.4471 | MATCH | -0.0071 |
+| acct#f0b52456 | 2025-11 | price:split | -2.67 | 276.795 | DIFF | -2.515 | DIFF | 0.155 |
+| acct#79d02c2c | 2023-01 | price:split | 5.5 | 4.4677 | DIFF | 5.5164 | MATCH | 0.0164 |
+| acct#79d02c2c | 2023-08 | price:split | -1.55 | -1.194 | DIFF | -1.506 | MATCH | 0.044 |
+| acct#79d02c2c | 2024-10 | price:split | -1.13 | 145.4343 | DIFF | -1.0671 | DIFF | 0.0629 |
+| acct#4a890dd1 | 2023-01 | price:split | 5.53 | 4.5015 | DIFF | 5.5434 | MATCH | 0.0134 |
+| acct#4a890dd1 | 2023-08 | price:split | -1.56 | -1.2084 | DIFF | -1.5161 | MATCH | 0.0439 |
+| acct#4a890dd1 | 2024-10 | price:split | -1.12 | 146.3785 | DIFF | -1.0616 | DIFF | 0.0584 |
+| acct#c753e42f | 2021-10 | price:split | 20.12 | 7.1908 | DIFF | 19.9111 | DIFF | -0.2089 |
+| acct#dba683c4 | 2022-04 | price:split | -18.71 | -14.79 | DIFF | -18.7022 | MATCH | 0.0078 |
+| acct#dba683c4 | 2022-06 | price:split | -5.86 | 30.9912 | DIFF | -5.8557 | MATCH | 0.0043 |
+| acct#dba683c4 | 2022-07 | price:split | 10.65 | 45.2117 | DIFF | 10.6101 | MATCH | -0.0399 |
+| acct#eeab73e8 | 2022-04 | price:split | -2.58 | -0.769 | DIFF | -2.7325 | DIFF | -0.1525 |
+| acct#eeab73e8 | 2022-05 | price:split | -2.37 | -2.3115 | DIFF | -2.3761 | MATCH | -0.0061 |
+| acct#f78e8ecd | 2025-11 | flow_value | 2.22 | 12.5832 | DIFF | 2.9946 | DIFF | 0.7746 |
+| acct#a011b5f7 | 2025-12 | price:distribution | 1.65 | 11.2855 | DIFF |  | UNGRADABLE |  |
+| acct#7f62f16f | 2025-12 | price:distribution | 1.64 | 11.2247 | DIFF |  | UNGRADABLE |  |
+| acct#8148a2c4 | 2025-12 | price:distribution | 1.64 | 11.185 | DIFF |  | UNGRADABLE |  |
+| acct#cce36d1f | 2025-12 | price:distribution | 1.62 | 11.0976 | DIFF |  | UNGRADABLE |  |
 
 By AFTER verdict: DIFF 42, MATCH 27, UNGRADABLE 4.
 

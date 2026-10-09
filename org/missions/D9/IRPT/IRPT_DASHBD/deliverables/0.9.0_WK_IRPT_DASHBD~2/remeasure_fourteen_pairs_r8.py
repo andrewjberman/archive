@@ -32,7 +32,24 @@ thresholds = h.load_thresholds()
 table, keycols = ard.load_classification(src)
 trn_days = ard.partition_days(s3, src["bucket"], src["transactions_prefix"])
 bal_days = ard.partition_days(s3, src["bucket"], src["balance_prefix"])
-INT_ADJ = {("0027265115", "2026-06-25"): 4429.53}   # INTRA/FC/IN CREDIT 'MARGIN INT ADJ' (row W1-S20; batch 195 ruled RETURN)
+def _REAL(token):
+    """Resolve an acct# token to the real account id at run time from the private evidence dir (outside the repo)."""
+    import json as _json
+    import os as _os
+    d = _os.environ.get("IRPT_PRIVATE_EVIDENCE_DIR")
+    if not d:
+        raise SystemExit("REFUSE: IRPT_PRIVATE_EVIDENCE_DIR is not set; this historical script needs the private account map")
+    p = _os.path.join(d, "account_map_49financial.json")
+    if not _os.path.isfile(p):
+        raise SystemExit("REFUSE: account_map_49financial.json is absent from IRPT_PRIVATE_EVIDENCE_DIR")
+    with open(p, encoding="utf-8") as fh:
+        m = _json.load(fh)
+    if token not in m:
+        raise SystemExit("REFUSE: token %s is not in the account map" % token)
+    return m[token]
+
+
+INT_ADJ = {(_REAL("acct#89d0916a"), "2026-06-25"): 4429.53}   # INTRA/FC/IN CREDIT 'MARGIN INT ADJ' (row W1-S20; batch 195 ruled RETURN)
 
 r4 = json.loads((D1 / "TIEOUT_49F_BLACKDIAMOND_R4.json").read_text(encoding="utf-8"))
 by_acct = {}

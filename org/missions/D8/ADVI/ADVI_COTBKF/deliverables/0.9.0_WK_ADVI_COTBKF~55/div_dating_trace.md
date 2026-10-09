@@ -2,7 +2,7 @@
 
 Read-only. Rule: see the module docstring of commonwealth_div_dating_trace.py (committed before this run). Ex-date sources: (1) EXDATES_ADVI_COTBKF_20261009.csv (39 rows, 0 refused for ex after pay); (2) dell1's price store s3://opal-data-assets/yahoo/global/silver/price_history/ (32 CUSIP partitions listed). G = 26 days (largest pay - ex gap in source 1).
 
-## B3S728504 2023-05
+## acct#79d02c2c 2023-05
 
 - reported 0.10; r26 computed 0.141810 (MATCH); r28 computed 0.181286 (DIFF); regression_pp (r28 - r26) = 0.039475
 
@@ -23,7 +23,7 @@ Ex-dated month: NOT COMPUTED -- no source holds the ex-date of 808524102, 808524
 
 **Class: untraced:ex-date no source holds for 808524102,808524839 (checked: EXDATES_ADVI_COTBKF_20261009.csv 39 rows, dell1 store listing 32 CUSIPs, bound_pp 0.408287 >= regression_pp 0.039475)**
 
-## B3S728504 2023-06
+## acct#79d02c2c 2023-06
 
 - reported 4.81; r26 computed 4.834446 (MATCH); r28 computed 5.239873 (DIFF); regression_pp (r28 - r26) = 0.405427
 
@@ -43,7 +43,7 @@ Ex-dated month: NOT COMPUTED -- no source holds the ex-date of 808524102, 808524
 
 **Class: untraced:ex-date no source holds for 808524102,808524839 (checked: EXDATES_ADVI_COTBKF_20261009.csv 39 rows, dell1 store listing 32 CUSIPs, bound_pp 0.416539 >= regression_pp 0.405427)**
 
-## B3S728506 2023-05
+## acct#4a890dd1 2023-05
 
 - reported 0.11; r26 computed 0.149265 (MATCH); r28 computed 0.189425 (DIFF); regression_pp (r28 - r26) = 0.040160
 
@@ -64,7 +64,7 @@ Ex-dated month: NOT COMPUTED -- no source holds the ex-date of 808524102, 808524
 
 **Class: untraced:ex-date no source holds for 808524102,808524839 (checked: EXDATES_ADVI_COTBKF_20261009.csv 39 rows, dell1 store listing 32 CUSIPs, bound_pp 0.408040 >= regression_pp 0.040160)**
 
-## B3S728506 2023-06
+## acct#4a890dd1 2023-06
 
 - reported 4.86; r26 computed 4.894278 (MATCH); r28 computed 5.285287 (DIFF); regression_pp (r28 - r26) = 0.391010
 
