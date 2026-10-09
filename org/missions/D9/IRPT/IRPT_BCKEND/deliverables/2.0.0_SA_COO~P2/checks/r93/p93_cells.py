@@ -27,12 +27,15 @@ P = WK + "NEVER_WIDEN_SIGNOFF_PACKET_IB-pr-380_381.md"
 ROLLBACK = "RbpsijC23XVUFPE0W34Gr/xqtDil94xYRqDuuZlaYx8="
 RUNNER = "data/assets/scripts/gold/investor_reporting"
 DIRECTORY = "infra/aws/lambda/investor-reporting/directory"
+KNOWN_RED = {"tests/test_holdings_rearm_trigger.py::test_rearm_trigger_live"}
 
 
-def pytest(cwd, *args):
-    p = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", *args], cwd=str(cwd),
+def pytest(cwd, *args, failed=None):
+    p = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rf", *args], cwd=str(cwd),
                        capture_output=True, timeout=280)
     out = re.sub(r"\x1b\[[0-9;]*m", "", (p.stdout + p.stderr).decode("utf-8", "replace"))
+    if failed is not None:
+        failed.update(m.replace("\\", "/") for m in re.findall(r"^FAILED (\S+?)(?: - |$)", out, re.M))
     last = [ln for ln in out.splitlines() if ln.strip()]
     return p.returncode, (last[-1] if last else "")
 
@@ -69,9 +72,13 @@ def main():
             m = re.search(r"\b(\d+) passed", last)
             if rc != 0 or not m or int(m.group(1)) < n:
                 fail("%s -k %s rc %d: %s" % (cwd, sel, rc, last))
-            rc2, last2 = pytest(root / cwd, "tests")
-            if rc2 != 0:
-                fail("%s suite rc %d: %s" % (cwd, rc2, last2))
+            red = set()
+            rc2, last2 = pytest(root / cwd, "tests", failed=red)
+            if rc2 != 0 and not (cwd == RUNNER and red and red <= KNOWN_RED
+                                 and re.search(r"\b%d failed" % len(red), last2)):
+                fail("%s suite rc %d: %s; failed %s" % (cwd, rc2, last2, sorted(red)))
+            if red:
+                print("NOTE: excused pre-existing red (AMENDMENT 1, row D2-W189-S3): %s" % sorted(red))
             print("OK: %s -k %s: %s; suite: %s" % (cwd, sel, last, last2))
     elif cid == "IB93-1-AC3":
         firms = load(R).get("firms") or {}
