@@ -18,8 +18,12 @@
  *   3 SPANS PLACED: components/thesisSpans.ts (pure, no page imports) exports splitOnSpans(text, spans). It returns pieces
  *     [{ text, span }] whose texts join back to the sentence exactly, with each served span that occurs in the text (first occurrence,
  *     in order, no overlap) as its own piece marked span: true; a span not in the text is skipped (loaded through the real module).
- *   4 A FIGURE OPENS ITS PASSAGE: ThesisCards.tsx draws each span piece as a <button> marked data-figure-span, pointing at the
- *     sentence's passage through aria-controls, which moves the reader to that passage (scrollIntoView or focus).
+ *   4 A FIGURE OPENS ITS PASSAGE (AMENDED at the round-63 close walk, tmp/ui-walk/20261009T112329Z shot 008: the served
+ *     quoted_spans are phrases, not figures, so a per-span button left "EUR 2.9 billion" unpressable, and each inline-block button
+ *     broke its sentence onto a new line): ThesisCards.tsx draws the WHOLE sentence text inside ONE <button> marked
+ *     data-sentence-press, laid out inline (class `inline`, never `inline-block` or `block`), pointing at the sentence's passage
+ *     through aria-controls and moving the reader there (scrollIntoView or focus). The served spans stay inside it as
+ *     <span data-figure-span> (underlined), never as buttons.
  *   5 PLANTED.
  * Source read only; no network; writes nothing.
  */
@@ -76,12 +80,17 @@ const G = {
     if (t === null) return ['ThesisCards.tsx missing'];
     const f = [];
     if (!/splitOnSpans\s*\(/.test(t)) f.push('ThesisCards.tsx does not use splitOnSpans');
-    const btn = /<button\b[^>]*data-figure-span[\s\S]{0,600}?<\/button>|<button\b[\s\S]{0,300}?data-figure-span[\s\S]{0,600}?<\/button>/.exec(t);
-    if (!btn) f.push('no <button ... data-figure-span>');
+    const open = /<button\b(?:[^>]|=>)*?data-sentence-press(?:[^>]|=>)*>/.exec(t);
+    if (!open) f.push('no sentence-wide <button data-sentence-press>');
     else {
-      if (!/aria-controls=/.test(btn[0])) f.push('the figure button names no passage (aria-controls)');
-      if (!/scrollIntoView|\.focus\(/.test(t)) f.push('pressing a figure does not move to its passage (scrollIntoView / focus)');
+      if (!/aria-controls=/.test(open[0])) f.push('the sentence button names no passage (aria-controls)');
+      const cls = /className=(?:"([^"]*)"|\{`([^`]*)`\}|\{'([^']*)'\})/.exec(open[0]);
+      const c = cls ? (cls[1] || cls[2] || cls[3] || '') : '';
+      if (!/(^|\s)inline(\s|$)/.test(c) || /(^|\s)(inline-block|block|flex|inline-flex)(\s|$)/.test(c)) f.push(`the sentence button is not laid out inline (class "${c}")`);
+      if (!/scrollIntoView|\.focus\(/.test(t)) f.push('pressing the sentence does not move to its passage (scrollIntoView / focus)');
     }
+    if (/<button\b(?:[^>]|=>)*?data-figure-span/.test(t)) f.push('a served span is still its own <button> (it must be a <span data-figure-span> inside the sentence button)');
+    if (!/<span\b(?:[^>]|=>)*?data-figure-span/.test(t)) f.push('no <span data-figure-span> for the served spans');
     return f;
   },
 };
@@ -104,7 +113,10 @@ push('A FIGURE OPENS ITS PASSAGE', G.press(t));
   const p = [];
   const r62 = "{hasDescription && description && (\n<div>{description.description_verdict_state !== 'PASSED' && (<p>No company description is on file yet.</p>)}\n<Block heading={description.description_verdict_state === 'PASSED' ? description.label : 'Filed detail (does not describe the business)'} />\n</div>)}\n{primaryHas && primary && (";
   if (!G.absence(r62).length || !G.caption(r62).length) p.push('the round-62 form admitted');
-  const clean = "{hasDescription && description && (\n<div><Block heading={description.label} /></div>)}\n{primaryHas && primary && (\nsplitOnSpans(sentence.text, sentence.quoted_spans).map((piece) => piece.span ? (<button type=\"button\" data-figure-span=\"\" aria-controls={passageId} onClick={() => document.getElementById(passageId)?.scrollIntoView()}>{piece.text}</button>) : piece.text)";
+  const clean = "{hasDescription && description && (\n<div><Block heading={description.label} /></div>)}\n{primaryHas && primary && (\n<button type=\"button\" data-sentence-press=\"\" aria-controls={passageId} className=\"inline text-left underline-offset-2\" onClick={() => document.getElementById(passageId)?.scrollIntoView()}>{splitOnSpans(sentence.text, sentence.quoted_spans).map((piece) => piece.span ? (<span data-figure-span=\"\" className=\"underline\">{piece.text}</span>) : piece.text)}</button>";
+  const r63first = clean.replace(/<button type="button" data-sentence-press=""[^>]*>/, '<p>').replace('</button>', '</p>').replace('<span data-figure-span="" className="underline">{piece.text}</span>', '<button type="button" data-figure-span="" aria-controls={passageId} onClick={() => go()}>{piece.text}</button>');
+  if (!G.press(r63first).length) p.push('the first round-63 build (per-span buttons) admitted');
+  if (!G.press(clean.replace('className="inline text-left', 'className="inline-block text-left')).length) p.push('an inline-block sentence button admitted');
   if (G.absence(clean).length || G.caption(clean).length || G.press(clean).length) p.push('the clean form refused: ' + [...G.absence(clean), ...G.caption(clean), ...G.press(clean)].join('; '));
   const okSplit = (text, spans) => {
     const out = []; let at = 0;
