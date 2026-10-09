@@ -1,0 +1,94 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-e-3",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/prd/NFRA_GATSCP_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "06887a5857"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~4",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.round2.md",
+  "vintage_commit": "06887a5857",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-e-3.crossbox-delivery-on-origin.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/crossbox-call.py",
+   "kind": "script",
+   "commit_or_etag": "eb9a878187",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-4, not pushed; no deploy plane. line gated on origin; issue --order; send-pending; selftest harness gains a scratch bare origin.",
+   "artifact_covered_by": [
+    "GE3-AC1",
+    "GE3-AC2"
+   ]
+  },
+  {
+   "path_or_key": ".tools/tests/test_crossbox_deliver.py",
+   "kind": "script",
+   "commit_or_etag": "eb9a878187",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-4, not pushed. 16 cases in a throwaway repo with a bare origin; writes nothing outside its temp dir.",
+   "artifact_covered_by": [
+    "GE3-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GE3-AC1",
+   "criterion_verbatim": "python .tools/tests/test_crossbox_deliver.py -- the three behaviours above, each with its control arm, in a throwaway repo with a bare origin.",
+   "method": "command",
+   "invocation": "python .tools/tests/test_crossbox_deliver.py",
+   "output_evidence": "rc=0\nok   a0-open-writes-the-crossbox-file\nok   a1-line-refused-while-the-commit-is-local-only\nok   a2-line-admitted-after-the-push-to-origin\nok   b1-issue-to-a-Z-lane-serial-opens-a-file-to-sitez\nok   b2-issue-to-a-serial-with-no-lane-letter-is-local-and-opens-nothing\nok   b3-issue-with-to-device-overrides-the-lane-rule\nok   b4-issue-refuses-an-uncommitted-order\nok   c1-send-pending-refused-for-a-non-MSTR-serial-and-records-nothing\nok   c2-send-pending-refused-with-no-acting-serial\nok   c3-dry-run-sends-nothing-and-says-what-it-would-send\nok   c4-send-pending-sends-the-pushed-item-and-records-sent-with-a-UTC-time\nok   c5-send-pending-holds-the-local-only-item-and-records-nothing-for-it\nok   c6-a-second-run-does-not-resend-the-sent-item\nok   c7-the-session-serial-file-is-the-fallback-acting-serial\nok   a3-line-refused-when-only-the-body-commit-is-local\nok   a4-line-admitted-once-the-body-commit-is-pushed\nXBOX-DELIVER ok=True cases=16/16",
+   "denominator": "16 of 16 cases ok (a1/a2 refused-then-admitted, a3/a4 body-commit control; b1-b4 issue; c1-c7 send-pending)",
+   "status": "PASS",
+   "expect": "XBOX-DELIVER\\ ok=True"
+  },
+  {
+   "criterion_id": "GE3-AC2",
+   "criterion_verbatim": "python .tools/crossbox-call.py --selftest -- the tool's own selftest still runs; its last line must read ok=True.",
+   "method": "command",
+   "invocation": "python .tools/crossbox-call.py --selftest",
+   "output_evidence": "rc=0\nok   open-refuses-an-uncommitted-body\nok   open-refuses-this-box-as-the-target\nok   open-writes-the-file-with-state-OPEN\nok   line-refused-until-the-file-is-committed\nok   line-refused-while-the-commit-is-local-only\nok   line-carries-the-commit-and-no-substance\nok   status-reads-SENT-NOT-ACKED-with-its-age\nok   receive-before-the-pull-reads-PULL-FIRST\nok   a-tampered-line-with-the-id-altered-is-refused\nok   a-tampered-line-with-the-seat-altered-is-refused\nok   receive-lands-one-file-in-the-seats-watched-inbox\nok   receive-twice-delivers-once\nok   the-sending-box-cannot-ack\nok   ack-sets-ACKED-and-prints-the-reply-line\nok   acked-records-the-reply-on-the-sending-box\nok   one-side-closed-reads-HALF-CLOSED\nok   the-open-calls-close-reader-refuses-a-half-closed-call\nok   merge-folds-the-other-boxs-fields-in\nok   both-sides-recorded-reads-CLOSED-BOTH\nok   the-open-calls-close-reader-accepts-CLOSED-BOTH\nok   the-sending-box-reads-CLOSED-BOTH-after-the-merge\nok   an-unknown-key-in-a-file-is-refused\nCROSSBOX-SELFTEST cases=22/22 ok=True",
+   "denominator": "22 of 22 selftest cases ok (21 existing + 1 new: line-refused-while-the-commit-is-local-only)",
+   "status": "PASS",
+   "expect": "CROSSBOX\\-SELFTEST\\ cases="
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "line is run on the same crossbox file before and after the push to the bare origin (a1 vs a2), and on the body commit alone (a3 vs a4); send-pending is run under a non-MSTR serial (c1) vs an MSTR serial (c4).",
+   "expected": "a1 rc 3 'is not on origin yet', a2 rc 0; a3 rc 3, a4 rc 0; c1 rc 3 nothing recorded, c4 sent recorded",
+   "observed": "all 16 cases ok in the committed tree",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 run three times (before commit, after commit, final from committed tree)",
+   "observed": "ok=True cases=16/16 each time",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the real agent bus and the real org/devices/crossbox/",
+   "reason": "Order bounds: nothing is sent on the real bus and no real crossbox file is opened; every exercise runs in the temp repo with a fake CROSSBOX_SEND_CMD."
+  },
+  {
+   "item": "the default send command (agentbus-sqs.sh send)",
+   "reason": "Not exercised; the parse of its 'MessageId=' stdout is implemented from its source (agentbus-sqs.sh :352) and the test uses a fake that prints the same line."
+  }
+ ],
+ "surprises": [],
+ "session_log": "2026-10-09 ~10:2xZ slot ~4. Read crossbox-call.py and devices.py; built line origin gate, issue, send-pending; the existing selftest needed a scratch bare origin because line now requires origin (22/22). Wrote the 16-case test; two cases failed at first on my own test sequence (an uncommitted recorded sent), fixed in the test. No premise failed.",
+ "compiler_tools": [
+  {
+   "tool": "crossbox-call.py issue / send-pending / line",
+   "invocation": "python .tools/crossbox-call.py --root <tmp repo> issue --order <path> | send-pending [--dry-run] | line --id <XB id>",
+   "result": "driven only inside the throwaway repo by test_crossbox_deliver.py: 16 of 16 cases ok"
+  }
+ ]
+}
