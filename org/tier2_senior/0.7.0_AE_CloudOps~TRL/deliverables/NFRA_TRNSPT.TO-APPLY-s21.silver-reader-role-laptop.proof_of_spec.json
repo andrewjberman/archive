@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_TRNSPT.TO-APPLY-s21.silver-reader-role-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TRL/task_orders/NFRA_TRNSPT.TO-APPLY-s21.silver-reader-role-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "124e65440e25c6dfca3f0952f340428ca130b3c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R21.md",
+    "vintage_commit": "68750c9d953abfd943094345560ba0963e41de95",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TRL/task_orders/NFRA_TRNSPT.TO-APPLY-s21.silver-reader-role-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TRL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T1339Z_nfra-trnspt-s21-silver-reader-laptop-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "e7ce5f27004869e1163f7bbdca941eb4a57f8810",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ledger CLOSED, 3 of 3 legs proven; carries the step-0 before-image, the plan graded from show -json, the predicted after-image written pre-apply, and the measured after-image",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "arn:aws:iam::313476888478:role/teams-global-transcripts-silver-reader-role",
+      "kind": "aws_resource",
+      "commit_or_etag": "AROA-live",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "iam get-role returned the role name; list-attached-role-policies returned exactly [teams-global-transcripts-silver-reader-policy]; get-policy-version v1 matches the plan after byte for byte; targeted re-plan -detailed-exitcode rc=0",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "arn:aws:kms:us-east-1:313476888478:key/44a2284f-1e14-4ea1-b6cb-f6121bfde35a",
+      "kind": "aws_resource",
+      "commit_or_etag": "policy-5-statements",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "kms get-key-policy before 4 statements / after 5; ADDED SilverReaderDecryptOnly; REMOVED none; 0 of 33 before leaf-values gone after; 0 of 4 shared statements semantically drifted",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "aws iam get-role --role-name teams-global-transcripts-silver-reader-role --query \"Role.RoleName\" expect \"teams-global-transcripts-silver-reader-role\"",
+      "method": "live_read",
+      "invocation": "aws iam get-role --role-name teams-global-transcripts-silver-reader-role --query \"Role.RoleName\"",
+      "expect": "\"teams-global-transcripts-silver-reader-role\"",
+      "output_evidence": "\"teams-global-transcripts-silver-reader-role\". PLAN LINE: 3 to add, 1 to change, 0 to destroy, graded from show -json as 4 non-no-op over a denominator of 6 resource_changes (creates aws_iam_role.silver_reader, aws_iam_policy.silver_reader, aws_iam_role_policy_attachment.silver_reader; ONE in-place update of aws_kms_key.transcripts whose only changed attribute is policy; aws_iam_role.second_reader and aws_s3_bucket.transcripts no-op; zero changes from the four Lambda files). KEY DIFF: 4 to 5 statements, ADDED SilverReaderDecryptOnly {Allow, Principal arn:aws:iam::313476888478:role/teams-global-transcripts-silver-reader-role, Action [kms:Decrypt,kms:DescribeKey], Resource *, Condition StringEquals kms:ViaService s3.us-east-1.amazonaws.com}, REMOVED none, 0 of 33 before leaf-values absent after, 0 of 4 shared statements semantically drifted (the 3 byte differences all resolved to Principal.AWS array reordering by KMS, identical membership), DellAgentUsersGenerateDataKey survives with both conditions intact. THREE PROOF STATUSES through the role: silver monday_meeting 200 OK, Teams bronze AccessDenied, research_meeting silver AccessDenied. LEDGER: org/critical_paths/change_management/20261009T1339Z_nfra-trnspt-s21-silver-reader-laptop-20261009_deploy_completion.md.",
+      "denominator": "6 resource_changes in the plan (4 non-no-op, 2 no-op); 4 key-policy statements before and 5 after over 5 distinct Sids; 33 leaf values before and 35 after; 3 of 3 proof reads; 5 Teams silver tables at listing time",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "existence": {
+      "description": "The two AccessDenied proof reads must be facts about the role's policy, not about absent objects: the same three keys were re-read in a SEPARATE arm with the assumed session unset, as the laptop identity (a full key user). A failed retrieval returns a value, and a missing object and a denied object read identically on S3.",
+      "expected_landed": "all three keys exist with a full grant while the role refuses two of them",
+      "expected_not_landed": "a key that does not exist would also return AccessDenied through the role, making the denial uninterpretable",
+      "observed": "MM-20260608-0855.parquet ContentLength 29000; ICA-20260609-0958.vtt ContentLength 52063; RT-20260407-1027.parquet ContentLength 41922 -- 3 of 3 exist",
+      "status": "PASS"
+    },
+    "comparator": {
+      "description": "The key-policy comparator had to distinguish KMS array reordering from a real one-value change, because a byte comparator reported 3 of 4 shared statements changed. A PLANTED MUTANT was run through the same comparator: DellAgentUsersGenerateDataKey's kms:ViaService set to sqs.us-east-1.amazonaws.com.",
+      "expected_landed": "the comparator reports drift on the planted mutant",
+      "expected_not_landed": "a comparator blind to the mutant would have let a real narrowing of the Dell GenerateDataKey condition pass as reordering",
+      "observed": "planted mutation detected as drift = True; the three real differences are Principal.AWS array ORDER with identical membership",
+      "status": "PASS"
+    },
+    "instrument": {
+      "description": "The pre-apply NoSuchEntity on the silver reader role had to be a fact about the role rather than about iam get-role.",
+      "expected_landed": "the same instrument returns a name for a role that exists",
+      "expected_not_landed": "an instrument failing on every input would make the absence unreadable",
+      "observed": "in one pre-apply sweep, teams-global-transcripts-second-reader-role returned its name and teams-global-transcripts-silver-reader-role returned NoSuchEntity",
+      "status": "PASS"
+    },
+    "pin": {
+      "description": "The order requires the apply pin to carry BOTH 365a08577e and dc5032abde.",
+      "expected_landed": "both read YES as ancestors of the apply pin 32d09cc6ad06beb379ddd344f0f551dcced8077b, with the reverse direction read as a negative control",
+      "expected_not_landed": "a merge-base check that answers YES in both directions is the instrument, not the world",
+      "observed": "365a08577e in HEAD YES; dc5032abde in HEAD YES; 124e65440e in HEAD YES; negative control HEAD in 365a08577e NO",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/NEVER_WIDEN_NFRA_TRNSPT_COO_HALF_SILVER_READER_20261009.md@23251db022 (blob 74b8779dba) -- read in full before the act",
+    "cto_half": "org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_FWD5_SILVER_READER_CTO_HALF.md@91e314b74e -- verdict GIVEN under conditions 1 to 3; this act took the SEQUENTIAL branch (a18 already landed at 09:55Z), so the signed key diff is the one statement"
+  },
+  "risk_class": "WORLD",
+  "rollback": "kms put-key-policy with the before-image recorded verbatim in the ledger's step 0 restores the four-statement policy; that is an update, not a delete. Destroying the three creates is Andrew's word. The targeted re-plan reads rc=0 at the state this instance grades.",
+  "scope": "Three IAM creates (role, policy, attachment) with names read from data/transcripts/scripts/teams/NAMES.json silver_reader through lib/opal_naming.py name(), and ONE added transcripts key-policy statement. No other root, Lambda or principal; no delete; no transcript content in any file or message. No transcripts-v* tag taken: the first tag on this root is cell TR-g-21, placed by the ISSUER after the drain, and git tag -l \"transcripts-v*\" still reads 0.",
+  "declared_exclusions": [
+    {
+      "item": "the cloudops-dell2-agent-user assumer arm of the step-2 proof",
+      "reason": "NOT EXERCISED. This device carries exactly one AWS profile ([default] = arn:aws:iam::313476888478:user/Andrew_Berman) and holds no Dell agent-user credential; Rule 26 keeps the apply on the device that owns the work rather than ferrying a credential to it. ABSENT is not EXERCISED-AGAINST: nothing here says a dell2-assumed read would fail. What IS measured is the role's live trust document -- a POLICY READ, not an exercise -- which admits Andrew_Berman and BOTH Dell agent users, so the arm is scheduling and not a permission gap. Owner: 2.0.0_SA_COO~T2 with a dell2-side seat."
+    },
+    {
+      "item": "FWD-5's own grade",
+      "reason": "The CTO half's condition 2 reserves it to Andrew's own read through the role. This instance proves the role and the key statement work; it does not and cannot make that grade."
+    },
+    {
+      "item": "comp-iam modelling of teams-global-transcripts-silver-reader-role",
+      "reason": "comp-iam role printed 'No role matching' because the role NAME is produced by jsondecode(file(NAMES.json)) rather than typed in the .tf -- the tool's static-parse limit, recorded rather than papered over. comp-iam also models (action) and never (action, resource), so the plan's resolved after values plus the three live reads are the stronger evidence and are what this instance rests on."
+    },
+    {
+      "item": "the crossbox seat gate's STOP verdict",
+      "reason": "It was WARN-mode, not an ENFORCE refusal, and both limbs were read rather than waved through: the OPEN-CALL limb matched the token infra/aws/terraform/transcripts inside another project's investigation document (XB-20261009T093642Z-9ec5 is an ORDER to dell1's ~CT1 about NFRA_CTLPLN rows), and the OPEN-DEPLOY limb matched a18's entry plus this entry's own open row."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/critical_paths/change_management/20261009T1339Z_nfra-trnspt-s21-silver-reader-laptop-20261009_deploy_completion.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-adversary",
+      "invocation": "comp-adversary compose org/tier2_senior/0.7.0_AE_CloudOps~TRL/task_orders/NFRA_TRNSPT.TO-APPLY-s21.silver-reader-role-laptop.md --max-neighbors 6 --digest-budget 6",
+      "result": "4 of 4 cited commits VERIFIED; 1 of 3 cited paths flagged MOVED-SINCE-AUTHORING (NFRA_TRNSPT_DECOMP_R21.md changed 09:07:16Z, after the order's 09:00:11Z vintage) -- read it at HEAD: AMENDMENT 1's TR-a-21 row matches this order and AMENDMENT 2 (13:0xZ) concerns TR-d-20 only; dc5032abde flagged as a hex run COMMIT_RE did not parse, and it was verified by hand as an ancestor of the apply pin"
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam role teams-global-transcripts-silver-reader-role",
+      "result": "No role matching -- the name comes from jsondecode(file(NAMES.json)) and is not a literal in the .tf; recorded as an instrument limit in declared_exclusions, not as an absence of grant"
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "DECLARED-NOT-APPLICABLE per the order's preflight -- an identity grant with no schedule",
+      "result": "not run; declared"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-rail denials answered with the printed RUN NEXT; two reads re-run under an audited '# rail-checked:' marker (the proof OBJECT-KEY listing and the live assume-role access proof, neither of which a comp-tool exercises)",
+      "result": "2 denials, both resolved; no comp-tool substitutes for a live assume-role read path"
+    }
+  ]
+}

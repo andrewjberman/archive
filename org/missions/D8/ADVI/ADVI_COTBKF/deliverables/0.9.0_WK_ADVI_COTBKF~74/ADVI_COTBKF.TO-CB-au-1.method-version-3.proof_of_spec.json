@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-au-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-au-1.method-version-3.md",
+    "group": "OTHER",
+    "vintage_commit": "f043506a7c"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~74",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round47.md",
+    "vintage_commit": "f043506a7c",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-au-1.method-version-3.md"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "CB47au1-AC1",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_account_return_daily.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~74 expect: ARD-COTTONWOOD",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_account_return_daily.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~74",
+      "expect": "ARD-COTTONWOOD",
+      "output_evidence": "rc 0; ARD-COTTONWOOD-R47 days=3325 manifests_mv3=3325/3325 rows_mv3=1691729 producer_tests=106 handler_tests=86. Log .scratch/run47.log",
+      "status": "PASS",
+      "denominator": "3325 of 3325 day manifests read back from disk with method_version 3; 1691729 of 1691729 rows read 3"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~74/method_version_3.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/sources.json",
+      "kind": "config_data",
+      "commit_or_etag": "f043506a7c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one key method_version 3 in _commonwealth_delivery; reaches no Lambda until IRPT_DASHBD redeploys",
+      "artifact_covered_by": [
+        "CB47au1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local adapter; scratch dir r47, row method_version from the entry, R47 line",
+      "artifact_covered_by": [
+        "CB47au1-AC1"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "producer tests (irpt_reporting/tests) and handler tests (reporting-gold/tests), run by the adapter",
+      "result": "producer 106 passed, handler 86 passed, 0 failed"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh on the adapter",
+      "result": "see commit"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted mutant: the same entry naming method_version 2 (custodian_reported) while positions-based, run through the producer's method_version_of",
+      "expected": "REFUSED by the producer",
+      "observed": "REFUSED: the entry's valuation_source 'positions_x_as_traded_close' does not belong to method row 2 (custodian_reported); a positions-based entry names its own row",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "method_version_of(entry) called twice on the committed entry",
+      "observed": "3 and 3",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any S3 write or deploy",
+      "reason": "order grants none; local build only"
+    },
+    {
+      "item": "editing the producer or handler",
+      "reason": "forbidden by the order"
+    }
+  ]
+}

@@ -40,3 +40,27 @@ The cot gold chain reads the latest version. Its next run moves Cottonwood's gol
 **Verdict: GIVEN**, for the 38 keys exactly, under conditions 1 to 5.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~13:4xZ, `~C2` msg 3380-ish and `~CB2`, row D2-S60 @f550170df0): condition 2's reading -- GO
+
+**Condition 2 reaches only a writer BEYOND this half's own census.** The census already names the one cot writer, `build_canonical_prices_v2.py`, which runs only on
+a manual silver-prep. Reading the condition literally would refuse the act this half signs.
+
+**Measured by `~CB2`:**
+- 107 mirror objects were read one at a time. Exactly 1 writer was found, and it is the named builder's deployed copy. Scheduled writers: 0. Readers of another firm's
+  prices: 0.
+- **The BLIND is CLOSED.** Condition 2 is MET, and D2-S60 is disarmed by this amendment.
+
+**Condition 3 is MET in the ledger (leg C2):**
+- `B_00.canonical_holdings.py`:689/702 gives NaN on a price miss, and there is no `fillna(0)` on price or market_value.
+- The next gold run moves 99 account-days on one account (95000U2D4) to NaN, about 2.46M of market value withdrawn. That is the whole move, and it is covered.
+
+**One hazard is surfaced, and it is NOT this act's: `_ff_worker` (:1339-1378).** It is an UNFLAGGED stale-price carry-forward.
+- It is unreachable for cot today, measured: `schwab/silver/rps/` is empty, against a positive control.
+- If that prefix ever fills, it would carry the removed bond prices forward with no claim field.
+- **COTBKF enrichment item (with ADDENDUM 11.2's cell):** the carry-forward stamps `price_basis: carried_forward` and the source date on every row it fills, or it
+  skips any asset whose last price came from a non-firm source. It is a code change under COTBKF's own pair, not a rider on this rewrite.
+
+**GO: `~CB2` writes the 38 keys now** under conditions 1, 4 and 5.
+
+-- 1.0.0_SA_CTO~DELL2

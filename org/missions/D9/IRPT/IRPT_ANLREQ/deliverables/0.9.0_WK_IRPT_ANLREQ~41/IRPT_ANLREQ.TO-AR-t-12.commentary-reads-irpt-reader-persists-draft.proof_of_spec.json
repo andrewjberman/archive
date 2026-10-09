@@ -131,11 +131,12 @@
     {
       "path_or_key": "infra/aws/terraform/investor-reporting/export/commentary_draft_store.tf",
       "kind": "terraform",
-      "commit_or_etag": "589aee38f0",
+      "commit_or_etag": "ca8a9c46f8",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "DESIRED, NOT APPLIED: no AWS call, plan or apply in this order (WORLD by path floor, LOCAL in act). Names are lib/opal_naming.py name() output.",
       "artifact_covered_by": [
-        "AR13-t-AC1"
+        "AR13-t-AC1",
+        "AR13-t-AC2"
       ]
     },
     {
@@ -177,6 +178,16 @@
       "artifact_covered_by": [
         "AR12-t-AC1"
       ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_commentary_draft_store_tf.py",
+      "kind": "test",
+      "commit_or_etag": "ca8a9c46f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only; parses the .tf as text, no AWS or terraform.",
+      "artifact_covered_by": [
+        "AR13-t-AC2"
+      ]
     }
   ],
   "acceptance": [
@@ -199,6 +210,26 @@
       "denominator": "10 of 10 tests in reports/tests/test_commentary_draft_store.py passed, including the four named (test_other_service_subject_refused, test_other_family_refused, test_second_put_same_request_refused, test_body_tenant_ignored), test_live_retained_put_admits_the_named_writer and test_package_reader_reads_only_the_draft_family; the whole reports/tests directory 151 of 151",
       "status": "PASS",
       "expect": "AR1-T13-OK"
+    },
+    {
+      "criterion_id": "AR13-t-AC2",
+      "criterion_verbatim": "AR13-t-AC2 -- the draft store's log group is declared once (owned by the yang-lambda module via log_retention_days = 14) and the module carries the retention.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R1_CHECKS/ar1_t2_checks.py t13lg",
+      "output_evidence": "AR1-T13LG-OK 2 passed in 0.13s (rc=0), at code commit ca8a9c46f8",
+      "denominator": "2 of 2 tests in reports/tests/test_commentary_draft_store_tf.py passed (test_log_group_declared_once, test_module_carries_retention); AR1-T13-OK 10 passed beside it; negative control: with the old aws_cloudwatch_log_group resource restored test_log_group_declared_once FAILED (1 failed, 1 passed), then reverted",
+      "status": "PASS",
+      "expect": "AR1-T13LG-OK"
+    },
+    {
+      "criterion_id": "AR13-t-AC3",
+      "criterion_verbatim": "AR13-t-AC3 -- python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R1_CHECKS/ar1_t2_checks.py t13b expects AR1-T13B-OK (draft store packaging closure builds).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R1_CHECKS/ar1_t2_checks.py t13b",
+      "output_evidence": "AR1-T13B-OK BUILD_ONLY: /tmp/lambda-artifact-irpt-commentary-draft-store-lambda.zip sha256=xyROb11eaQHbVx7KqF7lQAauPL2VOPKv7v8t9QqXJc8= key=investor-reporting/irpt-commentary-draft-store-lambda.zip (rc=0), pinned at map commit 1dbd639660. Direct run BUILD_ONLY=1 BAU_PARITY_SKIP=1 build-and-upload.sh investor-reporting irpt-commentary-draft-store-lambda: rc=0, 0 'not found', 1 function built, nothing uploaded. AMENDMENT 8 closure line: 'MEASURED (issuer, AST over the source_dir): the draft store's local import closure is {commentary_draft_store, composition, repository, retention}, all declared; none of the seven is in it. RULING: build with BAU_PARITY_SKIP=1, the script's own sanctioned override'. The seven unregistered siblings stay on row W41-S17.",
+      "denominator": "1 of 1 function built; 0 'not found' of 12 staged_from members",
+      "status": "PASS",
+      "expect": "AR1-T13B-OK"
     }
   ],
   "controls": {

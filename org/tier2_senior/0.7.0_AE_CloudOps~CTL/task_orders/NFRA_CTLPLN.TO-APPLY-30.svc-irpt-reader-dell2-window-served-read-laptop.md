@@ -4,9 +4,19 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>staged</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
+
+  <closure>
+    COMPLETE (issuer, ~14:0xZ). CTO yes msg 107976. ADD put 13:37:33-13:37:36Z by 0.7.0_AE_CloudOps~CTL -- AFTER dell2 G2's own window
+    13:05:57-13:35:57Z had already closed with NO read (msg 107978), so the access was never used. REMOVE put 13:45:37-13:45:41Z on G2's
+    "remove at once"; read back SET-EQUAL to BEFORE, dell2/dell1 explicitDeny. Issuer live poll: dell2 on the policy first seen 13:38:02Z,
+    gone 13:46:07Z. Ledger closed (@d7e3566b1d). A retry is a new GO, ADD first, the 30 minutes run from W1.
+    RETRY (AMENDMENT 1) COMPLETE (issuer, ~14:5xZ): ADD 14:19:47Z, G2 read once ~14:26:12Z and called R DONE 14:26:19Z, REMOVE 14:35:05Z,
+    read back SET-EQUAL to BEFORE, dell2/dell1 explicitDeny. Issuer live poll: first seen 14:20:12Z, gone 14:35:36Z. Ledgers closed
+    (@045091bab0).
+  </closure>
 
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
@@ -17,6 +27,22 @@
 </decomp_ref>
 
 
+
+  <amendment>
+    AMENDMENT 1 (issuer, 2026-10-09 ~14:1xZ) -- REOPENED for ONE RETRY of the same ledger irpt-ycdgen-served-read-20261009, under the same
+    CTO consent (msg 107976) and the dell2 CTO half @da885deef2. dell2 2.0.0_SA_COO~G2 (relay 0.0.0_AB_MSTR msg 107988): a served read of
+    REQ-5e4149d2. ADD FIRST, on the GO: start from live == BEFORE (set rule), put the signed ADD, read back, simulate; send the put time to
+    me and to dell2 via 0.0.0_AB_MSTR at once (G2 takes W1 on it). REMOVE at G2's "R done", OR 30 minutes after the ADD put WITHOUT waiting
+    -- this lane holds the clock itself. The first pair (13:37Z / 13:45Z) stays closed as recorded. A new NEVER-2 entry for the retry.
+  </amendment>
+
+  <amendment>
+    AMENDMENT 2 (issuer, 2026-10-09 ~15:3xZ) -- STAGED for a THIRD use of the same ledger irpt-ycdgen-served-read-20261009, same CTO consent
+    (msg 107976) and dell2 CTO half @da885deef2 (dell2 2.0.0_SA_COO~G2, relay 0.0.0_AB_MSTR msg 108023). DO NOT ADD on this text: the ADD waits
+    for the issuer's GO, which follows G2's "ADD now" (sent when dell2 0.7.0_AE_CloudOps~DELL2 reports R2 PASS on IRPT_ANLREQ.TO-APPLY-Y1 rev 4).
+    On the GO: start from live == BEFORE, put the signed ADD, read back, simulate, send the put time to me and to dell2 via 0.0.0_AB_MSTR at
+    once. REMOVE at G2's "R done" or ADD+30m WITHOUT waiting, this lane's own clock. A new NEVER-2 entry for this use.
+  </amendment>
 
   <objective>
     LEG ADD: set the resource policy of `arn:aws:secretsmanager:us-east-1:313476888478:secret:irpt/svc-irpt-analysis/password-rfHf9l` to

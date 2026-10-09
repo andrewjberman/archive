@@ -1,13 +1,15 @@
 """MDPF_STRATID R1 ledger L4 read (FWD-1): the first SCHEDULED mdpf-gold-lambda run after D2.
 
-Usage: python l4_read.py <pre_dir> <post_dir>
+Usage: python l4_read.py <pre_dir> <post_dir> [<ctl_pre_dir> <ctl_post_dir>]
   Each dir holds 12 files named <scope>__<view>.json, scope in global/49financial/inflection/cottonwood,
   view in aggregate-aua-timeseries/category-views/aum-metrics. pre = the 2026-10-07 run-date objects
   (version ids in PREFIRE_SNAPSHOT_20261009.md); post = the run date the fire writes.
 
 Checks (pair NEVER_WIDEN_PAIR_R1_GLOBAL_PFDE_FOLD.md sections 4-6, CTO~DELL1 msg 1575):
   A  per-firm history: every per-date figure on every date pre carries is equal in post, ignoring the two
-     admitted keys. Any moved figure prints STOP.
+     admitted keys. With a control pair (the previous day's transition, both files pre-D2; CTO ruling
+     CTO_RULING_STRATID_L4_PERFIRM_PRIOR_FRONTIER_RESTATEMENT_20261009.md), a move on the prior frontier date whose key family
+     the control also moves is the producer's baseline restatement and is ADMITTED; any other move prints STOP.
   B  per-firm admitted keys: sma_additive_aua all None, sma_additive_withheld == [].
   C  Global: SMA > ETF Strategies > PFDE == Cottonwood served PFDE on the post date; sma_additive_aua on that
      date == it (overlap 0) or PFDE is named in sma_additive_withheld (overlap unmeasured branch).
@@ -15,6 +17,7 @@ Checks (pair NEVER_WIDEN_PAIR_R1_GLOBAL_PFDE_FOLD.md sections 4-6, CTO~DELL1 msg
 """
 import json
 import os
+import re
 import sys
 
 FIRMS = ("49financial", "inflection", "cottonwood")
@@ -52,6 +55,10 @@ def history_diffs(pre, post):
     return diffs
 
 
+def family(key):
+    return re.sub(r"^by_model\.[^.]+\.", "by_model.*.", key)
+
+
 def find_member(node, member_id, path=()):
     if isinstance(node, dict):
         if node.get("member_id") == member_id:
@@ -63,14 +70,23 @@ def find_member(node, member_id, path=()):
             yield from find_member(x, member_id, path)
 
 
-def main(pre_dir, post_dir):
+def main(pre_dir, post_dir, ctl_pre=None, ctl_post=None):
     ok = True
     for f in FIRMS:
-        d = history_diffs(load(pre_dir, f, "aggregate-aua-timeseries"), load(post_dir, f, "aggregate-aua-timeseries"))
-        print("A %s history: %d moved figure(s)%s" % (f, len(d), " -- STOP" if d else ""))
-        for x in d[:10]:
+        pre = load(pre_dir, f, "aggregate-aua-timeseries")
+        d = history_diffs(pre, load(post_dir, f, "aggregate-aua-timeseries"))
+        admitted, stop = [], d
+        if ctl_pre and ctl_post:
+            ctl_fams = {family(x[0]) for x in history_diffs(load(ctl_pre, f, "aggregate-aua-timeseries"),
+                                                           load(ctl_post, f, "aggregate-aua-timeseries"))}
+            frontier = pre["dates"][-1]
+            admitted = [x for x in d if x[1] == frontier and family(x[0]) in ctl_fams]
+            stop = [x for x in d if x not in admitted]
+        print("A %s history: %d moved, %d admitted as baseline restatement, %d STOP%s"
+              % (f, len(d), len(admitted), len(stop), " -- STOP" if stop else ""))
+        for x in stop[:10]:
             print("    ", x)
-        ok &= not d
+        ok &= not stop
         p = load(post_dir, f, "aggregate-aua-timeseries")
         b = all(v is None for v in (p.get("sma_additive_aua") or [0])) and p.get("sma_additive_withheld") == []
         print("B %s admitted keys: %s" % (f, "OK" if b else "FAIL (sma_additive_aua=%r..., withheld=%r)"
@@ -114,4 +130,4 @@ def main(pre_dir, post_dir):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1], sys.argv[2]))
+    sys.exit(main(*sys.argv[1:5]))

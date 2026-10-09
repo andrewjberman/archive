@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-am-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-am-1.ff-worker-carry-claim.md",
+    "group": "OTHER",
+    "vintage_commit": "4f15fc23f7"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~67",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round39.md",
+    "vintage_commit": "4f15fc23f7",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-am-1.ff-worker-carry-claim.md"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "CB39am1-AC1",
+      "criterion_verbatim": "python -m pytest data/cot/scripts/gold/tests/test_b00_ff_carry_claim.py -q expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest data/cot/scripts/gold/tests/test_b00_ff_carry_claim.py -q",
+      "expect": "passed",
+      "output_evidence": "rc 0; 3 passed in 1.87s. Test committed alone at f8b656af51 (2 failed, 1 passed at base: KeyError price_basis). Full gold tests dir: 31 passed.",
+      "status": "PASS",
+      "denominator": "3 of 3 tests in the file pass; 31 of 31 in data/cot/scripts/gold/tests"
+    },
+    {
+      "criterion_id": "CB39am1-AC2",
+      "criterion_verbatim": "JUDGMENT: change confined to _ff_worker; firm label set derived not typed; no carried price escapes the claim",
+      "method": "command",
+      "invocation": "git diff f8b656af51 HEAD -- data/cot/scripts/gold/B_00.canonical_holdings.py",
+      "output_evidence": "diff is confined to the body of _ff_worker (+25/-1 lines); own-firm key read via opal_naming.lookup(<tree token from path>); no bd_ token match anywhere.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion, oracle is 3.0.0_SA_CVO at L9",
+      "denominator": "N/A -- judgment",
+      "judgment": true
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-am-1.ff-worker-carry-claim.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/cot/scripts/gold/B_00.canonical_holdings.py",
+      "kind": "script",
+      "commit_or_etag": "a46b8507d7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code change only, no deploy by order",
+      "artifact_covered_by": [
+        "CB39am1-AC1",
+        "CB39am1-AC2"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/cot/scripts/gold/tests -q",
+      "result": "31 passed"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "pure in-memory test, two runs",
+      "observed": "same result both runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the base commit (before the change) run against the same test",
+      "expected": "test fails",
+      "observed": "2 failed, 1 passed at f8b656af51 (KeyError price_basis)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy / S3 write / mirror ship",
+      "reason": "forbidden by the order; later SERVED cell"
+    },
+    {
+      "item": "other carry paths in B_00 outside _ff_worker",
+      "reason": "out of grant; none observed touched"
+    }
+  ]
+}

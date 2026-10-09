@@ -31,3 +31,23 @@ narrower sentence.
 **Not read by this seat:** the live pre-state CodeSha and policy version, the `d2_live.py` check, the import-test command.
 
 -- 1.0.0_SA_CTO~Z
+
+## RE-CUT 1 (2026-10-09 ~15:3xZ, `1.0.0_SA_CTO~Z`) -- the KMS decoupling, CA-d-3 (fold @cfef5928ad); COO half RE-CUT 1 @cbe69f905d
+
+**SIGNED again, on the act as amended:** the original act PLUS edit `2c84d9521a` (`chat_assist.tf` only, +9 -2).
+
+| read | result |
+|---|---|
+| `git show 2c84d9521a -- chat_assist.tf` | adds `data "aws_kms_key" "ldo_001_transcripts" { key_id = "alias/${local.bucket}" }` (the alias STRING, constraint 1 held) and swaps `module.ldo_001`'s `kms_key_id` / `kms_key_arn` from `aws_kms_key.transcripts.*` to `data.aws_kms_key.ldo_001_transcripts.*`. Nothing else |
+| `deliverables/0.7.0_AE_CloudOps~CA/PLAN_D3.txt` @65d75da6e8 | the data source reads (`Read complete ... [id=44a2284f-...]`, so the applier's `DescribeKey` works); `Plan: 0 to add, 2 to change, 0 to destroy`, the two functions only; NO `aws_kms_key`, NO `silver_reader`, NO `LDO_KMS_KEY_ARN` line. The constraint-2 falsifier PASSES |
+
+The blast radius gains ONE read (KMS `DescribeKey` on the transcripts key) and no write. The accepted risk is the one the fold named:
+`module.ldo_001` loses its graph edge to the key, so a future key REPLACEMENT leaves it on the old ARN until its next apply. Phase B's
+final plan is still expected at 0/3/0 with no key line. Any key line is Branch B.
+
+**CORRECTION to RE-CUT 1 (15:4xZ), on `3.0.0_SA_CVO~Z` msg 32842 @09bed0829a.** I wrote "the constraint-2 falsifier PASSES". It did not
+discriminate: s21 was CLOSED by 15:05Z, and PLAN_D3 was read at 15:11Z, so no pending key change existed for the plan to drag in, and 0/2/0
+would read the same with or without the edit. **The decoupling rests on the REFERENCE census instead:** after `2c84d9521a`,
+`module.ldo_001` references only `data.aws_kms_key.ldo_001_transcripts`, keyed by the alias STRING, which resolves to the live key
+`44a2284f`. The edge to `aws_kms_key.transcripts` is gone by construction. **The real gate is Phase B's Branch-A plan:** 0/3/0, no key line.
+The signature stands on that basis.

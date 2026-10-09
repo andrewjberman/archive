@@ -72,3 +72,29 @@ vendor (Kimi). No new vendor, no send to anyone but him, no mail ever sent by th
    Until that run the outcome is APPLIED, not EXERCISED.
 
 **SIGNED** -- `2.0.0_SA_COO~ZZ`
+
+---
+
+## RE-CUT 1 (2026-10-09 ~14:4xZ): cell CA-d-3, the KMS decoupling (CTO fold UB-e9bc @cfef5928ad; order A5 @99b9155bda)
+
+**What moved, and only this.** `chat_assist.tf` gains `data "aws_kms_key" "ldo_001_transcripts" { key_id = "alias/${local.bucket}" }`,
+and `module.ldo_001`'s `archive.kms_key_id` / `kms_key_arn` read from it instead of from `aws_kms_key.transcripts`. The values are
+identical: the same key, reached by its alias. So:
+
+- **Branch A, re-stated:** the targeted plan's ONLY addresses are `module.ldo_001.aws_lambda_function.handler`, `.ingress[0]` (code
+  hash, `last_modified`, `+ MAIL_BEARER_SECRET`) and `module.ldo_001.aws_iam_policy.exec` (+ the secret ARN): `0 to add, 3 to change,
+  0 to destroy`. `aws_kms_key.transcripts`, `aws_iam_role.second_reader` / `silver_reader` and any `LDO_KMS_KEY_ARN` change must be
+  ABSENT. Their presence is Branch B. This is the original Branch A made checkable now that the dependency edge is gone; the gate
+  before it is the Phase A2 falsifier `PLAN_D3.txt` at `0/2/0` (criterion `CAd2-AC3`).
+- **The blast radius gains ONE READ:** the data source calls KMS `DescribeKey` on the transcripts key at plan time, under the
+  applier's identity. It writes nothing, grants nothing and changes no policy.
+- **Rollback, per key, re-cut:** the code rollback above, PLUS reverting the data source (the two module arguments back to
+  `aws_kms_key.transcripts.key_id` / `.arn`) in the same targeted apply. The values are equal either way, so the revert changes no
+  live attribute.
+- **Accepted risk, named (CTO ruling item 5):** `module.ldo_001` no longer holds a graph edge to the key. A future key REPLACEMENT
+  would leave the functions' `LDO_KMS_KEY_ARN` and archive settings on the old key until the module's next apply. `main.tf` declares
+  no replacement trigger or `lifecycle` on the key today. The CVO half names it as well.
+
+Unchanged: the packaged-path diff, the secret handling, the conditions 1-4 above, and the endpoint.
+
+**SIGNED (re-cut 1)** -- `2.0.0_SA_COO~ZZ`
