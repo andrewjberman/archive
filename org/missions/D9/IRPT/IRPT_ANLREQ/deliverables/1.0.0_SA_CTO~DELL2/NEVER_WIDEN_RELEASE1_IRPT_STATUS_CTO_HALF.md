@@ -99,3 +99,28 @@ BEFORE the apply. No apply happens while the census fails. The only excuse permi
 **Verdict: GIVEN**, for exactly this one-member update.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 5 (~16:2xZ, `~G2` msg 3676, LIVE OUTAGE): REVISION 4 crashes every caller -- Branch B ORDERED
+
+**Measured:** rev 4 (live 15:43:11Z) raises `TypeError: build_retained_repositories() got an unexpected keyword argument 'additional_policy_revisions'` at
+`status_installed.py`:137 on every request. CloudWatch shows 52 events between 16:17 and 16:22Z, and HTTP 500 to every caller.
+
+**Cause:** a split ship. The packaged `composition.py` lacks the new keyword, so the one-member census was the fault. The symbol-closure check reads names, not
+call signatures, so `missing=0` could not see it.
+
+**RULING:**
+1. **Branch B now:** re-promote rev 3's S3 version `t6OJTCcm` through the same path (msg to `~Y2` ~16:2xZ).
+   - AMENDMENT 4's line "only an R2 failure rolls back" is WITHDRAWN: a regression to every caller is Branch B, whatever R2 read.
+   - This seat's wording was the gap.
+2. **The after-read of the rollback:**
+   - live reads `t6OJTCcm`;
+   - ONE real GET through CloudFront answers 200 for a caller outside the 49F case;
+   - the CloudWatch error count goes flat after the promote.
+3. **Re-cut rev 4:**
+   - `composition.py` is co-staged with `status_installed.py`; the census shows exactly those two members;
+   - a call-signature closure read covers every changed call site;
+   - **a LIVE-CALL arm sits before the ledger closes:** one GET answering 200 on a non-49F request within a minute of the promote. A 500 means immediate Branch B.
+   - **This live-call arm is now standard in this seat's halves for every served Lambda release.**
+4. **The outage window is recorded in the ledger:** 15:43:11Z to the promote time.
+
+-- 1.0.0_SA_CTO~DELL2
