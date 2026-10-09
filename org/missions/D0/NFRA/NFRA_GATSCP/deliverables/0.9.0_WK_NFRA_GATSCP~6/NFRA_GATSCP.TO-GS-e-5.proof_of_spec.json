@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-e-5",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-e-5.commit-regenerates-index-entry.md",
+  "group": "OTHER",
+  "vintage_commit": "06887a5857"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.round2.md",
+  "vintage_commit": "06887a5857",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-e-5.commit-regenerates-index-entry.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~6",
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/missions-tree-index.py",
+   "kind": "script",
+   "commit_or_etag": "76f7c70cb0709e4238efde3e34aa84382e2e0819",
+   "artifact_covered_by": [
+    "GE5-AC1"
+   ],
+   "introduces": [
+    "--only",
+    "--stdout",
+    "derive_staged_one",
+    "row_problems"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A tool in the repo; nothing is deployed to AWS."
+  },
+  {
+   "path_or_key": ".tools/safe-commit.sh",
+   "kind": "script",
+   "commit_or_etag": "76f7c70cb0709e4238efde3e34aa84382e2e0819",
+   "artifact_covered_by": [
+    "GE5-AC2"
+   ],
+   "introduces": [
+    "REGENERATE THE INDEX ENTRY",
+    "_TR_RE",
+    "could not be regenerated from the staged row"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A tool in the repo; nothing is deployed to AWS."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GE5-AC1",
+   "criterion_verbatim": "the unchanged staged row composes exactly the committed entry; a staged dep_stage change is carried (the difference); a row off its enum is refused with rc 1; the working-tree entry is untouched.",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round2_prep/checks/r2_derive_one.py\"",
+   "expect": "GS-E5-DERIVE ok=True",
+   "output_evidence": "  PASS unchanged-equals-committed: rc=0 equal=True\n  PASS staged-change-carried: rc=0 dep_stage=DECOMP expected=DECOMP\n  PASS bad-row-refused: rc=1 :: ERROR: ROW-ENUM dep_stage='NOT_A_STAGE' not in ('REGISTERED', 'PRD', 'DECOMP', 'EXECUTING', 'ROUND_CLOSE', 'CLOSED')\n  PASS worktree-untouched: sha256 same=True\nGS-E5-DERIVE ok=True arms=4 failed=0 (rc=0)",
+   "denominator": "4 of 4 arms passed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "GE5-AC2",
+   "criterion_verbatim": "safe-commit calls it before IN_SCOPE, appends the entry to PATHSPEC and carries the refusal message.",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round2_prep/checks/r2_safecommit_regen.py\"",
+   "expect": "GS-E5-SAFECOMMIT ok=True",
+   "output_evidence": "  PASS regen-before-in-scope: call_line=769 in_scope_line=786\n  PASS pathspec-and-refusal: pathspec_append=True refusal_message=True\nGS-E5-SAFECOMMIT ok=True arms=2 failed=0 (rc=0)",
+   "denominator": "2 of 2 arms passed",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Both checks FAIL at the base per the order; additionally the safe-commit step (2c) block was run in isolation against a copy of the real index: a staged dep_stage ROUND_CLOSE row regenerated and staged org/projects/NFRA_GATSCP.json and appended it to PATHSPEC (rc 0); a staged row with dep_stage BOGUS printed the REFUSED line with the reason and exited 1.",
+   "expected": "regenerate-and-stage on a good row; REFUSED rc 1 on an off-enum row",
+   "observed": "as expected on both rows; working-tree entry restored afterwards",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "both checks run once after the final edit; arms are deterministic reads of the index",
+   "observed": "GS-E5-DERIVE ok=True; GS-E5-SAFECOMMIT ok=True; missions-tree-index --self-test 52/52 PASS",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The seam in a real commit (a staged project.json regenerating its entry through safe-commit)",
+   "reason": "The order assigns it to the issuer's real ROUND_CLOSE commit; the worker lane cannot commit a project.json. The block was exercised in isolation on a copy of the index."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Worker 0.9.0_WK_NFRA_GATSCP~6, L7 of 2.0.0_SA_COO~N1, branch wk-NFRA_GATSCP-6; edits only to .tools/missions-tree-index.py and .tools/safe-commit.sh; derive --write not run; missions-tree-index --self-test: 52/52 PASS.",
+ "compiler_tools": [
+  {
+   "tool": "Read",
+   "invocation": "Read missions-tree-index.py estate/derive/materialise_index and safe-commit.sh :690-880",
+   "result": "insertion point before IN_SCOPE (3)"
+  }
+ ]
+}
