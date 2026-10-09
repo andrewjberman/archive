@@ -1,0 +1,122 @@
+{
+ "to_id": "NFRA_TRNSPT.TO-APPLY-p18",
+ "applier": "0.7.0_AE_CloudOps~TR2",
+ "pin": "634da92d0604cc77513a46dbdcd2db7677b8f5a4",
+ "pin_carries": {
+  "a9039b8d62": "ancestor (the wall-clock interim, content VTT only, wallclock NULL 'absent')",
+  "488c840f48": "ancestor (TR-t-20: the real transport + pull.tf on gateway/transcripts/bearer)",
+  "negative_control": "HEAD is NOT an ancestor of a9039b8d62 -- the is-ancestor instrument discriminates"
+ },
+ "built_zip": {
+  "path": "infra/aws/lambda/transcripts-pull/dist/transcripts-pull.zip",
+  "bytes": 876521,
+  "files": 88,
+  "sha256": "b5a15b19309400e84cfbdec45498b701faaa781095f8521448b67c67819ee870",
+  "sha256_b64": "taFbGTCUAOhM+97EVJi3AfqqeBCV+FIUSLZ8Z4Ge6HA="
+ },
+ "step1": {
+  "S04": {
+   "result": "MET",
+   "invocation": "gateway transcript tool list_meeting_transcripts, one allowlisted meeting (monday_meeting), read by name",
+   "observed": "status 200, count=20",
+   "claim": "measured"
+  },
+  "S05": {
+   "result": "MET, with the expiry ABSENT rather than near",
+   "secret": "gateway/transcripts/bearer (arn ...secret:gateway/transcripts/bearer-tY9tUO)",
+   "expiry": "ABSENT -- describe-secret carries 7 metadata keys (ARN, CreatedDate, Description, LastAccessedDate, LastChangedDate, Name, VersionIdsToStages) with no RotationEnabled and no NextRotationDate; the payload is a 64-byte opaque string with no JWT exp claim",
+   "value_printed": false,
+   "exercised_arm": "the stored bearer is accepted by the route NOW: GET /hx/transcripts/.../transcripts returns 403 meeting_not_allowed, not 401",
+   "negative_control": "the same call with a wrong 64-char bearer returns 401 unauthorized -- the route discriminates on the token, so ABSENT was converted to EXERCISED-AGAINST (CLAUDE.md 22a)",
+   "claim": "measured"
+  },
+  "KMS": {
+   "result": "MET -- no laptop route needed",
+   "key": "alias/opal-data-transcripts = 44a2284f-1e14-4ea1-b6cb-f6121bfde35a, KeyManager CUSTOMER, KeyState Enabled",
+   "key_policy": "4 statements; Sid RootAdministersTheKeyAndCannotUseIt delegates kms:Create* to arn:aws:iam::313476888478:root, so the identity half controls",
+   "identity_half": "user/cloudops-dell2-agent-user holds kms:CreateGrant via group policy cloudops-dell-agent-respol-allow-policy Sid AllowResourcePolicyChanges (Allow, Resource *, no Condition), found over a DENOMINATOR of 11 identity policy documents; no Deny matched",
+   "instrument_excluded": "simulate-principal-policy was NOT used as evidence -- it is blind to key policies and carries four false-deny modes plus one false-allow mode (cloud-ops IAM INSTRUMENT TRAPS)",
+   "claim": "measured"
+  }
+ },
+ "step2": {
+  "plan": "Plan: 9 to add, 0 to change, 0 to destroy.",
+  "targets": [
+   "aws_cloudwatch_log_group.pull",
+   "aws_iam_role.pull",
+   "aws_iam_policy.pull",
+   "aws_iam_role_policy_attachment.pull",
+   "aws_kms_grant.pull",
+   "aws_lambda_function.pull",
+   "aws_cloudwatch_event_rule.pull",
+   "aws_cloudwatch_event_target.pull",
+   "aws_lambda_permission.pull_from_rule"
+  ],
+  "foreign_lines": "grep over the whole 220-line plan for mail_pull|outlook-global|commentary|chat_assist|second_reader returns 1 line, a refresh line for aws_iam_role.second_reader; no foreign resource appears in the plan body",
+  "root_variable": "second_reader_trust_principal_arns has no default (readers.tf:15); passed as the LIVE MEASURED value read back from the applied role's trust policy, arn:aws:iam::313476888478:user/Opal_Terminal -- never a typed guess. readers.tf is not in the -target list.",
+  "apply": "Apply complete! Resources: 9 added, 0 changed, 0 destroyed.",
+  "created_ids": {
+   "aws_cloudwatch_log_group.pull": "/aws/lambda/teams-global-transcripts-pull-lambda",
+   "aws_cloudwatch_event_rule.pull": "teams-global-transcripts-pull-hourly",
+   "aws_iam_role.pull": "teams-global-transcripts-pull-role",
+   "aws_iam_policy.pull": "arn:aws:iam::313476888478:policy/teams-global-transcripts-pull-policy",
+   "aws_iam_role_policy_attachment.pull": "teams-global-transcripts-pull-role-20261009111246445400000001",
+   "aws_kms_grant.pull": "44a2284f-1e14-4ea1-b6cb-f6121bfde35a:f3f0c7b5b7d3e3e14fde71419640bfd0b2566adfea036b12abe50eec4d04399a",
+   "aws_lambda_function.pull": "teams-global-transcripts-pull-lambda",
+   "aws_lambda_permission.pull_from_rule": "AllowExecutionFromEventBridge",
+   "aws_cloudwatch_event_target.pull": "teams-global-transcripts-pull-hourly-terraform-20261009111300815800000002"
+  },
+  "zero_diff_replan": "No changes. Your infrastructure matches the configuration.",
+  "schedule_read_back": "teams-global-transcripts-pull-hourly cron(0 13-22 ? * MON-FRI *) ENABLED"
+ },
+ "shared_package_hazard": {
+  "function": "outlook-global-transcripts-pull-lambda",
+  "code_sha256_before": "VGIq85Xxm5KVLCnv16BASS63RsPMHScMEwZJP5SuMNY=",
+  "code_sha256_after": "VGIq85Xxm5KVLCnv16BASS63RsPMHScMEwZJP5SuMNY=",
+  "equal": true,
+  "last_modified_before": "2026-10-07T23:59:05.000+0000",
+  "last_modified_after": "2026-10-07T23:59:05.000+0000",
+  "note": "the rebuilt zip's hash (taFbGTCU...) differs from the mail pull's live hash, so an UNtargeted plan would have shown the update the -target list kept out; CTO half condition 2's warning for the next applies of this root stands",
+  "claim": "measured"
+ },
+ "deployed_bytes_vs_build_input": {
+  "function": "teams-global-transcripts-pull-lambda",
+  "live_code_sha256": "taFbGTCUAOhM+97EVJi3AfqqeBCV+FIUSLZ8Z4Ge6HA=",
+  "built_zip_sha256_b64": "taFbGTCUAOhM+97EVJi3AfqqeBCV+FIUSLZ8Z4Ge6HA=",
+  "equal": true,
+  "runtime": "python3.11",
+  "handler": "handler.lambda_handler",
+  "memory_mb": 128,
+  "timeout_s": 300,
+  "note": "resolved by CONTENT against the build input, never by filename (CLAUDE.md 22a CODE layer)",
+  "claim": "measured"
+ },
+ "step3_invoke": {
+  "request_id": "9c155dfe-c40a-4efb-95ae-f78c4077f459",
+  "status_code": 200,
+  "function_error": null,
+  "run_id": "pull-20261009T111454Z",
+  "transport": "gateway",
+  "no_person": true,
+  "duration_ms": 8697.48,
+  "max_memory_used_mb": 98,
+  "totals": {"listed": 0, "new": 0, "held": 0, "expired": 0, "refused": 4},
+  "per_series": {
+   "monday_meeting": {"listed": 0, "landed": 0, "refused": 1, "outcome": "REFUSED list refused meeting_not_allowed"},
+   "ocio_ic": {"listed": 0, "landed": 0, "refused": 1, "outcome": "REFUSED list refused meeting_not_allowed"},
+   "asset_management_ic": {"listed": 0, "landed": 0, "refused": 1, "outcome": "REFUSED list refused meeting_not_allowed"},
+   "research_meeting": {"listed": 0, "landed": 0, "refused": 1, "outcome": "REFUSED list refused meeting_not_allowed"}
+  },
+  "state_key": "s3://opal-data-transcripts/teams/transcripts/state/pull_runs/run=2026-10-09T11:14:54Z/run.json",
+  "reading": "the HOP is proven -- the Lambda reached the gateway under its own principal, took a typed refusal and wrote its own run state to S3. Nothing landed, which is the COO half's SECOND branch verbatim. The cause is the gateway HOST's allowlist (row NFRA_TRNSPT-D2-S11), not this apply.",
+  "content_quoted": false,
+  "claim": "measured"
+ },
+ "surprise_rows": [
+  "NFRA_TRNSPT-D2-S11 (BLOCKING, INERT): the headless /hx/transcripts route refuses all 4 allowlisted meetings 403 meeting_not_allowed -- the pull will land 0 until the gateway host's allowlist carries them. Owner NFRA_OPLGTW, routed via 2.0.0_SA_COO~T2.",
+  "NFRA_TRNSPT-D2-S12 (OBSERVATION, INERT): deployment rules 4 and 6 unmet for the transcripts root -- 0 of 232 lambda-source-map entries name a transcripts Lambda, and 0 transcripts-v* tags exist. Both files are outside this order's <paths>."
+ ],
+ "ledger": "org/critical_paths/change_management/20261009T1107Z_nfra-trnspt-p18-teams-pull-first-apply-20261009_deploy_completion.md",
+ "rollback": "terraform destroy -target of each of the nine creates (the KMS grant is revoked by its destroy). A destroy, and any deletion of landed objects, is Andrew's act and never this seat's.",
+ "claim": "measured"
+}
