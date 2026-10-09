@@ -58,10 +58,37 @@ def main():
         sources = {n[:-3]: z.read(n).decode("utf-8") for n in z.namelist() if n.endswith(".py") and "/" not in n}
     trees = {m: ast.parse(src, filename=m + ".py") for m, src in sources.items()}
     bound = {m: top_level_bindings(t) for m, t in trees.items()}
-    pairs = missing = 0
+    def resolves(node):
+        return (isinstance(node, ast.ImportFrom) and node.level == 0 and node.module in trees
+                and all(a.name == "*" or a.name in bound[node.module] for a in node.names))
+
+    def guarded_fallbacks(tree):
+        """AMENDMENT 1 (issuer 2026-10-09, row IRPT_BCKEND-D2-W223-S1): an ImportFrom inside an `except ImportError` /
+        `ModuleNotFoundError` handler is an OPTIONAL fallback when every ImportFrom in that try's body resolves in the package.
+        An unguarded import (release 4's defect) is still graded."""
+        skip = set()
+        for t in ast.walk(tree):
+            if not isinstance(t, ast.Try):
+                continue
+            body_imports = [n for n in t.body if isinstance(n, ast.ImportFrom)]
+            if not body_imports or not all(resolves(n) for n in body_imports):
+                continue
+            for h in t.handlers:
+                names = [h.type] if not isinstance(h.type, ast.Tuple) else list(h.type.elts)
+                if any(isinstance(n, ast.Name) and n.id in ("ImportError", "ModuleNotFoundError") for n in names):
+                    for n in ast.walk(h):
+                        if isinstance(n, ast.ImportFrom):
+                            skip.add(id(n))
+        return skip
+
+    pairs = missing = optional = 0
     for m, tree in sorted(trees.items()):
+        skip = guarded_fallbacks(tree)
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.level == 0 and node.module in trees:
+                if id(node) in skip:
+                    optional += len(node.names)
+                    continue
                 for a in node.names:
                     if a.name == "*":
                         continue
@@ -69,7 +96,7 @@ def main():
                     if a.name not in bound[node.module]:
                         missing += 1
                         print("MISSING %s.py:%d imports %s from %s" % (m, node.lineno, a.name, node.module))
-    print("symbol_closure modules=%d pairs=%d missing=%d" % (len(trees), pairs, missing))
+    print("symbol_closure modules=%d pairs=%d missing=%d optional_fallbacks=%d" % (len(trees), pairs, missing, optional))
     print("symbol_closure %s" % ("PASS" if missing == 0 else "FAIL"))
     sys.exit(0 if missing == 0 else 1)
 
