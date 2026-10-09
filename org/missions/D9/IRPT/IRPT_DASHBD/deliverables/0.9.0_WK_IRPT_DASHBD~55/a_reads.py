@@ -40,7 +40,7 @@ def main(day, out_json):
     man_act, _ = manifest("account_activity_daily")
     meas = act[act["coverage"] == "MEASURED"]
     res["a2"] = {"partition": k_act, "rows": int(len(act)), "coverage_census": {k: int(v) for k, v in act["coverage"].value_counts().items()},
-                 "manifest_coverage": man_act.get("coverage_census", man_act.get("coverage")), "measured_rows": int(len(meas))}
+                 "manifest_coverage": man_act.get("coverage_row_census"), "measured_rows": int(len(meas))}
     if len(meas):
         r = meas.iloc[0]
         ident = r["beginning_value"] + r["contributions"] - r["withdrawals"] + r["realized"] + r["unrealized_change"] + r["income"] - r["ending_value"]
@@ -77,10 +77,11 @@ def main(day, out_json):
     un = cls[cls["asset_class"] == "unclassified"]["market_value_eod"].sum()
     tot = cls["market_value_eod"].sum()
     share = float(un / tot) if tot else None
+    msh = (man_cls.get("unclassified_share_of_value") or {}).get("value")
     res["a6"] = {"partition": k_cls, "class_rows": int(len(cls)), "accounts": int(cls["account_id"].nunique()), "identity": ident,
                  "unclassified_sum": float(un), "all_sum": float(tot), "unclassified_share": share,
                  "manifest_unclassified_share_of_value": man_cls.get("unclassified_share_of_value"),
-                 "share_equals_manifest": (man_cls.get("unclassified_share_of_value") is not None and share is not None and abs(float(man_cls["unclassified_share_of_value"]) - share) < 1e-9)}
+                 "share_equals_manifest": bool(msh is not None and share is not None and abs(float(msh) - share) < 1e-9)}
     res["returns_partition"] = {"partition": k_ret, "rows": int(len(ret))}
     Path(out_json).write_text(json.dumps(res, indent=1, default=str), encoding="utf-8")
     print(json.dumps(res, indent=1, default=str))
