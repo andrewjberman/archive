@@ -179,7 +179,30 @@ def ac_6_2(root, cid):
     return _ok(cid)
 
 
-CHECKS = {"AB2-2-AC1": ac_2_1, "AB2-2-AC2": ac_2_2, "AB2-3-AC1": ac_3_1, "AB2-4-AC1": ac_4_1, "AB2-4-AC2": ac_4_2,
+def ac_1_1(root, cid):
+    """AB-e-1: five probes recorded with a status and a class each; the ledger named in the record is closed."""
+    try:
+        rec = _load(root, D + "/0.7.0_AE_CloudOps~DELL2/AB_E1_PROBES.json")
+    except Exception as exc:  # noqa: BLE001
+        return _fail(cid, "%s: %s" % (type(exc).__name__, exc))
+    probes = rec.get("probes") or []
+    want = {"in_book", "out_of_book", "firm_admin", "other_firm", "execute_api_bypass"}
+    got = {p.get("class") for p in probes}
+    if got != want or len(probes) != 5:
+        return _fail(cid, "probes must be exactly the five classes %s; got %s" % (sorted(want), sorted(str(g) for g in got)))
+    for p in probes:
+        if not isinstance(p.get("status"), int) or p.get("method") != "GET" or not p.get("route"):
+            return _fail(cid, "probe %s lacks an integer status, method GET or route" % p.get("class"))
+        if re.search(r"eyJ[A-Za-z0-9_-]{10,}", json.dumps(p)):
+            return _fail(cid, "probe %s carries token bytes" % p.get("class"))
+    slug = rec.get("ledger_slug") or ""
+    if not slug or os.path.exists(os.path.join(root, "org/critical_paths/.open_deploys/%s.json" % slug)):
+        return _fail(cid, "ledger %r missing or still open" % slug)
+    print("; ".join("%s=%s" % (p["class"], p["status"]) for p in probes))
+    return _ok(cid)
+
+
+CHECKS = {"AB2-1-AC1": ac_1_1, "AB2-2-AC1": ac_2_1, "AB2-2-AC2": ac_2_2, "AB2-3-AC1": ac_3_1, "AB2-4-AC1": ac_4_1, "AB2-4-AC2": ac_4_2,
           "AB2-5-AC1": ac_5_1, "AB2-5-AC2": ac_5_2, "AB2-6-AC1": ac_6_1, "AB2-6-AC2": ac_6_2}
 
 if __name__ == "__main__":
