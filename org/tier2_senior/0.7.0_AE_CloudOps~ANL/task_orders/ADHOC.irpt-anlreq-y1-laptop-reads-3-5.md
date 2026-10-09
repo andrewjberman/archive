@@ -4,11 +4,17 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~ANL</issued_to>
 <date>2026-10-09</date>
-<status>pending</status>
+<status>complete</status>
 <risk>SERVED</risk>
 
 <title>IRPT_ANLREQ release 1: the laptop's READ-ONLY reads 3a, 3b, 3c, 4 and 5 -- booleans, an expiry and outcome names only</title>
 
+<closure>
+COMPLETE (issuer, ~16:1xZ). Pass 1 (13:1xZ, @2315575398): 3b true; 3a/4_route/5 failed on one cause, a shared retention row the Y75 cleanup
+deleted (dell2 ruled leave). Re-run on fresh REQ-4b5155ac (AMENDMENT 1, @60cfbecb26): 3a TRUE (link sha matches, link discarded), 4_record
+TRUE, 4_route TRUE. Read 5 withdrawn by dell2 Y2 (msg 3624): the resident worker refuses on a schema gap (row IRPT_ANLREQ-D2-S15), fixed in
+G2's release 4, which runs its own ticket-bound read. 3a and 4 accepted by dell2.
+</closure>
 <amendment>
 AMENDMENT 1 (issuer, 2026-10-09 ~15:1xZ) -- REOPENED for a RE-RUN of reads 3a, 4 and 5 only, same spec @66b6d08b9c, on the FRESH request
 REQ-4b5155ac2ea9467ab771b414 (tenant 49financial; ticket TCK-20261009-a1052909). dell2 2.0.0_SA_COO~Y2 (relay 0.0.0_AB_MSTR msg 108017): its
