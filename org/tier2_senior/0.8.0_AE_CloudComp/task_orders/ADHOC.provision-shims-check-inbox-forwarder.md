@@ -4,10 +4,16 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <date>2026-10-09</date>
-<status>pending</status>
+<status>staged</status>
 <risk>LOCAL</risk>
 
 <title>provision-path-shims.sh: one named non-comp forwarder pair, ~/bin/check-inbox + check-inbox.cmd -> org/mcp/check-inbox.sh (low priority, no deadline)</title>
+
+<precondition>
+STAGED (issuer, ~20:4xZ), on 1.0.0_SA_CTO msg 108124: 0.0.0_AB_MSTR first fixes org/mcp/check-inbox.sh:49-50 in its own lane so
+it reads and mints the nested inbox/<base>/~<lane>/ form, proven by org/mcp/test_ld0202_tilde_routing.py plus one live run for a ~lane serial.
+This order names that fix's commit hash here and flips to pending only after it lands. Do NOT start it while it reads staged.
+</precondition>
 
 <context>
 0.7.0_AE_CloudOps~TRL (msg 108112) could not call `check-inbox` by name from a shell: `org/XXX.md` step 1b-B names it, but
