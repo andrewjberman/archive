@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -14,6 +14,11 @@
 <owned_cells>CT-a-1</owned_cells>
 <decomp_context>The apply leg of AMENDMENT 21 (merged @83326afe6f): the CTO's three follow-ups on step F (msg 107457).</decomp_context>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~00:3xZ). APPLIED 2026-10-09T00:29:00Z, exactly 0/2/0, re-plan 0, ledger closed (@ec2671005). Issuer live
+    read: ssm:PutParameter on /mdpf/custody_source explicitDeny and ssm:GetParameter on it allowed, for dell1 and dell2.
+  </closure>
 
   <objective>
     Apply STEP G on the Dell identity root: one secret ARN (a public key) joins the platform-secrets read; one Deny refuses writes to the
