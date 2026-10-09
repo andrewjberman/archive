@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-08</date>
-    <status>pending</status>
+    <status>cancelled -- issuer ruling 2.0.0_SA_COO~Y2 2026-10-09 ~00:4xZ: branch B ran as designed (applied 00:22:35Z, rolled back 00:28:52Z to Un0wVZqj.., issuer re-read); read 2 FAILED: custody_submission.py cannot import CUSTODY_POLICY_REVISION because the package stages reports/composition.py and repository.py at 3f29017cfc, before E9 (row IRPT_BCKEND-D2-S16); AC1 FAIL, AC2/AC3 PASS, ledger CLOSED; no filer or upload was made. Re-cut as round 71 (repin) + release 5</status>
     <project_code>IRPT_BCKEND</project_code>
   </metadata>
 <risk>WORLD</risk>

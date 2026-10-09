@@ -1,0 +1,90 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-en-1",
+ "firm": "FABRIC",
+ "phase": "INVESTIGATION",
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "e25bf67559",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-1.taxsma-master-enumerate.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e25bf67559"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~39",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~39/g5_enumerate_record.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Record of two list-only vendor requests from the SI2 box (SSM 22e138b8-907f-4694-87d4-a43ea7610b20 and 5ca67e2b-e63e-43b5-9eb9-e3849b58c963); nothing deployed, nothing landed in S3.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~39/g5_enumerate.result.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Side-by-side report and the same-shape verdict; nothing deployed.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: every count in your record is re-read from the SSM invocations themselves; the control enumerates files. <invocation>bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/g5.AC1.sh; echo \"exit=$?\"</invocation><expect>(?s)08403355: invocation .*08335338: invocation .*RESULT: PASS.*exit=0</expect>",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/g5.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)08403355: invocation .*08335338: invocation .*RESULT: PASS.*exit=0",
+   "output_evidence": "08403355: invocation 22e138b8-907f-4694-87d4-a43ea7610b20 status=Success started=2026-10-08T23:24:12.466Z; 08403355: ENUMERATED=226 over 2026-09-08..2026-10-08; types 13; 08335338: invocation 5ca67e2b-e63e-43b5-9eb9-e3849b58c963 status=Success started=2026-10-08T23:27:41.518Z; 08335338: ENUMERATED=248 over 2026-09-08..2026-10-08; types 14; RESULT: PASS; exit=0",
+   "denominator": "2 of 2 masters re-read from their SSM invocations; both outside the daily-pull windows; control enumerated 248 files.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: nothing landed under the new master, and the scheduled puller's code is the bytes it was. <invocation>bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/g5.AC2.sh; echo \"exit=$?\"</invocation><expect>(?s)\\(a\\) objects under schwab/08403355/: KeyCount=0 .*\\(b\\) code object ETag=0017f9b549ca9f8013704f50c4327bed .*Terraform roots: 0\\n.*RESULT: PASS.*exit=0</expect>",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/g5.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)\\(a\\) objects under schwab/08403355/: KeyCount=0 .*\\(b\\) code object ETag=0017f9b549ca9f8013704f50c4327bed .*Terraform roots: 0\\n.*RESULT: PASS.*exit=0",
+   "output_evidence": "(a) objects under schwab/08403355/: KeyCount=0 (aws rc=0)\n(b) code object ETag=0017f9b549ca9f8013704f50c4327bed (aws rc=0), cut 0017f9b549ca9f8013704f50c4327bed\n(c) tracked files changed since the cut under the puller and its two Terraform roots: 0\nRESULT: PASS\nexit=0",
+   "denominator": "3 of 3 sub-checks (a) (b) (c) pass.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Record copy with 08403355 enumerated changed 226 to 227 and 08335338 by_type acc changed 22 to 21, run through g5.AC1.py.",
+   "expected": "FAIL on both cells",
+   "observed": "FAIL: 08403355: output ENUMERATED=226, record says 227; FAIL: 08335338: per-type lines differ from the record's by_type; RESULT: FAIL",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "g5.AC1.sh run twice, output md5 compared.",
+   "expected": "identical",
+   "observed": "ad9b703d66ad182d334ab339ec68a22a on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W39-S1",
+  "NFRA_OPLGTW-Z-W39-S2",
+  "NFRA_OPLGTW-Z-W39-S3"
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~39/g5_enumerate.result.md",
+ "compiler_tools": [
+  {
+   "tool": "aws ssm send-command / get-command-invocation (AWS-RunPowerShellScript, scheduled-task pattern)",
+   "invocation": "aws ssm send-command --document-name AWS-RunPowerShellScript --parameters file://p_<master>.json",
+   "result": "2 of 2 runs Success, puller exit 0 both"
+  }
+ ]
+}

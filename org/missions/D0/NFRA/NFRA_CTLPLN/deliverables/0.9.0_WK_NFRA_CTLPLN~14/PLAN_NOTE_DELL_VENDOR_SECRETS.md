@@ -2,6 +2,8 @@
 
 **LATEST: section G (amendment 16, STEP E) widens the secrets grant to the 28 PLATFORM-KEY secrets and takes three Deny statements off; where sections A and B below say the PLATFORM-KEY class is NOT granted, section G governs.**
 
+**NEWEST: section J (amendment 21, three follow-ups on step F: one more secret ARN, one cutover-parameter Deny, one stale test retired). Expected plan: 0 to add, 2 to change, 0 to destroy.**
+
 Author: 0.9.0_WK_NFRA_CTLPLN~14. Supersedes the amendment-8 version of this note; amendment 10 (`1.0.0_SA_CTO` msg 106731, ruling 1) adds the resource-policy Allow (section B) and the section "What this Allow can undo". NOTHING WAS APPLIED, NO PLAN WAS RUN AGAINST THE BACKEND, NO IAM WRITE WAS MADE. NO SECRET VALUE WAS READ: this pass made no Secrets Manager call at all; the classification works from the saved listing (`tests/vendor_secrets_census.json`, taken 2026-10-07T21:00:45Z with `list-secrets`: names, descriptions, tags, key ids, dates) and from the code that uses each secret. Authority: Andrew-direct ~00:4xZ "lets start with lifting 1 2 3 6" (`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261008_004xZ_LIFT_FOUR_DELL_LIMITS_SECRETS_FIRM_DATA_RESOURCE_POLICIES_PUSH.md`) and `1.0.0_SA_CTO` msg 106669.
 
 ## What the ONE apply would show -- by reading the configuration, NOT from a plan
@@ -491,3 +493,42 @@ The Deny statements that remain: `DenyCloudTrailWrites`, `DenyS3DeletesOnProduct
 ### Simulation, this step
 
 The `POLICY-SIM` last line is in `NFRA_CTLPLN.TO-CT-a-1.amendment20.simulate_policy.outputs.txt`. `iamw_ok` counts, per user: 13 named arms (six allowed, three explicitDeny by the narrow Deny, four kept reads), two controls (CreateRole and PassRole read implicitDeny without the new policy), 97 partition arms (28 allowed, 69 explicitDeny by the narrow Deny), plus one shape arm. `planread_ok` counts every counted read for the Dell its root is placed on, one exactness arm (the policy's entries equal the set of reads the documents refuse without it; no wildcard, no write action) and six negatives (a neighbouring parameter and a different secret refused; `ssm:PutParameter` reads the same with and without the policy). One read is printed as `PLANREAD-HELD` and not counted. Existing arms that named a removed Deny were re-pointed at an action that stays refused (`iam:PutUserPolicy`, `iam:CreateLoginProfile`, `iam:CreateGroup`), so `denied_ok` keeps its count of 15; the second block (`passrole_ok`) now reads the real files and every arm reads allowed.
+
+
+## J. FOLLOW-UP CELL TO STEP F -- the IRPT render public key granted, writes to the cutover parameter denied, one stale PassRole test retired (amendment 21; `1.0.0_SA_CTO` msg 107457 on CTO half @b51c573d66; rows `NFRA_CTLPLN-W14-S31`, `-S32`, `-S33`, new rows `-S37`, `-S38`, `-S39`)
+
+Author: 0.9.0_WK_NFRA_CTLPLN~14. NOTHING WAS APPLIED, NO PLAN WAS RUN AGAINST THE BACKEND, NO IAM WRITE WAS MADE, NO SECRET VALUE WAS READ (the census was re-derived from the saved listing with `--reclass`: no AWS call). The only AWS calls were `iam:SimulateCustomPolicy` and, in one table run, `iam:SimulatePrincipalPolicy` on the live Dell users. The live documents were not compared to the repository text. Step F was already live when this pass ran: the live plan-read rows read `allowed` for the two SSM parameters (`derive_plan_reads.py --table`, 2026-10-08T23:41:33Z to 23:42:17Z), and the one live row that reads `implicitDeny` is the secret this cell grants. The custom-policy simulation ran 23:39:14Z to 23:40:04Z and again, as criterion CTa1-AC2, 23:43:23Z to 23:44:24Z, with identical results; no live arm changed between runs.
+
+### The expected plan, by reading (default variables), by address
+
+Relative to the state step F leaves (nine managed policies on the group):
+
+| resource address | action | what |
+|---|---|---|
+| `aws_iam_policy.dell_agent_platform_secrets[0]` (`cloudops-dell-agent-platform-secrets-policy`) | updated in place | the one statement `ReadPlatformKeys` gains one exact ARN: `arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/auth/irpt-render-jwt-public-key-EAL0l7`. 28 ARNs become 29; 2,707 characters become 2,806 of 6,144. Nothing else in the document changes. |
+| `aws_iam_policy.dell_agent_deploy` (`cloudops-dell-agent-deploy-policy`) | updated in place | the document gains one Deny statement, `DenyCutoverParameterWrites` (below), placed before `DenyProtectedFunctions`. 4,759 characters become 5,046 of 6,144. Nothing else in the document changes. |
+
+Expected: **0 to add, 2 to change, 0 to destroy.** The two addresses are the whole `-target` list. Secrets part one (`aws_iam_policy.dell_agent_vendor_secrets[0]`, 66 ARNs, 5,968 characters) is byte-for-byte unchanged; no attachment, no count, no description changes (a description is ForceNew, so none was touched: the part-two description still names signing keys, seeds, admin credentials and gateway bearer tokens, row `NFRA_CTLPLN-W14-S37`). The group still holds **9 managed policies of 10**.
+
+### The three changes, in plain words
+
+1. **S31 -- a public key is granted.** The secret `opal/auth/irpt-render-jwt-public-key` is the verifying half of the key pair that signs the firm's IRPT render tokens. It verifies tokens and signs nothing. The census moves it from OTHER to PLATFORM-KEY (granted; there is no public-key class, row `-S37`). Both Dells can then read its value by the exact ARN. dell2's plan of `portal-auth` reads it (`data.aws_secretsmanager_secret_version.irpt_render_jwt_public_key`, `irpt-render-secrets.tf:38`) and stopped at that read before. Census: secrets 114, granted 94 to **95**, platform_key 28 to **29**, other 19 to **18**, blocked_by_key 1 (unchanged). Plan-read rows: the held row is allowed, so `planread_ok` counts it (422 counted and 1 held becomes **423 counted, 0 held**).
+2. **S32 -- the cutover parameter is protected from writes.** `DenyCutoverParameterWrites` (Effect Deny, in `cloudops-dell-agent-deploy-policy`, the group policy with room): actions `ssm:PutParameter`, `ssm:DeleteParameter`, `ssm:DeleteParameters`, `ssm:LabelParameterVersion`, `ssm:AddTagsToResource`, `ssm:RemoveTagsFromResource`; Resource exactly `arn:aws:ssm:us-east-1:313476888478:parameter/mdpf/custody_source` (the bd-to-schwab cutover value). Reading the parameter (the plan-reads grant, `ssm:GetParameter` and `ssm:GetParameters`) is unchanged and still allowed. After step F a Dell can rewrite this policy, so the Deny guards against an accident, not an intent (the CTO's words, msg 107457). Row `-S32` was ARMED with the CTO as disarm owner: this commit builds the disarm, which is real only once applied.
+3. **S33 -- one stale test is retired.** `tests/render_passrole.py` asserted the PassRole Deny that step F removed and stopped with an error. It was NOT deleted, because `tests/derive_protected_functions.py` imports two helpers from it. Its renderer and `--write` mode (which could have re-created the retired Deny) are removed; `--check` now asserts the current truth: the deploy policy holds none of `DenyPassRoleExceptNamed`, `AllowPassNamedRoles`, `DenyEveryIamWrite` and no `iam:PassRole` action, and the IAM-roles policy holds `AllowPassAnyRole` (an Allow of `iam:PassRole` on `*`) and no PassRole Deny. Its last line is now `PASSROLE-CHECK ... ok=True` (row `-S38`).
+
+### Arms (simulation block twelve, `cutover_ok=23/23`, both Dell users)
+
+- Each of the six write actions on the exact ARN reads `explicitDeny`, matched statement `DenyCutoverParameterWrites` (12 of 12).
+- `ssm:GetParameter` and `ssm:GetParameters` on it read `allowed` (4 of 4).
+- `ssm:PutParameter` on a different parameter (`parameter/other/some_parameter`) reads **allowed**, exactly as it reads with the statement taken out of the deploy policy (today's decision, from the create policy's `CreateUpdateTagCompute` on `*`); the same for a parameter whose name only begins with the cutover name (`parameter/mdpf/custody_source_other`) (4 of 4).
+- Control: with the statement taken out, `ssm:PutParameter` on the cutover parameter reads `allowed` (2 of 2), so the Deny is the cause.
+- Shape: one statement of that name, six actions, one exact ARN, no wildcard (1 of 1). Total 12 + 4 + 4 + 2 + 1 = 23.
+- Vendor block: `vendor_ok` 245 of 245 becomes **249 of 249**. The public key reads `allowed` for both Dells and `implicitDeny` without the two secrets documents (one arm per user in the full sweep); two named arms were added per user: the public key (allowed) and `opal/auth/jwt-public-key` (OTHER, still refused); `twilio/recovery-code` and `schwab/sdd/session` stay refused.
+
+### What this cell can undo
+
+`DenyCutoverParameterWrites` is a statement in a managed policy a Dell can replace with a new version (step F, section I); it protects against accident only. Granting a public key adds no capability a Dell did not have through the IAM Allow (a Dell can already grant itself any read), and the key is public.
+
+### Not done
+
+`tests/plan_reads_census.json` was not re-derived: the registers now place one more Dell project (`MDPF_DEMQUE`) than the saved census (row `NFRA_CTLPLN-W14-S39`); whether its roots add a refused read is unread.
