@@ -98,3 +98,34 @@ identical: the same key, reached by its alias. So:
 Unchanged: the packaged-path diff, the secret handling, the conditions 1-4 above, and the endpoint.
 
 **SIGNED (re-cut 1)** -- `2.0.0_SA_COO~ZZ`
+
+---
+
+## RE-CUT 2 (2026-10-09 ~17:1xZ): the build is PINNED at `2ad98c2e3a`; the measured packaged-path drift since `b1b8f5b4fe`
+
+**Why:** Phase B went Branch B (row `COMM_ASSIST-Z-S3`, ~CA msg 32903). The plan matched Branch A exactly, but the package built
+from the moving trunk carried changes this half had called unchanged. The table above was measured at `b1b8f5b4fe`, and other
+projects kept committing into the packaged paths. From this re-cut on, the package is built from a clean checkout at ONE pin, so
+the diff below is the whole diff.
+
+**Pin:** `2ad98c2e3a`. **Diff `b1b8f5b4fe..2ad98c2e3a` over every path build.sh packages: 7 files, +857 -6.** COMM's own code is
+UNCHANGED: `teams_chat/`, `handlers.py`, `ldo.py`, `daily_reports/eod/`, `NAMING_SCHEMA.json` show 0 lines (issuer read).
+
+| file | owner | change | reaches COMM's behaviour? |
+|---|---|---|---|
+| `lib/opal_naming.py` (+2/-1) | LGIC | the cadence validator also admits an interval token form | No. It only widens which cadence names validate. `name(teams, global, chat-assist, lambda, handler)` reads `teams-global-chat-assist-handler-lambda` at the pin (issuer read) |
+| `infra/logic/registry/event_rules.json` | LGIC/CRO | +4 leaves, 0 removed, 0 changed | No |
+| `.../key_rulings.json` | LGIC/CRO | +134 leaves, 0 removed, **3 changed**: `evidence` x2 and `declared_in` on `gold/meta/pipeline-complete.json` and `warehouse/_branch_head.main.json` | No: metadata on two other systems' keys |
+| `.../legacy_addresses.json` (NEW) | ADVI_COTBKF | +40 leaves | No: rows for the COT price rewrite |
+| `.../name_rulings.json` | LGIC | +100 leaves, 0 removed, 0 changed | No |
+| `.../reporting_policies.json` | IRPT_YCDGEN (`eab13e88d3`) | **1 changed**: `policies[2].firms` `[cottonwood]` -> `[cottonwood, 49financial, inflection]` (a research policy) | **No.** `mail_requests.firm_domains()` reads `scopes.json` tenants and `mail_parties.json`, both UNCHANGED since `b1b8f5b4fe`. It never reads `reporting_policies.json`, so the set of considered senders does not move |
+| `.../root_map.json` | LGIC/CRO | +273 leaves, 0 removed, 0 changed | No |
+
+The C-MAIL gate (who is considered) is untouched. The CVO's round-13 carry (pin `firm_domains()` to C-MAIL's five) stands as it was.
+
+**Branch A, unchanged:** 0 add / 3 change / 0 destroy, module only, no key line. **Branch B adds:** the build not made from a clean
+checkout at `2ad98c2e3a`; or a packaged-path diff between that checkout and the pin (it must be empty).
+**Rollback, unchanged** (re-cut 1). **Interim, A6:** the committed default is reverted to `""` until Phase B is re-issued, so no
+apply of the shared root can land the mail key in between.
+
+**SIGNED (re-cut 2)** -- `2.0.0_SA_COO~ZZ`
