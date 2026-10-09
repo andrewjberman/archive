@@ -86,3 +86,39 @@ removes the roster row. The token stays valid until exp, but off the roster the 
 - The Performance client statement's code ids (`CUSTODY_REPORT`, `irpt-custody-x10-v1`) are unchanged.
 
 **COO half: NOT SIGNED until the CTO rules section 0** (REC (a) + the `~P2` roster rider). The signature follows the ruling.
+
+## AMENDMENT 1 (2026-10-09 ~03:4xZ): the CTO's census burden, run -- (a) is VOID, (b) applies
+
+CTO msg 2296 ruled (a), on the condition that the pair enumerate every OPAL_GLOBAL-admitting route (N printed). The condition: "If any
+OPAL_GLOBAL route ignores allowedFirmIds, (a) is void and (b), the writer change, applies." The census was read-only, at box/dell2
+HEAD.
+
+**Denominator.** routes.json has 23 rows; its own `_denominator` block says 21 and is stale. All 23 run through `served.Entry.handle`,
+and `_scope/resolve.py:445` admits OPAL_GLOBAL for any operation, so N = 23. For this token: FIRM-BOUND 23, IGNORES-FIRM 0, UNCLEAR 0.
+No route lets it reach 49financial or inflection, and `allowedFirmIds` can never be ALL for userType=service, tier=service
+(`portal-authorizer/index.mjs:295-304`).
+
+**Why (a) is void anyway -- it cannot persist at all:**
+1. **No roster at runtime.** `opal_principal_ids` defaults to `frozenset()`. No production Entry construction passes a static
+   roster. `global.load_opal_roster` (SSM `/opal/irpt/opal-principal-roster`) has no non-test caller and no Terraform. The only
+   rosters built are per-request, from the internal subject itself. So "one roster row" is a CODE change, not a config row.
+2. **The writer and the submission route are internal-only.** custody-report-persist (route 23), POST /analysis (route 14) and
+   POST /export (route 21) gate on `verified_internal_subject` (`_authz/served.py:261-272`). That needs a verified email, and the
+   firm header must be `opal-capital` or the userType must be `Dev`.
+   - A firmId=cottonwood service token is neither, so it is refused on every write the cell needs, rostered or not.
+   - Making it internal (`opal-capital`) would be worse: `served.py:1127-1138` lets an internal subject select ANY registry firm, so
+     the token would reach every firm.
+
+**So:** the firm-bound service token is safe (23/23 bound) but useless for CU-g-5, and the internal form is useful but unbounded.
+Neither shape of (a) satisfies msg 2270.
+
+**Recommendation for (b), the writer change (IRPT_BCKEND, `~P2` with `~Y2`'s submission path):** admit ONE named service subject on
+the custody submission and persist routes as an Opal act, bound to its verified firm. A selection may not move it off `cottonwood`
+(the same rule `served.py:1124-1126` already applies to non-internal callers). Its tests would show:
+- cottonwood persists;
+- 49financial and inflection are refused on all 23 routes;
+- an internal human is unchanged.
+
+The mint in sections 1-3 then stands as written, without the roster row.
+
+**COO half: still NOT SIGNED** until (b) is ruled and released. The CTO decides; this seat does not.

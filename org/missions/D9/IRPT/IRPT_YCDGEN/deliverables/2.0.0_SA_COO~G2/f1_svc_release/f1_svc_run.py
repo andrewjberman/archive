@@ -16,10 +16,12 @@ import base64
 import datetime
 import hashlib
 import json
+import os
 import re
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 
@@ -28,7 +30,7 @@ import boto3
 API = "https://d2n2nzpeqf34ge.cloudfront.net"  # production's same-origin path: CloudFront routes /auth/* and /api/scoped/*
 EMAIL = "svc-irpt-analysis@opalinvest.com"
 SECRET = "irpt/svc-irpt-analysis/password"
-TENANT = "cottonwood"
+TENANT = os.environ.get("F1_TENANT", "cottonwood")  # st28 seat arm: 49financial (CTO~DELL2 msg 2148); the default keeps st25/st26 runs
 BASE = "/api/scoped/investor-reporting"
 CODE = re.compile(r"^[A-Z0-9][A-Z0-9_.:-]{0,79}$")
 IDLIKE = re.compile(r"^[A-Za-z0-9_-]{8,128}$")
@@ -109,12 +111,18 @@ def main(argv):
         return dump(1)
     h = {"Content-Type": "application/json", "Authorization": "Bearer " + token, "X-Contract-Version": "v1"}
     q = "?selected_tenant=" + TENANT
-    upload = {"upload_token": "f1dell2-" + uuid.uuid4().hex, "filename": "cottonwood_prospect.csv",
+    # E5 (IRPT_BCKEND release 3): a filer whose allowedFirmIds lists the tenant names the firm advisor on the UPLOAD. The email is read
+    # from the environment (F1_ADVISOR_EMAIL) and never written to the record; the analysis request stays owned by the submitter.
+    advisor = os.environ.get("F1_ADVISOR_EMAIL", "").strip()
+    uq = q + ("&advisor_email=" + urllib.parse.quote(advisor) if advisor else "")
+    result.update(on_behalf_advisor_named=bool(advisor))
+    upload = {"upload_token": "f1dell2-" + uuid.uuid4().hex, "filename": TENANT + "_prospect.csv",
               "file_base64": base64.b64encode(data).decode(), "file_type": "csv", "declared_currency": "USD"}
     shown = dict(upload, file_base64="<%d bytes, sha256 %s>" % (len(data), result["file_sha256"][:16]))
     up = None
     for attempt in range(41):
-        s, resp = call("POST", BASE + "/analysis/inputs" + q, upload, h, record_body=shown)
+        s, resp = call("POST", BASE + "/analysis/inputs" + uq, upload, h, record_body=shown)
+        log[-1]["path"] = log[-1]["path"].replace(urllib.parse.quote(advisor), "<advisor>") if advisor else log[-1]["path"]
         up = resp.get("data") if isinstance(resp, dict) else None
         state = up.get("state") if isinstance(up, dict) else None
         say("upload attempt", attempt, "HTTP", s, "state", state)
