@@ -595,3 +595,52 @@ Expected: **0 to add, 1 to change, 0 to destroy.** Nothing else moves: `aws_iam_
 ### Transcript jobs (item 4)
 
 Prefixes the NFRA_TRNSPT jobs write, from `NFRA_TRNSPT.TO-RUN-x9` and `-b11` (`teams/transcripts/silver/research_meeting/`, 29 keys) and `infra/aws/terraform/transcripts/` (`chat_assist.tf`: `teams/transcripts/bronze/chat_messages/`, `silver/chat_threads/`, `state/chat_assist/`; `pull.tf`: `teams/transcripts/`; `mail_pull.tf`: `outlook/transcripts/`). dell2 `s3:PutObject` on each reads **allowed** (6 of 6, matched `S3ObjectsOnOpalBuckets`), positive control allowed, negative controls refused. Nothing is refused, so **nothing was granted and the transcripts root is unchanged.** `check_transcripts_dell_decrypt.py` still prints `dell_write_refused=8/10`; no arm moved. Row `NFRA_CTLPLN-W14-S44`: the key grants the Dells Decrypt and DescribeKey only, so a Dell PutObject would still fail at `kms:GenerateDataKey`; not widened here.
+
+## N. DELL2 ONLY GAINS kms:GenerateDataKey ON THE TRANSCRIPTS KEY (amendment 25; row `NFRA_CTLPLN-W14-S44`; `1.0.0_SA_CTO` ruling (b) msg 107696, record `ANDREW_DIRECT_20261009_025xZ_DELLS_RUN_THEIR_OWN_SCRIPTS_NO_LAPTOP_WAIT.md` @8fc644a586; COO half ADDENDUM 1)
+
+Author: 0.9.0_WK_NFRA_CTLPLN~14. NOTHING WAS APPLIED AND NO PLAN WAS RUN AGAINST THE BACKEND. The only AWS calls were `iam:SimulateCustomPolicy`, `iam:SimulatePrincipalPolicy`, `kms:DescribeKey`, `kms:GetKeyPolicy`, `sts:GetCallerIdentity` (read-only). No object was read, no bucket listed, no decrypt or data-key call was made.
+
+### Writers of the key's policy (counted first)
+
+One. `comp-find` over `infra/` for `aws_kms_key|aws_kms_key_policy|aws_kms_grant|aws_kms_alias` (87 hits, 1889 files scanned) and for the key's address and alias (36 hits, 1889 files): the only resource that sets the key policy is `aws_kms_key.transcripts` (its `policy` argument) at `infra/aws/terraform/transcripts/main.tf:75`. There is no `aws_kms_key_policy` resource anywhere under `infra/`. The other `transcripts` files only reference the key (`chat_assist.tf:81-82`, `mail_pull.tf:111`, `pull.tf:111`) or hold `aws_kms_grant` resources (`commentary.tf:90`, `mail_pull.tf:91`, `pull.tf:91`, and `modules/ldo/main.tf:311`), which are grants and do not write the policy.
+
+### Expected plan, by reading (address)
+
+| resource address | action | what |
+|---|---|---|
+| `aws_kms_key.transcripts` | update in place | `policy` only: one statement appended, `Dell2AgentUserGenerateDataKey` |
+
+Nothing else. The new variable `dell2_agent_user_name` has a default and creates no resource. `aws_kms_alias.transcripts`, the bucket, its policy (it refers to the key's ARN, which does not change), the encryption configuration, the three `aws_kms_grant` resources in this root and the Lambda resources are untouched. Plan summary by reading: `0 to add, 1 to change, 0 to destroy`. The issuer measures the real plan.
+
+### The key policy, before and after (statement Sid, principal, actions)
+
+Before (live, read with `kms get-key-policy`, equal to the render of `5c1d0af92c`; 3 statements):
+- `RootAdministersTheKeyAndCannotUseIt`: account root; administration actions only (unchanged).
+- `NamedReadersUseTheKey`: `var.reader_principal_arns`; `kms:Encrypt`, `kms:Decrypt`, `kms:ReEncrypt*`, `kms:GenerateDataKey*`, `kms:DescribeKey` (unchanged, byte-identical).
+- `DellAgentUsersDecryptOnly`: the two Dell agent users; `kms:Decrypt`, `kms:DescribeKey` (unchanged).
+
+After (4 statements): the three above, then
+- `Dell2AgentUserGenerateDataKey`: Allow; Principal the dell2 agent user alone (`arn:aws:iam::<account>:user/<var.dell2_agent_user_name>`; the variable's default is the builder's output for that user, `cloudops-dell2-agent-user`); Action exactly `kms:GenerateDataKey`; Resource `*`.
+
+No other action. Not `kms:Encrypt`, not `kms:ReEncrypt*`, not `kms:GenerateDataKeyWithoutPlaintext`: the S3 PutObject of an SSE-KMS object asks the key for `kms:GenerateDataKey`; a multipart upload also asks for `kms:Decrypt`, which both Dells already hold. No evidence of a further action needed was found, so none is added.
+
+### What dell2 newly can do, in plain words
+
+Its S3 PutObject under the jobs prefixes (already allowed by its own S3 policy, row `NFRA_CTLPLN-W14-S44`) can now complete on the transcripts bucket, because S3 can obtain the data key. It can also call `kms:GenerateDataKey` directly on that key, which yields a data key encrypted under the transcripts key and a plaintext copy for the caller; the plaintext key of a key it generates itself reveals nothing about existing objects. dell1 does not gain it, and the reader's access does not move.
+
+### Arms (simulation, `check_transcripts_dell_decrypt.py`)
+
+- dell2 `kms:GenerateDataKey` on the key: implicitDeny before, allowed now (the one arm that moved).
+- dell2 `s3:PutObject` on `teams/transcripts/silver/research_meeting/date=2026-10-08/x.parquet`: allowed (identity leg) and, with the key leg, allowed end to end. `dell2_generate_ok=True`.
+- dell1, the same two arms: identity leg allowed (the group's S3 policy), key leg implicitDeny, composed PutObject refused. `dell1_generate_refused=True`.
+- `dell_write_refused` is restated: 7/10 now (was 8/10). The three arms that read allowed, by name: dell1 `kms:PutKeyPolicy`, dell2 `kms:PutKeyPolicy` (the applied resource-policy Allow, accepted at amendment 17, unchanged) and dell2 `kms:GenerateDataKey` (new). The arm that moved: dell2 `kms:GenerateDataKey`, refused to allowed. No other arm moved, for either user, against the render of `5c1d0af92c`.
+- The reader's Decrypt and Encrypt stay allowed; an unlisted user stays refused; the rendered document differs from the applied one by exactly one added statement (`statements_added=1`); the live key policy equals the `5c1d0af92c` render, so the check reads `ok=True` before the apply and reads `ok=False` after it by construction (the pre-apply guard of row `NFRA_CTLPLN-W14-S40`).
+- Mutant controls (scratch copies of `main.tf`, `TRANSCRIPTS_MAIN_TF`): the new statement widened to both Dells reads `dell1_generate_refused=False ok=False`; `kms:Encrypt` added to the new statement reads `dell2_generate_ok=False ok=False` with the unexpected move named.
+
+### Rollback
+
+Remove the statement (revert this commit) and apply again: the key policy is a single in-place update and nothing depends on the new statement. Until the revert is applied, dell2 keeps `kms:GenerateDataKey`.
+
+### Not done
+
+The apply; a plan against the backend; a real PutObject through SSE-KMS (it needs the apply and is another route's). The simulator takes the union of identity and resource policies and does not model the KMS rule that a customer-managed key needs its key policy to permit use; the key leg here uses a neutral identity policy so only the key policy can allow, and the S3 leg is the user's live identity policies only.
