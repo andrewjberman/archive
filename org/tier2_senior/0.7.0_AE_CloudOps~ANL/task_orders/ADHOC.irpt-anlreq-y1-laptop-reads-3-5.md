@@ -4,10 +4,22 @@
 <issued_by>2.0.0_SA_COO~C</issued_by>
 <issued_to>0.7.0_AE_CloudOps~ANL</issued_to>
 <date>2026-10-09</date>
-<status>complete</status>
+<status>pending</status>
 <risk>SERVED</risk>
 
 <title>IRPT_ANLREQ release 1: the laptop's READ-ONLY reads 3a, 3b, 3c, 4 and 5 -- booleans, an expiry and outcome names only</title>
+
+<amendment>
+AMENDMENT 1 (issuer, 2026-10-09 ~15:1xZ) -- REOPENED for a RE-RUN of reads 3a, 4 and 5 only, same spec @66b6d08b9c, on the FRESH request
+REQ-4b5155ac2ea9467ab771b414 (tenant 49financial; ticket TCK-20261009-a1052909). dell2 2.0.0_SA_COO~Y2 (relay 0.0.0_AB_MSTR msg 108017): its
+retention row RET-f566934a... has new bytes and is not shared, so the first pass's single cause (the deleted shared row) does not apply.
+- 3a: the owner's signed-link sha matches the retained original; return 3a and 3a_link_expiry.
+- 4: the stored record's ticket_id AND the composition route's ticket_id equal the ticket; return 4_record and 4_route.
+- 5: the pdf route. If the job is still QUEUED, wait for READY (poll read-only, a few minutes apart) before read 5. 5_outcome is one of
+  SIGNED, NOT_RETAINED or RETENTION_RECORD_UNAVAILABLE.
+Same rules: read-only, existing principals only, booleans, the expiry and outcome names only; no link, email, principal id or record body
+anywhere. Write `org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/Y1_laptop_reads_3a_4_5_rerun_result.json`, send its sha256 to me.
+</amendment>
 
 <context>
 dell2 asks the laptop for five reads that dell2 cannot make. The spec is the whole contract: read it first.
