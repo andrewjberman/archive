@@ -30,6 +30,8 @@ def _served_ok(b: dict, deployed: str) -> bool:
             and isinstance(b.get("mail_domain_entries"), int)
             and b.get("mail_domain_entries") == b.get("mail_domain_entries_signed")
             and b.get("concierge_families_revoked_since_deploy") == 0
+            and b.get("bloomberg_tools_signed") in (4, 5)
+            and b.get("bloomberg_tools_allowed") == b.get("bloomberg_tools_signed")
             and b.get("grants_written") == 0)
 
 
