@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-26.dell2-shell-parity-standing-apply-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-26.dell2-shell-parity-standing-apply-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "05f4f958fd281905e5c053b13f15a30ce6865f28"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "7dd661eb9f5f42815d2541ac729747c3d8a25cbc",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-26.dell2-shell-parity-standing-apply-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell2_shell_parity_20261009/after-policy.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Applied 2026-10-09T03:52:21.7867819Z; live v7 exactly equals the repository policy; both Dell users' required arms verified; untargeted default replan exits 0 with no changes; no SSM command sent",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\" expects exit=0",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/nfra-ctlpln-identity plan -input=false -no-color -lock=false -detailed-exitcode; echo \"exit=$?\"",
+      "expect": "exit=0",
+      "output_evidence": "dell2_shell_parity_20261009/replan.txt and replan-verdict.json: untargeted=true, default_variables=true, exit=0, no_changes=true",
+      "denominator": "one complete untargeted default-variable plan of the NFRA_CTLPLN identity root after the apply",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "live_policy": {
+      "description": "The live default policy version distinguishes a completed standing-access apply from the former temporary window document",
+      "expected_landed": "v7 document equals dell2_ssm_policy.json and temporary window statements are absent",
+      "expected_not_landed": "v6 remains default or either temporary window statement remains",
+      "observed": "v7 is default; canonical_live_equals_repo=true; only the four repository statement Sids remain",
+      "status": "PASS"
+    },
+    "permission_boundary": {
+      "description": "The positive shell pair and three negative arms distinguish shell parity from a wider shell/session grant",
+      "expected_landed": "shell document and resident host allowed; PowerShell, export render, and StartSession explicitDeny",
+      "expected_not_landed": "positive pair denied or any negative arm allowed",
+      "observed": "all required decisions match",
+      "status": "PASS"
+    },
+    "dell1_unchanged": {
+      "description": "dell1's four before/after arms are the control for collateral policy movement",
+      "expected_landed": "all four signatures identical",
+      "expected_not_landed": "any signature changes",
+      "observed": "dell1_four_arms_unchanged=true",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL2_SHELL_PARITY_20261009.md@afef73dacf",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261009_025xZ_DELLS_RUN_THEIR_OWN_SCRIPTS_NO_LAPTOP_WAIT.md@de8b26aa1f"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Re-apply the NFRA_CTLPLN identity root at AMENDMENT 24 merge first parent d3918e91e4f9c1a6bc081bde6c25b7c4451617d4 using a newly reviewed exact 0/1/0 saved plan; this restores the previously live temporary-window policy state.",
+  "scope": "One in-place update to aws_iam_policy.dell2_ssm; no SSM command; no shared-branch push.",
+  "declared_exclusions": [
+    {
+      "item": "host-role runtime reach and dell2's later command executions",
+      "reason": "This order changes and verifies IAM policy state only; Dell command sends are reported separately after the fact."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell2_shell_parity_20261009/REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan / .tools/safe-apply.sh",
+      "invocation": "untargeted default-variable saved plan with isolated TF_DATA_DIR and shared TF_PLUGIN_CACHE_DIR",
+      "result": "pre-apply exact 0/1/0 on aws_iam_policy.dell2_ssm; apply 0/1/0; post-apply untargeted plan exit 0 with no changes"
+    },
+    {
+      "tool": "comp-iam and aws iam simulate-principal-policy",
+      "invocation": "two Dell users; shell document/resident host, PowerShell, export render, and StartSession arms",
+      "result": "dell2 positive pair allowed and three negative arms explicitDeny; dell1 four arms unchanged"
+    },
+    {
+      "tool": "comp-adversary compose",
+      "invocation": "TO-APPLY-26 governing order",
+      "result": "validation context declaration written to adversary-context.json"
+    }
+  ]
+}

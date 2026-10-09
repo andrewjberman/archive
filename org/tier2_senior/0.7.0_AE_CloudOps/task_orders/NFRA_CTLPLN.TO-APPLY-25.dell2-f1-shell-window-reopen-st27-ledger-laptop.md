@@ -4,9 +4,14 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
+
+  <closure>
+    COMPLETE (issuer, ~04:0xZ). B2 opened 2026-10-09T02:37:46Z; LEG C2 SUPERSEDED by TO-APPLY-26 (standing access applied 03:52:21Z, the
+    window variable retired). Ledger closed SUPERSEDED (@8d42d8967a).
+  </closure>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
