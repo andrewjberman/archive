@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-57",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "dd8541bb97"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "dd8541bb97",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-57.crossover-181.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~35",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~35/CROSSOVER_E1.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~35/tieout_compound_v2.py",
+      "kind": "script",
+      "commit_or_etag": "717ad888a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Imports round 30's tieout_compound.py; overrides the fee base only; ran locally over a cached read, S3 reads only, 0 vendor calls.",
+      "artifact_covered_by": [
+        "DB31-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~35/CROSSOVER_E1.json",
+      "kind": "config_data",
+      "commit_or_etag": "717ad888a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "181 rows, four cause classes; fix.after_within 8,088.",
+      "artifact_covered_by": [
+        "DB31-1-AC1",
+        "DB31-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~35/CROSSOVER_E1.md",
+      "kind": "doc",
+      "commit_or_etag": "717ad888a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Counts-only summary, no account number, name or balance.",
+      "artifact_covered_by": [
+        "DB31-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB31-1-AC1",
+      "criterion_verbatim": "DB31-1-AC1 -- the 181 each carry one traced cause class; counts equal the tally. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r31/p31_round31.py\" . DB31-1-AC1",
+      "output_evidence": "OK: 181 of 181 classed into 4 class(es): {'FEE_BASE_BALANCE_PATH': 134, 'ADDITIVE_TIE_COINCIDENCE': 22, 'FLOW_TIMING_RESIDUE': 23, 'NEGATIVE_FEE_ADDBACK': 2}\nDB31-1-AC1 PASS",
+      "denominator": "181 of 181 crossover segments classed; counts 134+22+23+2 = 181",
+      "status": "PASS",
+      "expect": "DB31-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB31-1-AC2",
+      "criterion_verbatim": "DB31-1-AC2 -- defect classes are listed; when any exists, a fix re-grades the full tie-out with within >= 7,459; when none, fix is null. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r31/p31_round31.py\" . DB31-1-AC2",
+      "output_evidence": "OK: defect classes ['FEE_BASE_BALANCE_PATH'] fixed in org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~35/tieout_compound_v2.py; within after the fix 8088 >= 7459\nDB31-1-AC2 PASS",
+      "denominator": "9,078 of 9,078 segments re-graded; 8,088 within, 990 outside; 1 defect class",
+      "status": "PASS",
+      "expect": "DB31-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Round 30's own two-point base is the negative arm: the same module without the override reproduces 7,459 within and 0 of the 181 back within; the v2 daily base brings 134 of the 181 back.",
+      "expected": "v2 within >= 7,459; round 30 base 7,459",
+      "observed": "variant sweep over the cached read: two-point base 7,459 (0 of 181), daily-mean base 8,088 (134 of 181), beginning-balance base 6,244, ending-balance base 6,056",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "One fetch of the landed pull and the served gold into a local cache; every figure computed from the cache.",
+      "observed": "not re-measured against S3",
+      "status": "N/A-WITH-REASON",
+      "reason": "Inputs are landed pull=20261004 and the served gold read once; the order asks for one analysis."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Class of the 133 segments the v2 fee base moves from WITHIN to OUTSIDE against round 30",
+      "reason": "Not asked by the order; counted and filed as row IRPT_DASHBD-W35-S1."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W35-S1"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~35/crossover_e1.py . --cache .scratch/cache.pkl",
+      "result": "{FEE_BASE_BALANCE_PATH: 134, ADDITIVE_TIE_COINCIDENCE: 22, FLOW_TIMING_RESIDUE: 23, NEGATIVE_FEE_ADDBACK: 2}; after_within 8088"
+    }
+  ]
+}
