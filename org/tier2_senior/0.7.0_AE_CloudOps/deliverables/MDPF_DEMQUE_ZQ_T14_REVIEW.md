@@ -30,9 +30,21 @@ Source reading exposed two producers sharing `backfill`: rivalfunds holdings and
 
 Rollback: unregister only the new named task; restore the prior version/bytes of the single initial object if it existed, otherwise remove only that newly written object. Capture prior object state before apply. No producer, auth, or IAM changes. No changes to the 07:00 task.
 
-## Outstanding
+## Completion and handoff
 
-Awaiting site-Z CTO signature on the committed candidate/act pair. AC2 and schedule are unperformed. No deployment has started, so no open deployment entry is owed yet.
+CTO site-Z half SIGNED at `3607c76017`, message 32558; conditions C1-C5 were applied. The initial upload and the schedule are complete. Change-management entry `org/critical_paths/change_management/20261009T0813Z_mdpf-demque-zq-t14-ledger_deploy_completion.md` is CLOSED, both legs proven.
+
+- C1: task runs the quoted uploader path in the shared workspace, not a worktree. Source remains `492cb5a2f1`.
+- C2: task wrapper reads `bbg_budget.ledger_dir()` without a producer import; missing day 1900-01-01 prints `SKIP: no ledger file for 1900-01-01`, exit 0. Other Python errors propagate. A native-command quoting error in the first scratch wrapper probe was fixed before task registration.
+- C3: exact target head-object returned 404 ABSENT before apply; prior-state JSON recorded. Rollback is removal of only that new daily object plus unregistration of the new task.
+- C4: ledger opened before the first write and closed after task read-back.
+- C5: exported `OPAL_BBGTML_daily_pull` XML compared equal before/after; existing task untouched.
+
+AC1 from shared workspace: five tests PASSED, `UPL-OK`. An in-memory mutant changed the holdings multiplier to 15; conversion test failed (`45 != 48`, exit 1). The unmodified suite then passed. No source/deployed file was mutated.
+
+AC2, both explicit day and exact no-argument order invocation: `LEDGER-OK rows=4 cells=17878 under s3://opal-data-assets/bloomberg/global/bronze/demand_ledger/dt=2026-10-08`. All four rows carry held claims. Served 1,040 bytes match local bytes; SHA256 `5ea616b2aaf151a888cbdd05097b0bb3ba375641c11294b9d490a292d023293f`, version `oTKuZIDmQ9me24YkH1uZ73gSF1gm5IU4`.
+
+Task `OPAL_DEMQUE_bbg_ledger_upload`: **Ready, enabled**, daily 08:30 Eastern, previous UTC day; Interactive user Opal Bloomberg, Limited. Next run October 9, 2026 at 08:30 Eastern. First scheduled fire is not yet observed. Its complete encoded/decoded action, trigger, principal and source pin are in `MDPF_DEMQUE_ZQ_T14_task.json` and exported XML; prior and served object evidence are in the adjacent `_prior.json` and `_served.json`.
 
 Candidate `492cb5a2f1` was safely merged locally as `ac9945ffe2`; the merge check found all three expected files present and the index matched HEAD on all three. Signature requested from `1.0.0_SA_CTO~Z` in message `20261009T080551Z_0.7.0_AE_CloudOps_ZQ_TO-DQ-t14__site-Z_WORLD_half_requested_o.md`.
 
@@ -40,4 +52,4 @@ Notebook coverage read is complete: the scheduled tplus1 runner and both named n
 
 Observation commit: `db1544544d`. The row gate rejected the issuer-required `W1` identifiers because this assignee is a named seat, not a numeric worker. Used the gate's documented audited `surprise-row-override` with the exact TO BOUNDS requirement as the reason. The row corpus check found zero new schema failures; both override audit entries were written by safe-commit/the hook.
 
-Push state: **LOCAL**. `git ls-remote` read origin `box/sitez` at `1ebbf7ecdf1d9d3c9c22f2023a61f27895181075` and origin `CLOUD` at `393790d6ad4d11054e8b916f3d4c69447fca2817`. This seat has not pushed. Order remains pending.
+Push state: **LOCAL**. At the candidate report, `git ls-remote` read origin `box/sitez` at `1ebbf7ecdf1d9d3c9c22f2023a61f27895181075` and origin `CLOUD` at `393790d6ad4d11054e8b916f3d4c69447fca2817`. This seat has not pushed. The completion commit carries the validated proof and terminal order status.
