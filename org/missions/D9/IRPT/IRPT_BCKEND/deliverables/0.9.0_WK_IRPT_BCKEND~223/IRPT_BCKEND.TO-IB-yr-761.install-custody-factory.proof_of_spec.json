@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-761",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-761.install-custody-factory.md",
+    "group": "OTHER",
+    "vintage_commit": "d8a3a749b3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R76_Y.md",
+    "vintage_commit": "d8a3a749b3",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-761.install-custody-factory.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~223",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/generate_installed.py",
+      "kind": "script",
+      "commit_or_etag": "0ee21c796f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "custody branch installed in RoutedSubmissionService; BUILD_ONLY only, no deploy",
+      "artifact_covered_by": [
+        "Y76-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_generate_installed_custody.py",
+      "kind": "test",
+      "commit_or_etag": "0ee21c796f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline test, 6 cases",
+      "artifact_covered_by": [
+        "Y76-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/generate.tf",
+      "kind": "config_data",
+      "commit_or_etag": "0ee21c796f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "layer + custody-factory inline policy declared; no plan, no apply",
+      "artifact_covered_by": [
+        "Y76-1-AC2",
+        "Y76-1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "4280c6d9da",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 staged rows added, generate_installed.py re-pinned; BUILD_ONLY only",
+      "artifact_covered_by": [
+        "Y76-1-AC2",
+        "Y76-1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y76-1-AC1",
+      "criterion_verbatim": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/reports/tests/test_generate_installed_custody.py",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/reports/tests/test_generate_installed_custody.py",
+      "output_evidence": "6 passed in 2.15s (rc=0)",
+      "denominator": "6 passed, 0 failed",
+      "expect": "passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y76-1-AC2",
+      "criterion_verbatim": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r73/cochange_closure.py irpt-ycharts-generate",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r73/cochange_closure.py irpt-ycharts-generate",
+      "output_evidence": "cochange_closure rows=88 commits_checked=33 split=0; cochange_closure PASS (rc=0)",
+      "denominator": "88 rows, 33 commits, 0 split",
+      "expect": "cochange_closure PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y76-1-AC3",
+      "criterion_verbatim": "bash org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r71/y71_ac2.sh",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r71/y71_ac2.sh",
+      "output_evidence": "OK: import-closure line present; MISSING holdings_publication_port.py:11 imports HoldingsPublication from publication; symbol_closure modules=66 pairs=298 missing=1; symbol_closure FAIL (rc=1). Row IRPT_BCKEND-D2-W223-S1.",
+      "denominator": "298 import pairs, 1 missing",
+      "expect": "symbol_closure PASS",
+      "status": "FAIL",
+      "status_reason": "holdings_publication_port.py:11 `from publication import HoldingsPublication` is flagged because the zip's publication.py is the YCharts extract module; cannot be met as written without editing ~M2's module or replacing its port; refusal clause applied, row IRPT_BCKEND-D2-W223-S1."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; AC1 arm (c) is the order's own negative control: a reader whose authorize_snapshot returns False, 'yes' or None never admits (3 of 3 refused).",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- offline fakes",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "surprises": [
+    "IRPT_BCKEND-D2-W223-S1",
+    "IRPT_BCKEND-D2-W223-S2",
+    "IRPT_BCKEND-D2-W223-S3"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "declared_exclusions": [],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python infra/aws/lambda/ci/release-census.py irpt-ycharts-generate --pin HEAD",
+      "result": "changed_members=11 (built_members=104 live_members=100; 4 added, 7 changed)"
+    }
+  ]
+}
