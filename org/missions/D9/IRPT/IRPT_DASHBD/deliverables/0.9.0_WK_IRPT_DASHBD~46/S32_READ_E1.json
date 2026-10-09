@@ -1,0 +1,134 @@
+{
+ "cell": "DB-b-69",
+ "author": "0.9.0_WK_IRPT_DASHBD~46",
+ "day": "2026-10-06",
+ "kit": {
+  "zip": "C:/opal-inbound/kit-py312-dashbd/kit-py312-dashbd-20261009.zip",
+  "sha256": "c76af678143a5f92c4a9638a8ac25e47d2f2c294a014cd3a457af96c55ff17bf",
+  "venv": "dell2 Python 3.12.10, pip install --no-index --find-links <kit> -r requirements-dashbd-py312.txt (7 wheels, 0 refused)",
+  "side_loaded_from_dell2_site_packages": [
+   "boto3 1.42.54",
+   "botocore",
+   "s3transfer",
+   "jmespath",
+   "urllib3",
+   "psutil (rows W44-S1)",
+   "pytest 9.0.2 with _pytest, pluggy, iniconfig, packaging, colorama, pygments, py.py (row W46-S2)"
+  ]
+ },
+ "runtime_kit": {
+  "numpy": "1.26.4",
+  "pandas": "2.2.3",
+  "pyarrow": "14.0.2",
+  "python": "3.12.10"
+ },
+ "runtime_tested": {
+  "numpy": "2.5.3",
+  "pandas": "3.0.6",
+  "pyarrow": "25.0.1",
+  "python": "3.14.7"
+ },
+ "runtime_basis": "each printed by its own process: s32_classify.py prints RUNTIME on start under each interpreter (kit venv python; dell2 default python)",
+ "classify_and_sum": {
+  "fixture": "custodian fact_trn partitions date=2026-10-06, 2026-10-05 and 2026-10-02 of the 49F source, read from S3 through the producer's own FlowCache (in-kind closes from the same-day positions partition), classified whole and filtered to the handler's --local account set (7,604 accounts: declared population unioned with the newest reporting partition)",
+  "script": "s32_classify.py (one process per interpreter) and s32_compare.py (exact comparison, floats by ==, no tolerance)",
+  "per_day_field_account_counts": {
+   "2026-10-02/flow": 113,
+   "2026-10-02/income": 48,
+   "2026-10-02/unvalued": 0,
+   "2026-10-02/cash_unknown": 0,
+   "2026-10-05/flow": 124,
+   "2026-10-05/income": 4725,
+   "2026-10-05/unvalued": 9,
+   "2026-10-05/cash_unknown": 0,
+   "2026-10-06/flow": 91,
+   "2026-10-06/income": 5965,
+   "2026-10-06/unvalued": 5,
+   "2026-10-06/cash_unknown": 1
+  },
+  "outputs_compared": "flow, income, unvalued, cash_unknown (per account) and the census, per day, plus partition_absent",
+  "equal": true,
+  "differences": [],
+  "negative_control": "one flow value moved by 0.01 in a copy of the tested output: the comparison reported 1 difference (acct#1 flow 2026-10-06), so an unequal pair is detected",
+  "sha256_of_output_files": {
+   "kit": "f337b41a4abd31919d10de5945c73e65348cb94d1a34095deaee4f0301711fe1",
+   "tested": "a953ef05afc8adc8488c4905c216387630a108f901acacb5292519f05a58ca79"
+  }
+ },
+ "returns_table": {
+  "old_pin": "bc50d5711e",
+  "producer": "data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+  "method": "s32_returns.py: the HEAD handler's own --local compute over the same 7,604 accounts for 2026-10-06 on the kit, once with h.ard = the module executed from `git show bc50d5711e:<path>` (source sha256 cb38fe16f002a1cf5a07ddd704f01a6992528bbec04f2486e13dca3e6b734529) and once with HEAD's file (source sha256 9935f5c7bcd7bd9ca071ae7b7a672a49a5d96fcb0cd7d558c9fc3bc49157fc19)",
+  "rows": 6888,
+  "sha256_old_pin": "20ec963f5c8c1976ff589c255e9a081a99e7e6103bd1b533527ed04c373ecf14",
+  "sha256_head": "20ec963f5c8c1976ff589c255e9a081a99e7e6103bd1b533527ed04c373ecf14",
+  "identical": true,
+  "canonical_csv_sha256_old_pin": "8cb018148fa6892064f23c9f9994838d1aef1179bfc2cf753061ab7810132c5a",
+  "canonical_csv_sha256_head": "8cb018148fa6892064f23c9f9994838d1aef1179bfc2cf753061ab7810132c5a",
+  "basis": "sha256 of the parquet file bytes each run wrote"
+ },
+ "db_b_43_test": {
+  "file": "data/assets/scripts/gold/irpt_reporting/tests/test_account_return_daily_none.py",
+  "runtime": "kit (pandas 2.2.3)",
+  "served_default": {
+   "passed": 4,
+   "failed": 0,
+   "what": "the four test bodies of the file with future.infer_string left at pandas 2.2.3's default (False, the served setting): the test's set_option calls are no-ops",
+   "script": "s32_db43_option_off.py",
+   "pandas": "2.2.3",
+   "future.infer_string": false
+  },
+  "forced_option_on": {
+   "passed": 0,
+   "failed": 4,
+   "note": "test forces future.infer_string ON, a pandas-3 mode experimental on 2.2.3; str.contains raises TypeError; the served runtime never enters it (row W46-S1)",
+   "command": "python -m pytest -p no:cacheprovider -q (kit venv)",
+   "failure": "TypeError: expected bytes, re.Pattern found, at account_return_daily.py:720 via pandas 2.2.3 string_arrow._str_contains, in all four (the test forces future.infer_string ON); row IRPT_DASHBD-W46-S1"
+  }
+ },
+ "db_b_43_test_tested_version": {
+  "runtime": "pandas 3.0.6 (Python 3.14.7)",
+  "passed": 4,
+  "failed": 0
+ },
+ "full_run": {
+  "command": "kit venv python deliverables/0.9.0_WK_IRPT_DASHBD~44/kit_run.py (prints RUNTIME, then runs deliverables/0.9.0_WK_IRPT_DASHBD~31/lots_750_run.py default -> round 28's batched_e2_run.py -> handler.local) for 2026-10-06, producer DEFAULT_BATCH_SIZE (1000: 8 batches, 7 of 1000 and 1 of 604)",
+  "runtime": {
+   "numpy": "1.26.4",
+   "pandas": "2.2.3",
+   "pyarrow": "14.0.2",
+   "python": "3.12.10"
+  },
+  "population_count": 7604,
+  "accounts_run": 7604,
+  "lots_stage_completed": true,
+  "lots_peak_mb": 1672.3,
+  "limit_mb": 2048,
+  "wall_seconds": {
+   "total": 374.93,
+   "lots": 264.36,
+   "returns": 25.91,
+   "class": 80.36
+  },
+  "limit_seconds": 900,
+  "stage_peak_mb": {
+   "returns": 292.4,
+   "class": 320.8,
+   "lots": 1672.3
+  },
+  "peak_basis": "process peak working set (Windows), as rounds 30 and 34",
+  "refusals": 0,
+  "refusal_lines": [],
+  "refusal_count_basis": "lines of the run's log (56 lines, 8 batch lines) matching REFUSED, LOTS_SKIPPED or CLASS_SKIPPED",
+  "lots_refused": null,
+  "local_exit_head": null,
+  "rows": {
+   "returns": 6888,
+   "class": 24992,
+   "account_activity_daily": 6888,
+   "account_lot_realized": 2523,
+   "account_lot_unrealized_daily": 568009
+  },
+  "s33_holds": true
+ }
+}
