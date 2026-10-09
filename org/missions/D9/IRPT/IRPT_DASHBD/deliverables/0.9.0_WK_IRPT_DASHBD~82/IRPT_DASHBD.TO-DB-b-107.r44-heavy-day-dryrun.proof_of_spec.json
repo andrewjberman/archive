@@ -1,0 +1,81 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-107",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e8f96f579c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "a7752c98da",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-107.r44-heavy-day-dryrun.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_DASHBD~82",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~82/R44_HEAVY_DAY_DRYRUN.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~82/R44_HEAVY_DAY_DRYRUN.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the sizing record the criterion reads: day selection with denominator, before reads, one dry-run invoke, REPORT line, written objects 0, verdict UNDER",
+   "artifact_covered_by": [
+    "DB53-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "arn:aws:lambda:us-east-1:313476888478:function:irpt-49f-reporting-gold-lambda",
+   "kind": "aws_resource",
+   "commit_or_etag": "oNgy4rnrduvN9N2axhsHBfe9izZKd8dZGeFGXAIh+cM=",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "unchanged by this order: CodeSha256 read before and after the one dry-run invoke equals oNgy4rnr...; no apply, no rollback (verdict UNDER)",
+   "artifact_covered_by": [
+    "DB53-1-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB53-1-AC1",
+   "criterion_verbatim": "DB53-1-AC1 -- the heaviest lots day of 90 is chosen with its denominator and dry-run sized on live oNgy4rnr, writing nothing. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r53/p53_round53.py\" . DB53-1-AC1",
+   "output_evidence": "OK: UNDER on 2026-10-08 (585281 lot rows; 2 days read) -- 395.1 s, 1685 MB\nDB53-1-AC1 PASS\nexit code 0",
+   "denominator": "1 of 1 sizing records read; 2 landed lot days read in the 90-day window (2 date= partitions per table); 1 invoke of 1 allowed (request 8af18543-b038-4303-872e-7eb0edfb90f1, StatusCode 200, no FunctionError); 7620 accounts, 585281 lots rows; 0 of 2873 objects under the gold prefix modified after invoke start (positive control 23 objects today)",
+   "status": "PASS",
+   "expect": "DB53-1-AC1 PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the checker reads R44_HEAVY_DAY_DRYRUN.json only",
+   "observed": "re-run prints the same PASS line",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The checker at the base (no record), the order's 'Base: FAIL'.",
+   "expected": "DB53-1-AC1 FAIL at the base",
+   "observed": "the checker code returns 'FAIL: no <record>' when the record file is absent (rc 1); the record did not exist in the worktree before this order's run",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a heavier day than 2026-10-08",
+   "reason": "Only 2 days (2026-10-07, 2026-10-08) have landed lot partitions; the maximum is the day DB-b-103 already sized. Recorded in row IRPT_DASHBD-D2-W82-S1."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-D2-W82-S1"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "none",
+   "invocation": "no .py file was edited by this order",
+   "result": "not applicable"
+  }
+ ]
+}
