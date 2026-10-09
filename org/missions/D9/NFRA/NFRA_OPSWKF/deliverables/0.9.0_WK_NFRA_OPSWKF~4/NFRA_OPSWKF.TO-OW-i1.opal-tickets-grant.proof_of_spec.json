@@ -20,9 +20,9 @@
    "kind": "script",
    "commit_or_etag": "6fd48e6630",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "nothing applied; no AWS call; applier applies under a later apply order",
+   "deploy_evidence": "nothing applied; no AWS call; applier applies under a later apply order; AMENDMENT 1: two statements, UpdateItem conditioned to 4 attributes",
    "artifact_covered_by": [
-    "OW-i1-AC1"
+    "OW-i1-AC2"
    ]
   },
   {
@@ -30,21 +30,21 @@
    "kind": "script",
    "commit_or_etag": "6fd48e6630",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "nothing applied; no AWS call",
+   "deploy_evidence": "nothing applied; no AWS call; AMENDMENT 1: two statements, UpdateItem conditioned to 4 attributes",
    "artifact_covered_by": [
-    "OW-i1-AC1"
+    "OW-i1-AC2"
    ]
   }
  ],
  "acceptance": [
   {
-   "criterion_id": "OW-i1-AC1",
-   "criterion_verbatim": "python org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/R1_CHECKS/ow_checks.py i1-grant -> OW-I1-GRANT-OK",
+   "criterion_id": "OW-i1-AC2",
+   "criterion_verbatim": "python org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/R1_CHECKS/ow_checks.py i1-cond -> OW-I1-COND-OK (OW-i1-AC1 RETIRED by AMENDMENT 1)",
    "method": "command",
-   "invocation": "python org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/R1_CHECKS/ow_checks.py i1-grant",
-   "output_evidence": "OW-I1-GRANT-OK grant+env present (2 functions); fmt SKIPPED: no terraform on PATH | rc=0",
-   "denominator": "2 of 2 functions carry TICKETS_TABLE; 1 of 1 grant statement",
-   "expect": "^OW-I1-GRANT-OK",
+   "invocation": "python org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/R1_CHECKS/ow_checks.py i1-cond",
+   "output_evidence": "OW-I1-COND-OK GetItem stmt + UpdateItem stmt conditioned to ['events', 'linked_submission_id', 'status', 'ticket_id']; env on 2 functions | rc=0",
+   "denominator": "2 of 2 statements (Read, conditioned Write); 2 of 2 functions carry TICKETS_TABLE; 4 of 4 written attributes in condition",
+   "expect": "^OW-I1-COND-OK",
    "status": "PASS"
   }
  ],
@@ -55,9 +55,9 @@
    "status": "STABLE"
   },
   "mutant": {
-   "description": "HEAD (base) iam.tf and lambdas.tf run through the same check",
-   "expected": "check fails at base",
-   "observed": "OW-I1-GRANT-FAIL iam.tf grants no table/opal-tickets | rc=1",
+   "description": "prior one-statement iam.tf (HEAD) run through i1-cond",
+   "expected": "check fails",
+   "observed": "OW-I1-COND-FAIL a statement on table/opal-tickets carries actions ['dynamodb:GetItem', 'dynamodb:UpdateItem'] | rc=1",
    "status": "FIRED-AS-EXPECTED"
   }
  },
@@ -72,7 +72,7 @@
  "compiler_tools": [
   {
    "tool": "python",
-   "invocation": "python .tools/proof-of-spec-check.py <instance> OW-i1-AC1",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> OW-i1-AC2",
    "result": "see final report"
   }
  ]
