@@ -17,7 +17,7 @@ from pathlib import Path
 
 F = "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_anlreq_r1/APPLY-Y1_after_reads.json"
 FN = "irpt-status"
-BUILT = "WTGCJPiSEWSack1XvAMRyTGSVLX84VSm+3eC3eSPgsQ="
+BUILT = "BjUZjt2oq8GPJSibq4vD/0m8/LfdN0GF3THwCaBMVOM="  # AMENDMENT 1: pair REVISION 2 at f23639ea21 (was WTGCJPiS)
 ROLLBACK = "E7VKvhg3E9D5euWO+S649/iyAJ05xUmFPqHEAKDTFxA="
 ROUTE = "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/original"
 READS = [str(i) for i in range(0, 6)]

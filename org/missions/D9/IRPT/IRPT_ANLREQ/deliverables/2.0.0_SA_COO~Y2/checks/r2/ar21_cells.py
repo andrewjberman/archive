@@ -24,6 +24,8 @@ ROWS = [
     # AMENDMENT 3 (issuer 2026-10-09 ~08:3xZ): AR-y-22's reader ships only if irpt-status stages these at its drain (@75650bef27).
     ("irpt-status", "infra/aws/lambda/investor-reporting/ops/entry.py"),
     ("irpt-status", "infra/aws/lambda/investor-reporting/ops/owned_report.py"),
+    # AMENDMENT 4 (issuer 2026-10-09 ~10:4xZ, row IRPT_BCKEND-D2-S43): the installed route table must declare /original.
+    ("irpt-status", "infra/aws/lambda/investor-reporting/reports/status_installed.py"),
 ]
 FUNCTIONS = ("irpt-status", "irpt-ycharts-generate")
 Y2 = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks"

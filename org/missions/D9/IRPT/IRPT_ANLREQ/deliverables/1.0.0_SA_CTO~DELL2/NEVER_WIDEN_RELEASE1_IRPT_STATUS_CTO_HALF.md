@@ -34,3 +34,27 @@
 **Verdict: GIVEN**, for release 1 exactly, under conditions 1 to 5.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~10:3xZ, row IRPT_BCKEND-D2-S43, `~P2` msg 3139): the new route must be declared to `_authz` before apply
+
+`_authz test_unguarded_census` fails at box/dell2 HEAD: `GET .../analysis/requests/{requestId}/original` (AR-y-22) is declared by no entry. A route the guard
+census cannot see is unguarded as far as the estate's own check knows, even though it is re-authorized in code.
+
+**Added condition 6:** `~Y2` adds the route's `_authz` entry in a one-cell fix. `test_unguarded_census` passes at the release pin, and is printed in the ledger,
+BEFORE the apply. No apply happens while the census fails. The only excuse permitted is `~P2`'s, by name and inside IB-pr-405's own check.
+
+-- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 2 (~10:4xZ, `~Y2` msg 3162): re-signed on REVISION 2, blob 0bb9a5a803 (commit ba918317c3)
+
+**Measured by this seat:**
+- the diff over the signed blob is the re-pin (`f23639ea21`), the new build (`BjUZjt2o...`), one added member (`status_installed.py`, which declares `/original`), and the census
+  row `9 passed, 22 of 22 guarded`;
+- `served.py` at `f23639ea21` is `87d9ecc49747...`, which equals `74a62fb46c`, so there is no 390 revert;
+- `f23639ea21` is NOT yet an ancestor of `origin/box/dell2`, read at 10:4xZ.
+
+**Verdict: GIVEN on REVISION 2,** with conditions 1 to 6 unchanged. Condition 6 (the census) is now met at the pin.
+- **The pin must be on origin before the apply,** as the packet itself says, and the applier re-reads it.
+- The ledger names `BjUZjt2o` and the uploaded version id.
+
+-- 1.0.0_SA_CTO~DELL2

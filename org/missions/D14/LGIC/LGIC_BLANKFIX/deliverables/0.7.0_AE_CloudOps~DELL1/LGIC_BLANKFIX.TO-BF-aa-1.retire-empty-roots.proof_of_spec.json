@@ -1,0 +1,156 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "LGIC_BLANKFIX.TO-BF-aa-1",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-aa-1.retire-empty-roots.md",
+    "group": "OTHER",
+    "vintage_commit": "6c36e70e0a"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DELL1",
+  "never_widen_pair": {
+    "coo_half": "NONE OWED -- this act changes nothing in AWS. It is a git removal of two folders whose Terraform state is empty; no served output moves and no grant changes.",
+    "cto_half": "NONE OWED, same reason. The governing rulings are 4.0.0_SA_CRO's RETIRE call (ROOT_MAP_ROUND10_RULINGS_20261009.md R10-4) and 1.0.0_SA_CTO~DELL1's terms (ROUND_ANALYSIS.round10.md ADDENDUM 1, msg 2231; round11 section 3 item 1): prove each root empty, retire in git only, leave any remote-state object as an act for Andrew.",
+    "read_before_first_live_act": "The order was read in full and its pin 6c36e70e0a verified an ancestor of HEAD before any act.",
+    "amendment": "None. GO from 2.0.0_SA_COO~B1 msg 2262, acked READ."
+  },
+  "risk_class": "WORLD",
+  "rollback": "`git revert 26eb2403f8` restores both folders and their three files. Nothing in AWS was changed, so there is nothing to roll back there: both remote-state objects are untouched at the VersionIds recorded in the evidence file, and a revert plus `terraform init` returns each root to exactly the state it had. Trigger: either acceptance criterion failing, or the issuer withdrawing the RETIRE call.",
+  "scope": "Retire `infra/aws/terraform/canonical-schwab-si2-schedule` and `infra/aws/terraform/opal-assets-absence` from git, each proven empty in Terraform state and unowning in AWS first, with both backend state objects left in place. Read-only in AWS throughout.",
+  "status": "THE ACT IS COMPLETE AND BOTH INSTRUMENT CRITERIA PASS: BAA1-AC1 RETIRE ok=True (2 of 2 roots absent, state_empty, aws_owned_zero, remote_state_left) and BAA1-AC2 ALL-ROOTS ok=True roots_total=86 mapped=86 unmapped=0. Retire commit 26eb2403f8. BAA1-AC3 is judgment and left to 2.0.0_SA_COO~B1. THIS INSTANCE IS NOT YET VALID, for one issuer-side reason: the order carries NO <proof_genre>DEPLOY</proof_genre> marker on its own line, and the checker admits DEPLOY only for an order its issuer marked a deploy at the cut (3.0.0_SA_CVO verdict 29306 condition 1) -- 'DEPLOY is never self-declared'. The genre enum holds only BUILD and DEPLOY, and BUILD has to escape a mutant this act has no code for, so no self-serve value is honest. THE ORDER IS THEREFORE NOT FLIPPED: the order requires the instance validated BEFORE the flip. Same class as AMGT_RESAPP.TO-AMGT-dd-4, where the issuer added the marker by amendment @e549887a18 and the instance then read VALID. One ask sent to 2.0.0_SA_COO~B1.",
+  "go_message": "2.0.0_SA_COO~B1 msg 2262 (GO), acked READ. Msg 2283 (NUDGE on the staged index) was answered by the commit landing; the staging it measured was the gate unstaging and restaging across three refused attempts, described under controls.",
+  "controls": {
+    "state_list_empty_is_an_absence_not_a_failed_read": {
+      "description": "`terraform state list` printing nothing with rc=0 is, on its face, indistinguishable from a backend it could not read -- and the whole cell turns on that output being empty. So the same command, same binary, same session was run against a root known to hold resources.",
+      "expected_landed": "a populated root prints many addresses while the two target roots print none",
+      "expected_not_landed": "the populated root also prints nothing, which would mean the empty reads are the instrument",
+      "observed": "`terraform -chdir=infra/aws/terraform/opal-assets state list` -> 238 addresses (data.aws_caller_identity.current, data.aws_lambda_layer_version.pandas_pyarrow, ...). Both target roots -> no output, rc=0. The reads discriminate.",
+      "status": "PASS"
+    },
+    "a_resource_outside_state_but_live_in_aws": {
+      "description": "The cell's own adversary preflight names this arm. An empty state does not by itself prove the root is inert -- something it describes could exist in AWS, created by hand or by another root.",
+      "expected_landed": "the AWS-plane read returns nothing owned by either root, with its denominator printed",
+      "expected_not_landed": "a resource the root manages turns up live, which under the refusal clause would STOP that root",
+      "observed": "canonical-schwab-si2-schedule: 0 hits across 2844 aws nodes. opal-assets-absence: 1 hit, a LOG_GROUP, named not rounded away (see the orphan control). Neither root OWNS anything -- an empty state manages zero resources -- so the refusal clause, which turns on a non-empty state or a resource owned by the root, does not fire.",
+      "status": "PASS"
+    },
+    "the_graph_zero_was_not_taken_at_face_value": {
+      "description": "comp-find --corpus aws prints its own caveat: a measured zero is not a claim of absence, because only resource classes the graph MODELS can match. Taking the 0 for root 1 as proof would inherit exactly that gap, so two independent reads were run against what the root's own header describes.",
+      "expected_landed": "no EventBridge rule carries the cron the root specifies, and the re-timing it describes is traceable elsewhere or absent",
+      "expected_not_landed": "a rule with that cron exists, meaning the root's plan did land and the folder is not a dead stub",
+      "observed": "Over 153 rules (auto-paginated, denominator printed) NO rule carries `cron(35 8,20 * * ? *)`. Four live rules DO name schwab/si2 under different names and crons (canonical-schwab-si2-08242234-daily-pull cron(15 10,22), -08335338- cron(45 9,21), schwab-canonical-si2-08403355-pull-daily cron(45 10,22), opal-assets-silver-schwab-sweep-daily). So the re-timing landed elsewhere and this root is a superseded intention. The instance it names in locals, i-0f3d57a97f14727af, is running (ec2 describe-instances) and is not owned here.",
+      "status": "PASS"
+    },
+    "the_orphan_log_group_is_named_rather_than_rounded_away": {
+      "description": "Root 2's single graph hit could have been reported as 'AWS-OWNED count=0' with the hit dropped. It is the one fact this retirement makes harder to find later, so it was read directly rather than inferred from the graph.",
+      "expected_landed": "the hit is characterised: what it is, whether its function exists, and whether it holds anything",
+      "expected_not_landed": "a bare count of 0 with the hit unmentioned",
+      "observed": "`/aws/lambda/opal-assets-absence-check` is LIVE, drift=LIVE-no-DECLARED, storedBytes 4811, retentionInDays None (never expires), 6 log streams -- so the function ran before it was removed. The function itself is GONE: get-function-configuration -> ResourceNotFoundException. Filed as surprise row LGIC_BLANKFIX-D1-S3 and listed for Andrew in the report.",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.7.0_AE_CloudOps~DELL1/RETIRE_EVIDENCE_round12.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The evidence file the order requires, carrying one STATE-LIST, AWS-OWNED and REMOTE-STATE line per root AT THE START OF A LINE, each followed by the output it rests on. First written with those tokens inside markdown headings, which defeated check_retire_round12.py's ^-anchored regexes (:39-41) and read as RETIRE ok=False state_empty=0 aws_owned_zero=0 remote_state_left=0 -- the git half had landed and the evidence half was simply unparseable. Corrected to line-start and re-run."
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "26eb2403f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Carries surprise row LGIC_BLANKFIX-D1-S3, the orphaned log group, with the id deviation recorded in the row's own notes."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BAA1-AC1",
+      "criterion_verbatim": "RETIRE ok=True",
+      "method": "command",
+      "invocation": "python org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/2.0.0_SA_COO~B1/check_retire_round12.py",
+      "output_evidence": "Last printed line: `RETIRE ok=True roots=2 absent=2 state_empty=2 aws_owned_zero=2 remote_state_left=2`. The two lines above it read `ROOT canonical-schwab-si2-schedule tracked_files=0` and `ROOT opal-assets-absence tracked_files=0`. The issuer's base dry-run at the cut read `RETIRE ok=False roots=2 absent=0`, so the check moved from FAIL to PASS on this act and is not a tautology.",
+      "denominator": "2 of 2 roots: absent 2, state_empty 2, aws_owned_zero 2, remote_state_left 2",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BAA1-AC2",
+      "criterion_verbatim": "roots_total=86 mapped=86 unmapped=0",
+      "method": "command",
+      "invocation": "python lib/opal_naming.py census --all-roots",
+      "output_evidence": "Last printed line: `ALL-ROOTS ok=True roots_total=86 mapped=86 unmapped=0 completed=86 stopped=0 items=2599 right=670 fix=1636 not_asked=268 pattern=25 carded=0 refused=0 hole=0 carded_class_holes=0 source_bucket_holes=0 event_rule_holes=0 unknown_word_holes=0 other_holes=0 stale_hints=0 uncounted=1 counted_at_caller=17`. Round 11's close read `roots_total=88 mapped=86 unmapped=2`, so the two unmapped roots are the two retired here and the estate now reads every remaining root mapped.",
+      "denominator": "86 of 86 roots mapped, 0 unmapped, 0 stopped, 0 holes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BAA1-AC3",
+      "criterion_verbatim": "2.0.0_SA_COO~B1 reads the evidence file and the report: no apply, destroy or S3 delete ran, and the three standing conditions were not touched. You record the paths and NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "read by 2.0.0_SA_COO~B1 of the evidence file and the report",
+      "output_evidence": "NO VERDICT RECORDED, as the order instructs. The paths: evidence `org/missions/D14/LGIC/LGIC_BLANKFIX/deliverables/0.7.0_AE_CloudOps~DELL1/RETIRE_EVIDENCE_round12.md`; retire commit `26eb2403f8`; surprise row `LGIC_BLANKFIX-D1-S3` in `org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md`. What this seat states as fact rather than verdict: no `apply`, `destroy`, `import`, `state rm`, `s3 rm` or `safe-apply` was run in this cell, and no send was made at all.",
+      "denominator": "not computable by this seat",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion, graded by 2.0.0_SA_COO~B1 and never self-graded (CLAUDE.md rule 27 L9). The order says explicitly: 'You record the paths and NO verdict.'"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Deleting either backend state object in S3",
+      "reason": "Explicitly Andrew's act, per the CTO terms the order carries: 'leave any remote-state object in place, as an act for Andrew'. Both were head-object'd and LEFT, with size and VersionId recorded, and both are listed for Andrew in the report."
+    },
+    {
+      "item": "Deleting the orphaned log group /aws/lambda/opal-assets-absence-check",
+      "reason": "Out of the cell's grant -- the <paths> block names the two folders plus the investigation file -- and the cell is read-only in AWS. Surfaced as a row and listed for Andrew instead."
+    },
+    {
+      "item": "Removing the leftover untracked .terraform/ directories in the two retired folders",
+      "reason": "They are provider caches this cell's own `terraform init` created, and they are gitignored (infra/aws/terraform/.gitignore:1), so they are absent from git as the criterion requires. Deleting them would be an `rm -rf` outside /tmp and .runtmp, which the cloud-ops profile does not pre-approve. Named in the report for whoever owns the box's disk."
+    },
+    {
+      "item": "Adding or changing any name or address",
+      "reason": "The order states it: this act adds no name, so org/mcp/naming-place.enforce does not refuse. The naming limb passed on the commit."
+    }
+  ],
+  "surprises": [
+    "LGIC_BLANKFIX-D1-S3: retiring opal-assets-absence removes the last repo trace of an orphaned log group -- /aws/lambda/opal-assets-absence-check is live (6 streams, 4811 B, no retention, LIVE-no-DECLARED) while the function it belongs to does not exist. Not owned by the root, so the refusal clause did not fire; reported rather than rounded into the count=0."
+  ],
+  "forward_notes": [
+    "The order's prescribed surprise-row id scheme, LGIC_BLANKFIX-D1-CO1-S<k>, is refused by the live gate: only the CO1 segment is wrong, since the D1 coordinate is REQUIRED for a row filed on dell1 and a bare id claims the laptop fabric. This seat first over-corrected to a bare LGIC_BLANKFIX-S14 after reading the gate's abbreviated grammar string, and the fabric limb refused that too -- correctly. Worth fixing in the order template: any future CO<n> scheme will be refused the same way.",
+    "A folder-level pathspec to safe-commit reached an IGNORED provider binary. `git rm -r <folder>` plus the folder as the pathspec staged infra/aws/terraform/canonical-schwab-si2-schedule/.terraform/providers/.../terraform-provider-aws_v5.100.0_x5.exe, and the commit-gate's large-file limb refused it -- correctly, since the only remedy after the fact is a history rewrite of a shared branch. `.terraform/` IS gitignored at infra/aws/terraform/.gitignore:1, so the ignore was bypassed somewhere in the staging path. Retiring any Terraform root after an init will hit this; the safe form is file-level pathspecs of the tracked files, which is what landed here.",
+    "The order was cut without <proof_genre>DEPLOY</proof_genre>, which no seat but the issuer may add -- the checker's whole point is that the genre is the issuer's mark, not the applier's claim. dd-4 hit this exact gap in round 80 and closed it with a one-line amendment. Worth adding to the LGIC_BLANKFIX cut template, since every CloudOps order under it will need the marker to produce a valid instance."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/2026-10-09/healgap_r2_1_landed_refused_once_and_a_verify_leg_dell1_cannot_close.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --corpus aws 'canonical-schwab-si2-schedule' and comp-find --corpus aws 'opal-assets-absence'",
+      "result": "PASS -- 0 hits and 1 hit respectively, each across a printed denominator of 2844 aws nodes, graph vintage 2026-10-09 06:17:57Z, stitch manifest 1089b9991c93. The tool's own caveat (only modeled classes can match) was carried and answered with two direct reads rather than dropped."
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "NOT RUN -- DECLARED-NOT-APPLICABLE by the order",
+      "result": "No schedule is created or changed; neither root holds one. Independently consistent with what was measured: no rule carries the cron root 1 describes."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "NOT RUN -- DECLARED-NOT-APPLICABLE by the order",
+      "result": "No grant moves; the cell is read-only in AWS."
+    }
+  ],
+  "regression_reads": {
+    "nothing_in_aws_changed": "No apply, destroy, import, state rm, s3 rm or safe-apply ran. Both backend objects remain at the VersionIds read before the commit: canonical-schwab-si2-schedule/tfstate G1Hy9VgQTCK_PCTJYWhQQ0eDwLx.ReWR (343 B, 2026-08-04), opal-assets-absence/tfstate Dm9SuGZIxfEG3z7WpyX3eAQk8Gm3CUlt (180 B, 2026-07-18).",
+    "the_si2_box_is_untouched": "i-0f3d57a97f14727af reads `running` after the commit as before it; it was never managed by the retired root.",
+    "the_live_si2_pulls_are_untouched": "The four live schwab/si2 rules keep their own crons; none was declared by either retired root, so no schedule moved.",
+    "estate_root_count": "88 roots with 2 unmapped at round 11's close -> 86 roots with 0 unmapped now. The delta is exactly the two folders retired here and nothing else.",
+    "three_standing_conditions": "NOT TOUCHED. This cell made no send at all, so conditions (1) and (2) cannot fire; it wrote no firm data bucket, never assumed the 49F principal, and moved no 49 Financial data (3)."
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_BLANKFIX/decompositions/LGIC_BLANKFIX_DECOMP.round12.md",
+    "vintage_commit": "6c36e70e0a",
+    "to_ref": "org/missions/D14/LGIC/LGIC_BLANKFIX/task-orders/LGIC_BLANKFIX.TO-BF-aa-1.retire-empty-roots.md"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ag-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ag-1.price-basis-census.md",
+    "group": "OTHER",
+    "vintage_commit": "0a2c4cb744"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~60",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round33.md",
+    "vintage_commit": "0a2c4cb744",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ag-1.price-basis-census.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_price_basis_census.py",
+      "kind": "script",
+      "commit_or_etag": "e5b8ad94ba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only census; no S3 write",
+      "artifact_covered_by": [
+        "CB33ag1-AC1",
+        "CB33ag1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB33ag1-AC1",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_price_basis_census.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~60 expect: PRICE-BASIS tickers=",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_price_basis_census.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~60",
+      "expect": "PRICE-BASIS tickers=",
+      "output_evidence": "rc 0; LAST line: PRICE-BASIS tickers=3580 as_traded=175 dividend_adjusted=2079 indistinguishable=872 mixed=79 no_yahoo=109 other=266 yahoo_calls=72 adv_days_on_adjusted=638948/1669040",
+      "denominator": "3580 of 3580 tickers carrying yahoo_finance rows classed (store 4,003 tickers, 11,291,021 rows); 72 Yahoo calls; 638,948 of 1,669,040 served account-days (distinct account,date) on adjusted prices",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB33ag1-AC2",
+      "criterion_verbatim": "JUDGMENT: the rule commit precedes the output commit in git, and each class follows from the printed comparison by that rule.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "git log --oneline -- data/assets/scripts/silver/commonwealth_price_basis_census.py org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~60 ; read price_basis_census.csv beside the rule in the script docstring",
+      "expect": "CVO grades at L9",
+      "output_evidence": "rule+script commit e5b8ad94ba (no output in it) precedes the output commit; the script blob at the run equals e5b8ad94ba (git diff e5b8ad94ba -- script is empty); per-ticker measures (share_close, share_adj, share_ra_c, rc_spread, adj_dev, overlap_days) are in price_basis_census.csv; two debug runs with --max-tickers 12 on real data preceded the full pass, rule unchanged",
+      "denominator": "3580 of 3580 tickers",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion, 3.0.0_SA_CVO at L9 is the oracle"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "no second full run: the task order asks for none; the Yahoo pulls are cached under .scratch/advi_cotbkf/yahoo_census/ so a rebuild reuses them",
+      "observed": "not re-run",
+      "status": "N/A-WITH-REASON",
+      "status_reason": "one-pass census against a live vendor; the task order names no determinism control"
+    },
+    "mutant": {
+      "description": "the task order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a rerun of the full pass for byte-identity",
+      "reason": "not asked; cached pulls make a rebuild possible"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W60-S1",
+    "ADVI_COTBKF-D2-W60-S2"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~60/ADVI_COTBKF.TO-CB-ag-1.price-basis-census.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/assets/scripts/silver/commonwealth_price_basis_census.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~60",
+      "result": "PRICE-BASIS tickers=3580 as_traded=175 dividend_adjusted=2079 indistinguishable=872 mixed=79 no_yahoo=109 other=266 yahoo_calls=72 adv_days_on_adjusted=638948/1669040"
+    }
+  ]
+}
