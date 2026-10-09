@@ -30,7 +30,7 @@ The row counts equal the COO half's.
 
 ## What the round found
 
-- **FWD-3 is SERVED** (measured, verify above), with B3S728504 and B3S728506, 2023-05 and 2023-06 ABSENT as REGRESSED_UNDER_R28.
+- **FWD-3 is SERVED** (measured, verify above), with acct#79d02c2c and acct#4a890dd1, 2023-05 and 2023-06 ABSENT as REGRESSED_UNDER_R28.
 - **Dividend trace (CB29ac2-AC2 is yours):** all 4 months `untraced`. No source holds the ex-dates of 808524102 or 808524839. That
   covers the 39-row EXDATES csv and the 32-CUSIP store listing. The dividend bound (0.416 pp) is above the regression (0.391 pp), so
   dividend dating is not ruled out.
