@@ -53,7 +53,7 @@ CTO half  1.0.0_SA_CTO~DELL2 -- owed
   | account_day_value | 21,102,041 | `214f291e261c4f5dd2ca92ca83ae21db7766f84...` |
   | month_grades | 82,593 | `ba99ee872423d4fe3e1e1c264fcf3e4e58e88275fe7dc7923399...` |
 
-  The ABSENT list: B3S728504 and B3S728506, 2023-05 and 2023-06 (n=4, reason `REGRESSED_UNDER_R28`, `manifest_list_same=True`).
+  The ABSENT list: acct#79d02c2c and acct#4a890dd1, 2023-05 and 2023-06 (n=4, reason `REGRESSED_UNDER_R28`, `manifest_list_same=True`).
 - **The applier rebuilds at its own HEAD.** Its dry run must name the same three keys and the same 4 ABSENT months. The hashes may differ
   only by `run_commit`; the row counts must be equal. Anything else: stop.
 - **The three prefixes were re-read** before giving this half, via the builder's `--verify`, which read them `served_rows=ABSENT` at

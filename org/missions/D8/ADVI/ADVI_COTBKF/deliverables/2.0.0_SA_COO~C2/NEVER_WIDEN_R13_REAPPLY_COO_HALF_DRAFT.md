@@ -20,7 +20,7 @@ applies). Restore is `copy_object` from the pins (versioning Enabled).
 ## 2. EXPECTED OUTCOME, BOTH BRANCHES
 
 - **A:** both scripts rc 0; VersionIds move off the pins; read-back of `crosswalk.parquet`: 1,533 rows, 471 MATCHED; of `account_links.parquet`:
-  1,450 rows, 212 LINKED, with B3S605711 -> B3S676722 LINKED and RGY003616 NOT_LINKED (LEFT_COMMONWEALTH); and the CB-m-2 diff re-run
+  1,450 rows, 212 LINKED, with acct#e1e2dacb -> acct#f6464238 LINKED and acct#d6187d4b NOT_LINKED (LEFT_COMMONWEALTH); and the CB-m-2 diff re-run
   against the NEW applied tables reads 0 changed.
 - **B:** a refused Put or any count off: restore all four pins, file the row, close the ledger ROLLED-BACK.
 

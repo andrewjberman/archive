@@ -14,7 +14,7 @@ Read-only; no write anywhere.
 ## Result
 
 - **Population:** 890 AMLP transaction rows on 99 accounts; 471 accounts are MATCHED (living clients) in the crosswalk.
-- **Account chosen:** 0QF880237, MATCHED, the living client with the most AMLP rows (43).
+- **Account chosen:** acct#8039e07b, MATCHED, the living client with the most AMLP rows (43).
 - **Valuation:** quantities signed by the chain's own table (`commonwealth_signs`: plus `by` `dvr` `li`, minus `sl` `loca`, `dv` no
   quantity). The account held AMLP from **2016-03-04 to 2020-05-15**, giving **1,058 valued days**, every one priced from the store (0 unpriced).
   - Peak quantity 15,724.494; peak value 97,162.55 on 2017-05-23.

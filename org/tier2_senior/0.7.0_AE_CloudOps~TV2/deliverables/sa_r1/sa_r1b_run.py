@@ -65,6 +65,25 @@ IRPT_SERVED = frozenset({
 })
 TICKET_FN = "opal-ticket-api"
 
+# These two are census MORE_THAN_ONE but read NO selected_tenant: the ticket plane is clamped by
+# _in_profile_scope on the TICKET's requester.firm. Identical bytes across firm arms is therefore expected
+# and says nothing either way, so a selector test on them is a category error.
+NO_SELECTOR_CARRIER = frozenset({"/api/scoped/tickets", "/api/scoped/tickets/metrics"})
+
+_VERDICTS = {}
+
+
+def verdict_of(key):
+    """The source census's verdict for 'METHOD /route', or NOT-IN-SOURCE-CENSUS for a live-only route."""
+    if not _VERDICTS:
+        src = json.loads(CENSUS.read_text(encoding="utf-8"))
+        for r in src["rows"]:
+            vs = {v.get("verdict") for v in r["per_token"].values()}
+            _VERDICTS[r["method"] + " " + r["route"]] = (
+                "MORE_THAN_ONE" if "MORE_THAN_ONE" in vs else
+                "ONE_FIRM" if "ONE_FIRM" in vs else sorted(str(v) for v in vs)[0])
+    return _VERDICTS.get(key, "NOT-IN-SOURCE-CENSUS")
+
 # AMENDMENT 1: the F10 leg M precedent attachment, so a CREATE arm reaches the firm clamp.
 SYN_ATTACHMENT = {
     "upload_id": "test-sar1b-20261009",
@@ -386,11 +405,27 @@ def census(token, run_id):
         "tickets_created_by_the_census": created_tickets,
         "arms": arms,
     })
+    # >> WHAT "BEHAVES AS ALL" IS, AND WHAT IT IS NOT. Corrected after run 2 of this order stopped on it.
+    # A route that returns the SAME bytes for every firm has no firm axis to leak through; the pair's own
+    # blast radius v2 already accepts that "the 51 NO_FIRM routes stay reachable as for any opal-capital
+    # user", and two ticket routes read no selected_tenant at all, so a selector test on them is a category
+    # error. Treating every selector-ignored arm as a STOP (which run 2 did) re-stops on exactly the arms
+    # run 1 had already classified as expected. The census verdict is the discriminator: an ignored selector
+    # is a REAL finding only on a route the census says resolves to one or more FIRMS.
+    unexpected_all = [t for t in selector_ignored
+                      if verdict_of(t[1] + " " + t[2]) in ("MORE_THAN_ONE", "ONE_FIRM")
+                      and t[2] not in NO_SELECTOR_CARRIER]
+    expected_all = [t for t in selector_ignored if t not in unexpected_all]
+    summary["selector_ignored_expected"] = expected_all
+    summary["selector_ignored_unexpected"] = unexpected_all
     stop = None
     if off_admits:
         stop = "OFF-LIST FIRM ADMIT on %d arm(s): %s" % (len(off_admits), off_admits[:4])
-    elif selector_ignored:
-        stop = "BEHAVES AS ALL on %d arm(s): %s" % (len(selector_ignored), selector_ignored[:4])
+    elif unexpected_all:
+        stop = ("BEHAVES AS ALL on %d arm(s) of a FIRM-SCOPED route: %s"
+                % (len(unexpected_all), unexpected_all[:4]))
+    print("  => selector-ignored: %d expected (NO_FIRM or no selector carrier), %d UNEXPECTED"
+          % (len(expected_all), len(unexpected_all)))
     print("  => armed %d | off-list admits %d | behaves-as-ALL %d | create arms not naming the firm %d"
           % (len(armed), len(off_admits), len(selector_ignored), len(create_fails)))
     print("  => STOP=%s" % stop)
@@ -593,10 +628,42 @@ def data_refresh_zero_calls(trace, start_unix, end_unix):
     save(trace)
 
 
+def limb3_non_500(token):
+    """AMENDMENT 3 precondition limb 3: ONE real call must answer non-500 before any hop.
+
+    It cannot be settled from the log group: after the 16:43:21Z rollback that group held ZERO events of
+    any kind, so 'no TypeError' there is ABSENCE OF TRAFFIC and not health. Only a real authenticated call
+    discriminates, and the authorizer refuses an unauthenticated one before irpt-status is ever reached --
+    so this runs after the mint and gates everything that follows.
+    """
+    res = call(token, "GET", "/api/scoped/investor-reporting/status", {"selected_tenant": FIRM})
+    ok = res["status"] < 500
+    print("== AMENDMENT 3 limb 3: one real irpt-status call ==")
+    print("  GET /api/scoped/investor-reporting/status -> http=%s reason=%r  non-500=%s"
+          % (res["status"], res["reason"], ok))
+    return ok, {"claim": "measured", "route": "GET /api/scoped/investor-reporting/status",
+                "status": res["status"], "reason": res["reason"], "non_500": ok,
+                "why_not_from_logs": ("the log group held 0 events of ANY kind after the 16:43:21Z rollback, "
+                                      "so a 0 error count there is absence of traffic, not health")}
+
+
 def save(trace):
+    """Run 2 is a SECTION: run 1's committed object stays exactly as the issuer committed it (@be24188c7a)."""
     for p in (TRACE, MY_TRACE):
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps(trace, indent=1) + "\n", encoding="utf-8")
+        doc = {}
+        if p.exists():
+            try:
+                doc = json.loads(p.read_text(encoding="utf-8"))
+            except ValueError:
+                doc = {}
+        if not isinstance(doc, dict):
+            doc = {}
+        if doc.get("run_id") and doc.get("run_id") != trace.get("run_id"):
+            doc["run_2"] = trace          # keep run 1 at the top level, add run 2 beside it
+        else:
+            doc = dict(doc, **trace)
+        p.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
 
 
 def main(argv):
@@ -610,6 +677,9 @@ def main(argv):
     trace = {
         "run_id": run_id, "executor": "0.7.0_AE_CloudOps~TV2", "claim": "measured",
         "pair": "v2.2", "order_pin": "68642d02e9",
+        "amendment_3": ("run 2 under the same pair and halves, started by the precondition rather than a new GO: "
+                        "irpt-status LastModified later than 15:43:11Z, CodeSha256 not VC/r14ka..., and ONE real "
+                        "call non-500. Fresh row and token; the full census re-run because a host changed."),
         "entry": {"host": HOST, "transport": "HTTPS through CloudFront",
                   "not_used": "direct lambda invoke (CTO IRPT_YCDGEN @d54e0b7515 condition 1)"},
         "preconditions": {"read27": a.read27, "cto_half_v2_2": "022ee70258", "row_written": None,
@@ -647,15 +717,25 @@ def main(argv):
     save(trace)
 
     try:
-        summary, stop = census(token, run_id)
-        trace["census"] = summary
+        ok3, limb3 = limb3_non_500(token)
+        trace["preconditions"]["amendment_3_limb_3"] = limb3
         save(trace)
-        if stop:
-            trace["named_failures"].append({"hop": "ALL", "status": None,
-                                            "reason": "STOP_BEFORE_HOPS", "note": stop})
-            print("STOP: %s -- no hop runs; going to cleanup" % stop)
+        if not ok3:
+            trace["named_failures"].append({
+                "hop": "ALL", "status": limb3["status"], "reason": "PRECONDITION_LIMB_3_FAILED",
+                "note": ("irpt-status still answers 5xx, so AMENDMENT 3 limb 3 is unmet: no census and no "
+                         "hop ran, and the order's 'never run hops against a 500 host' holds.")})
+            print("STOP: limb 3 unmet -- irpt-status answered %s; no census, no hops" % limb3["status"])
         else:
-            hops(token, advisor, trace)
+            summary, stop = census(token, run_id)
+            trace["census"] = summary
+            save(trace)
+            if stop:
+                trace["named_failures"].append({"hop": "ALL", "status": None,
+                                                "reason": "STOP_BEFORE_HOPS", "note": stop})
+                print("STOP: %s -- no hop runs; going to cleanup" % stop)
+            else:
+                hops(token, advisor, trace)
     finally:
         cleanup(token, trace)
         data_refresh_zero_calls(trace, issued, int(time.time()) + 1)

@@ -34,7 +34,7 @@ INDEX-PAGE-DIFF rows=11119 served_version=xS7loply3Eug2dT30ffGOyFgfQt7K8OM only_
   flow months on the new base rule (252 of 857 on the worker's run before E1).
   - **Cause, read against the transactions:** a withdrawal is delivered as an `lo` of CFNCASH plus an `sl` of the FDIC sweep for the
     same amount. The account value falls by TWICE the withdrawal, while the return takes the flow out once.
-  - **Evidence:** in 74 of 106 single-`lo` months the drop equals twice the flow (example: 0QF879352 on 2023-07-14, `lo` 455.68 and
+  - **Evidence:** in 74 of 106 single-`lo` months the drop equals twice the flow (example: acct#05dd4a9d on 2023-07-14, `lo` 455.68 and
     `sl` 455.68, the value drops 911.36, the month computes -32.71% against a reported -0.18%).
   - **No fix in this item.** The repair, for the CTO to list: an `sl` of the sweep fund that pays an `lo` of cash on the same day is
     one withdrawal, not a sale plus a withdrawal.
