@@ -28,3 +28,16 @@ portal DEV `9b06f6ed`.
   candidate for "ASML"?
 - What it means for round 63: the ASML read waits on that answer, or else walks `ASML_NA_Equity` reached through the name the page
   lists.
+
+4. **Show the candidate list well when a typed name matches several companies.** Source: CTO msg 2285, ruling
+   `ledger/CTO_RULING_ROUND57_R1A_R6_20261009.md` ADDENDUM 2, carried from the round-57 review item 1.
+   - Measured on the round-62 walk (`tmp/ui-walk/20261009T103538Z` shot 050): for "ASML", the server answers 404 with "2 companies match
+     'ASML'; type the ticker" and both candidates (`ASML_US_Equity` "ASML Holding NV", `ASML_NA_Equity` "ASML NA"). The page draws only
+     "No security found for "ASML"." and a Back button. That statement is false, and the served list is dropped.
+   - Cause: `notFound.ts:10-16`. `isNotFound` reads any 404 as not-found, and `notFoundWords` prints the fixed sentence. The served
+     candidates are never read.
+   - Fix shape: on a 404 that serves candidates, show the served message and one pickable row per candidate (its served name and key).
+     A pick opens that key. A 404 with no candidates keeps today's sentence.
+   - Test: `__tests__/notFound.test.tsx` covers only the no-candidate arm (Boeing), so a candidate arm is to be added.
+   - AMGT_RESAPP round 84 may later collapse ASML to one listing on a served issuer identity. The list stays for names that do not share
+     an identity.
