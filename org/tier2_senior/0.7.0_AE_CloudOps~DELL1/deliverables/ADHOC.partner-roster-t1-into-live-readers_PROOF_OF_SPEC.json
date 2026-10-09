@@ -1,0 +1,213 @@
+{
+  "genre": "DEPLOY",
+  "schema_version": "1.0",
+  "to_id": "ADHOC.partner-roster-t1-into-live-readers",
+  "firm": "MDPF",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/task_orders/ADHOC.partner-roster-t1-into-live-readers.md",
+    "group": "OTHER",
+    "vintage_commit": "6242d5ed49"
+  },
+  "assignee": "0.7.0_AE_CloudOps~DELL1",
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO~G1/deliverables/COO_HALF_PARTNER_ROSTER_DEPLOY_20261009.md@58e5631eb7",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_PARTNER_ROSTER_RETARGETED_20261009.md@af37bb5fca",
+    "read_before_first_live_act": "Both halves were read at their pins before the first live act; the COO half's leg-B expected-outcome table is what C6's two arms were graded against."
+  },
+  "risk_class": "SERVED",
+  "rollback": "LEG B (landed): re-point module.emitter to artifact version LEBxFtsuAQOsw4xcjeDepTZrRCj9CWAt (CodeSha256 n/Tu1ns1eNl1vLBiR29ZttXGVjuzz5DAsjV5gBut/2k=) by targeted apply; that version is INTACT in the versioned bucket, re-read at 2026-10-09T02:38Z. LEG A (never acted): no rollback needed -- the bundle still serves version BtC_0xCV5wIH1yJmIYw1XdDVh5UN_YC6, untouched.",
+  "scope": "Leg A: re-mint bundles.accrual_bridge from HEAD -- HELD, never acted. Leg B: the emitter's vendored partner_roster.json on a PINNED build -- LANDED and verified.",
+  "status": "PARTIAL -- leg B landed and accepted (C3-C6 PASS); leg A HELD pre-act on a write outside this order's <paths>; C7 clock-gated on the 17:15Z scheduled fire. Ledger deliberately OPEN.",
+  "go_message": "2.0.0_SA_COO~G1 msg 1448, acked by 0.7.0_AE_CloudOps~DELL1 (READ clock). Second relay context: CTO~DELL1 msgs 1287/1296.",
+  "controls": {
+    "crlf_discrimination_on_the_b0_rebuild": {
+      "description": "The B0 positive/negative control pair: the SAME tree at 9abdfa4c30 and the SAME build script, differing ONLY in the line endings of the vendored partner_roster.json. This is the read whose value differs between 'the live bytes are reproduced' and 'they are not', and it is what made the B0 STOP condition decidable rather than an instrument artifact.",
+      "expected_landed": "n/Tu1ns1eNl1vLBiR29ZttXGVjuzz5DAsjV5gBut/2k= -- the live CodeSha256, reproduced when the roster is at its committed LF bytes",
+      "expected_not_landed": "cxiWUYgfzn+OahvM0gAIMkf4sKPyO9oJew9Js2yKqN0= -- what the same tree yields when the roster is the CRLF copy git checked out",
+      "observed": "BOTH arms observed, on the same tree and script: LF -> n/Tu1ns1eNl1vLBiR29ZttXGVjuzz5DAsjV5gBut/2k= (match); CRLF-as-checked-out -> cxiWUYgfzn+OahvM0gAIMkf4sKPyO9oJew9Js2yKqN0= (no match). The two differ, so the read discriminates.",
+      "status": "PASS"
+    },
+    "accept_date_negative_arm": {
+      "description": "The acceptance behaviour read against the DEPLOYED package and against the B0 build, same seeded scenario (newest Cottonwood partition exactly 2 trading days behind run_date). The B0 arm is the negative control the never-widen half names.",
+      "expected_landed": "cadence_normalized_lag_td 1 and cadence_state within_slip_tolerance (declared_cadence T-1, offset 1)",
+      "expected_not_landed": "cadence_normalized_lag_td 0 and cadence_state at_declared_cadence (declared_cadence D+2, offset 2)",
+      "observed": "deployed package: norm_lag 1, within_slip_tolerance, declared_cadence T-1, offset 1. B0 build: norm_lag 0, at_declared_cadence, declared_cadence D+2, offset 2. accepted_date 2026-10-06 and refusal null in BOTH arms, confirming the half's claim that which partitions are accepted does not change and no figure moves -- only the label.",
+      "status": "PASS"
+    },
+    "deployed_bytes_are_the_read_surface": {
+      "description": "Every leg-B acceptance read is taken from the package downloaded from the function's own presigned Code.Location, not from the locally built zip -- so the evidence is the SERVED artifact and not the producer's self-report.",
+      "expected_landed": "the downloaded deployed package hashes to GLQf6kv4nzRLGd53ONG4S5F4ikOso/2lkbq03U/+G9A=, equal to the reported CodeSha256",
+      "expected_not_landed": "the download hashes to n/Tu1ns1eNl1vLBiR29ZttXGVjuzz5DAsjV5gBut/2k= (the pre-deploy bytes) or to anything else",
+      "observed": "openssl dgst -sha256 -binary on the 59165-byte download, base64 = GLQf6kv4nzRLGd53ONG4S5F4ikOso/2lkbq03U/+G9A=, equal to get-function-configuration CodeSha256.",
+      "status": "PASS"
+    }
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/opal-assets/opal-assets-daily-emitter.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "MONq1TwQ2OEsHx9.tHGRiXGXMEvyxyC.",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head-object reads VersionId MONq1TwQ2OEsHx9.tHGRiXGXMEvyxyC., Size 59165, Metadata content-sha256=GLQf6kv4nzRLGd53ONG4S5F4ikOso/2lkbq03U/+G9A= (read back after upload, exact). Prior version LEBxFtsuAQOsw4xcjeDepTZrRCj9CWAt preserved as the rollback target."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/emitter.tf",
+      "kind": "terraform",
+      "commit_or_etag": "7efcff6f31",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Resource address module.emitter.aws_lambda_function.this (function opal-assets-daily-emitter). The config file is UNCHANGED by this act -- emitter.tf was not edited; the act moved only the artifact the module reads, so the pin is the shared-tree commit this seat applied from. Applied via .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-assets apply -target=module.emitter (Rule 18; never bare terraform apply). get-function-configuration CodeSha256 = GLQf6kv4nzRLGd53ONG4S5F4ikOso/2lkbq03U/+G9A=, LastModified 2026-10-09T02:43:17Z. Targeted re-plan reads 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T0221Z_adhoc-partner-roster-t1_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "462f80e03e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ledger opened at deploy-START with 7 legs before any act, per CLAUDE.md NEVER-2 and criterion 1; sentinel org/critical_paths/.open_deploys/adhoc-partner-roster-t1.json committed in the same commit. Legs B0,B1,B2,B3 closed with proofs; A1,A2,B4 deliberately OPEN."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "the order's ledger reads CLOSED with legs A1,A2,B0,B1,B2,B3,B4 each proven (or B0 STOP recorded and legs B1-B4 not run)",
+      "method": "command",
+      "invocation": "python .tools/deploy_ledger.py check",
+      "output_evidence": "NOT CLOSED, deliberately. Legs closed with proof: B0, B1, B2, B3. Legs OPEN: A1 and A2 (leg A held pre-act, see C2) and B4 (clock-gated on the 17:15Z scheduled fire, see C7). The ledger is designed to stay open until every leg is proven, so closing it now would be the false-clean state the tool exists to prevent.",
+      "denominator": "4 of 7 legs closed with proof; 3 open (2 held, 1 clock-gated)",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "Clock- and dependency-gated, not failed. The ledger is held OPEN on purpose: legs A1/A2 await a write outside this order's <paths> (see C2) and leg B4 awaits the 2026-10-09T17:15Z scheduled fire (see C7). The later run that resolves it: close the ledger once the issuer disposes leg A and the 17:15Z read lands."
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "roster-authority-sha256 equals `git show HEAD:data/mdpf/config/partner_roster.json | sha256sum`; script-sha256 equals 648cf3f58881058236ff6c85bdb60ee9e20bb4af9a49051237b78dbb8a19e8d5",
+      "method": "live_read",
+      "invocation": ".tools/aws s3api head-object --bucket opal-data-assets --key portal/gold/mdpf/_code/mdpf-accrual-bridge.tar.gz --query Metadata",
+      "output_evidence": "NOT ATTEMPTED -- leg A1 HELD before any write. Live metadata still reads the pre-existing roster-authority-sha256 e86e46312d5b00a4e143b2f8859de46e43efdac12cd89790b07753feb1b347ae with script-sha256 648cf3f58881058236ff6c85bdb60ee9e20bb4af9a49051237b78dbb8a19e8d5, on version BtC_0xCV5wIH1yJmIYw1XdDVh5UN_YC6. REASON HELD: safe_deploy_core.py build_bundle_payload materializes members with src.read_bytes() on the WORKTREE path, while deploy_file uses _index_blob for exactly this reason. data/mdpf/config/partner_roster.json reads i/lf w/crlf with NO gitattributes rule (the :153 glob is *.yaml), so the mint would have stamped 9d8ed608c2111af398c591cbe7f8a74e6520418ea92c532cd8eebe53d3911087 instead of the required 4c104d9bb8509b89456ad46f41dc07bec1eb39c5caa045149d26a20e33ff64a6, and would have republished a SERVED bundle whose roster bytes are not HEAD's. Both remedies are outside this order's <paths>. Row ADHOC_PARTNER_ROSTER-D1-S1 @7efcff6f31.",
+      "denominator": "2 of 2 required metadata keys read on the live object; 0 of 1 mint acts attempted",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "Not attempted. The in-flow mint reads the WORKTREE rather than the committed authority (safe_deploy_core.py build_bundle_payload src.read_bytes(), against deploy_file's _index_blob), and the roster is i/lf w/crlf on this box, so the act would have stamped 9d8ed608.. onto a SERVED bundle instead of the required 4c104d9b... Both remedies are outside this order's <paths>, so the substitute oracle is the pre-act measurement recorded in row ADHOC_PARTNER_ROSTER-D1-S1 @7efcff6f31 plus the live head-object read showing the bundle still on its prior version."
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "package sha256 (base64) equals n/Tu1ns1eNl1vLBiR29ZttXGVjuzz5DAsjV5gBut/2k=",
+      "method": "command",
+      "invocation": "git worktree add --detach /c/tmp/b0-emitter 9abdfa4c30 && (roster written from the 9abdfa4c30 blob) && BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh opal-assets opal-assets-daily-emitter",
+      "output_evidence": "BUILD_ONLY: /tmp/lambda-artifact-opal-assets-daily-emitter.zip sha256=n/Tu1ns1eNl1vLBiR29ZttXGVjuzz5DAsjV5gBut/2k= -- EQUAL to the live CodeSha256. B0 commit = 9abdfa4c30, the order's own starting candidate. Reproduction requires the roster at its committed LF bytes; the CRLF copy as checked out yields cxiWUYgfzn+OahvM0gAIMkf4sKPyO9oJew9Js2yKqN0=. The build-script version is NOT a factor: the pre-BUILD_ONLY script at 9abdfa4c30 and the current script both yield cxiWUYgf.. on the CRLF input.",
+      "denominator": "1 of 1 candidate commits tried; 2 of 2 control arms run (LF match, CRLF no-match)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "equals the B1 build's sha256 (base64)",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name opal-assets-daily-emitter --query CodeSha256",
+      "output_evidence": "GLQf6kv4nzRLGd53ONG4S5F4ikOso/2lkbq03U/+G9A= -- EQUAL to the B1 build sha. B1 input was tree 9abdfa4c30 with ONLY partner_roster.json replaced by git show HEAD:data/mdpf/config/partner_roster.json (27433 bytes, 0 CRs, md5 3d309b267e6987b4f14250ed3d168d1a). Per-member comparison of the B1 zip against the B0 zip: 5 members both sides, member sets identical, SAME=4 DIFF=1 -- only partner_roster.json moved (af44aaad.. -> 4c104d9bb8509b89..). Targeted plan read exactly 0 to add, 1 to change, 0 to destroy, touching only s3_object_version and source_code_hash plus last_modified.",
+      "denominator": "5 of 5 package members hash-compared; 1 differs by design, 4 byte-identical",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C5",
+      "criterion_verbatim": "bd_holdings_s2 T-1 and bd_allocations_s2 T-1; file md5 begins 3d309b26",
+      "method": "live_read",
+      "invocation": "curl the function's own Code.Location presigned URL, then python: read partner_roster.json out of the DEPLOYED zip and print each Cottonwood custody feed's feed_id and cadence",
+      "output_evidence": "Deployed package (download hashes to GLQf6kv4.., equal to CodeSha256, so these are the served bytes). partner_roster.json md5 3d309b267e6987b4f14250ed3d168d1a (begins 3d309b26), sha256 4c104d9bb8509b89.. (the HEAD authority), 27433 bytes, 0 CRs. Feeds found: bd_holdings_s2 cadence 'T-1' at /partners[2]/legs/custody/feeds[0]; bd_allocations_s2 cadence 'T-1' at /partners[2]/legs/custody/feeds[1]. gate_policy.per_partner_max_lag_trading_days.cottonwood value 3, UNCHANGED as the half requires.",
+      "denominator": "2 of 2 Cottonwood custody feeds found and read; both T-1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C6",
+      "criterion_verbatim": "deployed: cadence_normalized_lag_td 1, cadence_state within_slip_tolerance; B0: 0, at_declared_cadence",
+      "method": "command",
+      "invocation": "python -I c6_driver.py <extracted package dir> -- calls channel_sources.accept_date('blackdiamond/cottonwood/silver/fact_holdings_s2', run_date='2026-10-08', tdb=<stub returning 2>, dates=['2026-10-02','2026-10-05','2026-10-06']), run once against the extracted DEPLOYED package and once against the extracted B0 build",
+      "output_evidence": "DEPLOYED: feed {feed_id bd_holdings_s2, cadence T-1, offset 1, max_lag 3} -> accepted_date 2026-10-06, cadence_lag_td 2, cadence_normalized_lag_td 1, cadence_state within_slip_tolerance, refusal null. B0 (negative arm): feed {cadence D+2, offset 2, max_lag 3} -> accepted_date 2026-10-06, cadence_lag_td 2, cadence_normalized_lag_td 0, cadence_state at_declared_cadence, refusal null. Both arms accept the SAME partition and refuse nothing, which is the half's state-coherence claim measured rather than asserted: only the label moved. Offsets are read from the roster's own /cadences/<name>/trading_day_offset (same_day 0, T-1 1, D+2 2), never hand-mapped.",
+      "denominator": "2 of 2 arms run (deployed + B0 negative); 1 seeded scenario (newest partition exactly 2 trading days behind run_date)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C7",
+      "criterion_verbatim": "declared_cadence T-1 on every Cottonwood row; accepted/refused partitions unchanged against the prior run's rule",
+      "method": "live_read",
+      "invocation": "read the Cottonwood rows written by the next opal-assets-daily-emitter-daily run (cron(15 17 * * ? *))",
+      "output_evidence": "NOT YET COMPUTABLE -- the next scheduled fire is 2026-10-09T17:15Z and the deploy landed 02:43Z. The scheduled fire IS the acceptance; an ad-hoc invoke would destroy the discriminator this criterion exists to produce, so it was NOT fired. Leg B4 is held OPEN on the ledger for this read, with the entry's window set to 20h at open time precisely so the wait is declared rather than blaring as an unexplained OPEN.",
+      "denominator": "0 of 1 scheduled runs elapsed since the 02:43:17Z deploy",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "Clock-gated. The next opal-assets-daily-emitter-daily fire is 2026-10-09T17:15Z, cron(15 17 * * ? *), and the deploy landed 02:43:17Z. The later run that resolves it IS that scheduled fire; an ad-hoc invoke would destroy the discriminator the criterion exists to produce, so it was not fired. Ledger leg B4 holds it."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Leg A -- the bundles.accrual_bridge re-mint (criteria C2, ledger legs A1/A2)",
+      "reason": "HELD before any write. The in-flow mint reads the WORKTREE, not the committed authority, and the roster is CRLF on this box, so the mint would have stamped the wrong sha onto a SERVED bundle. Both remedies (re-normalizing the file, or pointing build_bundle_payload at _index_blob) are outside this order's declared <paths>, and the order's conditions say a refusal is a row to report, never a workaround. Row ADHOC_PARTNER_ROSTER-D1-S1."
+    },
+    {
+      "item": "The deprecated loose key s3://opal-data-mdpf/code/scripts/gold/partner_roster.json",
+      "reason": "Explicitly NOT covered by either half; left untouched, never read, never written."
+    },
+    {
+      "item": "The four undeployed emitter commits ae106b1124, aaf2be288f, 650df7371e, 85dd7adc26",
+      "reason": "Explicitly NOT covered. The B1 build is pinned to tree 9abdfa4c30 with only the roster swapped, so none of the four is in the shipped package. A build from HEAD would have shipped all four."
+    },
+    {
+      "item": "Whether data/mdpf/config/partner_roster.json's deployed S3 copy on the safe-deploy loose leg currently mismatches its repo authority",
+      "reason": "Named as an exposure in the earlier CRLF record 8430c79f13 but not measured; it belongs to the MDPF deploy-path owner, and no order here covers it."
+    },
+    {
+      "item": "IAM",
+      "reason": "No IAM was touched, as the order's conditions require. Nothing to report under the Step F before-rule."
+    }
+  ],
+  "surprises": [
+    "ADHOC_PARTNER_ROSTER-D1-S1: the bundle mint reads the WORKING TREE, not the index blob, so leg A1 would have packaged CRLF roster bytes into the served bundle and stamped 9d8ed608.. where criterion C2 requires 4c104d9b.. -- filed as a pre-act read, mint never run, leg A1 held."
+  ],
+  "forward_notes": [
+    "ISSUER ACT NEEDED for this instance to validate: proof-of-spec-check refuses genre=DEPLOY because the order lacks the issuer marker <proof_genre>DEPLOY</proof_genre> on its own line (it carries <risk>SERVED</risk>, and the checker's own note says a LOCAL act is not a deploy). Every other limb passes: schema clean, 3 of 3 named controls discriminate with 0 DID-NOT-DISCRIMINATE, rollback named, artifact-resolution resolved. This seat did NOT add the marker itself even though the order file sits in its <paths>: the marker is the issuer's declaration of genre at the cut, and self-certifying it is the self-grading the checker exists to prevent.",
+    "B4/C7 is the only outstanding read on leg B and is clock-gated to the 2026-10-09T17:15Z scheduled fire.",
+    "Leg A needs a decision from the issuer: either re-normalize data/mdpf/config/partner_roster.json, or fix build_bundle_payload to use _index_blob as deploy_file already does. The second is the durable repair and reaches every declared bundle on every Windows worktree.",
+    "The sanctioned uploader cannot upload from dell1: infra/aws/lambda/ci/build-and-upload.sh resolves aws through a hardcoded aws.cmd path and dies 'aws.cmd: FATAL -- no AWS CLI found'. The artifact was uploaded with .tools/aws s3 cp plus the content-sha256 stamp the yang-lambda module requires, verified by read-back. Worth its own repair so a dell box can use the normal path.",
+    "proof-of-spec-check ANNOUNCE (refuses nothing here, but worth the issuer's eye): invocation-alignment reports 3 of 7 rows diverge from the criterion's <invocation> text -- C3, C5 and C6. In each case the instance records the fuller runnable command (the worktree cut for C3, the presigned-URL download for C5, the driver's actual arguments for C6) rather than the criterion's prose summary. Named so the divergence is the issuer's to accept or correct in the order, not something this seat quietly normalised away."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/2026-10-08/grant_cell_and_crlf_phantom.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'BUILD_ONLY' --limit 20",
+      "result": "PASS -- located infra/aws/lambda/ci/build-and-upload.sh's BUILD_ONLY contract and its offline test. Denominator 362 hits / 71,903 files, bands HEAD=6 DEF=5 SURFACED=97."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'opal-assets-daily-emitter' infra/aws/terraform/opal-assets --limit 20",
+      "result": "PASS -- isolated emitter.tf as the only implementing file. Denominator 39 hits / 21 files."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read .tools/safe_deploy_core.py --for 'how does the bundle mint materialize each member's bytes -- working tree or committed blob?'",
+      "result": "PASS, and it is the reason leg A1 was held instead of run. The SALIENT block surfaced deploy_file's _index_blob call and build_bundle_payload side by side, which is what exposed the worktree/index asymmetry."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read .tools/surprise-row-gate.py --for 'what keys must a surprise-channel investigation row carry?'",
+      "result": "PARTIAL -- it named the spec_asserts/world_is requirement and pointed at the ratified schema, but the dell1 coordinate rule (-D1- in the id) only surfaced from the gate's own refusal at commit time. Two commit attempts were needed."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/terraform/opal-assets/emitter.tf --enumerate '^\\s*(resource|module|data)\\s'",
+      "result": "FAIL (pattern) -- 0 hits across 261 lines scanned while the file plainly declares a module and three resources, so the regex form is not what --enumerate matches. Read the file region directly instead. Recorded because a 0 here with a nonzero scanned-line count is in-corpus and must not be read as absence."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "DECLARED-NOT-APPLICABLE per the order's preflight",
+      "result": "SKIPPED -- neither leg writes IAM. Separately confirmed this session that comp-iam cannot model an agent IAM USER at all ('No role matching cloudops-dell1-agent-user'); it is TF-role-scoped."
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "carried from the order's preflight (comp-schedule opal-assets-daily-emitter, run by the issuer 2026-10-09 02:2xZ)",
+      "result": "CARRIED -- no gate row names the emitter or the accrual bundle; the live trigger rule opal-assets-daily-emitter-daily cron(15 17 * * ? *) is ENABLED and is the only rule targeting the function, which is what makes B4 a 17:15Z read."
+    }
+  ],
+  "regression_reads": {
+    "runtime_sizing_unchanged": "Runtime python3.11, Timeout 600, Memory 1024 all unchanged on get-function-configuration after the apply -- the act moved code only.",
+    "cottonwood_window_unmoved": "gate_policy.per_partner_max_lag_trading_days.cottonwood still value 3 in the deployed roster; the half's 'not moved by this act' state-coherence line holds.",
+    "accept_refuse_verdicts_unchanged": "accepted_date and refusal identical between the deployed package and the B0 build on the seeded scenario, so no partition's accept/refuse verdict changed.",
+    "zero_diff_replan": "Targeted re-plan after apply: 'No changes. Your infrastructure matches the configuration.'"
+  }
+}
