@@ -21,12 +21,13 @@ Invocation per arm (C1: read-only; no Teams send; the answer returns to this sea
 | both message ids exist with the senders above | `read_chat_messages` on the chat, top 15 | measured |
 | the key is catalogued and servable | `opal_describe`: catalogued, channel `benchmarks_and_models`, firm_scope `opal-internal`, gate SERVE | measured |
 | the key's channel is inside Alyssa's grant | OA-g-3 proof of spec: `portal_channels` includes `benchmarks_and_models`, operations `[query]`, dates `rolling_complete_window` | held (recorded 2026-09-27, not re-read from DynamoDB) |
-| the key's as-of value | `data_as_of` 2026-08-10 per the catalog row; served object written 2026-10-08T12:04:15Z | held / measured (HEAD only) |
+| the key's as-of value | SUPERSEDED 2026-10-09 ~08:5xZ (UB-9a05): the served object reads `data_as_of` **2026-10-07**, `generated_at` 2026-10-08T12:04:14Z (`gateway_query_catalog`, 5 ETFs). The 2026-08-10 first written here was the catalog row's certification value (held) and is stale | measured |
+| the key's write cadence | the publisher rewrites the key daily at about 12:04Z, so the served value can move between arm (a) and the CVO's read | measured once (`generated_at`); the daily cadence is the CRO's reading, held |
 | the gateway's reading principal | `whoami` reads `Andrew@opalinvest.com`, not an `opalbloomberg` principal as the CRO approach states. The tool takes the asker from the message SENDER, so the caller's identity does not decide either arm | measured |
 | the CVO can read the key itself (C2) | the key is a plain catalog key served through `gateway_query_catalog`; the CVO's own read is the CVO's act | held |
 
-Before r29 serves, `write_class_denied` is the expected reading and is not a FAIL (C4). Arm (a)'s as-of date may read
-2026-08-10 against a `rolling_complete_window` grant; whatever the gateway returns is recorded raw and graded, never
+Before r29 serves, `write_class_denied` is the expected reading and is not a FAIL (C4). Arm (a)'s as-of date is read
+against a `rolling_complete_window` grant; whatever the gateway returns is recorded raw and graded, never
 predicted here.
 
 ## The clock (C4)
@@ -36,10 +37,13 @@ The arms run at the first read after NFRA_OPLGTW r29 (`NFRA_OPLGTW.TO-OG-rl-15`,
 
 ## Results (filled at the run)
 
-| arm | run at (UTC) | raw response | verdict |
-|---|---|---|---|
-| (b) | | | |
-| (a) | | | the CVO's J2 grade |
+| arm | run at (UTC) | raw response | pinned reference read (same minute) | verdict |
+|---|---|---|---|---|
+| (b) | | | n/a | |
+| (a) | | | `gateway_query_catalog("json/benchmarks/etf_returns.json")`: `data_as_of`, `generated_at`, raw body | the CVO's J2 grade |
+
+**J2 grades against the pinned reference read**, taken by this seat in the same minute as arm (a), never against a later
+portal read: the key is rewritten daily at about 12:04Z, so a later read can differ from a correct answer.
 
 ## What a pass does and does not prove
 

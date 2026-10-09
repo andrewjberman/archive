@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ae-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ae-1.split-level-probe.md",
+    "group": "OTHER",
+    "vintage_commit": "23e22086b3"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~58",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round31.md",
+    "vintage_commit": "23e22086b3",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ae-1.split-level-probe.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_split_level_probe.py",
+      "kind": "script",
+      "commit_or_etag": "23e22086b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one-shot evidence read; one new S3 key written (price_evidence), read back 2 rows",
+      "artifact_covered_by": [
+        "CB31ae1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB31ae1-AC1",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_split_level_probe.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~58 expect: LEVEL-PROBE cusips=2",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_split_level_probe.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~58",
+      "expect": "LEVEL-PROBE cusips=2",
+      "output_evidence": "rc 0; LAST line: LEVEL-PROBE cusips=2 branch=OTHER key=s3://opal-data-assets/commonwealth/cottonwood/silver/price_evidence/date=2022-10-12/part-00000.parquet readback_rows=2 (SCHB 13.98 x3 = 41.94; SCHZ 22.465 x2 = 44.93; neither within 2% of r28 or r26)",
+      "denominator": "2 of 2 CUSIPs priced as-traded and stored",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 run a second time",
+      "observed": "key existed; not rewritten; stored evidence matched fresh fetch; same LEVEL-PROBE line",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "in-process mutant: TOL forced from 0.02 to 0.20 and branch_of called on the stored as_traded values (41.94, 44.93); no file written",
+      "expected": "branch moves from OTHER to A",
+      "observed": "real=OTHER mutant=A",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "why the store closes differ from the outside as-traded level",
+      "reason": "branch OTHER; filed as BLOCKING row W58-S1 for adjudication"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W58-S1"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~58/ADVI_COTBKF.TO-CB-ae-1.split-level-probe.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python data/assets/scripts/silver/commonwealth_split_level_probe.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~58",
+      "result": "LEVEL-PROBE cusips=2 branch=OTHER key=s3://opal-data-assets/commonwealth/cottonwood/silver/price_evidence/date=2022-10-12/part-00000.parquet readback_rows=2"
+    }
+  ]
+}
