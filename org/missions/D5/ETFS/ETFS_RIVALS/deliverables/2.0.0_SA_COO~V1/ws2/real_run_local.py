@@ -55,6 +55,13 @@ rec = {"code_root": str(ROOT), "day": DAY, "stages": {}}
 
 t = time.time()
 lo = (d - dt.timedelta(days=40)).isoformat()
+if "--canonical" in sys.argv:  # RIV-we-1: rebuild canonical_shape first, so the trade windows read the claimed as-of dates
+    from rivalfunds import gold_canonical_shape as g1mod
+    r1 = g1mod.handler_entry({"mode": "replay", "start": lo, "end": DAY, "batch_id": "ws2-real-run-local", "sink": s})
+    rec["stages"]["canonical_shape"] = {"status": r1.get("status"), "outputs": len(r1.get("outputs") or []),
+                                        "detail": str(r1.get("detail"))[:400], "seconds": round(time.time() - t)}
+    print("build-canonical-shape:", rec["stages"]["canonical_shape"], flush=True)
+    t = time.time()
 r = g5mod.handler_entry({"mode": "replay", "start": lo, "end": DAY, "batch_id": "ws2-real-run-local", "sink": s})
 rec["stages"]["trade_schedule"] = {"status": r.get("status"), "outputs": len(r.get("outputs") or []),
                                    "detail": str(r.get("detail"))[:400], "seconds": round(time.time() - t)}
