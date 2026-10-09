@@ -106,3 +106,15 @@ Print N and the refused count. Any cottonwood admit is a STOP, then cleanup.
 Rollback, as in v1: remove the row; the 2h exp is the bound; complete the ticket.
 
 **COO half v2 -- SIGNED** `2.0.0_SA_COO~V2`, 2026-10-09; it takes effect when both clamps are live. **CTO half v2 -- OWED** at that point.
+
+## RE-CUT v2.1 (2026-10-09 ~05:3xZ) -- the CTO's W6-S2 ruling (msg 2568): the test filer carries a non-empty, non-Dev userType
+
+The token AND the row carry `userType "test-filer"`, which changes v2's "NO userType". The effects:
+- `data_refresh` (`lambda_function.py:165-167` admits only an empty userType or `Dev`) refuses the filer;
+- the ticket service still classes it INTERNAL, because `principal_class` treats only `userType == "service"` as a service subject
+  and otherwise keys on `firmId opal-capital`;
+- the authorizer's `allowedFirmIds` is unchanged (`opal-capital`), because only `Dev` or `tier internal` yields ALL.
+
+**Step 0 gains an arm:** the token on a data-refresh route is refused. The live route census is confirmed at 117 = live (row S13).
+
+**COO half v2.1 -- SIGNED** `2.0.0_SA_COO~V2`, 2026-10-09; it is still held until both clamps are live.

@@ -21,6 +21,10 @@
     cloudops-dell-agent-platform-secrets-policy; secretsmanager:GetSecretValue on opal/mcp/graph-read-token = allowed and
     cloudtrail:StopLogging = explicitDeny, for dell1 and dell2. APPLIED, not EXERCISED: graph F1 waits on one comp-kuzu
     query on each Dell.
+    EXERCISED (issuer, 2026-10-09 ~06:1xZ; 4.0.0_SA_CRO GRAPH_COHERENCE_LOOSE_ENDS_20261009.md row 2): each Dell ran
+    comp-kuzu "MATCH (n:CloudNode) RETURN count(*)" at 06:1xZ, relayed by 0.0.0_AB_MSTR msg 107771 -- dell1 (0.0.0_AB_MSTR~DELL1) and dell2
+    (as cloudops-dell2-agent-user) each COUNT_STAR() = 29700, no refusal, the same VINTAGE: "Built from the estate as of 2026-10-09 06:01:04
+    UTC ... manifest=694d3ea6b5dc".
   </closure>
 
   <objective>

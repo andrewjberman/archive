@@ -595,3 +595,198 @@ Expected: **0 to add, 1 to change, 0 to destroy.** Nothing else moves: `aws_iam_
 ### Transcript jobs (item 4)
 
 Prefixes the NFRA_TRNSPT jobs write, from `NFRA_TRNSPT.TO-RUN-x9` and `-b11` (`teams/transcripts/silver/research_meeting/`, 29 keys) and `infra/aws/terraform/transcripts/` (`chat_assist.tf`: `teams/transcripts/bronze/chat_messages/`, `silver/chat_threads/`, `state/chat_assist/`; `pull.tf`: `teams/transcripts/`; `mail_pull.tf`: `outlook/transcripts/`). dell2 `s3:PutObject` on each reads **allowed** (6 of 6, matched `S3ObjectsOnOpalBuckets`), positive control allowed, negative controls refused. Nothing is refused, so **nothing was granted and the transcripts root is unchanged.** `check_transcripts_dell_decrypt.py` still prints `dell_write_refused=8/10`; no arm moved. Row `NFRA_CTLPLN-W14-S44`: the key grants the Dells Decrypt and DescribeKey only, so a Dell PutObject would still fail at `kms:GenerateDataKey`; not widened here.
+
+## N. DELL2 ONLY GAINS kms:GenerateDataKey ON THE TRANSCRIPTS KEY (amendment 25; row `NFRA_CTLPLN-W14-S44`; `1.0.0_SA_CTO` ruling (b) msg 107696, record `ANDREW_DIRECT_20261009_025xZ_DELLS_RUN_THEIR_OWN_SCRIPTS_NO_LAPTOP_WAIT.md` @8fc644a586; COO half ADDENDUM 1)
+
+Author: 0.9.0_WK_NFRA_CTLPLN~14. NOTHING WAS APPLIED AND NO PLAN WAS RUN AGAINST THE BACKEND. The only AWS calls were `iam:SimulateCustomPolicy`, `iam:SimulatePrincipalPolicy`, `kms:DescribeKey`, `kms:GetKeyPolicy`, `sts:GetCallerIdentity` (read-only). No object was read, no bucket listed, no decrypt or data-key call was made.
+
+### Writers of the key's policy (counted first)
+
+One. `comp-find` over `infra/` for `aws_kms_key|aws_kms_key_policy|aws_kms_grant|aws_kms_alias` (87 hits, 1889 files scanned) and for the key's address and alias (36 hits, 1889 files): the only resource that sets the key policy is `aws_kms_key.transcripts` (its `policy` argument) at `infra/aws/terraform/transcripts/main.tf:75`. There is no `aws_kms_key_policy` resource anywhere under `infra/`. The other `transcripts` files only reference the key (`chat_assist.tf:81-82`, `mail_pull.tf:111`, `pull.tf:111`) or hold `aws_kms_grant` resources (`commentary.tf:90`, `mail_pull.tf:91`, `pull.tf:91`, and `modules/ldo/main.tf:311`), which are grants and do not write the policy.
+
+### Expected plan, by reading (address)
+
+| resource address | action | what |
+|---|---|---|
+| `aws_kms_key.transcripts` | update in place | `policy` only: one statement appended, `Dell2AgentUserGenerateDataKey` |
+
+Nothing else. The new variable `dell2_agent_user_name` has a default and creates no resource. `aws_kms_alias.transcripts`, the bucket, its policy (it refers to the key's ARN, which does not change), the encryption configuration, the three `aws_kms_grant` resources in this root and the Lambda resources are untouched. Plan summary by reading: `0 to add, 1 to change, 0 to destroy`. The issuer measures the real plan.
+
+### The key policy, before and after (statement Sid, principal, actions)
+
+Before (live, read with `kms get-key-policy`, equal to the render of `5c1d0af92c`; 3 statements):
+- `RootAdministersTheKeyAndCannotUseIt`: account root; administration actions only (unchanged).
+- `NamedReadersUseTheKey`: `var.reader_principal_arns`; `kms:Encrypt`, `kms:Decrypt`, `kms:ReEncrypt*`, `kms:GenerateDataKey*`, `kms:DescribeKey` (unchanged, byte-identical).
+- `DellAgentUsersDecryptOnly`: the two Dell agent users; `kms:Decrypt`, `kms:DescribeKey` (unchanged).
+
+After (4 statements): the three above, then
+- `Dell2AgentUserGenerateDataKey`: Allow; Principal the dell2 agent user alone (`arn:aws:iam::<account>:user/<var.dell2_agent_user_name>`; the variable's default is the builder's output for that user, `cloudops-dell2-agent-user`); Action exactly `kms:GenerateDataKey`; Resource `*`.
+
+No other action. Not `kms:Encrypt`, not `kms:ReEncrypt*`, not `kms:GenerateDataKeyWithoutPlaintext`: the S3 PutObject of an SSE-KMS object asks the key for `kms:GenerateDataKey`; a multipart upload also asks for `kms:Decrypt`, which both Dells already hold. No evidence of a further action needed was found, so none is added.
+
+### What dell2 newly can do, in plain words
+
+Its S3 PutObject under the jobs prefixes (already allowed by its own S3 policy, row `NFRA_CTLPLN-W14-S44`) can now complete on the transcripts bucket, because S3 can obtain the data key. It can also call `kms:GenerateDataKey` directly on that key, which yields a data key encrypted under the transcripts key and a plaintext copy for the caller; the plaintext key of a key it generates itself reveals nothing about existing objects. dell1 does not gain it, and the reader's access does not move.
+
+### Arms (simulation, `check_transcripts_dell_decrypt.py`)
+
+- dell2 `kms:GenerateDataKey` on the key: implicitDeny before, allowed now (the one arm that moved).
+- dell2 `s3:PutObject` on `teams/transcripts/silver/research_meeting/date=2026-10-08/x.parquet`: allowed (identity leg) and, with the key leg, allowed end to end. `dell2_generate_ok=True`.
+- dell1, the same two arms: identity leg allowed (the group's S3 policy), key leg implicitDeny, composed PutObject refused. `dell1_generate_refused=True`.
+- `dell_write_refused` is restated: 7/10 now (was 8/10). The three arms that read allowed, by name: dell1 `kms:PutKeyPolicy`, dell2 `kms:PutKeyPolicy` (the applied resource-policy Allow, accepted at amendment 17, unchanged) and dell2 `kms:GenerateDataKey` (new). The arm that moved: dell2 `kms:GenerateDataKey`, refused to allowed. No other arm moved, for either user, against the render of `5c1d0af92c`.
+- The reader's Decrypt and Encrypt stay allowed; an unlisted user stays refused; the rendered document differs from the applied one by exactly one added statement (`statements_added=1`); the live key policy equals the `5c1d0af92c` render, so the check reads `ok=True` before the apply and reads `ok=False` after it by construction (the pre-apply guard of row `NFRA_CTLPLN-W14-S40`).
+- Mutant controls (scratch copies of `main.tf`, `TRANSCRIPTS_MAIN_TF`): the new statement widened to both Dells reads `dell1_generate_refused=False ok=False`; `kms:Encrypt` added to the new statement reads `dell2_generate_ok=False ok=False` with the unexpected move named.
+
+### Rollback
+
+Remove the statement (revert this commit) and apply again: the key policy is a single in-place update and nothing depends on the new statement. Until the revert is applied, dell2 keeps `kms:GenerateDataKey`.
+
+### Not done
+
+The apply; a plan against the backend; a real PutObject through SSE-KMS (it needs the apply and is another route's). The simulator takes the union of identity and resource policies and does not model the KMS rule that a customer-managed key needs its key policy to permit use; the key leg here uses a neutral identity policy so only the key policy can allow, and the S3 leg is the user's live identity policies only.
+
+## O. DELL1 AND DELL2 HOLD IDENTICAL PERMISSIONS (amendment 26; Andrew-direct ~03:5xZ 2026-10-09 "DELL1 and DELL2 should have the exact same permissions and layout"; `1.0.0_SA_CTO` msg 107701, record @910951a1e0; COO half `NEVER_WIDEN_HALF_NFRA_CTLPLN_DELL1_DELL2_IDENTICAL_20261009.md`)
+
+Author: 0.9.0_WK_NFRA_CTLPLN~14. NOTHING WAS APPLIED AND NO PLAN WAS RUN AGAINST THE BACKEND. AWS calls were read-only: `iam:SimulateCustomPolicy`, `iam` list calls for the two users and the group, `kms:DescribeKey` and `GetKeyPolicy`, `s3api get-bucket-policy` on the three fenced buckets (policy text only), `sts:GetCallerIdentity`. No object was read, no secret value read.
+
+### The census (printed by `tests/simulate_dell_parity.py`, measured, writers counted)
+
+| per-user grant | where | writers | before | after |
+|---|---|---|---|---|
+| `dell1_bus` (receive from `agentbus-global-dell1-queue*`) | identity root, 1 `aws_iam_policy`, 1 user attachment | 1 | dell1 only | unchanged (per box) |
+| `dell2_bus` (the same, dell2's queue) | identity root, 1 policy, 1 user attachment | 1 | dell2 only | unchanged (per box) |
+| `dell2_ssm` (resident documents, shell-script document, denies) | identity root, 1 policy, 1 user attachment | 1 | dell2 only | BOTH: a second attachment, `aws_iam_user_policy_attachment.dell1_ssm` |
+| transcripts key `DellAgentUsersDecryptOnly` | `aws_kms_key.transcripts` policy | 1 | both users | unchanged |
+| transcripts key GenerateDataKey | `aws_kms_key.transcripts` policy | 1 | (not applied: amendment 25 named dell2 only) | `DellAgentUsersGenerateDataKey`, BOTH users |
+| bucket fences naming a Dell (`infra/logic/registry/exemptions.json`, built by `modules/opal_name` into the shared-infra bucket policies) | registry rows | 1 registry file, 4 `.tf` files read it | 3 buckets x 2 users | unchanged: the two users hold the same rows on the same 3 buckets |
+| any other `aws_iam_user_policy`, `aws_iam_user_policy_attachment` or group membership naming a Dell outside the identity root | all `.tf` under `infra/aws/terraform/` | 0 | none | none |
+| inline policies, other groups, other attached policies, live | `iam list-*` for each user | - | dell1: bus only; dell2: bus + ssm; no inline; both in the one group (9 attached) | dell1 gains ssm at the apply |
+
+What moved to the group: nothing. What was mirrored: `dell2_ssm` to dell1 (one more attachment of the existing policy), the key's GenerateDataKey statement to both users. Why the attachment and not the group: the group holds nine managed policies today (quota ten); a tenth would sit exactly on the quota and leave nothing for the next grant, and moving the policy from the user to the group would create a group attachment and destroy a user attachment in one apply, which Terraform does not order (a possible gap in dell2's access). Attaching the same policy to dell1 is one create and touches nothing live. The policy keeps its name `cloudops-dell2-agent-ssm-policy`, address, description and tags (its `Device = dell2` tag and the word dell2 in the name are now cosmetic; a rename or description change would REPLACE the live policy and its dell2 attachment, so a rename is a separate step that must be ordered create-before-destroy).
+
+Group managed-policy count: 9 of 10 (deploy, create, iam-roles, plan-reads, respol-allow, ssm-send, vendor-secrets, platform-secrets, routes-fn); `check_identity.py` prints `group_policies=9/10`.
+
+### Expected plan, by reading, per root
+
+Identity root `infra/aws/terraform/nfra-ctlpln-identity/` (last plan against the backend before this change: 03:53Z 2026-10-09, `No changes`, `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell2_shell_parity_20261009/replan.txt`):
+
+| resource address | action | what |
+|---|---|---|
+| `aws_iam_user_policy_attachment.dell1_ssm` | create | attaches `cloudops-dell2-agent-ssm-policy` to `cloudops-dell1-agent-user` |
+
+Plan summary by reading: 1 to add, 0 to change, 0 to destroy. NO resource is REPLACED or DESTROYED, so there is no ordering gap in dell2's access. The resource-address diff against the previous commit (`29f97ce54c`) is in `NFRA_CTLPLN.TO-CT-a-1.amendment26.plan_by_reading.txt`: one block added, none removed, none body-changed.
+
+Transcripts root `infra/aws/terraform/transcripts/` (the live key policy equals the render of `5c1d0af92c`, three statements):
+
+| resource address | action | what |
+|---|---|---|
+| `aws_kms_key.transcripts` | update in place | `policy` only: one statement appended, `DellAgentUsersGenerateDataKey` (both Dell users, `kms:GenerateDataKey`, Resource `*`) |
+
+0 to add, 1 to change, 0 to destroy for this order's edit. AMENDMENT 25's variable `dell2_agent_user_name` is removed (never applied; it created no resource). THE ROOT ALSO CARRIES ANOTHER CELL'S PENDING CHANGES (row `NFRA_CTLPLN-W14-S46`): `data.terraform_remote_state.irpt_core` added and `aws_iam_policy.commentary` and `aws_lambda_function.commentary` body-changed, arriving with `424998b161` (NFRA_TRNSPT TO-TR-c17, "DESIRED, not applied"). An untargeted plan of the root would show those too; the apply of this change should be TARGETED at `aws_kms_key.transcripts`.
+
+### Every dell1 arm that flipped (simulation, effective set as built)
+
+Refused to allowed (3): `ssm:SendCommand` on the resident host (`i-0167fd745ad906a66`) with `irpt-ycharts-deploy`; the same with `irpt-ycharts-run`; the same with `AWS-RunShellScript`. Also refused to allowed on the transcripts key: `kms:GenerateDataKey`, and so a Dell PutObject of the jobs' output under SSE-KMS completes (composed S3 leg + key leg). Still refused, now by an explicit Deny instead of by silence (same effect, not a flip): `AWS-RunPowerShellScript`, `AWS-RunRemoteScript`, `AWS-StartInteractiveCommand` to the resident host, `ssm:StartSession` on the shell-script and SSH-session documents, and `irpt-export-render-run`. Unchanged: dell1 reads command results, sends the 12 documents and the shell-script document to the six privileged hosts, is refused on another instance, and cannot delete a document.
+
+### Parity (`tests/simulate_dell_parity.py`)
+
+`DELL-PARITY arms=1531 equal=1531/1531 unequal=0 ok=True`. Arms: 1,494 (action, resource) pairs from every statement of the 10 documents either user holds (wildcard actions expanded from the installed botocore service models; group documents sampled at their first and last resource per statement, per-user documents in full); 8 `symmetric_by_box` arms for the bus policies, compared BY ROLE (each user on its own queue, each on the other box's queue) and equal; 13 arms on the transcripts key policy as rendered from the Terraform; 12 arms on the live policies of the three fenced buckets (each reads `GetObject`, `PutObject`, `ListBucket` allowed and `DeleteObject` explicitDeny for BOTH users). Negative controls: iam.tf without the `dell1_ssm` attachment reads 18 unequal arms (`ssm:SendCommand` on the host and the documents), `ok=False`; the key statement narrowed to dell2 reads 1 unequal arm (`kms:GenerateDataKey`), `ok=False`. The LIVE account still shows dell1 without the ssm policy, as expected before the apply (`LIVE-VS-BUILT` line).
+
+### What each Dell can newly do, in plain words
+
+dell1 can send the two resident documents and the AWS shell-script document to the resident host and read the result, and can write the jobs' output into the transcripts bucket under its key. dell2 can write the same output under the key (amendment 25, now for both). Neither can send a PowerShell, remote-script, interactive or session document, or the export render document, or delete a command document.
+
+### Not done
+
+The apply; a plan against the backend; a real `SendCommand` or PutObject. The live bucket fences were read for three buckets only (the buckets whose registry rows name a Dell); the group documents are sampled at two resources per statement. `kms:GenerateDataKey` on the transcripts key for dell2 was never applied before this pass, so dell2's live key access today is Decrypt and DescribeKey only.
+
+## P. BOTH DELLS RUN THE SHELL DOCUMENT ON mdpf-daily-runner, STANDING (amendment 27; dell2 `2.0.0_SA_COO~P2` relay msg 107720, row IRPT_BCKEND-D2-S25 @627f6fa99e, for IB-pr-383; both Dells by amendment 26)
+
+### First read: where `i-02448edb624a7a7cf` stands (printed before the edit)
+
+| question | answer | file:line |
+|---|---|---|
+| Does any explicit Deny in the identity root name this instance (by id or ARN)? | NO. The only occurrences of the id in the root are two census rows. No `instance/` ARN sits in any Deny of any policy file; the only `instance/` expression outside the ssm policy and the tests is the group send Allow's host list | `tests/reached_roles_census.json:1679`, `:6050`; `modules/routes_policy/main.tf:110` (an Allow) |
+| Does a comment, ruling or census row EXCLUDE it on purpose? | NO. Its census row reads `route_status: NO-ROUTE-FOUND`, which says no document was found to run on it, not that it is excluded | `tests/reached_roles_census.json:1694` |
+| Is it one of the routes' privileged hosts? | NO. The send Allow's hosts are the 6 host routes with at least one document; this host has `documents: []`. The routes hosts Deny is removed from the root (amendment 15, step D) | `tests/reached_roles_census.json:1685-1692`; `routes.tf:45-52` |
+| Instance role (name only) | `mdpf-daily-runner-ec2-role` (instance profile `mdpf-daily-runner-profile`); the census gives the role no YES-IAM, YES-TRAIL or YES-DELETE verdict (`yes_any=10` does not include it) | `tests/reached_roles_census.json:1681-1684`, `:6046-6060` |
+| Is the shell document already sent to it by repo code? | YES: `directory/refresh.py` and `holdings_refresh/refresh_dispatch.py` send `AWS-RunShellScript` to it (`EC2_MANIFEST.json services.mdpf-daily-runner`) | `tests/derive_ssm_documents.py --check` prints both under SENT-TO-THE-INSTANCE |
+| State | census (taken 2026-10-07T11:05:41Z) says `stopped`; the live state was not read (no instance call is permitted) | `tests/reached_roles_census.json:1680` |
+
+No deliberate Deny exists, so the order's STOP did not fire. Row `NFRA_CTLPLN-W14-S48` records two facts a signer may want beside the grant (the role's assume-chain to the 49 Financial source principal, and the resident-document cross pair).
+
+### The policy diff (`dell2_ssm_policy.json`, rendered by `tests/derive_ssm_documents.py --write`; `--check` compares)
+
+One statement added, between `SendResidentDocumentsToResidentHost` and `ReadCommandResults`; nothing else in the file moved:
+
+```
+{ "Sid": "SendShellScriptToDailyRunner", "Effect": "Allow", "Action": "ssm:SendCommand",
+  "Resource": [ "arn:aws:ec2:us-east-1:313476888478:instance/i-02448edb624a7a7cf",
+                "arn:aws:ssm:us-east-1::document/AWS-RunShellScript" ] }
+```
+
+Why a separate statement and not a third entry in the first: the first statement is the resident host's, and its Sid says so. The instance id is typed once in `derive_ssm_documents.py` (`DAILY_RUNNER_ID`) and the script checks it equals `EC2_MANIFEST.json services.mdpf-daily-runner.instance_id` (printed `manifest agrees: True`). Every other shell or session document stays in `DenyShellDocuments`; `ssm:StartSession` on the shell document stays in `DenyStartSessionOnShellScriptDocument`. The policy is 1,421 characters (limit 6,144). The group keeps 9 of 10 managed policies; no new policy, no new attachment.
+
+### Arms that moved (simulation, both users, the policies as built)
+
+- `shellpar_ok` 22/22 -> 32/32: ten arms added, five per user, on `mdpf-daily-runner`: shell document ALLOWED; PowerShell, remote-script and interactive-command documents explicitDeny by `DenyShellDocuments`; the export render document explicitDeny.
+- The arms that used this host as "an instance outside both grants" (shellpar 03 and 14, `ssm_ok` 03 and 09, `sendcmd_ok` 16 and 32) now use `i-00abf626b065373bc`, the first census host in no grant, and still read `implicitDeny`. Same decisions on a different instance: the only lines that differ from the amendment-26 run besides the ten new arms. (Before this pass the former arms read `implicitDeny` on this host: the refusal dell2 measured.)
+- Every other counter is unchanged: `ssm_ok=18/18 sendcmd_ok=33/33 walker_ok=11/11 iamw_ok=225/225 planread_ok=423/423 vendor_ok=255/255 routes_freed=114/138 routes_still_refused=24`, `all_ok=True`.
+- Reported, not counted (IAM authorises instance and document separately): both Dells may also send `irpt-ycharts-run` and `irpt-ycharts-deploy` to this host (`allowed, allowed`); a group-Allow document sent to it is `implicitDeny` (`NFRA_CTLPLN.TO-CT-a-1.amendment28.a27_cross_pairs.outputs.txt`).
+
+### Parity
+
+`DELL-PARITY arms=1532 equal=1532/1532 unequal=0 ok=True` (1531 before: the new statement adds one arm; every arm equal for both users, because both hold the one file).
+
+### Expected plan, by reading
+
+Identity root `infra/aws/terraform/nfra-ctlpln-identity/`:
+
+| resource address | action | what |
+|---|---|---|
+| `aws_iam_policy.dell2_ssm` | update in place | `policy` only: one statement added. Name, description and tags are untouched, so NOT replaced; the new version becomes the default and both attachments keep pointing at the same policy ARN, so there is no gap |
+
+Relative to the amendment-26 built state: 0 to add, 1 to change, 0 to destroy. If amendment 26 has not been applied yet (no apply record for `dell1_ssm` found under `org/tier2_senior`; the last backend plan, 03:53Z, `No changes`, preceded it), the plan also carries `aws_iam_user_policy_attachment.dell1_ssm` as 1 create: 1 to add, 1 to change, 0 to destroy. Nothing else may move. Nothing is REPLACED or DESTROYED.
+
+### Not done
+
+The apply; a plan against the backend; a real `SendCommand`; the live state of the instance; the live documents.
+
+## Q. THE GenerateDataKey STATEMENT IS SCOPED TO S3 AND THIS BUCKET (amendment 28 and the issuer's ruling; dell2 `2.0.0_SA_COO~T2` relay msg 107726/107740; `TO-RUN-a17` stopped at the key)
+
+### What the key statement says now (`infra/aws/terraform/transcripts/main.tf`, `DellAgentUsersGenerateDataKey`)
+
+Principals: both Dell users (`var.dell_agent_user_names`). Action: `kms:GenerateDataKey` alone. Resource `*` (the key). Exactly two conditions, both `StringEquals`:
+
+```
+"kms:ViaService"                   = "s3.us-east-1.amazonaws.com"
+"kms:EncryptionContext:aws:s3:arn" = aws_s3_bucket.transcripts.arn
+```
+
+The bucket ARN is the Terraform reference, never a typed string. There is no per-prefix value at the key and no `kms:Encrypt`.
+
+### Evidence for the two rulings
+
+- Bucket Key is on: `bucket_key_enabled = true` at `infra/aws/terraform/transcripts/main.tf:157` (line 138 in `box/laptop` @8837887671, which the issuer cited as 137; 147 at this branch's HEAD before this pass and 157 after it: the lines above it are the key-policy and comment lines the amendment-26 pass and this pass added). With a Bucket Key the encryption context S3 sends is the bucket ARN, so a per-prefix condition would refuse every write. The prefix boundary is the S3 identity leg, unchanged. The live `get-bucket-encryption` was NOT re-read by this pass: the Terraform text is the evidence, and the issuer's ruling cites the same line.
+- No `kms:Encrypt`: the evidence is dell2's measurement, quoted in the issuer's ruling (relay msg 107740): the a17/b17 code makes no direct KMS Encrypt call, the only KMS calls are `describe_key` (`pull.py:215`, `silver.py:277`, `gold.py:303`), and the writes are SSE-KMS PutObject, which needs `GenerateDataKey`. That code is not in this sparse worktree, so this pass did NOT re-read it: the claim is HELD (the issuer's), not measured here. Measured here: `kms:Encrypt` reads `implicitDeny` for both Dells in the check.
+- The Dells already hold `kms:DescribeKey` (`DellAgentUsersDecryptOnly`), so the three `describe_key` calls need nothing added.
+
+### The check (`tests/check_transcripts_dell_decrypt.py`)
+
+For each user, the simulator takes `ContextEntries` for the S3 context. In scope: `s3:PutObject` under `teams/transcripts/silver/research_meeting/` (identity leg) allowed, and `kms:GenerateDataKey` with `kms:ViaService` and the bucket ARN (key leg) allowed, so the composed SSE-KMS write is allowed. Out of scope, each refused at the key: `kms:GenerateDataKey` with ANOTHER bucket's ARN as context (the registry's first other bucket), and with NO `kms:ViaService`. Both users print both legs; the last line is unchanged in shape, and `dellN_generate_ok` means allowed in scope AND refused out of scope. The check also asserts the rendered statement's Condition equals exactly the two values above.
+
+LAST line: `TRANSCRIPTS-DELL-DECRYPT dell_decrypt=2/2 dell_write_refused=6/10 dell2_generate_ok=True dell1_generate_ok=True reader_unchanged=True unlisted_refused=True statements_added=1 ok=True`. Arms moved against the pre-amendment-25 state, unchanged since amendment 26: `kms:GenerateDataKey` implicitDeny -> allowed for each Dell (so 6/10 refused, 8/10 before). `kms:Encrypt`, `ReEncryptFrom`, `ScheduleKeyDeletion` stay refused for both; `PutKeyPolicy` stays allowed by design. The reader's statement is byte identical.
+
+### Expected plan, by reading
+
+Transcripts root `infra/aws/terraform/transcripts/` (the live key policy equals the render of `5c1d0af92c`, three statements, re-read this run: `live ... equals the before25 render: True`):
+
+| resource address | action | what |
+|---|---|---|
+| `aws_kms_key.transcripts` | update in place | `policy` only: one statement appended, `DellAgentUsersGenerateDataKey`, now carrying the two `StringEquals` conditions above |
+
+0 to add, 1 to change, 0 to destroy for this order's edit. THE ROOT STILL CARRIES ANOTHER CELL'S PENDING CHANGES (row `NFRA_CTLPLN-W14-S46`), so the apply is TARGETED. Target address: `-target=aws_kms_key.transcripts`. A targeted plan also walks the target's dependencies: `aws_s3_bucket.transcripts` (new: the key policy now references its ARN) and `data.aws_caller_identity.current`, which by reading show no change (the bucket block is untouched by this pass); the applier confirms that in the plan. Reference cycle: none (the bucket does not reference the key; the SSE configuration and the bucket policy reference both). `terraform fmt -check` rc=0 on both roots; `terraform init -backend=false` plus `terraform validate` ok on a scratch copy of the whole root outside the tracked tree (inputs stubbed as in the amendment-26 pass: the three NAMES.json files and runner_config.json from HEAD, placeholder lambda zips): `Success! The configuration is valid.`
+
+### Not done
+
+The apply; a plan against the backend; a real PutObject or GenerateDataKey; the live bucket encryption configuration read; the a17/b17 code re-read.

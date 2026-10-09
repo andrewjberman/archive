@@ -1,0 +1,30 @@
+CENSUS-IDENTITY-ROOT per-user attachments in the Terraform (aws_iam_user_policy_attachment), writers counted from the .tf text:
+  policy resource dell1_bus    writers(aws_iam_policy)=1 attached to dell1 (1 user attachment resources)
+  policy resource dell2_bus    writers(aws_iam_policy)=1 attached to dell2 (1 user attachment resources)
+  policy resource dell2_ssm    writers(aws_iam_policy)=1 attached to dell1+dell2 (2 user attachment resources)
+CENSUS-IDENTITY-ROOT group attachments=9 (managed-policy quota 10); user policy attachments dell1=['dell1_bus', 'dell2_ssm'] dell2=['dell2_bus', 'dell2_ssm']
+CENSUS-INFRA .tf lines naming a Dell user (builder name or resource address), outside comments: 8 lines in 2 files
+  infra/aws/terraform/nfra-ctlpln-identity/iam.tf                lines=7   first 20: name = "cloudops-dell1-agent-user"
+  infra/aws/terraform/transcripts/main.tf                        lines=1   first 66: default     = ["cloudops-dell1-agent-user", "cloudops-dell2-agent-user
+CENSUS-INFRA aws_iam_user_policy / user_policy_attachment / group_membership resources outside the identity root naming a Dell: 0
+CENSUS-RESOURCE-POLICY transcripts key policy: writer count=1 (aws_kms_key.transcripts policy argument), .tf files naming a Dell user in that root=['infra/aws/terraform/transcripts/main.tf']
+CENSUS-REGISTRY exemptions.json rows naming cloudops-dell1-agent-user: 3 buckets ['opal-data-49financial', 'opal-data-cottonwood', 'opal-data-inflection']
+CENSUS-REGISTRY exemptions.json rows naming cloudops-dell2-agent-user: 3 buckets ['opal-data-49financial', 'opal-data-cottonwood', 'opal-data-inflection']
+CENSUS-REGISTRY the two users hold the same rows on the same buckets: True (readers of exemptions.json among .tf files: 4)
+CENSUS-LIVE cloudops-dell1-agent-user attached=['cloudops-dell1-agent-bus-policy'] inline=[] groups=['cloudops-dell-agents-group']
+CENSUS-LIVE cloudops-dell2-agent-user attached=['cloudops-dell2-agent-bus-policy', 'cloudops-dell2-agent-ssm-policy'] inline=[] groups=['cloudops-dell-agents-group']
+CENSUS-LIVE group attached=9 ['cloudops-dell-agent-create-policy', 'cloudops-dell-agent-deploy-policy', 'cloudops-dell-agent-iam-roles-policy', 'cloudops-dell-agent-plan-reads-policy', 'cloudops-dell-agent-platform-secrets-policy', 'cloudops-dell-agent-respol-allow-policy', 'cloudops-dell-agent-routes-fn-policy', 'cloudops-dell-agent-ssm-send-policy', 'cloudops-dell-agent-vendor-secrets-policy'] inline=[]
+LIVE-VS-BUILT cloudops-dell1-agent-user: built attachments ['cloudops-dell1-agent-bus-policy', 'cloudops-dell2-agent-ssm-policy'] ; live ['cloudops-dell1-agent-bus-policy'] ; in the Terraform and not yet live (the apply adds): ['cloudops-dell2-agent-ssm-policy'] ; live and not in the Terraform: none
+LIVE-VS-BUILT cloudops-dell2-agent-user: built attachments ['cloudops-dell2-agent-bus-policy', 'cloudops-dell2-agent-ssm-policy'] ; live ['cloudops-dell2-agent-bus-policy', 'cloudops-dell2-agent-ssm-policy'] ; in the Terraform and not yet live (the apply adds): none ; live and not in the Terraform: none
+EFFECTIVE-SET dell1 group=9 documents ['dell_agent_create', 'dell_agent_deploy', 'dell_agent_iam_roles', 'dell_agent_plan_reads', 'dell_agent_platform_secrets', 'dell_agent_respol_allow', 'dell_agent_routes_fn', 'dell_agent_ssm_send', 'dell_agent_vendor_secrets'] ; own=['dell1_bus', 'dell2_ssm']
+EFFECTIVE-SET dell2 group=9 documents ['dell_agent_create', 'dell_agent_deploy', 'dell_agent_iam_roles', 'dell_agent_plan_reads', 'dell_agent_platform_secrets', 'dell_agent_respol_allow', 'dell_agent_routes_fn', 'dell_agent_ssm_send', 'dell_agent_vendor_secrets'] ; own=['dell2_bus', 'dell2_ssm']
+PER-USER DOCUMENTS held by both: ['dell2_ssm'] ; held by one only and not a bus policy: none ; symmetric_by_box: dell1=['dell1_bus'] dell2=['dell2_bus']
+ARMS census: 10 documents (bus policies compared by role), 1499 (action, resource) arms; wildcard actions with no botocore expansion or NotAction statements: 0 []
+ARMS policy-documents: simulated=1499 equal=1499 unequal=0 invalid-action-name(both users alike, not counted)=0 unread=0 (14s)
+ARMS symmetric_by_box (bus policies, by role: each user on its own queue and on the other box's queue): 8/8 equal
+ARMS resource-policy transcripts key (the rule: named statements, or root delegation AND the user's own policy): 13/13 equal; dell1={'Decrypt': 'allowed', 'DescribeKey': 'allowed', 'CreateGrant': 'allowed', 'GetKeyPolicy': 'allowed', 'ListGrants': 'allowed', 'PutKeyPolicy': 'allowed'}
+  FENCE opal-data-49financial both users: DeleteObject=explicitDeny, GetObject=allowed, ListBucket=allowed, PutObject=allowed
+  FENCE opal-data-cottonwood both users: DeleteObject=explicitDeny, GetObject=allowed, ListBucket=allowed, PutObject=allowed
+  FENCE opal-data-inflection both users: DeleteObject=explicitDeny, GetObject=allowed, ListBucket=allowed, PutObject=allowed
+ARMS resource-policy bucket fences (live policy text of the 3 buckets whose registry rows name a Dell): 12/12 equal
+DELL-PARITY arms=1532 equal=1532/1532 unequal=0 ok=True
