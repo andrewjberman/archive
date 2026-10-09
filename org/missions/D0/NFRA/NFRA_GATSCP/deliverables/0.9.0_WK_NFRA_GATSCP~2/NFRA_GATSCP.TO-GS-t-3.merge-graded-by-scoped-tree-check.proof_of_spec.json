@@ -1,0 +1,103 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-t-3",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/prd/NFRA_GATSCP_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7cb6183997"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~2",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.md",
+  "vintage_commit": "95669cba44",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-t-3.merge-graded-by-scoped-tree-check.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/box-sync.sh",
+   "kind": "script",
+   "commit_or_etag": "c8d936bf7a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-2, not pushed; no deploy plane. grade mode (read-only, any seat: no fetch, lock, audit row, ref move), merge_tree_of helper, grade_merge runs missions-tree-index.py check --staged --act-from-env on the private GIT_DIR after the row gate.",
+   "artifact_covered_by": [
+    "GS3-AC1"
+   ]
+  },
+  {
+   "path_or_key": ".tools/safe-merge.sh",
+   "kind": "script",
+   "commit_or_etag": "c8d936bf7a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-2, not pushed; no deploy plane. _sm_fast_lane runs the same scoped tree check on its private GIT_DIR; one new --self-test arm.",
+   "artifact_covered_by": [
+    "GS3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D0/NFRA/NFRA_GATSCP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "c8d936bf7a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-2, not pushed; no deploy plane. row NFRA_GATSCP-D1-W2-S2 appended."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GS3-AC1",
+   "criterion_verbatim": "a merge whose parents both carry LGIC_BLANKFIX's drift (from the merge base) is graded and passes with STANDING LGIC_BLANKFIX; a merge where both sides changed that row is refused (the difference control). The check builds its commits with plumbing only; it moves no ref and touches no working-tree file.",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_boxsync_grade.py\"",
+   "output_evidence": "rc=1\nFAIL bystander-lands: rc=0 standing_LGIC_BLANKFIX=False :: box-sync: grade SKIP -- the merge introduces nothing and no path changed on both sides | box-sync: grade c0dcf93317 + 19d0e8be59 -> PASS (graded=0/1); nothing landed, no ref moved\n  PASS own-refused: rc=1 ::   value enum fabric: 4 values from .tools/to-pipeline-gate.py:FABRIC_ENUM (read by AST at run time) |   ACT SCOPE: in-act=1 STANDING=0 (act projects: LGIC_BLANKFIX) |   [INDEX-DRIFT] org/projects/LGIC_BLANKFIX.json: dep_stage: index='EXECUTING' tree='DECOMP' | RESULT: 1 violation(s) in the act's projects, 0 STANDING  (denominators on the first line) | box-sync: grade fe14f811f6 + 53a2657560 -> REFUSED (graded=1/1); nothing landed, no ref moved | box-sync: REFUSED BY THE TREE CHECK on the merge's own paths (rc=1)\nGS-T3-BOXSYNC ok=False arms=2 failed=1",
+   "denominator": "1 of 2 arms PASS (own-refused PASS; bystander-lands FAIL: the merge's graded path set is empty, graded=0/1, so the ordered early SKIP returns before any tree check; see row NFRA_GATSCP-D1-W2-S2)",
+   "status": "FAIL",
+   "status_reason": "arm 1 (bystander-lands) cannot pass: the merge it builds has an empty graded path set, the order keeps the early SKIP there, so no tree check runs and no STANDING line prints; row NFRA_GATSCP-D1-W2-S2. Check not weakened.",
+   "expect": "GS\\-T3\\-BOXSYNC\\ ok=True"
+  },
+  {
+   "criterion_id": "GS3-AC2",
+   "criterion_verbatim": "the fast lane calls missions-tree-index.py with --staged and --act, and safe-merge.sh --self-test exits 0.",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_fastlane.py\"",
+   "output_evidence": "rc=0\nPASS fast-lane-runs-scoped-tree-check: function_found=True wired=True\n  PASS self-test-green: rc=0 ::      conflict path, the grade or the commit path -- these grep arms cannot see |      behaviour, only that the strings are still present. | PASS\nGS-T3-FASTLANE ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms (fast-lane-runs-scoped-tree-check, self-test-green)",
+   "status": "PASS",
+   "expect": "GS\\-T3\\-FASTLANE\\ ok=True"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1 builds merges from plumbing commits whose parents carry the bystander's row drift; arm 2 is the difference control (both sides changed the row).",
+   "expected": "arm 1 rc 0 with STANDING LGIC_BLANKFIX; arm 2 rc 1",
+   "observed": "arm 1 FAIL (graded set empty, SKIP, rc 0, no STANDING); arm 2 rc 1 with 'REFUSED BY THE TREE CHECK'. Own positive control with a non-empty graded set (both sides write one probe file identically): rc 0 and 'STANDING LGIC_BLANKFIX INDEX-DRIFT org/projects/LGIC_BLANKFIX.json', graded=1/1.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2 each run twice at c8d936bf7a",
+   "observed": "GS-T3-BOXSYNC ok=False arms=2 failed=1 both runs; GS-T3-FASTLANE ok=True arms=2 failed=0 both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "box-sync.sh box / integrate modes and safe-merge's in-tree path",
+   "reason": "Order bounds: only `grade` is exercised; the in-tree path commits through the GS-t-2 hook."
+  },
+  {
+   "item": "A driven run of _sm_fast_lane",
+   "reason": "It lands a merge; AC2 is structural by design and the issuer's one real run at close exercises the seam."
+  }
+ ],
+ "surprises": [
+  "NFRA_GATSCP-D1-W2-S2: GS3-AC1 arm 1 builds a merge with an EMPTY graded path set; the order keeps the early SKIP there, so no tree check runs and no STANDING line can print. BLOCKING, INERT. Check not weakened, SKIP kept; GS3-AC1 reads FAIL and the order stays open."
+ ],
+ "session_log": "2026-10-09 ~08:1xZ re-seated on slot ~2. Read both checks and box-sync/safe-merge. Built grade mode (guards on serial/lock/fetch for MODE=grade, merge_tree_of helper shared with make_merge), the tree check in grade_merge, the fast-lane tree check and one self-test arm. AC2 PASS; AC1 arm 2 PASS; arm 1 FAIL on the empty graded set, row W2-S2 filed, order left open per the refusal clause.",
+ "compiler_tools": [
+  {
+   "tool": "box-sync.sh grade",
+   "invocation": "bash .tools/box-sync.sh grade <P1> <P2>",
+   "result": "non-empty graded set control: rc 0, ACT SCOPE in-act=0 STANDING=1, STANDING LGIC_BLANKFIX INDEX-DRIFT; conflict beyond known classes: rc 4"
+  }
+ ]
+}
