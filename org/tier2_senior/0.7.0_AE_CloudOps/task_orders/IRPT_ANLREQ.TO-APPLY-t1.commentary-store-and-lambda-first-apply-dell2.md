@@ -15,6 +15,14 @@
 <decomp_context>Round 1, workstream ~T: the apply of AR-t-11 + AR-t-12 (with the AR-t-13 store under AMENDMENT 4), drained @77adb5a035. HELD: the GO is a separate message, sent only after IB-pr-391 (the composition reader) is applied and read back.</decomp_context>
 </decomp_ref>
 
+  <reassignment>
+    AMENDMENT 2 (issuer, 2026-10-09 ~13:3xZ): RELEASED. The composition reader is LIVE under IB-pr-397 (0.7.0_AE_CloudOps~IB2 msg 3355:
+    `irpt-commentary-composition-read-lambda` CodeSha256 ZZmWOFSA..., `irpt-commentary-composition-invoke-policy` exists), which is step 0's
+    read. Row IRPT_BCKEND-D2-S50 is fixed at @36b0bc0423: the draft store's root log group is removed and the yang-lambda module owns it
+    (`log_retention_days = 14`), so step 1 targets no root log group. The pin MUST carry 36b0bc0423
+    (`git merge-base --is-ancestor 36b0bc0423 <pin>`); a pin without it half-lands step 1 (ResourceAlreadyExistsException).
+  </reassignment>
+
   <objective>
     The FIRST apply of the commentary DRAFT store (IRPT export root) and the commentary Lambda (transcripts root), in the order the pair
     fixes: A (store, policy row PENDING) -> A2 (row ACTIVE + store code rebuilt) -> B (commentary). Report counts and stages only.
@@ -33,8 +41,8 @@
     0. Open a change ledger in org/critical_paths/change_management/ naming the pin (box/dell2 commit you apply from) and each zip's sha256
        (deploy-gate pin rule, MSTR msg 2681). Read back that `irpt-commentary-composition-read-lambda` and
        `irpt-commentary-composition-invoke-policy` EXIST (IB-pr-391 applied). Absent = STOP.
-    1. STEP A, `infra/aws/terraform/investor-reporting/export`: safe-apply targeted to the draft-store module, its role, role policy, log
-       group and `commentary_draft_store_invoke` policy. The plan must show exactly those creates and 0 change / 0 destroy; anything else = STOP.
+    1. STEP A, `infra/aws/terraform/investor-reporting/export`: safe-apply targeted to the draft-store module (which now owns the function's
+       log group, AMENDMENT 2), its role, role policy and `commentary_draft_store_invoke` policy. The plan must show exactly those creates and 0 change / 0 destroy; anything else = STOP.
     2. STEP A2: set `irpt-anlreq-x10-v1` ACTIVE in `infra/logic/registry/reporting_policies.json` with `enforcement_ref` = the full
        40-character hash of the merge carrying the store (read with git rev-parse), a one-row registry commit; rebuild the store zip from that
        commit; re-apply the store function's code only; put the rebuilt zip's sha256 in the ledger. Read the row ACTIVE at the applied pin.

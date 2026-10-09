@@ -62,12 +62,44 @@ the branch's DELETION** of `.claude/skills/bbg-teams-assist/SKILL.md` and `org/t
 RELAUNCH.md` (`git rm` both in the merge). Their content now lives in `opal_ai/opal/agent/`, and the one unported edit
 (the P3 row) is ruled RETIRED. The merge still lands on the cutover sitting, after both arms PASS.
 
+## Re-fold on fresh messages (CTO~Z ruling @4e2f00c9fa, msg 32767, after row Z-S70)
+
+The 900s bound stays; the live window is not widened. Each arm fires within 15 minutes of a NEW message from its sender,
+and the new message id and send time are recorded beside its result. The calling principal reads the cited message
+through its own delegated token (`whoami` = `Andrew@opalinvest.com`), so the message must sit in a chat that token can
+read:
+- **arm (b), un-admitted:** Andrew sends any message in his 1:1 chat with the Opal Bloomberg account,
+  `19:2e21f8e5-55ca-45c1-91b9-a4607bf28d4f_517aa5ee-b4d0-425a-b493-5a22ff77ac4f@unq.gbl.spaces` (listed in Andrew's
+  `list_chats`). Expected: `asker_no_profile` with the how-to-get-access line, no data read.
+- **arm (a), admitted:** Alyssa sends a portal-figure question at her sitting in a chat Andrew's token reads (their 1:1,
+  `19:2e21f8e5-..._ad037ea5-...`, as registered). Expected: the figure, as-of date, source and scope, with the raw pinned
+  read in the same minute.
+Key unchanged: `json/benchmarks/etf_returns.json`. The timing of (b) was put to Andrew by this seat (no seat sends for him).
+
+**Arm (b) widened (CTO~Z UB-e1ca fold @2fb30f869c, msg 32783):** fire on the FIRST message at most 900s old from ANY
+sender without an asker profile (anyone but Alyssa today) in any chat the principal reads; record the sender and the
+message's age at fire time. Watcher: each `/canonical-drive` tick (10m) polls `poll_addressed_teams_messages` since the
+previous tick, so a hit is at most about 11 minutes old when it fires, inside the 900s bound. **Arm (a) unchanged** (Alyssa's
+own fresh question, @4e2f00c9fa) until `3.0.0_SA_CVO~Z` rules the CTO's pitch.
+
 ## Results (filled at the run)
 
 | arm | run at (UTC) | raw response | pinned reference read (same minute) | verdict |
 |---|---|---|---|---|
-| (b) | | | n/a | |
-| (a) | | | `gateway_query_catalog("json/benchmarks/etf_returns.json")`: `data_as_of`, `generated_at`, raw body | the CVO's J2 grade |
+| (b) | 2026-10-09T13:06:43Z | `{"error": "the cited message is older than the 900s window or carries no parseable createdDateTime; no data was read", "guard_denied": true, "code": "asker_message_stale", "asker_scope_denied": true}` | n/a | NOT PASS: refused, but on staleness before the asker was resolved, not `asker_no_profile` (row Z-S70) |
+| (a) | ~2026-10-09T13:08Z (between the 13:06:43Z and 13:08:45Z reads) | `{"error": "the cited message is older than the 900s window or carries no parseable createdDateTime; no data was read", "guard_denied": true, "code": "asker_message_stale", "asker_scope_denied": true}` | not taken: no data was served, so there is nothing to grade against | NOT PASS: same refusal (row Z-S70) |
+
+**Trigger read before the arms (13:00:53Z-13:06Z):** OG-ap-3 last `<status>` = `complete` (13:00:53Z); r29 LIVE on
+`91811b648a` (AE~Z @5f1400c4a2, verify 5 of 5); r29 ledger entries in HEAD trees = 2 of 49 worktrees, both the opening
+blob `b3caddee0d` inherited by stale branches whose HEADs are contained in trunk (`C:/tmp/oa-25`,
+`C:/tmp/wk-oplgtw-r33-48`), so 0 live; COO~O confirms both ledgers CLOSED (ap3.AC2 PASS).
+
+**Why both arms refuse (row Z-S70):** r29 ships asker_scope clause (h), `infra/aws/ec2/opal-gateway/app/asker_scope.py:68`
+@91811b648a: a cited message older than `ASKER_MESSAGE_MAX_AGE_SECONDS` (default 900) is refused `asker_message_stale`.
+The registered messages are from 2026-10-08 21:19Z and 21:22Z. The fold's premise, arms driven from EXISTING messages,
+cannot be met on r29 as configured; each arm needs a message under 15 minutes old from its sender. This is the
+gateway's replay bound working as built: a stale citation is refused with no data read, for an admitted and an
+un-admitted sender alike.
 
 **J2 grades against the pinned reference read**, taken by this seat in the same minute as arm (a), never against a later
 portal read: the key is rewritten daily at about 12:04Z, so a later read can differ from a correct answer.
