@@ -3,7 +3,8 @@
                       that runs UNDER 85% of 4 GiB with the FWD-14 gate's decisions unchanged (worker ~276)
 
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
-  IB115-1-AC1  memory census M: one harness, real 49F inputs, upload disabled; peak_rss_bytes for trees pre404, b404, b410 and fix; the
+  IB115-1-AC1  memory census M: one harness, real 49F inputs, upload disabled; peak_rss_bytes, wall_time_s and table_lookups
+               (AMENDMENT 1) for trees pre404, b404, b410 and fix; the
                limit is 0.85 * 4 GiB; fix.peak_rss_bytes < limit, and b404's is >= the limit or its value explains the kill.
                Base: FAIL (no M).
   IB115-1-AC2  the publish-gate and runner suites pass (`-k publish_gate` >= 10 and the gold investor_reporting tests, the
@@ -59,6 +60,10 @@ def main():
         fix = trees["fix"]["peak_rss_bytes"]
         if fix >= LIMIT:
             fail("fix peak %d >= limit %d" % (fix, LIMIT))
+        # TO-IB-pr-414 AMENDMENT 1 (CTO ADDENDUM 20 item 1): the e56 cost is graded on the same harness
+        for t in ("pre404", "b404", "b410", "fix"):
+            if not isinstance(trees[t].get("wall_time_s"), (int, float)) or not isinstance(trees[t].get("table_lookups"), int):
+                fail("%s wall_time_s %r table_lookups %r" % (t, trees[t].get("wall_time_s"), trees[t].get("table_lookups")))
         print("OK: peak RSS pre404 %d, b404 %d, b410 %d, fix %d (limit %d)" % tuple(
             [trees[t]["peak_rss_bytes"] for t in ("pre404", "b404", "b410", "fix")] + [LIMIT]))
     elif cid == "IB115-1-AC2":
