@@ -19,8 +19,15 @@ The seven arms (design: FWD6_DESIGN_round6.md, "The exercise that would prove it
   D  ratchet grows          irpt-directory-refresh given cron(0/7 ...): HOLE count 0 -> 1; D-neg: a cron edit on a name that
                             already carries its word: count equal, rc=0
   E  organic (negative)     an existing wrong name touched, not renamed               -> rc=0, WARN
-  F  ratchet shrinks (neg)  a diff that fixes a HOLE (investor-reporting/intake)     -> rc=0, HOLE count 1 -> 0
+  F  ratchet shrinks (neg)  a diff that removes a HOLE (investor-reporting/intake)   -> rc=0, HOLE count 1 -> 0
+                            The HOLE is PLANTED in the overlay the arm hands the gate (a schedule block, minute field 0/7,
+                            added to the pre-image), never read from a live registry row's absence (row S12, BF-x-2).
+                            Difference control inside the arm: the same planted HOLE ADDED by the diff is refused (rc=1)
+                            with the placement switch present, and passes (rc=0, the skip notice printed) with it absent.
   G  switch absent          arm A with the placement switch absent                   -> the same text, rc=0
+Arm G runs with NAMING_PLACE_PREVIEW=1 in its child's environment (ruling W1-S22): while the switch is absent the commit
+gate skips the placement step unless that variable is 1, and arm G is the arm that runs the step with the switch absent. The
+other arms run without it (arm F's control reads the skip on purpose).
 One line per arm: expected and got. Last line, printed once: FWD6-ARMS ok=<bool> arms=7 held=<n>
 Python 3.9; ASCII only; standard library only.
 """
@@ -107,6 +114,8 @@ def load_gate(tmp, place_on, old_enforce=False):
     if place_on:
         with open(mod.PLACE_FILE, "w") as fh:
             fh.write("temporary switch for the exercise\n")
+    elif os.path.exists(mod.PLACE_FILE):  # a run in the same folder that had it present
+        os.remove(mod.PLACE_FILE)
     return mod
 
 
@@ -304,19 +313,35 @@ def judge_E(r):
                                                                 r["last"], r["head"], r["post"])
 
 
+HOLE_BLOCK = '''
+resource "aws_scheduler_schedule" "x_hole" {
+  name                = "irpt-intake-zhole"
+  schedule_expression = "cron(0/7 9 ? * MON-FRI *)"
+}
+'''
+
+
 def arm_F(tmp):
-    pre = head_text(INTAKE_TF)
-    post = edit_line(pre, 'default     = "cron(0/15 8-23 * * ? *)"', 'default     = "cron(0/15 * * * ? *)"')
+    base = head_text(INTAKE_TF)
+    pre = base + HOLE_BLOCK  # the HOLE planted in the overlay: the pre-image the gate is handed carries it
     mod = load_gate(tmp, True)
-    rc, out, lines = run_gate(mod, tmp, INTAKE_TF, pre, post)
-    head_n, post_n = counts_of("infra/aws/terraform/investor-reporting/intake", {INTAKE_TF: pre}, {INTAKE_TF: post})
+    rc, out, lines = run_gate(mod, tmp, INTAKE_TF, pre, base)
+    head_n, post_n = counts_of("infra/aws/terraform/investor-reporting/intake", {INTAKE_TF: pre}, {INTAKE_TF: base})
+    # difference control: the planted HOLE added by the diff, switch present then absent
+    modp = load_gate(tmp, True)
+    rc_on, _o, lines_on = run_gate(modp, tmp, INTAKE_TF, base, pre)
+    moda = load_gate(tmp, False)
+    rc_off, out_off, lines_off = run_gate(moda, tmp, INTAKE_TF, base, pre)
     return {"rc": rc, "head": head_n, "post": post_n, "ratchet": any(" <hole-count-ratchet> " in ln for ln in lines),
-            "last": last_line(lines)}
+            "last": last_line(lines), "ctl_on_rc": rc_on, "ctl_on_ratchet": any(" <hole-count-ratchet> " in ln for ln in lines_on),
+            "ctl_off_rc": rc_off, "ctl_off_notice": any("PLACE-NOTICE" in ln for ln in lines_off)}
 
 
 def judge_F(r):
-    good = r["rc"] == 0 and not r["ratchet"] and r["head"] == 1 and r["post"] == 0
-    return good, "rc=%d holes head=%d post=%d ratchet_row=%s last=%s" % (r["rc"], r["head"], r["post"], r["ratchet"], r["last"])
+    good = (r["rc"] == 0 and not r["ratchet"] and r["head"] == 1 and r["post"] == 0
+            and r["ctl_on_rc"] == 1 and r["ctl_on_ratchet"] and r["ctl_off_rc"] == 0 and r["ctl_off_notice"])
+    return good, "rc=%d holes head=%d post=%d ratchet_row=%s last=%s | control: planted HOLE added, switch present rc=%d ratchet_row=%s; switch absent rc=%d skip_notice=%s" % (
+        r["rc"], r["head"], r["post"], r["ratchet"], r["last"], r["ctl_on_rc"], r["ctl_on_ratchet"], r["ctl_off_rc"], r["ctl_off_notice"])
 
 
 def child(arm):
@@ -350,7 +375,11 @@ def snapshot():
 
 
 def spawn(arm):
-    p = subprocess.run([sys.executable, os.path.abspath(__file__), "--child", arm], capture_output=True, cwd=ROOT)
+    env = dict(os.environ)
+    env.pop("NAMING_PLACE_PREVIEW", None)
+    if arm == "G":
+        env["NAMING_PLACE_PREVIEW"] = "1"  # ruling W1-S22: the step runs with the switch absent only under this variable
+    p = subprocess.run([sys.executable, os.path.abspath(__file__), "--child", arm], capture_output=True, cwd=ROOT, env=env)
     out = p.stdout.decode("utf-8", "replace")
     for ln in out.splitlines():
         if ln.startswith("CHILD "):
@@ -390,7 +419,7 @@ def main():
         ("D ratchet grows", "rc=1; holes 0 -> 1; new HOLE line; D-neg: rc=0, holes equal", all(d[0] for d in ds),
          " | ".join(d[1] for d in ds)),
         ("E organic", "rc=0; EXISTING name WARN; holes equal; no ratchet row", E_good, E_got),
-        ("F ratchet shrinks", "rc=0; holes 1 -> 0; no ratchet row", F_good, F_got),
+        ("F ratchet shrinks", "rc=0; HOLE planted in overlay, holes 1 -> 0; no ratchet row; control: refused rc=1 switch present, rc=0 switch absent", F_good, F_got),
         ("G switch absent", "arm A text unchanged; rc=0; NAMING-GATE: WARN 1 graded", G_good, G_got),
     ]
     held = 0

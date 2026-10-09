@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e71b.seed-names-one-reseed",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f4b2f17d0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R12.md",
+    "vintage_commit": "e6f1fdfc1f",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/task_orders/MDPF_SECCLASS.TO-SC-e71b.seed-names-one-reseed.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classification.py",
+      "kind": "config_data",
+      "commit_or_etag": "021a6a33f7",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "WHAT THIS ROW NAMES, stated plainly because the schema cannot: THE ARTIFACT THIS ORDER PRODUCED IS 15 ROWS OF dynamodb://us-east-1/etf-classifications (AAETX AMECX CAIBX CFIHX CLBAX FBALX FKIQX FTYPX KAGIX LIPKX MDLOX SGIIX VSMGX VTIVX VTTHX), not a repo file. `kind` is a STAND-IN: the enum has no member for a DynamoDB row write, and s3_object -- the only kind the git resolver skips -- would be a false declaration of substrate, so the row pins the seed source whose ETF_NAME_OVERRIDES this act materialized into the table (row MDPF_SECCLASS-D1-S20, surfaced at this close, INERT: it degrades the record, not the world). THE ACT: ONE run at 2026-10-09T06:23:25Z-06:23:28Z on box/dell1: `python infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-classifications.py --region us-east-1 --accept-module-truth`, rc=0. WRITTEN markers, which are the oracle: 'Writing 15 item(s) to DynamoDB...' then 'OK: Seeding complete!' with 'Items written : 15' and 'Items untouched : 182', and NO [DRY RUN MODE] line and NO BLOCKED line. The D1-S18 trap is avoided by construction: the 'Items written' line prints under --dry-run too, so it is read only BESIDE the Writing marker and the absence of the dry-run marker, never alone. The act's three inputs (_shared/etf_classification.py, yang_pipeline/seed-etf-classifications.py, _shared/security_name.py) were verified byte-identical to build 021a6a33f7 by an empty `git diff --stat 021a6a33f7 HEAD -- <the three>` plus an empty `git status --porcelain` on them, with 021a6a33f7 an ancestor of HEAD under a DISCRIMINATING control (HEAD is not an ancestor of the build) -- so the running bytes are the signed bytes, resolved by CONTENT rather than by filename. Rollback: org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e71b_rollback.py --confirm puts each snapshot item back under ConditionExpression updated_by = 'seed-script', so a rollback cannot clobber a later legitimate writer; it was exercised dry BEFORE the act (15 WOULD-PUT rows, 0 written) and went unused. Output: org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e71b_THE_ACT_0622Z.txt.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R13_CHECKS/e71_reseed_verify.py -- expect 'E71-RESEED ok=True'",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R13_CHECKS/e71_reseed_verify.py",
+      "expect": "E71-RESEED ok=True",
+      "output_evidence": "E71-RESEED ok=True rows=15 names_ok=12/12 class_moved=[] by_wrong=[] name_miss=[] (rc=0), read at 06:2xZ immediately after the act. Preserved at e71b_ac1_post_act.txt; the pre-act reading of the same check sits beside it at e71b_ac1_pre_act.txt.",
+      "denominator": "15 of 15 rows and 12 of 12 names. A DISCRIMINATOR THAT MOVED, not a check that was always green: the order records the base at the cut as 'E71-RESEED ok=False rows=15 names_ok=0/12 class_moved=[]' with updated_by still mdpf-secclass-remap-b on all 15. An empty success is excluded twice over -- AC1 independently requires 12 of 12 names AND updated_by on all 15, and the idempotence arm (a second --dry-run reading 'rows to write : 0 of 197' with 'rows already correct (skipped): 197 of 197', no CONFLICT block, no BLOCKED line) proves the act both landed and is complete.",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-S20: proof-of-spec-check's artifacts_produced/kind enum has no member for rows written to a DynamoDB table, and only s3_object skips the git (commit, path) resolver -- so a DEPLOY-genre order whose whole product IS table rows cannot declare its artifact truthfully. Surfaced at this order's close, after the act had landed and been verified, and NOT chased: it moves no data and gates no deploy, it degrades the RECORD only, which is why it is INERT rather than ARMED. What this instance did instead is stated in full in the artifacts_produced row. The enum edit is a value-enum proposal under CLAUDE.md rule 24 (four-postulate record plus a word-boundary token census) and the schema's owner is not this seat; remediation is the CVO's. OBSERVATION, INERT, UNDER_INVESTIGATION."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-find --corpus aws",
+      "invocation": "comp-find --corpus aws 'bd-gold-layer-runner' --limit 20",
+      "result": "1 hit across 2,844 AWS nodes, denominator printed, BANDS EC2_INSTANCE=1 -> i-01003b035d2988dfb. This is what let amendment 1's window be MEASURED on the instance's own state instead of inferred from the issuer's 'log lands about 06:1xZ' estimate."
+    },
+    {
+      "tool": "comp-estate --resource",
+      "invocation": "comp-estate --resource bd-gold-layer-runner",
+      "result": "2 chain(s) in D2 (advi-bd / bd-gold-layer-legacy explicit-out; advi-bd / bd-gold-layer-pipeline in-scope), 135 of 135 chains scanned -- the runner's thread read through the graph before its live state."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": ".tools/deploy_ledger.py close-leg|close --slug secclass-e71-seed-names-sc1-20261009",
+      "result": "Legs W and G closed with proof, then CLOSED with all 3 legs proven and the sentinel removed. `check` re-run afterwards: this slug no longer appears in the 22-sentinel sweep."
+    },
+    {
+      "tool": "comp-find --name",
+      "invocation": "comp-find --name 'MDPF_SECCLASS.TO-SC*' org --limit 40",
+      "result": "154 hits across 54,834 files, denominator printed, which located the project tree at org/missions/D8/MDPF/MDPF_SECCLASS. An earlier `--name '*e71b*' org/missions` read a MEASURED 0 across 22,959 files: this order lives in the seat's own task_orders folder, not the project tree, so that zero was out-of-corpus and not an absence."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Four arms, each a check that could have STOPPED the act. (a) PRE-ACT MOVE DETECTOR: e71b_snapshot_recheck.py consistent-reads all 15 rows and compares EVERY field with last_updated INCLUDED against the issuer's 03:4xZ snapshot; a move or an absence exits 2 and is a STOP. (b) CONDITION-4 PARSER: the pre-act dry run's CONFLICT block is parsed, not eyeballed -- the tickers must be byte-equal to the 12 the halves name and no field beyond `name` may appear. (c) WINDOW: the instance state and the trigger-pending sentinel, each with its own positive control. (d) POST-ACT SIGNED-DELTA GRADER: e71b_signed_delta_readback.py grades the REAL delta against the SIGNED delta field by field and exits 2 on any move outside {updated_by, low_confidence, name, last_updated}.",
+      "expected": "(a) 15 equal, 0 moved, 0 absent. (b) 12 tickers byte-equal, fields ['name'] alone. (c) the instance not running and the sentinel absent, each distinguishable from a dead read. (d) updated_by -> seed-script 15/15, low_confidence -> ABSENT 15/15, name cleaned 12/12, name HELD on LIPKX VSMGX VTIVX 3/3, class fields byte-equal 15/15, UNSIGNED moves 0.",
+      "observed": "(a) 'E71B-RECHECK denominator=15 equal_to_snapshot=15 MOVED=0 ABSENT=0' at 06:17:53Z and again at 06:21Z -- about two hours after leg V, with a full BD gold run in between, so the very run the window exists to avoid wrote none of these rows. (b) 12 of 12 CONFLICT block lines parsed with 0 unparsed, fields ['name'], tickers byte-equal to AAETX AMECX CAIBX CFIHX CLBAX FBALX FKIQX FTYPX KAGIX MDLOX SGIIX VTTHX; the one PRESERVED line (VNQ management_style) is a no-write, not a CONFLICT, and not among the 15. (c) i-01003b035d2988dfb read running at 06:10:22Z, stopping at 06:19:47Z and stopped ('User initiated') at 06:20:38Z; gold/trigger-pending.json head-object 404 (rc=254) WITH a positive control -- list-objects-v2 on prefix gold/ returns keys, so bucket, prefix and credentials reach and the 404 is a true absence rather than a dead read. (d) 'E71B-READBACK denominator=15': 15/15, 15/15, 12/12, 3/3, 15/15, UNSIGNED moves 0, exit 0. The three names the halves EXCLUDE (LIPKX VSMGX VTIVX) were held, which is the negative arm: a script that cleaned all 15 would have failed here.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The signed delta was read from the producer's OWN rule at three independent places rather than predicted from the input's shape: the dry run's MERGE SUMMARY and CONFLICT block before the act, the real run's identical summary and CONFLICT block during it, and a consistent get-item per row after it.",
+      "observed": "'rows to write : 15 of 197' with 'rows whose values PRESERVED : 1 of 197' and 'rows already correct (skipped): 182 of 197' at all three pre-act readings (the issuer's 04:0xZ dry run, this seat's 06:21Z dry run, and the act itself), and the same 12-name CONFLICT block at all three. After the act the same script reads 'rows to write : 0 of 197' and 'rows already correct (skipped): 197 of 197' -- the only moving part is the one the halves signed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "last_updated in the POST-act read-back.",
+      "reason": "The act is its writer, so a move there is expected and grading it would mask the fields that matter. It is INCLUDED in the pre-act arm, where 'has anything else written this row' is exactly the question and last_updated is the strongest signal available."
+    },
+    {
+      "item": "The VNQ management_style PRESERVED line.",
+      "reason": "A no-write where the module had no value and the table did. It is not a CONFLICT, so condition 4 does not reach it, and VNQ is not one of the 15 rows this order moves."
+    },
+    {
+      "item": "Any consumer-side read of the 12 cleaned names (a portal page, a served gold artifact).",
+      "reason": "Outside this order's acceptance by construction: its bounds are one table and these 15 rows, and its single criterion is AC1. A consumer that re-serves these names does so on its own schedule under its own pair; the 36-reader census the GO records (@1a4eb4ca66) is the issuer's, not this seat's."
+    },
+    {
+      "item": "The three names the halves exclude (LIPKX VSMGX VTIVX).",
+      "reason": "Signed to HOLD, not to clean: they already read mixed-case in the snapshot, so clean_name() leaves them and they never enter the CONFLICT set. They are graded as a negative arm (held 3 of 3), never as a miss."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/logs/session_e71b_act_and_close_0605-0630Z.md"
+}

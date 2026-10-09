@@ -1,0 +1,248 @@
+data.aws_region.current: Reading...
+data.aws_caller_identity.current: Reading...
+data.aws_iam_policy_document.advi_billing_read_assume: Reading...
+data.aws_region.current: Read complete after 0s [id=us-east-1]
+data.aws_iam_policy_document.advi_billing_read_assume: Read complete after 0s [id=2690255455]
+data.aws_caller_identity.current: Read complete after 0s [id=313476888478]
+data.aws_iam_policy_document.advi_billing_read: Reading...
+data.aws_iam_policy_document.advi_billing_read: Read complete after 0s [id=1957308292]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+ <= read (data resources)
+
+Terraform will perform the following actions:
+
+  # aws_apigatewayv2_integration.advi_billing_read will be created
+  + resource "aws_apigatewayv2_integration" "advi_billing_read" {
+      + api_id                                    = "7k3ed8px20"
+      + connection_type                           = "INTERNET"
+      + description                               = "ADVI_BILLING AB-t-2: advi-49f-billing-read-lambda behind the existing portal authorizer"
+      + id                                        = (known after apply)
+      + integration_method                        = "POST"
+      + integration_response_selection_expression = (known after apply)
+      + integration_type                          = "AWS_PROXY"
+      + integration_uri                           = (known after apply)
+      + payload_format_version                    = "2.0"
+      + timeout_milliseconds                      = 10000
+    }
+
+  # aws_apigatewayv2_route.advi_billing_read will be created
+  + resource "aws_apigatewayv2_route" "advi_billing_read" {
+      + api_id             = "7k3ed8px20"
+      + api_key_required   = false
+      + authorization_type = "CUSTOM"
+      + authorizer_id      = "naqxlm"
+      + id                 = (known after apply)
+      + route_key          = "GET /api/scoped/partners/books/relationship/{clientKey}/fee-quarter/{quarter}"
+      + target             = (known after apply)
+    }
+
+  # aws_iam_role.advi_billing_read will be created
+  + resource "aws_iam_role" "advi_billing_read" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "ADVI_BILLING cell AB-t-2: the billing-read function. Reads ONLY the advi_billing gold prefix (quarter=<q>/<client_key>.json) of the firm bucket."
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "advi-49f-billing-read-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = {
+          + "ManagedBy" = "Terraform"
+          + "Project"   = "OpalPortal"
+          + "System"    = "AdvisorIntelligence"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role_policy.advi_billing_read will be created
+  + resource "aws_iam_role_policy" "advi_billing_read" {
+      + id          = (known after apply)
+      + name        = "advi-49f-billing-read-policy"
+      + name_prefix = (known after apply)
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action   = "s3:GetObject"
+                      + Effect   = "Allow"
+                      + Resource = "arn:aws:s3:::opal-data-49financial/advi/49financial/gold/advi_billing/*"
+                      + Sid      = "ReadTheAdviBillingGoldPrefixOnly"
+                    },
+                  + {
+                      + Action   = [
+                          + "logs:PutLogEvents",
+                          + "logs:CreateLogStream",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = "arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/advi-49f-billing-read-lambda:*"
+                      + Sid      = "OwnLogStreamOnly"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + role        = (known after apply)
+    }
+
+  # aws_lambda_permission.advi_billing_read_apigw will be created
+  + resource "aws_lambda_permission" "advi_billing_read_apigw" {
+      + action              = "lambda:InvokeFunction"
+      + function_name       = "advi-49f-billing-read-lambda"
+      + id                  = (known after apply)
+      + principal           = "apigateway.amazonaws.com"
+      + source_arn          = "arn:aws:execute-api:us-east-1:313476888478:7k3ed8px20/*/GET/api/scoped/partners/books/relationship/*/fee-quarter/*"
+      + statement_id        = "AllowPortalApiInvoke-advi-billing-read"
+      + statement_id_prefix = (known after apply)
+    }
+
+  # module.advi_billing_read.data.aws_s3_object.artifact will be read during apply
+  # (depends on a resource or a module with changes pending)
+ <= data "aws_s3_object" "artifact" {
+      + arn                           = (known after apply)
+      + body                          = (known after apply)
+      + bucket                        = "opal-313476888478-lambda-artifacts"
+      + bucket_key_enabled            = (known after apply)
+      + cache_control                 = (known after apply)
+      + checksum_crc32                = (known after apply)
+      + checksum_crc32c               = (known after apply)
+      + checksum_crc64nvme            = (known after apply)
+      + checksum_sha1                 = (known after apply)
+      + checksum_sha256               = (known after apply)
+      + content_disposition           = (known after apply)
+      + content_encoding              = (known after apply)
+      + content_language              = (known after apply)
+      + content_length                = (known after apply)
+      + content_type                  = (known after apply)
+      + etag                          = (known after apply)
+      + expiration                    = (known after apply)
+      + expires                       = (known after apply)
+      + id                            = (known after apply)
+      + key                           = "advi/advi-billing-read-lambda.zip"
+      + last_modified                 = (known after apply)
+      + metadata                      = (known after apply)
+      + object_lock_legal_hold_status = (known after apply)
+      + object_lock_mode              = (known after apply)
+      + object_lock_retain_until_date = (known after apply)
+      + server_side_encryption        = (known after apply)
+      + sse_kms_key_id                = (known after apply)
+      + storage_class                 = (known after apply)
+      + tags                          = (known after apply)
+      + version_id                    = (known after apply)
+      + website_redirect_location     = (known after apply)
+    }
+
+  # module.advi_billing_read.aws_cloudwatch_log_group.lambda will be created
+  + resource "aws_cloudwatch_log_group" "lambda" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + log_group_class   = (known after apply)
+      + name              = "/aws/lambda/advi-49f-billing-read-lambda"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 14
+      + skip_destroy      = false
+      + tags              = {
+          + "ManagedBy" = "Terraform"
+          + "System"    = "AdvisorIntelligence"
+        }
+      + tags_all          = {
+          + "ManagedBy" = "Terraform"
+          + "Project"   = "OpalPortal"
+          + "System"    = "AdvisorIntelligence"
+        }
+    }
+
+  # module.advi_billing_read.aws_lambda_function.this will be created
+  + resource "aws_lambda_function" "this" {
+      + architectures                  = (known after apply)
+      + arn                            = (known after apply)
+      + code_sha256                    = (known after apply)
+      + function_name                  = "advi-49f-billing-read-lambda"
+      + handler                        = "entry.lambda_handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + layers                         = []
+      + memory_size                    = 256
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "python3.12"
+      + s3_bucket                      = "opal-313476888478-lambda-artifacts"
+      + s3_key                         = "advi/advi-billing-read-lambda.zip"
+      + s3_object_version              = (known after apply)
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + skip_destroy                   = false
+      + source_code_hash               = (known after apply)
+      + source_code_size               = (known after apply)
+      + tags                           = {
+          + "Cell"      = "AB-t-2"
+          + "ManagedBy" = "Terraform"
+          + "Module"    = "yang-lambda"
+          + "Project"   = "ADVI_BILLING"
+          + "System"    = "AdvisorIntelligence"
+        }
+      + tags_all                       = {
+          + "Cell"      = "AB-t-2"
+          + "ManagedBy" = "Terraform"
+          + "Module"    = "yang-lambda"
+          + "Project"   = "ADVI_BILLING"
+          + "System"    = "AdvisorIntelligence"
+        }
+      + timeout                        = 10
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = {
+              + "ADVI_BILLING_FIRM" = "49financial"
+            }
+        }
+
+      + ephemeral_storage (known after apply)
+
+      + logging_config (known after apply)
+
+      + tracing_config (known after apply)
+    }
+
+Plan: 7 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + advi_billing_read_function_arn   = (known after apply)
+  + advi_billing_read_function_name  = "advi-49f-billing-read-lambda"
+  + advi_billing_read_gold_read_arns = [
+      + "arn:aws:s3:::opal-data-49financial/advi/49financial/gold/advi_billing/*",
+    ]
+  + advi_billing_read_role_arn       = (known after apply)
+  + advi_billing_read_route_key      = "GET /api/scoped/partners/books/relationship/{clientKey}/fee-quarter/{quarter}"
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: C:/dev/wk-advi-billing-1/.scratch/ab_t2.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "C:/dev/wk-advi-billing-1/.scratch/ab_t2.tfplan"
