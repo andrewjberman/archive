@@ -1,0 +1,86 @@
+{
+  "authoritative_read": {
+    "actions": [
+      "kms:Decrypt",
+      "kms:DescribeKey"
+    ],
+    "claim": "measured",
+    "conclusion": "kms:GenerateDataKey and kms:Encrypt are NOT granted. The refusal is REAL, and this read is what proves it.",
+    "effect": "Allow",
+    "principals": [
+      "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+      "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user"
+    ],
+    "sid": "DellAgentUsersDecryptOnly",
+    "source": "kms get-key-policy on the live key",
+    "statements_denominator": 3
+  },
+  "controls_that_refute_the_simulate": {
+    "action_name_control": {
+      "action": "kms:ZzzNoSuchActionName9999",
+      "result": "implicitDeny",
+      "why_it_matters": "false-deny mode 3 confirmed live: a nonexistent action is indistinguishable from a missing grant."
+    },
+    "discriminating_control": {
+      "action": "kms:Decrypt",
+      "on": "the SAME key",
+      "result": "implicitDeny",
+      "why_it_matters": "the key policy GRANTS this identity kms:Decrypt, so the instrument returns implicitDeny for an action the principal demonstrably holds. It is therefore non-discriminating on this key and its agreement with the real answer for Encrypt was luck, not evidence."
+    },
+    "root_cause": "simulate-principal-policy evaluates IDENTITY policies only. The grant here is in a RESOURCE-BASED KMS KEY POLICY, which that API cannot evaluate, so every answer it gave about this key was structurally uninformative."
+  },
+  "grant_owner": "the key-policy grant is the laptop act (CTO msg 2259)",
+  "seat": "0.7.0_AE_CloudOps~DELL2",
+  "step1_simulate": {
+    "identity": "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user",
+    "instrument_claim": "inferred -- NOT evidence. See controls.",
+    "key": "arn:aws:kms:us-east-1:313476888478:key/44a2284f-1e14-4ea1-b6cb-f6121bfde35a",
+    "key_resolved_from": "s3api get-bucket-encryption on opal-data-transcripts, not a guessed alias (alias/opal-transcripts does not exist)",
+    "results_one_resource_arn_per_call": {
+      "kms:Encrypt": "implicitDeny",
+      "kms:GenerateDataKey": "implicitDeny",
+      "s3:PutObject": "allowed"
+    }
+  },
+  "step2_before_list": {
+    "current_keys": 29,
+    "expected": 29,
+    "match": true,
+    "note": "read-only; captured so the issuer has AC1 denominator and the rollback source, even though the run itself stopped",
+    "rollback_versions": {
+      "teams/transcripts/silver/research_meeting/date=2026-04-07/RT-20260407-1027.parquet": "yPFd86PX6IBwWjMuza5bEhHjc5q672x_",
+      "teams/transcripts/silver/research_meeting/date=2026-04-09/RT-20260409-1029.parquet": "lxyeKfwdE0e81DitbjHl9Wi1LL5V7KRm",
+      "teams/transcripts/silver/research_meeting/date=2026-04-15/RT-20260415-1412.parquet": "9GDDEOTay570B3mg2zjcrjCZPSmArhIE",
+      "teams/transcripts/silver/research_meeting/date=2026-04-16/RT-20260416-1024.parquet": "yd5GXSiDANe89.2aWy.LwIWmkqOdOHUC",
+      "teams/transcripts/silver/research_meeting/date=2026-04-28/RT-20260428-0957.parquet": "fQsrH76glGv8msnNsQlOLYmPDNo1IQrC",
+      "teams/transcripts/silver/research_meeting/date=2026-04-30/RT-20260430-1256.parquet": "GjZ.TkitPp0ZYqtJJtIGkYPw3TDe69rc",
+      "teams/transcripts/silver/research_meeting/date=2026-05-05/RT-20260505-1024.parquet": "Sc1F.ywLbpnkIPYBQXovs47W.3fc6Oya",
+      "teams/transcripts/silver/research_meeting/date=2026-05-07/RT-20260507-1257.parquet": "Du3xy5Ha8myf6.sBvoCTLZSFVEfxsytg",
+      "teams/transcripts/silver/research_meeting/date=2026-05-12/RT-20260512-1026.parquet": "b2y4Qm_J9j7bAKoxAl4UNpuJG3OBNmsj",
+      "teams/transcripts/silver/research_meeting/date=2026-05-15/RT-20260515-0926.parquet": "d_mopS8Gadx4gonMpFV1RpLZOcGblMOJ",
+      "teams/transcripts/silver/research_meeting/date=2026-05-19/RT-20260519-1226.parquet": "RXp_2XesF7sGnGamd9NnyTC729oDRH5v",
+      "teams/transcripts/silver/research_meeting/date=2026-05-21/RT-20260521-1025.parquet": "Mp3H3fVoCJJMvvlkg.bxIVN2Sb52TPEk",
+      "teams/transcripts/silver/research_meeting/date=2026-05-26/RT-20260526-1026.parquet": "TDZC9dU9YYrBBMiQQNQ.kKUb.Hju58gI",
+      "teams/transcripts/silver/research_meeting/date=2026-05-28/RT-20260528-1022.parquet": "b8OHysStVsyFT27XgU8epoYZmfItOZvM",
+      "teams/transcripts/silver/research_meeting/date=2026-06-04/RT-20260604-1030.parquet": "rCaHL.MAYRi2FVHeMiU396VJn89pneiE",
+      "teams/transcripts/silver/research_meeting/date=2026-06-09/RT-20260609-0858.parquet": "0vlb.fHpDcGt83A9HpJ0.Vro3susV1JK",
+      "teams/transcripts/silver/research_meeting/date=2026-06-11/RT-20260611-1023.parquet": "ljwLrQvE09EwQ8Oe_PhFqRyWdlUvXZ5N",
+      "teams/transcripts/silver/research_meeting/date=2026-06-15/RT-20260615-1027.parquet": "KIeh01Vetal35Vivf1M3dJJ3B.oGDQIK",
+      "teams/transcripts/silver/research_meeting/date=2026-06-18/RT-20260618-1027.parquet": "w9mKKNWjmgzgXXsx1hMBqW2ACADK2xuz",
+      "teams/transcripts/silver/research_meeting/date=2026-06-29/RT-20260629-1025.parquet": "VhZSl_XWLeP_jwG5qZimuNX26_FSkuLZ",
+      "teams/transcripts/silver/research_meeting/date=2026-07-02/RT-20260702-1030.parquet": "r47_N67DF2mLInJFBiexM__Oe0CHQTDz",
+      "teams/transcripts/silver/research_meeting/date=2026-07-06/RT-20260706-1025.parquet": "GYXFicVbM5vE93a61nuqlJ_dUsj8Hrcd",
+      "teams/transcripts/silver/research_meeting/date=2026-07-10/RT-20260710-0954.parquet": "0gv9CMazI0ocO.l2cy0HznUqvYrqEBfw",
+      "teams/transcripts/silver/research_meeting/date=2026-07-17/RT-20260717-1257.parquet": "j95OU0_scmC2QzWfbWNccM3.9IZCxBNw",
+      "teams/transcripts/silver/research_meeting/date=2026-07-21/RT-20260721-1054.parquet": "CXDNGYF5qQ8G.VqafF2IBN65XXNfyf4M",
+      "teams/transcripts/silver/research_meeting/date=2026-07-23/RT-20260723-1027.parquet": "rIyFb2xNLi7C50cOX.DPgdtHjDsccisY",
+      "teams/transcripts/silver/research_meeting/date=2026-07-27/RT-20260727-1023.parquet": "2MRRBSilH.fgiyXoIqIV.dNAs7Uec53H",
+      "teams/transcripts/silver/research_meeting/date=2026-07-31/RT-20260731-0925.parquet": "hpfw7B7j6X0bLNIXXaNX9fq5I7DeeCAG",
+      "teams/transcripts/silver/research_meeting/date=2026-08-03/RT-20260803-1003.parquet": "Ph0bQCYUgwmvPu_paCVpXF.o3yKkajaL"
+    },
+    "version_rows": 58
+  },
+  "steps_3_and_4": "NOT RUN. Step 1 is a STOP and the order says nothing is written.",
+  "to_id": "NFRA_TRNSPT.TO-RUN-a17.research-fold-rewrite-apple-dell2",
+  "verdict": "STOPPED AT STEP 1 -- the encrypt grant this run needs is absent for this identity. NOTHING WAS WRITTEN."
+}

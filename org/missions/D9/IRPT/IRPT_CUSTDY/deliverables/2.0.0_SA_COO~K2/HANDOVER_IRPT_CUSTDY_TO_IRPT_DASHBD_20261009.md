@@ -1,6 +1,6 @@
-# HANDOVER -- IRPT_CUSTDY to IRPT_DASHBD (`2.0.0_SA_COO~K2` -> `2.0.0_SA_COO~D2`), DRAFT
+# HANDOVER -- IRPT_CUSTDY to IRPT_DASHBD (`2.0.0_SA_COO~K2` -> `2.0.0_SA_COO~D2`), FINAL (sent 2026-10-09 ~04:4xZ)
 
-**Status: DRAFT.** It is sent at `~K2`'s next drain-end, after the svc-custody-statement mint pair lands (the one act in flight
+**Status: FINAL.** Sent at `~K2`'s drain-end, once the svc-custody-statement mint pair held both halves (the one act in flight
 the ruling leaves with `~K2`). Ruling: `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_IRPT_PERFORMANCE_CONSOLIDATION_20261009.md`
 @ca5f74553d (msg 2413). IRPT_CUSTDY closes as `superseded_by: IRPT_DASHBD` at this handover, with its FWDs mapped. The mapping is
 the CTO's CONSOLIDATION addendum; this file does not number new ids.
@@ -63,3 +63,17 @@ one, and this file does not reconcile them; re-read at the handover.
 - ADDENDUM 2 of round 7: the E2 split into CU-g-5 / CU-g-6.
 - The draft E2a criteria (CU21-AC1..AC3), in TO-CU-g-2a.
 - Rotation of the svc-custody-statement token: due 14 days before exp. The owner moves to `~D2`.
+
+## 6. At send time (2026-10-09 ~04:4xZ)
+
+- **The svc-custody-statement mint pair holds both halves.**
+  - COO half: SIGNED by `~K2` @a319fc74b8 (AMENDMENT 2, ruling (b)).
+  - CTO half: GIVEN by `1.0.0_SA_CTO~DELL2`, msg 2440,
+    `deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_SVC_CUSTODY_STATEMENT_MINT_CTO_HALF.md`, against blob 323217e49c.
+  - CTO correction: the reader ARN add (and its rollback removal) on dell2's GetSecretValue allow-list is an identity policy no Dell
+    may write. It goes to the laptop's `0.7.0_AE_CloudOps` through `0.0.0_AB_MSTR~DELL2`. The mint, the secret and the read-backs
+    stay with `0.7.0_AE_CloudOps~DELL2`.
+  - The landing waits on IB-pr-385 and release 6, both LIVE. The landing and the token's rotation are `~D2`'s from now.
+- **The print page is on portal DEV** at fd345aef (ls-remote, msg 2408). PROD is Andrew's word (row 0347).
+- **`~K2` stops driving IRPT_CUSTDY** with this send. Its cron is deleted, and its `/canonical-drive` LIVE_ARMS row ends at
+  "project reads complete" via the supersession.

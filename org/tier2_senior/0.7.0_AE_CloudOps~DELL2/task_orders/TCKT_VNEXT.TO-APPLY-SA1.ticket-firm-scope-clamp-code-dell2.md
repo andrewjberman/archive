@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -21,7 +21,7 @@
   </objective>
 
   <context>
-    STATUS IS `staged` UNTIL THE CTO HALF IS GIVEN. The issuer flips it to `pending` and messages you.
+    CTO half GIVEN: org/missions/D7/TCKT/TCKT_VNEXT/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_SA_K1_FIRM_SCOPE_CLAMP_CTO_HALF.md (msg 2429). Its condition is met: 13 items scanned in opal-tickets at ~04:3xZ, all 12 tickets inside the 6 firms; the 1 item outside is _CONFIG:intake-cursor (no firm, no status; not a ticket).
 
     Packet and COO half: `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/SA_DEPLOY/SA_K1_DEPLOY_PACKET_20261009.md`.
 

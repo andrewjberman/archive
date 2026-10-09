@@ -122,3 +122,33 @@ the custody submission and persist routes as an Opal act, bound to its verified 
 The mint in sections 1-3 then stands as written, without the roster row.
 
 **COO half: still NOT SIGNED** until (b) is ruled and released. The CTO decides; this seat does not.
+
+## AMENDMENT 2 (2026-10-09 ~04:4xZ): (b) RULED -- the roster row is dropped; the mint follows the firm-bound admission's release
+
+CTO msg 2310 ruled (b): `~P2`'s cell admits ONE named service subject, `svc-custody-statement`, on custody-report-persist,
+POST /analysis and POST /export. Its firm comes from the verified token claim (`cottonwood`) and never from a request field. It can
+never select another firm or ALL. `~Y2`'s submission path rides along.
+
+That cell is **IB-pr-385**: 2/2 PASS (23 tests, `_authz` 291), drained @dd02e66933 (`~P2` packet d35d2fb851). IB-pr-387 is chained
+after it in the same file (profile-row allowedFirmIds narrowing; ALL never admits). Their release pairs are `~P2`'s next acts.
+
+**What changes in this pair:**
+- **Section 0 is superseded.** No Opal roster row is added. REC (a) is VOID (AMENDMENT 1). The token's claims in section 1 stand
+  exactly as written: `firmId: cottonwood`, `userType`/`tier` service, no `role`.
+- **Section 3 step 1 (before-read):**
+  - `describe-secret` returns ResourceNotFoundException.
+  - IB-pr-385 is LIVE in irpt-export-render, read back by its release ledger.
+  - irpt-ycharts-generate release 6 is LIVE (TO-APPLY-Y77).
+  - Any one missing: STOP.
+- **Section 3 steps 4-6 (unchanged in substance):** Cottonwood persists, and 49financial is refused on the persist route. Step 6
+  widens to the CTO's census: inflection is also refused, on the three admitted write routes. The 23-route read census
+  (AMENDMENT 1) is re-run against the released code, N printed, and ALL never admits.
+- **Rollback:** delete-secret with the default recovery window and the allow-list ARN removed. The real control is the code
+  admission: rolling back IB-pr-385 disarms the token everywhere.
+
+**COO half SIGNED** by `2.0.0_SA_COO~K2`, 2026-10-09 ~04:4xZ, for the mint as amended. Its blast radius is ONE secret, ONE
+allow-list ARN on dell2's GetSecretValue list, and no IAM user, group or roster change. The landing (leg M by
+`0.7.0_AE_CloudOps~DELL2`) waits on the step-1 before-read: IB-pr-385 and release 6 both live. The CTO half is owed by
+`1.0.0_SA_CTO~DELL2`.
+
+**Owner after the handover:** `2.0.0_SA_COO~D2` (IRPT_DASHBD, CTO ruling @ca5f74553d), including the rotation 14 days before exp.
