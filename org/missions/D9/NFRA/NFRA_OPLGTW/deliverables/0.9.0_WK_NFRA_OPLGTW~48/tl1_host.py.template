@@ -1,0 +1,69 @@
+"""OG-tl-1 PHASE C host program (NFRA_OPLGTW.TO-OG-tl-1 step 5), run by r29_ssm_prog.py under `env -i` from a per-run scratch that is removed in the
+same command list. argv: <served release sha>.  Read-only: no write, no Graph or AWS call, no transcript fetched, no route called.
+
+It reads, in this order:
+  1. the installed gateway's OWN reader of the allowlist -- app.transcript_route.meeting_allowlist() imported from /opt/opal-gateway in the installed venv,
+     fed ONLY the host's TRANSCRIPT_MEETING_ALLOWLIST value (every other .env value stays unread by the child) -> allowlist_count, allowlist_sha256
+     (sha256 of the sorted ids joined by ","), cross-checked against the host's own parse of .env (same count, same sorted ids);
+  2. the per-key sha256 of every .env value, compared with the PRE-r29 hashes embedded below (digests only; r29_before.json of 0.9.0_WK_NFRA_OPLGTW~43,
+     taken 2026-10-08 before the r29 deploy): a key present in both whose hash differs is "moved"; the two keys r29 signed to move (MAIL_BEARER,
+     MAIL_BEARER_LABELS) are subtracted, and the key r29 added (MAIL_SENDER_DOMAIN_TABLE) is not a change of an existing value.
+Prints counts, booleans, sorted KEY NAMES and digests. Never an id value, never a .env value."""
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+
+served = sys.argv[1] if len(sys.argv) > 1 else ""
+GW = "/opt/opal-gateway"
+PRE = json.loads("""@@PRE@@""")
+R29_SIGNED_MOVES = ["MAIL_BEARER", "MAIL_BEARER_LABELS"]
+R29_ADDED = ["MAIL_SENDER_DOMAIN_TABLE"]
+
+env_hash, raw_allow = {}, None
+for line in open(GW + "/.env", encoding="utf-8"):
+    m = re.match(r"^([A-Z0-9_]+)=(.*)$", line.rstrip(chr(10)).rstrip(chr(13)))
+    if m:
+        env_hash[m.group(1)] = hashlib.sha256(m.group(2).encode("utf-8")).hexdigest()
+        if m.group(1) == "TRANSCRIPT_MEETING_ALLOWLIST":
+            raw_allow = m.group(2)
+
+host_ids = sorted(x for x in re.split(r"[\s,]+", (raw_allow or "").strip()) if x)
+child_src = """
+import json, sys
+sys.path.insert(0, "/opt/opal-gateway")
+from app import transcript_route as t
+print("CHILD_JSON " + json.dumps(sorted(t.meeting_allowlist())))
+"""
+p = subprocess.run(["env", "-i", "HOME=/tmp", "PATH=/usr/local/bin:/usr/bin:/bin", "PYTHONDONTWRITEBYTECODE=1", "MOCK_GRAPH=1",
+                    "TRANSCRIPT_MEETING_ALLOWLIST=" + (raw_allow or ""), GW + "/.venv/bin/python", "-c", child_src],
+                   capture_output=True, text=True, cwd=GW)
+installed_ids, installed_ok = None, False
+for l in p.stdout.split(chr(10)):
+    if l.startswith("CHILD_JSON "):
+        installed_ids = json.loads(l[len("CHILD_JSON "):])
+        installed_ok = p.returncode == 0
+if not installed_ok:
+    print("TL1_CHILD_FAIL rc=%d stderr_tail=%s" % (p.returncode, re.sub(r"[0-9A-Za-z+/=_-]{60,}", "<long>", p.stderr[-500:]).replace(chr(10), " | ")))
+    sys.exit(1)
+
+changed = sorted(k for k in env_hash if k in PRE and env_hash[k] != PRE[k] and k not in R29_SIGNED_MOVES)
+moved_r29 = sorted(k for k in R29_SIGNED_MOVES if k in env_hash and k in PRE and env_hash[k] != PRE[k])
+added = sorted(set(env_hash) - set(PRE))
+removed = sorted(set(PRE) - set(env_hash))
+agree = installed_ids == host_ids
+body = {
+    "served_release": served,
+    "installed_code": bool(installed_ok and agree),
+    "allowlist_count": len(installed_ids),
+    "allowlist_sha256": hashlib.sha256(",".join(sorted(installed_ids)).encode("utf-8")).hexdigest(),
+    "env_values_changed": changed,
+}
+s = json.dumps(body, sort_keys=True)
+print("TL1_CROSSCHECK installed_reader_ids=%d env_parse_ids=%d equal=%s" % (len(installed_ids), len(host_ids), agree))
+print("TL1_ENV_BASIS pre_r29_keys=%d now_keys=%d added=%s removed=%s r29_signed_moves_observed=%s moved_after_subtracting_r29=%s" % (
+    len(PRE), len(env_hash), added, removed, moved_r29, changed))
+print("TL1_BODY " + s)
+print("TL1_DIGEST " + hashlib.sha256(s.encode("utf-8")).hexdigest())

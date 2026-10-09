@@ -1,0 +1,69 @@
+"""OG-tl-1 PHASE C host program (NFRA_OPLGTW.TO-OG-tl-1 step 5), run by r29_ssm_prog.py under `env -i` from a per-run scratch that is removed in the
+same command list. argv: <served release sha>.  Read-only: no write, no Graph or AWS call, no transcript fetched, no route called.
+
+It reads, in this order:
+  1. the installed gateway's OWN reader of the allowlist -- app.transcript_route.meeting_allowlist() imported from /opt/opal-gateway in the installed venv,
+     fed ONLY the host's TRANSCRIPT_MEETING_ALLOWLIST value (every other .env value stays unread by the child) -> allowlist_count, allowlist_sha256
+     (sha256 of the sorted ids joined by ","), cross-checked against the host's own parse of .env (same count, same sorted ids);
+  2. the per-key sha256 of every .env value, compared with the PRE-r29 hashes embedded below (digests only; r29_before.json of 0.9.0_WK_NFRA_OPLGTW~43,
+     taken 2026-10-08 before the r29 deploy): a key present in both whose hash differs is "moved"; the two keys r29 signed to move (MAIL_BEARER,
+     MAIL_BEARER_LABELS) are subtracted, and the key r29 added (MAIL_SENDER_DOMAIN_TABLE) is not a change of an existing value.
+Prints counts, booleans, sorted KEY NAMES and digests. Never an id value, never a .env value."""
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+
+served = sys.argv[1] if len(sys.argv) > 1 else ""
+GW = "/opt/opal-gateway"
+PRE = json.loads("""{"AUDIT_S3_BUCKET": "0cff903fb9c15f10857bb2ecae88270912500608dabe3c9711eb0a6d848f27ce", "AWS_REGION": "487d653406a6aebc3146cb844a4ce50265da74db272ee1c6002294850ef2e187", "BIND_HOST": "19e36255972107d42b8cecb77ef5622e842e8a50778a6ed8dd1ce94732daca9e", "BIND_PORT": "6c237681e70921603a306be9a1a5d9833fce5c1e268f52b1650970eaad0dce21", "BLACKDIAMOND_READER_EXTERNAL_ID": "e3f0d7f01d54f4fdfd8a6e896661be66112605746945c9522d8ee1771198d005", "BLACKDIAMOND_READER_ROLE_ARN": "e223cae40859684b05f3e53b4f6d533c6fbcd14837446b0aa7f96a0a36bef822", "CLIENT_ID": "9bc87781d60cf5b09e953e08f3d3cce2b589e9e5ece7296c0698c1af5130da32", "CLIENT_SECRET": "f30deb67d3cb62ffcd3bd5ef32daef54d434edc9623a787872fa5748f04e0cec", "DASHBOARD_OWNER_EMAILS": "7b1bca22c953247eca62f981fb02c02f3389e5e4933eb68ff4ea54ae81cddaaa", "ENABLED_INTEGRATIONS": "d028e69c985476d6d9dbeea5e62c44e48c449e731313836b368e8ac77362133a", "FERNET_KEY": "93edb6ac2cebfbb46d9c3fa4b6aee6f8d0fb5e998f4e39568bedb711deee50b4", "FIRM_ROLE_ARNS": "c2e33f0ceee781480b41d3f0eef5067090dfeeaacf84f84a4d7da00780699b39", "GATEWAY_JWT_PRIVATE_KEY_FILE": "f2dce098564fcd80247e26b67c59fa75f47bc995c732f30c21a306ea113dfc92", "GATEWAY_WORKERS": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b", "GRANT_WRITER_FUNCTION_NAME": "e9fb2e4a9e0d4a16f5c771f1d065f0540f52387702f8fdfc33212b5d06dc3c87", "GRAPH_READ_BEARER": "ef8f1520e76d67ef0312e202f3b57f82d04ad9a4b3d534c727154cd47d31e970", "IDENTITY_PROVIDER": "7a3509f8fb909021a49f275053a854abf43ce57d92317bd1630351cbcf3caa67", "INTERNAL_READER_ROLE_ARN": "d3cb8c63eb9d17ce71f102985fc84ba4365206e59139c722b2144848cafee6f3", "MAIL_BEARER": "cd7d0b00cf51ac4004532f2d16a7a55849760c983dc8eb6d728d0eb726f34b1b", "MAIL_BEARER_LABELS": "e5bd56ee14214bf566c860788bc39bd396f7de5008e874bbd681779e1e1cf31e", "MAIL_PDF_MAX_BYTES": "fa95b43be4cf8bb030d85e663324ecc5247c2af6272672bfd4bbc1020b40582b", "MAIL_SENDER_TABLE": "5cc887ebbcb379e37585a3ae017131a1ff0d02b9558635c532c9b626606de905", "MASTER_ADMIN_EMAILS": "7b1bca22c953247eca62f981fb02c02f3389e5e4933eb68ff4ea54ae81cddaaa", "MASTER_ADMIN_PRINCIPALS": "9e7f3e3956030116e269a02205c38b837d306341e7e83ad0863ad878ceb9591d", "MCPORTAL_CHANGES_TABLE": "89a28f65c1dcd1880b9539ef5ddbe5e015e70c4d2c8c9d5216635fad3a0baac5", "MOCK_GRAPH": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9", "MSP_CALLING_IDENTITIES": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "MS_INGEST_BEARER": "2b506e214a2a480afdd2122d626fecea263e6693a12889306a1be4227c4df935", "MS_INGEST_BEARER_LABELS": "f785c3ce1d580c8f22c1db8a14cf1268e44279ff5d461361dbbfaf19e8b11578", "MS_INGEST_IDENTITY": "7b1bca22c953247eca62f981fb02c02f3389e5e4933eb68ff4ea54ae81cddaaa", "NFRA_OPLGTW_CONTRACT_PATH": "085249e46481725cf0b014059463addc8a81cf3f241b0eb1d1fb5e351de348c2", "OTP_BEARER": "fadf038dbabde4e8e9c12d2eed7c8f51ab20de99911247b0e7e7e7fd7071cec5", "OTP_BEARER_LABELS": "8f539d8387a9383b523992320c06ae41d489b979025c5f031773aedc9586929d", "OTP_MAILBOX": "7b1bca22c953247eca62f981fb02c02f3389e5e4933eb68ff4ea54ae81cddaaa", "PUBLIC_BASE_URL": "50e759a4083368255c4dbccb928ed2127e47dab3893ecca3dc6df6946261aa72", "SCHWAB_ACCOUNT_REF_SECRET_ID": "d5beaa47ade18a0b409ffae9f144795f072ef87a27b2072cc611f3d7dd1548c1", "SCHWAB_CATALOG_ROLE_ARN": "384bb78403d69956efd2ff14f60573942223f7bea9c284491eb51a2c9b78fd5e", "SCHWAB_EXTERNAL_IDS_SECRET_ID": "9994828b7f52ddbfee20ae88c98e388a7295901fde3fda4f6497997e916e83b1", "SCHWAB_READER_ROLE_ARN": "5add158f59e3dd3405f01b5e515c289a3c8f4aa6065c4c1915e2c53f14501df3", "SPRINT_VIEW_ALLOWED_EMAILS": "7b1bca22c953247eca62f981fb02c02f3389e5e4933eb68ff4ea54ae81cddaaa", "TAXSMA_WORKBOOK_BEARER": "97787db1cc450b8fb0efc31ac9578fca97b2b4a9e25ecca26f96dd8481d284b5", "TAXSMA_WORKBOOK_IDENTITY": "898f0e17127f259f6615196572cbc6561cffba7ef87af3a05f53a92d139e5c4e", "TEAMS_BEARER": "a8ab693848aaa101cfcd9830f2d16ac3535d8411946bf01547dde976dffd6fe8", "TEAMS_BEARER_LABELS": "27c7fc02dfe3bf89f8e07dc0d069de870f340725e0cd1291987e0516e1a1680f", "TENANT_ID": "458819f3d52aa3fb514da966a0f09b6e5d07e72f5d221fbd92735adba5f8916e", "TRANSCRIPT_BEARER": "5fa40abf8bc2cd484f3ac6e40cc3477e126a094be071c5831aa1d5fb82d2837b", "TRANSCRIPT_BEARER_LABELS": "1bc66a7c86c9067d834068177882de7e21c5b34b72ccf154f63dbf4a0b56bbda", "TRANSCRIPT_MEETING_ALLOWLIST": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "WRITE_CAPABLE_EMAILS": "5b3cbe5dd6d59caa46dc4bf83befb1493506ce27b6da673a7f230ddaee752ece", "WRITE_CAPABLE_PRINCIPALS": "73f1f205d9be88c9bf7e65b716292dc2c211a10fe56fcee2e09f6be450135566", "YEARINREVIEW_VIEW_ALLOWED_EMAILS": "7b1bca22c953247eca62f981fb02c02f3389e5e4933eb68ff4ea54ae81cddaaa"}""")
+R29_SIGNED_MOVES = ["MAIL_BEARER", "MAIL_BEARER_LABELS"]
+R29_ADDED = ["MAIL_SENDER_DOMAIN_TABLE"]
+
+env_hash, raw_allow = {}, None
+for line in open(GW + "/.env", encoding="utf-8"):
+    m = re.match(r"^([A-Z0-9_]+)=(.*)$", line.rstrip(chr(10)).rstrip(chr(13)))
+    if m:
+        env_hash[m.group(1)] = hashlib.sha256(m.group(2).encode("utf-8")).hexdigest()
+        if m.group(1) == "TRANSCRIPT_MEETING_ALLOWLIST":
+            raw_allow = m.group(2)
+
+host_ids = sorted(x for x in re.split(r"[\s,]+", (raw_allow or "").strip()) if x)
+child_src = """
+import json, sys
+sys.path.insert(0, "/opt/opal-gateway")
+from app import transcript_route as t
+print("CHILD_JSON " + json.dumps(sorted(t.meeting_allowlist())))
+"""
+p = subprocess.run(["env", "-i", "HOME=/tmp", "PATH=/usr/local/bin:/usr/bin:/bin", "PYTHONDONTWRITEBYTECODE=1", "MOCK_GRAPH=1",
+                    "TRANSCRIPT_MEETING_ALLOWLIST=" + (raw_allow or ""), GW + "/.venv/bin/python", "-c", child_src],
+                   capture_output=True, text=True, cwd=GW)
+installed_ids, installed_ok = None, False
+for l in p.stdout.split(chr(10)):
+    if l.startswith("CHILD_JSON "):
+        installed_ids = json.loads(l[len("CHILD_JSON "):])
+        installed_ok = p.returncode == 0
+if not installed_ok:
+    print("TL1_CHILD_FAIL rc=%d stderr_tail=%s" % (p.returncode, re.sub(r"[0-9A-Za-z+/=_-]{60,}", "<long>", p.stderr[-500:]).replace(chr(10), " | ")))
+    sys.exit(1)
+
+changed = sorted(k for k in env_hash if k in PRE and env_hash[k] != PRE[k] and k not in R29_SIGNED_MOVES)
+moved_r29 = sorted(k for k in R29_SIGNED_MOVES if k in env_hash and k in PRE and env_hash[k] != PRE[k])
+added = sorted(set(env_hash) - set(PRE))
+removed = sorted(set(PRE) - set(env_hash))
+agree = installed_ids == host_ids
+body = {
+    "served_release": served,
+    "installed_code": bool(installed_ok and agree),
+    "allowlist_count": len(installed_ids),
+    "allowlist_sha256": hashlib.sha256(",".join(sorted(installed_ids)).encode("utf-8")).hexdigest(),
+    "env_values_changed": changed,
+}
+s = json.dumps(body, sort_keys=True)
+print("TL1_CROSSCHECK installed_reader_ids=%d env_parse_ids=%d equal=%s" % (len(installed_ids), len(host_ids), agree))
+print("TL1_ENV_BASIS pre_r29_keys=%d now_keys=%d added=%s removed=%s r29_signed_moves_observed=%s moved_after_subtracting_r29=%s" % (
+    len(PRE), len(env_hash), added, removed, moved_r29, changed))
+print("TL1_BODY " + s)
+print("TL1_DIGEST " + hashlib.sha256(s.encode("utf-8")).hexdigest())
