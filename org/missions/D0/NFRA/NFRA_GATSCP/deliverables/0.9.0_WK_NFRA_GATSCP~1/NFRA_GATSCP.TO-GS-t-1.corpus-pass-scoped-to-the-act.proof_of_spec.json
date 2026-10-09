@@ -1,0 +1,108 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-t-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-t-1.corpus-pass-scoped-to-the-act.md",
+  "group": "OTHER",
+  "vintage_commit": "a18420e142"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.md",
+  "vintage_commit": "a18420e142",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-t-1.corpus-pass-scoped-to-the-act.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/surprise-corpus-validate.py",
+   "kind": "script",
+   "commit_or_etag": "559a2e80bf08922ed32314194d88fa3995a252b0",
+   "artifact_covered_by": [
+    "GS1-AC1",
+    "GS1-AC3"
+   ],
+   "introduces": [
+    "--act",
+    "_graded_text",
+    "_act_paths"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A tool in the repo, read in place by the row gate; nothing is deployed to AWS."
+  },
+  {
+   "path_or_key": ".tools/surprise-row-gate.py",
+   "kind": "script",
+   "commit_or_etag": "559a2e80bf08922ed32314194d88fa3995a252b0",
+   "artifact_covered_by": [
+    "GS1-AC2"
+   ],
+   "introduces": [
+    "--act"
+   ],
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Only the corpus-pass call changed (passes --act for every dispatched channel path); nothing is deployed to AWS."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GS1-AC1",
+   "criterion_verbatim": "with a planted NEW failure in LGIC_BLANKFIX's channel, an act carrying another project's document passes and prints STANDING LGIC_BLANKFIX; an act carrying the planted document is refused",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_corpus_scope.py\"",
+   "expect": "GS-T1-SCOPE ok=True",
+   "output_evidence": "  PASS bystander-lands: rc=0 standing_LGIC_BLANKFIX=True | STANDING LGIC_BLANKFIX surprise-corpus org/missions/D14/LGIC/LGIC_BLANKFIX/surprise-channel/investigations/INVESTIGATION_v1.md LGIC_BLANKFIX-S1 /surfaced_at\n  PASS own-refused: rc=1 | [surprise-corpus] SCOPE: act_documents=1 in-act findings=1 (new=1 malformed=0) STANDING=0 ...\nGS-T1-SCOPE ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms passed; corpus 331 documents",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "GS1-AC2",
+   "criterion_verbatim": "the seam: the real row gate, with STAGED set, lands beside the planted failure and refuses on it",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_rowgate_seam.py\"",
+   "expect": "GS-T1-ROWGATE ok=True",
+   "output_evidence": "  PASS bystander-lands: rc=0 standing_LGIC_BLANKFIX=True | [surprise-corpus] OK: the act's documents are clean against the baseline (4 known, 1 STANDING outside the act, 0 resolved).\n  PASS own-refused: rc=1 | [surprise-corpus] REFUSED: 1 NEW failure(s), 0 RESOLVED baseline tuple(s). The set moved.\nGS-T1-ROWGATE ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms passed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "GS1-AC3",
+   "criterion_verbatim": "the baseline is read from the graded index: a baseline tuple dropped in the index only makes that failure NEW",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_corpus_bytes.py\"",
+   "expect": "GS-T1-BYTES ok=True",
+   "output_evidence": "  PASS index-baseline-read: rc=1 new_line_for_D1_CATVIEWS-S8=True | DENOMINATORS: documents=331 rows=9943 malformed_blocks=0 failures=4 baseline=3 known=3 new=1 resolved=0\nGS-T1-BYTES ok=True arms=1 failed=0",
+   "denominator": "1 of 1 arm passed",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Each check carries its own difference control: the same planted failure (LGIC_BLANKFIX surfaced_at made non-UTC, in a private copy of the index) is landed by a bystander act (rc 0, STANDING) and refused for an act carrying the planted document (rc 1); AC3 plants a dropped baseline tuple in the index while the working tree baseline is unchanged. The order states all three checks FAIL at the base.",
+   "expected": "bystander arm rc 0 with a STANDING LGIC_BLANKFIX line; own-document arm rc 1; dropped index baseline tuple reported NEW",
+   "observed": "GS-T1-SCOPE ok=True arms=2; GS-T1-ROWGATE ok=True arms=2; GS-T1-BYTES ok=True arms=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "all three checks run twice in succession at commit 559a2e80bf; last lines compared",
+   "observed": "identical last lines on both runs (GS-T1-SCOPE, GS-T1-ROWGATE, GS-T1-BYTES all ok=True)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Reading the baseline from the index when the index lacks the file but the working tree has it",
+   "reason": "The order allows a working-tree fallback with a WARN where the index read is impossible; that fallback is kept, as for the documents, and is not exercised by the checks."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Worker 0.9.0_WK_NFRA_GATSCP~1, L7 of 2.0.0_SA_COO~N1, branch wk-NFRA_GATSCP-1; edits only to the two .tools files; surprise-row-gate.py --self-test: RESULT: 0 arm(s) failed of 246 (+ live census).",
+ "compiler_tools": [
+  {
+   "tool": "Read",
+   "invocation": "Read .tools/surprise-corpus-validate.py in full",
+   "result": "406 lines; main at :338, sweep :236, _load_baseline :263"
+  }
+ ]
+}

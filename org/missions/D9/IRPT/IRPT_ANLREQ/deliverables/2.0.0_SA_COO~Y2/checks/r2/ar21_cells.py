@@ -5,8 +5,8 @@ Usage: python <this file> <repo_root> <criterion_id>
 Prints "<id> PASS" or "<id> FAIL" as the last line. Read-only: source map, git blobs, and a BUILD_ONLY of each function (no upload).
 
   AR21-y-AC1  every staged row named below carries a pin whose blob equals HEAD's blob of the same repo_path, and its sha256 equals that
-              blob's sha256: irpt-status submission.py + acceptance.py; irpt-ycharts-generate contracts/AnalysisSubmissionRequest.schema.json.
-              Base: FAIL (all three lag).
+              blob's sha256: irpt-status submission.py + acceptance.py (+ ops/entry.py + ops/owned_report.py, AMENDMENT 3); irpt-ycharts-generate
+              contracts/AnalysisSubmissionRequest.schema.json. Base at AMENDMENT 3: FAIL (2 of 5 lag).
   AR21-y-AC2  no staged commit ships split, for BOTH functions (checks/r73/cochange_closure.py irpt-status and irpt-ycharts-generate).
   AR21-y-AC3  every imported name resolves in BOTH built zips (BUILD_ONLY, then checks/r71/symbol_closure.py on each).
 """
@@ -21,6 +21,9 @@ ROWS = [
     ("irpt-status", "infra/aws/lambda/investor-reporting/ycharts/generate/submission.py"),
     ("irpt-status", "infra/aws/lambda/investor-reporting/ycharts/generate/acceptance.py"),
     ("irpt-ycharts-generate", "docs/contracts/investor-reporting/v1/AnalysisSubmissionRequest.schema.json"),
+    # AMENDMENT 3 (issuer 2026-10-09 ~08:3xZ): AR-y-22's reader ships only if irpt-status stages these at its drain (@75650bef27).
+    ("irpt-status", "infra/aws/lambda/investor-reporting/ops/entry.py"),
+    ("irpt-status", "infra/aws/lambda/investor-reporting/ops/owned_report.py"),
 ]
 FUNCTIONS = ("irpt-status", "irpt-ycharts-generate")
 Y2 = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks"

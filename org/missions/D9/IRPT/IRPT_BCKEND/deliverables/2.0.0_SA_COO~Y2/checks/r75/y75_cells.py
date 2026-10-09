@@ -52,7 +52,11 @@ def main():
     if not f.is_file():
         fail("no %s" % F)
     d = json.loads(f.read_text(encoding="utf-8"))
-    reads = d.get("reads") or {}
+    reads = dict(d.get("reads") or {})
+    # AMENDMENT 1 (issuer 2026-10-09 ~07:5xZ): read 0 asserts "live at start == ROLLBACK"; the applier records it as
+    # `live_before`. A measured live_before equal to ROLLBACK is read 0 PASS; any other value is read 0 FAIL.
+    if "0" not in reads and "live_before" in d:
+        reads["0"] = "PASS" if d["live_before"] == ROLLBACK else "FAIL"
     all_pass = all(reads.get(r) == ("STORED-NEXT-STATE" if r == "4" else "PASS") for r in READS)
 
     if cid == "Y75-1-AC1":
