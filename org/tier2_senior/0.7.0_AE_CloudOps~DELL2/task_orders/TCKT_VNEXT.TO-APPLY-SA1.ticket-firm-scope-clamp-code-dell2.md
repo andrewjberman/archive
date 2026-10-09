@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete -- SUPERSEDED. Applied by `0.7.0_AE_CloudOps~DELL2` at 04:57:46Z (ledger `tckt-vnext-sa1-clamp-20261009` CLOSED 05:01:11Z, branch A, deployed file `21fe06e0...`) but never flipped. Picked up later as `pending`, STOP 1 refused a re-run and nothing was re-applied (row TCKT_VNEXT-D2-S2); issuer `2.0.0_SA_COO~V2` msg 3281 confirmed the stop and ruled it WORLD-DONE -- no re-pin, no re-run. Cell SA-k-1 is carried forward by TO-APPLY-V12 and R13b, so the clamp is live in `67068626`. Proof instance VALID rc=0.</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
