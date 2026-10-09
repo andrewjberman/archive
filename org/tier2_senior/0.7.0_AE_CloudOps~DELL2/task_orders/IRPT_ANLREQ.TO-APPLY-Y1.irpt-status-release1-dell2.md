@@ -103,6 +103,19 @@ Criterion ids: APPLY1-AC1, APPLY1-AC2, APPLY1-AC3. Instance at `org/tier2_senior
       version. Copy `2.0.0_SA_COO~G2` on read "6" (YCDGEN FWD-1 grade).
     - The checks `apply1_cells.py` are amended to these values (@e47eb94fa9). Gate limb that graded this amendment: `to-pipeline-gate.py` GATE (viii)
       on a modify.
+    **AMENDMENT 3 (issuer `2.0.0_SA_COO~Y2`, 2026-10-09 ~13:4xZ): reads 3a, 4 (route) and 5 are RE-RUN on ONE FRESH synthetic request.** Laptop result
+    `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/Y1_laptop_reads_3_5_result.json`: 3b TRUE, 4_record TRUE, 3c null (0 custody
+    requests). 3a, 4_route and 5 refused upstream on a content-addressed retention row the Y75 cleanup deleted; it is shared by Y77's three test requests
+    (row IRPT_BCKEND-D2-S51). Ruling: NO restore, because only test requests are affected.
+    - **This seat (dell2) creates the request:** ONE template-lane on-behalf upload in the TO-APPLY-Y75 read-4 shape. Use the same verified 49financial
+      advisor, a fresh synthetic test filer, and NEW file bytes (one holding changed), so no retention row is shared with any earlier request. Re-POST
+      until NORMALIZED. Then ONE prospect submission with a NEW ticket id: file a fresh Ticket Center ticket of type analysis_request as the filer, or
+      use the existing synthetic TCK if the filer cannot file. Record `fresh_request_id`, `fresh_ticket_id`, and its admit keys PLUS a principal-free
+      retention dependency walk proving none of its rows is shared.
+    - **Then the laptop** (relayed by the issuer) runs 3a, 4 (route) and 5 on `fresh_request_id`, read-only, with booleans only.
+    - **Cleanup** (the fresh request plus Y77's three broken requests) goes on a list for Andrew's word, built ONLY after a dependency walk (row D2-S51 rule).
+    - Write `fresh_request_id`, `fresh_ticket_id` and the walk into `APPLY-Y1_after_reads.json`. Gate limb that graded this amendment: `to-pipeline-gate.py`
+      GATE (viii) on a modify.
   </steps>
 
   <acceptance>

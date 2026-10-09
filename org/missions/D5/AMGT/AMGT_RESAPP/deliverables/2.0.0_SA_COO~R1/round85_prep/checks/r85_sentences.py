@@ -4,6 +4,9 @@
   python r85_sentences.py --crit AC1 --where file --keys <ONE KEY> --draft <local drafting JSON>
     (round 85, the issuer: grades an OFFLINE draft written with no store write; S3's floor there is the CURRENT stored drafting
      document's sentence count for that key, read only -- the same shape, `sections[].sentences[]`)
+  --exclude-section NAME (repeatable) / --base-file PATH (round 86, the issuer): drop a section from every count (served, base
+     and floor) and read or write the floor from another base file -- R5 empties company_description's non-business lines, so the
+     no-sentence-lost arm is graded on the other sections against a base recorded before the act.
   --no-floor: S3 is printed but not graded (round 85 AMENDMENT 1 to AMGT-jj-1, CTO~DELL1 msg 2442: a fresh model draw's yield is
      not the join repair's to control -- row D1-W338-S1; the served floor is graded by AMGT-jj-2 on the live function).
 
@@ -39,6 +42,7 @@ BASE = os.path.join(HERE, "r85_sentences_base.json")
 GLUE_RE = re.compile(r"[a-z0-9%)][.!?][A-Z][a-z]")
 SPLIT_RE = re.compile(r"(?<=[a-z0-9%)][.!?])\s*(?=[A-Z][a-z])")
 FIGURE_RE = re.compile(r"\d[\d,]*\.\d+|\d{1,3}(?:,\d{3})+|\d{3,}")
+YEAR_RE = re.compile(r"(19|20)\d\d")
 
 
 def say(ok, label):
@@ -61,13 +65,24 @@ def _figures(text):
 def restated(text):
     parts = [p.strip() for p in SPLIT_RE.split(text or "") if p.strip()]
     for a, b in zip(parts, parts[1:]):
-        if _norm(a) == _norm(b) or len(_figures(a) & _figures(b)) >= 2:
+        shared = _figures(a) & _figures(b)
+        # Round 86 carry (row AMGT_RESAPP-D1-W339-S2): bare years (1900-2099) are dates, not facts -- a shared pair counts
+        # only when at least one shared figure is not a bare year (two sentences about 2025 vs 2024 are not a restatement).
+        if _norm(a) == _norm(b) or (len(shared) >= 2 and any(not YEAR_RE.fullmatch(f) for f in shared)):
             return True
     return False
 
 
+EXCLUDE = set()
+
+
+def _sec_name(sec):
+    return sec.get("section_id") or sec.get("section") or sec.get("key") or sec.get("name") or ""
+
+
 def _sentences_from_body(body):
-    return [s.get("text") or "" for sec in body.get("drafted_sections") or [] for s in sec.get("sentences") or []]
+    return [s.get("text") or "" for sec in body.get("drafted_sections") or [] if _sec_name(sec) not in EXCLUDE
+            for s in sec.get("sentences") or []]
 
 
 def _stored_doc(key):
@@ -78,7 +93,8 @@ def _stored_doc(key):
 
 
 def _doc_sentences(doc):
-    return [s.get("text") or "" for sec in doc.get("sections") or [] for s in sec.get("sentences") or []]
+    return [s.get("text") or "" for sec in doc.get("sections") or [] if _sec_name(sec) not in EXCLUDE
+            for s in sec.get("sentences") or []]
 
 
 def _read(key, where, draft=None):
@@ -110,9 +126,13 @@ def main():
     ap.add_argument("--where", choices=("deployed", "stored", "local", "file"), default="deployed")
     ap.add_argument("--draft")
     ap.add_argument("--no-floor", action="store_true")
+    ap.add_argument("--exclude-section", action="append", default=[])
+    ap.add_argument("--base-file")
     ap.add_argument("--keys", default=",".join(KEYS))
     ap.add_argument("--write-base", action="store_true")
     a = ap.parse_args()
+    EXCLUDE.update(a.exclude_section)
+    base_path = a.base_file or BASE
     root = _root()
     if root and root not in sys.path:
         sys.path.insert(0, root)
@@ -123,8 +143,8 @@ def main():
             ap.error("--where file needs --draft and exactly one --keys")
         base = {keys[0]: len(_doc_sentences(_stored_doc(keys[0])))}
         print("   file arm: S3 floor = the current stored draft's sentence count for %s: %d" % (keys[0], base[keys[0]]))
-    elif os.path.isfile(BASE):
-        base = json.load(open(BASE, encoding="utf-8"))
+    elif os.path.isfile(base_path):
+        base = json.load(open(base_path, encoding="utf-8"))
     counts, dbl_total, glue_total, n_total, short = {}, 0, 0, 0, []
     for key in keys:
         sents = _read(key, a.where, a.draft)
@@ -140,8 +160,8 @@ def main():
         print("   %-15s served sentences %3d (base %s) | restated %2d of %d | glued %2d of %d" % (
             key, len(sents), floor if floor is not None else "-", dbl, len(sents), glued, len(sents)))
     if a.write_base:
-        json.dump(counts, open(BASE, "w", encoding="utf-8", newline="\n"), indent=2, sort_keys=True)
-        print("   base written: %s" % BASE)
+        json.dump(counts, open(base_path, "w", encoding="utf-8", newline="\n"), indent=2, sort_keys=True)
+        print("   base written: %s" % base_path)
     s1 = say(dbl_total == 0, "S1 no served text states one fact twice in a row: %d of %d restated" % (dbl_total, n_total))
     s2 = say(glue_total == 0, "S2 no glued sentence boundary: %d of %d served texts glued" % (glue_total, n_total))
     s3 = say(bool(base) and not short, "S3 no name serves fewer sentences than its base (%s)" % (

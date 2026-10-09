@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-al-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-al-1.account-return-daily-build.md",
+    "group": "OTHER",
+    "vintage_commit": "c78115fb9e"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~66",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round38.md",
+    "vintage_commit": "c78115fb9e",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-al-1.account-return-daily-build.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/commonwealth_account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "b01e4fb611",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo code only; local build, no S3 write (order BOUNDS); the mint is CB-al-2's"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~66/account_return_daily_build.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build report; LAST line is the ARD-COTTONWOOD line"
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~66/ard_cottonwood_manifest.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "sha256 and content hash per day file; the day files themselves are under .scratch/ and uncommitted by the order"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB38al1-AC1",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_account_return_daily.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~66 expect: ARD-COTTONWOOD days=",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_account_return_daily.py --out org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~66",
+      "output_evidence": "ARD-COTTONWOOD days=3325 rows=1691729 absent_days=110 held_days=988 enum_ok=True addresses_from_builder=True (rc 0; run in the background under timeout 3000 as the order directs for a long run, a 120 s bound cannot hold a 1.69M-row, 3,325-file build). Also: ARD-EXCEPTIONS absent_months=5 absent_days_by_month_grade=110 absent_days_by_blank_reason=110 disagree=0; held_days_by_account_day_value=988 held_days_by_blank_reason=988 disagree=0; non-null value/flow/return in exception rows=0. ARD-METHOD-CLAIM field=return_basis value=None status=BLOCKING_GAP_NOT_STATED (row ADVI_COTBKF-D2-W66-S1). Sources: daily_returns VersionId w9j5YeV1LnNIakNlRTBX6jW1.SDHqmJR, account_day_value qIWjLLwCIh_Gx6IblSgyaint2tfJ37pr, month_grades QI5Ks8vQwGTwnc9ekyh.DOsyN8PKN3PB. First address s3://opal-data-cottonwood/irpt/cottonwood/gold/account_return_daily/date=2013-04-03, last .../date=2026-06-22. --verify-served: ARD-COTTONWOOD-VERIFY days=3325 match=0/3325 (every served day ABSENT, as expected before any mint).",
+      "denominator": "3325 of 3325 business days built and enum-checked; 1,691,729 of 1,691,729 FWD-3 daily_returns rows mapped; 110 of 110 absent-month days and 988 of 988 held days blank",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB38al1-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9 and never self-graded: every row's method claim is truthful (never the custodian method); the two exceptions read as blanks with reasons, never zeros; the producer is unedited.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~66/account_return_daily_build.md and the rule block in the docstring of data/assets/scripts/silver/commonwealth_account_return_daily.py; git diff e7316aa723..HEAD -- data/assets/scripts/gold/irpt_reporting/account_return_daily.py",
+      "output_evidence": "output produced, no verdict: method claim withheld (return_basis NULL on 107,316 measured rows, NOT_MEASURABLE on 1,584,413 blank rows, method_version NULL; nothing writes TWR or the custodian method); exceptions: value, flow and return null with day_quality NOT_MEASURABLE, guard_state GUARD_NOT_REACHED, reason in the sidecar and manifest (REGRESSED_UNDER_AS_TRADED 110, HELD_SOURCE_UNDER_REVIEW 988), 0 non-null value/flow/return in exception rows; producer file untouched by this worker (only the adapter and the investigation file are in its commits)",
+      "denominator": "1,691,729 rows to be read by the grader; 3 admitted return_basis values reviewed in CLAIM_REVIEW",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "PENDING-ADJUDICATION: judgment criterion; graded by 3.0.0_SA_CVO at L9, never self-graded"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A: no mutant control named by the order",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: no determinism control named by the order",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "S3 write and the mint of the 3,325 partitions",
+      "reason": "CB-al-2's, on the applier under a pair; this order is LOCAL and writes nothing to S3"
+    },
+    {
+      "item": "edits to the producer account_return_daily.py and sources.json",
+      "reason": "another project's code; the gap is named in row ADVI_COTBKF-D2-W66-S1"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W66-S1",
+    "ADVI_COTBKF-D2-W66-S2",
+    "ADVI_COTBKF-D2-W66-S3",
+    "ADVI_COTBKF-D2-W66-S4"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~66/ADVI_COTBKF.TO-CB-al-1.account-return-daily-build.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh data/assets/scripts/silver/commonwealth_account_return_daily.py",
+      "result": "OK: pre-commit gate clean for 1 of 1 file(s)"
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "checker loaded at .tools/proof-of-spec-check.py with SCHEMA_PATH = schema at 1f256cfc64 (see row ADVI_COTBKF-D2-W66-S4)",
+      "result": "VALID (rc=0)"
+    }
+  ]
+}

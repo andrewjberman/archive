@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_BCKEND</project_code>
   </metadata>
 <risk>WORLD</risk>

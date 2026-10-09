@@ -1,0 +1,127 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "Y77-1-AC1",
+      "criterion_verbatim": "release 6b's reads 0-5 all PASS",
+      "denominator": "6 reads, 0 through 5, every one required PASS. Read 5 was the last to clear: it held at DEFERRED-5a-TO-Y1-READ-4 until the laptop's 4_record came back TRUE",
+      "expect": "Y77-1-AC1 PASS",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r77/y77_cells.py . Y77-1-AC1",
+      "method": "command",
+      "output_evidence": "Y77-1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y77-1-AC2",
+      "criterion_verbatim": "the release landed as signed",
+      "denominator": "1 live function read against 1 built value, plus the re-plan and the ledger status",
+      "expect": "Y77-1-AC2 PASS",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r77/y77_cells.py . Y77-1-AC2",
+      "method": "command",
+      "output_evidence": "Y77-1-AC2 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "Y77-1-AC3",
+      "criterion_verbatim": "the offline suites and the census gate",
+      "denominator": "the offline custody suites and the import census gate",
+      "expect": "Y77-1-AC3 PASS",
+      "invocation": "python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks/r77/y77_cells.py . Y77-1-AC3",
+      "method": "command",
+      "output_evidence": "Y77-1-AC3 PASS",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "Y77-1-AC1",
+        "Y77-1-AC2",
+        "Y77-1-AC3"
+      ],
+      "commit_or_etag": "7d4318cd3e4662a23494219a6185c032f475b615",
+      "deploy_evidence": "reads 0 through 5b with their detail; the issuer's AMENDMENT 3 notes this file is named read_0..read_5b rather than the originally specified shape, and grades it as written",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_y77/Y77_reads_0_to_5.json"
+    },
+    {
+      "artifact_covered_by": [
+        "Y77-1-AC2"
+      ],
+      "commit_or_etag": "7d4318cd3e4662a23494219a6185c032f475b615",
+      "deploy_evidence": "the custody policy read back from live after the release",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_y77/Y77_custody_policy_readback.json"
+    },
+    {
+      "artifact_covered_by": [
+        "Y77-1-AC2"
+      ],
+      "commit_or_etag": "7d4318cd3e4662a23494219a6185c032f475b615",
+      "deploy_evidence": "the plan text, committed before the apply",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_y77/Y77_plan_release6b.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "compiler_tools": [
+    {
+      "invocation": "the issuer's own check, run per criterion by this seat",
+      "result": "Y77-1-AC1 PASS, Y77-1-AC2 PASS, Y77-1-AC3 PASS (checks @7283b73787)",
+      "tool": "y77_cells.py"
+    },
+    {
+      "invocation": "close --slug irpt-ycg-release6b-20261009",
+      "result": "CLOSED -- nothing stranded -- closed 20261009T100214Z",
+      "tool": "deploy_ledger.py"
+    }
+  ],
+  "controls": {
+    "read_5_was_not_self_cleared": {
+      "description": "read 5a asks whether the acceptance RECORD carries ticket_id, which needs a reader that can decrypt irpt-requests. This device cannot",
+      "expected_landed": "the laptop returns 4_record TRUE and read 5 flips to PASS",
+      "expected_not_landed": "read 5 staying DEFERRED-5a-TO-Y1-READ-4, which is exactly what the issuer's own check printed while it was outstanding",
+      "observed": "the check reported FAIL with its reason printed -- reads {0 PASS, 1 PASS, 2 PASS, 3 PASS, 4 PASS, 5 DEFERRED-5a-TO-Y1-READ-4} -- until the laptop's 4_record came back TRUE; it then read PASS. So the PASS was earned by an external reader, not by this seat relaxing anything",
+      "status": "PASS"
+    },
+    "typed_refusal_was_the_pass_condition": {
+      "description": "release 6b's read 3 PASSES on a typed factory REFUSAL rather than a success, so an operator reading rc or the public code alone would score it backwards",
+      "expected_landed": "the typed refusal appears in CloudWatch for the custody factory",
+      "expected_not_landed": "a success, or an untyped error",
+      "observed": "the refusal was read from CloudWatch, which is where the internal typed code lives; the public classifier masks it. This is the release-5 lesson applied",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "read 5a was not performed by this seat",
+      "reason": "irpt-requests is not decryptable on this device -- dynamodb Scan returns kms:Decrypt AccessDenied on key/7f4d3042 for user/cloudops-dell2-agent-user. The laptop performed it and returned 4_record TRUE, which is what closed read 5 (row IRPT_ANLREQ-D2-S8 records the same limit for Y1's reads 3-5)"
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R77_Y.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_BCKEND.TO-APPLY-Y77.irpt-ycharts-generate-release6-custody.md",
+    "vintage_commit": "7d4318cd3e4662a23494219a6185c032f475b615"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/release6_custody/NEVER_WIDEN_PAIR_RELEASE6B_CUSTODY.md, signed by the issuance (AMENDMENT 2)",
+    "cto_half": "the release 6b CTO half (issuer msg 2888); originally release 6's half @96e03f8ba1 (msg 2269), superseded by the 6b pair"
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "WORLD",
+  "rollback": "re-promote the prior artifact version by a targeted apply; not needed -- the ledger irpt-ycg-release6b-20261009 closed with nothing stranded at 10:02:14Z",
+  "schema_version": "1.0",
+  "scope": "release 6b of irpt-ycharts-generate -- the custody factory -- plus reads 0 through 5, the last of which (5a, the acceptance record's ticket_id) could not be read on this device and was closed by the laptop",
+  "session_log": "org/critical_paths/change_management/20261009T0924Z_irpt-ycg-release6b-20261009_deploy_completion.md",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_BCKEND.TO-APPLY-Y77.irpt-ycharts-generate-release6-custody.md",
+    "group": "OTHER",
+    "vintage_commit": "7d4318cd3e4662a23494219a6185c032f475b615"
+  },
+  "surprises": [],
+  "to_id": "IRPT_BCKEND.TO-APPLY-Y77"
+}

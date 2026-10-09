@@ -71,7 +71,9 @@ def main():
                 fail("%s %r" % (firm, r))
             if r.get("terminated_count") != want:
                 fail("%s terminated_count %r, want %d" % (firm, r.get("terminated_count"), want))
-            if want and r.get("carried_in_served") is not True:
+            # IB-pr-383 AMENDMENT 3: the applier records the carried entry as a COUNT; >= 1 (or True) is "present in the served directory"
+            carried = r.get("carried_in_served")
+            if want and not (carried is True or (type(carried) is int and carried >= 1)):
                 fail("%s carried_in_served %r" % (firm, r.get("carried_in_served")))
         if not isinstance((firms.get("49financial") or {}).get("source_client_ids_present"), bool):
             fail("49financial first landing not read: %r" % firms.get("49financial"))

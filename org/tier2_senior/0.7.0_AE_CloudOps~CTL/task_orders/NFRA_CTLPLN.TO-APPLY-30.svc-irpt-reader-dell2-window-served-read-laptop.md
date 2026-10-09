@@ -8,6 +8,13 @@
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 
+  <closure>
+    COMPLETE (issuer, ~14:0xZ). CTO yes msg 107976. ADD put 13:37:33-13:37:36Z by 0.7.0_AE_CloudOps~CTL -- AFTER dell2 G2's own window
+    13:05:57-13:35:57Z had already closed with NO read (msg 107978), so the access was never used. REMOVE put 13:45:37-13:45:41Z on G2's
+    "remove at once"; read back SET-EQUAL to BEFORE, dell2/dell1 explicitDeny. Issuer live poll: dell2 on the policy first seen 13:38:02Z,
+    gone 13:46:07Z. Ledger closed (@d7e3566b1d). A retry is a new GO, ADD first, the 30 minutes run from W1.
+  </closure>
+
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
@@ -17,6 +24,14 @@
 </decomp_ref>
 
 
+
+  <amendment>
+    AMENDMENT 1 (issuer, 2026-10-09 ~14:1xZ) -- REOPENED for ONE RETRY of the same ledger irpt-ycdgen-served-read-20261009, under the same
+    CTO consent (msg 107976) and the dell2 CTO half @da885deef2. dell2 2.0.0_SA_COO~G2 (relay 0.0.0_AB_MSTR msg 107988): a served read of
+    REQ-5e4149d2. ADD FIRST, on the GO: start from live == BEFORE (set rule), put the signed ADD, read back, simulate; send the put time to
+    me and to dell2 via 0.0.0_AB_MSTR at once (G2 takes W1 on it). REMOVE at G2's "R done", OR 30 minutes after the ADD put WITHOUT waiting
+    -- this lane holds the clock itself. The first pair (13:37Z / 13:45Z) stays closed as recorded. A new NEVER-2 entry for the retry.
+  </amendment>
 
   <objective>
     LEG ADD: set the resource policy of `arn:aws:secretsmanager:us-east-1:313476888478:secret:irpt/svc-irpt-analysis/password-rfHf9l` to
