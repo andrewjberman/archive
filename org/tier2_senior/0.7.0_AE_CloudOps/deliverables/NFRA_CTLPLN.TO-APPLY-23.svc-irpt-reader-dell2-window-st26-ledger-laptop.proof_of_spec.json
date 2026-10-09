@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-23.svc-irpt-reader-dell2-window-st26-ledger-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-23.svc-irpt-reader-dell2-window-st26-ledger-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "9c16e3ae9f1189a5d76ffa36c0d0e2ac01c525ca"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
+    "vintage_commit": "7dd661eb9f5f42815d2541ac729747c3d8a25cbc",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_CTLPLN.TO-APPLY-23.svc-irpt-reader-dell2-window-st26-ledger-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/svc_irpt_st26_20261009/after.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ADD live under set rule; dell2 allowed, dell1 explicitDeny, walker allowed; REMOVE pending",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "aws secretsmanager get-resource-policy returns WalkerReadsByExplicitArn after REMOVE",
+      "method": "live_read",
+      "invocation": "aws secretsmanager get-resource-policy --secret-id irpt/svc-irpt-analysis/password --query ResourcePolicy --output text",
+      "expect": "WalkerReadsByExplicitArn",
+      "output_evidence": "ADD readback contains WalkerReadsByExplicitArn; final signed BEFORE equality is owed after REMOVE",
+      "denominator": "one resource policy and 3 principals after REMOVE",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "AC1 is explicitly read after REMOVE at dell2 X1 or 2026-10-09T06:00Z."
+    }
+  ],
+  "controls": {
+    "reader_window": {
+      "description": "dell2 policy simulation before and after signed ADD",
+      "expected_landed": "allowed",
+      "expected_not_landed": "explicitDeny",
+      "observed": "allowed",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md@0e800098a7",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md@4d7f665001"
+  },
+  "risk_class": "WORLD",
+  "rollback": "Put signed BEFORE on the exact secret with block-public-policy, verify set equality, then simulate both Dells explicitDeny and walker allowed; mandatory at X1 or 06:00Z.",
+  "scope": "ADD complete; REMOVE pending for the same st26 ledger",
+  "declared_exclusions": [
+    {
+      "item": "REMOVE and final AC1",
+      "reason": "Triggered by dell2 X1 or the 06:00Z hard close."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/svc_irpt_st26_20261009/REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "aws iam simulate-principal-policy",
+      "invocation": "one exact secret ARN per principal with the signed live resource policy",
+      "result": "dell2 allowed; dell1 explicitDeny; Andrew_Berman allowed; no GetSecretValue call"
+    }
+  ]
+}
