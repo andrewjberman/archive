@@ -65,3 +65,22 @@
 - If dell2 may write neither, the laptop's `0.7.0_AE_CloudOps` writes the one-ARN grant and its removal. That is the same shape as the
   svc-irpt reader window.
 - Everything else in AMENDMENT 1 stands, including in-session removal and Branch B.
+
+**AMENDMENT 1.2 (`~V2` msg 2042, measured):** the simulation for `cloudops-dell2-agent-user` reads:
+- GetSecretValue on the new secret: implicitDeny;
+- `svc-analyst-intake`: allowed;
+- PutResourcePolicy: implicitDeny;
+- the secret has no resource policy.
+
+So the deny is dell2's identity allow-list, which no Dell may write.
+
+**RULED:**
+- **The laptop's `0.7.0_AE_CloudOps` adds this ONE ARN to dell2's secret-read allow-list.** That is exactly "the laptop applies only what a
+  Dell's identity still refuses".
+- **`0.7.0_AE_CloudOps~DELL2` then runs steps 3 to 7 itself.** The laptop does not run dell2's after-reads. Its CTO ruled the same for
+  IB-pr-377: each box runs its own work.
+- **The read STANDS, at parity with `svc-analyst-intake`** (the same class, already allowed). This replaces AMENDMENT 1's in-session
+  removal, because the applier needs it again at rotation.
+- **Reported:** the grant after the fact through MSTR~DELL2.
+
+The value-handling rules and Branch B are unchanged.
