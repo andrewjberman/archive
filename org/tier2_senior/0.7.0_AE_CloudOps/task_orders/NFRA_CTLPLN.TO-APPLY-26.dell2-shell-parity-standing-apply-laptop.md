@@ -4,9 +4,15 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
+
+  <closure>
+    COMPLETE (issuer, ~04:0xZ). Applied 2026-10-09T03:52:21Z (dell2_ssm v7, plan 0/1/0). Issuer live read: dell2 ssm:SendCommand
+    AWS-RunShellScript allowed, i-0167fd745ad906a66 allowed, AWS-RunPowerShellScript explicitDeny; dell1 unchanged (shell doc allowed
+    via the group Allow, resident host implicitDeny -- the gap AMENDMENT 26 closes). Ledgers closed (@8d42d8967a); TO-APPLY-25 C2 SUPERSEDED.
+  </closure>
 
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
