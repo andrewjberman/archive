@@ -35,7 +35,42 @@ import sys
 ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip() or os.getcwd()
 sys.path.insert(0, ROOT)
 DLV = os.path.join(ROOT, "org/missions/D8/MDPF/MDPF_CANON/deliverables")
+# AMENDMENT (row MDPF_CANON-D1-W5-S1): the PRD's root deliverables/ paths are unwritable by anyone under the owned-paths lane
+# TREE_DELIVERABLES (deliverables/<SERIAL>/** only), so each document lives in its author's serial folder.
+CENSUS = "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~4/READER_CENSUS.md"
+BASIS = "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~5/X2_GLOBAL_BASIS.md"
 arms = []
+
+
+def hcl_strings(text):
+    """Every double-quoted HCL string in text, with a quote inside a ${...} interpolation kept inside the string
+    (amended on row MDPF_CANON-D1-W7-S1: `"arn:aws:s3:::${module.m.scope_bucket["mdpf"]}/..."` is ONE string)."""
+    out, i, n = [], 0, len(text)
+    while i < n:
+        if text[i] != '"':
+            i += 1
+            continue
+        j, depth, buf = i + 1, 0, []
+        while j < n:
+            c = text[j]
+            if depth == 0 and c == '"':
+                break
+            if c == "\\" and j + 1 < n:
+                buf.append(text[j:j + 2])
+                j += 2
+                continue
+            if text.startswith("${", j):
+                depth += 1
+                buf.append("${")
+                j += 2
+                continue
+            if c == "}" and depth:
+                depth -= 1
+            buf.append(c)
+            j += 1
+        out.append("".join(buf))
+        i = j + 1
+    return out
 
 
 def arm(label, fn):
@@ -80,12 +115,12 @@ def evidence_fault(cell):
 
 
 def census():
-    src = read("org/missions/D8/MDPF/MDPF_CANON/deliverables/READER_CENSUS.md")
+    src = read(CENSUS)
     rows = []
 
     def shape(f):
         if src is None:
-            f.append("MISSING: deliverables/READER_CENSUS.md")
+            f.append("MISSING: " + CENSUS)
             return ""
         for tag in ("DENOMINATOR:", "INSTRUMENT:"):
             if tag not in src:
@@ -146,13 +181,13 @@ def census():
 
 # ---------------------------------------------------------------- basis
 def basis():
-    src = read("org/missions/D8/MDPF/MDPF_CANON/deliverables/X2_GLOBAL_BASIS.md")
+    src = read(BASIS)
     led = read("infra/logic/06_CONFORMANCE_LEDGER.md") or ""
     heads = [ln.lower() for ln in (src or "").splitlines() if ln.startswith("#")]
 
     def sections(f):
         if src is None:
-            f.append("MISSING: deliverables/X2_GLOBAL_BASIS.md")
+            f.append("MISSING: " + BASIS)
             return ""
         for want in ("aggregation level", "minimum firm count", "per-firm or per-account"):
             if not any(want in h for h in heads):
@@ -179,7 +214,7 @@ def basis():
         return f"integers stated: {sorted(set(nums))[:6]}"
 
     def cited(f):
-        path = "org/missions/D8/MDPF/MDPF_CANON/deliverables/X2_GLOBAL_BASIS.md"
+        path = BASIS
         rows = [ln for ln in led.splitlines() if ln.startswith("|") and re.search(r"\|\s*\**X2\**\s*\|", ln)]
         if not rows:
             f.append("no X2 row in infra/logic/06_CONFORMANCE_LEDGER.md")
@@ -253,7 +288,7 @@ def builder():
     iam = read("infra/aws/terraform/mdpf-pipeline/iam.tf") or ""
     gen = read("infra/aws/terraform/modules/opal_name/generated_locals.tf") or ""
     body = block(iam, "resource", "mdpf_gold_writers") or ""
-    arns = re.findall(r'"(arn:aws:s3:::[^"]*)"', body)
+    arns = [s for s in hcl_strings(body) if s.startswith("arn:aws:s3:::")]
     comp = [a for a in arns if "/mdpf/global/gold/" in a or not a.split(":::", 1)[1].count("/")]
 
     def no_local(f):
