@@ -7,7 +7,7 @@
   "spec_ref": {
     "doc": "org/tier2_senior/0.7.0_AE_CloudOps~CTL/task_orders/NFRA_CTLPLN.TO-APPLY-30.svc-irpt-reader-dell2-window-served-read-laptop.md",
     "group": "OTHER",
-    "vintage_commit": "96f9b367529e542add557a48e354928800739893"
+    "vintage_commit": "17d26864b56bb68ac3837b39bd1cccdde555540a"
   },
   "decomp_ref": {
     "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.access1.md",
@@ -37,6 +37,16 @@
       ]
     },
     {
+      "path_or_key": "org/critical_paths/change_management/20261009T1607Z_svc-irpt-served-read-w3-laptop-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "1f1a284a9c01c4476f0df32754ba208d9b28611e",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "WINDOW 3, the AMENDMENT 2 use. OPENED 16:07Z before the ADD put, as the amendment requires a NEW entry; both legs closed with proof; entry CLOSED 16:36:57Z and the sentinel removed",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
       "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~CTL/deliverables/NFRA_CTLPLN_TO-APPLY-30_REPORT.md",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
@@ -54,8 +64,8 @@
       "method": "live_read",
       "invocation": "aws secretsmanager get-resource-policy --secret-id irpt/svc-irpt-analysis/password --query ResourcePolicy --output text",
       "expect": "WalkerReadsByExplicitArn",
-      "output_evidence": "read after EACH of the two REMOVE legs (13:46Z and 14:36Z): Sid WalkerReadsByExplicitArn present (1 occurrence each time) with Principal.AWS = arn:aws:iam::313476888478:user/Andrew_Berman alone; the live document is SET-EQUAL to the signed BEFORE file in both reads. The latest read is the AMENDMENT 1 retry's",
-      "denominator": "1 secret resource policy, 2 statements, read whole every time (816 B at BEFORE, 944 B at ADD); after each REMOVE, cloudops-dell2-agent-user occurrences over the WHOLE live document = 0 and cloudops-dell1-agent-user = 0",
+      "output_evidence": "read after EACH of the three REMOVE legs (13:46Z, 14:36Z and 16:34Z): Sid WalkerReadsByExplicitArn present (1 occurrence each time) with Principal.AWS = arn:aws:iam::313476888478:user/Andrew_Berman alone; the live document is SET-EQUAL to the signed BEFORE file in all three reads. The latest read is window 3's",
+      "denominator": "1 secret resource policy, 2 statements, read whole every time (816 B at BEFORE, 944 B at ADD); after each of the three REMOVE legs, cloudops-dell2-agent-user occurrences over the WHOLE live document = 0 and cloudops-dell1-agent-user = 0",
       "status": "PASS"
     }
   ],
@@ -104,31 +114,52 @@
     },
     "window_deadline": {
       "description": "Each REMOVE had to run at G2's call or at its own ADD+30m without waiting for any GO, with this seat holding the clock",
-      "expected_landed": "REMOVE 1 at or before 14:07:36Z and REMOVE 2 at or before 14:49:50Z",
-      "expected_not_landed": "either REMOVE put landing after its hard close, or a window left open",
-      "observed": "an ADD+27m background alarm was armed at the moment of EACH ADD and each was stopped unused because G2 called first. REMOVE 1 at 13:45:41Z, 21 min 55 s early; REMOVE 2 at 14:35:09Z, 14 min 41 s early",
+      "expected_landed": "REMOVE 1 at or before 14:07:36Z, REMOVE 2 at or before 14:49:50Z, REMOVE 3 at or before 16:38:46Z",
+      "expected_not_landed": "any REMOVE put landing after its hard close, or a window left open",
+      "observed": "an ADD+27m background alarm was armed at the moment of EACH of the three ADDs and each was stopped unused because G2 called first. REMOVE 1 at 13:45:41Z (21 min 55 s early), REMOVE 2 at 14:35:09Z (14 min 41 s early), REMOVE 3 at 16:33:06Z (5 min 40 s early)",
       "status": "PASS"
     },
     "no_value_read": {
-      "description": "The order forbids THIS SEAT reading the secret value, on all four legs",
+      "description": "The order forbids THIS SEAT reading the secret value, on all six legs",
       "expected_landed": "0 GetSecretValue API calls by this seat",
       "expected_not_landed": "any get-secret-value invocation by this seat",
-      "observed": "0 -- the only calls were get-resource-policy, put-resource-policy and iam simulate-principal-policy, none of which returns the value. dell2's own read at ~14:26:12Z is G2's act under its ledger, not this seat's",
+      "observed": "0 -- the only calls were get-resource-policy, put-resource-policy and iam simulate-principal-policy, none of which returns the value. dell2's own reads (one ~14:26:12Z, two before 16:22:49Z) are G2's acts under its ledger, not this seat's",
+      "status": "PASS"
+    },
+    "pair3_add": {
+      "description": "WINDOW 3, the AMENDMENT 2 use for dell2's third served read -- LEG ADD, same signed files and same set rule, with its own NEW NEVER-2 entry opened before the put",
+      "expected_landed": "start SET-EQUAL to BEFORE and not to ADD; read-back SET-EQUAL to ADD and not to BEFORE; dell2 present exactly twice",
+      "expected_not_landed": "a start not set-equal to BEFORE (window 2 left something behind), or a read-back that did not move",
+      "observed": "start 16:06:10Z SET-EQUAL to BEFORE (816 B, rc=0), NOT set-equal to ADD (rc=1, exactly 2 places) -- also the independent live confirmation that window 2's REMOVE had stayed landed; put 16:08:43-16:08:46Z; read-back SET-EQUAL to ADD (944 B, rc=0), NOT set-equal to BEFORE (rc=1); dell2 occurrences 2, dell1 0",
+      "status": "PASS"
+    },
+    "pair3_add_reachability": {
+      "description": "WINDOW 3 ADD -- GetSecretValue simulated against the LIVE widened policy",
+      "expected_landed": "dell2 allowed, dell1 explicitDeny, the walker allowed",
+      "expected_not_landed": "dell1 allowed or dell2 denied",
+      "observed": "dell2 allowed, dell1 explicitDeny, user/Andrew_Berman allowed -- the three required, so no revert",
+      "status": "PASS"
+    },
+    "pair3_remove": {
+      "description": "WINDOW 3 LEG REMOVE -- ran on G2's R DONE at 16:22:49Z (relay msg 108043), not on the clock",
+      "expected_landed": "start SET-EQUAL to ADD; read-back SET-EQUAL to BEFORE; 0 occurrences of either Dell ARN; dell2 explicitDeny, dell1 explicitDeny, walker allowed",
+      "expected_not_landed": "a read-back still set-equal to ADD, any residual dell2 token, or dell2 still allowed",
+      "observed": "start 16:32:07Z SET-EQUAL to ADD, NOT set-equal to BEFORE; put 16:33:03-16:33:06Z; read-back SET-EQUAL to BEFORE, NOT set-equal to ADD; dell2 0, dell1 0; dell2 explicitDeny, dell1 explicitDeny, walker allowed. Window 3 open 24 min 20 s",
       "status": "PASS"
     }
   },
   "never_widen_pair": {
     "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NEVER_WIDEN_HALF_SVC_IRPT_READER_DELL2_WINDOW_20261008.md -- the TO-APPLY-15/16 window pair, re-used for this ledger and for the AMENDMENT 1 retry under the same consent",
     "cto_half": "the CTO half of the same window pair @7aab22d727c7c20efcca88d48663088fb0e04114, with the laptop CTO's consent for ledger irpt-ycdgen-served-read-20261009 named in the GO (msg 107976, addendum @075fab88351d6c1cd6f1d21d5da8b8e9778667c3) and re-cited by AMENDMENT 1; dell2's CTO half org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_SERVED_READ_WINDOW_CTO_HALF.md @da885deef23dc57bb48d3b727c34c925dc71c008",
-    "note": "AMENDMENT 1 widened no half: same ledger, same consent, same two signed documents, one additional pair of legs with its own NEVER-2 entry"
+    "note": "AMENDMENTS 1 and 2 widened no half: same ledger irpt-ycdgen-served-read-20261009, same CTO consent msg 107976, same two signed documents; each added one pair of legs with its OWN NEVER-2 entry. AMENDMENT 2 relay 0.0.0_AB_MSTR msg 108023, GO msg 108033 after G2's 'ADD now' 15:56:55Z (dell2 R2 MET @4a611a8e5f)"
   },
   "risk_class": "WORLD",
-  "rollback": "Each LEG REMOVE *is* the rollback of its LEG ADD and both have run: the signed BEFORE document is live and set-equal to the signed file. A further window would need a new GO from the issuer with ADD first; this seat will not re-widen on its own.",
-  "scope": "One secret's resource policy, widened to the signed ADD file twice and restored to the signed BEFORE file twice -- 8 min 5 s and 15 min 19 s, 23 min 24 s of open window in total. No other secret, key or principal touched; no secret value read by this seat; no file edited; no shared branch pushed.",
+  "rollback": "Each LEG REMOVE *is* the rollback of its LEG ADD and all three have run: the signed BEFORE document is live and set-equal to the signed file. A further window would need a new GO from the issuer with ADD first; this seat will not re-widen on its own.",
+  "scope": "One secret's resource policy, widened to the signed ADD file three times and restored to the signed BEFORE file three times -- 8 min 5 s, 15 min 19 s and 24 min 20 s, 47 min 44 s of open window in total across six legs. No other secret, key or principal touched; no secret value read by this seat; no file edited; no shared branch pushed.",
   "declared_exclusions": [
     {
       "item": "dell2's served reads themselves",
-      "reason": "outside this seat's read -- the comp-adversary BLIND arm. G2 reports one in-memory read at ~14:26:12Z inside window 2, under its own ledger irpt-ycdgen-served-read-20261009"
+      "reason": "outside this seat's read -- the comp-adversary BLIND arm. G2 reports one in-memory read ~14:26:12Z in window 2 and two more before its 16:22:49Z R DONE in window 3, under its own ledger irpt-ycdgen-served-read-20261009"
     },
     {
       "item": "pair 1 producing no read",
@@ -150,7 +181,7 @@
     {
       "tool": "comp-iam",
       "invocation": "comp-iam gaps",
-      "result": "run once this session; zero rows name irpt/svc-irpt-analysis/password or its resource policy. comp-iam models IDENTITY policy and is BLIND to a secret RESOURCE policy by construction, so the instrument cited for this grant is iam simulate-principal-policy --resource-policy <live document>, run on all four legs"
+      "result": "run once this session; zero rows name irpt/svc-irpt-analysis/password or its resource policy. comp-iam models IDENTITY policy and is BLIND to a secret RESOURCE policy by construction, so the instrument cited for this grant is iam simulate-principal-policy --resource-policy <live document>, run on all six legs"
     }
   ]
 }
