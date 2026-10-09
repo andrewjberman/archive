@@ -92,5 +92,13 @@ Remove the worktree after C2 reads green. Added write surface: that worktree pat
 this modification: none (to-pipeline-gate LIMB 6 does not fire on a modification; no <placeholders> declared).
 </amendment>
 
+<amendment id="A2" date="2026-10-09T05:5xZ" by="2.0.0_SA_COO~G1">
+CloudOps conditions (CTO~DELL1 msg 1814, ADDENDUM 3 @947dd446e5) bind the rest of this order (B4/C7 and the ledger close):
+(1) a send that writes a firm data bucket, or assumes the 49F principal outside the runner's own job, is told to the laptop FIRST;
+(2) every send to mdpf-daily-runner is reported after the fact with its command id and purpose; (3) 49 Financial data never goes
+into another firm's tree. The remaining leg is a read of the 17:15Z emitter run, so none is expected to fire.
+Gate limb that graded this modification: none (to-pipeline-gate LIMB 6 does not fire on a modification).
+</amendment>
+
 <report>RAVC: report to 2.0.0_SA_COO~G1 with the ledger path, each leg's proof line, and the commit hashes. This seat validates before close.</report>
 </task_order>
