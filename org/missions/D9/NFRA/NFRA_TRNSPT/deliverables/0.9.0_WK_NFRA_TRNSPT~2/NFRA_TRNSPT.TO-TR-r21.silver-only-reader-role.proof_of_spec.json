@@ -18,9 +18,9 @@
     {
       "path_or_key": "infra/aws/terraform/transcripts/readers.tf",
       "kind": "terraform",
-      "commit_or_etag": "3c68dab9c9",
+      "commit_or_etag": "0e7662674a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Plan-only; nothing applied (no terraform plan, no AWS call). Trust admits nobody while var.silver_reader_trust_principal_arns is []."
+      "deploy_evidence": "Plan-only; nothing applied (no terraform plan, no AWS call). Trust admits nobody while var.silver_reader_trust_principal_arns is []. AMENDMENT 1: Deny GetObject+ListBucket on teams/transcripts/silver/research_meeting/*. Not applied."
     },
     {
       "path_or_key": "infra/aws/terraform/transcripts/main.tf",
@@ -39,9 +39,9 @@
     {
       "path_or_key": "data/transcripts/scripts/tests/test_silver_reader_role.py",
       "kind": "test",
-      "commit_or_etag": "3c68dab9c9",
+      "commit_or_etag": "0e7662674a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "4 tests pass (the 3 named plus a key-statement test); negative control with a bronze prefix: 2 failed."
+      "deploy_evidence": "5 tests pass (adds test_research_meeting_prefix_denied); negative control: Deny Sid renamed -> 1 failed, 4 passed; restored -> 5 passed."
     }
   ],
   "acceptance": [
@@ -50,8 +50,8 @@
       "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R21_CHECKS/r21_checks.py r21 -- expect: R21-R21-OK",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R21_CHECKS/r21_checks.py r21",
-      "output_evidence": "R21-R21-OK 4 passed in 0.11s\nrc=0",
-      "denominator": "4 of 4 tests passed (the 3 named tests plus test_key_policy_decrypt_only_via_s3); the checker requires the 3 names present and >=3 passed",
+      "output_evidence": "R21-R21-OK 5 passed in 0.09s\nrc=0",
+      "denominator": "5 of 5 tests passed (adds test_research_meeting_prefix_denied)",
       "status": "PASS"
     }
   ],
@@ -62,7 +62,7 @@
     {
       "tool": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R21_CHECKS/r21_checks.py r21",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R21_CHECKS/r21_checks.py r21",
-      "result": "R21-R21-OK 4 passed"
+      "result": "R21-R21-OK 5 passed"
     },
     {
       "tool": "python .tools/proof-of-spec-check.py <instance> TR21-r21-AC1",
@@ -72,14 +72,14 @@
   ],
   "controls": {
     "mutant": {
-      "description": "Negative arm: readers.tf with the outlook silver prefix changed to a bronze prefix, restored after.",
-      "expected": "the silver-only and no-bronze tests fail.",
-      "observed": "2 failed, 2 passed; restored, 4 passed.",
+      "description": "Negative arm: DenyResearchMeetingSilver Sid renamed in readers.tf, restored after.",
+      "expected": "test_research_meeting_prefix_denied fails.",
+      "observed": "1 failed, 4 passed; restored, 5 passed.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "Tests parse committed .tf text; no clock, no network.",
-      "observed": "Same 4 passed on repeated runs.",
+      "observed": "Same 5 passed on repeated runs.",
       "status": "STABLE"
     }
   },
