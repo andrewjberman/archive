@@ -33,3 +33,27 @@
 **Verdict: GIVEN**, for exactly this code and one env key. Leg M follows only after after-reads (a) to (f) pass.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (2026-10-08 ~23:3xZ) -- RE-PIN v2: one deploy for F10-l-1, l-2 and l-3 (`~V2` msg 1922)
+
+**Signed against:** the same packet, now **blob 5d384ac592**, section "RE-PIN v2". The COO half v2 is SIGNED there. Pin `3b04c040fc`.
+
+**Measured by this seat:**
+- `git show 3b04c040fc:infra/aws/lambda/ticket_center/lambda_function.py | sha256sum` gives `01534e2d452acd02...`, which equals the packet.
+- `git diff --stat 2c70e239fa 3b04c040fc` over the ticket-center paths touches 5 files: `lambda_function.py` (+87), `main.tf` (+3, the
+  `package` route line), and three test files. Nothing else moves.
+
+**Condition 1 is CORRECTED, as `~V2` showed.** A zip's sha256 depends on the file's mtime, so my v1 bind to `OuTw3w...` could not be reproduced.
+The bind is now the FILE: the deployed zip's `lambda_function.py` must hash to `01534e2d...`. The applier records the zip content-sha256
+at step 3, before the apply.
+
+**v2 blast radius signed:**
+- **Plan 1/1/0:** the `package` route is added, and the function is changed (code plus the one env key).
+- **F10-l-2:** `svc-commentary` may omit `household` (`optional_for` type data). Humans and SUBMIT keep it required.
+- **F10-l-3:** `package_principal = ""`, so the route refuses every caller with a 403 (or a 400 on a malformed body). This is my
+  msg-1892 ruling as shipped.
+- **Both branches:** as the packet states. A route created without the new code reaches the old code's 404 fall-through, which fails closed.
+
+**Verdict: GIVEN (v2).** Condition 2 (row D2-S7 for build-and-upload, and BUILD_ONLY next time) stands. Leg M stays as GIVEN @81a0550165.
+
+-- 1.0.0_SA_CTO~DELL2

@@ -1,0 +1,346 @@
+{
+  "aws_iam_policy.dell_agent_deploy": {
+    "Statement": [
+      {
+        "Action": [
+          "s3:GetObject",
+          "s3:GetObjectVersion",
+          "s3:PutObject",
+          "s3:ListBucket",
+          "s3:GetBucketLocation",
+          "s3:ListBucketVersions",
+          "s3:GetBucket*"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "arn:aws:s3:::opal-*",
+          "arn:aws:s3:::opal-*/*"
+        ],
+        "Sid": "S3ObjectsOnOpalBuckets"
+      },
+      {
+        "Action": [
+          "lambda:UpdateFunctionCode",
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:PublishVersion",
+          "lambda:CreateAlias",
+          "lambda:UpdateAlias",
+          "lambda:InvokeFunction",
+          "ecs:RegisterTaskDefinition",
+          "ecs:DeregisterTaskDefinition",
+          "ecs:CreateService",
+          "ecs:UpdateService",
+          "ecs:RunTask",
+          "ecs:StopTask",
+          "events:PutRule",
+          "events:DeleteRule",
+          "events:PutTargets",
+          "events:RemoveTargets",
+          "events:EnableRule",
+          "events:DisableRule",
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:BatchGetItem",
+          "dynamodb:BatchWriteItem",
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:FilterLogEvents",
+          "logs:StartQuery",
+          "logs:StopQuery"
+        ],
+        "Effect": "Allow",
+        "Resource": "*",
+        "Sid": "DeployServices"
+      },
+      {
+        "Action": [
+          "sqs:SendMessage",
+          "sqs:GetQueueUrl",
+          "sqs:GetQueueAttributes"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "arn:aws:sqs:us-east-1:313476888478:agentbus-ajbdev-sitez-to-laptop.fifo",
+          "arn:aws:sqs:us-east-1:313476888478:agentbus-ajbdev-laptop-to-sitez.fifo",
+          "arn:aws:sqs:us-east-1:313476888478:agentbus-global-dell1-queue*",
+          "arn:aws:sqs:us-east-1:313476888478:agentbus-global-dell2-queue*"
+        ],
+        "Sid": "AgentbusSendToInboundQueues"
+      },
+      {
+        "Action": [
+          "sts:GetCallerIdentity",
+          "ec2:Describe*",
+          "iam:Get*",
+          "iam:List*",
+          "kms:Describe*",
+          "kms:Get*",
+          "kms:List*",
+          "lambda:Get*",
+          "lambda:List*",
+          "ecs:Describe*",
+          "ecs:List*",
+          "events:Describe*",
+          "events:List*",
+          "dynamodb:Describe*",
+          "dynamodb:List*",
+          "logs:Describe*",
+          "logs:Get*",
+          "logs:List*",
+          "sqs:List*",
+          "sns:Get*",
+          "sns:List*",
+          "cloudwatch:Describe*",
+          "cloudwatch:Get*",
+          "cloudwatch:List*",
+          "cloudtrail:Describe*",
+          "cloudtrail:Get*",
+          "cloudtrail:List*",
+          "cloudtrail:LookupEvents",
+          "rds:Describe*",
+          "rds:List*",
+          "s3:ListAllMyBuckets",
+          "ecr:Describe*",
+          "ecr:Get*",
+          "ecr:List*",
+          "application-autoscaling:Describe*",
+          "tag:Get*"
+        ],
+        "Effect": "Allow",
+        "Resource": "*",
+        "Sid": "ReadOnlyForTerraformPlan"
+      },
+      {
+        "Action": [
+          "cloudtrail:Stop*",
+          "cloudtrail:Update*",
+          "cloudtrail:DeleteChannel",
+          "cloudtrail:DeleteDashboard",
+          "cloudtrail:DeleteEventDataStore",
+          "cloudtrail:DeleteTrail",
+          "cloudtrail:PutEventConfiguration",
+          "cloudtrail:PutEventSelectors",
+          "cloudtrail:PutInsightSelectors"
+        ],
+        "Effect": "Deny",
+        "Resource": "*",
+        "Sid": "DenyCloudTrailWrites"
+      },
+      {
+        "Action": [
+          "s3:DeleteBucket*",
+          "s3:DeleteObject*",
+          "s3:PutLifecycleConfiguration"
+        ],
+        "Effect": "Deny",
+        "Resource": [
+          "arn:aws:s3:::opal-data-*",
+          "arn:aws:s3:::opal-data-*/*"
+        ],
+        "Sid": "DenyS3DeletesOnProductionData"
+      },
+      {
+        "Action": [
+          "dynamodb:DeleteTable",
+          "dynamodb:DeleteBackup",
+          "rds:Delete*"
+        ],
+        "Effect": "Deny",
+        "Resource": "*",
+        "Sid": "DenyTableAndDatabaseDeletes"
+      },
+      {
+        "Action": "apigateway:GET",
+        "Effect": "Deny",
+        "Resource": [
+          "arn:aws:apigateway:*::/apikeys",
+          "arn:aws:apigateway:*::/apikeys/*"
+        ],
+        "Sid": "DenyApiKeyReads"
+      },
+      {
+        "Action": [
+          "lambda:UpdateFunctionCode",
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:PublishVersion",
+          "lambda:CreateAlias",
+          "lambda:UpdateAlias",
+          "lambda:DeleteFunction",
+          "lambda:DeleteAlias",
+          "lambda:PutFunctionConcurrency",
+          "lambda:UpdateFunctionUrlConfig",
+          "lambda:CreateFunctionUrlConfig"
+        ],
+        "Effect": "Deny",
+        "Resource": [
+          "arn:aws:lambda:us-east-1:313476888478:function:auth-validator-edge",
+          "arn:aws:lambda:us-east-1:313476888478:function:auth-validator-edge:*",
+          "arn:aws:lambda:us-east-1:313476888478:function:cache-control-injector",
+          "arn:aws:lambda:us-east-1:313476888478:function:cache-control-injector:*",
+          "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-authorizer",
+          "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-authorizer:*",
+          "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-rest-authorizer",
+          "arn:aws:lambda:us-east-1:313476888478:function:opal-portal-rest-authorizer:*",
+          "arn:aws:lambda:us-east-1:313476888478:function:opalinvest-auth-handler",
+          "arn:aws:lambda:us-east-1:313476888478:function:opalinvest-auth-handler:*",
+          "arn:aws:lambda:us-east-1:313476888478:function:public-data-router",
+          "arn:aws:lambda:us-east-1:313476888478:function:public-data-router:*",
+          "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router",
+          "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router:*",
+          "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router-response",
+          "arn:aws:lambda:us-east-1:313476888478:function:shared-advisor-router-response:*",
+          "arn:aws:lambda:us-east-1:313476888478:function:trade-auth-handler",
+          "arn:aws:lambda:us-east-1:313476888478:function:trade-auth-handler:*",
+          "arn:aws:lambda:us-east-1:313476888478:function:trade-authorizer",
+          "arn:aws:lambda:us-east-1:313476888478:function:trade-authorizer:*"
+        ],
+        "Sid": "DenyProtectedFunctions"
+      }
+    ],
+    "Version": "2012-10-17"
+  },
+  "aws_iam_policy.dell_agent_iam_roles": {
+    "Statement": [
+      {
+        "Action": [
+          "iam:AddRoleToInstanceProfile",
+          "iam:AttachRolePolicy",
+          "iam:CreateInstanceProfile",
+          "iam:CreatePolicy",
+          "iam:CreatePolicyVersion",
+          "iam:CreateRole",
+          "iam:CreateServiceLinkedRole",
+          "iam:DeleteInstanceProfile",
+          "iam:DeletePolicy",
+          "iam:DeletePolicyVersion",
+          "iam:DeleteRole",
+          "iam:DeleteRolePermissionsBoundary",
+          "iam:DeleteRolePolicy",
+          "iam:DeleteServiceLinkedRole",
+          "iam:DetachRolePolicy",
+          "iam:PutRolePermissionsBoundary",
+          "iam:PutRolePolicy",
+          "iam:RemoveRoleFromInstanceProfile",
+          "iam:SetDefaultPolicyVersion",
+          "iam:TagInstanceProfile",
+          "iam:TagPolicy",
+          "iam:TagRole",
+          "iam:UntagInstanceProfile",
+          "iam:UntagPolicy",
+          "iam:UntagRole",
+          "iam:UpdateAssumeRolePolicy",
+          "iam:UpdateRole",
+          "iam:UpdateRoleDescription"
+        ],
+        "Effect": "Allow",
+        "Resource": "*",
+        "Sid": "AllowIamRolesPoliciesAndInstanceProfiles"
+      },
+      {
+        "Action": "iam:PassRole",
+        "Effect": "Allow",
+        "Resource": "*",
+        "Sid": "AllowPassAnyRole"
+      },
+      {
+        "Action": [
+          "iam:AddClientIDToOpenIDConnectProvider",
+          "iam:AddUserToGroup",
+          "iam:AttachGroupPolicy",
+          "iam:AttachUserPolicy",
+          "iam:ChangePassword",
+          "iam:CreateAccessKey",
+          "iam:CreateAccountAlias",
+          "iam:CreateDelegationRequest",
+          "iam:CreateGroup",
+          "iam:CreateLoginProfile",
+          "iam:CreateOpenIDConnectProvider",
+          "iam:CreateSAMLProvider",
+          "iam:CreateServiceSpecificCredential",
+          "iam:CreateUser",
+          "iam:CreateVirtualMFADevice",
+          "iam:DeactivateMFADevice",
+          "iam:DeleteAccessKey",
+          "iam:DeleteAccountAlias",
+          "iam:DeleteAccountPasswordPolicy",
+          "iam:DeleteGroup",
+          "iam:DeleteGroupPolicy",
+          "iam:DeleteLoginProfile",
+          "iam:DeleteOpenIDConnectProvider",
+          "iam:DeleteSAMLProvider",
+          "iam:DeleteSSHPublicKey",
+          "iam:DeleteServerCertificate",
+          "iam:DeleteServiceSpecificCredential",
+          "iam:DeleteSigningCertificate",
+          "iam:DeleteUser",
+          "iam:DeleteUserPermissionsBoundary",
+          "iam:DeleteUserPolicy",
+          "iam:DeleteVirtualMFADevice",
+          "iam:DetachGroupPolicy",
+          "iam:DetachUserPolicy",
+          "iam:EnableMFADevice",
+          "iam:EnableOrganizationsRootCredentialsManagement",
+          "iam:EnableOrganizationsRootSessions",
+          "iam:EnableOutboundWebIdentityFederation",
+          "iam:PutGroupPolicy",
+          "iam:PutUserPermissionsBoundary",
+          "iam:PutUserPolicy",
+          "iam:RemoveClientIDFromOpenIDConnectProvider",
+          "iam:RemoveUserFromGroup",
+          "iam:SetSecurityTokenServicePreferences",
+          "iam:TagMFADevice",
+          "iam:TagOpenIDConnectProvider",
+          "iam:TagSAMLProvider",
+          "iam:TagServerCertificate",
+          "iam:TagUser",
+          "iam:UntagMFADevice",
+          "iam:UntagOpenIDConnectProvider",
+          "iam:UntagSAMLProvider",
+          "iam:UntagServerCertificate",
+          "iam:UntagUser",
+          "iam:UpdateAccessKey",
+          "iam:UpdateAccountPasswordPolicy",
+          "iam:UpdateDelegationRequest",
+          "iam:UpdateGroup",
+          "iam:UpdateLoginProfile",
+          "iam:UpdateOpenIDConnectProviderThumbprint",
+          "iam:UpdateSAMLProvider",
+          "iam:UpdateSSHPublicKey",
+          "iam:UpdateServerCertificate",
+          "iam:UpdateServiceSpecificCredential",
+          "iam:UpdateSigningCertificate",
+          "iam:UpdateUser",
+          "iam:UploadSSHPublicKey",
+          "iam:UploadServerCertificate",
+          "iam:UploadSigningCertificate"
+        ],
+        "Effect": "Deny",
+        "Resource": "*",
+        "Sid": "DenyIamUsersGroupsKeysAndAccount"
+      }
+    ],
+    "Version": "2012-10-17"
+  },
+  "aws_iam_policy.dell_agent_plan_reads": {
+    "Statement": [
+      {
+        "Action": [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "arn:aws:ssm:us-east-1:313476888478:parameter/mdpf/custody_source",
+          "arn:aws:ssm:us-east-1::parameter/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64"
+        ],
+        "Sid": "ReadSsmParametersPlanReads"
+      }
+    ],
+    "Version": "2012-10-17"
+  }
+}
