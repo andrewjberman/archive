@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-71",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "6375cfa208"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "01661cf0da",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-71.cot-adapter-returns.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~48",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~48/IRPT_DASHBD.TO-DB-b-71.cot-adapter-returns.proof_of_spec.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~48/adapter_returns.py",
+      "kind": "script",
+      "commit_or_etag": "27c238c767",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline adapter: reads the custody source's silver holdings and transactions through opal_naming.address(), writes one parquet to .scratch; S3 reads only; no firm token, firm resolved by lookup('z09'). Not moved into a pipeline tree.",
+      "artifact_covered_by": [
+        "DB36-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~48/adapter_source.json",
+      "kind": "config_data",
+      "commit_or_etag": "27c238c767",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The adapter's source declaration as data; vendor column names live only here.",
+      "artifact_covered_by": [
+        "DB36-2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~48/tieout.py",
+      "kind": "script",
+      "commit_or_etag": "27c238c767",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Compounds the adapter's daily returns over each reported window and compares at 0.35 pp; classes every miss; writes the record.",
+      "artifact_covered_by": [
+        "DB36-2-AC1",
+        "DB36-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~48/COT_RETURNS_TIEOUT.json",
+      "kind": "doc",
+      "commit_or_etag": "27c238c767",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The record: source blackdiamond, comparison_source commonwealth, 61 accounts, denominator 61, within 0, 61 classed misses keyed by hashed account, output_columns read from the parquet, output_sha256 86cec8f7a7aacdebe896a0120537b047370a1eedc09cdbdee140277a7b0dd43f. The parquet itself stays in .scratch, uncommitted.",
+      "artifact_covered_by": [
+        "DB36-2-AC1",
+        "DB36-2-AC2",
+        "DB36-2-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB36-2-AC1",
+      "criterion_verbatim": "DB36-2-AC1 -- the sample's within-tolerance count at 0.35 pp printed with its denominator and account count, its source and comparison source named. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r36/p36_round36.py\" . DB36-2-AC1",
+      "output_evidence": "OK: blackdiamond against commonwealth (Portfolio Accounting Performance delivery dated 2026-06-23, silver performance table, Month rows, TWR, mapped to custody accounts through the same delivery's crosswalk, status MATCHED): 0 of 61 within 0.35 pp over 61 account(s)\nDB36-2-AC1 PASS rc=0",
+      "denominator": "0 of 61 account-windows within 0.35 pp, over 61 accounts; the PASS is the record's shape, not a tie (0 within; no reported window overlaps the source's value coverage, row IRPT_DASHBD-W48-S1)",
+      "status": "PASS",
+      "expect": "DB36-2-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB36-2-AC2",
+      "criterion_verbatim": "DB36-2-AC2 -- every miss classed in the record's declared classes, none UNCLASSED. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r36/p36_round36.py\" . DB36-2-AC2",
+      "output_evidence": "OK: 61 misses, each classed in ['WINDOW_ENDS_BEFORE_SOURCE_COVERAGE', 'WINDOW_STARTS_BEFORE_SOURCE_BASE', 'ACCOUNT_NOT_HELD_IN_WINDOW', 'DAY_NOT_MEASURABLE_IN_WINDOW', 'NO_TRADING_DAY_IN_WINDOW', 'RETURN_DIFFERS_BEYOND_TOLERANCE']\nDB36-2-AC2 PASS rc=0",
+      "denominator": "61 of 61 misses classed (28 WINDOW_ENDS_BEFORE_SOURCE_COVERAGE, 33 WINDOW_STARTS_BEFORE_SOURCE_BASE, 0 of each other class), 0 UNCLASSED",
+      "status": "PASS",
+      "expect": "DB36-2-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB36-2-AC3",
+      "criterion_verbatim": "DB36-2-AC3 -- the adapter output carries exactly the returns contract's columns, its sha256 printed, and no S3 write call in the worker's code. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r36/p36_round36.py\" . DB36-2-AC3",
+      "output_evidence": "OK: output carries the contract's 19 columns, sha 86cec8f7a7aa..., no S3 write call\nDB36-2-AC3 PASS rc=0",
+      "denominator": "19 of 19 contract columns, no extra; output sha256 86cec8f7a7aacdebe896a0120537b047370a1eedc09cdbdee140277a7b0dd43f over 69,160 rows, 980 accounts; 0 of 4 worker .py files contain put_object, upload_file, upload_fileobj or copy_object",
+      "status": "PASS",
+      "expect": "DB36-2-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 run against an empty root (.scratch/emptyroot) so the record is absent, before judging the PASS.",
+      "expected": "DB36-2-AC1 FAIL",
+      "observed": "FAIL: no org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~48/COT_RETURNS_TIEOUT.json / DB36-2-AC1 FAIL, rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The adapter was run twice over the same S3 inputs (before and after removing two unused variables) and the output parquet hashed each time.",
+      "observed": "both runs: 86cec8f7a7aacdebe896a0120537b047370a1eedc09cdbdee140277a7b0dd43f",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A same-window tie of the adapter's arithmetic against the reported source",
+      "reason": "No Commonwealth-reported window overlaps the source's value coverage for the same account (row IRPT_DASHBD-W48-S1), so within=0 measures that gap, not the arithmetic. Guard against holdings price return and the measured large-flow threshold are also not reached offline (row W48-S2)."
+    },
+    {
+      "item": "Any S3 write, vendor call, secret read, deploy",
+      "reason": "Outside the order's bounds"
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-W48-S1",
+    "IRPT_DASHBD-W48-S2"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/safe-commit.sh (py_compile, ds-precommit, ruff py39 on the staged .py files; naming gate)",
+      "result": "first attempt BLOCKED on two unused variables in adapter_returns.py (removed); second commit 27c238c767 clean"
+    }
+  ]
+}

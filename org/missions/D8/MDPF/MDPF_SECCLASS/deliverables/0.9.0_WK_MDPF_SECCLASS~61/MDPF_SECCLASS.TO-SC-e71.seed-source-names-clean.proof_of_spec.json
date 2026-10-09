@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e71",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f4b2f17d0f36d71d1eeef6430133ec234618c2c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R12.md",
+    "vintage_commit": "e6f1fdfc1fcd7773a9cd11b2864f558b7cba09b5",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e71.seed-source-names-clean.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~61",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/etf_classification.py",
+      "kind": "script",
+      "commit_or_etag": "c70e4b0d92",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-MDPF_SECCLASS-61 at c70e4b0d92 (LOCAL, not pushed, not deployed). 12 ETF_NAME_OVERRIDES values (lines 1124-1136) set to clean_name(old value); diff is 12 lines +12 -12, no other key, no class.",
+      "artifact_covered_by": [
+        "SC12-e71-AC1",
+        "SC12-e71-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/_shared/tests/test_seed_names_clean.py",
+      "kind": "test",
+      "commit_or_etag": "c70e4b0d92",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed at c70e4b0d92 (LOCAL). Pins all 12 names, clean_name(old)==pinned, and the ABALX untouched-key control.",
+      "artifact_covered_by": [
+        "SC12-e71-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC12-e71-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_r12_seed_names.py -- expect: SEED-NAMES ok=True",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R12_CHECKS/sc_r12_seed_names.py",
+      "expect": "SEED-NAMES ok=True",
+      "output_evidence": "SEED-NAMES ok=True keys=12 match=12 first_miss=[] (rc=0)",
+      "denominator": "12 of 12 seed-source keys match clean_name()",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "SC12-e71-AC2",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests -- expect: PYTEST-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R10_CHECKS/r10_pytest_ok.py infra/aws/lambda/v2_portal/_shared/tests",
+      "expect": "PYTEST-OK",
+      "output_evidence": "PYTEST-OK rc=0 summary=354 passed in 1.01s",
+      "denominator": "354 passed (328 base + 26 new in test_seed_names_clean.py), 0 failed",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any deploy, seed run, table write, push.",
+      "reason": "BOUNDS: deploy waits on limit item 5; the seed write that carries these names to the table is its own pair."
+    }
+  ],
+  "surprises": [],
+  "controls": {
+    "mutant": {
+      "description": "Same AC1 check on the BASE copy of etf_classification.py (git show e6f1fdfc1f:...etf_classification.py): the 12 values are all-caps there.",
+      "expected": "AC1 FAIL at base (SEED-NAMES ok=False match=0), PASS after the edit",
+      "observed": "Dry run recorded in the TO at base: ok=False match=0; after c70e4b0d92: ok=True match=12",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run once at c70e4b0d92; test_seed_names_clean.py has no I/O or clock.",
+      "observed": "AC1 ok=True match=12; AC2 PYTEST-OK 354 passed",
+      "status": "STABLE"
+    }
+  },
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e71.seed-source-names-clean.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh (runs .tools/commit-gate.sh)",
+      "result": "pre-commit gate clean for 2 of 2 files at c70e4b0d92"
+    }
+  ]
+}
