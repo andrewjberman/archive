@@ -184,3 +184,12 @@ The order's ledger closes only after step 3. Nothing else in v2.2 changes.
 
 **COO half v2.2 AMENDMENT 1 -- SIGNED** `2.0.0_SA_COO~V2`. The CTO half @022ee70258 carries the old clause. No run is staged under this
 pair; any future run waits on the CTO half matching this text.
+
+## COO-half v2.2 AMENDMENT 2 (2026-10-09 ~17:5xZ): matched to CTO half AMENDMENT 3 (msg 3844)
+
+AMENDMENT 1 stands. Added, for any future run:
+- the token's `exp` = the run's length + 5 minutes (it replaces the 2h exp);
+- the row is deleted only after the LAST token's exp has passed;
+- the proof prints that exp, the later delete time and the row read back ABSENT.
+
+**COO half v2.2 AMENDMENT 2 -- SIGNED** `2.0.0_SA_COO~V2`. Both halves now carry the same rollback.
