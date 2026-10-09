@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-ax-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ax-1.cot-gold-failclosed.md",
+    "group": "OTHER",
+    "vintage_commit": "f616e46440"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~77",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round50.md",
+    "vintage_commit": "f616e46440",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ax-1.cot-gold-failclosed.md"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "CB50ax1-AC1",
+      "criterion_verbatim": "python -m pytest data/cot/scripts/gold/tests/test_cot_gold_failclosed.py -q expect: passed",
+      "method": "command",
+      "invocation": "python -m pytest data/cot/scripts/gold/tests/test_cot_gold_failclosed.py -q",
+      "expect": "passed",
+      "output_evidence": "rc 1; 4 failed in 9.90s on HEAD. The test alone (2b4531d4a8) failed 4 of 4 at base and, with BOTH halves in the working copy, went green 4 of 4 (a: B_00 _ff_worker rows=2 writes=1, writer writes=1; b: both STOP 0 writes; c: writer STOP 0 writes; d: overrides=757 corrections=104). B_00 half is committed (7b85e1a074). The writer half was NOT committed: the commit-time naming gate REFUSED its plain legacy key constants (row ADVI_COTBKF-D2-W77-S3); the writer on HEAD still imports opal_naming at module level, so a/b/c/d fail at the writer arm with the blocked ImportError. The writer diff is saved at .scratch/writer_failclosed_plain_keys.patch.",
+      "status": "FAIL",
+      "denominator": "0 of 4 tests green on HEAD (4 of 4 with the uncommitted writer patch applied)",
+      "status_reason": "The writer half is blocked by the commit-time naming gate (row ADVI_COTBKF-D2-W77-S3: R20 case for the three plain legacy key constants); the order is left open."
+    },
+    {
+      "criterion_id": "CB50ax1-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by 3.0.0_SA_CVO at L9: no run-time opal_naming in either script; every key a plain legacy constant with no split; fail-closed on both files; no change beyond these.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read build_canonical_prices_v2.py and B_00.canonical_holdings.py; git diff 7b85e1a074^ 7b85e1a074 for B_00; .scratch/writer_failclosed_plain_keys.patch for the writer",
+      "output_evidence": "PENDING-ADJUDICATION. B_00: _ff_worker opal_naming import and ../../../../data tree computation removed; module helper _own_firm_beside reads scopes.json beside the script, STOP when missing (7b85e1a074). Writer: not committed (naming gate refusal, row D2-W77-S3). Keys before and after, equal: silver/transactions/ ; silver/historical_prices.parquet ; code/gold/ (config/ticker_lookup.json already a plain literal).",
+      "denominator": "2 of 2 scripts read; 1 of 2 committed",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion: 3.0.0_SA_CVO at L9 is the oracle; PENDING-ADJUDICATION"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W77-S1",
+    "ADVI_COTBKF-D2-W77-S2",
+    "ADVI_COTBKF-D2-W77-S3"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-ax-1.cot-gold-failclosed.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/cot/scripts/gold/tests/test_cot_gold_failclosed.py",
+      "kind": "test",
+      "commit_or_etag": "2b4531d4a8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test file",
+      "artifact_covered_by": [
+        "CB50ax1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/cot/scripts/gold/B_00.canonical_holdings.py",
+      "kind": "script",
+      "commit_or_etag": "7b85e1a074",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "no deploy; redeploy is CB-ax-2",
+      "artifact_covered_by": [
+        "CB50ax1-AC1",
+        "CB50ax1-AC2"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "data/cot/scripts/gold/tests",
+      "result": "with both halves: 36 passed, 4 failed + 7 errors in 3 older test files outside the paths grant (row W77-S1); on HEAD (B_00 half only) see AC1"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "data/assets/scripts/silver/tests",
+      "result": "754 passed, 11 skipped (includes test_cotbkf_no_split_key_literals)"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "safe-commit on both py files",
+      "result": "clean; the naming limb REFUSED the writer's keys"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The test alone at the base commit: the unchanged scripts under a hard opal_naming import blocker",
+      "expected": "4 of 4 FAIL on the blocked ImportError",
+      "observed": "4 failed at base",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "new test run three times",
+      "observed": "4 passed with both halves; 4 failed on HEAD, each time",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any S3 write or deploy",
+      "reason": "order grants none; S3 faked"
+    },
+    {
+      "item": "editing the three older gold test files that encode the fail-open behavior",
+      "reason": "outside the paths grant (row W77-S1)"
+    }
+  ]
+}
