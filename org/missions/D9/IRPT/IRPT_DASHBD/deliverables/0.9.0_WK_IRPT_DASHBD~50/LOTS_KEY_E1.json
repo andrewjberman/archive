@@ -1,0 +1,176 @@
+{
+ "task_order": "IRPT_DASHBD.TO-DB-b-73",
+ "worker": "0.9.0_WK_IRPT_DASHBD~50",
+ "producer_commit": "c0afa6f55e",
+ "repeat_census": {
+  "day": "2026-10-07",
+  "pairs": 1,
+  "rows_in_pairs": 2,
+  "accounts_with_a_repeat": 1,
+  "hashed_accounts": [
+   "c388a41e"
+  ],
+  "rows_read": 3245,
+  "groups_identical_in_every_column": 0,
+  "old_key": [
+   "firm",
+   "account_id",
+   "business_date",
+   "lot_id",
+   "quantity"
+  ],
+  "differing_columns": [
+   "cost_basis_unamortized",
+   "cost_per_share",
+   "disallowed_loss_amount",
+   "gain_loss_dollars",
+   "gain_loss_percentage",
+   "original_purchase_price",
+   "proceeds",
+   "proceeds_per_share",
+   "transaction_cost",
+   "transaction_cost_per_share",
+   "transaction_gain_loss_pct",
+   "w_s"
+  ],
+  "differing_columns_meaning": "source (custodian) column names. Same within the pair: close_event_id, close_open_event_id, order_number, acquired_date, closing_date, closing_quantity, trans_code, h_t, ticker_symbol, security_type. The pair is one lot split in two by a wash sale (w_s T / F, a disallowed loss on one half only): its halves close the same quantity for different proceeds.",
+  "source": "S3 reads only, the producer's own read_day over the custodian realized-lot partition of 2026-10-07 (sources.json lot_source); counts and column names only",
+  "script": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~50/repeat_census.py",
+  "note": "ONE pair (2 rows of 3245), not several: the round-36 refusal was this pair. 2026-10-06 has none under the round-28 key (0 of 2523)."
+ },
+ "new_key": [
+  "firm",
+  "account_id",
+  "business_date",
+  "lot_id",
+  "quantity",
+  "proceeds"
+ ],
+ "new_key_added_column": "proceeds",
+ "why_smallest": {
+  "size_of_addition": 1,
+  "single_source_columns_that_separate_the_pair": [
+   [
+    "cost_basis_unamortized"
+   ],
+   [
+    "cost_per_share"
+   ],
+   [
+    "disallowed_loss_amount"
+   ],
+   [
+    "gain_loss_dollars"
+   ],
+   [
+    "gain_loss_percentage"
+   ],
+   [
+    "original_purchase_price"
+   ],
+   [
+    "proceeds"
+   ],
+   [
+    "proceeds_per_share"
+   ],
+   [
+    "transaction_cost"
+   ],
+   [
+    "transaction_cost_per_share"
+   ],
+   [
+    "transaction_gain_loss_pct"
+   ],
+   [
+    "w_s"
+   ]
+  ],
+  "chosen": "proceeds, the first of the lot table's own columns (proceeds, cost_basis, realized_gain, custodian_cost_basis) that separates the pair, in table order as round 28 chose quantity; proceeds is a column of account_lot_realized. No identifier column (order_number, close_event_id, close_open_event_id, schwab_order_id) differs within the pair, so no closing-trade or order id can be the key addition; the two rows are one lot's wash and non-wash halves, both real, both kept.",
+  "no_zero_column_set": "no key addition of size 0 separates the pair (it shares the whole old key)",
+  "output_unique_under_new_key": {
+   "2026-10-06": {
+    "rows": 2523,
+    "duplicates": 0
+   },
+   "2026-10-07": {
+    "rows": 3245,
+    "duplicates_under_new_key": 0,
+    "duplicates_under_old_key": 1
+   }
+  }
+ },
+ "refusal": "realized_rows() still refuses by name: 'identical in every column' for a true duplicate row, and 'repeats with the same closing date, quantity and proceeds: the key is not unique' for a repeat of the whole new key with another column differing",
+ "contract": "org/standards/IRPT_DASHBD_ACCOUNT_LOT_REALIZED_CONTRACT.json primary_key equals new_key",
+ "tests": {
+  "passed": 45,
+  "failed": 0,
+  "skipped": 1,
+  "file": "data/assets/scripts/gold/irpt_reporting/tests/test_account_activity_lots.py",
+  "new_test": "data/assets/scripts/gold/irpt_reporting/tests/test_account_activity_lots.py::test_a_repeat_pair_with_the_same_id_and_quantity_but_other_proceeds_is_kept_whole_row_each",
+  "run_on": "the pandas 2.2.3 kit (python -m pytest <file>)",
+  "changed_test": "test_the_same_lot_id_date_quantity_and_proceeds_with_other_columns_differing_still_refuses_true_duplicate_key (was ..._same_lot_id_date_and_quantity_...; it differed in proceeds, now a key column, so it differs in gain)",
+  "whole_folder": {
+   "kit_pandas_2.2.3": "92 passed, 4 failed, 1 skipped -- the 4 are test_account_return_daily_none.py, known row IRPT_DASHBD-W46-S1 (forces future.infer_string ON), not this producer's test",
+   "system_python_pandas_3.0.6": "97 passed, 0 failed"
+  }
+ },
+ "kit_runs": {
+  "2026-10-06": {
+   "accounts": 7604,
+   "population": 7604,
+   "refusals": 0,
+   "lots_rows": 570532,
+   "lots_rows_by_table": {
+    "account_lot_realized": 2523,
+    "account_lot_unrealized_daily": 568009
+   },
+   "peak_mb": 1669.7,
+   "peak_basis": "process peak_wset (MB) over the whole process",
+   "lots_stage_peak_mb": 1669.7,
+   "total_s": 665.0,
+   "lots_stage_s": 520.14,
+   "returns_stage_s": 48.48,
+   "class_stage_s": 89.49,
+   "stopped_at_cap": false,
+   "local_exit_head": null,
+   "refusal_lines_in_log": 0
+  },
+  "2026-10-07": {
+   "accounts": 7604,
+   "population": 7604,
+   "refusals": 0,
+   "lots_rows": 569121,
+   "lots_rows_by_table": {
+    "account_lot_realized": 3245,
+    "account_lot_unrealized_daily": 565876
+   },
+   "peak_mb": 1668.9,
+   "peak_basis": "process peak_wset (MB) over the whole process",
+   "lots_stage_peak_mb": 1668.9,
+   "total_s": 652.21,
+   "lots_stage_s": 499.92,
+   "returns_stage_s": 49.36,
+   "class_stage_s": 95.82,
+   "stopped_at_cap": false,
+   "local_exit_head": null,
+   "refusal_lines_in_log": 0
+  }
+ },
+ "runtime": {
+  "pandas": "2.2.3",
+  "numpy": "1.26.4",
+  "pyarrow": "14.0.2",
+  "python": "3.12.10",
+  "printed_by_the_kit_process": "runtime: pandas 2.2.3, future.infer_string = False (served behaviour in force: True)",
+  "kit": "C:/opal-inbound/kit-py312-dashbd/kit-py312-dashbd-20261009.zip (7 wheels), venv in .scratch/kitvenv; boto3, botocore, s3transfer, jmespath, urllib3, psutil and pytest side-loaded from dell2's Roaming Python312 site-packages by .pth (rows W44-S1, W46-S2)",
+  "runner": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~50/kit_run_day.py -> ~31/lots_750_run.py default batch -> ~27/batched_e2_run.py (handler.local over the population, workers 12)"
+ },
+ "refusals_counted_as": "lines matching REFUSED, LOTS_SKIPPED or CLASS_SKIPPED in each run's log: 0 and 0",
+ "rows": [
+  "IRPT_DASHBD-D2-W50-S1",
+  "IRPT_DASHBD-D2-W50-S2",
+  "IRPT_DASHBD-D2-W50-S3"
+ ]
+}
