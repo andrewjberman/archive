@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-x-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "44fa181d43238fb8d110aeff80abd5b280eb9c5e",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-x-3.gateway-fabric-read-grant.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-x-3.gateway-fabric-read-grant.md",
+    "group": "OTHER",
+    "vintage_commit": "807220a352769f019ed0d26661ee6386ed963d57",
+    "vintage_note": "AMENDMENT 1. The cell was first built and attempted against the pre-amendment spec @44fa181d43, refused at the apply on the policy name, and resumed against this commit after the issuer's ruling on row NFRA_MCPORTAL-Z-S21."
+  },
+  "assignee": "0.7.0_AE_CloudOps~MP",
+  "outcome": "COMPLETE. All three criteria PASS against the AMENDED spec, plus a post-apply 0-diff. The inline policy gateway-mcportal-fabric-read-policy is live on opal-gateway-role: s3:GetObject on exactly fabric/activity/v1/* and fabric/open-calls/v1/* of opal-313476888478-globgrph, and s3:ListBucket on that bucket conditioned to the same two prefixes. No write, no third prefix, no other resource. Ledger CLOSED with all 3 legs proven, sentinel removed.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/mcportal_fabric_read.tf",
+      "kind": "code",
+      "commit_or_etag": "e5a036a659 (initial), then the amendment commit below",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ONE aws_iam_role_policy.gw_mcportal_fabric_read, name \"gateway-mcportal-fabric-read-policy\" as a LITERAL -- the Rule 30 builder output, per AMENDMENT 1. terraform fmt -check rc=0; 0 non-ascii; 0 CR bytes. Applied via safe-apply from the saved plan, so applied bytes == graded bytes. Present in terraform state; live IAM confirms the document (AC1); post-apply re-plan reads 'No changes. Your infrastructure matches the configuration.'",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/graph-read.tf",
+      "kind": "code",
+      "commit_or_etag": "e5a036a659",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "COMMENTS ONLY: 8 insertions, 2 deletions, every changed line inside the leading comment block; no resource line moved. The R3 paragraph carves out exactly fabric/activity/v1/ and fabric/open-calls/v1/, names mcportal_fabric_read.tf as the grant's home, and cites 'laptop 1.0.0_SA_CTO msg 107359 (relay 32030)'. It names the FILE, not the policy name, so AMENDMENT 1's rename required no edit here -- confirmed by a repo-wide census of the refused string, which returned 0 hits in this file. 0 non-ascii; LF preserved via a binary-mode write.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T0242Z_nfra-mcportal-r4-fabric-read-grant_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "4f639cc38d, fc4e478587, then the amendment commit below",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NEVER-2 entry opened at deploy-START and committed WITH its sentinel in one commit. Carries, written BEFORE the act: the pair-signed blast radius, both rollback commands per key, and the comp-iam gaps preflight with its own ceiling stated. It also carries an AMENDMENT 1 section recording the refusal verbatim, why the entry was HELD rather than left RED, and the issuer's ruling. FINAL: CLOSED, all 3 legs proven, sentinel removed -- 'deploy_ledger.py check' no longer lists it as open or held.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "fc4e478587",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Row NFRA_MCPORTAL-Z-S21, class BLOCKING, disarm_owner 2.0.0_SA_COO~MP, 9 grounded evidence items. The issuer ruled on it (option (a)) and the row's blocking premise is resolved by AMENDMENT 1; the row is left EXACTLY as written, append-only, because a surprise row is superseded by a NEW row citing it, never edited in place. Its option (c) -- the commit limb RAISEing a name the apply limb refuses -- is NOT resolved by this amendment and remains for the gate's owner. surprise-row-gate passed UNFORCED, no override line.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "actions=s3:GetObject+s3:ListBucket resources=3 problems=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round4/checks/x3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "actions=s3:GetObject+s3:ListBucket resources=3 problems=0\nRESULT: PASS\nexit=0",
+      "denominator": "1 inline policy read live by exact name on opal-gateway-role; its statements fully enumerated by the checker -- 2 actions, 3 resources, 0 problems",
+      "status": "PASS",
+      "note": "The checker's own arms also establish, on the live document, that the ListBucket statement IS conditioned and that its condition names neither 'warehouse' nor 'projection'. Before the apply this same criterion read NoSuchEntity rc=254, so the transition is measured, not assumed."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "simulation arms matched 6 of 6 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round4/checks/x3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "  OK  get activity: expect allowed, got allowed\n  OK  get open-calls: expect allowed, got allowed\n  OK  get warehouse: expect implicitDeny, got implicitDeny\n  OK  put activity: expect implicitDeny, got implicitDeny\n  OK  list activity: expect allowed, got allowed\n  OK  list warehouse: expect implicitDeny, got implicitDeny\nsimulation arms matched 6 of 6\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 arms run, ONE --resource-arns per call (CLAUDE.md 22a mode 1) and --context-entries supplied on both conditioned ListBucket arms (mode 2)",
+      "status": "PASS",
+      "note": "WHICH ARMS ACTUALLY CARRY EVIDENCE, AND WHEN. Pre-apply this criterion read 3 of 6, and the 3 passing arms were the NEGATIVE ones -- they were satisfied by the grant's ABSENCE exactly as they would be by a correct grant, so they discriminated nothing (ABSENT is not EXERCISED-AGAINST, rule 22). The 3 POSITIVE arms were the only discriminators then, and all three moved implicitDeny -> allowed across the apply. POST-apply the position reverses and all six carry evidence: the policy now exists, so an over-broad grant would have flipped get-warehouse, put-activity or list-warehouse to allowed, and none did. On the false-ALLOW mode (cloud-ops: a simulation matches the ARN against the policy's Resource patterns and never asks whether the ARN names anything): the three allowed arms are prefix keys inside opal-313476888478-globgrph, a bucket whose existence is established by this same module's live use of it (alb.tf, ms-ingest.tf) rather than by a listing -- BOUNDS 1 forbids reading any S3 object, so no listing was run and none is claimed."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "carve-out tokens present 6 of 6 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round4/checks/x3.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "carve-out tokens present 6 of 6\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 token/file pairs: 3 tokens (fabric/activity/v1/, fabric/open-calls/v1/, 107359) x 2 files (graph-read.tf, mcportal_fabric_read.tf)",
+      "status": "PASS",
+      "note": "Measured FAILING at the base commit by the issuer ('AC3 FAILS (the file is absent)') and PASSING once both files carry the carve-out and the ruling citation. Re-measured after AMENDMENT 1's rename, because the rename rewrote three lines of the header the tokens live in -- it still reads 6 of 6."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "NO SEALED PLANTED MUTANT WAS RUN, and this field says so rather than letting the absence read as a pass. What was available instead is stronger than usual for an IAM cell, because the act itself supplied a clean before/after on every criterion.",
+      "expected": "n/a -- not run.",
+      "observed": "Three natural controls, each a measured transition rather than a single post-hoc reading. (1) AC1: NoSuchEntity rc=254 -> 'resources=3 problems=0 PASS'. (2) AC2: 3 of 6 -> 6 of 6, with the three POSITIVE arms moving implicitDeny -> allowed and the three NEGATIVE arms holding implicitDeny across the change -- the second half is the real negative control, since an over-broad grant would have moved them. (3) AC3: absent -> 6 of 6 across this cell's write. A fourth, independent of this device: the base-state reading of all three criteria REPRODUCED the issuer's separately recorded dry-run exactly (AC1 NoSuchEntity, AC2 3 of 6 with the negative arms passing, AC3 absent), which is cross-device agreement on the instruments themselves. A fifth, unplanned but decisive: the naming limb REFUSED the pre-amendment name and PASSED the amended one, with nothing else changed -- the gate is demonstrably live and discriminating, not a rubber stamp.",
+      "status": "NOT-RUN-STATED"
+    },
+    "determinism": {
+      "method": "AC1 was run 3 times (before the first apply attempt; after the refused attempt; after the successful apply). AC2 twice and AC3 twice (once pre-apply, once post-apply; AC3's second run was after the rename rewrote its token lines). The targeted plan was run 3 times: pre-amendment, post-amendment, and post-apply.",
+      "observed": "Every repeated run at an unchanged world state printed an identical result. The two pre-apply AC1 runs both printed NoSuchEntity rc=254; the pre- and post-amendment plans both printed 'Plan: 1 to add, 0 to change, 0 to destroy' differing only in the name attribute; the post-apply plan printed 'No changes. Your infrastructure matches the configuration.' Results moved only where the world moved.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The pre-amendment policy name \"${var.name}-mcportal-fabric-read\" (= opal-gateway-mcportal-fabric-read) that the TO originally specified.",
+      "reason": "safe-apply's naming plan limb REFUSED it: 'NAMING REFUSE ... (ADDITION): OUT-OF-PATTERN as IAM_POLICY: the module would not produce this name', and 'BLOCKED by the naming plan limb (LGIC_ENFORCE DEC-6, ENFORCE mode, rc=1). Nothing was planned further or applied.' No override was taken (TO step 2) and the criterion was not repaired by the worker (BOUNDS 3); it was routed as row Z-S21 and the ISSUER amended both the name and AC1 @807220a352."
+    },
+    {
+      "item": "Running the named rollback.",
+      "reason": "Never needed. The refused attempt left DELTA=0 (live IAM NoSuchEntity; absent from terraform state), so there was nothing to delete; and the amended attempt succeeded, so there was nothing to undo. Both rollback commands remain recorded in the ledger entry against the amended name."
+    },
+    {
+      "item": "Editing row NFRA_MCPORTAL-Z-S21 now that its blocking premise is resolved.",
+      "reason": "A surprise row is append-only and is superseded by a NEW row citing it, never edited in place. The row's disposition flip is the CVO's act, and its option (c) is a live finding for the gate's owner regardless of this cell's outcome."
+    },
+    {
+      "item": "The TO's directed surprise-row id coordinate 'A7'.",
+      "reason": "surprise-row-gate.py refused it -- 'does not match the id grammar <CODE>-(Z-)?(W<n>-|C-)?S<k>'. The row used the legal seat form Z-S21, and AMENDMENT 1 adopted Z-S<k> for MP-x-3 and MP-x-4."
+    },
+    {
+      "item": "Running the plan through safe-apply, as TO step 5 words it.",
+      "reason": "safe-apply.sh gates and accepts `apply` ONLY -- its own header says 'Gates `apply` ONLY. `plan` and other subcommands are non-destructive -- call terraform.exe directly for those' -- and it refuses an invocation with no `apply` argument. The plan was therefore run with terraform directly and SAVED, and safe-apply was handed that exact saved plan file, so the graded and applied bytes are identical."
+    },
+    {
+      "item": "Any S3 read or listing of the two fabric prefixes.",
+      "reason": "BOUNDS 1 forbids it ('no S3 object is read or written'). The grant is forward-looking; the bucket's existence rests on this module's own live use of it, not on a listing. The consequence is stated rather than hidden: these simulations prove the policy's patterns match the keys typed, not that objects exist under them."
+    },
+    {
+      "item": "A HALTGT pass as evidence of anything.",
+      "reason": "Not cited. Per cloud-ops the checkpoint sees only unread files directly under inbox/<serial>/, so a live inbox Monitor guarantees a silent empty-inbox exit and a ~lane serial is unhaltable regardless. Substituted an explicit read before each apply: the inbox held exactly two messages across the session (32260 the GO, 32308 the ruling), both acked READ, with no STOP-class message at either apply."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-S21"
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.7.0_AE_CloudOps~MP/session_log.MP-x-3.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam gaps",
+      "invocation": "comp-iam gaps (worktree root, after the .tf change -- TO step 3 preflight)",
+      "result": "Total: 37 missing | 300 deny-present | 1 coverage-unknown | 3 resource-mismatch across 33 service(s). RESOURCE PLANE: 883 calls verdicted across 105 mapped roles; 666 UNRESOLVABLE-RESOURCE, 144 GRANTED, 50 GRANTED-BROAD, 20 UNGRANTED, 3 GRANTED-ACTION/UNGRANTED-RESOURCE. Estate-wide and pre-existing; this act adds no row. The only opal-gateway rows are two RESOURCE-MISMATCH rows for s3:GetObject on arn:aws:s3:::opal-mcp-audit/* from tests/test_schwab_audit.py:75,319 -- a bucket this act does not touch. CEILING STATED: comp-iam models (action), never (action, resource), so it can neither confirm the two-prefix carve-out nor falsify a third prefix; AC2's six arms are that oracle. Recorded in the ledger entry per step 3."
+    },
+    {
+      "tool": "lib/opal_naming.py name() -- the Rule 30 builder",
+      "invocation": "name('gateway', None, 'mcportal-fabric-read', 'policy'); name('mcportal', None, 'fabric-read', 'policy'); kind 'iam_policy'",
+      "result": "'gateway-mcportal-fabric-read-policy'; 'mcportal-fabric-read-policy'; and for 'iam_policy' a REFUSAL (ValueError: kind is neither a NAMING_SCHEMA.json kind nor a cadence). The first is what AMENDMENT 1 adopted. This was measured BEFORE the apply and is why the refusal, when it came, was immediately legible."
+    },
+    {
+      "tool": ".tools/naming-gate.py (COMMIT limb, via safe-commit)",
+      "invocation": "automatic inside .tools/safe-commit.sh for the .tf paths",
+      "result": "Pre-amendment: 'NAMING RAISE mcportal_fabric_read.tf:40 {x}-mcportal-fabric-read -> (rule or registry defect); why G3: the tokeniser cannot place a character of a resource name' -> WARN 1 graded, DID NOT REFUSE, so the commit landed. org/mcp/naming-gate.enforce is present, so ENFORCE was on and a REFUSE would have exited 1. This divergence from the apply limb is row Z-S21 option (c)."
+    },
+    {
+      "tool": "naming plan limb (inside .tools/safe-apply.sh)",
+      "invocation": ".tools/safe-apply.sh -chdir=infra/aws/terraform/opal-gateway apply ... .build/mpx3.tfplan",
+      "result": "Pre-amendment: 'NAMING REFUSE aws_iam_role_policy.gw_mcportal_fabric_read opal-gateway-mcportal-fabric-read -> gateway-mcportal-fabric-read-policy' / 'NAMING-PLAN: REFUSE 2 graded' / 'BLOCKED by the naming plan limb, rc=1'. Post-amendment: PASSED and the apply proceeded. It also WARNs that aws_iam_role.gw -> opal-gateway-role is itself out of pattern (-> gateway-role), existing so WARN only -- the module is mid-migration and only an ADDITION is refused."
+    },
+    {
+      "tool": "terraform plan (targeted) + show -json",
+      "invocation": "terraform -chdir=... plan -target=aws_iam_role_policy.gw_mcportal_fabric_read -out=.build/mpx3.tfplan; then show -json, parsed",
+      "result": "'Plan: 1 to add, 0 to change, 0 to destroy.' both pre- and post-amendment. JSON post-amendment: resource_changes=2, non-no-op=1, histogram {('create',):1}; name='gateway-mcportal-fabric-read-policy'; role='opal-gateway-role'; stmt McportalFabricPrefixReadOnly Allow ['s3:GetObject'] res=2 cond=NO; stmt McportalFabricPrefixListOnly Allow ['s3:ListBucket'] res=1 cond=yes with Condition {\"StringLike\": {\"s3:prefix\": [\"fabric/activity/v1/*\", \"fabric/open-calls/v1/*\", \"fabric/activity/v1/\", \"fabric/open-calls/v1/\"]}}. The counts alone would not have caught a wrong name or a missing condition; the JSON parse is what did."
+    },
+    {
+      "tool": "terraform plan (post-apply 0-diff)",
+      "invocation": "terraform -chdir=... plan -target=aws_iam_role_policy.gw_mcportal_fabric_read",
+      "result": "'No changes. Your infrastructure matches the configuration.' -- the third plane on the applied state, beside terraform state and live IAM."
+    },
+    {
+      "tool": "terraform init (offline, local mirror only)",
+      "invocation": "terraform -chdir=... init -plugin-dir=C:\\tmp\\wk-oplgtw-r32-39\\infra\\aws\\terraform\\opal-gateway\\.terraform\\providers -input=false",
+      "result": "Installed hashicorp/external v2.4.2, archive v2.8.0, aws v5.100.0 -- all three at the .terraform.lock.hcl versions, from the local filesystem mirror with NO registry fetch, so TO step 6's blocker did not fire. WORTH RECORDING: the module's own .terraform/providers in the main tree holds only archive and aws, and a first disk census scoped to Desktop and AppData returned ZERO for external 2.4.2 -- it would have produced a false 'provider absent' blocker. Every worktree on this device lives under C:/tmp, which that census did not scan."
+    },
+    {
+      "tool": "terraform fmt + ASCII census",
+      "invocation": "terraform fmt -check -diff mcportal_fabric_read.tf; python character census on both .tf files",
+      "result": "fmt rc=0 before and after the rename. Non-ascii: 0 in both files, counted as sum(1 for ch in text if ord(ch)>127) -- a character count, not the byte delta that CLAUDE.md warns is only a zero/non-zero detector. CR bytes 0; graph-read.tf's LF endings preserved by a binary-mode write."
+    },
+    {
+      "tool": "terraform state list",
+      "invocation": "terraform -chdir=... state list | grep gw_mcportal_fabric_read",
+      "result": "0 occurrences after the refused attempt (second plane on 'nothing landed'); the address present after the successful apply."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "open (3 legs) / close-leg L1,L2 / hold --gate-type sovereign / hold --release / close-leg L1,L2,L3 / close",
+      "result": "FINAL: 'CLOSED ... all 3 legs proven; sentinel removed', and 'check' no longer lists it. Two tool behaviours worth recording: (1) a `hold` while an apply leg was open was correctly REFUSED -- 'a half-landed deploy cannot be HELD (stays RED)' -- and closing L2 honestly as NOT EXECUTED cleared it; (2) close-leg OVERWRITES an already-closed leg's proof with no warning, which is what let the resumed act re-prove L1 and L2 in place, and would equally let a careless call erase a proof."
+    },
+    {
+      "tool": ".tools/safe-commit.sh + surprise-row-gate + missions-tree-check",
+      "invocation": "safe-commit --author '0.7.0_AE_CloudOps~MP <...>' -F <msgfile written by a non-shell writer> -- <paths>",
+      "result": "All commits msg-verify MATCH. surprise-row-gate on the row commit: 'OK: 1 file(s), all new rows carry their step-7/step-10 fields' and 'corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)' -- UNFORCED. TWO REFUSALS WERE HIT AND RESPECTED on a first attempt to commit the row in the SHARED tree: the A7 id grammar, and a standing corpus pass reporting 4 NEW failures of which 2 (NFRA_OPLGTW-Z-AE-S1/-S2) belong to another lane's uncommitted rows -- so CLAUDE.md 14b's append-only inversion couples a seat's row to its peers' uncommitted work. The row was moved into this worktree, where the corpus is at the clean base, and the shared-tree edit was reverted cleanly."
+    },
+    {
+      "tool": "comp-find / comp-read / comp-which (rail)",
+      "invocation": "comp-find 'globgrph' --files -- <module>; comp-find 'naming' --name --band HEAD -- .tools/; comp-read .tools/naming-gate.py --for '...'; comp-read main.tf --enumerate '...'; native Grep for the refused name repo-wide",
+      "result": "globgrph: DENOMINATOR 6 hits / 39 files scanned, 3 files. naming: 2 of 521 files in .tools/. comp-read on naming-gate.py surfaced its ENFORCE switch and its EXISTING->WARN branch, which is why the verdict was MEASURED rather than predicted from the builder's output. The post-rename census of the refused name (21 hits / 6 files) is what proved graph-read.tf needed no edit and separated the files that must move from the append-only records that must not. THREE rail denials were hit and respected: a comp-find piped to tail, a raw `aws iam get-role-policy` inspection (satisfied by running the issuer's own AC1 instead), and a compound call containing a .tf grep (split and re-run with native Grep). comp-which has NO curated rule for the naming gate -- it printed 'NO CURATED RULE MATCHED' at 0.57 against comp-similar, which is a catalog gap worth a row given the gate blocks every infra cell."
+    }
+  ]
+}
