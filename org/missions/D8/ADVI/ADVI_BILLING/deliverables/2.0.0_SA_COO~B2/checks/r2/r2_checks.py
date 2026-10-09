@@ -202,7 +202,80 @@ def ac_1_1(root, cid):
     return _ok(cid)
 
 
-CHECKS = {"AB2-1-AC1": ac_1_1, "AB2-2-AC1": ac_2_1, "AB2-2-AC2": ac_2_2, "AB2-3-AC1": ac_3_1, "AB2-4-AC1": ac_4_1, "AB2-4-AC2": ac_4_2,
+def ac_r1(root, cid):
+    """AB-r-1: the panel states both empty states and its bun test (with an *empty* case) passes."""
+    import shutil
+    panel = os.path.join(root, "portal/src/pages/AdvisorIntelligence/_shared/AdvisorBookFeePanel.tsx")
+    test = os.path.join(root, "portal/src/pages/AdvisorIntelligence/_shared/AdvisorBookFeePanel.test.tsx")
+    try:
+        src, tsrc = open(panel, encoding="utf-8").read(), open(test, encoding="utf-8").read()
+    except OSError as exc:
+        return _fail(cid, str(exc))
+    for phrase in ("No money moved in or out this quarter", "Nothing excluded"):
+        if phrase not in src or phrase not in tsrc:
+            return _fail(cid, "phrase %r missing from the panel or its test" % phrase)
+    if not re.search(r"""(?:test|it)\(\s*['"`][^'"`]*empty""", tsrc, re.I):
+        return _fail(cid, "no test named *empty*")
+    bun = shutil.which("bun")
+    if not bun:
+        return _fail(cid, "bun not on PATH")
+    proc = subprocess.run([bun, "test", "src/pages/AdvisorIntelligence/_shared/AdvisorBookFeePanel.test.tsx"],
+                          cwd=os.path.join(root, "portal"), capture_output=True, text=True, timeout=110)
+    m = re.search(r"(\d+) pass", proc.stdout + proc.stderr)
+    if proc.returncode != 0 or not m:
+        return _fail(cid, "bun test rc=%d" % proc.returncode)
+    print(m.group(0))
+    return _ok(cid)
+
+
+def ac_r2(root, cid):
+    """AB-r-2: one exercised cross-firm probe, refused by the firm binding, ledger closed, no token bytes."""
+    try:
+        rec = _load(root, D + "/0.7.0_AE_CloudOps~AB2/AB_R2_CROSSFIRM_PROBE.json")
+    except Exception as exc:  # noqa: BLE001
+        return _fail(cid, "%s: %s" % (type(exc).__name__, exc))
+    p = rec.get("probe") or {}
+    if p.get("method") != "GET" or p.get("status") not in (401, 403) or not p.get("route"):
+        return _fail(cid, "probe must be GET with status 401/403 and a route")
+    if p.get("refused_by") != "firm_binding":
+        return _fail(cid, "refused_by must be firm_binding, got %r" % p.get("refused_by"))
+    if re.search(r"eyJ[A-Za-z0-9_-]{10,}", json.dumps(rec)):
+        return _fail(cid, "record carries token bytes")
+    slug = rec.get("ledger_slug") or ""
+    if not slug or os.path.exists(os.path.join(root, "org/critical_paths/.open_deploys/%s.json" % slug)):
+        return _fail(cid, "ledger %r missing or still open" % slug)
+    print("status=%s refused_by=%s" % (p["status"], p["refused_by"]))
+    return _ok(cid)
+
+
+def ac_r3_1(root, cid):
+    return _pytest(root, cid, "infra/aws/ec2/opal-gateway/tests/test_advi_site_to_s3_registration.py", ("registered", "not_safe"))
+
+
+def ac_r3_2(root, cid):
+    """AB-r-3: the saved plan touches only the advi billing grant, adds/changes no other resource, destroys nothing."""
+    try:
+        with open(os.path.join(root, D, "0.9.0_WK_ADVI_BILLING~7", "AB_R3_PLAN.txt"), encoding="utf-8", errors="replace") as fh:
+            plan = fh.read()
+        packet = open(os.path.join(root, D, "0.9.0_WK_ADVI_BILLING~7", "RELEASE_PACKET_E2.md"), encoding="utf-8").read()
+    except OSError as exc:
+        return _fail(cid, str(exc))
+    m = re.search(r"Plan: (\d+) to add, (\d+) to change, (\d+) to destroy", plan)
+    if not m or m.group(3) != "0":
+        return _fail(cid, "no Plan line or it destroys")
+    touched = set(re.findall(r"#\s+(\S+)\s+will be (?:created|updated in-place|destroyed|replaced)", plan))
+    foreign = sorted(t for t in touched if "advi_billing" not in t)
+    if foreign:
+        return _fail(cid, "plan touches resources outside the advi billing grant: %s" % foreign[:5])
+    for need in ("DEPLOY_BASE_REF", "ADVI_FEE_STATEMENT_S3_ROOT", "rollback"):
+        if need.lower() not in packet.lower():
+            return _fail(cid, "release packet does not state %s" % need)
+    print(m.group(0), "touched:", sorted(touched))
+    return _ok(cid)
+
+
+CHECKS = {"AB3-1-AC1": ac_r1, "AB3-2-AC1": ac_r2, "AB3-3-AC1": ac_r3_1, "AB3-3-AC2": ac_r3_2,
+          "AB2-1-AC1": ac_1_1, "AB2-2-AC1": ac_2_1, "AB2-2-AC2": ac_2_2, "AB2-3-AC1": ac_3_1, "AB2-4-AC1": ac_4_1, "AB2-4-AC2": ac_4_2,
           "AB2-5-AC1": ac_5_1, "AB2-5-AC2": ac_5_2, "AB2-6-AC1": ac_6_1, "AB2-6-AC2": ac_6_2}
 
 if __name__ == "__main__":
