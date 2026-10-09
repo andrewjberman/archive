@@ -47,6 +47,37 @@ iam = open(IAM, encoding="utf-8").read()
 gold = open(GOLD, encoding="utf-8").read()
 
 
+def hcl_strings(text):
+    """Every double-quoted HCL string in text, with a quote inside a ${...} interpolation kept inside the string
+    (amended on row MDPF_CANON-D1-W7-S1: `"arn:aws:s3:::${module.m.scope_bucket["mdpf"]}/..."` is ONE string)."""
+    out, i, n = [], 0, len(text)
+    while i < n:
+        if text[i] != '"':
+            i += 1
+            continue
+        j, depth, buf = i + 1, 0, []
+        while j < n:
+            c = text[j]
+            if depth == 0 and c == '"':
+                break
+            if c == "\\" and j + 1 < n:
+                buf.append(text[j:j + 2])
+                j += 2
+                continue
+            if text.startswith("${", j):
+                depth += 1
+                buf.append("${")
+                j += 2
+                continue
+            if c == "}" and depth:
+                depth -= 1
+            buf.append(c)
+            j += 1
+        out.append("".join(buf))
+        i = j + 1
+    return out
+
+
 def blocks(src, kind, label=None):
     """Top-level HCL blocks `<kind> "<a>" ["<b>"] { ... }` with their labels and bodies (brace-matched)."""
     out = []
@@ -104,7 +135,7 @@ def grant_faults(arns):
 
 
 def s3_arns(body):
-    return re.findall(r'"(arn:aws:s3:::[^"]*)"', body)
+    return [s for s in hcl_strings(body) if s.startswith("arn:aws:s3:::")]
 
 
 arms = []
