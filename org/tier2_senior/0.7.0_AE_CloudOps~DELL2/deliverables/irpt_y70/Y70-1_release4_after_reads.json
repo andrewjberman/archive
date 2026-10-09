@@ -1,0 +1,59 @@
+{
+  "admit_final_state": null,
+  "admit_keys": [],
+  "advisor": null,
+  "body_sha256": null,
+  "branch": "B",
+  "built_sha": "emzWWzrR0TUf7sHDbEeDeedc1EnTeaXAMl5kSHYLU7E=",
+  "census_changed_members": [
+    "custody_submission.py"
+  ],
+  "diagnosis": {
+    "cause": "CUSTODY_POLICY_REVISION is defined in exactly ONE place in the estate -- infra/aws/lambda/investor-reporting/reports/composition.py:19 (= \"irpt-custody-x10-v1\") -- and irpt-ycharts-generate packages the GENERATE tree's composition.py, which does not define it. custody_submission.py line 15 does `from composition import CUSTODY_POLICY_REVISION, build_retained_repositories`, so in the deployed package that name does not exist",
+    "denominator": "comp-find '^CUSTODY_POLICY_REVISION\\s*=' over 68341 files: 1 definition, in reports/composition.py; 8 total mentions in the generate tree, all imports or uses, 0 definitions",
+    "symptom": "ImportError: cannot import name 'CUSTODY_POLICY_REVISION' from 'composition' (/var/task/composition.py)",
+    "why_the_offline_suites_missed_it": "the suites pass (3 passed; and 66 passed 2 skipped across the three custody suites) because on the TEST sys.path `composition` resolves to a module that DOES carry the name, while the zip's composition.py is a different file of the same name. A same-name shadow is invisible to pytest and visible only to an in-package import census -- which is exactly what read 2 is for"
+  },
+  "firm": "49financial",
+  "input_id": null,
+  "ledger_closed": true,
+  "limits": [
+    "BRANCH B. Release 4 applied 2026-10-09T00:22:35Z (S3 versionId YDb8Vrk.YuU6A3d7poxncrnoSCxit7K3) and was ROLLED BACK the same session: the step-0 version NqbpRnnx5METt43XaI_4nmk5fZDRTQpk was re-promoted by copy-object (new current version nA7hze1zlQfF55Q05.Vxr4E3v8kCE7HW, CopySourceVersionId = the step-0 version), then a targeted apply set source_code_hash back to Un0wVZqj... Live now reads Un0wVZqj.., State Active, LastUpdateStatus Successful, and its import census reads failed {}.",
+    "The S3 object now carries a THIRD version that is a byte copy of the pre-release artifact. No version was deleted; the release-4 bytes remain at YDb8Vrk.. for the fix to diff against. S3 deletes are Andrew's act and none was made.",
+    "Reads 3-7 were never reached, so NOTHING was written on the request/upload planes: no test filer row, no on-behalf upload, no upload records, no resolve_upload message, and no YCharts securities_info resolution. The one vendor-adjacent write the order permits was therefore never exercised.",
+    "The test filer key reads NOT FOUND on a consistent get-item, which is vacuously true here because it was never put -- stated so the read is not mistaken for a successful cleanup of something that existed.",
+    "Y70-1-AC1 is expected to FAIL on this branch and that is the correct grade: the release is defective. AC2 and AC3 are the cleanup and branch-coherence criteria and are met. AC2's laptop limb is skipped by its own logic because admit_keys is empty.",
+    "The deploy recorder was NOT run for release 4, because the release did not stand; the source map's artifact_sha256 was moved to emzWWzrR.. by build-and-upload at step 2 and now disagrees with the live Un0wVZqj.. That disagreement is REAL and is left visible rather than papered over, because the next act on this function is the fix, not a re-record. Named in row IRPT_BCKEND-D2-S16."
+  ],
+  "live_after": "Un0wVZqjqpwKhpYyFeBRW3fVFddrlHR0BtHjYuP5eNY=",
+  "live_before": "Un0wVZqjqpwKhpYyFeBRW3fVFddrlHR0BtHjYuP5eNY=",
+  "pin": "e94a64b0f6",
+  "read_detail": {
+    "0": "NOT REACHED -- read 2 failed first and Branch B fired. The role policy was not re-read this session.",
+    "1": "PASS -- after the apply, live CodeSha256 emzWWzrR.. == built; targeted re-plan 'No changes'. The code DID land correctly; the defect is inside the landed bytes, not in the landing.",
+    "2": "FAIL -- direct invoke {irpt_import_census:true} on the RELEASE 4 bytes: modules 62, failed {\"custody_submission\": \"ImportError: cannot import name 'CUSTODY_POLICY_REVISION' from 'composition' (/var/task/composition.py)\"}. custody_submission.py is THE ONE changed member of this release, so the release's own new module cannot import in the deployed package. POSITIVE CONTROL: the same invoke on the rolled-back bytes reads modules 62, failed {} -- the instrument can read clean and did, so the failure was introduced by this release.",
+    "3": "NOT REACHED -- no test filer was ever put.",
+    "4": "NOT REACHED -- no on-behalf upload was made, so no upload_id, no input_id, no admit keys and no resolve_upload message. Nothing to hand the laptop.",
+    "5": "NOT REACHED.",
+    "6": "NOT REACHED.",
+    "7": "NOT REACHED."
+  },
+  "reads": {
+    "0": "NOT-REACHED",
+    "1": "PASS",
+    "2": "FAIL",
+    "3": "NOT-REACHED",
+    "4": "NOT-REACHED",
+    "5": "NOT-REACHED",
+    "6": "NOT-REACHED",
+    "7": "NOT-REACHED"
+  },
+  "replan_changes": 0,
+  "rollback_source_version": "NqbpRnnx5METt43XaI_4nmk5fZDRTQpk",
+  "rolled_back": true,
+  "test_filer_key": {
+    "pk": "USER#irpt-r4-testfiler-20261008@opal.invalid"
+  },
+  "unlisted_advisor": null,
+  "upload_id": null
+}
