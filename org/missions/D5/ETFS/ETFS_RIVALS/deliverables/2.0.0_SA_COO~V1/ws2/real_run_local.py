@@ -21,6 +21,7 @@ import time
 ROOT = pathlib.Path(sys.argv[1]).resolve()
 DAY, OUT = sys.argv[2], pathlib.Path(sys.argv[3]).resolve()
 SEARCH = "--no-search" not in sys.argv
+FRESH = "--fresh-canonical" in sys.argv
 sys.path.insert(0, str(ROOT / "data" / "etfs" / "scripts"))
 sys.path.insert(1, str(ROOT))
 import pandas as pd  # noqa: E402
@@ -42,7 +43,10 @@ class OverlaySink:
         return self.local.exists(uri) or self.live.exists(uri)
 
     def list(self, prefix_uri):
-        return sorted(set(self.live.list(prefix_uri)) | set(self.local.list(prefix_uri)))
+        live = set(self.live.list(prefix_uri))
+        if FRESH and ("/gold/canonical_shape/" in prefix_uri or "/gold/trade_schedule/" in prefix_uri or "/gold/flow_reconciliation/" in prefix_uri):  # --fresh-canonical: rebuild G1 from inputs, never reuse a served revision
+            live = set()
+        return sorted(live | set(self.local.list(prefix_uri)))
 
     def put(self, uri, data, content_type=None):
         return self.local.put(uri, data, content_type)
@@ -55,7 +59,14 @@ rec = {"code_root": str(ROOT), "day": DAY, "stages": {}}
 
 t = time.time()
 lo = (d - dt.timedelta(days=40)).isoformat()
-r = g5mod.handler_entry({"mode": "replay", "start": lo, "end": DAY, "batch_id": "ws2-real-run-local", "sink": s})
+if "--canonical" in sys.argv:  # RIV-we-1: rebuild canonical_shape first, so the trade windows read the claimed as-of dates
+    from rivalfunds import gold_canonical_shape as g1mod
+    r1 = g1mod.handler_entry({"mode": "replay", "start": lo, "end": DAY, "batch_id": f"ws2-g1-{int(time.time())}", "sink": s, "budget_s": 7200})
+    rec["stages"]["canonical_shape"] = {"status": r1.get("status"), "outputs": len(r1.get("outputs") or []),
+                                        "detail": str(r1.get("detail"))[:400], "seconds": round(time.time() - t)}
+    print("build-canonical-shape:", rec["stages"]["canonical_shape"], flush=True)
+    t = time.time()
+r = g5mod.handler_entry({"mode": "replay", "start": lo, "end": DAY, "batch_id": f"ws2-g5-{int(time.time())}", "sink": s})
 rec["stages"]["trade_schedule"] = {"status": r.get("status"), "outputs": len(r.get("outputs") or []),
                                    "detail": str(r.get("detail"))[:400], "seconds": round(time.time() - t)}
 print("build-trade-schedule:", rec["stages"]["trade_schedule"], flush=True)
