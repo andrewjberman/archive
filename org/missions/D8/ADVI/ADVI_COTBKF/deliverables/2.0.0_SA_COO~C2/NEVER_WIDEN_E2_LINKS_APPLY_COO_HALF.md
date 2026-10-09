@@ -26,7 +26,7 @@
 ## 2. NEW REACHABLE STATE
 
 A links table covering every ended account (1,450) where round 3's covered 459; the 212 LINKED rows include the two links S9 named
-(acct#b777d6dc -> acct#e5077da3, acct#6c5d660c -> acct#03cd2494); cv0QF879185 reads NOT_LINKED (ambiguous, two candidates at score 1.0).
+(acct#b777d6dc -> acct#e5077da3, acct#6c5d660c -> acct#03cd2494); acct#e699b178 reads NOT_LINKED (ambiguous, two candidates at score 1.0).
 
 ## 3. EXPECTED OUTCOME, BOTH BRANCHES
 
