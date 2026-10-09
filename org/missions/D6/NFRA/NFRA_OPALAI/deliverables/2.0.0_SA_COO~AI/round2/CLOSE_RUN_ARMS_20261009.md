@@ -82,6 +82,16 @@ message's age at fire time. Watcher: each `/canonical-drive` tick (10m) polls `p
 previous tick, so a hit is at most about 11 minutes old when it fires, inside the 900s bound. **Arm (a) unchanged** (Alyssa's
 own fresh question, @4e2f00c9fa) until `3.0.0_SA_CVO~Z` rules the CTO's pitch.
 
+**As signed (CVO @4b80e7db6c; CTO record @0df0ac1145, msg 32792):**
+- **Arm (b):** before firing, READ the sender's profile state, never infer it from `from_name`:
+  `python org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/asker_profile_probe.py <sender oid> .`
+  Fire only on `PROFILE: NONE (fire allowed)`; skip a sender with any record; record the probe's two lines beside the raw
+  response. Any response other than the `asker_no_profile` refusal is a BLOCKING row, never a pass or a retry.
+  Probe controls at 14:1xZ (724 items, 17 POLICY): Alyssa `ad037ea5-...` -> PROFILE PRESENT active=1 any=10 (skip);
+  Andrew `2e21f8e5-...` -> PROFILE NONE.
+- **Arm (a):** ONLY on Alyssa's own asker question, within 900s, with the J2 raw read pinned in the same minute; never
+  on an unrelated message of hers.
+
 ## Results (filled at the run)
 
 | arm | run at (UTC) | raw response | pinned reference read (same minute) | verdict |
