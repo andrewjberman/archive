@@ -7,6 +7,12 @@ EngineSource and calculate(). No write, no vendor call. Window: YTD at the lates
 Arm A: the NEW-01 account (row S177: OK r_net -1.0 on 2026-04-16) refuses as EngineReturnImplausible.
 Arm B (control): an invested account of similar size with no r_net <= -1 day computes a finite value above -1.
 """
+import os as _os
+import sys as _sys
+
+if not _os.environ.get("IRPT_THREAD_ACCOUNT"):
+    print("SKIP: IRPT_THREAD_ACCOUNT unset")
+    _sys.exit(0)
 import math
 import sys
 from pathlib import Path
@@ -22,7 +28,7 @@ import tenants  # noqa: E402
 from ids import opaque_account  # noqa: E402
 from opal_naming import lookup  # noqa: E402
 
-BAD, GOOD = "0049615236", "0010498003"
+BAD, GOOD = "0049615236", _os.environ["IRPT_THREAD_ACCOUNT"]
 firm = lookup("49financial")
 src_args = dict(bucket=firm["bucket"], root=firm["trees"]["advi"]["gold_root"])
 s3 = boto3.client("s3")

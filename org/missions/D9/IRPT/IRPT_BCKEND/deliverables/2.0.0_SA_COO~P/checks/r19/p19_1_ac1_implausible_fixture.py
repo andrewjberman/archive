@@ -21,7 +21,7 @@ sys.path.insert(0, str(package / "tests"))
 import test_f49_engine as t  # noqa: E402  (FakeS3, _scope, ids -- the suite's own fixtures)
 
 f49 = t.f49_engine
-BAD, GOOD = "0049615236", "0010498003"
+BAD, GOOD = "0049615236", "9985623272"
 DAYS = {
     "2025-12-31": [(BAD, None, None, None, None), (GOOD, 0.001, 99.0, 100.0, 0.0)],
     "2026-01-02": [(BAD, 0.0, 13360.59, 13360.59, 0.0), (GOOD, 0.010, 100.0, 101.0, 0.0)],

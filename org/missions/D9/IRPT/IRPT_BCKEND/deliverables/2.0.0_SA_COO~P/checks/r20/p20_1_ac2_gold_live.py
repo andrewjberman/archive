@@ -7,6 +7,12 @@ Source: lib/opal_naming address("irpt", "49financial", "gold", "holdings_perform
 2026-01-01..2026-09-25 independently, then asks holdings_gold.calculate through HoldingsGoldSource on the live bucket.
 Pass: the two agree within 1e-12, and the answer's provider is OPAL_HOLDINGS.
 """
+import os as _os
+import sys as _sys
+
+if not _os.environ.get("IRPT_THREAD_ACCOUNT"):
+    print("SKIP: IRPT_THREAD_ACCOUNT unset")
+    _sys.exit(0)
 import io
 import sys
 from concurrent.futures import ThreadPoolExecutor
@@ -23,7 +29,7 @@ import opal_naming  # noqa: E402
 import tenants  # noqa: E402
 from ids import opaque_account  # noqa: E402
 
-T = "0010498003"
+T = _os.environ["IRPT_THREAD_ACCOUNT"]
 uri = opal_naming.address("irpt", "49financial", "gold", "holdings_performance_daily", "date=2026-01-02")
 bucket, _, key = uri[len("s3://"):].partition("/")
 prefix = key[:key.index("date=")]

@@ -86,7 +86,7 @@ def main():
         "note": ("accounts are RAW custodian keys; the battery issues each one with _ids.opaque_account(tenant, raw) and remaps "
                  "_authz/tests/fixtures.py's A1/A2/A3/A5 (same ownership, same directory) onto them, so a fixture names ${A1}. "
                  "A5 is advisor B's account. Dates in every fixture are 2026 (laptop CTO ruling A: nothing before 2024-01-01)."),
-        "accounts_raw": {"A1": "0010783709", "A2": "0010783710", "A3": "0010783711", "A5": "0020000005"},
+        "accounts_raw": {"A1": "9922488809", "A2": "0010783710", "A3": "0010783711", "A5": "0020000005"},
         "clients_raw": {"CLIENT_A": "client-fixture-A", "CLIENT_B": "client-fixture-B"},
         "constants": {"JOB_A": "JOB-0001", "JOB_OTHER_FIRM": "JOB-0900", "EXPORT_A": "EXP-" + "a" * 32,
                       "EXPORT_B": "EXP-" + "b" * 32},
@@ -279,7 +279,7 @@ def g_reporting_account():
     import base64
     rk = "GET /api/scoped/investor-reporting/reporting/{account_id}/{which}"
     body = '{"account":"fixture-A1","as_of":"2026-09-10","series_points":92}'
-    stubs = {"platinum_s3": {"objects": [{"raw": "0010783709", "manifest": body, "series": "SERIES-A1"},
+    stubs = {"platinum_s3": {"objects": [{"raw": "9922488809", "manifest": body, "series": "SERIES-A1"},
                                          {"raw": "0020000005", "manifest": '{"account":"fixture-A5"}', "series": "SERIES-A5"}]}}
     event = {"pathParameters": {"account_id": "${A1}", "which": "manifest"}}
     foreign = {"name": "foreign_object", "expect_codes": ["OBJECT_NOT_COVERED"],
@@ -288,7 +288,7 @@ def g_reporting_account():
                 {"outcome": "SERVED", "data_contains": [base64.b64encode(body.encode()).decode()]},
                 standard_cases(foreign=foreign), stubs=stubs,
                 notes=("platinum reporting objects are the recorded S3 (`_S3`): the opaque account id in the path maps to its raw key by the "
-                       "entry's own listing, so the world's accounts are issued ids derived from raw keys 0010783709 (A1) and 0020000005 (A5)."),
+                       "entry's own listing, so the world's accounts are issued ids derived from raw keys 9922488809 (A1) and 0020000005 (A5)."),
                 control={"principal": ADVISOR_B, "event": {"pathParameters": {"account_id": "${A5}", "which": "manifest"}}})
 
 
@@ -298,7 +298,7 @@ def g_reporting_summary():
     def summary(client, accts):
         return {"firm": "${TENANT}", "client_id": client, "accounts": [{"account_id": a} for a in accts], "unpublished_account_ids": []}
     stubs = {"platinum_s3": {"objects": [
-        {"raw": "0010783709", "summary_client": "${CLIENT_A}", "summary": summary("${CLIENT_A}", ["${A1}", "${A2}"])},
+        {"raw": "9922488809", "summary_client": "${CLIENT_A}", "summary": summary("${CLIENT_A}", ["${A1}", "${A2}"])},
         {"raw": "0020000005", "summary_client": "${CLIENT_B}", "summary": summary("${CLIENT_B}", ["${A5}"])}]}}
     event = {"pathParameters": {"client_id": "${CLIENT_A}"}}
     foreign = {"name": "foreign_object", "expect_codes": ["OBJECT_NOT_COVERED"], "event": {"pathParameters": {"client_id": "${CLIENT_B}"}},
