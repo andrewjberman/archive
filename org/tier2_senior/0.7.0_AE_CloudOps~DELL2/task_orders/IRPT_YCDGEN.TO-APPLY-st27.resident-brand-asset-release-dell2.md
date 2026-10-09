@@ -8,7 +8,7 @@
 <invocation>/<expect> each, read against the evidence files this order's applier already committed (0.7.0_AE_CloudOps~DELL2 msg 2260:
 the prose criteria had no cell_refs and no evaluable expect). Wording and meaning unchanged. Gate limb: none graded this modification.
 
-<status>pending</status>
+<status>complete</status>
     <project_code>IRPT_YCDGEN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -54,6 +54,7 @@ allow list Andrew-only. The pair is org/missions/D9/IRPT/IRPT_YCDGEN/deliverable
   </bounds>
 
   <proof_of_spec>
+Instance at `org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st27/IRPT_YCDGEN.TO-APPLY-st27.proof_of_spec.json`.
     <criterion id="AC1" cell_refs="YCD-w-6">Ledger irpt-ycdgen-st27-20261009 CLOSED with U2 P1 D2 V1 proven.<invocation>grep -m1 '^\*\*Status' org/critical_paths/change_management/20261009T0222Z_irpt-ycdgen-st27-20261009_deploy_completion.md</invocation><expect>^\*\*Status:\*\* CLOSED</expect></criterion>
     <criterion id="AC2" cell_refs="YCD-w-6">V1's output shows load_brand resolving the packaged path from the running e606008994-st27 root, env brand vars [].<invocation>grep -m1 'V1 brand from the RUNNING root' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st27/D2_V1_INSTALL_20261009.txt</invocation><expect>e606008994-st27/ycharts/research/brand/brand\.json .*env brand vars \[\]$</expect></criterion>
     <criterion id="AC3" cell_refs="YCD-w-6">V1's output shows the allow list Andrew only.<invocation>grep -m1 'V1 allow list' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st27/D2_V1_INSTALL_20261009.txt</invocation><expect>OPAL_PRODUCER_PRINCIPALS = \("andrew@opalinvest\.com",\)$</expect></criterion>
