@@ -1,0 +1,156 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "IB94-2-AC1",
+      "criterion_verbatim": "the live refresh CodeSha256 equals the built 6eOFTopG, the bundle landed at the built sha, the replay ran before the ledger, and the ledger is CLOSED",
+      "denominator": "1 live function read against 1 built value, 1 bundle object read by version, 1 replay comparison and 1 ledger status",
+      "expect": "IB94-2-AC1 PASS",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r94/p94_release_cells.py\" . IB94-2-AC1",
+      "method": "command",
+      "output_evidence": "IB94-2-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB94-2-AC2",
+      "criterion_verbatim": "the driven refresh is READY at all 3 firms with terminated_count 1/1/0, and the carried entry is in the served directory",
+      "denominator": "3 firms, each with its own manifest and served artifact: 3 of 3 READY, and terminated 1 / 1 / 0",
+      "expect": "IB94-2-AC2 PASS",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r94/p94_release_cells.py\" . IB94-2-AC2",
+      "method": "command",
+      "output_evidence": "IB94-2-AC2 PASS",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "IB94-2-AC1",
+        "IB94-2-AC2"
+      ],
+      "commit_or_etag": "e8e0557ed79fb2d1684d02c7376b34a036c39c7c",
+      "deploy_evidence": "the bundle before/after versions, both seeding runs with their sub-branch and rollback versions, and the driven refresh per firm",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~DELL2/IB94-2_directory_release_after_reads.json"
+    },
+    {
+      "artifact_covered_by": [
+        "IB94-2-AC2"
+      ],
+      "commit_or_etag": "0b1087120f",
+      "deploy_evidence": "the three-firm held read the CTO's AMENDMENT 1 was signed against",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~DELL2/IB94-2_live_held_read_f6d48603.json"
+    },
+    {
+      "artifact_covered_by": [
+        "IB94-2-AC2"
+      ],
+      "commit_or_etag": "HhAH6OlkvI.5KXc9mxDa3RKM_ZP2xl.5",
+      "deploy_evidence": "inflection's seeded directory, 295 entries, carried_forward.terminated 1; the prior version gDdnnAtQMNoqrIIw4SBcvB is the rollback",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "s3_object",
+      "path_or_key": "s3://opal-data-inf/investor-reporting/directory/2026-10-09/directory.json"
+    },
+    {
+      "artifact_covered_by": [
+        "IB94-2-AC2"
+      ],
+      "commit_or_etag": "E7.CIDHc4XRnz1C0QBPC3jRV",
+      "deploy_evidence": "cottonwood's seeded directory, 271 entries, carried_forward.terminated 1; the prior version KPTEHS4QfyJCoSGj87nUlsQo is the rollback",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "s3_object",
+      "path_or_key": "s3://opal-data-cot/investor-reporting/directory/2026-10-08/directory.json"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "compiler_tools": [
+    {
+      "invocation": "the issuer's own check, run per criterion by this seat",
+      "result": "IB94-2-AC1 PASS, IB94-2-AC2 PASS",
+      "tool": "p94_release_cells.py"
+    },
+    {
+      "invocation": "S1 inflection and S2 cottonwood to i-02448edb624a7a7cf via SSM",
+      "result": "both rc=0, at 14:06:14Z and 14:08:38Z",
+      "tool": "ib383_host_send.py"
+    },
+    {
+      "invocation": "close-leg x6 | close",
+      "result": "irpt-directory-release-20261009 CLOSED, all 6 legs proven",
+      "tool": "deploy_ledger.py"
+    }
+  ],
+  "controls": {
+    "bundle_bound_by_content_not_by_tag": {
+      "description": "the CTO bound the seeding to bundle f6d48603; a version-id comparison alone would not prove the bytes",
+      "expected_landed": "the sha256 recomputed from the downloaded bytes equals f6d48603",
+      "expected_not_landed": "a different bundle, which the amendment makes a STOP",
+      "observed": "re-verified immediately before the FIRST firm at 13:59:59Z: live version W2WragrP52i8M7MfL22oXVPuHsTjyVLO and sha256 f6d48603a6496f78733312e49b0e279b0907288db3423575f735835e896a0118 from the bytes, 112861 bytes",
+      "status": "PASS"
+    },
+    "carry_confirmed_through_the_served_state": {
+      "description": "the runner reporting carried=1 is its own self-report; the served state is the independent reading",
+      "expected_landed": "inflection's SERVED held read moves carried=0 -> carried=1 after S1, read with the bundle's own reader",
+      "expected_not_landed": "served staying at 0, meaning the write did not reach the served path",
+      "observed": "the held read taken immediately before S2 showed inflection served carried=1 where the pre-S1 read showed 0; and both seeded firms' refresh manifests state the carry in their own words",
+      "status": "PASS"
+    },
+    "scheduled_fire_was_not_raced": {
+      "description": "the CTO condition excludes the seeding from 13:20-14:00Z because a concurrent scheduled fire would make two writers of the same keys",
+      "expected_landed": "the seeding runs outside that window",
+      "expected_not_landed": "a run inside it. This seat reached step 5 at 13:20:05Z, five seconds in, and held",
+      "observed": "the 09:40 ET fire then landed at 13:40:47-50Z, INSIDE the window and on the same keys -- measured, because inflection's dated key was 404 at 13:12Z and PRESENT at 13:52Z. The seeding ran at 14:06 and 14:08Z. The condition was not theoretical and honouring the five seconds is what avoided the race",
+      "status": "PASS"
+    },
+    "unseeded_firm_discriminates": {
+      "description": "terminated_count is only evidence if it can read something other than 1. 49financial was never seeded and is the negative arm",
+      "expected_landed": "1 at both seeded firms and 0 at the unseeded one",
+      "expected_not_landed": "1 everywhere, which would mean the field says nothing",
+      "observed": "inflection 1, cottonwood 1, 49financial 0 -- read from each served artifact's own carried_forward.terminated",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "no 49financial key was written",
+      "reason": "AMENDMENT 2 @dfe7b3c085 confirms the write set is 2 firms and 4 objects; 49financial is read in step 6 only. I asked for that confirmation before writing rather than resolving the AMENDMENT 1 wording myself"
+    },
+    {
+      "item": "cottonwood landed on 2026-10-08, not today",
+      "reason": "its own trading-day walk read the 2026-10-09 source set INCOMPLETE and selected the previous complete day. No --as-of was passed precisely so the runner would make that choice (row W2-S55). Not a defect, and the two firms' read-backs are therefore judged per firm rather than as mirror images"
+    },
+    {
+      "item": "row IRPT_BCKEND-D2-S25 is listed as a surprise but is now STALE",
+      "reason": "it recorded this identity refused ssm:SendCommand on the runner host at 03:57Z, which was true then and blocked these very legs. The grant has since landed and both sends succeeded. Its disarm_owner is 0.0.0_AB_MSTR~DELL2, which filed D2-S55, so the disarm is not mine to record"
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-383.directory-release-380-381-applied-and-seeded.md",
+    "vintage_commit": "b8106b83656776b4e19439ce88da2f5940203d8f"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "the IB-pr-380/381 sign-off packet, blob d60e4a9a75 (drain @93e31749b4); the COO half is @8323d3fb19, with AMENDMENT 1 releasing the seeding legs @e460b9b55e, AMENDMENT 2 @dfe7b3c085 fixing the write set to 2 firms / 4 objects, and AMENDMENT 3 @faa6cd924e reading carried_in_served as a count",
+    "cto_half": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_IB_pr_380_381_DIRECTORY_RELEASE_CTO_HALF.md, which signs BOTH seeding sub-branches (a same-date overwrite and a new dated key), with AMENDMENT 1 @25f78da818 binding the seeding to bundle f6d48603"
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "WORLD",
+  "rollback": "restore the seeded keys last-written-first with latest.json last, from the prior versions recorded per firm; not needed -- nothing failed and no partial seed exists",
+  "schema_version": "1.0",
+  "scope": "the ONE directory release at pin 7f31bbfa4e -- the irpt-directory-refresh function and the runner bundle -- then the per-firm seeding run for inflection and cottonwood, then the driven after-read across all three firms",
+  "session_log": "org/critical_paths/change_management/20261009T0329Z_irpt-directory-release-20261009_deploy_completion.md",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-383.directory-release-380-381-applied-and-seeded.md",
+    "group": "OTHER",
+    "vintage_commit": "faa6cd924ef5941052acc9a60b6ee4b21659f175"
+  },
+  "surprises": [
+    "IRPT_BCKEND-D2-S23",
+    "IRPT_BCKEND-D2-S25"
+  ],
+  "to_id": "IRPT_BCKEND.TO-IB-pr-383"
+}

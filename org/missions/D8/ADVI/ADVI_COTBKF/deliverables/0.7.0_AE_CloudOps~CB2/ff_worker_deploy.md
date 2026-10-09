@@ -120,3 +120,36 @@ bar is 3 of 3 and rc 0, and both hold.
 ## Push state
 
 MEASURED at write time -- see the final report line; re-measure at read time.
+
+## Post-commit finding resolved: R4-B fired on the ledger OPEN, not a close
+
+The delivery commit's breadcrumb reported `1 open finding(s)`, owned by this seat:
+`org/critical_paths/.open_findings/deploy_stale_20261009T141417Z.json`, severity **blocking-class**,
+saying "a deploy-completion ledger CLOSED but comp-pipescript deployed reports the named script(s)
+STALE/MISSING on S3 ... A scheduled PROD trigger may run STALE code."
+
+**It was true when measured and obsolete by the time it was read.** Its own fields give the timeline:
+
+| event | time |
+|---|---|
+| ledger **OPEN** commit `7ba4bf0ecf` | 14:14:13Z |
+| finding `detected_utc` | **14:14:17Z** (4s later) |
+| the deploy (S3 `LastModified`) | **14:19:29Z** (5m12s after the finding) |
+
+The finding names `closing_commit: 7ba4bf0ecf`, which is the **open** commit -- `deploy_ledger.py open`
+self-commits its two files, and the R4-B trigger treats any commit touching a `change_management` ledger
+as a *closed* deploy. So it measured S3 while S3 still correctly held the pre-round-39 bytes, and filed a
+blocking-class finding against a deploy that had not happened yet.
+
+**Resolved by measurement, not by assertion:** `comp-pipescript deployed
+data/cot/scripts/gold/B_00.canonical_holdings.py` now reads **MATCH**, basis "raw bytes (working tree and
+S3 object are byte-identical)", Summary `1 MATCH, 0 STALE, 0 MISSING_ON_S3`, with its denominator printed
+(`code/gold/` = 1 object checked, filter matched 1 of 48) and `ANSWER-STATE:
+PRESENT_WITH_ZERO_RESULTS`. The finding file was then deleted per the README lifecycle (resolve or record
+why expected, then delete); it was untracked, so this is a plain file removal and not destructive git.
+
+The trigger defect itself is **not** mine to fix and is routed to `0.0.0_AB_MSTR~DELL2` as
+infrastructure (rule 32). It matters beyond this one file: a blocking-class false positive on every
+multi-leg deploy that opens its ledger before writing is precisely the "honest flag nobody owns" the
+`.open_findings/README.md` exists to prevent, and R4-A was already retired as a class for emitting
+findings that no act could resolve.
