@@ -11,7 +11,7 @@ branch and again after the drain). 0 JUDGMENT criteria. Risk LOCAL: diagnosis, p
 | order | drain | criteria (issuer re-run) | result |
 |---|---|---|---|
 | DB-b-36 (E1: diagnose the round-23 identity gaps) | @f71fd042c1 (worker ~21: 32caac124b, 0e4edcb0b6) | DB24-1-AC1..AC3 PASS | The ~1.1M account's window read term by term. Cause: CONDITIONAL-BY-COUNTERPARTY rows resolve to None in the served `classify_and_sum`, and on pandas 3 the None becomes NaN and the rows drop; plus in-kind lot basis. 10 value-moving types mapped to no term. The 39 gaps classed: ROUNDING 30, MISSING-TERM 9, at the tolerance 0.05 stated before the run |
-| DB-b-37 (E2: fix and re-grade; amendment 1 @0473127246) | @f71fd042c1 (worker ~21: 5b6c8ea7a5, 2a094137e9) | DB24-2-AC1..AC3 PASS | Three fixes in `account_activity_lots.py`; `account_return_daily.py` not edited. Re-grade over the same 91 accounts: 55 pass, 36 fail (ROUNDING 32, MISSING-TERM 3, OTHER 1); round 23 was 52 / 39. Exercise window: account `0054008006`, 2026-09-17..2026-10-05, realized and both flows non-zero, ties at 0.0075. Tests 31 (23 kept, 8 new) |
+| DB-b-37 (E2: fix and re-grade; amendment 1 @0473127246) | @f71fd042c1 (worker ~21: 5b6c8ea7a5, 2a094137e9) | DB24-2-AC1..AC3 PASS | Three fixes in `account_activity_lots.py`; `account_return_daily.py` not edited. Re-grade over the same 91 accounts: 55 pass, 36 fail (ROUNDING 32, MISSING-TERM 3, OTHER 1); round 23 was 52 / 39. Exercise window: account `acct#2fcb1889`, 2026-09-17..2026-10-05, realized and both flows non-zero, ties at 0.0075. Tests 31 (23 kept, 8 new) |
 
 Drain hygiene: commit-gate clean on the producer and its tests; the folder's suite 78 passed; safe-merge 13 paths, 0 dropped, 0 foreign.
 

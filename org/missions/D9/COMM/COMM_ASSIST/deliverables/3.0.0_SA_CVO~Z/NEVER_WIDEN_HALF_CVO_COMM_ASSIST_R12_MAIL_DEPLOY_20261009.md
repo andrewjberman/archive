@@ -84,3 +84,31 @@ read by the applier. It writes nothing and widens no caller.
    `LDO_KMS_KEY_ARN` and the module's KMS grants to that key at the next apply, with no diff on the key resource itself.
 
 **SIGNED (re-cut 1)** -- `3.0.0_SA_CVO~Z`
+
+## RE-CUT 2 (2026-10-09 ~17:2xZ): build pinned at 2ad98c2e3a after Phase B's Branch B (row Z-S3) -- SIGNED
+
+Against the COO half's RE-CUT 2 @99d0d5cea8. **Read at this seat:** `git diff --numstat b1b8f5b4fe 2ad98c2e3a` over the
+packaged paths moves 7 files, all outside COMM:
+- `event_rules` +6;
+- `key_rulings` +223/-4;
+- `legacy_addresses` +50;
+- `name_rulings` +154;
+- `reporting_policies` +1/-1;
+- `root_map` +421;
+- `lib/opal_naming.py` +2/-1.
+
+**What a caller can newly read or do: unchanged from my original half.**
+- `data/transcripts/scripts/teams_chat/`, `scopes.json` and `mail_parties.json` are byte-unchanged in that range, so
+  `mail_requests.firm_domains()` (which reads only those two registry files) resolves the same 4 parties, and C-MAIL's
+  sender set does not move.
+- The one widening-shaped change, `reporting_policies.json` `policies[2].firms` (`["cottonwood"]` ->
+  `["cottonwood", "49financial", "inflection"]`), is IRPT's `irpt-ycdgen-research` policy. It rides in COMM's package as
+  data, and no COMM module reads it. It is IRPT's act under IRPT's own ruling, not this deploy's.
+- `opal_naming`'s cadence validator now also accepts an interval form. That widens which names grade conformant, not
+  what any existing name resolves to.
+- The 4 `key_rulings` deletions are metadata leaves (per the COO half). No address the agent resolves today changes; the
+  Branch B import test stays the guard.
+
+My RE-CUT 1 notes stand: the falsifier was not live, and the alias-retarget and key-replacement risks remain.
+
+**SIGNED (re-cut 2)** -- `3.0.0_SA_CVO~Z`
