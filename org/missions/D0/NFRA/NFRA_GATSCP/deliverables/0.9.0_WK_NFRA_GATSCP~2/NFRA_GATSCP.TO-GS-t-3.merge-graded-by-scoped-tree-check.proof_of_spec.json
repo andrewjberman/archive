@@ -40,7 +40,7 @@
    "kind": "doc",
    "commit_or_etag": "c8d936bf7a",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-2, not pushed; no deploy plane. row NFRA_GATSCP-D1-W2-S2 appended."
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-2, not pushed; no deploy plane. row NFRA_GATSCP-D1-W2-S2 appended. row NFRA_GATSCP-D1-W2-S3 appended (resolves S2)."
   }
  ],
  "acceptance": [
@@ -49,10 +49,9 @@
    "criterion_verbatim": "a merge whose parents both carry LGIC_BLANKFIX's drift (from the merge base) is graded and passes with STANDING LGIC_BLANKFIX; a merge where both sides changed that row is refused (the difference control). The check builds its commits with plumbing only; it moves no ref and touches no working-tree file.",
    "method": "command",
    "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_boxsync_grade.py\"",
-   "output_evidence": "rc=1\nFAIL bystander-lands: rc=0 standing_LGIC_BLANKFIX=False :: box-sync: grade SKIP -- the merge introduces nothing and no path changed on both sides | box-sync: grade c0dcf93317 + 19d0e8be59 -> PASS (graded=0/1); nothing landed, no ref moved\n  PASS own-refused: rc=1 ::   value enum fabric: 4 values from .tools/to-pipeline-gate.py:FABRIC_ENUM (read by AST at run time) |   ACT SCOPE: in-act=1 STANDING=0 (act projects: LGIC_BLANKFIX) |   [INDEX-DRIFT] org/projects/LGIC_BLANKFIX.json: dep_stage: index='EXECUTING' tree='DECOMP' | RESULT: 1 violation(s) in the act's projects, 0 STANDING  (denominators on the first line) | box-sync: grade fe14f811f6 + 53a2657560 -> REFUSED (graded=1/1); nothing landed, no ref moved | box-sync: REFUSED BY THE TREE CHECK on the merge's own paths (rc=1)\nGS-T3-BOXSYNC ok=False arms=2 failed=1",
-   "denominator": "1 of 2 arms PASS (own-refused PASS; bystander-lands FAIL: the merge's graded path set is empty, graded=0/1, so the ordered early SKIP returns before any tree check; see row NFRA_GATSCP-D1-W2-S2)",
-   "status": "FAIL",
-   "status_reason": "arm 1 (bystander-lands) cannot pass: the merge it builds has an empty graded path set, the order keeps the early SKIP there, so no tree check runs and no STANDING line prints; row NFRA_GATSCP-D1-W2-S2. Check not weakened.",
+   "output_evidence": "rc=0\n  PASS bystander-lands: rc=0 standing_LGIC_BLANKFIX=True :: ... STANDING LGIC_BLANKFIX INDEX-DRIFT org/projects/LGIC_BLANKFIX.json dep_stage: index='EXECUTING' tree='DECOMP' | box-sync: grade 5b031a81cb + a0a0398b71 -> PASS (graded=1/0); nothing landed, no ref moved\n  PASS own-refused: rc=1 :: ... RESULT: 1 violation(s) in the act's projects, 0 STANDING | box-sync: grade 2bfc58ff7e + e6bb4b0749 -> REFUSED (graded=1/1) | box-sync: REFUSED BY THE TREE CHECK on the merge's own paths (rc=1)\nGS-T3-BOXSYNC ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms PASS (bystander-lands, own-refused) with the check amended per AMENDMENT 2 @f980747a55",
+   "status": "PASS",
    "expect": "GS\\-T3\\-BOXSYNC\\ ok=True"
   },
   {
@@ -70,12 +69,12 @@
   "mutant": {
    "description": "AC1 builds merges from plumbing commits whose parents carry the bystander's row drift; arm 2 is the difference control (both sides changed the row).",
    "expected": "arm 1 rc 0 with STANDING LGIC_BLANKFIX; arm 2 rc 1",
-   "observed": "arm 1 FAIL (graded set empty, SKIP, rc 0, no STANDING); arm 2 rc 1 with 'REFUSED BY THE TREE CHECK'. Own positive control with a non-empty graded set (both sides write one probe file identically): rc 0 and 'STANDING LGIC_BLANKFIX INDEX-DRIFT org/projects/LGIC_BLANKFIX.json', graded=1/1.",
+   "observed": "arm 1 PASS rc 0 with STANDING LGIC_BLANKFIX (graded=1/0); arm 2 rc 1 REFUSED BY THE TREE CHECK (graded=1/1).",
    "status": "FIRED-AS-EXPECTED"
   },
   "determinism": {
    "method": "AC1 and AC2 each run twice at c8d936bf7a",
-   "observed": "GS-T3-BOXSYNC ok=False arms=2 failed=1 both runs; GS-T3-FASTLANE ok=True arms=2 failed=0 both runs",
+   "observed": "AC1 re-run after AMENDMENT 2: ok=True arms=2 failed=0; AC2: ok=True arms=2 failed=0",
    "status": "STABLE"
   }
  },
@@ -90,9 +89,10 @@
   }
  ],
  "surprises": [
-  "NFRA_GATSCP-D1-W2-S2: GS3-AC1 arm 1 builds a merge with an EMPTY graded path set; the order keeps the early SKIP there, so no tree check runs and no STANDING line can print. BLOCKING, INERT. Check not weakened, SKIP kept; GS3-AC1 reads FAIL and the order stays open."
+  "NFRA_GATSCP-D1-W2-S2",
+  "NFRA_GATSCP-D1-W2-S3"
  ],
- "session_log": "2026-10-09 ~08:1xZ re-seated on slot ~2. Read both checks and box-sync/safe-merge. Built grade mode (guards on serial/lock/fetch for MODE=grade, merge_tree_of helper shared with make_merge), the tree check in grade_merge, the fast-lane tree check and one self-test arm. AC2 PASS; AC1 arm 2 PASS; arm 1 FAIL on the empty graded set, row W2-S2 filed, order left open per the refusal clause.",
+ "session_log": "2026-10-09 ~08:1xZ re-seated on slot ~2. Read both checks and box-sync/safe-merge. Built grade mode (guards on serial/lock/fetch for MODE=grade, merge_tree_of helper shared with make_merge), the tree check in grade_merge, the fast-lane tree check and one self-test arm. AC2 PASS; AC1 arm 2 PASS; arm 1 FAIL on the empty graded set, row W2-S2 filed, order left open per the refusal clause. | Close: brought AMENDMENT 2 @f980747a55 (check + order) byte-for-byte; AC1 ok=True, AC2 ok=True; D1-W2-S2 resolved by row D1-W2-S3.",
  "compiler_tools": [
   {
    "tool": "box-sync.sh grade",
