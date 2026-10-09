@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_STRATID.TO-W2-1",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-W2-1.one-etf-list-names-and-rules.md",
+    "group": "OTHER",
+    "vintage_commit": "7575b70c45"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/decompositions/MDPF_STRATID_DECOMP_W2.md",
+    "vintage_commit": "7575b70c45",
+    "to_ref": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-W2-1.one-etf-list-names-and-rules.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_STRATID~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/etfs/config/etf_universe.json",
+      "kind": "config_data",
+      "commit_or_etag": "4efca68989",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "GUARD 1: no S3 write; issuer deploys after read",
+      "artifact_covered_by": [
+        "W2-1-AC1",
+        "W2-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "W2-1-AC1",
+      "criterion_verbatim": "the file carries cited full_names for exactly the 4 tickers and sma_name_rules that give pfde, pfoe and a null member for the three probe names",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_1_list.py",
+      "output_evidence": "full_names: DIVZ=Polen Dividend Income ETF, IDVZ=Polen International Dividend Income ETF, PFDE=Pathfinder Disciplined US Equity ETF, PFOE=Pathfinder Focused Opportunities ETF; sma_name_rules: 3 row(s); W21-LIST-OK (rc=0) after A7: Muni pattern Opal_Muni_Sleeve, member null",
+      "denominator": "4 of 4 tickers named and cited; 3 of 3 probes graded",
+      "status": "PASS",
+      "expect": "W21-LIST-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "W2-1-AC2",
+      "criterion_verbatim": "the three ETFS producers' _load_universe rule still reads exactly the 4 tickers from the amended file",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_1_loaders.py",
+      "output_evidence": "3 of 3 loaders carry the rule; universe read = ['DIVZ', 'IDVZ', 'PFDE', 'PFOE']; W21-LOADERS-OK (rc=0)",
+      "denominator": "3 of 3 loaders",
+      "status": "PASS",
+      "expect": "W21-LOADERS-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "checks run once each after the edit",
+      "observed": "OK tokens",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "scratch copy (.scratch/mut, uncommitted) with the Muni pattern changed to Opal_Muni_Nope; AC1 checker run against it",
+      "expected": "W21-LIST-BAD on the Muni probe",
+      "observed": "W21-LIST-BAD rules give set() for 'Opal_Muni_Income', want {None} (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "S3 write / deploy",
+      "reason": "GUARD 1"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.9.0_WK_MDPF_STRATID~4/MDPF_STRATID.TO-W2-1.one-etf-list-names-and-rules.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python json.load",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/W2_CHECKS/w2_1_list.py",
+      "result": "file parses and grades W21-LIST-OK"
+    }
+  ]
+}
