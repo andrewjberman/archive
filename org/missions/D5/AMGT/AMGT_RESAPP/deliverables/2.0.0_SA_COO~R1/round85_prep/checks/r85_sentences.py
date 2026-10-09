@@ -4,6 +4,8 @@
   python r85_sentences.py --crit AC1 --where file --keys <ONE KEY> --draft <local drafting JSON>
     (round 85, the issuer: grades an OFFLINE draft written with no store write; S3's floor there is the CURRENT stored drafting
      document's sentence count for that key, read only -- the same shape, `sections[].sentences[]`)
+  --no-floor: S3 is printed but not graded (round 85 AMENDMENT 1 to AMGT-jj-1, CTO~DELL1 msg 2442: a fresh model draw's yield is
+     not the join repair's to control -- row D1-W338-S1; the served floor is graded by AMGT-jj-2 on the live function).
 
 Reads every served machine sentence (`drafted_sections[].sentences[].text`) for the five stored 20-F names (ASML NA -- capture 004's
 key -- BABA, NU, PBR, SAP), from the live function (--where deployed, the default), the stored drafting documents (--where stored:
@@ -107,6 +109,7 @@ def main():
     ap.add_argument("--crit", required=True, choices=["AC1"])
     ap.add_argument("--where", choices=("deployed", "stored", "local", "file"), default="deployed")
     ap.add_argument("--draft")
+    ap.add_argument("--no-floor", action="store_true")
     ap.add_argument("--keys", default=",".join(KEYS))
     ap.add_argument("--write-base", action="store_true")
     a = ap.parse_args()
@@ -143,7 +146,9 @@ def main():
     s2 = say(glue_total == 0, "S2 no glued sentence boundary: %d of %d served texts glued" % (glue_total, n_total))
     s3 = say(bool(base) and not short, "S3 no name serves fewer sentences than its base (%s)" % (
         "names below base: %s" % short if short else ("no base recorded" if not base else "%d names at or above base" % len(keys))))
-    ok = s1 and s2 and s3
+    if a.no_floor:
+        print("   --no-floor: S3 printed, not graded")
+    ok = s1 and s2 and (s3 or a.no_floor)
     print("R85 SENTENCES AC1: %s" % ("YES" if ok else "NO"))
     return 0 if ok else 1
 
