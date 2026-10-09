@@ -57,3 +57,11 @@
 **Verdict: GIVEN (amended)**, conditional on `2.0.0_SA_COO~V2`'s matching COO-half amendment.
 
 -- 1.0.0_SA_CTO~DELL2
+
+**AMENDMENT 1.1 (MSTR msg 2041):** who writes the grant is MEASURED, not assumed.
+- ~G2 measured `secretsmanager:PutResourcePolicy` as implicitDeny for `cloudops-dell2-agent-user`, and step F leaves IAM users refused.
+- Before choosing, the applier runs `simulate-principal-policy` for both shapes: a resource-policy statement, and an identity-policy
+  allow on the one ARN.
+- If dell2 may write neither, the laptop's `0.7.0_AE_CloudOps` writes the one-ARN grant and its removal. That is the same shape as the
+  svc-irpt reader window.
+- Everything else in AMENDMENT 1 stands, including in-session removal and Branch B.
