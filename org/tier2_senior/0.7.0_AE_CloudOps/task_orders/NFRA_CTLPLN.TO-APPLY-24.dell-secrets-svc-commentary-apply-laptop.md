@@ -4,9 +4,15 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
+
+  <closure>
+    COMPLETE (issuer, ~02:1xZ). Applied 2026-10-09T02:03:17Z (policy default v3, plan 0/1/0, one ARN added). Issuer live read: both
+    Dell users GetSecretValue on opal/ticketing/svc-commentary-pXsmuU allowed, on opal/ticketing/svc-commentary-other implicitDeny.
+    Ledger closed (@3e3b61274f). dell2 V2 told via 0.0.0_AB_MSTR.
+  </closure>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
