@@ -28,7 +28,7 @@
 </context>
 
 <scope>
-1. **Do not start until `ADHOC.canon-r1-gold-writer-iam` is CLOSED.** Edit no source file, with ONE exception (AMENDMENT 1, issuer ruling on msg 3111): set the one literal `MDPF_GOLD_COMMIT` at `infra/aws/terraform/mdpf-pipeline/gold-lambda.tf:293` to `55c3cc4642...` (the full 40-character hash of the build pin), committed via safe-commit AFTER the build and BEFORE the apply. The stamp names the pin the package was built from (the file's own instruction), never the commit that carries it. The build stays `--pin 55c3cc4642`. The live stamp `e20899bce7` is already stale against the live code `ff1a8867a6`, and this redeploy makes it true.
+1. **Do not start until `ADHOC.canon-r1-gold-writer-iam` is CLOSED.** Edit no source file, with ONE exception (AMENDMENT 1, issuer ruling on msg 3111): set the one literal `MDPF_GOLD_COMMIT` at `infra/aws/terraform/mdpf-pipeline/gold-lambda.tf:293` to `55c3cc4642...` (the full 40-character hash of the build pin), committed via safe-commit AFTER the build and BEFORE the apply. The stamp names the pin the package was built from (the file's own instruction), never the commit that carries it. The build stays `--pin 55c3cc4642`. The live stamp `e20899bce7` is already stale against the live code `ff1a8867a6`, and this redeploy makes it true. **AMENDMENT 2** (issuer ruling on msg 3128, row MDPF_CANON-D1-S3): also add ONE PACKAGE row to `infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py` beside the two silver rows (:169-170): `("opal_unidentified.py", "data/assets/scripts/silver/opal_unidentified.py")`. `build_cottonwood_mdpf_slice.py:131-136` imports it unguarded and the package (at ff1a8867a6 as at 55c3cc4642) omits it. Commit it via safe-commit, then rebuild FROM THAT COMMIT (`--pin <that commit>`): the package must contain the fix. MDPF_GOLD_COMMIT is set to that build pin, as in AMENDMENT 1. `build_package.py` joins the paths. Then re-upload, re-apply, and run C3 and C4.
 2. Open a deploy ledger.
 3. Build the package from the pinned commit: `python infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py --pin 55c3cc4642`.
 4. Deploy by the function's own Terraform path, never `update-function-code`:
@@ -43,6 +43,7 @@
 </scope>
 
 <paths>
+infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py
 infra/aws/terraform/mdpf-pipeline/gold-lambda.tf
 org/critical_paths/change_management/
 org/critical_paths/.open_deploys/
