@@ -133,7 +133,7 @@ all sixteen:
    classification, carried forward unchanged by `IAM-r-1` -- `IAM-r-3`'s own per-member
    re-confirmation was not present in this worker's tree at write time; see CLASS RULINGS,
    MEMBERSHIP NOTE below.
-5. `finbert-ec2-backfill-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+5. `finbert-ec2-backfill-role` -- DEFER owner=0.7.0_AE_CloudOps~Z reason=completed one-shot backfill; retirement is a WORLD act no one has asked for (CTO, ROUND_ANALYSIS.round5.md @f77e32d7c3; revisited only if a finbert backfill recurs) -- the earlier ADOPT recommendation rested on: the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -332,7 +332,7 @@ all sixteen:
     service-default candidates; membership is INHERITED from round 1's classification, not
     independently re-confirmed by `IAM-r-3` in this worker's tree -- see CLASS RULINGS, MEMBERSHIP
     NOTE below.
-16. `workspace-sync-lambda-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
+16. `workspace-sync-lambda-role` -- DEFER owner=0.7.0_AE_CloudOps~Z reason=no consumer since 2025-12-30; no domain module (CTO, ROUND_ANALYSIS.round5.md @f77e32d7c3; adoption opens only if a module comes to own the function) -- the earlier ADOPT recommendation rested on: the adopting act (a
     `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
     exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
     assumption; THE OWNER FINDING below carries its four planes and their denominators.
