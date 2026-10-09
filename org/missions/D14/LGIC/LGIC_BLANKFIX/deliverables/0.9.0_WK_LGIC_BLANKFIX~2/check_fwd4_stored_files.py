@@ -10,7 +10,6 @@ Last line, printed once:  FWD4-STORED ok=True files=N with_source_owner=N undeci
   ok               every line carries both fields, the move was read, and the move agrees with its own fields
 """
 import os
-import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -37,7 +36,8 @@ import opal_naming_rootcheck as rc  # noqa: E402
 import opal_naming_rootmap as rm  # noqa: E402
 
 MAP = os.path.join(ROOT, "infra", "logic", "registry", "root_map.json")
-FIELDS = re.compile(r" source=(\S+) owner=(\S+)(?:;|  \[|$)")
+# Round 14 (R4): a stored-file line carries `source=<x> owner=<who moves the store> scope=<whose file it is>`. This round-13
+# check's "source and owner" of the ADDRESS is the line's source and SCOPE now; the owner field is the ruling row's mover.
 
 
 def main():
@@ -62,10 +62,10 @@ def main():
                 stored.append((key, ln, parts))
     with_so = undecided = 0
     for key, ln, parts in stored:
-        m = FIELDS.search(parts[3] + "  [")
-        if m is None:
-            problems.append("a stored-file line of %s carries no source and owner: %s" % (key, ln))
-        elif "UNDECIDED" in (m.group(1), m.group(2)):
+        _d, src, _own, scope = rc.split_stored_fields(parts[3])
+        if src is None or scope is None:
+            problems.append("a stored-file line of %s carries no source and scope: %s" % (key, ln))
+        elif src.startswith("UNDECIDED") or scope.startswith("UNDECIDED"):
             undecided += 1
         else:
             with_so += 1
@@ -73,9 +73,10 @@ def main():
     move = None
     for key, ln, parts in stored:
         kind, _typ, cur, detail, _where = parts
-        detail, src, own = rc.split_source_owner(detail)
+        detail, src, _mover, own = rc.split_stored_fields(detail)
         new = detail.split(" (", 1)[0].split(";", 1)[0]
-        if (kind == "FIX" and src not in (None, "UNDECIDED") and own not in (None, "UNDECIDED") and new != cur
+        if (kind == "FIX" and src is not None and own is not None and not src.startswith("UNDECIDED")
+                and not own.startswith("UNDECIDED") and new != cur
                 and "{" not in new and " " not in new):
             move = (key, cur, new, src, own, ln)
             break

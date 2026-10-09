@@ -1,0 +1,24 @@
+{
+ "deterministic": false,
+ "derivation_site": null,
+ "reason": "sel_<64 hex> = sha256 of {schema_version, firm_id, account_ids, directory_revision}; directory_revision is the sha256 of the whole firm directory the Enforcer held (not a field of the selection file); POST /analysis then loads the STORED record for that id and refuses an unstored or changed one.",
+ "evidence": [
+  "infra/aws/lambda/investor-reporting/_scope/selection.py:40-44 (_reference: hash over schema_version, firm_id, account_ids, directory_revision)",
+  "infra/aws/lambda/investor-reporting/_scope/selection.py:19-22 (directory_revision: sha256 of the whole directory JSON)",
+  "infra/aws/lambda/investor-reporting/_scope/selection.py:110-123 (resolve_selection: load_selection(firm, id), then record/binding/_reference checks; 'selection reference unavailable' when absent)",
+  "infra/aws/lambda/investor-reporting/_scope/selection_store.py:29-35 (load: DynamoDB get_item on SELECTION#<id>; None when absent)",
+  "infra/aws/lambda/investor-reporting/performance/entry.py:92-105 (_resolve_selected -> resolve_selection with configured_store().load)"
+ ],
+ "runner_branch": "not deterministic: load_selection accepts a file without account_set_id; run omits the account_set_id query when absent; refs and the E2A-SELECTION output line record selection_source=file and the file's sha256",
+ "runner_files": [
+  "data/assets/scripts/gold/irpt_custody/e2a_real_statement.py::load_selection",
+  "data/assets/scripts/gold/irpt_custody/e2a_real_statement.py::selection_record"
+ ],
+ "row": "IRPT_DASHBD-D2-W68-S1",
+ "tests": {
+  "passed": 25,
+  "failed": 0,
+  "new_test": "data/assets/scripts/gold/irpt_custody/tests/test_e2a_real_statement.py::test_selection_file_without_account_set_id_is_accepted_and_runs_without_an_id",
+  "also": "whole irpt_custody/tests folder: 188 passed, 1 xfailed, 0 failed; new tests: test_selection_file_with_a_valid_account_set_id_still_passes_it_through, test_malformed_selection_file_is_still_refused_by_name (7 params)"
+ }
+}

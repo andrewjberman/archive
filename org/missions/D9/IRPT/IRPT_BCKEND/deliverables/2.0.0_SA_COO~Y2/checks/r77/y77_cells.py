@@ -50,6 +50,7 @@ APPLY_AT = "2026-10-09T09:30:00Z"
 # read 5a (the acceptance RECORD carries ticket_id) cannot be read on dell2 (irpt-requests is not decryptable here); it is graded on
 # IRPT_ANLREQ TO-APPLY-Y1 read 4, the served read of the same record through irpt-status.
 Y1_READS = "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_anlreq_r1/APPLY-Y1_after_reads.json"
+LAPTOP_Y1 = "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/Y1_laptop_reads_3_5_result.json"
 
 
 def _pass(v):
@@ -68,6 +69,11 @@ def adapt(root):
     r2, r3 = a.get("read_2") or {}, a.get("read_3") or {}
     y1 = root / Y1_READS
     y1_4 = (json.loads(y1.read_text(encoding="utf-8")).get("reads") or {}).get("4") if y1.is_file() else None
+    # AMENDMENT 4 (issuer 2026-10-09 ~13:3xZ): read 5a is the STORED record property, which the laptop measured directly
+    # (get_item, ConsistentRead) as reads.4_record in the Y1 laptop result; that is the oracle dell2 cannot run.
+    lap = root / LAPTOP_Y1
+    if lap.is_file() and (json.loads(lap.read_text(encoding="utf-8")).get("reads") or {}).get("4_record") is True:
+        y1_4 = "PASS"
     reads = {
         "0": "PASS" if _pass(a.get("read_0")) else "FAIL",
         "1": "PASS" if _pass(a.get("read_1")) else "FAIL",
