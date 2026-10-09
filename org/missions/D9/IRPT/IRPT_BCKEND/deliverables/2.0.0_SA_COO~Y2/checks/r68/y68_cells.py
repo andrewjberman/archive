@@ -87,9 +87,8 @@ def main():
             adm = res.get("admit_readback") or {}
             print("laptop admit read-back: body_sha256_match=%r owner_is_advisor=%r acting_principal_is_filer=%r" % (
                 adm.get("body_sha256_match"), adm.get("owner_is_advisor"), adm.get("acting_principal_is_filer")))
-            if reads.get("4") == "STORED-NEXT-STATE" and not (adm.get("body_sha256_match") is True
-                    and adm.get("owner_is_advisor") is True and adm.get("acting_principal_is_filer") is True):
-                fail("the laptop did not confirm the stored body and the UPLOAD record (owner, acting_principal_id)")
+            # AMENDMENT 1 (issuer, 2026-10-09 ~01:3xZ; CTO msg 2091 on CVO msg 2088): AC2 grades CLEANUP only. The X-1 actor
+            # read-back (owner, acting_principal_id, body sha) moved to release 5 after-read 4 (CTO msg 1877), row IRPT_BCKEND-D2-S17.
             for k in keys:
                 state = got.get(json.dumps(k, sort_keys=True))
                 print("%s %s" % (state, json.dumps(k, sort_keys=True)))

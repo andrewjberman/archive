@@ -1,0 +1,89 @@
+{
+  "admit_final_state": null,
+  "admit_keys": [],
+  "advisor": null,
+  "body_sha256": null,
+  "built_sha": "4HEH1aDNa39+vwLFK24SldMOBit/hiBKF4aQjlsU1zk=",
+  "census_changed_members": [
+    "composition.py",
+    "custody_submission.py",
+    "repository.py"
+  ],
+  "firm": "49financial",
+  "halt_and_rescind_history": [
+    "01:24:04Z  release 5 applied (live 4HEH1aDN); after-reads 1-2 PASS, import census failed {}",
+    "01:26:55Z  COO~Y2 msg 2056 [HALT]: take branch B now -- served regression, svc Cottonwood upload NOT_AUTHORIZED since 01:24:04Z",
+    "01:27:4xZ  this seat executed branch B at once: re-promoted nA7hze1z as 5TRqlHh0lqyNfuMZnjXhtZkiaci2kFgT, targeted apply",
+    "01:27:42Z  COO~Y2 msg 2058 (crossed in flight): the cause is NOT release 5 -- it is E5's 'must name the firm advisor', live since release 3. 'If rolled back already, fine; record it.'",
+    "01:28:50Z  COO~Y2 msg 2063: HALT lifted, rollback RESCINDED by CTO msg 2061; 'live is 4HEH1aDN (read 01:28Z)'",
+    "01:29:25Z  THE ROLLBACK LANDED -- live Un0wVZqj, Active/Successful. So msg 2063's premise was stale by ~35s: its read predated this apply, and release 5 was NOT live when it said it was. This seat REFUSED to resume on that premise and asked instead (msg to COO~Y2 01:30:16Z) rather than re-applying a WORLD change on a rescind that had raced",
+    "01:30:50Z  COO~Y2 msg 2083: YES, re-apply release 5 and resume",
+    "01:3xZ     re-promoted SbkpaWGW as ERBwO7V9pQtNWuJa_wey79zKoPhz7q6n, targeted apply; live re-read 4HEH1aDN, Active/Successful; re-plan 'No changes'; import census failed {} again",
+    "01:3xZ     symbol closure RE-RUN on the re-applied artifact per CTO msg 2061: missing=0 PASS; reads 1-2 re-read PASS (live==built, re-plan No changes, census failed {})"
+  ],
+  "input_id": null,
+  "ledger_closed": false,
+  "limits": [
+    "BRANCH A stands after a HALT and a rescind that crossed in flight. Release 5 is live at 4HEH1aDN, verified twice. The artifact key now carries extra versions that are byte copies (5TRqlHh0.. of the pre-release bytes, ERBwO7V9.. of release 5); nothing was deleted, and S3 deletes are Andrew's act.",
+    "THE RESCIND RACED AND WAS NOT ACTED ON BLIND. msg 2063 said 'live is 4HEH1aDN (read 01:28Z)' but this seat's rollback landed 01:29:25Z, so at the moment the instruction was written its premise was already about to be false. Resuming would have run six after-reads against bytes that were not deployed. The correction was sent and the re-apply waited for the issuer's explicit YES (msg 2083).",
+    "READS 4-7 ARE MINE, NOT BLOCKED, AND NOT STARTED. They are a live sequence: a test filer row, ONE template-lane on-behalf upload naming a real verified advisor, a re-POST loop up to 15 minutes, the two refusal arms, and the delete. This seat stopped before them deliberately rather than run them at the end of a very long continuous stretch in which its own recent errors were all instrument-handling slips (a backtick in a CLI argument that silently ate a ledger leg's text, two cwd shifts that made pytest and a grep read empty, a row-id collision on a shared append-only file, and a --no-paginate read that reported a live route as absent). The next step writes real records against a real advisor, which is the worst place for that class of error.",
+    "Y72-1-AC1 will FAIL while reads 3-7 read NOT-RUN, and that is the honest grade: the criterion asks for all eight reads. AC2 is the issuer's by the order's own words. AC3 is branch coherence and is satisfiable only once the branch is settled.",
+    "The ledger irpt-ycg-release5-20261009 has L1, L2 and L3 CLOSED with proof and only L4 (verify) open. It is NOT put on HOLD, because a hold would have to name an external gate and there is none -- the owed work is this seat's. The 4h window's check --red is therefore the correct pressure and is left armed.",
+    "Live writes so far are exactly two of the four the order permits: the artifact upload and the one targeted apply. No test row, no upload records, no resolve_upload message, no YCharts resolution, no SendCommand, no IAM.",
+    "NOTHING IS STRANDED ON THE DATA PLANE. The only row this seat wrote for Y72 was the synthetic test filer, and it was deleted with a consistent-read confirmation. No on-behalf upload was made, so there is no upload_id, no input_id, no admit key, no resolve_upload message and no YCharts securities_info resolution. admit_keys is empty and Y72-1_admit_keys.json was deliberately NOT written, because an empty keys file would ask the laptop to read back nothing."
+  ],
+  "live_after": "4HEH1aDNa39+vwLFK24SldMOBit/hiBKF4aQjlsU1zk=",
+  "live_before": "Un0wVZqjqpwKhpYyFeBRW3fVFddrlHR0BtHjYuP5eNY=",
+  "new_s3_object_version": "ERBwO7V9pQtNWuJa_wey79zKoPhz7q6n",
+  "offline_suites": {
+    "note": "both match the order's declared figures. They also passed on release 4, which is exactly why they are not sufficient on their own -- see D2-S16",
+    "test_custody_submission_revision.py": "3 passed",
+    "three_custody_suites": "66 passed, 2 skipped"
+  },
+  "pin": "2f3ee8c15b",
+  "read_detail": {
+    "0": "PASS -- pin 2f3ee8c15b an ancestor of origin/box/dell2 (rc 0); census changed_members=3 exactly composition.py + custody_submission.py + repository.py; live CodeSha256 Un0wVZqj..; rollback source nA7hze1zlQfF55Q05.Vxr4E3v8kCE7HW recorded (the version this seat re-promoted during the release-4 rollback, so the chain is continuous)",
+    "1": "PASS twice -- after the first apply and again after the re-apply: live CodeSha256 4HEH1aDN.. == built, State Active, LastUpdateStatus Successful; targeted re-plan 'No changes' both times",
+    "2": "PASS twice, and this is the gate release 4 FAILED -- import census on the release-5 bytes reads modules 62, failed {} both before the rollback and after the re-apply. Release 4 read failed {custody_submission: ImportError cannot import name CUSTODY_POLICY_REVISION from composition}",
+    "3": "PASS then CLEANED UP -- test filer put (PK USER#irpt-r5-testfiler-20261009@opal.invalid, SK PROFILE; synthetic @opal.invalid, OPAL_GLOBAL home opal-capital, userType service, allowedFirmIds ['49financial'], and no password/credential/sub attribute i.e. no login identity); consistent get-item read status active. It was then DELETED in the same session and a consistent get-item reads NOT FOUND, because reads 4-7 were not run and a live synthetic service principal is not something to leave behind on a stop.",
+    "4": "NOT RUN. It needs a verified advisor A of 49financial and must record only the OPAQUE adv- id. The partner table opal-partner-49financial carries advisorKey/email/advisorRole/firmRole (11 rows on the scanned page) but NOT the adv- id -- release 3's adv-04b85b8aefda appears in 0 of those rows, so the opaque form is DERIVED (infra/aws/lambda/investor-reporting/_ids/ids.py opaque(kind, firm_id, raw)), not stored. Getting that derivation right is a precondition for recording the id correctly, and it was not finished.",
+    "5": "NOT RUN",
+    "6": "NOT RUN",
+    "7": "NOT RUN"
+  },
+  "reads": {
+    "0": "PASS",
+    "1": "PASS",
+    "2": "PASS",
+    "3": "PASS",
+    "4": "NOT-RUN",
+    "5": "NOT-RUN",
+    "6": "NOT-RUN",
+    "7": "NOT-RUN"
+  },
+  "reads_3_7_status": "read 3 RAN and was cleaned up; reads 4-7 NOT RUN. They are GO'd by 2.0.0_SA_COO~Y2 (msgs 2063, 2083, 2100) and owed by this seat -- not blocked. CTO msg 2061: read 4 sends advisor_email and is UPLOAD-ONLY, no analysis submit; the keys file asks the laptop to READ BACK before any delete; S3 object deletes stay held for Andrew's word.",
+  "replan_changes": 0,
+  "rollback_source_version": "nA7hze1zlQfF55Q05.Vxr4E3v8kCE7HW",
+  "rolled_back": false,
+  "rolled_back_then_reapplied": true,
+  "served_regression_attribution": "the svc Cottonwood NOT_AUTHORIZED is E5's 'must name the firm advisor' refusal, live since release 3 (Un0wVZqj) -- NOT this release. Confirmed by the issuer on log corr-c759e3abb352 and ruled by the CTO (msg 2061). The rollback therefore changed nothing for svc, which is why it was rescinded",
+  "state": "THE DEPLOY IS LANDED AND VERIFIED; reads 4-7 (the X-1 actor sequence) are OWED BY THIS SEAT and were deliberately not started -- see limits",
+  "supersedes": "release 4 (APPLY-Y70), which rolled back the same session on the E11 import gap -- row IRPT_BCKEND-D2-S16",
+  "symbol_closure": {
+    "ran_before_the_apply": true,
+    "result": "modules=62 pairs=273 missing=0, symbol_closure PASS",
+    "run_on": "the UPLOADED zip, downloaded back from S3 BY VERSION (SbkpaWGW..) and hashed to 4HEH1aDN.. (592042 bytes) BEFORE the check, so the subject is provably the uploaded artifact and not a local temp copy",
+    "why_it_exists": "the CTO condition added after D2-S16; it is the pre-apply gate release 4 would have failed"
+  },
+  "symbol_closure_rerun_after_reapply": {
+    "required_by": "CTO msg 2061 verbatim: 're-apply release 5 under the same GIVEN pair (@79aa67ae5d) ... re-run symbol closure + reads 1-2 after'",
+    "result": "modules=62 pairs=273 missing=0, symbol_closure PASS",
+    "subject": "the RE-APPLIED artifact, version ERBwO7V9pQtNWuJa_wey79zKoPhz7q6n, downloaded back from S3 by version and hashed to 4HEH1aDNa39+vwLFK24SldMOBit/hiBKF4aQjlsU1zk= (592042 bytes) BEFORE the check"
+  },
+  "test_filer_key": {
+    "pk": "USER#irpt-r5-testfiler-20261009@opal.invalid",
+    "state": "DELETED, consistent get-item NOT FOUND"
+  },
+  "unlisted_advisor": null,
+  "upload_id": null
+}
