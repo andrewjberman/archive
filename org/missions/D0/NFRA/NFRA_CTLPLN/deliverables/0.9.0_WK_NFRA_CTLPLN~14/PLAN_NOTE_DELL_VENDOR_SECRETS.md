@@ -532,3 +532,15 @@ Expected: **0 to add, 2 to change, 0 to destroy.** The two addresses are the who
 ### Not done
 
 `tests/plan_reads_census.json` was not re-derived: the registers now place one more Dell project (`MDPF_DEMQUE`) than the saved census (row `NFRA_CTLPLN-W14-S39`); whether its roots add a refused read is unread.
+
+## K. THE UI-WALKER PASSWORD READ, BY EXACT ARN (amendment 22; `1.0.0_SA_CTO` msg 107538, superseding 107534 on dell1's correction)
+
+Metadata read (describe-parameters, no value): `/opal/ui-walker/password` is a SecureString under `KeyId alias/aws/ssm` (the AWS-managed key), so no KMS statement is written.
+
+Expected plan by reading: ONE policy changed in place, `aws_iam_policy` for `dell_planreads_policy.json` (the group's plan-reads policy, 430 -> 630 characters, far under 6,144). Nothing created, nothing destroyed; the group's managed-policy count is unchanged (9 of 10).
+
+The statement: Sid `ReadUiWalkerPassword`, Allow `ssm:GetParameter` ONLY on `arn:aws:ssm:us-east-1:313476888478:parameter/opal/ui-walker/password`. No `GetParameters`, no `GetParametersByPath`, NO `ssm:DeleteParameter`, no wildcard.
+
+Blast radius: both Dells can read that one password (the decrypt happens under the AWS-managed key, which any principal allowed GetParameter may use). They still cannot delete it (a delete would erase the version history; simulated implicitDeny) and cannot read any sibling parameter. `ssm:PutParameter` on it reads as before the change (allowed, from the existing deploy grant), so a Dell can write a new version and now also read it back. Re-enabling the walker login is a separate decision.
+
+Simulation: `walker_ok=11/11` (both Dells; GetParameter allowed, DeleteParameter and GetParameters implicitDeny, GetParameter on `/opal/ui-walker/other` implicitDeny, PutParameter allowed with and without the statement, plus the shape check).

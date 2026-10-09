@@ -4,7 +4,6 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~RV</issued_to>
     <date>2026-10-07</date>
-    <status>pending</status>
     <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>

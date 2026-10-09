@@ -1,0 +1,110 @@
+diff --git a/data/assets/scripts/silver/conversion_manifest.py b/data/assets/scripts/silver/conversion_manifest.py
+index f4779f4a1b..be8d7d0000 100644
+--- a/data/assets/scripts/silver/conversion_manifest.py
++++ b/data/assets/scripts/silver/conversion_manifest.py
+@@ -40,6 +40,15 @@ class ManifestError(ValueError):
+ BASIS_LABEL = {
+     "08242234": "SCHWAB-RPS basis",
+     "08335338": "BD-sourced 49F basis",
++    "08403355": "Tax SMA basis",
++}
++
++# Source types the vendor does NOT publish for a master (OG-en-1 record, 2026-10-08: 08403355
++# returned 13 of the control's 14 types, no slm over 30 days; shape ruling 1.0.0_SA_CTO~O msg
++# 32147, 2026-10-09). Closure-only: a type listed here that DOES land is expected and converted
++# as usual; this only names the reason for an absent table.
++MASTER_NOT_PUBLISHED = {
++    "08403355": ("slm",),
+ }
+ 
+ # The named honest holes (design SS2c / dictionary SS2c): reader-variance types that
+@@ -778,8 +787,14 @@ def build_closure(run_id: str, trigger: str, master: str, date: str, inventory:
+     non_applicable = [{"subject": p["type"], "kind": "source_partition",
+                        "reason": "NAMED_HOLE"}
+                       for p in partitions if p["disposition"] == SRC_NAMED_HOLE]
++    not_published = {"fact_" + x for x in MASTER_NOT_PUBLISHED.get(master, ())}
++    non_applicable += [{"subject": x, "kind": "source_partition",
++                        "reason": "NOT_PUBLISHED_FOR_MASTER"}
++                       for x in sorted(MASTER_NOT_PUBLISHED.get(master, ()))
++                       if x not in bronze]
+     non_applicable += [{"subject": t, "kind": "table",
+-                        "reason": "DECLARED_NO_SOURCE_PARTITION"}
++                        "reason": ("NOT_PUBLISHED_FOR_MASTER" if t in not_published
++                                   else "DECLARED_NO_SOURCE_PARTITION")}
+                        for t in declared_tables() if t not in source_of]
+ 
+     closure = {
+diff --git a/data/assets/scripts/silver/silver_registry.py b/data/assets/scripts/silver/silver_registry.py
+index a288f0c150..76be7c4a54 100644
+--- a/data/assets/scripts/silver/silver_registry.py
++++ b/data/assets/scripts/silver/silver_registry.py
+@@ -53,7 +53,7 @@ QUARANTINE_PREFIX = "_quarantine/"
+ # from the key the file arrived under. (Same discipline as the emitter's
+ # _declared_masters vs _observed_masters: a guard whose two sides agree by
+ # construction cannot fail.)
+-DECLARED_SCHWAB_MASTERS = ("08242234", "08335338")
++DECLARED_SCHWAB_MASTERS = ("08242234", "08335338", "08403355")
+ 
+ # ---------------------------------------------------------------------------
+ # fact_ NAMING (Andrew-direct, dictionary v0.4 @ 8c2574c2e; CTO 20260714T091651Z).
+diff --git a/data/assets/scripts/silver/tests/test_schwab_runtime.py b/data/assets/scripts/silver/tests/test_schwab_runtime.py
+index 199a0df64d..f07cacab8d 100644
+--- a/data/assets/scripts/silver/tests/test_schwab_runtime.py
++++ b/data/assets/scripts/silver/tests/test_schwab_runtime.py
+@@ -181,9 +181,9 @@ def test_sweep_converts_the_shortfall_writes_manifests_and_folds_status(monkeypa
+     assert "backfill-status" in lane24["backfill_status"]
+     assert lane33["converted"] == 0
+     assert lane33["backfill_status"].startswith("NOT_WRITTEN")
+-    # two manifests, one per lane, run-id-keyed
++    # one manifest per lane (three declared masters since OG-tm-1), run-id-keyed
+     assert {json.loads(s3.objects[ln["manifest"]])["master"] for ln in out["lanes"]} \
+-        == {"08242234", "08335338"}
++        == {"08242234", "08335338", "08403355"}
+ 
+ 
+ def test_sweep_REFUSES_a_pipe_date_missing_RLD_whole_and_says_so(monkeypatch):
+diff --git a/data/assets/scripts/silver/tests/test_conversion_manifest.py b/data/assets/scripts/silver/tests/test_conversion_manifest.py
+index 9fa114060f..7826a5d4d9 100644
+--- a/data/assets/scripts/silver/tests/test_conversion_manifest.py
++++ b/data/assets/scripts/silver/tests/test_conversion_manifest.py
+@@ -1086,3 +1086,40 @@ def test_ogc1_ac11(monkeypatch):
+     assert verdicts[3]["status"] == "incomplete"
+     assert ("INCONSISTENT_RECORD", "closure_id") in {
+         (f["class"], f["subject"]) for f in verdicts[3]["findings"]}
++
++
++# --- OG-tm-1: a master the vendor does not publish a type for (08403355 has no slm) -----------
++def _og_tm1_inventory(master, types, date="20261007"):
++    import set_identity_guard as g
++    bronze, silver = {}, {}
++    for t in types:
++        bronze[t] = ["schwab/%s/bronze/%s/%s/%s.CRS%s.%s.zip" % (master, t, date, master, date, t.upper())]
++        for fact in g.expected_tables(t):
++            for tab in [fact] + list(g._dims_for_table(fact)):
++                silver.setdefault(tab, []).append(
++                    {"key": cm.canonical_object_key(master, tab, "2026-10-07"),
++                     "version_id": "v1", "size": 10, "etag": "e", "rows": 5})
++    return {"bronze": bronze, "silver": silver, "errors": []}
++
++
++_OG_TM1_TYPES = "acc rld rly rps rty sec tcfx tnn trn uln ult upn upt".split()
++
++
++def test_og_tm1_taxsma_day_without_slm_qualifies_and_names_slm_not_published():
++    c = cm.build_closure("r1", "event", "08403355", "2026-10-07",
++                         _og_tm1_inventory("08403355", _OG_TM1_TYPES), [])
++    assert c["status"] == "qualified" and c["findings"] == []
++    na = {(x["kind"], x["subject"]): x["reason"] for x in c["non_applicable"]}
++    assert na[("source_partition", "slm")] == "NOT_PUBLISHED_FOR_MASTER"
++    assert na[("table", "fact_slm")] == "NOT_PUBLISHED_FOR_MASTER"
++
++
++def test_og_tm1_the_declaration_is_this_master_only_and_never_hides_a_landed_slm():
++    other = cm.build_closure("r1", "event", "08242234", "2026-10-07",
++                             _og_tm1_inventory("08242234", _OG_TM1_TYPES), [])
++    assert {x["reason"] for x in other["non_applicable"] if x["subject"] == "fact_slm"} \
++        == {"DECLARED_NO_SOURCE_PARTITION"}
++    landed = cm.build_closure("r1", "event", "08403355", "2026-10-07",
++                              _og_tm1_inventory("08403355", _OG_TM1_TYPES + ["slm"]), [])
++    assert not [x for x in landed["non_applicable"] if "slm" in x["subject"]]
++    assert "fact_slm" in landed["expected_tables"]
