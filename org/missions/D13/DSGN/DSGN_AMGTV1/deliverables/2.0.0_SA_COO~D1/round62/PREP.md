@@ -13,5 +13,9 @@ lands. Read at portal DEV `9b06f6ed`.
    prices, so the one sentence (`data-timeline-price-absent`) was never seen rendered. The next close walk picks a name outside the
    stored price history (95 tickers, gg-5).
 
+   The candidate name is **NVDA US**. At 10:2xZ, the 95 tickers in the stored objects (`price_history_px_last/date=2026-10-02/year_pull.json`
+   and `date=2026-10-07/daily_30d.json`) include AMD US and 992 HK but not NVDA US, MSFT US or AAPL US. NVDA is a covered name: AMGT_RESAPP
+   gg-4 names it with served feed items. The walk passes `--security "NVDA"`.
+
 Check: `round62/checks/r62.cjs`, dry-run at DEV `9b06f6ed` 2 of 4 (ONE LINE and THE AXIS SAYS WHAT IT IS FAIL as expected; NOTHING
 INVENTED holds as the guard; PLANTED passes). Items 1-2 are one repair cell, LOCAL, cut as LF (row `DSGN_AMGTV1-D1-S1`).
