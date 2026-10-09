@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_CANON.TO-CN-a-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "12adb87963"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "155ac2ce67",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-a-1.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_CANON~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/mdpf-pipeline/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform source on branch wk-MDPF_CANON-1 (LOCAL); no apply; CloudOps applies after the drain."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/mdpf-pipeline/gold-lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform source on branch wk-MDPF_CANON-1 (LOCAL); no apply; CloudOps applies after the drain."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: r1_iam.py -- expect: ROUND 1 GOLD WRITERS: 6 of 6 arms -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round1/checks/r1_iam.py\"; echo \"exit=$?\"",
+      "output_evidence": "ARM PASS NAMES: one opal_name module per firm (function gold-writer, kind role), the role named by it, none typed :: names: mdpf-49f-gold-writer-role, mdpf-inf-gold-writer-role, mdpf-cot-gold-writer-role\nARM PASS GRANT: each role's S3 grants are its firm bucket or its firm gold prefix of the four artifacts only :: 15 S3 ARN(s) across the three roles, every one the firm bucket or a firm gold prefix\nARM PASS TRUST: each role trusts mdpf-gold-lambda, the Lambda may assume it, gold-lambda.tf passes its ARN :: each role trusts mdpf-gold-lambda; the Lambda may assume each; the env carries each ARN\nARM PASS GLOBAL: the gold Lambda's own role may write the composite gold of the four artifacts in opal-data-mdpf :: 4 of 4 composite gold artifacts granted to the gold Lambda's own role\nARM PASS ADMITTED: the live DenyForeignFirmPrincipals admits each name() role with no edit :: each name() role is admitted by its bucket's live DenyForeignFirmPrincipals, unedited\nARM PASS PLANTED: the grant comparator refuses platinum, state, wildcard and typed-bucket grants :: platinum, state, wildcard and typed-bucket grants refused; a correct set passes\nROUND 1 GOLD WRITERS: 6 of 6 arms\nexit=0",
+      "denominator": "6 of 6 arms",
+      "status": "PASS",
+      "expect": "ROUND 1 GOLD WRITERS: 6 of 6 arms"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: terraform fmt -check iam.tf gold-lambda.tf -- expect: exit=0 with no file listed -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && terraform -chdir=infra/aws/terraform/mdpf-pipeline fmt -check iam.tf gold-lambda.tf; echo \"exit=$?\"",
+      "output_evidence": "terraform fmt -check iam.tf gold-lambda.tf listed no file (empty stdout, empty stderr)\nexit=0",
+      "denominator": "2 of 2 files clean (none listed)",
+      "status": "PASS",
+      "expect": "exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 is JUDGMENT, graded on the issuer's real run at the round-1 close: after CloudOps applies, get-role on each name() role shows the trust on mdpf-gold-lambda-role and the four gold prefixes only, and the gold Lambda's live env carries the three ARNs.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment=true: no invocation; graded on the issuer's round-1 close run",
+      "output_evidence": "Source only: three roles gw_49f/gw_inf/gw_cot trust aws_iam_role.mdpf_gold_lambda.arn, grant the four gold prefixes, and gold-lambda.tf env carries GOLD_WRITER_ROLE_ARN_49FINANCIAL/_INFLECTION/_COTTONWOOD. Nothing applied.",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "graded at the round-1 close run",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Issuer's base run of r1_iam.py: 2 of 6 arms (NAMES, GRANT, TRUST, GLOBAL fail before the build).",
+      "expected": "2 of 6 before the build; 6 of 6 after.",
+      "observed": "6 of 6 after the build, exit=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "r1_iam.py and terraform fmt -check run once on the final source.",
+      "observed": "both green",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform validate / plan",
+      "reason": "Not named by the order; no AWS or backend access used."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-W1-S1"
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "r1_iam.py",
+      "result": "ROUND 1 GOLD WRITERS: 6 of 6 arms"
+    },
+    {
+      "tool": "terraform",
+      "invocation": "terraform fmt -check iam.tf gold-lambda.tf",
+      "result": "exit=0"
+    }
+  ]
+}
