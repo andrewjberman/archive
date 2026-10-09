@@ -32,8 +32,10 @@ old_errors = subprocess.run(["git", "show", "%s:infra/aws/lambda/investor-report
                             cwd=str(ROOT), capture_output=True, check=True).stdout
 
 
-PRE_BINDING_PIN = subprocess.run(["git", "rev-parse", pin + "^"], cwd=str(ROOT), capture_output=True, check=True).stdout.decode().strip()
-pre_entry = subprocess.run(["git", "show", "%s:infra/aws/lambda/investor-reporting/narrative/entry.py" % PRE_BINDING_PIN],
+# The control is the entry.py from BEFORE the binding change. It is the parent of the binding commit cabad9008c (IB-pr-399), NOT the
+# parent of the pin: at any pin after the binding change the pin's parent already carries the bound entry, so that control cannot fail.
+PRE_BINDING_REF = subprocess.run(["git", "rev-parse", "cabad9008c^"], cwd=str(ROOT), capture_output=True, check=True).stdout.decode().strip()
+pre_entry = subprocess.run(["git", "show", "%s:infra/aws/lambda/investor-reporting/narrative/entry.py" % PRE_BINDING_REF],
                            cwd=str(ROOT), capture_output=True, check=True).stdout
 
 
@@ -177,7 +179,7 @@ arm("no_row_internal_selects_other_firm",
 pre_widen = count(lambda p: p["pre_binding_entry"]["noRow"]["reached_firm_check"] == "inflection")
 arm("NEGATIVE CONTROL: the same built tree with entry.py put back to its pre-IB-pr-399 bytes binds the no-row internal caller to inflection (the widening this cell removes)",
     "expected-diff" if len(pre_widen) == n else "UNEXPECTED",
-    "%d of %d routes bind to inflection without NarrativeEntry (pre-binding entry.py = %s)" % (len(pre_widen), n, PRE_BINDING_PIN[:10]), True)
+    "%d of %d routes bind to inflection without NarrativeEntry (pre-binding entry.py = %s)" % (len(pre_widen), n, PRE_BINDING_REF[:10]), True)
 row_unlisted_ok = count(lambda p: p["pre_binding_entry"]["rowCotInf"]["code"] == "FIRM_BINDING")
 arm("a row-listed caller is narrowed identically with and without NarrativeEntry (row [cottonwood] selecting inflection: refused FIRM_BINDING)",
     "identical" if len(row_unlisted_ok) == n and len(row_refuse) == n else "UNEXPECTED",

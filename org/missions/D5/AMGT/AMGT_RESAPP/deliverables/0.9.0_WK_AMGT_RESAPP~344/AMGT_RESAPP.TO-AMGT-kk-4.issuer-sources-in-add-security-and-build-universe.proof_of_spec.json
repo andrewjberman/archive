@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-kk-4.issuer-sources-in-add-security-and-build-universe",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "36845bd58b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "36845bd58b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-kk-4.issuer-sources-in-add-security-and-build-universe.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~344",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/add_security.py",
+      "kind": "script",
+      "commit_or_etag": "d07ac030f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_build_document passes crosswalk.load_issuer_sources() (function scope) into build_crosswalk; a load failure raises IssuerSourcesUnreadable and main prints REFUSED and returns 6 (fail-closed, AMENDMENT 1, row S1); no deploy.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/build_universe.py",
+      "kind": "script",
+      "commit_or_etag": "d07ac030f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_union(issuer_sources=None) stamps issuer; union_main reads the sources at call time (row S2); no deploy.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_writers_carry_issuer.py",
+      "kind": "test",
+      "commit_or_etag": "d07ac030f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 tests offline, sources stubbed (incl. the fail-closed refusal).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every test passes: a record added by each writer carries issuer.cik from a stubbed measured source, and none when no source measures it; 0 failed; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"/c/tmp/stubfitz;$(pwd)\" py -3.12 -m pytest lib/research/identity/tests/test_writers_carry_issuer.py -q; echo \"exit=$?\"",
+      "output_evidence": "........                                                                 [100%]\n8 passed in 0.66s\nexit=0",
+      "denominator": "8 passed, 0 failed",
+      "status": "PASS",
+      "expect": "passed[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the identity folder passes with 0 failed; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"/c/tmp/stubfitz;$(pwd)\" py -3.12 -m pytest lib/research/identity -q; echo \"exit=$?\"",
+      "output_evidence": "256 passed, 47 warnings, 2 subtests passed in 23.75s\nexit=0",
+      "denominator": "256 passed, 0 failed",
+      "status": "PASS",
+      "expect": "passed[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no planted discriminator; AC1 and AC2 are the checks over the built list and the local resolver.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: the local list reads live stores (filing_source, the SEC ticker table, universe/v1) so a later build may differ",
+      "observed": "n/a",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any store write, deploy or redeploy",
+      "reason": "Bounds s.1: no deploy, no store write; tests stub the sources."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W344-S1",
+    "AMGT_RESAPP-D1-W344-S2"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~344/",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "py -3.12 -m pytest lib/research/identity -q",
+      "result": "256 passed, 47 warnings, 2 subtests passed (rc=0)"
+    }
+  ]
+}
