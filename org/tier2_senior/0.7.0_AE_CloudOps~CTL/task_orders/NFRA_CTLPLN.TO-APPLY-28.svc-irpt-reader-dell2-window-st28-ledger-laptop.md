@@ -4,9 +4,16 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
+
+  <closure>
+    COMPLETE (issuer, ~13:1xZ). ADD put 2026-10-09T09:09:10Z by base 0.7.0_AE_CloudOps (CTO yes msg 107856); dell2 read the secret in memory,
+    each read reported after the fact; X1 at 12:03Z. REMOVE put 12:46:15-12:46:19Z by 0.7.0_AE_CloudOps~CTL (re-addressed; base seat deaf
+    since 09:29Z), read back SET-EQUAL to BEFORE, dell2 and dell1 explicitDeny. Issuer live read 12:47:32Z dell2 absent; 12:48:38Z simulation
+    explicitDeny. Inside the 13:09:10Z deadline; 44 min after X1 (the deaf-seat delay). Ledger closed 12:53:00Z (@b3d0b610d4). CTO informed.
+  </closure>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
