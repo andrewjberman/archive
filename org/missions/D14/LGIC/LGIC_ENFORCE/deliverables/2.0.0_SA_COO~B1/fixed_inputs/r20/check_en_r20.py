@@ -251,7 +251,10 @@ def arm_s12(d):
     line = rec.get("grade_line") or ""
     need(line == "NONE" or pname in line, "grade_line neither names the planted name nor is NONE")
     if line == "NONE":
-        need(re.match(r"LGIC_ENFORCE-[A-Z0-9]+-S\d+$", rec.get("row_id") or ""), "grade_line NONE needs a surprise row_id")
+        # AMENDMENT 1 (EN-z-5, row LGIC_ENFORCE-D1-W2-S153): a worker's row id carries W<n> (LGIC_ENFORCE-D1-W2-S152)
+        need(re.match(r"LGIC_ENFORCE-(?:[A-Z0-9]+-)+S\d+$", rec.get("row_id") or ""), "grade_line NONE needs a surprise row_id")
+        rows = open(os.path.join(ROOT, PROJ, "surprise-channel/investigations/INVESTIGATION_v1.md"), encoding="utf-8").read()
+        need(('"id": "%s"' % rec["row_id"]) in rows, "row_id %s is not a row in the channel" % rec["row_id"])
     need(rec.get("gate_summary", "").startswith("NAMING-GATE: "), "gate_summary is not the gate's summary line")
     print("qa_branch=%s commit=%s grade_line=%s summary=%s" % (br, sha, line, rec["gate_summary"]))
     return "PASS-R20-S12"
