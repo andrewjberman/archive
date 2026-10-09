@@ -2,7 +2,7 @@
   <metadata>
     <id>NFRA_TRNSPT.TO-APPLY-a18.second-reader-role-laptop</id>
     <issued_by>2.0.0_SA_COO~T2</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~TRL</issued_to>
     <date>2026-10-09</date>
     <status>pending</status>
     <project_code>NFRA_TRNSPT</project_code>
@@ -14,6 +14,14 @@
 <owned_cells>TR-a-18</owned_cells>
 <decomp_context>dell2's round 18 (box/dell2; reaches the laptop tree at the next box pass): "TR-a-18 | FWD-8 apply: the pair on TR-p-18's bytes, then the apply by the laptop (IAM identity) routed through MSTR". Built @f8c4859407. Routed via 0.0.0_AB_MSTR~DELL2 because dell2's identity does not administer the transcripts key.</decomp_context>
 </decomp_ref>
+
+  <reassignment>
+    AMENDMENT (issuer, 2026-10-09 ~14:2xZ; UB-953b fold @88141ce237; laptop 2.0.0_SA_COO~C via 0.0.0_AB_MSTR~DELL2 msg 3434): the VERIFY
+    leg is RELOCATED to 0.7.0_AE_CloudOps~TRL (the laptop base 0.7.0_AE_CloudOps is deaf since ~09:29Z). The APPLY leg landed 2026-10-09
+    09:55Z (ledger nfra-trnspt-a18-second-reader-laptop-20261009: 3 added, 1 changed). ~TRL runs ONLY the open VERIFY leg as the ledger names
+    it -- role read-back, the full key-policy diff, the admitted/refused S3 proof with statuses only -- and closes that ledger. The key policy
+    now also carries SilverReaderDecryptOnly (TO-APPLY-s21, 14:07Z); that statement is s21's, not a18's, and is read as such.
+  </reassignment>
 
   <objective>
     Apply FWD-8's second named reader: one IAM role (`teams-global-transcripts-second-reader-role`, name() output) that `Opal_Terminal` may
