@@ -3,7 +3,7 @@
 **Cell:** `IRPT_DASHBD.TO-DB-b-10` | **By:** `0.9.0_WK_IRPT_DASHBD~1`, 2026-10-02 | **Word:** @0abef798f7 card 4
 **Records:** `TIEOUT_49F_BLACKDIAMOND_R4.json`, `BD_LIKEDAY_PULL_R4.json`, `BD_LIKEDAY_PLAN_R4.json` (the reviewed request bodies), `RAW_BD_PERIOD_<account>.sanitised.json.gz` (the full response, `accountName` replaced; sha256 of the unsanitised bytes in the pull record notes below), script `bd_likeday_pull_r4.py`
 **Vendor calls:** 3 performancePeriod requests (one per mapped account), 0 transport retries, 1 session-token mint (see row IRPT_DASHBD-W1-S11), 0 performanceSeries.
-**Mapped:** acct#89d0916a, 0076459710, 0084073310. **Unmapped:** 0035940058 and 0091939812 (no `bd_internal_id` in the roster, status `pending_resolution`; not guessed).
+**Mapped:** acct#89d0916a, acct#6b914f88, acct#ffa615d2. **Unmapped:** acct#f08ffd13 and acct#d0cf6c92 (no `bd_internal_id` in the roster, status `pending_resolution`; not guessed).
 
 ## The table
 
@@ -16,13 +16,13 @@
 | acct#89d0916a | 2026-07-08 | 2026-08-04 | 20 | 20 | yes | +1.1633% | +1.0072% | 0.1561% |
 | acct#89d0916a | 2026-08-06 | 2026-08-19 | 10 | 10 | yes | +0.4949% | +0.4991% | 0.0042% |
 | acct#89d0916a | 2026-08-21 | 2026-10-01 | 29 | 29 | yes | -10.0257% | -10.2211% | 0.1954% |
-| 0076459710 | 2026-07-09 | 2026-08-04 | 19 | 19 | yes | +5.0098% | +5.0098% | 0.0000% |
-| 0076459710 | 2026-08-11 | 2026-08-19 | 7 | 7 | yes | +3.9440% | +4.2747% | 0.3307% |
-| 0076459710 | 2026-08-21 | 2026-09-09 | 13 | 13 | yes | +1.7933% | +1.7858% | 0.0076% |
-| 0076459710 | 2026-09-16 | 2026-10-01 | 12 | 12 | yes | -6.7067% | -6.5769% | 0.1297% |
-| 0084073310 | 2026-03-20 | 2026-08-04 | 94 | 94 | yes | +24.2267% | +23.9661% | 0.2606% |
-| 0084073310 | 2026-08-06 | 2026-08-19 | 10 | 10 | yes | +1.8714% | +1.9838% | 0.1124% |
-| 0084073310 | 2026-08-21 | 2026-10-01 | 29 | 29 | yes | +6.1779% | +6.8856% | 0.7078% |
+| acct#6b914f88 | 2026-07-09 | 2026-08-04 | 19 | 19 | yes | +5.0098% | +5.0098% | 0.0000% |
+| acct#6b914f88 | 2026-08-11 | 2026-08-19 | 7 | 7 | yes | +3.9440% | +4.2747% | 0.3307% |
+| acct#6b914f88 | 2026-08-21 | 2026-09-09 | 13 | 13 | yes | +1.7933% | +1.7858% | 0.0076% |
+| acct#6b914f88 | 2026-09-16 | 2026-10-01 | 12 | 12 | yes | -6.7067% | -6.5769% | 0.1297% |
+| acct#ffa615d2 | 2026-03-20 | 2026-08-04 | 94 | 94 | yes | +24.2267% | +23.9661% | 0.2606% |
+| acct#ffa615d2 | 2026-08-06 | 2026-08-19 | 10 | 10 | yes | +1.8714% | +1.9838% | 0.1124% |
+| acct#ffa615d2 | 2026-08-21 | 2026-10-01 | 29 | 29 | yes | +6.1779% | +6.8856% | 0.7078% |
 
 **Summary:** 14 pairs, 14 like-day pairs (coverage 14 of 14); over the like-day pairs the median abs_diff is 0.1637% and the max is 1.2130%.
 
@@ -30,4 +30,4 @@
 
 Each row is one maximal run of consecutive NYSE trading days (`lib/trading_calendar.py`) with a non-null `total_return_daily` in the served reporting gold, at least 5 days long; `opal_twr` is the geometric link of those daily returns. BD was asked for its time-weighted return (Cumulative, net of fees) over exactly those ranges, one request per account. On all 14 pairs BD's `daysHeld` equals Opal's linked-day count, so every pair is a like-day pair and no pair is left out of the median or the max. This record states differences between two series over equal day counts; it does not say which series is right on any row.
 
-Full-response sha256 (unsanitised bytes, first 16 hex): acct#89d0916a `9cacaf85e9a483b8`; 0076459710 `a6276efe2c043d7a`; 0084073310 `6c4bff2f216376f8`.
+Full-response sha256 (unsanitised bytes, first 16 hex): acct#89d0916a `9cacaf85e9a483b8`; acct#6b914f88 `a6276efe2c043d7a`; acct#ffa615d2 `6c4bff2f216376f8`.
