@@ -27,7 +27,24 @@ BUCKET = "opal-data-49financial"
 PREFIX = "irpt/49financial/gold/account_return_daily/"
 FUNCTION = "irpt-49f-reporting-gold-lambda"
 CHUNK = 25
-P2_SERVED6 = {"0010783709", "0027265115", "0035940058", "0076459710", "0084073310", "0091939812"}
+def _REAL(token):
+    """Resolve an acct# token to the real account id at run time from the private evidence dir (outside the repo)."""
+    import json as _json
+    import os as _os
+    d = _os.environ.get("IRPT_PRIVATE_EVIDENCE_DIR")
+    if not d:
+        raise SystemExit("REFUSE: IRPT_PRIVATE_EVIDENCE_DIR is not set; this historical script needs the private account map")
+    p = _os.path.join(d, "account_map_49financial.json")
+    if not _os.path.isfile(p):
+        raise SystemExit("REFUSE: account_map_49financial.json is absent from IRPT_PRIVATE_EVIDENCE_DIR")
+    with open(p, encoding="utf-8") as fh:
+        m = _json.load(fh)
+    if token not in m:
+        raise SystemExit("REFUSE: token %s is not in the account map" % token)
+    return m[token]
+
+
+P2_SERVED6 = {_REAL("acct#08137b81"), _REAL("acct#89d0916a"), _REAL("acct#f08ffd13"), _REAL("acct#6b914f88"), _REAL("acct#ffa615d2"), _REAL("acct#d0cf6c92")}
 
 s3 = boto3.client("s3")
 lam = boto3.client("lambda", config=Config(read_timeout=960, connect_timeout=30, retries={"max_attempts": 0}))
