@@ -8,7 +8,7 @@ analysis @57304c750b and its ADDENDUM 1 @7a888d7675 (DB-b-5 narrowed to the read
 | cell | order | terminal state | evidence |
 |---|---|---|---|
 | `DB-b-5` | the issuer's served act | APPLIED 2026-10-02T05:52:22Z; ledger `irpt-dashbd-reporting-read-apply-20261002` CLOSED (5 of 5 legs) | packet @5cad424bd8 (blob f44ee4d312), COO half signed, CTO half batch 115 (`CTO_HALF_IRPT_DASHBD_READ_ROUTE_20261002.md`); 8 added, 0 changed, 0 destroyed |
-| `DB-b-6` | TO-DB-b-6 (`0.9.0_WK_IRPT_DASHBD~1`, direct act) | COMPLETE @205f18b142, merged @119b8ed80a | DB-6-AC1 PASS, proof VALID rc=0 (issuer re-run); record `deliverables/0.9.0_WK_IRPT_DASHBD~1/FLOW_RESIDUAL_acct#e7ab8585_R2.{json,md}` |
+| `DB-b-6` | TO-DB-b-6 (`0.9.0_WK_IRPT_DASHBD~1`, direct act) | COMPLETE @205f18b142, merged @119b8ed80a | DB-6-AC1 PASS, proof VALID rc=0 (issuer re-run); record `deliverables/0.9.0_WK_IRPT_DASHBD~1/FLOW_RESIDUAL_acct#89d0916a_R2.{json,md}` |
 
 ## The one real run of each outcome
 
@@ -19,7 +19,7 @@ analysis @57304c750b and its ADDENDUM 1 @7a888d7675 (DB-b-5 narrowed to the read
   unpublished account, the route's expected branch, on which the page kept the tab's own figure.
 - **The read root's controls:** V1 (CodeSha256 equals the source map; the route on `CUSTOM` / `naqxlm`; 17 of 17 prior
   investor-reporting routes unchanged; re-plan No changes) and N1 (an unauthenticated GET answered 401; no invocation).
-- **FWD-8 enrichment (DB-b-6):** the 1,498.38 USD residual on acct#e7ab8585 is not one leg and not on 2026-07-07 (the issuer's inference,
+- **FWD-8 enrichment (DB-b-6):** the 1,498.38 USD residual on acct#89d0916a is not one leg and not on 2026-07-07 (the issuer's inference,
   refuted): it is the net, over 2026-03-16 .. 2026-08-28, of four offsetting classes -- in-kind transfers valued -7,252.16 (measured),
   margin interest +10,724.31 classed internal at Opal and external at the vendor (measured), trade and merger differences -3,277.48
   (inferred) and the vendor cash asset +1,303.71 (inferred). The fee leg (2,423.40 on 2026-07-07) matches to the cent. No vendor call.
