@@ -14,7 +14,7 @@ Prepared by 0.9.0_WK_IRPT_BCKEND~262 for 2.0.0_SA_COO~P2 / 1.0.0_SA_CTO (CTO msg
 
 ## The pin and the builds
 
-- **Release pin P: `%s`** (branch `wk-IRPT_BCKEND-262`): the commit that holds both restages, the `files[]` member and the narrative tests. `served.py` at P is blob `87d9ecc49747` (IB-pr-390's code commit `74a62fb46c`).
+- **Release pin P: `c18b5fec743eef161ce1bc7ee444c7653e90865e`** (branch `wk-IRPT_BCKEND-262`): the commit that holds both restages, the `files[]` member and the narrative tests. `served.py` at P is blob `87d9ecc49747` (IB-pr-390's code commit `74a62fb46c`).
 - Census: `infra/aws/lambda/ci/release-census.py <function> --pin P` for each of the two functions, live zip read from AWS (read only), diffed by member and sha256.
 - BUILD_ONLY from a clean tree (porcelain 0 lines before and after every build), each function built twice, byte-identical: **YES** (2 of 2 built). Command: `TMPDIR=<scratch> BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting <function>  (the REAL source map, no override)`. Zips kept only in scratch; nothing uploaded; source map untouched.
 

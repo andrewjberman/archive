@@ -40,7 +40,7 @@ w("- **irpt-holdings (row W201-S5).** `holdings/holdings_publication_port.py` (a
 w("")
 w("## The pin and the builds")
 w("")
-w("- **Release pin P: `%s`** (branch `wk-IRPT_BCKEND-262`): the commit that holds both restages, the `files[]` member and the narrative tests. `served.py` at P is blob `87d9ecc49747` (IB-pr-390's code commit `74a62fb46c`).")
+w("- **Release pin P: `%s`** (branch `wk-IRPT_BCKEND-262`): the commit that holds both restages, the `files[]` member and the narrative tests. `served.py` at P is blob `87d9ecc49747` (IB-pr-390's code commit `74a62fb46c`)." % pin)
 w("- Census: `infra/aws/lambda/ci/release-census.py <function> --pin P` for each of the two functions, live zip read from AWS (read only), diffed by member and sha256.")
 w("- BUILD_ONLY from a clean tree (porcelain %d lines before and after every build), each function built twice, byte-identical: **%s** (2 of 2 built). Command: `%s`. Zips kept only in scratch; nothing uploaded; source map untouched." % (
     cen["build_only"]["porcelain_lines_before"], "YES" if cen["build_only"]["built_twice_identical_all"] else "NO", cen["build_only"]["command"]))
