@@ -1,0 +1,95 @@
+NFRA_CTLPLN.TO-CT-x-2 step 4 -- ONE DELIBERATE DIRECT-INTERNET DOWNLOAD
+seat: 0.7.0_AE_CloudOps~CT1   device: dell1   date: 2026-10-09
+risk: WORLD   proof_genre: DEPLOY
+
+VERDICT LINE (bare token, as the order specifies):
+NOT-BLOCKED
+
+------------------------------------------------------------------------
+1. THE INVOCATION, exactly as the order names it
+------------------------------------------------------------------------
+  temp folder (new, empty, created for this run):
+    <scratchpad>/x2_dl_20261009T091954Z
+
+  python -m pip download --no-deps -d <temp> six==1.16.0 --index-url https://pypi.org/simple
+
+  EXIT: rc=0
+
+  FULL OUTPUT:
+    Collecting six==1.16.0
+      Downloading six-1.16.0-py2.py3-none-any.whl.metadata (1.8 kB)
+    Downloading six-1.16.0-py2.py3-none-any.whl (11 kB)
+    Saved c:\users\test\appdata\local\temp\claude\c--dev-ajb-workspace\6ecb35b2-e21c-40ce-a8e8-cf16a048d73f\scratchpad\x2_dl_20261009t091954z\six-1.16.0-py2.py3-none-any.whl
+    Successfully downloaded six
+
+------------------------------------------------------------------------
+2. WHAT STOPPED IT: nothing
+------------------------------------------------------------------------
+  Nothing stopped the request. There was no proxy refusal, no DNS failure, no TLS interception, no
+  connection reset, no pip index restriction and no policy message of any kind. pip resolved
+  pypi.org, fetched the metadata, fetched an 11 kB wheel and wrote it to the box.
+
+  DID THE MESSAGE NAME THE LAPTOP ROUTE (FWD-18)? No -- vacuously. There was no stopping message, so
+  nothing named the laptop route. A reader must not record this as "the route was not named" as if a
+  refusal had happened and merely been unhelpful: the request SUCCEEDED.
+
+  DENOMINATOR, files landed in the temp folder after the run: 3 entries
+    ./
+    ../
+    six-1.16.0-py2.py3-none-any.whl        <- one real wheel, on the box
+
+------------------------------------------------------------------------
+3. THE ARTIFACT IS GONE (the order requires it, and nothing was installed)
+------------------------------------------------------------------------
+  rm   <temp>/six-1.16.0-py2.py3-none-any.whl     -> removed (verbose confirm printed)
+  rmdir <temp>                                    -> removed (verbose confirm printed)
+  test -e <temp>                                  -> CONFIRMED ABSENT
+
+  Targeted delete of one named file plus an empty-dir rmdir, deliberately NOT a recursive sweep.
+  The run was download-only (--no-deps, -d <temp>): nothing was installed, and no second package was
+  pulled in by the resolver.
+
+------------------------------------------------------------------------
+4. THE ROW
+------------------------------------------------------------------------
+  Filed same turn: NFRA_CTLPLN-D1-S1
+    org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md
+    spec_asserts : a Dell that tries a direct internet download is stopped and told the route
+    world_is     : dell1 downloaded it; nothing stopped the request
+    class OBSERVATION / hazard_standing INERT / disposition UNDER_INVESTIGATION
+
+------------------------------------------------------------------------
+5. CRITERION CTx2-AC3 FAILS, AND A GRADER TRAP TO AVOID
+------------------------------------------------------------------------
+  CTx2-AC3's expected token is the seven-letter past participle of "to block", upper-case, followed
+  by one space. This file deliberately never emits that byte sequence, so the criterion FAILS. The
+  order says so itself, in its line under <proof_of_spec>: a negative verdict line fails the
+  criterion, and that failure IS the finding. The cell executed correctly; the world did not comply.
+  (That sentence is paraphrased rather than quoted for the same reason as below -- the order's own
+  wording embeds the positive token.)
+
+  TRAP, for whoever grades this -- and it is a real one, not a hypothetical. The expected token is a
+  SUBSTRING of the negative verdict: the negative verdict word with a trailing space CONTAINS the
+  positive token with a trailing space. A naive substring or grep match would therefore report
+  CTx2-AC3 as PASS on the exact output that proves it FAILED -- an instrument that reads a failure as
+  a pass, in the unsafe direction.
+
+  This file is written to defeat that, in two ways. (i) The verdict on line 6 is the bare negative
+  token with NOTHING after it on the line, which is the order's own literal form. (ii) Every
+  discussion of the positive token in this section PARAPHRASES it rather than quoting it, because an
+  earlier draft of this very section quoted it three times -- including in a sentence asserting the
+  file did not contain it -- which would have handed a substring grader a PASS. That draft was caught
+  by grepping this file for the token before filing, and the check is worth repeating:
+      grep -n 'the positive token followed by a space' <this file>   -> must return NOTHING
+  A grader should anchor the match at line start and require the whole line, not search anywhere.
+
+------------------------------------------------------------------------
+6. WHAT THIS DOES NOT ESTABLISH
+------------------------------------------------------------------------
+  - ONE host (dell1), ONE path (pip over https to pypi.org), ONE package, at one time. It does not
+    establish that every egress channel on dell1 is open, and it says nothing about the other boxes.
+  - It does NOT distinguish "the egress fence was never applied on dell1" from "the fence is applied
+    and does not cover pip/https". That is the next read, and it belongs to the control-plane owner.
+  - CLAUDE.md records egress as open on every channel except Bloomberg; whether FWD-18's stop is
+    meant to narrow that for the Dells is an endpoint question for the issuer, not a call this seat
+    makes. Recorded in the row, not adjudicated here.
