@@ -28,14 +28,14 @@ Identical to the worker's line. The arms are v1/`r19` against v1/`conditional` (
 | 1 | CFNCASH-equals-proceeds (the CTO's double-credit lead) | 23 | 25 | -- (lead read 0 of 23) |
 | 2 | + (a) sold security valued the day before, + (c) vendor CFNCASH leg of a sweep sale | 1 | 0 | issuer, amendment 1 |
 | 3 | (a) replaced by (a'): blank the day (`UNVALUED_FUNDING_SALE`) | 1 | 0 | issuer, amendment 2 |
-| -- | accept B3S748567 2025-07 as the one named regression | 1 | 0 | CTO msg 1618, amendment 3 |
+| -- | accept acct#57e741a5 2025-07 as the one named regression | 1 | 0 | CTO msg 1618, amendment 3 |
 | 4 | `divfee` layered (CB-w-2) | 95 | -- | refused; CTO msg 1707 |
 
 - **My amendment 1 was wrong on the 25.** Condition (a) cannot separate a credit that restores the level from one that inflates it. The
   amendment-2 blank changed no verdict: the 2,110 blank days were already blank as UNPRICED. What remains wrong is the cash level
   carried into later months, which a one-day blank cannot reach. The CTO named this the common cause and put it in round 24.
-- **The 23 by class:** vendor CFNCASH leg of a sweep sale 13 (0QF879352); unvalued funding sale 9; credit kept by every condition 1
-  (B3S748567 2025-07, funded by 316067107, the parked core candidate, row D2-S30).
+- **The 23 by class:** vendor CFNCASH leg of a sweep sale 13 (acct#05dd4a9d); unvalued funding sale 9; credit kept by every condition 1
+  (acct#57e741a5 2025-07, funded by 316067107, the parked core candidate, row D2-S30).
 - **Round 22's 25 recovered months are DIFF again** under `conditional` (MATCH 0, DIFF 25, UNGRADABLE 0). This is recorded as the CTO
   ruled.
 - **CB-w-2 (`divfee`):** 58 of the 75 trade-day movers came back, but 95 months regressed. `fch` never helped (the months match

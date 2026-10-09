@@ -8,7 +8,9 @@ Usage: python signature_closure.py <zip>
 For every call `f(...)` where `f` is bound by `from <packaged module> import f` (a function, or a class -> its __init__),
 the call's keywords must be parameters of the packaged callee (or the callee takes **kwargs), and its positional count
 must fit (or the callee takes *args). Calls with *a / **kw unpacking are counted as unknown and skipped, and the count
-is printed. Last line: "signature_closure calls=<n> checked=<k> skipped_unpack=<u> mismatched=<m>"; exit 1 when m > 0.
+is printed. NOT SEEN: attribute calls (module.f(...)) and calls through a variable or a keyword dict built at run time
+(irpt-performance-adapter served.py builds render["load_report_owner"] and calls Enforcer(**render): that live split is
+outside this check, so a pair also carries the live-call arm, CTO msg 3731). Last line: "signature_closure calls=<n> checked=<k> skipped_unpack=<u> mismatched=<m>"; exit 1 when m > 0.
 """
 import ast
 import sys
