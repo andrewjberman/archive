@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-82",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "30c815767d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-82.inf-billing-flag.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~59",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~59/INF_BILLING_FLAG.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~59/INF_BILLING_FLAG.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "billing flag source chosen and slices re-derived; S3 reads only of silver/api_dims/billing and performance; hashed keys only, no identifiers.",
+      "artifact_covered_by": [
+        "DB39-1-AC1",
+        "DB39-1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB39-1-AC1",
+      "criterion_verbatim": "DB39-1-AC1 -- the billing-flag source named with every place searched and its readable count against the 36 baseline. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r39/p39_round39.py\" . DB39-1-AC1",
+      "output_evidence": "OK: silver/api_dims/billing (snapshot 2026-10-08, routed legacy bucket alias): Billing.FeeAmount present / FeeScheduleName a named schedule = billed; no FeeAmount and '0 Fee Schedule Names' = unbilled -- 562 of 562 readable (was 36, gained 526); 4 place(s) searched\nDB39-1-AC1 PASS",
+      "denominator": "562 of 562 sample accounts readable; 4 places searched",
+      "status": "PASS",
+      "expect": "DB39-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB39-1-AC2",
+      "criterion_verbatim": "DB39-1-AC2 -- billed, unbilled and billing_total re-derived under that flag with readable-of-denominator and a status by rule. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r39/p39_round39.py\" . DB39-1-AC2",
+      "output_evidence": "OK: billed/unbilled at 562 of 562 (COMPLETE), billing_total COMPLETE\nDB39-1-AC2 PASS",
+      "denominator": "3 of 3 slices at 562 of 562, COMPLETE",
+      "status": "PASS",
+      "expect": "DB39-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "checker reads the record only",
+      "observed": "same last lines on rerun",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Not run; the checker is the coordinator's and the record is the only input.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any S3 write, vendor call, deploy, or edit under data/, infra/, portal/",
+      "reason": "Bounds of the order; none made. The flag is inferred from billing-dim fee amount and schedule, not Orion's IncludedInBilling; values are the round-37 aggregates by bill presence."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "none",
+      "invocation": "no worker .py was written",
+      "result": "n/a"
+    }
+  ]
+}
