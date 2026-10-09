@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_ENFORCE.TO-EN-ab-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/prd/LGIC_ENFORCE_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ae827f741f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/decompositions/LGIC_ENFORCE_DECOMP.md",
+    "vintage_commit": "ae827f741f",
+    "to_ref": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-ab-1.census-reads-name-rulings.md"
+  },
+  "assignee": "0.9.0_WK_LGIC_ENFORCE~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_naming.py",
+      "kind": "script",
+      "commit_or_etag": "4d6ca219e0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "census_judge/census read name_rulings.json (RULED, ruled=<n>, STALE); grade() untouched; a repo library with no deploy scope",
+      "artifact_covered_by": [
+        "AB1R22-AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/tests/test_opal_naming.py",
+      "kind": "test",
+      "commit_or_etag": "56505ce411",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three test arms; lib/tests 199 passed, 1 skipped (base 196 passed, 1 skipped)",
+      "artifact_covered_by": [
+        "AB1R22-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/census-rulings.r22.result.md",
+      "kind": "doc",
+      "commit_or_etag": "c9907a53a5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the result file the order names; a repo document with no deploy scope",
+      "artifact_covered_by": [
+        "AB1R22-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c9907a53a5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row LGIC_ENFORCE-D1-W1-S2 appended",
+      "introduces": [
+        "LGIC_ENFORCE-D1-W1-S2"
+      ],
+      "artifact_covered_by": [
+        "AB1R22-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AB1R22-AC1",
+      "criterion_verbatim": "AB1R22-AC1 -- the three ruled names read `CENSUS RULED ... name_rulings.json#<their index>`, the unruled name cards, `ruled=3` is printed, and without a card the unruled name still STOPS the run.",
+      "method": "command",
+      "invocation": "timeout 1500 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~B1/fixed_inputs/r22/check_en_r22.py ruled",
+      "output_evidence": "A: CENSUS RULED names IAM_GROUP calculated-group -- name_rulings.json#2 none_owed\nA: CENSUS RULED names SECRET astn/kimi/api-key -- name_rulings.json#3 none_owed\nA: CENSUS RULED names IAM_POLICY restricted-prefix-get-put-list -- name_rulings.json#118 cloudops-49f-restricted-breakglass-policy\nA: CENSUS CARDED names LAMBDA zzqx-unruled-r22-lambda -- NOT-JUDGED (R-29)\nB: rc=3 last=\"CENSUS: STOPPED on the first RAISE after 0 judged (0 carded, ruled=3): names LAMBDA 'zzqx-unruled-r22-lambda'\"\nPASS-R22-RULED\nrc=0",
+      "denominator": "3 of 3 ruled names read RULED with their index (#2, #3, #118); 1 of 1 unruled name CARDED in arm A and STOPPED the run in arm B; run at c9907a53a5 (lib code last changed 4d6ca219e0)",
+      "status": "PASS",
+      "expect": "PASS-R22-RULED"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The check's arm B is the negative control: the same names file with no --not-judged card, so the unruled LAMBDA zzqx-unruled-r22-lambda reaches the census as a bare RAISE.",
+      "expected": "rc 3, CENSUS: STOPPED naming the unruled name, with the three ruled names not stopping the run",
+      "observed": "B: rc=3 last=\"CENSUS: STOPPED on the first RAISE after 0 judged (0 carded, ruled=3): names LAMBDA 'zzqx-unruled-r22-lambda'\"",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the check run twice against the committed bytes (once at 4d6ca219e0, once at c9907a53a5)",
+      "observed": "PASS-R22-RULED both runs, rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a whole-estate RULED count from a --live --repo run",
+      "reason": "the run stops on the first uncarded RAISE of each plane (live API_GW sentiment-query-api; repo S3Key config/mdpf/route_bindings.yaml); recorded in row LGIC_ENFORCE-D1-W1-S2 and the result file; no card file was in the order's paths"
+    },
+    {
+      "item": "edits to grade(), infra/logic/registry/ and org/mcp/naming-place.enforce",
+      "reason": "outside the order's grant; none made"
+    }
+  ],
+  "surprises": [
+    "LGIC_ENFORCE-D1-W1-S2"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/census-rulings.r22.result.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest lib/tests -q -p no:cacheprovider",
+      "result": "199 passed, 1 skipped"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_LGIC_ENFORCE~1 <0.9.0_WK_LGIC_ENFORCE~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "56505ce411, 4d6ca219e0, c9907a53a5, rc 0, LOCAL"
+    }
+  ]
+}
