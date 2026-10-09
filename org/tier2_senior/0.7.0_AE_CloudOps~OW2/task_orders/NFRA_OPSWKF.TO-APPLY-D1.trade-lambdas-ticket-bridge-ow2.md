@@ -73,6 +73,19 @@
     6. Close the ledger and record the deploy. Report once to `2.0.0_SA_COO~O2`.
   </steps>
 
+  <amendment_1>
+    AMENDMENT 1 (issuer, 2026-10-09 ~09:5xZ). Ruling: org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_DELL2_APPLIER_SUBSTITUTION_20261009.md
+    AMENDMENT 1 @bff4e48547 (CTO msg 3059), answering row NFRA_OPSWKF-D2-S3 (the tagauthz limb's untargeted plan 403s on
+    ses:DescribeConfigurationSet). Step 4 may take ONE audited TAGAUTHZ_OVERRIDE, on these conditions only:
+    - The override line names row NFRA_OPSWKF-D2-S3 and this ruling.
+    - At apply, the targeted plan is exactly K1-K4, 0 to add / 3 to change / 0 to destroy (the three resources in step 4). Anything else
+      is branch B: STOP.
+    - Before the apply, print the tags of the three changed resources and match them by hand to the canon; quote the match in the ledger.
+    - The override is spent by this one apply and is never reused, by this order or any other.
+    The missing grant (cloudops-dell-agent-plan-reads-policy, ses:DescribeConfigurationSet) is routed by the issuer via MSTR to the laptop
+    fabric. It is not this lane's to fix. Every other step, after-read and bound is unchanged.
+  </amendment_1>
+
   <bounds>
     Rollback, per key, in the same window:
     - re-point each function to the step-2 `s3_object_version`;
