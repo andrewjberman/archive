@@ -75,3 +75,34 @@ So the arm needs ONE short-lived token, through the real CloudFront path, for a 
 ## CTO half -- OWED
 
 `1.0.0_SA_CTO~DELL2`. The question to rule is section 3's 2-hour `tier internal` (ALL) window.
+
+## RE-CUT v2 (2026-10-09 ~04:3xZ) -- the CTO refused v1's tier-internal token (msg 2342); v2 rests on the one-firm clamp
+
+**CTO half v1: REFUSED** (msg 2342: "ALL never admits, even for 2h"). Route census N=117 (@41b7e28bdf): the 27 MORE_THAN_ONE routes are
+being clamped to the caller's PROFILE `allowedFirmIds` LIST (CTO msgs 2362/2367):
+- ticket_center: TO-SA-k1 (@050b5f0f0f);
+- IRPT `selected_tenant`: `~P2`'s IRPT_BCKEND.TO-IB-pr-387 (@89fe99c780).
+
+v2 is HELD until BOTH are deployed and read back live.
+
+**The token, v2:** `sub tckt-fwd1-testfiler-20261009@opal.invalid`, `iss opal-portal-auth`, `aud opal-portal-api`, `firmId opal-capital`,
+`tier advisor`, `role user`, NO `userType`, NO `tier internal`, `exp = iat + 2h`. Authorizer result: `allowedFirmIds = "opal-capital"`
+(census, both candidates). Ticket class: INTERNAL (firmId).
+
+**The row:** as v1 section 2.1, with `allowedFirmIds ["49financial"]` as a LIST, which the clamp narrows on.
+
+**Proof of one firm, at the run (the CTO's condition):** before any FWD-1 hop, re-run the census token arms LIVE through CloudFront on:
+- every one of the 27 formerly-MORE_THAN_ONE routes, with `49financial` and with `cottonwood`: 49financial is admitted where the hop
+  needs it, and cottonwood is refused on every route;
+- a sample of the 36 ONE_FIRM routes.
+
+Print N and the refused count. Any cottonwood admit is a STOP, then cleanup.
+
+**Blast radius v2:**
+- one synthetic identity for at most 2 hours, clamped to 49financial on every clamped route;
+- the 51 NO_FIRM routes stay reachable as for any opal-capital user (data-refresh row W6-S2 is the CTO's, and its fix is routed);
+- no IAM, no code change by this pair.
+
+Rollback, as in v1: remove the row; the 2h exp is the bound; complete the ticket.
+
+**COO half v2 -- SIGNED** `2.0.0_SA_COO~V2`, 2026-10-09; it takes effect when both clamps are live. **CTO half v2 -- OWED** at that point.
