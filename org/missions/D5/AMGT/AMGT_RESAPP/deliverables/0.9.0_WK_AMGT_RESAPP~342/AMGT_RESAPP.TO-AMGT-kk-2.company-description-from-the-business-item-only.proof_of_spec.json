@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-kk-2.company-description-from-the-business-item-only",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "9bac67f9d0028064629cba97b38e3a077f9f6996"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "4aa37450fe312fddfe7354c110c76f05bd3b2695",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-kk-2.company-description-from-the-business-item-only.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~342",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/drafting_build.py",
+      "kind": "script",
+      "commit_or_etag": "5e7fd9efe7fcb40ada4ae9210191dec59ff52d96",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, add-only: BUSINESS_ONLY_SECTIONS, location_is_business(), item_is_business_cited(); FilingsProducer.draft skips a company_description item unless it cites >=1 passage and every cited passage's location label names 20-F Item 4 / 4.B or 10-K Item 1. No deploy; future drafts only (stored drafts are AMGT-kk-3).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_description_business_only.py",
+      "kind": "test",
+      "commit_or_etag": "5e7fd9efe7fcb40ada4ae9210191dec59ff52d96",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 9 tests -- business item kept (4.B, Item 4, 10-K Item 1), Item 5 / 3.D / 10-K 1A dropped, mixed-evidence item dropped, no-business name drafts an empty section, other sections byte-equal, served business sentence reaches the document, location reader table. Negative control: with the rule disabled 4 of the 9 fail.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every test in the new file passes (a business item kept; Item 5 and 3.D dropped; no business text drafts empty; other sections unchanged), 0 failed; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"/c/tmp/stubfitz;$(pwd)\" py -3.12 -m pytest lib/research/filings/tests/test_description_business_only.py -q; echo \"exit=$?\"",
+      "output_evidence": ".........                                                                [100%]\n9 passed in 0.25s\nexit=0",
+      "denominator": "9 of 9 tests in test_description_business_only.py passed, 0 failed",
+      "status": "PASS",
+      "expect": "(?s)\\A(?!.*failed).*\\b\\d+ passed in [\\d.]+s\\s*exit=0\\Z",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the filings and drafting folders pass with 0 failed; and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"/c/tmp/stubfitz;$(pwd)\" py -3.12 -m pytest lib/research/filings/tests lib/research/drafting -q; echo \"exit=$?\"",
+      "output_evidence": "........................................................................ [ 24%]\n........................................................................ [ 49%]\n........................................................................ [ 74%]\n........................................................................ [ 98%]\n...                                                                      [100%]\n291 passed in 12.09s\nexit=0",
+      "denominator": "291 of 291 tests passed in lib/research/filings/tests + lib/research/drafting, 0 failed",
+      "status": "PASS",
+      "expect": "(?s)\\A(?!.*failed).*\\b\\d+ passed in [\\d.]+s\\s*exit=0\\Z",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Rule switched off (BUSINESS_ONLY_SECTIONS emptied) and the new file re-run: the discriminating tests must fail.",
+      "expected": "the Item 5 / 3.D / 1A / mixed-evidence / empty-section tests fail",
+      "observed": "4 failed, 5 passed with the rule disabled (empty-section, 10-K 1A dropped, Item 5 + 3.D dropped, mixed-evidence dropped); 9 passed with it enabled",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the producer is deterministic pure Python over a fixture; each suite was run more than once with identical pass counts (9, 9, 291, 291)",
+      "observed": "identical",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Stored drafts (drafting/v1 objects) and any store write",
+      "reason": "Out of bounds; stored drafts move under AMGT-kk-3. This cell is future drafts only."
+    },
+    {
+      "item": "Live-data check (r86_description.py --crit AC1)",
+      "reason": "Not a criterion of this order; reads the deployed function after kk-3."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~342/AMGT_RESAPP.TO-AMGT-kk-2.company-description-from-the-business-item-only.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "py -3.12 -m py_compile lib/research/filings/drafting_build.py lib/research/filings/tests/test_description_business_only.py",
+      "result": "RUN-AT-COMMIT-BY-commit-gate.sh"
+    }
+  ]
+}
