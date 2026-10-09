@@ -64,3 +64,26 @@ instance is written. No new surprise row: the issuer RULED this reading in amend
 carried the decoupling to round 13, so the finding is owned and dispositioned -- re-filing it as a row would duplicate an owned
 finding. `PHASE B: NOT YET` at HEAD, now also waiting on NFRA_TRNSPT `TO-APPLY-s21` (pending, laptop `0.7.0_AE_CloudOps~TRL`);
 OG-ap-3 is complete (`fab015fa54`).
+
+---
+
+## PHASE A2 -- cell `CA-d-3`, the KMS decoupling (A5 @`99b9155bda`; CTO fold UB-e9bc @`cfef5928ad`)
+
+27. VALUE-PRESERVATION, measured BEFORE the edit: `kms describe-key --key-id alias/opal-data-transcripts` -> KeyId `44a2284f-1e14-4ea1-b6cb-f6121bfde35a`, State `Enabled`. That is the same key id `PHASE_A_PLAN_2.txt:88` printed for the key resource and the same key in both functions' live `LDO_KMS_KEY_ARN`. The alias and the resource name ONE key, so the edit moves the dependency edge and not the value.
+28. `local.bucket` is `local.scope_row.bucket` (`main.tf:76`), and `aws_kms_alias.transcripts.name` is `"alias/${local.bucket}"` (`main.tf:145`) -- so the data source's STRING is the same alias Terraform already manages, written as the string and never as a reference to that alias resource.
+29. EDIT, `chat_assist.tf` ONLY (commit `2c84d9521a`): added `data "aws_kms_key" "ldo_001_transcripts" { key_id = "alias/${local.bucket}" }` plus the why-comment, and repointed `kms_key_id` -> `data.aws_kms_key.ldo_001_transcripts.id` and `kms_key_arn` -> `.arn` (was the key resource's `.key_id` / `.arn`). No other file touched; nothing applied.
+30. THE COMMENT'S WORDING IS CONSTRAINED BY THE CHECKER, which is worth recording because it reads as a trap: `d3_decouple.py:28` runs `re.findall(r"aws_kms_alias\.|aws_kms_key\.transcripts", head)` over the WHOLE file text of `git show HEAD:chat_assist.tf`, comments included. The order requires a comment saying why, so a comment naming either token would have failed the very check it exists to pass. The comment therefore says "the key resource declared in main.tf" and "the alias RESOURCE" without the literal tokens. Verified before committing: 0 forbidden tokens, and the check-1 data-source regex matches. The checker was read and not edited.
+31. HEAD/TREE IDENTITY before the plan: `git diff --stat HEAD -- chat_assist.tf` empty, so the bytes the plan read are the bytes the checker reads at HEAD.
+32. THE FALSIFIER, taken exactly as Phase A (committed default `""`, plus the one A3 foreign `-var` RE-READ live at this act: 1 statement of 1, 1 principal of 1 -> `["arn:aws:iam::313476888478:user/Opal_Terminal"]`), fresh scratch `TF_DATA_DIR` confirmed outside every git tree, clean `init` with no migrate or reconfigure prompt. Saved as `PLAN_D3.txt`.
+33. **`Plan: 0 to add, 2 to change, 0 to destroy`** -- the expected reading. ADDRESS DENOMINATOR: 2 of 2, both the module's own (`module.ldo_001.aws_lambda_function.handler` :44, `...ingress[0]` :61). `aws_kms_key.transcripts` GONE from the plan, `silver_reader` GONE, `second_reader` absent, no `LDO_KMS_KEY_ARN` diff line. The two changes are `source_code_hash` `xWURpe/n...` -> `+VT4f32xh...` and `last_modified` -> `(known after apply)`, 27 unchanged attributes hidden on each.
+34. `CAd2-AC3` -> **`RESULT: PASS`**, rc=0, all five checks True (`timeout 120 python .../d3_decouple.py`). It FAILed at the base, as the order states.
+
+## Verdict (PHASE A2)
+
+**The decoupling holds and the falsifier passes.** The reading that blocked Phase A -- a sibling's `silver_reader` create and an
+unsignable `(known after apply)` key policy -- is GONE from a `-target=module.ldo_001` plan, which is what A5 set out to prove.
+Applied nothing, opened no ledger, read no secret value, called no route, sent no mail, invoked nothing. No proof_of_spec
+instance is written yet: `CAd2-AC1` and `CAd2-AC2` are PHASE B's and still FAIL at the base by design, so `<status>` stays
+`pending` and is not flipped. `PHASE B: NOT YET` at HEAD. Under A5 the GO now needs OG-ap-3 (complete, `fab015fa54`) AND
+either this cell merged with the halves RE-SIGNED for this edit, or NFRA_TRNSPT `TO-APPLY-s21` complete. The re-sign is the
+issuer's and the signers'; this seat holds.

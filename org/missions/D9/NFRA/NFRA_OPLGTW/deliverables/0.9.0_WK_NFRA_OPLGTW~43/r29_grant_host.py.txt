@@ -1,0 +1,64 @@
+# OG-rl-15 PHASE C host program (shipped by r29_ssm_grant.py behind ga1_host_prelude.py.txt: HybridStore, POLICY# reads real, all else in memory).
+# READ ONLY: the holder's profile and grant are read from the real store; nothing is written to DynamoDB (put_runtime on a POLICY key raises). tid/oid arrive in the
+# process environment (SSM parameters) and are never printed; master account ids are never printed (masters are m0, m1). Prints counts, window bounds, seconds.
+#   RL15G_MODE=pre    BEFORE the grant write: the 13-month availability read through the catalog with calendar_months=13 under the CURRENT grant's policy check
+#                     (the candidate in memory, nothing stored): the halves' branch (a), at least 1 qualified date per master, and Z-W42-S2's cost, measured before the act.
+#   RL15G_MODE=after  AFTER the write: the gateway's own SchwabService._availability under the STORED grant (revision 4, calendar_months 13); prints RL15G_BODY / RL15G_DIGEST.
+import hashlib
+import json
+import os
+import time
+
+
+def run():
+    from app import data_entitlement as de
+    from app.context import Principal
+
+    mode = os.environ["RL15G_MODE"]
+    tid, oid = os.environ["GA1_TID"], os.environ["GA1_OID"]
+    svc, catalog, store, contract = build()
+    praw = store.get(de.profile_key(tid, oid))
+    assert praw is not None, "holder profile not found in the store"
+    profile = de.parse_profile(praw, tid, oid)
+    grant = de.parse_grant(store.get(de.grant_key(tid, oid, profile.grant_revision)), tid, oid, profile.grant_revision)
+    assert grant.status == "active"
+    scope = grant.scope
+    principal = Principal(tid, oid, praw.get("email") or "")
+    print("RL15G_GRANT mode=%s profile_revision=%s grant_revision=%s date_mode=%s calendar_months=%s masters=%d datasets=%s operations=%s"
+          % (mode, profile.revision, grant.revision, scope.date_mode, scope.calendar_months, len(scope.masters), sorted(scope.datasets), sorted(scope.operations)))
+    cache = {}
+    counts, rows = [], []
+    t_all = time.time()
+    for mi, master in enumerate(sorted(scope.masters)):
+        t_m = time.time()
+        for dataset in sorted(scope.datasets):
+            t_d = time.time()
+            if mode == "pre":
+                check = svc._policy_check(principal, {"operation": "list", "master": master, "dataset": dataset})
+                avail = catalog.availability(master, dataset, check, date_mode=scope.date_mode, dates=sorted(scope.dates), cache=cache, calendar_months=13)
+            else:
+                import asyncio
+                avail = asyncio.run(svc._availability(principal, scope, master, dataset, "list", cache))
+            n = len(avail.get("available_dates") or [])
+            counts.append(n)
+            w = avail.get("window") or {}
+            rows.append({"m": "m%d" % mi, "dataset": dataset, "available_dates": n, "first": w.get("first"), "last": w.get("last"),
+                         "latest_qualified_date": avail.get("latest_qualified_date"), "denominator": avail.get("denominator"),
+                         "seconds": round(time.time() - t_d, 1)})
+        print("RL15G_MASTER m%d seconds=%.1f cache_entries=%d" % (mi, time.time() - t_m, len(cache)))
+    total = time.time() - t_all
+    for r in rows:
+        print("RL15G_AVAIL " + json.dumps(r, sort_keys=True))
+    print("RL15G_TIMING mode=%s total_seconds=%.1f combos=%d min_available_dates=%d" % (mode, total, len(counts), min(counts) if counts else -1))
+    if mode == "after":
+        facts = json.loads(os.environ["RL15G_FACTS"])
+        body = {"served_release": os.environ["GA1_SERVED_RELEASE"], "principals_changed": facts["principals_changed"], "fields_changed": facts["fields_changed"],
+                "calendar_months_after": [scope.calendar_months], "other_principals_changed": facts["other_principals_changed"],
+                "prior_reach_recorded": facts["prior_reach_recorded"], "thirteen_month_read_available_dates_min": min(counts) if counts else 0}
+        s = json.dumps(body, sort_keys=True)
+        print("RL15G_BODY " + s)
+        print("RL15G_DIGEST " + hashlib.sha256(s.encode("utf-8")).hexdigest())
+
+
+if __name__ == "__main__":
+    run()

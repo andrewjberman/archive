@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "IRPT_BCKEND.TO-APPLY-Y75.release5b-test-admit-readback-cleanup-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_BCKEND.TO-APPLY-Y75.release5b-test-admit-readback-cleanup-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "61db47009fa12d7ddaee9673ac7c33f455d8d342"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R75_Y.md",
+    "vintage_commit": "7d4318cd3e4662a23494219a6185c032f475b615",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_BCKEND.TO-APPLY-Y75.release5b-test-admit-readback-cleanup-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ANL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/r75/Y75-1_laptop_cleanup_result.json",
+      "kind": "doc",
+      "commit_or_etag": "0911a71d4b29702d6d9130926a3d57ce8db4f7f9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the base seat's step-6 result, sha256 26fbc10f0f87a83060d67c5ec07551c7ebf0c5d3e70659404ddc2e2d5da0e638, equal to the sha the CLOSED ledger entry records for the CLEANUP leg -- two independent reads of the same bytes. Re-verified live by THIS lane: 7 of 7 DDB NOT_FOUND strongly consistent, 2 of 2 exact-key S3 re-lists empty, 0 delete markers, sweep_extra 0.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 counts versions of exactly the 2 named keys (never the wider prefix, which holds other uploads); the row also states the 7 DDB keys read NOT_FOUND after delete.",
+      "method": "live_read",
+      "invocation": "python -c \"import json,subprocess as s,boto3;k=json.loads(s.check_output(['git','show','4bcebfcb09:org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/r75/Y75-1_admit_keys_v3.json']));c=boto3.client('s3');print('VERSIONS_LEFT=%d'%sum(len([v for v in c.list_object_versions(Bucket=x['bucket'],Prefix=x['key']).get('Versions',[]) if v['Key']==x['key']]) for x in k['admit_keys'] if x['kind']=='s3'))\"",
+      "expect": "VERSIONS_LEFT=0",
+      "output_evidence": "VERSIONS_LEFT=0 (run verbatim by this lane); 7 of 7 DDB keys NOT_FOUND on ConsistentRead; 2 of 2 exact-key list-object-versions empty with 0 delete markers",
+      "denominator": "keys file @4bcebfcb09 names 7 ddb (table irpt-requests) + 2 s3 (bucket opal-data-irpt) = 9, and 2 s3_versions -- the counts the order fences on; exact-key match only, never the prefix; sweep_extra 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "exact_key_absence_is_a_true_absence": {
+      "description": "The same list_object_versions client, same bucket, run UNSCOPED, must still see versions -- otherwise a zero on the 2 named keys could be a blind lister rather than an absence.",
+      "expected_landed": "0 versions on each of the 2 exact keys WHILE the unscoped list still returns versions",
+      "expected_not_landed": "versions still present on the 2 exact keys, or the unscoped list also empty",
+      "observed": "0 versions on each of the 2 exact keys; unscoped list on the same bucket returned 5 versions",
+      "status": "PASS"
+    },
+    "ddb_absence_is_strongly_consistent": {
+      "description": "Each of the 7 named rows read with ConsistentRead=True, so NOT_FOUND is not an eventually-consistent replica lag.",
+      "expected_landed": "7 of 7 NOT_FOUND",
+      "expected_not_landed": "any row EXISTS",
+      "observed": "7 of 7 NOT_FOUND",
+      "status": "PASS"
+    },
+    "nothing_stranded": {
+      "description": "The Y75 deploy ledger is CLOSED and its .open_deploys sentinel is gone -- read as a union over every live worktree HEAD, with ls -a so .unindexed_red_state.json cannot hide.",
+      "expected_landed": "no open sentinel names Y75",
+      "expected_not_landed": "an open sentinel or red-state file names Y75",
+      "observed": "19 open-deploy files exist across 1 worktree (denominator printed) and NONE names Y75; positive control confirms the exact path irpt-y75-amend2-cleanup-laptop-20261009.json existed and was removed by the close commit 1299ad2367",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/task_orders/IRPT_BCKEND.TO-APPLY-Y75.release5b-test-admit-readback-cleanup-laptop.md@61db47009f -- the literal 9 keys of Y75-1_admit_keys_v3.json@4bcebfcb09 and no other row, object, table, bucket or policy",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO~DELL2/deliverables/ in commit 35fabf20c8570beae1d52dab648053967fcdfa29 -- Andrew's word to 1.0.0_SA_CTO~DELL2, ruling 1 approving exactly the listed objects, every version, deleted only after read-back, and no other object"
+  },
+  "risk_class": "WORLD",
+  "rollback": "None available and none authorized: the 7 DDB rows and both S3 keys' versions were permanently deleted under Andrew's explicit test-cleanup approval @35fabf20c8. The deleted versions are not recoverable. This lane performed NO delete and so has nothing to roll back; the rollback statement is inherited from the act it proves.",
+  "scope": "READ-ONLY by re-address. This lane ran AC1 verbatim and re-verified the base seat's completed cleanup: 7 exact DDB rows NOT_FOUND, 2 exact S3 keys zero versions, sweep_extra 0. No delete, no create, no policy or resource change, no identity in any file.",
+  "declared_exclusions": [
+    {
+      "item": "The act itself -- the read-back and the 9 deletes",
+      "reason": "Done by the base seat 0.7.0_AE_CloudOps at 10:10Z before this lane was addressed; the RE-ADDRESSED amendment gives this lane ONE act, the proof instance, and says it deletes nothing. This instance VERIFIES that act live; it does not claim to have performed it."
+    },
+    {
+      "item": "A ref-for-ref match against the base seat's opaque key_refs",
+      "reason": "That seat's result file hashes keys by its own recipe; this lane hashed by its own. The COUNTS and per-key states are what this lane measured itself (7 of 7, 2 of 2); no claim is made that the two ref spellings agree."
+    },
+    {
+      "item": "The 18 non-Y75 open-deploy sentinels",
+      "reason": "They belong to other seats and projects. This instance asserts only that none of them names Y75, over a printed denominator; their own state is not this lane's to grade."
+    },
+    {
+      "item": "Steps 3, 4, 5 and 6 of <the_act> as ACTS",
+      "reason": "Superseded for this lane by the RE-ADDRESSED amendment (no delete, no sweep-and-write). Their OUTCOMES are read back here as evidence; step 6's result file was written and committed by the base seat at 0911a71d4b."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/logs/2026-10-09/anl_lane_y75_proof_instance.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to IRPT_BCKEND.TO-APPLY-Y75.release5b-test-admit-readback-cleanup-laptop",
+      "result": "session TO id bound race-free per seat+session"
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py --self-test",
+      "result": "RESULT: 59 of 59 arm(s) behaved -- the validator was exercised red-first BEFORE this instance was trusted to it"
+    }
+  ]
+}
