@@ -7,8 +7,9 @@ Usage: python <this file> <repo_root> <criterion_id>
   DB36-1-AC1  ~47/R35_APPLY_RECORD.json: plan {add 0, change 3, destroy 0}; apply.complete true; readback.code_sha256 equals the HEAD
               source map's deployed_code_sha256 for irpt-49f-reporting-gold-lambda and differs from the rollback anchor; ledger_entry
               names an existing file under org/critical_paths/change_management/. Base: FAIL.
-  DB36-1-AC2  the same record's dry_run {duration_ms, max_memory_mb, objects_written}: objects_written == 0, duration_ms < 85% of 900 s
-              (765,000) and max_memory_mb < 85% of 2048 MB (1,740.8). Base: FAIL.
+  DB36-1-AC2  the same record's dry_run {duration_ms, max_memory_mb, objects_written, accounts, lots_rows}: objects_written == 0,
+              duration_ms < 85% of 900 s (765,000) and max_memory_mb < 85% of 2048 MB (1,740.8); AMENDMENT 1: accounts >= 7,000 and
+              lots_rows > 0, so the read sizes the lots stage over the population. Base: FAIL.
   DB36-1-AC3  the same record's first_fire {request_id, how in scheduled|adhoc, a1..a6 each {pass true, value non-empty}} with
               a4.delta == 0. Base: FAIL.
   DB36-<k>-AC1  (k=2 Cottonwood ~48 COT_RETURNS_TIEOUT.json; k=3 Inflection ~49 INF_RETURNS_TIEOUT.json): `source` (the adapter's input
@@ -79,6 +80,11 @@ def main():
             d = r.get("dry_run") or {}
             if not num(d.get("duration_ms")) or not num(d.get("max_memory_mb")) or d.get("objects_written") != 0:
                 fail("dry_run %r" % d)
+            # AMENDMENT 1 (issuer, 2026-10-09 ~04:1xZ): the read must SIZE the lots stage -- a dry_run that computed no lots rows
+            # (e.g. SOURCE_LAG on the only day) passes the limits vacuously. lots_rows: the lots-stage row count the run logged.
+            if not isinstance(d.get("accounts"), int) or d["accounts"] < 7000 or not isinstance(d.get("lots_rows"), int) or d["lots_rows"] <= 0:
+                fail("dry_run did not size the lots stage: accounts %r, lots_rows %r (need >= 7,000 accounts and lots_rows > 0)"
+                     % (d.get("accounts"), d.get("lots_rows")))
             if d["duration_ms"] >= 765000 or d["max_memory_mb"] >= 1740.8:
                 fail("dry_run at or over 85%% of a limit: %s ms, %s MB (a STOP and a row)" % (d["duration_ms"], d["max_memory_mb"]))
             print("OK: dry_run %s ms of 900,000, %s MB of 2,048, 0 objects written" % (d["duration_ms"], d["max_memory_mb"]))

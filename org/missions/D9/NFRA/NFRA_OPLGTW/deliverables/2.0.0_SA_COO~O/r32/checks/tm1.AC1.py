@@ -2,11 +2,14 @@
 
   (a) the scheduled puller's code object s3://opal-data-assets/code/canonical-schwab-si2/sdd-daily-pull.ps1 carries
       '08403355' in the -Master ValidateSet, beside the two existing masters;
-  (b) EventBridge rule canonical-schwab-si2-08403355-daily-pull exists and is ENABLED, with a cron whose every fire time
-      is at least 30 minutes from every fire time of the two existing masters' rules (read live);
+  (b) the new master's EventBridge rule exists and is ENABLED (its name is lib/opal_naming.py builder output, row
+      NFRA_OPLGTW-Z-S68, default schwab-canonical-si2-08403355-pull-daily, override TM1_NEW_RULE), with a cron whose every
+      fire time is at least 30 minutes from every fire time of the two existing masters' rules (read live; the siblings keep
+      their names canonical-schwab-si2-<master>-daily-pull);
   (c) its one target is AWS-RunPowerShellScript on the SI2 box, and its input runs the puller with
       `-Master 08403355 -Target monolith`.
 """
+import os
 import re
 import sys
 
@@ -14,6 +17,11 @@ import boto3
 
 BOX = "i-0f3d57a97f14727af"
 NEW, OLD = "08403355", ("08242234", "08335338")
+NEW_RULE = os.environ.get("TM1_NEW_RULE", "schwab-canonical-si2-08403355-pull-daily")
+
+
+def rule_name(m):
+    return NEW_RULE if m == NEW else "canonical-schwab-si2-%s-daily-pull" % m
 
 
 def fires(cron):
@@ -42,7 +50,7 @@ def main():
     ev = boto3.client("events", region_name="us-east-1")
     crons = {}
     for m in (NEW,) + OLD:
-        name = "canonical-schwab-si2-%s-daily-pull" % m
+        name = rule_name(m)
         try:
             r = ev.describe_rule(Name=name)
         except ev.exceptions.ResourceNotFoundException:
@@ -63,7 +71,7 @@ def main():
                 if close or not of:
                     print("FAIL: (b) fires within 30 minutes of %s (or that rule unreadable): %s" % (o, close))
                     ok = False
-        tg = ev.list_targets_by_rule(Rule="canonical-schwab-si2-%s-daily-pull" % NEW).get("Targets") or []
+        tg = ev.list_targets_by_rule(Rule=rule_name(NEW)).get("Targets") or []
         inp = tg[0].get("Input", "") if len(tg) == 1 else ""
         ids = (tg[0].get("RunCommandParameters") or {}).get("RunCommandTargets") if len(tg) == 1 else None
         box_ok = bool(ids) and any(t.get("Key") == "InstanceIds" and t.get("Values") == [BOX] for t in ids)
