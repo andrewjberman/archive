@@ -42,7 +42,8 @@ BUN_TESTS = {
     "v21-page": (Path("src/pages/TicketCenter/__tests__/package-r2.test.tsx"),
                  ["the real client opens the branded PDF through analysis-request-pdf",
                   "shows the custody sentence when original_ref is null", "shows an I7 ref by its artifact id",
-                  "shows an unparseable ref as text and never links it"]),
+                  "shows an unparseable ref as text and never links it",
+                  "the real client opens the original file through analysis-request-original"]),
 }
 STRIP = re.compile(r"\x1b\[[0-9;]*m")
 

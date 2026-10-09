@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-s-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {"doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/prd/NFRA_MCPORTAL_PRD.md", "group": "OTHER", "vintage_commit": "87b310f4c2"},
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "820dd79e36",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-g-1.fabric-gitstate-handler.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~9",
+  "artifacts_produced": [
+    {"path_or_key": "infra/aws/ec2/opal-gateway/app/admin_fabric_gitstate.py", "kind": "script", "commit_or_etag": "f07058ecd019bddd2437dff4a96c7c75a938cda6", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+     "deploy_evidence": "New handler gitstate + _compute(client=None). Not deployed (BOUNDS: no deploy, no AWS call); the blob id is git hash-object of the committed bytes. The issuer adds the route line at the merge.",
+     "artifact_covered_by": ["AC1", "AC2"], "introduces": ["def _compute", "async def gitstate", "@owner_only"]},
+    {"path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_fabric_gitstate.py", "kind": "test", "commit_or_etag": "0daf3a84bf033888ef3989a7fe35c49c82c84273", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+     "deploy_evidence": "New: six tests offline (fake S3 client, stubbed owner identity, TestClient); the real-capture test serves the verbatim capture with now pinned to 2026-10-09T08:00:00Z.",
+     "artifact_covered_by": ["AC1", "AC2"],
+     "introduces": ["def test_gitstate_state_rule", "def test_gitstate_absent_box_reads_not_recorded", "def test_gitstate_integration_refused", "def test_gitstate_store_unreadable_returns_503", "def test_gitstate_non_owner_is_refused", "def test_real_capture_gitstate"]}
+  ],
+  "acceptance": [
+    {"criterion_id": "AC1", "criterion_verbatim": "AC1 (cell_refs=MP-s-1): bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/g1.AC1.sh; echo \"exit=$?\" -- expect: gitstate tests: 0 failed; named tests PASSED 5 of 5 -- RESULT: PASS -- exit=0",
+     "method": "test_suite",
+     "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/g1.AC1.sh; echo \"exit=$?\"",
+     "output_evidence": "gitstate tests: ======================== 6 passed, 1 warning in 0.45s =========================; named tests PASSED 5 of 5\nRESULT: PASS\nexit=0",
+     "denominator": "5 of 5 named tests PASSED, 0 failed (file total 6 passed)", "status": "PASS",
+     "expect": "named tests PASSED 5 of 5.*RESULT: PASS.*exit=0"},
+    {"criterion_id": "AC2", "criterion_verbatim": "AC2 (cell_refs=MP-s-1): bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/g1.AC2.sh; echo \"exit=$?\" -- expect: gitstate real capture: 0 failed; named tests PASSED 1 of 1 -- RESULT: PASS -- exit=0",
+     "method": "test_suite",
+     "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/g1.AC2.sh; echo \"exit=$?\"",
+     "output_evidence": "gitstate real capture: ======================== 6 passed, 1 warning in 0.22s =========================; named tests PASSED 1 of 1\nRESULT: PASS\nexit=0",
+     "denominator": "1 of 1 named test PASSED, 0 failed (file total 6 passed); capture = 944 objects, 4 latest.json, 71 gitstate objects", "status": "PASS",
+     "expect": "named tests PASSED 1 of 1.*RESULT: PASS.*exit=0"}
+  ],
+  "controls": {
+    "determinism": {"method": "g1.AC1.sh and g1.AC2.sh each run twice (once before and once after the commit).", "observed": "identical: 6 passed, RESULT: PASS, exit=0 each time.", "status": "STABLE"},
+    "mutant": {"description": "No dedicated mutant built; negative arms (absent box, non-owner 403 with zero store calls, AccessDenied 503, no-refusal literal) run inside the named tests.", "expected": "N/A -- declared, not run", "observed": "N/A -- declared, not run", "status": "N/A-SPEC-NAMES-NONE"}
+  },
+  "declared_exclusions": [
+    {"item": "app/admin_api.py route line", "reason": "Out of write surface; the issuer adds Route(\"/fabric/gitstate\", admin_fabric_gitstate.gitstate, methods=[\"GET\"]) at the merge."},
+    {"item": "a live S3 read", "reason": "BOUNDS: no AWS call; the seam is exercised against the verbatim capture only."}
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~9/NFRA_MCPORTAL.TO-MP-g-1.fabric-gitstate-handler.proof_of_spec.json",
+  "compiler_tools": [
+    {"tool": "pytest (Python 3.11)", "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_admin_fabric_gitstate.py -v -p no:cacheprovider --color=no", "result": "6 passed"}
+  ]
+}
