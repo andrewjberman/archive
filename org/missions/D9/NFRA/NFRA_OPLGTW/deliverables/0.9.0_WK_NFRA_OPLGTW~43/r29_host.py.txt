@@ -1,6 +1,6 @@
 """OG-rl-15 host program: the r29 behaviours of the code in OG_GW_DIR (default the INSTALLED /opt/opal-gateway), read as a SEPARATE process
 (never the running service, never /opt/opal-gateway/.env sourced). Run by r29_ssm_prog.py under `env -i` from a per-run scratch directory that is
-removed in the same command list. argv: <mode> [<served release sha> [<signed domain entries> [<signed bloomberg tools> [<revoked families>]]]]
+removed in the same command list. argv: <mode> [<served release sha> [<signed domain entries> [<revoked families>]]]
 modes: before (installed r28 code) | rehearsal (staged release bytes, installed tree untouched) | after (installed release code).
 
 What it reads, all in process, none of it a write:
@@ -13,7 +13,6 @@ What it reads, all in process, none of it a write:
   calendar_months_max      the largest n in 0..20 that data_entitlement.parse_scope accepts as a rolling grant's calendar_months (13; 0 when none is)
   contract_version         deploy/NFRA_OPLGTW_CONTRACT.json contract_version           (1.4)
   mail_domain_entries      len(mail_route.domain_table()) after the deploy's own sed/paste pipeline over deploy/mail_sender_domain_table.txt
-  bloomberg_tools_allowed  how many of the SIGNED concierge tools identity_scope.check admits for the seed identity (A2/A3)
 Synthetic inputs only: no principal, no tool call, no /login, no Graph or AWS call, no grant, no state-store access, no lake object.
 Prints booleans, counts and tool names; never an id, token, address or credential."""
 import asyncio
@@ -30,10 +29,8 @@ staged = GW != "/opt/opal-gateway"
 mode = sys.argv[1] if len(sys.argv) > 1 else "before"
 served = sys.argv[2] if len(sys.argv) > 2 else ""
 signed_domains = int(sys.argv[3]) if len(sys.argv) > 3 else -1
-signed_tools = [t for t in (sys.argv[4].split(",") if len(sys.argv) > 4 else []) if t]
-revoked = int(sys.argv[5]) if len(sys.argv) > 5 else -1
+revoked = int(sys.argv[4]) if len(sys.argv) > 4 else -1
 SCR = os.environ["R28_SCRATCH"]
-FIVE = ["opal_discover", "opal_describe", "find_sharepoint_site", "search_files", "blackdiamond_list_fees"]
 
 
 def emit(tag, obj):
@@ -134,19 +131,9 @@ def main_section():
     print("R29_DOMAINS table_reader_present=%s env_key_in_installed_env=%s entries=%d signed=%d exact_only_and_demo_refused=%s" % (
         has_dt, env_has_domain_key, len(entries), signed_domains, admitted_only_exact))
     print("R29_DOMAIN_LIST %s" % ",".join(entries))
-    # A2/A3: the concierge's allowlist through the code, and what the C2 data grant says about each tool for a principal with NO profile
-    per = {}
-    for t in FIVE:
-        reason = identity_scope.check(SC, t)
-        noprof = de.decide(t, de.Access(False, None, None, frozenset())) if hasattr(de, "Access") else "n/a"
-        per[t] = {"identity_allowlist_admits": reason is None, "c2_grant_gates_no_profile": noprof is not None,
-                  "destructive_ops_class": destructive_ops.classify(t)["class"].name, "registered": t in names}
-        print("R29_BBG %s allowlist_admits=%s registered=%s ops_class=%s c2_data_grant_denies_a_no_profile_principal=%s" % (
-            t, per[t]["identity_allowlist_admits"], per[t]["registered"], per[t]["destructive_ops_class"], per[t]["c2_grant_gates_no_profile"]))
-    allowed = sum(1 for t in signed_tools if per.get(t, {}).get("identity_allowlist_admits"))
     emit("R29_MAIN_JSON", {"tools": len(names), "scoped_scope_count": len(consent), "asker_query_class": asker_cls.name, "asker_query_write_class": asker_wc,
                            "unclassified_registered_tools": len(unclassified), "send_gate_in_oauth_as": gate, "calendar_months_max": cmax,
-                           "contract_version": cv, "mail_domain_entries": len(entries), "bloomberg_tools_allowed": allowed,
+                           "contract_version": cv, "mail_domain_entries": len(entries),
                            "domain_probe_ok": bool(admitted_only_exact)})
 
 
@@ -178,8 +165,7 @@ body = {"served_release": served, "installed_code": not staged, "tools": m["tool
         "unclassified_registered_tools": m["unclassified_registered_tools"], "send_gate_in_oauth_as": m["send_gate_in_oauth_as"],
         "calendar_months_max": m["calendar_months_max"], "contract_version": m["contract_version"],
         "mail_domain_entries": m["mail_domain_entries"], "mail_domain_entries_signed": signed_domains,
-        "concierge_families_revoked_since_deploy": revoked, "bloomberg_tools_allowed": m["bloomberg_tools_allowed"],
-        "bloomberg_tools_signed": len(signed_tools), "grants_written": 0}
+        "concierge_families_revoked_since_deploy": revoked, "grants_written": 0}
 s = json.dumps(body, sort_keys=True)
 dig = hashlib.sha256(s.encode("utf-8")).hexdigest()
 if mode == "before":

@@ -60,13 +60,10 @@ for f, cell in FILES + [("../../../../org/standards/NFRA_OPLGTW_CONTRACT.json", 
     print("%s [%s]: candidate changed-lines %d, cell changed-lines %d, only-in-candidate %d, only-in-cell %d => %s%s" % (
         f if not f.startswith("..") else "org/standards/NFRA_OPLGTW_CONTRACT.json", cell, sum(n.values()), sum(own.values()), sum(x.values()), sum(y.values()), v, extra))
     ok = ok and v in ("EQUAL", "CELL+ENTRIES+E3", "CELL+E2")
-for f, tag in (("app/graph_scope_map.py", "E1"), ("tests/test_scoped_consent_r253.py", "E4")):
+for f in ("identity_tool_allowlist.txt", "app/identity_scope.py", "app/graph_scope_map.py", "tests/test_scoped_consent_r253.py"):   # A6: nothing Bloomberg ships
     n = net(G + f)
-    print("%s [release-time edit %s, in no cell's diff]: added %d lines, removed %d lines" % (f, tag, sum(v for k, v in n.items() if k.startswith("+")), sum(v for k, v in n.items() if k.startswith("-"))))
-# the two named additions that are not a cell's build commit
-al = net(G + "identity_tool_allowlist.txt")
-print("identity_tool_allowlist.txt [A2]: added %d lines, removed %d lines; added rows (non-comment; the identity is the live file's own first-row identity, not printed; tool names): %s" % (
-    sum(v for k, v in al.items() if k.startswith("+")), sum(v for k, v in al.items() if k.startswith("-")), sorted(k[1:].split(" ", 1)[1] for k in al if k.startswith("+") and not k.startswith("+#") and k.strip("+"))))
+    print("%s [A6: must be untouched]: changed lines %d => %s" % (f, sum(n.values()), "UNTOUCHED" if not n else "TOUCHED"))
+    ok = ok and not n
 ht = net(G + "tests/test_schwab_host_inputs.py")
 print("tests/test_schwab_host_inputs.py [floor constants]: %s" % sorted(ht.items()))
 nm = [x for x in run(WT, "status", "--short").split("\n") if x.strip()]

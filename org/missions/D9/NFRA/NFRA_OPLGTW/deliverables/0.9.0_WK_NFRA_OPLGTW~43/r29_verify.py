@@ -1,12 +1,12 @@
 """OG-rl-15 PHASE B verify (form step 6; steps 11-12), WRITTEN at Phase A, never run against a deploy by the Phase A worker.
-Release r29 = live aa75078e1b (r28) + the four cells (OG-md-1, OG-sf-1, OG-rf-1, OG-cm-1) + A2/A3's allowlist rows + the release-time edits E1-E4 (ANNOUNCE_OG-rl-15.md).
-13 files reach the host (r29_release_md5.txt vs r29_live_md5.txt: 12 modified, 1 new: deploy/mail_sender_domain_table.txt). No tool and no route is added or removed (7a).
+Release r29 = live aa75078e1b (r28) + the four cells (OG-md-1, OG-sf-1, OG-rf-1, OG-cm-1) + the release-time edits E2, E3 (ANNOUNCE_OG-rl-15.md); no Bloomberg change (A6).
+11 files reach the host (r29_release_md5.txt vs r29_live_md5.txt: 10 modified, 1 new: deploy/mail_sender_domain_table.txt). No tool and no route is added or removed (7a).
 
 usage:  python r29_verify.py before <state.json>
         python r29_verify.py after  <state.json> [--expect-changed NAME,NAME]
 
 `before` reads the host on the installed LIVE code (MainPID, /health, tool names, .env key NAMES and per-key value sha256 -- a digest only, never a value, shipped md5 against the
-release list: exactly the 13 release files differ) and saves them. Keep the state file OUT of the repository (e.g. <worktree>/.scratch/r29_before.json).
+release list: exactly the 11 release files differ) and saves them. Keep the state file OUT of the repository (e.g. <worktree>/.scratch/r29_before.json).
 `after` (run IMMEDIATELY after the deploy returns) exits 0 only if all hold:
   1. host /health 200 and the service active;
   2. shipped md5 = the release bytes (98 of 98);
@@ -140,7 +140,7 @@ def main():
         ok = (R["health"] == 200 and R["active"] == "active" and len(R["tools"] or []) == 66 and sorted(R["md5_bad"]) == differ and len(R["env_keys"]) == 51)
         print("BEFORE saved: MainPID %s, env value sha256 saved %d (hash only), env key names %d, tools %d, /health %s, shipped md5 %d of %d vs the release list; the %d differing are exactly the release's %s => %s" % (
             R["mainpid"], len(R["env_hashes"]), len(R["env_keys"]), len(R["tools"] or []), R["health"], R["md5_ok"], R["md5_listed"], len(R["md5_bad"]),
-            "13 host files" if sorted(R["md5_bad"]) == differ else "FILES (MISMATCH with the expected list: %s)" % sorted(set(R["md5_bad"]) ^ set(differ)), "PASS" if ok else "FAIL"))
+            "11 host files" if sorted(R["md5_bad"]) == differ else "FILES (MISMATCH with the expected list: %s)" % sorted(set(R["md5_bad"]) ^ set(differ)), "PASS" if ok else "FAIL"))
         return 0 if ok else 1
     B = json.load(open(a.state, encoding="utf-8"))
     res = []
