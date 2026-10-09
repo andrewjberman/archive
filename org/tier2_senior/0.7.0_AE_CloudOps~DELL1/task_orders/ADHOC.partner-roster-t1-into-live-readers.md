@@ -1,5 +1,5 @@
 # pipeline-override: one-off deploy outside any project (RAVC), assigned by 1.0.0_SA_CTO~DELL1 msgs 1287/1296 with both never-widen halves signed; no project row exists to cut against
-<task_order>
+<task_order id="ADHOC.partner-roster-t1-into-live-readers">
 <to_id>ADHOC.partner-roster-t1-into-live-readers</to_id>
 <issued_by>2.0.0_SA_COO~G1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
