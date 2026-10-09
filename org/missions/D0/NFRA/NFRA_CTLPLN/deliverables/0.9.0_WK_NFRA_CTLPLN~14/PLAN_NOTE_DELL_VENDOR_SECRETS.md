@@ -559,3 +559,39 @@ Simulation: `vendor_ok` 249/249 -> 255/255 (both Dells: the per-secret sweep gai
 
 What a Dell can newly do: read that one token (create analysis requests as the commentary service). It can write neither a user-policy nor a resource policy on it under its own box's never-widen pair (dell2 measured PutUserPolicy explicitDeny, PutResourcePolicy implicitDeny).
 
+
+## M. DELL2 SHELL PARITY, STANDING, AND THE WINDOW RETIRES (amendment 24; Andrew-direct ~02:5xZ 2026-10-09 "the DELLS should not be waiting on us for this function"; `1.0.0_SA_CTO` msg 107664, CTO half signed @de8b26aa1f)
+
+Author: 0.9.0_WK_NFRA_CTLPLN~14. NOTHING WAS APPLIED, NO PLAN WAS RUN AGAINST THE BACKEND, NO IAM WRITE WAS MADE, NO SSM COMMAND WAS SENT, NO SECRET VALUE WAS READ. The only AWS calls were `iam:SimulateCustomPolicy` and `iam:SimulatePrincipalPolicy` (read-only). The live documents were not compared to the repository text.
+
+### Expected plan by reading (addresses)
+
+| resource address | action | what |
+|---|---|---|
+| `aws_iam_policy.dell2_ssm` (`cloudops-dell2-agent-ssm-policy`) | updated in place | the document becomes the file `dell2_ssm_policy.json` as rendered by `tests/derive_ssm_documents.py --write` (1,206 characters without whitespace, of 6,144). Name, description and tags are byte for byte as before, so the change is an in-place new policy version, not a replacement. |
+
+Expected: **0 to add, 1 to change, 0 to destroy.** Nothing else moves: `aws_iam_user_policy_attachment.dell2_ssm` is unchanged; dell1's policies, the group Allow (`aws_iam_policy.dell_agent_ssm_send[0]`) and the three group policy files are untouched; the group's managed-policy count is unchanged (9 of 10). The variable `open_dell2_f1_shell_window` and the module outputs `shellwin_open_json`, `shellwin_open_chars`, `shellwin_f1_in_send_hosts` and the module input `dell2_ssm_base` are removed from the configuration; none is a resource, so none appears in a plan. Whichever of the two former documents the account holds today (the closed file, or the window-open derivation if a window was applied), the next plan shows the same single in-place change, and a plain plan can no longer re-close the access. `-target='aws_iam_policy.dell2_ssm'` is the whole target list. The transcripts root: **no change** (item 4: all six written prefixes already read allowed; see below).
+
+### The document, before and after (statement Sid and the documents it names)
+
+| statement | before | after |
+|---|---|---|
+| `SendResidentDocumentsToResidentHost` (Allow `ssm:SendCommand`) | instance `i-0167fd745ad906a66`, `irpt-ycharts-deploy`, `irpt-ycharts-run` | the same three, plus `arn:aws:ssm:us-east-1::document/AWS-RunShellScript` |
+| `ReadCommandResults` (Allow) | 4 read actions on `*` | unchanged |
+| `DenyShellDocuments` (Deny `ssm:SendCommand`, `ssm:StartSession`) | AWS-RunShellScript, AWS-RunPowerShellScript, AWS-RunRemoteScript, AWS-StartInteractiveCommand, AWS-StartNonInteractiveCommand, AWS-StartSSHSession, AWS-StartPortForwardingSession*, `irpt-export-render-run` | the same eight MINUS AWS-RunShellScript |
+| `DenyStartSessionOnShellScriptDocument` (Deny `ssm:StartSession`) | absent | added: `arn:aws:ssm:*::document/AWS-RunShellScript`, so a session on the shell document stays refused |
+
+### What a Dell can newly do, in plain words
+
+- **dell2, standing:** `ssm:SendCommand` with `AWS-RunShellScript` to the resident host `i-0167fd745ad906a66` (census role `irpt-ycharts-runner-role`, verdict NO): a shell as that host's role, with no window and no ledger leg. On the six privileged route hosts dell2 already had the same send through the group Allow, as dell1 does; that does not change.
+- **dell1:** nothing changes. dell1 still cannot send anything to the resident host (the host is not in the group Allow).
+- **Still refused for dell2:** AWS-RunPowerShellScript, AWS-RunRemoteScript, AWS-StartInteractiveCommand, the session documents, `ssm:StartSession` on the shell document, `irpt-export-render-run`, a send to any instance outside the resident host and the six, and `ssm:DeleteDocument`.
+- **Cross-product note (unchanged in kind):** because IAM authorises the document and the instance as separate resources, dell2 may also pair its resident documents with the six hosts and the shell document with any of its allowed instances; every such pairing is a send dell2 already held or now holds by name.
+
+### Simulation, this step
+
+`POLICY-SIM ... ssm_ok=14/14 ... walker_ok=11/11 iamw_ok=225/225 planread_ok=423/423 sendcmd_ok=33/33 shellpar_ok=18/18 routes_freed=114/138 routes_still_refused=24 vendor_ok=255/255 all_ok=True` (file `NFRA_CTLPLN.TO-CT-a-1.amendment24.simulate_policy.outputs.txt`). Two arms changed expectation and moved into `shellpar_ok`: the `ssm_ok` arm "dell2 sends the shell document to the host" (explicitDeny before, allowed now; `ssm_ok` 15 to 14) and the `sendcmd_ok` arm "dell2 sends the shell-script document to a host of the Allow (window closed)" (explicitDeny before, allowed now; `sendcmd_ok` 34 to 33). `shellpar_ok` is 18 arms: dell2 allowed on the resident host and on one route host; refused on an outside instance, PowerShell, remote-script, interactive-command, a session on the shell and on the SSH document, the export render document; its resident document still allowed; DeleteDocument refused; and seven dell1 control arms. Controls: the same F1 send under the pre-change file reads explicitDeny, under the new file without the shell Allow resource reads implicitDeny, and the session arm without the new Deny reads implicitDeny.
+
+### Transcript jobs (item 4)
+
+Prefixes the NFRA_TRNSPT jobs write, from `NFRA_TRNSPT.TO-RUN-x9` and `-b11` (`teams/transcripts/silver/research_meeting/`, 29 keys) and `infra/aws/terraform/transcripts/` (`chat_assist.tf`: `teams/transcripts/bronze/chat_messages/`, `silver/chat_threads/`, `state/chat_assist/`; `pull.tf`: `teams/transcripts/`; `mail_pull.tf`: `outlook/transcripts/`). dell2 `s3:PutObject` on each reads **allowed** (6 of 6, matched `S3ObjectsOnOpalBuckets`), positive control allowed, negative controls refused. Nothing is refused, so **nothing was granted and the transcripts root is unchanged.** `check_transcripts_dell_decrypt.py` still prints `dell_write_refused=8/10`; no arm moved. Row `NFRA_CTLPLN-W14-S44`: the key grants the Dells Decrypt and DescribeKey only, so a Dell PutObject would still fail at `kms:GenerateDataKey`; not widened here.
