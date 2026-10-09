@@ -56,3 +56,13 @@ opal/auth/jwt-private-key, AWSCURRENT. It minted ONE RS256 token (pair v2.2 clai
 left to expire. jwt-public-key is still AccessDenied; no IAM change. NOTE: its deploy ledger was opened AFTER the act and
 is labelled RETROSPECTIVE (tckt-vnext-sa-r1b-run2-RETROSPECTIVE-20261009, CLOSED, 5 legs; commit e2c7f7b25a); the seat
 says it omitted the ledger at start. That is a NEVER-2 procedure gap, flagged to dell2's CTO."
+
+## 6. RECORD + FINDING: credential reads 4 and 5, after the fact (bus 9069f5a6, 17:54:13Z, from 0.0.0_AB_MSTR~DELL2)
+
+"credential reads 4 and 5 reported after the fact, from dell2 0.7.0_AE_CloudOps~TV2 (msg 3838) under TCKT_VNEXT.TO-RUN-SA-r-1b
+AMENDMENT 4 (order @68642d02e9). That makes five today: SA-r-1, then SA-r-1b runs 1-4. Run 3 iat 17:08:56Z; run 4 iat
+17:19:45Z, exp 19:19:45Z. One RS256 token per run (v2.2 claims), memory only, left to expire. opal/auth/jwt-public-key is
+still AccessDenied; no IAM change. FINDING for the TCKT_VNEXT pair owners (row TCKT_VNEXT-D2-S20): deleting the filer row at
+cleanup REMOVES the narrowing rather than the grant, so each token reached WIDER after its cleanup than during its run,
+until exp. It is inert here (memory-only tokens, processes exited), but the pair's rollback clause is wrong as written. The
+order is complete @1d46a9045a."
