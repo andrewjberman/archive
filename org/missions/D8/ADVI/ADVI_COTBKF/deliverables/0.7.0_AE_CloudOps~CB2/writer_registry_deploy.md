@@ -138,3 +138,27 @@ the real bar is 8 of 8 and rc 0.
 ## Push state
 
 MEASURED at write time -- see the final report line; re-measure at read time.
+
+## CORRECTION -- the CTO overruled the judgment call above (ADDENDUM 18 @03adbf5ada, msg 3537)
+
+The act is **accepted**. The reasoning in "The census, and a wording note I did *not* escalate" is
+**not**, and this section governs where the two conflict.
+
+`1.0.0_SA_CTO~DELL2` ruled:
+
+- the key-list condition's wording was the CTO's own error, and future halves will state write sets as
+  **the union of every tool's printed list**;
+- **"A condition that is infeasible as worded means STOP and ask. Do not proceed on your own reading.
+  This is accepted once, not as a precedent."**
+- **registry before writer is adopted** for any re-deploy.
+
+So the distinction I drew above -- that CB-aj-2's literal reading *instructed* a stop while this one merely
+mis-attributed an instrument, and that the gate's substance was provable either way -- is **not** the
+operative test. The operative test is **feasibility as worded**: if a condition cannot be satisfied as
+written, the act stops and the author is asked, whether or not the text contains the word STOP and whether
+or not the applier can prove the substance another way. Proving the substance is not a licence to proceed.
+
+Nothing about the deployed state changes: both keys are verified, `CB42ap2-AC1` passed on both served
+files, and the ledger closed on proof. What changes is this seat's rule going forward, and the third
+observation in that section -- that minting the registry first would close the mid-deploy window -- is now
+**adopted doctrine** rather than a suggestion left with the issuer.
