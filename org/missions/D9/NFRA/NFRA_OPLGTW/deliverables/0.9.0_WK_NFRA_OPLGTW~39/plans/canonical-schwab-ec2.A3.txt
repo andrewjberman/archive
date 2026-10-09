@@ -1,0 +1,85 @@
+# canonical-schwab-ec2 plan after amendment A3 (rule name from the builder), plan only, -lock=false, no apply.
+# Plan: 2 to add, 0 to change, 0 to destroy. Targets 1-2 create; the two sibling rules and their targets are not in the plan (no change).
+# The Phase A box-grant change is gone from this plan because the site applier already applied Leg B.
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_cloudwatch_event_rule.si2_daily["08403355"] will be created
+  + resource "aws_cloudwatch_event_rule" "si2_daily" {
+      + arn                 = (known after apply)
+      + description         = "OPAL_ASSETS C3(c): daily SDD REST pull of Tax SMA (master 08403355) -> monolith opal-data-assets bronze. CREATE-NEW (new-territory); the dead GUI schedule is untouched."
+      + event_bus_name      = "default"
+      + force_destroy       = false
+      + id                  = (known after apply)
+      + name                = "schwab-canonical-si2-08403355-pull-daily"
+      + name_prefix         = (known after apply)
+      + schedule_expression = "cron(45 10,22 * * ? *)"
+      + tags_all            = (known after apply)
+    }
+
+  # aws_cloudwatch_event_target.si2_daily["08403355"] will be created
+  + resource "aws_cloudwatch_event_target" "si2_daily" {
+      + arn            = "arn:aws:ssm:us-east-1::document/AWS-RunPowerShellScript"
+      + event_bus_name = "default"
+      + force_destroy  = false
+      + id             = (known after apply)
+      + input          = jsonencode(
+            {
+              + commands         = [
+                  + "$ErrorActionPreference='Continue'",
+                  + "$ProgressPreference='SilentlyContinue'",
+                  + "$aws='C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe'",
+                  + "$s3='s3://opal-data-assets/code/canonical-schwab-si2/sdd-daily-pull.ps1'",
+                  + "$local='C:\\schwab-sdd\\sdd-daily-pull.ps1'",
+                  + "New-Item -ItemType Directory -Force 'C:\\schwab-sdd' | Out-Null",
+                  + "& $aws s3 cp $s3 $local --only-show-errors",
+                  + "if ($LASTEXITCODE -ne 0) { throw 'FATAL: could not pull sdd-daily-pull.ps1 from S3 _ops' }",
+                  + "$tn='OpalSddDailyPull-08403355'",
+                  + "$sns='arn:aws:sns:us-east-1:313476888478:opal-critical-surface-alerts'",
+                  + "$tr='powershell.exe -ExecutionPolicy Bypass -File C:\\schwab-sdd\\sdd-daily-pull.ps1 -Master 08403355 -Target monolith -SnsTopicArn ' + $sns",
+                  + "Unregister-ScheduledTask -TaskName $tn -Confirm:$false -ErrorAction SilentlyContinue",
+                  + "schtasks /Create /TN $tn /TR $tr /SC ONCE /ST 23:59 /RU Administrator /IT /RL HIGHEST /F | Out-Null",
+                  + "if ($LASTEXITCODE -ne 0) { throw 'FATAL: could not register the Administrator scheduled task' }",
+                  + "$before = (Get-ScheduledTaskInfo -TaskName $tn).LastRunTime",
+                  + "schtasks /Run /TN $tn | Out-Null",
+                  + "$startDeadline = (Get-Date).AddSeconds(90)",
+                  + "do { Start-Sleep -Seconds 5; $st = (Get-ScheduledTask -TaskName $tn).State; $now = (Get-ScheduledTaskInfo -TaskName $tn).LastRunTime } while ($st -ne 'Running' -and $now -eq $before -and (Get-Date) -lt $startDeadline)",
+                  + "if ($st -ne 'Running' -and $now -eq $before) { throw \"FATAL: scheduled task $tn NEVER STARTED. An /IT (interactive) task requires the Administrator console session to be logged on -- check it. This is a NO-RUN, and a no-run must never be mistaken for a clean run.\" }",
+                  + "$runDeadline = (Get-Date).AddMinutes(50)",
+                  + "do { Start-Sleep -Seconds 15; $st = (Get-ScheduledTask -TaskName $tn).State } while ($st -eq 'Running' -and (Get-Date) -lt $runDeadline)",
+                  + "$rc = (Get-ScheduledTaskInfo -TaskName $tn).LastTaskResult",
+                  + "Get-Content C:\\schwab-sdd\\daily\\08403355\\daily-pull.log -Tail 25 -ErrorAction SilentlyContinue",
+                  + "Unregister-ScheduledTask -TaskName $tn -Confirm:$false -ErrorAction SilentlyContinue",
+                  + "if ($st -eq 'Running') { throw \"FATAL: pull for 08403355 still Running after the 50-minute deadline -- treating as hung.\" }",
+                  + "if ($rc -ne 0) { throw \"FATAL: sdd-daily-pull.ps1 for 08403355 exited rc=$rc (see the log tail above; the puller also SNS-paged).\" }",
+                  + "Write-Output ('OK: daily pull for 08403355 completed as Administrator, rc=' + $rc)",
+                  + "exit 0",
+                ]
+              + executionTimeout = [
+                  + "3600",
+                ]
+            }
+        )
+      + role_arn       = "arn:aws:iam::313476888478:role/canonical-schwab-si2-daily-events-ssm-role"
+      + rule           = "schwab-canonical-si2-08403355-pull-daily"
+      + target_id      = (known after apply)
+
+      + run_command_targets {
+          + key    = "InstanceIds"
+          + values = [
+              + "i-0f3d57a97f14727af",
+            ]
+        }
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  ~ si2_daily_rule_arns            = {
+      + "08403355" = (known after apply)
+        # (2 unchanged attributes hidden)
+    }
