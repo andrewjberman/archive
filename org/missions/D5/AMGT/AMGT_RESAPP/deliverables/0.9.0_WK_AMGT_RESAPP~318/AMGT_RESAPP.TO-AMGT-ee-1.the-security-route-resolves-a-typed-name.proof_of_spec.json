@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ee-1.the-security-route-resolves-a-typed-name",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "f43ca41993"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "f43ca41993",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ee-1.the-security-route-resolves-a-typed-name.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~318",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "67e51346c2885c031e7b7c61b6b0af3b45595df1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED at the per-security arm's 404 branch only: function-scope `from lib.research.api import name_search`, resolve_query(typed); exact or one candidate re-resolves identity with that key (identity.requested keeps the typed text); two or more return 404 with a plain sentence and a candidates list; none keeps today's 404. The redeploy carries the function-scope import only (lib.research.api.name_search is already in the package the function ships; /resolve at :7076 already imports it the same way). Local only.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_route_typed_name.py",
+      "kind": "test",
+      "commit_or_etag": "67e51346c2885c031e7b7c61b6b0af3b45595df1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 4 tests on a planted crosswalk (one, several, none, exact key never reaches the branch). 4 passed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a typed ticker and a typed name serve the canonical key's page, 'Micro' answers 404 saying several companies match with the candidates, an unknown string keeps today's 404; C1-C4 PASS; R81 ROUTE AC1 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round81_prep/checks/r81_route.py\" --crit AC1 --where local; echo \"exit=$?\"",
+      "output_evidence": "   canonical AMD_US_Equity: 200, 32 keys\nPASS C1 'AMD' answers 200 and serves AMD_US_Equity's body\nPASS C2 'Advanced Micro Devices' answers 200 and serves AMD_US_Equity's body\nPASS C3 'zzqx' answers 404 with a plain sentence: \"no security matches 'zzqx': it is not in the identity crosswalk, not a landed model block and not a covered name\"\nPASS C4 'Micro' (three matches) answers 404 and says more than one matches: \"3 companies match 'Micro'; type the ticker.\"\nR81 ROUTE AC1 SERVED: YES\nexit=0",
+      "denominator": "4 of 4 C lines PASS (C1 ticker, C2 name, C3 unknown, C4 several)",
+      "status": "PASS",
+      "expect": "PASS C1.*PASS C2.*PASS C3.*PASS C4.*R81 ROUTE AC1 SERVED: YES.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "an exact key's /thesis body on the tree hashes equal to the deployed function's, 4 of 4; R81 ROUTE AC2 SERVED: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round81_prep/checks/r81_route.py\" --crit AC2; echo \"exit=$?\"",
+      "output_evidence": "PASS B1 'AMD_US_Equity' /thesis: local 200 7a825f95b855, deployed 200 7a825f95b855\nPASS B1 'BA_US_Equity' /thesis: local 200 55ef17b1bc00, deployed 200 55ef17b1bc00\nPASS B1 'ABNB_US_Equity' /thesis: local 200 0146a2e2066c, deployed 200 0146a2e2066c\nPASS B1 'AMD US' /thesis: local 200 57eb6da72ec4, deployed 200 57eb6da72ec4\nR81 ROUTE AC2 SERVED: YES\nexit=0",
+      "denominator": "4 of 4 B1 lines PASS (local hash == deployed hash)",
+      "status": "PASS",
+      "expect": "(B1 .*){4}R81 ROUTE AC2 SERVED: YES.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "name_search.resolve_query replaced in memory by a function answering `none` for every string, then the checker's own ac1() run on it (.scratch/mutant.py).",
+      "expected": "AC1 must FAIL on the mutant: C1, C2 and C4 FAIL, SERVED: NO, exit 1.",
+      "observed": "FAIL C1 'AMD' answers 404; FAIL C2 'Advanced Micro Devices' answers 404; PASS C3; FAIL C4 'Micro' answers 'no security matches'; R81 ROUTE AC1 SERVED: NO; mutant_exit=1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 output md5 over four runs after the pass run.",
+      "observed": "The first of the four differed (c3f17259f65b...); the next three were identical (636697b9f498...). AC1 reads the live crosswalk and stores; the one early difference was not diffed (not captured). AC2 reads the deployed function and is not hashed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The two failures in lib/research/api/tests",
+      "reason": "Both are ModuleNotFoundError: No module named 'pypdf' (test_print_fiscal_year_sort.py::test_head_copy_raises_on_mixed_keys and test_print_format_rich.py::test_default_and_fmt_pdf_are_byte_identical_to_build_pack_itself); failing at the base as the order says; no row filed. Folder last line: 2 failed, 875 passed."
+    },
+    {
+      "item": "Deploy of the function",
+      "reason": "Out of BOUNDS: no deploy. AC2 reads the deployed function only to compare."
+    }
+  ],
+  "surprises": [],
+  "session_log": "no separate log file; the session is the git history of branch wk-AMGT_RESAPP-318 (code commit 67e51346c2) and this instance's recorded outputs",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/api/scoped_amgt.py lib/research/api/tests/test_route_typed_name.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh, code commit 67e51346c2)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~318 <0.9.0_WK_AMGT_RESAPP~318@opal.agent>\" -F <msgfile> -- <2 code paths>",
+      "result": "passed first time; commit 67e51346c2"
+    }
+  ]
+}
