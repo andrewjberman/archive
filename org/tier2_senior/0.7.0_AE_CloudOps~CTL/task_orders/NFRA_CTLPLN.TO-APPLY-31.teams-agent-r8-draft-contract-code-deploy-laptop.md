@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~CTL</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -13,6 +13,20 @@
 <decomp_doc>org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.inbound8.md</decomp_doc> (workstream INBOUND, round 8, macro COMM): the apply leg of cell `CT-i-14` (built, merged @bde0c0fc90)
 <owned_cells>CT-i-14</owned_cells>
 </decomp_ref>
+
+  <closure>
+    COMPLETE (issuer, ~23:2xZ): APPLIED, not yet EXERCISED.
+    - Live 23:03Z: both functions at CodeSha256 SFSTGBQX3r49t2YXSrN+6t6Ekmz1NrpxkjX09VHLZEM=. The issuer read both live; the handler's
+      LastModified is 23:03:08Z.
+    - Branch A 0/2/0. Re-plan clean. ingress_poll 5, ingress_step_failed 0.
+    - Ledger 20261009T2245Z_teams-r8-draft-contract-laptop-20261009 CLOSED 23:09:22Z. Proof instance VALID (issuer re-ran the
+      check). Report @3af6f043b3.
+    DEVIATIONS, graded ACCEPTED:
+    (1) The one foreign -var (second_reader_trust_principal_arns), passed at its live value read at the act. This is the A3 method
+        on the same root; it widened nothing, and branch A was met exactly.
+    (2) STOP 3 widened from 60 to 180 minutes, to avoid reading an uninformative zero as clean. That is stricter, not looser.
+    EXERCISE: the issuer's first-hour draft_contract read runs at ~00:05Z. The first real drafting call is the live exercise.
+  </closure>
 
   <precondition>
     STAGED until BOTH halves are signed:
@@ -90,6 +104,7 @@ lane: CloudOps~CTL applies under both signed halves (COO @082e0d865a, CTO @c2fa3
 <proof_of_spec>
   <criterion id="AC1" cell_refs="CT-i-14"><invocation>python data/transcripts/scripts/tests/test_draft_contract.py</invocation><expect>DRAFT-CONTRACT ok=True</expect></criterion>
   <criterion id="AC2" cell_refs="CT-i-14" judgment="true"/>
+Instance at `org/tier2_senior/0.7.0_AE_CloudOps~CTL/deliverables/teams_r8_20261009/NFRA_CTLPLN.TO-APPLY-31.teams-agent-r8-draft-contract-code-deploy-laptop.proof_of_spec.json`.
 </proof_of_spec>
 
   <report>
