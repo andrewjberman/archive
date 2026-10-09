@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COMM_ASSIST.TO-CA-d-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.7.0_AE_CloudOps~CA",
+  "spec_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/prd/COMM_ASSIST_PRD.md",
+    "group": "C",
+    "vintage_commit": "805fec22c5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/COMM/COMM_ASSIST/decompositions/COMM_ASSIST_DECOMP.round12.md",
+    "vintage_commit": "4c14e95965",
+    "to_ref": "org/missions/D9/COMM/COMM_ASSIST/task-orders/COMM_ASSIST.TO-CA-d-2.mail-deploy.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/transcripts/chat_assist.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4fd7b6abcc",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The variable's committed default is the secret ARN and the targeted apply of module.ldo_001 landed it. The same file carries CA-d-3's KMS data source (2c84d9521a)."
+    },
+    {
+      "path_or_key": "teams-global-chat-assist-handler-lambda",
+      "kind": "aws_resource",
+      "commit_or_etag": "op92gM7rlR9956tienAEp2Dscy2zhdARV3WEbYDFp/M=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "get-function-configuration read live AFTER the apply: CodeSha256 op92gM7rlR9956tienAEp2Dscy2zhdARV3WEbYDFp/M= (the pinned build at 2ad98c2e3a), LastModified 2026-10-09T18:33:43Z, MAIL_BEARER_SECRET = arn:aws:secretsmanager:us-east-1:313476888478:secret:gateway/mail/commassist-bearer-cPYbR3. Before: xWURpe/nRkiZAc8Uui+arsJpSeVnUErNEHBWqtvrM5Q= with no such variable."
+    },
+    {
+      "path_or_key": "teams-global-chat-assist-ingress-lambda",
+      "kind": "aws_resource",
+      "commit_or_etag": "op92gM7rlR9956tienAEp2Dscy2zhdARV3WEbYDFp/M=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Read live AFTER the apply: the same CodeSha256, LastModified 2026-10-09T18:33:37Z, MAIL_BEARER_SECRET = the same ARN. Its mail step is live in CloudWatch: mail_poll {calls:4, domains:4, failed:0, fetched:0, refused:0, sent:0}, and 0 not-configured lines."
+    },
+    {
+      "path_or_key": "arn:aws:iam::313476888478:policy/teams-global-chat-assist-policy",
+      "kind": "aws_resource",
+      "commit_or_etag": "policy default version v4 (was v3), UpdateDate 2026-10-09T18:33:30Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "get-policy read live: DefaultVersionId v3 -> v4, UpdateDate 2026-10-09T18:33:30Z. The plan's only policy change was + the one secret ARN in the secrets-read Resource list; the whole plan carried 3 addition lines and 0 removal lines."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CAd2-AC1",
+      "criterion_verbatim": "the issuer's live check (read it; do not edit it). The secret exists; `chat_assist.tf` at HEAD commits its ARN; both functions carry the built package's hash (not round 7's) and `MAIL_BEARER_SECRET` = the ARN; the exec policy grants the read. It FAILs at the base.",
+      "method": "live_read",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~ZZ/r12/checks/d2_live.py\"",
+      "output_evidence": "RESULT: PASS -- secret exists; chat_assist.tf default at HEAD equals the ARN; built package op92gM7rlR9956tienAEp2Dscy2zhdARV3WEbYDFp/M=; both functions CodeSha256 == built and != r7; both MAIL_BEARER_SECRET == the ARN; exec policy grants GetSecretValue on it.",
+      "denominator": "8 of 8 checks printed by d2_live.py read True (secret existence, HEAD default, built-artifact presence, then CodeSha256 and MAIL_BEARER_SECRET across 2 functions, then the policy grant). It read FAIL at the base, as the issuer's pre-cut note records.",
+      "status": "PASS",
+      "expect": "RESULT: PASS"
+    },
+    {
+      "criterion_id": "CAd2-AC2",
+      "criterion_verbatim": "NEVER-2: the ledger `comm-assist-r12-mail-deploy` is committed CLOSED at HEAD and its sentinel is gone. It FAILs at the base.",
+      "method": "command",
+      "invocation": "bash \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~ZZ/r12/checks/d2_ledger.sh\"",
+      "output_evidence": "RESULT: PASS -- comm-assist-r12-mail-deploy: entries at HEAD 1, CLOSED=yes, sentinel at HEAD=no; comm-assist-r12-mail-deploy-2: entries at HEAD 1, CLOSED=yes, sentinel at HEAD=no.",
+      "denominator": "2 of 2 ledgers the check reads at HEAD c19f3a3e91 (before that commit it read only the first), 3 fields each = 6 of 6 as required.",
+      "status": "PASS",
+      "expect": "RESULT: PASS"
+    },
+    {
+      "criterion_id": "CAd2-AC3",
+      "criterion_verbatim": "Phase A2's falsifier (the issuer's check; read it, do not edit it): the data source on the alias STRING, no key-resource or alias reference left in `chat_assist.tf`, and `PLAN_D3.txt` at 0/2/0 with no key, reader or `LDO_KMS_KEY_ARN` line. It FAILs at the base.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/COMM/COMM_ASSIST/deliverables/2.0.0_SA_COO~ZZ/r12/checks/d3_decouple.py\"",
+      "output_evidence": "RESULT: PASS -- data source keyed on the alias STRING; 0 key-resource/alias tokens in chat_assist.tf at HEAD; PLAN_D3.txt 0 to add, 2 to change, 0 to destroy; no key or reader address; no LDO_KMS_KEY_ARN diff.",
+      "denominator": "5 of 5 checks printed by d3_decouple.py read True. It read FAIL at the base.",
+      "status": "PASS",
+      "expect": "RESULT: PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Appended one byte to the built artifact infra/aws/lambda/teams-chat-assist/dist/teams-chat-assist.zip -- a gitignored build product, so the mutation touches no committed state and nothing live -- making the built hash differ from the deployed CodeSha256. AC1's 'CodeSha256 == built' limb is the one the entire deploy claim rests on, so that is the limb mutated rather than an incidental one.",
+      "expected": "AC1 flips to RESULT: FAIL with both per-function 'CodeSha256 == built and != r7' checks reading False, while the live hash stays op92gM7rlR9956tienAEp2Dscy2zhdARV3WEbYDFp/M=.",
+      "observed": "RESULT: FAIL. Built package read Z0NczKL2JIhRlPz2B5FXEYuNXitmYp+SpQEF8tAb3ls=; both per-function checks False; live still op92gM7rlR9956tienAEp2Dscy2zhdARV3WEbYDFp/M=. Restored the artifact from the pinned worktree and AC1 returned to PASS, so the mutation was fully reverted.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran d2_live.py twice back to back against unchanged inputs (same HEAD, same dist/ artifact, same live AWS state) and compared the verdict lines.",
+      "observed": "RESULT: PASS on both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The real mail run: one considered mail from one of the five domains arriving as a text with a draft and the right flag, and one that does not name Andrew sending nothing.",
+      "reason": "Explicitly not this order's -- 'That run is the issuer's at close, not this order's (an applier sends no test mail).' The outcome is therefore APPLIED, not EXERCISED, until the issuer's run. No test mail was sent and nothing was invoked."
+    },
+    {
+      "item": "The secret's value.",
+      "reason": "Never read, written, rotated or deleted by this cell. Only its ARN was recorded, through describe-secret, which returns no value. The secret is NFRA_OPLGTW's."
+    },
+    {
+      "item": "Message content in the ingress logs.",
+      "reason": "The order limits step 7 to log lines. Only event and count fields were read (ingress_poll, channel_poll, mail_poll); no message body."
+    },
+    {
+      "item": "Whether CA-d-3's decoupling is what made the plan clean.",
+      "reason": "PLAN_D3 could not discriminate (s21 closed before it ran), as the CTO and CVO both corrected. The decoupling rests on the reference census -- chat_assist.tf references only the data source -- and on this apply's own plan carrying no key RESOURCE address, only the data source's Read."
+    }
+  ],
+  "surprises": [
+    "COMM_ASSIST-Z-S1",
+    "COMM_ASSIST-Z-S3",
+    "COMM_ASSIST-Z-S4"
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~CA/logs/2026-10-09/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'COMM_ASSIST-Z[A-Za-z0-9-]*S[0-9]+' org/missions/D9/COMM/COMM_ASSIST org/surprise_channel --limit 40",
+      "result": "4 hits across 87 files scanned, denominator printed. Established COMM_ASSIST-Z-C-S1 as the only Z- id already taken, which is how the gate-legal id COMM_ASSIST-Z-S1 was chosen after the order's COMM_ASSIST-Z-AE-S1 was refused by the row grammar."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"how do I grep the repo\"",
+      "result": "Startup forwarder exercise: a forwarder RAN; 102 of 102 comp-tools resolve bare."
+    }
+  ]
+}
