@@ -29,9 +29,13 @@ except Exception as e:  # noqa: BLE001 -- the module is absent at the base: the 
     print("AC1 RESULT: FAIL 1 (import)")
     sys.exit(0)
 
-G4 = pd.DataFrame([{"security_id": "TKOMY_US_Equity", "date": d, "px_close": p, "currency": "USD"} for d, p in
+# gold security_market carries `security_name` (read at the cut: "Tokio Marine Holdings Inc" on the TKOMY rows), so the
+# candidate's name comes from the stored frame, never from a name typed into the module (AMENDMENT 1).
+G4 = pd.DataFrame([{"security_id": "TKOMY_US_Equity", "date": d, "px_close": p, "currency": "USD",
+                    "security_name": "Tokio Marine Holdings Inc"} for d, p in
                    [("2026-10-05", 49.59), ("2026-10-06", 50.5), ("2026-10-07", 3.33)]] +
-                  [{"security_id": "AAA_US_Equity", "date": d, "px_close": p, "currency": "USD"} for d, p in
+                  [{"security_id": "AAA_US_Equity", "date": d, "px_close": p, "currency": "USD",
+                    "security_name": "AAA Corp"} for d, p in
                    [("2026-10-06", 10.0), ("2026-10-07", 19.0)]])
 NO_ACTIONS = pd.DataFrame([], columns=["security_id", "event_type", "ratio", "ex_date", "claim"])
 STORED = pd.DataFrame([{"security_id": "TKOMY US Equity", "event_type": "split", "ratio": 15.0, "ex_date": "2026-10-07",
@@ -40,6 +44,7 @@ STORED = pd.DataFrame([{"security_id": "TKOMY US Equity", "event_type": "split",
 # (a) the 93% drop with no action on file is one candidate; a 1.9x move is not
 c = dm.detect(G4, NO_ACTIONS)
 check("a", len(c) == 1 and c[0].get("security_id") == "TKOMY_US_Equity" and str(c[0].get("date"))[:10] == "2026-10-07"
+      and c[0].get("security_name") == "Tokio Marine Holdings Inc"
       and abs(float(c[0].get("prior_close")) - 50.5) < 1e-9 and abs(float(c[0].get("close")) - 3.33) < 1e-9,
       f"candidates {c}")
 
@@ -68,5 +73,9 @@ check("c", isinstance(row, dict) and row.get("event_type") == "split" and float(
 none = dm.lookup({"security_id": "TKOMY_US_Equity", "date": "2026-10-07", "prior_close": 50.5, "close": 3.33,
                   "security_name": "Tokio Marine Holdings Inc"}, search=lambda q: [])
 check("d", none is None, f"no result -> {none!r}")
+
+# (e) no security name is typed into the module: names come from the stored frame (or the sweep's names= argument)
+src = open(dm.__file__, encoding="utf-8").read()
+check("e", "Tokio" not in src and "TKOMY" not in src and "8766" not in src, "module source names no specific security")
 
 print("AC1 RESULT: PASS 0 failures" if not fails else f"AC1 RESULT: FAIL {len(fails)} ({', '.join(fails)})")
