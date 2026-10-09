@@ -1,0 +1,78 @@
+{
+  "built_only_fields": [
+    "custody (the built-only custody arms: the registry row as packaged PENDING_ENFORCEMENT, then a SYNTHETIC in-memory ACTIVE copy -- a simulation, never a release)"
+  ],
+  "built_zip": {
+    "bytes": 415060,
+    "code_sha256": "7T29wPhzbU/FlJpeT3MNSJ5jFWcEmi7bvHiSKECkyns=",
+    "source": "BUILD_ONLY=1 build-and-upload.sh investor-reporting irpt-export-render (nothing uploaded)"
+  },
+  "divergent_fields": [
+    "mode (the run label: 'live' vs 'built', by design)"
+  ],
+  "fixtures": "one retained irpt-x10-v1 ANALYSIS and one retained PERFORMANCE, reserved through the LIVE zip's own code path",
+  "identical": true,
+  "identical_detail": {
+    "fixture": true,
+    "get": true,
+    "kinds": true,
+    "module_files": true,
+    "negative_control": true,
+    "policy_revision": true,
+    "policy_sha256": true,
+    "policy_state": true
+  },
+  "identical_fields": [
+    "fixture",
+    "get",
+    "kinds",
+    "module_files",
+    "negative_control",
+    "policy_revision",
+    "policy_sha256",
+    "policy_state"
+  ],
+  "live_zip": {
+    "bytes": 414177,
+    "code_sha256": "rNjtTwcmhpNdHUV7VcO1cRPcC1wHaANm1oIP+Xvf6Ek=",
+    "source": "aws lambda get-function irpt-export-render Code.Location"
+  },
+  "method": "deliverables/0.9.0_WK_IRPT_BCKEND~182/replay/replay_zip.py (IB-pr-374's replay), one zip per process under python -I",
+  "negative_control_detail": {
+    "built": {
+      "ANALYSIS": {
+        "altered_rows": 1,
+        "exc": "RetentionRefused: retention binding changed",
+        "refused": true
+      },
+      "PERFORMANCE": {
+        "altered_rows": 1,
+        "exc": "RetentionRefused: retention binding changed",
+        "refused": true
+      }
+    },
+    "live": {
+      "ANALYSIS": {
+        "altered_rows": 1,
+        "exc": "RetentionRefused: retention binding changed",
+        "refused": true
+      },
+      "PERFORMANCE": {
+        "altered_rows": 1,
+        "exc": "RetentionRefused: retention binding changed",
+        "refused": true
+      }
+    },
+    "note": "a retention row's policy_sha256 altered; repository.get must refuse. RetentionRefused('retention binding changed') on ANALYSIS and PERFORMANCE in BOTH zips, 1 altered row each"
+  },
+  "negative_control_refused_by_both": true,
+  "no_network_no_aws": "the replay reads no repo file and makes no AWS or vendor call; in-memory index and blob fakes, synthetic ids only",
+  "policy": {
+    "revision": "irpt-x10-v1",
+    "sha256": "e0046398e23951451498c0fcfec29154db5b26d4c70d80c4121f50fd3dfc8c85",
+    "state": "ACTIVE"
+  },
+  "read_back": "repository.get read each report back through BOTH zips; the `get` structures are byte-identical after canonical JSON",
+  "what": "IB-pr-378 Part A step 2 -- offline differential replay, run BEFORE the ledger was opened",
+  "zip_delta_control": "diff -rq over the two unzipped trees: 55 members each, and they differ in EXACTLY the two declared members custody_persist.py and custody_write.py, nothing else -- artifact-level corroboration of release-census changed_members=2"
+}

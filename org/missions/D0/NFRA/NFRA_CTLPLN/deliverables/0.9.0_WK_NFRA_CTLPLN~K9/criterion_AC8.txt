@@ -1,0 +1,40 @@
+CASE 1 PASS: registry logged ['GET /selfcheck-registry host=127.0.0.1'] and answered 404=True; proxy logged 2 lines (CONNECT + absolute-URI GET) and answered 502
+STEP 0 bun --version                                                          registry=0 proxy=0 rc=0 any request here is a finding: a version check that phones home
+STEP 0b proxy-honour fetch of a loopback URL                                  registry=0 proxy=1 rc=0 URL is the loopback registry listener; honoured=True (a request on the proxy listener) 
+STEP 1 proxy proof, --no-install, registry default                            registry=0 proxy=0 rc=1 expect zero; this arm cannot prove the proxy works
+STEP 2 positive arm, all three forms of Redirect A + proxy, no disarm         registry=0 proxy=6 rc=1 
+STEP 2 positive arm, Redirect A form env:BUN_CONFIG_REGISTRY alone            registry=0 proxy=6 rc=1 
+STEP 2 positive arm, Redirect A form env:NPM_CONFIG_REGISTRY alone            registry=0 proxy=6 rc=1 
+STEP 2 positive arm, Redirect A form project-bunfig alone                     registry=0 proxy=6 rc=1 
+STEP 2 positive arm with the redirects every candidate carries                registry=0 proxy=6 rc=1 
+STEP d help text: bun --help                                                  registry=0 proxy=0 rc=0 
+STEP d help text: bun run --help                                              registry=0 proxy=0 rc=0 
+STEP c control: a malformed user-level bunfig is read by `bun run`            registry=0 proxy=0 rc=1 read=False (a config error instead of the probe's resolution error proves the temporary-home file was read)
+ARM version                                      role=version        registry=0 proxy=0 rc=0 cache_files=0 verdict=- | 1.3.9
+ARM proxy-honor-check                            role=proxy-honor    registry=0 proxy=1 rc=0 cache_files=0 verdict=- | fetch-status 502
+ARM proxy-proof                                  role=proxy-proof    registry=0 proxy=0 rc=1 cache_files=0 verdict=- | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM positive-all-forms                           role=positive       registry=0 proxy=6 rc=1 cache_files=0 verdict=- | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM positive-alone:env:BUN_CONFIG_REGISTRY       role=positive-form  registry=0 proxy=6 rc=1 cache_files=0 verdict=- | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM positive-alone:env:NPM_CONFIG_REGISTRY       role=positive-form  registry=0 proxy=6 rc=1 cache_files=0 verdict=- | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM positive-alone:project-bunfig                role=positive-form  registry=0 proxy=6 rc=1 cache_files=0 verdict=- | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM positive-final                               role=positive-final registry=0 proxy=6 rc=1 cache_files=0 verdict=- | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM flag:--no-install                            role=candidate      registry=0 proxy=0 rc=1 cache_files=0 verdict=PASS | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM flag-after-subcommand:--no-install           role=candidate      registry=0 proxy=0 rc=1 cache_files=0 verdict=PASS | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM project-bunfig                               role=candidate      registry=0 proxy=0 rc=1 cache_files=0 verdict=PASS | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM user-bunfig                                  role=candidate      registry=0 proxy=6 rc=1 cache_files=0 verdict=FAIL | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM help:--help                                  role=help           registry=0 proxy=0 rc=0 cache_files=0 verdict=- | --if-present                    Exit without an error if the entrypoint does not exist
+ARM help:run --help                              role=help           registry=0 proxy=0 rc=0 cache_files=0 verdict=- | --no-exit-on-error              Continue running other scripts when one fails (with --parallel/--sequential)
+ARM control:user-bunfig-is-read-by-run           role=control        registry=0 proxy=0 rc=1 cache_files=0 verdict=- | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM env:BUN_CONFIG_SKIP_INSTALL_PACKAGES=1       role=candidate      registry=0 proxy=6 rc=1 cache_files=0 verdict=FAIL | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM env:BUN_FEATURE_FLAG_DISABLE_INSTALL_INDEX=1 role=candidate      registry=0 proxy=6 rc=1 cache_files=0 verdict=FAIL | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM env:BUN_FEATURE_FLAG_DISABLE_REDIS_AUTO_PIPE role=candidate      registry=0 proxy=6 rc=1 cache_files=0 verdict=FAIL | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM env:BUN_FEATURE_FLAG_DISABLE_SQL_AUTO_PIPELI role=candidate      registry=0 proxy=6 rc=1 cache_files=0 verdict=FAIL | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+ARM structural                                   role=candidate      registry=0 proxy=0 rc=1 cache_files=0 verdict=PASS | error: Cannot find module '@opal-no-such-scope-d7486fc68e912f5e/probe' from 'C:\tmp\kit-bun-noegress-tzjd8ex2\
+BUN-NO-EGRESS bun=1.3.9 positive_requests=6 candidates=9 passing=4 leaked_public=0 form=flag:--no-install ok=True
+CASE 2 PASS: measure rc=0; BUN-NO-EGRESS bun=1.3.9 positive_requests=6 candidates=9 passing=4 leaked_public=0 form=flag:--no-install ok=True
+CASE 3 PASS: refused 6 of 6 verbs with rc=2 naming link or none; allow decision=ALLOW-REGISTRY (loud=True); --version decision=PASS-INFO
+CASE 4 PASS: wrap --version rc=0 printed '1.3.9' (bare bun printed '1.3.9'); requests registry=0 proxy=0; wrap run of an unresolvable import rc=1 form applied=True requests registry=0 proxy=0
+CASE 5 PASS: planted grader (all PASS): ok=False, 5 regression(s) flagged (user-bunfig graded PASS with registry=0 proxy=6 timed_out=False; env:BUN_CONFIG_SKIP_INSTALL_PACKAGES=1 graded PASS with registry=0 proxy=6 timed_out=False); candidates that made requests: ['user-bunfig', 'env:BUN_CONFIG_SKIP_INSTALL_PACKAGES=1', 'env:BUN_FEATURE_FLAG_DISABLE_INSTALL_INDEX=1', 'env:BUN_FEATURE_FLAG_DISABLE_REDIS_AUTO_PIPELINING=1', 'env:BUN_FEATURE_FLAG_DISABLE_SQL_AUTO_PIPELINING=1']; honest grader ok=True
+CASE 6 PASS: 20 of 20 arms ran with loopback proxy variables, empty NO_PROXY and an isolated home; temporary base C:\tmp outside the repository=True
+CASE 7 PASS: first argument of every bun process: ['--help', '--no-install', '--version', 'run'] (registry verbs run: 0); source has a version-like token=False, a baked path=False
+BUN-KIT-TEST cases=7/7 ok=True

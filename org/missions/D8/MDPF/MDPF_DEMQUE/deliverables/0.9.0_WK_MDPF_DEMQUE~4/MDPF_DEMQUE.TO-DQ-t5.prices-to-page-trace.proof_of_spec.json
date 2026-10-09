@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t5",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t5.prices-to-page-trace.md",
+    "group": "OTHER",
+    "vintage_commit": "6dc65d8cba"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "6dc65d8cba",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t5.prices-to-page-trace.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~4/FWD1_HOP6_PRICES_TO_PAGE_TRACE.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A read-only trace document; nothing is deployed. Every AWS call was a read (events list-rules, scheduler list-schedules/get-schedule, ssm get-document, s3 ls/cp/sync/head-object, lambda get-function-configuration).",
+      "artifact_covered_by": [
+        "DQ1-t5-AC1",
+        "DQ1-t5-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ1-t5-AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t5_trace.py -> TRACE-OK",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R1_CHECKS/dq_t5_trace.py",
+      "output_evidence": "TRACE-OK hops=5 (rc=0), run from C:/tmp/wk-demque-4 under timeout 60 at 2026-10-08T23:46Z, twice. The check requires a table with columns hop/question/answer/grounding, rows Q1..Q5 each with a non-empty answer and grounding, and a VERDICT line. The deliverable carries all five rows and 'VERDICT: BUILD-NEEDED -- ...'.",
+      "denominator": "5 of 5 hop rows (Q1..Q5) present with non-empty answer and grounding; 1 of 1 VERDICT line",
+      "status": "PASS",
+      "expect": "TRACE-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ1-t5-AC2",
+      "criterion_verbatim": "JUDGMENT, graded by the CVO at L9: each answer is correct against the code and the live schedule.",
+      "method": "manual_read_with_citation",
+      "invocation": "(judgment criterion; no invocation)",
+      "output_evidence": "Each of Q1..Q5 carries its grounding in the deliverable's table (live AWS reads and file:line). Output recorded with no verdict.",
+      "denominator": "5 answers to grade",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the answers' correctness against the code and the live schedule is graded by 3.0.0_SA_CVO at L9",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The check run from an empty directory, where the deliverable path does not resolve (equivalent to the base state the order names: AC1 fails at the base).",
+      "expected": "TRACE-BAD no file ...",
+      "observed": "TRACE-BAD no file org\\missions\\D8\\MDPF\\MDPF_DEMQUE\\deliverables\u0000.9.0_WK_MDPF_DEMQUE~4\\FWD1_HOP6_PRICES_TO_PAGE_TRACE.md (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran the AC1 invocation twice back to back on the same file.",
+      "observed": "TRACE-OK hops=5 rc=0 both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "CloudWatch Logs read for the last S_00 attempt",
+      "reason": "The SSM runs tee their complete output to s3://opal-data-cot/logs/cot-exporter/{gold,silver}-run/, which was read for all 144 + 122 retained logs; CloudWatch would add nothing for a script that no scheduled document runs."
+    },
+    {
+      "item": "The bd-gold-trigger Lambda path (bd-gold-nightly-fallback, bd-canonical-prices-daily)",
+      "reason": "Those rules belong to the bd firm; Cottonwood is its own firm and only its own planes were read."
+    },
+    {
+      "item": "Whether platinum/firm/client_directory.json carries any price field",
+      "reason": "Out of the five questions; only its existence and mtime were read (2026-10-08T11:37:00Z)."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W4-S1: the cell premise that Cottonwood's gold run goes through gold_dispatch.sh is false; the scheduled opal-cot-gold-run SSM document runs a fixed script list with no S_00.",
+    "MDPF_DEMQUE-D1-W4-S2: Cottonwood's live nightly run does not read canonical_prices.parquet on any page-feeding path; B_00 builds canonical holdings from BD-reported market value."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "aws (read-only)",
+      "invocation": "events list-rules; scheduler list-schedules/get-schedule; ssm get-document; s3 sync of the gold-run and silver-run log prefixes; s3api head-object",
+      "result": "Q1/Q2/Q3 grounding in the deliverable."
+    },
+    {
+      "tool": "comp-routes trace",
+      "invocation": "comp-routes trace /api/scoped/advisor-intelligence/platinum/clients/R1/composition.json --json",
+      "result": "RESOLVED platinum/clients/R1/composition.json, origin S3-opal-data-bd (model plane; used only as a cross-check, not as evidence)."
+    }
+  ]
+}

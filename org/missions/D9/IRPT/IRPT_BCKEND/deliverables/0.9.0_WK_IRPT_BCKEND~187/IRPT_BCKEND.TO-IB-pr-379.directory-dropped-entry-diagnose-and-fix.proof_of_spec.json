@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-379",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-379.directory-dropped-entry-diagnose-and-fix.md",
+    "group": "OTHER",
+    "vintage_commit": "b3a7b44fd4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "b3a7b44fd4",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-379.directory-dropped-entry-diagnose-and-fix.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~187",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~187/IB91-1_dropped_entry_diagnosis.json",
+      "kind": "config_data",
+      "commit_or_etag": "ea04dda12d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "diagnosis from read-only AWS reads (refresh manifests, directory artifacts, source dims); opaque ids only",
+      "artifact_covered_by": [
+        "IB91-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ea04dda12d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_BCKEND-D2-W187-S1 appended",
+      "artifact_covered_by": [
+        "IB91-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB91-1-AC1",
+      "criterion_verbatim": "IB91-1-AC1 -- the diagnosis names both firms' dropped entries (opaque ids), the cause and the evidence, plus the over-age date. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r91/p91_cells.py\" . IB91-1-AC1",
+      "output_evidence": "IB91-1-AC1 PASS | rc=0 | OK: inflection SOURCE_REMOVAL, cottonwood SOURCE_REMOVAL; over-age deadline 2026-10-12",
+      "denominator": "2 of 2 firms carry a disappeared_count >= 1, a cause and evidence; 1 overage_deadline",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB91-1-AC2",
+      "criterion_verbatim": "IB91-1-AC2 -- the dropped_entry tests pass and the previous-state tests still pass. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r91/p91_cells.py\" . IB91-1-AC2",
+      "output_evidence": "FAIL: -k dropped_entry rc 5: 190 deselected in 1.23s | IB91-1-AC2 FAIL | rc=1. NOT MET BY DESIGN: both firms are SOURCE_REMOVAL, so the order's stop clause applies and no fix or test was written (row IRPT_BCKEND-D2-W187-S1).",
+      "denominator": "0 of 190 directory tests selected by -k dropped_entry",
+      "status": "FAIL",
+      "status_reason": "Task order stop clause: both firms are SOURCE_REMOVAL (diagnosis, row IRPT_BCKEND-D2-W187-S1), so no fix, test, pin, build or packet is made; the disappearance rule needs a CTO ruling first. The order stays open."
+    },
+    {
+      "criterion_id": "IB91-1-AC3",
+      "criterion_verbatim": "IB91-1-AC3 -- the packet names P, the built sha, the rollback sha and both branches; the census records a clean-tree BUILD_ONLY with rc 0.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r91/p91_cells.py\" . IB91-1-AC3",
+      "output_evidence": "FAIL: missing NEVER_WIDEN_SIGNOFF_PACKET_IB-pr-379.md or IB91-1_refresh_census.json | IB91-1-AC3 FAIL | rc=1. NOT MET BY DESIGN: no fix means no pin P, no BUILD_ONLY and no packet (row IRPT_BCKEND-D2-W187-S1).",
+      "denominator": "0 of 2 required files exist",
+      "status": "FAIL",
+      "status_reason": "Task order stop clause: both firms are SOURCE_REMOVAL (diagnosis, row IRPT_BCKEND-D2-W187-S1), so no fix, test, pin, build or packet is made; the disappearance rule needs a CTO ruling first. The order stays open."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant: inflection disappeared_count set to 0 in the working copy of the diagnosis (restored byte-identical, sha256 32ac70affe6e before and after).",
+      "expected": "IB91-1-AC1 FAIL",
+      "observed": "FAIL: inflection disappeared_count 0 / IB91-1-AC1 FAIL rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- no release-census run, the order stopped at the diagnosis",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_BCKEND-D2-W187-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> IB91-1-AC1,IB91-1-AC2,IB91-1-AC3",
+      "result": "see final report"
+    }
+  ]
+}

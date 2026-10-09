@@ -1,0 +1,168 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "IB89-1-AC1",
+      "criterion_verbatim": "pin 4710b8007b; refresh {refresh.py} and search {entry.py, expiry.py, trading_calendar.py}; live == built for both (re-read live); census 0 and re-plan 0; activation legs closed; not rolled back. Base: FAIL (no file).",
+      "denominator": "2 of 2 functions graded; live CodeSha256 re-read from AWS by the check itself",
+      "expect": "IB89-1-AC1 PASS",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r89/p89_cells.py\" . IB89-1-AC1",
+      "method": "command",
+      "output_evidence": "OK: pin 4710b8007b, refresh 1 + search 3 members, live == built for both, census 0, replan 0, activation legs closed | IB89-1-AC1 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IB89-1-AC2",
+      "criterion_verbatim": "the five-arm controlled-clock drive passes 5 of 5 against the deployed modules. Base: FAIL (no file).",
+      "denominator": "5 of 5 arms",
+      "expect": "IB89-1-AC2 PASS",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r89/p89_cells.py\" . IB89-1-AC2",
+      "method": "command",
+      "output_evidence": "OK: five-arm controlled-clock drive 5 of 5 against the deployed modules | IB89-1-AC2 PASS; harness rc=0, 5 of 5 reason codes and 5 of 5 (state, code) pairs pairwise distinct",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "IB89-1-AC1"
+      ],
+      "commit_or_etag": "4710b8007b",
+      "deploy_evidence": "targeted safe-apply of module.irpt_directory_refresh.aws_lambda_function.this; live CodeSha256 RE-READ == built sha; s3_object_version M8O8zFha.. -> Ntv3Br2Y..; handler.py held at rider blob 48313e9c0e (staged_from sha256 e46922a00379 == live bytes)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "script",
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/refresh.py"
+    },
+    {
+      "artifact_covered_by": [
+        "IB89-1-AC1",
+        "IB89-1-AC2"
+      ],
+      "commit_or_etag": "4710b8007b",
+      "deploy_evidence": "targeted safe-apply of module.irpt_directory_search.aws_lambda_function.this (Apply complete 0 added 1 changed 0 destroyed); live CodeSha256 RE-READ == built sha; s3_object_version S5vL.tP9.. -> 7L6kC0.B..; live_members 22 -> 24 (expiry.py and trading_calendar.py landed)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "script",
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/entry.py"
+    },
+    {
+      "artifact_covered_by": [
+        "IB89-1-AC1",
+        "IB89-1-AC2"
+      ],
+      "commit_or_etag": "79e297fd90",
+      "deploy_evidence": "the after-reads file both criteria read",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~DELL2/IB89-1_r61_release_after_reads.json"
+    },
+    {
+      "artifact_covered_by": [
+        "IB89-1-AC1"
+      ],
+      "commit_or_etag": "79e297fd90",
+      "deploy_evidence": "NEVER-2 ledger opened BEFORE any apply and CLOSED with all 6 legs proven; sentinel removed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/critical_paths/change_management/20261008T2259Z_irpt-r61-directory-release-dell2-20261008_deploy_completion.md"
+    },
+    {
+      "artifact_covered_by": [
+        "IB89-1-AC1"
+      ],
+      "commit_or_etag": "79e297fd90",
+      "deploy_evidence": "arm (a) driver, run on dell2 under amendment 1; two reader defects found by running it and fixed in-session (row IRPT_BCKEND-D2-S13)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "script",
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~DELL2/ib89_1_a_driven_refresh_ready.py"
+    },
+    {
+      "artifact_covered_by": [
+        "IB89-1-AC1"
+      ],
+      "commit_or_etag": "79e297fd90",
+      "deploy_evidence": "arm (c) driver; measures drivability on the trading-day frontier before reading; verdict NOT_DRIVABLE",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "script",
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~DELL2/ib89_1_c_over_age_search.py"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "compiler_tools": [
+    {
+      "invocation": "python infra/aws/lambda/ci/release-census.py irpt-directory-refresh|-search --pin 4710b8007b",
+      "result": "pre-apply refresh changed_members=1 and search changed_members=3, equal to the signed lists; post-apply changed_members=0 for both",
+      "tool": "release-census.py"
+    },
+    {
+      "invocation": ".tools/terraform.exe plan -no-color -lock=false (untargeted, whole directory root, after both applies)",
+      "result": "No changes. Your infrastructure matches the configuration.",
+      "tool": "terraform"
+    },
+    {
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/directory apply -target=<module> -auto-approve",
+      "result": "two targeted applies, refresh then search; Apply complete 0 added 1 changed 0 destroyed each",
+      "tool": "safe-apply.sh"
+    },
+    {
+      "invocation": "python .tools/deploy_ledger.py open|close-leg|close --slug irpt-r61-directory-release-dell2-20261008",
+      "result": "OPENED 6 legs before any apply; CLOSED all 6 legs proven, sentinel removed",
+      "tool": "deploy_ledger.py"
+    },
+    {
+      "invocation": "--function irpt-directory-refresh,irpt-directory-search (scoped, not --all), then --code-sha256 per row",
+      "result": "source map stamped; deployed_code_sha256 corrected from the stale pre-apply value to live for both rows (the S357 correction)",
+      "tool": "record-terraform-deploy.sh + record-deploy-scope.py"
+    },
+    {
+      "invocation": "bash .tools/commit-gate.sh <the two arm scripts>",
+      "result": "clean: 2 of 2, then 1 of 1 on each fix",
+      "tool": "commit-gate.sh"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 re-reads live CodeSha256 from AWS on every run, so it cannot pass from a stale record; the untargeted re-plan was run after BOTH applies and returned No changes across the whole root, not only the two targets. ORDERING CONTROL: after the refresh-only apply, irpt-directory-search was re-read and still carried its START sha cmNmYm1j.., proving -target scoped as intended. DEPLOYED-BYTES CONTROL: the five-arm drive imported refresh.py, expiry.py and trading_calendar.py from the UNZIPPED LIVE zip in a shadow tree with an EMPTY lib/, so no repo copy could satisfy an import; deployed refresh.py sha256 ed3d0c881890 equals the pin bytes",
+      "observed": "AC1 PASS and AC2 PASS on re-run; untargeted re-plan 0-diff; search unmoved after the refresh-only apply; deployed refresh.py bytes == pin bytes",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the issuer's own comp-adversary dry-run of p89_cells.py at base pin 4710b8007b, before any artifact existed",
+      "expected": "both criteria FAIL (no file)",
+      "observed": "IB89-1-AC1 FAIL, IB89-1-AC2 FAIL",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "no git tag minted",
+      "reason": "zero investor-reporting-v* tags exist, so CLAUDE.md rule 6's series does not exist for this pipeline and this order does not ask for one"
+    },
+    {
+      "item": "arm (a) READY at 1 of 3 firms; arm (c) NOT_DRIVABLE",
+      "reason": "neither is an AC1/AC2 criterion -- both are step-4 real runs, recorded measured in the after-reads and in row IRPT_BCKEND-D2-S13; the two FAILED firms are a build condition this release surfaces, with the previous directory still served"
+    },
+    {
+      "item": "no IAM, route, schedule, table or bucket change",
+      "reason": "the order's BOUNDS confine the served change to the two functions' code; targeted applies only"
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-377.r61-directory-release-applied.md",
+    "vintage_commit": "eaa9d73081"
+  },
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "schema_version": "1.0",
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-377.r61-directory-release-applied.md",
+    "group": "OTHER",
+    "vintage_commit": "f348d52c58"
+  },
+  "surprises": [
+    "IRPT_BCKEND-D2-S11",
+    "IRPT_BCKEND-D2-S12",
+    "IRPT_BCKEND-D2-S13"
+  ],
+  "to_id": "IRPT_BCKEND.TO-IB-pr-377"
+}
