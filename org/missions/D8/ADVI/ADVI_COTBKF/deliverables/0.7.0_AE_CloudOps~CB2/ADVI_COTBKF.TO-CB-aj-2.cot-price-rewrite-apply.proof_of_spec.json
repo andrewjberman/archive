@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-aj-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-aj-2.cot-price-rewrite-apply.md",
+    "group": "OTHER",
+    "vintage_commit": "11870bd837"
+  },
+  "assignee": "0.7.0_AE_CloudOps~CB2",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round36.md",
+    "vintage_commit": "35931777b7",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-aj-2.cot-price-rewrite-apply.md"
+  },
+  "acceptance": [
+    {
+      "criterion_id": "CB36aj2-AC1",
+      "criterion_verbatim": "python data/assets/scripts/silver/commonwealth_cot_price_rewrite.py --verify-served --out .scratch/advi_cotbkf/cot_price_rewrite_verify expect: COT-PRICE-REWRITE-VERIFY keys=38",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/commonwealth_cot_price_rewrite.py --verify-served --out .scratch/advi_cotbkf/cot_price_rewrite_verify",
+      "expect": "COT-PRICE-REWRITE-VERIFY keys=38",
+      "output_evidence": "rc 0; last line COT-PRICE-REWRITE-VERIFY keys=38 match=38/38; 38 lines beginning MATCH and 0 beginning MISMATCH (counted with grep -c, not eyeballed), each printing served_version, served_sha256 and manifest_sha256. Graded on the stronger bar keys=38 AND match=38/38 AND rc 0, because the criterion's expect substring is printed even when every key mismatches. Log .scratch/advi_cotbkf/cb_aj_2/verify.log",
+      "status": "PASS",
+      "denominator": "38 of 38 served keys re-read by their own get_object and hashed in 1 MiB chunks; a second independent full read after the write's own read-back, by a different code path, both agreeing"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-S60"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.7.0_AE_CloudOps~CB2/cot_price_rewrite_apply.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-cot/silver/prices/canonical_prices.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "76.rgWIXYdLNsXSwrXvyuEmaEtfr9y98",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ONE NEW VERSION written, prior version 5JN8rkV4dcE.v64dYVAA6PR5jccvS8Rc KEPT and proven still retrievable afterwards (head_object by VersionId, against a control where a bogus VersionId is rejected). 1,623 of the 1,734 removed rows are in this store object; rows 11,291,021 -> 11,289,398. Served sha256 51a1f1f7e19a0ce3... equals the manifest, checked twice by two code paths.",
+      "artifact_covered_by": [
+        "CB36aj2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/silver/prices/2026-04-14.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "JdGZrpPQMiw2tFQdsYGiDYaXoY2LJnZ.",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ONE NEW VERSION written, prior fGDQqialTgvN2alIUQLhQABTfk5c3Bxu kept and still retrievable. Served sha256 59651c7e4fc1fbf3... equals the manifest. First of the 37 daily files, each losing exactly its 3 bd_txn_price rows (10,105 -> 10,102 here); the full 38-row prior/new VersionId and sha256 table is in the ledger entry and at .scratch/advi_cotbkf/cb_aj_2/write_report.json.",
+      "artifact_covered_by": [
+        "CB36aj2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T1320Z_advi-cotbkf-cot-price-rewrite-cb-aj-2-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "f550170df0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "opened with 5 legs before any write (open self-commits, fix @00d3393ff3); legs C2 and C3 proven and committed @f550170df0 while the act was still held at 0 of 38 keys; C1, W1 and V1 closed after the CTO's ruling; entry CLOSED with all 5 legs proven and the sentinel removed",
+      "artifact_covered_by": [
+        "CB36aj2-AC1"
+      ]
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open / close-leg x5 / close --slug advi-cotbkf-cot-price-rewrite-cb-aj-2-20261009; hold attempted and REFUSED",
+      "result": "5 legs declared before the write; C2+C3 closed and committed during the hold; CLOSED with all 5 proven. The hold attempt was refused both ways -- plain hold refuses while an apply leg is open, --pre-apply refuses once any leg is proven -- so the entry was left honestly OPEN during the ruling rather than carrying a proof it did not have"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> CB36aj2-AC1",
+      "result": "run BEFORE the complete flip, as the order's <proof_of_spec> block requires"
+    },
+    {
+      "tool": "commonwealth_cot_price_rewrite.py census()/scheduled_count()",
+      "invocation": "imported and called directly, because a rebuild is forbidden and the script exposes no census CLI mode",
+      "result": "writers=7 scheduled=0, identical to CB-aj-1; 'wired into live gold doc: []' so the ENABLED chain runs no writer; files_scanned=780, tf_files=17, 5 schedule rules in TF, 9 live-plane resources read one at a time"
+    },
+    {
+      "tool": "aws s3api / boto3",
+      "invocation": "list_objects_v2 paginated to exhaustion on code/gold/ (107), gold/canonical/holdings/ (133) and schwab/silver/rps/ (0, against a silver/prices/ control reading 90); 107 get_object for the mirror; 38 head_object + put_object + get_object for the write; 38 head_object by prior VersionId after it",
+      "result": "every count carries its denominator; every zero carries a positive control; 38 of 38 written and verified; 38 of 38 prior versions still retrievable"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the files were applied AS BUILT and never rebuilt, so determinism is graded as agreement across independent reads of the same bytes: the local file hashed before each put, the served object hashed after each put, and then all 38 served objects hashed again by verify_served's separate code path",
+      "observed": "38 of 38 agree on all three reads (local_sha == served_sha == manifest sha256_after), and the issuer's own re-run of CB-aj-1 at ~13:1xZ had already reproduced the same LAST line and the same 38 local hashes. No rebuild was run, because the manifest's sha256_after values are the signed values and a rebuild could only move them",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "two planted negative controls, each run so that a zero in the corresponding check could not be a blind instrument. (1) The mirror scanner was given a probe string carrying both a foreign bucket name and a silver/prices put_object. (2) The condition-5 retrievability check was given a bogus VersionId on a real key.",
+      "expected": "(1) the scanner reports it sees both the foreign bucket and the writer; (2) the bogus version is rejected rather than returning an object",
+      "observed": "(1) MIRROR-CONTROL planted_probe foreign_seen=True writer_seen=True, so the 0 foreign price readers across 107 objects is a real absence; (2) the bogus VersionId raised ClientError, so the 38 of 38 prior-version successes discriminate. A third control guarded the gold count: an exact asset_name match would read a spelling difference as absence, so a substring sweep over the same 133 gold files for BNP, NEWMONT and WELLS FARGO returned only the equities and a different 2028 WFC bond, confirming the two zero-account-day bonds are genuinely absent from gold and the 99 is not an understatement",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deleting any old version",
+      "reason": "CTO half condition 5 -- old-version deletes are Andrew's act and not part of this pair. All 38 prior versions were proven still retrievable after the write"
+    },
+    {
+      "item": "reading the next manual silver-prep for the three CUSIPs",
+      "reason": "CTO half condition 4, and the order states it explicitly: 'the issuer's watch item. It is not this order's act'"
+    },
+    {
+      "item": "rebuilding the 38 files",
+      "reason": "forbidden by the amendment; the manifest's sha256_after values are what the pair signed, and the local files were checked against them on all 38 rather than sampled"
+    },
+    {
+      "item": "fixing _ff_worker's unflagged stale-price carry-forward",
+      "reason": "surfaced by this seat at gate C2 and ruled NOT this act's by the CTO (msg 3386): it is unreachable for cot today (schwab/silver/rps/ empty against a control) and goes on COTBKF's enrichment list as its own cell with ADDENDUM 11.2's, a code change under COTBKF's own pair rather than a rider on this rewrite"
+    },
+    {
+      "item": "deciding condition 2's scope",
+      "reason": "the condition was unsatisfiable as written (row D2-S60) and CLAUDE.md bars the receiving seat from adjudicating scope. Nothing was written until 1.0.0_SA_CTO~DELL2 ruled it MET in CTO half AMENDMENT 1 @fa3cabc1ea"
+    }
+  ]
+}
