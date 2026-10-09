@@ -1,0 +1,92 @@
+{
+  "to_id": "NFRA_IAMROLES202609.TO-IAM-v-3",
+  "produced_by": "0.9.0_WK_NFRA_IAMROLES202609~13",
+  "produced_at_utc": "2026-10-09T09:35Z",
+  "role": "smartx-assets-pull-role",
+  "role_arn": "arn:aws:iam::313476888478:role/smartx-assets-pull-role",
+  "action": "secretsmanager:DescribeSecret",
+  "terraform_file": "infra/aws/terraform/smartx-pipeline/assets-pull-iam.tf",
+  "terraform_line": 101,
+  "terraform_resource": "aws_iam_role_policy.assets_pull (inline policy smartx-assets-pull-access)",
+  "terraform_statement_sid": "ReadAuthBundle",
+  "terraform_line_before": "        Action = [\"secretsmanager:GetSecretValue\", \"secretsmanager:DescribeSecret\"]",
+  "terraform_line_after": "        Action = [\"secretsmanager:GetSecretValue\"]",
+  "round4_status": "never-used",
+  "round4_bundle_blob": "3ac4deb7f663065bbdc32b3efb76d251c4cfab7b",
+  "round4_neighbours": {
+    "secretsmanager:GetSecretValue": "used 2026-10-08",
+    "secretsmanager:PutSecretValue": "used 2026-10-08",
+    "logs:CreateLogStream": "used 2026-10-08"
+  },
+  "consumers": [
+    {
+      "identity": "Lambda function smartx-assets-daily-pull (us-east-1)",
+      "how_found": [
+        "aws lambda list-functions --region us-east-1: 233 functions scanned, exactly 1 whose Role is smartx-assets-pull-role",
+        "aws iam get-role: trust policy principal is lambda.amazonaws.com only (no portal, client login, user, or other service principal)",
+        "infra/aws/lambda/ci/lambda-source-map.json entry smartx-assets-daily-pull iam_role=smartx-assets-pull-role (instrument section [4] agrees: 1 found)",
+        "infra/aws/terraform/smartx-pipeline/assets-pull-lambda.tf line 38: role = aws_iam_role.assets_pull.arn"
+      ],
+      "schedule": "EventBridge Scheduler smartx-assets-daily-pull-daily ENABLED, cron(2 13 * * ? *) UTC (assets-pull-lambda.tf line 138)",
+      "deployed_code_check": "deployed zip CodeSha256 4Iw0TWcez71pRQoUK0GXPxGMOAsVMIgMBIGhk+JRk8k= equals lambda-source-map artifact_sha256; all 8 .py files in the deployed zip are byte-identical (CRLF-normalised) to infra/aws/lambda/smartx_assets_pull/; none contains describe_secret or DescribeSecret; auth_bundle.py calls only get_secret_value and put_secret_value"
+    }
+  ],
+  "predicted_breaks": [],
+  "predicted_post_state": {
+    "simulate_principal_policy_after_apply": "secretsmanager:DescribeSecret on each of the 5 ReadAuthBundle resources reads eval_decision=implicitDeny; secretsmanager:GetSecretValue on the same 5 stays allowed; secretsmanager:PutSecretValue on smartx/jwt/current-jk8FRu stays allowed",
+    "grants_revoked_by_instrument_count": 5,
+    "grants_revoked_meaning": "the instrument's 'WOULD BREAK 5 caller paths' counts the 5 resource patterns on which DescribeSecret is currently ALLOWED (capability removed); no caller of those paths exists in 90 days of Access Advisor or 89 days of CloudTrail, so no caller breaks"
+  },
+  "observation_window": {
+    "waits_for": "the first scheduled run of smartx-assets-daily-pull that STARTS after the narrowing is applied (cron(2 13 * * ? *) UTC, daily)",
+    "rule": "let D be the UTC date of the first 13:02Z run that starts after the apply completes: if the apply lands before 13:02Z on date X then D=X, otherwise D=X+1",
+    "earliest_read": "13:30Z on D (run durations observed 537s-859s; the D log stream is complete when its REPORT lines are present)",
+    "reads": [
+      "aws logs filter-log-events --log-group-name /aws/lambda/smartx-assets-daily-pull on the D stream",
+      "aws cloudtrail lookup-events --lookup-attributes AttributeKey=Username,AttributeValue=smartx-assets-daily-pull for D"
+    ]
+  },
+  "falsifiers": [
+    "F1: any log event matching AccessDenied in the D stream",
+    "F2: any CloudTrail event on D for Username smartx-assets-daily-pull with errorCode AccessDenied or UnauthorizedOperation, or eventName=DescribeSecret (any outcome)",
+    "F3: zero GetSecretValue events on D (baseline about 6 per day; 541 events over 89 days) - the auth path did not run",
+    "F4: an ERROR signature in the D stream other than the standing baseline DirtyRunError (feed9 reconciliation ... PARTIAL identity table, raised at lambda_function.py line 265)"
+  ],
+  "standing_baseline": {
+    "source": "aws logs filter-log-events, 30-day window to 2026-10-09T09:26Z, patterns AccessDenied/ERROR/Traceback/timed out/DirtyRunError",
+    "result": "30 of 30 daily runs (2026-09-09..2026-10-08) each carry exactly one [ERROR] DirtyRunError feed9 reconciliation event; 0 AccessDenied; 0 timeouts. The failure is a data reconciliation after the auth path, unrelated to IAM. Row NFRA_IAMROLES202609-Z-W13-S1."
+  },
+  "evidence": {
+    "access_advisor": "permission-cold round-4 bundle row: secretsmanager:DescribeSecret status never-used, last_used null; same service tracked at action level (GetSecretValue and PutSecretValue read 'used' 2026-10-08)",
+    "cloudtrail_username_smartx_assets_daily_pull": "1446 management events 2026-07-14..2026-10-08: Decrypt 634, GetSecretValue 541, CreateLogStream 93, GenerateDataKey 89, PutSecretValue 89, DescribeSecret 0",
+    "code": "no describe_secret in the deployed artifact (see consumers)",
+    "reach_check": "5 of 5 resource patterns allowed pre-change, condition_handling=no-condition; positive control (PutSecretValue on the jwt secret) allowed"
+  },
+  "rollback": {
+    "exact_revert": "git apply -R narrowing.patch (or git revert of the v-4 commit) restores line 101 to: Action = [\"secretsmanager:GetSecretValue\", \"secretsmanager:DescribeSecret\"]; then re-run the same safe-apply on infra/aws/terraform/smartx-pipeline",
+    "verify_rollback": "simulate-principal-policy secretsmanager:DescribeSecret on smartx/jwt/current-jk8FRu reads allowed again",
+    "no_out_of_band": "no put-role-policy or console edit; terraform is the only path in both directions"
+  },
+  "instrument_blob": "bd7620790c6884d55969779812bebe9ba7565355",
+  "instrument_invocation": "python org/missions/D12/NFRA/NFRA_IAMROLES202609/deliverables/0.9.0_WK_NFRA_IAMROLES202609~2/preflight-blast-radius.py --role smartx-assets-pull-role --remove secretsmanager:DescribeSecret",
+  "candidate_search": {
+    "population": "280 roles / 1486 never-used rows in the round-4 bundle (199 roles carry at least one never-used row; 1329 rows are not logs:CreateLogGroup)",
+    "rejected": [
+      {
+        "role": "etfs-canon-fanin-role",
+        "action": "dynamodb:DescribeTable",
+        "tf": "infra/aws/terraform/etfs-canon/fanin-lambda.tf:75",
+        "why": "met rules 1-4, REJECTED on rule 5: the table opal-etfs-ownership-daily was deleted 2026-08-07T13:58-04:00 (CloudTrail DeleteTable) and the daily Lambda fails with ResourceNotFoundException on BatchWriteItem, so no outcome could be read from a consumer that already fails earlier. Row Z-W13-S2."
+      },
+      {
+        "role": "95 roles whose only never-used row is logs:CreateLogGroup (e.g. inf-billing-daily-role)",
+        "why": "the grant comes from the AWS-managed AWSLambdaBasicExecutionRole attachment, not from a statement declared in the module; rule 4 (one action out of one declared statement) cannot hold"
+      },
+      {
+        "role": "smartx-jwt-refresher-role",
+        "action": "secretsmanager:DescribeSecret",
+        "why": "declared in TWO statements (rest-pull-iam.tf lines 43 and 56); removing it from one leaves the permission live through the other, so the narrowing would not be observable"
+      }
+    ]
+  }
+}
