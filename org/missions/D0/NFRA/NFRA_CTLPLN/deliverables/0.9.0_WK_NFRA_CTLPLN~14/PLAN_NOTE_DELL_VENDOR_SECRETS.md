@@ -2,7 +2,9 @@
 
 **LATEST: section G (amendment 16, STEP E) widens the secrets grant to the 28 PLATFORM-KEY secrets and takes three Deny statements off; where sections A and B below say the PLATFORM-KEY class is NOT granted, section G governs.**
 
-**NEWEST: section J (amendment 21, three follow-ups on step F: one more secret ARN, one cutover-parameter Deny, one stale test retired). Expected plan: 0 to add, 2 to change, 0 to destroy.**
+**NEWEST: section L (amendment 23, one more secret ARN, svc-commentary). Expected plan: 0 to add, 1 to change, 0 to destroy.**
+
+**PREVIOUS: section J (amendment 21, three follow-ups on step F: one more secret ARN, one cutover-parameter Deny, one stale test retired). Expected plan: 0 to add, 2 to change, 0 to destroy.**
 
 Author: 0.9.0_WK_NFRA_CTLPLN~14. Supersedes the amendment-8 version of this note; amendment 10 (`1.0.0_SA_CTO` msg 106731, ruling 1) adds the resource-policy Allow (section B) and the section "What this Allow can undo". NOTHING WAS APPLIED, NO PLAN WAS RUN AGAINST THE BACKEND, NO IAM WRITE WAS MADE. NO SECRET VALUE WAS READ: this pass made no Secrets Manager call at all; the classification works from the saved listing (`tests/vendor_secrets_census.json`, taken 2026-10-07T21:00:45Z with `list-secrets`: names, descriptions, tags, key ids, dates) and from the code that uses each secret. Authority: Andrew-direct ~00:4xZ "lets start with lifting 1 2 3 6" (`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261008_004xZ_LIFT_FOUR_DELL_LIMITS_SECRETS_FIRM_DATA_RESOURCE_POLICIES_PUSH.md`) and `1.0.0_SA_CTO` msg 106669.
 
@@ -544,3 +546,16 @@ The statement: Sid `ReadUiWalkerPassword`, Allow `ssm:GetParameter` ONLY on `arn
 Blast radius: both Dells can read that one password (the decrypt happens under the AWS-managed key, which any principal allowed GetParameter may use). They still cannot delete it (a delete would erase the version history; simulated implicitDeny) and cannot read any sibling parameter. `ssm:PutParameter` on it reads as before the change (allowed, from the existing deploy grant), so a Dell can write a new version and now also read it back. Re-enabling the walker login is a separate decision.
 
 Simulation: `walker_ok=11/11` (both Dells; GetParameter allowed, DeleteParameter and GetParameters implicitDeny, GetParameter on `/opal/ui-walker/other` implicitDeny, PutParameter allowed with and without the statement, plus the shape check).
+
+## L. ONE MORE SECRET ARN: `opal/ticketing/svc-commentary` (amendment 23; dell2 `2.0.0_SA_COO~V2` msg 2046, relay `RELAY_20261009T0122Z_DELL2_SVC_COMMENTARY_SECRET_GRANT`; both never-widen halves signed @b70dd6fbad)
+
+Metadata read only (secretsmanager ListSecrets: names, descriptions, tags, key ids; no value). The live listing holds 115 secrets in us-east-1 (17 regions listed, 0 listing errors); the saved census held 114. The ONLY difference is this secret: nothing removed, renamed or changed in description, tags or key.
+
+Census row: `opal/ticketing/svc-commentary`, class PLATFORM-KEY (a service bearer token, RS256, 90-day TTL, create-only on the firm's own ticket API; the same kind as `opal/ticketing/svc-analyst-intake`), default key (`kms_default` true, no customer-managed key), decision GRANTED, arn `arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/ticketing/svc-commentary-pXsmuU`. The census was extended by exactly this one record from the live listing (the six-minute repository scan was not re-run: every other record, reference, placement and grant is byte-for-byte as saved) and re-classed with `--reclass`: granted 95 -> 96, platform_key 29 -> 30, granted_platform_key 29 -> 30, other 18, blocked_by_key 1.
+
+Expected plan by reading: ONE policy changed in place, the PLATFORM-KEY secrets part (`ReadPlatformKeys`, built by the module from the census): one ARN added, 29 -> 30 entries, 2,898 characters against 6,144 (part one, vendor and client sessions, is unchanged at 66 entries, 5,968). Nothing created, nothing destroyed; the group's managed-policy count is unchanged. Action `secretsmanager:GetSecretValue` only, exact ARN, no wildcard.
+
+Simulation: `vendor_ok` 249/249 -> 255/255 (both Dells: the per-secret sweep gains this secret allowed, and without the secrets documents implicitDeny; the NAMED arm for it allowed; an unlisted sibling `opal/ticketing/svc-commentary-other` refused; per user 3 new arms).
+
+What a Dell can newly do: read that one token (create analysis requests as the commentary service). It can write neither a user-policy nor a resource policy on it under its own box's never-widen pair (dell2 measured PutUserPolicy explicitDeny, PutResourcePolicy implicitDeny).
+
