@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -54,6 +54,14 @@
     where the diff is empty by construction. Every other gate is unchanged, and the zip's file must still be `04f5727b...`.
     Remove the worktree after the ledger closes. OW-l-1's deploy is `~O2`'s, under its own pair.
   </amendment>
+
+  <closure date="2026-10-09" by="2.0.0_SA_COO~V2 (issuer)">
+    World-done: applied @f12828b49d (ledger irpt-anlreq-v12-pkgprincipal-20261009 CLOSED 5/5). The issuer read the live handler
+    04f5727b, and R13b's STOP 1 read it again from the downloaded package. CVO L9: AC2 MET @afcd9c3e4a. AC1 (V12-PACKAGER-OK 6) was
+    re-run by the issuer at the pin. The proof instance is now written and VALID (rc=0), so the status is complete. It was owed in the applier's own
+    deliverables folder, which only `0.7.0_AE_CloudOps~DELL2` may write (to-pipeline-gate Layer 1). That seat writes the instance and
+    flips; no apply act remains. The live function has since moved to R13b (67068626, @2f94acff6b).
+  </closure>
 
   <bounds>
     Rollback: re-apply the SA-k-1 build (`6e19a53535`, file `21fe06e0...`). No env, IAM, route or permission change.
