@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_STRATID.TO-ST-u1",
+  "phase": "BUILD-GENERAL",
+  "firm": "MDPF",
+  "assignee": "0.9.0_WK_MDPF_STRATID~7",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-ST-u1.cottonwood-outside-counted-or-held-out.md",
+    "group": "OTHER",
+    "vintage_commit": "604628912e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_STRATID/decompositions/MDPF_STRATID_DECOMP_R2.md",
+    "vintage_commit": "604628912e",
+    "to_ref": "org/missions/D8/MDPF/MDPF_STRATID/task-orders/MDPF_STRATID.TO-ST-u1.cottonwood-outside-counted-or-held-out.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "kind": "script",
+      "commit_or_etag": "fab599bcea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "SMA_FIRM_POPULATION['cottonwood']='outside'; build_category_views gains member_by_firm (by_firm on a member row); deploy and the never-widen pair are the issuer's at the drain.",
+      "artifact_covered_by": [
+        "ST2-u1-AC1",
+        "ST2-u1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_gold_consolidator.py",
+      "kind": "script",
+      "commit_or_etag": "fab599bcea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "tree validates a firm-listed entry per firm and sums one row per member with by_firm; overlay holds out value==overlap, skips the Tax leaf, refuses a key overwrite; not deployed.",
+      "artifact_covered_by": [
+        "ST2-u1-AC1",
+        "ST2-u1-AC2",
+        "ST2-u1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/tests/stratid/test_stratid_round2_firm_basis.py",
+      "kind": "test",
+      "commit_or_etag": "fab599bcea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five named tests plus three more (key collision, two firms split, Tax leaf), 8 PASSED."
+    },
+    {
+      "path_or_key": "data/mdpf/tests/stratid/test_stratid_global_fold.py",
+      "kind": "test",
+      "commit_or_etag": "fab599bcea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_undeclared_firm_member_not_counted re-pointed to inflection (R4); 7 of 7 still PASSED."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ST2-u1-AC1",
+      "criterion_verbatim": "the five named tests pass.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R2_CHECKS/st_u1_tests.py",
+      "expect": "U1-OK",
+      "output_evidence": "8 passed in 1.00s (the five named: cottonwood_declared_outside, fully_overlapped_member_held_out_by_name_not_added, two_basis_member_validates_per_firm, zero_overlap_member_counted_in_its_bucket, undeclared_firm_still_not_counted; plus key_collision_never_overwrites_the_earlier_entry, two_firms_on_one_member_split_by_firm, cottonwood_tax_leaf_is_the_tax_folds_not_the_sleeve_folds); final line U1-OK; rc=0",
+      "denominator": "5 of 5 named tests PASSED (8 of 8 in the file)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ST2-u1-AC2",
+      "criterion_verbatim": "the seam probe on real data (read-only S3). Cottonwood is declared outside. Arm A: with the served slice folded into Global's pre-fold doc, every Cottonwood sma member is counted or named withheld, and the tree shapes. Arm B: with Cottonwood divz's overlap planted at 0, the tree's Dividend SMA equals 49financial's plus Cottonwood's, the total rises by exactly Cottonwood's divz, and Client does not move.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R2_CHECKS/st_u1_seam.py",
+      "expect": "SEAM-OK",
+      "output_evidence": "inputs: portal/gold/mdpf/global/aggregate-aua-timeseries/2026-10-08.json (493 dates) | gold/mdpf_revamp/cottonwood/aggregate_aua_timeseries.json (last 2026-10-08) |   A divz value 1369280.57 overlap 1369280.57 -> counted 0.00 | withheld OVERLAP 1369280.57 |   A pfde value 410420.98 overlap 0.0 -> counted 410420.98 | BUILD cottonwood=outside | A total 2147378054.74 (pre 2146967633.76 + counted 410420.98), tree shapes | B divz 18448606.81 = 17079326.24 + 1369280.57, total +1369280.57, Client unchanged | SEAM-OK; rc=0",
+      "denominator": "3 of 3 (build, arm A, arm B) held; read-only S3 on opal-data-assets; arm A covers 2 of 2 Cottonwood sma members on the served slice",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ST2-u1-AC3",
+      "criterion_verbatim": "round 1's seven Global-fold tests and the TaxSMA check still pass.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R2_CHECKS/st_u1_regress.py",
+      "expect": "U1-REGRESS-OK",
+      "output_evidence": "st_t3_tests.py -> T3-OK; st_t3_regress.py -> T3-REGRESS-OK; final line U1-REGRESS-OK; rc=0",
+      "denominator": "2 of 2 sub-checks (7 of 7 fold tests, 9 of 9 TaxSMA served-fold tests)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Disabled ONLY the held-out skip in apply_sma_sleeve_overlay (`if counted == 0.0:` made `if False and counted == 0.0:`), reran the round-2 test file, restored the file.",
+      "expected": "test_fully_overlapped_member_held_out_by_name_not_added fails.",
+      "observed": "1 failed, 7 passed: test_fully_overlapped_member_held_out_by_name_not_added (assert 'divz' not in by_model). Restored file: 8 passed.",
+      "method": "command",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "Synthetic docs, no clock, no network in AC1/AC3.",
+      "expected": "identical result on rerun",
+      "observed": "round-2 test file run three times (7 then 8 tests, all passed each time).",
+      "method": "command",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy, build_all against real S3, never-widen sign-off",
+      "reason": "The issuer's at the drain (BOUNDS)."
+    },
+    {
+      "item": "data/mdpf/tests/stratid/test_stratid_basis.py",
+      "reason": "Round-1 test asserting Cottonwood undeclared goes red; outside <paths>, left unedited. Surprise row MDPF_STRATID-D1-W7-S1."
+    },
+    {
+      "item": "by_firm on rows that have no firm-listed entry (as committed in ST-u-1 fab599bcea)",
+      "reason": "ST-u-1 emitted by_firm only for a member with a firm-listed entry (PFDE, a two-basis divz). ST-u-2 extends it to carve-out-only Global rows (MDPF_STRATID-D1-W7-S3); the Tax leaf has none."
+    }
+  ],
+  "surprises": [
+    "MDPF_STRATID-D1-W7-S1: test_stratid_basis.py::test_undeclared_firm_population_is_not_counted red under the registry row, outside paths",
+    "MDPF_STRATID-D1-W7-S2: the post-TaxSMA Cottonwood tax leaf would become a sleeve-fold candidate; fold skips it, seam cannot see it"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest via _pytest_named.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_STRATID_S1/R2_CHECKS/st_u1_tests.py",
+      "result": "U1-OK"
+    }
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_STRATID/deliverables/0.9.0_WK_MDPF_STRATID~7/MDPF_STRATID.TO-ST-u1.cottonwood-outside-counted-or-held-out.proof_of_spec.json"
+}
