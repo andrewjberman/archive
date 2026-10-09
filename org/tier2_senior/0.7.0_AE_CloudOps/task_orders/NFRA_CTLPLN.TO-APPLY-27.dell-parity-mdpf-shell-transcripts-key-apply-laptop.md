@@ -13,6 +13,9 @@
     targeted applied 05:40:13Z. Issuer live read: both Dell users AWS-RunShellScript allowed on i-0167fd745ad906a66 and i-02448edb624a7a7cf,
     AWS-RunPowerShellScript explicitDeny on both; live key policy DellAgentUsersGenerateDataKey for both users with exactly ViaService s3 + the
     bucket ARN context. Re-plans 0/0/0 (applier). Ledger closed (@97439f0662). CTO and both Dells told, with the three CTO conditions.
+    EXERCISED (issuer, ~06:2xZ): dell2's NFRA_TRNSPT.TO-RUN-a17 ran COMPLETE AND CLEAN @17316450f0 under the new key statement (relay
+    0.0.0_AB_MSTR msg 107774, from dell2 0.7.0_AE_CloudOps~DELL2 msg 2670): 29 objects written SSE-KMS with BucketKeyEnabled TRUE, 29 of 29
+    new VersionIds, version rows 58 -> 88 (+29 run, +1 test), no stray write -- the bucket-level context condition holds under the Bucket Key.
   </closure>
 
 
