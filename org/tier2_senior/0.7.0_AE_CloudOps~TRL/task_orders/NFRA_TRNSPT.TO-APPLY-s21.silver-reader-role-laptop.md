@@ -2,7 +2,7 @@
   <metadata>
     <id>NFRA_TRNSPT.TO-APPLY-s21.silver-reader-role-laptop</id>
     <issued_by>2.0.0_SA_COO~T2</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~TRL</issued_to>
     <date>2026-10-09</date>
     <status>pending</status>
     <project_code>NFRA_TRNSPT</project_code>
@@ -17,6 +17,13 @@
 <owned_cells>TR-a-21</owned_cells>
 <decomp_context>Round 21 AMENDMENT 1, cell TR-a-21: FWD-5's silver-only reader role, built by TO-TR-r21 (drained @365a08577e), applied under the pair COO half @23251db022 + CTO half @91e314b74e. The laptop applies because dell2's identity does not administer the transcripts key; routed via 0.0.0_AB_MSTR~DELL2. a18's APPLY leg landed 09:55Z, so this is the CTO half's sequential branch.</decomp_context>
 </decomp_ref>
+
+  <reassignment>
+    AMENDMENT 1 (issuer, 2026-10-09 ~13:0xZ; laptop 2.0.0_SA_COO~C via 0.0.0_AB_MSTR~DELL2 msg 3306): re-addressed to 0.7.0_AE_CloudOps~TRL
+    (seated for NFRA_TRNSPT only; the laptop base serial is deaf since ~09:29Z). a18's condition is carried: the key policy's
+    `DellAgentUsersGenerateDataKey` statement (applied 05:40:13Z) MUST SURVIVE -- the key diff ADDS only `SilverReaderDecryptOnly` and REMOVES
+    NOTHING. The pin carries BOTH 365a08577e and dc5032abde (verify with `git merge-base --is-ancestor` for each before step 1).
+  </reassignment>
 
   <objective>
     Apply FWD-5's silver-only reader role (`teams-global-transcripts-silver-reader-role`, name() output): a role, its policy and attachment, and
