@@ -1,0 +1,135 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-80",
+ "firm": "INF",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e8f96f579c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "3c01cf1110",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-80.taxonomy-keys-adapter.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_DASHBD~56",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~56/INF_TIEOUT_R38.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/inf/scripts/silver/orion_cashflow_taxonomy.yaml",
+   "kind": "config_data",
+   "commit_or_etag": "a91506e6fb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "order's named exception: four entries' account_boundary keys, the 48 header and one history entry; bucket and nna_direction untouched; yaml.safe_load reads 48 types; no deploy.",
+   "artifact_covered_by": [
+    "DB38-3-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~56/orion_account_return_daily.py",
+   "kind": "script",
+   "commit_or_etag": "a91506e6fb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "offline adapter run from the repo root with --registry-key inflection --end 2026-10-08: S3 reads only, no put/upload/copy/delete call, no vendor call; py_compile rc 0, ruff --target-version py39 All checks passed; commit passed the commit gate.",
+   "artifact_covered_by": [
+    "DB38-3-AC2",
+    "DB38-3-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~56/orion_sources.json",
+   "kind": "config_data",
+   "commit_or_etag": "a91506e6fb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "declaration copied from ~53 with the two departure comments and fee_sources removed; read by the adapter run above.",
+   "artifact_covered_by": [
+    "DB38-3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~56/INF_TIEOUT_R38.json",
+   "kind": "config_data",
+   "commit_or_etag": "a91506e6fb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "record written by the adapter run; no account number, name or balance (counts and a sha256 only).",
+   "artifact_covered_by": [
+    "DB38-3-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB38-3-AC1",
+   "criterion_verbatim": "DB38-3-AC1 -- the four entries carry account_boundary as adopted, no other entry does, and the header reads 48. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r38/p38_round38.py\" . DB38-3-AC1",
+   "output_evidence": "OK: 4 entries carry account_boundary as adopted; 48 types, header 48\nDB38-3-AC1 PASS",
+   "denominator": "4 of 4 adopted entries tagged (Internal Account Journal In in, Out out; Federal and State Tax Withheld out with before_tax_return); 0 other entries tagged of 48 types; header total_type_desc_entries_v2 48 = len(types) 48; bucket and nna_direction unchanged on all 48 (diff touches 28 added lines, 3 changed header lines).",
+   "status": "PASS",
+   "expect": "DB38-3-AC1 PASS"
+  },
+  {
+   "criterion_id": "DB38-3-AC2",
+   "criterion_verbatim": "DB38-3-AC2 -- the adapter reads the keys from the ratified taxonomy file and the departure comments are gone. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r38/p38_round38.py\" . DB38-3-AC2",
+   "output_evidence": "OK: departure removed; org\\missions\\D9\\IRPT\\IRPT_DASHBD\\deliverables\\0.9.0_WK_IRPT_DASHBD~56\\orion_account_return_daily.py reads the ratified keys\nDB38-3-AC2 PASS",
+   "denominator": "2 of 2 departure keys removed from ~56/orion_sources.json (inter_account_comment, tax_withheld_comment); 1 of 1 adapter .py reads account_boundary from orion_cashflow_taxonomy.yaml and refuses (drift) when the declared boundary classes differ from the file's tagged entries.",
+   "status": "PASS",
+   "expect": "DB38-3-AC2 PASS"
+  },
+  {
+   "criterion_id": "DB38-3-AC3",
+   "criterion_verbatim": "DB38-3-AC3 -- the tie-out on both bases, gross from the landed silver. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r38/p38_round38.py\" . DB38-3-AC3",
+   "output_evidence": "OK: gross 418 of 562, net 421 of 562, gross from s3://opal-data-assets/orion/4698/silver/account_performance_gross/snapshot_date=2026-10-08 as of 2026-10-08\nDB38-3-AC3 PASS",
+   "denominator": "gross 418 of 562, net 421 of 562 account-windows within 0.35 pp (one sample of 562 accounts, Rolling 3-Year window 2023-10-09 to 2026-10-08); gross from the landed silver s3://opal-data-assets/orion/4698/silver/account_performance_gross/snapshot_date=2026-10-08 as of 2026-10-08; net from the landed silver/api_dims/performance snapshot 2026-10-08 twr_value. NNA-only probe on the same sample: net 293, gross 291.",
+   "status": "PASS",
+   "expect": "DB38-3-AC3 PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the checker reads the committed taxonomy, declaration, adapter and record only; no run state",
+   "observed": "printed the same last line on a second run",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "In a scratch root (.scratch/mroot), the State Tax Withheld entry's account_boundary key deleted from a copy of the taxonomy (the real file untouched); the checker run with that root.",
+   "expected": "DB38-3-AC1 FAIL naming the missing entry",
+   "observed": "FAIL: account_boundary entries {...3 entries, no State Tax Withheld} != {...4 entries}\nDB38-3-AC1 FAIL (rc 1)",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a live Orion pull",
+   "reason": "Bounds of the order: the token expired 2026-10-09T07:02:50Z (row IRPT_DASHBD-W57-S1); gross is the landed silver, net the landed performance silver."
+  },
+  {
+   "item": "fee slices and live-gross miss classes in the ~56 adapter",
+   "reason": "No landed input for them; they stay in ~53 (row IRPT_DASHBD-W56-S1); fee slices are DB-b-81."
+  },
+  {
+   "item": "any S3 write, Bloomberg or Black Diamond call, deploy, bun or download; any edit under infra/ or portal/; any edit under data/ other than the one named taxonomy file",
+   "reason": "Bounds of the order; none made."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-W56-S1"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "py_compile",
+   "invocation": "python -m py_compile orion_account_return_daily.py",
+   "result": "rc 0"
+  },
+  {
+   "tool": "ruff",
+   "invocation": "ruff check --target-version py39 <~56 folder>",
+   "result": "All checks passed"
+  }
+ ]
+}
