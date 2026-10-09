@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t9",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t9.bloomberg-quote-and-actuals.md",
+    "group": "OTHER",
+    "vintage_commit": "06cb4fc38c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "06cb4fc38c",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t9.bloomberg-quote-and-actuals.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_quote.py",
+      "kind": "script",
+      "commit_or_etag": "7d32a211ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy, no AWS call, no Bloomberg call; offline tests",
+      "artifact_covered_by": [
+        "DQ3-t9-AC1",
+        "DQ3-t9-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_allowance.json",
+      "kind": "config_data",
+      "commit_or_etag": "7d32a211ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy, no AWS call, no Bloomberg call; offline tests",
+      "artifact_covered_by": [
+        "DQ3-t9-AC1",
+        "DQ3-t9-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_bbg.py",
+      "kind": "test",
+      "commit_or_etag": "7d32a211ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no deploy, no AWS call, no Bloomberg call; offline tests",
+      "artifact_covered_by": [
+        "DQ3-t9-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ3-t9-AC1",
+      "criterion_verbatim": "the six named tests, and three round-1/2 queue tests still pass (regression arm).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R3_CHECKS/dq_t9_tests.py",
+      "output_evidence": "6 passed (BBGQ-NEW-OK); 8 passed (BBGQ-REGRESSION-OK); BBGQ-OK, rc=0",
+      "denominator": "6 of 6 new + 3 of 3 required regression tests passed by name",
+      "status": "PASS",
+      "expect": "BBGQ-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ3-t9-AC2",
+      "criterion_verbatim": "the seam against the two real filed requests and the real producer file: ICT quotes exactly 4 reference cells; ABNB quotes a positive model-block total whose breakdown sums to it; each carries a finish date or a named allowance gap.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R3_CHECKS/dq_t9_seam.py",
+      "output_evidence": "BSEAM-OK ICT=4 ABNB=989 (forecast=51, header=25, history=913), rc=0; both carry finish_date null with a named allowance_gap",
+      "denominator": "2 of 2 real filed requests quoted",
+      "status": "PASS",
+      "expect": "BSEAM-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 and AC2 run twice (before and after the docstring line-number edit)",
+      "observed": "BBGQ-OK and BSEAM-OK on both runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "Scratch copy of bbg_quote.py (.scratch/mut, uncommitted) with _figure defaulting a missing or absent figure to 0 (the never-default rule broken)",
+      "expected": "test_allowance_unknown_gives_no_finish_date_and_names_the_gap FAILS; the other five pass",
+      "observed": "1 failed, 5 passed: FAILED test_allowance_unknown_gives_no_finish_date_and_names_the_gap (assert '2026-10-08' is None)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Bloomberg call, import of integrations/bloomberg modules, AWS call, deploy, __init__.py, edits to demand_queue.py",
+      "reason": "order BOUNDS"
+    },
+    {
+      "item": "model_block history row count (calendar years HIST_START.year..today.year, 11 for 2026) is INFERRED, an upper bound; Bloomberg returns the fiscal years it holds in the window",
+      "reason": "the producer's code states the window, not the rows returned"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~8/MDPF_DEMQUE.TO-DQ-t9.bloomberg-quote-and-actuals.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit bbg_quote.py + bbg_allowance.json + test_demque_bbg.py",
+      "result": "commit 7d32a211ea"
+    }
+  ]
+}
