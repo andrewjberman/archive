@@ -61,3 +61,50 @@ about 50 from 7 Sep and drops to 3.33 on the last point.
 The dialog's trade list follows the selected window (30d / 90d / 365d), its heading names that window, and it sits
 collapsed behind a disclosure control that is closed by default. It is written from the chart object's markers, as
 round 18 (RIV-tl-1) wrote it.
+
+## Comments 4-6 -- the CGIC audit (Andrew-direct ~05:2xZ), VERBATIM
+
+> "Another thing I'm noticing is in the Audit section. What is happening here, with Tokyo Electron being "excluded" becuse
+> its a cash management operation? is that saying it got a dividend? Also i want to know why we're seemingly marking trades
+> way less than 20bps in delta. Go throught the CGIC audit report here and identify if anything here looks weird or is
+> otherwise off pattern"
+
+Read by 2.0.0_SA_COO~V1 from the pasted CGIC audit (latest report 2026-10-06, dataset revision 20261008T122342Z-6ea2fb54eece):
+
+4. **The exclusion line reads as if it named the trade below it.** Window 2026-10-02 to 2026-10-05: "1 money-market line(s)
+   traded: cash management ..." counts the fund's cash-sweep line, not Tokyo Electron and not a dividend; Tokyo Electron is
+   the one trade shown (trim 164,600 -> 128,600). Work: the exclusion names the excluded line (security and amount) and sits
+   apart from the trade table, so it cannot be read as the row under it.
+5. **Trades far below 20 bps, and trades that are not trades.** No code applies Andrew's 20 bps tolerance (PRD v0.21 FWD-10
+   SOURCE: "at a 20bps tolerance it's immediately clear who is discretionary and who is systematic"); 20 bps appears only as
+   the smallest marker size (PRD :1096). In the pasted audit, 12 rows show an UNCHANGED share count with a nonzero inferred
+   trade, all "flow adjusted": MediaTek 428,000 -> 428,000 (-1,442), Renault 277,771 -> 277,771 (-936 and -2,361), SMC 10,700
+   -> 10,700 (-36), Jentech 23,000 -> 23,000 (-77), Taisei 56,900 -> 56,900 (-192), Aura 46,976 -> 46,976 (-158 and -399),
+   Grifols 120,713 -> 120,713 (-407 and -1,026), Tokyo Electron 205,000 -> 205,000 (-1,743). The flow adjustment subtracts a
+   holding's pro-rata share of creations/redemptions, so an untouched holding in a flow window becomes a trade. Inferred
+   shares also differ from the actual change where shares did move (TSM -12,720 actual vs -13,927 inferred; Standard
+   Chartered +143,405 vs +140,638; Tokyo Electron -40,400 vs -41,090). Work: an unchanged share count is never a trade; and
+   a trade below the 20 bps tolerance (of fund weight) is not shown as a trade (kept in the audit as below tolerance).
+6. **Trades on "repeat" days.** The day strip marks 10-01, 10-02, 10-05 and 10-06 "BBG repeat" (and 10-07 a gap), yet the
+   10-02 -> 10-05 and 10-05 -> 10-06 windows carry trades (Tokyo Electron's trim; Vale's entry). A repeated report cannot
+   produce a trade, so either the label or the windows are wrong. Work: read which, and make the two agree.
+
+## Comment 7 -- the Period bar (Andrew-direct ~05:3xZ), VERBATIM
+
+> "Also we do not need this "Period" component in the top of the page anymore because its handled where the actual ranking
+> components are"
+
+Work: remove the PERIOD row (30d / 90d / 365d with their dates) from the page header; the ranking panels' own period
+controls stay.
+
+## Comment 8 -- the Direction Verdict accounts (Andrew-direct ~05:3xZ), VERBATIM
+
+> "if you look in the "Direction Verdict" more than half of the analyses lead with something like "These trades mostly
+> support rather than contradict the longer record." That is not a bad phrase on its own, but when every single fund is
+> saying the same thing, its not very interesting for the reader, and they may tune it out. We may need to give more token
+> budget or more specific prompting for this function to delve deeper."
+
+Work: the direction-verdict prompt (`ai_accounts.py`, `P_DIRECTION`) leads with what is specific to the fund (the names,
+sizes and dates that decide the verdict), forbids the stock opening, and gets the token budget it needs; a check counts
+opening sentences across the 13 funds and fails when more than a quarter share the same lead. This touches `ai_accounts.py`,
+which round 28's aw-1 deploy carries: it waits until that deploy is read at the 13:00Z sweep.
