@@ -790,3 +790,40 @@ Transcripts root `infra/aws/terraform/transcripts/` (the live key policy equals 
 ### Not done
 
 The apply; a plan against the backend; a real PutObject or GenerateDataKey; the live bucket encryption configuration read; the a17/b17 code re-read.
+
+## R. ses:DescribeConfigurationSet JOINS THE PLAN-READS POLICY (amendment 29; dell2 CTO ruling AMENDMENT 1 @bff4e48547, row NFRA_OPSWKF-D2-S3)
+
+Expected plan, by reading (nothing was planned or applied; the live documents were not compared):
+
+- ONE change, in place: `aws_iam_policy.dell_agent_plan_reads` (`cloudops-dell-agent-plan-reads-policy`), argument `policy`, one statement added between
+  `ReadSsmParametersPlanReads` and `ReadUiWalkerPassword`:
+  `{"Sid": "ReadSesConfigurationSetPlanReads", "Effect": "Allow", "Action": "ses:DescribeConfigurationSet", "Resource": ["*"]}`.
+- Nothing else: no new policy, no attachment, no user, no group, no key. Plan: 0 to add, 1 to change, 0 to destroy.
+- The Resource is "*" and not the configuration-set ARN: the evaluator reads an ARN-scoped Allow of this action as implicitDeny (measured with
+  iam:SimulateCustomPolicy, ARN and "*" crossed 2x2; only "*" with "*" is allowed). The action is read-only and names no other action.
+- Why the census missed it: `derive_plan_reads.py` read data sources and `aws_ssm_parameter` resources only (managed resources were skipped by design), so the kind
+  `aws_ses_configuration_set` was ABSENT from the census (not present-and-unmapped), and the saved census predated `trade-pipeline` becoming a Dell-placed root.
+  Fixed at the source: `MANAGED_READS` maps the kind to its refresh read, and `render_policy` writes it. The saved rows stay; one root entry and one read row were added,
+  because a full re-derive today also adds 32 reads of other roots (the saved file was already out of step at the base: census_file_matches=False), which are not this
+  amendment's to move. Policy size: 680 non-whitespace characters against 6,144.
+- Arms that moved: planread_ok now reads 428/428 (423 before, by subtraction: 5 added = the derived dell2 read of the census, and per Dell user the allowed
+  DescribeConfigurationSet and the refused DeleteConfigurationSet control). The control reads implicitDeny with and without the policy; the allowed arm reads implicitDeny
+  without the policy and allowed with it.
+
+
+## S. ONE MORE SECRET ARN: `opal/investor-reporting/svc-custody-statement` (amendment 30; dell2 `IRPT_DASHBD` TO-DB-b-84 leg R, relay `0.0.0_AB_MSTR` msg 107924; COO half AMENDMENT 2 @a319fc74b8, CTO half msg 2440)
+
+Metadata read only (secretsmanager ListSecrets: names, descriptions, tags, key ids; no value). `derive_vendor_secrets.py --live` listed 116 secrets in us-east-1 (17 regions, 0 listing errors); the saved census held 115. The ONLY difference is this secret: nothing removed, renamed or changed in name, ARN, description, tags or key. The listing also moved `last_accessed` on 42 secrets and `last_changed` on 4 (`orion/jwt/current`, `orion/eclipse_jwt/current`, `smartx/jwt/current`, `irpt/svc-irpt-analysis/password`); those are timestamps, they change no class or grant, and they are not saved.
+
+Census row: `opal/investor-reporting/svc-custody-statement`, class PLATFORM-KEY (a service token, 90-day TTL, for the firm's own IRPT statement submission and persist routes, one firm only; the same kind as `opal/ticketing/svc-analyst-intake` and `opal/ticketing/svc-commentary`), default key (`kms_default` true, `kms_key_id` null, no customer-managed key), decision GRANTED, arn `arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/investor-reporting/svc-custody-statement-9CmPmS`. The expected class held, so no stop. The census was extended by exactly this record (as for section L; the repository scan was not re-run into the saved file: every other record, reference, placement and grant is byte-for-byte as saved) and re-classed with `--reclass`: granted 96 -> 97, platform_key 30 -> 31, granted_platform_key 30 -> 31, other 18, blocked_by_key 1.
+
+Expected plan by reading (nothing was planned or applied; the live documents were not compared). Together with section R, TWO policies change in place and nothing else:
+- `aws_iam_policy.dell_agent_plan_reads` (`cloudops-dell-agent-plan-reads-policy`), argument `policy`: section R's one statement, `ReadSesConfigurationSetPlanReads`.
+- `aws_iam_policy.dell_agent_platform_secrets` (`cloudops-dell-agent-platform-secrets-policy`), argument `policy`, Sid `ReadPlatformKeys`: ONE ARN added, 30 -> 31 explicit entries, 3,006 characters against 6,144 (part two; section L left it at 2,898). Part one (vendor and client sessions) is unchanged at 66 entries, 5,968. Action `secretsmanager:GetSecretValue` only, exact ARN with its six-character suffix, no wildcard.
+- Nothing created, nothing destroyed, no attachment, user, group or key touched; the group's managed-policy count is unchanged. Plan: 0 to add, 2 to change, 0 to destroy.
+
+Simulation: `vendor_ok` 255/255 -> 261/261 (+6, three per Dell user): the per-secret sweep gains this secret allowed (and implicitDeny without the secrets documents), the NAMED arm for it allowed with its census class checked at run time, and the arm AMENDMENT 30 asks for on an unlisted secret: a sibling `opal/investor-reporting/svc-custody-statement-other-AbCdEf` that no listing holds reads implicitDeny with the documents. `VENDOR-ONE-TO-ONE entries=97 (part one 66, part two 31) each_matches_exactly_one=True wildcards=False ... chars=5968+3006`. The other fields are unchanged from section R's run (`planread_ok=428/428`). `DELL-PARITY` 1533/1533, `unequal=0` (one arm more than before: the new secret's, identical for both Dells because the grant is on the group).
+
+What a Dell can newly do: read that one token (submit and persist IRPT client statements as the custody-statement service, Cottonwood only; the firm comes from the verified claim, and the code admission IB-pr-385 is the real control). It can write neither a user-policy nor a resource policy on it under its own box's never-widen pair.
+
+Also in this pass (a test fix, no plan effect): `tests/check_transcripts_dell_decrypt.py` now renders the WHOLE transcripts root, so `local.named_reader_arns` (readers.tf) resolves; the second reader's role ARN is stubbed from its builder name (row `NFRA_CTLPLN-W14-S49`).
