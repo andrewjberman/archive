@@ -1,3 +1,31 @@
+# dell1's deploy refusal, measured by exercise -- and RESOLVED: the grant landed 23:24:52Z and the plan is clean
+
+> ## STATUS: CLOSED 2026-10-08 ~23:46Z. The grant cell was cut and is ACCEPTED BY EXERCISE.
+>
+> `cloudops-dell-agent-plan-reads-policy` was **created 2026-10-08T23:24:52Z** -- after this file's measurement
+> (22:35Z) and after the ask -- attached to group `cloudops-dell-agents-group`. It grants `ssm:GetParameter` +
+> `ssm:GetParameters` on exactly `arn:aws:ssm:us-east-1:313476888478:parameter/mdpf/custody_source` (plus the
+> arm64 AMI parameter). **It carries NO `PutParameter`**, which is the narrowing this file asked for.
+>
+> Verified by exercise, not by reading the policy:
+> - `aws ssm get-parameter --name /mdpf/custody_source` -> **rc=0** (was rc=254). Type `String`, Version 4.
+> - `terraform plan` on `infra/aws/terraform/mdpf-pipeline/` -> **rc=0, zero `Error:` lines**,
+>   `Plan: 0 to add, 1 to change, 0 to destroy`. The refusal that blocked it is gone.
+>
+> **Consequence for the 220xZ record's placement 2:** the laptop no longer needs to apply for dell1 on this
+> refusal. That was the whole of the carve-out ("only until that grant lands, and only for that refusal"), and
+> it has landed.
+>
+> The measurement below is retained as the record of what was wrong and how it was established. Everything in
+> it was accurate when taken; two readings are now superseded and marked inline.
+>
+> **One thing NOT resolved, and it is now the only item left on this module:**
+> `aws_s3_object.mdpf_route_bindings` is still pending in-place. See the off-task section at the end.
+
+---
+
+## Original measurement (22:35Z) -- accurate when taken, now superseded by the grant above
+
 # dell1's deploy refusal, measured by exercise: `ssm:GetParameter` is denied at the ACTION level, not the resource
 
 **Seat:** `0.7.0_AE_CloudOps~DELL1` (dell1 own-box deploy seat)
@@ -145,5 +173,47 @@ UNMEASURED by me.
 **Claim field:** every value in this file is `measured`. Two rows previously carried `UNMEASURED` and are now
 closed above. The one remaining `UNMEASURED` is named inline: the cause of the `route_bindings` delta.
 
-**Nothing was applied.** The only acts were reads: three AWS reads, one read-only `terraform plan`
-(`-lock=false`, no state lock taken), and one source read. This seat holds no IAM write and asked for none.
+**Nothing was applied.** The only acts were reads: AWS reads, two read-only `terraform plan` runs
+(`-lock=false`, no state lock taken), and source reads. This seat holds no IAM write and asked for none --
+the grant was cut by the control plane, not here.
+
+---
+
+## Closing addenda
+
+### The grant surface, read in full -- the denominator behind the subtraction
+
+Before the cell landed, the question "is `ssm:GetParameter` granted anywhere?" was answered by subtraction over
+a printed denominator rather than a forward guess. The principal's permission set has **10 writers**, not the 2
+a first read suggests (the group is not one writer -- it is a container for nine):
+
+```
+1 user-attached:  cloudops-dell1-agent-bus-policy
+9 via group cloudops-dell-agents-group:
+  plan-reads(v1) create(v3) platform-secrets(v1) respol-allow(v2) deploy(v5)
+  ssm-send(v1) routes-fn(v1) vendor-secrets(v1) iam-roles(v1)
+TOTAL: 451 action-entries across 10 documents; 10 of 10 fetched, none silently failed
+No permissions boundary on the user (PermissionsBoundary: null) -- so nothing was silently capping the set.
+```
+
+`comp-iam` cannot answer this and must not be cited for it: it is TF-ROLE-scoped and returns
+`No role matching 'cloudops-dell1-agent-user'`. This principal is an IAM USER absent from the TF role corpus.
+The raw reads carry a `# rail-checked:` marker naming that.
+
+### The live parameter VALUE is `schwab`, not the `bd` in Terraform -- EXPECTED, not drift
+
+The read returned `Value: "schwab"`, Version 4, last modified 2026-07-07. `lambdas.tf:25` declares
+`value = "bd"`. **This is by design and must not be "fixed":** that resource carries
+`lifecycle.ignore_changes = [value]` precisely so the `bd -> schwab` co-activation cutover -- done by
+`aws ssm put-parameter` under never-widen + CVO co-sign -- is not drift-reverted by a later apply. TF owns the
+parameter's EXISTENCE and initial value; the value is operationally controlled. Recorded here so a future
+reader does not mistake the divergence for drift and revert a served-critical cutover.
+
+### Instrument note: a worktree-file hash is not comparable to a git blob on this box
+
+While confirming these records reached `origin/CLOUD`, comparing `sha256sum <file>` against
+`git show origin/CLOUD:<file>` produced a mismatch on a file that is in fact identical. Cause: autocrlf. The
+worktree copy held 33 CRs and was 2511 bytes against the blob's 2478 -- `2511 - 2478 = 33`, the delta is
+entirely line endings, and CR-stripped both sides hash identically. **Use `git diff` against the ref, or
+CR-normalize before hashing.** A file written in-session with LF and not yet re-checked-out will match by luck,
+which makes the bad instrument look sound exactly once.
