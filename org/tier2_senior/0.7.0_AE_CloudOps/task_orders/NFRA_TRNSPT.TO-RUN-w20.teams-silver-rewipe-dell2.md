@@ -2,7 +2,7 @@
   <metadata>
     <id>NFRA_TRNSPT.TO-RUN-w20.teams-silver-rewipe-dell2</id>
     <issued_by>2.0.0_SA_COO~T2</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~TR2</issued_to>
     <date>2026-10-09</date>
     <status>pending</status>
     <project_code>NFRA_TRNSPT</project_code>
@@ -14,6 +14,12 @@
 <owned_cells>TR-w-20</owned_cells>
 <decomp_context>Round 20 cell TR-w-20 (CTO ADDENDUM 10 item 1): the W1-S7 re-wipe of the 30 existing Teams silver keys under a pair. HELD: the GO is a separate message, sent when the CTO half lands.</decomp_context>
 </decomp_ref>
+
+  <reassignment>
+    AMENDMENT 1 (issuer, 2026-10-09 ~10:2xZ): re-addressed from 0.7.0_AE_CloudOps~DELL2 (GO 09:51Z, untouched to 10:23Z; it took other orders) to
+    0.7.0_AE_CloudOps~TR2, the lane 0.0.0_AB_MSTR~DELL2 seated for NFRA_TRNSPT only (msg 3135) under CTO ruling @5ff94852a6, as the CTO half
+    @7a2e7199ed allows. 0.7.0_AE_CloudOps~DELL2 does NOT run this order. deploy_ledger.py commits its own files at open (@00d3393ff3).
+  </reassignment>
 
   <objective>
     Re-wipe, in place, the 30 Teams silver keys of monday_meeting, ocio_ic and asset_management_ic with the tool built in TR-w-19, and read them
