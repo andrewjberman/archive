@@ -1,0 +1,91 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_GATSCP.TO-GS-e-4",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/prd/NFRA_GATSCP_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7cb6183997"
+ },
+ "assignee": "0.9.0_WK_NFRA_GATSCP~5",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D0/NFRA/NFRA_GATSCP/decompositions/NFRA_GATSCP_DECOMP.round2.md",
+  "vintage_commit": "6c36e70e0a",
+  "to_ref": "org/missions/D0/NFRA/NFRA_GATSCP/task-orders/NFRA_GATSCP.TO-GS-e-4.baseline-reset-refused.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/surprise-row-gate.py",
+   "kind": "script",
+   "commit_or_etag": "bda5e3209fb09707d3251f7f524eaf291d08a14c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-5, not pushed; baseline path dispatched triggers the corpus pass with --act for it.",
+   "artifact_covered_by": [
+    "GE4-AC1",
+    "GE4-AC2"
+   ]
+  },
+  {
+   "path_or_key": ".tools/surprise-corpus-validate.py",
+   "kind": "script",
+   "commit_or_etag": "bda5e3209fb09707d3251f7f524eaf291d08a14c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL-risk order: committed on branch wk-NFRA_GATSCP-5, not pushed; baseline among --act paths makes every finding in-act.",
+   "artifact_covered_by": [
+    "GE4-AC1",
+    "GE4-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "GE4-AC1",
+   "criterion_verbatim": "with one baseline tuple dropped in a private index, the row gate given only the baseline refuses; given another project's untouched document, it lands and prints the uncovered failure as STANDING with its own project (the difference control).",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round2_prep/checks/r2_baseline_reset.py\"",
+   "output_evidence": "PASS reset-refused: rc=1\nPASS bystander-standing: rc=0 standing_D1_CATVIEWS=True\nGS-E4-RESET ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms",
+   "status": "PASS",
+   "expect": "GS\\-E4\\-RESET\\ ok=True"
+  },
+  {
+   "criterion_id": "GE4-AC2",
+   "criterion_verbatim": "round 1's corpus scope check still passes.",
+   "method": "command",
+   "invocation": "python \"org/missions/D0/NFRA/NFRA_GATSCP/deliverables/2.0.0_SA_COO~N1/round1_prep/checks/r1_corpus_scope.py\"",
+   "output_evidence": "PASS bystander-lands: rc=0 standing_LGIC_BLANKFIX=True\nPASS own-refused: rc=1\nGS-T1-SCOPE ok=True arms=2 failed=0",
+   "denominator": "2 of 2 arms",
+   "status": "PASS",
+   "expect": "GS\\-T1\\-SCOPE\\ ok=True"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1 plants a baseline with its first tuple dropped in a private index and runs the gate twice: staged=baseline, and staged=another project's document (difference control).",
+   "expected": "baseline staged -> rc 1; other document -> rc 0 with a STANDING line",
+   "observed": "reset-refused rc=1; bystander-standing rc=0 with STANDING D1_CATVIEWS. AC1 failed at the base (per the order).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "checks run once each at HEAD bda5e3209f",
+   "observed": "single run; not repeated",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "row gate --self-test new arms",
+   "reason": "outside the order; self-test reports 0 failed of 246"
+  }
+ ],
+ "surprises": [],
+ "session_log": "2026-10-09 GROUNDING TREE-OK on wk-NFRA_GATSCP-5. Read AC1 and both tools. Added baseline-path trigger in the row gate main and a baseline-in-acts branch in corpus main. Ran AC1, AC2, row gate self-test (RESULT: 0 arm(s) failed of 246 (+ live census)).",
+ "compiler_tools": [
+  {
+   "tool": "surprise-row-gate.py --self-test",
+   "invocation": "python .tools/surprise-row-gate.py --self-test",
+   "result": "RESULT: 0 arm(s) failed of 246 (+ live census)"
+  }
+ ]
+}

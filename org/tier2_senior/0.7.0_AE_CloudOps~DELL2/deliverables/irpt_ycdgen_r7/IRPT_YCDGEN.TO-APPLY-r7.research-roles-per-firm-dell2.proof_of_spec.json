@@ -1,0 +1,121 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The ledger irpt-ycdgen-r7-research-roles-20261009 is CLOSED.",
+      "denominator": "1 Status line, read from the committed ledger entry",
+      "expect": "^\\*\\*Status:\\*\\* CLOSED",
+      "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-ycdgen-r7-research-roles-20261009_deploy_completion.md",
+      "method": "command",
+      "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261009T103410Z",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "The simulate shows 3 allowed and 6 denied.",
+      "denominator": "9 cells of the 3x3, 3 on the diagonal and 6 off it",
+      "expect": "S1 matrix allowed=3 denied=6$",
+      "invocation": "grep -m1 'S1 matrix' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_r7/S1_SIMULATE_20261009.txt",
+      "method": "command",
+      "output_evidence": "S1 matrix allowed=3 denied=6",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "The runner's AssumeRole lists exactly the 3 research role ARNs.",
+      "denominator": "3 ARNs in the runner policy's AssumeRole Resource list, read live after the apply",
+      "expect": "V1 assume list n=3 irpt-49f-ycharts-research-role,irpt-cot-ycharts-research-role,irpt-inf-ycharts-research-role$",
+      "invocation": "grep -m1 'V1 assume list' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_r7/V1_READBACK_20261009.txt",
+      "method": "command",
+      "output_evidence": "V1 assume list n=3 irpt-49f-ycharts-research-role,irpt-cot-ycharts-research-role,irpt-inf-ycharts-research-role",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "commit_or_etag": "0617cb243d2c73019f6ad44f34674ccd44b50217",
+      "deploy_evidence": "the apply line, both gate events and the V1 read-back",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_r7/R7_result.json"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "commit_or_etag": "5e2112390efd46872cc678e2a53839190ba7cb45",
+      "deploy_evidence": "the 3x3 matrix AC2 is graded on, with its method and its limits stated",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_r7/S1_SIMULATE_20261009.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "compiler_tools": [
+    {
+      "invocation": "-chdir=infra/aws/terraform/investor-reporting/ycharts apply <saved planfile>",
+      "result": "Apply complete! Resources: 4 added, 1 changed, 0 destroyed",
+      "tool": "safe-apply.sh"
+    },
+    {
+      "invocation": "run by safe-apply from the REPO ROOT",
+      "result": "WARN 23 graded. It first failed CLOSED with FileNotFoundError on infra/logic/registry/root_map.json when safe-apply ran from inside the terraform directory -- the file exists at the repo root and the gate resolves it relative to cwd. No override was taken; the gate was given the cwd it needs.",
+      "tool": "naming-plan-gate"
+    }
+  ],
+  "controls": {
+    "role_absence_before": {
+      "description": "the 49f role was confirmed ABSENT before the apply, so its presence after is a change this apply made rather than a standing state",
+      "expected_landed": "NoSuchEntity before, and a live role with a CreateDate at the apply after",
+      "expected_not_landed": "the role already existing, which would make the read-back vacuous",
+      "observed": "iam get-role NoSuchEntity before, against a live positive control on irpt-ycharts-generate-role; after, CreateDate 2026-10-09T10:29:26Z",
+      "status": "PASS"
+    },
+    "scope_isolation": {
+      "description": "the 3x3 itself is the control: each policy is evaluated against its OWN firm's prefix and against each OTHER firm's, so a policy that over-reached would show an off-diagonal allow",
+      "expected_landed": "3 allowed on the diagonal and 6 denied off it",
+      "expected_not_landed": "any off-diagonal allow, which the amendment makes a rollback before F1",
+      "observed": "allowed 3, denied 6, off-diagonal allows NONE",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the PRINCIPAL 3x3 is not in this instance",
+      "reason": "every simulate form is AccessDenied to this identity -- SimulateCustomPolicy, and SimulatePrincipalPolicy on the role ARNs -- because Sid SimulateOwnPolicyOnly scopes it to user/${aws:username} alone. CTO half AMENDMENT 2 therefore grades AC2 on the document 3x3 and routes the principal 3x3 to the laptop as a record."
+    },
+    {
+      "item": "isolation was NOT proven functionally",
+      "reason": "this seat did not assume the roles and attempt a cross-firm GetObject. A deliberate cross-firm access attempt is reserved, and proving isolation by attempting to breach it is not an applier's call."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R7.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_YCDGEN.TO-APPLY-r7.research-roles-per-firm-dell2.md",
+    "vintage_commit": "d5e3459acbd4a4ebc08a20d0e2d300f2f0f0dd21"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "signed in the r7 packet by the issuance (2.0.0_SA_COO~G2)",
+    "cto_half": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_R7_RESEARCH_ROLES_CTO_HALF.md @717d42269a, GIVEN, with AMENDMENT 1 (msg 3132: document 3x3 in the ledger, then A1, then the principal 3x3) and AMENDMENT 2 (msg 3149: AC2 stands on the document 3x3 and the principal 3x3 goes to the laptop as a record)"
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "WORLD",
+  "rollback": "terraform destroy -target of each created resource plus restoring the runner policy's prior AssumeRole list; a destroy is Andrew's word, never this seat's",
+  "schema_version": "1.0",
+  "scope": "the per-firm research roles for 49financial and inflection plus the runner's 3-ARN AssumeRole list, all derived by resident.tf from policy row irpt-ycdgen-research-v1",
+  "session_log": "org/critical_paths/change_management/20261009T1018Z_irpt-ycdgen-r7-research-roles-20261009_deploy_completion.md",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_YCDGEN.TO-APPLY-r7.research-roles-per-firm-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "4cf3a805c784b8e800a0ea7fbde465b85b4218d4"
+  },
+  "surprises": [],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-r7"
+}
