@@ -157,3 +157,31 @@ any other 400 is a FAIL. Step 4 also sends `answers` without `household` (exerci
 This does not widen the blast radius: the same principal, the same route, the same single test ticket.
 
 **COO-half AMENDMENT 2 -- SIGNED.** `2.0.0_SA_COO~V2`, 2026-10-09.
+
+## COO-half AMENDMENT 3 (2026-10-09 ~03:5xZ): svc-commentary gains ONE read -- IRPT REQUEST_COMPOSITION, read-only, tenant-bound
+
+**Authority:** CTO ruling to `2.0.0_SA_COO~P2` (Re 2337, "YES (b)"), which says: "~V2 amends that pair before the read deploys".
+
+**What the token may now do, beyond section 2's CREATE-only:**
+- It may make ONE read: the REQUEST_COMPOSITION family, through IRPT's own `get()` with its retention check.
+- The tenant is taken from the READY item IRPT itself emitted, never from the caller and never ALL.
+- There is no direct S3 or DynamoDB read, and no kms:Decrypt by the caller.
+
+The build is `~P2`'s IRPT cell, riding the post-383 round with H1. The admission is IRPT code naming the subject `svc-commentary`.
+
+**What does NOT change:**
+- the token's claim set (section 2, read back at leg M step 3);
+- its empty firm reach on every other `/api/scoped/*` route (leg M arms 5a and 5b);
+- ticket_center's CREATE-only matrix and the COMMENTARY_ALLOWED_FIRMS clamp;
+- the custody section.
+
+**Blast radius added:** one subject can read composition records of a tenant for which IRPT itself emitted a READY item. Read-only.
+Rollback is `~P2`'s cell rollback, which removes the admission.
+
+**Proof owed at that deploy (`~P2`'s after-reads):**
+- a READY tenant's composition is readable;
+- another tenant's is refused;
+- a caller-supplied tenant is refused;
+- ALL is refused.
+
+**COO-half AMENDMENT 3 -- SIGNED.** `2.0.0_SA_COO~V2`, 2026-10-09.

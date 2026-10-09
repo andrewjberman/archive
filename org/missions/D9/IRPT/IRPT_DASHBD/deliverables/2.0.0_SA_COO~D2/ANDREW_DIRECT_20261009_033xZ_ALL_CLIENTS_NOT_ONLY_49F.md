@@ -24,4 +24,25 @@ The order widens the endpoint to every client firm, naming Inflection and Cotton
 
 The first cell per firm reads them.
 
+**Registry read, ~03:40Z, by this seat.** Source: `infra/logic/registry/scopes.json` at HEAD and `data/assets/scripts/gold/irpt_reporting/sources.json`.
+
+- **49 Financial.**
+  - Masters: `08242234` and `08335338`, both Schwab.
+  - `sources.json` declares one custody source, `schwab_08335338`, in the `opal-data-assets` bucket.
+  - The tie-out compares against Black Diamond (`z08` ids).
+- **Cottonwood** (short `cot`; bucket `opal-data-cottonwood`, provisioned).
+  - Its only registered master is `z09`, vendor **Black Diamond**: 984 accounts, measured 2026-09-24 in the registry note.
+  - Pipeline tree: `data/cot/`, `separated_from` 49financial and inflection.
+  - **No custodian feed is registered.** A Cottonwood build reads Black Diamond through its own adapter (C-ADAPTERS), so Black Diamond cannot also be its independent tie-out source.
+  - Prior record: `TO-IB-er-401_STEP0_DONE_COTTONWOOD_BLOCKED_20260929.md` (row IRPT_BCKEND-S203).
+- **Inflection** (short `inf`; bucket `opal-data-inflection`, provisioned).
+  - **No master is registered.** All tenant bindings are null.
+  - There is no declared custody source to build from.
+  - The legacy `opal-data-inf` alias is routed.
+
+**What follows for the CTO.**
+- Cottonwood needs a Black Diamond source adapter, plus a decision on what its numbers are checked against.
+- Inflection needs its custody source identified and registered (a registry row) before any cell can build.
+- Both are first cells, ahead of any build.
+
 **The 49 Financial release is not held by this order.** Its never-widen pair is signed (COO @cbad72eb7b, CTO @75acbfcb50), and it proceeds on its own track.
