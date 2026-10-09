@@ -1,0 +1,139 @@
+{
+ "schema_version": "1.0",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "to_id": "ETFS_RIVALS.TO-RIV-wi-1.sweep-runs-dramatic-move-lookup",
+ "decomp_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+  "vintage_commit": "7a8a5e39ab",
+  "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-wi-1.sweep-runs-dramatic-move-lookup.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7a8a5e39ab"
+ },
+ "assignee": "0.9.0_WK_ETFS_RIVALS~32",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/dramatic_move.py",
+   "kind": "script",
+   "commit_or_etag": "5927c46aa2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/sweep.py",
+   "kind": "script",
+   "commit_or_etag": "5927c46aa2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/etfs-pipeline/rivalfunds_package.py",
+   "kind": "script",
+   "commit_or_etag": "5927c46aa2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_riv_wi1_sweep_lookup.py",
+   "kind": "test",
+   "commit_or_etag": "5927c46aa2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "data/etfs/scripts/rivalfunds/tests/conftest.py",
+   "kind": "test",
+   "commit_or_etag": "5927c46aa2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "code commit on the worker branch; no served write, no deploy",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "run_for_day: TKM searched and one row with its source_url; 0 searches for a flat name; the cap holds and prints; a failing search never raises and writes nothing -- expect: WI1 RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/ws3_item8_prep/wi1_lookup_run_check.py",
+   "expect": "WI1 RESULT: PASS 0 failures",
+   "output_evidence": "ARM A/B: report {'candidates': 3, 'searched': 3, 'calls': 5, 'written': 1, 'failed': 0, 'capped': 0, 'uri': 's3://opal-data-etfs/rivalfunds/etfs/gold/corporate_actions/date=2026-10-08/actions-inferred-20261009T141846Z-bf71c051b427.parquet'}; files 1; queries ['Drop B Co stock split October 2026', 'Drop B Co merger exchange ratio October 2026', 'Drop A Co stock split October 2026', 'Drop A Co merger exchange ratio October 2026', 'Tokio Marine Holdings Inc stock split October 2026']\nARM C: report {'candidates': 3, 'searched': 2, 'calls': 4, 'written': 0, 'failed': 0, 'capped': 1, 'uri': None}; candidates searched ['Drop A', 'Drop B']; printed 'dramatic_move: cap 2; candidates 3; searched 2; calls 4; written 0; failed 0; capped 1'\nARM D: report {'candidates': 3, 'searched': 3, 'calls': 3, 'written': 0, 'failed': 3, 'capped': 0, 'uri': None}; files 0\nWI1 RESULT: PASS 0 failures",
+   "denominator": "4 of 4 arms (A TKM row with source_url, B flat name 0 searches, C cap 2 of 3 prints cap, D failing search) under timeout 120 (rc 0, not 124)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the sweep calls it inside a non-raising try; serp.py is staged; serp_search finds it in a Lambda tree -- expect: WI1 WIRING RESULT: PASS 0 failures",
+   "method": "command",
+   "invocation": "python org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~V1/ws3_item8_prep/wi1_wiring_check.py",
+   "expect": "WI1 WIRING RESULT: PASS 0 failures",
+   "output_evidence": "(a) run_sweep calls run_for_day: True; inside a try that does not re-raise: True\n(b) STAGED destination for serp.py: data/find/dualbiz/scripts\n(c) serp_search resolves a Lambda-tree path: True\nWI1 WIRING RESULT: PASS 0 failures",
+   "denominator": "3 of 3 checks (a call in a non-raising try, b STAGED, c Lambda-tree path) under timeout 120 (rc 0, not 124)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "J1",
+   "criterion_verbatim": "the pair's read on the served page (Tokio Marine adjusted), not the worker's",
+   "method": "manual_read_with_citation",
+   "judgment": true,
+   "invocation": "none: judgment criterion on the served page; no deploy, no served write, no live search is permitted to this worker",
+   "output_evidence": "Worker-side only: both checks PASS offline; rivalfunds suite 993 passed, 6 skipped. No live search and no served read was made.",
+   "denominator": "N/A -- judgment criterion; the served page after the deploy pair is the object",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Judgment criterion graded at L9 on the served page after the deploy pair; the worker records output and no verdict."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "none run: the order names no mutant control.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "python -m pytest -q rivalfunds/tests from data/etfs/scripts, after the final edit",
+   "observed": "993 passed, 6 skipped, 0 failed (run once).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Flipping the task order's <status> to complete",
+   "reason": "The face leaves the flip to the issuer."
+  }
+ ],
+ "surprises": [
+  "ETFS_RIVALS-D1-W32-S1",
+  "ETFS_RIVALS-D1-W32-S2",
+  "ETFS_RIVALS-D1-W32-S3"
+ ],
+ "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~32 <0.9.0_WK_ETFS_RIVALS~32@opal.agent>\" -F <msgfile> -- <paths>",
+   "result": "5927c46aa2"
+  }
+ ]
+}
