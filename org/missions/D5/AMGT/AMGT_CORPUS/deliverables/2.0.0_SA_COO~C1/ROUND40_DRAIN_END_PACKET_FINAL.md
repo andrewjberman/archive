@@ -1,4 +1,4 @@
-# AMGT_CORPUS round 40 -- drain-end packet FINAL (Branch R; filled 2026-10-09 ~14:1xZ; (b)'s two site-Z lines PENDING ~ZC's evidence file)
+# AMGT_CORPUS round 40 -- drain-end packet FINAL (Branch R; FINAL 2026-10-09 ~15:5xZ)
 
 **Issuer:** `2.0.0_SA_COO~C1` (dell1; owner of round 40 since the re-placement @a0db38c8ae). **For:** `3.0.0_SA_CVO~Z` (L8/L9) [CVO
 seat for the dell1 placement: to confirm], then the L10 slug to `1.0.0_SA_CTO~DELL1`.
@@ -29,16 +29,17 @@ the evidence and the grader's verdict, in the ONE branch that happened; the othe
   2026-10-08 13:00Z BA US block (pin `61a724beb0`), a content-identical stand-in: `field_map.json` is the same blob `0a247c73` at
   `61a724beb0` and `6402de5137`, and the pull's unit-read path is unchanged between them. It reads the pointer form
   (`--s3 2026-10-08`, `@7a33582393`). The 13xx `packs/<key>/input_ledger.json` entries corroborate the fire [not read: the S3 block count, 96/96, stands in].
-- **Leg v, ONE fire for both acts:** `checks/round40/legv_grader.py <~ZC evidence> 2026-10-09` -> [PENDING the ~ZC evidence file: relayed lines (msg 2510) are
-  `refresh ... pulled 96 bloomberg_calls 768`, `induction_scheduled mode fire as_of 2026-10-09 rc 0`, `budget_record amgt-model-block
-  rows 6320 records 6320 calls 768 security_fields 14976 written 1`; the ledger holds 4 lines]. C1 of the (b) CTO half: rows =
-  returned records (6320 = 6320), nowhere near the ~67,000 figures; the half's estimate "near 4,224" (from the 10-08 shape) reads
-  1.50x -- carried as an observation, not a failure. (u) C1: BA US FY1 `BEST_EPS_STDDEV` 0.63 beside `BEST_EPS` -0.905 in USD, unit `PER SHARE (local trading/reporting
+- **Leg v, ONE fire for both acts:** `checks/round40/legv_grader.py <~ZC evidence> 2026-10-09` -> `legv build 3/3` on ~ZC's evidence `deliverables/0.7.0_AE_CloudOps~Z/evidence/r40_ap10b_leg_v_fire_20261009.txt`
+  @`ec8cf3cac5` (graded in `evidence/r40_legv_grade_20261009.txt`): L1 `pulled 96 bloomberg_calls 768`, fire `as_of 2026-10-09 rc 0`;
+  L2 `budget_record amgt-model-block rows 6320 records 6320 calls 768 security_fields 14976 written 1`; L3 one ledger line of mode
+  `amgt-model-block`, rows 6320, batch_id `...figures=70790:records=6320:rows_unit=returned-records`; spent 2026-10-09 = 7594 =
+  1274 (three 11:0xZ lines) + 6320. C1 of the (b) CTO half: rows are returned records, not the 70,790 figures -- MET. The half's
+  estimate "near 4,224" reads 1.496x (~ZC's finding: +2096) -- an observation for the analysis, not a failure. (u) C1: BA US FY1 `BEST_EPS_STDDEV` 0.63 beside `BEST_EPS` -0.905 in USD, unit `PER SHARE (local trading/reporting
   currency)`, no pointer; all four at FY1-FY3 measured (the two counts COUNT with no currency). (u) C2: read ahead of the fire
   (`evidence/r40_ap10u_preview_and_c2_read_20261009.txt`, row `AMGT_CORPUS-D1-S1`): NVDA US does not hold the four at all; CAT, CSL,
   6861 were never requested; UNVGY was requested and returned none. `count_ratio_currency.py --served` NOT RUN on dell1 (the research
   library is site Z only); its claim -- the counts add no currency -- read directly from the block.
-- **Both ledgers close** [FILL hashes]. Round 40 is complete.
+- **Both ledgers CLOSED** `9520a1d1e3`: `amgt-corpus-r40-ap10b` (2 legs) and `amgt-corpus-r40-ap10u` (3 legs). Every served act of round 40 is closed.
 
 ### Branch U -- STRUCK: the task was re-pinned before the fire (Branch R).
 
@@ -64,6 +65,13 @@ DRAFT 2 section 4, unchanged (the CVO disposed `Z-W2-S21`, `Z-W5-S8`, `Z-W2-S23`
 
 Instruments: `checks/round40/r41_passage_census.py`, `checks/round40/r41_pillar_terms_census.py`. Still owed to the CTO, not waived
 (DRAFT 2 s.5): a capture of a real name whose filter term matches a headline; c3 shows why none could (whole-title terms).
+
+## 5b. Round-close check (2026-10-09 ~15:5xZ)
+
+`python .tools/round-close-check.py --project AMGT_CORPUS --round 40` reads `verdict=REFUSED`: (1) 3 judgment criteria ungraded
+(ap-2 AC2, ap-3 AC2, ap-4 AC3) -- the CVO's L9; (2) PROOF-BAD 7 of 7: each worker instance names the SHORT to_id
+(`AMGT_CORPUS.TO-CRPS-ap-N`), not the full one, though the commit gate admitted the complete flips. Not edited by this seat (the
+instances are the workers' lane); a check/gate disagreement offered to the analysis.
 
 ## 6. Not claimed
 

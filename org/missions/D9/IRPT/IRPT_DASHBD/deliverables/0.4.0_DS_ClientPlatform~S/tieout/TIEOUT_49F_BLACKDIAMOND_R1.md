@@ -10,10 +10,10 @@
 
 | account | period (effective) | BD daysHeld | Opal days used / in period | gaps | BD TWR | Opal END | Opal START | Opal MID | abs_diff (START) |
 |---|---|---|---|---|---|---|---|---|---|
-| 0027265115 | 2026-03-16 .. 2026-06-30 | 74 | 65 / 73 | 8 | -8.1346% | -9.9161% | -9.7580% | -9.7872% | 1.6233% |
-| 0027265115 | 2026-03-16 .. 2026-08-28 | 116 | 104 / 115 | 11 | -5.7099% | -6.0299% | -5.8650% | -5.8954% | 0.1551% |
-| 0027265115 | 2026-04-08 .. 2026-06-30 | 58 | 54 / 58 | 4 | -8.1799% | -9.8772% | -9.8772% | -9.8772% | 1.6973% |
-| 0027265115 | 2026-07-01 .. 2026-08-28 | 42 | 39 / 42 | 3 | +2.6385% | +4.3139% | +4.3139% | +4.3139% | 1.6754% |
+| acct#e7ab8585 | 2026-03-16 .. 2026-06-30 | 74 | 65 / 73 | 8 | -8.1346% | -9.9161% | -9.7580% | -9.7872% | 1.6233% |
+| acct#e7ab8585 | 2026-03-16 .. 2026-08-28 | 116 | 104 / 115 | 11 | -5.7099% | -6.0299% | -5.8650% | -5.8954% | 0.1551% |
+| acct#e7ab8585 | 2026-04-08 .. 2026-06-30 | 58 | 54 / 58 | 4 | -8.1799% | -9.8772% | -9.8772% | -9.8772% | 1.6973% |
+| acct#e7ab8585 | 2026-07-01 .. 2026-08-28 | 42 | 39 / 42 | 3 | +2.6385% | +4.3139% | +4.3139% | +4.3139% | 1.6754% |
 | 0076459710 | 2026-07-08 .. 2026-08-28 | 38 | 34 / 38 | 4 | +12.7830% | +9.1259% | +9.1259% | +9.1259% | 3.6572% |
 
 **Summary (preferred convention START):** median **1.6754%**, p90 **3.6572%**, max **3.6572%**.
@@ -38,7 +38,7 @@ mismatch as acceptable agreement.
 END, START and MIDPOINT differ **only** on days where `external_flow` is non-zero; on a zero-flow
 day all three reduce to `V_t / V_(t-1) - 1` and are the *same number*. Across these five periods
 there are **10 flow-bearing account-days and exactly ONE** survives into the eligible population
-(2026-03-25, account 0027265115, flow $448,559.28). Three of the five periods have **zero**. START and MIDPOINT are
+(2026-03-25, account acct#e7ab8585, flow $448,559.28). Three of the five periods have **zero**. START and MIDPOINT are
 therefore identical on **three of the five** periods -- the three with no eligible flow day --
 and their **medians** coincide exactly, because the median of five values lands on one of those
 non-discriminating periods. START's median margin over END is 0.000218941: one day, one account.
@@ -67,9 +67,9 @@ discriminating days the gold withholds.
 ## Corroboration worth recording
 
 Black Diamond's own `startDate` equals this seat's independently measured gold inception on **both**
-mapped accounts: 0027265115 -> 2026-03-16 and 0076459710 -> 2026-07-08. Those dates were measured
+mapped accounts: acct#e7ab8585 -> 2026-03-16 and 0076459710 -> 2026-07-08. Those dates were measured
 from the custodian's balance partitions by `first_data_dates()` before any vendor file was read.
-Separately, BD reports `shortAllocation 0.4557` on 0027265115, corroborating row S9's finding that
+Separately, BD reports `shortAllocation 0.4557` on acct#e7ab8585, corroborating row S9's finding that
 the Tax SMA product is short by design.
 
 ## Routed
