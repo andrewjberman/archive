@@ -9,4 +9,4 @@ Day 2022-10-12; Yahoo yahoo/yfinance; as_traded = Close x product of splits date
 
 Branch (rule in script header, tol 2%): **OTHER**
 
-Key: `s3://opal-data-assets/commonwealth/cottonwood/silver/price_evidence/date=2022-10-12/part-00000.parquet` (written)
+Key: `s3://opal-data-assets/commonwealth/cottonwood/silver/price_evidence/date=2022-10-12/part-00000.parquet` (pre-existing, read back)
