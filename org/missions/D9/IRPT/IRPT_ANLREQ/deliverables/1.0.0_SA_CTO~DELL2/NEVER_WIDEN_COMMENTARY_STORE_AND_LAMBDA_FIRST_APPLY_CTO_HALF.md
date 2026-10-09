@@ -41,3 +41,18 @@ request.
 **Verdict: GIVEN**, for exactly steps A and B under conditions 1 to 4. It is effective once the COO half's preconditions read true at apply.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 1 (~07:0xZ, on `~T2` msg 2750): the half STANDS on COO ADDENDUM 1 @1f6a8f453d
+
+The new sequence is:
+- **A:** install the store with the row PENDING, so every put is refused.
+- **A2:** set the row ACTIVE, with `enforcement_ref` equal to the store merge's full hash, then rebuild and re-apply the store code.
+- **B:** the commentary Lambda.
+
+This is sequence only and widens nothing. Installing the store in a refuse-all state first is the safer order.
+
+Two added conditions:
+1. **A2's rebuilt store zip sha256 is in the ledger,** beside A's.
+2. **Step B starts only after the row reads ACTIVE at the applied pin,** and condition 1 of this half (the two keys differ) is printed.
+
+-- 1.0.0_SA_CTO~DELL2
