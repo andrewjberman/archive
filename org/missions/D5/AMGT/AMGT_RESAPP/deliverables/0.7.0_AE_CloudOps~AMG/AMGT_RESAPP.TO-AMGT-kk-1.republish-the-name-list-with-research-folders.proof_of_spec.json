@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-kk-1.republish-the-name-list-with-research-folders",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "778e99abd8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "778e99abd8",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-kk-1.republish-the-name-list-with-research-folders.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~AMG",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "f2dbac84a4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC3's guard: main() refuses --write-pool when the research library is ABSENT and the served latest carries research_universe.folders, placed before build_crosswalk and before any put; plus the new _library_absent_reason probe. Library code, not a deployed artifact -- no Lambda, no EC2, no container in this order.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_crosswalk_refuses_absent_library.py",
+      "kind": "test",
+      "commit_or_etag": "f2dbac84a4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 arms: the refusal with no put attempted, the printed reason, the first-publish case, the --out case, a readable library still publishing (negative arm), an unnameable read failure not treated as absent, and four arms grading _library_absent_reason directly against the real LibraryAbsentError class.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/crosswalk/v1/2026-10-09.json",
+      "kind": "s3_object",
+      "commit_or_etag": "34365cc5a62fca5f33f4b122024cd5e4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The act. Same-key versioned re-put from the laptop so research_universe carries its live folder count. NEW VersionId d3y5Cbs6ygTMvKj28fSvbR4ciDsyPv.9, ContentLength 850198, document-sha256 0229681e6db25ab54f14c18d103180f4da7869f01f965b33527d24a719d9e52c, SSE AES256, read back by head-object. PRIOR VersionId CHWQWAM0oNxOpU_5Hs8_fy5RUZ_Sgl20 (850056 bytes, document-sha256 a03c8cac74f9ac439a325421683e9be4374b588815c65ef5e57060a97ec64d77) still present with IsLatest=false -- list-object-versions reads 2 versions, so NO delete was made and the rollback bytes are intact.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T1714Z_amgt-resapp-r86-kk1-crosswalk-republish-laptop-20261009_deploy_completion.md",
+      "kind": "config_data",
+      "commit_or_etag": "d1db275",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger opened BEFORE the act with 5 legs (L1 ancestry, L2 pre-put AC1, L3 the put, L4 post-put AC1 live, L5 AC2+AC3); every leg closed with its proof; sentinel org/critical_paths/.open_deploys/amgt-resapp-r86-kk1-crosswalk-republish-laptop-20261009.json.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the latest stored name list keeps every record, carries issuer.cik as before, and every top-level field of 2026-10-07.json is present with an equal value or an admitted change, with research_universe.folders 1 or more; C1-C5 PASS; R85 CROSSWALK AC1: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round85_prep/checks/r85_crosswalk.py\" --crit AC1 --reference crosswalk/v1/2026-10-07.json --admit as_of,denominators.with_issuer_cik,research_universe.read_at,research_universe.folders,denominators.research_folders_live,research_universe.source; echo \"exit=$?\"",
+      "output_evidence": "stored name lists under s3://opal-data-harvest/crosswalk/v1/: 8 (latest crosswalk/v1/2026-10-09.json)\n   this list crosswalk/v1/2026-10-09.json: 243 records; prior crosswalk/v1/2026-10-07.json: 243 records\nPASS C1 no record dropped: 243 of 243 prior records present\n   ASML_NA_Equity issuer ('937966', 'measured', \"s3://opal-data-harvest/sec/harvest/silver/filing_source/date=2026-10-09/part-20261009T093737Z.parquet :: this name's own stored filing 000162828026011378, the CIK in its EDGAR path\")\n   ASML_US_Equity issuer ('937966', 'measured', \"s3://opal-data-harvest/sec/harvest/bronze/company_tickers/date=2026-09-22/company_tickers.json :: the SEC ticker-to-CIK table, this US listing's own ticker 'ASML'\")\nPASS C2 both ASML listings carry measured issuer.cik 937966 with a named source\nPASS C3 every issuer.cik is measured with a named source: 204 of 243 carry one; 0 bad\nPASS C4 the four other stored 20-F names carry their filer CIKs: 4 of 4\n   C5 reference crosswalk/v1/2026-10-07.json\n   C5 ADMITTED     as_of: reference \"2026-10-07\" | graded \"2026-10-09\"\n   C5 ADMITTED     denominators.research_folders_live: reference 97 | graded 102\n   C5 ADMITTED     denominators.with_issuer_cik: reference \"<MISSING>\" | graded 204\n   C5 ADMITTED     research_universe.folders: reference 97 | graded 102\n   C5 ADMITTED     research_universe.read_at: reference \"2026-10-07T17:18:12.682543+00:00\" | graded \"2026-10-09T17:20:50.364041+00:00\"\n   C5 ADMITTED     research_universe.source: reference \"C:\\\\Users\\\\Opal Bloomberg\\\\OneDrive - Opal Capital\\\\Shared - Documents\\\\Asset Management\\ | graded \"C:\\\\Users\\\\AndrewBerman\\\\OneDrive - Opal Capital\\\\Shared - Documents\\\\Asset Management\\\\R\nPASS C5 every reference field present with an equal value or admitted (0 not admitted); research_universe folders 102\nR85 CROSSWALK AC1: YES\nexit=0\n[run LIVE against the served key AFTER the put, at HEAD 778e99abd8; --admit is AMENDMENT 4's amended list]",
+      "denominator": "C1 243 of 243 prior records; C3 204 of 243 carry issuer.cik, 0 bad; C4 4 of 4 filers; C5 0 of 6 changed leaves not admitted; research_universe.folders 102",
+      "status": "PASS",
+      "expect": "R85 CROSSWALK AC1: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a typed ASML still resolves to ASML_NA_Equity, Micro still lists, the other answers byte-equal; R84 LISTING AC1: YES; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round84_prep/checks/r84_listing.py\" --crit AC1 --where deployed; echo \"exit=$?\"",
+      "output_evidence": "thesis 'ASML': status 200, served key 'ASML_NA_Equity', names ASML_US_Equity: True\n   resolve 'ASML': status 200, status field 'exact', security_key 'ASML_NA_Equity'\nPASS R1 'ASML' resolves to the covered listing ASML_NA_Equity and names the other listing\n   thesis 'Micro': status 404, candidates ['AMD_US_Equity', 'MSFT_US_Equity', 'MU_US_Equity']\nPASS R2 different issuers with similar names still answer the candidate list\n   resolve  Nu     now 200:ecb54e1b1b368b1b base 200:ecb54e1b1b368b1b\n   resolve  zzqx   now 200:7fecf0645a815f8f base 200:7fecf0645a815f8f\n   thesis   zzqx   now 404:072e9755e2fa4fd0 base 404:072e9755e2fa4fd0\nPASS R3 the one-candidate and no-match arms are byte-equal to the base: 3 of 3\nR84 LISTING AC1: YES\nexit=0\n[run AFTER the put. Also run BEFORE the put, same result -- the issuer notes AC2 is a bound: it PASSED at the base too, so it proves the republish BROKE nothing, not that the republish worked.]",
+      "denominator": "R1-R3 PASS (3 of 3); R3 byte-equal arms 3 of 3",
+      "status": "PASS",
+      "expect": "R84 LISTING AC1: YES[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "every guard test passes: --write-pool with an absent library and a served research_universe exits nonzero with no put attempted; a first publish and the --out build behave as before; 0 failed; and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" py -3.12 -m pytest lib/research/identity/tests/test_crosswalk_refuses_absent_library.py -q; echo \"exit=$?\"",
+      "output_evidence": "..........                                                               [100%]\n10 passed in 0.11s\nexit=0\n[Run BEFORE the put (gating the publish, as the order requires the guard land and test first) and again AFTER it; 10 passed both times. ALSO exercised END TO END against LIVE state, which the unit arms alone cannot reach: with library_root patched to raise the real LibraryAbsentError (exactly the dell1 condition) and write_pool replaced by a mock so a guard failure could not touch the key, main(['--as-of','2026-10-09','--write-pool']) returned rc=2 with write_pool called=False and printed 'REFUSED: the research library is ABSENT on this device and the served latest list carries research_universe.folders=102 -- publishing here would write ABSENT over a served count. NO put was attempted.' -- the served count read live from the key this act had just published. The negative arm in the same run: main(['--as-of','2026-10-09','--out',<tmp>]) returned rc=0, write_pool called=False, 850056 bytes written.]",
+      "denominator": "10 of 10 unit arms passed, 0 failed; live end-to-end exercise 1 refusal arm + 1 negative arm, 2 of 2 as expected",
+      "status": "PASS",
+      "expect": "10 passed[\\s\\S]*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "PLANTED and exercised by this seat before the commit, because AC3's whole claim is a refusal and a test suite that passes against a missing refusal would be worthless. The mutant deletes the guard's `return 2` from lib/research/identity/crosswalk.py, leaving the printed reason in place -- the smallest edit that keeps the code looking correct while removing the refusal.",
+      "expected": "the two refusal arms FAIL and the mutant PUBLISHES instead of refusing; the other 8 arms, which do not depend on the refusal, still pass",
+      "observed": "2 failed, 8 passed. The mutant's captured stdout reads 'OK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-10-09.json ContentLength=1 document-sha256=s schema-version=1 records=243 MEASURED=243 UNRESOLVED=0' -- i.e. it published, which is the regression. FAILED test_the_refusal_prints_its_reason_and_the_served_count and test_write_pool_refuses_and_attempts_no_put, both 'AssertionError: 0 == 0' (rc 0 where nonzero was required). Restored from a pre-mutation copy and re-run: 10 passed. The mutant ran only against mocked write_pool, so no S3 object was ever at risk.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two independent --out builds of the same as-of date, one before and one after the CLOUD merge that preceded the put (the merge touched 0 files under lib/research/, verified by git diff --name-only f2dbac84a4 80c910315f -- lib/research/)",
+      "observed": "Both builds: 850198 bytes, records=243, with_issuer_cik=204 -- identical in length and in every graded denominator. NOT byte-identical, and deliberately so: research_universe.read_at is a fresh live timestamp on every build (2026-10-09T16:06:23 vs 17:17:13), which is the disclosure field doing its job. The document also reads live stores (filing_source, the SEC ticker table, universe/v1, the served pool), so byte-equality across time is not the right determinism claim for this artifact.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any store write other than today's crosswalk key; any deploy; any schedule",
+      "reason": "Bounds s.2 of the order: 'today's crosswalk key only, no other store write, no deploy, no schedule'. One put was made, to crosswalk/v1/2026-10-09.json. No Lambda, EC2, container, trigger or cron was touched; comp-schedule is DECLARED-NOT-APPLICABLE in the order's own preflight."
+    },
+    {
+      "item": "any S3 delete",
+      "reason": "Bounds s.2: 'No S3 delete, ever.' The rollback is a versioned re-put of the prior bytes. list-object-versions reads 2 versions on the key, the prior one IsLatest=false -- proof that nothing was deleted."
+    },
+    {
+      "item": "any send to mdpf-daily-runner, any Bloomberg call, any bun/npm/pip install, any push of a shared branch",
+      "reason": "Bounds s.3, s.4, s.6 of the order. None was made. The branch wk-amgt-kk1-r86 is a scratch branch; nothing was pushed by this seat."
+    },
+    {
+      "item": "the <status> flip to complete, and any edit to the task order file",
+      "reason": "The order file is NOT in this order's <paths> block, and the three terminal statuses are the COO's or the ISSUER's, never the assignee's alone. The issuer already set <status> to pending in AMENDMENT 2."
+    },
+    {
+      "item": "genre DEPLOY",
+      "reason": "Section 5's prose calls the instance 'genre DEPLOY', but the order carries NO line-anchored <proof_genre>DEPLOY</proof_genre> tag at HEAD (grep returns 0 against a positive control that finds <risk>, <round>, <slot>, <fabric>, <worker_class>). The schema is explicit that DEPLOY 'is a CLAIM the checker grades against the governing order's issuer mark' and 'the graded party cannot confer it on itself', so this instance is genre BUILD and carries the {mutant, determinism} controls block instead. If the issuer wants the DEPLOY genre, it adds that tag and this instance can be re-cut."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-S1",
+    "AMGT_RESAPP-S2",
+    "AMGT_RESAPP-S3"
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~AMG/logs/2026-10-09/",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": ".tools/commit-gate.sh lib/research/identity/crosswalk.py lib/research/identity/tests/test_crosswalk_refuses_absent_library.py",
+      "result": "PASS -- 'OK: pre-commit gate clean for 2 of 2 file(s)' (py_compile + ds-precommit + ruff py39)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=\"$(pwd)\" py -3.12 -m pytest lib/research/identity/tests/ lib/research/corpus/tests/test_library.py -q",
+      "result": "PASS -- 276 passed, 47 warnings, 2 subtests passed in 32.01s. Regression arm: proves the guard did not break test_crosswalk_served_union.py:183, which patches _research_folders_for_disclosure as a 2-TUPLE -- the reason the guard uses a separate _library_absent_reason probe instead of widening that return."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open --slug amgt-resapp-r86-kk1-crosswalk-republish-laptop-20261009 ... --window-hours 4 ; then close-leg x5 ; then close",
+      "result": "PASS -- opened before the act with 5 legs, all 5 closed with proof"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find '_research_folders_for_disclosure' . --limit 30",
+      "result": "PASS -- census found exactly ONE code caller (crosswalk.py:1654) and ONE test patcher (test_crosswalk_served_union.py:183, a 2-tuple), which is what ruled out widening the helper's return. Also surfaced round78/GROUP_E_NOTES.md:318 recording that round85_prep's check calls the same private name."
+    },
+    {
+      "tool": "aws s3api",
+      "invocation": "head-object and list-object-versions on s3://opal-data-harvest/crosswalk/v1/2026-10-09.json, before and after the put",
+      "result": "PASS -- prior VersionId CHWQWAM0oNxOpU_5Hs8_fy5RUZ_Sgl20 recorded BEFORE the act; after it, new VersionId d3y5Cbs6ygTMvKj28fSvbR4ciDsyPv.9 and DENOMINATOR 2 version(s) with the prior IsLatest=false. s3api used, not `aws s3 ls`, because s3api renders UTC (rule 22a)."
+    },
+    {
+      "tool": "crosswalk --disclosure",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m lib.research.identity.crosswalk --as-of 2026-10-09 --disclosure",
+      "result": "PASS -- 'folders_in_records 96 research_folders_live 102 snapshot_input_names 89 snapshot_stale_against_live True'. The order's named free pre-check that the library is readable, run before the put."
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "TCKT_VNEXT.TO-RUN-SA-r-1b.fwd1-seat-arm-journey-v22-tv2",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-RUN-SA-r-1b.fwd1-seat-arm-journey-v22-tv2.md",
+    "group": "OTHER",
+    "vintage_commit": "68642d02e9"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TV2",
+  "decomp_ref": {
+    "doc": "org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_SA.md",
+    "vintage_commit": "68642d02e9",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/task_orders/TCKT_VNEXT.TO-RUN-SA-r-1b.fwd1-seat-arm-journey-v22-tv2.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/sa_r1b_trace.json",
+      "kind": "config_data",
+      "commit_or_etag": "66bfdf5c2e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the order's one artifact, four run sections: run 1 at the top level, run_2, run_3, run_4. Identical bytes were written to the ORDERED path deliverables/2.0.0_SA_COO~V2/R1_RUN/sa_r1b_trace.json, which owned-paths refuses to this lane; 2.0.0_SA_COO~V2 commits that copy (msgs 3612, 3743)."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/sa_r1b_run.py",
+      "kind": "script",
+      "commit_or_etag": "66bfdf5c2e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the run driver; local only. commit-gate.sh clean on every edit (py_compile + ds-precommit + ruff py39)."
+    },
+    {
+      "path_or_key": "opal-tickets TCK-20261009-67ab7f27 (run 4 journey) + TCK-20261009-5882385c, TCK-20261009-5fbdb06c, TCK-20261009-5a980ddf",
+      "kind": "ddb_rows",
+      "commit_or_etag": "N/A -- live rows created by the run",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "every ticket this order created was COMPLETED http 200 by the same principal. The run-4 journey ticket was re-read by direct ConsistentRead: answers.firm 49financial, attachment carrying the upload door's upload_id and input_id, claimed_by/assignee the filer, report_ref recorded 2026-10-09T17:31:59.179Z, status completed."
+    },
+    {
+      "path_or_key": "opal-users-v2 PK=USER#tckt-fwd1-testfiler-20261009@opal.invalid SK=PROFILE",
+      "kind": "ddb_rows",
+      "commit_or_etag": "N/A -- created and removed once per run",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "each of the four runs wrote the row under attribute_not_exists(PK), read it back PRESENT, and deleted it with a ConsistentRead read-back ABSENT. Net world change: none."
+    },
+    {
+      "path_or_key": "org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "66bfdf5c2e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows TCKT_VNEXT-D2-S18 (irpt-status 500 regression, since repaired) and D2-S20 (the pair's rollback clause widens rather than narrows)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/reread_27.py expect: READ27 27/27",
+      "method": "command",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/reread_27.py",
+      "output_evidence": "run before EVERY attempt because hosts moved twice during the order: 16:18Z, 16:48Z, 17:08Z and 17:19Z all printed 'READ27 27/27' rc 0. The 16:48Z run is the one that matters -- it followed the Branch B rollback of irpt-status and showed LastModified 16:43:21Z with CodeSha256 t6OJTCcm (no longer VC/r14ka) while the served.py member hash stayed 87d9ecc4, so the rollback kept the clamp bytes.",
+      "denominator": "27 of 27 clamped routes across 8 hosts, the script's own total printed beside the result, on each of four invocations",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "JUDGMENT: the trace -- the one-firm proof with zero cottonwood admits, and every hop recorded with its artifact.",
+      "method": "live_read",
+      "invocation": "python org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/sa_r1/sa_r1b_run.py (HTTPS through d2n2nzpeqf34ge.cloudfront.net; a direct lambda invoke was deliberately NOT used, per CTO IRPT_YCDGEN @d54e0b7515 condition 1)",
+      "output_evidence": "NOT SELF-GRADED; the evidence is stated and the verdict withheld. FIRST HALF MET AND MEASURED: census over 82 of 91 live /api/scoped routes (9 data-refresh skipped per AMENDMENT 2), 0 off-list admits, 0 leaks on AMENDMENT 4's limb 1 (no off-list payload differed from the own-firm answer) and 0 on limb 2 with 0 UNKNOWN (all 16 selector-ignored arms cleared by code read). SECOND HALF: every hop (a)-(g) answered in run 4 with its artifact recorded, and the ticket row independently corroborates the end-to-end shape. ONE LINK IS NOT ESTABLISHED: hop (e) is UNVERIFIED because this instrument polled the state field and read UNAVAILABLE, a value absent from the contract's progress enum, so it never observed stage; and the request's real stage is UNVERIFIABLE-BY-INSTRUMENT from this seat (kms:Decrypt denied on irpt-requests, and the bounds forbid an IAM change). A report_ref is a reference, not a report, so whether the analysis generated one is not asserted.",
+      "denominator": "7 of 7 hops executed and recorded; 82 census routes armed x 3 firm arms; 27 clamped routes graded; 16 selector-ignored arms classified",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "judgment=true: graded by 3.0.0_SA_CVO at L9 and never self-graded (CLAUDE.md rule 27 L9). The one open link, whether the referenced analysis produced a report, is named rather than claimed, and is unverifiable from this seat within the order's bounds.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "FOUR negative controls, all recorded here because the BUILD controls shape admits mutant and determinism only. (1) BYTES: resolve the deployed served.py by CONTENT from pin 74a62fb46c and run HEAD as a control that must NOT match. (2) INSTRUMENT: a uniform 401 across own-firm arms would mean the token never reached the clamp. (3) ZERO-CALL: the data-refresh filter must FIND the filer in a window where it did call, before a zero elsewhere means anything. (4) LIMB 2: the selector-read table must not be a source-dir walk, because a walk clears a route that reads the selector through a shared bundled module.",
+      "expected": "(1) pin -> 87d9ecc4 and HEAD -> something else. (2) own-firm arms return varied codes. (3) the filter returns >0 in SA-r-1's window and 0 in the later windows. (4) a host whose own dir shows 0 occurrences but which refuses off-list targets must still be marked as reading the selector.",
+      "observed": "(1) pin 74a62fb46c -> 87d9ecc4 exactly; HEAD -> ada9bf5b, different. (2) all_own_arms_401 false; arms returned NOT_FOUND / INVALID_INPUT / OBJECT_NOT_COVERED / UNEXPECTED / NOT_AUTHORIZED / None. (3) 3 matches in SA-r-1's 15:40-15:45Z window INCLUDING the gate's own line 'User tckt-fwd1-testfiler-20261009@opal.invalid userType=test-filer admitted as Opal-internal', and 0 in every later window -- a true negative, and that line also confirms row D2-S16 in the deployed gate's own words. (4) irpt-holdings counts 0 occurrences in its own source_dir yet refused both off-list firms with FIRM_BINDING through the shared _authz boundary, so the walk was rejected and a verified table used instead.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "four live attempts of the same order were run (1, 2, 3, 4), so the census is repeated rather than single-shot",
+      "observed": "the census result was stable across attempts: 82 armed, 0 off-list admits every time, and the same 16 selector-ignored arms. What changed between attempts was the WORLD (irpt-status 500 then repaired) and THIS INSTRUMENT (three oracle defects found and fixed), never the clamp verdict.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "hop (e) did not establish that the analysis reached a terminal stage, and the stage cannot be read from this seat",
+      "reason": "the instrument polled the wrong field (state, not stage) and a direct read of irpt-requests is AccessDenied on kms:Decrypt, which the order's bounds forbid fixing. Named, not retried into a pass."
+    },
+    {
+      "item": "9 routes on opal-data-refresh-api were never probed",
+      "reason": "AMENDMENT 2 forbids it -- it is a write path. The negative proof replaces the probe: 0 calls for the filer in that Lambda's own log group, with a positive control."
+    },
+    {
+      "item": "5 ticket-api arms were never exercised against an off-list firm in run 1",
+      "reason": "their gate keys on the ticket's requester.firm via a DynamoDB read and takes no selector; a synthetic id refuses at `cur is None`, which is NOT-FOUND and indistinguishable from a clamp refusal. From run 3 the CREATE arms carry AMENDMENT 1's synthetic attachment and DO reach the clamp."
+    },
+    {
+      "item": "the private/public key pair was never compared directly",
+      "reason": "secretsmanager:GetSecretValue on opal/auth/jwt-public-key is AccessDenied to this principal and the bounds forbid an IAM change; the live calls were the control instead."
+    },
+    {
+      "item": "run 2 ran with no open NEVER-2 ledger entry",
+      "reason": "this seat's lapse, recorded rather than hidden: a retrospective entry was opened and closed for it and labelled retrospective, because an entry opened after the fact is a record and not a control. Run 3's entry was opened BEFORE the run, as the issuer then required."
+    }
+  ],
+  "surprises": [
+    "TCKT_VNEXT-D2-S20",
+    "TCKT_VNEXT-D2-S18",
+    "TCKT_VNEXT-D2-S16",
+    "TCKT_VNEXT-D2-S15"
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~TV2/logs/2026-10-09/tv2_startup_and_sa_r1_fwd1_seat_arm_run.md",
+  "compiler_tools": [
+    {
+      "tool": "reread_27.py",
+      "invocation": "python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R1_RUN/reread_27.py",
+      "result": "READ27 27/27 rc 0 on all four invocations (16:18Z, 16:48Z, 17:08Z, 17:19Z)"
+    },
+    {
+      "tool": "apigatewayv2 get-routes / get-integrations",
+      "invocation": "paginated client-side over API 7k3ed8px20, plus get_apis across the account as the denominator",
+      "result": "119 live routes vs the source census's 117; 91 /api/scoped across 14 Lambdas; 2 live-only scoped GETs the source census structurally cannot see"
+    },
+    {
+      "tool": "jsonschema (published contract)",
+      "invocation": "Draft202012Validator against docs/contracts/investor-reporting/v1/AnalysisSubmissionRequest.schema.json",
+      "result": "run 3's submission body: 8 violations; run 4's corrected body: valid. Validated OFFLINE before spending the run."
+    },
+    {
+      "tool": "logs filter_log_events",
+      "invocation": "/aws/lambda/irpt-status (the regression), /aws/lambda/irpt-ycharts-generate (the typed refusal), /aws/lambda/opal-data-refresh-api (the zero-call proof, both arms)",
+      "result": "47 TypeError events pinning row D2-S18; MISSING_REQUEST_FIELD as (d)'s typed cause; 3 matches in the positive-control window and 0 in the proof windows"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "on sa_r1b_run.py after every edit",
+      "result": "clean each time (py_compile + ds-precommit + ruff py39)"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open / close-leg / close for run 1, the run-2 retrospective entry, and runs 3+4 (6 legs)",
+      "result": "all entries CLOSED with every leg proven; the run-3 entry opened BEFORE the run"
+    },
+    {
+      "tool": "comp-schedule / comp-iam",
+      "invocation": "not run",
+      "result": "DECLARED-NOT-APPLICABLE by the order's preflight. No IAM was changed, and two AccessDenied limits were recorded rather than worked around."
+    }
+  ]
+}
