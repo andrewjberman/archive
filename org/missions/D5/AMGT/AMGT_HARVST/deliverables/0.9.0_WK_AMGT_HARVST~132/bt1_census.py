@@ -1,5 +1,6 @@
 """AMGT_HARVST round 76, HVST-bt-1 -- THE CENSUS of `1.0.0_SA_CTO~DELL1` R31 (a common-word alias needs a second anchor),
-worker 0.9.0_WK_AMGT_HARVST~132.
+worker 0.9.0_WK_AMGT_HARVST~132. AMENDMENT 1 (ADDENDUM 4): the common-word set is MEASURED FROM SILVER (`common_word_scan.py` writes
+`common_word_aliases.json`: LOWER > CAP_MID); the dictionary list is withdrawn. This script reads that one file, through the matcher.
 
 Built from round 74's `br1_census.py` (worker ~126); only the rule tested is changed. POPULATION: the SERVED gold mention part
 `amgt/harvest/gold/article_security_mention/date=2026-10-08/part-20261009T093755Z.parquet` (rebuild #12) read by an S3 GET, its
@@ -28,7 +29,7 @@ from lib.research.harvest import store  # noqa: E402
 LIST = os.path.join(ROOT, "org", "missions", "D5", "AMGT", "AMGT_HARVST", "deliverables", "0.9.0_WK_AMGT_HARVST~129",
                     "securities.universe.r75.json")
 GOLD_KEY = "amgt/harvest/gold/article_security_mention/date=2026-10-08/part-20261009T093755Z.parquet"
-SOURCE_JSON = os.path.join(HERE, "WORDLIST_SOURCE.json")
+COMMON_JSON = os.path.join(HERE, "common_word_aliases.json")
 OUT_TXT = os.path.join(HERE, "bt1_census.out")
 OUT_JSON = os.path.join(HERE, "bt1_census.json")
 WIDTH = 160
@@ -113,21 +114,34 @@ def spread_over_securities(rows, n, seed):
 
 def main():
     securities = {s["security_key"]: s for s in json.load(open(LIST, encoding="utf-8"))}
-    src = json.load(open(SOURCE_JSON, encoding="utf-8"))
-    words = pg._common_word_set()
-    emit("WORD LIST: %d words, sha256 %s" % (src["lines"], src["sha256"]))
+    counted = json.load(open(COMMON_JSON, encoding="utf-8"))
+    assert pg._COMMON_WORD_LIST_PATH and os.path.samefile(pg._COMMON_WORD_LIST_PATH, COMMON_JSON)   # the matcher reads THIS file
+    rows = counted["aliases"]
     common_by_sec = {}
     for sk, sec in securities.items():
         c = pg._common_word_aliases(sec)
         if c:
             common_by_sec[sk] = c
     n_alias = sum(len(v) for v in common_by_sec.values())
-    emit("COMMON-WORD ALIASES: %d over %d securities" % (n_alias, len(common_by_sec)))
-    for sk in sorted(common_by_sec):
-        for a in common_by_sec[sk]:
-            emit("  %s: %s" % (sk, a))
-    EXTRA.append("(word list loaded: %d distinct lower-case words; securities in the list %d; securities with an alias list %d)"
-         % (len(words), len(securities), sum(1 for s in securities.values() if s.get("aliases"))))
+    emit("COMMON-WORD ALIASES (silver): %d over %d securities; articles scanned %d"
+         % (n_alias, len(common_by_sec), counted["articles_scanned"]))
+    flagged = sorted((r for r in rows if r["lower"] > r["cap_mid"]), key=lambda r: (r["security_key"], r["alias"]))
+    for r in flagged:
+        emit("  %s: %s  LOWER %d  CAP_MID %d" % (r["security_key"], r["alias"], r["lower"], r["cap_mid"]))
+    near = sorted((r for r in rows if r["lower"] <= r["cap_mid"] and r["cap_mid"] > 0 and r["lower"] > 0),
+                  key=lambda r: (-(float(r["lower"]) / r["cap_mid"]), r["security_key"], r["alias"]))
+    seen, misses = set(), []
+    for r in near:       # one line per alias text: an ADR and its ordinary share carry the same counts
+        if r["alias"].lower() in seen:
+            continue
+        seen.add(r["alias"].lower())
+        misses.append(r)
+    emit("10 NEAREST MISSES (not flagged; highest LOWER / CAP_MID; one line per alias):")
+    for r in misses[:10]:
+        emit("  %s: %s  LOWER %d  CAP_MID %d  ratio %.3f" % (r["security_key"], r["alias"], r["lower"], r["cap_mid"],
+                                                          float(r["lower"]) / r["cap_mid"]))
+    EXTRA.append("(file: %d (security, alias) rows, %d flagged; securities in the list %d; securities with an alias list %d)"
+                 % (len(rows), len(flagged), len(securities), sum(1 for s_ in securities.values() if s_.get("aliases"))))
 
     client = store._default_client()
     body = client.get_object(Bucket=store.HARVEST_BUCKET, Key=GOLD_KEY)["Body"].read()
@@ -240,6 +254,32 @@ def main():
     for line in cvo_lines:
         emit(line)
 
+    emit("BRAND CHECK: flagged aliases that are also the company's ordinary trading name (the alias is the company name without "
+         "its legal suffix, or its leading words); for 3.0.0_SA_CVO, no verdict:")
+    suffix = re.compile(r"[\s,]+(inc|corp|corporation|co|company|ltd|limited|plc|s\.?a\.?|n\.?v\.?|ag|se|holdings?|group|llc|"
+                        r"l\.?p\.?|sa|nv|spa|s\.p\.a\.|ab|asa|oyj|a/s|\.com)\.?$", re.I)
+    brand, other = [], []
+    for r in flagged:
+        company = (securities[r["security_key"]].get("company") or "").strip()
+        base = company
+        while True:
+            nxt = suffix.sub("", base).strip(" ,.")
+            if nxt == base or not nxt:
+                break
+            base = nxt
+        words = r["alias"].lower().split()
+        cwords = base.lower().split()
+        if cwords[:len(words)] == words and words:
+            brand.append((r, company))
+        else:
+            other.append((r, company))
+    for r, company in brand:
+        emit("  BRAND %s: %s  (company %r)  LOWER %d  CAP_MID %d" % (r["security_key"], r["alias"], company, r["lower"], r["cap_mid"]))
+    emit("  %d of %d flagged aliases are the company's own trading name; the other %d flagged are not (alias, company):"
+         % (len(brand), len(flagged), len(other)))
+    for r, company in other:
+        emit("  OTHER %s: %s  (company %r)" % (r["security_key"], r["alias"], company))
+
     sample = spread_over_securities(removed_spans, 20, 76)
     emit("REMOVED SAMPLE 20: (of %d discarded mentions over %d securities; this sample covers %d securities)"
          % (len(removed_spans), len(set(r["security_key"] for r in removed_spans)), len(set(r["security_key"] for r in sample))))
@@ -262,7 +302,8 @@ def main():
               "common_word_aliases": common_by_sec, "removed_by_security_pairs": dict(by_sec),
               "removed_by_security_mentions": dict(men_by_sec), "removed_sample": sample, "kept_sample": ksample,
               "kept_pairs_by_anchor_kind": dict(kept_by_kind), "articles_not_found_in_silver": not_found,
-              "word_list": src}
+              "common_word_file": os.path.basename(COMMON_JSON), "articles_scanned": counted["articles_scanned"],
+              "nearest_misses": misses[:10]}
     with io.open(OUT_JSON, "w", encoding="utf-8", newline="\n") as handle:
         json.dump(result, handle, indent=1, ensure_ascii=True, default=str)
     with io.open(OUT_TXT, "w", encoding="ascii", newline="\n") as handle:
