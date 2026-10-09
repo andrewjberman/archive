@@ -4,6 +4,10 @@
                            /analysis with ticket_id) with no "Request report" click            [--portal <dir>]
   v12-packager AR12-v-AC1  ticket_center: package_principal is NAMED and firm-bound by its PROFILE row LIST (fail closed)
   v13-open     AR13-v-AC1  portal: the ticket page lists the package files and opens each through I6           [--portal <dir>]
+  v21-package  AR21-v-AC1  ticket_center (round 2): the package route admits I5' (original_ref null) and reads pdf_ref and
+                           commentary_ref as I7 canonical JSON
+  v21-page     AR21-v-AC2  portal (round 2): the PDF opens through analysis-request-pdf; the I5' sentence; I7 refs shown, never
+                           linked by guess                                                                       [--portal <dir>]
   regress      AR-v-AC2    the whole ticket_center tests directory passes (>= 131 passed, 0 failed)
   portal-tsc   AR-v-AC3    `bun x tsc -b` in the portal worktree exits 0                                          [--portal <dir>]
 
@@ -21,6 +25,10 @@ PY_TESTS = {
                      ["test_package_principal_named_in_type_definition", "test_packager_admitted_for_firm_in_its_profile_list",
                       "test_packager_refused_for_firm_outside_its_list", "test_packager_refused_without_profile_list",
                       "test_packager_non_list_scope_refused", "test_other_principals_still_refused"]),
+    "v21-package": (Path("infra/aws/lambda/ticket_center/tests/test_package_i5p_i7.py"),
+                    ["test_package_admits_null_original_ref", "test_package_still_requires_report_pdf_commentary",
+                     "test_package_admits_i7_canonical_refs", "test_package_refuses_non_canonical_i7_ref",
+                     "test_package_refuses_i7_ref_with_extra_or_missing_field"]),
 }
 BUN_TESTS = {
     "v11-form": (Path("src/pages/TicketCenter/__tests__/analysis-form-i1.test.tsx"),
@@ -31,6 +39,11 @@ BUN_TESTS = {
     "v13-open": (Path("src/pages/TicketCenter/__tests__/package-open.test.tsx"),
                  ["lists the four package files on the ticket", "opens the report and the PDF through the owned reader",
                   "names a file with no reader instead of linking it", "makes no call for a ticket without a package"]),
+    "v21-page": (Path("src/pages/TicketCenter/__tests__/package-r2.test.tsx"),
+                 ["the real client opens the branded PDF through analysis-request-pdf",
+                  "shows the custody sentence when original_ref is null", "shows an I7 ref by its artifact id",
+                  "shows an unparseable ref as text and never links it",
+                  "the real client opens the original file through analysis-request-original"]),
 }
 STRIP = re.compile(r"\x1b\[[0-9;]*m")
 
@@ -92,7 +105,7 @@ def _tsc(portal):
 
 def main(argv):
     if not argv:
-        print("usage: ar_v_checks.py {v11-form|v12-packager|v13-open|regress|portal-tsc} [--portal <dir>]")
+        print("usage: ar_v_checks.py {v11-form|v12-packager|v13-open|v21-package|v21-page|regress|portal-tsc} [--portal <dir>]")
         return 2
     sub = argv[0]
     portal = argv[argv.index("--portal") + 1] if "--portal" in argv else None

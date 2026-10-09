@@ -95,6 +95,8 @@ for r in mine:
     c["noRow"] = run(rk, op, op_hdr(), "inflection", None)
     c["rowCotCot"] = run(rk, op, op_hdr(), "cottonwood", {"allowedFirmIds": ["cottonwood"]})
     c["rowCotInf"] = run(rk, op, op_hdr(), "inflection", {"allowedFirmIds": ["cottonwood"]})
+    c["rowAllStr"] = run(rk, op, op_hdr(), "inflection", {"allowedFirmIds": "ALL"})            # AMENDMENT 1: ALL never admits
+    c["rowAllList"] = run(rk, op, op_hdr(), "inflection", {"allowedFirmIds": ["ALL", "cottonwood"]})
     if op in SVC_OPS:
         c["svcCot"] = run(rk, op, headers(SVC, "cottonwood", "service"), None, {"allowedFirmIds": "ALL"})
         c["svcInf"] = run(rk, op, headers(SVC, "inflection", "service"), None, {"allowedFirmIds": "ALL"})

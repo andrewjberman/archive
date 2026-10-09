@@ -5,6 +5,11 @@ model block read from S3 on this box.
 Read-only: it reads one local file and S3 objects; no Bloomberg call, no write.
 
   python legv_grader.py <evidence.txt> <YYYY-MM-DD>      (PYTHONPATH=. from the repository root)
+  python legv_grader.py --s3 <YYYY-MM-DD>                 (the dell1-readable side only, no site-Z file)
+
+--s3 prints S1 (how many security keys carry a derived model block stamped <day>, against the 96 registered) and S2 (WHICH
+pin fired, read from BA US's newest block of <day>: the four dispersion fields' unit is the pointer `SEE field_map.json` on
+6402de5137 and a measured unit on 7580fe909c), then C1. It grades nothing site-Z-only: L2 and L3 need the site-Z evidence file.
 
 Prints one line per limb and a last line `legv build <passed>/<graded>`:
   L1 fire      the refresh line reads `pulled 96 bloomberg_calls 768` and the fire's own line reads `as_of <day> rc 0`;
@@ -72,7 +77,35 @@ def ba_c1(day):
     return "\n".join(out)
 
 
+FOUR = ("BEST_CPS_STDDEV", "BEST_CPS_NUMEST", "BEST_EPS_STDDEV", "BEST_EPS_NUMEST")
+
+
+def s3_side(day):
+    sys.path.insert(0, "integrations/bloomberg/research")
+    import model_block_pull as m
+
+    s3 = m._s3()
+    stamp_day = day.replace("-", "")
+    latest = m._model_block_latest_stamps(s3)
+    today = sorted(k for k, st in latest.items() if st.startswith(stamp_day))
+    print(f"S1 blocks    {len(today)} security key(s) carry a derived block stamped {day} (registered 96)")
+    prefix = f"derived/{m.ENGINE}/BA_US_Equity/"
+    keys = sorted(o["Key"] for o in s3.list_objects_v2(Bucket=m.BUCKET, Prefix=prefix).get("Contents", []))
+    keys = [k for k in keys if k[len(prefix):].startswith(stamp_day)]
+    if not keys:
+        print(f"S2 pin       UNREAD: no BA US block stamped {day}")
+        return 1
+    doc = json.loads(s3.get_object(Bucket=m.BUCKET, Key=keys[-1])["Body"].read())
+    units = sorted({str(f.get("unit")) for f in doc.get("figures", []) if f.get("mnemonic") in FOUR})
+    pointer = any(u.startswith("SEE field_map.json") for u in units)
+    print(f"S2 pin       {'a pin WITHOUT the map (pointer unit; today 6402de5137)' if pointer else 'a pin WITH the map (measured unit; today 7580fe909c)'}: block {keys[-1]}; units {units}")
+    print(ba_c1(day))
+    return 0
+
+
 def main(argv):
+    if len(argv) == 3 and argv[1] == "--s3":
+        return s3_side(argv[2])
     if len(argv) != 3:
         print(__doc__)
         return 2

@@ -1,0 +1,93 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "list-objects-v2 on outlook/transcripts/state/pull_runs/ --query length(Contents) reads 19",
+      "denominator": "19 objects under the pull_runs prefix, client-side count beside the length() value",
+      "expect": "19",
+      "invocation": "aws s3api list-objects-v2 --bucket opal-data-transcripts --prefix outlook/transcripts/state/pull_runs/ --query \"length(Contents)\"",
+      "method": "live_read",
+      "output_evidence": "19. The literal invocation printed 19, and a CLIENT-SIDE count of the same auto-paginated listing also read 19 objects with IsTruncated None -- both are stated because a paginated length() returns the PAGE count (CLAUDE.md 22a), so the two agreeing is what makes 19 a denominator rather than a page.",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "beef69ea0d7bb7c18ba48722affee70d85ea7808",
+      "deploy_evidence": "the run record: the pull counts, the 6 newly landed dates, the silver and gold outcomes, and the version gate; no mail content",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_TRNSPT.TO-RUN-b17_result.json"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "compiler_tools": [
+    {
+      "invocation": "python data/transcripts/scripts/outlook/pull.py --gateway --days 365 --apply (ONCE)",
+      "result": "listed=453 landed=24 skipped_known=8 list_refusals=0 refused=0",
+      "tool": "pull.py"
+    },
+    {
+      "invocation": "--date <d> --apply for each of the 6 newly landed dates",
+      "result": "silver rows 6 held_out 6; gold rows 0",
+      "tool": "silver.build / gold.build"
+    }
+  ],
+  "controls": {
+    "versionid_gate": {
+      "description": "step 2: the live silver keys and VersionIds must equal the committed prior list, else STOP",
+      "expected_landed": "5 keys, identical sets, 0 differing VersionIds",
+      "expected_not_landed": "any difference, which is a STOP",
+      "observed": "5 committed prior silver keys, 5 live, sets identical, 0 differing",
+      "status": "PASS"
+    },
+    "wipe_test": {
+      "description": "CONDITION 2: test_wipe_planted at the pin f7a378fcb1, run from a CLEAN extract because the one dirty file in this tree is a FIXTURE these tests consume",
+      "expected_landed": "13 passed",
+      "expected_not_landed": "any failure, which blocks the run",
+      "observed": "13 passed",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the step-1 KMS simulate readings are NOT used as evidence",
+      "reason": "all three read implicitDeny including kms:Decrypt, which the key policy grants unconditionally; simulate-principal-policy evaluates identity policies only and cannot see a resource-based key policy. The grant was established from the key policy plus a17 admitted write to the same bucket and key."
+    },
+    {
+      "item": "gold gained 0 rows",
+      "reason": "all six new silver rows are HELD OUT, so none reaches gold. Internally consistent, and stated plainly in the result rather than left to be inferred from a table of zeroes."
+    },
+    {
+      "item": "the order cited prior-version list path does not exist",
+      "reason": "it cites org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/2.0.0_SA_COO~T2/R16_BACKFILL_PRIOR_VERSIONS.json, absent at pin d035a3a8a6 (positive control: CLAUDE.md at that pin reads 30714 bytes). The real file is org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/R16_BACKFILL_PRIOR_VERSIONS.json, found by git log --all over the filename; the gate ran against it."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R17.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_TRNSPT.TO-RUN-b17.analysis-commentary-365d-backfill-dell2.md",
+    "vintage_commit": "5074835d7065603e137ebe89f41b624500c19398"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/NEVER_WIDEN_NFRA_TRNSPT_COO_HALF_365D_BACKFILL_20261009.md @1bb934be65, executor amended to this seat",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_NFRA_TRNSPT_CTO_HALF_365D_BACKFILL_20261009.md with AMENDMENT 1 (msg 2232)"
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "SERVED",
+  "rollback": "copy each prior silver VersionId back over its key; a NEW key delete is Andrew act, never this seat. The 6 new dates are NEW keys.",
+  "schema_version": "1.0",
+  "scope": "ONE bounded 365-day backfill of the analysis-commentary mail pull, then silver and gold for each newly landed bronze date. The four declared prefixes only.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_TRNSPT.TO-RUN-b17_result.json",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_TRNSPT.TO-RUN-b17.analysis-commentary-365d-backfill-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "3b3b4b618bb34bc29ef66733b8376655ff675acb"
+  },
+  "surprises": [],
+  "to_id": "NFRA_TRNSPT.TO-RUN-b17"
+}

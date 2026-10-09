@@ -1,16 +1,16 @@
-"""IRPT_BCKEND round 77 (workstream ~Y, issuer 2.0.0_SA_COO~Y2) -- checks of cell TO-APPLY-Y77 (irpt-ycharts-generate RELEASE 6: the custody factory; pair release6_custody/NEVER_WIDEN_PAIR_RELEASE6_CUSTODY.md (blob a3c54ba263) + CTO half @96e03f8ba1 (msg 2269)).
+"""IRPT_BCKEND round 77 (workstream ~Y, issuer 2.0.0_SA_COO~Y2) -- checks of cell TO-APPLY-Y77 (AMENDMENT 2: RELEASE 6b, pair NEVER_WIDEN_PAIR_RELEASE6B_CUSTODY.md + CTO half (msg 2888); originally RELEASE 6: the custody factory; pair release6_custody/NEVER_WIDEN_PAIR_RELEASE6_CUSTODY.md (blob a3c54ba263) + CTO half @96e03f8ba1 (msg 2269)).
 
 Usage: python <this file> <repo_root> <criterion_id>
 Prints "<id> PASS" or "<id> FAIL" as the last line. Reads committed JSON and re-reads live AWS state (read-only).
 
-  Y77-1-AC1  the after-reads file reads 0-4 "PASS"; built_sha == the signed V6EiBNcJ..; LIVE (re-read here) CodeSha256 equals it;
+  Y77-1-AC1  the after-reads file reads 0-5 "PASS"; built_sha == the signed V6EiBNcJ..; LIVE (re-read here) CodeSha256 equals it;
              the inline policy irpt-ycharts-generate-custody-factory-policy reads back with EXACTLY the 11 signed ARNs; the layers carry
              AWSSDKPandas-Python312:16; rolled_back false. Base: FAIL (no file).
   Y77-1-AC2  read 3's writes are named: every object version under the cottonwood custody_reports prefix (listed live here) that is
              not in the file's `custody_reports_before` set appears in `read3_objects` (key + VersionId), and nothing listed there is
              absent from the bucket unless Andrew's delete is recorded (`deleted_on_andrews_word` true). Base: FAIL (no file).
   Y77-1-AC3  branch coherence: every read PASS -> live == built, policy present; any read not PASS -> rolled_back true, live ==
-             5FRkux2o.. (release 5b), the policy ABSENT and the pandas layer detached; ledger_closed true either way. Base: FAIL (no file).
+             ZA0QJ5Wt.. (IB-pr-390), the policy ABSENT and the pandas layer still attached (390's); ledger_closed true either way. Base: FAIL (no file).
 """
 import json
 import sys
@@ -22,8 +22,8 @@ FN = "irpt-ycharts-generate"
 ROLE = "irpt-ycharts-generate-role"
 POLICY = "irpt-ycharts-generate-custody-factory-policy"
 LAYER = "arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python312:16"
-BUILT = "V6EiBNcJ2267Ox2cZAj7VZC+rlv+XrmpW5y6aCr/YOM="
-ROLLBACK = "5FRkux2oSNN1jB4xJEibio+F9F2ofl9mgcuH9jN/JrY="
+BUILT = "tdpterTMfJlWXjnoAQCwil+wN/Jf8Q/yLjGxTk7yUkk="  # AMENDMENT 2: release 6b at pin 66207bce7d (was V6EiBNcJ)
+ROLLBACK = "ZA0QJ5Wt/7JcwmuzVfHOeNAdFk6th4H5IEeqQStDYm8="  # AMENDMENT 2: IB-pr-390 live (was 5FRkux2o)
 REPORTS_BUCKET = "opal-data-irpt"
 REPORTS_PREFIX = "irpt/cottonwood/platinum/custody_reports/"
 SIGNED_ARNS = sorted([
@@ -39,7 +39,7 @@ SIGNED_ARNS = sorted([
     "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/platinum/custody_reports/*",
     "arn:aws:s3:::opal-data-irpt/irpt/inflection/platinum/custody_reports/*",
 ])
-READS = [str(i) for i in range(0, 5)]
+READS = [str(i) for i in range(0, 6)]  # AMENDMENT 2: read 5 = the ticket binding live
 
 
 def live_config():
@@ -132,7 +132,8 @@ def main():
         if all_pass:
             if d.get("rolled_back") is not False or live != BUILT or arns is None:
                 fail("branch A incoherent")
-        elif d.get("rolled_back") is not True or live != ROLLBACK or arns is not None or LAYER in layers:
+        # AMENDMENT 2: the pandas layer is already live under IB-pr-390, so branch B keeps it; only the policy is removed.
+        elif d.get("rolled_back") is not True or live != ROLLBACK or arns is not None or LAYER not in layers:
             fail("branch B incoherent: a failed read without a full rollback to %s" % ROLLBACK)
     print("%s PASS" % cid)
 
