@@ -69,6 +69,28 @@
         "DQ6-t21-AC1",
         "DQ6-t21-AC2"
       ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/daily_draw.py",
+      "kind": "script",
+      "commit_or_etag": "83e9eccfef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no store write, no AWS write, no deploy; new columns reach the store at the next scheduled draw (issuer)",
+      "artifact_covered_by": [
+        "DQ6-t21-AC1",
+        "DQ6-t21-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_store.py",
+      "kind": "test",
+      "commit_or_etag": "83e9eccfef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: no store write, no AWS write, no deploy; new columns reach the store at the next scheduled draw (issuer)",
+      "artifact_covered_by": [
+        "DQ6-t21-AC1",
+        "DQ6-t21-AC2"
+      ]
     }
   ],
   "acceptance": [
@@ -77,8 +99,8 @@
       "criterion_verbatim": "the four named tests, including the unchanged existing columns.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R6_CHECKS/dq_t21_tests.py",
-      "output_evidence": "4 passed in 1.14s; TRC-OK, rc=0 (test_tr_is_close_plus_exdate_cash_over_prior_close_split_safe, test_missing_cash_flag_on_non_exdate_gap_against_bloomberg, test_money_market_tr_from_bloomberg_never_yahoo_zero, test_existing_price_columns_unchanged PASSED). Base per the order: TRC-BAD no file.",
-      "denominator": "4 of 4 required tests passed by name",
+      "output_evidence": "Re-run after amendment @154f28a514: 4 passed in 0.73s; TRC-OK, rc=0. Full demque suite `python -m pytest -q -p no:cacheprovider data/mdpf/scripts/demque`: 80 passed, 0 failed (test_only_the_locked_range_is_written now asserts date, close_served, as_traded_close FIRST then cash, total_return, tr_source, flags). Base per the order: TRC-BAD no file.",
+      "denominator": "4 of 4 required tests passed by name; full suite 80 of 80 passed",
       "status": "PASS",
       "expect": "TRC-OK",
       "judgment": false
@@ -88,7 +110,7 @@
       "criterion_verbatim": "the REAL column on LNVGY (2025-12-11 flagged missing_cash) and FXFXX (total return from Bloomberg, never Yahoo).",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R6_CHECKS/dq_t21_run.py",
-      "output_evidence": "LNVGY rows=7002, FXFXX rows=633, WROTE names=2; TRCOL-OK LNVGY missing_cash 2025-12-11; FXFXX 633 rows from ['accrual', 'bloomberg'], 633 non-zero. rc=0. LNVGY 2025-12-11: total_return -0.036950 yahoo, flags [missing_cash]. FXFXX sources: bloomberg 25, accrual 608 (Bloomberg history starts 2026-08-25; Yahoo 2023-04-17), yahoo 0.",
+      "output_evidence": "Re-run after amendment: TRCOL-OK LNVGY missing_cash 2025-12-11; FXFXX 633 rows from ['accrual', 'bloomberg'], 633 non-zero. rc=0. daily_draw.run() exercised in .scratch with a stubbed draw and injected bbg_loader: FXFXX (money_market.csv) received its Bloomberg rows, AMLP (none) received None; stored rows report money_market True/False and bloomberg_tr True/False.",
       "denominator": "2 of 2 names run; LNVGY 1 of 1 target date flagged; FXFXX 633 of 633 rows sourced bloomberg|accrual, 0 yahoo",
       "status": "PASS",
       "expect": "TRCOL-OK",
@@ -110,10 +132,6 @@
   },
   "declared_exclusions": [
     {
-      "item": "existing test_demque_store.py::test_only_the_locked_range_is_written",
-      "reason": "asserts exactly three columns; fails by the ordered column append; file outside the write grant; surprise row MDPF_DEMQUE-D1-W18-S1"
-    },
-    {
       "item": "any Bloomberg call, any AWS write, any deploy, any write to a price store",
       "reason": "order BOUNDS"
     }
@@ -127,6 +145,11 @@
       "tool": "bash .tools/safe-commit.sh",
       "invocation": "safe-commit code, test, csv, contract, surprise row",
       "result": "commit ae637ebc63, msg-verify MATCH"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit daily_draw.py and test_demque_store.py",
+      "result": "commit 83e9eccfef, msg-verify MATCH"
     }
   ]
 }
