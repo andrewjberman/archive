@@ -1,0 +1,80 @@
+{
+  "Statement": [
+    {
+      "Action": [
+        "kms:Create*",
+        "kms:Describe*",
+        "kms:Enable*",
+        "kms:List*",
+        "kms:Put*",
+        "kms:Update*",
+        "kms:Revoke*",
+        "kms:Disable*",
+        "kms:Get*",
+        "kms:Delete*",
+        "kms:TagResource",
+        "kms:UntagResource",
+        "kms:ScheduleKeyDeletion",
+        "kms:CancelKeyDeletion"
+      ],
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::313476888478:root"
+      },
+      "Resource": "*",
+      "Sid": "RootAdministersTheKeyAndCannotUseIt"
+    },
+    {
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ],
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam::313476888478:user/Andrew_Berman",
+          "arn:aws:iam::313476888478:role/teams-global-transcripts-second-reader-role"
+        ]
+      },
+      "Resource": "*",
+      "Sid": "NamedReadersUseTheKey"
+    },
+    {
+      "Action": [
+        "kms:Decrypt",
+        "kms:DescribeKey"
+      ],
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+          "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user"
+        ]
+      },
+      "Resource": "*",
+      "Sid": "DellAgentUsersDecryptOnly"
+    },
+    {
+      "Action": "kms:GenerateDataKey",
+      "Condition": {
+        "StringEquals": {
+          "kms:EncryptionContext:aws:s3:arn": "arn:aws:s3:::opal-data-transcripts",
+          "kms:ViaService": "s3.us-east-1.amazonaws.com"
+        }
+      },
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+          "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user"
+        ]
+      },
+      "Resource": "*",
+      "Sid": "DellAgentUsersGenerateDataKey"
+    }
+  ],
+  "Version": "2012-10-17"
+}
