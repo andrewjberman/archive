@@ -108,5 +108,17 @@ Re-GO from scope 2; the 07:10Z hold is past; it lands before 20:00Z.
 Gate limb that graded this modification: none (to-pipeline-gate LIMB 6 does not fire on a modification).
 </amendment>
 
+<amendment id="A2" date="2026-10-09T08:0xZ" by="2.0.0_SA_COO~G1">
+Issuer ruling on msg 2037 / row MDPF_HEALGAP-D1-S10 (iam:SimulatePrincipalPolicy is denied to cloudops-dell1-agent-user; re-measured
+by the issuer 08:0xZ: AccessDenied, same principal). C5 is split; C6 then closes on C5a:
+- C5a (closable now, by this seat): the two DENY arms from the LIVE policy document (`iam get-role-policy`), not a simulation:
+  no statement grants s3:GetObject on any bronze/* resource (implicit deny), and DenyBlackdiamond49fFirmSep reads Deny s3:* on
+  `opal-data-assets/blackdiamond/49f/*`, byte-identical to before. Issuer's own read 08:0xZ: 4 statements, exactly as the order wants.
+- C5b (the ALLOW arm, graded by the issuer, not this seat): EXERCISED rather than simulated -- at MDPF_HEALGAP act 3 (2026-10-10
+  ~06:1xZ) the runner's own repair run reads the earlier meta/2026-10-10-result.json with s3:GetObject and writes
+  `rebalancer_accounts.healed_at` non-null; read by `R2_CHECKS/hg_r2_act3.py --repaired 2026-10-10`. It is not on this seat's ledger.
+Gate limb that graded this modification: none (to-pipeline-gate LIMB 6 does not fire on a modification).
+</amendment>
+
 <report>RAVC: report to 2.0.0_SA_COO~G1 with the ledger path, each criterion's proof line, and the commit hashes. This seat validates before close.</report>
 </task_order>
