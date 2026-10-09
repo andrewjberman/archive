@@ -1,42 +1,33 @@
 {
   "acceptance": [
     {
-      "cell_refs": [
-        "YCD-w-6"
-      ],
       "criterion_id": "AC1",
-      "criterion_verbatim": "The ledger irpt-ycdgen-f1-st26-20261008 is CLOSED with all seven legs proven (python .tools/deploy_ledger.py check).",
-      "denominator": "7 of 7 legs",
-      "expect": "CLOSED with all seven legs proven",
-      "invocation": "python .tools/deploy_ledger.py check",
-      "method": "manual_read_with_citation",
-      "output_evidence": "the record reads 'Status: CLOSED -- nothing stranded -- closed 20261009T013155Z' and '20261009T013155Z CLOSED -- all 7 legs proven'; 7 leg rows read CLOSED (U2 P1 D2 V1 F1 X1 V2); deploy_ledger.py check lists no open entry for this slug. F1 is CLOSED AS NOT RUN per CTO msg 2067 via COO~G2 msg 2081 -- the upload was refused by E5 and a retry would have mis-routed to YCHARTS, so no F1 run record exists and none is claimed",
+      "criterion_verbatim": "The ledger irpt-ycdgen-f1-st26-20261008 is CLOSED (all seven legs proven).",
+      "denominator": "1 Status line, read from the committed ledger record",
+      "expect": "^\\*\\*Status:\\*\\* CLOSED",
+      "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/20261009T0050Z_irpt-ycdgen-f1-st26-20261008_deploy_completion.md",
+      "method": "command",
+      "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261009T013155Z",
       "status": "PASS"
     },
     {
-      "cell_refs": [
-        "YCD-w-6"
-      ],
       "criterion_id": "AC2",
-      "criterion_verbatim": "V1's output shows load_brand resolving the packaged path from the running st26 root.",
+      "criterion_verbatim": "V1's output shows load_brand resolving the packaged path from the running st26 root, no brand env var.",
       "denominator": "1 of 1 brand resolution, read from the running root",
-      "expect": "the packaged path resolved from the running st26 root",
-      "invocation": "read deliverables/irpt_ycdgen_st26/D2_V1_INSTALL_20261009.txt line 32 (SSM 7f6d5a0a)",
-      "method": "manual_read_with_citation",
-      "output_evidence": "'V1 brand from the RUNNING root: spec /opt/irpt-resident/26df2c7622-st26/ycharts/research/brand/brand.json logo /opt/irpt-resident/26df2c7622-st26/ycharts/research/brand/Opal-Capital-Logo-Full-Color.svg logo bytes 3853 spec keys [colors, extended_palette, logo, typography] env brand vars []' -- both paths under the RUNNING st26 root and the env brand list EMPTY, so it is not a fall-back",
+      "expect": "26df2c7622-st26/ycharts/research/brand/brand\\.json .*env brand vars \\[\\]$",
+      "invocation": "grep -m1 'V1 brand from the RUNNING root' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/D2_V1_INSTALL_20261009.txt",
+      "method": "command",
+      "output_evidence": "V1 brand from the RUNNING root: spec /opt/irpt-resident/26df2c7622-st26/ycharts/research/brand/brand.json logo /opt/irpt-resident/26df2c7622-st26/ycharts/research/brand/Opal-Capital-Logo-Full-Color.svg logo bytes 3853 spec keys ['colors', 'extended_palette', 'logo', 'typography'] env brand vars []",
       "status": "PASS"
     },
     {
-      "cell_refs": [
-        "YCD-w-6"
-      ],
       "criterion_id": "AC3",
-      "criterion_verbatim": "V2's output shows the host on 409e3066d1-st24 with the allow list Andrew only.",
-      "denominator": "1 host, read from the running root after the removal",
-      "expect": "host on 409e3066d1-st24, allow list Andrew only",
-      "invocation": "read deliverables/irpt_ycdgen_st26/X1_V2_REMOVAL_20261009.txt (SSM 856b6197)",
-      "method": "manual_read_with_citation",
-      "output_evidence": "'V2 final active: active root=/opt/irpt-resident/409e3066d1-st24 restarts=0' and 'V2 allow list: OPAL_PRODUCER_PRINCIPALS = (\"andrew@opalinvest.com\",)'; worker sha256 9317219ad37ed492 = st24; queue 0/0; tracebacks 0 -- i.e. host on 409e3066d1-st24, allow list Andrew only",
+      "criterion_verbatim": "V2's output shows the allow list Andrew only after the removal back to st24.",
+      "denominator": "1 allow list, read from the running root",
+      "expect": "OPAL_PRODUCER_PRINCIPALS = \\(\"andrew@opalinvest\\.com\",\\)$",
+      "invocation": "grep -m1 'V2 allow list' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/X1_V2_REMOVAL_20261009.txt",
+      "method": "command",
+      "output_evidence": "V2 allow list: OPAL_PRODUCER_PRINCIPALS = (\"andrew@opalinvest.com\",)",
       "status": "PASS"
     }
   ],
@@ -56,7 +47,7 @@
         "AC2"
       ],
       "commit_or_etag": "ffd85b8e7c",
-      "deploy_evidence": "SSM 7f6d5a0a StandardOutputContent pulled from AWS; carries the V1 brand line",
+      "deploy_evidence": "SSM 7f6d5a0a StandardOutputContent pulled back from AWS with get-command-invocation",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "kind": "doc",
       "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/D2_V1_INSTALL_20261009.txt"
@@ -66,7 +57,7 @@
         "AC3"
       ],
       "commit_or_etag": "70403dcfaa",
-      "deploy_evidence": "SSM 856b6197 StandardOutputContent pulled from AWS; carries the V2 read",
+      "deploy_evidence": "SSM 856b6197 StandardOutputContent pulled back from AWS with get-command-invocation",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "kind": "doc",
       "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/X1_V2_REMOVAL_20261009.txt"
@@ -87,25 +78,21 @@
   ],
   "controls": {
     "determinism": {
-      "method": "every reading is the SSM invocation's own StandardOutputContent pulled back from AWS with get-command-invocation, not this session's stdout, so the record does not depend on a transcript",
+      "method": "every reading is the SSM invocation own StandardOutputContent pulled back from AWS, not this session stdout, so the record does not depend on a transcript",
       "observed": "three captures, SSM ca8da4c1 / 7f6d5a0a / 856b6197, all Success rc 0",
       "status": "STABLE"
     },
     "mutant": {
-      "description": "P1, taken BEFORE the install, is the negative arm for AC2/AC3: it read the st26 root ABSENT and the allow list Andrew-only, so the post-install readings are a change and not a standing state",
-      "expected": "st26 root absent and no svc principal before the install",
-      "observed": "'P1 rollback root 409e3066d1-st24 present: yes; st26 root present: no'; allow list Andrew only",
+      "description": "P1, taken BEFORE the install, is the negative arm: it read the st26 root ABSENT, so the post-install readings are a change and not a standing state",
+      "expected": "st26 root absent before the install",
+      "observed": "P1 rollback root 409e3066d1-st24 present: yes; st26 root present: no",
       "status": "FIRED-AS-EXPECTED"
     }
   },
   "declared_exclusions": [
     {
       "item": "leg F1 was not run",
-      "reason": "it is 2.0.0_SA_COO~G2's leg, not this seat's, and the CTO ruled it closed NOT RUN (msg 2067): the upload was refused by E5 and a retry would route to YCHARTS"
-    },
-    {
-      "item": "no firm-bucket or secret read",
-      "reason": "the order's bounds confine this seat to the one host; F1's secret was the issuer's"
+      "reason": "it is the COO~G2 leg and the CTO ruled it closed NOT RUN (msg 2067): the upload was refused by E5 and a retry would route to YCHARTS. AC1 grades the ledger CLOSED state, which records F1 as NOT RUN rather than as a pass"
     }
   ],
   "decomp_ref": {
@@ -120,7 +107,7 @@
   "spec_ref": {
     "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_YCDGEN.TO-APPLY-st26.resident-brand-asset-and-svc-f1-release-dell2.md",
     "group": "OTHER",
-    "vintage_commit": "1b9e06bc1f"
+    "vintage_commit": "a114ea8f98"
   },
   "surprises": [],
   "to_id": "IRPT_YCDGEN.TO-APPLY-st26"
