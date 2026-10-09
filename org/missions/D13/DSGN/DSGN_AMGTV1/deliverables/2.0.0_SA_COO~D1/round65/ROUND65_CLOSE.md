@@ -26,3 +26,11 @@ disarmed and its login is refused (401).
   - item 2, nothing tying an event title to its marker;
   - item 3, the picker's "type the ticker" words.
 - **FWD-1:** Andrew's own signed-in walk on PROD. PROD now carries rounds 58-64 (`c6c1eb2a`).
+
+## After the close (12:5xZ)
+
+- **L9:** AV-zzq-1 MET (round-65 analysis @287424bb47). There is no round-66 list; the page's open items are closed.
+- **Live:** portal DEV `2726bbe7` and PROD `18364342` (ls-remote read 12:57Z). PROD now carries rounds 58-65. The pair is CTO @287424bb47
+  and COO @b4e5890be8.
+- **Remaining outcome:** FWD-1, Andrew's own signed-in walk on PROD (open call `dell1-20261009T092027Z-2caa`, OPEN). Its text still
+  names the earlier build `fa5ba2af`; PROD has since moved to `18364342`.
