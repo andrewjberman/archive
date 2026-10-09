@@ -1,5 +1,5 @@
 set -u
-# Ledger irpt-ycdgen-f1-st26-20261008, legs D2 + V1: fetch the signed st26 install script BY KEY AND VERSION, verify its sha256, run it
+# Ledger irpt-ycdgen-f1-st26-20261008, legs D2 + V1: fetch the signed st26 install script BY KEY (the host role holds GetObject, not GetObjectVersion), verify its sha256 (it binds the bytes), run it
 # (it stages the tar, checks every member, keeps st24 for rollback and rolls back itself on a failed start), then read the running
 # package back. Sent through Systems Manager by host_read.py. No vendor call. Operator 0.7.0_AE_CloudOps~DELL2 for 2.0.0_SA_COO~G2.
 NEW=26df2c7622-st26
