@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-pr-384",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "db365b3f57"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "db365b3f57",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-384.runner-refuses-build-that-drops-a-source-entry.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~195",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/directory_runner.py",
+      "kind": "script",
+      "commit_or_etag": "c7b401e8f7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run_firm raises REFUSED: BUILD_DROPS_SOURCE_ENTRY before land() when held (source-still-holds, build-lacks) is non-empty and the call would write; dry run records carried_forward.refused and main() rc 1. Committed at c7b401e8f7; code-only, no deploy.",
+      "artifact_covered_by": [
+        "IB95-1-AC1",
+        "IB95-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_directory_runner_refuse_drop.py",
+      "kind": "test",
+      "commit_or_etag": "c7b401e8f7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 refuse_drop tests with a put-counting fake S3, one per branch plus the dry-run arm. Committed at c7b401e8f7.",
+      "artifact_covered_by": [
+        "IB95-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/directory/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "c7b401e8f7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Comment-only: stale SKELETON ONLY clause and No resources are declared clause removed (row D2-S23); git diff shows 0 HCL lines changed.",
+      "artifact_covered_by": [
+        "IB95-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c7b401e8f7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one row appended: IRPT_BCKEND-D2-W195-S1; surprise-row-gate OK at commit.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IB95-1-AC1",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r95/p95_s4.py\" . IB95-1-AC1 -> IB95-1-AC1 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r95/p95_s4.py\" . IB95-1-AC1",
+      "output_evidence": "OK: -k refuse_drop: 4 passed, 365 deselected in 3.88s | IB95-1-AC1 PASS (rc=0)",
+      "denominator": "4 of 4 refuse_drop tests passed (selected from 369 runner tests); threshold >= 3",
+      "status": "PASS",
+      "expect": "IB95-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "IB95-1-AC2",
+      "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r95/p95_s4.py\" . IB95-1-AC2 -> IB95-1-AC2 PASS",
+      "method": "test_suite",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r95/p95_s4.py\" . IB95-1-AC2",
+      "output_evidence": "OK: runner suite 1 failed, 368 passed in 30.86s; excused ['tests/test_holdings_rearm_trigger.py::test_rearm_trigger_live'] | IB95-1-AC2 PASS (rc=0)",
+      "denominator": "368 of 369 runner tests passed; the 1 failure is the pre-existing red S71 guard, excused by exact node id",
+      "status": "PASS",
+      "expect": "IB95-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Run the same suite before the refusal was scoped (run_firm raising unconditionally) and compare.",
+      "expected": "the unconditional raise breaks the two IB-pr-381 tests that pin run_firm returning on a dropped source entry",
+      "observed": "3 failed, 362 passed (the two IB-pr-381 tests plus the S71 red); after scoping to writing calls, 1 failed (S71 only). Recorded in row IRPT_BCKEND-D2-W195-S1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "p95_s4.py AC1 and AC2 each run once at the worktree root after the final code; the 4 new tests also ran standalone",
+      "observed": "identical PASS/FAIL both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "tests/test_directory_runner_terminated.py",
+      "reason": "Outside this order's <paths>; two of its tests pin run_firm returning on a dropped source entry, so the refusal is scoped to calls that write (upload or local_out). Disclosed at IRPT_BCKEND-D2-W195-S1."
+    },
+    {
+      "item": "build, upload, apply, deploy",
+      "reason": "BOUNDS: code and tests only; the release follows IB-pr-383 under its own pair. No AWS call made."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W195-S1"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "p95_s4.py",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r95/p95_s4.py\" . IB95-1-AC1 / IB95-1-AC2",
+      "result": "IB95-1-AC1 PASS; IB95-1-AC2 PASS"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 directory_runner.py test_directory_runner_refuse_drop.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "safe-commit.sh --author ... -- 4 paths",
+      "result": "committed c7b401e8f7; surprise-row-gate OK 1 new row; to-pipeline-gate OK"
+    }
+  ]
+}

@@ -20,9 +20,41 @@ def fail(msg):
     return 1
 
 
+CLAMP_TESTS = Path("infra/aws/lambda/ticket_center/tests/test_profile_firm_scope.py")
+CLAMP_NAMES = {
+    "sa-clamp-scope": ["test_scope_list_narrows_internal_create", "test_no_row_keeps_today", "test_empty_list_keeps_today",
+                       "test_non_list_scope_refused", "test_all_in_list_never_admits", "test_scope_read_by_verified_identity_not_body",
+                       "test_services_and_clients_unchanged"],
+    "sa-clamp-routes": ["test_list_filtered_to_scope", "test_metrics_over_scope_only", "test_get_outside_scope_refused",
+                        "test_claim_outside_scope_refused", "test_complete_outside_scope_refused", "test_report_outside_scope_refused"],
+}
+
+
+def _pytest(names):
+    import re
+    import subprocess
+    if not CLAMP_TESTS.exists():
+        return False, "absent: %s" % CLAMP_TESTS.as_posix()
+    src = CLAMP_TESTS.read_text(encoding="utf-8")
+    missing = [n for n in names if not re.search(r"^\s*def %s\(" % re.escape(n), src, re.M)]
+    if missing:
+        return False, "missing test(s): %s" % ", ".join(missing)
+    r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", CLAMP_TESTS.as_posix(),
+                        "-k", " or ".join(names)], capture_output=True, text=True, timeout=170)
+    out = re.sub(r"\x1b\[[0-9;]*m", "", r.stdout + r.stderr)
+    passed = int((re.search(r"(\d+) passed", out) or [0, 0])[1])
+    if r.returncode != 0 or passed < len(names):
+        return False, "rc=%d passed=%d of %d" % (r.returncode, passed, len(names))
+    return True, "passed=%d" % passed
+
+
 def main(argv):
+    if argv and argv[0] in CLAMP_NAMES:
+        ok, why = _pytest(CLAMP_NAMES[argv[0]])
+        print("%s-%s %s" % (argv[0].upper(), "OK" if ok else "FAIL", why))
+        return 0 if ok else 1
     if not argv or argv[0] != "sa-census":
-        print("usage: sa_checks.py sa-census")
+        print("usage: sa_checks.py {sa-census|sa-clamp-scope|sa-clamp-routes}")
         return 2
     if not CENSUS.exists():
         return fail("absent: %s" % CENSUS.as_posix())

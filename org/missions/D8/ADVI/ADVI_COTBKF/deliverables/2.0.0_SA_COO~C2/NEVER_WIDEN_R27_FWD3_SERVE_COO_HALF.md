@@ -2,7 +2,7 @@
 
 **Signer:** `2.0.0_SA_COO~C2` (dell2). **Counterpart:** `1.0.0_SA_CTO~DELL2`. **Applier:** `0.7.0_AE_CloudOps~CB2` (MSTR msg 2264).
 **Given when:** CB-aa-3 (round 27) is drained VALID with `FWD3-SERVE mode=dry ... keys=3 addresses_from_builder=True`, and the dry
-run's three addresses equal the keys in section 1. Until then this file is a DRAFT and nothing is written. **Code at the apply:** the
+run's three addresses equal the keys in section 1. Until then this file is a DRAFT and nothing is written. **ADDED 2026-10-09 ~04:1xZ (disarm of rows D2-W50-S1, S2, S3):** the half is ALSO not given while the build carries days whose value is known wrong -- split days valued with split-adjusted closes against as-traded quantities (S1), in-kind `li` flows understated (S2), `dvr` close steps (S3). It is given only once those days are repaired, or blanked with their reason (FWD-3: "a day that cannot be worked out says so and is never filled in"), by a ruled cell. **Code at the apply:** the
 drained `data/assets/scripts/silver/commonwealth_fwd3_serve.py`, unchanged since the drain commit.
 
 ## 1. THE ACT AND ITS BLAST RADIUS
