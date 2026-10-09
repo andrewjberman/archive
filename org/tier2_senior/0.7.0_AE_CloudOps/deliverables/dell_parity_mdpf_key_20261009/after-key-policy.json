@@ -1,0 +1,82 @@
+﻿{
+    "captured_utc":  "2026-10-09T05:40:47.8530310Z",
+    "key_arn":  "arn:aws:kms:us-east-1:313476888478:key/44a2284f-1e14-4ea1-b6cb-f6121bfde35a",
+    "policy_name":  "default",
+    "policy":  {
+                   "Version":  "2012-10-17",
+                   "Statement":  [
+                                     {
+                                         "Sid":  "RootAdministersTheKeyAndCannotUseIt",
+                                         "Effect":  "Allow",
+                                         "Principal":  {
+                                                           "AWS":  "arn:aws:iam::313476888478:root"
+                                                       },
+                                         "Action":  [
+                                                        "kms:Create*",
+                                                        "kms:Describe*",
+                                                        "kms:Enable*",
+                                                        "kms:List*",
+                                                        "kms:Put*",
+                                                        "kms:Update*",
+                                                        "kms:Revoke*",
+                                                        "kms:Disable*",
+                                                        "kms:Get*",
+                                                        "kms:Delete*",
+                                                        "kms:TagResource",
+                                                        "kms:UntagResource",
+                                                        "kms:ScheduleKeyDeletion",
+                                                        "kms:CancelKeyDeletion"
+                                                    ],
+                                         "Resource":  "*"
+                                     },
+                                     {
+                                         "Sid":  "NamedReadersUseTheKey",
+                                         "Effect":  "Allow",
+                                         "Principal":  {
+                                                           "AWS":  "arn:aws:iam::313476888478:user/Andrew_Berman"
+                                                       },
+                                         "Action":  [
+                                                        "kms:Encrypt",
+                                                        "kms:Decrypt",
+                                                        "kms:ReEncrypt*",
+                                                        "kms:GenerateDataKey*",
+                                                        "kms:DescribeKey"
+                                                    ],
+                                         "Resource":  "*"
+                                     },
+                                     {
+                                         "Sid":  "DellAgentUsersDecryptOnly",
+                                         "Effect":  "Allow",
+                                         "Principal":  {
+                                                           "AWS":  [
+                                                                       "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                                                       "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user"
+                                                                   ]
+                                                       },
+                                         "Action":  [
+                                                        "kms:Decrypt",
+                                                        "kms:DescribeKey"
+                                                    ],
+                                         "Resource":  "*"
+                                     },
+                                     {
+                                         "Sid":  "DellAgentUsersGenerateDataKey",
+                                         "Effect":  "Allow",
+                                         "Principal":  {
+                                                           "AWS":  [
+                                                                       "arn:aws:iam::313476888478:user/cloudops-dell1-agent-user",
+                                                                       "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user"
+                                                                   ]
+                                                       },
+                                         "Action":  "kms:GenerateDataKey",
+                                         "Resource":  "*",
+                                         "Condition":  {
+                                                           "StringEquals":  {
+                                                                                "kms:ViaService":  "s3.us-east-1.amazonaws.com",
+                                                                                "kms:EncryptionContext:aws:s3:arn":  "arn:aws:s3:::opal-data-transcripts"
+                                                                            }
+                                                       }
+                                     }
+                                 ]
+               }
+}
