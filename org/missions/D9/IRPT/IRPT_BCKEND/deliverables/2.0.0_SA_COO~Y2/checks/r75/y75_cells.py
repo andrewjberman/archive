@@ -23,6 +23,10 @@ FN = "irpt-ycharts-generate"
 BUILT = "5FRkux2oSNN1jB4xJEibio+F9F2ofl9mgcuH9jN/JrY="
 ROLLBACK = "Un0wVZqjqpwKhpYyFeBRW3fVFddrlHR0BtHjYuP5eNY="
 READS = [str(i) for i in range(0, 8)]
+# AMENDMENT 3 (issuer 2026-10-09 ~10:2xZ): live has since moved under LATER SIGNED releases of the same function; a live
+# CodeSha256 in this map is release 5b superseded, not undone. Nothing else is admitted.
+LATER_SIGNED = {"ZA0QJ5Wt/7JcwmuzVfHOeNAdFk6th4H5IEeqQStDYm8=": "IB-pr-390 via IB-pr-395 (CTO msgs 2833/2855)",
+                "tdpterTMfJlWXjnoAQCwil+wN/Jf8Q/yLjGxTk7yUkk=": "release 6b, TO-APPLY-Y77 (CTO msg 2888)"}
 
 
 def live_sha():
@@ -66,8 +70,10 @@ def main():
             fail("built_sha %r != signed %s" % (d.get("built_sha"), BUILT))
         live = live_sha()
         print("live CodeSha256 %s" % live)
-        if live != BUILT:
+        if live != BUILT and live not in LATER_SIGNED:
             fail("live %s != built %s" % (live, BUILT))
+        if live in LATER_SIGNED:
+            print("live is a later signed release: %s" % LATER_SIGNED[live])
         if d.get("rolled_back") is not False:
             fail("rolled_back is %r" % d.get("rolled_back"))
     elif cid == "Y75-1-AC2":
@@ -95,11 +101,38 @@ def main():
             if reads.get("4") == "STORED-NEXT-STATE" and not (adm.get("body_sha256_match") is True
                     and adm.get("owner_is_advisor") is True and adm.get("acting_principal_is_filer") is True):
                 fail("the laptop did not confirm the stored body and the UPLOAD record (owner, acting_principal_id)")
-            for k in keys:
-                state = got.get(json.dumps(k, sort_keys=True))
-                print("%s %s" % (state, json.dumps(k, sort_keys=True)))
-                if state != "NOT_FOUND":
-                    fail("admit key not confirmed NOT_FOUND by the laptop: %r" % k)
+            rows = res.get("results") or []
+            if rows and all("key_ref" in r for r in rows):
+                # AMENDMENT 3 (issuer 2026-10-09 ~10:2xZ): the laptop names keys by opaque key_ref (12 hex; S3 refs carry
+                # "@<version_id>"). Grade: one NOT_FOUND result per admit key; every S3 version of the keys file named by
+                # its version id AND re-read absent HERE; the DDB rows rest on the laptop's own live re-read (dell2
+                # cannot read irpt-requests).
+                if len(rows) != len(keys) or any(r.get("after_delete") != "NOT_FOUND" for r in rows):
+                    fail("laptop results: %d rows for %d keys, or one not NOT_FOUND" % (len(rows), len(keys)))
+                named = {r["key_ref"].split("@", 1)[1] for r in rows if "@" in r["key_ref"]}
+                import boto3
+                from botocore.exceptions import ClientError
+                s3 = boto3.client("s3")
+                kf = (root / F).parent / "Y75-1_admit_keys.json"
+                s3v = json.loads(kf.read_text(encoding="utf-8")).get("s3_versions") or {} if kf.is_file() else {}
+                if not s3v:
+                    fail("no s3_versions in %s" % kf)
+                for skey, versions in s3v.items():
+                    for v in versions:
+                        if v not in named:
+                            fail("S3 version %s not named in the laptop results" % v)
+                        try:
+                            s3.head_object(Bucket="opal-data-irpt", Key=skey, VersionId=v)
+                            fail("S3 version %s still present" % v)
+                        except ClientError:
+                            print("ABSENT-HERE s3 version %s" % v)
+                print("laptop rows %d of %d keys, all NOT_FOUND" % (len(rows), len(keys)))
+            else:
+                for k in keys:
+                    state = got.get(json.dumps(k, sort_keys=True))
+                    print("%s %s" % (state, json.dumps(k, sort_keys=True)))
+                    if state != "NOT_FOUND":
+                        fail("admit key not confirmed NOT_FOUND by the laptop: %r" % k)
         print("denominator: 1 test row + %d admit key(s)" % len(keys))
     else:
         if d.get("ledger_closed") is not True:
@@ -107,7 +140,7 @@ def main():
         live = live_sha()
         print("live CodeSha256 %s; reads all PASS: %s; rolled_back %r" % (live, all_pass, d.get("rolled_back")))
         if all_pass:
-            if d.get("rolled_back") is not False or live != BUILT:
+            if d.get("rolled_back") is not False or (live != BUILT and live not in LATER_SIGNED):
                 fail("branch A incoherent")
         elif d.get("rolled_back") is not True or live != ROLLBACK:
             fail("branch B incoherent: a failed read without a rollback to %s" % ROLLBACK)
