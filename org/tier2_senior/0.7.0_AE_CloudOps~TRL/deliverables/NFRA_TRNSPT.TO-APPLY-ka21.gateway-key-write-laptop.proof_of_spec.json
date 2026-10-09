@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_TRNSPT.TO-APPLY-ka21.gateway-key-write-laptop",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~TRL/task_orders/NFRA_TRNSPT.TO-APPLY-ka21.gateway-key-write-laptop.md",
+    "group": "OTHER",
+    "vintage_commit": "c9d94e9dffa94b9d4a19ff92710c0bd71531aa5c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R21.md",
+    "vintage_commit": "c1ef86dfb7cbab0dc9b5115605939c0166d8933a",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~TRL/task_orders/NFRA_TRNSPT.TO-APPLY-ka21.gateway-key-write-laptop.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~TRL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/critical_paths/change_management/20261009T1632Z_nfra-trnspt-ka21-gateway-key-write-laptop-20261009_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ledger CLOSED, 3 of 3 legs proven; carries the Bucket Key branch read, the step-1 census with its denominator and planted control, the DESIRED-plane addendum, the plan graded from show -json, the measured after-image and the two conditions",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "arn:aws:kms:us-east-1:313476888478:key/44a2284f-1e14-4ea1-b6cb-f6121bfde35a",
+      "kind": "aws_resource",
+      "commit_or_etag": "policy-6-statements",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "kms get-key-policy before 5 statements / after 6; ADDED GatewayWritesTranscripts; REMOVED none; 0 of 35 before leaf-values gone after; shared-statement drift 0 of 5; live equals the plan's after-document; targeted re-plan -detailed-exitcode rc=0",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -c \"import boto3,json;s3=boto3.client('s3');k=s3.get_bucket_encryption(Bucket='opal-data-transcripts')['ServerSideEncryptionConfiguration']['Rules'][0]['ApplyServerSideEncryptionByDefault']['KMSMasterKeyID'];print('GatewayWritesTranscripts' in [x.get('Sid') for x in json.loads(boto3.client('kms').get_key_policy(KeyId=k,PolicyName='default')['Policy'])['Statement']])\" expect True",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json;s3=boto3.client('s3');k=s3.get_bucket_encryption(Bucket='opal-data-transcripts')['ServerSideEncryptionConfiguration']['Rules'][0]['ApplyServerSideEncryptionByDefault']['KMSMasterKeyID'];print('GatewayWritesTranscripts' in [x.get('Sid') for x in json.loads(boto3.client('kms').get_key_policy(KeyId=k,PolicyName='default')['Policy'])['Statement']])\"",
+      "expect": "True",
+      "output_evidence": "True. STEP-1 CASE: NO S3 WRITE GRANT -- the opal-gateway-role has 0 Allow statements granting an S3 write that reaches opal-data-transcripts, by subtraction over 29 statements in 22 live documents, and the DESIRED plane agrees (comp-find 'opal-data-transcripts' over infra/aws/terraform/opal-gateway returns 0 hits across 40 files scanned; 4 binary files in scope were not searched). The order names no-grant a pass. BUCKET KEY read by the applier: BucketKeyEnabled=true, so the CTO half's BRANCH 2 governs. PLAN LINE: 0 to add, 1 to change, 0 to destroy -- 1 non-no-op over a denominator of 4 resource_changes, only the policy attribute changed, nothing after_unknown, so the plan itself was the oracle. KEY DIFF: 5 -> 6 statements, ADDED GatewayWritesTranscripts {Allow, Principal arn:aws:iam::313476888478:role/opal-gateway-role, Action [kms:GenerateDataKey,kms:Encrypt], Resource *, Condition StringEquals kms:ViaService s3.us-east-1.amazonaws.com + kms:EncryptionContext:aws:s3:arn arn:aws:s3:::opal-data-transcripts}, REMOVED none, shared-statement drift 0 of 5 so all five statements the COO half names are intact, 0 of 35 before leaf-values gone, kms:Decrypt ABSENT. SIX Sids read back. LEDGER: org/critical_paths/change_management/20261009T1632Z_nfra-trnspt-ka21-gateway-key-write-laptop-20261009_deploy_completion.md.",
+      "denominator": "22 live policy documents / 29 statements for the step-1 census, 11 of them naming an S3 action; 5 probe ARNs; 4 resource_changes in the plan (1 non-no-op, 3 no-op); 5 key-policy statements before and 6 after; 35 leaf values before, 37 after; 40 files scanned for the DESIRED-plane zero; 1 CloudTrail PutKeyPolicy event since 16:30Z",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "existence": {
+      "description": "Step 1's answer is a NEGATIVE (no write grant), and a negative from a matcher that cannot fire reads identically to a true absence. Five PLANTED statements (not live policy) were run through the same matcher.",
+      "expected_landed": "the two wildcard shapes that would make this zero a lie are flagged, and the permitted-prefix shape is flagged too",
+      "expected_not_landed": "a matcher blind to a wildcard resource would report zero for a role holding s3:PutObject on arn:aws:s3:::*/*",
+      "observed": "s3:PutObject on arn:aws:s3:::*/* FLAGGED (1 write action, 4 probes); s3:* on * FLAGGED (20 write actions, 5 probes); PutObject on the permitted market_update prefix FLAGGED (1 write, 1 probe); PutObject on arn:aws:s3:::opal-data-bd/* not flagged; s3:GetObject on this bucket not flagged (4 probes, no write action)",
+      "status": "PASS"
+    },
+    "one_write": {
+      "description": "safe-apply was invoked twice -- the first invocation's output was truncated by a head pipe, so whether it applied is not established from that output. For a WORLD-risk key-policy edit the number of writes that actually landed has to be measured, not inferred.",
+      "expected_landed": "exactly ONE successful PutKeyPolicy from this act",
+      "expected_not_landed": "two writes, or a first write whose document differed from the graded plan",
+      "observed": "a live get-key-policy BETWEEN the two invocations read 5 statements with GatewayWritesTranscripts absent, so the first wrote nothing; CloudTrail lookup-events for PutKeyPolicy from 16:30:00Z returned a denominator of 1 event, at 16:44:04Z with 6 statements, errorCode census {none: 1}",
+      "status": "PASS"
+    },
+    "plane": {
+      "description": "A LIVE-only census is silent on a grant already written in Terraform awaiting an apply (the declared-but-unapplied class), which is exactly what the CTO half's branch-2 condition is about.",
+      "expected_landed": "the DESIRED plane carries no transcripts write for this role either, and the two S3 PutObject statements it does carry resolve to other buckets",
+      "expected_not_landed": "an unresolved interpolation read as opaque would hide a transcripts write behind local.advi_billing_bucket",
+      "observed": "local.advi_billing_bucket resolves to local.advi_billing_tiers.homes.FIRM.bronze.bucket with prefix smartx/<scope>/bronze/fee_statement/ (advi_billing_gateway_iam.tf:36,38), and the second PutObject is the audit lake on opal-mcp-audit; comp-find 'opal-data-transcripts' over the gateway root returns 0 hits across 40 files scanned, with 4 binary in-scope files declared unsearched",
+      "status": "PASS"
+    },
+    "pin": {
+      "description": "The order requires the apply pin to carry b74b1e45bd.",
+      "expected_landed": "b74b1e45bd is an ancestor of the apply pin, with the reverse direction read as a negative control",
+      "expected_not_landed": "a merge-base check answering YES in both directions is the instrument, not the world",
+      "observed": "b74b1e45bd in 95a62b9f29fdff643344667b82e5364203e3c002 YES; c9d94e9dff, 6791d6ebc2, ad98587dfa and 0b2018ac25 also YES; negative control HEAD in b74b1e45bd NO",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_TRNSPT_T2/NEVER_WIDEN_NFRA_TRNSPT_COO_HALF_GATEWAY_KEY_WRITE_20261009.md@6791d6ebc2 (blob 8242d3a9bf) -- read in full before the act; it names the five live statements that must be unchanged, and all five read unchanged",
+    "cto_half": "org/missions/D9/NFRA/NFRA_TRNSPT/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_GATEWAY_KEY_WRITE_TR_ka_21_CTO_HALF.md@ad98587dfa -- verdict GIVEN under conditions 1 to 4; the applier's own get-bucket-encryption read BucketKeyEnabled=true, so BRANCH 2 governs and the prefix boundary stays with site Z's S3 grant"
+  },
+  "risk_class": "WORLD",
+  "rollback": "kms put-key-policy with the five-statement before-image recorded verbatim in the ledger's step 0 restores the prior policy; that is an update, not a delete. The targeted re-plan reads rc=0 at the state this instance grades.",
+  "scope": "ONE added transcripts key-policy statement, GatewayWritesTranscripts, granting kms:GenerateDataKey and kms:Encrypt to the role the opal-gateway root's own instance_role_name output names, conditioned on kms:ViaService = S3 us-east-1 and kms:EncryptionContext:aws:s3:arn = this bucket. No kms:Decrypt. No role, bucket policy or other terraform root touched; no delete; no transcript content in any file or message. No transcripts-v* tag taken: the first tag on this root is cell TR-g-21, the ISSUER's after the drain, and git tag -l \"transcripts-v*\" still reads 0.",
+  "declared_exclusions": [
+    {
+      "item": "the CTO half's branch-2 prefix condition on site Z's OG-ab-2 S3 grant",
+      "reason": "NOT DISCHARGED, and not dischargeable in advance. Branch 2 holds only if the gateway role's S3 grant reads s3:PutObject on sharepoint/transcripts/bronze/market_update/* alone, with no Delete and no other prefix. That grant does not exist yet on either plane, which is the case the order permits (the key statement alone writes nothing). When OG-ab-2 mints it, the condition binds whoever applies it. Owner: site Z via 0.0.0_AB_MSTR."
+    },
+    {
+      "item": "the real write that exercises this statement",
+      "reason": "The COO half reserves it: the real proof is site Z's OG-ab-2 landing of the market-update deck, which then un-parks TR-d-20 on its sha256 against the item's quickXorHash. This instance proves the key statement is live and correctly scoped, not that a write has happened -- no write was attempted and no content was touched."
+    },
+    {
+      "item": "the 4 binary files in the opal-gateway terraform root",
+      "reason": "comp-find's measured zero for 'opal-data-transcripts' over that root covers 40 scanned files and explicitly does NOT cover 4 in-scope binary files. Recorded rather than rounded up to a clean zero. The live-plane census is unaffected: it read the attached policy documents themselves, not the repo."
+    },
+    {
+      "item": "the DESIRED-vs-LIVE statement counts (25 vs 29)",
+      "reason": "comp-iam reads 25 statements for this role from infra/aws/terraform/opal-gateway/main.tf; the live census found 29 across 22 attached documents. The planes have different denominators -- live includes the attached managed policy and policies declared outside that one file -- so neither count is quoted as the other's and no reconciliation is claimed here. Both agree on the only question asked: no transcripts write."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/critical_paths/change_management/20261009T1632Z_nfra-trnspt-ka21-gateway-key-write-laptop-20261009_deploy_completion.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-adversary",
+      "invocation": "comp-adversary compose org/tier2_senior/0.7.0_AE_CloudOps~TRL/task_orders/NFRA_TRNSPT.TO-APPLY-ka21.gateway-key-write-laptop.md --max-neighbors 6 --digest-budget 4",
+      "result": "PASS, clean. 4 of 4 cited commits VERIFIED (14cbf27dec, 6791d6ebc2, ad98587dfa, b74b1e45bd); 3 of 3 cited paths stable, 0 flagged"
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam role opal-gateway-role",
+      "result": "PARTIAL, and useful. Resolved the role in the DESIRED plane (25 statements) and surfaced two S3 PutObject statements, one of them behind an unresolved local -- which is what prompted the DESIRED-plane addendum. Both resolve to other buckets. comp-iam models (action) and never (action, resource), and cannot see a KMS key policy at all, so it is a floor here, not the measurement"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'advi_billing_bucket|advi_billing_key_prefix' infra/aws/terraform/opal-gateway --limit 40 ; comp-find 'opal-data-transcripts' infra/aws/terraform/opal-gateway --limit 40",
+      "result": "PASS. 3 hits resolved the advi_billing local; 0 hits for the transcripts bucket across 40 files scanned, with 4 binary in-scope files declared unsearched. Two rail denials on the way there (a recursive grep, then a census piped into head) were answered with the printed RUN NEXT rather than overridden"
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "DECLARED-NOT-APPLICABLE per the order's preflight -- an identity grant with no schedule",
+      "result": "not run; declared"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open / close-leg x3 / close",
+      "result": "PASS. Ledger CLOSED, all 3 legs proven, sentinel removed"
+    }
+  ]
+}
