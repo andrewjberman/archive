@@ -1,0 +1,112 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-tl-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "1ce3ae4639"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "1ce3ae4639",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-tl-1.transcript-allowlist-4-meetings.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~48",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+   "kind": "script",
+   "commit_or_etag": "78afad4283",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Release commit 78afad4283 on rel-nfra-oplgtw-tl1 (one file; base 4514246d65). The applier deployed the exact re-cut c97232408d (TO-OG-ap-4, ledger nfra-oplgtw-og-tl-1-allowlist closed @71d432d4a8; EC2_MANIFEST deployed_commit c97232408d72bc649c92da7e4e711c0ebf0a3950 at box/sitez HEAD). Read back through the installed host by SSM 2519416e-fbb4-4b40-854f-ad929025196c: the installed reader app.transcript_route.meeting_allowlist() returns 4 ids, sha256 of the sorted ids bd206c964417adfb491d5af53c0dc0c9b6eb5bfd007eecf920a67fd80cbfea62.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~48/TL1_READ.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The host's own answer, {body, ssm_command_id, instance_id} plus a basis note outside the body; the host printed TL1_DIGEST f9597825d546e6fc883cb93f9fb7b5849d62bf8840d8fc05820e3bbf7482e59e over the body in the same SSM invocation. A read; nothing written to the host.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~48/tl1_host.py.txt",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Read-only host program shipped by r29_ssm_prog.py under env -i from a per-run scratch removed in the same command list (SCRATCH_REMOVED=yes, HOST_TMP_og_r29_LEFTOVER=0); embeds per-key sha256 digests only.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the release changes one file and reads the ids from the committed json. <invocation>bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/tl1.AC1.sh; echo \"exit=$?\"</invocation>",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/tl1.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)files differing 1 \\(want 1\\): infra/aws/ec2/opal-gateway/deploy-to-ec2\\.sh.*ids typed literally: 0 \\(want 0\\); release json equals HEAD's: yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "base 4514246d658cfbb4de58636c9f6d149f7b9abb36 -> release 78afad428389a4665aed267ac7f44e76533be59a: files differing 1 (want 1): infra/aws/ec2/opal-gateway/deploy-to-ec2.sh\ndeploy-to-ec2.sh reads meeting_allowlist.json: 5 (want >=1); ids typed literally: 0 (want 0); release json equals HEAD's: yes\nRESULT: PASS\nexit=0",
+   "denominator": "1 of 1 differing files (want 1); 0 of 4 ids typed literally; 1 of 1 release json equal to HEAD's",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the served host holds exactly those ids, and nothing else in `.env` moved. <invocation>bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/tl1.AC2.sh; echo \"exit=$?\"</invocation>",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/tl1.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)transcript allowlist served: fields=yes ssm=Success digest=yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "NOT RUN BY THE WORKER: the check reads EC2_MANIFEST.json at HEAD of the shared tree, which holds deployed_commit c97232408d only at box/sitez; the issuer runs it from C:/Users/Opal Bloomberg/Desktop/ajb_workspace after this record is drained. Pre-check of the same attestation instrument against box/sitez's deployed_commit: `python rl15_attest.py TL1_READ.json TL1_DIGEST c97232408d72bc649c92da7e4e711c0ebf0a3950` -> `fields=yes ssm=Success digest=yes` (rc 0); with a wrong served release (91811b648a) -> `fields=no ssm=Success digest=yes` (rc 1). Host body: {\"allowlist_count\": 4, \"allowlist_sha256\": \"bd206c964417adfb491d5af53c0dc0c9b6eb5bfd007eecf920a67fd80cbfea62\", \"env_values_changed\": [\"TRANSCRIPT_MEETING_ALLOWLIST\"], \"installed_code\": true, \"served_release\": \"c97232408d72bc649c92da7e4e711c0ebf0a3950\"} ; TL1_DIGEST f9597825d546e6fc883cb93f9fb7b5849d62bf8840d8fc05820e3bbf7482e59e",
+   "denominator": "1 of 1 records; allowlist_count 4 of 4 ids; env_values_changed 1 key (TRANSCRIPT_MEETING_ALLOWLIST) of 52 .env keys",
+   "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+   "status_reason": "Rides a NAMED later run: the issuer 2.0.0_SA_COO~O runs tl1.AC2.sh from the shared tree after this record is drained."
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3 (judgment, `3.0.0_SA_CVO~Z` at L9): dell2's own re-probe (one read per meeting, row NFRA_TRNSPT-D2-S11) reads 3 of 4 meetings, the fourth a Graph-side 403 as the ruling predicts.",
+   "method": "manual_read_with_citation",
+   "invocation": "none by the worker: the re-probe is dell2's (one read per meeting, row NFRA_TRNSPT-D2-S11); no transcript content was read here",
+   "output_evidence": "Host state the re-probe will meet: the 4 ids of meeting_allowlist.json are on the installed allowlist (count 4, sha256 bd206c964417adfb491d5af53c0dc0c9b6eb5bfd007eecf920a67fd80cbfea62); Research Team Meeting reached 403 at the 2026-10-09 TRANSCRIPT_REACH_RUN, so 3 of 4 are expected readable.",
+   "denominator": "N/A -- judgment criterion, graded at L9 by the CVO",
+   "judgment": true,
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Oracle: 3.0.0_SA_CVO~Z at L9 reading dell2's own re-probe (row NFRA_TRNSPT-D2-S11); no instrument on this fabric reads a meeting's transcript, by bound."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The attestation instrument rl15_attest.py run on the same TL1_READ.json with a WRONG served release (91811b648a, the r29 sha) in place of the manifest's deployed_commit.",
+   "expected": "FAIL (fields=no)",
+   "observed": "fields=no ssm=Success digest=yes (rc 1); the right sha: fields=yes ssm=Success digest=yes (rc 0)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The host program run once; its body digest recomputed locally from the recorded body and compared with the digest the host printed.",
+   "expected": "identical",
+   "observed": "host TL1_DIGEST f9597825d546e6fc883cb93f9fb7b5849d62bf8840d8fc05820e3bbf7482e59e == sha256(json.dumps(body, sort_keys=True)) recomputed by rl15_attest (digest=yes)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W48-S1",
+  "NFRA_OPLGTW-Z-W48-S2",
+  "NFRA_OPLGTW-Z-W48-S3"
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~48/tl1_host.out",
+ "compiler_tools": [
+  {
+   "tool": "r29_ssm_prog.py (SSM host runner) with tl1_host.py.txt",
+   "invocation": "R28_JSON_DIR=<W> R28_JSON_SPECS='[[\"TL1_BODY\",\"TL1_DIGEST\",\"TL1_READ.json\"]]' python r29_ssm_prog.py <W>/tl1_host.py.txt <W>/tl1_host.out c97232408d72bc649c92da7e4e711c0ebf0a3950",
+   "result": "SSM 2519416e-fbb4-4b40-854f-ad929025196c Success; body {\"allowlist_count\": 4, \"allowlist_sha256\": \"bd206c964417adfb491d5af53c0dc0c9b6eb5bfd007eecf920a67fd80cbfea62\", \"env_values_changed\": [\"TRANSCRIPT_MEETING_ALLOWLIST\"], \"installed_code\": true, \"served_release\": \"c97232408d72bc649c92da7e4e711c0ebf0a3950\"}"
+  }
+ ]
+}
