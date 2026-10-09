@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
     <date>2026-10-09</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -21,7 +21,7 @@
   </objective>
 
   <context>
-    STATUS IS `staged` UNTIL THE CTO HALF IS GIVEN. The issuer flips it to `pending` and messages you.
+    CTO half GIVEN: org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_AR_V12_PACKAGE_PRINCIPAL_CTO_HALF.md @7319f84a6e (msg 2646). Conditions: the plan shows exactly ONE change, on opal-ticket-api; you apply with a pinned ledger; (the packager mint pair names its exact firm list -- a later pair, not this order).
 
     Packet and COO half: `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~V2/AR_V12_DEPLOY_PACKET_20261009.md`.
 
