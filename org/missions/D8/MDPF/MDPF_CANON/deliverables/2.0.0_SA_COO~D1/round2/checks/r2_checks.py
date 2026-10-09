@@ -38,6 +38,37 @@ DLV = os.path.join(ROOT, "org/missions/D8/MDPF/MDPF_CANON/deliverables")
 arms = []
 
 
+def hcl_strings(text):
+    """Every double-quoted HCL string in text, with a quote inside a ${...} interpolation kept inside the string
+    (amended on row MDPF_CANON-D1-W7-S1: `"arn:aws:s3:::${module.m.scope_bucket["mdpf"]}/..."` is ONE string)."""
+    out, i, n = [], 0, len(text)
+    while i < n:
+        if text[i] != '"':
+            i += 1
+            continue
+        j, depth, buf = i + 1, 0, []
+        while j < n:
+            c = text[j]
+            if depth == 0 and c == '"':
+                break
+            if c == "\\" and j + 1 < n:
+                buf.append(text[j:j + 2])
+                j += 2
+                continue
+            if text.startswith("${", j):
+                depth += 1
+                buf.append("${")
+                j += 2
+                continue
+            if c == "}" and depth:
+                depth -= 1
+            buf.append(c)
+            j += 1
+        out.append("".join(buf))
+        i = j + 1
+    return out
+
+
 def arm(label, fn):
     f = []
     try:
@@ -253,7 +284,7 @@ def builder():
     iam = read("infra/aws/terraform/mdpf-pipeline/iam.tf") or ""
     gen = read("infra/aws/terraform/modules/opal_name/generated_locals.tf") or ""
     body = block(iam, "resource", "mdpf_gold_writers") or ""
-    arns = re.findall(r'"(arn:aws:s3:::[^"]*)"', body)
+    arns = [s for s in hcl_strings(body) if s.startswith("arn:aws:s3:::")]
     comp = [a for a in arns if "/mdpf/global/gold/" in a or not a.split(":::", 1)[1].count("/")]
 
     def no_local(f):
