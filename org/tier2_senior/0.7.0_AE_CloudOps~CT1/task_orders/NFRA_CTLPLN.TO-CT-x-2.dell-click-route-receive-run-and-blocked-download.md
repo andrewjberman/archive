@@ -2,7 +2,7 @@
 <to_id>NFRA_CTLPLN.TO-CT-x-2.dell-click-route-receive-run-and-blocked-download</to_id>
 <project>NFRA_CTLPLN</project>
 <issued_by>2.0.0_SA_COO~C</issued_by>
-<issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
+<issued_to>0.7.0_AE_CloudOps~CT1</issued_to>
 <date>2026-10-09</date>
 <status>pending</status>
 <risk>WORLD</risk>
@@ -32,7 +32,7 @@
 <the_act>
 1. **Receive.** When the pack arrives, run `intake_receive.py verify`, then `prove`, then `install` (index-free) for it on dell1, each
    as its `--help` says. Save each full output to
-   `org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt`, in order.
+   `org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt`, in order.
 2. **The lane's work runs.** Name the lane that asked for click, from the approval file. Run ONE ordinary command of that lane's work
    that imports click, as that lane's order or tool names it. If no such command exists on dell1 yet, run
    `python -c "import click; print('CLICK', click.__version__)"` and say the lane's command was not found. Append the command and its
@@ -42,7 +42,7 @@
 4. **One deliberate stopped download.** Run, once,
    `python -m pip download --no-deps -d <a new temporary folder> six==1.16.0 --index-url https://pypi.org/simple`, which downloads
    only and installs nothing. Record exactly what stopped it, and whether the message named the laptop route (FWD-18).
-   - Write the output to `org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/NFRA_CTLPLN.TO-CT-x-2.blocked-download.txt`, with a
+   - Write the output to `org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.blocked-download.txt`, with a
      line `BLOCKED <what stopped it>` or `NOT-BLOCKED`.
    - If it was NOT stopped, delete the temporary folder, file one row (`spec_asserts`: a Dell is stopped; `world_is`: it downloaded),
      and say so. Do not install it.
@@ -56,20 +56,20 @@
 </bounds>
 
 <proof_of_spec>
-<criterion id="CTx2-AC1" cell_refs="CT-x-2"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt</invocation><expect>DOWNLOADS-TODAY requests=0</expect></criterion>
+<criterion id="CTx2-AC1" cell_refs="CT-x-2"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt</invocation><expect>DOWNLOADS-TODAY requests=0</expect></criterion>
 <criterion id="CTx2-AC2" cell_refs="CT-x-2"><invocation>python -c "import click; print('CLICK', click.__version__)"</invocation><expect>CLICK 8.3.1</expect></criterion>
-<criterion id="CTx2-AC3" cell_refs="CT-x-2"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/NFRA_CTLPLN.TO-CT-x-2.blocked-download.txt</invocation><expect>BLOCKED </expect></criterion>
+<criterion id="CTx2-AC3" cell_refs="CT-x-2"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.blocked-download.txt</invocation><expect>BLOCKED </expect></criterion>
 </proof_of_spec>
 <expected_criteria>CTx2-AC1,CTx2-AC2,CTx2-AC3</expected_criteria>
 CTx2-AC3: a `NOT-BLOCKED` line fails the criterion, and that failure is the finding.
 
 Write the proof instance to
-`org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/NFRA_CTLPLN.TO-CT-x-2.dell-click-route-receive-run-and-blocked-download.proof_of_spec.json`
+`org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.dell-click-route-receive-run-and-blocked-download.proof_of_spec.json`
 and validate it with `python .tools/proof-of-spec-check.py <instance> CTx2-AC1,CTx2-AC2,CTx2-AC3`. The status flip is the issuer's.
 
 <paths>
-org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/
-org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/
+org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/
+org/tier2_senior/0.7.0_AE_CloudOps~CT1/logs/
 org/devices/intake/records/
 org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md
 </paths>
