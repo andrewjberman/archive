@@ -17,4 +17,4 @@ Live IAM simulations passed all six required arms:
 
 The targeted replan returned exit `0` with no changes. The deploy ledger `org/critical_paths/change_management/20261009T0125Z_dell-steph-laptop-20261009_deploy_completion.md` is closed and its sentinel is removed. Evidence is in this directory, principally `plan-verdict.json`, `apply.txt`, `after.json`, and `replan.txt`.
 
-The CTO-required untargeted convergence read remains deferred until `TO-APPLY-20` leg C2 closes. Running it while C2 is open would include the shell-window closure, so it is outside this targeted order until that trigger occurs.
+The CTO-required untargeted convergence read was deferred until `TO-APPLY-20` leg C2 closed. After C2 closed at 01:43:20Z, an untargeted default-variable plan returned exit `0` with no changes. Evidence is in `../f1_b2_20261009/c2-replan.txt` and `../f1_b2_20261009/c2-replan-verdict.json`.

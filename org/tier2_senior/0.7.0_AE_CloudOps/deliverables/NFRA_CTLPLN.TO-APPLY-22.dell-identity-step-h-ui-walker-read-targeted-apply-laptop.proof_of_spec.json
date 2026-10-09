@@ -19,7 +19,7 @@
     {
       "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_steph_20261009/after.json",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "a38f5937eebfefde1f93b8c5888f1fad4029b94b",
       "deployed_state": "DEPLOYED-VERIFIED",
       "deploy_evidence": "Applied 2026-10-09T01:26:36Z; live policy equals targeted plan; version v2; six of six authorization arms passed; parameter value not read",
       "artifact_covered_by": ["AC1"]
@@ -52,6 +52,13 @@
       "expected_not_landed": "Either shell document or F1 host SendCommand denied",
       "observed": "Both shell document and F1 host SendCommand allowed",
       "status": "PASS"
+    },
+    "root_convergence": {
+      "description": "After the independently governed F1 window closed, the untargeted default root plan distinguishes convergence from a stranded Step H or window delta",
+      "expected_landed": "exit 0 with no changes",
+      "expected_not_landed": "exit 2 or any planned change",
+      "observed": "exit 0 with no changes at 2026-10-09T01:43:58Z",
+      "status": "PASS"
     }
   },
   "never_widen_pair": {
@@ -60,13 +67,8 @@
   },
   "risk_class": "WORLD",
   "rollback": "Targeted re-apply only aws_iam_policy.dell_agent_plan_reads at merge 9e17e06278 first parent 2070e381bc7c1e64b86add9d86e8b376aed26a47, then verify both read/delete controls and preserve the independently governed shell window.",
-  "scope": "Step H only: the dell_agent_plan_reads policy gained one exact UI-walker GetParameter statement; the F1 shell-window policy was not in the plan.",
-  "declared_exclusions": [
-    {
-      "item": "Untargeted root convergence read",
-      "reason": "CTO condition defers it until TO-APPLY-20 leg C2 closes; doing it earlier would include the separately governed shell-window closure."
-    }
-  ],
+  "scope": "Step H: the dell_agent_plan_reads policy gained one exact UI-walker GetParameter statement; the targeted apply preserved the F1 window, and the untargeted root converged after C2 closed.",
+  "declared_exclusions": [],
   "surprises": [],
   "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/dell_steph_20261009/REPORT.md",
   "compiler_tools": [
@@ -79,6 +81,11 @@
       "tool": "aws iam simulate-principal-policy",
       "invocation": "six exact action/resource arms across dell1 and dell2",
       "result": "six of six expected decisions; parameter value not read"
+    },
+    {
+      "tool": "terraform plan",
+      "invocation": "untargeted default-variable root plan after TO-APPLY-20 C2",
+      "result": "exit 0 with no changes; CTO Step H convergence condition satisfied"
     }
   ]
 }
