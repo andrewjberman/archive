@@ -37,7 +37,7 @@
 
 CB-ab-1 (r28, worker `~53` @56130ece96, rows W53-S2..S4):
 - MATCH went from 3,098 to 3,133;
-- regressions = 4, all unexplained: B3S728504 and B3S728506, months 2023-05 and 2023-06; dividend dating is suspected.
+- regressions = 4, all unexplained: acct#79d02c2c and acct#4a890dd1, months 2023-05 and 2023-06; dividend dating is suspected.
 
 **Ruling: the hold on the mint is LIFTED, on these conditions.**
 1. **The 4 named account-months are BLANKED,** never served with a value. In `daily_returns` and `account_day_value` they read ABSENT, with the

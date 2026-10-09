@@ -22,7 +22,7 @@ RESIDUALS explained=5 of 5 sign_gap=0 vendor_rounding=4 source_gap=1
 | 2026-05-29 | DVRX | 3.456 | -3.456 |
 | 2026-06-02 | sl | 861.008 | -861.008 |
 
-## B3S605716 07399D345 -- VENDOR_ROUNDING
+## acct#9bd1ed4d 07399D345 -- VENDOR_ROUNDING
 
 - rebuilt quantity 0.00086, snapshot 0.00086, last transaction 2026-06-18, 8 rows
 - reason: in 104959.54 over 2 rows, out 104959.5391 over 6 rows, net 0.0008599999965; last out row lo 32000.164 on 2026-06-18 against 32000.16486 held before it (it carries 3 decimals, the rows reach 5); snapshot holds 0.00086 (equal to the rebuild)
@@ -38,7 +38,7 @@ RESIDUALS explained=5 of 5 sign_gap=0 vendor_rounding=4 source_gap=1
 | 2025-09-30 | CAF | -725.21235 | -725.21235 |
 | 2026-06-18 | lo | 32000.164 | -32000.164 |
 
-## B3S622848 07399D345 -- VENDOR_ROUNDING
+## acct#87772861 07399D345 -- VENDOR_ROUNDING
 
 - rebuilt quantity 0.00086, snapshot 0.00086, last transaction 2026-06-02, 6 rows
 - reason: in 52479.77 over 1 rows, out 52479.76914 over 5 rows, net 0.0008599999965; last out row lo 32000.164 on 2026-06-02 against 32000.16486 held before it (it carries 3 decimals, the rows reach 5); snapshot holds 0.00086 (equal to the rebuild)
@@ -52,7 +52,7 @@ RESIDUALS explained=5 of 5 sign_gap=0 vendor_rounding=4 source_gap=1
 | 2025-09-30 | CAF | -725.21235 | -725.21235 |
 | 2026-06-02 | lo | 32000.164 | -32000.164 |
 
-## B3S706372 74440B405 -- VENDOR_ROUNDING
+## acct#3b5864a2 74440B405 -- VENDOR_ROUNDING
 
 - rebuilt quantity 0.02, snapshot 0.02, last transaction 2026-06-02, 153 rows
 - reason: in 1274.921 over 75 rows, out 1274.901 over 11 rows, net 0.02; last out row sl 607.405 on 2026-06-02 against 607.425 held before it (it carries 3 decimals, the rows reach 3); snapshot holds 0.02 (equal to the rebuild)
@@ -68,7 +68,7 @@ RESIDUALS explained=5 of 5 sign_gap=0 vendor_rounding=4 source_gap=1
 | 2026-05-29 | DVRX | 2.438 | -2.438 |
 | 2026-06-02 | sl | 607.405 | -607.405 |
 
-## RGY007151 60934N500 -- SOURCE_GAP
+## acct#2f33cbcc 60934N500 -- SOURCE_GAP
 
 - rebuilt quantity 0.003, snapshot 0.003, last transaction 2025-10-08, 1 rows
 - reason: every signed row brings shares in (1 rows, 0.003 in) and no row in the delivery takes the fraction out; snapshot holds 0.003 (equal to the rebuild)

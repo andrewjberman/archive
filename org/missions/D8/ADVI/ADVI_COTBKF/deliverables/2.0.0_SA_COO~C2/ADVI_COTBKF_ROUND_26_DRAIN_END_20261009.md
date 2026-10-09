@@ -31,7 +31,7 @@ ASF is NO-SOURCE.
 
 ## What the round found
 
-- **ASF: NO-SOURCE.** There are 6 rows, all in one account (B3S606537), dated 2019-01-18..22, netting to 0.00. 3 pair with a same-day
+- **ASF: NO-SOURCE.** There are 6 rows, all in one account (acct#8e3fbc63), dated 2019-01-18..22, netting to 0.00. 3 pair with a same-day
   `ManAltF` reversal; 3 pair with nothing. The CRO's research names ASF on 0 lines. The rule (a document, or every row paired) was fixed
   before the run, so ASF stays internal.
 - **The census of all 82,593 graded months:** MATCH 3,098 (3.75%).

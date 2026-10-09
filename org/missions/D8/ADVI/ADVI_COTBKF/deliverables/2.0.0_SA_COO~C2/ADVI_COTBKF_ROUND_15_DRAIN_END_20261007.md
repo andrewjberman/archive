@@ -7,12 +7,12 @@ Round 15 was cut as one issuance (@d6f1f583f0, `fanout: 1 of 1 chains, cap 8`) o
 
 | order | worker | drain | criteria | real run on dell2 (shared tree, after the drain) |
 |---|---|---|---|---|
-| CB-o-1 near-match page from the served crosswalk | ~31 | @cb6c7d6cd5 | VALID: AC1 PASS, AC2 3 passed (served-vs-generator control) | `NEAR-MATCH-PAGE near_matches=22 served_equals_generator=True crosswalk_version=wv5z6zeRnWQrPGfO3UcmrxlIaz3ozzLZ entered=1 left=0 entered_accounts=0QF879245` |
+| CB-o-1 near-match page from the served crosswalk | ~31 | @cb6c7d6cd5 | VALID: AC1 PASS, AC2 3 passed (served-vs-generator control) | `NEAR-MATCH-PAGE near_matches=22 served_equals_generator=True crosswalk_version=wv5z6zeRnWQrPGfO3UcmrxlIaz3ozzLZ entered=1 left=0 entered_accounts=acct#8179a706` |
 
 **The page:** `deliverables/0.9.0_WK_ADVI_COTBKF~31/near_matches.{csv,md}` -- 22 entries; all 21 of round 4's kept; 0 left.
 
 **The entering entry (the CTO's control, criterion 2), completed by the issuer from the served history:** the worker could not give
-0QF879245's score before (the round-4 page lists only in-band accounts). The previous served crosswalk version, kept by bucket versioning,
+acct#8179a706's score before (the round-4 page lists only in-band accounts). The previous served crosswalk version, kept by bucket versioning,
 gives it:
 
 | crosswalk VersionId | status | score | reason_code |

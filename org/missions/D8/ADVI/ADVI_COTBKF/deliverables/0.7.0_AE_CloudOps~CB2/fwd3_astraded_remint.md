@@ -113,8 +113,8 @@ key was deleted — which also leaves the CTO half's human-confirmation conditio
   `05613L3H2` / `651639AX4` / `95000U2D4`. No 49F-contaminated price reaches a served value (D2-S52).
   They re-enter only through the ADDENDUM 10 rewrite plus a later delta — not this cell.
 - **5 ABSENT months**, reason `REGRESSED_UNDER_AS_TRADED`, `manifest_list_same=True`, each
-  `computed=ABSENT return=ABSENT verdict=ABSENT`: 0QF878956 2022-03 (23 days / 253 holding rows),
-  0QF878956 2022-08 (23/253), B3S793726 2026-03 (22/220), D49151054 2021-07 (21/21), D49151054 2021-10
+  `computed=ABSENT return=ABSENT verdict=ABSENT`: acct#aaeb760c 2022-03 (23 days / 253 holding rows),
+  acct#aaeb760c 2022-08 (23/253), acct#f78e8ecd 2026-03 (22/220), D49151054 2021-07 (21/21), D49151054 2021-10
   (21/42). `absent_months=5` was the amendment's bar and it is met on the nose — a 4 or a 6 was a STOP.
   The CTO's "a named row per month" condition is already met upstream by rows D2-S53..S57.
 - **The reader gate stays CLOSED.** This seat granted nothing.

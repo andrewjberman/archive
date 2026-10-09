@@ -37,14 +37,14 @@ Identical to the worker's line. The arms are v1 with the round-19 cash leg (`r19
   | `core` | 0 of 16 |
   | all movers | 25 of 163 |
 
-  - The traced D49141714 2019-02 returned to MATCH; RGY005018 2024-12 is still DIFF (-8.8079 vs -8.02).
+  - The traced D49141714 2019-02 returned to MATCH; acct#65b3b3ea 2024-12 is still DIFF (-8.8079 vs -8.02).
   - All 138 remaining movers are named in `deliverables/0.9.0_WK_ADVI_COTBKF~43/sweep_regrade.md`.
 - **A second mechanism (row W43-S1):** dividend rows (cash in) fund sweep buys, and fee rows `man`/`fch` (cash out) are paid by sweep
   sales, with no matching cash leg.
   - Of the 122 `neither` movers still DIFF, 94 carry such a row on a sweep-trade day.
   - No non-sweep sale falls on a sweep-trade day inside any of the 147 `neither` months, so the 25 that returned are carried-balance
     months.
-- **Regressions:** 23 months moved MATCH -> DIFF between the arms, 19 of them in accounts 0QF879130 and 0QF879352. They are named, and
+- **Regressions:** 23 months moved MATCH -> DIFF between the arms, 19 of them in accounts acct#c42b98c0 and acct#05dd4a9d. They are named, and
   their cause is not measured.
 - **Whole grade:** MATCH 2,057 -> 2,103; DIFF 1,522 -> 1,520; UNGRADABLE 79,014 -> 78,970. The control is 642 of 642 unchanged.
 - **E2:** both mover scripts check the list version recorded in the persisted grades and refuse a mismatch:
