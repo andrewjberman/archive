@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_COTBKF.TO-CB-z-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-z-3.endpoint-read.md",
+    "group": "OTHER",
+    "vintage_commit": "67792182ce"
+  },
+  "assignee": "0.9.0_WK_ADVI_COTBKF~49",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_COTBKF/decompositions/ADVI_COTBKF_DECOMP.round26.md",
+    "vintage_commit": "67792182ce",
+    "to_ref": "org/missions/D8/ADVI/ADVI_COTBKF/task-orders/ADVI_COTBKF.TO-CB-z-3.endpoint-read.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~49/ENDPOINT_READ_20261009.md",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only endpoint read; nothing deployed, no S3 write",
+      "artifact_covered_by": [
+        "CB26z3-AC1",
+        "CB26z3-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CB26z3-AC1",
+      "criterion_verbatim": "python -c (count of '| FWD-n | REALIZED|NOT |' rows) expect: fwd_rows=9",
+      "method": "command",
+      "invocation": "python -c \"import sys,re;t=open(sys.argv[1],encoding='utf-8').read();r=sorted(set(re.findall(r'^\\| FWD-([1-9]) \\| (REALIZED|NOT) \\|',t,re.M)));print('fwd_rows=%d'%len({a for a,_ in r}))\" org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~49/ENDPOINT_READ_20261009.md",
+      "expect": "fwd_rows=9",
+      "output_evidence": "fwd_rows=9 (rc 0). 4 REALIZED (FWD-1,5,6,8), 5 NOT (FWD-2,3,4,7,9).",
+      "denominator": "9 of 9 FWD rows present",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CB26z3-AC2",
+      "criterion_verbatim": "JUDGMENT: each row's instrument was run now and its evidence measured",
+      "method": "manual_read_with_citation",
+      "invocation": "read ENDPOINT_READ_20261009.md; instrument column per row",
+      "expect": "judgment, graded by 3.0.0_SA_CVO at L9",
+      "output_evidence": "PENDING-ADJUDICATION: nine rows, instruments and outputs recorded verbatim in the deliverable; no verdict given",
+      "denominator": "9 of 9 rows carry an instrument and measured evidence",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "PENDING-ADJUDICATION: judgment=\"true\" criterion, graded by 3.0.0_SA_CVO at L9 and never self-graded; the worker records output only"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 regex run twice on the same file",
+      "observed": "fwd_rows=9 both times",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "AC1 regex run on a copy with one FWD row deleted",
+      "expected": "fwd_rows=8",
+      "observed": "fwd_rows=8 on the copy without the FWD-9 row (run), so the check fires on a missing row",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "restricted CRM prefix and bucket-policy read",
+      "reason": "barred by the order; FWD-4 and FWD-7 read NOT with that reason"
+    },
+    {
+      "item": "rebuild of the daily returns with method_r25",
+      "reason": "read-only order; FWD-3 reports the local file as measured, row ADVI_COTBKF-D2-W49-S1"
+    }
+  ],
+  "surprises": [
+    "ADVI_COTBKF-D2-W49-S1"
+  ],
+  "session_log": "org/missions/D8/ADVI/ADVI_COTBKF/deliverables/0.9.0_WK_ADVI_COTBKF~49/ADVI_COTBKF.TO-CB-z-3.endpoint-read.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -c AC1 regex over ENDPOINT_READ_20261009.md",
+      "result": "fwd_rows=9"
+    }
+  ]
+}
