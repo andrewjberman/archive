@@ -31,7 +31,13 @@ For each key, copy the prior VersionId above back as the current version:
 ## 3. The build to apply (filled from CB-ah-2; empty = not given)
 
 - build commit / run_commit: `<from CB-ah-2>`
-- `--hold-cusips`: `<from CB-ah-1's class: none if own_firm; the three bd_txn_price CUSIPs if cross_firm or unresolved>`
+- `--hold-cusips`: **`05613L3H2,95000U2D4,651639AX4`.**
+  - Basis: CB-ah-1 classes the writer `cross_firm` (drained @248cb44fa0; issuer re-run matches), and CTO ADDENDUM 9 holds the served
+    `bd_txn_price` objects from the rebuild until they are re-sourced.
+  - Issuer read of the repo: the store's prices for these CUSIPs (1.0188 / 0.9804 / 0.9037) are the constants in 49 Financial's
+    `data/black_diamond/scripts/silver/scoped_price_exceptions.json`. `data/cot/scripts/gold/build_canonical_prices_v2.py:22-24` states
+    that cot does not run that inject.
+  - Their holding-days build BLANK, with reason `HELD_SOURCE_UNDER_REVIEW`.
 - price input `.scratch/advi_cotbkf/r34_price_input.parquet` sha256: `<from CB-ah-2>`
 - per table, rows and content hash from `--dry-run`: `<from CB-ah-2>`
 - ABSENT list (reason `REGRESSED_UNDER_<rule>`): `<from CB-ah-2>`
