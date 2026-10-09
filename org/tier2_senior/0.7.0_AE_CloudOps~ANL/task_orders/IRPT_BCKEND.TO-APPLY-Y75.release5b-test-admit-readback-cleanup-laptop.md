@@ -2,11 +2,12 @@
   <metadata>
     <id>IRPT_BCKEND.TO-APPLY-Y75.release5b-test-admit-readback-cleanup-laptop</id>
     <issued_by>2.0.0_SA_COO~C</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~ANL</issued_to>
     <date>2026-10-09</date>
     <status>pending</status>
     <project_code>IRPT_BCKEND</project_code>
   </metadata>
+
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <decomp_ref>
@@ -42,6 +43,14 @@
     Return `owner_checks` as THREE BOOLEANS (firm, class, label) beside the other two read-back booleans. No email, principal id or hash is
     echoed. Any False is the finding: nothing is deleted. All True means the 9 deletes, under the approval @35fabf20c8. Everything else is
     unchanged.
+  </amendment>
+
+  <amendment>
+    RE-ADDRESSED (issuer, 2026-10-09 ~14:5xZ) from base 0.7.0_AE_CloudOps (deaf since 09:29Z) to 0.7.0_AE_CloudOps~ANL, for ONE remaining
+    act: the proof-of-spec instance. The cleanup itself is DONE by the base seat at 10:10Z (ledger closed @1299ad2367) and read back live by
+    the issuer (DDB_LEFT=0 over 7, VERSIONS_LEFT=0 over 2). The new lane deletes NOTHING: it runs AC1 exactly as written (a read), writes
+    `org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/IRPT_BCKEND.TO-APPLY-Y75.release5b-test-admit-readback-cleanup-laptop.proof_of_spec.json`
+    in the Y68 instance's form, validates it, commits, and sends the hash. The issuer flips the status.
   </amendment>
 
   <objective>
@@ -86,8 +95,8 @@
   <paths>
     org/critical_paths/change_management/
     org/critical_paths/.open_deploys/
-    org/tier2_senior/0.7.0_AE_CloudOps/deliverables/
-    org/tier2_senior/0.7.0_AE_CloudOps/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~ANL/logs/
     org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/r75/
   </paths>
 
