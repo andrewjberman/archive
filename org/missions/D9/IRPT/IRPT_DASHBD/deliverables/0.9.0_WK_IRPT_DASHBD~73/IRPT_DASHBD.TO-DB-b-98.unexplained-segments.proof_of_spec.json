@@ -1,0 +1,97 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-98",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e8f96f579c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "cf393fccca",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-98.unexplained-segments.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_DASHBD~73",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~73/UNEXPLAINED_CLASSIFIED.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~73/classify_unexplained.py",
+   "kind": "script",
+   "commit_or_etag": "145eb673c6",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only classifier over the V2 tie-out inputs (S3 GETs); no deploy by this order",
+   "artifact_covered_by": [
+    "DB48-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~73/UNEXPLAINED_CLASSIFIED.json",
+   "kind": "config_data",
+   "commit_or_etag": "145eb673c6",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record the checker reads",
+   "artifact_covered_by": [
+    "DB48-1-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~73/REASON_SET_RULE24.md",
+   "kind": "doc",
+   "commit_or_etag": "145eb673c6",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the rule-24 record the checker requires at HEAD",
+   "artifact_covered_by": [
+    "DB48-1-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB48-1-AC1",
+   "criterion_verbatim": "DB48-1-AC1 -- the 990 outside segments sum over a declared reason set with no UNEXPLAINED, and each of the 510 is reasoned or a filed defect. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r48/p48_round48.py\" . DB48-1-AC1",
+   "output_evidence": "OK: 990 outside classified over 10 reasons; 510 formerly unexplained\nDB48-1-AC1 PASS",
+   "denominator": "990 of 990 V2 OUTSIDE segments counted in by_reason (449 FLOW_TIMING, 26 INCOME_DATE, 4 COVERAGE_DAYS, 1 MISSING_PRICE, 156 NEAR_ZERO_BASE, 96 BOUNDARY_VALUE_GAP, 45 ZERO_GAIN_VENDOR_TWR, 3 FLOW_CONVENTION_ENVELOPE, 13 WINDOW_ONE_DAY_SHIFT, 197 DEFECT); 510 of 510 V2-UNEXPLAINED segments classified, 510 distinct; 197 DEFECT segments name rows IRPT_DASHBD-D2-W73-S1 (74) and -S2 (123), both present in the channel; exit code 0",
+   "status": "PASS",
+   "expect": "DB48-1-AC1 PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the checker reads the committed record, V2 and the channel; no run state",
+   "observed": "printed the same last line on a second read",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The checker against a copy of the record whose by_reason carries an UNEXPLAINED key (NEAR_ZERO_BASE renamed).",
+   "expected": "DB48-1-AC1 FAIL",
+   "observed": "FAIL: by_reason keys [...] outside reason_set; DB48-1-AC1 FAIL (rc 1)",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the cause of the 197 DEFECT segments",
+   "reason": "Not determinable from the inputs; filed as rows IRPT_DASHBD-D2-W73-S1 and -S2 as the order directs."
+  },
+  {
+   "item": "vendor call, secret read, S3 write, deploy, bun, download, backend edit",
+   "reason": "Bounds of the order; none made (S3 GETs only)."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-D2-W73-S1",
+  "IRPT_DASHBD-D2-W73-S2",
+  "IRPT_DASHBD-D2-W73-S3"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "ruff via .tools/commit-gate.sh",
+   "invocation": "bash .tools/safe-commit.sh ... (py_compile + ds-precommit + ruff)",
+   "result": "passed on the first commit"
+  }
+ ]
+}
