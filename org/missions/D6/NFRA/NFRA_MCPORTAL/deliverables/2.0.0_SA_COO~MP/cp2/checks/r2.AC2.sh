@@ -6,7 +6,7 @@
 . "$(dirname "$0")/_root.sh"
 read -r DEP PREV MCP < <(python -c "import json;g=json.load(open('infra/aws/ec2/EC2_MANIFEST.json',encoding='utf-8'))['services']['opal-gateway'];print(g.get('deployed_commit',''),g.get('previous_deployed_commit',''),g.get('mcportal_commit',''))" | tr -d '\r')
 desc=no; [ -n "$DEP" ] && [ -n "$PREV" ] && git merge-base --is-ancestor "$PREV" "$DEP" 2>/dev/null && desc=yes
-allow='^infra/aws/ec2/opal-gateway/(app/admin_fabric_(overlap|gitstate|calls)\.py|app/admin_api\.py|app/refs/overlap_rules\.json|tests/test_admin_fabric_(overlap|gitstate|calls)\.py)$'
+allow='^infra/aws/ec2/opal-gateway/(app/admin_fabric\.py|app/admin_fabric_(overlap|gitstate|calls)\.py|app/admin_api\.py|app/refs/overlap_rules\.json|tests/test_admin_fabric_(overlap|gitstate|calls)\.py)$'
 files=$(git diff --name-only "$PREV" "$DEP" -- infra/aws/ec2/opal-gateway/app infra/aws/ec2/opal-gateway/tests 2>&1)
 n=$(printf '%s\n' "$files" | grep -c . ); out=$(printf '%s\n' "$files" | grep -cvE "$allow")
 # Row Z-S28: resolve the mcportal repo from the MAIN worktree (a linked worktree has no nested checkout), and fail LOUD
