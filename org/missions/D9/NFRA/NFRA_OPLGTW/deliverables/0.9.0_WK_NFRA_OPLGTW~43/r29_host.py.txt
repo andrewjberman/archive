@@ -1,0 +1,196 @@
+"""OG-rl-15 host program: the r29 behaviours of the code in OG_GW_DIR (default the INSTALLED /opt/opal-gateway), read as a SEPARATE process
+(never the running service, never /opt/opal-gateway/.env sourced). Run by r29_ssm_prog.py under `env -i` from a per-run scratch directory that is
+removed in the same command list. argv: <mode> [<served release sha> [<signed domain entries> [<signed bloomberg tools> [<revoked families>]]]]
+modes: before (installed r28 code) | rehearsal (staged release bytes, installed tree untouched) | after (installed release code).
+
+What it reads, all in process, none of it a write:
+  tools                    the registered tool count (the code's own register_enabled over the host's ENABLED_INTEGRATIONS)
+  scoped_scope_count       the scoped concierge's consent scopes (build_consent_url for the code's seed identity, held in a variable, never printed)
+  asker_query_class        destructive_ops.classify("opal_asker_query")["class"].name  (R54: SAFE)
+  asker_query_write_class  destructive_ops.write_class("opal_asker_query")             (R54: None)
+  unclassified_registered_tools  registered tools whose classify() is the fail-closed unknown tag (R54: 0)
+  send_gate_in_oauth_as    hasattr(oauth_as, "SendGate")                                (R50)
+  calendar_months_max      the largest n in 0..20 that data_entitlement.parse_scope accepts as a rolling grant's calendar_months (13; 0 when none is)
+  contract_version         deploy/NFRA_OPLGTW_CONTRACT.json contract_version           (1.4)
+  mail_domain_entries      len(mail_route.domain_table()) after the deploy's own sed/paste pipeline over deploy/mail_sender_domain_table.txt
+  bloomberg_tools_allowed  how many of the SIGNED concierge tools identity_scope.check admits for the seed identity (A2/A3)
+Synthetic inputs only: no principal, no tool call, no /login, no Graph or AWS call, no grant, no state-store access, no lake object.
+Prints booleans, counts and tool names; never an id, token, address or credential."""
+import asyncio
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+
+SECTION = os.environ.get("R28_SECTION", "")
+GW = os.environ.get("OG_GW_DIR") or "/opt/opal-gateway"
+staged = GW != "/opt/opal-gateway"
+mode = sys.argv[1] if len(sys.argv) > 1 else "before"
+served = sys.argv[2] if len(sys.argv) > 2 else ""
+signed_domains = int(sys.argv[3]) if len(sys.argv) > 3 else -1
+signed_tools = [t for t in (sys.argv[4].split(",") if len(sys.argv) > 4 else []) if t]
+revoked = int(sys.argv[5]) if len(sys.argv) > 5 else -1
+SCR = os.environ["R28_SCRATCH"]
+FIVE = ["opal_discover", "opal_describe", "find_sharepoint_site", "search_files", "blackdiamond_list_fees"]
+
+
+def emit(tag, obj):
+    print(tag + " " + json.dumps(obj, sort_keys=True))
+
+
+def domain_table_value():
+    """The deploy script's own pipeline over the shipped file: drop comment and blank lines, trim, join with commas."""
+    p = os.path.join(GW, "deploy", "mail_sender_domain_table.txt")
+    if not os.path.isfile(p):
+        return None
+    out = []
+    for ln in open(p, encoding="utf-8").read().replace("\r", "").split("\n"):
+        s = ln.strip()
+        if s and not s.startswith("#"):
+            out.append(s)
+    return ",".join(out)
+
+
+def main_section():
+    env = {}
+    for line in open("/opt/opal-gateway/.env", encoding="utf-8"):
+        m = re.match(r"^([A-Za-z0-9_]+)=(.*)$", line.rstrip("\r\n"))
+        if m:
+            v = m.group(2)
+            if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+                v = v[1:-1]
+            env[m.group(1)] = v
+    env_has_domain_key = "MAIL_SENDER_DOMAIN_TABLE" in env
+    os.environ.update(env)
+    sys.path.insert(0, GW)
+    pid = subprocess.check_output(["systemctl", "show", "opal-gateway", "-p", "MainPID", "--value"]).decode().strip()
+    enabled = ""
+    for kv in open("/proc/%s/environ" % pid, "rb").read().split(bytes([0])):
+        if kv.startswith(b"ENABLED_INTEGRATIONS="):
+            enabled = kv.split(b"=", 1)[1].decode("utf-8", "replace")
+    os.environ.update({"ENABLED_INTEGRATIONS": enabled, "MOCK_GRAPH": "1", "AUDIT_PATH": os.path.join(SCR, "r29_audit.jsonl"), "RATE_LIMIT_ENABLED": "0",
+                       "TOKEN_CACHE_DIR": os.path.join(SCR, "tokcache"), "IDENTITY_TOOL_ALLOWLIST_PATH": os.path.join(GW, "identity_tool_allowlist.txt")})
+    os.makedirs(os.environ["TOKEN_CACHE_DIR"], exist_ok=True)
+    os.environ.pop("AUDIT_S3_BUCKET", None)
+    if staged:                      # the rehearsal reads the table the staged release would ship, through the deploy's own pipeline
+        dv = domain_table_value()
+        if dv is not None:
+            os.environ["MAIL_SENDER_DOMAIN_TABLE"] = dv
+    import dotenv
+    dotenv.load_dotenv = lambda *a, **k: False
+    from mcp.server.fastmcp import FastMCP
+    from app import audit, identity_scope, token_broker, tools, integrations, destructive_ops, oauth_as, mail_route
+    from app import data_entitlement as de
+    import urllib.parse
+    assert not audit._cfg.AUDIT_S3_BUCKET, "AUDIT_S3_BUCKET must be empty"
+    SC = sorted(identity_scope._SEED)[0]            # the scoped concierge's seed identity; held in a variable, never printed
+    integrations.register_enabled(tools.mcp, enabled.split())
+    names = sorted(t.name for t in asyncio.run(FastMCP.list_tools(tools.mcp)))
+    q = urllib.parse.parse_qs(urllib.parse.urlparse(token_broker.build_consent_url(token_broker.make_state(SC))).query)
+    consent = sorted(set(" ".join(q.get("scope", [])).split()) - {"openid", "profile", "offline_access"})
+    unknown = getattr(destructive_ops, "_UNKNOWN_TAG", None)
+    unclassified = [n for n in names if destructive_ops.classify(n) == unknown]
+    asker_cls = destructive_ops.classify("opal_asker_query")["class"]
+    asker_wc = destructive_ops.write_class("opal_asker_query")
+    print("R29_CODE destructive_ops.py md5 %s source=%s oauth_as.py md5 %s identity_tool_allowlist md5 %s" % (
+        hashlib.md5(open(destructive_ops.__file__, "rb").read()).hexdigest()[:8], "stage" if staged else "installed",
+        hashlib.md5(open(oauth_as.__file__, "rb").read()).hexdigest()[:8],
+        hashlib.md5(open(os.path.join(GW, "identity_tool_allowlist.txt"), "rb").read()).hexdigest()[:8]))
+    print("R29_TOOLS registered=%d consent_scopes=%d unclassified=%d %s" % (len(names), len(consent), len(unclassified), unclassified))
+    print("R29_ASKER class=%s write_class=%r in_SAFE_TOOLS=%s" % (asker_cls.name, asker_wc, "opal_asker_query" in destructive_ops.SAFE_TOOLS))
+    # R50: the send gate
+    gate = hasattr(oauth_as, "SendGate")
+    print("R29_SENDGATE present=%s" % gate)
+    # PRD v2.0 item 4: calendar_months through the code's own strict parser
+    accepted = []
+    for n in range(0, 21):
+        raw = {"masters": ["08242234"], "datasets": ["dim_position"], "accounts": {"08242234": ["ACC1"]},
+               "dates": {"mode": "rolling_complete_window", "calendar_months": n},
+               "columns": {"dim_position": ["account_ref", "business_date", "cusip"]}, "operations": ["list", "describe"]}
+        try:
+            sc = de.parse_scope(raw)
+            if getattr(sc, "calendar_months", None) == n:
+                accepted.append(n)
+        except Exception:               # noqa: BLE001 -- Malformed, or an older parser refusing the unknown key
+            pass
+    cmax = max(accepted) if accepted else 0
+    print("R29_MONTHS accepted=%s max=%d (14 refused: %s)" % (accepted, cmax, 14 not in accepted))
+    cv = json.load(open(os.path.join(GW, "deploy", "NFRA_OPLGTW_CONTRACT.json"), encoding="utf-8")).get("contract_version")
+    print("R29_CONTRACT version=%s" % cv)
+    # PRD v1.9 C7: the domain table, through the route's own reader and its own admission test
+    has_dt = hasattr(mail_route, "domain_table")
+    entries = sorted(mail_route.domain_table()) if has_dt else []
+    probes = {}
+    if has_dt:
+        for d in entries:
+            ok_exact = mail_route.sender_allowed({"from": {"emailAddress": {"address": "someone@" + d}}})
+            ok_sub = mail_route.sender_allowed({"from": {"emailAddress": {"address": "someone@sub." + d}}})
+            ok_suffix = mail_route.sender_allowed({"from": {"emailAddress": {"address": "someone@x" + d}}})
+            probes[d] = [bool(ok_exact), bool(ok_sub), bool(ok_suffix)]
+        probes["demo.test"] = [bool(mail_route.sender_allowed({"from": {"emailAddress": {"address": "someone@demo.test"}}}))]
+    admitted_only_exact = has_dt and all(v == [True, False, False] for k, v in probes.items() if k != "demo.test") and probes.get("demo.test") == [False]
+    print("R29_DOMAINS table_reader_present=%s env_key_in_installed_env=%s entries=%d signed=%d exact_only_and_demo_refused=%s" % (
+        has_dt, env_has_domain_key, len(entries), signed_domains, admitted_only_exact))
+    print("R29_DOMAIN_LIST %s" % ",".join(entries))
+    # A2/A3: the concierge's allowlist through the code, and what the C2 data grant says about each tool for a principal with NO profile
+    per = {}
+    for t in FIVE:
+        reason = identity_scope.check(SC, t)
+        noprof = de.decide(t, de.Access(False, None, None, frozenset())) if hasattr(de, "Access") else "n/a"
+        per[t] = {"identity_allowlist_admits": reason is None, "c2_grant_gates_no_profile": noprof is not None,
+                  "destructive_ops_class": destructive_ops.classify(t)["class"].name, "registered": t in names}
+        print("R29_BBG %s allowlist_admits=%s registered=%s ops_class=%s c2_data_grant_denies_a_no_profile_principal=%s" % (
+            t, per[t]["identity_allowlist_admits"], per[t]["registered"], per[t]["destructive_ops_class"], per[t]["c2_grant_gates_no_profile"]))
+    allowed = sum(1 for t in signed_tools if per.get(t, {}).get("identity_allowlist_admits"))
+    emit("R29_MAIN_JSON", {"tools": len(names), "scoped_scope_count": len(consent), "asker_query_class": asker_cls.name, "asker_query_write_class": asker_wc,
+                           "unclassified_registered_tools": len(unclassified), "send_gate_in_oauth_as": gate, "calendar_months_max": cmax,
+                           "contract_version": cv, "mail_domain_entries": len(entries), "bloomberg_tools_allowed": allowed,
+                           "domain_probe_ok": bool(admitted_only_exact)})
+
+
+if SECTION == "main":
+    main_section()
+    sys.exit(0)
+
+
+def child():
+    env = dict(os.environ)
+    env["R28_SECTION"] = "main"
+    p = subprocess.run([sys.executable, os.path.abspath(sys.argv[0])] + sys.argv[1:], env=env, capture_output=True, text=True)
+    tag = "R29_MAIN_JSON "
+    sys.stdout.write("\n".join(l for l in p.stdout.split("\n") if not l.startswith(tag)) + "\n")
+    if p.returncode != 0:
+        print("R29_CHILD_FAIL rc=%d stderr_tail=%s" % (p.returncode, re.sub(r"[0-9a-fA-F-]{36}", "<guid>", p.stderr[-600:]).replace("\n", " | ")))
+    for l in p.stdout.split("\n"):
+        if l.startswith(tag):
+            return json.loads(l[len(tag):])
+    return None
+
+
+m = child()
+if not m:
+    print("RESULT: FAIL (the section did not report)")
+    sys.exit(1)
+body = {"served_release": served, "installed_code": not staged, "tools": m["tools"], "scoped_scope_count": m["scoped_scope_count"],
+        "asker_query_class": m["asker_query_class"], "asker_query_write_class": m["asker_query_write_class"],
+        "unclassified_registered_tools": m["unclassified_registered_tools"], "send_gate_in_oauth_as": m["send_gate_in_oauth_as"],
+        "calendar_months_max": m["calendar_months_max"], "contract_version": m["contract_version"],
+        "mail_domain_entries": m["mail_domain_entries"], "mail_domain_entries_signed": signed_domains,
+        "concierge_families_revoked_since_deploy": revoked, "bloomberg_tools_allowed": m["bloomberg_tools_allowed"],
+        "bloomberg_tools_signed": len(signed_tools), "grants_written": 0}
+s = json.dumps(body, sort_keys=True)
+dig = hashlib.sha256(s.encode("utf-8")).hexdigest()
+if mode == "before":
+    emit("RL15_BEFORE_BODY", body)
+elif staged:
+    print("RL15_REHEARSAL_BODY " + s)
+    print("RL15_REHEARSAL_DIGEST " + dig)
+    b2 = dict(body, installed_code=True, concierge_families_revoked_since_deploy=0)     # form step 7: a STAND-IN so the criterion's instrument is exercised BEFORE GO
+    s2 = json.dumps(b2, sort_keys=True)
+    print("STEP7_STANDIN RL15_BODY " + s2)
+    print("STEP7_STANDIN RL15_DIGEST " + hashlib.sha256(s2.encode("utf-8")).hexdigest())
+else:
+    print("RL15_BODY " + s)
+    print("RL15_DIGEST " + dig)
