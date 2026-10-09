@@ -139,7 +139,7 @@ all sixteen:
    destructive git, dropping tables/S3 deletes, stopping EC2, anything unrecoverable"), so no
    agent seat can be its terminal owner alone. Nothing was minted, scheduled or deleted by
    recording that. See THE OWNER FINDING below.
-8. `opal-data-refresh-lambda-role` -- EXEMPT owner=NO-ACCEPTING-SEAT reason=production serving-path role
+8. `opal-data-refresh-lambda-role` -- EXEMPT owner=0.7.0_AE_CloudOps~Z reason=production serving-path role
    (backs the deployed `opal-data-refresh-api` Lambda via a literal `role_arn`,
    `infra/aws/terraform/data-refresh/main.tf:38`) that Terraform already touches through five
    `aws_iam_role_policy` attachments explicitly naming it "the pre-existing
@@ -158,6 +158,19 @@ all sixteen:
    at `infra/aws/terraform/data-refresh/zz_adoption_candidate.tf.proposed:29-30` (`IAM-r-5`) -- so
    what is missing on this row is not the work, it is a seat that has accepted it. See THE OWNER
    FINDING below.
+   ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: I take custody of this role AND of the adoption
+   decision for it, on evidence re-measured live today rather than inherited -- all THREE Lambdas in
+   the data-refresh root (`opal-data-refresh-api`, `opal-data-refresh-api-qa-scratch`,
+   `portal-time-machine`) assume this role, and all FIVE of its live inline policies are declared in
+   this module, so this module is its custody home; I deployed through it today under
+   `NFRA_OPLGTW.TO-OG-da-1` and the role was unchanged by both applies. WHAT I DO NOT ACCEPT BY THIS
+   COMMIT: the apply. Moving the inert text into a live `.tf` is a separate WORLD act under its own
+   never-widen pair, and I would not apply it as written until that pair names ADOPTION_PLAN section
+   7's two non-travelling items -- the state key it lands in and the provider `default_tags` it
+   inherits. CITATION NOTE: the count of five is confirmed against the live role (5 inline, 1 attached
+   managed), but this row's LINE cites have aged -- the five are now `main.tf:60`, `:82`, `:101`,
+   `:140` and `qa-scratch-instance.tf:53`, and 17 lines of that last shift are MINE, from the OG-da-1
+   qa-scratch pin at `99c3b4c1b1`. The substance is unaffected at any line number.
 9. `opal-smartx-lambda-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
@@ -172,7 +185,7 @@ all sixteen:
    manifest (`infra/aws/manifests/lambda/opal-portal-functions.yaml:138,736-737`). An inventory entry
    describes the role; it is not a decision to except it from Terraform, so FWD-4's exemption bar is
    not met.
-10. `portal-auth-lambda-role` -- EXEMPT owner=NO-ACCEPTING-SEAT reason=production serving-path role per
+10. `portal-auth-lambda-role` -- EXEMPT owner=0.7.0_AE_CloudOps~Z reason=production serving-path role per
     IAM-s-5's own character note ("PRODUCTION SURFACES ON THE SERVING PATH ... a much heavier
     claim"), and unlike `opal-data-refresh-lambda-role` this one has ZERO Terraform source touch at
     all (fresh comp-iam parse: absent; `comp-find infra/ --all`: only world-model census/inventory
@@ -187,6 +200,16 @@ all sixteen:
     (`infra/aws/terraform/data-refresh/zz_adoption_candidate.tf.proposed:66-67`, `IAM-r-5`, whose
     own row `Z-W6-S1` records that this module is the wrong custody home for it). See THE OWNER
     FINDING below.
+    ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: I take custody of this role AND of the adoption
+    decision for it -- portal-auth is a surface this seat owns -- and I re-measured it live today: 1
+    inline policy (`jwt-public-key-secret`), 1 attached managed policy
+    (`AWSLambdaBasicExecutionRole`), `RoleLastUsed` EMPTY, created 2026-02-19T16:00:39Z, max session
+    3600, description "Scoped Lambda role - created 2026-02-19 IAM audit" -- every value matching the
+    inert text. WHAT I DO NOT ACCEPT BY THIS COMMIT: the apply, and separately the PLACEMENT. This
+    module is the wrong custody home by row `Z-W6-S1`'s own finding; that open call is NOT settled
+    here, because accepting custody of a role is not a decision about which module declares it. I also
+    accept NO narrowing on the back of the zero-usage reading: `C-TWO-REMEDIES` binds, and a role that
+    has never been used is not evidence that a permission is unneeded.
 11. `portfolio-management-lambda-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
     `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
     exists and is busy, and NO seat in it has accepted this row -- a measured search, not an

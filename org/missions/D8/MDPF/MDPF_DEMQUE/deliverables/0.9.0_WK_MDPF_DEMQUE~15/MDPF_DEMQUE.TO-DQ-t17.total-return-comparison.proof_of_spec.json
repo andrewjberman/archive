@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t17",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t17.total-return-comparison.md",
+    "group": "OTHER",
+    "vintage_commit": "79b1ad21d2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "79b1ad21d2",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t17.total-return-comparison.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~15",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/tr_compare.py",
+      "kind": "script",
+      "commit_or_etag": "dd0defa4fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "order BOUNDS: research code; S3 and Yahoo read only, no deploy",
+      "artifact_covered_by": [
+        "DQ5-t17-AC1",
+        "DQ5-t17-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_tr_compare.py",
+      "kind": "test",
+      "commit_or_etag": "dd0defa4fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline pytest on synthetic frames, not deployed",
+      "artifact_covered_by": [
+        "DQ5-t17-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~15/TR_COMPARISON.json",
+      "kind": "config_data",
+      "commit_or_etag": "dd0defa4fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "report data, no deploy; 18 names",
+      "artifact_covered_by": [
+        "DQ5-t17-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~15/TR_COMPARISON.md",
+      "kind": "doc",
+      "commit_or_etag": "dd0defa4fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "written finding; JUDGMENT, graded at L9 not by the worker",
+      "artifact_covered_by": [
+        "DQ5-t17-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ5-t17-AC1",
+      "criterion_verbatim": "the three named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R5_CHECKS/dq_t17_tests.py",
+      "output_evidence": "3 passed in 0.73s; TRM-OK, rc=0 (test_daily_tr_from_as_traded_close_and_exdate_cash, test_split_day_is_not_a_return, test_comparison_aligns_on_common_trade_dates_only PASSED). Base per the order: TRM-BAD no file.",
+      "denominator": "3 of 3 required tests passed by name",
+      "status": "PASS",
+      "expect": "TRM-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ5-t17-AC2",
+      "criterion_verbatim": "the REAL comparison on ED, BX and CSCO: at least 200 common days each, the numbers present, an events list.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R5_CHECKS/dq_t17_run.py",
+      "output_evidence": "ED days=257 median_abs_diff_bp=0.00 cum_bbg=0.0860 cum_yahoo=0.0860 events=4 | BX days=254 median_abs_diff_bp=0.00 cum_bbg=-0.3372 cum_yahoo=-0.3372 events=4 | CSCO days=254 median_abs_diff_bp=0.00 cum_bbg=0.6878 cum_yahoo=0.6878 events=5 | TRCMP-OK 3 names, rc=0",
+      "denominator": "3 of 3 names with days_compared >= 200 (257, 254, 254), numbers numeric, events lists present; separate full run covers 18 names in TR_COMPARISON.json",
+      "status": "PASS",
+      "expect": "TRCMP-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "tr_compare.py run twice on the same stored Bloomberg history (12-name run, then 18-name run, then the AC2 3-name run)",
+      "observed": "ED/BX/CSCO days_compared, cum_tr_bloomberg and cum_tr_yahoo identical across the three runs",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "The order names no mutant control",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the written finding in TR_COMPARISON.md",
+      "reason": "JUDGMENT criterion, graded at L9; the worker records, never grades"
+    },
+    {
+      "item": "the 6-name extension KO, JNJ, T, VZ, MO, XOM",
+      "reason": "re-runs this script when the queued draw lands (order RECORD FACE)"
+    },
+    {
+      "item": "any Bloomberg call, any AWS write, any deploy, any write to a price store",
+      "reason": "order BOUNDS"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~15/MDPF_DEMQUE.TO-DQ-t17.total-return-comparison.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "safe-commit tr_compare.py, test, TR_COMPARISON json and md",
+      "result": "commit dd0defa4fe, msg-verify MATCH"
+    }
+  ]
+}
