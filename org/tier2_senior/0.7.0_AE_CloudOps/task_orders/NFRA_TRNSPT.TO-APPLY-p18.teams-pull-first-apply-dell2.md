@@ -2,7 +2,7 @@
   <metadata>
     <id>NFRA_TRNSPT.TO-APPLY-p18.teams-pull-first-apply-dell2</id>
     <issued_by>2.0.0_SA_COO~T2</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~DELL2</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~TR2</issued_to>
     <date>2026-10-09</date>
     <status>pending</status>
     <project_code>NFRA_TRNSPT</project_code>
@@ -14,6 +14,14 @@
 <owned_cells>TR-s-18</owned_cells>
 <decomp_context>Round 18 cell TR-s-18 (FWD-2) widened by CTO ADDENDUM 7 @504e23e93f (msg 2909): the Teams pull was never applied; round 18 cuts its apply in two steps under one pair. HELD: the GO is a separate message, sent when the CTO half lands.</decomp_context>
 </decomp_ref>
+
+  <reassignment>
+    AMENDMENT 1 (issuer, 2026-10-09 ~10:4xZ): re-addressed to 0.7.0_AE_CloudOps~TR2 (the NFRA_TRNSPT lane, MSTR msg 3135). Step 1 STOPPED earlier at
+    @7d2c8c8c53 (secret absent; transport a stub, row D2-S10). Both are fixed and merged: the real transport + pull.tf on gateway/transcripts/bearer
+    (TR-t-20 @488c840f48) and the wall-clock interim, content VTT only, wall-clock NULL 'absent', never derived (CTO ADDENDUM 11; @a9039b8d62).
+    Re-run from STEP 1 on a zip built from a pin carrying @a9039b8d62; the CTO half binds that rebuilt zip's sha256 in the ledger. Runs AFTER
+    TO-RUN-w20. S05 now reads the expiry of gateway/transcripts/bearer (never its value). 0.7.0_AE_CloudOps~DELL2 does NOT run this order.
+  </reassignment>
 
   <objective>
     The FIRST apply of the Teams meeting pull (infra/aws/terraform/transcripts/pull.tf): step 1 a preconditions read (no write), step 2 a targeted
@@ -30,7 +38,7 @@
     0. Open a change ledger in org/critical_paths/change_management/ naming the pin and the built zip's sha256. Print the LIVE CodeSha256 of
        `outlook-global-transcripts-pull-lambda` (the shared package's other user).
     1. STEP 1 (no write): S04 -- one gateway transcript-tool call read by name, status and count only; S05 -- the expiry of the token in
-       `teams/global/gateway-token`, never its value; KMS -- the key policy read for kms:CreateGrant by the applying identity. Any unmet = STOP,
+       `gateway/transcripts/bearer`, never its value; KMS -- the key policy read for kms:CreateGrant by the applying identity. Any unmet = STOP,
        named; a KMS refusal goes to 0.0.0_AB_MSTR~DELL2 as a laptop act.
     2. STEP 2: build `infra/aws/lambda/transcripts-pull/build.sh`; safe-apply `infra/aws/terraform/transcripts` with `-target` on exactly the nine
        pull.tf resources the COO half lists. The plan shows exactly those creates; anything else = STOP.
