@@ -1,0 +1,125 @@
+{
+ "for": "IRPT_ANLREQ.TO-APPLY-Y1 AMENDMENT 1 -- the laptop's READ-ONLY reads 3a, 3b, 3c, 4, 5",
+ "spec": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/Y1_laptop_reads_3_5_spec.json@66b6d08b9c",
+ "order": "ADHOC.irpt-anlreq-y1-laptop-reads-3-5 (issued 2.0.0_SA_COO~C), run by 0.7.0_AE_CloudOps~ANL",
+ "run_at_utc": "2026-10-09T12:5xZ",
+ "release_under_test": {
+  "function": "irpt-status",
+  "code_sha256": "BjUZjt2oq8GPJSibq4vD/0m8/LfdN0GF3THwCaBMVOM=",
+  "last_modified": "2026-10-09T11:20:57.000+0000",
+  "claim": "measured",
+  "how": "aws lambda get-function-configuration at the act; equals the sha the spec names"
+ },
+
+ "reads": {
+  "3a": false,
+  "3a_link_expiry": null,
+  "3b": true,
+  "3c": null,
+  "3c_custody_request_exists": false,
+  "4_record": true,
+  "4_route": false,
+  "5": false,
+  "5_outcome": "OUTSIDE_DECLARED_DOMAIN"
+ },
+
+ "method": {
+  "how_each_get_was_reached": "direct invoke of irpt-status with the event the HTTP API front door passes -- routeKey + pathParameters + queryStringParameters + the edge-injected trusted header set (resolve.py TRUSTED_HEADERS) carrying each principal's claims. The edge is the gate; the function reads the claims, so this is the shape the service's own route table resolves.",
+  "principals": {
+   "3a_4_5": "the request's REAL owner, replayed from the stored record: an OPAL_GLOBAL subject in home firm opal-capital selecting data firm 49financial. Existing principal; nothing minted.",
+   "3b": "an EXISTING firm-bound principal of another firm (an active cottonwood admin profile row in opal-users-v2 -> FIRM_OPERATIONS). Existing principal; nothing minted."
+  },
+  "writes": "NONE. No create, no delete, no policy or resource change. 3c created nothing.",
+  "credentials": "none minted. Caller arn:aws:iam::313476888478:user/Andrew_Berman (the laptop identity that can decrypt irpt-requests)."
+ },
+
+ "measurement": {
+  "3a": {
+   "outcome": "the route did NOT sign a link",
+   "public_reason_code": "NOT_FOUND",
+   "internal": "RetentionExpired: retention record unavailable",
+   "join": "the invocation's own AWS RequestId sliced its own log lines (START/REPORT), never a time window",
+   "sha256_match": "NOT EXERCISED -- no link was issued, so there was nothing to hash. false here means 'did not answer a matching link', never 'answered a mismatched one'."
+  },
+  "3b": {
+   "outcome": "refused on both arms, nothing signed",
+   "arm_no_selection": "NOT_AUTHORIZED (internal ProspectOwnershipRefused: issued record not currently authorized)",
+   "arm_selects_49financial": "FIRM_BINDING (refused before any record read; no internal record by design)",
+   "control": "a recursive walk of both payloads found zero url-valued keys"
+  },
+  "3c": {
+   "outcome": "no custody-lane request exists in the tenant -> null, exists=false, none created",
+   "denominator": 7,
+   "instrument": "principal-free: every 49financial acceptance record's frozen composition read straight from S3 at the BUILDER's address (lib/opal_naming.reporting_destination, family REQUEST_COMPOSITION, pinned VersionId) and its browser half inspected for input_id",
+   "lanes": {
+    "prospect_lane_carries_input_id": 7,
+    "custody_lane_no_input_id": 0,
+    "unreadable": 0
+   },
+   "integrity": "all 7 composition blobs hashed equal to their composition_ref.sha256",
+   "why_not_the_route": "the route's own composition read is reachable for only 1 of the 7 (three refuse on the absent retention row below, three on their own owners' firm narrowing), so a route-only census would have reported a lane distribution over a denominator of 1 and called it the tenant"
+  },
+  "4_record": {
+   "outcome": "the STORED acceptance record of the ticketed request carries ticket_id equal to ticket_id_sent",
+   "instrument": "get_item on irpt-requests, ConsistentRead, record attribute parsed; compared in memory",
+   "claim": "measured"
+  },
+  "4_route": {
+   "outcome": "the route did NOT answer a composition",
+   "public_reason_code": "NOT_FOUND",
+   "internal": "RetentionExpired: retention record unavailable",
+   "note": "false here is NOT a ticket mismatch. The route never reached composition.ticket_id; it refused upstream on the shared absent retention row. The ticket itself is proven by 4_record."
+  },
+  "5": {
+   "outcome": "the route neither signed nor answered ANALYSIS_PDF_NOT_RETAINED",
+   "public_reason_code": "NOT_FOUND",
+   "internal": "RetentionExpired: retention record unavailable",
+   "note": "it refuses upstream of the PDF-retention branch, so whether a PDF is retained for this request is UNMEASURED by this read"
+  }
+ },
+
+ "uncovered_enum_member": {
+  "field": "reads.5_outcome",
+  "declared_domain": ["SIGNED", "NOT_RETAINED"],
+  "observed": "RETENTION_RECORD_UNAVAILABLE (public NOT_FOUND / internal RetentionExpired)",
+  "finding": "the observed outcome is a member the declared domain does not hold, so neither SIGNED nor NOT_RETAINED is a true answer. The field carries OUTSIDE_DECLARED_DOMAIN rather than the nearest legal value, because forcing NOT_RETAINED would assert the PDF-retention branch was reached and it was not.",
+  "owner": "2.0.0_SA_COO~Y2 -- the spec's author decides whether the enum gains the member or the read is re-cut once the row below is restored"
+ },
+
+ "root_cause_one_shared_dependency": {
+  "statement": "3a, 4_route and 5 are ONE failure, not three. All three of the spec's named requests depend on the SAME retention row, and that row is absent from irpt-requests.",
+  "absent_row": "RETENTION#RET-021c9f6b5a6c410564cfad5c59ef10174f344d0f778b232f8f2bbae8c8e7c5b7",
+  "absent_row_family": "NORMALIZED_PORTFOLIO (the dependency of each request's REQUEST_COMPOSITION retention row)",
+  "affected_requests": [
+   "REQ-3d76e5b49dae4f91db1694b0 (spec: prospect)",
+   "REQ-9d59d4d2334f841152914569 (spec: ticketed)",
+   "REQ-f7ddede91f98562412314b6e (spec: third -- reads 4-5 of TO-APPLY-Y77)"
+  ],
+  "instrument": "principal-free walk of the retention dependency tree in irpt-requests (DynamoRetentionIndex key spelling RETENTION#<retention_id>), no Lambda and no principal involved",
+  "denominator": "7 of 7 requests walked; each request's own REQUEST_COMPOSITION row is PRESENT and unexpired (RESERVED, ~20-30 days remaining; one PROMOTING)",
+  "distribution": {
+   "chain_all_live": 4,
+   "chain_first_missing_row_is_RET_021c9f6b": 3
+  },
+  "positive_control": "REQ-cf1d7894dd4b73a148b01a2d, whose chain is complete (REQUEST_COMPOSITION -> NORMALIZED_PORTFOLIO -> ORIGINAL_HOLDINGS, all live), ANSWERS its composition through the identical route, principal replay and event shape. So the three refusals are the world's missing row, not the method.",
+  "key_spelling_control": "390 RETENTION# rows exist in tenant 49financial, so an ABSENT verdict is a true absence and not a wrong key prefix",
+  "two_agreeing_instruments": "the live route's internal exception (RetentionExpired: retention record unavailable) and the direct table walk (first missing row RET-021c9f6b) name the same cause independently",
+  "not_claimed": "this seat did not determine WHY the row is absent (never published, or reaped). That is upstream of a read-only order and is the owner's call.",
+  "owner": "2.0.0_SA_COO~Y2 via 2.0.0_SA_COO~C"
+ },
+
+ "delivery": {
+  "spec_result_path": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/release1/Y1_laptop_reads_3_5_result.json",
+  "written_to": "org/tier2_senior/0.7.0_AE_CloudOps~ANL/deliverables/Y1_laptop_reads_3_5_result.json",
+  "why": "owned-paths refused the spec path for this seat (lane TREE_DELIVERABLES, clause ADHC_OWNPTH.004: deliverables/<SERIAL>/** permits only the serial named by the sub-folder, here 2.0.0_SA_COO~Y2). The order's stated fallback applies: this seat writes under its own deliverables and sends the sha256; 2.0.0_SA_COO~Y2 commits it on the spec path.",
+  "bytes_identical_at_both_paths": true
+ },
+
+ "hygiene": {
+  "email_shaped_strings_in_this_file": 0,
+  "signed_links_in_this_file": 0,
+  "principal_ids_in_this_file": 0,
+  "record_bodies_in_this_file": 0,
+  "non_ascii_characters": 0
+ }
+}
