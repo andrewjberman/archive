@@ -1,0 +1,88 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-pr-387",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-387.internal-caller-profile-row-allowed-firm-ids.md",
+  "group": "OTHER",
+  "vintage_commit": "89fe99c780"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "89fe99c780",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pr-387.internal-caller-profile-row-allowed-firm-ids.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~198",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/_authz/served.py",
+   "kind": "script",
+   "commit_or_etag": "b4b544fb15",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Entry._internal_allowed_firms + non-service branch in handle; code only, nothing built, uploaded or applied",
+   "artifact_covered_by": [
+    "IB96-1-AC1",
+    "IB96-1-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_allowed_firm_ids.py",
+   "kind": "test",
+   "commit_or_etag": "b4b544fb15",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "12 tests named allowed_firm_ids (incl. amendment-1 lookup-error fail-closed)",
+   "artifact_covered_by": [
+    "IB96-1-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "IB96-1-AC1",
+   "criterion_verbatim": "IB96-1-AC1 -- in _authz/tests, `-k allowed_firm_ids` passes (>= 5): listed firm admitted; unlisted refused; no row or empty list unchanged; non-list refused; ALL refused with a non-empty list. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r96/p96_cells.py\" . IB96-1-AC1",
+   "expect": "IB96-1-AC1 PASS",
+   "output_evidence": "OK: 12 passed, 291 deselected | IB96-1-AC1 PASS | rc=0 (re-run after AMENDMENT 1)",
+   "denominator": "12 passed of 12 selected by -k allowed_firm_ids (303 collected); threshold >= 5",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "IB96-1-AC2",
+   "criterion_verbatim": "IB96-1-AC2 -- the whole _authz/tests suite passes, including IB-pr-385's svc_custody_statement tests. Base: PASS; must stay so.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r96/p96_cells.py\" . IB96-1-AC2",
+   "expect": "IB96-1-AC2 PASS",
+   "output_evidence": "AMENDMENT 1 (f237da2821) granted the two test files; 4 tests re-stated to the CTO rule, served.py unchanged. OK: 303 passed | IB96-1-AC2 PASS | rc=0",
+   "denominator": "303 passed of 303 collected",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 and AC2 each run twice; no clock, network or randomness in the tests",
+   "observed": "12 passed on each AC1 run; 303 passed on the AC2 run after AMENDMENT 1",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "Two mutants of served.py (restored after; worktree copy diff clean): (1) the narrowing comparison disabled (`if listed is not None and selected not in listed` -> `if False`); (2) a lookup error or non-list value falls back to listed = None (any-firm).",
+   "expected": "each mutant fails at least one allowed_firm_ids test; the unmutated file passes 12",
+   "observed": "control 12 passed; mutant 1: 3 failed (unlisted_firm_refused, all_never_admits, never_read_from_a_header); mutant 2: 7 failed (non_list_value_refused x5, non_string_member_refused, lookup_error_fails_closed)",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "IRPT_BCKEND-D2-W198-S1",
+  "IRPT_BCKEND-D2-W198-S2"
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> IB96-1-AC1,IB96-1-AC2",
+   "result": "rc=0"
+  }
+ ]
+}
