@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-d-8",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b06af7c0d2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "7a37c5b906",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-d-8.discover-answers-needs-and-her-words.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~28",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/opal_discover/integration.py",
+      "kind": "script",
+      "commit_or_etag": "4b0ff635e9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "discover reads the catalog's needs: (29 entries) through their own text; match carries need{id,status,op_class,owner,tool,also_tools,retires,live_error?,grant?}; GAP names owner and no next_tool; write need grant = data_entitlement.tool_denial(tool) for the caller (no tool -> allowed false 'no tool'); needs shown to opal-internal only. Nothing deployed; MX-r-9 releases.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_opal_discover.py",
+      "kind": "test",
+      "commit_or_etag": "4b0ff635e9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 named tests added (gap owner/no tool; grant refused; grant allowed); the 23 existing tests unchanged and passing; 26 passed.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/routing/questions.yaml",
+      "kind": "test",
+      "commit_or_etag": "4b0ff635e9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Q28-Q36 added, each quoted from PRD v0.7 (lines 245, 246, 268, 269), asker Alyssa Keith (her two briefs, via PRD v0.7), expected_tool NEED:<id>.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/routing/run_routing.py",
+      "kind": "script",
+      "commit_or_etag": "4b0ff635e9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a first match that is a catalogued need routes as NEED:<id>; expected_tool NEED:<id> is a HIT when the first match is that need; --plant-mislabel control still falls by one (33 of 36 plain, 32 of 36 planted).",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "her phrasings + write asks: present 9 of 9, routed 9 of 9 on the first try; original asks routed n of 27 with n >= 24 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round8/checks/d8.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "her phrasings + write asks: present 9 of 9, routed 9 of 9 on the first try; original asks routed 24 of 27 (floor 24)\nRESULT: PASS\nexit=0",
+      "denominator": "9 of 9 asks present and routed (Q28-Q36); 24 of 27 original asks routed (floor 24, base 24; misses Q05, Q07, Q22 identical to base); whole harness 33 of 36",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest rc=0; named tests passed 3 of 3; failed/error tests 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round8/checks/d8.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error tests 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 named tests passed; 0 failed/error; whole file 26 passed (23 existing + 3 new)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The issuer's dry run at base ac135370d2: d8.AC1 FAIL (present 0 of 9, routed 0 of 9; original 27 at 24), d8.AC2 FAIL (named tests passed 0 of 3). The routing harness's own control: --plant-mislabel swaps one hit question's expected tool.",
+      "expected": "--plant-mislabel reports exactly one fewer hit than the plain run.",
+      "observed": "plain run ROUTING: 33 of 36; --plant-mislabel (planted on Q01) ROUTING: 32 of 36. The nine new asks at the start of this order: 'account counts by partner' landed on platinum/mdpf/{scope}/aum-metrics.json, 'S&P YTD' on the two market-returns datasets, the other seven on NOT_CATALOGUED.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of each invocation compared",
+      "observed": "AC1 run1 == run2: True ; AC2 run1 == run2: True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Edits to DATA_CATALOG.yaml, workflows/atom_decomposition/**, data_entitlement.py, any role, grant, tool or route",
+      "reason": "Order bounds 1 and 2; the catalog is MX-c-6's and the grant decision is only called, never changed."
+    },
+    {
+      "item": "Deploy and push",
+      "reason": "Order bound 3; MX-r-9 releases."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W28-S4",
+    "NFRA_MCPINDEX-Z-W28-S5",
+    "NFRA_MCPINDEX-Z-W28-S6"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-d-8.discover-answers-needs-and-her-words.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_opal_discover.py -q from infra/aws/ec2/opal-gateway",
+      "result": "26 passed"
+    },
+    {
+      "tool": "run_routing.py",
+      "invocation": "python tests/routing/run_routing.py from infra/aws/ec2/opal-gateway",
+      "result": "ROUTING: 33 of 36 routed to the expected tool; MISSES: Q05, Q07, Q22"
+    }
+  ]
+}
