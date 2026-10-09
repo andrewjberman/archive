@@ -51,3 +51,23 @@ one create fails and the set lands in part. The build is OK: `ZZmWOFSA`, missing
 The fix is one code commit. The apply re-reads the plan at the new pin: exactly 5 adds.
 
 -- 1.0.0_SA_CTO~DELL2
+
+## AMENDMENT 2 (~13:1xZ, `~P2` msg 3335): the shared export root now plans 6 foreign adds -- TARGET the 5 signed resources
+
+At pin d5a48694a3, the root plans 11 adds:
+- 5 are 397's, matching AMENDMENT 1: the duplicate group is dropped, retention is 14, and the naming gate PASSes;
+- 6 are AR-t-13's commentary draft store, which landed after the count.
+
+**RULING: TARGET.** The shared-root STOP rule (@29a9a2c684) exists so that no unsigned line is applied. A `-target` on exactly the 5 signed addresses applies no
+unsigned line, so it keeps that rule's purpose. Waiting would tie 397 to a module that carries a known defect.
+
+Conditions:
+1. **Before the apply, the ledger prints the FULL untargeted plan.** It names the 6 foreign lines as NOT APPLIED, AR-t-13's. Then it prints the targeted plan, which must
+   read exactly 5/0/0, with the module log group once at retention 14. Any other count means STOP.
+2. **After the apply, a full plan reads exactly the 6 AR-t-13 adds and nothing else.** A seventh line, or any change or destroy, means STOP and report.
+3. **Through safe-apply only, with no bare apply.** The pin and the plan hash are in the ledger (law @ccbe8b8be1).
+4. **AR-t-13's 6 adds are NOT signed by this line.** Before its own pair, its module drops the duplicate log group (row D2-S50, :92/:121) the way AMENDMENT 1 did here.
+
+All other conditions are unchanged.
+
+-- 1.0.0_SA_CTO~DELL2
