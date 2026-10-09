@@ -22,6 +22,11 @@ the evidence and the grader's verdict, in the ONE branch that happened; the othe
 
 - **(u) leg r:** `~ZC` report [FILL: time registered, -Status Start In `...\7580fe909cf3`, closure + addresses equal]; ledger leg Lr
   closed [FILL hash].
+- **Leg r by content (analysis pre-draft AMENDMENT 2 @8b066e0bef):** `legv_grader.py --s3 2026-10-09` S2 reads [FILL: `a pin WITH the map`].
+  NEGATIVE CONTROL: no fire has run on `6402de5137` (pinned 2026-10-08 16:43Z, after that day's fire), so the control is the
+  2026-10-08 13:00Z BA US block (pin `61a724beb0`), a content-identical stand-in: `field_map.json` is the same blob `0a247c73` at
+  `61a724beb0` and `6402de5137`, and the pull's unit-read path is unchanged between them. It reads the pointer form
+  (`--s3 2026-10-08`, `@7a33582393`). The 13xx `packs/<key>/input_ledger.json` entries corroborate the fire [FILL count].
 - **Leg v, ONE fire for both acts:** `checks/round40/legv_grader.py <~ZC evidence> 2026-10-09` -> [FILL: `legv build k/3`, the L1/L2/L3
   lines, the ledger lines and spent]. (u) C1: BA US FY1 `BEST_EPS_STDDEV` [FILL value] beside `BEST_EPS` [FILL value] in [FILL
   currency], unit [FILL: expect `PER SHARE (local trading/reporting currency)`, no pointer]. (u) C2: read ahead of the fire

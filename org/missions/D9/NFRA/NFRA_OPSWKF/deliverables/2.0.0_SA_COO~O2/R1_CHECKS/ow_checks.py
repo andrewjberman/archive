@@ -6,6 +6,7 @@
   e3-writeback OW-e3-AC1  approve/reject on a ticket-born submission writes the event + status onto the ticket
   e3-fence     OW-e3-AC2  Execute on origin=ticket is refused before any write, S3 put or brokerage email; non-ticket Execute unchanged
   trade-regress OW-e-AC2  both trade handler test directories pass whole (pre-existing files included)
+  i1-cond      OW-i1-AC2  (CTO half OW-d-1 cond. 1) GetItem stmt + UpdateItem stmt conditioned on dynamodb:Attributes to the 4 written attrs
   i1-grant     OW-i1-AC1  trade-pipeline Terraform grants GetItem+UpdateItem on table/opal-tickets and sets TICKETS_TABLE on both Lambdas
   k1-selftest  OW-k1-AC1  tools/ops_kit/serve.py --selftest prints both panels with source=fixture
   k1-bounds    OW-k1-AC2  the kit carries no AWS SDK or credential reference
@@ -136,6 +137,52 @@ def _grant():
     return True, "grant+env present (2 functions); fmt %s" % ("checked" if tf else "SKIPPED: no terraform on PATH")
 
 
+TICKET_WRITE_ATTRS = {"ticket_id", "linked_submission_id", "events", "status"}
+
+
+def _grant_conditioned():
+    """CTO half OW-d-1 condition 1: GetItem on table/opal-tickets in one statement; UpdateItem alone in another, carrying
+    ForAllValues:StringEquals on dynamodb:Attributes equal to exactly the four attributes K1/K2 write. Plus the env pair."""
+    iam = Path("infra/aws/terraform/trade-pipeline/iam.tf")
+    lam = Path("infra/aws/terraform/trade-pipeline/lambdas.tf")
+    if not iam.exists() or not lam.exists():
+        return False, "absent terraform file"
+    it = iam.read_text(encoding="utf-8")
+    if "table/opal-tickets" not in it:
+        return False, "no statement names table/opal-tickets"
+    get_ok = upd_ok = False
+    lines = it.splitlines()
+    for i, ln in enumerate(lines):
+        if not re.match(r"\s*Sid\s*=", ln):
+            continue
+        close = " " * (len(ln) - len(ln.lstrip()) - 2) + "}"   # the statement's own closing brace, one level out
+        j = i + 1
+        while j < len(lines) and not (lines[j].rstrip().rstrip(",") == close):
+            j += 1
+        blk = "\n".join(lines[i:j])
+        if "table/opal-tickets" not in blk:
+            continue
+        act_line = re.search(r"^\s*Action\s*=\s*(\[[^\]]*\]|\"[^\"]*\")", blk, re.M)
+        acts = set(re.findall(r'"(dynamodb:[A-Za-z]+)"', act_line.group(1))) if act_line else set()
+        if acts == {"dynamodb:GetItem"}:
+            get_ok = True
+        elif acts == {"dynamodb:UpdateItem"}:
+            if "ForAllValues:StringEquals" not in blk or "dynamodb:Attributes" not in blk:
+                return False, "UpdateItem statement lacks ForAllValues:StringEquals on dynamodb:Attributes"
+            listed = set(re.findall(r'"([a-z_]+)"', blk.split("dynamodb:Attributes", 1)[1].split("]", 1)[0]))
+            if listed != TICKET_WRITE_ATTRS:
+                return False, "dynamodb:Attributes lists %s, expected %s" % (sorted(listed), sorted(TICKET_WRITE_ATTRS))
+            upd_ok = True
+        else:
+            return False, "a statement on table/opal-tickets carries actions %s" % sorted(acts)
+    if not (get_ok and upd_ok):
+        return False, "GetItem statement %s, conditioned UpdateItem statement %s" % (get_ok, upd_ok)
+    n = len(re.findall(r'TICKETS_TABLE\s*=\s*"opal-tickets"', lam.read_text(encoding="utf-8")))
+    if n != 2:
+        return False, "TICKETS_TABLE set on %d function(s), expected 2" % n
+    return True, "GetItem stmt + UpdateItem stmt conditioned to %s; env on 2 functions" % sorted(TICKET_WRITE_ATTRS)
+
+
 def _kit_selftest():
     serve = KIT / "serve.py"
     if not serve.exists():
@@ -219,6 +266,8 @@ def main(argv):
         ok, why = _trade_regress()
     elif sub == "i1-grant":
         ok, why = _grant()
+    elif sub == "i1-cond":
+        ok, why = _grant_conditioned()
     elif sub == "k1-selftest":
         ok, why = _kit_selftest()
     elif sub == "k1-bounds":

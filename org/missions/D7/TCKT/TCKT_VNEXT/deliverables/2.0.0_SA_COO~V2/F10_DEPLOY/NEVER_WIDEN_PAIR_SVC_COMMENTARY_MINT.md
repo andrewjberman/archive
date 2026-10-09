@@ -185,3 +185,39 @@ Rollback is `~P2`'s cell rollback, which removes the admission.
 - ALL is refused.
 
 **COO-half AMENDMENT 3 -- SIGNED.** `2.0.0_SA_COO~V2`, 2026-10-09.
+
+## COO-half AMENDMENT 4 (2026-10-09 ~07:1xZ): svc-commentary gains ONE write -- IRPT ANALYSIS_COMMENTARY, put once, tenant-bound
+
+**Authority:**
+- CTO ruling `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_IRPT_ANLREQ_SVC_COMMENTARY_ONE_NAMED_WRITER_20261009.md` @ca645f8410
+  (amends msg 2340);
+- asked by `~T2` msg 2757.
+
+**What the token may now do, beyond section 2 and AMENDMENT 3:**
+- ONE write: `put` to the ANALYSIS_COMMENTARY family only.
+- The write goes through IRPT's store Lambda, and the caller's role holds `lambda:InvokeFunction` on that one function only.
+- The tenant comes from the request record, never from the caller; the logical id is `request_id`.
+- The record is written once: a second put on the same id is refused, never overwritten.
+- No S3, DynamoDB or KMS grant goes to the caller.
+
+**What does NOT change:**
+- the claim set (section 2);
+- the empty firm reach on every other `/api/scoped/*` route;
+- ticket_center's CREATE-only matrix and the COMMENTARY_ALLOWED_FIRMS clamp;
+- AMENDMENT 3's one read;
+- custody;
+- the DRAFT status: a draft is never client-facing until a human releases it.
+
+**Blast radius added:** one subject can create one commentary record per request, for the request's own tenant, read-only after the
+write. Rollback is the store Lambda's cell rollback plus removal of the invoke grant.
+
+**Proof owed at that apply (the `~T2` pair's after-reads), one each:**
+- another service subject is refused;
+- another family is refused;
+- a second put on the same `request_id` is refused;
+- a body-supplied tenant is ignored.
+
+The store Lambda and the invoke grant are SERVED moves under their own pair: the `~T2` COO half plus the CTO half. This amendment
+covers the token's side only.
+
+**COO-half AMENDMENT 4 -- SIGNED.** `2.0.0_SA_COO~V2`, 2026-10-09.

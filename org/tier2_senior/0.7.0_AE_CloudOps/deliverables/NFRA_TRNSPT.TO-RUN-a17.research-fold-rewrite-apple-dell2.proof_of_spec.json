@@ -1,0 +1,89 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1's row states the client-side count, and that each of the 29 keys carries a VersionId newer than the saved one.",
+      "denominator": "29 current keys before and 29 after, the same key set",
+      "expect": "29",
+      "invocation": "aws s3api list-objects-v2 --bucket opal-data-transcripts --prefix teams/transcripts/silver/research_meeting/ --query \"length(Contents)\"",
+      "method": "live_read",
+      "output_evidence": "29. Counted CLIENT-SIDE from an auto-paginated list-object-versions (IsTruncated None), not from the length() the invocation prints, because a paginated length() returns the PAGE count (CLAUDE.md 22a); both agree at 29 here. Key sets before and after are IDENTICAL, and 29 of 29 keys carry a VersionId newer than the saved one, 0 unchanged. Version rows went 58 -> 88: +30 = the 29 run writes plus the 1 bucket-key test write, so no stray write occurred.",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "17316450f0db93dc302406f742d0616cf0602080",
+      "deploy_evidence": "the run result: counts, the 29 prior VersionIds and the 29 new ones, with no transcript content",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_TRNSPT.TO-RUN-a17_result.json"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "compiler_tools": [
+    {
+      "invocation": "python -m data.transcripts.scripts.teams.research_fold --apply --verify --src <structured>",
+      "result": "RESEARCH-VERIFY objects=29 rows=20473 held_out_rows=3644 rewipe_counts all 0",
+      "tool": "research_fold.py"
+    },
+    {
+      "invocation": "git archive 5074835d70 | tar -x",
+      "result": "a clean extract, because the shared tree is dirty under data/",
+      "tool": "git archive"
+    }
+  ],
+  "controls": {
+    "bucket_key_probe": {
+      "description": "the issuer warned the grant is scoped by kms:EncryptionContext:aws:s3:arn and the bucket has a Bucket Key, so it might still deny. ONE object was written first as the test, by SERVER-SIDE copy-object so no plaintext transcript byte reached local disk (the bounds forbid transcript text in any file).",
+      "expected_landed": "admitted: an SSE-KMS write to this bucket succeeds with BucketKeyEnabled true",
+      "expected_not_landed": "a refusal on GenerateDataKey, which stops the run with nothing else written",
+      "observed": "admitted: ServerSideEncryption aws:kms with BucketKeyEnabled TRUE, so the bucket-key path is the one exercised",
+      "status": "PASS"
+    },
+    "version_change": {
+      "description": "prior vs new VersionId on the literal 29 keys",
+      "expected_landed": "29 changed versions",
+      "expected_not_landed": "0 changed versions",
+      "observed": "29 changed versions, 0 unchanged",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "steps 3-4 were not run on the first attempt",
+      "reason": "step 1 refused on the key policy before the grant; that refusal is recorded in NFRA_TRNSPT.TO-RUN-a17_step1_refusal.json and the run resumed after TO-APPLY-27 applied at 05:40:13Z"
+    },
+    {
+      "item": "the step-1 simulate-principal-policy readings are NOT used as evidence for anything",
+      "reason": "that API evaluates IDENTITY policies only and cannot see a resource-based KMS key policy, so it returned implicitDeny for kms:Decrypt -- which the key policy grants unconditionally -- and for a nonsensical action name. It is a non-discriminating instrument here, so it is recorded as an exclusion rather than dressed up as a control: the schema rightly treats a DID-NOT-DISCRIMINATE control as invalidating. The grant was proved by the key-policy read plus the one-object bucket-key write."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_TRNSPT/decompositions/NFRA_TRNSPT_DECOMP_R17.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_TRNSPT.TO-RUN-a17.research-fold-rewrite-apple-dell2.md",
+    "vintage_commit": "5074835d7065603e137ebe89f41b624500c19398"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "N/A: the order states never-widen does not apply -- the write set is a literal 29-key list the actor controls, CLAUDE.md NEVER-1 non-application",
+    "cto_half": "N/A: no IAM or key-policy scope change by this run; the same literal 29 versioned keys, and the TO-APPLY-27 grant was the laptop act, not this one"
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "SERVED",
+  "rollback": "copy each saved prior VersionId back over its key; versioning is Enabled so no delete is needed. The 29 prior VersionIds are in the result file.",
+  "schema_version": "1.0",
+  "scope": "ONE idempotent re-write of the 29 KMS-encrypted research_meeting silver parquets, keeping Apple as an issuer (CVO exception msg 2200, ADJUDICATION_v9), then a read-back. This prefix only.",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_TRNSPT.TO-RUN-a17_result.json",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_TRNSPT.TO-RUN-a17.research-fold-rewrite-apple-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "f7a378fcb12d8c9248a5be5421a443a6c138d652"
+  },
+  "surprises": [],
+  "to_id": "NFRA_TRNSPT.TO-RUN-a17"
+}
