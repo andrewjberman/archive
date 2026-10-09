@@ -8,9 +8,11 @@ AC1 (the stored source): the LATEST silver `filing_source` row for --key (vendor
     S1 parser opal-filings-fetch/2.0.0; S2 its excerpt `item_keys` holds "business";
     S3 its stamped `language` is "en" (row AMGT_RESAPP-D1-W332-S1: BABA read pt, SAP es before round 84).
 AC2 (what is served): GET /security/<KEY>/thesis (--where deployed: the live function, read only):
-    T1 200; T2 at least one served `location` is cited to the business item (Item 4.B / Business overview / Item 4
-       Information on the Company / Our Business); T3 the served sentences are English: 80% or more of them carry one of
-       " the ", " and ", " of " (a Portuguese or Spanish draft reads near 0%).
+    T1 200; T2 at least one served `location` STARTS with the business item (Item 4.B / Business overview / Item 4
+       Information on the Company / Our Business); T3 the served sentences are English: 80% or more of them carry an English
+       function word (the, and, of, to, in, from, at, on, with, its, is, are, was, were, by, for, versus). Round 84 AMENDMENT 1 to
+       AMGT-ii-3: the first set (the/and/of) read SAP's number-heavy English segment sentences as unmarked (26 of 34, 76%).
+       A Portuguese or Spanish draft still reads near 0% (none of these words is Portuguese or Spanish).
 Verdict: R84 STORE ACn <KEY>: YES|NO (exit 0|1).
 """
 from __future__ import annotations
@@ -23,8 +25,8 @@ import sys
 
 FN = "opal-amgt-scoped-api"
 PREFIX = "/api/scoped/amgt"
-BUSINESS_RE = re.compile(r"item\s*4\s*\.?\s*b\b|business overview|item\s*4\s*\.?\s*information on|our business", re.I)
-ENGLISH_RE = re.compile(r"\s(the|and|of)\s", re.I)
+BUSINESS_RE = re.compile(r"^\s*(item\s*4\b|business overview|our business)", re.I)  # anchored: row D1-W337-S1
+ENGLISH_RE = re.compile(r"\s(the|and|of|to|in|from|at|on|with|its|is|are|was|were|by|for|versus)\s", re.I)
 
 
 def say(ok, label):

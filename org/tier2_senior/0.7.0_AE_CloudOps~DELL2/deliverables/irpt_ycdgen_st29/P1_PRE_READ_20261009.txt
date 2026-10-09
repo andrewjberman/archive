@@ -1,0 +1,27 @@
+IRPT_YCDGEN.TO-APPLY-st29 -- P1 host pre-read, 2026-10-09T11:54:37Z, 0.7.0_AE_CloudOps~DELL2
+ssm 83221192-4417-4770-bc6f-ef49f89677ee Success rc 0
+
+P1 active=active root=/opt/irpt-resident/b7ad601c58-st28 since=Fri 2026-10-09 08:42:02 UTC restarts=0
+P1 allow list: OPAL_PRODUCER_PRINCIPALS = ("andrew@opalinvest.com", "svc-irpt-analysis@opalinvest.com")
+P1 worker sha256 c0bbea55fc9b069ed7b283b47af78fe73023c2c072d7bb862abbfc0ab41a3c09
+P1 rollback root e606008994-st27 present: yes; st28 root present: yes
+P1 receipt: /opt/irpt-resident/b7ad601c58-st28 738ac208c466dc93 irpt-ycdgen-f1-st28-20261009
+P1 library 857d90b81960d69a7a6700be6fffe33d86628694aef95f8cfb64aca7a82cb839 wrapper 55ddb8f7947cba7cdca1b9139d4d0a1a3ad620e330c86ba3ab648d334763aff9
+P1 pydeps pyarrow: present; renderer drop-in: present
+P1 queue visible/in-flight: 0 0
+P1 journal 60s: polls=3 tracebacks=0
+
+WHAT THIS ESTABLISHES, against what the order asked for:
+  st28 running                 YES, active on root b7ad601c58-st28
+  the st27 root present        YES, e606008994-st27 -- this is the root X1 removes BACK to, so its
+                               presence is the precondition for the whole removal arm, not a detail
+  the installer two guards     BOTH ALREADY TRUE: the host library reads 857d90b8..., equal to the
+                               installer WANT_LIBRARY, and the wrapper reads 55ddb8f7..., equal to
+                               its WANT_WRAPPER. The installer exits 18 if the wrapper differs, so
+                               reading these BEFORE the install turns a would-be mid-flight abort
+                               into a precondition that is known to hold.
+  queue 0/0                    YES, and read TWICE by different instruments: the SQS API
+                               (ApproximateNumberOfMessages 0, NotVisible 0) and the host own read
+                               in this script. The API values are APPROXIMATE by name, so a single
+                               source would not have been enough to open a gate the CTO half says
+                               is never forced.
