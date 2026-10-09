@@ -39,6 +39,7 @@ BASE = os.path.join(HERE, "r85_sentences_base.json")
 GLUE_RE = re.compile(r"[a-z0-9%)][.!?][A-Z][a-z]")
 SPLIT_RE = re.compile(r"(?<=[a-z0-9%)][.!?])\s*(?=[A-Z][a-z])")
 FIGURE_RE = re.compile(r"\d[\d,]*\.\d+|\d{1,3}(?:,\d{3})+|\d{3,}")
+YEAR_RE = re.compile(r"(19|20)\d\d")
 
 
 def say(ok, label):
@@ -61,7 +62,10 @@ def _figures(text):
 def restated(text):
     parts = [p.strip() for p in SPLIT_RE.split(text or "") if p.strip()]
     for a, b in zip(parts, parts[1:]):
-        if _norm(a) == _norm(b) or len(_figures(a) & _figures(b)) >= 2:
+        shared = _figures(a) & _figures(b)
+        # Round 86 carry (row AMGT_RESAPP-D1-W339-S2): bare years (1900-2099) are dates, not facts -- a shared pair counts
+        # only when at least one shared figure is not a bare year (two sentences about 2025 vs 2024 are not a restatement).
+        if _norm(a) == _norm(b) or (len(shared) >= 2 and any(not YEAR_RE.fullmatch(f) for f in shared)):
             return True
     return False
 
