@@ -11,10 +11,10 @@ from botocore.exceptions import ClientError
 
 
 ROOT = Path(__file__).resolve().parents[5]
-PIN = "14ddee6c67"
+PIN = "4bcebfcb09"
 KEYS_PATH = (
-    "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/"
-    "deliverables/irpt_y75/Y75-1_admit_keys.json"
+    "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/"
+    "2.0.0_SA_COO~Y2/r75/Y75-1_admit_keys_v3.json"
 )
 RESULT_PATH = ROOT / (
     "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/"
@@ -117,7 +117,24 @@ def validate_shape(keys):
     return ddb, s3, tables[0], buckets[0]
 
 
-def execute(keys):
+def owner_readback(upload_item, keys):
+    owner = upload_item.get("owner") if upload_item else None
+    owner = owner if isinstance(owner, dict) else {}
+    principal_id = owner.get("principal_id")
+    label = None
+    if isinstance(principal_id, str):
+        label = "adv-" + hashlib.sha256(
+            principal_id.lower().encode("utf-8")
+        ).hexdigest()[:12]
+    checks = {
+        "firm": owner.get("firm_id") == keys["firm"],
+        "principal_class": owner.get("principal_class") == "FIRM_ADVISOR",
+        "label": label == keys["advisor"],
+    }
+    return all(checks.values()), checks
+
+
+def execute(keys, delete):
     ddb_entries, s3_entries, table_name, bucket_name = validate_shape(keys)
     dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
     table = dynamodb.Table(table_name)
@@ -143,15 +160,58 @@ def execute(keys):
             == keys["body_sha256"]
         )
 
+    owner_is_advisor, owner_checks = owner_readback(upload_item, keys)
     readback = {
         "body_sha256_match": body_match,
-        "owner_is_advisor": bool(upload_item) and upload_item.get("owner") == keys["advisor"],
+        "owner_is_advisor": owner_is_advisor,
         "acting_principal_is_filer": bool(upload_item)
         and upload_item.get("acting_principal_id") == keys["test_filer_email"],
     }
     if not all(readback.values()):
-        write_result({"admit_readback": readback, "results": [], "sweep_extra": 0})
+        write_result(
+            {
+                "admit_readback": readback,
+                "owner_checks": owner_checks,
+                "results": [],
+                "sweep_extra": 0,
+            }
+        )
+        print(
+            json.dumps(
+                {
+                    "ddb_named": len(ddb_entries),
+                    "s3_named": len(s3_entries),
+                    "table": table_name,
+                    "bucket": bucket_name,
+                    "admit_readback": readback,
+                    "owner_checks": owner_checks,
+                    "result_rows": 0,
+                    "sweep_extra": 0,
+                    "email_shaped_count_written": 0,
+                    "stopped_before_delete": True,
+                },
+                sort_keys=True,
+            )
+        )
         raise SystemExit(2)
+
+    if not delete:
+        print(
+            json.dumps(
+                {
+                    "ddb_named": len(ddb_entries),
+                    "s3_named": len(s3_entries),
+                    "table": table_name,
+                    "bucket": bucket_name,
+                    "admit_readback": readback,
+                    "owner_checks": owner_checks,
+                    "eligible_for_delete": True,
+                    "email_shaped_count_written": 0,
+                },
+                sort_keys=True,
+            )
+        )
+        return
 
     results = []
     named_revisions = {entry["request_revision"] for entry in ddb_entries}
@@ -203,6 +263,7 @@ def execute(keys):
 
     result = {
         "admit_readback": readback,
+        "owner_checks": owner_checks,
         "results": results,
         "sweep_extra": len(sweep_extras),
     }
@@ -215,6 +276,7 @@ def execute(keys):
                 "table": table_name,
                 "bucket": bucket_name,
                 "admit_readback": readback,
+                "owner_checks": owner_checks,
                 "result_rows": len(results),
                 "sweep_extra": len(sweep_extras),
                 "email_shaped_count_written": count,
@@ -228,16 +290,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--preflight", action="store_true")
+    parser.add_argument("--readback-only", action="store_true")
     args = parser.parse_args()
-    if args.execute == args.preflight:
-        parser.error("choose exactly one of --preflight or --execute")
+    if sum((args.execute, args.preflight, args.readback_only)) != 1:
+        parser.error("choose exactly one of --preflight, --readback-only, or --execute")
 
     keys = load_pinned_keys()
     ddb, s3, table, bucket = validate_shape(keys)
     if args.preflight:
         print(json.dumps({"ddb_named": len(ddb), "s3_named": len(s3), "table": table, "bucket": bucket}, sort_keys=True))
         return
-    execute(keys)
+    execute(keys, delete=args.execute)
 
 
 if __name__ == "__main__":

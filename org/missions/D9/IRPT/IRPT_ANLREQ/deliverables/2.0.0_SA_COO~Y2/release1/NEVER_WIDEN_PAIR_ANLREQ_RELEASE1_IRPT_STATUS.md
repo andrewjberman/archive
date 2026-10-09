@@ -13,8 +13,8 @@ DRAFT: no half signed.
 
 ## 1. Pin and artifact
 
-- **Pin:** box/dell2 `3a6d021e4a`. LOCAL when drafted; it must be on origin before the apply.
-- **Built** (BUILD_ONLY at HEAD = pin, this seat): `WTGCJPiSEWSack1XvAMRyTGSVLX84VSm+3eC3eSPgsQ=`. Import-closure OK, 38 files.
+- **Pin:** box/dell2 `f23639ea21` (REVISION 2; was `3a6d021e4a`). It must be on origin before the apply.
+- **Built** (BUILD_ONLY at HEAD = pin, this seat): `BjUZjt2oq8GPJSibq4vD/0m8/LfdN0GF3THwCaBMVOM=` (REVISION 2; was `WTGCJPiS...`).
 - **Live now / ROLLBACK:** `E7VKvhg3E9D5euWO+S649/iyAJ05xUmFPqHEAKDTFxA=`, LastModified 07:43:46Z. That is IB-pr-395's release of IB-pr-390's
   `served.py` on this host. The applier records the current S3 version at step 0 as the rollback source.
 
@@ -22,9 +22,13 @@ DRAFT: no half signed.
 
 | gate | reading |
 |---|---|
-| census against LIVE (`release-census.py irpt-status --pin HEAD`) | `changed_members=5`: `acceptance.py`, `submission.py` (AR-y-11), `entry.py`, `owned_report.py`, `pdf_link.py` (AR-y-22). No other lane's member rides |
+| census against LIVE (`release-census.py irpt-status --pin HEAD`) | `changed_members=6`: `acceptance.py`, `submission.py` (AR-y-11), `entry.py`, `owned_report.py`, `pdf_link.py`, `status_installed.py` (AR-y-22 and AMENDMENT 4: the installed route table declares `/original`). No other lane's member rides |
 | `checks/r73/cochange_closure.py irpt-status` | `split=0` (42 rows) |
 | `checks/r71/symbol_closure.py` on the BUILT zip | `modules=37 pairs=115 missing=0`, PASS |
+
+| `_authz/tests/test_unguarded_census.py` (CTO condition, row IRPT_BCKEND-D2-S43) | `9 passed`: 22 of 22 in-lane routes guarded, `/original` among them |
+
+**REVISION 2 (2026-10-09 ~10:5xZ):** re-pinned for AR-y-21 AMENDMENT 4 (drained @f23639ea21). The installed route table now declares `/original`, which the release-1 CTO half @723211d44d made a condition (msg 3140). The CTO half re-signs this blob.
 
 ## 3. Terraform, plan-only (this seat)
 
@@ -74,3 +78,27 @@ Read the failing call's CloudWatch line before halting.
 
 - The CTO half.
 - Pin `3a6d021e4a` on origin.
+
+## REVISION 3 (2026-10-09 ~12:2xZ, `2.0.0_SA_COO~Y2`; CTO msg 3245, ~G2 msg 3241, row IRPT_YCDGEN-D2-S20) -- a second apply on top of LIVE revision 2
+
+- **Why:** live `irpt-status` (`BjUZjt2o`, revision 2, applied 11:20:57Z) refuses the Opal-engine 49financial report `REQ-5e4149d2...` with
+  `RetentionRefused 'invalid retention reference'` (CloudWatch 12:02:18Z). Its packaged `reporting_policies.json` carries `irpt-ycdgen-research-v1`
+  with firms `[cottonwood]` only.
+- **Pin:** `5240156380` (AR-y-21 AMENDMENT 5 drained). It must be on origin before the apply.
+- **Built:** `t6OJTCcmOnWGVl8iglcvfGoYb3PbPJqJYqsSgJBpGdI=` (BUILD_ONLY at the pin, this seat).
+- **Live now / ROLLBACK:** `BjUZjt2oq8GPJSibq4vD/0m8/LfdN0GF3THwCaBMVOM=` (revision 2).
+- **Census against LIVE:** `changed_members=1`, `infra/logic/registry/reporting_policies.json` (live `2bd3520dd386` -> built `1479826b5764`). The research
+  row's firms become `[cottonwood, 49financial, inflection]`, the YCD-a-7 trunk line @23e39f11d7, fenced per firm by the r7 roles.
+- **`ops/entry.py` and `ops/owned_report.py` stay at this lane's commits** (eb70303e8f, 62880e9bfc). ~P2's later change to both (worker ~268) ships in
+  IB-pr-405, not here.
+- **`_authz` unguarded-route census at the pin:** 9 passed, 22 of 22.
+- **Plans:** `investor-reporting/ops -target=module.irpt_status`: the code change only (s3_object_version + source_code_hash). No API change.
+- **After-reads:**
+  - R0: live at start == `BjUZjt2o`.
+  - R1: symbol closure on the uploaded zip, `missing=0`.
+  - R2: live == `t6OJTCcm`, re-plan 0, `_authz` census still 22 of 22.
+  - R3: `REQ-5e4149d2`'s read through irpt-status no longer refuses `RetentionRefused`. Its OWNER's read answers, or a typed refusal OTHER than the
+    retention reference is quoted.
+  - R4: a cottonwood request's read is unchanged.
+- **Branch B:** re-promote revision 2's S3 version.
+- The CTO half re-signs this blob.

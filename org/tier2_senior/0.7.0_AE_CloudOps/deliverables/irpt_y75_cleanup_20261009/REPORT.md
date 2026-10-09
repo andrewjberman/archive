@@ -1,13 +1,15 @@
-# IRPT Y75 release-5b cleanup result
+# IRPT Y75 release-5b cleanup result — Amendment 2
 
 The pinned cleanup denominator was exactly seven `irpt-requests` keys and two `opal-data-irpt` keys.
 
-The mandatory readback gate ran before the first delete and returned:
+The mandatory readback gate ran from keys file v3 at `4bcebfcb09` before the first delete and returned:
 
 - `body_sha256_match`: `true`
-- `owner_is_advisor`: `false`
+- `owner_is_advisor`: `true`
 - `acting_principal_is_filer`: `true`
 
-Because one boolean was false, the runner stopped immediately. It issued zero DDB delete calls and zero S3 delete calls. The cleanup result contains an empty `results` array. The sweep was not run because it follows the delete gate; its stored value is the no-op placeholder `0` and is not a claim that the wider tenant contains no matching rows.
+The three owner subchecks (`firm`, `principal_class`, and derived `label`) were also all `true`. The comparison ran in memory and emitted no identity value.
 
-No raw identity value was written or printed. The email-shaped-string count across the files written for this run is zero. Ledger `irpt-y75-release5b-cleanup-laptop-20261009` is closed as a refused no-op with no world mutation.
+All seven named `irpt-requests` rows existed before deletion and read `NOT_FOUND` afterward. Both named S3 object versions existed before deletion and read `NOT_FOUND` afterward. An independent readback returned `DDB_LEFT=0` and `VERSIONS_LEFT=0`. The bounded tenant sweep found zero extra rows.
+
+No raw identity value was written or printed. The email-shaped-string count across the files written for this run is zero. Ledger `irpt-y75-amend2-cleanup-laptop-20261009` is closed with every leg proven.

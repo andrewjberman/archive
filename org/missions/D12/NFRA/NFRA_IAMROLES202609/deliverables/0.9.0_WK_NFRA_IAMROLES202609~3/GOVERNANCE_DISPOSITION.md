@@ -65,7 +65,7 @@ all sixteen:
 
 ## DISPOSITION TABLE -- 16 of 16
 
-1. `bd-merge-daily-lambda-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+1. `bd-merge-daily-lambda-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -75,14 +75,31 @@ all sixteen:
    Terraform-declared bd- siblings (`bd-processor-lambda-role`, `bd-silver-merge-role`,
    `bd-daily-trigger-lambda-role` and others, per the same comp-iam parse) and nothing in this repo
    distinguishing it as a candidate for exception.
-2. `bd-pipeline-task-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+   ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: Live 2026-10-09: lambda trust, 1 inline `bd-merge-daily-policy`, 0
+   consumers of 233 functions, RoleLastUsed EMPTY. Home `infra/aws/terraform/bd-pipeline/`, which already declares two
+   roles from the same 2026-02-19 batch. Never used is NOT my reason to retire it: `news-pipeline/iam.tf:256,303`
+   declares two roles it annotates `orphaned`, so this estate's pattern is to declare. I accept custody of the role
+   AND of the adoption decision; I do NOT accept the apply, which is a separate WORLD act under its own never-widen
+   pair, and any declaration must leave `inline_policy` and `managed_policy_arns` ABSENT (both are Optional+Computed
+   and become authoritative when set). Full reasoning: deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md;
+   families and order of application: ADOPTION_PLAN_TEN.md.
+2. `bd-pipeline-task-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
    Same evidence pattern as #1: absent from the fresh comp-iam
    parse, no SURFACED/DEF source hit, no documented rationale, an ordinary bd- role among many
    already-declared bd- siblings.
-3. `codebuild-semantic-clustering-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+   ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: Live 2026-10-09: `ecs-tasks.amazonaws.com` trust -- the only
+   non-Lambda trust of my ten -- 1 inline `BDPipelineTaskPolicy`, RoleLastUsed 2026-02-02. Its 0 Lambda consumers is
+   EXPECTED and is not evidence of disuse: the Lambda map cannot see an ECS task role. Home
+   `infra/aws/terraform/bd-pipeline/`. CONDITION: its pair must state the assume_role_policy principal explicitly, the
+   one field a copy-paste from a sibling Lambda role gets silently wrong. I accept custody of the role AND of the
+   adoption decision; I do NOT accept the apply, which is a separate WORLD act under its own never-widen pair, and any
+   declaration must leave `inline_policy` and `managed_policy_arns` ABSENT (both are Optional+Computed and become
+   authoritative when set). Full reasoning: deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and
+   order of application: ADOPTION_PLAN_TEN.md.
+3. `codebuild-semantic-clustering-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -97,6 +114,14 @@ all sixteen:
    manages CodeBuild roles of this exact shape in Terraform (`opal-drift-producer-codebuild-role`,
    `opal-stitch-produce-codebuild-role`, both present in the fresh comp-iam parse) -- this one is the
    outlier against that convention, not the norm.
+   ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: Live 2026-10-09: `codebuild.amazonaws.com` trust, 1 inline
+   `CodeBuildSemanticClusteringPolicy`, RoleLastUsed 2026-09-11 -- live infrastructure, not a leftover. OPEN CALL I do
+   not close: its home is a BUILD-plane question, and the module owning the semantic/news RUNTIME is not automatically
+   the module that should own a CodeBuild project's role; I would not let a pair land it in `news-pipeline/` because
+   the names rhyme. I accept custody of the role AND of the adoption decision; I do NOT accept the apply, which is a
+   separate WORLD act under its own never-widen pair, and any declaration must leave `inline_policy` and
+   `managed_policy_arns` ABSENT (both are Optional+Computed and become authoritative when set). Full reasoning:
+   deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and order of application: ADOPTION_PLAN_TEN.md.
 4. `ecsTaskExecutionRole` -- EXEMPT owner=1.0.0_SA_CTO~Z reason=AWS-managed service role, minted by a
    console or service action (the literal conventional name AWS's own ECS quick-create
    task-execution-role wizard assigns), correctly outside our Terraform -- CLASS RULING, see CLASS
@@ -108,21 +133,39 @@ all sixteen:
    classification, carried forward unchanged by `IAM-r-1` -- `IAM-r-3`'s own per-member
    re-confirmation was not present in this worker's tree at write time; see CLASS RULINGS,
    MEMBERSHIP NOTE below.
-5. `finbert-ec2-backfill-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+5. `finbert-ec2-backfill-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
    Absent from the fresh comp-iam parse and from every
    first-party source file (census/inventory JSON only); an EC2 backfill role with no service-default
    naming pattern and no documented exclusion rationale anywhere in this repo.
-6. `lambda-ec2-runtime-monitor-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+   ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: Live 2026-10-09: `ec2.amazonaws.com` trust, 1 inline
+   `DynamoDBAccessPolicy`, created 14:23Z and last used 15:20Z on 2025-12-15 in us-east-2 and never since -- its whole
+   lifetime is about one hour, the signature of a one-shot backfill. I propose NO custody home deliberately: adopting
+   a role whose job is finished is the wrong act and retiring it is a WORLD decision nobody has asked for. The
+   decision owed is adopt-or-retire, and the evidence that settles it sits with the workload's owner. I accept custody
+   of the role AND of the adoption decision; I do NOT accept the apply, which is a separate WORLD act under its own
+   never-widen pair, and any declaration must leave `inline_policy` and `managed_policy_arns` ABSENT (both are
+   Optional+Computed and become authoritative when set). Full reasoning:
+   deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and order of application: ADOPTION_PLAN_TEN.md.
+6. `lambda-ec2-runtime-monitor-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
    Same evidence pattern: absent from the fresh
    comp-iam parse, no SURFACED/DEF source hit beyond census JSON, no documented rationale for
    exclusion.
-7. `lambda-test-role` -- RETIRE owner=NO-ACCEPTING-SEAT reason=three planes agree that nothing declares
+   ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: Live 2026-10-09: lambda trust, 1 inline `EC2RuntimeMonitorPolicy` +
+   `AWSLambdaBasicExecutionRole`, consumer `ec2-runtime-monitor`, RoleLastUsed 2026-10-09T09:51:30Z -- FIFTEEN MINUTES
+   before I read it. This is a RUNNING PRODUCTION ROLE and the acceptance says so loudly, because the error this row
+   invites is treating an undeclared role as a dormant one. OPEN CALL: its home -- a cross-cutting operational
+   function no module obviously owns; `shared-infra/iam_legacy.tf` is the honest candidate but 'legacy' argues against
+   putting live infrastructure there. I accept custody of the role AND of the adoption decision; I do NOT accept the
+   apply, which is a separate WORLD act under its own never-widen pair, and any declaration must leave `inline_policy`
+   and `managed_policy_arns` ABSENT (both are Optional+Computed and become authoritative when set). Full reasoning:
+   deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and order of application: ADOPTION_PLAN_TEN.md.
+7. `lambda-test-role` -- RETIRE owner=0.7.0_AE_CloudOps~Z reason=three planes agree that nothing declares
    it and nothing uses it -- 0 Terraform hits across 415 tracked `.tf` files (IAM-r-3's per-member
    verdict list), 1 of 2382 live nodes with no consumer node pointing at it, and no LastUsedDate
    inside AWS's 400-day tracking window -- so the honest answer is that this role should not
@@ -139,7 +182,14 @@ all sixteen:
    destructive git, dropping tables/S3 deletes, stopping EC2, anything unrecoverable"), so no
    agent seat can be its terminal owner alone. Nothing was minted, scheduled or deleted by
    recording that. See THE OWNER FINDING below.
-8. `opal-data-refresh-lambda-role` -- EXEMPT owner=NO-ACCEPTING-SEAT reason=production serving-path role
+   ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: Live 2026-10-09: lambda trust, ZERO inline, only
+   `AWSLambdaBasicExecutionRole`, 0 consumers, RoleLastUsed EMPTY, created 2026-02-19T16:00:44 in a nine-role scripted
+   batch. I accept RETIRE as the right disposition -- the only retirement among my ten -- because it grants nothing
+   beyond CloudWatch Logs, its generic name identifies no workload, and it has never been used; rows 11 and 14 fail
+   that test on every count. I do NOT accept the delete itself: the four proofs it needs (including an ABSENT negative
+   control against a role known to be in use) and its rollback are in ADOPTION_PLAN_TEN.md Family F, and it is a WORLD
+   act needing its own order and pair.
+8. `opal-data-refresh-lambda-role` -- EXEMPT owner=0.7.0_AE_CloudOps~Z reason=production serving-path role
    (backs the deployed `opal-data-refresh-api` Lambda via a literal `role_arn`,
    `infra/aws/terraform/data-refresh/main.tf:38`) that Terraform already touches through five
    `aws_iam_role_policy` attachments explicitly naming it "the pre-existing
@@ -158,7 +208,20 @@ all sixteen:
    at `infra/aws/terraform/data-refresh/zz_adoption_candidate.tf.proposed:29-30` (`IAM-r-5`) -- so
    what is missing on this row is not the work, it is a seat that has accepted it. See THE OWNER
    FINDING below.
-9. `opal-smartx-lambda-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+   ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: I take custody of this role AND of the adoption
+   decision for it, on evidence re-measured live today rather than inherited -- all THREE Lambdas in
+   the data-refresh root (`opal-data-refresh-api`, `opal-data-refresh-api-qa-scratch`,
+   `portal-time-machine`) assume this role, and all FIVE of its live inline policies are declared in
+   this module, so this module is its custody home; I deployed through it today under
+   `NFRA_OPLGTW.TO-OG-da-1` and the role was unchanged by both applies. WHAT I DO NOT ACCEPT BY THIS
+   COMMIT: the apply. Moving the inert text into a live `.tf` is a separate WORLD act under its own
+   never-widen pair, and I would not apply it as written until that pair names ADOPTION_PLAN section
+   7's two non-travelling items -- the state key it lands in and the provider `default_tags` it
+   inherits. CITATION NOTE: the count of five is confirmed against the live role (5 inline, 1 attached
+   managed), but this row's LINE cites have aged -- the five are now `main.tf:60`, `:82`, `:101`,
+   `:140` and `qa-scratch-instance.tf:53`, and 17 lines of that last shift are MINE, from the OG-da-1
+   qa-scratch pin at `99c3b4c1b1`. The substance is unaffected at any line number.
+9. `opal-smartx-lambda-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
    `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
    exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
    assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -172,7 +235,15 @@ all sixteen:
    manifest (`infra/aws/manifests/lambda/opal-portal-functions.yaml:138,736-737`). An inventory entry
    describes the role; it is not a decision to except it from Terraform, so FWD-4's exemption bar is
    not met.
-10. `portal-auth-lambda-role` -- EXEMPT owner=NO-ACCEPTING-SEAT reason=production serving-path role per
+   ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: Live 2026-10-09: lambda trust, THREE inline (`opal-smartx-logs`,
+   `opal-smartx-s3-access`, `opal-smartx-secrets`), RoleLastUsed 2025-12-30. The cleanest adoption of my ten: every
+   policy names the pipeline and `infra/aws/terraform/smartx-pipeline/` exists (15 .tf files, verified). Three inline
+   policies is the most of any role here, so this is where a 'completed' block costs most. I accept custody of the
+   role AND of the adoption decision; I do NOT accept the apply, which is a separate WORLD act under its own
+   never-widen pair, and any declaration must leave `inline_policy` and `managed_policy_arns` ABSENT (both are
+   Optional+Computed and become authoritative when set). Full reasoning:
+   deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and order of application: ADOPTION_PLAN_TEN.md.
+10. `portal-auth-lambda-role` -- EXEMPT owner=0.7.0_AE_CloudOps~Z reason=production serving-path role per
     IAM-s-5's own character note ("PRODUCTION SURFACES ON THE SERVING PATH ... a much heavier
     claim"), and unlike `opal-data-refresh-lambda-role` this one has ZERO Terraform source touch at
     all (fresh comp-iam parse: absent; `comp-find infra/ --all`: only world-model census/inventory
@@ -187,7 +258,17 @@ all sixteen:
     (`infra/aws/terraform/data-refresh/zz_adoption_candidate.tf.proposed:66-67`, `IAM-r-5`, whose
     own row `Z-W6-S1` records that this module is the wrong custody home for it). See THE OWNER
     FINDING below.
-11. `portfolio-management-lambda-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+    ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: I take custody of this role AND of the adoption
+    decision for it -- portal-auth is a surface this seat owns -- and I re-measured it live today: 1
+    inline policy (`jwt-public-key-secret`), 1 attached managed policy
+    (`AWSLambdaBasicExecutionRole`), `RoleLastUsed` EMPTY, created 2026-02-19T16:00:39Z, max session
+    3600, description "Scoped Lambda role - created 2026-02-19 IAM audit" -- every value matching the
+    inert text. WHAT I DO NOT ACCEPT BY THIS COMMIT: the apply, and separately the PLACEMENT. This
+    module is the wrong custody home by row `Z-W6-S1`'s own finding; that open call is NOT settled
+    here, because accepting custody of a role is not a decision about which module declares it. I also
+    accept NO narrowing on the back of the zero-usage reading: `C-TWO-REMEDIES` binds, and a role that
+    has never been used is not evidence that a permission is unneeded.
+11. `portfolio-management-lambda-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
     `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
     exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
     assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -197,6 +278,16 @@ all sixteen:
     main.tf:227`, a distinctly-named sibling created in the same module) -- a genuinely separate,
     undeclared role alongside an already-declared one in the same domain, with no documented
     rationale anywhere in this repo for treating it differently.
+    ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: Live 2026-10-09: lambda trust, 1 inline `portfolio-s3-dynamodb` +
+    `AWSLambdaBasicExecutionRole`, 0 consumers, RoleLastUsed EMPTY, created 2026-02-19T16:00:38 with the batch
+    description. The best-precedented row of my ten: six of its nine batch siblings are already declared in their own
+    domain modules, and its home `infra/aws/terraform/portfolio-management/` exists and declares the distinctly-named
+    sibling `portfolio-export-lambda-role`, which I verified by printing the bytes at main.tf:226-227 rather than
+    trusting this row's citation. I accept custody of the role AND of the adoption decision; I do NOT accept the
+    apply, which is a separate WORLD act under its own never-widen pair, and any declaration must leave
+    `inline_policy` and `managed_policy_arns` ABSENT (both are Optional+Computed and become authoritative when set).
+    Full reasoning: deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and order of application:
+    ADOPTION_PLAN_TEN.md.
 12. `rds-monitoring-role` -- EXEMPT owner=1.0.0_SA_CTO~Z reason=AWS-managed service role, minted by a
     console or service action (the literal name AWS's own RDS Enhanced Monitoring console flow offers
     when no role is specified), correctly outside our Terraform -- CLASS RULING, see CLASS RULINGS
@@ -216,13 +307,21 @@ all sixteen:
     Terraform source at this cell's own re-measurement; see the filed surprise row -- this is not a
     governance finding about the role, it is an instrument discrepancy the governance disposition
     corrects for.
-14. `sentiment_query_api-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+14. `sentiment_query_api-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
     `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
     exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
     assumption; THE OWNER FINDING below carries its four planes and their denominators.
     Absent from the fresh comp-iam parse and from all
     Terraform source (census/inventory JSON only); an ordinary API-serving lambda role with no
     service-default naming pattern and no documented exclusion rationale.
+    ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: Live 2026-10-09: lambda trust, 1 inline `DynamoDBAccess` +
+    `AWSLambdaBasicExecutionRole`, consumer `sentiment_query_api`, RoleLastUsed 2026-01-02, both consumer and last use
+    in US-EAST-2. A live consumer-bearing role, adopted LAST of the adoptions with row 6. CONDITION: its pair must
+    carry the REGION -- a declaration that silently assumes us-east-1 would adopt a role whose workload lives
+    elsewhere. I accept custody of the role AND of the adoption decision; I do NOT accept the apply, which is a
+    separate WORLD act under its own never-widen pair, and any declaration must leave `inline_policy` and
+    `managed_policy_arns` ABSENT (both are Optional+Computed and become authoritative when set). Full reasoning:
+    deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and order of application: ADOPTION_PLAN_TEN.md.
 15. `vpc-flow-logs-role` -- EXEMPT owner=1.0.0_SA_CTO~Z reason=AWS-managed service role, minted by a
     console or service action (the literal name AWS's own VPC Flow Logs console setup offers when no
     role is specified), correctly outside our Terraform -- CLASS RULING, see CLASS RULINGS below;
@@ -233,7 +332,7 @@ all sixteen:
     service-default candidates; membership is INHERITED from round 1's classification, not
     independently re-confirmed by `IAM-r-3` in this worker's tree -- see CLASS RULINGS, MEMBERSHIP
     NOTE below.
-16. `workspace-sync-lambda-role` -- ADOPT owner=NO-ACCEPTING-SEAT reason=the adopting act (a
+16. `workspace-sync-lambda-role` -- ADOPT owner=0.7.0_AE_CloudOps~Z reason=the adopting act (a
     `resource "aws_iam_role"` block for this name in `infra/aws/terraform/`) sits in a lane that
     exists and is busy, and NO seat in it has accepted this row -- a measured search, not an
     assumption; THE OWNER FINDING below carries its four planes and their denominators.
@@ -892,3 +991,12 @@ Filed in `../../surprise-channel/investigations/INVESTIGATION_v1.md`:
 - `NFRA_IAMROLES202609-Z-W3-S5` -- `lambda-test-role` reads as residue, a different remedy shape
   (retire vs. formalize) than the other two classes; dispositioned exempt, owner=UNASSIGNED, with
   the decision named.
+    ACCEPTED 2026-10-09 by `0.7.0_AE_CloudOps~Z`: Live 2026-10-09: lambda trust, 1 inline
+    `workspace-sync-permissions`, 0 consumers, RoleLastUsed 2025-12-30. HONEST LIMIT: this is the row with the least
+    distinguishing evidence of my ten -- a named policy and a named role, nine months idle, no consumer and no obvious
+    module -- so I accept custody WITHOUT asserting a home, and I would want the workload's owner named in its pair
+    before a declaration lands anywhere. I accept custody of the role AND of the adoption decision; I do NOT accept
+    the apply, which is a separate WORLD act under its own never-widen pair, and any declaration must leave
+    `inline_policy` and `managed_policy_arns` ABSENT (both are Optional+Computed and become authoritative when set).
+    Full reasoning: deliverables/0.7.0_AE_CloudOps~Z/ACCEPTANCE_ROWS_TEN.md; families and order of application:
+    ADOPTION_PLAN_TEN.md.

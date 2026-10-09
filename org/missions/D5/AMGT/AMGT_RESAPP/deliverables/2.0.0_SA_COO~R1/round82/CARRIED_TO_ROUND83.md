@@ -17,3 +17,5 @@ Cited, not cut: the CTO~DELL1 round-82 analysis decides what round 83 cuts.
 5. **gg-6's print change is graded on the tree only** (pypdf absent on dell1); a served-PDF read needs pypdf or another box.
 
 -- 2.0.0_SA_COO~R1
+- D1-S7 fold (CTO msg 2169): lambda-source-map _last_deploy_recorded key goes into the next CloudOps order for this project.
+  Detail (CTO msg 2197, laptop CTO msg 107888): the recorder stops writing lambda-source-map.json's top-level _last_deploy_recorded and derives it on read; this project's CloudOps lane is 0.7.0_AE_CloudOps~RA1 (rule 27 seating).

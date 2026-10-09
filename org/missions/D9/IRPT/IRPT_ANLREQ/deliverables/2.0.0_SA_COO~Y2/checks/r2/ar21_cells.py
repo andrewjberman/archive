@@ -24,7 +24,15 @@ ROWS = [
     # AMENDMENT 3 (issuer 2026-10-09 ~08:3xZ): AR-y-22's reader ships only if irpt-status stages these at its drain (@75650bef27).
     ("irpt-status", "infra/aws/lambda/investor-reporting/ops/entry.py"),
     ("irpt-status", "infra/aws/lambda/investor-reporting/ops/owned_report.py"),
+    # AMENDMENT 4 (issuer 2026-10-09 ~10:4xZ, row IRPT_BCKEND-D2-S43): the installed route table must declare /original.
+    ("irpt-status", "infra/aws/lambda/investor-reporting/reports/status_installed.py"),
+    # AMENDMENT 5 (issuer 2026-10-09 ~12:1xZ, CTO msg 3245, row IRPT_YCDGEN-D2-S20): the research policy row must carry its 3 firms.
+    ("irpt-status", "infra/logic/registry/reporting_policies.json"),
 ]
+HELD = {  # AMENDMENT 5: graded at this lane's own drained commit; ~P2's worker ~268 changed both after (IB-pr-405 ships it)
+    "infra/aws/lambda/investor-reporting/ops/entry.py": "eb70303e8f",
+    "infra/aws/lambda/investor-reporting/ops/owned_report.py": "62880e9bfc",
+}
 FUNCTIONS = ("irpt-status", "irpt-ycharts-generate")
 Y2 = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~Y2/checks"
 
@@ -52,7 +60,10 @@ def main():
             if len(rows) != 1:
                 fail("%s: %d staged row(s) for %s" % (fn, len(rows), path))
             r = rows[0]
-            head = git(root, "show", "HEAD:" + path)
+            # AMENDMENT 5: a row HELD at this lane's own commit is graded against that commit, not HEAD, because HEAD carries
+            # another lane's unreleased change that this release must not ship (CTO msg 3221 ordering: IB-pr-405 follows).
+            ref = HELD.get(path, "HEAD")
+            head = git(root, "show", "%s:%s" % (ref, path))
             at_pin = git(root, "show", "%s:%s" % (r["pin"], path))
             sha = hashlib.sha256(at_pin).hexdigest()
             ok = at_pin == head and r.get("sha256") == sha

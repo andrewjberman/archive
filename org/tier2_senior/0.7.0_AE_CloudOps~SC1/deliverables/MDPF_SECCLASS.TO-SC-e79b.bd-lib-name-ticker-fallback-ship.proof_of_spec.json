@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e79b.bd-lib-name-ticker-fallback-ship",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f4b2f17d0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R16.md",
+    "vintage_commit": "1fdbeb91d3",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/task_orders/MDPF_SECCLASS.TO-SC-e79b.bd-lib-name-ticker-fallback-ship.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-bd/code/gold/lib/etf_classifier.py",
+      "kind": "s3_object",
+      "commit_or_etag": "eb9bb85208c96fa15ede01cf3618782d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ONE safe-deploy run at 2026-10-09T09:54:21Z (the S3 object's own LastModified) on box/dell1: `bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/lib/etf_classifier.py`, rc=0. Lines: '1 path(s) to deploy (1 script, 0 bundle-member)', '[script] data/black_diamond/scripts/gold/lib/etf_classifier.py (authored by unknown) -> code/gold/lib/', 'DEPLOYED [bd] data/black_diamond/scripts/gold/lib/etf_classifier.py', 'VERIFY OK comp-pipescript deployed ...', terminal 'OK: safe-deploy gate PASS -- all 1 file(s) deployed and verified'. Pre-act ETag 535378b5e0b01891c3cf685faf1ed653 at VersionId yPda0uV6nypDdrdFVi.0ZW86Mdxk_cI2 (the rollback handle, unused); post-act VersionId hnOzzH4QClDqa_qbd6Y5tqKu3Kag4vtM, 18,485 B, equal to the repo file in BOTH md5 and size. CTO condition 2's shipped member list is printed in full and carries THREE explicit '[not shipped]' lines for the _shared modules declared for this layer, each reading 'NOT named by this deploy -- S3 keeps its served bytes'; zero second members, so no STOP and no restore. THE WINDOW HELD THE ACT ONCE: at 09:42:36Z the runner read stopped, at the 09:50:07Z call-site guard it read RUNNING (launched 09:46:48Z, a start the order's 04:00Z/23:00Z model does not predict), and the guard aborted the deploy with exit 9 so nothing was uploaded into a live instance; the runner stopped again at 09:53:06Z and the ship ran at 09:54:09Z under the same guard. Output at org/tier2_senior/0.7.0_AE_CloudOps~SC1/deliverables/e79b_safe_deploy.out.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R16_CHECKS/e79_shipped_lib_check.py -- expect 'E79-SHIPPED ok=True'",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R16_CHECKS/e79_shipped_lib_check.py",
+      "expect": "E79-SHIPPED ok=True",
+      "output_evidence": "E79-SHIPPED ok=True repo=eb9bb85208c96fa15ede01cf3618782d served=eb9bb85208c96fa15ede01cf3618782d version=hnOzzH4QClDqa_qbd6Y5tqKu3Kag4vtM rollback=535378b5e0b01891c3cf685faf1ed653 control=MATCH (rc=0), read immediately after the ship. Preserved at e79b_ac1_post_ship.txt.",
+      "denominator": "1 of 1 moving key at the signed md5, with the check's own control reading MATCH. A DISCRIMINATOR THAT MOVED: the order records the base at the cut (~09:4xZ) as 'E79-SHIPPED ok=False repo=eb9bb852... served=535378b5... rollback=535378b5... control=MATCH'. The preflight's empty-success exclusion is satisfied on its own terms rather than by assertion -- served EQUALS repo AND DIFFERS from the rollback ETag. Watch set measured WIDER than the two keys the order names: all keys under code/gold/ read pre and post -- pre=188, post=188, MOVED=1 and that one key IS the target, ADDED=0, GONE=0, compared by script rather than by eye. The two named watch keys are identical pre and post on ETag AND VersionId (etf_classification_scheduled.py 40ffa3fa at PXFS5WDfvYHP.8C46EbqxdPgig2bQ.My; C_06.client_mix_timeseries.py d7eb83b6 at y1QO4QB9EeDDn4jVUL6k25ZGuhqifMdm), which is stronger than ETag equality alone because a re-upload of identical bytes would mint a new VersionId. STOPS=0.",
+      "status": "PASS"
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-S23: crossbox-deploy-check's OPEN-CALL and OVERLAP limbs match at root/token granularity rather than at the keys a deploy moves, so this one-key ship drew 'STOP: 4 hit(s)' of which 4 of 4 were unrelated -- one an unrelated NFRA_CTLPLN order whose body document quotes the token 'data/black_diamond' once at line 2839, two dell2 rows for NFRA_MCPINDEX whose named file is a BRONZE script on another box. All four were enumerated and resolved BEFORE leg D closed, and leg D's proof records each resolution. OBSERVATION, INERT in WARN mode, UNDER_INVESTIGATION; it arms under ENFORCE, and in the direction that trains an operator to override. Remediation is the CVO's.",
+    "MDPF_SECCLASS-D1-S22: the same tool's OPEN-DEPLOY limb went unresolvable on the sibling e60b ship when a concurrent drain removed a worktree between the gate's `git worktree list` and its `ls-tree`. Different axis from S23 (a race, not granularity) and wanting a different fix. Recorded here because this order's ship drew an OPEN-DEPLOY hit too, and that limb's reading is therefore not independent evidence."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "safe-deploy.sh",
+      "invocation": "bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/lib/etf_classifier.py",
+      "result": "OK -- gate PASS, 1 of 1 deployed and verified; exactly one DEPLOYED line and three '[not shipped]' lines. Its seat-gates limb printed 4 hits in WARN mode (rows S23, S22), each enumerated and resolved before the leg closed."
+    },
+    {
+      "tool": "safe_deploy_core.shipped_artifacts_for",
+      "invocation": "shipped_artifacts_for(['data/black_diamond/scripts/gold/lib/etf_classifier.py'], ()) and the same with ('black_diamond',); positive control shipped_artifacts_for(['infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py'], ('black_diamond',))",
+      "result": "CTO condition 2 re-measured, not assumed. Target reads [] in BOTH arms -- which alone proves nothing, since that is also what a dead function returns. The positive control, run as a SEPARATE invocation, returns 1 member ('...etf_classification_scheduled.py', 'opal-data-bd', 'code/gold/lib/_shared/etf_classification_scheduled.py') and its no-tree arm returns 0. So the function does report members when they exist and the target's [] is a TRUE negative."
+    },
+    {
+      "tool": "crossbox-deploy-check.py",
+      "invocation": "python .tools/crossbox-deploy-check.py --root data/black_diamond",
+      "result": "Run directly to enumerate what safe-deploy summarised: OPEN-CALL hit (3) over 26 crossbox files plus 4 device open_calls.json, OVERLAP hit (1), UPSET clear. Named each hit and its reason, which is what made the resolution possible; its own MDPF_SECCLASS line reads 'this box or unplaced, not another box's' and correctly did not hit."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": ".tools/deploy_ledger.py open --leg V|P|D|G ; close-leg V|P|D ; hold --gate-type external --reread-event",
+      "result": "Entry opened with 4 legs before the act. A hold attempted while leg D was still open was REFUSED -- 'open APPLY/DEPLOY leg(s) [D] -- a half-landed deploy cannot be HELD (stays RED)' -- which is the tool behaving correctly and is already recorded as row D1-S14 (no state for opened-but-never-started), so it was not re-filed. After leg D closed the hold was accepted and the entry reads HELD with only the issuer's verify leg open."
+    },
+    {
+      "tool": "boto3 list_object_versions paginator",
+      "invocation": "leg P: paginate gold/entities/clients/ to exhaustion, IsLatest only, plus head_object on the two single keys",
+      "result": "CTO condition 3 satisfied: 18,178 keys (2 singles + 18,176 client .json) over 453 pages, 0 keys without a VersionId. The page count is printed beside the object count because a `list-* --query length()` returns the PAGE's length and would read like a total."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Four arms, each able to STOP the act or to invalidate its evidence. (a) STEP-0 STATE: the served lib must read 535378b5 at yPda0uV6; anything else is a STOP and a report, because the signed rollback handle would not exist. (b) NAMED-SHIP SET under a discriminating control, since shipped_artifacts_for returning [] is indistinguishable from a dead call without one. (c) WINDOW, re-read in the SAME shell as the deploy and aborting it, rather than read in an earlier call and trusted. (d) WATCH SET pre and post over every key under code/gold/, on ETag and (for the two named keys) VersionId, where any key but the target moving is a STOP with a same-session restore by step-0 VersionId.",
+      "expected": "(a) 535378b5 / yPda0uV6 exactly. (b) target [] with the positive control returning at least one member. (c) the guard aborts if the runner is up, the sentinel exists, or the clock is inside the COT window. (d) MOVED=1 and that key is the target; both named watch keys identical on both fields.",
+      "observed": "(a) served 535378b5e0b01891c3cf685faf1ed653 at VersionId yPda0uV6nypDdrdFVi.0ZW86Mdxk_cI2, 17,907 B, LastModified 2026-10-08T19:41:53Z -- exact, so no STOP. (b) target [] in both arms; positive control 1 member; no-tree arm 0 -- discrimination established, so the [] is a true negative. (c) THE GUARD FIRED FOR REAL, which is the strongest evidence in this record that it is not decorative: at 09:50:07Z it read the runner RUNNING (launched 09:46:48Z, between the 09:42:36Z stopped read and the ship) and aborted with exit 9, 'NOT SHIPPING'. Nothing was uploaded. The runner stopped at 09:53:06Z and the same guard passed at 09:54:09Z. (d) pre=188, post=188, MOVED=1 = the target, ADDED=0, GONE=0; both named watch keys byte-identical on ETag AND VersionId.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The shipped bytes were read at four independent places: the repo file's md5 locally; `git status --porcelain` on that path to prove the md5 is of COMMITTED bytes and not a dirty worktree; the S3 object's head-object ETag after the ship; and AC1's own independent repo-vs-served comparison with its built-in control.",
+      "observed": "eb9bb85208c96fa15ede01cf3618782d at all of them, at 18,485 B both locally and in S3, with git status empty on the path. The pre-act served value 535378b5 (17,907 B) differs in both md5 and size, so the move is real and not a re-upload of the same bytes; AC1's control reads MATCH.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Leg G and every arm of CTO condition 4 (the 23 securities' identity_hop, TWCUX in equity, the 0.05pp unclassified fall, the ticker-with-row control, the outside-the-six census).",
+      "reason": "Assigned to the ISSUER by the order: 'after the next BD fire, the issuer's read (2.0.0_SA_COO~M1 closes G; report when D closes)'. This seat does not grade it and did not. The entry is HELD on that named event with the apply legs proven."
+    },
+    {
+      "item": "The serving effect of the shipped lib.",
+      "reason": "Not measurable until a BD gold fire runs it: the lib is library code, so no served data artifact changes at ship time. That is why acceptance here is an ETag identity and the behavioural arm is leg G's."
+    },
+    {
+      "item": "Whether the order's window model ('BD fires 04:00Z and 23:00Z') is complete.",
+      "reason": "Out of this order's acceptance, and surfaced to the issuer in the leg-D report rather than adjudicated here. Measured facts recorded: the runner was up 09:46:48Z-09:53:06Z while NO gold fire was underway (newest log chain_full_20261009_040117.log, last modified 06:15:37Z; every chain_full start in 6 days is 04:01Z or 23:00Z). This seat held to the window's LITERAL arm (no instance running) and did not reason its way past a signed condition to the purpose arm."
+    },
+    {
+      "item": "Flipping this order's <status> to complete.",
+      "reason": "The order does not instruct it, unlike its siblings e60b and e71b which say so explicitly, and leg G is the issuer's. Left at pending and stated in the report; closing it is the issuer's call, not this seat's to infer."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~SC1/logs/session_e79b_lib_ship_0939-1000Z.md"
+}

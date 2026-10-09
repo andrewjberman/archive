@@ -6,7 +6,7 @@
 <date>2026-10-09</date>
 <status>pending</status>
 <risk>WORLD</risk>
-<proof_genre>DEPLOY</proof_genre>
+<proof_genre>BUILD</proof_genre>
 <round>6</round>
 <workstream>THREAD</workstream>
 
@@ -17,6 +17,27 @@
 <owned_cells>CT-x-2</owned_cells>
 <decomp_context>FWD-15 (one real package laptop -> Dell, checked; the lane's work runs), FWD-17 (what was checked and what it cannot rule out), FWD-18 (a box that tries an internet download is stopped and told the route) and FWD-19 (what a box downloaded today, from a record). The L10 analysis, item E3: no Dell receipt, no index-free install, no "the lane's work runs", no egress count, and no deliberate stopped install.</decomp_context>
 </decomp_ref>
+
+<amendment>
+AMENDMENT 1 (issuer, 2026-10-09 ~09:4xZ) -- answering 0.7.0_AE_CloudOps~CT1's ONE ASK, row NFRA_CTLPLN-D1-S3 (relay 0.0.0_AB_MSTR msg 107907,
+evidence @2008d30670): dell1 already runs click 8.5.0, so installing 8.3.1 into the box's interpreter would be a DOWNGRADE. It would
+break huggingface_hub's core requirement (click>=8.4.2,<9.0.0). DO NOT install into the box's interpreter. Gate limb: none graded this
+modification. Step 1's `install` and step 2's run move into ONE FRESH, ISOLATED environment:
+- Create `python -m venv <a new folder under the system temp directory>` with no system site packages.
+- Install the checked wheel into THAT environment index-free, through `intake_receive.py install` if it takes a target interpreter, or
+  else `<venv python> -m pip install --no-index --no-deps <the verified wheel path>`. Say which.
+- Step 2's command runs with `<venv python>` in place of `python`, and its output line (`CLICK 8.3.1`) is appended to the receive file,
+  which `CTx2-AC2` now reads (the issuer changed its invocation from a live import to that file, because the venv is deleted after).
+- Delete the venv folder after the proof is written.
+This proves the route the outcome names (checked file received, verified, proved, installed index-free, the work runs) without changing
+dell1's working environment. Step 3's count covers the venv install. Step 4 stands as written: it has already run, and it is NOT-BLOCKED
+(row D1-S1). That is the finding; CTx2-AC3 failing is the honest result and is not to be changed.
+</amendment>
+<amendment>
+AMENDMENT 2 (issuer, 2026-10-09 ~10:3xZ) -- proof_genre is BUILD, not DEPLOY. This answers 0.7.0_AE_CloudOps~CT1's ask (relay 0.0.0_AB_MSTR msg
+107935): the cell moves no served output and carries no never-widen pair, so the schema's DEPLOY branch (coo_half + cto_half) cannot
+apply. The order moves, not the schema. Gate limb: none graded this modification.
+</amendment>
 
 <context>
 - **The pack:** `click-8.3.1-py3-none-any.whl`, sha256 981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6, checked and
@@ -57,7 +78,7 @@
 
 <proof_of_spec>
 <criterion id="CTx2-AC1" cell_refs="CT-x-2"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt</invocation><expect>DOWNLOADS-TODAY requests=0</expect></criterion>
-<criterion id="CTx2-AC2" cell_refs="CT-x-2"><invocation>python -c "import click; print('CLICK', click.__version__)"</invocation><expect>CLICK 8.3.1</expect></criterion>
+<criterion id="CTx2-AC2" cell_refs="CT-x-2"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.receive.txt</invocation><expect>CLICK 8.3.1</expect></criterion>
 <criterion id="CTx2-AC3" cell_refs="CT-x-2"><invocation>cat org/tier2_senior/0.7.0_AE_CloudOps~CT1/deliverables/NFRA_CTLPLN.TO-CT-x-2.blocked-download.txt</invocation><expect>BLOCKED </expect></criterion>
 </proof_of_spec>
 <expected_criteria>CTx2-AC1,CTx2-AC2,CTx2-AC3</expected_criteria>

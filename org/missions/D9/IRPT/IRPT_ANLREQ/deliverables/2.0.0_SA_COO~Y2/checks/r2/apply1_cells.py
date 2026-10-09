@@ -17,10 +17,10 @@ from pathlib import Path
 
 F = "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_anlreq_r1/APPLY-Y1_after_reads.json"
 FN = "irpt-status"
-BUILT = "WTGCJPiSEWSack1XvAMRyTGSVLX84VSm+3eC3eSPgsQ="
-ROLLBACK = "E7VKvhg3E9D5euWO+S649/iyAJ05xUmFPqHEAKDTFxA="
+BUILT = "t6OJTCcmOnWGVl8iglcvfGoYb3PbPJqJYqsSgJBpGdI="  # AMENDMENT 2: pair REVISION 3 at 5240156380 (rev 2 BjUZjt2o, rev 1 WTGCJPiS)
+ROLLBACK = "BjUZjt2oq8GPJSibq4vD/0m8/LfdN0GF3THwCaBMVOM="  # AMENDMENT 2: revision 2 is the rollback of revision 3
 ROUTE = "GET /api/scoped/investor-reporting/analysis/requests/{requestId}/original"
-READS = [str(i) for i in range(0, 6)]
+READS = [str(i) for i in range(0, 8)]  # AMENDMENT 2: 6 = REQ-5e4149d2 served (no RetentionRefused), 7 = per-member diff exactly reporting_policies.json
 
 
 def live_sha():
@@ -98,7 +98,8 @@ def main():
         if all_pass:
             if d.get("rolled_back") is not False or live != BUILT or n != 1:
                 fail("branch A incoherent")
-        elif d.get("rolled_back") is not True or live != ROLLBACK or n != 0:
+        elif d.get("rolled_back") is not True or live != ROLLBACK or n != 1:
+            # AMENDMENT 2: revision 3 rolls back to revision 2, whose route stays (exactly ONE)
             fail("branch B incoherent")
     print("%s PASS" % cid)
 

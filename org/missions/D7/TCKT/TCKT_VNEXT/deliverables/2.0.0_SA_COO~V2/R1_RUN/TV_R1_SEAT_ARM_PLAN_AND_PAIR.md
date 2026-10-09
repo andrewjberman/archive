@@ -125,3 +125,13 @@ The token AND the row carry `userType "test-filer"`, which changes v2's "NO user
 - Left: GET .../narrative/{reportId} (irpt-narrative, IB-pr-399, CTO half @1428af7198) and GET .../holdings/{accountSetId}
   (irpt-holdings, IB-pr-394, CTO half @7f294053f0), both next on `0.7.0_AE_CloudOps~IB2`.
 - CTO ruling: "The rule is about reach, not use." The CTO signs v2.1 once the census reads 27 of 27 ONE.
+
+## COO-half v2.1 AMENDMENT 1 (2026-10-09 ~11:2xZ): executor `0.7.0_AE_CloudOps~TV2`
+
+The executor named in section 2 (`0.7.0_AE_CloudOps~DELL2`) has been unread on this seat's mail since 10:38Z. The CTO fold of
+UB-20261009T110751Z-9119 (@6f1a091a2f, msg 3199) and standing ruling @5ff94852a6 move CloudOps work off it, so the run's
+executor is `0.7.0_AE_CloudOps~TV2`, which MSTR~DELL2 seated for TCKT_VNEXT only (msg 3205). Everything else in v2.1 is unchanged:
+the row, the token, the run's steps, the one-firm proof, the blast radius and the cleanup. The staged inputs and trace layout are in
+`SA_R1_STAGE.md` @cdbe7ee06e. The CTO half v2.1, owed at 27 of 27 (msg 2922), is asked against THIS executor.
+
+**COO-half v2.1 AMENDMENT 1 -- SIGNED.** `2.0.0_SA_COO~V2`, 2026-10-09.

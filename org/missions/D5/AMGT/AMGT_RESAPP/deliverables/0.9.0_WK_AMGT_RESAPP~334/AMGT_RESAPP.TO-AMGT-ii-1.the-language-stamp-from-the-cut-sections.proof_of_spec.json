@@ -1,0 +1,101 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ii-1.the-language-stamp-from-the-cut-sections",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "5edb9fcb5e",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ii-1.the-language-stamp-from-the-cut-sections.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+  "group": "C",
+  "vintage_commit": "5edb9fcb5e"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~334",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/filings/fetch.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "fetch.py:417 now stamps language from excerpt_text (the cut sections) instead of the whole document text; one line plus a comment edit.",
+   "introduces": [
+    "detect_language(excerpt_text)"
+   ],
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/filings/tests/test_language_from_cut_sections.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Two tests: Portuguese plant behind XBRL-noise header reads pt; English behind the same header reads en. Filings test folder: 247 passed.",
+   "introduces": [
+    "LanguageFromCutSections"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "all five cached English 20-F filings are stamped en and the planted Portuguese filing is stamped pt; L1-L2 PASS; R84 LANGUAGE AC1: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" py -3.12 \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round84_prep/checks/r84_language.py\" --crit AC1; echo \"exit=$?\"",
+   "output_evidence": "PASS L1 x5 (ASML, BABA, NU, PBR, SAP all en); L1 denominator: 5 of 5 cached English filings stamped en; PASS L2 negative control: planted Portuguese filing stamped pt (excerpt 65241 chars); R84 LANGUAGE AC1: YES; exit=0",
+   "denominator": "5 of 5 cached English filings en; 1 of 1 planted Portuguese filing pt",
+   "status": "PASS",
+   "expect": "R84 LANGUAGE AC1: YES[\\s\\S]*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the 10-K fixture and dd-1's 20-F fixture sections hash as at the base; R82 CUT AC2: YES; and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && PYTHONPATH=\"$(pwd)\" python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round82_prep/checks/r82_cut.py\" --crit AC2; echo \"exit=$?\"",
+   "output_evidence": "PASS B1 the 10-K and 20-F fixture sections hash as at round 80: R80 R1 AC3 SERVED: YES; R82 CUT AC2: YES; exit=0",
+   "denominator": "all fixture section hashes of the check (B1)",
+   "status": "PASS",
+   "expect": "R82 CUT AC2: YES[\\s\\S]*exit=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Planted Portuguese filing behind a 40,000+-char stopword-free XBRL header (check L2 and the new test); the base stamps it en.",
+   "expected": "pt",
+   "observed": "pt after the fix",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 ran once on the fix; the filings folder ran once",
+   "observed": "pure offline reads; no clock or network input",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "battery.py:414 and document.py:1510 whole-text language stamps",
+   "reason": "Order bars changes to battery.py and document.py; named in the prep notes for the CTO."
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "PYTHONPATH=.scratch/fz:. py -3.12 -m pytest lib/research/filings/tests -q -p no:cacheprovider",
+   "result": "247 passed in 12.22s"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <instance>",
+   "result": "see WORKER REPORT"
+  }
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~334/SESSION_LOG.md"
+}
