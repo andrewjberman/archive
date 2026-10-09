@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-k-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/prd/NFRA_MCPORTAL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cecf26d2c9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "adfc7412bf",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-k-1.fabric-calls-handlers.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~10",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_fabric_calls.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New this cell. Nothing deploys from this order (BOUNDS: no push, no AWS call, no real S3 write); committed on wk-NFRA_MCPORTAL-cp2-10 in the same commit as this instance.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "introduces": [
+        "def _compute",
+        "async def calls",
+        "async def close_call",
+        "def _file_request",
+        "def _requests_for"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_fabric_calls.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New this cell: the eight named tests plus three extras (request-state attach, 503 unreadable, 503 put failure). Tests are not deployed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "introduces": [
+        "def test_calls_absent_box_reads_absent",
+        "def test_calls_open_filter_and_order",
+        "def test_close_writes_one_request_under_requests",
+        "def test_close_refuses_call_not_open",
+        "def test_close_bad_input_400",
+        "def test_calls_non_owner_is_refused",
+        "def test_real_capture_calls",
+        "def test_request_accepted_by_open_calls_scan"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~10/probes/mp_k1_mutant.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "CONTROLS.mutant probe; rewrites the untracked-at-run source in place and restores the exact original bytes in a finally block.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (cell_refs=MP-k-1): bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/k1.AC1.sh; echo \"exit=$?\" -- expect: calls tests: 0 failed; named tests PASSED 6 of 6 -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/k1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "calls tests: ======================== 11 passed, 1 warning in 0.98s ========================; named tests PASSED 6 of 6\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 named tests PASSED; 11 tests in the file, 0 failed",
+      "status": "PASS",
+      "expect": "calls tests: .*named tests PASSED 6 of 6.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (cell_refs=MP-k-1): bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/k1.AC2.sh; echo \"exit=$?\" -- expect: calls seams: 0 failed; named tests PASSED 2 of 2 -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/k1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "calls seams: ======================== 11 passed, 1 warning in 0.29s ========================; named tests PASSED 2 of 2\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 named tests PASSED; real capture: 4 of 4 roster boxes published (laptop 0, sitez 1, dell1 2, dell2 2 open; 5 calls); real apply_requests returned (1, 0, 1, [])",
+      "status": "PASS",
+      "expect": "calls seams: .*named tests PASSED 2 of 2.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "probes/mp_k1_mutant.py replaces the 'if call_id not in open_ids:' check in close_call's writer with 'if False:' and reruns test_close_refuses_call_not_open, then restores the original bytes.",
+      "expected": "REAL: 1 passed. MUTANT: 1 failed (a CLOSED or unknown call_id would be written as a request).",
+      "observed": "REAL: (0, '1 passed, 10 deselected') MUTANT: (1, '1 failed, 10 deselected'). VERDICT: PASS-MP-K1-MUTANT.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "k1.AC1.sh and k1.AC2.sh run twice back-to-back (offline fakes, fixed capture).",
+      "observed": "AC1: 6 of 6, RESULT: PASS both runs. AC2: 2 of 2, RESULT: PASS both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "app/admin_api.py route lines",
+      "reason": "Not in this order's paths; the issuer adds Route(\"/fabric/calls\", admin_fabric_calls.calls, methods=[\"GET\"]) and Route(\"/fabric/calls/close\", admin_fabric_calls.close_call, methods=[\"POST\"]) at the merge."
+    },
+    {
+      "item": "a live S3 read or write",
+      "reason": "BOUNDS: no AWS call, no real S3 write; every S3 interaction is a fake client or the verbatim capture. The live POST needs MP-k-2's grant."
+    },
+    {
+      "item": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~10/probes/mp_k1_mutant.py",
+      "reason": "The CONTROLS.mutant probe referenced by controls.mutant; not an artifact of either named criterion (AC1/AC2 are the TO's only two)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~10/probes/mp_k1_mutant.py",
+  "compiler_tools": [
+    {
+      "tool": "pytest (python -m pytest)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/cp2/checks/k1.AC1.sh / k1.AC2.sh",
+      "result": "both RESULT: PASS exit=0, run twice"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <app + test>",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    }
+  ]
+}
