@@ -184,17 +184,72 @@ DISPOSITIONS = {
 }
 
 
+# ---------------------------------------------------------------------------------------------------------------------------- shim-free record
+SHIMFREE_JSON, SHIMFREE_MD = "NEAR_ZERO_SHIMFREE_E1.json", "NEAR_ZERO_SHIMFREE_E1.md"
+ROUND33_FIXED, ROUND33_TIEOUT = 79, 8385
+
+
+def write_shimfree(out_dir, plan, bronze, gold, pop, rows, tests, counts, effect, control_ok, full):
+    """TO-DB-b-66: the 153 re-run with no shim, on the reader's own mean, and the whole planned population graded by the reader with this result.
+    tieout_within_total = reader-graded segments within 0.35 pp, where each row of a FIXED class is graded on BD's landed gain (the near-zero fix)."""
+    import hashlib
+    reader_path = Path(reader.__file__).resolve()
+    rec33 = json.loads((HERE / OUT_JSON).read_bytes().decode("utf-8"))
+    same_rows = [(x["account"], x["segment"], x["sub_class"]) for x in rows] == [(x["account"], x["segment"], x["sub_class"]) for x in rec33["rows"]]
+    fixed_cls = {c for c in counts if DISPOSITIONS[c]["disposition"] == "fixed"}
+    fixed_within = sum(effect[c]["within_landed_gain"] for c in fixed_cls)
+    graded, _planned = reader.build_rows(plan, bronze, gold, reader.FLOW_CONVENTION)
+    graded = [x for x in graded if x["verdict"] in ("WITHIN", "OUTSIDE")]
+    # per-row tests in row order (tests[sub] was appended in row order)
+    seen, per_row = {}, []
+    for r in rows:
+        i = seen.get(r["sub_class"], 0)
+        seen[r["sub_class"]] = i + 1
+        per_row.append(tests[r["sub_class"]][i])
+    landed = {key(x): t["landed_gain"] for x, t in zip(pop, per_row)}
+    fixed_keys = {key(x) for x, r in zip(pop, rows) if r["sub_class"] in fixed_cls}
+    reader_within = sum(1 for x in graded if x["abs_diff_pp"] <= TOL)
+    total = 0
+    for x in graded:
+        k = key(x)
+        if k in fixed_keys:
+            total += 1 if (landed[k] is not None and landed[k] <= TOL) else 0
+        else:
+            total += 1 if x["abs_diff_pp"] <= TOL else 0
+    near_zero_keys = {key(x) for x in pop}
+    reader_within_153 = sum(1 for x in graded if key(x) in near_zero_keys and x["abs_diff_pp"] <= TOL)
+    out_rows = [{"account": r["account"], "segment": r["segment"], "sub_class": r["sub_class"], "evidence": r["evidence"],
+                 "abs_diff_pp": t["abs_diff_pp_served"]} for r, t in zip(rows, per_row)]
+    rec = {"measured_by": "0.9.0_WK_IRPT_DASHBD~43", "claim": "measured", "task_order": "IRPT_DASHBD.TO-DB-b-66", "tolerance_pp": TOL, "vendor_calls": 0,
+           "shim_applied": False,
+           "mean": "reader of record daily_mean_value (positive_only=True) for the near-zero classes; round 32's classify binds positive_only=False itself",
+           "population": len(out_rows), "rows": out_rows, "counts": counts,
+           "fixed_classes": sorted(fixed_cls), "fixed_within": fixed_within, "fixed_within_round33": ROUND33_FIXED,
+           "tieout_graded": len(graded), "tieout_within_total": total, "tieout_within_round33": ROUND33_TIEOUT,
+           "reader_within_all_segments": reader_within, "reader_within_of_the_153": reader_within_153,
+           "same_rows_as_round33_record": same_rows, "round33_counts": rec33["counts"],
+           "control_round32_counts_reproduced": control_ok,
+           "reader_sha256": hashlib.sha256(reader_path.read_bytes()).hexdigest(),
+           "files_read": dict(full["files_read"], round33_record="org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~42/NEAR_ZERO_E3.json")}
+    (out_dir / SHIMFREE_JSON).write_bytes((json.dumps(rec, indent=1) + "\n").encode("utf-8"))
+    lines = ["# NEAR_ZERO_SHIMFREE_E1 -- the %d NEAR_ZERO_BALANCE rows re-run with no shim (TO-DB-b-66, 0.9.0_WK_IRPT_DASHBD~43)" % len(out_rows), "",
+             "Counts only. Record: `NEAR_ZERO_SHIMFREE_E1.json`. Module: `near_zero_e3.py --out-dir`. S3 reads only; zero vendor calls. Tolerance 0.35 pp.", "",
+             "shim_applied: false. The near-zero classifier uses the reader of record's own mean; round 32's classify binds the reader's `daily_mean_value` itself.", "",
+             "| sub-class | segments | disposition |", "|---|---|---|"]
+    for k in CLASSES:
+        if k in counts:
+            lines.append("| %s | %d | %s |" % (k, counts[k], DISPOSITIONS[k]["disposition"]))
+    lines += ["| total | %d | |" % len(out_rows), "",
+              "Fixed classes within 0.35 pp under the reader's mean: %d of %d (round 33: %d)." % (fixed_within, sum(counts[c] for c in fixed_cls), ROUND33_FIXED),
+              "Tie-out: %d segments graded by the reader; within 0.35 pp with the shim-free near-zero result: %d (round 33: %d); the reader alone: %d, of which %d are among the %d." % (
+                  len(graded), total, ROUND33_TIEOUT, reader_within, reader_within_153, len(out_rows)),
+              "Sub-classes and rows identical to the round 33 record: %s. Control (round 32's counts reproduced): %s." % (same_rows, control_ok), ""]
+    (out_dir / SHIMFREE_MD).write_bytes(("\n".join(lines) + "\n").encode("utf-8"))
+    print(json.dumps({"counts": counts, "fixed_within": fixed_within, "tieout_graded": len(graded), "tieout_within_total": total,
+                      "reader_within_all": reader_within, "reader_within_153": reader_within_153, "same_rows": same_rows}, indent=1))
+
+
 # ---------------------------------------------------------------------------------------------------------------------------- run
-def _shim_round32():
-    """round 32's classify calls `uc.mean_daily_value`, a name round 32's reader promotion (DB-b-60) removed from the round 31 module (it is
-    `daily_mean_value` now). The shim restores the name so round 32's classify can be RUN here; its effect is controlled in `main` by re-running
-    classify on round 32's own 170 rows and comparing to LARGE_FLOW_E3.json's counts."""
-    if not hasattr(uc, "mean_daily_value"):
-        uc.mean_daily_value = uc.daily_mean_value
-        return True
-    return False
-
-
 def _within(ts, k):
     return sum(1 for t in ts if t.get(k) is not None and t[k] <= TOL)
 
@@ -206,8 +261,12 @@ def main():
     pop = [x for x in rec31["rows"] if x.get("cause_class") == "NEAR_ZERO_BALANCE"]
     r32_large = json.loads(R32_LARGE.read_bytes().decode("utf-8"))
     r32_pop = [x for x in rec31["rows"] if x.get("cause_class") == "LARGE_FLOW_DAY"]
-    a2bd, n_obj, bronze, gold, n_part, n_gold = lf.load(root, cache, pop + r32_pop)
-    shimmed = _shim_round32()
+    out_dir = Path(sys.argv[sys.argv.index("--out-dir") + 1]).resolve() if "--out-dir" in sys.argv else None
+    if out_dir:        # shim-free re-run (TO-DB-b-66): the whole planned population is read, so the tie-out total can be graded by the reader
+        plan, (n_obj, bronze, gold, n_part, n_gold) = reader.load(root, cache)
+        a2bd = {r["account"]: str(r["bd_account"]) for r in plan["request_list"]}
+    else:
+        a2bd, n_obj, bronze, gold, n_part, n_gold = lf.load(root, cache, pop + r32_pop)
     # control: round 32's classify, re-run on its own 170 rows, reproduces its recorded counts
     ctl = {}
     for x in r32_pop:
@@ -242,7 +301,7 @@ def main():
                "outside_under_flow_start_round32": sum(1 for k in pop_keys if seg_fs.get(k, {}).get("verdict") == "OUTSIDE"),
                "graded_in_round32_flowstart": sum(1 for k in pop_keys if k in seg_fs),
                "round32_classify_on_these_153": r32_sub, "crosstab_sub_class_by_round32_class": cross,
-               "shim": {"applied": shimmed, "what": "uc.mean_daily_value := uc.daily_mean_value (name removed from round 31's module by round 32's reader promotion)",
+               "shim": {"applied": False, "what": "none: round 32's classify (large_flow_e3.py) binds the reader of record's daily_mean_value (positive_only=False, as round 31) itself",
                         "control_round32_counts_reproduced": control_ok, "control_counts": ctl, "recorded_counts": r32_large["counts"]}}
     # the fix effect
     fix_rows = [c for c in CLASSES if c in counts and DISPOSITIONS[c]["disposition"] == "fixed"]
@@ -282,6 +341,9 @@ def main():
                           "bronze_prefix": "s3://%s/%s" % (r17.BRONZE_BUCKET, r17.BRONZE_PREFIX), "bronze_object_count": n_obj,
                           "served_series": "s3://%s/%sdate=<YYYY-MM-DD>/data.parquet (%d partitions)" % (r17.GOLD_BUCKET, r17.GOLD_PREFIX, n_part),
                           "served_accounts": n_gold}}
+    if out_dir:
+        write_shimfree(out_dir, plan, bronze, gold, pop, rows, tests, counts, effect, control_ok, out)
+        return
     (HERE / OUT_JSON).write_bytes((json.dumps(out, indent=1) + "\n").encode("utf-8"))
     lines = ["# NEAR_ZERO_E3 -- the %d NEAR_ZERO_BALANCE misses traced to a sub-class (TO-DB-b-65, 0.9.0_WK_IRPT_DASHBD~42)" % len(rows), "",
              "Counts only. Record: `NEAR_ZERO_E3.json`. Module: `near_zero_e3.py` (imports round 32's `large_flow_e3.py` and the reader of record). "
