@@ -17,9 +17,9 @@
     {
       "path_or_key": "portal/src/pages/SecurityAnalysis/modelSheet.ts",
       "kind": "script",
-      "commit_or_etag": "7f0edd90b4c04638691bd012f2034cacca69eae7",
+      "commit_or_etag": "26f621d51cf5da6dad0037ed866e12c092a515b3",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Portal branch wk-AMGT_CORPUS-44-portal, local only, no push. buildModelSheet takes a 7th optional teamSheet argument; given rows, the sheet is exactly those labels in order (a label matching a row spec takes that spec's figures, any other row shows no figure and the worded reason TEAM_ROW_NO_FIGURE); absent, null or empty, the output is byte-equal to the base.",
+      "deploy_evidence": "Portal branch wk-AMGT_CORPUS-44-portal, local only, no push. buildModelSheet takes a 7th optional teamSheet argument; given rows, the sheet is exactly those labels in order (a label matching a row spec takes that spec's figures, any other row shows no figure and the worded reason TEAM_ROW_NO_FIGURE); absent, null or empty, the output is byte-equal to the base. Amendment 1: the team rows lead as the first group and the base's other groups (margin history, valuation/return/balance-sheet) stay below unchanged; only the hard-coded Financial Summary group is replaced.",
       "introduces": [
         "TEAM_ROW_NO_FIGURE"
       ],
@@ -52,12 +52,12 @@
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round44/at2_check.cjs\" portal -- expect (?m)^at2 build 2/2 control 1/1$",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round44/at2_check.cjs\" portal -- expect (?m)^at2 build 3/3 control 1/1$",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && node \"org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~C1/checks/round44/at2_check.cjs\" portal",
-      "output_evidence": "at2 build 2/2 control 1/1",
-      "denominator": "b1 6 of 6 team-sheet rows in order and label; b2 6 of 6 figure-less rows with a worded reason; control 1 of 1 byte-equal to the base snapshot; rc 0",
-      "expect": "(?m)^at2 build 2/2 control 1/1$",
+      "output_evidence": "at2 build 3/3 control 1/1",
+      "denominator": "b1 6 of 6 team-sheet rows in order and label; b2 6 of 6 figure-less rows with a worded reason; b3 2 of 2 base groups kept below unchanged, forecast years kept; control 1 of 1 byte-equal to the base snapshot; rc 0",
+      "expect": "(?m)^at2 build 3/3 control 1/1$",
       "status": "PASS"
     },
     {
@@ -66,7 +66,7 @@
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs > /dev/null 2>&1; echo \"tabs rc=$?\"",
       "output_evidence": "tabs rc=0",
-      "denominator": "1 of 1 tab harness run exited 0; bun run typecheck rc 0",
+      "denominator": "1 of 1 tab harness run exited 0; bun run typecheck rc 0 (re-run at amendment 1)",
       "expect": "(?m)^tabs rc=0$",
       "status": "PASS"
     }
@@ -74,13 +74,13 @@
   "controls": {
     "mutant": {
       "description": "The team-sheet branch in buildModelSheet disabled (condition made false), then at2_check.cjs run.",
-      "expected": "build 0/2: the base's 61 hard-coded rows come back instead of the 6 team-sheet labels.",
-      "observed": "at2 b2 rows with no figure 61; at2 build 0/2 control 1/1, rc 1; file restored, at2 build 2/2 control 1/1 on two further runs, portal tree clean.",
+      "expected": "build 0/3: the base's hard-coded rows come back instead of the 6 team-sheet labels.",
+      "observed": "Team-sheet branch disabled (condition made false): at2 build 0/3 control 1/1; file restored, at2 build 3/3 control 1/1 on three further runs, portal tree clean.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "at2_check.cjs run three times at the graded tree (pure function, no network).",
-      "observed": "at2 build 2/2 control 1/1 every run.",
+      "observed": "at2_check.cjs run three times after the restore: at2 build 3/3 control 1/1 every run.",
       "status": "STABLE"
     }
   },
@@ -91,7 +91,7 @@
     {
       "tool": "at2_check.cjs (AC1)",
       "invocation": "node at2_check.cjs portal",
-      "result": "rc 0; at2 build 2/2 control 1/1"
+      "result": "rc 0; at2 build 3/3 control 1/1"
     },
     {
       "tool": "tabs.harness.cjs (AC2)",

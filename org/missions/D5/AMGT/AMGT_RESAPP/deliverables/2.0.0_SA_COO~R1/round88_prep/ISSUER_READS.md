@@ -38,6 +38,14 @@ members' `cap_vintage` 2026-08-06; peers `as_of` 2026-09-24T2252Z. **Answer:** U
 than today's header and on a different vintage from its members. **Defect for round 89:** refresh the subject cap to the header's
 vintage, or drop it with its reason (the row's two branches).
 
+## Z-W212-S2 (2026-10-09 ~21:2xZ) -- url on every gold article_security_mention row
+
+Read-only over all 24 objects under `amgt/harvest/gold/article_security_mention/` (459,334 rows in all), per object: the 17 builds before
+2026-10-06 carry NO `url` column (0 of their rows); the 2026-10-06T06:20 build carries it on 31,919 of 33,665; every build since
+2026-10-06T08:44 -- six, the latest `date=2026-10-08/part-20261009T093755Z` (52,424 rows) -- carries a url on 100% of rows (33,665;
+48,025; 48,358; 52,282; 52,709; 52,424). Each build is a full rebuild, so the served latest is complete. **Answer: YES since the 10-06
+rebuild; Z-W212-S2 -> CLOSED on this read** (the producer change landed in HARVST's rebuild between 10-06T06:20 and 08:44).
+
 ## Still to read this round
 
-Z-W212-S2 (store url coverage), Z-W266-S3 (driver-chart coverage).
+Z-W266-S3 (driver-chart coverage).

@@ -92,7 +92,7 @@ def main():
     by_part = {}
     for k in extract._list_keys(client, prefix):
         if k.lower().endswith((".xlsx", ".xlsm")):
-            by_part.setdefault(k[len(prefix):].split("/")[0].split("=", 1)[-1], []).append(k)
+            by_part.setdefault(k[len(prefix):].split("/")[0].split("=", 1)[-1].replace("-SLASH-", "/"), []).append(k)  # partitions encode "/" as -SLASH-
     try:
         from lib.research.corpus import team_sheet
     except ImportError:
