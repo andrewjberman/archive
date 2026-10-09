@@ -1,0 +1,122 @@
+MDPF_SECHIST.TO-DEPLOY-GOLD step 4 -- THE PLAN, and its grading as AC2
+seat 0.7.0_AE_CloudOps~SH1  |  2026-10-09T2003xxZ  |  terraform infra/aws/terraform/etfs-positioning
+saved plan: gold.tfplan (applied from the SAVED plan, so what was graded is what lands)
+
+AC2 is graded from the PLAN JSON, not from the text below.
+The text output collapses unchanged elements ('# (4 unchanged elements hidden)'), so reading it
+and concluding 'nothing else changed' would be inference. The counts here are over the full
+denominator that terraform show -json prints.
+
+RESOURCE DENOMINATOR: 9 resource_changes in the plan
+   aws_cloudwatch_event_rule.etf_positioning_producer_daily       ['no-op']
+   aws_cloudwatch_event_target.etf_positioning_producer_daily     ['no-op']
+   aws_iam_role.etf_positioning_producer                          ['no-op']
+   aws_iam_role_policy.etf_positioning_producer_s3                ['update']
+   aws_iam_role_policy_attachment.etf_positioning_producer_basic  ['no-op']
+   aws_lambda_layer_version.opal_trading_calendar                 ['no-op']
+   aws_lambda_permission.events_etf_positioning_producer          ['no-op']
+   module.etf_positioning_producer.aws_cloudwatch_log_group.lambda ['no-op']
+   module.etf_positioning_producer.aws_lambda_function.this       ['update']
+
+LIMB 1 -- IAM. before 8 statements -> after 9.
+   ADDED            : 1
+      {"Action": ["s3:PutObject"], "Effect": "Allow", "Resource": ["arn:aws:s3:::opal-data-etfs/bloomberg/etfs/silver/history_gaps/*"], "Sid": "Stage1WriteHistoryGaps"}
+   REMOVED          : 0
+   CARRIED IDENTICAL: 8 of 8 prior statements
+   prior Sids, all intact: Stage1ReadInputs, Stage1ListBackfill, Stage1WriteGold, Stage2ReadGold, Stage2ServePlatinum, ListEtfsBucket, ListPlatinumEtfs, Stage2ReadEtfClassifications
+
+   VERDICT: exactly ONE statement added, none removed, none modified. That statement is R1's:
+   s3:PutObject on the history-gap prefix lib/opal_naming.address() builds, no wildcard above it.
+   The STOP condition in the task order (any other IAM change) is NOT met.
+
+LIMB 2 -- the code. 46 lambda attributes compared; 3 differ:
+      last_modified      '2026-08-28T18:49:14.000+0000' -> None
+      s3_object_version  '7r5NQeGQE9Nj.2G9ARqpZMBfEfIwfiii' -> 'oqVg2A1LdkeHx5CHfzA6KfOs4HhEMq2T'
+      source_code_hash   'qQk9ohLihOInJnvj/NncAms1IuoEIkkjRwpb8EIFouQ=' -> 'YEYdzIZd2KQp3NngjJ5anv8RfTcsB8MqG21yRvCKVhM='
+
+   s3_object_version and source_code_hash both move to the artifact this seat built at pin
+   09b6a7d580 and VERIFIED on S3 (size 676850 AND content-sha256 metadata both matched on
+   head-object; rc=0 from the cp was not treated as evidence). last_modified is known after
+   apply. No env var, memory, timeout, layer, role, handler or schedule change.
+
+AC2 VERDICT: PASS
+
+WHAT THIS PLAN CANNOT SEE, stated rather than left implicit:
+   a plan grades DESIRED against APPLIED. It does not exercise the function. The book table and
+   the publisher stage are the dry run's declared BLIND spots too, and they are the L3 read the
+   issuer 2.0.0_SA_COO~H1 owns on the first scheduled run.
+
+==============================================================================
+VERBATIM terraform show OUTPUT OF THE SAVED PLAN FOLLOWS
+==============================================================================
+
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_iam_role_policy.etf_positioning_producer_s3 will be updated in-place
+  ~ resource "aws_iam_role_policy" "etf_positioning_producer_s3" {
+        id          = "etf-positioning-producer-role:s3-rw-etfs-gold-platinum"
+        name        = "s3-rw-etfs-gold-platinum"
+      ~ policy      = jsonencode(
+          ~ {
+              ~ Statement = [
+                    # (2 unchanged elements hidden)
+                    {
+                        Action   = [
+                            "s3:PutObject",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "arn:aws:s3:::opal-data-etfs/gold/*",
+                        ]
+                        Sid      = "Stage1WriteGold"
+                    },
+                  + {
+                      + Action   = [
+                          + "s3:PutObject",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-etfs/bloomberg/etfs/silver/history_gaps/*",
+                        ]
+                      + Sid      = "Stage1WriteHistoryGaps"
+                    },
+                    {
+                        Action   = [
+                            "s3:GetObject",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "arn:aws:s3:::opal-data-etfs/gold/*",
+                        ]
+                        Sid      = "Stage2ReadGold"
+                    },
+                    # (4 unchanged elements hidden)
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (2 unchanged attributes hidden)
+    }
+
+  # module.etf_positioning_producer.aws_lambda_function.this will be updated in-place
+  ~ resource "aws_lambda_function" "this" {
+        id                             = "etf-positioning-producer"
+      ~ last_modified                  = "2026-08-28T18:49:14.000+0000" -> (known after apply)
+      ~ s3_object_version              = "7r5NQeGQE9Nj.2G9ARqpZMBfEfIwfiii" -> "oqVg2A1LdkeHx5CHfzA6KfOs4HhEMq2T"
+      ~ source_code_hash               = "qQk9ohLihOInJnvj/NncAms1IuoEIkkjRwpb8EIFouQ=" -> "YEYdzIZd2KQp3NngjJ5anv8RfTcsB8MqG21yRvCKVhM="
+        tags                           = {
+            "ManagedBy" = "Terraform"
+            "Module"    = "yang-lambda"
+            "System"    = "ETFS_POSITIONING"
+        }
+        # (28 unchanged attributes hidden)
+
+        # (4 unchanged blocks hidden)
+    }
+
+Plan: 0 to add, 2 to change, 0 to destroy.
