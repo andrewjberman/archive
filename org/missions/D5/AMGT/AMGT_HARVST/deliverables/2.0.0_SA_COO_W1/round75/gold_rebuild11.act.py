@@ -24,8 +24,7 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-HARVST = os.path.dirname(os.path.dirname(HERE))
-DELIV = os.path.join(HARVST, "deliverables")
+DELIV = os.path.dirname(os.path.dirname(HERE))  # .../AMGT_HARVST/deliverables
 CELL = os.path.join(DELIV, "0.9.0_WK_AMGT_HARVST~129")
 R32 = os.path.join(DELIV, "2.0.0_SA_COO_H", "round32")
 R72 = os.path.join(DELIV, "2.0.0_SA_COO_H", "round72")

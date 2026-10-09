@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-76",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8f96f579c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "30c815767d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-76.inf-gross-fee-tieout.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~53",
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~53/INF_GROSS_FEE_TIEOUT.json",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~53/orion_account_return_daily.py",
+      "kind": "script",
+      "commit_or_etag": "d9c635bd00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline adapter run from the repo root with --registry-key inflection --end 2026-10-08: S3 reads only, no put/upload/copy/delete call in the file; py_compile rc 0, ruff --target-version py39 All checks passed; the commit passed the naming and surprise-row gates.",
+      "artifact_covered_by": [
+        "DB37-4-AC1",
+        "DB37-4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~53/orion_gross_fee_pull.py",
+      "kind": "script",
+      "commit_or_etag": "d9c635bd00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only Orion query API pull (saved-query runs through Generate, no create/edit/delete; token read from its S3 secret into memory, never printed or written); py_compile rc 0, ruff clean; wrote 4 CSVs to .scratch (3129 rows each), not committed.",
+      "artifact_covered_by": [
+        "DB37-4-AC1",
+        "DB37-4-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~53/orion_sources.json",
+      "kind": "config_data",
+      "commit_or_etag": "d9c635bd00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the adapter declaration: ratified flow set read from the taxonomy yaml and refused on drift, the two departing classes, the gross and fee sources; no firm token, no credential.",
+      "artifact_covered_by": [
+        "DB37-4-AC1",
+        "DB37-4-AC2",
+        "DB37-4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~53/INF_GROSS_FEE_TIEOUT.json",
+      "kind": "config_data",
+      "commit_or_etag": "d9c635bd00",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the tie-out record: 291 of 562 account-windows within 0.35 pp, gross vs gross (418 with the two departing classes as flows), 271 misses in 5 declared classes, 6 fee slices, flagged classes with counts, net_control; output_sha256 eb1e981c34e0e97581386f5a77d8065bc1f8f790c005b3fdd09c50512209ce57 (parquet 423,186 rows kept in .scratch). Accounts appear as sha256-prefix keys only.",
+      "artifact_covered_by": [
+        "DB37-4-AC1",
+        "DB37-4-AC2",
+        "DB37-4-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB37-4-AC1",
+      "criterion_verbatim": "DB37-4-AC1 -- Opal gross vs Orion gross, within count at 0.35 pp with its denominator and account count. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r37/p37_round37.py\" . DB37-4-AC1",
+      "output_evidence": "OK: gross vs Orion Connect query API (read-only), saved query 'Performance Dim' with the performance option's feeMethod overridden to Gross Of Fees: account-level TWR, Before-Tax, Gross of Fees, Annualized, window Rolling 3-Year (2023-10-09 .. 2026-10-08): 291 of 562 within 0.35 pp over 562 account(s)\nDB37-4-AC1 PASS",
+      "denominator": "291 of 562 account-windows within 0.35 pp (562 accounts, one Rolling 3-Year window each, 2023-10-09 to 2026-10-08, 752 trading days); flows by the ratified taxonomy. With the two departing classes as flows: 418 of 562 (flow_variant_within).",
+      "status": "PASS",
+      "expect": "DB37-4-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB37-4-AC2",
+      "criterion_verbatim": "DB37-4-AC2 -- Orion's fee source named and all six fee slices reported, each a figure or ABSENT with what was searched. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r37/p37_round37.py\" . DB37-4-AC2",
+      "output_evidence": "OK: fee source Orion Connect query API, saved query 'Unified Account Dim': Activity.Value with activityOptionId 11 (Advisory Fees Paid), per account over the Rolling 3-Year window (PATH_DISCOVERY.md:181); billed / unbilled from Asset.IncludedInBilling of saved query 'Billing Dim' (PATH_DISCOVERY.md:158); supervised / unsupervised from the account-level managed flag landed in silver/api_dims/accounts_v2 (inferred); slices supervised=3993493.53, unsupervised=51.44, supervision_total=4246172.01, billed=78182.7, unbilled=0.0, billing_total=4246172.01\nDB37-4-AC2 PASS",
+      "denominator": "6 of 6 slices are figures, 0 ABSENT. 562 of 562 sample accounts carry a fee figure; supervised 483 accounts, unsupervised 11, flag unavailable 68 (252,627.04 dollars, reported apart); Asset.IncludedInBilling is broken for 526 of 562 sample accounts (2882 of 3129 database-wide), so billed (36 accounts) and unbilled (0) are over the readable subset only (row IRPT_DASHBD-D2-W53-S2).",
+      "status": "PASS",
+      "expect": "DB37-4-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB37-4-AC3",
+      "criterion_verbatim": "DB37-4-AC3 -- every miss classed, and the two departing flow classes flagged with counts. Base: FAIL.",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r37/p37_round37.py\" . DB37-4-AC3",
+      "output_evidence": "OK: 271 misses classed; flagged [('INTER_ACCOUNT_JOURNAL', 764), ('TAX_WITHHELD', 1855)]\nDB37-4-AC3 PASS",
+      "denominator": "271 of 271 misses classed (562 - 291): LINK_BROKEN_NO_BASE 79, DEPARTURE_FLOW_CLASS 127, RESIDUAL_LARGE_FLOW 51, DEPARTURE_AND_OTHER_FEE 2, RESIDUAL_NO_LARGE_FLOW 12; 0 UNCLASSED. Flagged: Internal Account Journal pair 764 rows on 144 accounts; Federal/State Tax Withheld 1855 rows on 105 accounts.",
+      "status": "PASS",
+      "expect": "DB37-4-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the checker reads INF_GROSS_FEE_TIEOUT.json only; no run state",
+      "observed": "printed the same last lines on a second read",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "In a scratch root, the first miss's class changed to UNCLASSED (the real record untouched).",
+      "expected": "DB37-4-AC3 FAIL with that miss named",
+      "observed": "FAIL: 1 miss(es) unclassed: [{'account': '797eab2e1b2992fe', ... 'class': 'UNCLASSED' ...}]\nDB37-4-AC3 FAIL (rc 1)",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Orion's gross figure from S3",
+      "reason": "No gross figure is landed (silver/api_dims/performance is Net of Fees; silver/performance_dim is net on all rows), so it was pulled read-only from Orion's query API under the order's exception (row IRPT_DASHBD-D2-W53-S1). The unchanged net query read live agrees with the landed net on 558 of 562 accounts within 0.35 pp (median 0.06 pp)."
+    },
+    {
+      "item": "a supervised flag that Orion names, and a billed/unbilled split over every sample account",
+      "reason": "Orion names no supervised field (the managed flag is read, an inference) and Asset.IncludedInBilling is unreadable for 526 of 562 sample accounts (row IRPT_DASHBD-D2-W53-S2)."
+    },
+    {
+      "item": "a ruling on the two departing classes",
+      "reason": "They are flagged, counted and probed (418 of 562 with them as flows); the amendment proposal is DB-b-77 (row IRPT_DASHBD-D2-W53-S3)."
+    },
+    {
+      "item": "any S3 write, Bloomberg or Black Diamond call, deploy, bun or download; any write call to Orion; any edit under data/, infra/ or portal/",
+      "reason": "Bounds of the order; none made. The Orion calls were the order's named exception: GETs plus the Generate POST that runs a saved report; the token was read from its S3 secret for the calls only and never printed, written or committed. The parquet and the four CSVs are in .scratch and not committed."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W53-S1",
+    "IRPT_DASHBD-D2-W53-S2",
+    "IRPT_DASHBD-D2-W53-S3"
+  ],
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile orion_account_return_daily.py orion_gross_fee_pull.py",
+      "result": "rc 0"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 orion_account_return_daily.py orion_gross_fee_pull.py",
+      "result": "All checks passed"
+    }
+  ]
+}

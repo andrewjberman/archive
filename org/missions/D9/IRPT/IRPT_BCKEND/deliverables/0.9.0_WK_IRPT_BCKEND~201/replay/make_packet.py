@@ -24,7 +24,8 @@ TF = {"irpt-49f-reporting-read-lambda": "reporting-read/lambda.tf", "irpt-direct
       "irpt-export-render": "export/lambda.tf", "irpt-holdings": "holdings/lambda.tf", "irpt-narrative": "narrative/lambda.tf",
       "irpt-performance-adapter": "performance/lambda.tf", "irpt-status": "ops/lambda.tf", "irpt-ycharts-generate": "ycharts/generate.tf"}
 pin = cen["pin"]
-arts = cen["artifacts"] + cen["unbuilt_census_only"]
+arts = cen["artifacts"]
+HELD = cen["held_out"]
 L = []
 w = L.append
 
@@ -36,29 +37,26 @@ def short_owner(m):
 w("# Never-widen sign-off packet -- IB-pr-390: release of IB-pr-385 + IB-pr-387 (`_authz/served.py` hosts) -- svc-custody-statement admitted on three routes, internal callers narrowed by their profile row")
 w("")
 w("Prepared by 0.9.0_WK_IRPT_BCKEND~201 for 2.0.0_SA_COO~P2 / 1.0.0_SA_CTO. Nothing here was uploaded, deployed or applied: BUILD_ONLY from a clean tree, offline replays, AWS reads only. "
-  "Files beside this packet: `IB97-3_release_census.json`, `IB97-3_release_replay.json`, `lambda-source-map.candidate.json`, `amendment1_ALL_never_admits.patch`, `replay/` (the scripts). Model: `0.9.0_WK_IRPT_BCKEND~189/NEVER_WIDEN_SIGNOFF_PACKET_IB-pr-380_381.md`.")
+  "Files beside this packet: `IB97-3_release_census.json`, `IB97-3_release_replay.json`, `replay/` (the scripts). `lambda-source-map.candidate.json` and `amendment1_ALL_never_admits.patch` are SUPERSEDED history of the pre-amendment packet (the patch is now committed; the real map is restaged; no candidate map is used). Model: `0.9.0_WK_IRPT_BCKEND~189/NEVER_WIDEN_SIGNOFF_PACKET_IB-pr-380_381.md`.")
 w("")
-w("**READ THIS FIRST -- this packet is PRE-AMENDMENT and the order is left OPEN.**")
+w("**READ THIS FIRST -- this packet is AMENDMENT 1 (issuer 2.0.0_SA_COO~P2, CTO msg 2569) and releases 6 of the 8 `served.py` hosts.**")
 w("")
-w("1. **Amendment 1 (ALL never admits an internal caller, CTO msg 2569) is NOT in this pin.** The lane gate refused the code commit (row `IRPT_BCKEND-D2-W201-S1`, BLOCKING): "
-  "`served.py` and two test files are in no order's `<paths>` until the drain. The change is written, tested and saved as `amendment1_ALL_never_admits.patch` (_authz suite: 303 passed, 1 failed -- row S3: `test_svc_custody_statement.py` is outside the grant). "
-  "At this pin an internal caller whose row is the string `ALL` is still treated as unrestricted. Measured live: of 83 `opal-users-v2` profile rows, 2 carry `allowedFirmIds` -- one internal `Dev` row with a LIST of six ids that covers all four firms, and one service row `cottonwood`; **0 internal rows hold `ALL`**, so the amendment changes no live caller today. "
-  "Do not sign the final pair on this pin: re-run `replay/make_census.py`, `replay/run_replay.py`, `replay/make_packet.py` at the amendment's commit.")
-w("2. **A build at the real source map does not carry this change** (row S4, ARMED). All 8 functions pin `served.py` at older blobs. The artifacts below are built from `lambda-source-map.candidate.json` (8 `staged_from` rows differ) through `BAU_SOURCE_MAP_OVERRIDE`. The applier must land that restage in `lambda-source-map.json` first, or the release is a no-op that reads green.")
-w("3. **`irpt-narrative` must stay OUT of the pair** (row S6, ARMED): the new `served.py` raises `TypeError` on its error path against that function's staged `errors.py`, and its live boundary is 27 `served.py` commits behind. **`irpt-holdings` has no built artifact** (row S5): the builder refuses on a parity gate that fails at the real map too.")
+w("1. **ALL never admits an internal caller, and it is in this pin.** A profile `allowedFirmIds` equal to the string `ALL`, or a list holding `ALL`, is refused FIRM_BINDING at the internal narrowing step (code commit `%s`, `_authz` suite 304 passed). Measured live 2026-10-09 (the pre-amendment packet): of 83 `opal-users-v2` profile rows, 2 carry `allowedFirmIds` -- one internal `Dev` row with a LIST of six ids that covers all four firms, and one service row `cottonwood`; **0 internal rows hold `ALL`**, so the change refuses no live caller today." % cen["code_pin"][:10])
+w("2. **The real source map carries the change.** `served.py`'s staged row of each released host pins `%s` (restage commit `c2bb612234`); the artifacts below are built at the REAL `lambda-source-map.json`, no candidate map, no override." % cen["code_pin"][:10])
+w("3. **HELD OUT, not in this pair: `irpt-holdings` (row S5) and `irpt-narrative` (row S6); their source-map rows are NOT restaged.** Every route they serve is **NOT YET NARROWED** -- see the section below, which names the follow-up cell.")
 w("")
 w("## The pin and the builds")
 w("")
-w("- **Release pin P: `%s`** (branch `wk-IRPT_BCKEND-201`). Code pin `dea0f53252` (box/dell2 HEAD as the worktree carries it) holds IB-pr-385 `7e0bfc3222` and IB-pr-387 `b4b544fb15`; P is the next commit, which adds the candidate map. `served.py` at P is blob `e1db29d5eb5b`." % pin)
-w("- **Census of EVERY function that packages `_authz/served.py`: 8 of 8** in `lambda-source-map.json` (a token census of `served.py` in `files[]` and `staged_from` over all 229 functions): %s. The layer map carries no copy (0 hits)." % ", ".join("`%s`" % f for f in cen["functions_packaging_served_py"]))
-w("- BUILD_ONLY from a clean tree (porcelain 0 lines before and after every build), each function built twice, byte-identical: **%s** (7 of 7 built). Command: `%s`. Zips kept only in scratch, removed; nothing uploaded; source map untouched." % ("YES" if cen["build_only"]["built_twice_identical_all"] else "NO", cen["build_only"]["command"]))
+w("- **Release pin P (census pin): `%s`** (branch `wk-IRPT_BCKEND-201`). **Code pin `%s`** (the commit that adds ALL-never-admits to `served.py`; it sits on IB-pr-385 `7e0bfc3222` and IB-pr-387 `b4b544fb15`). P is two commits on: the restage `c2bb612234` and the routes.json denominator `71e9aacf27`. `served.py` at the code pin is blob `87d9ecc49747`." % (pin, cen["code_pin"][:10]))
+w("- **Census: the 6 RELEASED hosts of the 8 that package `_authz/served.py`** (a token census of `served.py` in `files[]` and `staged_from` over all 229 functions found 8; the layer map carries no copy): %s. Held out, with their rows: %s. The layer map carries no copy (0 hits)." % (", ".join("`%s`" % f for f in cen["functions_packaging_served_py"]), "; ".join("`%s` -- %s" % (k, v) for k, v in HELD.items())))
+w("- BUILD_ONLY from a clean tree (porcelain 0 lines before and after every build), each function built twice, byte-identical: **%s** (%d of %d built). Command: `%s`. Zips kept only in scratch, removed; nothing uploaded; source map untouched." % ("YES" if cen["build_only"]["built_twice_identical_all"] else "NO", len(arts), len(cen["functions_packaging_served_py"]), cen["build_only"]["command"]))
 w("")
 w("| function | built sha256 (CodeSha256 form) | hex | bytes | live_before (CodeSha256) | changed members vs live | S3 rollback version (live zip) |")
 w("|---|---|---|---|---|---|---|")
 for a in arts:
     w("| `%s` | %s | %s | %s | `%s` | %d | `%s` |" % (
-        a["name"], ("`%s`" % a["built_sha256"]) if a.get("built_sha256") else "NOT BUILT (row S5)", ("`%s`" % a["built_sha256_hex"][:16] + "...") if a.get("built_sha256_hex") else "-",
-        a.get("built_bytes", "-"), a["live_before"], len(a["changed_members"]), ROLLBACK[a["name"]]))
+        a["name"], "`%s`" % a["built_sha256"], "`%s`" % a["built_sha256_hex"][:16] + "...",
+        a["built_bytes"], a["live_before"], len(a["changed_members"]), ROLLBACK[a["name"]]))
 w("")
 w("`live_before` = `aws lambda get-function-configuration` CodeSha256, read 2026-10-09; each equals the `content-sha256` metadata of the LATEST version of `s3://opal-313476888478-lambda-artifacts/investor-reporting/<function>.zip`, which is the rollback version in the last column.")
 w("")
@@ -69,14 +67,14 @@ for a in arts:
     for m in a["changed_members"]:
         w("- %s `%s` (built `%s`, live `%s`): %s" % (m["status"], m["member"], m["built_sha256_prefix"], m["live_sha256_prefix"], short_owner(m) if m["owner_commits"] else m["owner_commit"]))
     w("")
-w("`served.py` is owned by `b4b544fb15` (IB-pr-387) and `7e0bfc3222` (IB-pr-385); in 49f-reporting-read, directory-search, export-render and holdings the live blob also predates `fff1b0395a` (IB-pr-366, the served CREATE guard) and `db8161f46e` (IB-pr-357), which ride in (row S7). "
+w("`served.py` is owned by `%s` (ALL never admits, this amendment), `b4b544fb15` (IB-pr-387) and `7e0bfc3222` (IB-pr-385); in 49f-reporting-read and directory-search and export-render the live blob also predates `fff1b0395a` (IB-pr-366, the served CREATE guard) and `db8161f46e` (IB-pr-357), which ride in (row S7). "
   "Grouping for the signer: **clean (served.py only):** 49f-reporting-read, directory-search, export-render. **Carry other unreleased cells:** performance-adapter (`holdings_gold.py`, `loaders.py`), status (`canonical_profile_reads.py`, `loaders.py`, `maintained_sources.py`), ycharts-generate (`generate_installed.py` IB-yr-761 and four added custody/holdings members). "
-  "**The svc subject needs export-render (custody-report-persist, submit-export) AND ycharts-generate (analysis-requests).**")
+  "**The svc subject needs export-render (custody-report-persist, submit-export) AND ycharts-generate (analysis-requests).**" % cen["code_pin"][:10])
 w("")
 w("## What the release does")
 w("")
 w("- **IB-pr-385.** `verified_internal_subject` admits ONE firm-bound service subject, `svc-custody-statement` (sub, `userType` service, edge-verified, not renderer, verified `x-firm-id` == `lookup('cottonwood')['long']` from `lib/opal_naming.py`). `Entry.handle` keeps it out of the any-firm selection and `global`, puts it on the Opal roster for its own firm only, and refuses it NOT_AUTHORIZED on every operation but `custody-report-persist`, `analysis-requests`, `submit-export`. A zip without the registry refuses it (fail closed).")
-w("- **IB-pr-387.** An internal caller selecting another firm is narrowed by its profile row's `allowedFirmIds`: a non-empty list narrows; no row, no attribute or an empty list is unchanged; a non-list value or any read error is FIRM_BINDING. (At this pin a bare `ALL` is still unchanged: amendment 1, row S1.)")
+w("- **IB-pr-387.** An internal caller selecting another firm is narrowed by its profile row's `allowedFirmIds`: a non-empty list narrows; no row, no attribute or an empty list is unchanged; a non-list value or any read error is FIRM_BINDING. **Amendment 1: `ALL` (the string, or a list member) is a FIRM_BINDING refusal, never an unrestricted spelling.**")
 w("")
 w("## Writers of each changed property")
 w("")
@@ -85,10 +83,10 @@ w("- **A caller's selectable firms (the property IB-pr-387 narrows).** Writers o
 w("")
 w("## Every route this change admits (pair of admitted and another-firm-refused)")
 w("")
-w("Source of the route set: `docs/contracts/investor-reporting/v1/routes.json` at P -- 23 routes (21 DECLARED + 2 ROUTED_ELSEWHERE); its own `_denominator` is stale (row S2). The narrowing applies on every route, because every route runs `Entry.handle` and the narrowing fires when a caller selects a firm other than its verified one. Each route below is replayed through its HANDLER's built zip (holdings: the would-be zip). Columns: **A** = internal row `[cottonwood]` selecting cottonwood (admitted); **B** = the same caller selecting inflection (refused FIRM_BINDING built; the live zip admitted it); **C** = no-row Opal caller selecting inflection (identical built and live). svc rows: **S1** svc cottonwood claim (admitted on built, not on live); **S2** svc inflection and 49financial claims (not admitted, built and live identical); **S3** svc cottonwood selecting inflection (FIRM_BINDING).")
+w("Source of the route set: `docs/contracts/investor-reporting/v1/routes.json` at P -- 23 routes (21 DECLARED + 2 ROUTED_ELSEWHERE); its `_denominator` now reads declared 21, routed_elsewhere 2, total 23 (row S2 fixed, `71e9aacf27`, no route changed). **21 of the 23 are replayed below (the 6 released hosts); the other 2 are the held-out hosts' and are listed as NOT YET NARROWED.** The narrowing applies on every route, because every route runs `Entry.handle` and the narrowing fires when a caller selects a firm other than its verified one. Each route below is replayed through its HANDLER's built zip. Columns: **A** = internal row `[cottonwood]` selecting cottonwood (admitted); **B** = the same caller selecting inflection (refused FIRM_BINDING built; the live zip admitted it); **C** = no-row Opal caller selecting inflection (identical built and live); **ALL** = internal caller whose row is the string `ALL` / a list holding `ALL`, selecting inflection (refused FIRM_BINDING built). svc rows: **S1** svc cottonwood claim (admitted on built, not on live); **S2** svc inflection and 49financial claims (not admitted, built and live identical); **S3** svc cottonwood selecting inflection (FIRM_BINDING).")
 w("")
-w("| route | operation | handler | A | B (built / live) | C | svc S1 / S2 / S3 |")
-w("|---|---|---|---|---|---|---|")
+w("| route | operation | handler | A | B (built / live) | C | ALL (str / list, built) | svc S1 / S2 / S3 |")
+w("|---|---|---|---|---|---|---|---|")
 
 
 def adm(c, firm):
@@ -96,9 +94,6 @@ def adm(c, firm):
 
 
 for p in rep["routes"]:
-    if p["function"] == "irpt-narrative":
-        w("| %s | %s | `%s` | EXCLUDED | EXCLUDED | EXCLUDED | - (row S6: built TypeError on the error path) |" % (p["route"], p["operation"], p["function"]))
-        continue
     A = p["internal_row_cottonwood_selecting_cottonwood"]
     B = p["internal_row_cottonwood_selecting_inflection"]
     C = p["internal_no_row_selecting_inflection"]
@@ -111,13 +106,26 @@ for p in rep["routes"]:
             s["svcCotSel"]["built"]["code"])
     else:
         svc = "n/a (svc: %s)" % p["svc"]["svcOther"]["built"]["code"]
-    w("| %s | %s | `%s`%s | %s | %s / %s | %s | %s |" % (
-        p["route"], p["operation"], p["function"], " (would-be)" if p["built_kind"] == "would_be" else "",
+    AS, AL = p["internal_row_ALL_string_selecting_inflection"]["built"], p["internal_row_ALL_list_selecting_inflection"]["built"]
+    allc = "%s / %s" % (AS["code"] if AS["reached_firm_check"] is None else "ADMITTED", AL["code"] if AL["reached_firm_check"] is None else "ADMITTED")
+    w("| %s | %s | `%s` | %s | %s / %s | %s | %s | %s |" % (
+        p["route"], p["operation"], p["function"],
         "admitted" if adm(A["built"], "cottonwood") and adm(A["live"], "cottonwood") else "CHECK",
         B["built"]["code"] if B["built"]["reached_firm_check"] is None else "ADMITTED", "admitted" if B["live"]["reached_firm_check"] == "inflection" else "refused",
-        "identical" if C["built"] == C["live"] else "DIFFERS", svc))
+        "identical" if C["built"] == C["live"] else "DIFFERS", allc, svc))
 w("")
 w("The non-svc `svc: UNEXPECTED` entries for `irpt-directory-search` mean the subject is not recognised at all there (its tree has no `lib/opal_naming.py`), so it is an ordinary service principal with an empty Opal roster; elsewhere it is NOT_AUTHORIZED. Tests cited as the second cover of each pair: `_authz/tests/test_svc_custody_statement.py` (23, incl. `test_svc_custody_statement_cottonwood_admitted_on_each_route`, `..._other_firm_claim_refused`) and `_authz/tests/test_allowed_firm_ids.py` (12: listed firm admitted, unlisted firm refused).")
+w("")
+w("## NOT YET NARROWED -- the routes of the two held-out hosts")
+w("")
+w("`irpt-holdings` and `irpt-narrative` are NOT in this release (their source-map rows are not restaged, nothing here builds or replays them). **Until they are released, an internal caller selecting another firm on these routes is NOT narrowed by its profile row and the svc subject is not admitted there:**")
+w("")
+w("| route | operation | handler | status | why held out |")
+w("|---|---|---|---|---|")
+for h in rep["held_out_routes_not_replayed"]:
+    w("| %s | %s | `%s` | **NOT YET NARROWED** | %s |" % (h["route"], h["operation"], h["function"], HELD[h["function"]]))
+w("")
+w("**Follow-up cell: none is cut at this pin** (decomposition section 90 carries IB-pr-390 and IB-pr-391 only). It is for the issuer 2.0.0_SA_COO~P2 to cut, one cell for both hosts or one per host: (a) `irpt-holdings` -- clear the ADHC_DRIFTD.002 parity gate (`holdings_publication_port.py` is in `source_dir` and not in `files[]`), then restage `served.py` at the code pin and build/replay/sign; (b) `irpt-narrative` -- restage its `errors.py` to one carrying `public_line(admitted=)` (and its 27 `served.py` commits of drift), then the same. Rows `IRPT_BCKEND-D2-W201-S5` and `-S6` are the evidence.")
 w("")
 w("## The replay (offline; live versus built artifacts; `IB97-3_release_replay.json`)")
 w("")
@@ -128,14 +136,14 @@ w("|---|---|---|---|")
 for a in rep["arms"]:
     w("| %s | %s | %s | %s |" % (a["name"], a["verdict"], "yes" if a["negative_control"] else "no", a["detail"].replace("|", "/")))
 w("")
-w("`lib/opal_naming.py` `lookup('cottonwood')` (row D2-S26): resolves from the built tree of 6 of 8 functions, including both svc hosts (`irpt-export-render`, `irpt-ycharts-generate`); `irpt-directory-search` and `irpt-narrative` carry no `lib/opal_naming.py`, so the subject is simply not recognised there (fail closed, and neither hosts a svc route). Not replayed: IB-pr-366's on-behalf create guard and IB-pr-357's envelope field (they ride in, row S7); the narrative route (row S6); a live token of the subject (none exists until the mint pair is applied).")
+w("`lib/opal_naming.py` `lookup('cottonwood')` (row D2-S26): resolves from the built tree of 5 of the 6 released functions, including both svc hosts (`irpt-export-render`, `irpt-ycharts-generate`); `irpt-directory-search` carries no `lib/opal_naming.py`, so the subject is simply not recognised there (fail closed, and it hosts no svc route). Not replayed: IB-pr-366's on-behalf create guard and IB-pr-357's envelope field (they ride in, row S7); the two held-out hosts' routes; a live token of the subject (none exists until the mint pair is applied).")
 w("")
 w("## Branch A (released)")
 w("")
-w("Precondition (row S4): the applier lands the candidate restage in `infra/aws/lambda/ci/lambda-source-map.json` (8 `staged_from` rows: pin `b4b544fb15...`, sha256 `e1db29d5...`; or the amendment's commit), commits, then builds from a clean tree. For each function in the signed set (recommended: every one but `irpt-narrative`; `irpt-holdings` only after the parity gate is cleared, row S5):")
+w("Precondition: none to restage -- the real map already pins `%s` for the 6 released hosts (commit `c2bb612234`); the applier does not restage. Build from a clean tree at P or a descendant. For each of the 6 functions in the signed set (`irpt-holdings` and `irpt-narrative` are NOT in it):" % cen["code_pin"][:10])
 w("")
 w("1. `BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting <function>` and compare the printed sha256 to the table (ABORT if different), then the same script without BUILD_ONLY (S3 object `s3://opal-313476888478-lambda-artifacts/investor-reporting/<key>.zip`, `<key>` = the function name, except 49f-reporting-read = `irpt-reporting-read-lambda`).")
-w("2. The Terraform deploy path of the function's module (`infra/aws/terraform/investor-reporting/<tf file>`: %s); no IAM, route, schedule or environment change. Effect on served bytes: svc-custody-statement becomes admissible on the three routes for a cottonwood token (none exists yet); internal callers with a list row are narrowed (0 today); `served.py`'s IB-pr-366/357 changes also land." % "; ".join("`%s` %s" % (k.replace("irpt-", ""), v) for k, v in sorted(TF.items())))
+w("2. The Terraform deploy path of the function's module (`infra/aws/terraform/investor-reporting/<tf file>`: %s); no IAM, route, schedule or environment change. Effect on served bytes: svc-custody-statement becomes admissible on the three routes for a cottonwood token (none exists yet); internal callers with a list row are narrowed and an `ALL` row is refused (0 such rows today); `served.py`'s IB-pr-366/357 changes also land." % "; ".join("`%s` %s" % (k.replace("irpt-", ""), v) for k, v in sorted(TF.items()) if k in cen["functions_packaging_served_py"]))
 w("3. Per-family image/layer: none touched. The ledger entry names every function in the signed set.")
 w("")
 w("## Branch B (rolled back)")
@@ -144,7 +152,7 @@ w("Per function, redeploy the prior artifact through the same Terraform path (ne
 w("")
 w("## The replay arm for the applier (rerun before the ledger)")
 w("")
-w("From the repo root, scratch directory OUTSIDE the worktree holding `zips/<function>.1.zip` (the zips to be uploaded): `python replay/run_replay.py <scratch> <pin> <out.json>` (reads the live zips and layers from AWS, runs `replay/authz_case_runner.py` per tree). STOP the apply if any arm is `UNEXPECTED`; if the svc arm is not `expected-diff` on all 3 routes; if arm B is not refused on every counted route; if the no-row arm is not identical; or if the no-registry negative control admits the subject. Delete the scratch directory afterwards.")
+w("From the repo root, scratch directory OUTSIDE the worktree holding `zips/<function>.1.zip` (the zips to be uploaded): `python replay/run_replay.py <scratch> <pin> <out.json>` (reads the live zips and layers from AWS, runs `replay/authz_case_runner.py` per tree). STOP the apply if any arm is `UNEXPECTED`; if the svc arm is not `expected-diff` on all 3 routes; if arm B or the ALL arm is not refused on every counted route; if the no-row arm is not identical; or if the no-registry negative control admits the subject. Delete the scratch directory afterwards.")
 w("")
 w("## The after-read")
 w("")
@@ -155,6 +163,6 @@ w("2. **Internal caller, narrowed.** Use an existing internal caller whose profi
 w("")
 w("## Rows")
 w("")
-w("`IRPT_BCKEND-D2-W201-S1` (BLOCKING: amendment 1 cannot be committed), `-S2` (the stale `_denominator` is in the contract file, not the granted path), `-S3` (BLOCKING: IB-pr-385's test collides with amendment 1), `-S4` (BLOCKING, ARMED: source map pins), `-S5` (BLOCKING: irpt-holdings parity gate), `-S6` (BLOCKING, ARMED: irpt-narrative), `-S7` (IB-pr-366/357 ride in).")
+w("Dispositioned by AMENDMENT 1: `IRPT_BCKEND-D2-W201-S1` (amendment code committed, `%s`), `-S2` (routes.json denominator fixed, `71e9aacf27`), `-S3` (svc test fixture re-pointed to a no-row caller, same code commit), `-S4` (source map restaged, `c2bb612234`). Still open and ARMED: `-S5` (irpt-holdings parity gate) and `-S6` (irpt-narrative errors.py) -- both held out; `-S7` (IB-pr-366/357 ride in)." % cen["code_pin"][:10])
 (D / "NEVER_WIDEN_SIGNOFF_PACKET_IB-pr-390.md").write_text("\n".join(L) + "\n", encoding="utf-8", newline="\n")
 print("OK: packet", len("\n".join(L)), "chars")

@@ -1,5 +1,5 @@
 """IB-pr-390 census writer. From the worktree root:
-    python replay/make_census.py <scratch_dir> <pin> <candidate_map_repo_path> <out_json>
+    python replay/make_census.py <scratch_dir> <pin> <map_repo_path> <out_json> <code_pin>   (AMENDMENT 1: the REAL map, no candidate)
 Runs release-census.py (read only; live zip from AWS) for each function that packages _authz/served.py, attaches the
 BUILD_ONLY outputs (<scratch>/zips/<fn>.1.zip and .2.zip, built twice), reads live_before (CodeSha256) from AWS, and finds each
 changed member's OWNER COMMITS: the commits that touched its source path after the commit holding the LIVE blob, up to the
@@ -14,8 +14,10 @@ from pathlib import Path
 
 ROOT = Path(subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, check=True).stdout.decode().strip())
 scratch, pin, map_path, out_path = Path(sys.argv[1]), sys.argv[2], sys.argv[3], Path(sys.argv[4])
-FUNCS = ["irpt-49f-reporting-read-lambda", "irpt-directory-search", "irpt-export-render", "irpt-holdings", "irpt-narrative",
-         "irpt-performance-adapter", "irpt-status", "irpt-ycharts-generate"]
+FUNCS = ["irpt-49f-reporting-read-lambda", "irpt-directory-search", "irpt-export-render", "irpt-performance-adapter",
+         "irpt-status", "irpt-ycharts-generate"]          # the 6 RELEASED hosts (AMENDMENT 1)
+HELD_OUT = {"irpt-holdings": "row IRPT_BCKEND-D2-W201-S5 (parity gate refuses BUILD_ONLY at the real map)",
+            "irpt-narrative": "row IRPT_BCKEND-D2-W201-S6 (new served.py raises TypeError against its staged errors.py)"}
 
 
 def git(*a):
@@ -90,16 +92,16 @@ for fn in FUNCS:
                     "built_bytes": z1.stat().st_size, "built_twice_identical": h1.digest() == h2.digest()})
         artifacts.append(art)
     else:
-        art["not_built"] = "BUILD_ONLY refused: ADHC_DRIFTD.002 parity (holdings_publication_port.py is in source_dir and not in files[]); row IRPT_BCKEND-D2-W201-S5"
-        unbuilt.append(art)
-doc = {"to_id": "IRPT_BCKEND.TO-IB-pr-390", "pin": pin, "candidate_map": map_path,
-       "pin_note": "code pin dea0f53252 (box/dell2 HEAD as the worktree carries it; contains IB-pr-385 7e0bfc3222 and IB-pr-387 b4b544fb15); "
-                   "census pin = the next commit, which adds the candidate source map (row IRPT_BCKEND-D2-W201-S4)",
+        raise SystemExit("no built zip pair for " + fn)
+code_pin = sys.argv[5] if len(sys.argv) > 5 else ""
+doc = {"to_id": "IRPT_BCKEND.TO-IB-pr-390", "pin": pin, "map": map_path, "candidate_map": None, "code_pin": code_pin,
+       "pin_note": "AMENDMENT 1. code pin %s (served.py with ALL-never-admits; the staged row of every released host pins it); census pin = box/dell2 HEAD as the worktree carries it "
+                   "after the restage and the routes.json denominator commits. The REAL source map is used: no candidate map." % code_pin,
        "census_commands": census_cmds,
-       "functions_packaging_served_py": FUNCS,
+       "functions_packaging_served_py": FUNCS, "held_out": HELD_OUT,
        "artifacts": artifacts, "unbuilt_census_only": unbuilt,
        "build_only": {"rc": 0, "tree_clean": True, "built_twice_identical_all": all(a["built_twice_identical"] for a in artifacts),
-                      "command": "BUILD_ONLY=1 BAU_SOURCE_MAP_OVERRIDE=<candidate map> bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting <function>",
+                      "command": "BUILD_ONLY=1 bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting <function>  (TMPDIR outside the worktree; real lambda-source-map.json)",
                       "porcelain_lines_before": 0, "porcelain_lines_after": 0, "nothing_uploaded": True, "source_map_untouched": True}}
 out_path.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
 for a in artifacts + unbuilt:

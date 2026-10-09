@@ -1,0 +1,101 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-pf-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "02feea1287",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pf-1.profile-confines-data-tools-only.md"
+ },
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "4fb7326f67"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~45",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+   "kind": "script",
+   "commit_or_etag": "b47fc56a98",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "BUILT and HELD on branch wk-NFRA_OPLGTW-33-45; no release, deploy, grant or AWS call (order bounds).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_data_entitlement_family.py",
+   "kind": "test",
+   "commit_or_etag": "27e1969db3",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Offline test file; nothing deployed.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py",
+   "kind": "test",
+   "commit_or_etag": "b47fc56a98",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Pinned expectations moved to the new arm (ac02-ac07, ac09, ac11, ac12); ac08 untouched; nothing deployed.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the new rule's four arms (profiled keeps non-data tools; unprofiled denied data; Alyssa's data reach unchanged; one family). <invocation>bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/pf1.AC1.sh; echo \"exit=$?\"</invocation><expect>(?s)named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0</expect>",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/pf1.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0",
+   "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "4 of 4 named tests (test_ogpf1_ac01..04) passed; the unprofiled arm denies 5 of 5 Schwab tools and passes the Black Diamond tool to its own gate unchanged (row Z-W45-S2).",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: the query, grant and admin suites pass whole; the guard suite fails nothing new. <invocation>bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/pf1.AC2.sh; echo \"exit=$?\"</invocation>",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r32/checks/pf1.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)test_schwab_query\\.py: pytest rc=0 .*removed or renamed 0.*test_admin_grants\\.py: pytest rc=0 .*removed or renamed 0.*test_entitlement_admin\\.py: pytest rc=0 .*removed or renamed 0.*failures beyond the base's test_ogz1_ac08: 0.*RESULT: PASS.*exit=0",
+   "output_evidence": "tests/test_schwab_query.py: pytest rc=0 (27 passed); failed/error lines 0; test functions at the cut 27, now 27, removed or renamed 0\ntests/test_admin_grants.py: pytest rc=0 (5 passed); failed/error lines 0; test functions at the cut 5, now 5, removed or renamed 0\ntests/test_entitlement_admin.py: pytest rc=0 (9 passed); failed/error lines 0; test functions at the cut 9, now 9, removed or renamed 0\ntests/test_data_entitlement_guard.py: 1 failed, 11 passed; failures beyond the base's test_ogz1_ac08: 0\nRESULT: PASS\nexit=0",
+   "denominator": "3 of 3 suites pass whole (41 tests, 0 removed or renamed); guard suite 11 of 12 pass, the 1 failure is the base's test_ogz1_ac08. Full output: deliverables/0.9.0_WK_NFRA_OPLGTW~45/pf1.AC2.out.txt",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "decide() with the active-profile non-family pass-through disabled (the old rule restored): the profiled principal denied every non-data tool again. Run through pf1.AC1.sh, then the file restored byte for byte.",
+   "expected": "FAIL on the profiled-keeps-non-data arm",
+   "observed": "pytest rc=1; named tests passed 2 of 4; failed/error lines 2; RESULT: FAIL (output: deliverables/0.9.0_WK_NFRA_OPLGTW~45/mutant_pf1.AC1.out.txt)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "pf1.AC1.sh run twice, output md5 compared.",
+   "expected": "identical",
+   "observed": "5fae53a13935a59f6d0320c509e914e4 on both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W45-S1",
+  "NFRA_OPLGTW-Z-W45-S2",
+  "NFRA_OPLGTW-Z-W45-S3",
+  "NFRA_OPLGTW-Z-W45-S4"
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~45/totals.txt",
+ "compiler_tools": [
+  {
+   "tool": "python -m pytest (offline; moto DynamoDB, Entra faked)",
+   "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/<file>.py -q",
+   "result": "family 4 passed; guard 11 passed 1 failed (base ac08); schwab_query 27 passed; admin_grants 5 passed; entitlement_admin 9 passed; portal_grant 5 passed 2 failed (base)"
+  }
+ ]
+}

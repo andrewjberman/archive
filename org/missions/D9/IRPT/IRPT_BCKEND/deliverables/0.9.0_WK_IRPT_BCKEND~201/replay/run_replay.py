@@ -16,8 +16,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = Path(subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, check=True).stdout.decode().strip())
 scratch, pin, out_path = Path(sys.argv[1]), sys.argv[2], Path(sys.argv[3])
-FUNCS = ["irpt-49f-reporting-read-lambda", "irpt-directory-search", "irpt-export-render", "irpt-holdings", "irpt-narrative",
-         "irpt-performance-adapter", "irpt-status", "irpt-ycharts-generate"]
+FUNCS = ["irpt-49f-reporting-read-lambda", "irpt-directory-search", "irpt-export-render", "irpt-performance-adapter",
+         "irpt-status", "irpt-ycharts-generate"]          # the 6 RELEASED hosts (AMENDMENT 1); holdings and narrative are held out
 SVC_OPS = {"custody-report-persist", "analysis-requests", "submit-export"}
 spec = importlib.util.spec_from_file_location("rc", str(ROOT / "infra/aws/lambda/ci/release-census.py"))
 rc = importlib.util.module_from_spec(spec)
@@ -26,8 +26,6 @@ spec.loader.exec_module(rc)
 routes_path = scratch / "routes.json"
 routes_path.write_bytes(subprocess.run(["git", "show", "%s:docs/contracts/investor-reporting/v1/routes.json" % pin],
                                        cwd=str(ROOT), capture_output=True, check=True).stdout)
-served_blob = subprocess.run(["git", "show", "%s:infra/aws/lambda/investor-reporting/_authz/served.py" % pin],
-                             cwd=str(ROOT), capture_output=True, check=True).stdout
 
 
 def extract(data, dest):
@@ -62,15 +60,8 @@ for f in FUNCS:
     live_zip = rc.fetch_live_zip(ROOT, f)
     extract(live_zip, scratch / "live" / f)
     built_zip = scratch / "zips" / (f + ".1.zip")
-    if built_zip.is_file():
-        extract(built_zip.read_bytes(), scratch / "built" / f)
-        kind = "built"
-    else:
-        # irpt-holdings: the builder refuses (ADHC_DRIFTD.002, row W201-S5). WOULD-BE zip = the live zip with the one
-        # changed member (served.py) replaced by the pinned blob -- what the candidate map's census names. Not an artifact.
-        extract(live_zip, scratch / "built" / f)
-        (scratch / "built" / f / "served.py").write_bytes(served_blob)
-        kind = "would_be"
+    extract(built_zip.read_bytes(), scratch / "built" / f)
+    kind = "built"
     for side in ("built", "live"):
         out = scratch / ("case_%s_%s.json" % (side, f))
         r = subprocess.run([sys.executable, "-I", str(HERE / "authz_case_runner.py"), str(scratch / side / f), str(routes_path),
@@ -120,6 +111,8 @@ arms = []
 per_route = []
 for r_ in json.load(open(routes_path, encoding="utf-8"))["routes"]:
     rk, op, fn = r_["route_key"], r_["operation"], r_["handler"]
+    if fn not in FUNCS:
+        continue
     b = results[("built", fn)]["routes"][rk]["cases"]
     lv = results[("live", fn)]["routes"][rk]["cases"]
     per_route.append({
@@ -127,17 +120,17 @@ for r_ in json.load(open(routes_path, encoding="utf-8"))["routes"]:
         "internal_row_cottonwood_selecting_cottonwood": {"built": b["rowCotCot"], "live": lv["rowCotCot"]},
         "internal_row_cottonwood_selecting_inflection": {"built": b["rowCotInf"], "live": lv["rowCotInf"]},
         "internal_no_row_selecting_inflection": {"built": b["noRow"], "live": lv["noRow"]},
+        "internal_row_ALL_string_selecting_inflection": {"built": b["rowAllStr"], "live": lv["rowAllStr"]},
+        "internal_row_ALL_list_selecting_inflection": {"built": b["rowAllList"], "live": lv["rowAllList"]},
         "svc": ({k: {"built": b[k], "live": lv[k]} for k in ("svcCot", "svcInf", "svc49", "svcCotSel")}
                 if op in SVC_OPS else {"svcOther": {"built": b["svcOther"], "live": lv["svcOther"]}})})
 
-# irpt-narrative: its built tree raises TypeError on the new served.py's error path (errors.public_line has no `admitted`
-# keyword in its staged errors.py, row W201-S6) -- recorded as a defect, counted in no arm.
-EXCLUDED = {"irpt-narrative"}
-defects = [{"route": p["route"], "function": p["function"],
-            "built_codes": sorted({str(c["built"]["code"]) for k, c in list(p.items()) if isinstance(c, dict) and "built" in c} )}
-           for p in per_route if p["function"] in EXCLUDED]
+# the held-out hosts' routes are not replayed (AMENDMENT 1); the packet lists them as NOT YET NARROWED
+HELD = {"irpt-holdings", "irpt-narrative"}
+held_out_routes = [{"route": r_["route_key"], "operation": r_["operation"], "function": r_["handler"]}
+                   for r_ in json.load(open(routes_path, encoding="utf-8"))["routes"] if r_["handler"] in HELD]
+defects = []
 per_route_all = per_route
-per_route = [p for p in per_route if p["function"] not in EXCLUDED]
 n = len(per_route)
 ok_narrow_admit = [p for p in per_route if p["internal_row_cottonwood_selecting_cottonwood"]["built"]["reached_firm_check"] == "cottonwood"
                    and p["internal_row_cottonwood_selecting_cottonwood"]["live"]["reached_firm_check"] == "cottonwood"]
@@ -145,6 +138,8 @@ ok_narrow_refuse = [p for p in per_route
                     if p["internal_row_cottonwood_selecting_inflection"]["built"]["reached_firm_check"] is None
                     and p["internal_row_cottonwood_selecting_inflection"]["built"]["code"] == "FIRM_BINDING"
                     and p["internal_row_cottonwood_selecting_inflection"]["live"]["reached_firm_check"] == "inflection"]
+ok_all = [p for p in per_route if all(p[k]["built"]["reached_firm_check"] is None and p[k]["built"]["code"] == "FIRM_BINDING"
+                                      for k in ("internal_row_ALL_string_selecting_inflection", "internal_row_ALL_list_selecting_inflection"))]
 ok_norow = [p for p in per_route if sig(p["internal_no_row_selecting_inflection"]["built"]) == sig(p["internal_no_row_selecting_inflection"]["live"])
             and p["internal_no_row_selecting_inflection"]["built"]["reached_firm_check"] == "inflection"]
 svc_routes = [p for p in per_route if p["operation"] in SVC_OPS]
@@ -168,10 +163,13 @@ arms.append({"name": "svc-custody-statement admitted on custody-report-persist, 
                        % (len(ok_svc_admit), len(svc_routes), ", ".join(p["route"] + " (" + p["function"] + ")" for p in svc_routes))})
 arms.append({"name": "internal caller, profile row allowedFirmIds [cottonwood], selecting inflection: refused (FIRM_BINDING) through the built zip, admitted through the live zip",
              "verdict": "expected-diff" if len(ok_narrow_refuse) == n else "UNEXPECTED", "negative_control": False,
-             "detail": "%d of %d routes (every route of docs/contracts/investor-reporting/v1/routes.json except irpt-narrative's 1, through its handler's zip; irpt-holdings through the WOULD-BE zip)" % (len(ok_narrow_refuse), n)})
+             "detail": "%d of %d routes (the routes of the 6 released hosts, each through its handler's built zip)" % (len(ok_narrow_refuse), n)})
 arms.append({"name": "internal caller, profile row [cottonwood], selecting cottonwood (the admitted half of each narrowing pair): admitted through both zips",
              "verdict": "identical" if len(ok_narrow_admit) == n else "UNEXPECTED", "negative_control": False,
              "detail": "%d of %d routes" % (len(ok_narrow_admit), n)})
+arms.append({"name": "AMENDMENT 1 (CTO msg 2569): internal caller whose profile row is the string ALL, or a list holding ALL, selecting inflection: refused FIRM_BINDING through the built zip (never an unrestricted spelling)",
+             "verdict": "expected-diff" if len(ok_all) == n else "UNEXPECTED", "negative_control": False,
+             "detail": "%d of %d routes, both forms; the live zip's outcome for the same caller is recorded per route in routes[]" % (len(ok_all), n)})
 arms.append({"name": "unrelated Opal internal caller with no profile row, selecting inflection: identical through both zips (any-firm reach unchanged)",
              "verdict": "identical" if len(ok_norow) == n else "UNEXPECTED", "negative_control": False,
              "detail": "%d of %d routes, same (firm, roster, code) built and live, bound to inflection" % (len(ok_norow), n)})
@@ -192,7 +190,7 @@ arms.append({"name": "lib/opal_naming.py lookup('cottonwood') resolves from the 
              "detail": "resolved from %d of %d built trees: %s; the svc host zips are %s; trees that do not resolve: %s"
                        % (len(lookup_ok), len(lookups), ", ".join(sorted(lookup_ok)), ", ".join(sorted(svc_hosts)),
                           ", ".join(sorted(set(lookups) - set(lookup_ok))) or "none")})
-doc = {"pin": pin, "arms": arms, "defects_not_counted_in_arms": defects, "lookup_cottonwood_from_built": lookups, "routes": per_route_all,
+doc = {"pin": pin, "arms": arms, "held_out_routes_not_replayed": held_out_routes, "defects_not_counted_in_arms": defects, "lookup_cottonwood_from_built": lookups, "routes": per_route_all,
        "svc_firm_lookup_through_served": {f: results[("built", f)]["svc_firm_lookup"] for f in FUNCS},
        "built_kinds": {f: results[("built", f)]["kind"] for f in FUNCS},
        "harness": "replay/authz_case_runner.py; outcome = (firm_claims_match bound firm, Opal roster handed to enforcer_for, public_reason_code); offline, no AWS write, AWS reads only for the live zips"}

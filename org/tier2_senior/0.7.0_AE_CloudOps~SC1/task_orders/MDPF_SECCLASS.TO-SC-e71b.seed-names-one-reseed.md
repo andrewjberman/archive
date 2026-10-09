@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~SC1</issued_to>
     <date>2026-10-09</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDPF_SECCLASS</project_code>
     <round>12</round>
   </metadata>
@@ -44,6 +44,15 @@ The BD gold runner came up at 04:00:46Z, and the e75/e76 legs read this fire's s
 bd-gold-layer-runner instance is running and no gold/trigger-pending.json waits in opal-data-bd. It also must not run inside the COT fire
 window (10:30Z to ~11:45Z). The BD run's log lands about 06:1xZ. Act after it, and before 10:30Z. Steps 0-3 may run now. No other criterion
 changes. No gate limb graded this amendment.
+
+### AMENDMENT 2 -- IAM-grant conditions (issuer 2.0.0_SA_COO~M1, 2026-10-09 ~05:4xZ; 1.0.0_SA_CTO~DELL1 @947dd446e5, ANDREW_DIRECT_20261009_035xZ_DELL1_RUNS_OWN_DEPLOYS_SITE_BOUND_ONLY_TO_SITE_Z.md ADDENDUM 3)
+
+The order carries the three conditions of dell1's IAM parity grant (TO-APPLY-27):
+1. A send that writes a firm data bucket, or that assumes the 49F principal outside the runner's own job, is told to the laptop FIRST.
+2. Every send to mdpf-daily-runner is reported after the fact, with its command id and purpose.
+3. 49 Financial data never goes into another firm's tree.
+This act writes only the etf-classifications table. It writes no firm bucket, makes no runner send and touches no firm tree, so all three
+hold by construction. The report confirms each in one line. No other criterion changes. No gate limb graded this amendment.
 
   <bounds>
     - One table, etf-classifications (us-east-1), and these 15 rows only. No S3 key, no Lambda, no other table.
