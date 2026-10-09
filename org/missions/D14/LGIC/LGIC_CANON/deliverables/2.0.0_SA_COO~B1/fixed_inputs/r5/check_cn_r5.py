@@ -126,7 +126,38 @@ def arm_run():
     return "PASS-R5-RUN"
 
 
-ARMS = {"step13": arm_step13, "paths": arm_paths, "run": arm_run}
+CORE = sorted(["/advisor-intelligence", "/macro", "/market", "/philosophy", "/portfolios", "/positioning", "/valuations"])
+
+
+def arm_paths2():
+    """CN-q-4 (ADDENDUM 1): the 7-page core derived for a client firm with the portal on, plus the firm's registry field
+    tenant.pages; 49financial derives exactly its FIRM_ALLOWED_PATHS entry with 0 carded; `--check` passes on the live map and
+    STOPs (non-zero) when the map grants a page the registry does not hold."""
+    rc, out = run([sys.executable, "lib/opal_portal_paths.py", "49financial", "--json"], timeout=120)
+    need(rc == 0, "the derivation exited %d for 49financial: %s" % (rc, out[-300:]))
+    doc = json.loads(out[out.index("{"):])
+    derived, carded = sorted(doc.get("derived") or []), doc.get("carded") or []
+    want = allowed_today()
+    print("49financial: today=%d derived=%d carded=%d" % (len(want), len(derived), len(carded)))
+    need(set(CORE) <= set(derived), "the 7-page core is not all derived: missing %s" % sorted(set(CORE) - set(derived)))
+    need(derived == want and not carded, "derived != FIRM_ALLOWED_PATHS['49financial'] or something is carded (missing %s, extra %s)"
+         % (sorted(set(want) - set(derived)), sorted(set(derived) - set(want))))
+    rc, out = run([sys.executable, "lib/opal_portal_paths.py", "--check"], timeout=120)
+    print("check live: rc=%d last=%r" % (rc, (out.strip().splitlines() or [""])[-1][:160]))
+    need(rc == 0, "--check fails on the live map")
+    src = open(os.path.join(ROOT, FIRM_ACCESS), encoding="utf-8").read()
+    planted = src.replace("'49financial': new Set([", "'49financial': new Set([\n    '/zz-planted-page-r5',", 1)
+    need(planted != src, "could not plant a page into a copy of firmAccess.ts")
+    tmp = os.path.join(tempfile.mkdtemp(prefix="cn-r5-"), "firmAccess.ts")
+    with open(tmp, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(planted)
+    rc, out = run([sys.executable, "lib/opal_portal_paths.py", "--check", "--access", tmp], timeout=120)
+    print("check planted: rc=%d last=%r" % (rc, (out.strip().splitlines() or [""])[-1][:160]))
+    need(rc != 0 and "/zz-planted-page-r5" in out, "--check did not STOP on a granted page the registry does not hold")
+    return "PASS-R5-PATHS2"
+
+
+ARMS = {"step13": arm_step13, "paths": arm_paths, "run": arm_run, "paths2": arm_paths2}
 
 
 def main():

@@ -23,6 +23,9 @@ Arms:
   6 STATUS     run_status: all intended built -> PASS; one missing -> PARTIAL (M16).
   7 WIRED      mdpf_gold_consolidator.py imports mdpf_gold_parquet and calls write_partition and run_status;
                build_package.py ships mdpf_gold_parquet.py.
+  8 DENIED-ABSENT (AMENDMENT 1, the issuer at the CN-a-2 drain) a principal with Get/Put on the prefix and only a
+               prefix-CONDITIONED ListBucket (the firm roles and the composite grant) gets 403 AccessDenied, not 404, on a
+               missing key: write_partition still writes create-only ("written", then "unchanged"); a 403 on the PUT raises.
 Prints one line per arm and "ROUND 1 PARQUET WRITER: <k> of <n> arms"; exit 0 only when every arm passes.
 """
 import importlib.util
@@ -255,6 +258,44 @@ def a_wired(f):
     return "the consolidator imports and calls the writer; the package ships it"
 
 
+class DeniedS3(FakeS3):
+    """A principal holding Get/Put on the prefix but only a prefix-CONDITIONED ListBucket: S3 answers a GetObject on a
+    missing key 403 AccessDenied, not 404 (the request carries no s3:prefix). The create-only put still succeeds."""
+
+    def get_object(self, Bucket, Key):
+        if self._k(Bucket, Key) not in self.store:
+            import botocore.exceptions as be  # noqa: PLC0415
+            raise be.ClientError({"Error": {"Code": "AccessDenied", "Message": "Access Denied"}}, "GetObject")
+        return {"Body": io.BytesIO(self.store[self._k(Bucket, Key)])}
+
+
+class DeniedPutS3(DeniedS3):
+    def put_object(self, Bucket, Key, Body, **kw):
+        import botocore.exceptions as be  # noqa: PLC0415
+        raise be.ClientError({"Error": {"Code": "AccessDenied", "Message": "Access Denied"}}, "PutObject")
+
+
+def a_denied_absent(f):
+    m = M.get("m")
+    if not m:
+        f.append("INPUT: module not loaded")
+        return ""
+    recs = [{"data_as_of": "2026-10-08", "metric": "total_assets", "value": 1.5}]
+    s3 = DeniedS3()
+    r1 = m.write_partition(s3, "49financial", "aum_metrics", "2026-10-08", recs)
+    if r1 != "written":
+        f.append(f"a 403 on the read of a missing key -> {r1!r} (want 'written' through the create-only put)")
+    r2 = m.write_partition(s3, "49financial", "aum_metrics", "2026-10-08", recs)
+    if r2 != "unchanged":
+        f.append(f"the second write -> {r2!r} (want 'unchanged')")
+    try:
+        m.write_partition(DeniedPutS3(), "49financial", "aum_metrics", "2026-10-08", recs)
+        f.append("a 403 on the PUT was swallowed (a real permission fault must raise)")
+    except Exception:  # noqa: BLE001 -- the raise is the pass
+        pass
+    return "a 403 read of a missing key writes create-only; a 403 put raises"
+
+
 arm("KEYS: 16 partition URIs equal address(mdpf, scope, gold, artifact, date=..., object=data.parquet)", a_keys)
 arm("UNTYPED: the writer module types no s3:// and no opal-data- string", a_untyped)
 arm("WRITE ONCE: written, then unchanged with no second put, then conflict with the stored bytes untouched", a_write_once)
@@ -262,6 +303,7 @@ arm("ROUND TRIP: the stored object is parquet and its rows equal the records", a
 arm("SESSIONS: a firm scope assumes its own env ARN (unset refuses); global assumes none", a_sessions)
 arm("STATUS: run_status reads PASS only when every intended scope was built (M16)", a_status)
 arm("WIRED: the consolidator imports and calls the writer; the package ships the module", a_wired)
+arm("DENIED-ABSENT (AMENDMENT 1): a 403 read of a missing key (prefix-conditioned ListBucket) still writes create-only; a 403 put raises", a_denied_absent)
 
 ok = 0
 for label, passed, detail in arms:
