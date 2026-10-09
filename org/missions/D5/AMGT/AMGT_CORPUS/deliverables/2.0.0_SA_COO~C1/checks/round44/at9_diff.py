@@ -25,6 +25,7 @@ from lib.research.harvest import store
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PRE12 = os.path.join(os.path.dirname(os.path.dirname(HERE)), "evidence", "r42_ar2_changes_whole_20261009.txt")
+EXPECTED = set()
 CASE_NAMES = ("8035_JP_Equity", "BZLFY_US_Equity", "HEI_US_Equity", "SNPS_US_Equity", "TSM_US_Equity", "V_US_Equity")
 
 
@@ -53,6 +54,8 @@ def main():
     print("at9 fitz %s version %s mode %s method %s" % ("real" if real else "STUB", ver, mode, dossier.METHOD_VERSION))
     client = store._default_client()
     keys = dossier._resolved_security_keys(client=client)
+    global EXPECTED
+    EXPECTED = _gain12()
     counts = {"SAME": 0, "GAIN9": 0, "RESTORE7": 0, "BOTH-DIFFER": 0, "ALL-DIFFER": 0}
     gain9, restored_cases = set(), set()
     n = 0
@@ -84,7 +87,12 @@ def main():
             counts[cls] += 1
             if cls in ("RESTORE7", "BOTH-DIFFER", "ALL-DIFFER"):
                 print("%s %s %s" % (cls, key, name))
-    expected = _gain12()
+            # CTO half condition 2: every ALL-DIFFER field, and every field fed by a changed input (a GAIN9 outside the 12), WHOLE
+            if cls in ("ALL-DIFFER", "BOTH-DIFFER") or (cls == "GAIN9" and (key, name) not in EXPECTED):
+                print("  WHOLE /7  %s" % a)
+                print("  WHOLE /9  %s" % b)
+                print("  WHOLE new %s" % c)
+    expected = EXPECTED
     for k in sorted(expected - gain9):
         print("GAIN-MISSING %s %s" % k)
     for k in sorted(gain9 - expected):
