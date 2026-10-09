@@ -1,0 +1,187 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "<expect>V21-PACKAGE-OK</expect>. The order's clause beneath the block: \"AC1 runs in the detached worktree at the pin, before the upload, with invalid AWS keys.\"",
+      "denominator": "5 of 5 checks inside the v21-package subcommand passed (the tool prints its own denominator: passed=5); 1 detached worktree at 1 pin; run once before the upload",
+      "expect": "V21-PACKAGE-OK",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~V2/AR_V_CHECKS/ar_v_checks.py v21-package",
+      "method": "command",
+      "output_evidence": "V21-PACKAGE-OK passed=5, rc=0. Run with cwd /c/dev/wk-ar2-r13 (the detached worktree at ba6fcb1c14) and with AWS_ACCESS_KEY_ID=AKIAINVALIDINVALID00 plus a 40-char invalid AWS_SECRET_ACCESS_KEY, as the order's clause requires, and BEFORE the S3 upload. INSTRUMENT NOTE, recorded because the first reading was wrong and the wrongness was mine: an initial run of this same check under `python -I` returned V21-PACKAGE-FAIL rc=2 passed=0 of 5. `-I` implies `-P`, which omits the script's own directory from sys.path, so the module could not import its siblings and every one of the 5 checks failed for one non-code reason. Re-run with the invocation EXACTLY as the order names it (no -I), same cwd and same invalid keys: V21-PACKAGE-OK passed=5. The 0-of-5 shape is what identified it as an instrument artifact rather than a code failure; nothing in the repo was changed between the two runs (worktree clean at ba6fcb1c14 both times).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "<criterion id=\"AC2\" cell_refs=\"AR-v-21\" judgment=\"true\"/>, with the order's clause: \"AC2 (judgment, graded at L9) is the step-5 after-reads.\"",
+      "denominator": "5 of 5 step-5 after-reads taken, (a) through (e); 1 live function; 1 zip entry in the downloaded package; 8 of 8 env keys compared before and after; 2 unauthenticated POST routes plus 1 positive control; 1 DynamoDB table read before and after; 1 full-root replan",
+      "invocation": "aws lambda get-function --function-name opal-ticket-api (download Code.Location, hash the zip's lambda_function.py); aws lambda get-function-configuration --function-name opal-ticket-api (CodeSha256 + env); curl -X POST https://opalinvest.dev/api/scoped/tickets and .../TEST-NONE/package, with curl https://opalinvest.dev/ as the positive control; aws dynamodb describe-table --table-name opal-tickets --query Table.ItemCount; .tools/terraform.exe plan -input=false -detailed-exitcode",
+      "judgment": true,
+      "method": "live_read",
+      "output_evidence": "The five step-5 after-reads, each measured after the apply, offered for L9 and NOT self-graded. (a) the deployed file is 67068626...: the live package downloaded via `lambda get-function` Code.Location holds exactly 1 entry, lambda_function.py, sha256 670686262068808fcf1d3e0c05ce8e92e32441f9382efeb9361c789ab19457a8 -- equal to `git show ba6fcb1c14:infra/aws/lambda/ticket_center/lambda_function.py` and to the built zip's entry, a three-way CONTENT equality. (b) env unchanged: the same 8 key names before and after (CLIENT_LINK_MAP, COMMENTARY_ALLOWED_FIRMS, CUTOFF_ET, ROUTING_MATRIX, TABLE_NAME, TICKET_DEEP_LINK_BASE, TICKET_DL_MAP, USERS_TABLE), COMMENTARY_ALLOWED_FIRMS byte-exact \"49financial,cottonwood,inflection\"; the plan carried environment inside an unchanged block and the apply ran that exact saved planfile. (c) an unauthenticated POST is refused: POST https://opalinvest.dev/api/scoped/tickets -> HTTP 401 {\"error\":\"Missing or invalid Authorization header\"}, and the package route POST https://opalinvest.dev/api/scoped/tickets/TEST-NONE/package -> HTTP 401 likewise, with a positive control GET https://opalinvest.dev/ -> HTTP 200 so the 401 is a refusal and not an unreachable host. (d) ItemCount unchanged: opal-tickets ItemCount 13 before and 13 after. (e) replan 0-diff: a full re-plan of the ticket-center root with -detailed-exitcode returned rc=0 and \"No changes. Your infrastructure matches the configuration.\"",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; the CVO grades it at L9"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "commit_or_etag": "ba6fcb1c14e78648c82515f44ceb99b9b44794a3",
+      "deploy_evidence": "CODE ONLY, the one resource this apply changed: module.opal_ticket_api.aws_lambda_function.this (function opal-ticket-api). The live CodeSha256 re-read after the apply is HK82TEd0SQWeGqWEEG7HV10QK8agPizblDoXkvITRJA=, equal to the uploaded zip's content-sha256 metadata; the deployed zip's lambda_function.py resolves by CONTENT to 670686262068808fcf1d3e0c05ce8e92e32441f9382efeb9361c789ab19457a8, the bytes at this pin. LastModified 2026-10-09T11:43:28.000+0000. Apply complete! Resources: 0 added, 1 changed, 0 destroyed. The pin named here is the BUILD INPUT's commit, which is what the CODE-layer control diffs the deployed bytes against; the terraform config in this root was not modified by this act.",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "terraform",
+      "path_or_key": "infra/aws/terraform/ticket-center/main.tf"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "commit_or_etag": "d6a861dff496b7e1f9a9feea4b32b75b",
+      "deploy_evidence": "the uploaded artifact, Size 28994, metadata content-sha256=HK82TEd0SQWeGqWEEG7HV10QK8agPizblDoXkvITRJA= read back by head-object after the cp (never a bare cp exit); the module reads that metadata as source_code_hash",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "kind": "s3_object",
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/ticket-center/opal-ticket-api.zip"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "commit_or_etag": "2f94acff6b",
+      "deploy_evidence": "the NEVER-2 ledger entry, opened at deploy START pinned to ba6fcb1c14 and file 67068626..., naming 0.7.0_AE_CloudOps~AR2 as the substitute applier and citing @5ff94852a6 and @11a11e67e2 (CTO half condition 3); 2 legs, both closed on measured proof, entry CLOSED and sentinel removed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/critical_paths/change_management/20261009T1139Z_irpt-anlreq-r13b-ticket-joint-ar2-20261009_deploy_completion.md"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~AR2",
+  "compiler_tools": [
+    {
+      "invocation": "git worktree add --detach /c/dev/wk-ar2-r13 ba6fcb1c14",
+      "result": "a clean detached extract at ba6fcb1c14 (status --porcelain empty), so later box/dell2 commits cannot enter the build; the build input hashed 670686262068808fcf1d3e0c05ce8e92e32441f9382efeb9361c789ab19457a8 in the worktree, equal to the order's required value. Positive control beside the ancestry read: ba6fcb1c14 IS an ancestor of HEAD and 00d3393ff3 IS an ancestor of HEAD, so the instrument answers YES when the answer is yes.",
+      "tool": "git worktree"
+    },
+    {
+      "invocation": "BUILD_ONLY=1 bash infra/aws/terraform/ticket-center/build-and-upload.sh, then the same script without BUILD_ONLY",
+      "result": "BUILD_ONLY first, so the zip's lambda_function.py hash was proven 67068626... BEFORE anything was uploaded (step 3's STOP condition). Then the real run: zipped 28994 bytes, uploaded, head-object read back Size 28994 and content-sha256=HK82TEd0SQWeGqWEEG7HV10QK8agPizblDoXkvITRJA=, identical to the BUILD_ONLY reading, so the build is deterministic in this worktree.",
+      "tool": "build-and-upload.sh"
+    },
+    {
+      "invocation": ".tools/terraform.exe plan -input=false -out=tfplan.r13b in /c/dev/wk-ar2-r13/infra/aws/terraform/ticket-center",
+      "result": "Plan: 0 to add, 1 to change, 0 to destroy -- branch A exactly. The one resource is module.opal_ticket_api.aws_lambda_function.this updated in-place, and its diff is three attributes only: source_code_hash IMJsVN6U8F730Z9Typ1AuG2bRUunlFYJ5it+jkirlWM= -> HK82TEd0SQWeGqWEEG7HV10QK8agPizblDoXkvITRJA=, s3_object_version vTaikElcFfkLXSqEOKZhg_iH1_FViE37 -> TNDfJSNhCarmtqRmFU.jsPUaiO7BLSsK, and last_modified -> known after apply; 28 unchanged attributes and 4 unchanged blocks hidden. Terraform resolved ONLY at .tools/terraform.exe on this device (v1.15.8); bare `terraform` is absent from PATH here, so the binary was derived and not assumed.",
+      "tool": "terraform plan"
+    },
+    {
+      "invocation": ".tools/safe-apply.sh apply -input=false tfplan.r13b (from the detached worktree's ticket-center root)",
+      "result": "rc=0, Apply complete! Resources: 0 added, 1 changed, 0 destroyed. Applied from the SAVED planfile, so the applied change set is byte-identical to the one read and graded against branch A. The naming-plan-gate raised 6 NAMING WARNs, all on PRE-EXISTING out-of-pattern names this act did not create or move (rule 30 non-application: an existing pipeline reaches conformance through its own migration project, never as a rider). The comp-tagauthz gate PASSED over 0 candidate resources, and the tombstone gate was CLEAN over 0 creates. The HALTGT checkpoint pass is NOT cited as evidence of not having been halted (ADHC_HALTGT, LD-0267).",
+      "tool": "safe-apply.sh (Rule 18)"
+    },
+    {
+      "invocation": ".tools/terraform.exe plan -input=false -detailed-exitcode (after the apply)",
+      "result": "rc=0 and \"No changes. Your infrastructure matches the configuration.\" -- -detailed-exitcode was used so 0-diff is read from a discriminating exit code (0 no-changes / 2 changes / 1 error), not from matching prose",
+      "tool": "terraform plan"
+    },
+    {
+      "invocation": "python .tools/deploy_ledger.py open --slug irpt-anlreq-r13b-ticket-joint-ar2-20261009 ... | close-leg x2 | close",
+      "result": "opened at deploy START with 2 legs (--lambda opal-ticket-api for the tf-lambda leg, plus V1 verify), each closed on its own measured proof, entry CLOSED. The `open` self-committed at 5dd4d18162 (HEAD carries the fix @00d3393ff3); the `close` did not, so it was committed by hand.",
+      "tool": "deploy_ledger.py"
+    }
+  ],
+  "controls": {
+    "ac1_instrument_vs_code": {
+      "description": "the first AC1 reading was a FAIL and it was my invocation, not the code. Recorded because an instrument artifact reported as a code failure would have STOPPED a sound release.",
+      "expected_landed": "the check run with the invocation EXACTLY as the order names it returns V21-PACKAGE-OK passed=5",
+      "expected_not_landed": "it still fails at the order's own invocation, which would mean the pin's package logic is genuinely broken and the order STOPS",
+      "observed": "under `python -I` (my addition): V21-PACKAGE-FAIL rc=2 passed=0 of 5 -- `-I` implies `-P` and drops the script's directory from sys.path, so all 5 checks failed for one non-code reason. At the order's own invocation, same cwd, same invalid keys, unchanged tree: V21-PACKAGE-OK passed=5. The two readings differ only by my flag, so the discriminator is the flag.",
+      "status": "PASS"
+    },
+    "deployed_bytes_vs_build_input": {
+      "description": "the CODE layer of CLAUDE.md 22a: deployed bytes diffed against the BUILD INPUT by CONTENT, never by filename and never from a green plan",
+      "expected_landed": "the deployed zip's lambda_function.py hashes to 670686262068808fcf1d3e0c05ce8e92e32441f9382efeb9361c789ab19457a8, the pin's bytes",
+      "expected_not_landed": "it hashes to anything else -- the function runs bytes this act did not build",
+      "observed": "670686262068808fcf1d3e0c05ce8e92e32441f9382efeb9361c789ab19457a8, equal. The control demonstrably had something to catch: the IDENTICAL read taken before the apply returned 04f5727bebf83e7c19493f944bc1c8ed2f7a28404b5137d6cf2cb32b699f9a38, a different value, so the instrument distinguishes the two builds rather than always agreeing.",
+      "status": "PASS"
+    },
+    "env_unchanged": {
+      "description": "the shared line of both COO halves and the CTO half: no env change. The 8 key names were read BEFORE as well as after, so this is a comparison and not a single reading.",
+      "expected_landed": "the same 8 key names before and after, and COMMENTARY_ALLOWED_FIRMS byte-exact",
+      "expected_not_landed": "a key added, removed or renamed, or a changed value -- the act widened past CODE ONLY",
+      "observed": "8 keys before, the same 8 after, byte-identical names; COMMENTARY_ALLOWED_FIRMS \"49financial,cottonwood,inflection\" exactly, matching the value the earlier TCKT_VNEXT F10 entry recorded. The plan independently placed environment in an unchanged block, and the apply ran that exact saved planfile.",
+      "status": "PASS"
+    },
+    "itemcount_unchanged": {
+      "description": "no data change: this is a code release and must not write the table",
+      "expected_landed": "opal-tickets ItemCount is the same number before and after",
+      "expected_not_landed": "it moves -- the release wrote data",
+      "observed": "13 before, 13 after. Noted for the reader: the earlier TCKT_VNEXT F10 entry recorded 12, so the table did move between that deploy and this one through ordinary ticket creation; the control is same-before-vs-after across THIS act, which is 13 to 13, not equality with a historical figure.",
+      "status": "PASS"
+    },
+    "plan_scope_one_change": {
+      "description": "CTO half condition 2, the shared-root rule @29a9a2c684: exactly one change, on opal-ticket-api, or STOP. ticket-center also holds the IAM role, its three policies, the lambda permission and 9 apigatewayv2 routes, so a widening act had somewhere to show up.",
+      "expected_landed": "Plan: 0 to add, 1 to change, 0 to destroy, the one change on module.opal_ticket_api.aws_lambda_function.this, and no env, IAM, route or permission attribute in its diff",
+      "expected_not_landed": "any other count, any second resource, or an env/IAM/route/permission attribute in the diff -- branch B, STOP, nothing applied",
+      "observed": "Plan: 0 to add, 1 to change, 0 to destroy; one '# ... will be updated in-place' line, on module.opal_ticket_api.aws_lambda_function.this; its diff is 3 attributes (source_code_hash, s3_object_version, last_modified) with 28 attributes and 4 blocks unchanged. The IAM role, the 3 role policies, the lambda permission and all 9 routes appear in the run ONLY as 'Refreshing state...' reads, which are not changes.",
+      "status": "PASS"
+    },
+    "stop1_v12_live_before_apply": {
+      "description": "CTO half condition 1 and step 1: this release may only land on top of V12. The precondition was measured on the DEPLOYED BYTES, not on V12's <status> field, which is stale (row IRPT_ANLREQ-D2-S9).",
+      "expected_landed": "the live function's deployed lambda_function.py reads V12's 04f5727bebf83e7c19493f944bc1c8ed2f7a28404b5137d6cf2cb32b699f9a38 -> proceed",
+      "expected_not_landed": "anything else -> STOP, report, apply nothing",
+      "observed": "04f5727bebf83e7c19493f944bc1c8ed2f7a28404b5137d6cf2cb32b699f9a38, read from the downloaded live package at ~11:31Z with CodeSha256 IMJsVN6U8F730Z9Typ1AuG2bRUunlFYJ5it+jkirlWM= and LastModified 2026-10-09T08:22:45.000+0000. Corroborated, not substituted: 3.0.0_SA_CVO graded V12 AC2 MET @afcd9c3e4a.",
+      "status": "PASS"
+    },
+    "unauthenticated_post_refused": {
+      "description": "the auth boundary is unmoved by a code release, including on the package route the previous release added",
+      "expected_landed": "an unauthenticated POST is refused, and a positive control proves the host is reachable so the refusal is the application's and not the network's",
+      "expected_not_landed": "a 2xx (the boundary opened) or a connection failure (the refusal is unproven, since an unreachable host refuses everything)",
+      "observed": "POST /api/scoped/tickets -> HTTP 401 {\"error\":\"Missing or invalid Authorization header\"}; POST /api/scoped/tickets/TEST-NONE/package -> HTTP 401 likewise; positive control GET https://opalinvest.dev/ -> HTTP 200. The host answers, so the 401 discriminates.",
+      "status": "PASS"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deployment rule 6 (post-apply `{pipeline}-v{X.Y.Z}` tag and --follow-tags push)",
+      "reason": "outside this order's scope and surface: the order is CODE ONLY with a named 6-step sequence that does not include a tag, and no ticket-center-v* tag series exists to increment. Surfaced rather than worked around; owner is the issuer 2.0.0_SA_COO~V2."
+    },
+    {
+      "item": "deployment rule 4 (lambda-source-map entry for opal-ticket-api)",
+      "reason": "not touched by this act and not in the order's steps. The map pairs a Lambda with its repo dir and explicitly does NOT compare deployed bytes to built-from bytes, so it is not a control this proof could lean on; the CODE-layer read above is."
+    },
+    {
+      "item": "the HALTGT checkpoint pass inside safe-apply",
+      "reason": "a HALTGT pass is not evidence of not having been halted: the checkpoint sees only unread files directly under inbox/<serial>/, and a ~lane agent with a live inbox Monitor is structurally unhaltable (ADHC_HALTGT, LD-0267). It is therefore not cited as a control."
+    },
+    {
+      "item": "an authenticated end-to-end exercise of the two code deltas (trade_request's 5 new questions; package_ticket's original_ref/pdf_ref/commentary_ref tightening)",
+      "reason": "the order's steps do not ask for it and this seat holds no portal advisor identity. Both halves already state why: internal trade_request creates without answers get a 400 and the portal form already sends them, and the package route has no live caller until the packager mint. ABSENT is not EXERCISED-AGAINST, and this is recorded as absent rather than implied passing."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R2.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~AR2/task_orders/IRPT_ANLREQ.TO-APPLY-R13b.ticket-joint-i5p-i7-trade-request-ar2.md",
+    "vintage_commit": "a30b01837acba5b5fbe6e868382603bc2e1eb07b"
+  },
+  "firm": "FABRIC",
+  "genre": "DEPLOY",
+  "never_widen_pair": {
+    "coo_half": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~V2/TICKET_R13_JOINT_DEPLOY_PACKET_20261009.md @cc15159703 (blob f37241d8f8) carries the ~V2 half for blast radius (b) and the shared lines, both branches; the ~O2 half for blast radius (a) and the shared lines is org/missions/D9/NFRA/NFRA_OPSWKF/deliverables/2.0.0_SA_COO~O2/D1_DEPLOY/COO_HALF_OW_L1_TICKET_R13_JOINT_20261009.md @37a9fac095. CITATION-AGE CHECK: the ~O2 half cites the packet at @dd11e81e46, whose blob is 41f156f09c, while the CTO signed blob f37241d8f8 at @cc15159703. The two blobs were diffed rather than assumed equivalent: the ONLY difference is the packet's own sign-off bookkeeping (the OW-l-1 section moving from OWED to SIGNED and gaining the pointer to the ~O2 half), and dd11e81e46 is an ancestor of cc15159703. Blast radius (a), (b) and the shared lines are byte-identical across both, so both halves bind the same text.",
+    "cto_half": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/1.0.0_SA_CTO~DELL2/NEVER_WIDEN_TICKET_R13_JOINT_RELEASE_CTO_HALF.md @11a11e67e2, verdict GIVEN for this one code update under conditions 1 to 3. Condition 3 names the applier as 0.7.0_AE_CloudOps~DELL2; this seat applied instead under CTO standing ruling @5ff94852a6 item 2 (org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_DELL2_APPLIER_SUBSTITUTION_20261009.md), which permits an MSTR-seated per-project CloudOps lane to substitute, halves unchanged, when the named applier is unread or stalled. Its three conditions are met: the signed blast radius and conditions were applied exactly with only the applier's name changed; the issuer's order names the ruling and the half; and the original order IRPT_ANLREQ.TO-APPLY-R13 was WITHDRAWN from ~DELL2 first @4f6b1b8d57, so two appliers never held one order."
+  },
+  "phase": "BUILD-GENERAL",
+  "risk_class": "WORLD",
+  "rollback": "re-apply V12's build: pin 86454002bf, whose infra/aws/lambda/ticket_center/lambda_function.py is 04f5727bebf83e7c19493f944bc1c8ed2f7a28404b5137d6cf2cb32b699f9a38 -- build and upload from a detached worktree at that pin with infra/aws/terraform/ticket-center/build-and-upload.sh, then one safe-apply, which is the same single in-place code change in reverse. No env, IAM, route or permission change is involved in either direction. The pre-act live values needed to confirm a rollback landed are recorded above: CodeSha256 IMJsVN6U8F730Z9Typ1AuG2bRUunlFYJ5it+jkirlWM= and s3_object_version vTaikElcFfkLXSqEOKZhg_iH1_FViE37.",
+  "schema_version": "1.0",
+  "scope": "CODE ONLY. One safe-apply in infra/aws/terraform/ticket-center deploying opal-ticket-api at box/dell2 pin ba6fcb1c14 (lambda_function.py 67068626...), built in a detached worktree so later box/dell2 commits cannot enter the build. The two deltas over V12 are trade_request's 5 new questions (4 required) and package_ticket's original_ref/pdf_ref/commentary_ref tightening. No env, IAM, route, permission or data change; no second resource; nothing in any other terraform root; the one family on the artifact key is opal-ticket-api itself, a Lambda, so a describe-task-definition family sweep does not apply.",
+  "session_log": "org/critical_paths/change_management/20261009T1139Z_irpt-anlreq-r13b-ticket-joint-ar2-20261009_deploy_completion.md",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~AR2/task_orders/IRPT_ANLREQ.TO-APPLY-R13b.ticket-joint-i5p-i7-trade-request-ar2.md",
+    "group": "OTHER",
+    "vintage_commit": "c51bb60cfbd08fa8c0b224a85cea7dcbdad886c9"
+  },
+  "surprises": [
+    "IRPT_ANLREQ-D2-S9: IRPT_ANLREQ.TO-APPLY-V12 is world-done and CVO-graded MET @afcd9c3e4a, but its <status> still reads pending, so this order's \"run it AFTER V12 is complete\" was satisfied on the artifact and not on the field. INERT; the only act owed is the issuer flipping one <status>. Row appended to the IRPT_ANLREQ channel.",
+    "IRPT_ANLREQ-D2-S10: the TCKT_VNEXT entry org/critical_paths/.open_deploys/tckt-vnext-f10-d1-mint-20261009.json (author 0.7.0_AE_CloudOps~DELL2) is still status OPEN on this same Lambda, opened 2026-10-09T00:56:24Z with a 4.0h window (~10.6h elapsed), its leg M1 (mint svc-commentary) unproven, and it is visible only in a per-worktree union since it is absent from the shared tree. It did not impede this act, measured rather than assumed: its tf-lambda and V1 legs are closed with its own 0-diff replan of this root at 01:06:45Z, and this seat's independent pre-apply plan read the root clean. The entry belongs to TCKT_VNEXT so this seat does not dispose of it; rowed in IRPT_ANLREQ's channel because it was found working this order on the same function. Owner 0.7.0_AE_CloudOps~DELL2, disarm_owner 2.0.0_SA_COO~V2, who holds both lanes."
+  ],
+  "to_id": "IRPT_ANLREQ.TO-APPLY-R13b"
+}
