@@ -146,6 +146,7 @@ def main(argv):
     if s != 200 and s != 202:
         return dump(1)
     server_id = ((resp.get("data") or {}).get("identity") or {}).get("request_id") if isinstance(resp, dict) else None
+    say("server request id", server_id)
     result.update(server_request_id=server_id)
     return poll_and_read(h, q, server_id or request_id, result, dump)
 
@@ -189,7 +190,32 @@ def read_only(request_id, out):
     if not token:
         return dump(1)
     h = {"Content-Type": "application/json", "Authorization": "Bearer " + token, "X-Contract-Version": "v1"}
-    return poll_and_read(h, "?selected_tenant=" + TENANT, request_id, result, dump)
+    q = "?selected_tenant=" + TENANT
+    if request_id == "LATEST":
+        # The filer's own history (GET .../analysis/requests); the newest accepted request is the one this seat submitted.
+        s, hist = call("GET", BASE + "/analysis/requests" + q, None, h)
+        found = []
+
+        def walk(node):
+            if isinstance(node, dict):
+                ident = node.get("identity") if isinstance(node.get("identity"), dict) else {}
+                rid = ident.get("request_id") or node.get("request_id")
+                at = node.get("accepted_at") or node.get("created_at") or ident.get("accepted_at")
+                if isinstance(rid, str) and rid.startswith("REQ-"):
+                    found.append((str(at or ""), rid))
+                for v in node.values():
+                    walk(v)
+            elif isinstance(node, list):
+                for v in node:
+                    walk(v)
+        walk(hist)
+        say("history HTTP", s, "requests", len(set(r for _, r in found)))
+        if not found:
+            return dump(1)
+        request_id = max(found)[1]
+        result.update(server_request_id=request_id)
+        say("latest request", request_id)
+    return poll_and_read(h, q, request_id, result, dump)
 
 
 if __name__ == "__main__":

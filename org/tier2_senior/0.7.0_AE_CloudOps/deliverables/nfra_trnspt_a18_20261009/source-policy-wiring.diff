@@ -1,0 +1,94 @@
+diff --git a/infra/aws/terraform/transcripts/main.tf b/infra/aws/terraform/transcripts/main.tf
+index f6eecb628e..b66bb238cf 100644
+--- a/infra/aws/terraform/transcripts/main.tf
++++ b/infra/aws/terraform/transcripts/main.tf
+@@ -14,7 +14,7 @@
+ #   - Every object is encrypted under one customer-managed key (SSE-KMS, bucket default, bucket key on).
+ #   - The key policy gives the account root ADMINISTRATION only. It does not give root the use actions, so an
+ #     IAM policy elsewhere in the account holding kms:Decrypt on "*" does NOT reach this key.
+-#   - Use (Decrypt, GenerateDataKey) is granted to var.reader_principal_arns; and DECRYPT ONLY (kms:Decrypt, kms:DescribeKey)
++#   - Use (Decrypt, GenerateDataKey) is granted to local.named_reader_arns (readers.tf: var.reader_principal_arns plus the second reader's role); and DECRYPT ONLY (kms:Decrypt, kms:DescribeKey)
+ #     to the two Dell agent users (var.dell_agent_user_names), on Andrew's word of 2026-10-07 -- nobody else.
+ #   - BOTH Dell agent users also hold kms:GenerateDataKey (var.dell_agent_user_names), so an S3 PutObject of the jobs' output under SSE-KMS can complete
+ #     for either box (CTO ruling (b), msg 107696, then Andrew-direct 2026-10-09 ~03:5xZ "DELL1 and DELL2 should have the exact same permissions and layout").
+@@ -100,7 +100,7 @@ resource "aws_kms_key" "transcripts" {
+       {
+         Sid       = "NamedReadersUseTheKey"
+         Effect    = "Allow"
+-        Principal = { AWS = var.reader_principal_arns }
++        Principal = { AWS = local.named_reader_arns }
+         Action    = ["kms:Encrypt", "kms:Decrypt", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:DescribeKey"]
+         Resource  = "*"
+       },
+diff --git a/infra/aws/terraform/transcripts/readers.tf b/infra/aws/terraform/transcripts/readers.tf
+new file mode 100644
+index 0000000000..bc6bfc25a8
+--- /dev/null
++++ b/infra/aws/terraform/transcripts/readers.tf
+@@ -0,0 +1,66 @@
++# transcripts -- the SECOND NAMED READER's AWS principal (NFRA_TRNSPT TO-TR-p18, cell TR-p-18; CTO ADDENDUM 6 @7558d41da5). DESIRED.
++# NOT APPLIED -- plan only. Held by its never-widen pair (the apply is the issuer's, under a CTO + COO sign-off).
++#
++# Andrew-direct 2026-09-29 names two reader ACCOUNTS (andrew@opalinvest.com and opalbloomberg@opalinvest.com). The first maps to
++# var.reader_principal_arns' user principal (main.tf). The second is an IAM ROLE that a person assumes: it holds no policy but the read of this
++# tier -- s3:GetObject and s3:ListBucket on the transcripts bucket. Its use of the key is the key policy's NamedReadersUseTheKey statement
++# (main.tf), whose principal list gains this role's ARN through local.named_reader_arns; nothing else in the key policy changes.
++#
++# NAMES: the role and policy names are lib/opal_naming.py name() output recorded in data/transcripts/scripts/teams/NAMES.json
++# `second_reader`, read here, never typed.
++#
++# TRUST: WHO may assume this role is NOT decided in this file. var.second_reader_trust_principal_arns has NO default on purpose: the
++# issuer's pair names the principal with Andrew's routing, and a plan without it is refused by terraform (a required variable).
++
++variable "second_reader_trust_principal_arns" {
++  description = "IAM principal ARNs allowed to assume the second named reader's role. NO default: the issuer's pair names it with Andrew's routing; it is not decided by the TO-TR-p18 cell."
++  type        = list(string)
++}
++
++locals {
++  second_reader_names       = jsondecode(file("${path.module}/../../../../data/transcripts/scripts/teams/NAMES.json")).second_reader
++  second_reader_role_name   = local.second_reader_names.role.name
++  second_reader_policy_name = local.second_reader_names.policy.name
++  # The key policy's named readers: the variable's list plus the second reader's role (main.tf NamedReadersUseTheKey).
++  named_reader_arns = concat(var.reader_principal_arns, [aws_iam_role.second_reader.arn])
++}
++
++resource "aws_iam_role" "second_reader" {
++  name = local.second_reader_role_name
++
++  assume_role_policy = jsonencode({
++    Version = "2012-10-17"
++    Statement = [{
++      Effect    = "Allow"
++      Principal = { AWS = var.second_reader_trust_principal_arns }
++      Action    = "sts:AssumeRole"
++    }]
++  })
++}
++
++resource "aws_iam_policy" "second_reader" {
++  name = local.second_reader_policy_name
++
++  policy = jsonencode({
++    Version = "2012-10-17"
++    Statement = [
++      {
++        Sid      = "ReadTheTranscriptsObjects"
++        Effect   = "Allow"
++        Action   = "s3:GetObject"
++        Resource = "${aws_s3_bucket.transcripts.arn}/*"
++      },
++      {
++        Sid      = "ListTheTranscriptsBucket"
++        Effect   = "Allow"
++        Action   = "s3:ListBucket"
++        Resource = aws_s3_bucket.transcripts.arn
++      },
++    ]
++  })
++}
++
++resource "aws_iam_role_policy_attachment" "second_reader" {
++  role       = aws_iam_role.second_reader.name
++  policy_arn = aws_iam_policy.second_reader.arn
++}
