@@ -1,0 +1,109 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "Ledger irpt-ycdgen-st27-20261009 CLOSED with U2 P1 D2 V1 proven.",
+      "denominator": "1 Status line, read from the committed ledger record",
+      "expect": "^\\*\\*Status:\\*\\* CLOSED",
+      "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/20261009T0222Z_irpt-ycdgen-st27-20261009_deploy_completion.md",
+      "method": "command",
+      "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261009T030159Z",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "V1's output shows load_brand resolving the packaged path from the running e606008994-st27 root, env brand vars [].",
+      "denominator": "1 of 1 brand resolution, read from the running root",
+      "expect": "e606008994-st27/ycharts/research/brand/brand\\.json .*env brand vars \\[\\]$",
+      "invocation": "grep -m1 'V1 brand from the RUNNING root' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st27/D2_V1_INSTALL_20261009.txt",
+      "method": "command",
+      "output_evidence": "V1 brand from the RUNNING root: spec /opt/irpt-resident/e606008994-st27/ycharts/research/brand/brand.json logo /opt/irpt-resident/e606008994-st27/ycharts/research/brand/Opal-Capital-Logo-Full-Color.svg logo bytes 3853 spec keys ['colors', 'extended_palette', 'logo', 'typography'] env brand vars []",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "V1's output shows the allow list Andrew only.",
+      "denominator": "1 allow list, read from the running root",
+      "expect": "OPAL_PRODUCER_PRINCIPALS = \\(\"andrew@opalinvest\\.com\",\\)$",
+      "invocation": "grep -m1 'V1 allow list' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st27/D2_V1_INSTALL_20261009.txt",
+      "method": "command",
+      "output_evidence": "V1 allow list: OPAL_PRODUCER_PRINCIPALS = (\"andrew@opalinvest.com\",)",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "5632e869f3",
+      "deploy_evidence": "the NEVER-2 ledger, opened before any write and CLOSED with U2 P1 D2 V1 proven; sentinel removed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/critical_paths/change_management/20261009T0222Z_irpt-ycdgen-st27-20261009_deploy_completion.md"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ],
+      "commit_or_etag": "5632e869f3",
+      "deploy_evidence": "SSM 0af804a1 StandardOutputContent pulled back from AWS with get-command-invocation",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st27/D2_V1_INSTALL_20261009.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "compiler_tools": [
+    {
+      "invocation": "open | close-leg x4 | close --slug irpt-ycdgen-st27-20261009",
+      "result": "opened before any write; CLOSED with all 4 legs proven, sentinel removed",
+      "tool": "deploy_ledger.py"
+    },
+    {
+      "invocation": "pre_read.sh, then install_st27.sh from this seat lane copy",
+      "result": "two sends on i-0167fd745ad906a66, SSM 8abece29 and 0af804a1, both Success rc 0",
+      "tool": "host_read.py (SSM AWS-RunShellScript)"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "U2 was proven by reading each staged object BACK BY VERSION and hashing it, and the member census was DERIVED (269 - 2 added - 2 changed - 0 removed = 265 identical) rather than restated",
+      "observed": "tar sha256 20916261074c356a.. and script sha256 64a817c58c66ebd1.. both equal the order declared values; worker sha unchanged from st24, as the census predicted",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "P1, taken BEFORE the install, is the negative arm: it read the st27 root ABSENT, so the post-install readings are a change and not a standing state",
+      "expected": "st27 root absent before the install",
+      "observed": "P1 rollback root 409e3066d1-st24 present: yes; st27 root present: no",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "no F1 or X1/V2 legs",
+      "reason": "st27 is the st26 shape MINUS svc and those legs, as the order states; the window closes after V1 and the host stays on st27"
+    },
+    {
+      "item": "two documentation defects in the issuer install_st27.sh were reported, not fixed",
+      "reason": "its header says it fetches BY KEY AND VERSION while line 13 is a plain aws s3 cp by KEY (the SAFE behaviour), and its VER placeholder ships as __ST27_SCRIPT_VERSION__ unfilled; owned-paths refuses this seat in the COO lane, so this seat ran a VER-filled copy in its own lane"
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6M.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_YCDGEN.TO-APPLY-st27.resident-brand-asset-release-dell2.md",
+    "vintage_commit": "1b9e06bc1f"
+  },
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "schema_version": "1.0",
+  "session_log": "org/critical_paths/change_management/20261009T0222Z_irpt-ycdgen-st27-20261009_deploy_completion.md",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_YCDGEN.TO-APPLY-st27.resident-brand-asset-release-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "a114ea8f98"
+  },
+  "surprises": [],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-st27"
+}

@@ -1,0 +1,114 @@
+{
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "The ledger irpt-ycdgen-f1-st26-20261008 is CLOSED (all seven legs proven).",
+      "denominator": "1 Status line, read from the committed ledger record",
+      "expect": "^\\*\\*Status:\\*\\* CLOSED",
+      "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/20261009T0050Z_irpt-ycdgen-f1-st26-20261008_deploy_completion.md",
+      "method": "command",
+      "output_evidence": "**Status:** CLOSED -- nothing stranded -- closed 20261009T013155Z",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "V1's output shows load_brand resolving the packaged path from the running st26 root, no brand env var.",
+      "denominator": "1 of 1 brand resolution, read from the running root",
+      "expect": "26df2c7622-st26/ycharts/research/brand/brand\\.json .*env brand vars \\[\\]$",
+      "invocation": "grep -m1 'V1 brand from the RUNNING root' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/D2_V1_INSTALL_20261009.txt",
+      "method": "command",
+      "output_evidence": "V1 brand from the RUNNING root: spec /opt/irpt-resident/26df2c7622-st26/ycharts/research/brand/brand.json logo /opt/irpt-resident/26df2c7622-st26/ycharts/research/brand/Opal-Capital-Logo-Full-Color.svg logo bytes 3853 spec keys ['colors', 'extended_palette', 'logo', 'typography'] env brand vars []",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "V2's output shows the allow list Andrew only after the removal back to st24.",
+      "denominator": "1 allow list, read from the running root",
+      "expect": "OPAL_PRODUCER_PRINCIPALS = \\(\"andrew@opalinvest\\.com\",\\)$",
+      "invocation": "grep -m1 'V2 allow list' org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/X1_V2_REMOVAL_20261009.txt",
+      "method": "command",
+      "output_evidence": "V2 allow list: OPAL_PRODUCER_PRINCIPALS = (\"andrew@opalinvest.com\",)",
+      "status": "PASS"
+    }
+  ],
+  "artifacts_produced": [
+    {
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "commit_or_etag": "70403dcfaa",
+      "deploy_evidence": "the NEVER-2 ledger, opened before any write and CLOSED with all seven legs proven; sentinel removed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/critical_paths/change_management/20261009T0050Z_irpt-ycdgen-f1-st26-20261008_deploy_completion.md"
+    },
+    {
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "commit_or_etag": "ffd85b8e7c",
+      "deploy_evidence": "SSM 7f6d5a0a StandardOutputContent pulled back from AWS with get-command-invocation",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/D2_V1_INSTALL_20261009.txt"
+    },
+    {
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "commit_or_etag": "70403dcfaa",
+      "deploy_evidence": "SSM 856b6197 StandardOutputContent pulled back from AWS with get-command-invocation",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "kind": "doc",
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/deliverables/irpt_ycdgen_st26/X1_V2_REMOVAL_20261009.txt"
+    }
+  ],
+  "assignee": "0.7.0_AE_CloudOps~DELL2",
+  "compiler_tools": [
+    {
+      "invocation": "open | close-leg x7 | close --slug irpt-ycdgen-f1-st26-20261008",
+      "result": "opened before any write; CLOSED with all 7 legs proven, sentinel removed",
+      "tool": "deploy_ledger.py"
+    },
+    {
+      "invocation": "pre_read.sh, install_st26.sh, remove_st26_to_st24.sh",
+      "result": "three sends on i-0167fd745ad906a66, all Success rc 0, each reported to 0.0.0_AB_MSTR~DELL2 after the fact",
+      "tool": "host_read.py (SSM AWS-RunShellScript)"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "every reading is the SSM invocation own StandardOutputContent pulled back from AWS, not this session stdout, so the record does not depend on a transcript",
+      "observed": "three captures, SSM ca8da4c1 / 7f6d5a0a / 856b6197, all Success rc 0",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "P1, taken BEFORE the install, is the negative arm: it read the st26 root ABSENT, so the post-install readings are a change and not a standing state",
+      "expected": "st26 root absent before the install",
+      "observed": "P1 rollback root 409e3066d1-st24 present: yes; st26 root present: no",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "leg F1 was not run",
+      "reason": "it is the COO~G2 leg and the CTO ruled it closed NOT RUN (msg 2067): the upload was refused by E5 and a retry would route to YCHARTS. AC1 grades the ledger CLOSED state, which records F1 as NOT RUN rather than as a pass"
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_YCDGEN/decompositions/IRPT_YCDGEN_DECOMP_R6M.md",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_YCDGEN.TO-APPLY-st26.resident-brand-asset-and-svc-f1-release-dell2.md",
+    "vintage_commit": "1b9e06bc1f"
+  },
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "schema_version": "1.0",
+  "session_log": "org/critical_paths/change_management/20261009T0050Z_irpt-ycdgen-f1-st26-20261008_deploy_completion.md",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~DELL2/task_orders/IRPT_YCDGEN.TO-APPLY-st26.resident-brand-asset-and-svc-f1-release-dell2.md",
+    "group": "OTHER",
+    "vintage_commit": "a114ea8f98"
+  },
+  "surprises": [],
+  "to_id": "IRPT_YCDGEN.TO-APPLY-st26"
+}
