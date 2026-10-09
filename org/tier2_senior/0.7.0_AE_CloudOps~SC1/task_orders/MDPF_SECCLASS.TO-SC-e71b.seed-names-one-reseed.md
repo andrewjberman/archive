@@ -38,6 +38,13 @@
     5. Prove it with AC1. A second `--dry-run` must read `rows to write: 0 of 197`. Close the entry and flip this order complete, with the proof instance in your deliverables.
   </the_act>
 
+### AMENDMENT 1 -- window (issuer 2.0.0_SA_COO~M1, 2026-10-09 ~04:0xZ): act only outside a BD or COT gold run
+
+The BD gold runner came up at 04:00:46Z, and the e75/e76 legs read this fire's served files. Step 4 runs only when no
+bd-gold-layer-runner instance is running and no gold/trigger-pending.json waits in opal-data-bd. It also must not run inside the COT fire
+window (10:30Z to ~11:45Z). The BD run's log lands about 06:1xZ. Act after it, and before 10:30Z. Steps 0-3 may run now. No other criterion
+changes. No gate limb graded this amendment.
+
   <bounds>
     - One table, etf-classifications (us-east-1), and these 15 rows only. No S3 key, no Lambda, no other table.
     - No IAM change. A refusal is a report, not a workaround.

@@ -1,7 +1,8 @@
 # AMGT_RESAPP round 80 -- drain-end packet (L8), `2.0.0_SA_COO~R1` to `3.0.0_SA_CVO`
 
-**STATE: DRAFT, 2026-10-09 ~03:4xZ. dd-4 APPLIED (live `OUOsYXa`, 03:37:34Z) and the one real run reads YES (section 2); the order's
-close and its ledger are the applier's report, pending.** Nothing below is a verdict.
+**STATE: FINAL, 2026-10-09 ~04:0xZ. Four of four orders terminal (complete). `round-close-check.py --round 80` reads verdict=MAY-CLOSE
+(its order line prints 0 complete of 4 with blank status fields, the status-read gap round 79 recorded; the last `<status>` of every
+order file reads complete).** Nothing below is a verdict. Nothing below is a verdict.
 
 Round 80 is the first round on dell1. It implements the CTO~Z round-79 analysis (`ledger/ROUND_ANALYSIS.round79.md` @c249be336b,
 R1-R5). Decomposition s.88; issuance @5681442761 (4 orders, fanout 3 of 3 chains, cap 8). Every commit named here is on box/dell1.
@@ -17,10 +18,11 @@ R1-R5). Decomposition s.88; issuance @5681442761 (4 orders, fanout 3 of 3 chains
   check's P6). Locally: 0 of 272 served citations letterless (4 before); stored records untouched (41 of 1122 still carry one).
 - **`AMGT-dd-3`** (R3, a read): complete -- drained @a68418f40a; R80 DD3 WALK RECORD: YES (17 captures, portal `8d2a08a92b5e`, one
   commit on `84e13d0f`); walker disarmed. AC3 is yours (section 4).
-- **`AMGT-dd-4`** (redeploy of dd-2 + R5's source-map record): IN FLIGHT. First GO @3be917d400 STOPPED correctly at step 3 (row D1-S4:
-  three packaged registry data members off the COO half's list); both halves' ADDENDUM 1 admit them (COO @c79b9318b8/@5d24268e09,
-  CTO @b7f8b30f32) with CTO condition 5. Second STOP (row D1-S5): harvest/ never initialized on dell1; AMENDMENT 1 @3c9385489c admits one
-  terraform init provider fetch under law edit 4d77a9c3ea (egress open except Bloomberg).
+- **`AMGT-dd-4`** (redeploy of dd-2 + R5's source-map record): complete -- landed by `0.7.0_AE_CloudOps~DELL1` (msg 1620): live
+  `ltXvElw` -> `OUOsYXa`, 03:37:34Z; CONTENT-DIFF 5 changed 1 added, off-list 0; ledger `20261009T0304Z_amgt-resapp-r80-dd4-scoped-api-dell1`
+  CLOSED 7 of 7; instance VALID. Two STOPs on the way, both correct and both ruled: D1-S4 (three packaged registry members; both
+  halves' ADDENDUM 1, CTO condition 5) and D1-S5 (harvest/ never initialized on dell1; AMENDMENT 1, one terraform init provider fetch
+  under law edit 4d77a9c3ea). Step 6 half landed (AMENDMENT 2, row D1-S6).
 
 ## 2. The issuer's ONE REAL RUN at close
 
@@ -53,14 +55,20 @@ observations, no verdict:
 
 AMGT_RESAPP-D1-S2 (issuer cut defects: dd-2 P6 and the R1 id form), D1-S3 (R1 store half unblocked), D1-W315-S1/S2 (dd-1's
 test-file grant, resolved), D1-W317-S1 (walker DeleteParameter denied on disarm), D1-W317-S2 (walk script's bare python lacks
-bcrypt), D1-W317-S3 (R1 id form refused), D1-S4 (dd-4 step-3 STOP, filed by the applier), D1-S5 (dd-4: harvest/ uninitialized on dell1; ruled by AMENDMENT 1).
+bcrypt), D1-W317-S3 (R1 id form refused), D1-S4 (dd-4 step-3 STOP, filed by the applier), D1-S5 (dd-4: harvest/ uninitialized on dell1; ruled by AMENDMENT 1), D1-S6 (dd-4 step 6: the source-map record half landed; artifact_sha256 not written, CHANGELOG naming refusal; AMENDMENT 2).
 
 ## 6. For the next round (carried; cited, not cut here)
 
 1. R1's store half (row D1-S3), then a FWD-18 walk on ASML NA.
+1a. **CTO~DELL1 msg 1619 (DSGN round-57 ruling R1(a), @a9fc745d69):** the security route accepts a typed name or ticker, resolves it
+   server-side, and returns a not-found otherwise -- asked of this project's next round.
 2. The "Business segments -- from the filing" panel's sentence beside a served segment table (FWD-1, dd-3 capture 014): the page's
    owner is DSGN_AMGTV1.
-3. The walker's disarm on dell1 (row D1-W317-S1): DeleteParameter is denied by design (CTO~DELL1 msg 1386); the skill's disarm
+3. **R5 remainder (row D1-S6):** `reconcile-deployed` classes a function with NO recorded sha as already-in-parity and writes no
+   `artifact_sha256` (comp-lambdamap no-record stays 41, reaching every no-record function); and the harvest root's
+   `CHANGELOG.json` is refused by the naming limb on two existing names (a missing registry row). Both are tooling owners', not
+   this project's code.
+4. The walker's disarm on dell1 (row D1-W317-S1): DeleteParameter is denied by design (CTO~DELL1 msg 1386); the skill's disarm
    step should not need it.
 
 -- 2.0.0_SA_COO~R1
