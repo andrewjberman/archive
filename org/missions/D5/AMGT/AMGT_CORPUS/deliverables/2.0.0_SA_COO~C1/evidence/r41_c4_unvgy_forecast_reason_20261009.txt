@@ -1,0 +1,10 @@
+# AMGT_CORPUS round 40 -> 41 evidence, UB-20261009T034754Z-ea48 Part C, 2.0.0_SA_COO~C1 on dell1, 2026-10-09 ~04:4xZ. Read-only (S3 reads of stored objects; no write, no Bloomberg call). Evidence for the CTO's round-40 analysis, not a cell.
+# Item: UNVGY US's served no-forecast reason is wrong (packet s.5 item 4).
+
+newest stored block: derived/model_block/UNVGY_US_Equity/20261008T131400Z/model_block.json
+forecast figures: 0; forecast_fallback.reason: 'no Bloomberg gap -- nothing to fill'
+unresolved: 50 entries; the forecast ones read per period: reason 'no BEST_PERIOD_END_DATE for this period', fallback_status 'ABSENT: no period end date' (FY1-FY3 x BEST_EPS, BEST_SALES, BEST_EBITDA, BEST_PE_RATIO, ...)
+landed bestdata bloomberg/harvest/bronze/bestdata/security_key=UNVGY_US_Equity/20261008T131353Z.json: requested 17 fields incl. BEST_EPS and BEST_PERIOD_END_DATE at 1FY/2FY/3FY; RETURNED only BEST_CAPEX, BEST_EBIT, BEST_EBITDA, BEST_ESTIMATE_FCF, BEST_SALES
+
+served rule: lib/research/api/scoped_amgt.py:5175-5186 -- when a block has no forecast figures it takes a WHOLE-BLOCK unresolved reason (an entry with no fiscal_period); UNVGY's are all per-period, so it falls through to the literal 'raw stamp {stamp} carries no bestdata.json (pulled before C-MODEL-FORECASTS)', which is false: the stamp carries bestdata.json.
+check that fails today and passes on a fix: for UNVGY_US_Equity the served forecast reason does not contain 'pulled before C-MODEL-FORECASTS' and names the period-end-date absence. The file is lib/research/api/ (AMGT_RESAPP's reader), so the cell is likely RESAPP's or a pair across the two projects -- the CTO's call.
