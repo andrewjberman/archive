@@ -1,0 +1,2719 @@
+{
+ "denominator": {
+  "roots_scanned": [
+   "infra/aws/terraform/shared-infra/apigateway-portal",
+   "infra/aws/terraform/partners-api",
+   "infra/aws/terraform/bd-pipeline",
+   "infra/aws/terraform/ticket-center",
+   "infra/aws/terraform/portal-content",
+   "infra/aws/terraform/harvest",
+   "infra/aws/terraform/investor-reporting/api",
+   "infra/aws/terraform/investor-reporting/reporting-read"
+  ],
+  "routes_found": 117,
+  "roots_read_and_excluded": [
+   "infra/aws/terraform/inf-pipeline (its aws_apigatewayv2_route is on aws_apigatewayv2_api.inf_otp_relay, a different API, not the portal API 7k3ed8px20)",
+   "infra/aws/terraform/trade-pipeline/apigateway.tf, shared-infra/main.tf, portal-auth/cloudfront-distribution.tf, harvest/main.tf (mention 7k3ed8px20 but declare no aws_apigatewayv2_route)"
+  ],
+  "method": "glob of every *.tf under infra/ for aws_apigatewayv2_route (10 files, 71 hits incl. for_each); each for_each map/list/contract expanded by hand; the console-only $default route named in shared-infra comments is included as UNRESOLVED",
+  "not_in_source": "routes that exist only live (e.g. the /api/shared/advisor-intelligence/* routes, partners-api/api-gateway.tf:12-13) cannot be enumerated from source"
+ },
+ "candidate_tokens": [
+  {
+   "name": "T_ADVISOR_OPAL",
+   "claims": {
+    "firmId": "opal-capital",
+    "tier": "advisor",
+    "role": "user",
+    "userType": null
+   }
+  },
+  {
+   "name": "T_SERVICE_TIER_OPAL",
+   "claims": {
+    "firmId": "opal-capital",
+    "tier": "service",
+    "role": "user",
+    "userType": null
+   }
+  }
+ ],
+ "rows": [
+  {
+   "route": "/api/scoped/tickets",
+   "method": "POST",
+   "function": "opal-ticket-api",
+   "firm_source": "infra/aws/lambda/ticket_center/lambda_function.py:1072",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "CREATE: firmId==opal-capital resolves INTERNAL (:291-293); the ticket firm must be in allowedFirmIds (_firm_allowed :310-315 via _create_firm_allowed :318-323), so only opal-capital passes. A CREATE with answers.firm=49financial is refused 400 at :1072-1073 for BOTH tokens. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "CREATE: firmId==opal-capital resolves INTERNAL (:291-293); the ticket firm must be in allowedFirmIds (_firm_allowed :310-315 via _create_firm_allowed :318-323), so only opal-capital passes. A CREATE with answers.firm=49financial is refused 400 at :1072-1073 for BOTH tokens. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/tickets/submit",
+   "method": "POST",
+   "function": "opal-ticket-api",
+   "firm_source": "infra/aws/lambda/ticket_center/lambda_function.py:1008",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "SUBMIT-FORM: firm is server-derived from the context firmId (:1008); body requester/firm fields are refused 400 (:998-1001). Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "SUBMIT-FORM: firm is server-derived from the context firmId (:1008); body requester/firm fields are refused 400 (:998-1001). Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/tickets",
+   "method": "GET",
+   "function": "opal-ticket-api",
+   "firm_source": "infra/aws/lambda/ticket_center/lambda_function.py:1103",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ALL tickets, every requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "LIST: INTERNAL is admitted (:1090 MATRIX :137) and the handler scans/queries the whole table with NO firm filter (:1099-1103). Smallest clamp: drop items whose requester.firm fails _firm_allowed(actor, firm). Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ALL tickets, every requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "LIST: INTERNAL is admitted (:1090 MATRIX :137) and the handler scans/queries the whole table with NO firm filter (:1099-1103). Smallest clamp: drop items whose requester.firm fails _firm_allowed(actor, firm). Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/tickets/metrics",
+   "method": "GET",
+   "function": "opal-ticket-api",
+   "firm_source": "infra/aws/lambda/ticket_center/lambda_function.py:1375",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ALL tickets, every requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "METRICS: INTERNAL is admitted; aggregates over every in_progress/completed ticket with no firm filter (:1374-1377). Clamp: skip items whose requester.firm fails _firm_allowed. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ALL tickets, every requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "METRICS: INTERNAL is admitted; aggregates over every in_progress/completed ticket with no firm filter (:1374-1377). Clamp: skip items whose requester.firm fails _firm_allowed. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/tickets/{ticketId}",
+   "method": "GET",
+   "function": "opal-ticket-api",
+   "firm_source": "infra/aws/lambda/ticket_center/lambda_function.py:1123",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ANY ticket by id, any requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "GET: INTERNAL admitted; get_item by ticket_id with no firm check (:1123-1126). Clamp: 404 when requester.firm fails _firm_allowed. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ANY ticket by id, any requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "GET: INTERNAL admitted; get_item by ticket_id with no firm check (:1123-1126). Clamp: 404 when requester.firm fails _firm_allowed. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/tickets/{ticketId}/claim",
+   "method": "POST",
+   "function": "opal-ticket-api",
+   "firm_source": "infra/aws/lambda/ticket_center/lambda_function.py:1145",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ANY ticket by id, any requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "CLAIM: INTERNAL admitted; reads and updates the ticket with no firm check (:1145-1187). Clamp: refuse when requester.firm fails _firm_allowed. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ANY ticket by id, any requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "CLAIM: INTERNAL admitted; reads and updates the ticket with no firm check (:1145-1187). Clamp: refuse when requester.firm fails _firm_allowed. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/tickets/{ticketId}/complete",
+   "method": "POST",
+   "function": "opal-ticket-api",
+   "firm_source": "infra/aws/lambda/ticket_center/lambda_function.py:1207",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ANY ticket by id, any requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "COMPLETE: INTERNAL admitted; assignee check only (_sod_block :1129-1137), no firm check (:1207-1243). Clamp: refuse when requester.firm fails _firm_allowed. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ANY ticket by id, any requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "COMPLETE: INTERNAL admitted; assignee check only (_sod_block :1129-1137), no firm check (:1207-1243). Clamp: refuse when requester.firm fails _firm_allowed. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/tickets/{ticketId}/report",
+   "method": "POST",
+   "function": "opal-ticket-api",
+   "firm_source": "infra/aws/lambda/ticket_center/lambda_function.py:1260",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ANY claimed ticket the caller is assignee of, any requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "REPORT: INTERNAL admitted; gated on assignee==caller and in_progress (:1263-1266), no firm check. Reach is any ticket the caller itself claimed. Clamp: refuse when requester.firm fails _firm_allowed. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "ANY claimed ticket the caller is assignee of, any requester firm"
+     ],
+     "other_firm_refused": false,
+     "note": "REPORT: INTERNAL admitted; gated on assignee==caller and in_progress (:1263-1266), no firm check. Reach is any ticket the caller itself claimed. Clamp: refuse when requester.firm fails _firm_allowed. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/tickets/{ticketId}/package",
+   "method": "POST",
+   "function": "opal-ticket-api",
+   "firm_source": "infra/aws/lambda/ticket_center/lambda_function.py:1306",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "PACKAGE: the matrix row is empty (:145) and package_principal is '' (:104), so every caller is denied at :1306-1307. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "PACKAGE: the matrix row is empty (:145) and package_principal is '' (:104), so every caller is denied at :1306-1307. Identical for both candidate tokens: the authorizer yields firmId=opal-capital, allowedFirmIds=opal-capital, userType=null for either (portal-authorizer/index.mjs:293-322; tier advisor vs service is not read here)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/lead-panel/rankings/{movement}/{subject}",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/lead-panel/timeseries/{movement}/{subject}",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{security_key}/overlay",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{security_key}/thesis",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{security_key}/peers",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{security_key}/coverage",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{security_key}/print",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/freshness",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/lists",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{security_key}/ledger",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{security_key}/versions",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{security_key}/compare",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/resolve",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{security_key}/timeline",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{security_key}/timeline/day/{date}",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/security/{proxy+}",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6877",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Firm-agnostic research data: no firm key is read after the X-Firm-Id presence check, so no firm's data is selected and none can be named. The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/watchlist",
+   "method": "GET",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6941",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Watchlist rows are keyed by the edge-injected firm; a client cannot name a firm in path, query or body (:6373-6376). The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Watchlist rows are keyed by the edge-injected firm; a client cannot name a firm in path, query or body (:6373-6376). The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/watchlist/star",
+   "method": "POST",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6943",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Watchlist rows are keyed by the edge-injected firm; a client cannot name a firm in path, query or body (:6373-6376). The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Watchlist rows are keyed by the edge-injected firm; a client cannot name a firm in path, query or body (:6373-6376). The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/amgt/watchlist/unstar",
+   "method": "POST",
+   "function": "opal-amgt-scoped-api",
+   "firm_source": "lib/research/api/scoped_amgt.py:6943",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Watchlist rows are keyed by the edge-injected firm; a client cannot name a firm in path, query or body (:6373-6376). The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Watchlist rows are keyed by the edge-injected firm; a client cannot name a firm in path, query or body (:6373-6376). The adapter takes firm identity ONLY from the edge-injected X-Firm-Id (:6368-6380), which is payload.firmId=opal-capital for both tokens (auth-validator-edge/index.mjs:549). Only the watchlist arms key anything by firm (:6941-6949); every other arm serves the firm-agnostic research corpus (no firm_id use after :6877)."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/portal-content",
+   "method": "GET",
+   "function": "opal-portal-content-api",
+   "firm_source": "infra/aws/lambda/portal_content/lambda_function.py:88",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Scans the whole content-override table with no identity read (:84-98); the content is Opal's own, not a firm's. Any authenticated caller reads it."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Scans the whole content-override table with no identity read (:84-98); the content is Opal's own, not a firm's. Any authenticated caller reads it."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/portal-content/{surfaceId}",
+   "method": "PUT",
+   "function": "opal-portal-content-api",
+   "firm_source": "infra/aws/lambda/portal_content/lambda_function.py:103",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Write predicate firmId==INTERNAL_FIRM_ID (:76-79, :103); any other firm gets 403. Both tokens pass as opal-capital. The store is a single global content table (visible to every firm), so this is a write to shared Opal content, not firm-keyed data."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Write predicate firmId==INTERNAL_FIRM_ID (:76-79, :103); any other firm gets 403. Both tokens pass as opal-capital. The store is a single global content table (visible to every firm), so this is a write to shared Opal content, not firm-keyed data."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/portal-content/{surfaceId}",
+   "method": "DELETE",
+   "function": "opal-portal-content-api",
+   "firm_source": "infra/aws/lambda/portal_content/lambda_function.py:145",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Same predicate as PUT (:145): firmId==opal-capital else 403. Resets a shared Opal content override."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Same predicate as PUT (:145): firmId==opal-capital else 403. Resets a shared Opal content override."
+    }
+   }
+  },
+  {
+   "route": "/api/private/research/pull",
+   "method": "POST",
+   "function": "opal-research-pull-enqueue",
+   "firm_source": "infra/aws/lambda/research/pull_enqueue/lambda_function.py:77",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "The handler reads no identity at all (:77-108): any authorizer-admitted caller enqueues a research pull (S3 status write + SQS message). No firm axis."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "The handler reads no identity at all (:77-108): any authorizer-admitted caller enqueues a research pull (S3 status write + SQS message). No firm axis."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/data-refresh/history",
+   "method": "GET",
+   "function": "opal-data-refresh-api",
+   "firm_source": "infra/aws/lambda/data_refresh/lambda_function.py:1002",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/data-refresh/status/{executionId}",
+   "method": "GET",
+   "function": "opal-data-refresh-api",
+   "firm_source": "infra/aws/lambda/data_refresh/lambda_function.py:810",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/data-refresh/rollback",
+   "method": "POST",
+   "function": "opal-data-refresh-api",
+   "firm_source": "infra/aws/lambda/data_refresh/lambda_function.py:1209",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/data-refresh/trigger",
+   "method": "POST",
+   "function": "opal-data-refresh-api",
+   "firm_source": "infra/aws/lambda/data_refresh/lambda_function.py:432",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/data-refresh/upload-urls",
+   "method": "POST",
+   "function": "opal-data-refresh-api",
+   "firm_source": "infra/aws/lambda/data_refresh/lambda_function.py:345",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/security-scanner/factors",
+   "method": "GET",
+   "function": "opal-data-refresh-api",
+   "firm_source": "infra/aws/lambda/data_refresh/lambda_function.py:1613",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/security-scanner/universe/{universeId}/data",
+   "method": "GET",
+   "function": "opal-data-refresh-api",
+   "firm_source": "infra/aws/lambda/data_refresh/lambda_function.py:1639",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/security-scanner/universe/{universeId}/scanner",
+   "method": "GET",
+   "function": "opal-data-refresh-api",
+   "firm_source": "infra/aws/lambda/data_refresh/lambda_function.py:1671",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/security-scanner/upload-url",
+   "method": "POST",
+   "function": "opal-data-refresh-api",
+   "firm_source": "infra/aws/lambda/data_refresh/lambda_function.py:1553",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Platform data-refresh operation, not firm-keyed. The gate is validate_user_type (:138-198): userType 'Dev' OR EMPTY is admitted (:160-167), and 'null' is mapped to empty (:160-161), so a token with no userType is ADMITTED. No firm id is read anywhere in this function."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/submissions",
+   "method": "GET",
+   "function": "trade-dashboard-api",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-dashboard-api/src/dashboard_api.py:48",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/submissions/by-approver",
+   "method": "GET",
+   "function": "trade-dashboard-api",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-dashboard-api/src/dashboard_api.py:48",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/submissions/by-initiator",
+   "method": "GET",
+   "function": "trade-dashboard-api",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-dashboard-api/src/dashboard_api.py:48",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/submissions/by-status",
+   "method": "GET",
+   "function": "trade-dashboard-api",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-dashboard-api/src/dashboard_api.py:48",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/submissions/pending",
+   "method": "GET",
+   "function": "trade-dashboard-api",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-dashboard-api/src/dashboard_api.py:48",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/submissions/{id}",
+   "method": "GET",
+   "function": "trade-dashboard-api",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-dashboard-api/src/dashboard_api.py:48",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/submissions/{id}/excel",
+   "method": "GET",
+   "function": "trade-dashboard-api",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-dashboard-api/src/dashboard_api.py:48",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/users",
+   "method": "GET",
+   "function": "trade-dashboard-api",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-dashboard-api/src/dashboard_api.py:48",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). The router (:38-85) reads only path and query; it applies no identity or firm check, so any authorizer-admitted caller reads the whole trade book / user list."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/users/me",
+   "method": "GET",
+   "function": "trade-dashboard-api",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-dashboard-api/src/dashboard_api.py:388",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). Identity is the authorizer email only (:387-389), returning the caller's own trade-users row."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). Identity is the authorizer email only (:387-389), returning the caller's own trade-users row."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/submit",
+   "method": "POST",
+   "function": "trade-submission-handler",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-submission-handler/src/submission_handler.py:117",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). initiator_email is read from the body (:117) and must exist in trade-users (:123); no firm is read."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). initiator_email is read from the body (:117) and must exist in trade-users (:123); no firm is read."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/workflow",
+   "method": "POST",
+   "function": "trade-workflow-handler",
+   "firm_source": "infra/aws/lambda/trade-pipeline/trade-workflow-handler/src/workflow_handler.py:162",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). Actor is the authorizer email (:159-163), then trade-users group membership (:121-133); no firm is read."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Trade desk data is single-tenant (no firm attribute in the handler). Actor is the authorizer email (:159-163), then trade-users group membership (:121-133); no firm is read."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/identifiers/search",
+   "method": "GET",
+   "function": "trade-identifier-cache",
+   "firm_source": "infra/aws/terraform/trade-pipeline/lambdas.tf:10",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "UNRESOLVED",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "trade-identifier-cache has NO repo source (lambdas.tf:10 'EXTERNAL (no repo source)'; deployed from a placeholder zip, lambdas.tf:149). Its firm handling cannot be read from source."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "UNRESOLVED",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "trade-identifier-cache has NO repo source (lambdas.tf:10 'EXTERNAL (no repo source)'; deployed from a placeholder zip, lambdas.tf:149). Its firm handling cannot be read from source."
+    }
+   }
+  },
+  {
+   "route": "/api/general/trades/identifiers/batch",
+   "method": "POST",
+   "function": "trade-identifier-cache",
+   "firm_source": "infra/aws/terraform/trade-pipeline/lambdas.tf:10",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "UNRESOLVED",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "trade-identifier-cache has NO repo source (lambdas.tf:10 'EXTERNAL (no repo source)'; deployed from a placeholder zip, lambdas.tf:149). Its firm handling cannot be read from source."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "UNRESOLVED",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "trade-identifier-cache has NO repo source (lambdas.tf:10 'EXTERNAL (no repo source)'; deployed from a placeholder zip, lambdas.tf:149). Its firm handling cannot be read from source."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/timeseries/{dimension}",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/snapshots/{dimension}",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/filters",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/summary",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/partner-analytics",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/cumulative-chart",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/clients-tab",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/advisors/{advisorId}/book",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/clients/growth",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/clients/tax-breakdown",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/clients/tax-deferred",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/clients/{clientKey}/detail",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/advisor-intelligence/advisors/{advisorId}/mix-views",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1725",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/firm/all/composition",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/firm/all/mix-views",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/advisor/{advisorId}/timeseries",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/advisor/{advisorId}/mix-timeseries",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/advisor/{advisorId}/platinum-summary",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/relationship/{relationshipId}/platinum-summary",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/advisor/{advisorId}/composition",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/account/{accountId}/composition",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/account/{accountId}/timeseries",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/relationship/{relationshipId}/composition",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/relationship/{relationshipId}/concentration-timeseries",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/relationship/{relationshipId}/mix-timeseries",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/partners/books/relationship/{relationshipId}/timeseries",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:1823",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "Firm comes from ?firmId, else the authorizer firmId (:1707-1719, :1812-1818); is_authorized (:271-285) admits it only if in allowedFirmIds. allowedFirmIds is 'opal-capital' for both tokens, so only opal-capital passes (:1725 / :1823) and any other firm is 401. The ALL fallback (:1659-1661) fires only when allowedFirmIds is EMPTY, which is not the case here. If opal-capital has no FIRM# bucket row the route 404s (:1730-1732; DynamoDB data, not in source). For advisors/* and clients/* advisor-intelligence paths the edge (index.mjs:408-423, tier_policy.mjs:29-36) additionally refuses a token with no advisorRole."
+    }
+   }
+  },
+  {
+   "route": "/api/partners",
+   "method": "GET",
+   "function": "opal-partners-data",
+   "firm_source": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py:599",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "handle_get_partners (:577-610) lists non-internal partner firms and keeps a firm only if it is in allowedFirmIds (:599), so the answer is at most opal-capital, and EMPTY if opal-capital is tier internal (:591; DynamoDB data). Any other firm is filtered out."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "opal-capital"
+     ],
+     "other_firm_refused": true,
+     "note": "handle_get_partners (:577-610) lists non-internal partner firms and keeps a firm only if it is in allowedFirmIds (:599), so the answer is at most opal-capital, and EMPTY if opal-capital is tier internal (:591; DynamoDB data). Any other firm is filtered out."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/selections",
+   "method": "POST",
+   "function": "irpt-directory-search",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/directory/browse",
+   "method": "GET",
+   "function": "irpt-directory-search",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/directory/search",
+   "method": "GET",
+   "function": "irpt-directory-search",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/directory/resolve",
+   "method": "POST",
+   "function": "irpt-directory-search",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/performance/{accountSetId}",
+   "method": "GET",
+   "function": "irpt-performance-adapter",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/analysis",
+   "method": "POST",
+   "function": "irpt-ycharts-generate",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/analysis/{jobId}/sections",
+   "method": "GET",
+   "function": "irpt-status",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/narrative/{reportId}",
+   "method": "GET",
+   "function": "irpt-narrative",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/status",
+   "method": "GET",
+   "function": "irpt-status",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/status/{jobId}",
+   "method": "GET",
+   "function": "irpt-status",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/export",
+   "method": "POST",
+   "function": "irpt-export-render",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/export/{exportId}",
+   "method": "GET",
+   "function": "irpt-export-render",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/export/{exportId}/download",
+   "method": "GET",
+   "function": "irpt-export-render",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/custody-report/{reportId}",
+   "method": "GET",
+   "function": "irpt-export-render",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/custody-report",
+   "method": "POST",
+   "function": "irpt-export-render",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/holdings/{accountSetId}",
+   "method": "GET",
+   "function": "irpt-holdings",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/analysis/inputs",
+   "method": "POST",
+   "function": "irpt-ycharts-generate",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/analysis/requests",
+   "method": "GET",
+   "function": "irpt-status",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/analysis/comparisons",
+   "method": "GET",
+   "function": "irpt-ycharts-generate",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/analysis/requests/{requestId}",
+   "method": "GET",
+   "function": "irpt-status",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/analysis/requests/{requestId}/pdf",
+   "method": "GET",
+   "function": "irpt-status",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1124",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "MORE_THAN_ONE",
+     "firms": [
+      "49financial",
+      "inflection",
+      "cottonwood"
+     ],
+     "other_firm_refused": false,
+     "note": "Shared served boundary (_authz/served.py Entry.handle). verified firm = X-Firm-Id = opal-capital; internal = verified_internal_subject (:261-272: x-firm-id==opal-capital). An internal caller may name ANY registry tenant with selected_tenant (:472-497) and is refused only if bucket_for() has no mapping (:1124-1131). The extra allowedFirmIds clamp applies ONLY when x-user-type=='service' (:1134-1137); both candidate tokens carry no userType, so it never fires. Reachable tenants = the enabled client firms in data/firm_registry.json (49financial, inflection, cottonwood: 3 of 3). Without selected_tenant the verified firm opal-capital has no bucket mapping and is refused."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/reporting/{account_id}/{which}",
+   "method": "GET",
+   "function": "irpt-49f-reporting-read-lambda",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1129",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "49financial"
+     ],
+     "other_firm_refused": true,
+     "note": "Same served boundary (:1124-1131), but this function's IRPT_DIRECTORY_BUCKET_MAP is ONE firm: terraform/investor-reporting/reporting-read/locals.tf:59 builds it from the single registry firm of the custody source (49financial, derived via gold/irpt_reporting/sources.json -> scopes.json). bucket_for() refuses every other tenant (loaders.py:65-68) and the opal-capital verified firm itself is unmapped, so a selected_tenant of 49financial is the only admitted value."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "49financial"
+     ],
+     "other_firm_refused": true,
+     "note": "Same served boundary (:1124-1131), but this function's IRPT_DIRECTORY_BUCKET_MAP is ONE firm: terraform/investor-reporting/reporting-read/locals.tf:59 builds it from the single registry firm of the custody source (49financial, derived via gold/irpt_reporting/sources.json -> scopes.json). bucket_for() refuses every other tenant (loaders.py:65-68) and the opal-capital verified firm itself is unmapped, so a selected_tenant of 49financial is the only admitted value."
+    }
+   }
+  },
+  {
+   "route": "/api/scoped/investor-reporting/reporting/client/{client_id}/summary",
+   "method": "GET",
+   "function": "irpt-49f-reporting-read-lambda",
+   "firm_source": "infra/aws/lambda/investor-reporting/_authz/served.py:1129",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "49financial"
+     ],
+     "other_firm_refused": true,
+     "note": "Same served boundary (:1124-1131), but this function's IRPT_DIRECTORY_BUCKET_MAP is ONE firm: terraform/investor-reporting/reporting-read/locals.tf:59 builds it from the single registry firm of the custody source (49financial, derived via gold/irpt_reporting/sources.json -> scopes.json). bucket_for() refuses every other tenant (loaders.py:65-68) and the opal-capital verified firm itself is unmapped, so a selected_tenant of 49financial is the only admitted value."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "ONE_FIRM",
+     "firms": [
+      "49financial"
+     ],
+     "other_firm_refused": true,
+     "note": "Same served boundary (:1124-1131), but this function's IRPT_DIRECTORY_BUCKET_MAP is ONE firm: terraform/investor-reporting/reporting-read/locals.tf:59 builds it from the single registry firm of the custody source (49financial, derived via gold/irpt_reporting/sources.json -> scopes.json). bucket_for() refuses every other tenant (loaders.py:65-68) and the opal-capital verified firm itself is unmapped, so a selected_tenant of 49financial is the only admitted value."
+    }
+   }
+  },
+  {
+   "route": "/auth/{proxy+}",
+   "method": "ANY",
+   "function": "opalinvest-auth-handler",
+   "firm_source": "infra/aws/opalinvest_dev/lambda/auth-handler/src/index.ts:433",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "authorization_type NONE (routes.tf:8): no authorizer context exists. The handler verifies the bearer itself; the only cross-user sub-routes are /auth/admin/users* and each requires auth.role=='admin' (:421, :433, :445, :458), which a role=user token fails (403). All other sub-routes act on the caller's own account."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "authorization_type NONE (routes.tf:8): no authorizer context exists. The handler verifies the bearer itself; the only cross-user sub-routes are /auth/admin/users* and each requires auth.role=='admin' (:421, :433, :445, :458), which a role=user token fails (403). All other sub-routes act on the caller's own account."
+    }
+   }
+  },
+  {
+   "route": "/auth/{proxy+}",
+   "method": "OPTIONS",
+   "function": "opalinvest-auth-handler",
+   "firm_source": "infra/aws/terraform/shared-infra/apigateway-portal/routes.tf:322",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "CORS preflight on the unauthenticated auth route (authorization_type NONE, routes.tf:322); no identity, no data."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "CORS preflight on the unauthenticated auth route (authorization_type NONE, routes.tf:322); no identity, no data."
+    }
+   }
+  },
+  {
+   "route": "/{proxy+}",
+   "method": "OPTIONS",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/terraform/shared-infra/apigateway-portal/routes.tf:330",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "CORS preflight catch-all (authorization_type NONE, routes.tf:330); no identity, no data."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "CORS preflight catch-all (authorization_type NONE, routes.tf:330); no identity, no data."
+    }
+   }
+  },
+  {
+   "route": "/metadata/yang",
+   "method": "GET",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/lambda/portal_data_proxy/lambda_function.py:2102",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    }
+   }
+  },
+  {
+   "route": "/v1/health/data-availability",
+   "method": "GET",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/lambda/portal_data_proxy/lambda_function.py:2102",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    }
+   }
+  },
+  {
+   "route": "/v1/market/rsi",
+   "method": "GET",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/lambda/portal_data_proxy/lambda_function.py:2102",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    }
+   }
+  },
+  {
+   "route": "/v1/market/rsi/details",
+   "method": "GET",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/lambda/portal_data_proxy/lambda_function.py:2102",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    }
+   }
+  },
+  {
+   "route": "/v1/metadata/yang",
+   "method": "GET",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/lambda/portal_data_proxy/lambda_function.py:2102",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    }
+   }
+  },
+  {
+   "route": "/v1/sentiment/fear-greed",
+   "method": "GET",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/lambda/portal_data_proxy/lambda_function.py:2102",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    }
+   }
+  },
+  {
+   "route": "/v1/sentiment/fear-greed/details",
+   "method": "GET",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/lambda/portal_data_proxy/lambda_function.py:2102",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    }
+   }
+  },
+  {
+   "route": "/v1/sentiment/keywords",
+   "method": "GET",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/lambda/portal_data_proxy/lambda_function.py:2102",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    }
+   }
+  },
+  {
+   "route": "/v1/sentiment/keyword-intelligence",
+   "method": "POST",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/lambda/portal_data_proxy/lambda_function.py:2102",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "NO_FIRM",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Market/sentiment data proxy: lambda_handler (:2088-2400) reads only path and method; it contains no firm, tier or authorizer reference. Any authorizer-admitted caller reads it. No firm axis."
+    }
+   }
+  },
+  {
+   "route": "$default",
+   "method": "ANY",
+   "function": "opal-portal-data-proxy",
+   "firm_source": "infra/aws/terraform/shared-infra/apigateway-portal/routes.tf:1",
+   "per_token": {
+    "T_ADVISOR_OPAL": {
+     "verdict": "UNRESOLVED",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Route khcd4f1 ($default catch-all, integration s7ntfz4 = opal-portal-data-proxy) is console-only and NOT in Terraform (routes.tf:1-2, main.tf:53-57). Its authorization_type is not in source, so who may call it cannot be read. The target function (portal_data_proxy) has no firm logic, but whether an authorizer fronts this route is unknown."
+    },
+    "T_SERVICE_TIER_OPAL": {
+     "verdict": "UNRESOLVED",
+     "firms": [],
+     "other_firm_refused": null,
+     "note": "Route khcd4f1 ($default catch-all, integration s7ntfz4 = opal-portal-data-proxy) is console-only and NOT in Terraform (routes.tf:1-2, main.tf:53-57). Its authorization_type is not in source, so who may call it cannot be read. The target function (portal_data_proxy) has no firm logic, but whether an authorizer fronts this route is unknown."
+    }
+   }
+  }
+ ]
+}
