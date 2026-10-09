@@ -1,0 +1,99 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-101",
+ "firm": "49F",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e8f96f579c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "vintage_commit": "dc2cf4a330",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-101.defect-w73-s2.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_DASHBD~76",
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~76/W73_S2_EVIDENCE.json",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~76/resolve_w73_s2.py",
+   "kind": "script",
+   "commit_or_etag": "1ba8eafcda",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only reader of the served daily gold and the landed Black Diamond bronze (S3 GETs); no deploy by this order",
+   "artifact_covered_by": [
+    "DB49-3-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~76/W73_S2_EVIDENCE.json",
+   "kind": "config_data",
+   "commit_or_etag": "1ba8eafcda",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "both sides' values for each of the 123 segments; the file the BD_SIDE evidence fields name",
+   "artifact_covered_by": [
+    "DB49-3-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~76/W73_S2_RESOLUTION.json",
+   "kind": "config_data",
+   "commit_or_etag": "1ba8eafcda",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record the checker reads: 123 segments, disposition and cause each",
+   "artifact_covered_by": [
+    "DB49-3-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DB49-3-AC1",
+   "criterion_verbatim": "DB49-3-AC1 -- each of the 123 W73-S2 segments is a producer fix with a test, or a Black Diamond-side finding with evidence. Base: FAIL.",
+   "method": "command",
+   "invocation": "python \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r49/p49_round49.py\" . DB49-3-AC1",
+   "output_evidence": "OK: 123 segments: {'BD_SIDE': 123}\nDB49-3-AC1 PASS",
+   "denominator": "123 of 123 W73-S2 segments, 123 distinct; 0 PRODUCER_FIX, 123 BD_SIDE each with an evidence file at HEAD; causes BD_FEE_TIMING_ENVELOPE 74, LARGE_FLOW_DAY_SENSITIVITY 24, DUST_BASE_FEE_ADDBACK 9, FLOW_TIMING_START_OF_DAY 7, BD_FEE_FIGURE_EXTREME 6, FLOW_TIMING_MID_DAY 2, UNRESOLVED_BY_EXCLUSION 1; served-series END identity holds 123 of 123; exit code 0",
+   "status": "PASS",
+   "expect": "DB49-3-AC1 PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the checker reads the committed record and files at HEAD; no run state",
+   "observed": "printed the same last line on a second read",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The checker against a copy of the resolution with the first segment's disposition changed to PRODUCER_FIX and no test field.",
+   "expected": "DB49-3-AC1 FAIL",
+   "observed": "FAIL: PRODUCER_FIX without a test at HEAD: None; DB49-3-AC1 FAIL (rc 1)",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a producer fix and test",
+   "reason": "None written: the served daily returns re-link exactly from the served value and flow in all 123 segments, so no producer defect was found; row IRPT_DASHBD-D2-W76-S1."
+  },
+  {
+   "item": "a two-sided finding that BD is wrong for the 25 LARGE_FLOW_DAY_SENSITIVITY and UNRESOLVED_BY_EXCLUSION segments",
+   "reason": "BD's daily path is not in the landed point; those carry BD_SIDE by exclusion because the check admits only two dispositions; row IRPT_DASHBD-D2-W76-S1."
+  },
+  {
+   "item": "vendor call, secret read, S3 write, deploy, bun, download, edit under data/ infra/ portal/",
+   "reason": "Bounds of the order; none made (S3 GETs only)."
+  }
+ ],
+ "surprises": [
+  "IRPT_DASHBD-D2-W76-S1"
+ ],
+ "compiler_tools": [
+  {
+   "tool": "ruff via .tools/commit-gate.sh",
+   "invocation": "bash .tools/safe-commit.sh ... (py_compile + ds-precommit + ruff)",
+   "result": "passed on the first commit"
+  }
+ ]
+}
