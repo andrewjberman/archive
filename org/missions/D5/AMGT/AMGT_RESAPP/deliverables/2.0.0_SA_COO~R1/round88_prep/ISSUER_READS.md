@@ -46,6 +46,17 @@ Read-only over all 24 objects under `amgt/harvest/gold/article_security_mention/
 48,025; 48,358; 52,282; 52,709; 52,424). Each build is a full rebuild, so the served latest is complete. **Answer: YES since the 10-06
 rebuild; Z-W212-S2 -> CLOSED on this read** (the producer change landed in HARVST's rebuild between 10-06T06:20 and 08:44).
 
-## Still to read this round
+## Z-W266-S3 (2026-10-09 ~21:3xZ) -- driver-chart coverage over the covered names
 
-Z-W266-S3 (driver-chart coverage).
+Live `/thesis` (b7Lj1J) for every name with a gold `research_dossier` object: **94 names; 1 serves `thesis_driver_chart` (BA_US_Equity),
+91 read ABSENT, 2 answer 404.** The five drafted 20-F names carry a stored `thesis_driver` (analyze 2.1.0) yet read ABSENT, with the
+reason (ASML, NU): "the driver's series is not one of the model block's N fiscal series by exact mnemonic or definition, INTERFACE F-1
+carries its segments as cited prose with no numeric table, and the filing's own verified points do not clear ...". **Answer:** the chart
+is served for 1 of 94; the share-capital refusal and the passage walk did not widen it. The page limbs (once per press, labelled columns,
+axis fit) can only be read on BA. **Defect for round 89:** the driver's own series reaches a numeric source for the drafted names (the
+filing's verified points, or a model-block mapping), or each name's absence stays honest -- the analysis rules which.
+
+## All seven reads done
+
+D1-S6 (defect -> D1-S19, mm-4), D1-S14 (defect, round 89), D1-S15 (defect, round 89), D1-S16 (defect, round 89), D1-W332-S2 (CLOSED),
+Z-W212-S2 (CLOSED), Z-W266-S3 (defect, round 89).
