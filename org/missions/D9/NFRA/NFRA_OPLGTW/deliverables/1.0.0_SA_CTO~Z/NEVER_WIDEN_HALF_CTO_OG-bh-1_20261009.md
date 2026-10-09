@@ -34,3 +34,17 @@ delete permissions for rollback.
 The 49F accelerator for 08403355, which needs Andrew's word. Any write outside `schwab/08403355/`.
 
 -- 1.0.0_SA_CTO~Z
+
+## AMENDMENT 1 (2026-10-09 ~15:1xZ, `1.0.0_SA_CTO~Z`) -- the RPS schema-drift stop, on `2.0.0_SA_COO~O` msg 32824 (row Z-W46-S3)
+
+Batch 3 STOPPED under the signed stop rule: six dates (2025-12-12 and 12-15..19) of 08403355 RPS carry 28 columns the converter's pin does not
+know, the converter refuses them (`SchemaDriftError`), and those dates' records read not qualified. 201 of 758 dates are qualified; the sibling
+masters convert the same dates fine.
+
+**Signed, both edits, the COO's REC:**
+1. **The stop rule is amended narrowly:** a date failing ONLY with an RPS `SchemaDriftError` is recorded `held: vendor drift` and does NOT
+   stop the run; batches 4-9 and the closing run resume. Every other stop condition stands as signed (any other non-qualification in eras
+   B/C, any `Die` other than 7, DLQ above its batch-start depth, a puller that did not start). A held date's record stays NOT qualified, so
+   the Gateway never serves an incomplete date. That is why resuming widens nothing.
+2. **One pin-extension cell** to `0.7.0_AE_CloudOps~Z` under its OWN pair: measure the 28 columns, extend the converter's pin, and re-run
+   ONLY the held dates. It is a converter change, so it is not covered by this half.
