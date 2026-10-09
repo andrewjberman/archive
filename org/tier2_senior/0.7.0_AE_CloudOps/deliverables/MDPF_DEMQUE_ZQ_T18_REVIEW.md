@@ -1,6 +1,6 @@
 # TO-DQ-t18 site-Z notebook meter
 
-**Seat:** 0.7.0_AE_CloudOps~ZQ. **State:** pending CTO site-Z signature, activation, and next scheduled-run evidence.
+**Seat:** 0.7.0_AE_CloudOps~ZQ. **State:** CTO signed with C1 timing hold; pending baseline read, activation, and first metered scheduled-run evidence.
 **archetype:** IMPLEMENT
 
 COO~Q1 dispatch 20261009T095711Z resumes the order under amendment
@@ -47,7 +47,13 @@ AC2 reads the actual latest local ledger: four existing records (held cells 0, 5
 Change record opened at build start:
 `org/critical_paths/change_management/20261009T1002Z_mdpf-demque-zq-t18-meter_deploy_completion.md`.
 The single activation leg is the live workspace RUNNER change, with exact candidate bytes and unchanged task XML readback required.
-CTO~Z requested to sign candidate e465eabe7b via message 20261009T100422Z.
+CTO~Z signed candidate e465eabe7b at 3ccf1f560f, notified by message 32661 / 20261009T101110Z.
+Signature: `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_HALF_MDPF_DEMQUE_DQ_T18_BBGTML_METER_20261009.md`.
+**C1:** merge only after the Oct 9 07:00 Eastern scheduled run has completed on the original runner and its log has been read.
+The deployment ledger stays OPEN until then. No timer or new task is armed. The first metered scheduled run is consequently Oct 10;
+its ledger evidence remains required before completion. At Oct 9 06:11 Eastern, the shared RUNNER still named
+`integrations/bloomberg/pipeline/tplus1/tools/run_daily_pull.py`, LastRunTime was Oct 8 07:00:01, LastTaskResult 50,
+and NextRunTime was Oct 9 07:00. C1 was not discharged. ACK sent to CTO; issuer notified of this hold.
 The COO half is the amended issued order. One RUNNER assignment writes the property; the wrapper uses the existing runner for both
 success and failure branches. Rollback restores the original RUNNER assignment and premerge uploader bytes; original runner remains
 on disk. Do not rerun a pull to roll back; there is no task, IAM, or auth rollback because those are unchanged.
@@ -60,10 +66,10 @@ The order remains pending regardless of the two build acceptance passes until it
 
 comp-which/comp-read and known-path reads grounded the order and sources. comp-to bound the exact order to this session.
 sequence-check: UNPLACED, not sequenced; project rules govern. comp-blast scheduled_daily_pull: SUBJECT_ABSENT_FROM_CORPUS,
-not impact clearance. comp-schedule was read before the candidate edit: 30s partial; 90s reached C1, continuation from C1 requested.
+not impact clearance. comp-schedule was read before the candidate edit: 30s partial; 90s reached C1; continuation from C1 also timed out at C2 (0 of 27 ledger entries).
 Its partial view is not a clean gate census. Direct task XML and original runner/cmd source provide the concrete scope evidence.
 safe-commit risk reflex checked 5 files against 1662 danger nodes and returned clean; normal Python/naming/hooks passed.
 
 Push state LOCAL; no push attempted. Origin measured during this turn:
-box/sitez fa592373e7df1c58c1d05dfe13c31503dbdf2459;
+box/sitez b8a215979f46451c01924636a8a4b11b569a559b (Oct 9 06:11 Eastern read);
 CLOUD 1a926d0b91071a56691d40d5eb88199b43faebac.
